@@ -1,0 +1,100 @@
+[Tests]
+  issues = '#33397'
+  design = 'PointInUnionCheckUO.md PointInSignedFunctionCheckUO.md '
+           'PointInPolyhedronCheckUO.md'
+
+  [tristate]
+    type = 'Exodiff'
+    input = 'union_tristate.i'
+    exodiff = 'union_tristate_out.e'
+    recover = false
+    requirement = 'The system shall classify a point against a union of geometries using the '
+                  'precedence inside over on over outside, reporting inside where the point is '
+                  'inside any geometry, on where it is only on a geometry, and outside where it is '
+                  'outside every geometry.'
+  []
+
+  [tristate_threaded]
+    type = 'Exodiff'
+    input = 'union_tristate.i'
+    exodiff = 'union_tristate_out.e'
+    min_threads = 2
+    prereq = 'tristate'
+    recover = false
+    requirement = 'The system shall produce the same union point classification when run with '
+                  'multiple threads as when run serially, since the union and its signed-function '
+                  'providers keep per-thread state to avoid data races.'
+  []
+
+  [tristate_positive_inside]
+    type = 'Exodiff'
+    input = 'union_tristate.i'
+    # Negate both level sets and flag them positive-inside; the normalized sign is
+    # unchanged, so the classification must match the negative-inside gold.
+    cli_args = "Functions/funcA/expression='1-x' Functions/funcB/expression='2-x' "
+               "UserObjects/checkA/inside_is_negative=false "
+               "UserObjects/checkB/inside_is_negative=false"
+    exodiff = 'union_tristate_out.e'
+    prereq = 'tristate_threaded'
+    recover = false
+    requirement = 'The system shall classify points against a signed level-set function whose '
+                  'positive values denote the interior when inside_is_negative is false, producing '
+                  'the same union classification as the equivalent negative-inside functions.'
+  []
+
+  [nested]
+    type = 'Exodiff'
+    input = 'union_nested.i'
+    exodiff = 'union_nested_out.e'
+    recover = false
+    requirement = 'The system shall allow a union of geometries to be used as a provider of another '
+                  'union, classifying points against the nested union.'
+  []
+
+  [two_meshes]
+    type = 'Exodiff'
+    input = 'union_two_meshes.i'
+    exodiff = 'union_two_meshes_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify a point as contained when it is inside either of two '
+                  'closed surface meshes combined in a union.'
+  []
+
+  [mesh_and_function]
+    type = 'Exodiff'
+    input = 'union_mesh_and_function.i'
+    exodiff = 'union_mesh_and_function_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify a point against a union of geometries given in mixed '
+                  'representations, namely a meshed closed surface and a signed level-set function.'
+  []
+
+  [invalid_parameters]
+    requirement = 'The system shall report an error for an invalid union point-containment parameter '
+                  'combination, namely'
+    [negative_tolerance]
+      type = 'RunException'
+      input = 'union_tristate.i'
+      cli_args = 'UserObjects/checkA/tolerance=-1'
+      expect_err = 'tolerance.*must be greater than zero'
+      detail = 'a non-positive on-surface tolerance for a signed-function checker,'
+    []
+    [empty_providers]
+      type = 'RunException'
+      input = 'union_tristate.i'
+      cli_args = "UserObjects/union/providers=''"
+      expect_err = 'must list at least one provider'
+      detail = 'an empty list of union providers, and'
+    []
+    [provider_not_a_checker]
+      type = 'RunException'
+      input = 'union_two_meshes.i'
+      cli_args = 'UserObjects/union/providers=builder1'
+      expect_err = 'does not implement the point-in-surface check interface'
+      mesh_mode = REPLICATED
+      detail = 'a union provider that does not implement the point-in-surface check interface.'
+    []
+  []
+[]

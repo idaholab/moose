@@ -47,6 +47,12 @@ points and writes the values in the same order as the `points` parameter. Both
 interfaces report `1` for `SurfaceSide::INSIDE` or `SurfaceSide::ON` and `0` for
 `SurfaceSide::OUTSIDE`.
 
+## Composition into a union
+
+`PointInPolyhedronCheckUO` implements the point-in-surface check interface, so it
+can be listed as a provider of a [PointInUnionCheckUO.md] to contribute a meshed
+closed surface to a composite geometry.
+
 The following complete input creates a closed surface, configures a
 `PointInPolyhedronCheckUO`, stores mesh-wide classifications in the `inside`
 auxiliary variable, and evaluates one interior and one exterior point with a
