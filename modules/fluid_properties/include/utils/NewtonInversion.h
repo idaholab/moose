@@ -179,10 +179,6 @@ NewtonSolve2D(const T & f,
   DenseVector<T> minus_R(system_size), func_evals(system_size), u_update(system_size);
   DenseMatrix<T> J(system_size, system_size);
   unsigned int iteration = 0;
-#ifndef NDEBUG
-  DenseVector<Real> svs(system_size), evs_real(system_size), evs_imag(system_size);
-  DenseMatrix<Real> raw_J(system_size, system_size), raw_J2(system_size, system_size);
-#endif
 
   typedef std::function<void(const T &, const T &, T &, T &, T &)> FuncType;
   std::array<FuncType, 2> func = {{f_from_x_y, g_from_x_y}};
@@ -203,7 +199,7 @@ NewtonSolve2D(const T & f,
   if (debug)
     Moose::out << "Target values for 2D Newton inversion:\n" << targets << std::endl;
 
-  using std::isnan, std::max, std::abs;
+  using std::max, std::abs;
 
   do
   {
@@ -218,13 +214,12 @@ NewtonSolve2D(const T & f,
     // immediately return if we are converged
     const bool converged = convergence_check(minus_R);
 
-    // Check for NaNs before proceeding to system solve. We may simultaneously not have NaNs in z
-    // but have NaNs in the function evaluation
+    // Check for non-finite values before proceeding to the system solve
     for (const auto i : make_range(system_size))
-      if (isnan(minus_R(i)))
+      if (!std::isfinite(MetaPhysicL::raw_value(minus_R(i))))
       {
         assign_solution();
-        mooseException(caller_name + ": NaN detected in Newton solve");
+        mooseException(caller_name + ": Non-finite residual detected in NewtonSolve2D");
       }
 
     if (debug)
@@ -239,6 +234,13 @@ NewtonSolve2D(const T & f,
     int degenerate_row = -1;
     for (const auto i : make_range(system_size))
     {
+      for (const auto j : make_range(system_size))
+        if (!std::isfinite(MetaPhysicL::raw_value(J(i, j))))
+        {
+          assign_solution();
+          mooseException(caller_name + ": Non-finite Jacobian detected in NewtonSolve2D");
+        }
+
       const auto rowmax = max(abs(J(i, 0)), abs(J(i, 1)));
       if (rowmax > 0)
       {
@@ -255,19 +257,16 @@ NewtonSolve2D(const T & f,
     }
 
 #ifndef NDEBUG
-    //
-    // Check nature of linearized system
-    //
-    for (const auto i : make_range(system_size))
-      for (const auto j : make_range(system_size))
-      {
-        raw_J(i, j) = MetaPhysicL::raw_value(J(i, j));
-        raw_J2(i, j) = MetaPhysicL::raw_value(J(i, j));
-      }
-    raw_J.svd(svs);
-    raw_J2.evd(evs_real, evs_imag);
     if (debug)
+    {
+      DenseVector<Real> svs(system_size);
+      DenseMatrix<Real> raw_J(system_size, system_size);
+      for (const auto i : make_range(system_size))
+        for (const auto j : make_range(system_size))
+          raw_J(i, j) = MetaPhysicL::raw_value(J(i, j));
+      raw_J.svd(svs);
       Moose::out << "Jacobian singular values:\n" << svs << std::endl;
+    }
 #endif
 
     if (degenerate_row == -1)
@@ -283,13 +282,13 @@ NewtonSolve2D(const T & f,
     J.zero();
     u += u_update;
 
-    // Check for NaNs
+    // Check for non-finite solution values
     for (const auto i : make_range(system_size))
-      if (isnan(u(i)))
+      if (!std::isfinite(MetaPhysicL::raw_value(u(i))))
       {
         assign_solution();
-        mooseException(caller_name + ": NaN detected in NewtonSolve2D\n" + status_string(0).str() +
-                       "\n" + status_string(1).str());
+        mooseException(caller_name + ": Non-finite solution detected in NewtonSolve2D\n" +
+                       status_string(0).str() + "\n" + status_string(1).str());
       }
 
     if (converged)

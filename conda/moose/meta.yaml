@@ -29,7 +29,7 @@ requirements:
     - {{ compiler('fortran') }}
     - {{ stdlib('c') }}
     # for libmesh libtool
-    - moose-libmesh 2026.06.05_ab36c00 mpich_0
+    - moose-libmesh 2026.06.05_ab36c00 mpich_1
     # build utilities
     - make
     - packaging
@@ -44,12 +44,12 @@ requirements:
     # see libfabric entry in conda/conda_build_config.yaml (only for mpich)
     - libfabric {{ libfabric }} # [linux]
     - libpng
-    - moose-libmesh 2026.06.05_ab36c00 mpich_0
+    - moose-libmesh 2026.06.05_ab36c00 mpich_1
     - moose-wasp 2026.06.15_d8777a8 build_0
     - zlib
   run:
     - mpich {{ mpich_version }}
-    - moose-libmesh 2026.06.05_ab36c00 mpich_0
+    - moose-libmesh 2026.06.05_ab36c00 mpich_1
     - moose-wasp 2026.06.15_d8777a8 build_0
     # c++ compiler for jit
     - gxx_linux-64 {{ cxx_compiler_version }}.*               # [linux]

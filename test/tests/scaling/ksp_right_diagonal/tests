@@ -1,0 +1,46 @@
+[Tests]
+  design = 'NonlinearSystemBase.md'
+  issues = '#33418'
+
+  [right_diagonal]
+    type = CSVDiff
+    input = right_diagonal.i
+    csvdiff = right_diagonal_out.csv
+    requirement = 'The system shall reset its PETSc KSP right diagonal scale to unity for each nonlinear solve before collectively applying newly supplied nonuniform entries.'
+  []
+  [unrequested]
+    type = RunException
+    input = right_diagonal.i
+    cli_args = 'UserObjects/right_scale/test_type=unrequested Outputs/csv=false'
+    expect_err = 'The KSP right diagonal scale must be requested before setting its entries.'
+    requirement = 'The system shall reject KSP right diagonal scale entries supplied before the scale is requested.'
+  []
+  [nonpositive]
+    type = RunException
+    input = right_diagonal.i
+    cli_args = 'UserObjects/right_scale/test_type=nonpositive Outputs/csv=false'
+    expect_err = 'KSP right diagonal scale entry for DOF .* must be finite and positive.'
+    requirement = 'The system shall reject nonpositive KSP right diagonal scale entries.'
+  []
+  [nonfinite]
+    type = RunException
+    input = right_diagonal.i
+    cli_args = 'UserObjects/right_scale/test_type=nonfinite Outputs/csv=false'
+    expect_err = 'KSP right diagonal scale entry for DOF .* must be finite and positive.'
+    requirement = 'The system shall reject nonfinite KSP right diagonal scale entries.'
+  []
+  [nonowned]
+    type = RunException
+    input = right_diagonal.i
+    cli_args = 'UserObjects/right_scale/test_type=nonowned Outputs/csv=false'
+    expect_err = 'KSP right diagonal scale entry for non-owned DOF .* was supplied.'
+    requirement = 'The system shall reject KSP right diagonal scale entries for non-owned degrees of freedom.'
+  []
+  [conflicting]
+    type = RunException
+    input = right_diagonal.i
+    cli_args = 'UserObjects/right_scale/test_type=conflicting Outputs/csv=false'
+    expect_err = 'Conflicting KSP right diagonal scales .* were supplied for DOF .*.'
+    requirement = 'The system shall reject conflicting KSP right diagonal scales supplied for one degree of freedom.'
+  []
+[]

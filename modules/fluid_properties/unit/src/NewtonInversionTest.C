@@ -10,6 +10,8 @@
 #include "gtest/gtest.h"
 #include "NewtonInversion.h"
 
+#include <limits>
+
 void
 function_f1(Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
 {
@@ -180,4 +182,39 @@ TEST(NewtonInversion, NewtonSolve2D)
   catch (MooseException &)
   {
   }
+}
+
+TEST(NewtonInversion, NewtonSolve2DNonFiniteUpdate)
+{
+  unsigned int function_evaluations = 0;
+  auto overflowing_update =
+      [&function_evaluations](Real x, Real, Real & value, Real & derivative_x, Real & derivative_y)
+  {
+    ++function_evaluations;
+    value = x;
+    derivative_x = std::isfinite(x) ? std::numeric_limits<Real>::min()
+                                    : std::numeric_limits<Real>::quiet_NaN();
+    derivative_y = 0;
+  };
+  auto identity_y = [](Real, Real y, Real & value, Real & derivative_x, Real & derivative_y)
+  {
+    value = y;
+    derivative_x = 0;
+    derivative_y = 1;
+  };
+
+  Real return_x;
+  Real return_y;
+  EXPECT_THROW(FluidPropertiesUtils::NewtonSolve2D(std::numeric_limits<Real>::max(),
+                                                   Real(0),
+                                                   0,
+                                                   0,
+                                                   return_x,
+                                                   return_y,
+                                                   1e-8,
+                                                   1e-8,
+                                                   overflowing_update,
+                                                   identity_y),
+               MooseException);
+  EXPECT_EQ(function_evaluations, 1u);
 }
