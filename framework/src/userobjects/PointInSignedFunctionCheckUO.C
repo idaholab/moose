@@ -24,11 +24,10 @@ PointInSignedFunctionCheckUO::validParams()
   params.addRequiredParam<FunctionName>(
       "function",
       "Signed level-set function; negative inside by default (see inside_is_negative).");
-  params.addParam<Real>(
-      "tolerance",
-      libMesh::TOLERANCE,
-      "Half-width, in function value space, of the on-surface band around the "
-      "zero level set. Points within this band are classified as on the surface.");
+  params.addParam<Real>("tolerance",
+                        libMesh::TOLERANCE,
+                        "Half-width, in function value space, of the on-surface band around the "
+                        "zero level set. Points within this band are labeled as on the surface.");
   params.addParam<bool>(
       "inside_is_negative",
       true,

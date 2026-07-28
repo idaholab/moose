@@ -16,7 +16,7 @@ class Function;
 
 /**
  * Point-containment checker backed by a signed level-set Function: the point is
- * classified from the sign of the function value (INSIDE where it is negative,
+ * labeled from the sign of the function value (INSIDE where it is negative,
  * OUTSIDE where positive, ON within tolerance of zero).
  *
  * This is a ThreadedGeneralUserObject because evaluating a parsed Function mutates
