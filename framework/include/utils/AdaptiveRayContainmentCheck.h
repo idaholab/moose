@@ -186,6 +186,14 @@ private:
                      const Point & ray_end,
                      const bool use_primary_direction = true) const;
 
+  /// 2D crossing count using a half-open side-based crossing rule: an edge is counted when its two
+  /// endpoints lie on strictly opposite sides of the ray line (a vertex or collinear edge exactly on
+  /// the line is thus counted consistently, with no tolerance) and the crossing is on the ray_start
+  /// side of the query point. See countCrossings() for the parameters.
+  int countCrossings2D(const Point & ray_start,
+                       const Point & ray_end,
+                       const bool use_primary_direction) const;
+
   /// Ray start strictly outside the global AABB along `unit_direction`, for any direction.
   /// The 8 AABB corners are projected onto the direction to find the box extent, and the
   /// start is placed just past the far side (a scale-aware padding), moving only the

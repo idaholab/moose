@@ -82,6 +82,17 @@
                   'from a file, combined in a union.'
   []
 
+  [mesh_and_stl]
+    type = 'Exodiff'
+    input = 'union_mesh_and_stl.i'
+    exodiff = 'union_mesh_and_stl_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify a point as contained when it is inside either a '
+                  'generator-built closed three-dimensional TRI3 surface mesh or a closed '
+                  'three-dimensional TRI3 surface mesh read from an STL file, combined in a union.'
+  []
+
   [invalid_parameters]
     requirement = 'The system shall report an error for an invalid union point-containment parameter '
                   'combination, namely'

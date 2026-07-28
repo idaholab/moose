@@ -106,9 +106,11 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
                "; choose a different ray_direction or use the auto (pca_ray) method.");
   }
 
-  // The primary rays disagreed on parity. Probe the remaining PCA variance directions: if any
-  // probe ray escapes without crossing the surface, the point is outside. Otherwise the query is
-  // undecidable.
+  // Defensive fallback. With the half-open crossing count, the two opposite primary rays always
+  // agree in parity for a well-formed closed surface, so this path is not reached for valid input;
+  // it is kept as a safety net should a future or degenerate case ever produce a parity
+  // disagreement. Probe the remaining PCA variance directions: if any probe ray escapes without
+  // crossing the surface, the point is outside. Otherwise the query is undecidable.
   for (const auto obb_axis : make_range(static_cast<unsigned int>(_dim - 1)))
   {
     const Point fallback_direction = _obb_bounds.getAxisDirection(obb_axis);
@@ -164,6 +166,12 @@ AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
                                             const Point & ray_end,
                                             const bool use_primary_direction) const
 {
+  // The 2D count uses a half-open side-based crossing rule, which counts a ray passing exactly
+  // through a boundary vertex or along a collinear edge correctly without any tolerance. The 3D
+  // path is unchanged.
+  if (_dim == 2)
+    return countCrossings2D(ray_start, ray_end, use_primary_direction);
+
   int count = 0;
   const auto candidate_ids =
       use_primary_direction ? collectCandidateElementIDs(ray_end) : std::vector<unsigned int>{};
@@ -184,6 +192,59 @@ AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
     if (rayIntersectGeometry(ray_start, ray_end, elem))
       count++;
   }
+  return count;
+}
+
+int
+AdaptiveRayContainmentCheck::countCrossings2D(const Point & ray_start,
+                                              const Point & ray_end,
+                                              const bool use_primary_direction) const
+{
+  const auto candidate_ids =
+      use_primary_direction ? collectCandidateElementIDs(ray_end) : std::vector<unsigned int>{};
+  const auto num_candidates = use_primary_direction ? candidate_ids.size() : _num_elements;
+
+  // The ray goes from ray_start (placed outside the geometry) to the query point p = ray_end, so
+  // the crossings on the segment are exactly those of the half-line from p toward ray_start.
+  const Point & p = ray_end;
+  const Point dir = ray_end - ray_start; // start -> p
+
+  int count = 0;
+
+  for (const auto candidate : make_range(num_candidates))
+  {
+    const auto elem_id = use_primary_direction ? candidate_ids[candidate] : candidate;
+    const auto & surf = _bd_elements[elem_id].get();
+    const auto ball = surf->computeBoundingBall();
+
+    if (isOutsideRayBBox(ray_start, dir, ball))
+      continue;
+    if (isOutsideBoundingRegion(ray_start, dir, ball))
+      continue;
+
+    const Elem & e = surf->elem();
+    const Point a = e.point(0) - p;
+    const Point b = e.point(1) - p;
+
+    // Signed perpendicular position of each edge endpoint relative to the ray line. The strict ">"
+    // on both endpoints is the half-open ("one end closed, one end open") crossing convention: an
+    // endpoint exactly on the ray line is assigned one fixed side, so a vertex shared by two edges
+    // is counted by exactly one of them, an edge collinear with the ray (both sides zero) is
+    // skipped, and a tangential touch cancels to an even count. No tolerance is needed.
+    const Real side_a = dir.cross(a)(2);
+    const Real side_b = dir.cross(b)(2);
+    if ((side_a > 0.0) == (side_b > 0.0))
+      continue;
+
+    // The edge crosses the ray line; keep it only if the crossing lies on the ray_start side of p
+    // (on the segment [ray_start, p]), i.e. opposite the +dir direction that points from start to
+    // p.
+    const Real t = side_a / (side_a - side_b);
+    const Point crossing = a + t * (b - a); // crossing point relative to p
+    if (dir * crossing < 0.0)
+      ++count;
+  }
+
   return count;
 }
 

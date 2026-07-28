@@ -16,7 +16,7 @@ in the shifted boundary method). If your level set is positive inside instead, s
 
 ## Tolerance and the on-surface band
 
-A point is classified as follows, after normalizing so that negative denotes the
+A point is labeled as follows, after normalizing so that negative denotes the
 interior:
 
 - `phi < -tolerance` -> `INSIDE`
