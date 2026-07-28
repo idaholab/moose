@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ActionComponent.h"
+#include "ComponentMeshGenerationHelper.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"
 
@@ -18,7 +18,7 @@
  * The template argument is the dimension: 0D components don't need to be re-oriented,
  * while 1D, 2D and 3D components could need this feature.
  */
-class ComponentMeshTransformHelper : public virtual ActionComponent
+class ComponentMeshTransformHelper : public ComponentMeshGenerationHelper
 {
 public:
   static InputParameters validParams();
