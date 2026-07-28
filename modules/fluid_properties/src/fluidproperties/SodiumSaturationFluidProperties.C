@@ -70,13 +70,13 @@ SodiumSaturationFluidProperties::rho_from_p_s(Real pressure, Real entropy) const
   auto entropy_from_p_T = [&](Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT)
   { s_from_p_T(p, T, s, ds_dp, ds_dT); };
   const Real temperature = FluidPropertiesUtils::NewtonSolve(pressure,
-                                                              entropy,
-                                                              _T_initial_guess,
-                                                              _tolerance,
-                                                              entropy_from_p_T,
-                                                              name() + "::rho_from_p_s",
-                                                              _max_newton_its,
-                                                              _verbose_newton)
+                                                             entropy,
+                                                             _T_initial_guess,
+                                                             _tolerance,
+                                                             entropy_from_p_T,
+                                                             name() + "::rho_from_p_s",
+                                                             _max_newton_its,
+                                                             _verbose_newton)
                                .first;
   return rho_from_p_T(pressure, temperature);
 }
@@ -88,13 +88,13 @@ SodiumSaturationFluidProperties::rho_from_p_s(
   auto entropy_from_p_T = [&](Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT)
   { s_from_p_T(p, T, s, ds_dp, ds_dT); };
   const Real temperature = FluidPropertiesUtils::NewtonSolve(pressure,
-                                                              entropy,
-                                                              _T_initial_guess,
-                                                              _tolerance,
-                                                              entropy_from_p_T,
-                                                              name() + "::rho_from_p_s",
-                                                              _max_newton_its,
-                                                              _verbose_newton)
+                                                             entropy,
+                                                             _T_initial_guess,
+                                                             _tolerance,
+                                                             entropy_from_p_T,
+                                                             name() + "::rho_from_p_s",
+                                                             _max_newton_its,
+                                                             _verbose_newton)
                                .first;
 
   Real s, ds_dp, ds_dT;
@@ -115,11 +115,8 @@ SodiumSaturationFluidProperties::v_from_p_T(Real pressure, Real temperature) con
 }
 
 void
-SodiumSaturationFluidProperties::specific_volume_derivatives(Real temperature,
-                                                              Real & v,
-                                                              Real & dv_dT,
-                                                              Real & d2v_dT2,
-                                                              Real & d3v_dT3) const
+SodiumSaturationFluidProperties::specific_volume_derivatives(
+    Real temperature, Real & v, Real & dv_dT, Real & d2v_dT2, Real & d3v_dT3) const
 {
   const Real rho = rho_from_p_T(_reference_pressure, temperature);
   const Real drho_dT = -0.21390 - 2 * 1.1046e-5 * temperature;
@@ -136,16 +133,16 @@ Real
 SodiumSaturationFluidProperties::cp0_from_T(Real temperature) const
 {
   const Real t2 = temperature * temperature;
-  return 3.7782E-10 * t2 * t2 - 1.7191E-6 * t2 * temperature +
-         3.0921E-3 * t2 - 2.4560 * temperature + 1972.0;
+  return 3.7782E-10 * t2 * t2 - 1.7191E-6 * t2 * temperature + 3.0921E-3 * t2 -
+         2.4560 * temperature + 1972.0;
 }
 
 Real
 SodiumSaturationFluidProperties::dcp0_dT_from_T(Real temperature) const
 {
   const Real t2 = temperature * temperature;
-  return 4 * 3.7782E-10 * t2 * temperature - 3 * 1.7191E-6 * t2 +
-         2 * 3.0921e-3 * temperature - 2.456;
+  return 4 * 3.7782E-10 * t2 * temperature - 3 * 1.7191E-6 * t2 + 2 * 3.0921e-3 * temperature -
+         2.456;
 }
 
 void
@@ -167,8 +164,7 @@ SodiumSaturationFluidProperties::p_from_v_e(Real v, Real e) const
   specific_volume_derivatives(temperature, v, v_T, d2v_dT2, d3v_dT3);
 
   const Real h = h_from_p_T(_reference_pressure, temperature);
-  return _reference_pressure +
-         (h - _reference_pressure * v - e) / (temperature * v_T);
+  return _reference_pressure + (h - _reference_pressure * v - e) / (temperature * v_T);
 }
 
 void
@@ -189,8 +185,7 @@ SodiumSaturationFluidProperties::p_from_v_e(
   const Real ddenominator_dv = (v_T + temperature * d2v_dT2) * dT_dv;
 
   pressure = _reference_pressure + numerator / denominator;
-  dp_dv = (dnumerator_dv * denominator - numerator * ddenominator_dv) /
-           (denominator * denominator);
+  dp_dv = (dnumerator_dv * denominator - numerator * ddenominator_dv) / (denominator * denominator);
   dp_de = -1.0 / denominator;
 }
 
@@ -241,8 +236,8 @@ SodiumSaturationFluidProperties::h_from_p_T(Real pressure, Real temperature) con
 {
   Real t2 = temperature * temperature;
   const Real h0 = 3.7782E-10 * t2 * t2 * temperature / 5 - 1.7191E-6 * t2 * t2 / 4.0 +
-                  3.0921E-3 * t2 * temperature / 3.0 - 2.4560 * t2 / 2.0 +
-                  1972.0 * temperature - 401088.7;
+                  3.0921E-3 * t2 * temperature / 3.0 - 2.4560 * t2 / 2.0 + 1972.0 * temperature -
+                  401088.7;
 
   Real v, dv_dT, d2v_dT2, d3v_dT3;
   specific_volume_derivatives(temperature, v, dv_dT, d2v_dT2, d3v_dT3);
@@ -258,8 +253,7 @@ SodiumSaturationFluidProperties::h_from_p_T(
   Real v, dv_dT, d2v_dT2, d3v_dT3;
   specific_volume_derivatives(temperature, v, dv_dT, d2v_dT2, d3v_dT3);
   dh_dp = v - temperature * dv_dT;
-  dh_dT = cp0_from_T(temperature) -
-          (pressure - _reference_pressure) * temperature * d2v_dT2;
+  dh_dT = cp0_from_T(temperature) - (pressure - _reference_pressure) * temperature * d2v_dT2;
 }
 
 Real
@@ -299,8 +293,8 @@ SodiumSaturationFluidProperties::s_from_p_T(Real pressure, Real temperature) con
   const auto temperature_part = [](Real T)
   {
     const Real T2 = T * T;
-    return 3.7782e-10 * T2 * T2 / 4.0 - 1.7191e-6 * T2 * T / 3.0 +
-           3.0921e-3 * T2 / 2.0 - 2.4560 * T + 1972.0 * std::log(T);
+    return 3.7782e-10 * T2 * T2 / 4.0 - 1.7191e-6 * T2 * T / 3.0 + 3.0921e-3 * T2 / 2.0 -
+           2.4560 * T + 1972.0 * std::log(T);
   };
 
   Real v, dv_dT, d2v_dT2, d3v_dT3;
@@ -393,8 +387,7 @@ SodiumSaturationFluidProperties::cp_from_p_T(Real pressure, Real temperature) co
 {
   Real v, dv_dT, d2v_dT2, d3v_dT3;
   specific_volume_derivatives(temperature, v, dv_dT, d2v_dT2, d3v_dT3);
-  return cp0_from_T(temperature) -
-         (pressure - _reference_pressure) * temperature * d2v_dT2;
+  return cp0_from_T(temperature) - (pressure - _reference_pressure) * temperature * d2v_dT2;
 }
 
 void

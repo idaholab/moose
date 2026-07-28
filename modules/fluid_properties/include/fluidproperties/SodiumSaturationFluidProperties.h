@@ -55,8 +55,7 @@ public:
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   virtual Real T_from_p_h(Real p, Real h) const override;
-  virtual void
-  T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
+  virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
 
   virtual Real s_from_p_T(Real p, Real T) const override;
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
@@ -103,11 +102,8 @@ public:
 private:
   static constexpr Real _reference_pressure = 1.0e5;
 
-  void specific_volume_derivatives(Real temperature,
-                                   Real & v,
-                                   Real & dv_dT,
-                                   Real & d2v_dT2,
-                                   Real & d3v_dT3) const;
+  void specific_volume_derivatives(
+      Real temperature, Real & v, Real & dv_dT, Real & d2v_dT2, Real & d3v_dT3) const;
   Real cp0_from_T(Real temperature) const;
   Real dcp0_dT_from_T(Real temperature) const;
 };
