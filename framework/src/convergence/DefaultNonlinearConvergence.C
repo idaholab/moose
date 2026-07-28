@@ -285,19 +285,19 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
 }
 
 void
-DefaultNonlinearConvergence::modifyMaximumIterations(const unsigned int max_iter)
+DefaultNonlinearConvergence::setMaximumIterations(const unsigned int max_iter)
 {
   _nl_max_its = max_iter;
 }
 
 void
-DefaultNonlinearConvergence::modifyAbsoluteTolerance(const Real abs_tol)
+DefaultNonlinearConvergence::setAbsoluteTolerance(const Real abs_tol)
 {
   _nl_abs_tol = abs_tol;
 }
 
 void
-DefaultNonlinearConvergence::modifyRelativeTolerance(const Real rel_tol)
+DefaultNonlinearConvergence::setRelativeTolerance(const Real rel_tol)
 {
   _nl_rel_tol = rel_tol;
 }

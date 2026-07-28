@@ -31,12 +31,12 @@ public:
   virtual void preSolve() override;
   virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
-  /// Modifies the maximum nonlinear iterations
-  void modifyMaximumIterations(const unsigned int max_iter);
-  /// Modifies the absolute nonlinear tolerance
-  void modifyAbsoluteTolerance(const Real abs_tol);
-  /// Modifies the relative nonlinear tolerance
-  void modifyRelativeTolerance(const Real rel_tol);
+  /// Sets the maximum nonlinear iterations
+  void setMaximumIterations(const unsigned int max_iter);
+  /// Sets the absolute nonlinear tolerance
+  void setAbsoluteTolerance(const Real abs_tol);
+  /// Sets the relative nonlinear tolerance
+  void setRelativeTolerance(const Real rel_tol);
 
 protected:
   /// Sets the nonlinear system parameters, such as tolerances
@@ -82,10 +82,10 @@ protected:
   unsigned int _nl_current_pingpong;
 
 private:
-  /// Nonlinear maximum nonlinear iterations (modifiable by modifyMaximumIterations)
+  /// Nonlinear maximum nonlinear iterations (modifiable by setMaximumIterations)
   unsigned int _nl_max_its;
-  /// Nonlinear absolute tolerance (modifiable by modifyAbsoluteTolerance)
+  /// Nonlinear absolute tolerance (modifiable by setAbsoluteTolerance)
   Real _nl_abs_tol;
-  /// Nonlinear relative tolerance (modifiable by modifyRelativeTolerance)
+  /// Nonlinear relative tolerance (modifiable by setRelativeTolerance)
   Real _nl_rel_tol;
 };

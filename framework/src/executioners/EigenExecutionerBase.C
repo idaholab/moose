@@ -217,8 +217,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   // every power iteration is a linear solve, so set max nonlinear iterations to 1 and
   // give a very loose nonlinear tolerance so that it always converges
   es_params.set<Real>("linear solver tolerance") = l_rtol;
-  _eigen_sys_conv->modifyMaximumIterations(1);
-  _eigen_sys_conv->modifyRelativeTolerance(1.0 - 1e-8);
+  _eigen_sys_conv->setMaximumIterations(1);
+  _eigen_sys_conv->setRelativeTolerance(1.0 - 1e-8);
 
   if (echo)
   {
@@ -363,8 +363,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // restore parameters changed by the executioner
   es_params.set<Real>("linear solver tolerance") = l_tol_bak;
-  _eigen_sys_conv->modifyMaximumIterations(nl_max_its_bak);
-  _eigen_sys_conv->modifyRelativeTolerance(nl_rel_tol_bak);
+  _eigen_sys_conv->setMaximumIterations(nl_max_its_bak);
+  _eigen_sys_conv->setRelativeTolerance(nl_rel_tol_bak);
 
   // FIXME: currently power iteration use old and older solutions, so restore them
   _problem.restoreOldSolutions();
@@ -590,8 +590,8 @@ EigenExecutionerBase::nonlinearSolve(Real nl_rtol, Real nl_atol, Real l_rtol, Re
       eigen_sys_params.get<Real>("nonlinear solver relative residual tolerance");
 
   es_params.set<Real>("linear solver tolerance") = l_rtol;
-  _eigen_sys_conv->modifyAbsoluteTolerance(nl_atol);
-  _eigen_sys_conv->modifyRelativeTolerance(nl_rtol);
+  _eigen_sys_conv->setAbsoluteTolerance(nl_atol);
+  _eigen_sys_conv->setRelativeTolerance(nl_rtol);
 
   // call nonlinear solve
   _problem.solve(_eigen_sys.number());
@@ -601,8 +601,8 @@ EigenExecutionerBase::nonlinearSolve(Real nl_rtol, Real nl_atol, Real l_rtol, Re
 
   // restore nonlinear solve parameters
   es_params.set<Real>("linear solver tolerance") = l_tol_bak;
-  _eigen_sys_conv->modifyAbsoluteTolerance(nl_abs_tol_bak);
-  _eigen_sys_conv->modifyRelativeTolerance(nl_rel_tol_bak);
+  _eigen_sys_conv->setAbsoluteTolerance(nl_abs_tol_bak);
+  _eigen_sys_conv->setRelativeTolerance(nl_rel_tol_bak);
 
   return _problem.converged(_eigen_sys.number());
 }
