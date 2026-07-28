@@ -44,7 +44,7 @@
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
-      detail = 'using the small strain formulation and calculate a perfect Jacobian.'
+      detail = 'using the small strain formulation and compare its assembled Jacobian against finite differences.'
     []
     [finite-jac]
       type = 'PetscJacobianTester'
@@ -55,7 +55,7 @@
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
-      detail = 'using the finite strain formulation and calculate a perfect Jacobian.'
+      detail = 'using the finite strain formulation and compare its assembled Jacobian against finite differences.'
     []
   []
   [stiff]
