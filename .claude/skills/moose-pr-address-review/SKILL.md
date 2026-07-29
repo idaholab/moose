@@ -17,8 +17,7 @@ GitHub replies, and thread resolution require explicit approval after the user
 has seen their exact contents.
 
 Use `moose-codegraph` before changing MOOSE C++ or Python, and use the
-read-only Steps 0-4 of `moose-pr-review` to re-audit the revised PR. Do not
-duplicate their MOOSE-specific checklists here.
+read-only Steps 0-4 of `moose-pr-review` to re-audit the revised PR.
 
 ## Step 1 - Identify the PR and preserve local state
 
@@ -83,9 +82,10 @@ ask the user before editing. For a clear accepted request, continue.
 
 For each file to edit:
 
-1. Read the root and applicable ancestor `AGENTS.md` files. Apply all
-   non-conflicting instructions; the closest file takes precedence on a
-   conflict.
+1. Read only the `AGENTS.md` files at the repository root and in directories
+   between the repository root and the changed file. Never search above the
+   repository root. Apply all non-conflicting instructions; the closest file
+   takes precedence on a conflict.
 2. Use `moose-codegraph` before changing MOOSE C++ or Python to find existing
    functionality, sibling patterns, callers, and blast radius.
 3. Make only changes traceable to accepted review feedback. Do not clean up
@@ -128,9 +128,10 @@ still show its exact text first.
 
 Never stage, commit, amend, rebase, push, or force-push without explicit user
 approval. Default to proposing one new commit containing the accepted review
-changes and the required issue reference. Show its exact files and message.
-Require separate approval for amend, rebase, or force-push, and prefer
-`--force-with-lease`.
+changes. Ensure that at least one commit in the development branch references
+an issue; do not add a redundant reference to the new commit when the branch
+already satisfies that requirement. Show its exact files and message. Require
+separate approval for amend, rebase, or force-push, and prefer `--force-with-lease`.
 
 Local edits made while addressing the requested review are authorized; their
 publication is not. Do not treat the initial request to "address the review"
@@ -161,20 +162,14 @@ Replying and resolving are separate operations. Follow these hard rules:
   resolved unless the user explicitly requests a new reply; do not unresolve
   it.
 
-For a non-trivial accepted change, make the reply invite reviewer confirmation
-and state that the conversation was intentionally left open. For disagreement
-or clarification, post only the approved rationale or question and leave the
-thread open.
+For an accepted change, reply only `Done.` unless a short qualifier is needed
+to identify what changed. Do not ask the reviewer to confirm it or mention
+that the conversation was left open. For disagreement or clarification, post
+only the approved rationale or question and leave the thread open.
 
-## Final report
+## Finish concisely
 
-Report:
-
-- Changes made and tests run.
-- Commit and pushed SHA, if approved.
-- Replies posted, with URLs.
-- Trivial threads explicitly approved and resolved.
-- Every non-trivial, failed, ambiguous, or unverified conversation still open.
-
-Do not say that the review is fully addressed while an actionable item or
-failed verification remains.
+After publishing, return only a brief success note and the PR URL. Do not
+repeat the response package or summarize commits, replies, and resolutions the
+user can inspect on GitHub. Expand the response only for an action that failed,
+was skipped, remains blocked, or still requires user input.

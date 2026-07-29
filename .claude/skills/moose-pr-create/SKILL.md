@@ -15,9 +15,9 @@ Create a draft PR only after the exact candidate diff passes MOOSE's local
 instructions and contribution gates. Treat branch preparation and GitHub
 publication as separate, approval-controlled phases.
 
-Reuse the `moose-pr-review` skill for the MOOSE review standard and the
-`moose-codegraph` skill for its code-navigation mechanics. Do not duplicate
-their checklists here, and do not use the posting step from `moose-pr-review`.
+Use the `moose-pr-review` skill for the MOOSE review standard and the
+`moose-codegraph` skill for its code-navigation mechanics. Do not use the
+posting step from `moose-pr-review`.
 
 ## Step 1 - Establish the candidate
 
@@ -38,10 +38,10 @@ invalidates the audit below; restart the audit from the new SHA.
 
 ## Step 2 - Enforce every applicable AGENTS.md
 
-For every changed path, read the repository-root `AGENTS.md` and every
-`AGENTS.md` in its ancestor directories. Apply all non-conflicting
-instructions; when instructions conflict, the closest file to the changed path
-takes precedence. Do not assume the root file is the only one.
+For each changed path, read only the `AGENTS.md` files at the repository root
+and in directories between the repository root and the changed path. Never
+search above the repository root. Apply all non-conflicting instructions; when
+instructions conflict, the closest file to the changed path takes precedence.
 
 Build a concise compliance table containing the instruction, affected paths,
 evidence, and pass/block result. A violation is a blocker: show the exact
@@ -68,8 +68,9 @@ Run Steps 0-4 of `moose-pr-review` in local-branch mode and stop before its
 optional posting step. In particular:
 
 - Require CodeGraph as that skill specifies.
-- Check every commit for an issue reference and read the linked issues for
-  intent.
+- Require at least one commit in `<base>..HEAD` to reference an issue, then
+  read the referenced issues for intent. Do not require every commit to carry
+  its own issue reference.
 - Check design and scope, reuse, the MOOSE Code Standard, tests and SQA
   metadata, documentation, and new-object stub pages.
 - Treat every "required change" as a blocker. Suggestions are not blockers.
@@ -154,8 +155,11 @@ After approval:
 If publication fails, inspect the failure before retrying. Never create a
 second PR to recover from an ambiguous first attempt.
 
-## Final report
+## Finish concisely
 
-Return the PR URL, base/head, draft state, tests run, unrun checks, and any
-non-blocking suggestions. If blocked, lead with the blocker and the exact
-surgical repair proposed; do not imply that a PR was created.
+After creation, return only a brief success note and the PR URL. Do not repeat
+the title, body, base/head branches, draft state, tests, or other information
+the user can inspect on GitHub or already reviewed in the publication preview.
+Expand the response only for an action that failed, was skipped, remains
+blocked, or still requires user input. If no PR was created, do not imply
+otherwise.

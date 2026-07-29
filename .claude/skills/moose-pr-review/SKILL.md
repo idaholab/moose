@@ -34,7 +34,8 @@ each instance:
 
 - C++ formatting: `git clang-format <base>` (uses `.clang-format`)
 - Python formatting: `black .` (uses `pyproject.toml`)
-- No trailing whitespace / tabs, and the "every commit references an issue" check
+- No trailing whitespace / tabs, and the "at least one development-branch commit
+  references an issue" check
 
 Focus human/AI review on the semantic standards CI can't see: naming, const-correctness,
 access control, API design, C-vs-C++ construct choices, tests, and documentation.
@@ -79,10 +80,11 @@ Reason / Design / Impact (the PR template fields).
 
 ```bash
 # Review the branch against the point it was cut from. <base> is the integration branch this
-# work will merge into - for MOOSE that is `next` (use `origin/next`). This is NOT the branch's
-# upstream tracking branch: `git rev-parse @{u}` resolves to this same branch's remote copy
-# (e.g. origin/<branch>), not the base. Use three dots so the diff shows only what this branch
-# added, regardless of how far the integration branch moved.
+# work will merge into. For MOOSE the branch name is `next`, but do not assume a remote name:
+# resolve the remote-tracking ref for the remote that represents the canonical MOOSE repository.
+# This is NOT the branch's upstream tracking branch: `git rev-parse @{u}` resolves to this same
+# branch's remote copy (e.g. <fork>/<branch>), not the base. Use three dots so the diff shows
+# only what this branch added, regardless of how far the integration branch moved.
 git diff <base>...HEAD              # the changes under review
 git log <base>..HEAD --format='%h %s'   # the commits under review - read them for intent and scope
 ```
@@ -100,7 +102,8 @@ changed:
 
 - **Applicable `AGENTS.md` guidance.** Read the `AGENTS.md` files from the merge target
   revision, not copies changed by the PR itself. For a GitHub PR this revision is `baseRefOid`;
-  for a local branch it is `<base>` (normally `origin/next`). List tracked guidance with
+  for a local branch it is `<base>`, resolved from the canonical MOOSE remote rather than an
+  assumed remote name. List tracked guidance with
   `git ls-tree -r --name-only <base-revision> | rg '(^|/)AGENTS\.md$'` and read applicable
   files with line numbers using `git show <base-revision>:<path> | nl -ba` (fetch the base
   revision first if necessary). The root file applies repository-wide; a nested file applies
@@ -108,9 +111,10 @@ changed:
   they conflict. Map the resulting root-to-deep guidance chain to every changed path. If the PR
   adds or changes an `AGENTS.md`, review that file as a policy/documentation change, but do not
   let it retroactively govern the same PR.
-- **Linked issue(s).** Read the issue(s) the commits reference - they are your spec for judging
-  whether the change is complete and correctly scoped. (CI already enforces that a reference
-  exists, so don't spend review time policing its presence.)
+- **Linked issue(s).** Read the issue(s) referenced by any commit in the development branch -
+  they are your spec for judging whether the change is complete and correctly scoped. (CI already
+  enforces that at least one commit contains a reference, so don't spend review time policing its
+  presence or require every commit to repeat it.)
 - **Newly registered objects.** Find new user-facing objects in the diff:
   `git diff <base>...HEAD | grep -E '^\+.*register(MooseObject|.*Action)\('`.
   Each new object drives both a documentation check (Step 3E) and a testing check (Step 3D).

@@ -80,7 +80,7 @@ The test: Every changed line should trace directly to the user's request.
   stack uses conda unless this has already been established in the
   conversation. If it does, ask which conda environment to activate and wait
   for the answer before running the command; do not use an existing binary or
-  current shell state to bypass this check.
+  current shell state as a shortcut around this check.
 
 ## 7. Goal-Driven Execution
 
