@@ -75,8 +75,12 @@ The test: Every changed line should trace directly to the user's request.
 
 - Prefer builtin tools over bash commands whenever possible in the vein of
   reducing permission prompting.
-- Before building or testing with conda, ask the user which conda environment
-  to activate rather than guessing.
+- Before building or performing verification, including running tests or
+  invoking a pre-existing MOOSE executable, ask the user whether their MOOSE
+  stack uses conda unless this has already been established in the
+  conversation. If it does, ask which conda environment to activate and wait
+  for the answer before running the command; do not use an existing binary or
+  current shell state to bypass this check.
 
 ## 7. Goal-Driven Execution
 
