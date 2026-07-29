@@ -149,6 +149,28 @@
                   'level-set surface lies within the element without enclosing any element nodes.'
   []
 
+  [edge_clip_outside_guard]
+    type = Exodiff
+    input = '2D_edge_clip.i'
+    exodiff = '2D_edge_clip_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall classify an element whose nodes all lie outside a surface as '
+                  'intercepted rather than outside when the surface clips a finite region of the '
+                  'element interior, using the quadrature occupied-ratio check.'
+  []
+
+  [triangle_clip_outside_guard]
+    type = Exodiff
+    input = '2D_triangle_clip.i'
+    exodiff = '2D_triangle_clip_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall apply the occupied-ratio in-out classification to a polygonal '
+                  'surface with sharp corners on a refined mesh, marking an element whose nodes all '
+                  'lie outside the polygon as intercepted where a corner clips the element interior.'
+  []
+
   [debug_mesh_output]
     type = 'Exodiff'
     input = '2D_lambda0p5.i'
