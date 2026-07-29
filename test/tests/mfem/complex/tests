@@ -60,5 +60,13 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
+  [MFEMRadialPML]
+    type = CSVDiff
+    input = radial_pml.i
+    csvdiff = 'OutputData/RadialPML.csv'
+    requirement = 'The system shall have the ability to absorb an outgoing wave using a perfectly matched layer whose coordinate stretch is measured along rays from a reference point.'
+    capabilities = 'mfem'
+    recover = false
+    max_parallel = 1
   []
 []
