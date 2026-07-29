@@ -103,6 +103,16 @@ PBSodiumFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
     return _H0 + F_enthalpy(temperature) - F_enthalpy(_T0);
 }
 
+void
+PBSodiumFluidProperties::h_from_p_T(
+    Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+{
+  h = h_from_p_T(pressure, temperature);
+  // This model defines enthalpy as pressure-independent and its temperature derivative as cp.
+  dh_dp = 0.0;
+  dh_dT = cp_from_p_T(pressure, temperature);
+}
+
 Real
 PBSodiumFluidProperties::beta_from_p_T(Real /*pressure*/, Real temperature) const
 {
