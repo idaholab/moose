@@ -12,25 +12,21 @@
 #pragma once
 
 #include "MFEMComplexKernel.h"
-#include "MFEMPMLStretch.h"
+#include "MFEMPMLStretchVector.h"
 
 /**
  * Perfectly matched layer tensor coefficient.
- *
- * The radial stretch is diagonal in the local radial and tangential frame, so the tensor in
- * Cartesian coordinates is
- *
- *     M = lambda_t I + (lambda_r - lambda_t) rhat (x) rhat,
- *
- * whose eigenvalues follow from the radial and tangential stretch factors J_r and J_t and their
- * determinant det(J) = J_r J_t^(d-1).
  *
  * Which tensor applies is set by the quantity the bilinear form integrates, not by the operator
  * using it: pulling the weak form back from stretched to physical coordinates gives one factor for
  * an integrand holding the curl of the field and another for one holding the field itself.
  *
- *     CURL  = det(J)^-1 J^T J    lambda_r = J_r^2/det, lambda_t = J_t^2/det
- *     FIELD = det(J) (J^T J)^-1  lambda_r = det/J_r^2, lambda_t = det/J_t^2
+ *     CURL  = det(J)^-1 J^T J
+ *     FIELD = det(J) (J^T J)^-1
+ *
+ * The stretch Jacobian J is a full matrix, since the level sets of the harmonic coordinate bend
+ * the stretch direction from point to point. It is complex symmetric rather than Hermitian, so
+ * both tensors are formed with the plain transpose.
  *
  * The result is scaled by a base scalar coefficient, and only its real or imaginary part is
  * returned, as the complex system is assembled from two real bilinear forms.
@@ -49,7 +45,7 @@ public:
     IM
   };
 
-  MFEMPMLMatrixCoefficient(const MFEMPMLStretch & stretch,
+  MFEMPMLMatrixCoefficient(const MFEMPMLStretchVector & stretch,
                            mfem::Coefficient & base_coefficient,
                            Tensor tensor,
                            Part part)
@@ -66,7 +62,7 @@ public:
             const mfem::IntegrationPoint & ip) override;
 
 private:
-  const MFEMPMLStretch & _stretch;
+  const MFEMPMLStretchVector & _stretch;
   mfem::Coefficient & _base_coefficient;
   const Tensor _tensor;
   const Part _part;
@@ -79,7 +75,7 @@ private:
 class MFEMPMLScalarCoefficient : public mfem::Coefficient
 {
 public:
-  MFEMPMLScalarCoefficient(const MFEMPMLStretch & stretch,
+  MFEMPMLScalarCoefficient(const MFEMPMLStretchVector & stretch,
                            mfem::Coefficient & base_coefficient,
                            MFEMPMLMatrixCoefficient::Part part)
     : _stretch(stretch), _base_coefficient(base_coefficient), _part(part)
@@ -89,15 +85,15 @@ public:
   double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 
 private:
-  const MFEMPMLStretch & _stretch;
+  const MFEMPMLStretchVector & _stretch;
   mfem::Coefficient & _base_coefficient;
   const MFEMPMLMatrixCoefficient::Part _part;
 };
 
 /**
- * Base class for radial perfectly matched layer complex bilinear form kernels. The layer is this
- * kernel's block, and the stretch geometry is derived from the mesh and a reference point.
- * Subclasses build the operator integrator from the appropriate coefficient.
+ * Base class for perfectly matched layer complex bilinear form kernels. The layer is this kernel's
+ * block, and the stretch geometry is derived from it alone. Subclasses build the operator
+ * integrator from the appropriate coefficient.
  */
 class MFEMPMLKernel : public MFEMComplexKernel
 {
@@ -113,12 +109,12 @@ protected:
   virtual mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) = 0;
 
   /// Construct the stretch from the mesh, this kernel's block and the input parameters.
-  std::unique_ptr<MFEMPMLStretch> makeStretch();
+  std::unique_ptr<MFEMPMLStretchVector> makeStretch();
 
   /// Base scalar coefficient, such as the reluctivity or the mass coefficient.
   mfem::Coefficient & _base_coefficient;
   /// Declared before the coefficients below, which hold a reference to it.
-  std::unique_ptr<MFEMPMLStretch> _stretch;
+  std::unique_ptr<MFEMPMLStretchVector> _stretch;
   MFEMPMLMatrixCoefficient _matrix_re;
   MFEMPMLMatrixCoefficient _matrix_im;
   MFEMPMLScalarCoefficient _scalar_re;
