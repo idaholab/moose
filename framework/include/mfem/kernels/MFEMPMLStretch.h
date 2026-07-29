@@ -26,7 +26,7 @@
  *     J_t = 1 + i alpha s^n / (L^n r)       (tangential, r~/r)
  *
  * where alpha is the decay coefficient and n the decay polynomial order. The mesh must either be
- * convex or the chosen reference point must be such that the ray from the reference point through 
+ * convex or the chosen reference point must be such that the ray from the reference point through
  * any evaluation point intersects the inner and outer surfaces of the layer exactly once.
  */
 class MFEMPMLStretch

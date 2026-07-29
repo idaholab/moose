@@ -77,8 +77,7 @@ MFEMPMLStretch::MFEMPMLStretch(mfem::ParMesh & mesh,
 
   mesh.ExchangeFaceNbrData();
 
-  auto in_pml = [&pml_attributes](int attribute)
-  { return pml_attributes.Find(attribute) != -1; };
+  auto in_pml = [&pml_attributes](int attribute) { return pml_attributes.Find(attribute) != -1; };
 
   // Depth is measured along rays leaving the reference point, which is only meaningful if that
   // point lies inside the mesh but outside the layer: a ray must cross the inner surface of the
@@ -247,9 +246,8 @@ MFEMPMLStretch::castRay(const mfem::Vector & direction, const std::vector<double
       qvec[0] = tvec[1] * edge1[2] - tvec[2] * edge1[1];
       qvec[1] = tvec[2] * edge1[0] - tvec[0] * edge1[2];
       qvec[2] = tvec[0] * edge1[1] - tvec[1] * edge1[0];
-      const double v =
-          (direction[0] * qvec[0] + direction[1] * qvec[1] + direction[2] * qvec[2]) *
-          inverse_determinant;
+      const double v = (direction[0] * qvec[0] + direction[1] * qvec[1] + direction[2] * qvec[2]) *
+                       inverse_determinant;
       if (v < -eps || u + v > 1.0 + eps)
         continue;
       const double t =
