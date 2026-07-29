@@ -25,7 +25,7 @@ MFEMPMLCurlCurlKernel::validParams()
 }
 
 MFEMPMLCurlCurlKernel::MFEMPMLCurlCurlKernel(const InputParameters & parameters)
-  : MFEMPMLKernel(parameters, MFEMPMLDiagMatrixCoefficient::C1)
+  : MFEMPMLKernel(parameters, MFEMPMLMatrixCoefficient::CURL)
 {
 }
 
