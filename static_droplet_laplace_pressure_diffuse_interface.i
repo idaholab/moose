@@ -28,7 +28,8 @@ R_outside_sample = 0.30
 pressure_jump_exact = ${fparse sigma / R}
 liquid_volume_exact = ${fparse 3.141592653589793 * R * R}
 
-c_alpha = 0.0
+c_alpha = 0.1
+interface_width = 0.015625
 
 [Mesh]
   [mesh]
@@ -111,7 +112,7 @@ c_alpha = 0.0
 [Functions]
   [alpha_init]
     type = ParsedFunction
-    expression = 'if((x-${xc})^2 + (y-${yc})^2 < ${R}^2, 1, 0)'
+    expression = '0.5 * (1 + tanh((${R} - sqrt((x-${xc})^2 + (y-${yc})^2)) / (sqrt(2) * ${interface_width})))'
   []
 []
 
