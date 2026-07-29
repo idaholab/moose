@@ -37,9 +37,9 @@ public:
   void SetOperator(const mfem::Operator & op) override;
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
-    if (!_matrix_free_ams)
-      mooseError("MatrixFreeAMS preconditioner was not initialized with both the operator and "
-                 "bilinear form before use.");
+    mooseAssert(_matrix_free_ams,
+                "MatrixFreeAMS preconditioner was not initialized with both the operator and "
+                "bilinear form before use.");
     _matrix_free_ams->Mult(x, y);
   }
 
