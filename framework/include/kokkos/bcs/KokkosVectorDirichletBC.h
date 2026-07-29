@@ -17,6 +17,7 @@ public:
   static InputParameters validParams();
 
   KokkosVectorDirichletBC(const InputParameters & parameters);
+  KokkosVectorDirichletBC(const KokkosVectorDirichletBC & object);
 
   template <typename Derived>
   KOKKOS_FUNCTION Moose::Kokkos::Real3 computeQpResidual(const unsigned int qp,
@@ -26,5 +27,6 @@ public:
   }
 
 protected:
+  const RealVectorValue & _values_host;
   const Moose::Kokkos::Real3 _values;
 };

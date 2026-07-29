@@ -98,7 +98,7 @@ Mesh::initMap()
   // Enumerate one off-process neighbor layer for element-side geometry data.
   if (_needs_element_side_geometry)
     for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      for (const auto side : elem->side_index_range())
       {
         const auto neighbor = elem->neighbor_ptr(side);
         if (neighbor && neighbor != libMesh::remote_elem &&
@@ -161,13 +161,13 @@ Mesh::initElement()
     _num_side_nodes[elem_type_id].create(elem->n_sides());
     _local_side_node[elem_type_id].create(elem->n_nodes(), elem->n_sides());
 
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : elem->side_index_range())
     {
       const auto side_ptr = elem->build_side_ptr(side);
 
       _num_side_nodes[elem_type_id][side] = side_ptr->n_nodes();
 
-      for (unsigned int node = 0; node < side_ptr->n_nodes(); ++node)
+      for (const auto node : side_ptr->node_index_range())
         _local_side_node[elem_type_id](node, side) = elem->local_side_node(side, node);
     }
 
@@ -243,7 +243,7 @@ Mesh::initElement()
   {
     const auto eid = getContiguousElementID(elem);
 
-    for (unsigned int node = 0; node < elem->n_nodes(); ++node)
+    for (const auto node : elem->node_index_range())
       _nodes(node, eid) = getContiguousNodeID(elem->node_ptr(node));
   }
 
@@ -360,7 +360,7 @@ Mesh::initElementSideGeometry()
     const auto eid = getContiguousElementID(elem);
     const auto elem_centroid = elem->vertex_average();
 
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : elem->side_index_range())
     {
       auto & face = side_builder(*elem, side);
       const auto face_centroid = face.vertex_average();

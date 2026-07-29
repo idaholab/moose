@@ -25,7 +25,7 @@ checkVariable(const Variable & var, bool expect_vector, const std::string & wrap
     mooseError("Attempted to construct Kokkos ", wrapper_name, " with an uninitialized variable.");
 
   if (var.vector() != expect_vector)
-    mooseError("Kokkos",
+    mooseError("Kokkos ",
                wrapper_name,
                " cannot be constructed with ",
                var.vector() ? "vector" : "scalar",
@@ -36,7 +36,8 @@ checkVariable(const Variable & var, bool expect_vector, const std::string & wrap
  * The Kokkos wrapper classes for MOOSE-like shape function access
  */
 ///@{
-class VariablePhiValue
+template <bool is_test>
+class VariableShapeValue
 {
 public:
   /**
@@ -50,7 +51,7 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.jfe();
+    auto fe = is_test ? datum.ife() : datum.jfe();
 
     return side == libMesh::invalid_uint
                ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
@@ -58,7 +59,8 @@ public:
   }
 };
 
-class VariablePhiGradient
+template <bool is_test>
+class VariableShapeGradient
 {
 public:
   /**
@@ -72,7 +74,7 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.jfe();
+    auto fe = is_test ? datum.ife() : datum.jfe();
 
     return datum.J(qp) *
            (side == libMesh::invalid_uint
@@ -81,57 +83,17 @@ public:
   }
 };
 
-class VariableTestValue
-{
-public:
-  /**
-   * Get the current test function
-   * @param datum The AssemblyDatum object of the current thread
-   * @param i The element-local DOF index
-   * @param qp The local quadrature point index
-   * @returns The test function
-   */
-  KOKKOS_FUNCTION Real operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
-  {
-    auto & elem = datum.elem();
-    auto side = datum.side();
-    auto fe = datum.ife();
-
-    return side == libMesh::invalid_uint
-               ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
-  }
-};
-
-class VariableTestGradient
-{
-public:
-  /**
-   * Get the gradient of the current test function
-   * @param datum The AssemblyDatum object of the current thread
-   * @param i The element-local DOF index
-   * @param qp The local quadrature point index
-   * @returns The gradient of the test function
-   */
-  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
-  {
-    auto & elem = datum.elem();
-    auto side = datum.side();
-    auto fe = datum.ife();
-
-    return datum.J(qp) *
-           (side == libMesh::invalid_uint
-                ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp));
-  }
-};
-
+using VariablePhiValue = VariableShapeValue<false>;
+using VariablePhiGradient = VariableShapeGradient<false>;
+using VariableTestValue = VariableShapeValue<true>;
+using VariableTestGradient = VariableShapeGradient<true>;
 using ADVariablePhiValue = VariablePhiValue;
 using ADVariablePhiGradient = VariablePhiGradient;
 using ADVariableTestValue = VariableTestValue;
 using ADVariableTestGradient = VariableTestGradient;
 
-class VectorVariablePhiValue
+template <bool is_test>
+class VectorVariableShapeValue
 {
 public:
   /**
@@ -145,7 +107,7 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.jfe();
+    auto fe = is_test ? datum.ife() : datum.jfe();
 
     return side == libMesh::invalid_uint
                ? datum.assembly().getVectorPhi(elem.subdomain, elem.type, fe)(i, qp)
@@ -153,7 +115,8 @@ public:
   }
 };
 
-class VectorVariablePhiGradient
+template <bool is_test>
+class VectorVariableShapeGradient
 {
 public:
   /**
@@ -167,7 +130,7 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.jfe();
+    auto fe = is_test ? datum.ife() : datum.jfe();
 
     auto grad =
         side == libMesh::invalid_uint
@@ -178,7 +141,8 @@ public:
   }
 };
 
-class VectorVariablePhiCurl
+template <bool is_test>
+class VectorVariableShapeCurl
 {
 public:
   /**
@@ -192,7 +156,7 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.jfe();
+    auto fe = is_test ? datum.ife() : datum.jfe();
 
     auto grad =
         side == libMesh::invalid_uint
@@ -203,78 +167,12 @@ public:
   }
 };
 
-class VectorVariableTestValue
-{
-public:
-  /**
-   * Get the current vector test function
-   * @param datum The AssemblyDatum object of the current thread
-   * @param i The element-local DOF index
-   * @param qp The local quadrature point index
-   * @returns The vector test function
-   */
-  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
-  {
-    auto & elem = datum.elem();
-    auto side = datum.side();
-    auto fe = datum.ife();
-
-    return side == libMesh::invalid_uint
-               ? datum.assembly().getVectorPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : datum.assembly().getVectorPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
-  }
-};
-
-class VectorVariableTestGradient
-{
-public:
-  /**
-   * Get the gradient of the current vector test function
-   * @param datum The AssemblyDatum object of the current thread
-   * @param i The element-local DOF index
-   * @param qp The local quadrature point index
-   * @returns The gradient of the vector test function
-   */
-  KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
-  {
-    auto & elem = datum.elem();
-    auto side = datum.side();
-    auto fe = datum.ife();
-
-    auto grad =
-        side == libMesh::invalid_uint
-            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
-
-    return grad * datum.J(qp).transpose();
-  }
-};
-
-class VectorVariableTestCurl
-{
-public:
-  /**
-   * Get the curl of the current vector test function
-   * @param datum The AssemblyDatum object of the current thread
-   * @param i The element-local DOF index
-   * @param qp The local quadrature point index
-   * @returns The curl of the vector test function
-   */
-  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
-  {
-    auto & elem = datum.elem();
-    auto side = datum.side();
-    auto fe = datum.ife();
-
-    auto grad =
-        side == libMesh::invalid_uint
-            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
-
-    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
-  }
-};
-
+using VectorVariablePhiValue = VectorVariableShapeValue<false>;
+using VectorVariablePhiGradient = VectorVariableShapeGradient<false>;
+using VectorVariablePhiCurl = VectorVariableShapeCurl<false>;
+using VectorVariableTestValue = VectorVariableShapeValue<true>;
+using VectorVariableTestGradient = VectorVariableShapeGradient<true>;
+using VectorVariableTestCurl = VectorVariableShapeCurl<true>;
 ///@}
 
 /**
@@ -749,11 +647,11 @@ public:
   /**
    * Get the current vector variable value
    * @param datum The AssemblyDatum object of the current thread
-   * @param qp The local quadrature point index
+   * @param idx The local quadrature point index or DOF index
    * @returns The vector variable value
    */
   KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum,
-                                   unsigned int qp,
+                                   unsigned int idx,
                                    unsigned int comp = 0) const;
 
   /**
@@ -882,7 +780,7 @@ private:
 };
 
 KOKKOS_FUNCTION inline Real3
-VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
+VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp) const
 {
   KOKKOS_ASSERT(_var.initialized());
 
@@ -896,13 +794,23 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp, unsigned
 
     if (_dof)
     {
-      KOKKOS_ASSERT(datum.isNodal());
-
-      auto node = datum.node();
       auto dimension = datum.assembly().getDimension();
 
-      for (unsigned int comp = 0; comp < dimension; ++comp)
-        value(comp) = sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, comp, var), tag);
+      if (datum.isNodal())
+      {
+        auto node = datum.node();
+
+        for (unsigned int c = 0; c < dimension; ++c)
+          value(c) = sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, c, var), tag);
+      }
+      else
+      {
+        auto elem = datum.elem().id;
+        auto offset = idx * dimension;
+
+        for (unsigned int c = 0; c < dimension; ++c)
+          value(c) = sys.getVectorDofValue(sys.getElemLocalDofIndex(elem, offset + c, var), tag);
+      }
     }
     else
     {
@@ -912,9 +820,9 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp, unsigned
       auto side = datum.side();
 
       if (side == libMesh::invalid_uint)
-        value = sys.getVectorQpVectorValue(elem, datum.qpOffset() + qp, var, tag);
+        value = sys.getVectorQpVectorValue(elem, datum.qpOffset() + idx, var, tag);
       else
-        value = sys.getVectorQpVectorValueFace(elem, side, qp, var, tag);
+        value = sys.getVectorQpVectorValueFace(elem, side, idx, var, tag);
     }
   }
   else

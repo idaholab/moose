@@ -126,7 +126,7 @@ Variable::init(const std::vector<Real> & values, CoupleableKey)
 {
   _initialized = true;
   _coupled = false;
-  _nodal = true;
+  _nodal = false;
   _components = values.size();
 
   _default_value = values;
@@ -137,7 +137,7 @@ Variable::init(const std::vector<Real3> & values, CoupleableKey)
 {
   _initialized = true;
   _coupled = false;
-  _nodal = true;
+  _nodal = false;
   _components = values.size();
   _vector = true;
 

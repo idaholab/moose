@@ -1,4 +1,4 @@
-# This example reproduces the libmesh vector_fe example 1 results
+# This example reproduces the libmesh vector_fe example 1 results using Kokkos objects
 
 [Mesh]
   type = GeneratedMesh

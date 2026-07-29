@@ -35,7 +35,7 @@
     allow_warnings = True
     cli_args = "Kernels/advection/efield='.3 .3' Outputs/file_base=kokkos_coupled_scalar_default_vector_value_alt_out"
     expect_out = "You supplied less than 3 arguments for the default vector value for variable efield"
-    requirement = "The Kokkos system shall warn when assigning a default value with number of components less than LIBMESH_DIM, "
+    requirement = "The Kokkos system shall warn when assigning a default value with number of components less than 3, "
                   "and it shall be able to assign the default value from the input file."
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'

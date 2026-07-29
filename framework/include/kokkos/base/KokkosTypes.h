@@ -318,8 +318,8 @@ Vector3<Real>::cartesian_product(const Real3 vector) const
 {
   Real33 tensor;
 
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       tensor(i, j) = v[i] * vector.v[j];
 
   return tensor;
@@ -328,8 +328,8 @@ Vector3<Real>::cartesian_product(const Real3 vector) const
 inline Real33 &
 Real33::operator=(const libMesh::TypeTensor<Real> & tensor)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       a[i][j] = tensor(i, j);
 
   return *this;
@@ -338,8 +338,8 @@ Real33::operator=(const libMesh::TypeTensor<Real> & tensor)
 KOKKOS_INLINE_FUNCTION Real33 &
 Real33::operator=(const Real33 & tensor)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       a[i][j] = tensor.a[i][j];
 
   return *this;
@@ -348,8 +348,8 @@ Real33::operator=(const Real33 & tensor)
 KOKKOS_INLINE_FUNCTION Real33 &
 Real33::operator=(const Real scalar)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       a[i][j] = scalar;
 
   return *this;
@@ -358,16 +358,16 @@ Real33::operator=(const Real scalar)
 KOKKOS_INLINE_FUNCTION void
 Real33::operator+=(const Real33 tensor)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       a[i][j] += tensor.a[i][j];
 }
 
 KOKKOS_INLINE_FUNCTION void
 Real33::operator*=(const Real scalar)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       a[i][j] *= scalar;
 }
 
@@ -376,8 +376,8 @@ Real33::contract(const Real33 tensor) const
 {
   Real value = 0;
 
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       value += a[i][j] * tensor.a[i][j];
 
   return value;
@@ -449,8 +449,8 @@ Real33::transpose() const
 {
   Real33 tr_mat;
 
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       tr_mat(i, j) = a[j][i];
 
   return tr_mat;
@@ -481,9 +481,9 @@ operator*(const Real33 left, const Real33 right)
 {
   Real33 mul;
 
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      for (unsigned int k = 0; k < 3; ++k)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
+      for (unsigned int k = 0; k < Moose::dim; ++k)
         mul(i, j) += left(i, k) * right(k, j);
 
   return mul;
