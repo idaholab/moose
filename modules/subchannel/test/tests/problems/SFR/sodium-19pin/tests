@@ -23,6 +23,17 @@
     allow_warnings = true
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
+  [test_implicit_tiny_dt]
+    type = RunApp
+    input = test19_monolithic.i
+    cli_args = 'Executioner/type=Transient Executioner/dt=1e-5 Executioner/end_time=1e-5 Executioner/abort_on_solve_fail=true SubChannel/interpolation_scheme=upwind SubChannel/enthalpy_subcycles=2 SubChannel/rtol=1e-10 SubChannel/atol=1e-12 SubChannel/mass_flow_relaxation=0.3 SubChannel/pressure_relaxation=0.8 Outputs/exodus=false Outputs/csv=false'
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The coupled subchannel solver shall converge a transient sodium case with a 10 microsecond time step, upwind spatial interpolation, and enthalpy subcycling.'
+  []
   [test_monolithic]
     type = CSVDiff
     input = test19_monolithic.i
