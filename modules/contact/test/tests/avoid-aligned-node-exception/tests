@@ -1,12 +1,12 @@
 [Tests]
-  issues = '#31308'
+  issues = '#31308 #33378'
   design = 'AutomaticMortarGeneration.md'
   [test]
     type = Exodiff
     input = test.i
     exodiff = test_out.e
     custom_cmp = test.cmp
-    requirement = 'The system shall be able to close cracks with initially aligned nodes and show zero penetration using Lagrange-multipler based mortar contact.'
+    requirement = 'The system shall close cracks with initially aligned nodes using Lagrange-multiplier mortar contact.'
     valgrind = 'none'
     capabilities = 'method!=dbg'
     mesh_mode = 'replicated'

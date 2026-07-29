@@ -37,8 +37,8 @@ PenaltyWeightedGapUserObject::validParams()
         obj_params.get<SubdomainName>("secondary_subdomain");
     rm_params.set<SubdomainName>("primary_subdomain") =
         obj_params.get<SubdomainName>("primary_subdomain");
-    // penetration_tolerance is required exactly for augmented-Lagrange contact, which retains the
-    // existing frozen-normal geometry.
+    // penetration_tolerance is required exactly for augmented-Lagrange contact, which uses
+    // frozen-normal geometry.
     rm_params.set<bool>("ghost_point_neighbors") =
         obj_params.get<bool>("use_nodal_normal_derivatives") &&
         !obj_params.isParamValid("penetration_tolerance");
