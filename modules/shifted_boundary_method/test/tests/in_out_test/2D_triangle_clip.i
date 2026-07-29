@@ -1,8 +1,4 @@
-# A triangular closed surface on a finer grid. The triangle's sharp corners poke into element
-# interiors whose four nodes are all outside the triangle, and its straight edges clip corners
-# of other elements the same way. Every such element must be classified as intercepted rather
-# than outside, exercising the occupied-ratio guard (active_nodes == 0 requires ratio_active ==
-# 0.0) for a polygon with sharp features instead of a smooth circle.
+# Test a triangular closed surface with sharp corners and intercepted elements.
 
 [Problem]
   solve = false
