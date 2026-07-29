@@ -5,28 +5,33 @@
 
    Optional jinja arguments:
 
-   - ALTERNATE_FROM: Set an alternate from image
+   - VARIANT: Set an alternate variant (from image)
 -#}
 
 {#- Directory definitions                              -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
 
-{#- Image from definitions                            -#}
-{%- set ALTERNATE_FROM = ALTERNATE_FROM | default("") -%}
-{%- set DEFAULT_IMAGE = "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714" -%}
+{#- Image variant definitions
+    rocky8_gcc:        moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260816
+    rocky8_oneapi:     moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.1.1-mpich4.3.2-20260816
+    rocky9_gcc:        moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260816
+    ubuntu24_clang:    moose-mpi-ubuntu24-clang:24.04-clang22.1.8-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260816
+    ubuntu24_cuda_gcc: moose-mpi-ubuntu24-cuda-gcc:24.04-cuda13.3.1-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260816
+    ubuntu24_gcc:      moose-mpi-ubuntu24-gcc:24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260816
+    ubuntu24_gccmin:   moose-mpi-ubuntu24-gccmin:24.04-gcc9.5.0-mpich5.0.1-20260816
+-#}
 {%- set FROM_IMAGES = {
-  "intel":             "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-oneapi:pr30-8.10-gcc13.3.1-oneapi2026.1.0-mpich4.3.2-20260714",
-  "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714",
-  "rocky9":            "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714",
-  "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714",
-  "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-clang:pr30-24.04-clang22.1.8-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714",
-  "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-cuda-gcc:pr30-24.04-cuda13.3.0-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714",
-  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gcc:pr30-24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714",
-  "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gccmin:pr30-24.04-gcc9.5.0-mpich5.0.1-20260714",
+  "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc@sha256:2acf202db6a4cb4134b3bcc9e3dd2d7a0eaf580a8952cdfdc4d8005f3531e862",
+  "rocky8_oneapi":     "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi@sha256:b39debf42c662abfab8c2e78749a80839e5cb340c67c07534fad192759ec923b",
+  "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc@sha256:7793a16f7a060aa81127e02c184d8e150eb67f722b614c2b5e493efb3d26269b",
+  "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-clang@sha256:ccb18d6e869b4215df94d34db6e0eb4222d9a87f083e378ebd6088ec38f7bc6e",
+  "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-cuda-gcc@sha256:a73ea9d79e7a632a365e0386b01672e3833621627cc577a353599242c12a3511",
+  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gcc@sha256:5c9d891583ac96fbd7ac062d325a15f56e1a49061cccea8db21ab007a44ba5c0",
+  "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gccmin@sha256:997ce51ef4f38e5480f22a8c35d20d9a6aff6a998bb3e84d6189102d559c2211"
 } -%}
 
 Bootstrap: docker
-From: {{ FROM_IMAGES.get(ALTERNATE_FROM, DEFAULT_IMAGE) }}
+From: {{ FROM_IMAGES.get(VARIANT, "ubuntu24_gcc") }}
 
 %environment
     # Fix locale warnings
