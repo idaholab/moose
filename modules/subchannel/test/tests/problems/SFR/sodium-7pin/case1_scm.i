@@ -62,6 +62,8 @@ axial_shape_scale = 1.33449883449883
   pin_HTC_closure = kazimi_carelli_htc
   P_tol = 1.0e-8
   T_tol = 1.0e-8
+  rtol = 1.0e-10
+  atol = 1.0e-10
   full_output = true
   verbose_subchannel = true
 []
