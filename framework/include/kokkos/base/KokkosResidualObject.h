@@ -31,6 +31,9 @@ class ResidualObject : public ::ResidualObject,
 public:
   static InputParameters validParams();
 
+  /// Whether this object's hooks factor out the test function
+  static constexpr bool use_precompute_hooks = false;
+
   /**
    * Constructor
    * @param field_type The MOOSE variable field type

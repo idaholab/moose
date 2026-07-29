@@ -26,6 +26,9 @@ class VectorKernelValue : public VectorKernel
 public:
   static InputParameters validParams();
 
+  /// VectorKernelValue hooks factor out the test function
+  static constexpr bool use_precompute_hooks = true;
+
   /**
    * Constructor
    */
@@ -37,23 +40,23 @@ public:
    */
   ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int /* j */,
-                                          const unsigned int /* qp */,
-                                          AssemblyDatum & /* datum */) const
+  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int /* j */,
+                                             const unsigned int /* qp */,
+                                             AssemblyDatum & /* datum */) const
   {
-    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
+    ::Kokkos::abort("Default precomputeQpJacobian() should never be called. Make sure you properly "
                     "redefined this method in your class without typos.");
 
     return Real3(0);
   }
   template <typename Derived>
-  KOKKOS_FUNCTION Real3 computeQpOffDiagJacobian(const unsigned int /* j */,
-                                                 const unsigned int /* jvar */,
-                                                 const unsigned int /* qp */,
-                                                 AssemblyDatum & /* datum */) const
+  KOKKOS_FUNCTION Real3 precomputeQpOffDiagJacobian(const unsigned int /* j */,
+                                                    const unsigned int /* jvar */,
+                                                    const unsigned int /* qp */,
+                                                    AssemblyDatum & /* datum */) const
   {
     ::Kokkos::abort(
-        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
+        "Default precomputeQpOffDiagJacobian() should never be called. Make sure you properly "
         "redefined this method in your class without typos.");
 
     return Real3(0);
@@ -68,12 +71,12 @@ public:
   template <typename Derived>
   static auto defaultJacobian()
   {
-    return &VectorKernelValue::computeQpJacobian<Derived>;
+    return &VectorKernelValue::precomputeQpJacobian<Derived>;
   }
   template <typename Derived>
   static auto defaultOffDiagJacobian()
   {
-    return &VectorKernelValue::computeQpOffDiagJacobian<Derived>;
+    return &VectorKernelValue::precomputeQpOffDiagJacobian<Derived>;
   }
   ///@}
 
@@ -101,7 +104,7 @@ VectorKernelValue::computeResidualInternal(const Derived & kernel, AssemblyDatum
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real3 value = datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
+          Real3 value = datum.JxW(qp) * kernel.template precomputeQpResidual<Derived>(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _test(datum, i, qp);
@@ -119,7 +122,7 @@ VectorKernelValue::computeJacobianInternal(const Derived & kernel, AssemblyDatum
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real3 value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
+          Real3 value = datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_ke[i] += value * _test(datum, i, qp);
@@ -138,7 +141,7 @@ VectorKernelValue::computeOffDiagJacobianInternal(const Derived & kernel,
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real3 value = datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
+          Real3 value = datum.JxW(qp) * kernel.template precomputeQpOffDiagJacobian<Derived>(
                                             j, datum.jvar(), qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)

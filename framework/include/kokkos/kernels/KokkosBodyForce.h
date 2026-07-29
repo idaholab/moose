@@ -19,7 +19,7 @@ public:
   KokkosBodyForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int, AssemblyDatum &) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int, AssemblyDatum &) const;
 
 protected:
   /// Scale factor
@@ -31,7 +31,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBodyForce::computeQpResidual(const unsigned int, AssemblyDatum &) const
+KokkosBodyForce::precomputeQpResidual(const unsigned int, AssemblyDatum &) const
 {
   return -_scale * _postprocessor;
 }

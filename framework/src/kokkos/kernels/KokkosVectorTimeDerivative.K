@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosVectorTimeDerivative);
 InputParameters
 KokkosVectorTimeDerivative::validParams()
 {
-  InputParameters params = Moose::Kokkos::VectorTimeKernel::validParams();
+  InputParameters params = Moose::Kokkos::VectorTimeKernelValue::validParams();
   params.addClassDescription("The time derivative operator with the weak form of $(\\vec{\\psi_i}, "
                              "\\frac{\\partial \\vec{u_h}}{\\partial t})$.");
   params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise");
@@ -23,6 +23,6 @@ KokkosVectorTimeDerivative::validParams()
 }
 
 KokkosVectorTimeDerivative::KokkosVectorTimeDerivative(const InputParameters & parameters)
-  : Moose::Kokkos::VectorTimeKernel(parameters), _lumping(getParam<bool>("lumping"))
+  : Moose::Kokkos::VectorTimeKernelValue(parameters), _lumping(getParam<bool>("lumping"))
 {
 }

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "KokkosVectorTimeKernel.h"
+#include "KokkosVectorTimeKernelValue.h"
 
-class KokkosVectorTimeDerivative : public Moose::Kokkos::VectorTimeKernel
+class KokkosVectorTimeDerivative : public Moose::Kokkos::VectorTimeKernelValue
 {
 public:
   static InputParameters validParams();
@@ -19,57 +19,18 @@ public:
   KokkosVectorTimeDerivative(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
-  template <typename Derived>
   KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real3 computeQpResidual(const unsigned int qp,
-                                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidual(const unsigned int qp,
+                                                            AssemblyDatum & datum) const;
   template <typename Derived>
   KOKKOS_FUNCTION Moose::Kokkos::Real3
-  computeQpJacobian(const unsigned int j, const unsigned int qp, AssemblyDatum & datum) const;
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real3
-  computeQpJacobianDummy(const unsigned int, const unsigned int, AssemblyDatum &) const
-  {
-    return Moose::Kokkos::Real3(0);
-  }
-
-  // The computeQpJacobian() of this class has the same signature with that of VectorKernelValue
-  // (without test function index), but this class itself derives from VectorTimeKernel whose base
-  // class is VectorKernel (with test function index). Therefore, their function pointers cannot be
-  // compared. Instead, we provide the function pointer of a dummy function to the dispatcher
-  // registry to make it think that non-default computeQpJacobian() was implemented.
-  template <typename Derived>
-  static auto defaultJacobian()
-  {
-    return &KokkosVectorTimeDerivative::computeQpJacobianDummy<Derived>;
-  }
+  precomputeQpJacobian(const unsigned int j, const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   const bool _lumping;
 };
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-KokkosVectorTimeDerivative::computeResidualInternal(const Derived & kernel,
-                                                    AssemblyDatum & datum) const
-{
-  ResidualObject::computeResidualInternal(
-      datum,
-      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-        {
-          Moose::Kokkos::Real3 value =
-              datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
-
-          for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += value * _test(datum, i, qp);
-        }
-      });
-}
 
 template <typename Derived>
 KOKKOS_FUNCTION void
@@ -99,7 +60,7 @@ KokkosVectorTimeDerivative::computeJacobianInternal(const Derived & kernel,
       for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
       {
         Moose::Kokkos::Real3 value =
-            datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
+            datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum);
 
         for (unsigned int i = ib; i < ie; ++i)
           local_ke[i - ib] += value * _test(datum, i, qp);
@@ -114,16 +75,16 @@ KokkosVectorTimeDerivative::computeJacobianInternal(const Derived & kernel,
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosVectorTimeDerivative::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosVectorTimeDerivative::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _u_dot(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosVectorTimeDerivative::computeQpJacobian(const unsigned int j,
-                                              const unsigned int qp,
-                                              AssemblyDatum & datum) const
+KokkosVectorTimeDerivative::precomputeQpJacobian(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const
 {
   return _phi(datum, j, qp) * _du_dot_du;
 }

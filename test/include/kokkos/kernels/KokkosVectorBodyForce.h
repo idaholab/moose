@@ -20,8 +20,8 @@ public:
   KokkosVectorBodyForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::Real3 computeQpResidual(const unsigned int qp,
-                                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidual(const unsigned int qp,
+                                                            AssemblyDatum & datum) const;
 
 protected:
   const Moose::Kokkos::Scalar<const Real> _scale;
@@ -35,7 +35,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
-KokkosVectorBodyForce::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosVectorBodyForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   const auto & function_x = static_cast<const KokkosParsedFunction &>(_function_x);
   const auto & function_y = static_cast<const KokkosParsedFunction &>(_function_y);
