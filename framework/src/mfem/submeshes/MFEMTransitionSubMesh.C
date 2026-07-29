@@ -28,8 +28,10 @@ MFEMTransitionSubMesh::validParams()
       "vertex on the specified boundary, that lie on one side of it (the single interior side "
       "for an exterior boundary), and that are restricted to the set of user-specified "
       "subdomains.");
-  params.addRequiredParam<BoundaryName>(
-      "cut_boundary", "The boundary from which the transition region is constructed.");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "cut_boundary",
+      "The boundary or boundaries from which the transition region is constructed. Accepts a "
+      "space-separated list of numeric boundary attributes and/or named boundary attribute sets.");
   params.deprecateParam("cut_boundary", "boundary", "07/23/2027");
   params.addRequiredParam<BoundaryName>(
       "transition_subdomain_boundary",
@@ -43,26 +45,52 @@ MFEMTransitionSubMesh::validParams()
       "The name of the subdomain attribute to be created comprised of the set of all elements "
       "of the closed geometry, including the new transition region.");
   params.addRangeCheckedParam<unsigned int>(
-      "num_layers",
+      "num_layers_positive",
       1,
-      "num_layers >= 1",
-      "Number of element-thick layers to grow inward from the boundary. Values > 1 are "
-      "supported only for exterior boundaries.");
+      "num_layers_positive >= 0",
+      "Number of element-thick layers to grow on the positive side of the boundary (the side the "
+      "surface normal points towards). Zero grows no layer on that side. For an exterior boundary "
+      "this is the number of layers grown inwards.");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_layers_negative",
+      0,
+      "num_layers_negative >= 0",
+      "Number of element-thick layers to grow on the negative side of the boundary. Zero grows no "
+      "layer on that side. Must be zero for an exterior boundary, which has only one side.");
   return params;
 }
 
 MFEMTransitionSubMesh::MFEMTransitionSubMesh(const InputParameters & parameters)
   : MFEMSubMesh(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
-    _boundary(getParam<BoundaryName>("boundary")),
-    _boundary_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
-        getMesh(), getMesh().bdr_attribute_sets.GetAttributeSet(_boundary)))),
+    _boundary_submesh(std::make_shared<mfem::ParSubMesh>(
+        mfem::ParSubMesh::CreateFromBoundary(getMesh(), boundaryAttributes()))),
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
     _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
     _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
-    _boundary_normal(3),
-    _num_layers(getParam<unsigned int>("num_layers"))
+    _num_layers_positive(getParam<unsigned int>("num_layers_positive")),
+    _num_layers_negative(getParam<unsigned int>("num_layers_negative"))
 {
+}
+
+mfem::Array<int>
+MFEMTransitionSubMesh::boundaryAttributes()
+{
+  mfem::Array<int> attributes;
+  for (const auto & name : getParam<std::vector<BoundaryName>>("boundary"))
+  {
+    try
+    {
+      // Numeric boundary attribute.
+      attributes.Append(std::stoi(name));
+    }
+    catch (const std::invalid_argument &)
+    {
+      // Named boundary attribute set.
+      attributes.Append(getMesh().bdr_attribute_sets.GetAttributeSet(name));
+    }
+  }
+  return attributes;
 }
 
 void
@@ -82,8 +110,7 @@ MFEMTransitionSubMesh::buildSubMesh()
 void
 MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
-  int mpi_comm_rank = getMFEMProblem().getProblemData().myid;
-  int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
+  const int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
 
   // Determine whether the supplied boundary is on the mesh exterior. A boundary face is
   // exterior only if its face topology is Boundary; interior cut faces and parallel
@@ -108,166 +135,91 @@ MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                 getMFEMProblem().getComm());
   _exterior_boundary = (local_interior_face_found == 0);
 
-  // For an interior cut, determine the face normal based on the first boundary element found
-  // on the cut to use when determining orientation relative to the cut. An exterior boundary
-  // has elements on only one side, so no side selection (and hence no normal) is needed.
-  if (!_exterior_boundary)
-  {
-    const mfem::Array<int> & parent_cut_element_id_map = _boundary_submesh->GetParentElementIDMap();
-    int rank_with_submesh = -1;
-    if (parent_cut_element_id_map.Size() > 0)
-    {
-      int reference_face = parent_cut_element_id_map[0];
-      _boundary_normal =
-          findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
-      rank_with_submesh = mpi_comm_rank;
-    }
-    MPI_Allreduce(
-        MPI_IN_PLACE, &rank_with_submesh, 1, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
-    MPI_Bcast(_boundary_normal.GetData(),
-              _boundary_normal.Size(),
-              MFEM_MPI_REAL_T,
-              rank_with_submesh,
-              getMFEMProblem().getComm());
-  }
-  // Iterate over all vertices on cut, find elements with those vertices,
-  // and declare them transition elements if they are on the +ve side of the cut
-  mfem::Array<int> transition_els;
-  std::vector<HYPRE_BigInt> global_cut_vert_ids;
-  mfem::Array<HYPRE_BigInt> gi;
-  parent_mesh.GetGlobalVertexIndices(gi);
+  if (_exterior_boundary && _num_layers_negative > 0)
+    mooseError("MFEMTransitionSubMesh: num_layers_negative must be zero for an exterior boundary, "
+               "which has elements on one side only.");
+
+  mfem::Array<HYPRE_BigInt> global_vertex_ids;
+  parent_mesh.GetGlobalVertexIndices(global_vertex_ids);
   std::unique_ptr<mfem::Table> vert_to_elem(parent_mesh.GetVertexToElementTable());
-  const mfem::Array<int> & cut_to_parent_vertex_id_map = _boundary_submesh->GetParentVertexIDMap();
-  for (int i = 0; i < _boundary_submesh->GetNV(); ++i)
+
+  // Averaged surface normals at the boundary vertices, which identify both the boundary vertices
+  // themselves and the side each neighbouring element lies on. An exterior boundary has elements
+  // on one side only, so there only the set of boundary vertices is needed.
+  std::map<HYPRE_BigInt, mfem::Vector> vertex_normals;
+  if (_exterior_boundary)
   {
-    int cut_vert = cut_to_parent_vertex_id_map[i];
-    global_cut_vert_ids.push_back(gi[cut_vert]);
-    int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
-    const int * els_adj_to_cut = vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
-    for (int i = 0; i < ne; i++)
+    const mfem::Array<int> & vertex_id_map = _boundary_submesh->GetParentVertexIDMap();
+    std::vector<HYPRE_BigInt> ids_local;
+    for (const auto i : make_range(_boundary_submesh->GetNV()))
+      ids_local.push_back(global_vertex_ids[vertex_id_map[i]]);
+
+    // Share the ids so that boundary vertices owned by other ranks are also seen here.
+    int n_local = ids_local.size();
+    std::vector<int> sizes(mpi_comm_size);
+    MPI_Allgather(&n_local, 1, MPI_INT, sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
+    std::vector<int> offset(mpi_comm_size);
+    std::exclusive_scan(sizes.begin(), sizes.end(), offset.begin(), 0);
+    const int total = std::accumulate(sizes.begin(), sizes.end(), 0);
+    std::vector<HYPRE_BigInt> ids_all(total);
+    MPI_Allgatherv(ids_local.data(),
+                   n_local,
+                   HYPRE_MPI_BIG_INT,
+                   ids_all.data(),
+                   sizes.data(),
+                   offset.data(),
+                   HYPRE_MPI_BIG_INT,
+                   getMFEMProblem().getComm());
+    for (const auto id : ids_all)
+      vertex_normals[id];
+  }
+  else
+    vertex_normals = computeVertexNormals(parent_mesh, global_vertex_ids);
+
+  // Seed each side with the subdomain-restricted elements touching a boundary vertex.
+  mfem::Array<int> positive_seed, negative_seed;
+  for (const auto v : make_range(parent_mesh.GetNV()))
+  {
+    const auto it = vertex_normals.find(global_vertex_ids[v]);
+    if (it == vertex_normals.end())
+      continue;
+    const int ne = vert_to_elem->RowSize(v);
+    const int * els = vert_to_elem->GetRow(v);
+    for (const auto i : make_range(ne))
     {
-      const int el_adj_to_cut = els_adj_to_cut[i];
-      if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
-          (_exterior_boundary || isPositiveSideOfCut(el_adj_to_cut, cut_vert, parent_mesh)))
-        transition_els.Append(el_adj_to_cut);
+      const int el = els[i];
+      if (el < 0 || !isInDomain(el, getSubdomainAttributes(), parent_mesh))
+        continue;
+      if (_exterior_boundary || isPositiveSide(el, v, it->second, parent_mesh))
+        positive_seed.Append(el);
+      else
+        negative_seed.Append(el);
     }
   }
 
-  // share cut verts coords or global ids across all procs
-  int n_cut_vertices = global_cut_vert_ids.size();
-  std::vector<int> cut_vert_sizes(mpi_comm_size);
-  MPI_Allgather(
-      &n_cut_vertices, 1, MPI_INT, cut_vert_sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
-  // Make an offset array and total the sizes.
-  std::vector<int> n_vert_offset(mpi_comm_size);
-  std::exclusive_scan(cut_vert_sizes.begin(), cut_vert_sizes.end(), n_vert_offset.begin(), 0);
-  int global_n_cut_vertices = std::accumulate(cut_vert_sizes.begin(), cut_vert_sizes.end(), 0);
-
-  // Gather the queries to all ranks.
-  std::vector<HYPRE_BigInt> all_cut_verts(global_n_cut_vertices);
-  MPI_Allgatherv(global_cut_vert_ids.data(),
-                 n_cut_vertices,
-                 HYPRE_MPI_BIG_INT,
-                 all_cut_verts.data(),
-                 cut_vert_sizes.data(),
-                 n_vert_offset.data(),
-                 HYPRE_MPI_BIG_INT,
-                 getMFEMProblem().getComm());
-
-  // Detect shared vertices and add corresponding elements
-  for (const auto g : make_range(1, parent_mesh.GetNGroups()))
-    for (const auto gv : make_range(parent_mesh.GroupNVertices(g)))
-    {
-      // all elements touching this shared vertex should be updated
-      int cut_vert = parent_mesh.GroupVertex(g, gv);
-      for (std::size_t i = 0; i < all_cut_verts.size(); i += 1)
-        if (gi[cut_vert] == all_cut_verts[i]) // check if shared vertex is on the cut plane
-        {
-          int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
-          const int * els_adj_to_cut =
-              vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
-          for (int i = 0; i < ne; i++)
-          {
-            const int el_adj_to_cut = els_adj_to_cut[i];
-            if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
-                isPositiveSideOfCut(el_adj_to_cut, cut_vert, parent_mesh))
-              transition_els.Append(el_adj_to_cut);
-          }
-        }
-    }
+  mfem::Array<int> transition_els;
+  std::set<int> transition_set;
+  growLayers(parent_mesh,
+             global_vertex_ids,
+             *vert_to_elem,
+             vertex_normals,
+             positive_seed,
+             _num_layers_positive,
+             true,
+             transition_set,
+             transition_els);
+  growLayers(parent_mesh,
+             global_vertex_ids,
+             *vert_to_elem,
+             vertex_normals,
+             negative_seed,
+             _num_layers_negative,
+             false,
+             transition_set,
+             transition_els);
 
   transition_els.Sort();
   transition_els.Unique();
-
-  // Grow additional inward element layers for a thick (e.g. PML) region. Only supported for
-  // exterior boundaries, where there is no side filter, so growth is pure subdomain-restricted
-  // vertex adjacency. Interior cuts keep a single layer.
-  if (_num_layers > 1)
-  {
-    if (!_exterior_boundary)
-      mooseError("MFEMTransitionSubMesh: num_layers > 1 is only supported for exterior "
-                 "boundaries.");
-
-    std::set<int> transition_set(transition_els.begin(), transition_els.end());
-    mfem::Array<int> last_ring(transition_els);
-
-    for (unsigned int layer = 1; layer < _num_layers; ++layer)
-    {
-      // Global vertex ids of the most recently added ring (local contribution).
-      std::vector<HYPRE_BigInt> front_local;
-      for (const auto el : last_ring)
-      {
-        mfem::Array<int> el_verts;
-        parent_mesh.GetElementVertices(el, el_verts);
-        for (const auto v : el_verts)
-          front_local.push_back(gi[v]);
-      }
-
-      // Share the ring's vertex ids across all ranks so growth crosses processor boundaries.
-      int n_front = front_local.size();
-      std::vector<int> front_sizes(mpi_comm_size);
-      MPI_Allgather(
-          &n_front, 1, MPI_INT, front_sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
-      std::vector<int> front_offset(mpi_comm_size);
-      std::exclusive_scan(front_sizes.begin(), front_sizes.end(), front_offset.begin(), 0);
-      int front_total = std::accumulate(front_sizes.begin(), front_sizes.end(), 0);
-      std::vector<HYPRE_BigInt> front_all(front_total);
-      MPI_Allgatherv(front_local.data(),
-                     n_front,
-                     HYPRE_MPI_BIG_INT,
-                     front_all.data(),
-                     front_sizes.data(),
-                     front_offset.data(),
-                     HYPRE_MPI_BIG_INT,
-                     getMFEMProblem().getComm());
-      std::sort(front_all.begin(), front_all.end());
-      front_all.erase(std::unique(front_all.begin(), front_all.end()), front_all.end());
-
-      // Add subdomain-restricted elements touching any front vertex; they form the next ring.
-      mfem::Array<int> new_ring;
-      for (const auto v : make_range(parent_mesh.GetNV()))
-      {
-        if (!std::binary_search(front_all.begin(), front_all.end(), gi[v]))
-          continue;
-        int ne = vert_to_elem->RowSize(v);
-        const int * els = vert_to_elem->GetRow(v);
-        for (const auto i : make_range(ne))
-        {
-          const int el = els[i];
-          if (isInDomain(el, getSubdomainAttributes(), parent_mesh) &&
-              transition_set.insert(el).second)
-          {
-            transition_els.Append(el);
-            new_ring.Append(el);
-          }
-        }
-      }
-      last_ring = new_ring;
-    }
-
-    transition_els.Sort();
-    transition_els.Unique();
-  }
 
   setAttributes(parent_mesh, transition_els);
 }
@@ -299,19 +251,197 @@ MFEMTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & fa
   return normal;
 }
 
+std::map<HYPRE_BigInt, mfem::Vector>
+MFEMTransitionSubMesh::computeVertexNormals(mfem::ParMesh & parent_mesh,
+                                            const mfem::Array<HYPRE_BigInt> & global_vertex_ids)
+{
+  const int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
+
+  // Accumulate the normal of every local boundary face into each of its vertices. Orientation
+  // consistency between neighbouring faces comes from the mesh's own orientation of the surface,
+  // which is well defined for an orientable boundary.
+  std::map<HYPRE_BigInt, mfem::Vector> local_normals;
+  const mfem::Array<int> & parent_bdr_id_map = _boundary_submesh->GetParentElementIDMap();
+  for (const auto i : make_range(parent_bdr_id_map.Size()))
+  {
+    const int bdr_el = parent_bdr_id_map[i];
+    const mfem::Vector n = findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_el));
+    mfem::Array<int> verts;
+    parent_mesh.GetBdrElementVertices(bdr_el, verts);
+    for (const auto v : verts)
+    {
+      auto & accumulated = local_normals[global_vertex_ids[v]];
+      if (accumulated.Size() == 0)
+      {
+        accumulated.SetSize(3);
+        accumulated = 0.0;
+      }
+      for (const auto d : make_range(3))
+        accumulated[d] += n[d];
+    }
+  }
+
+  // Flatten for communication: one global id and three normal components per entry.
+  std::vector<HYPRE_BigInt> ids_local;
+  std::vector<double> normals_local;
+  for (const auto & [id, n] : local_normals)
+  {
+    ids_local.push_back(id);
+    for (const auto d : make_range(3))
+      normals_local.push_back(n[d]);
+  }
+
+  int n_local = ids_local.size();
+  std::vector<int> id_sizes(mpi_comm_size);
+  MPI_Allgather(&n_local, 1, MPI_INT, id_sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
+  std::vector<int> id_offset(mpi_comm_size), normal_sizes(mpi_comm_size),
+      normal_offset(mpi_comm_size);
+  std::exclusive_scan(id_sizes.begin(), id_sizes.end(), id_offset.begin(), 0);
+  for (const auto r : make_range(mpi_comm_size))
+    normal_sizes[r] = 3 * id_sizes[r];
+  std::exclusive_scan(normal_sizes.begin(), normal_sizes.end(), normal_offset.begin(), 0);
+  const int n_total = std::accumulate(id_sizes.begin(), id_sizes.end(), 0);
+
+  std::vector<HYPRE_BigInt> ids_all(n_total);
+  std::vector<double> normals_all(3 * n_total);
+  MPI_Allgatherv(ids_local.data(),
+                 n_local,
+                 HYPRE_MPI_BIG_INT,
+                 ids_all.data(),
+                 id_sizes.data(),
+                 id_offset.data(),
+                 HYPRE_MPI_BIG_INT,
+                 getMFEMProblem().getComm());
+  MPI_Allgatherv(normals_local.data(),
+                 3 * n_local,
+                 MPI_DOUBLE,
+                 normals_all.data(),
+                 normal_sizes.data(),
+                 normal_offset.data(),
+                 MPI_DOUBLE,
+                 getMFEMProblem().getComm());
+
+  // Sum contributions per global vertex, then normalise.
+  std::map<HYPRE_BigInt, mfem::Vector> vertex_normals;
+  for (const auto i : make_range(n_total))
+  {
+    auto & accumulated = vertex_normals[ids_all[i]];
+    if (accumulated.Size() == 0)
+    {
+      accumulated.SetSize(3);
+      accumulated = 0.0;
+    }
+    for (const auto d : make_range(3))
+      accumulated[d] += normals_all[3 * i + d];
+  }
+  for (auto & [_, n] : vertex_normals)
+  {
+    const double norm = n.Norml2();
+    if (norm > 0.0)
+      n /= norm;
+  }
+  return vertex_normals;
+}
+
+void
+MFEMTransitionSubMesh::growLayers(mfem::ParMesh & parent_mesh,
+                                  const mfem::Array<HYPRE_BigInt> & global_vertex_ids,
+                                  const mfem::Table & vert_to_elem,
+                                  const std::map<HYPRE_BigInt, mfem::Vector> & vertex_normals,
+                                  const mfem::Array<int> & seed,
+                                  unsigned int num_layers,
+                                  bool positive_side,
+                                  std::set<int> & transition_set,
+                                  mfem::Array<int> & transition_els)
+{
+  if (num_layers == 0)
+    return;
+
+  const int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
+
+  mfem::Array<int> ring;
+  for (const auto el : seed)
+    if (transition_set.insert(el).second)
+    {
+      transition_els.Append(el);
+      ring.Append(el);
+    }
+
+  for (unsigned int layer = 1; layer < num_layers; ++layer)
+  {
+    // Global vertex ids of the most recently added ring, shared across all ranks so that growth
+    // crosses processor boundaries.
+    std::vector<HYPRE_BigInt> front_local;
+    for (const auto el : ring)
+    {
+      mfem::Array<int> el_verts;
+      parent_mesh.GetElementVertices(el, el_verts);
+      for (const auto v : el_verts)
+        front_local.push_back(global_vertex_ids[v]);
+    }
+
+    int n_front = front_local.size();
+    std::vector<int> front_sizes(mpi_comm_size);
+    MPI_Allgather(
+        &n_front, 1, MPI_INT, front_sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
+    std::vector<int> front_offset(mpi_comm_size);
+    std::exclusive_scan(front_sizes.begin(), front_sizes.end(), front_offset.begin(), 0);
+    const int front_total = std::accumulate(front_sizes.begin(), front_sizes.end(), 0);
+    std::vector<HYPRE_BigInt> front_all(front_total);
+    MPI_Allgatherv(front_local.data(),
+                   n_front,
+                   HYPRE_MPI_BIG_INT,
+                   front_all.data(),
+                   front_sizes.data(),
+                   front_offset.data(),
+                   HYPRE_MPI_BIG_INT,
+                   getMFEMProblem().getComm());
+    std::sort(front_all.begin(), front_all.end());
+    front_all.erase(std::unique(front_all.begin(), front_all.end()), front_all.end());
+
+    mfem::Array<int> new_ring;
+    for (const auto v : make_range(parent_mesh.GetNV()))
+    {
+      if (!std::binary_search(front_all.begin(), front_all.end(), global_vertex_ids[v]))
+        continue;
+      // A seed vertex lying on the boundary must not let growth cross to the other side.
+      const auto it = vertex_normals.find(global_vertex_ids[v]);
+      const bool on_boundary = (it != vertex_normals.end());
+      const int ne = vert_to_elem.RowSize(v);
+      const int * els = vert_to_elem.GetRow(v);
+      for (const auto i : make_range(ne))
+      {
+        const int el = els[i];
+        if (el < 0 || !isInDomain(el, getSubdomainAttributes(), parent_mesh))
+          continue;
+        if (on_boundary && !_exterior_boundary &&
+            isPositiveSide(el, v, it->second, parent_mesh) != positive_side)
+          continue;
+        if (transition_set.insert(el).second)
+        {
+          transition_els.Append(el);
+          new_ring.Append(el);
+        }
+      }
+    }
+    ring = new_ring;
+  }
+}
+
 bool
-MFEMTransitionSubMesh::isPositiveSideOfCut(const int & el,
-                                              const int & el_vertex_on_cut,
-                                              mfem::ParMesh & parent_mesh)
+MFEMTransitionSubMesh::isPositiveSide(const int & el,
+                                      const int & boundary_vertex,
+                                      const mfem::Vector & normal,
+                                      mfem::ParMesh & parent_mesh)
 {
   const int sdim = parent_mesh.SpaceDimension();
   mfem::Vector el_center(3);
   parent_mesh.GetElementCenter(el, el_center);
-  mfem::Vector vertex_coords(parent_mesh.GetVertex(el_vertex_on_cut), sdim);
-  mfem::Vector relative_center(sdim);
-  for (int j = 0; j < sdim; j++)
-    relative_center[j] = el_center[j] - vertex_coords[j];
-  return _boundary_normal * relative_center > 0;
+  mfem::Vector vertex_coords(parent_mesh.GetVertex(boundary_vertex), sdim);
+  double dot = 0.0;
+  for (const auto j : make_range(sdim))
+    dot += normal[j] * (el_center[j] - vertex_coords[j]);
+  return dot > 0;
 }
 
 void
@@ -369,6 +499,10 @@ MFEMTransitionSubMesh::isInDomain(const int & element,
 {
   // element<0 for ghost elements
   if (element < 0)
+    return true;
+
+  // An empty subdomain list means the object applies to all subdomains.
+  if (subdomains.Size() == 0)
     return true;
 
   for (const auto & subdomain : subdomains)

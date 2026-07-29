@@ -42,22 +42,49 @@ protected:
   /// Finds the normal vector of a face in the mesh from its vertices
   mfem::Vector findFaceNormal(const mfem::ParMesh & mesh, const int & face);
 
-  /// Checks whether an element lies on the positive or negative side of the cut plane
-  bool isPositiveSideOfCut(const int & el, const int & el_vertex_on_cut, mfem::ParMesh & mesh);
+  /// Checks whether an element lies on the positive side of the boundary at a given boundary
+  /// vertex, using the averaged surface normal at that vertex.
+  bool isPositiveSide(const int & el,
+                      const int & boundary_vertex,
+                      const mfem::Vector & normal,
+                      mfem::ParMesh & mesh);
 
-  const BoundaryName & _boundary;
+  /// Averaged unit surface normal at every boundary vertex, keyed by global vertex id and summed
+  /// across ranks so that vertices shared between processors agree.
+  std::map<HYPRE_BigInt, mfem::Vector>
+  computeVertexNormals(mfem::ParMesh & parent_mesh,
+                       const mfem::Array<HYPRE_BigInt> & global_vertex_ids);
+
+  /// Grow num_layers element rings from seed into transition_set, staying on the requested side of
+  /// the boundary and within the user's subdomains.
+  void growLayers(mfem::ParMesh & parent_mesh,
+                  const mfem::Array<HYPRE_BigInt> & global_vertex_ids,
+                  const mfem::Table & vert_to_elem,
+                  const std::map<HYPRE_BigInt, mfem::Vector> & vertex_normals,
+                  const mfem::Array<int> & seed,
+                  unsigned int num_layers,
+                  bool positive_side,
+                  std::set<int> & transition_set,
+                  mfem::Array<int> & transition_els);
+
+  /// Resolve the 'boundary' parameter (numeric attributes and/or named attribute sets) into the
+  /// set of boundary attribute IDs the transition region is built from.
+  mfem::Array<int> boundaryAttributes();
+
   std::shared_ptr<mfem::ParSubMesh> _boundary_submesh{nullptr};
   const BoundaryName & _transition_subdomain_boundary;
   const SubdomainName & _transition_subdomain;
   const SubdomainName & _closed_subdomain;
-  mfem::Vector _boundary_normal;
 
   /// True if the supplied boundary lies on the exterior of the mesh (only one side has
   /// elements), in which case no side selection is performed.
   bool _exterior_boundary{false};
 
-  /// Number of element-thick layers grown inward from the boundary (exterior boundaries only).
-  const unsigned int _num_layers;
+  /// Number of element-thick layers grown on the positive side of the boundary, and inwards for
+  /// an exterior boundary.
+  const unsigned int _num_layers_positive;
+  /// Number of element-thick layers grown on the negative side of the boundary.
+  const unsigned int _num_layers_negative;
 };
 
 #endif
