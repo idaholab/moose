@@ -737,19 +737,15 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
   // first check if the FE type is continuous because in that case the value is
   // unique and we can take a short cut, the default weighting_type found_first also
   // shortcuts out
-  auto family =
-      _fe_problem
-          .getVariable(
-              _tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD)
-          .feType()
-          .family;
+  const auto family = _system->variable_type(var_name).family;
 
   if (weighting_type == 1 ||
       (family != L2_LAGRANGE && family != MONOMIAL && family != L2_HIERARCHIC))
     return pointValue(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
-  std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name);
+  std::map<const Elem *, Real> values =
+      discontinuousPointValue(t, p, var_name, subdomain_ids);
   switch (weighting_type)
   {
     case 2:
@@ -761,27 +757,27 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
     }
     case 4:
     {
-      Real smallest_elem_id_value = std::numeric_limits<Real>::max();
-      dof_id_type smallest_elem_id = _fe_problem.mesh().maxElemId();
-      for (auto & v : values)
-        if (v.first->id() < smallest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      Real selected_value = values.begin()->second;
+      for (const auto & v : values)
+        if (v.first->id() < selected_elem_id)
         {
-          smallest_elem_id = v.first->id();
-          smallest_elem_id_value = v.second;
+          selected_elem_id = v.first->id();
+          selected_value = v.second;
         }
-      return smallest_elem_id_value;
+      return selected_value;
     }
     case 8:
     {
-      Real largest_elem_id_value = std::numeric_limits<Real>::lowest();
-      dof_id_type largest_elem_id = 0;
-      for (auto & v : values)
-        if (v.first->id() > largest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      Real selected_value = values.begin()->second;
+      for (const auto & v : values)
+        if (v.first->id() > selected_elem_id)
         {
-          largest_elem_id = v.first->id();
-          largest_elem_id_value = v.second;
+          selected_elem_id = v.first->id();
+          selected_value = v.second;
         }
-      return largest_elem_id_value;
+      return selected_value;
     }
   }
 
@@ -887,7 +883,8 @@ SolutionUserObjectBase::discontinuousPointValue(
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
-    std::map<const Elem *, Real> map2 = evalMultiValuedMeshFunction(pt, local_var_index, 2);
+    std::map<const Elem *, Real> map2 =
+        evalMultiValuedMeshFunction(pt, local_var_index, 2, subdomain_ids);
 
     if (map.size() != map2.size())
       mooseError(
@@ -934,27 +931,27 @@ SolutionUserObjectBase::pointValueGradientWrapper(
     }
     case 4:
     {
-      RealGradient smallest_elem_id_value;
-      dof_id_type smallest_elem_id = _fe_problem.mesh().maxElemId();
-      for (auto & v : values)
-        if (v.first->id() < smallest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      RealGradient selected_value = values.begin()->second;
+      for (const auto & v : values)
+        if (v.first->id() < selected_elem_id)
         {
-          smallest_elem_id = v.first->id();
-          smallest_elem_id_value = v.second;
+          selected_elem_id = v.first->id();
+          selected_value = v.second;
         }
-      return smallest_elem_id_value;
+      return selected_value;
     }
     case 8:
     {
-      RealGradient largest_elem_id_value;
-      dof_id_type largest_elem_id = 0;
-      for (auto & v : values)
-        if (v.first->id() > largest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      RealGradient selected_value = values.begin()->second;
+      for (const auto & v : values)
+        if (v.first->id() > selected_elem_id)
         {
-          largest_elem_id = v.first->id();
-          largest_elem_id_value = v.second;
+          selected_elem_id = v.first->id();
+          selected_value = v.second;
         }
-      return largest_elem_id_value;
+      return selected_value;
     }
   }
 
@@ -1058,18 +1055,18 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
     std::map<const Elem *, RealGradient> map2 =
-        evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
+        evalMultiValuedMeshFunctionGradient(pt, local_var_index, 2, subdomain_ids);
 
     if (map.size() != map2.size())
       mooseError(
-          "In SolutionUserObjectBase::discontinuousPointValue map and map2 have different size");
+          "In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have different size");
 
     // construct the interpolated map
     for (auto & k : map)
     {
       if (map2.find(k.first) == map2.end())
         mooseError(
-            "In SolutionUserObjectBase::discontinuousPointValue map and map2 have differing keys");
+            "In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have differing keys");
       RealGradient val = k.second;
       RealGradient val2 = map2[k.first];
       map[k.first] = val + (val2 - val) * _interpolation_factor;
@@ -1116,6 +1113,8 @@ SolutionUserObjectBase::evalMeshFunction(const Point & p,
       _cached_p = p;
       if (subdomain_ids)
         _cached_subdomain_ids = *subdomain_ids;
+      else
+        _cached_subdomain_ids.clear();
       _cached_values = output;
     }
 
@@ -1132,6 +1131,8 @@ SolutionUserObjectBase::evalMeshFunction(const Point & p,
       _cached_p2 = p;
       if (subdomain_ids)
         _cached_subdomain_ids2 = *subdomain_ids;
+      else
+        _cached_subdomain_ids2.clear();
       _cached_values2 = output;
     }
     else

@@ -17,6 +17,47 @@
 
     requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
   []
+  [point_value_wrapper]
+    type = CSVDiff
+    input = point_value_wrapper.i
+    csvdiff = point_value_wrapper_out.csv
+    prereq = discontinuous_value_solution_uo_p1
+    issues = '#31766'
+    requirement = "The system shall reduce multivalued imported solution values and gradients using selectable weighting policies."
+  []
+
+  [point_value_wrapper_time_source]
+    type = RunApp
+    input = point_value_wrapper_time_source.i
+    issues = '#31766'
+    requirement = "The system shall write time-dependent scalar and gradient fields on multiple source subdomains for testing imported-solution interpolation."
+  []
+
+  [point_value_wrapper_time_reader]
+    type = CSVDiff
+    input = point_value_wrapper_time_reader.i
+    csvdiff = point_value_wrapper_time_reader_out.csv
+    prereq = point_value_wrapper_time_source
+    issues = '#31766'
+    requirement = "The system shall apply source-subdomain restrictions to both interpolation states and interpolate imported gradients between distinct time states."
+  []
+
+  [point_value_cache_source]
+    type = RunApp
+    input = point_value_cache_source.i
+    issues = '#31766'
+    requirement = "The system shall write a discontinuous solution on multiple source subdomains for testing restricted point-value lookup caching."
+  []
+
+  [point_value_cache_reader]
+    type = RunException
+    input = point_value_cache_reader.i
+    prereq = point_value_cache_source
+    expect_err = "Failed to access the data for variable 'source_value' at point"
+    issues = '#31766'
+    requirement = "The system shall not reuse an unrestricted cached source value for a later source-subdomain-restricted point lookup."
+  []
+
   [test_scalar]
     type = RunApp
     cli_args = 'UserObjects/soln/mesh=gold/testscalarrename.e UserObjects/soln/system_variables=""'
