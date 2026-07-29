@@ -211,11 +211,15 @@ fixed reference density is baked into a scalar `PT_shift`.
 
 Exactly one of the following two parameters must be supplied.
 
-**Hydraulic head** (`aquifer_head`): The far-field head $h_{\mathrm{aq}}$ (m) is specified
+#### Hydraulic head (`aquifer_head`)
+
+The far-field head $h_{\mathrm{aq}}$ (m) is specified
 directly.  The aquifer pressure is computed from [eq:p_aq_head] at each quadrature point.
 The conductance $C$ must also be supplied via `aquifer_conductance`.
 
-**Pressure at datum** (`aquifer_pressure_at_datum`): The aquifer pressure at a reference
+#### Pressure at datum (`aquifer_pressure_at_datum`)
+
+The aquifer pressure at a reference
 elevation $z_{\mathrm{datum}}$ is specified, and the pressure at other elevations follows
 from the hydrostatic gradient:
 \begin{equation}
@@ -261,21 +265,10 @@ hydraulically connected aquifer body.
 ### Comparison with PorousFlowPiecewiseLinearSink
 
 On a horizontal boundary with a nearly incompressible fluid, `PorousFlowAquiferBC` and
-`PorousFlowPiecewiseLinearSink` are equivalent:
-
-| Feature | PorousFlowAquiferBC | PorousFlowPiecewiseLinearSink |
-| :--- | :--- | :--- |
-| Reference pressure | $\rho_{\mathrm{nodal}} g (h-z)$ per QP | scalar `PT_shift` |
-| Non-horizontal boundaries | Correct at every QP | Wrong except at one elevation |
-| Density in hydrostatic correction | Local nodal $\rho$ from EOS | Fixed $\rho_0$ baked into `PT_shift` |
-| Conductance (pressure form) | Computed from $k$, $\mu$, $L$ | Must be supplied manually |
-| Jacobian | Includes $\partial\rho/\partial P$ terms | Simpler, omits density coupling |
-
-For simple cases — horizontal boundary, incompressible fluid, known aquifer pressure — either
-BC works.  `PorousFlowAquiferBC` is preferred whenever the boundary has vertical extent,
-whenever the fluid is compressible enough that the hydrostatic equilibrium pressure deviates
-noticeably from the incompressible value, or whenever it is more natural to specify the
-aquifer head than to pre-compute a scalar pressure shift.
+`PorousFlowPiecewiseLinearSink` are equivalent. `PorousFlowAquiferBC` is preferred whenever
+the boundary has vertical extent, whenever the fluid is compressible enough that the hydrostatic
+equilibrium pressure deviates noticeably from the incompressible value, or whenever it is more
+natural to specify the aquifer head than to pre-compute a scalar pressure shift.
 
 An example input using the head formulation:
 

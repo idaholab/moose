@@ -27,8 +27,8 @@ quadrature point, the hydrostatic correction is correct on boundaries of any ori
 including vertical faces.
 
 The fluid density used in the hydrostatic correction, $\rho_{\mathrm{nodal}}$, is taken from
-PorousFlow's own nodal material property `PorousFlow_fluid_phase_density_nodal`.  This makes
-the aquifer pressure self-consistent with the equation of state used in the rest of the model.
+PorousFlow's own nodal material property.  This makes the aquifer pressure self-consistent
+with the equation of state used in the rest of the model.
 
 ## Reference-pressure formulations
 
@@ -46,8 +46,7 @@ is at hydrostatic equilibrium with the aquifer, even when the boundary has verti
 This is because the hydraulic head $h = z + P/(\rho g)$ is constant throughout a hydrostatic
 column, so $P_{\mathrm{model}}(z) = \rho g (h - z) = P_{\mathrm{aq}}(z)$ everywhere.
 
-The conductance $C$ must be supplied directly via `aquifer_conductance` [kg m$^{-2}$ Pa$^{-1}$
-s$^{-1}$].  A physically reasonable estimate is $C = \rho k / (\mu L)$, where $k$ is the
+The conductance $C$ must be supplied directly via `aquifer_conductance` (kg.m$^{-2}$.Pa$^{-1}$.s$^{-1}$).  A physically reasonable estimate is $C = \rho k / (\mu L)$, where $k$ is the
 permeability of the intervening material (m$^2$), $\mu$ is the fluid viscosity (Pa.s), and
 $L$ is the distance to the far-field aquifer (m).
 
