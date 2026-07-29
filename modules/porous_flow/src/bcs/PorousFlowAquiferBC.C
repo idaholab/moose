@@ -22,34 +22,34 @@ PorousFlowAquiferBC::validParams()
       "head equals the aquifer head, even when the boundary has vertical extent.");
   params.addRequiredParam<RealVectorValue>(
       "gravity",
-      "Gravitational acceleration vector [m/s^2], e.g. '0 0 -9.81'. "
+      "Gravitational acceleration vector (m/s^2), e.g. '0 0 -9.81'. "
       "The elevation at each quadrature point is computed as the component of the "
       "position vector in the direction opposite to gravity.");
   params.addParam<Real>("aquifer_head",
-                        "Far-field hydraulic head of the aquifer [m above model datum]. "
+                        "Far-field hydraulic head of the aquifer (m above model datum). "
                         "P_aq(z) = rho_nodal * |g| * (aquifer_head - z), where rho_nodal is "
                         "the PorousFlow nodal fluid density at the boundary node. "
                         "Mutually exclusive with aquifer_pressure_at_datum.");
   params.addParam<Real>("aquifer_pressure_at_datum",
-                        "Far-field aquifer pressure at datum_elevation [Pa]. "
+                        "Far-field aquifer pressure at datum_elevation (Pa). "
                         "P_aq(z) = aquifer_pressure_at_datum "
                         "        + rho_nodal * |g| * (datum_elevation - z), where rho_nodal is "
                         "the PorousFlow nodal fluid density at the boundary node. "
                         "Mutually exclusive with aquifer_head.");
   params.addParam<Real>("datum_elevation",
                         0.0,
-                        "Elevation of the reference point for aquifer_pressure_at_datum [m].");
+                        "Elevation of the reference point for aquifer_pressure_at_datum (m).");
   params.addParam<Real>(
       "aquifer_conductance",
-      "Conductance per unit boundary area [kg/(m^2 * Pa * s)]. "
+      "Conductance per unit boundary area (kg/(m^2*Pa*s)). "
       "The mass flux leaving the domain is conductance * (P_model - P_aquifer). "
       "Required when using the aquifer_head formulation. "
-      "Can be estimated as rho * k / (mu * L) where k is aquifer permeability [m^2], "
-      "mu is fluid viscosity [Pa s], and L is the distance to the far-field [m].");
+      "Can be estimated as rho * k / (mu * L) where k is aquifer permeability (m^2), "
+      "mu is fluid viscosity (Pa.s), and L is the distance to the far-field (m).");
   params.addRangeCheckedParam<Real>(
       "aquifer_distance",
       "aquifer_distance > 0",
-      "Distance from the boundary to the far-field aquifer [m]. "
+      "Distance from the boundary to the far-field aquifer (m). "
       "Required when using the aquifer_pressure_at_datum formulation. "
       "The conductance is computed internally as rho * k_nn / (mu * aquifer_distance), "
       "where k_nn is the permeability projected onto the boundary normal, "
@@ -57,7 +57,7 @@ PorousFlowAquiferBC::validParams()
   params.addRangeCheckedParam<Real>(
       "aquifer_permeability",
       "aquifer_permeability > 0",
-      "Permeability of the material between the boundary and the far-field aquifer [m^2], "
+      "Permeability of the material between the boundary and the far-field aquifer (m^2), "
       "used as k_nn in the conductance formula of the aquifer_pressure_at_datum formulation. "
       "If not supplied, the boundary permeability projected onto the boundary normal is used, "
       "which is appropriate when the aquifer is a continuation of the boundary material.");
