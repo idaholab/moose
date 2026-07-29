@@ -125,8 +125,8 @@ protected:
   void computeP(int iblock);
   /// Computes Enthalpy per channel for block iblock
   virtual void computeh(int iblock) = 0;
-  /// Computes Temperature per channel for block iblock
-  void computeT(int iblock);
+  /// Computes and relaxes Temperature per channel for block iblock
+  Real computeT(int iblock);
   /// Computes Density per channel for block iblock
   void computeRho(int iblock);
   /// Computes Viscosity per channel for block iblock
@@ -230,10 +230,28 @@ protected:
   Real _CT;
   /// Convergence tolerance for the pressure loop in external solve
   const Real & _P_tol;
+  /// Maximum number of pressure iterations; zero selects the solver's existing automatic limit
+  const int & _P_maxit;
   /// Convergence tolerance for the temperature loop in internal solve
   const Real & _T_tol;
   /// Maximum iterations for the inner temperature loop
   const int & _T_maxit;
+  /// Relaxation factor for temperature updates in the inner thermal-hydraulic iteration
+  const Real & _T_relaxation;
+  /// Number of enthalpy, temperature, and property updates performed per flow solve
+  const unsigned int & _enthalpy_subcycles;
+  /// Equation relaxation factor for mass flow rate in the coupled implicit solve
+  const Real & _mass_flow_equation_relaxation;
+  /// Equation relaxation factor for pressure in the coupled implicit solve
+  const Real & _pressure_equation_relaxation;
+  /// Equation relaxation factor for crossflow in the coupled implicit solve
+  const Real & _crossflow_equation_relaxation;
+  /// Relaxation factor for mass flow rate updates in the coupled implicit solve
+  const Real & _mass_flow_relaxation;
+  /// Relaxation factor for pressure updates in the coupled implicit solve
+  const Real & _pressure_relaxation;
+  /// Relaxation factor for crossflow updates in the coupled implicit solve
+  const Real & _crossflow_relaxation;
   /// The relative convergence tolerance, (relative decrease) for the ksp linear solver
   const PetscReal & _rtol;
   /// The absolute convergence tolerance for the ksp linear solver
@@ -342,8 +360,8 @@ protected:
   /// Mass conservation - axial convection
   Mat _mc_axial_convection_mat;
   Vec _mc_axial_convection_rhs;
-  /// Mass conservation - density time derivative
-  /// No implicit matrix
+  /// Mass conservation - pressure derivative of transient density
+  Mat _mc_density_pressure_mat;
 
   /// Axial momentum
   /// Axial momentum conservation - compute turbulent cross fluxes
@@ -410,6 +428,8 @@ protected:
   PetscScalar _max_sumWij;
   PetscScalar _max_sumWij_new;
   PetscScalar _correction_factor = 1.0;
+  /// Maximum pressure fixed-point update before solution relaxation over the blocks
+  Real _pressure_fixed_point_error = 1.0;
 
 public:
   static InputParameters validParams();
