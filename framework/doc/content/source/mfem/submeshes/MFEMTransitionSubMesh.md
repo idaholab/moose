@@ -9,13 +9,36 @@ user-specified boundary (an interior cut or an exterior boundary of the mesh) in
 closed volumetric subdomain, consisting of all elements that:
 
 - Have at least one vertex that lies on the boundary,
-- Lie on one side of the boundary, and
+- Lie on a requested side of the boundary, and
 - Are members of the user-specified volumetric subdomain.
 
 These elements are collectively referred
 to as a 'transition' subdomain of the parent mesh, due to their role in defining minimal domains of
 support for scalar 'transition' variables used in some methods to enforce global topological
-constraints on domains with non-trivial topologies.
+constraints on domains with non-trivial topologies. A layer several elements thick also serves as
+the absorbing region of a perfectly matched layer, as used by [MFEMPMLCurlCurlKernel.md].
+
+## Sides and layer thickness
+
+The boundary need not be planar; it need only be orientable, so that each of its vertices has a well
+defined surface normal. That normal is averaged from the boundary faces meeting at the vertex, which
+distinguishes the two sides of the boundary: an element lies on the positive side if its centre is
+displaced from the boundary vertex along the normal, and on the negative side otherwise.
+
+Two parameters set how many element-thick layers are grown on each side:
+
+- `num_layers_positive`, the number of layers on the positive side, defaulting to one.
+- `num_layers_negative`, the number of layers on the negative side, defaulting to zero.
+
+A count of zero grows no layer on that side, so the counts alone select which sides are used: the
+default of one positive and zero negative layers produces a single layer on the positive side. An
+exterior boundary has elements on one side only, so `num_layers_positive` gives the number of layers
+grown inwards and `num_layers_negative` must be zero.
+
+Growth is confined to the subdomains named by `block`, which accepts both numeric attributes and
+named attribute sets and applies to every layer, not just the first. A layer grown with
+`block = coil` therefore cannot pull in elements of a neighbouring subdomain such as the surrounding
+air. Leaving `block` empty applies the object to all subdomains.
 
 In addition, `MFEMTransitionSubMesh` modifies attributes on the parent `mfem::ParMesh` to allow
 the new transition region and its boundary to be referenced by other kernels and boundary conditions
