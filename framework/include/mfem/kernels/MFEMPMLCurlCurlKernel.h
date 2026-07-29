@@ -15,8 +15,7 @@
 
 /**
  * Perfectly matched layer curl curl integrator: (c1 curl u, curl v) with c1 = det(J)^-1 J^T J
- * scaled by the base reluctivity coefficient, where J is the Jacobian of the radial coordinate
- * stretch.
+ * scaled by the base reluctivity coefficient, where J is the Jacobian of the coordinate stretch.
  */
 class MFEMPMLCurlCurlKernel : public MFEMPMLKernel
 {
@@ -31,9 +30,9 @@ protected:
     // inverse determinant of the stretch rather than the full tensor.
     if (_stretch->dim() == 2)
       return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _scalar_re
-                                                                              : _scalar_im);
+                                                                               : _scalar_im);
     return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _matrix_re
-                                                                            : _matrix_im);
+                                                                             : _matrix_im);
   }
 };
 

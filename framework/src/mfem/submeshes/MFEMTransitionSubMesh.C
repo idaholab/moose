@@ -127,12 +127,8 @@ MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
       break;
     }
   }
-  MPI_Allreduce(MPI_IN_PLACE,
-                &local_interior_face_found,
-                1,
-                MPI_INT,
-                MPI_MAX,
-                getMFEMProblem().getComm());
+  MPI_Allreduce(
+      MPI_IN_PLACE, &local_interior_face_found, 1, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
   _exterior_boundary = (local_interior_face_found == 0);
 
   if (_exterior_boundary && _num_layers_negative > 0)
@@ -382,8 +378,7 @@ MFEMTransitionSubMesh::growLayers(mfem::ParMesh & parent_mesh,
 
     int n_front = front_local.size();
     std::vector<int> front_sizes(mpi_comm_size);
-    MPI_Allgather(
-        &n_front, 1, MPI_INT, front_sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
+    MPI_Allgather(&n_front, 1, MPI_INT, front_sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
     std::vector<int> front_offset(mpi_comm_size);
     std::exclusive_scan(front_sizes.begin(), front_sizes.end(), front_offset.begin(), 0);
     const int front_total = std::accumulate(front_sizes.begin(), front_sizes.end(), 0);
@@ -445,8 +440,7 @@ MFEMTransitionSubMesh::isPositiveSide(const int & el,
 }
 
 void
-MFEMTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
-                                        mfem::Array<int> & transition_els)
+MFEMTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh, mfem::Array<int> & transition_els)
 {
   // Generate a set of local new attributes for transition region elements
   const int old_max_attr = parent_mesh.attributes.Max();
@@ -494,8 +488,8 @@ MFEMTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
 
 bool
 MFEMTransitionSubMesh::isInDomain(const int & element,
-                                     const mfem::Array<int> & subdomains,
-                                     const mfem::ParMesh & mesh)
+                                  const mfem::Array<int> & subdomains,
+                                  const mfem::ParMesh & mesh)
 {
   // element<0 for ghost elements
   if (element < 0)

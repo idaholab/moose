@@ -8,6 +8,7 @@ decay_coefficient = ${fparse 5.0 / (omega * sqrt(epsilon * mu))}
 source_width = ${fparse 5 * omega * sqrt(epsilon * mu) / pi}
 source_width_squared = ${fparse source_width * source_width}
 source_amplitude = ${fparse source_width_squared / pi}
+z_center = 0
 
 [Mesh]
   type = MFEMFileMesh
@@ -38,7 +39,7 @@ source_amplitude = ${fparse source_width_squared / pi}
 [Functions]
   [source_field]
     type = ParsedVectorFunction
-    expression_x = '${source_amplitude} * exp(-${source_width_squared} * ((x - 0.5)^2 + (y - 0.5)^2))'
+    expression_x = '${source_amplitude} * exp(-${source_width_squared} * ((x - 0.5)^2 + (y - 0.5)^2 + (z - ${z_center})^2))'
     expression_y = '0'
   []
 []
@@ -133,6 +134,12 @@ source_amplitude = ${fparse source_width_squared / pi}
 [Outputs]
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/RadialPML
+    file_base = OutputData/PML
   []
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/PML
+    vtk_format = ASCII
+  []
+
 []
