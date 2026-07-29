@@ -14,8 +14,9 @@
 #include "MFEMPMLKernel.h"
 
 /**
- * PML-stretched curl-curl integrator: (c1 curl u, curl v) with c1 = detJ^{-1} J^T J scaled by the
- * base reluctivity coefficient.
+ * Perfectly matched layer curl curl integrator: (c1 curl u, curl v) with c1 = det(J)^-1 J^T J
+ * scaled by the base reluctivity coefficient, where J is the Jacobian of the radial coordinate
+ * stretch.
  */
 class MFEMPMLCurlCurlKernel : public MFEMPMLKernel
 {
@@ -24,9 +25,15 @@ public:
   MFEMPMLCurlCurlKernel(const InputParameters & parameters);
 
 protected:
-  mfem::BilinearFormIntegrator * makeIntegrator(mfem::VectorCoefficient & coef) override
+  mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) override
   {
-    return new mfem::CurlCurlIntegrator(coef);
+    // In two dimensions the curl of a vector field is a scalar, so this term picks up only the
+    // inverse determinant of the stretch rather than the full tensor.
+    if (_stretch->dim() == 2)
+      return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _scalar_re
+                                                                              : _scalar_im);
+    return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _matrix_re
+                                                                            : _matrix_im);
   }
 };
 

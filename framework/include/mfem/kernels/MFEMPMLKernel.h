@@ -12,23 +12,36 @@
 #pragma once
 
 #include "MFEMComplexKernel.h"
+#include "MFEMPMLStretch.h"
 
 /**
- * Diagonal perfectly-matched-layer matrix coefficient. Evaluates the complex Cartesian coordinate
- * stretch dxs(x) at an integration point and returns the real or imaginary part of one of the two
- * PML tensors:
- *   - C1 = detJ^{-1} J^T J   (used by the curl-curl term; scalar in 2D, diagonal in 3D)
- *   - C2 = detJ (J^T J)^{-1} (used by the vector FE mass term; diagonal, size dim)
- * The geometry (inner boundary comp_domain_bdr and per-side PML length) is supplied by the kernel,
- * derived from the mesh.
+ * Perfectly matched layer tensor coefficient.
+ *
+ * The radial stretch is diagonal in the local radial and tangential frame, so the tensor in
+ * Cartesian coordinates is
+ *
+ *     M = lambda_t I + (lambda_r - lambda_t) rhat (x) rhat,
+ *
+ * whose eigenvalues follow from the radial and tangential stretch factors J_r and J_t and their
+ * determinant det(J) = J_r J_t^(d-1).
+ *
+ * Which tensor applies is set by the quantity the bilinear form integrates, not by the operator
+ * using it: pulling the weak form back from stretched to physical coordinates gives one factor for
+ * an integrand holding the curl of the field and another for one holding the field itself.
+ *
+ *     CURL  = det(J)^-1 J^T J    lambda_r = J_r^2/det, lambda_t = J_t^2/det
+ *     FIELD = det(J) (J^T J)^-1  lambda_r = det/J_r^2, lambda_t = det/J_t^2
+ *
+ * The result is scaled by a base scalar coefficient, and only its real or imaginary part is
+ * returned, as the complex system is assembled from two real bilinear forms.
  */
-class MFEMPMLDiagMatrixCoefficient : public mfem::VectorCoefficient
+class MFEMPMLMatrixCoefficient : public mfem::MatrixCoefficient
 {
 public:
   enum Tensor
   {
-    C1,
-    C2
+    CURL,
+    FIELD
   };
   enum Part
   {
@@ -36,84 +49,80 @@ public:
     IM
   };
 
-  MFEMPMLDiagMatrixCoefficient(int dim,
-                               const mfem::Array2D<double> & comp_domain_bdr,
-                               const mfem::Array2D<double> & length,
-                               double decay_coefficient,
-                               double decay_polynomial,
-                               Tensor tensor,
-                               Part part)
-    : mfem::VectorCoefficient(tensor == C1 ? (dim == 2 ? 1 : dim) : dim),
-      _dim(dim),
-      _comp_domain_bdr(comp_domain_bdr),
-      _length(length),
-      _decay_coefficient(decay_coefficient),
-      _decay_polynomial(decay_polynomial),
+  MFEMPMLMatrixCoefficient(const MFEMPMLStretch & stretch,
+                           mfem::Coefficient & base_coefficient,
+                           Tensor tensor,
+                           Part part)
+    : mfem::MatrixCoefficient(stretch.dim()),
+      _stretch(stretch),
+      _base_coefficient(base_coefficient),
       _tensor(tensor),
       _part(part)
   {
   }
 
-  using mfem::VectorCoefficient::Eval;
-
-  void Eval(mfem::Vector & K,
+  void Eval(mfem::DenseMatrix & K,
             mfem::ElementTransformation & T,
             const mfem::IntegrationPoint & ip) override;
 
 private:
-  /// Fill dxs[i] with the complex stretch factor in each Cartesian direction at point x.
-  void stretchFunction(const mfem::Vector & x, std::vector<std::complex<double>> & dxs) const;
-
-  const int _dim;
-  const mfem::Array2D<double> _comp_domain_bdr;
-  const mfem::Array2D<double> _length;
-  const double _decay_coefficient;
-  const double _decay_polynomial;
+  const MFEMPMLStretch & _stretch;
+  mfem::Coefficient & _base_coefficient;
   const Tensor _tensor;
   const Part _part;
 };
 
 /**
- * Base class for PML-stretched complex bilinear-form kernels. Derives
- * the Cartesian PML geometry from the mesh (outer bounding box and the interior/non-PML region's
- * bounding box) and applies the coordinate stretch as an on-the-fly complex coefficient scaling a
- * base scalar coefficient. Subclasses supply the operator integrator and the stretch tensor
- * (C1 for curl-curl, C2 for vector FE mass). The PML region is this kernel's block.
+ * Scalar perfectly matched layer coefficient a/det(J). In two dimensions the curl of a vector field
+ * is a scalar, so the curl curl term picks up only the inverse determinant rather than a tensor.
+ */
+class MFEMPMLScalarCoefficient : public mfem::Coefficient
+{
+public:
+  MFEMPMLScalarCoefficient(const MFEMPMLStretch & stretch,
+                           mfem::Coefficient & base_coefficient,
+                           MFEMPMLMatrixCoefficient::Part part)
+    : _stretch(stretch), _base_coefficient(base_coefficient), _part(part)
+  {
+  }
+
+  double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
+
+private:
+  const MFEMPMLStretch & _stretch;
+  mfem::Coefficient & _base_coefficient;
+  const MFEMPMLMatrixCoefficient::Part _part;
+};
+
+/**
+ * Base class for radial perfectly matched layer complex bilinear form kernels. The layer is this
+ * kernel's block, and the stretch geometry is derived from the mesh and a reference point.
+ * Subclasses build the operator integrator from the appropriate coefficient.
  */
 class MFEMPMLKernel : public MFEMComplexKernel
 {
 public:
   static InputParameters validParams();
-  MFEMPMLKernel(const InputParameters & parameters, MFEMPMLDiagMatrixCoefficient::Tensor tensor);
+  MFEMPMLKernel(const InputParameters & parameters, MFEMPMLMatrixCoefficient::Tensor tensor);
 
   mfem::BilinearFormIntegrator * getRealBFIntegrator() override;
   mfem::BilinearFormIntegrator * getImagBFIntegrator() override;
 
 protected:
-  /// Build the operator integrator from the (base-coefficient-scaled) diagonal coefficient.
-  virtual mfem::BilinearFormIntegrator * makeIntegrator(mfem::VectorCoefficient & coef) = 0;
+  /// Build the operator integrator for the real or imaginary part of the stretched coefficient.
+  virtual mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) = 0;
 
-  /// Bounding box of the interior (non-PML) region = inner PML boundary, reduced across ranks.
-  mfem::Array2D<double> getCompDomainBoundary();
-  /// Per-axis, per-side PML thickness from the mesh bounding box and the inner PML boundary.
-  mfem::Array2D<double> getLength(const mfem::Array2D<double> & comp_domain_bdr);
+  /// Construct the stretch from the mesh, this kernel's block and the input parameters.
+  std::unique_ptr<MFEMPMLStretch> makeStretch();
 
-  /// Base scalar coefficient (e.g. reluctivity 1/mu or mass -omega^2 eps).
-  mfem::Coefficient & _base_coef;
-  const double _decay_coefficient;
-  const double _decay_polynomial;
-
-  const int _dim;
-  /// Inner PML boundary (per axis, low/high side), i.e. where the PML starts.
-  const mfem::Array2D<double> _comp_domain_bdr;
-  /// PML thickness per axis and side (0 on a side with no PML).
-  const mfem::Array2D<double> _length;
-
-  /// Real and imaginary parts of the diagonal stretch tensor, scaled by the base coefficient.
-  MFEMPMLDiagMatrixCoefficient _pml_re;
-  MFEMPMLDiagMatrixCoefficient _pml_im;
-  mfem::ScalarVectorProductCoefficient _scaled_re;
-  mfem::ScalarVectorProductCoefficient _scaled_im;
+  /// Base scalar coefficient, such as the reluctivity or the mass coefficient.
+  mfem::Coefficient & _base_coefficient;
+  /// Declared before the coefficients below, which hold a reference to it.
+  std::unique_ptr<MFEMPMLStretch> _stretch;
+  MFEMPMLMatrixCoefficient _matrix_re;
+  MFEMPMLMatrixCoefficient _matrix_im;
+  MFEMPMLScalarCoefficient _scalar_re;
+  MFEMPMLScalarCoefficient _scalar_im;
 };
 
 #endif
