@@ -24,7 +24,7 @@ MFEMPMLVectorFEMassKernel::validParams()
 }
 
 MFEMPMLVectorFEMassKernel::MFEMPMLVectorFEMassKernel(const InputParameters & parameters)
-  : MFEMPMLKernel(parameters, MFEMPMLDiagMatrixCoefficient::C2)
+  : MFEMPMLKernel(parameters, MFEMPMLMatrixCoefficient::FIELD)
 {
 }
 

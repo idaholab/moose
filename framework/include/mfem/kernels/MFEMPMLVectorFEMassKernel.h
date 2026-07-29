@@ -14,8 +14,8 @@
 #include "MFEMPMLKernel.h"
 
 /**
- * PML-stretched vector FE mass integrator: (c2 u, v) with c2 = detJ (J^T J)^{-1} scaled by the
- * base mass coefficient, where J is the Jacobian of the complex PML coordinate stretch.
+ * Perfectly matched layer vector FE mass integrator: (c2 u, v) with c2 = det(J) (J^T J)^-1 scaled
+ * by the base mass coefficient, where J is the Jacobian of the radial coordinate stretch.
  */
 class MFEMPMLVectorFEMassKernel : public MFEMPMLKernel
 {
@@ -24,9 +24,10 @@ public:
   MFEMPMLVectorFEMassKernel(const InputParameters & parameters);
 
 protected:
-  mfem::BilinearFormIntegrator * makeIntegrator(mfem::VectorCoefficient & coef) override
+  mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) override
   {
-    return new mfem::VectorFEMassIntegrator(coef);
+    return new mfem::VectorFEMassIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _matrix_re
+                                                                                 : _matrix_im);
   }
 };
 
