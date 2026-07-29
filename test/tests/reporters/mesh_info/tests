@@ -13,7 +13,6 @@
                   mesh_info_out.json.3'
       min_parallel = 4
       max_parallel = 4
-      keep_reporter_types = true
 
       detail = "outputs all information be default"
     []
@@ -24,7 +23,6 @@
       jsondiff = limit_items_out.json
       cli_args = 'Reporters/mesh_info/items="num_dofs" Outputs/file_base=limit_items_out'
       skip_keys = 'part number_of_parts'
-      keep_reporter_types = true
 
       detail = "outputs specific items"
     []
@@ -42,7 +40,6 @@
                   Reporters/mesh_info/elem_items=all
                   Reporters/mesh_info/elem_qualities=all
                   Outputs/file_base=elem_all_out'
-      keep_reporter_types = true
 
       detail = "includes all extra information about elems"
     []
@@ -57,7 +54,6 @@
       cli_args = 'Reporters/mesh_info/items="local_elems"
                   Reporters/mesh_info/elem_items="elem_type volume"
                   Outputs/file_base=elem_items_out'
-      keep_reporter_types = true
 
       detail = "includes selected extra information about elems"
     []
@@ -73,7 +69,6 @@
                   Reporters/mesh_info/elem_qualities="min_angle jacobian"
                   Outputs/file_base=elem_qualities_out'
       skip_keys = 'part number_of_parts'
-      keep_reporter_types = true
 
       detail = "includes selected elem quality information"
     []
@@ -91,7 +86,6 @@
                   Reporters/mesh_info/sideset_items=all
                   Reporters/mesh_info/sideset_qualities=all
                   Outputs/file_base=sideset_all_out'
-      keep_reporter_types = true
 
       detail = "includes all extra information about sidesets"
     []
@@ -104,7 +98,6 @@
                   Reporters/mesh_info/sideset_items="min_volume max_volume"
                   Outputs/file_base=sideset_items_out'
       skip_keys = 'part number_of_parts'
-      keep_reporter_types = true
 
       detail = "includes selected extra information about sidesets"
     []
@@ -117,7 +110,6 @@
                   Reporters/mesh_info/sideset_qualities="min_jacobian max_jacobian"
                   Outputs/file_base=sideset_qualities_out'
       skip_keys = 'part number_of_parts'
-      keep_reporter_types = true
 
       detail = "includes selected sideset quality information"
     []
@@ -135,7 +127,6 @@
                   Reporters/mesh_info/subdomain_items=all
                   Reporters/mesh_info/subdomain_qualities=all
                   Outputs/file_base=subdomain_all_out'
-      keep_reporter_types = true
 
       detail = "includes all extra information about subdomains"
     []
@@ -148,7 +139,6 @@
                   Reporters/mesh_info/subdomain_items="min_volume max_volume"
                   Outputs/file_base=subdomain_items_out'
       skip_keys = 'part number_of_parts'
-      keep_reporter_types = true
 
       detail = "includes selected extra information about subdomains"
     []
@@ -161,7 +151,6 @@
                   Reporters/mesh_info/subdomain_qualities="min_min_angle max_max_angle"
                   Outputs/file_base=subdomain_qualities_out'
       skip_keys = 'part number_of_parts'
-      keep_reporter_types = true
 
       detail = "includes selected subdomain quality information"
     []
