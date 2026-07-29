@@ -9,6 +9,7 @@
 
 #include "OrientedBoundingBox.h"
 #include "MooseError.h"
+#include "MooseUtils.h"
 
 #include <cmath>
 
