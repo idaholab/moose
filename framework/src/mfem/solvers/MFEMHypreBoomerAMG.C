@@ -48,6 +48,14 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG() { _solver.reset(); }
 
 void
+MFEMHypreBoomerAMG::ConstructSolver()
+{
+  auto solver = std::make_unique<mfem::HypreBoomerAMG>();
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
+}
+
+void
 MFEMHypreBoomerAMG::SetSolverParameters(mfem::HypreBoomerAMG & solver)
 {
   solver.iterative_mode = getParam<bool>("use_initial_guess");
@@ -59,14 +67,6 @@ MFEMHypreBoomerAMG::SetSolverParameters(mfem::HypreBoomerAMG & solver)
 
   if (_mfem_fespace && !mfem::HypreUsingGPU())
     solver.SetElasticityOptions(_mfem_fespace.get());
-}
-
-void
-MFEMHypreBoomerAMG::ConstructSolver()
-{
-  auto solver = std::make_unique<mfem::HypreBoomerAMG>();
-  SetSolverParameters(*solver);
-  _solver = std::move(solver);
 }
 
 #endif

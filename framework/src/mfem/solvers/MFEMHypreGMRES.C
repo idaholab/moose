@@ -38,6 +38,15 @@ MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
 }
 
 void
+MFEMHypreGMRES::ConstructSolver()
+{
+  auto solver = std::make_unique<mfem::HypreGMRES>(getMFEMProblem().getComm());
+  SetSolverParameters(*solver);
+  SetPreconditioner(*solver);
+  _solver = std::move(solver);
+}
+
+void
 MFEMHypreGMRES::SetSolverParameters(mfem::HypreGMRES & solver)
 {
   solver.iterative_mode = getParam<bool>("use_initial_guess");
@@ -46,15 +55,6 @@ MFEMHypreGMRES::SetSolverParameters(mfem::HypreGMRES & solver)
   solver.SetMaxIter(getParam<int>("l_max_its"));
   solver.SetKDim(getParam<int>("kdim"));
   solver.SetPrintLevel(getParam<int>("print_level"));
-}
-
-void
-MFEMHypreGMRES::ConstructSolver()
-{
-  auto solver = std::make_unique<mfem::HypreGMRES>(getMFEMProblem().getComm());
-  SetSolverParameters(*solver);
-  SetPreconditioner(*solver);
-  _solver = std::move(solver);
 }
 
 #endif

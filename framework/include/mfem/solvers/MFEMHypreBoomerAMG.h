@@ -24,11 +24,11 @@ public:
   MFEMHypreBoomerAMG(const InputParameters &);
   ~MFEMHypreBoomerAMG();
 
-  /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::HypreBoomerAMG & solver) override;
+  void ConstructSolver() override;
 
 protected:
-  void ConstructSolver() override;
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::HypreBoomerAMG & solver) override;
 
 private:
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};

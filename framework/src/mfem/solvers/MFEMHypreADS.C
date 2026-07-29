@@ -35,18 +35,18 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreADS::SetSolverParameters(mfem::HypreADS & solver)
-{
-  solver.iterative_mode = getParam<bool>("use_initial_guess");
-  solver.SetPrintLevel(getParam<int>("print_level"));
-}
-
-void
 MFEMHypreADS::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
   SetSolverParameters(*solver);
   _solver = std::move(solver);
+}
+
+void
+MFEMHypreADS::SetSolverParameters(mfem::HypreADS & solver)
+{
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 #endif

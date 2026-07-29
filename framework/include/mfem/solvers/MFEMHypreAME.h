@@ -44,10 +44,10 @@ public:
     return _eigensolver->GetEigenvector(index);
   }
 
-protected:
   /// Override in derived classes to construct and set the solver options.
   virtual void ConstructSolver() override;
 
+protected:
   /// Sets the operator for the eigensolver and propagates it to the preconditioner.
   virtual void SetOperatorImpl(mfem::Operator & op) override
   {

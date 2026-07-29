@@ -31,9 +31,9 @@ public:
 
   MFEMOperatorChebyshevSmoother(const InputParameters & parameters);
 
-protected:
   void ConstructSolver() override;
 
+protected:
   /// Rebuilds the multigrid hierarchy for the supplied finest-level operator.
   virtual void SetOperatorImpl(mfem::Operator & op) override;
 

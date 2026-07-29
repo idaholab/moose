@@ -37,6 +37,15 @@ MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
 }
 
 void
+MFEMCGSolver::ConstructSolver()
+{
+  auto solver = std::make_unique<mfem::CGSolver>(getMFEMProblem().getComm());
+  SetSolverParameters(*solver);
+  SetPreconditioner(*solver);
+  _solver = std::move(solver);
+}
+
+void
 MFEMCGSolver::SetSolverParameters(mfem::CGSolver & solver)
 {
   solver.iterative_mode = getParam<bool>("use_initial_guess");
@@ -44,15 +53,6 @@ MFEMCGSolver::SetSolverParameters(mfem::CGSolver & solver)
   solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver.SetMaxIter(getParam<int>("l_max_its"));
   solver.SetPrintLevel(getParam<int>("print_level"));
-}
-
-void
-MFEMCGSolver::ConstructSolver()
-{
-  auto solver = std::make_unique<mfem::CGSolver>(getMFEMProblem().getComm());
-  SetSolverParameters(*solver);
-  SetPreconditioner(*solver);
-  _solver = std::move(solver);
 }
 
 #endif

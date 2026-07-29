@@ -35,17 +35,17 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 }
 
 void
-MFEMOperatorJacobiSmoother::SetSolverParameters(mfem::OperatorJacobiSmoother & solver)
-{
-  solver.iterative_mode = getParam<bool>("use_initial_guess");
-}
-
-void
 MFEMOperatorJacobiSmoother::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::OperatorJacobiSmoother>(getParam<double>("damping"));
   SetSolverParameters(*solver);
   _solver = std::move(solver);
+}
+
+void
+MFEMOperatorJacobiSmoother::SetSolverParameters(mfem::OperatorJacobiSmoother & solver)
+{
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
 }
 
 #endif

@@ -23,7 +23,6 @@ public:
 
   MFEMMUMPS(const InputParameters & parameters);
 
-protected:
   void ConstructSolver() override;
 };
 

@@ -37,6 +37,15 @@ MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters)
 }
 
 void
+MFEMHyprePCG::ConstructSolver()
+{
+  auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
+  SetSolverParameters(*solver);
+  SetPreconditioner(*solver);
+  _solver = std::move(solver);
+}
+
+void
 MFEMHyprePCG::SetSolverParameters(mfem::HyprePCG & solver)
 {
   solver.iterative_mode = getParam<bool>("use_initial_guess");
@@ -44,15 +53,6 @@ MFEMHyprePCG::SetSolverParameters(mfem::HyprePCG & solver)
   solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver.SetMaxIter(getParam<int>("l_max_its"));
   solver.SetPrintLevel(getParam<int>("print_level"));
-}
-
-void
-MFEMHyprePCG::ConstructSolver()
-{
-  auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
-  SetSolverParameters(*solver);
-  SetPreconditioner(*solver);
-  _solver = std::move(solver);
 }
 
 #endif

@@ -24,9 +24,9 @@ public:
 
   MFEMHypreADS(const InputParameters &);
 
-protected:
   void ConstructSolver() override;
 
+protected:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::HypreADS & solver) override;
 

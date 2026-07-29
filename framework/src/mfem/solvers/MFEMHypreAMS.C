@@ -39,20 +39,20 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 }
 
 void
+MFEMHypreAMS::ConstructSolver()
+{
+  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
+}
+
+void
 MFEMHypreAMS::SetSolverParameters(mfem::HypreAMS & solver)
 {
   if (getParam<bool>("singular"))
     solver.SetSingularProblem();
   solver.iterative_mode = getParam<bool>("use_initial_guess");
   solver.SetPrintLevel(getParam<int>("print_level"));
-}
-
-void
-MFEMHypreAMS::ConstructSolver()
-{
-  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
-  SetSolverParameters(*solver);
-  _solver = std::move(solver);
 }
 
 #endif

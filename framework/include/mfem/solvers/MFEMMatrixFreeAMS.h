@@ -66,7 +66,6 @@ public:
 
   void UpdateEquationSystemContext() override;
 
-protected:
   void ConstructSolver() override;
 
 private:
