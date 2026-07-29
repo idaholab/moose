@@ -57,7 +57,7 @@ public:
 
   /**
    * Return the cached contact normal for the supplied lower-dimensional secondary element node.
-   * The stored value is the existing mechanical-contact nodal normal. Coordinate derivatives are
+   * The raw value is the stored normalized secondary nodal normal. Coordinate derivatives are
    * included while this object's formulation and the current assembly mode require them.
    */
   const ADRealVectorValue & contactNormal(const Elem & lower_secondary_elem,

@@ -14,8 +14,8 @@ InputParameters
 ADRowDependentTestKernel::validParams()
 {
   InputParameters params = ADKernel::validParams();
-  params.addClassDescription("Tests Jacobian assembly with distinct AD derivative support across "
-                             "residual rows.");
+  params.addClassDescription(
+      "Tests Jacobian assembly when residual rows have different AD derivative support.");
   return params;
 }
 

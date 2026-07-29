@@ -1,6 +1,6 @@
 [Tests]
   design = FEProblemBase.md
-  issues = '#14166 #20773'
+  issues = '#14166 #20773 #33378'
   [grid_sequencing]
     type = Exodiff
     input = grid-sequencing.i
@@ -12,5 +12,7 @@
     partial = True
     mesh_mode = replicated # Fix when mortar segment mesh is distributed
     custom_cmp = grid-sequencing.cmp
+    min_parallel = 2
+    max_parallel = 2
   []
 []

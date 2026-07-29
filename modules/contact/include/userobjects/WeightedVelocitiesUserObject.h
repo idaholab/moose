@@ -32,8 +32,8 @@ public:
 
   /**
    * Return contact tangents for the supplied lower-dimensional secondary element node.
-   * Stored values are the existing mechanical-contact nodal tangents; derivatives are included
-   * when the internal quasistatic normal-derivative path and AD derivative recording are enabled.
+   * Raw values are the stored mechanical-contact nodal tangents; derivatives are included when the
+   * internal quasistatic normal-derivative path and AD derivative recording are enabled.
    */
   std::array<ADRealVectorValue, 2> contactTangents(const Elem & lower_secondary_elem,
                                                    unsigned int nodal_index) const;
