@@ -2137,8 +2137,22 @@ SubChannel1PhaseProblem::solveAndPopulateEnthalpy(
   KSPConvergedReason reason;
   LibmeshPetscCall(KSPGetConvergedReason(ksp, &reason));
   if (reason < 0)
-    mooseError(
-        name(), ": enthalpy linear solve failed with PETSc KSP reason ", static_cast<int>(reason));
+  {
+    PetscInt iterations;
+    PetscReal residual_norm;
+    LibmeshPetscCall(KSPGetIterationNumber(ksp, &iterations));
+    LibmeshPetscCall(KSPGetResidualNorm(ksp, &residual_norm));
+    mooseError(name(),
+               ": enthalpy linear solve failed: ",
+               KSPConvergedReasons[reason],
+               " (",
+               static_cast<int>(reason),
+               ") after ",
+               iterations,
+               " iterations; residual norm = ",
+               residual_norm,
+               ".");
+  }
 
   // Scatter to _h_soln with sanity checks
   PetscScalar * xx = nullptr;
@@ -2515,6 +2529,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   KSP ksp;
   PC pc;
   LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
+  LibmeshPetscCall(KSPSetOptionsPrefix(ksp, "scm_coupled_"));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
@@ -2531,6 +2546,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(PCFieldSplitSetIS(pc, NULL, part));
     LibmeshPetscCall(ISDestroy(&part));
   }
+  LibmeshPetscCall(KSPSetFromOptions(ksp));
   V("Linear solver assembled");
 
   // ============================== Solve =====================================
@@ -2540,9 +2556,22 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   KSPConvergedReason reason;
   LibmeshPetscCall(KSPGetConvergedReason(ksp, &reason));
   if (reason < 0)
+  {
+    PetscInt iterations;
+    PetscReal residual_norm;
+    LibmeshPetscCall(KSPGetIterationNumber(ksp, &iterations));
+    LibmeshPetscCall(KSPGetResidualNorm(ksp, &residual_norm));
     mooseError(name(),
-               ": coupled mass/momentum linear solve failed with PETSc KSP reason ",
-               static_cast<int>(reason));
+               ": coupled mass/momentum linear solve failed: ",
+               KSPConvergedReasons[reason],
+               " (",
+               static_cast<int>(reason),
+               ") after ",
+               iterations,
+               " iterations; residual norm = ",
+               residual_norm,
+               ".");
+  }
 
   // destroy solver containers first
   LibmeshPetscCall(VecDestroy(&b_nest));
