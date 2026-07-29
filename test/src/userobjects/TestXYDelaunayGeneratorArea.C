@@ -9,6 +9,8 @@
 
 #include "TestXYDelaunayGeneratorArea.h"
 
+#include "Function.h"
+
 #include "libmesh/parallel_algebra.h"
 
 registerMooseObject("MooseTestApp", TestXYDelaunayGeneratorArea);
