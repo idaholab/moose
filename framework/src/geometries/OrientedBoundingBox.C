@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OrientedBoundingBox.h"
+#include "MooseError.h"
+
 #include <cmath>
 
 #include "libmesh/replicated_mesh.h"
@@ -31,7 +33,7 @@ OrientedBoundingBox::OrientedBoundingBox(const std::vector<std::pair<Point, Poin
 
   _maximal_corner = _minimal_corner;
   // (a) Build orthonormal basis & lengths
-  for (unsigned i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
   {
     const Point vec = axis_pairs[i].second - _minimal_corner;
     _dirs[i] = vec.unit();
@@ -40,8 +42,8 @@ OrientedBoundingBox::OrientedBoundingBox(const std::vector<std::pair<Point, Poin
   }
 
   // (b) Ensure orthogonality
-  for (unsigned i = 0; i < _dim; ++i)
-    for (unsigned j = i + 1; j < _dim; ++j)
+  for (const auto i : make_range(_dim))
+    for ([[maybe_unused]] const auto j : make_range(i + 1, _dim))
       mooseAssert(MooseUtils::absoluteFuzzyEqual(_dirs[i] * _dirs[j], 0.0),
                   "Basis directions are not orthogonal");
 }
@@ -50,7 +52,7 @@ void
 OrientedBoundingBox::print(std::ostream & os) const
 {
   os << "OrientedBoundingBox: dim=" << _dim << ", origin=" << _minimal_corner << '\n';
-  for (unsigned i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
     os << "  axis[" << i << "] dir=" << _dirs[i] << ", len=" << _len[i] << '\n';
 }
 
@@ -58,7 +60,7 @@ bool
 OrientedBoundingBox::contains(const Point & pt, const Real tolerance) const
 {
   const Point rel = pt - _minimal_corner;
-  for (unsigned i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
   {
     const Real proj = rel * _dirs[i];
     if (!MooseUtils::absoluteFuzzyGreaterEqual(proj, 0.0, tolerance) ||

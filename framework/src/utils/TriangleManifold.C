@@ -13,6 +13,7 @@
 #include "MooseError.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/mesh_tet_interface.h"
 #include "libmesh/unstructured_mesh.h"
 
 #include <algorithm>
@@ -127,6 +128,8 @@ TriangleManifold::finalize()
   // Validate that the mesh can be used as a manifold
   // We use the same logic as determining if the mesh can the tetrahedralized.
   auto umesh = dynamic_cast<UnstructuredMesh *>(&_mesh);
+  if (!umesh)
+    mooseError("TriangleManifold requires an UnstructuredMesh to validate the surface manifold.");
   TriangleManifoldUtils::SurfaceChecker checker(*umesh);
   auto msg = checker.improveAndValidate();
   if (!msg.empty())

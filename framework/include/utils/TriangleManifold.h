@@ -13,8 +13,8 @@
 #include "SurfaceSide.h"
 
 #include "libmesh/bounding_box.h"
-#include "libmesh/face_tri3.h"
-#include "libmesh/mesh_tet_interface.h"
+#include "libmesh/mesh_base.h"
+#include "libmesh/point_locator_base.h"
 
 #include <iosfwd>
 #include <memory>

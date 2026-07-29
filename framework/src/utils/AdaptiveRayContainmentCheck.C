@@ -308,7 +308,6 @@ AdaptiveRayContainmentCheck::isOutsideBoundingRegion(const Point & orig,
 BoundingBox
 AdaptiveRayContainmentCheck::computeGlobalBoundingBox()
 {
-  _bounds_ready = true;
   const auto & first_elem = _bd_elements[0]->elem();
   BoundingBox bbox = first_elem.loose_bounding_box();
 
@@ -340,9 +339,15 @@ AdaptiveRayContainmentCheck::rayStartOutsideOBB(const Point & point,
   mooseAssert(obb_axis < static_cast<unsigned int>(_dim),
               "AdaptiveRayContainmentCheck::rayStartOutsideOBB: invalid OBB axis index.");
 
-  const Real safe_factor = 1.1;
   const Real axis_length = _obb_bounds.getAxisLength(obb_axis);
   const Real half_axis_length = axis_length / 2.0;
+
+  // The projection below lands the point exactly on the OBB face perpendicular to the ray
+  // (ray_direction == the OBB axis direction), so any positive outward step is provably
+  // outside the box. Use a scale-aware padding, consistent with rayStartOutsideAABB: an
+  // absolute floor (also guards a near-zero axis) plus a small fraction of the box extent
+  // to stay clear of floating-point noise at large coordinate scales.
+  const Real padding = _eps_on_surface + 1e-2 * axis_length;
 
   Point projection_plane_corner;
   Real direction_multiplier;
@@ -362,7 +367,7 @@ AdaptiveRayContainmentCheck::rayStartOutsideOBB(const Point & point,
 
   const Point projected_point =
       projectPointOntoPlane(point, projection_plane_corner, ray_direction);
-  return projected_point - safe_factor * axis_length * direction_multiplier * ray_direction;
+  return projected_point - padding * direction_multiplier * ray_direction;
 }
 
 ///  Finalize the ray direction (auto -> PCA, user -> as given) and its bounding box.

@@ -8,8 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-#include "MooseMesh.h"
-#include "MooseError.h"
+
+#include "MooseTypes.h"
+
+#include "libmesh/point.h"
+
+#include <filesystem>
+#include <iosfwd>
+#include <utility>
+#include <vector>
 
 namespace libMesh
 {

@@ -53,13 +53,6 @@ public:
   const Point & rayDirection() const { return _ray_direction; }
 
 private:
-  /// Maximum direction and second maximum direction from PCA
-  Point _max_dir, _second_max_dir;
-
-  /// @brief  The boundary elements' node points
-  /// (prepare inside this class).
-  std::vector<Point> _nodal_points;
-
   /// @brief  The centroid of the boundary elements' node points
   /// (prepare inside this class).
   Point _centroid_nodal_points;
@@ -112,9 +105,6 @@ private:
 
   /// The bounding box AABB.
   BoundingBox _bounds;
-
-  /// Whether the bounding box has been computed and is ready for use.
-  bool _bounds_ready = false;
 
   /// Whether the ray direction is auto-selected via PCA (true) or user-selected (false).
   /// Set once in the constructor from the RayDirectionOptions mode. Only an auto ray runs
