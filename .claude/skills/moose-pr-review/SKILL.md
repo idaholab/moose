@@ -2,15 +2,15 @@
 name: moose-pr-review
 description: >-
   Review a MOOSE pull request or local branch against MOOSE's contribution standards:
-  the MOOSE Code Standard (SCS), the SQA testing rules (every test is a requirement, with
-  requirement/design/issues), required documentation stub pages for new objects, and PR
-  governance (issue references, scope, required-vs-suggested phrasing). Use this whenever
-  someone wants to review MOOSE changes or asks "review this PR", "review my branch",
-  "is this ready to merge", "check my changes before I submit", or wants pre-submission
-  feedback on code in the MOOSE framework or its modules - even if they never say the word
-  "review". This is the MOOSE-aware review layer; it complements the generic /code-review
-  and /security-review skills and defers to them for deep correctness and security analysis
-  rather than duplicating that work.
+  applicable AGENTS.md guidance, the MOOSE Code Standard (SCS), the SQA testing rules
+  (every test is a requirement, with requirement/design/issues), required documentation
+  stub pages for new objects, and PR governance (issue references, scope,
+  required-vs-suggested phrasing). Use this whenever someone wants to review MOOSE changes
+  or asks "review this PR", "review my branch", "is this ready to merge", "check my changes
+  before I submit", or wants pre-submission feedback on code in the MOOSE framework or its
+  modules - even if they never say the word "review". This is the MOOSE-aware review layer;
+  it complements the generic /code-review and /security-review skills and defers to them
+  for deep correctness and security analysis rather than duplicating that work.
 ---
 
 # Reviewing a MOOSE Pull Request
@@ -26,6 +26,10 @@ security analysis - those are covered well by the built-in `/code-review` and
 `/security-review` skills. Run or recommend those for deep correctness/security; spend this
 skill's attention on what is unique to MOOSE and what CI cannot auto-check.
 
+Use `moose-verify-changes` for any build or test execution. This skill assesses
+whether the change has appropriate tests and SQA traceability; it does not
+duplicate the verification workflow.
+
 ## What CI already enforces (do not nitpick by hand)
 
 Formatting is checked automatically on every PR, so manual review time should not be spent on
@@ -34,7 +38,8 @@ each instance:
 
 - C++ formatting: `git clang-format <base>` (uses `.clang-format`)
 - Python formatting: `black .` (uses `pyproject.toml`)
-- No trailing whitespace / tabs, and the "every commit references an issue" check
+- No trailing whitespace / tabs, and the "at least one development-branch commit
+  references an issue" check
 
 Focus human/AI review on the semantic standards CI can't see: naming, const-correctness,
 access control, API design, C-vs-C++ construct choices, tests, and documentation.
@@ -67,21 +72,23 @@ Determine the target and compute the diff. Two cases:
 **A GitHub PR** (user gives a number or URL, or asks to review a specific PR):
 
 ```bash
-gh pr view <num> --json title,body,baseRefName,headRefName,author,files,commits,state,statusCheckRollup
+gh pr view <num> --json title,body,baseRefName,baseRefOid,headRefName,author,files,commits,state,statusCheckRollup
 gh pr diff <num>
 ```
 
-`baseRefName` is the merge target (MOOSE PRs target `next`). Use the PR body to read the
-author's stated Reason / Design / Impact (the PR template fields).
+`baseRefName` is the merge target (MOOSE PRs target `next`); `baseRefOid` identifies the exact
+target revision whose review policy governs the PR. Use the PR body to read the author's stated
+Reason / Design / Impact (the PR template fields).
 
 **A local branch** (the default when no PR is named):
 
 ```bash
 # Review the branch against the point it was cut from. <base> is the integration branch this
-# work will merge into - for MOOSE that is `next` (use `origin/next`). This is NOT the branch's
-# upstream tracking branch: `git rev-parse @{u}` resolves to this same branch's remote copy
-# (e.g. origin/<branch>), not the base. Use three dots so the diff shows only what this branch
-# added, regardless of how far the integration branch moved.
+# work will merge into. For MOOSE the branch name is `next`, but do not assume a remote name:
+# resolve the remote-tracking ref for the remote that represents the canonical MOOSE repository.
+# This is NOT the branch's upstream tracking branch: `git rev-parse @{u}` resolves to this same
+# branch's remote copy (e.g. <fork>/<branch>), not the base. Use three dots so the diff shows
+# only what this branch added, regardless of how far the integration branch moved.
 git diff <base>...HEAD              # the changes under review
 git log <base>..HEAD --format='%h %s'   # the commits under review - read them for intent and scope
 ```
@@ -97,9 +104,21 @@ changed:
 
 ## Step 2 - Gather MOOSE context
 
-- **Linked issue(s).** Read the issue(s) the commits reference - they are your spec for judging
-  whether the change is complete and correctly scoped. (CI already enforces that a reference
-  exists, so don't spend review time policing its presence.)
+- **Applicable `AGENTS.md` guidance.** Read the `AGENTS.md` files from the merge target
+  revision, not copies changed by the PR itself. For a GitHub PR this revision is `baseRefOid`;
+  for a local branch it is `<base>`, resolved from the canonical MOOSE remote rather than an
+  assumed remote name. List tracked guidance with
+  `git ls-tree -r --name-only <base-revision> | rg '(^|/)AGENTS\.md$'` and read applicable
+  files with line numbers using `git show <base-revision>:<path> | nl -ba` (fetch the base
+  revision first if necessary). The root file applies repository-wide; a nested file applies
+  only to its directory subtree; and the deepest applicable file overrides a parent only where
+  they conflict. Map the resulting root-to-deep guidance chain to every changed path. If the PR
+  adds or changes an `AGENTS.md`, review that file as a policy/documentation change, but do not
+  let it retroactively govern the same PR.
+- **Linked issue(s).** Read the issue(s) referenced by any commit in the development branch -
+  they are your spec for judging whether the change is complete and correctly scoped. (CI already
+  enforces that at least one commit contains a reference, so don't spend review time policing its
+  presence or require every commit to repeat it.)
 - **Newly registered objects.** Find new user-facing objects in the diff:
   `git diff <base>...HEAD | grep -E '^\+.*register(MooseObject|.*Action)\('`.
   Each new object drives both a documentation check (Step 3E) and a testing check (Step 3D).
@@ -110,10 +129,10 @@ changed:
 
 Work top-down: assess the high-level design first (a sound design with rough edges is fixable;
 a wrong design may not be), then the details. For each dimension, the highest-value checks are
-summarized here; the reference files hold the full checklists - read the relevant one when the
-diff touches that area.
+summarized here; the cited files hold the full checklists - read the relevant one when the diff
+touches that area.
 
-**A. Design, scope, and user interface** (`reviewing.md`)
+**A. Design, scope, and user interface** (`framework/doc/content/framework/reviewing.md`)
 - Is the high-level design sound, and proportionate scrutiny applied (changes affecting many
   users or that others will build on deserve more)?
 - Scrutinize the **user interface**: new input parameters, their names, defaults, and whether
@@ -150,7 +169,25 @@ diff touches that area.
 - Significant changes warrant a newsletter entry (current month, e.g.
   `modules/doc/content/newsletter/2026/2026_06.md`).
 
-**F. Correctness and security** (defer, don't duplicate)
+**F. Applicable `AGENTS.md` guidance (observable rules only)**
+- Assess rules whose compliance can be established from the diff and necessary surrounding
+  context. Typical examples cover simplicity, reuse, surgical scope, unrelated cleanup,
+  newly orphaned code, comment preservation and clarity, exact code-style constructs, and
+  tests required by the changed behavior.
+- Silently skip process-only rules that the review artifacts cannot prove, such as whether the
+  author stated assumptions before coding, presented a plan, chose a particular tool, or asked
+  before activating a conda environment. Do not infer a violation and do not spend report space
+  listing unverifiable rules.
+- Report only violations introduced or caused by the change. Do not turn pre-existing code
+  outside the diff into review findings.
+- Treat direct mandates and prohibitions (`must`, `use`, `do not`, `never`) as required changes.
+  Treat preferences and recommendations as suggestions unless another applicable MOOSE standard
+  already makes the issue required.
+- Cite both the changed `path:line` and the governing `<path>/AGENTS.md:line`. When an existing
+  review dimension catches the same problem, emit one finding and cite both standards rather
+  than duplicating it.
+
+**G. Correctness and security** (defer, don't duplicate)
 - For logic bugs, edge cases, and efficiency, run the built-in `/code-review` (or recommend it).
 - For anything security-sensitive (parsing untrusted input, file/system access, memory safety),
   run or recommend `/security-review`. Memory-management-heavy code may warrant a valgrind
@@ -159,10 +196,12 @@ diff touches that area.
 ## Step 4 - Write the report
 
 The central organizing principle of a MOOSE review is separating what the author **must**
-change from what you **suggest**. Be explicit about which is which (per `reviewing.md`):
-required items use imperative phrasing ("Mark this parameter `const`"); suggestions use "I
-suggest" / "consider". Treat minor items (typos, grammar, docstrings) as required. Every
-finding should be actionable and anchored to a `path:line` so the author can jump to it.
+change from what you **suggest**. Be explicit about which is which (per
+`framework/doc/content/framework/reviewing.md`): required items use imperative phrasing
+("Mark this parameter `const`"); suggestions use "I suggest" / "consider". Treat minor items
+(typos, grammar, docstrings) as required. Every finding should be actionable. Anchor
+line-specific findings to a `path:line`; for a cross-cutting scope finding, name the affected
+files or commits.
 
 Use this structure:
 
@@ -171,10 +210,12 @@ Use this structure:
 
 ## Summary
 <2-4 sentences: what the change does, overall design assessment, and a recommendation
-(approve / approve-with-nits / changes-required).>
+(approve / approve-with-nits / changes-required). Name the applicable AGENTS.md files and
+state either "no observable violations" or the number of required changes and suggestions
+arising from them. Do not mention skipped process-only rules.>
 
 ## Required changes
-1. `path/to/file.C:42` - <what is wrong and why it must change> _(standard | tests | docs | design)_
+1. `path/to/file.C:42` - <what is wrong and why it must change> _(agents | standard | tests | docs | design)_
 2. ...
 (If none: "None.")
 
@@ -189,6 +230,8 @@ Use this structure:
 <Stub pages for new objects; addClassDescription; param doc strings; newsletter entry if warranted.>
 
 ## Checklist
+- [ ] Applicable AGENTS.md files resolved from the merge target for every changed path
+- [ ] Observable AGENTS.md guidance checked without reporting process-only rules
 - [ ] CodeGraph available and used to check for reinvented functionality
 - [ ] No new symbol duplicates existing MOOSE functionality (or reuse justified)
 - [ ] Code Standard (const-correctness, access control, naming, C++ constructs)
