@@ -33,7 +33,7 @@ SignedDistanceToSurfaceMesh::SignedDistanceToSurfaceMesh(const InputParameters &
 void
 SignedDistanceToSurfaceMesh::initialSetup()
 {
-  // Lazy (Deffered) initialization
+  // Lazy (Deferred) initialization
   UnsignedDistanceToSurfaceMesh::initialSetup();
   _in_out_test = &getUserObject<PointInPolyhedronCheckUO>("in_out_test");
 }

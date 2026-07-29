@@ -9,6 +9,8 @@
 
 #include "InterceptedElementModifier.h"
 #include "SBMUtils.h"
+#include "Function.h"
+#include "PointInPolyhedronCheckUO.h"
 
 registerMooseObject("ShiftedBoundaryMethodApp", InterceptedElementModifier);
 
@@ -69,7 +71,7 @@ InterceptedElementModifier::initialSetup()
   if (_in_out_test_base)
     _in_out_test_type = DistanceType::GEOMETRY;
   else if (_parsed_function)
-    _in_out_test_type = DistanceType::SIGN_DISTANCE;
+    _in_out_test_type = DistanceType::SIGNED_DISTANCE;
   else
     mooseError("InterceptedElementModifier: provide exactly one geometry source, but neither "
                "'signed_dist_function' nor 'in_out_test' was set.");
@@ -78,86 +80,87 @@ InterceptedElementModifier::initialSetup()
 SubdomainID
 InterceptedElementModifier::computeSubdomainID()
 {
-  const Elem * elem = this->_current_elem;
+  const Elem * elem = _current_elem;
   if (!elem)
     mooseError("InterceptedElementModifier: _current_elem is null!");
 
-  auto check_lambda_flags = [&](Real ratio_active) -> SubdomainID
-  { return isInactive(ratio_active, _lambda) ? _subdomain_id_outside : _subdomain_id_inside; };
-
-  if (_in_out_test_type == DistanceType::SIGN_DISTANCE)
+  const auto classify_element = [&](const bool all_nodes_active,
+                                    const bool all_nodes_inactive,
+                                    const Real ratio_active) -> SubdomainID
   {
-    Real min_val = std::numeric_limits<Real>::max();
-    Real max_val = std::numeric_limits<Real>::lowest();
-
-    for (const auto node : make_range(elem->n_nodes()))
-    {
-      Real val = _parsed_function->value(_t, elem->point(node));
-      min_val = std::min(min_val, val);
-      max_val = std::max(max_val, val);
-    }
-
-    const bool all_nodes_active = (_is_domain_inside_surface && max_val < _threshold) ||
-                                  (!_is_domain_inside_surface && min_val > _threshold);
-    const bool all_nodes_inactive = (_is_domain_inside_surface && min_val > _threshold) ||
-                                    (!_is_domain_inside_surface && max_val < _threshold);
-    auto is_active = [&](const Point & p)
-    {
-      Real val = _parsed_function->value(_t, p);
-      return (_is_domain_inside_surface && val < _threshold) ||
-             (!_is_domain_inside_surface && val > _threshold);
-    };
-
-    const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
-    // Same-side nodes do not rule out a surface crossing the element or enclosing a region within
-    // it. Quadrature sampling detects most such cases, but may miss very small regions. Exact
-    // endpoint comparisons are intentional: activeElementFraction returns exactly zero or one when
-    // no or all quadrature points are active, respectively.
+    // Same-side nodes do not rule out a surface crossing the element or enclosing a region
+    // within it. Quadrature sampling detects most such cases, but may miss very small regions.
+    // Exact endpoint comparisons are intentional: activeElementFraction returns exactly zero
+    // or one when no or all quadrature points are active, respectively.
     if (all_nodes_active && ratio_active == 1.0)
       return _subdomain_id_inside;
+
     if (all_nodes_inactive && ratio_active == 0.0)
       return _subdomain_id_outside;
 
-    if (_mark_intercepted /*optional*/)
+    if (_mark_intercepted)
       return _subdomain_id_intercepted;
 
-    return check_lambda_flags(ratio_active);
-  }
-  else if (_in_out_test_type == DistanceType::GEOMETRY)
+    return isInactive(ratio_active, _lambda) ? _subdomain_id_outside : _subdomain_id_inside;
+  };
+
+  switch (_in_out_test_type)
   {
-    unsigned int inside_nodes = 0;
-    for (const auto node : make_range(elem->n_nodes()))
-      if (_in_out_test_base->ifInside(elem->point(node)))
-        ++inside_nodes;
-
-    const unsigned int active_nodes =
-        _is_domain_inside_surface ? inside_nodes : elem->n_nodes() - inside_nodes;
-
-    auto is_active = [&](const Point & p)
+    case DistanceType::SIGNED_DISTANCE:
     {
-      return (_is_domain_inside_surface && _in_out_test_base->ifInside(p)) ||
-             (!_is_domain_inside_surface && !_in_out_test_base->ifInside(p));
-    };
+      Real min_val = std::numeric_limits<Real>::max();
+      Real max_val = std::numeric_limits<Real>::lowest();
 
-    const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
-    // Same-side nodes do not rule out a surface crossing the element or enclosing a region within
-    // it. Quadrature sampling detects most such cases, but may miss very small regions. Exact
-    // endpoint comparisons are intentional: activeElementFraction returns exactly zero or one when
-    // no or all quadrature points are active, respectively.
-    if (active_nodes == elem->n_nodes() && ratio_active == 1.0)
-      return _subdomain_id_inside;
-    if (active_nodes == 0 && ratio_active == 0.0)
-      return _subdomain_id_outside;
+      for (const auto node : make_range(elem->n_nodes()))
+      {
+        const Real val = _parsed_function->value(_t, elem->point(node));
+        min_val = std::min(min_val, val);
+        max_val = std::max(max_val, val);
+      }
 
-    if (_mark_intercepted /*optional*/)
-      return _subdomain_id_intercepted;
+      const bool all_nodes_active = (_is_domain_inside_surface && max_val < _threshold) ||
+                                    (!_is_domain_inside_surface && min_val > _threshold);
 
-    return check_lambda_flags(ratio_active);
+      const bool all_nodes_inactive = (_is_domain_inside_surface && min_val > _threshold) ||
+                                      (!_is_domain_inside_surface && max_val < _threshold);
+
+      const auto is_active = [&](const Point & point)
+      {
+        const Real val = _parsed_function->value(_t, point);
+        return (_is_domain_inside_surface && val < _threshold) ||
+               (!_is_domain_inside_surface && val > _threshold);
+      };
+
+      const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+
+      return classify_element(all_nodes_active, all_nodes_inactive, ratio_active);
+    }
+
+    case DistanceType::GEOMETRY:
+    {
+      unsigned int inside_nodes = 0;
+      for (const auto node : make_range(elem->n_nodes()))
+        if (_in_out_test_base->ifInside(elem->point(node)))
+          ++inside_nodes;
+
+      const unsigned int active_nodes =
+          _is_domain_inside_surface ? inside_nodes : elem->n_nodes() - inside_nodes;
+
+      const auto is_active = [&](const Point & point)
+      {
+        const bool is_inside = _in_out_test_base->ifInside(point);
+        return _is_domain_inside_surface ? is_inside : !is_inside;
+      };
+
+      const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+
+      return classify_element(active_nodes == elem->n_nodes(), active_nodes == 0, ratio_active);
+    }
+
+    case DistanceType::NONE:
+      mooseError("InterceptedElementModifier: DistanceType::NONE is invalid in "
+                 "computeSubdomainID().");
   }
-  else
-  {
-    mooseError("InterceptedElementModifier: Unknown AdaptiveRayContainmentCheck type!");
-  }
 
-  return -1; // fallback (shouldn't reach)
+  mooseError("InterceptedElementModifier: unhandled DistanceType in computeSubdomainID().");
 }

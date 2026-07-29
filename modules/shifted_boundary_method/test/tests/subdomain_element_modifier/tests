@@ -98,5 +98,23 @@
       detail = 'if the fixed_x_ray method is requested for PointInSubdomainCheckUO, which performs '
                'per-subdomain ray-casting and cannot use the whole-mesh TriangleManifold engine.'
     []
+
+    [ambiguous_subdomain]
+      type = RunException
+      input = 'subdomain_point_query.i'
+      # Single background element whose centroid is the midpoint of the edge shared by grains 1 and
+      # 2, so whichSubdomain() reports the point ON both subdomains.
+      cli_args = 'Mesh/background_mesh/nx=1 Mesh/background_mesh/ny=1 '
+                 'Mesh/background_mesh/xmin=0.3543469099322497 '
+                 'Mesh/background_mesh/xmax=0.5543469099322497 '
+                 'Mesh/background_mesh/ymin=-0.08224820222176318 '
+                 'Mesh/background_mesh/ymax=0.11775179777823683'
+      expect_err = 'is contained in multiple subdomains'
+      allow_test_objects = true
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'if a point is contained in more than one subdomain of a PointInSubdomainCheckUO '
+               'surface mesh, since a single-subdomain query is then ambiguous.'
+    []
   []
 []

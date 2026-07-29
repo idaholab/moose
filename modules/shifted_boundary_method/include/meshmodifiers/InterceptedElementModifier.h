@@ -10,13 +10,14 @@
 #pragma once
 
 #include "SBMElementSubdomainModifierBase.h"
-#include "Function.h"
-#include "PointInPolyhedronCheckUO.h"
+
+class Function;
+class PointInPolyhedronCheckUO;
 
 enum class DistanceType
 {
   NONE = -1,
-  SIGN_DISTANCE = 0,
+  SIGNED_DISTANCE = 0,
   GEOMETRY = 1
 };
 
@@ -50,9 +51,8 @@ private:
   /// user object for in-out test
   const PointInPolyhedronCheckUO * _in_out_test_base;
 
-private:
   /// How to classify the element to be inside or outside
-  /// 1. SIGN_DISTANCE: use the signed distance function to classify the element
+  /// 1. SIGNED_DISTANCE: use the signed distance function to classify the element
   /// 2. GEOMETRY: use the geometry to classify the element
   DistanceType _in_out_test_type = DistanceType::NONE;
 };

@@ -44,7 +44,7 @@ SubdomainElementModifier::computeSubdomainID()
   if (!elem)
     mooseError("SubdomainElementModifier: _current_elem is null!");
 
-  const auto & all_checkers = _subdomain_id_tester.getAllSubdomainCheckers();
+  const auto & all_checkers = _subdomain_id_tester.subdomainCheckers();
   if (all_checkers.empty())
     mooseError("SubdomainElementModifier: subdomain checker collection is empty!");
 
@@ -67,7 +67,7 @@ SubdomainElementModifier::computeSubdomainID()
       continue;
     }
 
-    auto * const checker = checker_ptr.get();
+    const auto * const checker = checker_ptr;
     const Real ratio_active = SBMUtils::activeElementFraction(
         *elem,
         _qrule_order,
@@ -85,9 +85,9 @@ SubdomainElementModifier::computeSubdomainID()
   if (fully_inside_subdomain)
     return *fully_inside_subdomain;
 
-  // The checker collection is a std::unordered_map, so iteration order is not deterministic.
-  // Compare every candidate against the fixed exact maximum, then resolve fuzzy ties by the
-  // lowest subdomain ID.
+  // Iteration order is deterministic (subdomainCheckers() is id-ordered), but fuzzy-equal ratios
+  // can still tie. Compare every candidate against the fixed exact maximum, then resolve fuzzy
+  // ties by the lowest subdomain ID.
   for (const auto & [sub_id, ratio_active] : intercepted_candidates)
     if (MooseUtils::absoluteFuzzyEqual(ratio_active, max_ratio) &&
         (!best_intercepted_subdomain || sub_id < *best_intercepted_subdomain))

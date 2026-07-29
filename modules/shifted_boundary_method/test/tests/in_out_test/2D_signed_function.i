@@ -1,6 +1,6 @@
 # Same immersed ellipse as 2D_lambda0p5.i, but the InterceptedElementModifier is
 # driven by a signed level-set function (signed_dist_function) instead of a
-# geometric in-out UserObject. This exercises the SIGN_DISTANCE branch of
+# geometric in-out UserObject. This exercises the SIGNED_DISTANCE branch of
 # InterceptedElementModifier::computeSubdomainID. The level set is negative
 # inside the ellipse and positive outside, matching is_domain_inside_surface = true.
 nx = 16

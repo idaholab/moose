@@ -12,6 +12,8 @@
 #include "libmesh/utility.h"
 
 #include <filesystem>
+#include <sstream>
+#include <vector>
 
 registerMooseObject("ShiftedBoundaryMethodApp", PointInSubdomainCheckUO);
 
@@ -70,8 +72,10 @@ PointInSubdomainCheckUO::initialSetup()
 
     // fixed_x_ray is rejected in the constructor, so only the ray backends reach here;
     // the facade's mesh argument is used only by fixed_x_ray and is unreferenced.
-    _subdomain_id_checkers[subdomain_id] = std::make_unique<PointContainmentClassifier>(
+    auto checker = std::make_unique<PointContainmentClassifier>(
         _builder.mesh(), &set, _method, _tolerance, options);
+    _subdomain_checkers_view.emplace(subdomain_id, checker.get());
+    _subdomain_id_checkers[subdomain_id] = std::move(checker);
   }
 }
 
@@ -90,11 +94,32 @@ PointInSubdomainCheckUO::ifInside(const Point & p) const
 subdomain_id_type
 PointInSubdomainCheckUO::whichSubdomain(const Point & p) const
 {
-  for (const auto & [subdomain_id, checker] : _subdomain_id_checkers)
+  // A point can be reported INSIDE or ON more than one subdomain when subdomain surfaces overlap
+  // or the point lies exactly on a shared interface. That is ambiguous for a single-subdomain
+  // query, so collect every match (in ascending id order via the id-ordered view) and error
+  // unless there is exactly one.
+  std::vector<subdomain_id_type> matches;
+  for (const auto & [subdomain_id, checker] : _subdomain_checkers_view)
   {
     const SurfaceSide side = checker->sideness(p);
     if (side == SurfaceSide::INSIDE || side == SurfaceSide::ON)
-      return subdomain_id;
+      matches.push_back(subdomain_id);
   }
-  return libMesh::Elem::invalid_subdomain_id;
+
+  if (matches.empty())
+    return libMesh::Elem::invalid_subdomain_id;
+
+  if (matches.size() > 1)
+  {
+    std::ostringstream ids;
+    for (const auto i : index_range(matches))
+      ids << (i ? ", " : "") << matches[i];
+    mooseError("PointInSubdomainCheckUO: point ",
+               p,
+               " is contained in multiple subdomains (",
+               ids.str(),
+               "); the geometry is ambiguous for a single-subdomain query.");
+  }
+
+  return matches.front();
 }
