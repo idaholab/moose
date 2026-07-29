@@ -57,8 +57,11 @@ protected:
   /// Pointer to SolutionUserObject containing the solution of interest
   const SolutionUserObjectBase * _solution_object_ptr;
 
-  /// The local SolutionUserObject index for the variable extracted from the file
-  unsigned int _solution_object_var_index;
+  /// The name of the variable extracted from the imported solution
+  std::string _solution_object_var_name;
+
+  /// Policy used when the imported solution is multivalued at the query point
+  const MooseEnum & _weighting_type;
 
   /// Factor to scale the solution by (default = 1)
   const Real _scale_factor;

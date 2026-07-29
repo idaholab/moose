@@ -26,6 +26,10 @@ SolutionFunction::validParams()
                                           "The SolutionUserObject to extract data from.");
   params.addParam<std::string>("from_variable",
                                "The name of the variable in the file that is to be extracted");
+  params.addParam<MooseEnum>(
+      "weighting_type",
+      SolutionUserObjectBase::weightingType(),
+      "The policy used to select a unique value when the imported solution is multivalued.");
 
   // Add optional paramters
   params.addParam<Real>(
@@ -43,7 +47,8 @@ SolutionFunction::validParams()
 
 SolutionFunction::SolutionFunction(const InputParameters & parameters)
   : Function(parameters),
-    _solution_object_ptr(NULL),
+    _solution_object_ptr(nullptr),
+    _weighting_type(getParam<MooseEnum>("weighting_type")),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
 {
@@ -59,11 +64,9 @@ SolutionFunction::initialSetup()
   // construction of the function
   _solution_object_ptr = &getUserObject<SolutionUserObjectBase>("solution");
 
-  std::string var_name;
-
   // If 'from_variable' is supplied, use the value
   if (isParamValid("from_variable"))
-    var_name = getParam<std::string>("from_variable");
+    _solution_object_var_name = getParam<std::string>("from_variable");
 
   // If not, get the value from the SolutionUserObject
   else
@@ -71,21 +74,30 @@ SolutionFunction::initialSetup()
     // Get all the variables from the SolutionUserObject
     const std::vector<std::string> & vars = _solution_object_ptr->variableNames();
 
-    // If there are more than one, throw an error
+    // If no variables are available, there is nothing for this function to extract
+    if (vars.empty())
+      mooseError(
+          "The SolutionUserObject contains no variables for the SolutionFunction to extract");
+
+    // If there is more than one, the desired source variable must be specified
     if (vars.size() > 1)
       mooseError("The SolutionUserObject contains multiple variables, the SolutionFunction must "
-                 "specifiy the desired variable in the input file with 'from_variable'");
+                 "specify the desired variable in the input file with 'from_variable'");
 
     // Define the variable
-    var_name = vars[0];
+    _solution_object_var_name = vars[0];
   }
-  _solution_object_var_index = _solution_object_ptr->getLocalVarIndex(var_name);
+
+  // Validate the imported variable name during setup rather than waiting for the first evaluation.
+  _solution_object_ptr->getLocalVarIndex(_solution_object_var_name);
 }
 
 Real
 SolutionFunction::value(Real t, const Point & p) const
 {
-  return _scale_factor * (_solution_object_ptr->pointValue(t, p, _solution_object_var_index)) +
+  return _scale_factor *
+             _solution_object_ptr->pointValueWrapper(
+                 t, p, _solution_object_var_name, _weighting_type) +
          _add_factor;
 }
 
@@ -93,6 +105,7 @@ RealGradient
 SolutionFunction::gradient(Real t, const Point & p) const
 {
   return _scale_factor *
-             (_solution_object_ptr->pointValueGradient(t, p, _solution_object_var_index)) +
+             _solution_object_ptr->pointValueGradientWrapper(
+                 t, p, _solution_object_var_name, _weighting_type) +
          _add_grad;
 }
