@@ -2346,6 +2346,9 @@ AutomaticMortarGeneration::computeADNodalNormals(
                      secondary_elem->id(),
                      ".");
 
+        // qweight * area_vector is equivalent to JxW * face_normal. Fix its orientation to the
+        // Real-valued face normal because the incident-face set and orientation are not
+        // differentiated.
         const Real orientation =
             MetaPhysicL::raw_value(area_vector) * face_normals[qp] < 0 ? -1 : 1;
 
@@ -2369,8 +2372,8 @@ AutomaticMortarGeneration::computeADNodalNormals(
     const auto & stored_normal = libmesh_map_find(_secondary_node_to_nodal_normal, secondary_node);
     mooseAssert((MetaPhysicL::raw_value(nodal_normal) - stored_normal).norm() < 100 * TOLERANCE,
                 "The stored and AD secondary nodal normals must use the same geometry state.");
-    // Preserve the existing contact direction exactly while retaining the derivatives produced by
-    // the equivalent AD area-vector calculation.
+    // Set the raw value from the stored contact direction while retaining the derivatives produced
+    // by the equivalent AD area-vector calculation.
     for (const auto component : make_range(3u))
       nodal_normal(component).value() = stored_normal(component);
     nodal_normals.emplace(secondary_node, std::move(nodal_normal));

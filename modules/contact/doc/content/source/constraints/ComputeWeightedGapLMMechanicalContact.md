@@ -70,12 +70,12 @@ and the corresponding direction derivatives in normal traction and tangential ve
 
 The corresponding weighted-gap or weighted-velocity user objects and primal normal-traction,
 tangential-friction, and penalty contact constraints use the same linearized directions.
-The existing mortar test functions, coordinate factors, and dual or Petrov-Galerkin basis choices
-are unchanged; their weighted contributions are already contained in \(\boldsymbol{G}_A\).
+Mortar test functions, coordinate factors, and dual or Petrov-Galerkin basis choices are unchanged;
+their weighted contributions are already contained in \(\boldsymbol{G}_A\).
 
-Dynamic mortar through [ContactAction](/ContactAction.md) retains its existing Jacobian behavior.
-Augmented-Lagrangian penalty, Cartesian-LM, cohesive-zone, and nonmortar contact also retain their
-existing Jacobian behavior. Quadrature-point normal interpolation is not supported for this
+Dynamic mortar through [ContactAction](/ContactAction.md) uses frozen normal and tangent directions
+in its Jacobian. Augmented-Lagrangian penalty, Cartesian-LM, cohesive-zone, and nonmortar contact
+also use frozen directions. Quadrature-point normal interpolation is not supported for this
 local-basis contact path. The displacement variables must be nodal nonlinear variables in the
 system assembled by the contact objects.
 

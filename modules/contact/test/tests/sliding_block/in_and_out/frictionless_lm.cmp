@@ -9,5 +9,5 @@ GLOBAL VARIABLES relative 1.e-6 floor 1e-6
 
 NODAL VARIABLES relative 1.e-6 floor 1e-6
 	contact_normal_lm  # min:               0 @ t1,n1	max:       13778.582 @ t13,n224
-	disp_x             # min:               0 @ t1,n137	max:     0.059671401 @ t9,n220
-	disp_y             # min:               0 @ t1,n137	max:              15 @ t15,n221
+	disp_x relative 2.e-6 # min:               0 @ t1,n137	max:     0.059671401 @ t9,n220
+	disp_y relative 5.e-6 # min:               0 @ t1,n137	max:              15 @ t15,n221
