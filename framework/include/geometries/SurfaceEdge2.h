@@ -12,10 +12,7 @@
 #include "SurfaceElement.h"
 #include "LineSegment.h"
 
-/// Derived class for 2-node edge surface elements (Edge2)
-/// LineSegment is listed first so it is initialized before SurfaceElement;
-/// the base class constructor then receives the unit normal from
-/// LineSegment::normal() (see the .C file).
+/// Derived class for 2-node edge surface elements (Edge2).
 class SurfaceEdge2 : public LineSegment, public SurfaceElement
 {
 public:

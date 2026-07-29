@@ -26,8 +26,10 @@
  * hold a non-owning reference to this builder instead of re-retrieving the mesh.
  *
  * The whole-mesh SurfaceElementSet is built by the virtual buildDefaultSet()
- * hook so subclasses that need a different grouping (e.g. per subdomain) can
- * override it and avoid building a whole-mesh set that would be discarded.
+ * hook. Subclasses that need a different grouping (e.g. per subdomain) build
+ * it under their own name instead of overriding this hook, so that
+ * surfaceElementSet() still returns a correct whole-mesh set for any caller
+ * that requests it via a BoundaryMeshBuilder reference.
  */
 class BoundaryMeshBuilder : public GeneralUserObject
 {
@@ -47,29 +49,27 @@ public:
 
   /// The whole-mesh SurfaceElementSet, built lazily on first call. Must be called
   /// only from the single-threaded setup phase (e.g. initialSetup()): the lazy
-  /// build is not re-entrant. Subclasses that override buildDefaultSet() with a
-  /// different grouping may leave this empty (calling this then trips an assertion).
+  /// build is not re-entrant.
   const SurfaceElementSet & surfaceElementSet() const;
 
 protected:
-  /// Build the default (whole-mesh) SurfaceElementSet. Subclasses may override to
-  /// build a different grouping and skip the whole-mesh set entirely.
+  /// Build the default (whole-mesh) SurfaceElementSet. Not intended to be
+  /// overridden: subclasses that need a different grouping should build it
+  /// under their own name and leave this hook alone, so that this whole-mesh
+  /// set is still correctly built for any caller going through the base class.
   virtual void buildDefaultSet();
 
   /**
    * Whether the boundary mesh is "closed" -- i.e. has no open edges or faces.
-   * Walks every side of every element and returns false as soon as it finds a
-   * side with no neighbor. On a manifold surface mesh this is equivalent to
-   * watertightness; non-manifold input is not validated here.
+   * On a manifold surface mesh this is equivalent to watertightness;
+   * non-manifold input is not validated here.
    */
   bool checkWatertightness() const;
 
   /// The owned boundary mesh, kept alive so SurfaceElement pointers stay valid.
   std::unique_ptr<MeshBase> _mesh;
 
-  /// The whole-mesh SurfaceElementSet. Built lazily by surfaceElementSet() (or
-  /// eagerly by a subclass) via buildDefaultSet(); mutable so the const accessor
-  /// can populate it on first use.
+  /// The whole-mesh SurfaceElementSet, lazily cached on first use.
   mutable std::unique_ptr<SurfaceElementSet> _set;
 
   /// The name of a mesh saved via a MeshGenerator's `save_mesh_as` parameter.

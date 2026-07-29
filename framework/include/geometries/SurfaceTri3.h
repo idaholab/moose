@@ -12,10 +12,7 @@
 #include "SurfaceElement.h"
 #include "Triangle.h"
 
-/// Derived class for 3-node triangular surface elements (Tri3)
-/// Triangle is listed first so it is initialized before SurfaceElement;
-/// the base class constructor then receives the unit normal from
-/// Triangle::normal() (see the .C file).
+/// Derived class for 3-node triangular surface elements (Tri3).
 class SurfaceTri3 : public Triangle, public SurfaceElement
 {
 public:

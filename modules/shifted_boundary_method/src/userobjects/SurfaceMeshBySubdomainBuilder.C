@@ -29,16 +29,16 @@ SurfaceMeshBySubdomainBuilder::SurfaceMeshBySubdomainBuilder(const InputParamete
 void
 SurfaceMeshBySubdomainBuilder::initialSetup()
 {
-  // Run the shared mesh setup/validation. The base no longer builds a set
-  // eagerly, so build the per-subdomain grouping here: this builder's consumers
-  // read it via getSurfaceElementSetsBySubdomain(), not surfaceElementSet(), so
-  // the base class's lazy trigger would never fire.
+  // Run the shared mesh setup/validation, then build the per-subdomain
+  // grouping. This builder's consumers read it via
+  // getSurfaceElementSetsBySubdomain(), not surfaceElementSet(), so the base
+  // class's lazy whole-mesh set is simply never triggered.
   BoundaryMeshBuilder::initialSetup();
-  buildDefaultSet();
+  buildSetsBySubdomain();
 }
 
 void
-SurfaceMeshBySubdomainBuilder::buildDefaultSet()
+SurfaceMeshBySubdomainBuilder::buildSetsBySubdomain()
 {
   // Group active elements by subdomain, then build one SurfaceElementSet per group.
   std::unordered_map<subdomain_id_type, std::vector<const Elem *>> elems_by_subdomain;

@@ -34,8 +34,9 @@ public:
   }
 
 protected:
-  /// Build one SurfaceElementSet per subdomain instead of a whole-mesh set.
-  virtual void buildDefaultSet() override;
+  /// Builds one SurfaceElementSet per subdomain, independent of the base class's
+  /// whole-mesh set.
+  void buildSetsBySubdomain();
 
   std::unordered_map<subdomain_id_type, SurfaceElementSet> _sets_by_subdomain;
 };

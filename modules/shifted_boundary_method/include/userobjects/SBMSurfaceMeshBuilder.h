@@ -32,8 +32,7 @@ public:
   /// Callers must check hasKDTree() first; this is asserted in debug builds.
   KDTree & getKDTree() const;
 
-  /// Whether this builder has a KDTree available. Consumers that require the tree should
-  /// check this in initialSetup and mooseError with a friendly message naming both objects.
+  /// Whether the centroid KDTree was built and is available for use.
   bool hasKDTree() const { return _kd_tree != nullptr; }
 
 protected:

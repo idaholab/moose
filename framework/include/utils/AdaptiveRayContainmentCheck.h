@@ -164,8 +164,7 @@ private:
                                                  const std::array<Point, 2> & ray_starts) const;
 
   /// True if `p` lies on the surface (within `_eps_on_surface`), i.e. some candidate element
-  /// contains it. This is a property of `p` alone (independent of any ray), so `sideness()`
-  /// tests it once up front rather than re-deriving it on every ray cast.
+  /// contains it. This is a property of `p` alone, independent of any ray direction.
   bool isOnSurface(const Point & p) const;
 
   /// Count how many times the segment from `ray_start` to `ray_end` crosses the surface. The

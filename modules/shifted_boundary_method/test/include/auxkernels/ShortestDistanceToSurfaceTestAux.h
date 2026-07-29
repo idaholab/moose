@@ -27,9 +27,7 @@ public:
 
   explicit ShortestDistanceToSurfaceTestAux(const InputParameters & parameters);
 
-  /// If a 'builder' was supplied, queries its surfaceElementSet().centroids()
-  /// once and verifies it is non-empty. Used purely so coverage tests can touch
-  /// that path from production code paths.
+  /// If a 'builder' was supplied, validates it produced a non-empty surface element set.
   virtual void initialSetup() override;
 
 protected:

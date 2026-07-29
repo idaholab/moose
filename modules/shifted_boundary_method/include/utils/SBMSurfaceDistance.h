@@ -16,11 +16,9 @@ class SurfaceElement;
 namespace SBMUtils
 {
 /**
- * Compute the distance vector from an arbitrary point to a surface element.
- *
- * (a) First computes the normal-based distance and its projection point.
- * (b) If the projection point falls outside the element, returns the vector to
- *     the closest edge or vertex instead.
+ * Returns the vector from pt to the nearest point on the surface element:
+ * the normal projection if it falls inside the element, otherwise the
+ * nearest edge or vertex.
  *
  * Precondition (mooseAssert in debug builds): the element's sides are EDGE2 or
  * NODEELEM (the only side types this routine handles).

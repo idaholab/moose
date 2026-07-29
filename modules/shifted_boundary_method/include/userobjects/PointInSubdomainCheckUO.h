@@ -46,7 +46,6 @@ protected:
   std::unordered_map<subdomain_id_type, std::unique_ptr<PointContainmentClassifier>>
       _subdomain_id_checkers;
 
-  /// Non-owning, const, id-ordered view over _subdomain_id_checkers handed out by
-  /// subdomainCheckers(); built once in initialSetup().
+  /// Non-owning, const, id-ordered view of the per-subdomain checkers, keyed by subdomain id.
   std::map<subdomain_id_type, const PointContainmentClassifier *> _subdomain_checkers_view;
 };

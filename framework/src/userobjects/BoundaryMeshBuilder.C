@@ -110,9 +110,7 @@ BoundaryMeshBuilder::surfaceElementSet() const
   if (!_set)
     const_cast<BoundaryMeshBuilder *>(this)->buildDefaultSet();
 
-  mooseAssert(_set,
-              "BoundaryMeshBuilder '" + name() +
-                  "': the whole-mesh SurfaceElementSet is not available. A subclass may have "
-                  "overridden buildDefaultSet() with a different grouping.");
+  if (!_set)
+    mooseError("BoundaryMeshBuilder '", name(), "': buildDefaultSet() did not initialize _set.");
   return *_set;
 }

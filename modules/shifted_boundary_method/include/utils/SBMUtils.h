@@ -44,10 +44,7 @@ buildDistanceFunctions(const std::vector<FunctionName> & function_names,
 RealVectorValue
 distanceVectorFromFunction(const Function * func, const libMesh::Point & pt, Real t);
 
-/// Compute the true boundary surface normal using a distance function.
-/// The query point is first projected onto the true boundary, and the
-/// surface normal of the boundary is then evaluated at the projected
-/// (closest) point.
+/// Compute the true boundary surface normal at the point on the boundary closest to pt.
 RealVectorValue trueNormalFromFunction(const Function * func, const libMesh::Point & pt, Real t);
 
 /// Scan all distance functions and return the closest distance vector.
