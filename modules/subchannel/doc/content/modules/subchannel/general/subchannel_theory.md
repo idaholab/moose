@@ -190,7 +190,11 @@ The collocated discretization of the variables is presented in [fig:dis] . $i,j$
     id=fig:dis
     caption=Subchannel collocated discretization.
 
-The governing equations are discretized as follows:
+The governing equations are discretized as follows. In transient calculations, SCM uses a
+first-order backward Euler discretization for all temporal storage terms. Storage is evaluated at
+the downstream node of each axial control volume. Because this time discretization is implemented
+directly by SCM, selecting a MOOSE time integrator other than `ImplicitEuler` does not change it;
+SCM issues a warning when another time integrator is requested.
 
 - Conservation of mass:
 
@@ -224,12 +228,41 @@ The governing equations are discretized as follows:
 \end{bmatrix}
 \end{equation}
 
-which is equivalent to:
+For a segregated solve, this is equivalent to:
 
 \begin{equation}
 \label{mass-dis3}
 \boldsymbol{M_{mm}} \vec{\dot{m}} = \vec{b_m} - \boldsymbol{M_{mw}}\vec{w}
 \end{equation}
+
+In the transient monolithic solve, the new-time density in the storage term is also linearized with
+respect to pressure at constant enthalpy:
+
+\begin{equation}
+\left(\frac{\partial \rho}{\partial p}\right)_h =
+\left(\frac{\partial \rho}{\partial p}\right)_T -
+\left(\frac{\partial \rho}{\partial T}\right)_p\,
+\frac{\left(\frac{\partial h}{\partial p}\right)_T}
+{\left(\frac{\partial h}{\partial T}\right)_p}.
+\label{density-pressure-derivative}
+\end{equation}
+
+The corresponding pressure block gives the monolithic mass equation
+
+\begin{equation}
+\label{mass-dis-monolithic}
+\boldsymbol{M_{mm}}\vec{\dot{m}} +
+\boldsymbol{M_{mp}}\vec{P} +
+\boldsymbol{M_{mw}}\vec{w} = \vec{b_m}.
+\end{equation}
+
+Here $\boldsymbol{M_{mp}}$ is present when density and energy are computed in a transient solve and
+is zero for a steady solve. The constant-enthalpy derivative includes both the direct pressure
+dependence of density and the temperature response required to hold enthalpy fixed. This is
+important for [PBSodiumFluidProperties.md] and other fluids even when a density model has little or
+no direct pressure dependence at constant temperature. Including this block removes an
+$\mathcal{O}(1/\Delta t)$ pressure fixed-point feedback that otherwise becomes unstable as the time
+step decreases.
 
 Similarly for the other equations,
 
@@ -237,7 +270,7 @@ Similarly for the other equations,
 
 \begin{equation}
 \label{axial-momentum-dis}
-\Delta P_{i,k} = P_{i,k-1} - P_{i,k} = \frac{1}{S_{i,k-1}} \bigg[ \frac{\dot{m_{i,j}}^{n+1}  -  \dot{m}_{i,k}^{n}}{\Delta t} \Delta Z +
+\Delta P_{i,k} = P_{i,k-1} - P_{i,k} = \frac{1}{S_{i,k-1}} \bigg[ \frac{\dot{m}_{i,k}^{n+1}  -  \dot{m}_{i,k}^{n}}{\Delta t} \Delta Z +
  \frac{\dot{m}_{i,k}^2}{S_{i,k} \rho_{i,k}} -  \frac{\dot{m}_{i,k-1}^2}{S_{i,k-1} \rho_{i,k-1}}
     + \sum_{j}w_{ij,k} U^\star  + C_{T}\sum_{j} w_{ij,k}' \big[ \frac{\dot{m}_{i,k}}{\rho_{i,k-1}S_{i,k}} - \frac{\dot{m_{j,k}}}{\rho_{jk-1} S_{j,k}}\big]
 +\frac{1}{2} K_i \frac{\dot{m}_{i,k} |\dot{m}_{i,k}|}{S_{i,k} \rho_{i,k}} -g  \rho_{i,k} S_{i,k} \Delta Z \bigg]
@@ -250,7 +283,9 @@ and in matrix form,
 \boldsymbol{S}\vec{\Delta P} = -\boldsymbol{M_{pp}} \vec{P},
 \end{equation}
 
-where the matrix $\boldsymbol{M_{pm}}$ is calculated using the lagged values of the unknown variables $\vec{w}, \vec{\dot{m}}$.
+where the matrix $\boldsymbol{M_{pm}}$ is calculated using the lagged values of the unknown variables
+$\vec{w}, \vec{\dot{m}}$. The axial-momentum storage term uses $\dot{m}_{i,k}$ at the downstream
+node for both the new and old time levels.
 
 - Conservation of linear momentum in the lateral direction:
 
@@ -303,7 +338,54 @@ The main unknown variable in this non linear residual is the crossflow $w_{ij}$.
     id=stencil
     caption=SCM hybrid numerical scheme
 
-Once the main flow variables converge in a block, the enthalpy conservation equation is solved and enthalpy $(h)$ is retrieved in all the nodes of the block. In the special case where no heat is added to the fluid in the block, the enthalpy does not need to be calculated in that block (unless there is a non-uniform enthalpy inlet distribution). Using enthalpy, pressure and the equations of state, temperature $T_i$ and the fluid properties such as density $\rho_i$ and viscosity $\mu_i$ are calculated. After the fluid properties are updated, the solve is repeated until the temperature field converges. Once the temperature solution converges the procedure is repeated for the next block downstream. Once the temperature solution converges in all blocks we check to see if pressure has converged in all blocks. If not, we repeat the procedure starting again from the first block, until pressure has converged. Note that in order for the pressure information from the outlet to reach the inlet, it will require a number of the pressure loop iterations equal to the number of blocks. Last, the calculation of the flow variables and of the residual is done in an explicit manner.
+For each outer pressure iteration, blocks are visited sequentially from the assembly inlet to the
+outlet. Within a block, SCM first refreshes the flow solution and then solves the enthalpy equation,
+recovers temperature from pressure and enthalpy, and updates density and viscosity. The
+`enthalpy_subcycles` parameter controls how many enthalpy, temperature, and property updates are
+performed before the next flow solve. Its default value of one preserves the original
+flow-then-enthalpy ordering. Values greater than one opt into thermal subcycling with a lagged flow
+field.
+
+The temperature recovered from the equation of state can be relaxed independently:
+
+\begin{equation}
+\vec{T}^{\,\ell+1} =
+\vec{T}^{\,\ell} +
+\alpha_T\left[\vec{T}(\vec{p},\vec{h})-\vec{T}^{\,\ell}\right],
+\end{equation}
+
+where $\alpha_T$ is set by `T_relaxation` and defaults to one. The temperature convergence measure
+uses the unrelaxed equation-of-state update,
+
+\begin{equation}
+\epsilon_T =
+\frac{\left\|\vec{T}(\vec{p},\vec{h})-\vec{T}^{\,\ell}\right\|_2}
+{\left\|\vec{T}^{\,\ell}\right\|_2 + 10^{-14}},
+\end{equation}
+
+so changing `T_relaxation` does not redefine `T_tol`.
+
+After all blocks have been processed, SCM checks pressure convergence. The segregated algorithms
+use the relative field change
+
+\begin{equation}
+\epsilon_P =
+\frac{\left\|\vec{P}^{\,\ell+1}-\vec{P}^{\,\ell}\right\|_2}
+{\left\|\vec{P}^{\,\ell}+P_{\mathrm{out}}\mathbf{1}\right\|_2+10^{-14}},
+\end{equation}
+
+whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update among the
+blocks. Measuring the monolithic update before post-solve relaxation keeps the meaning of `P_tol`
+independent of `pressure_relaxation`. The maximum errors are synchronized across processes. If the
+pressure field has not converged, the block sweep starts again at the inlet; pressure information
+therefore requires multiple outer iterations to propagate upstream when several blocks are used.
+`P_maxit` and `T_maxit` limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
+the solver's automatic outer-iteration limit.
+
+Convergence status is local to the current solve attempt. Only the final pressure and temperature
+status is retained, so a transient step that fails and is retried with a smaller time step can
+subsequently report convergence. A failure in an earlier outer iteration likewise does not latch a
+permanent failure if a later iteration converges.
 
 ### Algorithm variations
 
@@ -329,7 +411,7 @@ In this case, the governing mass, axial momentum and crossflow momentum  conserv
 
 \begin{equation}
 \begin{bmatrix}
-\boldsymbol{M_{mm}} & 0 & \boldsymbol{M_{mw}} & 0\\
+\boldsymbol{M_{mm}} & \boldsymbol{M_{mp}} & \boldsymbol{M_{mw}} & 0\\
 \boldsymbol{M_{pm}} & \boldsymbol{M_{pp}} & 0 & 0 \\
 0 & \boldsymbol{M_{wp}} & \boldsymbol{M_{ww}} & 0 \\
 0 & 0 & 0 & \boldsymbol{M_{hh}}
@@ -349,7 +431,15 @@ In this case, the governing mass, axial momentum and crossflow momentum  conserv
 \end{bmatrix}
 \end{equation}
 
-Since the enthalpy governing equations are uncoupled from the other equations in this otherwise monolithic system (enthalpy is coupled to the flow equations via the fluid properties update), it makes sense to lag the enthalpy solution and solve for it separately. The flow variables are calculated by solving that big system (without the enthalpy) to retrieve all the unknowns at the same time instead of one by one, and on all the nodes of the block: $\vec{\dot{m}}, \vec{P}, \vec{w_{ij}}. \vec{DP}$ is not explicitly calculated, otherwise the solution algorithm is the same as in the default method and the solver used is PETSc KSPSolve.
+The pressure coupling $\boldsymbol{M_{mp}}$ is the transient density linearization described in
+[density-pressure-derivative]. Since the enthalpy governing equations are uncoupled from the other
+equations in this otherwise monolithic system (enthalpy is coupled to the flow equations through
+the fluid-property update), enthalpy is lagged and solved separately. The flow system retrieves
+$\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a block; $\vec{\Delta P}$
+is not explicitly calculated. The coupled flow system is solved with PETSc FGMRES and a field-split
+preconditioner. SCM checks the PETSc convergence reason for both the coupled flow and enthalpy
+linear solves and reports the reason, iteration count, and residual norm instead of accepting a
+diverged solution.
 
 As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to maintain realizability. A distinctive feature of this method is the introduction of a *weak relaxation* logic that stabilizes and accelerates convergence of the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and $crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks $M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing equations. Note that the solution is influenced by the stabilization method and its coefficients.
 
@@ -357,25 +447,29 @@ As soon as the big matrix is constructed, the solver will calculate cross-flow r
 
 !! Intentional comment to provide extra spacing
 
-From the axial- and cross-momentum rows, the code forms quick, diagonally preconditioned estimates:
+From the axial- and cross-momentum rows, the code forms a quick pressure estimate and a provisional
+cross-momentum imbalance:
 \begin{equation}
 \begin{aligned}
 \hat{\mathbf m} &= M_{pm}\,\mathbf m, \\
 \hat{\mathbf p} &= \frac{\hat{\mathbf m}}{\operatorname{diag}(M_{pp}) + \varepsilon_p\mathbf 1},\\
-\hat{\mathbf W} &= \frac{M_{wp}\,\hat{\mathbf p} - \mathbf b_w}{\operatorname{diag}(M_{ww}) + \varepsilon_W\mathbf 1},
+\hat{\mathbf r}_w &= M_{wp}\,\hat{\mathbf p} - \mathbf b_{w,p},
 \end{aligned}
 \end{equation}
-with small safeguards $\varepsilon_p,\varepsilon_W\sim 10^{-10}$ to avoid division by zero. Using $\hat{\mathbf W}$, the per-channel crossflow sum $\sum_{j} w_{ij}$ is assembled into a vector $\mathrm{sumw_{ij}}_{\mathrm{loc}}$.
+where $\mathbf b_{w,p}$ is the pressure-force right-hand side and
+$\varepsilon_p=10^{-10}$ avoids division by zero. The signed gap contributions in
+$\hat{\mathbf r}_w$ are accumulated per channel into
+$\mathrm{sumw_{ij}}_{\mathrm{loc}}$.
 
-#### 2. Crossflow relaxation parameter
+#### 2. Adaptive resistance multiplier
 
 !! Intentional comment to provide extra spacing
 
-Two guarded scalars are computed:
+Two scales are computed:
 
 \begin{equation}
 \begin{aligned}
-m_{\min} &= \max\big(\min |\mathbf m|,\; 10^{-10}\big),\\
+m_{\min} &= \min |\mathbf m|,\\
 S_{\max} &= \max\Big(\max |\mathrm{sumw_{ijloc}}|,\; 10^{-10}\Big)
 \end{aligned}
 \end{equation}
@@ -384,11 +478,11 @@ Additionally, a mean inter-iteration change for crossflow is formed
 \begin{equation}
 r_{\mathrm{base}} = \operatorname{mean}\big(\big|\mathbf W^{(k)}| - |\mathbf W^{(k-1)}\big|\big),
 \end{equation}
-leading to a relaxation factor
+leading to an adaptive resistance multiplier
 \begin{equation}
 r = \frac{r_{\mathrm{base}}}{\max(S_{\max}, \varepsilon)} + 0.5,\qquad \varepsilon\sim10^{-10}.
 \end{equation}
-The +0.5 offset biases toward mild under-relaxation.
+The +0.5 offset supplies a baseline contribution to the added resistance.
 
 #### 3. Crossflow resistance inflation
 
@@ -425,27 +519,58 @@ Finally, $K$ is added to the diagonal of the cross-momentum block,
 \begin{equation}
 M_{ww} \;\leftarrow\; M_{ww} + K\,I,
 \end{equation}
-thereby increasing diagonal dominance and improving conditioning for the crossflow equations. Note that this treatment does influence the cross-flow distribution solution.
+thereby increasing diagonal dominance and improving conditioning for the crossflow equations. Note
+that this treatment does influence the crossflow distribution solution.
 
-#### 4. Per-equation under-relaxation
+#### 4. Equation under-relaxation
 
 !! Intentional comment to provide extra spacing
 
-Classical linear under-relaxation is applied automatically and separately to each equation $f\in\{\mathbf m,\mathbf p,\mathbf W\}$ using factors
+Classical linear under-relaxation is applied separately to each equation
+$f\in\{\mathbf m,\mathbf p,\mathbf W\}$. The factors are user-selectable through
+`mass_flow_equation_relaxation`, `pressure_equation_relaxation`, and
+`crossflow_equation_relaxation`; their defaults are
 \begin{equation}
 \alpha_m=1.0,\qquad \alpha_p=1.0,\qquad \alpha_W=0.1.
 \end{equation}
-For each equation, with the corresponding diagonal $D_f=\operatorname{diag}(M_{ff})$, the system is modified as
+For each equation, with $D_f=\operatorname{diag}(M_{ff})$, only the diagonal and right-hand side
+are modified:
 \begin{equation}
 \begin{aligned}
-M_{ff} &\leftarrow \frac{1}{\alpha_f} M_{ff}, \\
-\mathbf b_f &\leftarrow \mathbf b_f + (1-\alpha_f)\,D_f\,\mathbf x^{\text{old}}_f.
+M_{ff} &\leftarrow M_{ff} +
+\left(\frac{1}{\alpha_f}-1\right)D_f, \\
+\mathbf b_f &\leftarrow \mathbf b_f +
+\left(\frac{1}{\alpha_f}-1\right)D_f\,\mathbf x^{\text{old}}_f.
 \end{aligned}
 \end{equation}
-This standard construction ensures that solving the modified linear system yields the *under-relaxed* update for equation $f$. In practice, only $\mathbf W$ is strongly damped, while $\mathbf m$ and $\mathbf p$ can be solved without additional damping. This relaxation happens inside the temperature loop.
+The off-diagonal entries are unchanged. A factor of one bypasses relaxation, while a factor below
+one increases the diagonal magnitude and damps the update toward the previous iterate without
+changing the fixed point. With the defaults, only the crossflow equation is under-relaxed.
 
-#### 5. Net effect
+#### 5. Post-solve solution relaxation
 
 !! Intentional comment to provide extra spacing
 
-The combination of (i) safeguarded scale estimation, (ii) adaptive, time smoothed, and piecewise snapped added crossflow resistance, and (iii) selective under-relaxation produces a more diagonally dominant and robust nested solve that tolerates rapid changes in crossflow while preserving good convergence properties for mass flow and pressure.
+After the coupled system is solved, each solution field can be relaxed independently:
+
+\begin{equation}
+\mathbf x_f^{\,\ell+1} =
+\beta_f\mathbf x_f^\star + (1-\beta_f)\mathbf x_f^{\,\ell},
+\end{equation}
+
+where $\mathbf x_f^\star$ is the raw linear solution. The factors are set with
+`mass_flow_relaxation`, `pressure_relaxation`, and `crossflow_relaxation`; all three default to
+one. Equation relaxation and post-solve relaxation are independent and may be used together. Both
+preserve the fixed point: equation relaxation modifies the matrix and right-hand side before the
+linear solve, while post-solve relaxation damps the fixed-point update after that solve.
+
+#### 6. Net effect
+
+!! Intentional comment to provide extra spacing
+
+The combination of (i) scale estimation, (ii) adaptive, iteration-smoothed, and piecewise snapped
+added crossflow resistance, and (iii) independently configurable equation and solution relaxation
+improves robustness of the nested solve during rapid crossflow changes. Added resistance and
+equation relaxation both increase entries on the crossflow diagonal, but neither guarantees strict
+diagonal dominance for every geometry and flow state. Post-solve relaxation does not alter matrix
+conditioning. Users can retain the default behavior or tune the two relaxation layers separately.
