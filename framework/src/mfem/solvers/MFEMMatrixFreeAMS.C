@@ -50,8 +50,7 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
 InputParameters
 MFEMMatrixFreeAMS::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
-  params += Moose::MFEM::LORInterface::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>::validParams();
   params.addClassDescription("MFEM matrix-free auxiliary-space Maxwell preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMScalarCoefficientName>(
@@ -73,8 +72,7 @@ MFEMMatrixFreeAMS::validParams()
 }
 
 MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters),
-    Moose::MFEM::LORInterface(parameters),
+  : Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>(parameters),
     _alpha_coef(getScalarCoefficient("alpha_coefficient")),
     _beta_coef(getScalarCoefficient("beta_coefficient")),
     _inner_pi_its(getParam<unsigned int>("inner_pi_iterations")),
@@ -91,8 +89,9 @@ MFEMMatrixFreeAMS::ConstructSolver()
   _solver = std::move(solver);
 }
 
+template <>
 void
-MFEMMatrixFreeAMS::UpdateEquationSystemContext()
+Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>::UpdateEquationSystemContext()
 {
   LinearSolverBase::UpdateEquationSystemContext();
   SetupLOR(_equation_system);

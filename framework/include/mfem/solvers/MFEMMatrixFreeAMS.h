@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMLORInterface.h"
+#include "MFEMLORLinearSolverBase.h"
 
 namespace Moose::MFEM
 {
@@ -57,16 +57,17 @@ private:
 /**
  * Wrapper for mfem::MatrixFreeAMS solver.
  */
-class MFEMMatrixFreeAMS : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
+class MFEMMatrixFreeAMS : public Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>
 {
 public:
   static InputParameters validParams();
 
   MFEMMatrixFreeAMS(const InputParameters &);
 
-  void UpdateEquationSystemContext() override;
-
   void ConstructSolver() override;
+
+protected:
+  virtual void SetSolverParameters(mfem::MatrixFreeAMS &) override {}
 
 private:
   mfem::Coefficient & _alpha_coef;
