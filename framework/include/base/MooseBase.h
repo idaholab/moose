@@ -193,16 +193,6 @@ public:
   T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const;
 
   /**
-   * Test if a parameter of the given name and type exists
-   * @param name The name of the parameter to test
-   */
-  template <typename T>
-  inline bool haveParameter(const std::string & name) const
-  {
-    return _pars.have_parameter<T>(name);
-  }
-
-  /**
    * Test if the supplied parameter is valid
    * @param name The name of the parameter to test
    */
@@ -422,7 +412,7 @@ template <typename T>
 const T *
 MooseBase::queryParam(const std::string & name) const
 {
-  return haveParameter<T>(name) && isParamValid(name) ? &getParam<T>(name) : nullptr;
+  return _pars.queryParam<T>(name);
 }
 
 template <typename T>

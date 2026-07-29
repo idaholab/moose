@@ -13,9 +13,6 @@
 
 #include "MFEMLinearSolverBase.h"
 #include "MFEMFESpaceHierarchy.h"
-#include "libmesh/ignore_warnings.h"
-#include "mfem/fem/multigrid.hpp"
-#include "libmesh/restore_warnings.h"
 
 /**
  * P-multigrid / geometric multigrid preconditioner backed by
@@ -39,9 +36,9 @@
  *     type = MFEMGeometricMultigridSolver
  *     variable          = u
  *     fespace_hierarchy = h1_hierarchy
- *     smoothers         = 'boomeramg'   # use on all interior levels
+ *     smoothers         = chebyshev   # use on all interior levels
  *     coarse_solver     = boomeramg
- *     assembly_levels   = 'legacy'      # use on all levels
+ *     assembly_levels   = legacy      # use on all levels
  *   []
  *   [main]
  *     type = MFEMCGSolver
@@ -86,7 +83,7 @@ private:
     MGProxy(MFEMGeometricMultigridSolver & owner);
 
     /// Updates the concrete MFEM multigrid object used by Mult().
-    void setMG(mfem::GeometricMultigrid & mg);
+    void SetMG(mfem::GeometricMultigrid & mg);
 
     /// Rebuilds the owner's multigrid hierarchy for the new outer-solver operator.
     void SetOperator(const mfem::Operator & op) override;
