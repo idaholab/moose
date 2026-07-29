@@ -15,7 +15,7 @@
 
 /**
  * Perfectly matched layer vector FE mass integrator: (c2 u, v) with c2 = det(J) (J^T J)^-1 scaled
- * by the base mass coefficient, where J is the Jacobian of the radial coordinate stretch.
+ * by the base mass coefficient, where J is the Jacobian of the coordinate stretch.
  */
 class MFEMPMLVectorFEMassKernel : public MFEMPMLKernel
 {
