@@ -77,7 +77,8 @@ householderTangents(const Vector & normal)
 
   const Vector h_vector(normal(0) + 1.0, normal(1), normal(2));
 
-  // This chart is singular at (-1, 0, 0), where a constant orthonormal basis is used.
+  // This chart is singular at (-1, 0, 0), where a constant orthonormal basis with zero
+  // derivatives is used.
   if (std::abs(MetaPhysicL::raw_value(h_vector(0))) < TOLERANCE)
     return {{Vector(0, 1, 0), Vector(0, 0, -1)}};
 
