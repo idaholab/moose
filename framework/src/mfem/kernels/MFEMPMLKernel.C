@@ -12,71 +12,86 @@
 #include "MFEMPMLKernel.h"
 #include "MFEMProblem.h"
 
-void
-MFEMPMLDiagMatrixCoefficient::stretchFunction(const mfem::Vector & x,
-                                              std::vector<std::complex<double>> & dxs) const
+namespace
 {
-  constexpr std::complex<double> zi(0.0, 1.0);
-  const double n = _decay_polynomial;
-  for (int i = 0; i < _dim; ++i)
-  {
-    dxs[i] = 1.0;
-    // High side (only if a PML exists there, i.e. length > 0).
-    if (_length(i, 1) > 0.0 && x(i) >= _comp_domain_bdr(i, 1))
-    {
-      const double coeff = n * _decay_coefficient / std::pow(_length(i, 1), n);
-      dxs[i] = 1.0 + zi * coeff * std::abs(std::pow(x(i) - _comp_domain_bdr(i, 1), n - 1.0));
-    }
-    // Low side.
-    if (_length(i, 0) > 0.0 && x(i) <= _comp_domain_bdr(i, 0))
-    {
-      const double coeff = n * _decay_coefficient / std::pow(_length(i, 0), n);
-      dxs[i] = 1.0 + zi * coeff * std::abs(std::pow(x(i) - _comp_domain_bdr(i, 0), n - 1.0));
-    }
-  }
-}
-
+/// Radial and tangential eigenvalues of the requested tensor, given the stretch factors.
+///
+/// J = J_r (rhat x rhat) + J_t (I - rhat x rhat) is already a spectral decomposition, and J is
+/// complex symmetric, so J^T J = J^2. Both tensors are therefore diagonal in that same basis and
+/// their eigenvalues follow one at a time, which avoids assembling J or inverting it per
+/// integration point. The caller rebuilds the Cartesian tensor from these and rhat.
 void
-MFEMPMLDiagMatrixCoefficient::Eval(mfem::Vector & K,
-                                   mfem::ElementTransformation & T,
-                                   const mfem::IntegrationPoint & ip)
+tensorEigenvalues(MFEMPMLMatrixCoefficient::Tensor tensor,
+                  const std::complex<double> & radial_factor,
+                  const std::complex<double> & tangential_factor,
+                  int dim,
+                  std::complex<double> & radial_eigenvalue,
+                  std::complex<double> & tangential_eigenvalue)
 {
-  double x[3];
-  mfem::Vector transip(x, 3);
-  T.Transform(ip, transip);
+  const std::complex<double> determinant =
+      (dim == 2) ? radial_factor * tangential_factor
+                 : radial_factor * tangential_factor * tangential_factor;
 
-  std::vector<std::complex<double>> dxs(_dim);
-  stretchFunction(transip, dxs);
-
-  std::complex<double> det(1.0, 0.0);
-  for (int i = 0; i < _dim; ++i)
-    det *= dxs[i];
-
-  K.SetSize(vdim);
-  if (_tensor == C2)
+  if (tensor == MFEMPMLMatrixCoefficient::CURL)
   {
-    // detJ (J^T J)^{-1}: diagonal entry det / dxs[i]^2.
-    for (int i = 0; i < _dim; ++i)
-    {
-      const std::complex<double> val = det / (dxs[i] * dxs[i]);
-      K(i) = (_part == RE) ? val.real() : val.imag();
-    }
-  }
-  else if (_dim == 2)
-  {
-    // detJ^{-1} J^T J in 2D reduces to the scalar 1/det.
-    const std::complex<double> val = 1.0 / det;
-    K(0) = (_part == RE) ? val.real() : val.imag();
+    radial_eigenvalue = radial_factor * radial_factor / determinant;
+    tangential_eigenvalue = tangential_factor * tangential_factor / determinant;
   }
   else
   {
-    // detJ^{-1} J^T J in 3D: diagonal entry dxs[i]^2 / det.
-    for (int i = 0; i < _dim; ++i)
-    {
-      const std::complex<double> val = (dxs[i] * dxs[i]) / det;
-      K(i) = (_part == RE) ? val.real() : val.imag();
-    }
+    radial_eigenvalue = determinant / (radial_factor * radial_factor);
+    tangential_eigenvalue = determinant / (tangential_factor * tangential_factor);
   }
+}
+}
+
+void
+MFEMPMLMatrixCoefficient::Eval(mfem::DenseMatrix & K,
+                               mfem::ElementTransformation & T,
+                               const mfem::IntegrationPoint & ip)
+{
+  const int dim = _stretch.dim();
+  double coordinates[3];
+  mfem::Vector point(coordinates, 3);
+  T.Transform(ip, point);
+
+  mfem::Vector radial_direction;
+  std::complex<double> radial_factor, tangential_factor;
+  _stretch.evaluate(point, radial_direction, radial_factor, tangential_factor);
+
+  std::complex<double> radial_eigenvalue, tangential_eigenvalue;
+  tensorEigenvalues(
+      _tensor, radial_factor, tangential_factor, dim, radial_eigenvalue, tangential_eigenvalue);
+
+  const double base = _base_coefficient.Eval(T, ip);
+  const double radial =
+      base * ((_part == RE) ? radial_eigenvalue.real() : radial_eigenvalue.imag());
+  const double tangential =
+      base * ((_part == RE) ? tangential_eigenvalue.real() : tangential_eigenvalue.imag());
+
+  // M = lambda_t I + (lambda_r - lambda_t) rhat (x) rhat
+  K.SetSize(dim);
+  for (const auto i : make_range(dim))
+    for (const auto j : make_range(dim))
+      K(i, j) = (radial - tangential) * radial_direction[i] * radial_direction[j] +
+                ((i == j) ? tangential : 0.0);
+}
+
+double
+MFEMPMLScalarCoefficient::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
+{
+  double coordinates[3];
+  mfem::Vector point(coordinates, 3);
+  T.Transform(ip, point);
+
+  mfem::Vector radial_direction;
+  std::complex<double> radial_factor, tangential_factor;
+  _stretch.evaluate(point, radial_direction, radial_factor, tangential_factor);
+
+  const std::complex<double> inverse_determinant = 1.0 / (radial_factor * tangential_factor);
+  const double base = _base_coefficient.Eval(T, ip);
+  return base * ((_part == MFEMPMLMatrixCoefficient::RE) ? inverse_determinant.real()
+                                                         : inverse_determinant.imag());
 }
 
 InputParameters
@@ -84,114 +99,68 @@ MFEMPMLKernel::validParams()
 {
   InputParameters params = MFEMComplexKernel::validParams();
   params.addClassDescription(
-      "Base class for perfectly-matched-layer-stretched complex bilinear-form kernels.");
+      "Base class for radial perfectly matched layer complex bilinear form kernels.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of the base scalar coefficient to scale the integrator by.");
   params.addRequiredParam<Real>(
       "decay_coefficient",
-      "PML decay coefficient, equal to the tuning constant divided by the wavenumber (c/k).");
-  params.addParam<Real>(
-      "decay_polynomial", 2.0, "Polynomial order of the PML stretch profile.");
+      "Decay coefficient of the layer, equal to the tuning constant divided by the wavenumber.");
+  params.addParam<Real>("decay_polynomial", 2.0, "Polynomial order of the stretch profile.");
+  params.addParam<std::vector<Real>>(
+      "reference_point",
+      {},
+      "Point that depth into the layer is measured from. Defaults to the barycenter of the mesh.");
   return params;
 }
 
 MFEMPMLKernel::MFEMPMLKernel(const InputParameters & parameters,
-                             MFEMPMLDiagMatrixCoefficient::Tensor tensor)
+                             MFEMPMLMatrixCoefficient::Tensor tensor)
   : MFEMComplexKernel(parameters),
-    _base_coef(getScalarCoefficient("coefficient")),
-    _decay_coefficient(getParam<Real>("decay_coefficient")),
-    _decay_polynomial(getParam<Real>("decay_polynomial")),
-    _dim(getMFEMProblem().mesh().getMFEMParMesh().Dimension()),
-    _comp_domain_bdr(getCompDomainBoundary()),
-    _length(getLength(_comp_domain_bdr)),
-    _pml_re(_dim,
-            _comp_domain_bdr,
-            _length,
-            _decay_coefficient,
-            _decay_polynomial,
-            tensor,
-            MFEMPMLDiagMatrixCoefficient::RE),
-    _pml_im(_dim,
-            _comp_domain_bdr,
-            _length,
-            _decay_coefficient,
-            _decay_polynomial,
-            tensor,
-            MFEMPMLDiagMatrixCoefficient::IM),
-    _scaled_re(_base_coef, _pml_re),
-    _scaled_im(_base_coef, _pml_im)
+    _base_coefficient(getScalarCoefficient("coefficient")),
+    _stretch(makeStretch()),
+    _matrix_re(*_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::RE),
+    _matrix_im(*_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::IM),
+    _scalar_re(*_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::RE),
+    _scalar_im(*_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::IM)
 {
 }
 
-mfem::Array2D<double>
-MFEMPMLKernel::getCompDomainBoundary()
-{
-  const mfem::ParMesh & mesh = getMFEMProblem().mesh().getMFEMParMesh();
-
-  // The inner PML boundary is the bounding box of the interior (non-PML) region, i.e. all elements
-  // NOT in this kernel's block. For a box this is exactly where the PML starts; on a face with no
-  // PML (e.g. a source face) the interior reaches the domain boundary there, giving length 0 on
-  // that side (see computeLength), which the stretch skips (no divide-by-zero).
-  const mfem::Array<int> & pml_attrs = getSubdomainAttributes();
-  mfem::Vector inner_min(_dim), inner_max(_dim);
-  inner_min = std::numeric_limits<double>::max();
-  inner_max = std::numeric_limits<double>::lowest();
-  for (const auto e : make_range(mesh.GetNE()))
-  {
-    if (pml_attrs.Find(mesh.GetAttribute(e)) != -1)
-      continue; // skip PML elements; accumulate interior only
-    mfem::Array<int> verts;
-    mesh.GetElementVertices(e, verts);
-    for (const auto v : verts)
-    {
-      const double * c = mesh.GetVertex(v);
-      for (const auto d : make_range(_dim))
-      {
-        inner_min(d) = std::min(inner_min(d), c[d]);
-        inner_max(d) = std::max(inner_max(d), c[d]);
-      }
-    }
-  }
-  MPI_Allreduce(
-      MPI_IN_PLACE, inner_min.GetData(), _dim, MFEM_MPI_REAL_T, MPI_MIN, getMFEMProblem().getComm());
-  MPI_Allreduce(
-      MPI_IN_PLACE, inner_max.GetData(), _dim, MFEM_MPI_REAL_T, MPI_MAX, getMFEMProblem().getComm());
-
-  mfem::Array2D<double> comp_domain_bdr(_dim, 2);
-  for (const auto d : make_range(_dim))
-  {
-    comp_domain_bdr(d, 0) = inner_min(d);
-    comp_domain_bdr(d, 1) = inner_max(d);
-  }
-  return comp_domain_bdr;
-}
-
-mfem::Array2D<double>
-MFEMPMLKernel::getLength(const mfem::Array2D<double> & comp_domain_bdr)
+std::unique_ptr<MFEMPMLStretch>
+MFEMPMLKernel::makeStretch()
 {
   mfem::ParMesh & mesh = getMFEMProblem().mesh().getMFEMParMesh();
-  mfem::Vector pmin, pmax;
-  mesh.GetBoundingBox(pmin, pmax);
 
-  mfem::Array2D<double> length(_dim, 2);
-  for (const auto d : make_range(_dim))
-  {
-    length(d, 0) = comp_domain_bdr(d, 0) - pmin(d);
-    length(d, 1) = pmax(d) - comp_domain_bdr(d, 1);
-  }
-  return length;
+  // An empty reference point leaves the choice to MFEMPMLStretch, which uses the mesh barycenter.
+  const auto & supplied_point = getParam<std::vector<Real>>("reference_point");
+  if (!supplied_point.empty() && (int)supplied_point.size() != mesh.Dimension())
+    mooseError("MFEMPMLKernel: reference_point must have one entry per spatial dimension, so ",
+               mesh.Dimension(),
+               " entries for this mesh, but ",
+               supplied_point.size(),
+               " were given.");
+
+  mfem::Vector reference_point(supplied_point.size());
+  for (const auto d : index_range(supplied_point))
+    reference_point[d] = supplied_point[d];
+
+  return std::make_unique<MFEMPMLStretch>(mesh,
+                                          getSubdomainAttributes(),
+                                          reference_point,
+                                          getParam<Real>("decay_coefficient"),
+                                          getParam<Real>("decay_polynomial"),
+                                          getMFEMProblem().getComm());
 }
 
 mfem::BilinearFormIntegrator *
 MFEMPMLKernel::getRealBFIntegrator()
 {
-  return makeIntegrator(_scaled_re);
+  return makeIntegrator(MFEMPMLMatrixCoefficient::RE);
 }
 
 mfem::BilinearFormIntegrator *
 MFEMPMLKernel::getImagBFIntegrator()
 {
-  return makeIntegrator(_scaled_im);
+  return makeIntegrator(MFEMPMLMatrixCoefficient::IM);
 }
 
 #endif
