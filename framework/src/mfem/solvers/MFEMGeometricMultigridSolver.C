@@ -80,7 +80,7 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
   auto & problem = getMFEMProblem();
   auto eq_sys = problem.getProblemData().eqn_system;
 
-  if (eq_sys->Eigen() || eq_sys->Complex())
+  if (eq_sys->IsEigen() || eq_sys->IsComplex())
     mooseError("GeometricMultigridSolver '", name(), "': requires a real, non-eigen eq. system");
 
   // Co-own the hierarchy so it outlives this solver.
@@ -137,7 +137,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   auto & problem = getMFEMProblem();
   auto eq_sys = problem.getProblemData().eqn_system;
 
-  if (eq_sys->Nonlinear() || eq_sys->Multivariate())
+  if (eq_sys->IsNonlinear() || eq_sys->IsMultivariate())
     mooseError("GeometricMultigridSolver '", name(), "': requires a univariate, linear eq. system");
 
   const int N = _hierarchy->GetNumLevels();

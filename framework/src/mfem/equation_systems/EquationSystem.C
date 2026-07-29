@@ -713,9 +713,9 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
 {
   if (solver.IsLOR())
   {
-    if (Complex())
+    if (IsComplex())
       mooseError("LOR solve is not supported for complex equation systems.");
-    if (Multivariate())
+    if (IsMultivariate())
       mooseError("LOR solve is only supported for single-variable systems");
 
     const auto & test_var_name = _test_var_names.at(0);

@@ -137,15 +137,15 @@ public:
   mfem::Array<int> & GetEssentialBoundaryMarkers(const std::string & var_name);
 
   /// @returns A pointer to the complex equation system, nullptr if not such
-  virtual ComplexEquationSystem * Complex() const { return nullptr; }
+  virtual const ComplexEquationSystem * IsComplex() const { return nullptr; }
   /// @returns A pointer to the eigenproblem equation system, nullptr if not such
-  virtual EigenproblemEquationSystem * Eigen() const { return nullptr; }
+  virtual const EigenproblemEquationSystem * IsEigen() const { return nullptr; }
   /// @returns A pointer to the time-dependent equation system, nullptr if not such
-  virtual TimeDependentEquationSystem * TimeDependent() const { return nullptr; }
+  virtual const TimeDependentEquationSystem * IsTimeDependent() const { return nullptr; }
   /// @returns Whether this is a multivariate (maybe mixed) equation system
-  bool Multivariate() const { return _test_var_names.size() > 1; }
+  bool IsMultivariate() const { return _test_var_names.size() > 1; }
   /// @returns Whether nonlinear integrators are present in the equation system
-  bool Nonlinear() const { return _non_linear; }
+  bool IsNonlinear() const { return _non_linear; }
 
 protected:
   /// Add coupled variable to EquationSystem.

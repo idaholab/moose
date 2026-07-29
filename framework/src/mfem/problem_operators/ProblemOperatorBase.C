@@ -80,7 +80,7 @@ ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
                                        const mfem::Vector & rhs,
                                        mfem::Vector & x)
 {
-  const bool nonlinear = equation_system.Nonlinear();
+  const bool nonlinear = equation_system.IsNonlinear();
 
   // `nonlinear` describes the assembled MFEM operator, not whether the user configured a
   // nonlinear solver object. A linear problem may still intentionally be solved through the
