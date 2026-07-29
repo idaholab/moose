@@ -17,7 +17,8 @@ GitHub replies, and thread resolution require explicit approval after the user
 has seen their exact contents.
 
 Use `moose-codegraph` before changing MOOSE C++ or Python, and use the
-read-only Steps 0-4 of `moose-pr-review` to re-audit the revised PR.
+read-only Steps 0-4 of `moose-pr-review` to re-audit the revised PR. Use
+`moose-verify-changes` for build and test execution.
 
 ## Step 1 - Identify the PR and preserve local state
 
@@ -100,18 +101,12 @@ incorrect or already addressed, prepare a reply instead.
 
 ## Step 5 - Verify the revision
 
-Before building or performing verification, including running `run_tests` or
-invoking a pre-existing MOOSE executable, ask whether the user's MOOSE stack
-uses conda unless the conversation already establishes it. If it does, ask
-which conda environment to activate and wait for the answer. Do not inspect or
-run an existing binary as a shortcut around this gate.
-
-Run focused tests for the accepted changes, then use Steps 0-4 of
-`moose-pr-review` to re-audit the full PR. Check the delta from the recorded
+Use `moose-verify-changes` to verify the accepted changes, then use Steps 0-4
+of `moose-pr-review` to re-audit the full PR. Check the delta from the recorded
 starting SHA separately so unrelated or accidental changes are visible.
 
-If verification fails, keep the thread open and report the failure. Do not
-claim the feedback is addressed.
+If a relevant check fails or is not run, keep the thread open and report the
+limitation. Do not claim the feedback is addressed.
 
 ## Step 6 - Prepare the response package
 

@@ -26,6 +26,10 @@ security analysis - those are covered well by the built-in `/code-review` and
 `/security-review` skills. Run or recommend those for deep correctness/security; spend this
 skill's attention on what is unique to MOOSE and what CI cannot auto-check.
 
+Use `moose-verify-changes` for any build or test execution. This skill assesses
+whether the change has appropriate tests and SQA traceability; it does not
+duplicate the verification workflow.
+
 ## What CI already enforces (do not nitpick by hand)
 
 Formatting is checked automatically on every PR, so manual review time should not be spent on

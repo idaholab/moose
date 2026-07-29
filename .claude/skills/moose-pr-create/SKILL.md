@@ -16,8 +16,9 @@ instructions and contribution gates. Treat branch preparation and GitHub
 publication as separate, approval-controlled phases.
 
 Use the `moose-pr-review` skill for the MOOSE review standard and the
-`moose-codegraph` skill for its code-navigation mechanics. Do not use the
-posting step from `moose-pr-review`.
+`moose-codegraph` skill for its code-navigation mechanics. Use
+`moose-verify-changes` for build and test execution. Do not use the posting
+step from `moose-pr-review`.
 
 ## Step 1 - Establish the candidate
 
@@ -74,19 +75,13 @@ optional posting step. In particular:
 - Check design and scope, reuse, the MOOSE Code Standard, tests and SQA
   metadata, documentation, and new-object stub pages.
 - Treat every "required change" as a blocker. Suggestions are not blockers.
-- Run the relevant verification for the changed behavior. A failing relevant
-  test is a blocker.
-
-Before building or performing verification, including running `run_tests` or
-invoking a pre-existing MOOSE executable, ask whether the user's MOOSE stack
-uses conda unless the conversation already establishes it. If it does, ask
-which conda environment to activate and wait for the answer. Do not inspect or
-run an existing binary as a shortcut around this gate.
+- Use `moose-verify-changes` to verify the changed behavior. A failing relevant
+  check is a blocker.
 
 If the user explicitly declines or cannot provide an environment for relevant
-verification, report those checks as "not run." Because this workflow always
-creates a draft, the user may explicitly approve opening it with those checks
-outstanding; never conceal the missing verification.
+verification and `moose-verify-changes` reports checks as not run, the user may
+explicitly approve opening a draft with those checks outstanding. Never
+conceal the missing verification.
 
 ## Step 4 - Draft the PR
 
