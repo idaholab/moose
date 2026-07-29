@@ -51,15 +51,15 @@
       detail = 'using the Gnielinski correlation.'
       cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=gnielinski'
     []
-    [negative_htc_error]
+    [invalid_wire_correction_error]
       type = RunException
       input = 'XX09_SCM_SS17.i'
-      expect_err = 'The heat transfer coefficient must be non-negative and finite\.'
+      expect_err = 'The base of the Cheng-Todreas turbulent wire correction must be non-negative and finite for a corner subchannel\.'
       capabilities = 'method!=dbg'
       valgrind = NONE
       recover = false
       max_parallel = 1
-      detail = 'and reject non-physical heat transfer coefficients from HTC closures.'
+      detail = 'and reject wire geometries outside the mathematical domain of the Cheng-Todreas correlation.'
       cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski wire_diameter=0.003 Outputs/file_base=negative_htc_error'
     []
     [kazimi_carelli]
