@@ -55,6 +55,8 @@ The test: Every changed line should trace directly to the user's request.
 
 - Never delete correct preexisting code comments.
 - Add comments when the code alone does not make clear what's happening.
+- Explain every non-obvious numeric value, including tolerances, with a nearby
+  comment that records its source or rationale rather than merely restating it.
 - Add Doxygen comments for classes and class members whose purpose is not
   obvious from their names.
 - Use ASCII characters.
