@@ -19,12 +19,11 @@ TestSolutionPointValueCache::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "The source variable to evaluate.");
-  params.addRequiredParam<Point>(
-      "prime_point", "A point inside the source subdomain used to prime the cache.");
-  params.addRequiredParam<Point>(
-      "test_point", "A point outside the restricted source subdomain.");
-  params.addRequiredParam<SubdomainID>(
-      "source_subdomain", "The source subdomain used for the restricted lookups.");
+  params.addRequiredParam<Point>("prime_point",
+                                 "A point inside the source subdomain used to prime the cache.");
+  params.addRequiredParam<Point>("test_point", "A point outside the restricted source subdomain.");
+  params.addRequiredParam<SubdomainID>("source_subdomain",
+                                       "The source subdomain used for the restricted lookups.");
   params.addRequiredParam<UserObjectName>("solution",
                                           "The SolutionUserObject containing the source solution.");
   return params;
@@ -51,14 +50,13 @@ TestSolutionPointValueCache::getValue() const
   const std::set<subdomain_id_type> restricted_subdomains{_source_subdomain};
 
   // Cache a valid lookup restricted to the selected source subdomain.
-  _solution_object_ptr->pointValue(
-      _t, _prime_point, _variable_name, &restricted_subdomains);
+  _solution_object_ptr->pointValue(_t, _prime_point, _variable_name, &restricted_subdomains);
 
   // Replace the cached point and values with an unrestricted lookup outside that subdomain.
   _solution_object_ptr->pointValue(_t, _test_point, _variable_name);
 
   // A fresh restricted evaluation at this point must fail because the point is outside the
-  // selected source subdomain. The stale cache currently allows this call to return instead.
-  return _solution_object_ptr->pointValue(
-      _t, _test_point, _variable_name, &restricted_subdomains);
+  // selected source subdomain. If stale source-subdomain metadata were retained, this call
+  // would incorrectly return.
+  return _solution_object_ptr->pointValue(_t, _test_point, _variable_name, &restricted_subdomains);
 }

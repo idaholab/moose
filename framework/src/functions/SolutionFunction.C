@@ -95,17 +95,15 @@ SolutionFunction::initialSetup()
 Real
 SolutionFunction::value(Real t, const Point & p) const
 {
-  return _scale_factor *
-             _solution_object_ptr->pointValueWrapper(
-                 t, p, _solution_object_var_name, _weighting_type) +
+  return _scale_factor * _solution_object_ptr->pointValueWrapper(
+                             t, p, _solution_object_var_name, _weighting_type) +
          _add_factor;
 }
 
 RealGradient
 SolutionFunction::gradient(Real t, const Point & p) const
 {
-  return _scale_factor *
-             _solution_object_ptr->pointValueGradientWrapper(
-                 t, p, _solution_object_var_name, _weighting_type) +
+  return _scale_factor * _solution_object_ptr->pointValueGradientWrapper(
+                             t, p, _solution_object_var_name, _weighting_type) +
          _add_grad;
 }

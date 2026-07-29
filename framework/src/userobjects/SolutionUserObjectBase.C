@@ -744,8 +744,7 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
     return pointValue(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
-  std::map<const Elem *, Real> values =
-      discontinuousPointValue(t, p, var_name, subdomain_ids);
+  std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name, subdomain_ids);
   switch (weighting_type)
   {
     case 2:
@@ -1058,15 +1057,15 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
         evalMultiValuedMeshFunctionGradient(pt, local_var_index, 2, subdomain_ids);
 
     if (map.size() != map2.size())
-      mooseError(
-          "In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have different size");
+      mooseError("In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have "
+                 "different size");
 
     // construct the interpolated map
     for (auto & k : map)
     {
       if (map2.find(k.first) == map2.end())
-        mooseError(
-            "In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have differing keys");
+        mooseError("In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have "
+                   "differing keys");
       RealGradient val = k.second;
       RealGradient val2 = map2[k.first];
       map[k.first] = val + (val2 - val) * _interpolation_factor;
