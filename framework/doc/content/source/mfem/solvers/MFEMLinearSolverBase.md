@@ -18,7 +18,7 @@ preconditioners - can be passed to the `mfem::Solver` at construction time.
 
 Linear solvers of type `T` that can be used as a Low-Order-Refined (LOR) preconditioner or solver
 should inherit from the derived class `LORLinearSolverBase<T>`, as described in
-[MFEMLORLinearSolverBase.md]
+[MFEMLORLinearSolverBase.md].
 
 !if-end!
 
