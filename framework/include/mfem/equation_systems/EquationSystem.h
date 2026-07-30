@@ -53,11 +53,6 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
-  /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & var_name,
-                                mfem::ParGridFunction & trial_gf,
-                                mfem::Array<int> & global_ess_markers);
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
@@ -114,8 +109,6 @@ public:
   }
 
   /**
-<<<<<<< HEAD
-=======
    * @returns a reference to the MFEM ParGridFunction corresponding to trial_var_name
    */
   mfem::ParGridFunction & GetGridFunction(const std::string & trial_var_name)
@@ -192,6 +185,11 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
+  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
+  /// markers of all essential boundaries
+  virtual void ApplyEssentialBC(const std::string & var_name,
+                                mfem::ParGridFunction & trial_gf,
+                                mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables

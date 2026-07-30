@@ -135,15 +135,9 @@ LORLinearSolverBase<MFEMSolverType>::SetupLOR(
     mooseError("LOR solve is only supported for single-variable systems");
 
   const auto & test_var_name = equation_system->GetTestVarNames().at(0);
-  const auto & trial_var_name = equation_system->GetTrialVarNames().at(0);
-  mfem::ParGridFunction & trial_gf = equation_system->GetGridFunction(trial_var_name);
   _a = &equation_system->GetBilinearForm(test_var_name);
   CheckSpectralEquivalence(*_a);
-
-  _ess_bdr_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-  _ess_bdr_markers = 0;
-  equation_system->ApplyEssentialBC(trial_var_name, trial_gf, _ess_bdr_markers);
-
+  _ess_bdr_markers = equation_system->GetEssentialBoundaryMarkers(test_var_name);
   _a->ParFESpace()->GetEssentialTrueDofs(_ess_bdr_markers, _ess_tdofs);
 }
 
