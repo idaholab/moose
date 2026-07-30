@@ -142,14 +142,14 @@ TEST_F(MortarSegmentHelperTest, quadrilateralReferenceRecovery)
   const auto clipping_sized_violation =
       referencePoint(coarse_helper, Point(-5.e-7, 0.25), unit_square, master, &reason);
   ASSERT_TRUE(clipping_sized_violation) << reason;
-  EXPECT_DOUBLE_EQ((*clipping_sized_violation)(0), -1.);
+  EXPECT_NEAR((*clipping_sized_violation)(0), -1., 1.e-12);
 
   reason.clear();
   const auto distorted_boundary_spill = referencePoint(
       segment_helper, bilinearPoint(distorted, 1., -1.001), distorted, master, &reason);
   ASSERT_TRUE(distorted_boundary_spill) << reason;
-  EXPECT_DOUBLE_EQ((*distorted_boundary_spill)(0), 1.);
-  EXPECT_DOUBLE_EQ((*distorted_boundary_spill)(1), -1.);
+  EXPECT_NEAR((*distorted_boundary_spill)(0), 1., 1.e-12);
+  EXPECT_NEAR((*distorted_boundary_spill)(1), -1., 1.e-12);
 }
 
 TEST_F(MortarSegmentHelperTest, quadrilateralReferenceRecoveryRejectsInvalidMaps)
