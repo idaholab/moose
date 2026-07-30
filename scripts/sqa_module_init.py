@@ -28,8 +28,10 @@ doc_location = os.path.join(os.getenv("MOOSE_DIR"), "modules", folder, "doc")
 data = (
     "directories:\n"
     "    - ${{MOOSE_DIR}}/modules/{}/test/tests\n"
+    "    - ${{MOOSE_DIR}}/modules/{}/unit/src\n"
     "specs:\n"
-    "    - tests\n".format(folder)
+    "    - tests\n"
+    "    - '*.unit_tests'\n".format(folder, folder)
 )
 ymlfile = os.path.join(doc_location, "sqa_{}.yml".format(folder))
 with open(ymlfile, "w+") as fid:
