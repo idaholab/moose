@@ -74,7 +74,9 @@ public:
   static const std::vector<libMesh::ElemQuality> elem_qualities;
 
   /**
-   * Base struct for informationfor a single entry (elem, sideset, subdomain).
+   * Base struct for information for a single entry (elem, sideset, subdomain).
+   *
+   * @tparam IDType The type of the ID.
    */
   template <typename IDType>
   struct InfoBase
@@ -90,6 +92,8 @@ public:
 
   /**
    * Struct for element-containing entries (elem, sideset, subdomain).
+   *
+   * @tparam IDType The type of the ID.
    */
   template <typename IDType>
   struct ElemContainingInfo : public InfoBase<IDType>
@@ -105,6 +109,9 @@ public:
 
   /**
    * Structure for a single domain entry (sideset or subdomain).
+   *
+   * @tparam IDType The type of the ID.
+   * @tparam ElemsType The type for the elements entry (different for sidesets and subdomains).
    */
   template <typename IDType, typename ElemsType>
   struct DomainInfo : public ElemContainingInfo<IDType>
@@ -114,7 +121,7 @@ public:
 
     /// Name
     std::string name;
-    /// Bounded element qualities
+    /// Bounded (min, max) element qualities
     std::map<DomainQuality, Real> qualities;
     /// Elements in the domain
     std::vector<ElemsType> elems;
@@ -207,7 +214,7 @@ public:
     bool processor_ids = false;
     ///@}
 
-    /// Bounded element qualities that should be output
+    /// Bounded (min, max) element qualities that should be output
     std::vector<DomainQuality> qualities;
   };
 
@@ -235,9 +242,11 @@ public:
   };
 
   /**
-   * Struct that defines a domain (sideset or subdomain) map
-   * (id -> entities) and the items that should be output
-   * about that domain.
+   * Struct that defines a domain (sideset or subdomain) map (id -> entities) and
+   * the items that should be output about that domain.
+   *
+   * @tparam InfoType The type of the information storage for each entity.
+   * @tparam ItemsType The type of the items storage that define what to output.
    */
   template <class InfoType, class ItemsType>
   struct InfoMap
@@ -262,27 +271,30 @@ public:
   using SubdomainInfoMap = InfoMap<SubdomainInfo, DomainInfoItems>;
 
   /**
-   * Struct that contains all of the reporter data for a domain type
-   * (sideset or subdomain) and the items that should be output
-   * for that domain.
+   * Struct that contains all of the reporter data for a domain type (sideset or subdomain)
+   * and the items that should be output for that domain.
+   *
+   * @tparam InfoMapType The type of the storage map (id -> information).
+   * @tparam ItemsType The type of the items storage that define what to output.
+
    */
-  template <class InfoMapType, class InfoItemsType>
+  template <class InfoMapType, class ItemsType>
   struct CombinedInfos
   {
     using info_map_type = InfoMapType;
     using id_type = typename InfoMapType::id_type;
     using info_type = typename InfoMapType::info_type;
     using map_type = typename info_map_type::map_type;
-    using items_type = InfoItemsType;
+    using items_type = ItemsType;
 
-    CombinedInfos(info_map_type * local, info_map_type * global, const InfoItemsType & items);
+    CombinedInfos(info_map_type * local, info_map_type * global, const ItemsType & items);
 
     /// Local information
     InfoMapType * const local;
     /// Global information
     InfoMapType * const global;
     /// Which entries are to be output
-    const InfoItemsType items;
+    const ItemsType items;
   };
   /// Complete information storage (local, global, items) for sidesets
   using ElemInfos = CombinedInfos<ElemInfoMap, ElemInfoItems>;
