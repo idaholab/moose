@@ -271,7 +271,7 @@
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
       exodiff = 'frictionless-mortar-3d-action-delaunay_108_0_displaced_mortar_segment_mesh.e'
-      # The contact line search prevents cycling when the active set or discrete overlap changes.
+      # The residual-based contact line search damps Newton steps while the overlap changes.
       cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Executioner/line_search=contact '
@@ -371,7 +371,7 @@
       input = 'frictionless-mortar-3d.i'
       capabilities = 'ad_size>=150'
       exodiff = 'frictionless-mortar-3d-direct-delaunay_108_0_displaced_mortar_segment_mesh.e'
-      # The contact line search prevents cycling when the active set or discrete overlap changes.
+      # The residual-based contact line search damps Newton steps while the overlap changes.
       cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Executioner/line_search=contact '
                  'Executioner/contact_line_search_allowed_lambda_cuts=3 '
