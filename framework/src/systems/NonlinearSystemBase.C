@@ -75,6 +75,8 @@
 #include "FVScalarLagrangeMultiplierConstraint.h"
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
+#include "FVBoundaryCondition.h"
+#include "FVInterfaceKernel.h"
 #include "FVScalarLagrangeMultiplierInterface.h"
 #include "GeneralUserObject.h"
 #include "OffDiagonalScalingMatrix.h"
@@ -102,6 +104,7 @@
 #include "libmesh/petsc_solver_exception.h"
 
 #include <ios>
+#include <type_traits>
 
 #include "petscsnes.h"
 #include <PetscDMMoose.h>
@@ -110,6 +113,31 @@ extern PetscErrorCode DMCreate_Moose(DM);
 EXTERN_C_END
 
 using namespace libMesh;
+
+namespace
+{
+template <typename T>
+void
+appendFVSetupObjects(TheWarehouse & warehouse,
+                     const std::string & system_name,
+                     const unsigned int system_number,
+                     const THREAD_ID tid,
+                     std::vector<SetupInterface *> & results)
+{
+  static_assert(std::is_base_of_v<MooseObject, T>);
+  static_assert(std::is_base_of_v<SetupInterface, T>);
+
+  std::vector<T *> objects;
+  warehouse.query()
+      .template condition<AttribSystem>(system_name)
+      .template condition<AttribSysNum>(system_number)
+      .template condition<AttribThread>(tid)
+      .queryInto(objects);
+
+  for (auto * object : objects)
+    results.push_back(object);
+}
+}
 
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
                                          System & sys,
@@ -222,6 +250,23 @@ NonlinearSystemBase::turnOffJacobian()
   nonlinearSolver()->jacobian = NULL;
 }
 
+std::vector<SetupInterface *>
+NonlinearSystemBase::getFVSetupObjects(THREAD_ID tid)
+{
+  std::vector<SetupInterface *> fv_objects;
+  auto & warehouse = _fe_problem.theWarehouse();
+
+  appendFVSetupObjects<FVElementalKernel>(
+      warehouse, "FVElementalKernel", number(), tid, fv_objects);
+  appendFVSetupObjects<FVFluxKernel>(warehouse, "FVFluxKernel", number(), tid, fv_objects);
+  appendFVSetupObjects<FVBoundaryCondition>(warehouse, "FVDirichletBC", number(), tid, fv_objects);
+  appendFVSetupObjects<FVBoundaryCondition>(warehouse, "FVFluxBC", number(), tid, fv_objects);
+  appendFVSetupObjects<FVInterfaceKernel>(
+      warehouse, "FVInterfaceKernel", number(), tid, fv_objects);
+
+  return fv_objects;
+}
+
 void
 NonlinearSystemBase::initialSetup()
 {
@@ -246,27 +291,8 @@ NonlinearSystemBase::initialSetup()
       _integrated_bcs.initialSetup(tid);
 
       if (_fe_problem.haveFV())
-      {
-        std::vector<FVElementalKernel *> fv_elemental_kernels;
-        _fe_problem.theWarehouse()
-            .query()
-            .template condition<AttribSystem>("FVElementalKernel")
-            .template condition<AttribThread>(tid)
-            .queryInto(fv_elemental_kernels);
-
-        for (auto * fv_kernel : fv_elemental_kernels)
-          fv_kernel->initialSetup();
-
-        std::vector<FVFluxKernel *> fv_flux_kernels;
-        _fe_problem.theWarehouse()
-            .query()
-            .template condition<AttribSystem>("FVFluxKernel")
-            .template condition<AttribThread>(tid)
-            .queryInto(fv_flux_kernels);
-
-        for (auto * fv_kernel : fv_flux_kernels)
-          fv_kernel->initialSetup();
-      }
+        for (auto * fv_object : getFVSetupObjects(tid))
+          fv_object->initialSetup();
     }
 
     _scalar_kernels.initialSetup();
@@ -350,35 +376,8 @@ NonlinearSystemBase::timestepSetup()
     _integrated_bcs.timestepSetup(tid);
 
     if (_fe_problem.haveFV())
-    {
-      std::vector<FVFluxBC *> bcs;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxBC")
-          .template condition<AttribThread>(tid)
-          .queryInto(bcs);
-
-      std::vector<FVInterfaceKernel *> iks;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVInterfaceKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(iks);
-
-      std::vector<FVFluxKernel *> kernels;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(kernels);
-
-      for (auto * bc : bcs)
-        bc->timestepSetup();
-      for (auto * ik : iks)
-        ik->timestepSetup();
-      for (auto * kernel : kernels)
-        kernel->timestepSetup();
-    }
+      for (auto * fv_object : getFVSetupObjects(tid))
+        fv_object->timestepSetup();
   }
   _scalar_kernels.timestepSetup();
   _constraints.timestepSetup();
@@ -413,35 +412,8 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
     _integrated_bcs.customSetup(exec_type, tid);
 
     if (_fe_problem.haveFV())
-    {
-      std::vector<FVFluxBC *> bcs;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxBC")
-          .template condition<AttribThread>(tid)
-          .queryInto(bcs);
-
-      std::vector<FVInterfaceKernel *> iks;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVInterfaceKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(iks);
-
-      std::vector<FVFluxKernel *> kernels;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(kernels);
-
-      for (auto * bc : bcs)
-        bc->customSetup(exec_type);
-      for (auto * ik : iks)
-        ik->customSetup(exec_type);
-      for (auto * kernel : kernels)
-        kernel->customSetup(exec_type);
-    }
+      for (auto * fv_object : getFVSetupObjects(tid))
+        fv_object->customSetup(exec_type);
   }
   _scalar_kernels.customSetup(exec_type);
   _constraints.customSetup(exec_type);

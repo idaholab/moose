@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify MOOSE Changes"
+  short_description: "Build and test MOOSE changes safely"
+  default_prompt: "Use $moose-verify-changes to select and run focused verification for my current MOOSE changes."

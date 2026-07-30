@@ -25,7 +25,7 @@ MFEMGeometricMultigridSolver::MGProxy::MGProxy(MFEMGeometricMultigridSolver & ow
 }
 
 void
-MFEMGeometricMultigridSolver::MGProxy::setMG(mfem::GeometricMultigrid & mg)
+MFEMGeometricMultigridSolver::MGProxy::SetMG(mfem::GeometricMultigrid & mg)
 {
   _mg = &mg;
   height = mg.Height();
@@ -56,8 +56,6 @@ MFEMGeometricMultigridSolver::validParams()
 
   params.addRequiredParam<std::string>("variable",
                                        "Name of the trial variable this preconditioner acts on.");
-  params.addRequiredParam<std::string>(
-      "fespace_hierarchy", "Name of the MFEMFESpaceHierarchy that defines the level structure.");
   params.addRequiredParam<std::vector<MFEMSolverName>>(
       "smoothers",
       "Names of LinearSolverBase objects used as smoothers on the interior levels "
@@ -65,8 +63,9 @@ MFEMGeometricMultigridSolver::validParams()
       "N-1 (one per interior level, ordered coarse-to-fine).");
   params.addRequiredParam<MFEMSolverName>(
       "coarse_solver", "Name of the LinearSolverBase used on the coarsest level.");
-  params.addRequiredParam<std::vector<std::string>>(
+  params.addParam<std::vector<std::string>>(
       "assembly_levels",
+      {"legacy"},
       "Assembly level for each level in the hierarchy. Valid values: 'legacy', 'full', "
       "'element', 'partial', 'none'. May have length 1 (used on all N levels) or N.");
   return params;
@@ -78,12 +77,22 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
     _smoother_names(getParam<std::vector<MFEMSolverName>>("smoothers")),
     _coarse_solver_name(getParam<MFEMSolverName>("coarse_solver"))
 {
+  auto & problem = getMFEMProblem();
+  auto eq_sys = problem.getProblemData().eqn_system;
+
+  if (eq_sys->IsEigen() || eq_sys->IsComplex())
+    mooseError("GeometricMultigridSolver '", name(), "': requires a real, non-eigen eq. system");
+
   // Co-own the hierarchy so it outlives this solver.
-  const auto & hierarchy_name = getParam<std::string>("fespace_hierarchy");
-  _hierarchy = getMFEMProblem().getProblemData().fespace_hierarchies.GetShared(hierarchy_name);
+  if (auto * hierarchy_name = problem.getMFEMObject<MFEMVariable>("MooseVariableBase", _var_name)
+                                  .queryParam<std::string>("fespace_hierarchy"))
+    _hierarchy = problem.getProblemData().fespace_hierarchies.GetShared(*hierarchy_name);
+  else
+    paramError("variable", "must be associated with an MFEMFESpaceHierarchy.");
 
   // Parse assembly levels, optionally expanding a single input value to all levels.
   const int N = _hierarchy->GetNumLevels();
+  mooseAssert(N, "Malformed MFEMFESpaceHierarchy w/ no levels");
   const auto & asm_strs = getParam<std::vector<std::string>>("assembly_levels");
   const int n_asm = asm_strs.size();
   if (n_asm != 1 && n_asm != N)
@@ -112,21 +121,8 @@ MFEMGeometricMultigridSolver::ConstructSolver()
 mfem::AssemblyLevel
 MFEMGeometricMultigridSolver::ParseAssemblyLevel(const std::string & s) const
 {
-  if (s == "legacy")
-    return mfem::AssemblyLevel::LEGACY;
-  if (s == "full")
-    return mfem::AssemblyLevel::FULL;
-  if (s == "element")
-    return mfem::AssemblyLevel::ELEMENT;
-  if (s == "partial")
-    return mfem::AssemblyLevel::PARTIAL;
-  if (s == "none")
-    return mfem::AssemblyLevel::NONE;
-  paramError("assembly_levels",
-             "unknown assembly level '",
-             s,
-             "'. Valid values: legacy, full, element, partial, none.");
-  return mfem::AssemblyLevel::LEGACY;
+  static MooseEnum assembly_levels("legacy full element partial none", "legacy");
+  return (assembly_levels = s).getEnum<mfem::AssemblyLevel>();
 }
 
 void
@@ -139,29 +135,13 @@ void
 MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 {
   auto & problem = getMFEMProblem();
-  auto & pd = problem.getProblemData();
+  auto eq_sys = problem.getProblemData().eqn_system;
 
-  auto * eq_sys = dynamic_cast<Moose::MFEM::EquationSystem *>(pd.eqn_system.get());
-  if (!eq_sys)
-    mooseError("GeometricMultigridSolver '",
-               name(),
-               "': requires a standard (non-complex, non-time-dependent) EquationSystem.");
-
-  if (eq_sys->Nonlinear())
-    mooseError("GeometricMultigridSolver '",
-               name(),
-               "': nonlinear equation systems are not currently supported.");
-
-  if (eq_sys->HasMixedBilinearForms(_var_name))
-    paramError("variable",
-               "mixed bilinear form contributions are not supported for variable '",
-               _var_name,
-               "'. Block multigrid is required for saddle-point / mixed-field problems.");
+  if (eq_sys->IsNonlinear() || eq_sys->IsMultivariate())
+    mooseError("GeometricMultigridSolver '", name(), "': requires a univariate, linear eq. system");
 
   const int N = _hierarchy->GetNumLevels();
-  if (N < 1)
-    paramError("fespace_hierarchy", "hierarchy must contain at least one level.");
-  const int finest_level = N - 1;
+  const int finest_level = _hierarchy->GetFinestLevelIndex();
 
   // Validate smoother vector length (levels 1 to N-1 each need a smoother).
   const int n_smooth = _smoother_names.size();
@@ -178,7 +158,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   };
 
   // Obtain essential boundary attribute markers from the equation system.
-  mfem::Array<int> ess_bdr = eq_sys->BuildEssentialBoundaryMarkers(_var_name);
+  mfem::Array<int> & ess_bdr = eq_sys->GetEssentialBoundaryMarkers(_var_name);
 
   auto & finest_fespace =
       static_cast<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(finest_level));
@@ -213,13 +193,9 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 
     // Build level operator.
     mfem::Operator * level_op = nullptr;
-    bool own_op = false;
 
     if (level == finest_level)
-    {
       level_op = const_cast<mfem::Operator *>(&op);
-      own_op = false;
-    }
     else
     {
       auto blf =
@@ -228,7 +204,6 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
       auto level_op_handle = std::make_unique<mfem::OperatorHandle>();
       blf->FormSystemMatrix(level_tdofs, *level_op_handle);
       level_op = level_op_handle->Ptr();
-      own_op = false; // owned by level_op_handle or blf
       new_level_ops.push_back(std::move(level_op_handle));
       new_blfs.push_back(std::move(blf));
     }
@@ -238,7 +213,8 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     auto & level_smoother = get_smoother(level);
     level_smoother.SetOperator(*level_op);
 
-    mg_ptr->AddLevel(level_op, &level_smoother.GetSolver(), own_op, /*ownSmoother=*/false);
+    mg_ptr->AddLevel(
+        level_op, &level_smoother.GetSolver(), /*ownOperator=*/false, /*ownSmoother=*/false);
   }
 
   // Atomically replace:
@@ -248,6 +224,6 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   _mg = std::move(mg);
   _level_ops = std::move(new_level_ops);
   _level_blfs = std::move(new_blfs);
-  _mg_proxy->setMG(*_mg);
+  _mg_proxy->SetMG(*_mg);
 }
 #endif

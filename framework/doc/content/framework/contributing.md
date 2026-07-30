@@ -63,6 +63,15 @@ Create a branch for your work:
 git checkout -b branch_name upstream/devel
 ```
 
+We recommend installing the [pre-commit](https://pre-commit.com) hooks once per clone. They automatically format and check your changes before each commit, running the same clang-format, black, ruff, whitespace, and copyright-header checks that are enforced when your code is contributed:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+The hook configuration lives in [`.pre-commit-config.yaml`](https://github.com/idaholab/moose/blob/devel/.pre-commit-config.yaml), and the tool versions mirror those pinned in `requirements.txt`. When a hook reformats a file, the commit is aborted; simply `git add` the modified files and commit again.
+
 Make your modifications and commit them to a branch (be sure to reference an issue number in your commit messages).
 
 ```bash

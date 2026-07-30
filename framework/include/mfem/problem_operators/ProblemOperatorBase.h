@@ -48,7 +48,7 @@ class EquationSystem;
  *      2. SolveWithOperator() - the linear/nonlinear dispatch that requires knowing
  *         which MOOSE solver objects are configured (jacobian_solver, nonlinear_solver).
  *      3. Block-vector bookkeeping (trial/test true-DoF offsets and vectors) that
- *         bridges MFEM's true-DoF world with MOOSE's grid-function world.
+ *         bridges between the true-DoF algebraic world with the FE gridfunction world.
  */
 class ProblemOperatorBase
 {

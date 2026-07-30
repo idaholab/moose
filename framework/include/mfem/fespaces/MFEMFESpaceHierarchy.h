@@ -49,7 +49,7 @@ public:
 
   bool isScalar() const { return _is_scalar; }
 
-  bool isVector() const { return _is_vector; }
+  bool isVector() const { return !isScalar(); }
 
 private:
   void buildHierarchy();
@@ -62,7 +62,6 @@ private:
   std::vector<std::unique_ptr<mfem::FiniteElementCollection>> _level_fecs;
 
   bool _is_scalar = false;
-  bool _is_vector = false;
 };
 
 #endif

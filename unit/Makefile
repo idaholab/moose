@@ -10,8 +10,14 @@
 # FRAMEWORK_DIR - Location of the MOOSE framework
 #
 ###############################################################################
-MOOSE_DIR          ?= $(shell dirname `pwd`)
+MOOSE_DIR          ?= $(shell dirname "$$PWD")
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+ifneq ($(words $(MOOSE_DIR)),1)
+  $(error MOOSE_DIR contains whitespace: '$(MOOSE_DIR)'. MOOSE Makefiles do not support paths with whitespace; move the checkout or set MOOSE_DIR to a path without whitespace)
+endif
+ifneq ($(words $(FRAMEWORK_DIR)),1)
+  $(error FRAMEWORK_DIR contains whitespace: '$(FRAMEWORK_DIR)'. MOOSE Makefiles do not support paths with whitespace; move the checkout or set FRAMEWORK_DIR to a path without whitespace)
+endif
 ADDITIONAL_CPPFLAGS += -Wall -Wextra -DMOOSE_UNIT_TEST
 ###############################################################################
 

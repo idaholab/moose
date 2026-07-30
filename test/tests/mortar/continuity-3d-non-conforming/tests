@@ -102,17 +102,19 @@
   []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
+    issues = '#33282'
     input = 'continuity_sphere_hex.i'
     exodiff = 'continuity_sphere_hex27_debug_2_1_undisplaced_mortar_segment_mesh.e'
     cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND '
                'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
                'Outputs/file_base=continuity_sphere_hex27_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
-                  'for a curved HEX27 mortar interface.'
+                  'using default geometric subpatch-plane normals for a curved HEX27 mortar interface.'
     recover = false
   []
   [continuity_sphere_hex20-debug-mesh]
     type = 'Exodiff'
+    issues = '#33282'
     prereq = 'continuity_sphere_hex27-debug-mesh'
     input = 'continuity_sphere_hex.i'
     exodiff = 'continuity_sphere_hex20_debug_2_1_undisplaced_mortar_segment_mesh.e'
@@ -120,8 +122,32 @@
                'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
                'Outputs/file_base=continuity_sphere_hex20_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
-                  'for a curved HEX20 mortar interface.'
+                  'using default geometric subpatch-plane normals for a curved HEX20 mortar interface.'
     recover = false
+  []
+  [subpatch-plane-modes]
+    issues = '#33282'
+    requirement = 'The system shall construct the expected 3D mortar segment mesh on a curved HEX8 '
+                  'interface using'
+    [hex8-geometric-default-debug-mesh]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_geometric_2_1_undisplaced_mortar_segment_mesh.e'
+      cli_args = 'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
+                 'Outputs/file_base=continuity_sphere_hex8_geometric'
+      detail = 'the default geometric subpatch normal and'
+      recover = false
+    []
+    [hex8-averaged-nodal-normal-debug-mesh]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_averaged_2_1_undisplaced_mortar_segment_mesh.e'
+      cli_args = 'Constraints/mortar/mortar_3d_subpatch_plane=AVERAGED_NODAL_NORMAL '
+                 'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
+                 'Outputs/file_base=continuity_sphere_hex8_averaged'
+      detail = 'an explicitly selected averaged nodal normal.'
+      recover = false
+    []
   []
   [triangulation-modes]
     issues = '#23802'
@@ -217,6 +243,7 @@
   []
   [continuity_tet10-debug-mesh]
     type = 'Exodiff'
+    issues = '#33282'
     prereq = 'continuity_sphere_hex20-debug-mesh'
     input = 'continuity_tet.i'
     exodiff = 'continuity_tet10_debug_107_2_undisplaced_mortar_segment_mesh.e'
@@ -224,11 +251,12 @@
                'Variables/T/order=SECOND Variables/lambda/family=LAGRANGE Variables/lambda/order=SECOND '
                'Constraints/mortar/debug_mesh=true Outputs/exodus=false Outputs/file_base=continuity_tet10_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
-                  'for a TET10 mortar interface.'
+                  'using default geometric subpatch-plane normals for a TET10 mortar interface.'
     recover = false
   []
   [continuity_tet14-debug-mesh]
     type = 'Exodiff'
+    issues = '#33282'
     prereq = 'continuity_tet10-debug-mesh'
     input = 'continuity_tet.i'
     exodiff = 'continuity_tet14_debug_107_2_undisplaced_mortar_segment_mesh.e'
@@ -236,7 +264,7 @@
                'Variables/T/order=THIRD Variables/lambda/family=LAGRANGE Variables/lambda/order=THIRD '
                'Constraints/mortar/debug_mesh=true Outputs/exodus=false Outputs/file_base=continuity_tet14_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
-                  'for a TET14 mortar interface.'
+                  'using default geometric subpatch-plane normals for a TET14 mortar interface.'
     recover = false
   []
   [continuity_nonconforming_tet]

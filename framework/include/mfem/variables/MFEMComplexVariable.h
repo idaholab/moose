@@ -27,9 +27,6 @@ public:
   // Declare default coefficients associated with this complex gridfunction.
   void declareCoefficients();
 
-  /// Returns true if the variable lives on a scalar (vdim == 1) finite element space.
-  bool isScalar() const { return _fespace.isScalar(); }
-
 protected:
   const MFEMFESpace & _fespace;
 

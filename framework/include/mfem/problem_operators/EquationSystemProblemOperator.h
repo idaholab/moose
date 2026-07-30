@@ -22,7 +22,7 @@ namespace Moose::MFEM
  * On each call to Solve() this class:
  *   1. Forms equation-system data (kernels -> weak forms -> constrained linear part and
  *      nonlinear action forms).
- *   2. Calls EquationSystem::ProvideOperator() to pass either the EquationSystem itself or
+ *   2. Calls SolveWithOperator() to pass either the EquationSystem itself or
  *      the assembled linear operator (and the bilinear form for LOR preconditioners) to the
  *      configured solver tree.
  *   3. Dispatches to the linear or nonlinear solve path via SolveWithOperator().

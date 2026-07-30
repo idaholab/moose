@@ -135,7 +135,7 @@ JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann:
     for (const auto & reserved : reserved_values)
       param_json["reserved_values"].push_back(reserved);
 
-    std::string t = MooseUtils::prettyCppType(params->type(iter.first));
+    std::string t = documentationCppType(MooseUtils::prettyCppType(params->type(iter.first)));
     param_json["cpp_type"] = t;
     param_json["basic_type"] = basicCppType(t);
     param_json["group_name"] = params->getGroupName(iter.first);
@@ -365,6 +365,14 @@ JsonSyntaxTree::addActionTask(const std::string & path,
 }
 
 std::string
+JsonSyntaxTree::documentationCppType(const std::string & cpp_type)
+{
+  auto s = cpp_type;
+  pcrecpp::RE("\\bdouble\\b").GlobalReplace("Real", &s);
+  return s;
+}
+
+std::string
 JsonSyntaxTree::basicCppType(const std::string & cpp_type)
 {
   std::string s = "String";
@@ -410,7 +418,7 @@ JsonSyntaxTree::basicCppType(const std::string & cpp_type)
            cpp_type == "long" || cpp_type == "unsigned long" || cpp_type == "long long" ||
            cpp_type == "unsigned long long")
     s = "Integer";
-  else if (cpp_type == "double" || cpp_type == "float")
+  else if (cpp_type == "Real" || cpp_type == "double" || cpp_type == "float")
     s = "Real";
   else if (cpp_type == "bool")
     s = "Boolean";
