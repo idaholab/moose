@@ -118,8 +118,8 @@
   [line_sample]
     type = MFEMLineValueSampler
     variable = 'B'
-    start_point = '0 2 0'
-    end_point = '0 -2 0'
+    start_point = '0 1.99 0'
+    end_point = '0 -1.99 0'
     num_points = 10
   []
 []
