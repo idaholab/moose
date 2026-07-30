@@ -172,7 +172,7 @@ TEST_F(SodiumSaturationFluidPropertiesTest, pressureExtension)
   _fp->s_from_p_T(p, T, s, ds_dp, ds_dT);
 
   DERIV_TEST(_fp->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
-  REL_TEST(h - h0, (p - p0) * (v - T * dv_dT), REL_TOL_SAVED_VALUE);
+  REL_TEST(h - h0, (p - p0) * (v - T * dv_dT), REL_TOL_CONSISTENCY);
   REL_TEST(dh_dp, v - T * dv_dT, REL_TOL_DERIVATIVE);
   REL_TEST(dh_dT, _fp->cp_from_p_T(p, T), REL_TOL_DERIVATIVE);
   REL_TEST(ds_dp, (dh_dp - v) / T, REL_TOL_DERIVATIVE);
@@ -188,7 +188,7 @@ TEST_F(SodiumSaturationFluidPropertiesTest, temperatureFromPressureEnthalpy)
   const Real T = 800.0;
   const Real h = _fp->h_from_p_T(p, T);
 
-  REL_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_CONSISTENCY);
   DERIV_TEST(_fp->T_from_p_h, p, h, REL_TOL_DERIVATIVE);
 }
 
@@ -206,8 +206,8 @@ TEST_F(SodiumSaturationFluidPropertiesTest, specificEntropy)
   const Real v = _fp->v_from_p_T(p, T);
   const Real e = _fp->e_from_p_T(p, T);
   const Real s = _fp->s_from_p_T(p, T);
-  REL_TEST(_fp->s_from_v_e(v, e), s, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->rho_from_p_s(p, s), 1 / v, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->s_from_v_e(v, e), s, REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->rho_from_p_s(p, s), 1 / v, REL_TOL_CONSISTENCY);
 
   DERIV_TEST(_fp->s_from_p_T, p, T, REL_TOL_DERIVATIVE);
   // Larger perturbations keep the finite differences above cancellation and inversion noise.
@@ -236,11 +236,11 @@ TEST_F(SodiumSaturationFluidPropertiesTest, PTFromVE)
 
   // Verify the remaining (v,e) properties required by compressible-flow applications
   REL_TEST(_fp->c_from_v_e(v, e), 2301.5361599999997, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->cp_from_v_e(v, e), _fp->cp_from_p_T(p, T), REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->cv_from_v_e(v, e), _fp->cv_from_p_T(p, T), REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->mu_from_v_e(v, e), _fp->mu_from_p_T(p, T), REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->k_from_v_e(v, e), _fp->k_from_p_T(p, T), REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->e_from_p_rho(p, 1 / v), e, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->cp_from_v_e(v, e), _fp->cp_from_p_T(p, T), REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->cv_from_v_e(v, e), _fp->cv_from_p_T(p, T), REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->mu_from_v_e(v, e), _fp->mu_from_p_T(p, T), REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->k_from_v_e(v, e), _fp->k_from_p_T(p, T), REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->e_from_p_rho(p, 1 / v), e, REL_TOL_CONSISTENCY);
 
   DERIV_TEST(_fp->p_from_v_e, v, e, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp->T_from_v_e, v, e, REL_TOL_DERIVATIVE);
