@@ -271,10 +271,11 @@
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
       exodiff = 'frictionless-mortar-3d-action-delaunay_108_0_displaced_mortar_segment_mesh.e'
-      # Globalize the nonlinear step while the Delaunay overlap geometry changes between iterates.
+      # The contact line search prevents cycling when the active set or discrete overlap changes.
       cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
-                 'Executioner/line_search=basic '
+                 'Executioner/line_search=contact '
+                 'Executioner/contact_line_search_allowed_lambda_cuts=3 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-delaunay'
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
@@ -370,8 +371,10 @@
       input = 'frictionless-mortar-3d.i'
       capabilities = 'ad_size>=150'
       exodiff = 'frictionless-mortar-3d-direct-delaunay_108_0_displaced_mortar_segment_mesh.e'
-      # Globalize the nonlinear step while the Delaunay overlap geometry changes between iterates.
-      cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Executioner/line_search=basic '
+      # The contact line search prevents cycling when the active set or discrete overlap changes.
+      cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+                 'Executioner/line_search=contact '
+                 'Executioner/contact_line_search_allowed_lambda_cuts=3 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-direct-delaunay '
                  'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
@@ -400,8 +403,6 @@
   [frictional-mortar-3d-pg]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d_pg.i'
-    # Leave room to accept the step that converges on the configured final nonlinear iteration.
-    cli_args = 'Executioner/nl_max_its=31'
     capabilities = 'ad_size>=150 & method!=dbg'
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
@@ -444,7 +445,6 @@
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
-               'Executioner/nl_max_its=31 '
                'Outputs/file_base=frictional-mortar-3d_pg_out'
     capabilities = 'ad_size>=150'
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
