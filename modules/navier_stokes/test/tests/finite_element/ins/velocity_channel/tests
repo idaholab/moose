@@ -26,6 +26,8 @@
       type = Exodiff
       input = traction-supg.i
       exodiff = traction-supg_out.e
+      # velocity_y diffs at value -1.05-10 relative 2.38e-5 with -march=x86-64-v3
+      abs_zero = 1e-9
       detail = 'using a hand-coded Jacobian, and'
       # PR #26848. Clang 16 Apple Si is not compatible.
       capabilities = 'machine=x86_64'
@@ -34,6 +36,8 @@
       type = Exodiff
       input = ad-traction-supg.i
       exodiff = ad-traction-supg_out.e
+      # velocity_y diffs at value -1.05-10 relative 2.38e-5 with -march=x86-64-v3
+      abs_zero = 1e-9
       detail = 'using an automatic differentiation computed Jacobian and compute identical results, indicating the traction implementations with second order derivatives for the viscous term in the stabilization term are identical.'
       # PR #26848. Clang 16 Apple Si is not compatible.
       capabilities = 'machine=x86_64'

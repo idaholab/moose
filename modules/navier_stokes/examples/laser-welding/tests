@@ -12,8 +12,9 @@
       valgrind = 'heavy'
       # machine=x86_64: see #26848
       capabilities = 'strumpack & machine=x86_64'
+      # error_T diffs relative 8.9e-6 with -march=x86-64-v3
+      abs_zero = 5e-8
       detail = 'in two dimensions, using a finite element discretization for all variables, and'
-      abs_zero = 1e-8
     []
     [2d-fe-with-curvature]
       input = 2d.i
