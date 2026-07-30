@@ -6,6 +6,7 @@
     type = RunCommand
     command = "cd ../../../examples/uel_tri_tests; make"
     use_shell = True
+    min_slots = 2 # memory heavy
     requirement = "The UEL tri tests example shall be built."
     # installation_type=in_tree: see #25279
     capabilities = 'method=opt & installation_type=in_tree'
