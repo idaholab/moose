@@ -1889,7 +1889,7 @@ public:
     }
   }
 
-  DenseVector<Real> getJacobianDiagonal(DenseMatrix<Number> & ke)
+  DenseVector<Real> getJacobianDiagonal(const DenseMatrix<Number> & ke)
   {
     unsigned int rows = ke.m();
     unsigned int cols = ke.n();
@@ -2136,7 +2136,7 @@ private:
   /**
    * Push a local Jacobian block with proper scaling into cache for a certain tag.
    */
-  void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+  void cacheJacobianBlock(const DenseMatrix<Number> & jac_block,
                           const MooseVariableBase & ivar,
                           const MooseVariableBase & jvar,
                           const std::vector<dof_id_type> & idof_indices,
@@ -2146,7 +2146,7 @@ private:
   /**
    * Push non-zeros of a local Jacobian block with proper scaling into cache for a certain tag.
    */
-  void cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
+  void cacheJacobianBlockNonzero(const DenseMatrix<Number> & jac_block,
                                  const MooseVariableBase & ivar,
                                  const MooseVariableBase & jvar,
                                  const std::vector<dof_id_type> & idof_indices,

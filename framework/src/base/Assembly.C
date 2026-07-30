@@ -3603,7 +3603,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
 // private method, so no key required
 void
-Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+Assembly::cacheJacobianBlock(const DenseMatrix<Number> & jac_block,
                              const MooseVariableBase & ivar,
                              const MooseVariableBase & jvar,
                              const std::vector<dof_id_type> & idof_indices,
@@ -3658,18 +3658,11 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
         }
     }
   }
-
-  // These Assembly-owned Jacobian blocks are accumulation buffers. Some paths reuse a block after
-  // caching without an intervening prepare call (and therefore without resize zeroing it), so
-  // clearing here prevents stale contributions from being accumulated and cached again. Keeping
-  // the clear here also avoids duplicating it at every element, neighbor, nonlocal, and mortar
-  // cache call site.
-  jac_block.zero();
 }
 
 // private method, so no key required
 void
-Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
+Assembly::cacheJacobianBlockNonzero(const DenseMatrix<Number> & jac_block,
                                     const MooseVariableBase & ivar,
                                     const MooseVariableBase & jvar,
                                     const std::vector<dof_id_type> & idof_indices,
@@ -3722,13 +3715,6 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
           }
     }
   }
-
-  // These Assembly-owned Jacobian blocks are accumulation buffers. Some paths reuse a block after
-  // caching without an intervening prepare call (and therefore without resize zeroing it), so
-  // clearing here prevents stale contributions from being accumulated and cached again. Keeping
-  // the clear here also avoids duplicating it at every element, neighbor, nonlocal, and mortar
-  // cache call site.
-  jac_block.zero();
 }
 
 void
