@@ -18,7 +18,21 @@ elements.
 
 ## 2D
 
-Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630). In short, a nodal-normal projection is used to map points from the primary interface to the secondary interface; secondary interface elements are then split by the projected nodes to form mortar segment mesh elements.
+Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630) and follows the
+nodal-normal projection construction of [!cite](yang2005two). Yang et al. define a continuous
+secondary normal field by cross-weighting the normals of the adjacent edges. Specifically, their
+unnormalized normal at node $A$ is $\hat{\boldsymbol{n}}_A =
+l_2\boldsymbol{n}_{A1} + l_1\boldsymbol{n}_{A2}$: the normal of each edge is weighted by the
+length of the other edge. They use this field both to project secondary nodes onto the primary
+interface and to project primary nodes onto the secondary interface. The secondary interface
+elements are split at the projected primary nodes to form the mortar segment mesh elements.
+
+MOOSE deviates from the nodal-normal weighting in [!cite](yang2005two): rather than explicitly
+cross-weighting adjacent normals, MOOSE weights each normal by the nodal `JxW` contribution from
+that same edge, obtained with a `QNodal` quadrature rule. For straight first-order edges this `JxW`
+is proportional to the length of the same edge, so the two definitions differ when adjacent edge
+lengths differ. For curved or higher-order edges the MOOSE weight is additionally a local nodal
+quadrature/Jacobian contribution rather than a complete-edge length.
 
 ## 3D
 
@@ -90,5 +104,47 @@ vertices; it does not project the physical quadrature point again. On curved par
 evaluation points lie on their respective finite element faces but need not align along
 $\boldsymbol{n}_m$. MOOSE reports an error if a retained mortar segment cannot build a complete
 reference map; it does not fall back to `normal_projection`.
+
+### Subpatch plane normal
+
+The construction of the smoothed secondary nodal normals and the selection of a local subpatch
+projection plane are separate operations. MOOSE first accumulates face-normal contributions at the
+secondary nodes using the nodal `JxW` weights described above and normalizes the resulting nodal
+vectors. Changing that weighting or smoothing procedure is outside the scope of the
+[!param](/Constraints/EqualValueConstraint/mortar_3d_subpatch_plane) parameter. The parameter only
+controls how MOOSE converts the stored nodal normals or the subpatch geometry into the plane used
+for 3D projection and polygon clipping.
+
+The two available modes use the same linearized subpatch topology and center:
+
+- `GEOMETRIC_NORMAL` is the default. For a triangular subpatch, MOOSE computes an edge cross
+  product; for a quadrilateral subpatch, it computes the cross product of the bilinear center
+  tangents so that the normal represents the full bilinear patch rather than one selected
+  diagonal. The averaged nodal normal is used only to choose the sign of the geometric normal and
+  preserve MOOSE's primary-to-secondary orientation convention; it does not determine the plane
+  direction.
+- `AVERAGED_NODAL_NORMAL` evaluates the interpolated, smoothed secondary nodal-normal field at the
+  subpatch center by summing the stored normals at the subpatch vertices and normalizing the
+  result. This is the averaged-normal plane construction described in the mortar framework of
+  [!cite](popp2010dual).
+
+Thus, omitting `mortar_3d_subpatch_plane` selects the geometric construction. Select the
+averaged-normal construction with
+
+```
+mortar_3d_subpatch_plane = AVERAGED_NODAL_NORMAL
+```
+
+For both modes, overlap polygons below the mortar-segment area tolerance are discarded, do not seed
+the breadth-first primary-element search, and do not leave orphan nodes in the mortar segment mesh.
+
+Sharp 3D corners need an additional admissibility check when geometric subpatch planes are used.
+In `GEOMETRIC_NORMAL` mode,
+[!param](/Constraints/EqualValueConstraint/minimum_projection_angle) rejects primary and secondary
+subpatch pairings whose geometric normals are too close to orthogonal before polygon clipping. This
+avoids cross-corner mortar segments while preserving opposing or nearly opposing face-to-face
+coupling. Geometric mode therefore requires `minimum_projection_angle` to lie between zero and
+ninety degrees. In `AVERAGED_NODAL_NORMAL` mode, the parameter retains its existing MOOSE input
+range and projection checks and does not apply this additional geometric normal-pair filter.
 
 !bibtex bibliography
