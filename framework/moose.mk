@@ -191,6 +191,15 @@ ifeq (, $(shell which $(pyconfig) 2>/dev/null))
 	pyconfig := python-config
 endif
 
+# Embedded Python (libpython) for the NEML2 eager runtime: libneml2_eager.so leaves the
+# CPython API symbols undefined and resolves them from the host process at load time, so the
+# MOOSE executable must link libpython. This reuses the same python(3)-config mechanism MOOSE
+# already uses for its Python bindings; --embed adds -lpython. Linking libpython also enables
+# the framework's "embedded_python" capability (see framework/src/base/Capabilities.C).
+ifeq ($(ENABLE_NEML2),true)
+	libmesh_LDFLAGS += -Wl,-rpath,$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --ldflags --embed)
+endif
+
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
 	DYNAMIC_LOOKUP := -undefined dynamic_lookup

@@ -55,6 +55,14 @@
       # Function used at nodes
       allow_warnings = true
     []
+    [block_subdomain_material]
+      type = 'Exodiff'
+      input = 'piecewise_constant_block_subdomain_material.i'
+      exodiff = 'piecewise_constant_block_subdomain_material.e'
+      cli_args = 'Outputs/file_base=piecewise_constant_block_subdomain_material'
+      detail = 'with data sorted by blocks and read through a material held constant over each '
+               'subdomain (computed during subdomain setup, before the element is reinitialized),'
+    []
     [multiple_files]
       type = 'Exodiff'
       input = 'piecewise_constant_elem_multiple.i'

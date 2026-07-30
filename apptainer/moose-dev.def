@@ -83,8 +83,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
 {% if WITHOUT_PYTORCH is not defined %}
-    test -d {{ LIBTORCH_DIR }} && export LIBTORCH_DIR={{ LIBTORCH_DIR }}
-    test -d {{ NEML2_DIR }} && export NEML2_DIR={{ NEML2_DIR }}
+    # PyTorch and NEML2 are installed into the container's Python environment
+    # ({{ PYTHON_DIR }}). Expose their locations so MOOSE's ./configure can find them
+    # (./configure --with-libtorch=$LIBTORCH_DIR --with-neml2=$NEML2_DIR).
+    export LIBTORCH_DIR=$({{ PYTHON_DIR }}/bin/python -c 'import torch, os; print(os.path.dirname(torch.__file__))' 2>/dev/null)
+    export NEML2_DIR=$({{ PYTHON_DIR }}/bin/python -c 'import neml2, os; print(os.path.dirname(neml2.__file__))' 2>/dev/null)
 {%- endif %}
 
 {% if PROFILING is defined %}
@@ -371,7 +374,12 @@ EOF
 {%- endif %}
 
 {% if WITHOUT_PYTORCH is not defined %}
-    # Build libtorch
+    # Build PyTorch from source and install it (as the Python package) into the container's
+    # Python environment ({{ PYTHON_DIR }}). NEML2 v3 links against the torch in that
+    # environment. Building from source -- rather than installing a wheel -- lets us link
+    # PyTorch against PETSc's OpenBLAS so its BLAS/LAPACK is ABI-compatible with PETSc; a
+    # prebuilt wheel bundles its own BLAS, which can clash with PETSc (see
+    # modules/doc/content/getting_started/installation/install_neml2.md).
     (
         cd ${ROOT_BUILD_DIR}
 
@@ -383,46 +391,38 @@ EOF
         git checkout {{ PYTORCH_GIT_SHA }}
         git submodule update --init --depth 1 --recursive
 
-        # Create a temporary python environment for building libtorch
-        LIBTORCH_BUILD_VENV=${ROOT_BUILD_DIR}/pytorch_venv
-        ${PYTHON_DIR}/bin/python -m venv ${LIBTORCH_BUILD_VENV}
-        source ${LIBTORCH_BUILD_VENV}/bin/activate
-        pip3 install --no-cache -r ${PYTORCH_SRC_DIR}/requirements.txt
+        # Install PyTorch's build requirements into the container Python
+        ${PYTHON_DIR}/bin/pip install --no-cache -r ${PYTORCH_SRC_DIR}/requirements.txt
 
-        # Determine additional libtorch configure flags
-        LIBTORCH_FLAGS=()
+        # Build options, consumed by PyTorch's setup.py as environment variables (mirrors
+        # the choices in scripts/configure_libtorch.sh):
+        #   * link BLAS/LAPACK against PETSc's OpenBLAS for ABI compatibility with PETSc
+        #   * disable distributed/MPI and unused CPU-acceleration libraries
+        #   * keep MAGMA for GPU linear algebra when CUDA is available
+        export USE_BLAS=1 BLAS=OpenBLAS USE_LAPACK=1
+        export CMAKE_INCLUDE_PATH="${PETSC_DIR}/include"
+        export CMAKE_LIBRARY_PATH="${PETSC_DIR}/lib"
+        export USE_MPI=0 USE_DISTRIBUTED=0 USE_GLOO=0 USE_NCCL=0 USE_XCCL=0 USE_TENSORPIPE=0
+        export USE_MKLDNN=0 USE_NNPACK=0 USE_XNNPACK=0 USE_PYTORCH_QNNPACK=0 USE_FBGEMM=0
+        export USE_KINETO=0 USE_ITT=0 BUILD_TEST=0
+        export MAX_JOBS=${MOOSE_JOBS}
         # Require CUDA if we have cuda available
         if [ -n "${CUDA_DIR:-}" ]; then
             # 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
-            LIBTORCH_FLAGS+=(
-                "-DTORCH_CUDA_ARCH_LIST=8.0;8.6;8.9"
-                "-DUSE_CUDA:BOOL=ON"
-                "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}"
-            )
+            export USE_CUDA=1 USE_MAGMA=1
+            export TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9"
+            export CUDA_HOME=${CUDA_DIR}
         else
-            LIBTORCH_FLAGS+=("-DUSE_CUDA:BOOL=OFF")
+            export USE_CUDA=0
         fi
 
-        # Build and install libtorch
-        LIBTORCH_DIR={{ LIBTORCH_DIR }}
-        LIBTORCH_LOGS=$LIBTORCH_DIR/logs
-        mkdir -p $LIBTORCH_LOGS
-        LIBTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/libtorch_build
-        mkdir $LIBTORCH_BUILD_DIR
-        source ${ROOT_BUILD_DIR}/configure_libtorch.sh
-        configure_libtorch \
-            "$PYTORCH_SRC_DIR" \
-            "$LIBTORCH_BUILD_DIR" \
-            "$LIBTORCH_DIR" \
-            -DCMAKE_C_FLAGS="-w" \
-            -DCMAKE_CXX_FLAGS="-w" \
-            "${LIBTORCH_FLAGS[@]}" 2>&1 | tee ${LIBTORCH_LOGS}/cmake.log
-        build_libtorch "$LIBTORCH_BUILD_DIR" "$MOOSE_JOBS" 2>&1 | tee ${LIBTORCH_LOGS}/build.log
-        install_libtorch "$LIBTORCH_BUILD_DIR" "$LIBTORCH_DIR" 2>&1 | tee ${LIBTORCH_LOGS}/install.log
+        # Build and install PyTorch into the container Python (site-packages)
+        PYTORCH_LOGS={{ PYTHON_DIR }}/logs
+        mkdir -p ${PYTORCH_LOGS}
+        ${PYTHON_DIR}/bin/pip install --no-cache --no-build-isolation . 2>&1 | tee ${PYTORCH_LOGS}/pytorch.build.log
 
-        # Cleanup the build environment
-        deactivate
-        rm -rf ${LIBTORCH_BUILD_VENV} ${PYTORCH_SRC_DIR} ${LIBTORCH_BUILD_DIR}
+        # Cleanup
+        rm -rf ${PYTORCH_SRC_DIR}
     )
 {%- endif %}
 
@@ -483,11 +483,13 @@ EOF
     fi
 
 {% if WITHOUT_PYTORCH is not defined %}
-    # Build neml2
+    # Build and install NEML2 into the container's Python environment (next to PyTorch).
+    # The build script pip-installs NEML2 from source and discovers torch from the active
+    # Python, so put the container Python first on PATH.
     (
         cd ${ROOT_BUILD_DIR}
+        export PATH={{ PYTHON_DIR }}/bin:${PATH}
 
-        NEML2_DIR={{ NEML2_DIR }}
         NEML2_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ NEML2_BUILD_SCRIPT }}
 
         # Clone neml2
@@ -498,23 +500,18 @@ EOF
         git checkout {{ NEML2_GIT_SHA }}
         git submodule update --init --recursive --depth 1
 
-{% if PROFILING is defined %}
-        METHODS="oprof"
-{%- else %}
-        METHODS="opt devel dbg"
-{%- endif %}
+        # The build script installs NEML2 but not its build backend, and runs with
+        # --no-build-isolation, so provide scikit-build-core in the container Python.
+        ${PYTHON_DIR}/bin/pip install --no-cache scikit-build-core
 
-        # Build neml2
+        # Build + install neml2 into the container Python (site-packages)
         cd ${ROOT_BUILD_DIR}
-        NEML2_LOGS=${NEML2_DIR}/logs
+        NEML2_LOGS={{ PYTHON_DIR }}/logs
         mkdir -p ${NEML2_LOGS}
-        METHODS="$METHODS" \
         NEML2_SRC_DIR=${NEML2_SRC_DIR} \
-        NEML2_DIR=${NEML2_DIR} \
-        LIBTORCH_DIR={{ LIBTORCH_DIR }} \
-        WASP_DIR={{ WASP_DIR }} \
+        NEML2_JOBS=${MOOSE_JOBS} \
             ${NEML2_BUILD_SCRIPT} \
-                --skip-submodule-update 2>&1 | tee ${NEML2_LOGS}/build.log
+                --skip-submodule-update 2>&1 | tee ${NEML2_LOGS}/neml2.build.log
 
         # Cleanup
         rm -rf ${NEML2_SRC_DIR} ${NEML2_BUILD_SCRIPT}
@@ -615,9 +612,7 @@ EOF
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
 {% if WITHOUT_PYTORCH is not defined %}
-    # libtorch
-    {{ MOOSE_DIR }}/scripts/configure_libtorch.sh {{ ROOT_BUILD_DIR }}/configure_libtorch.sh
-    # neml2
+    # neml2 (PyTorch is built from source inline; no separate script is copied)
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
 {%- endif %}
