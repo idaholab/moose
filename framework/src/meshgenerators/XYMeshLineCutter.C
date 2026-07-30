@@ -23,13 +23,15 @@ XYMeshLineCutter::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum cutting_type("CUT_ELEM_TRI MOV_NODE", "CUT_ELEM_TRI");
+  MooseEnum cutting_type("CUT_ELEM_TRI MOV_NODE CUT_ELEM_POLY", "CUT_ELEM_TRI");
   params.addParam<MooseEnum>(
       "cutting_type",
       cutting_type,
       "Which method is to be used to cut the input mesh. 'CUT_ELEM_TRI' is the recommended method "
       "but it may cause fine elements near the cutting line, while 'MOV_NODE' deforms subdomain "
-      "boundaries if they are not perpendicular to the cutting line.");
+      "boundaries if they are not perpendicular to the cutting line. 'CUT_ELEM_POLY' clips each "
+      "crossed element against the cutting line and represents the retained piece with a "
+      "C0POLYGON element (no remeshing of full elements is needed).");
 
   params.addRequiredParam<MeshGeneratorName>("input", "The input mesh that needs to be trimmed.");
   params.addRequiredParam<std::vector<Real>>(
@@ -49,6 +51,11 @@ XYMeshLineCutter::validParams()
       "trimmer_tri",
       "Suffix to the block name used for quad elements that are trimmed/converted into "
       "triangular elements to avert degenerate quad elements");
+  params.addParam<SubdomainName>(
+      "poly_elem_subdomain_name_suffix",
+      "trimmer_poly",
+      "Suffix to the block name used for elements that are clipped into C0POLYGON elements when "
+      "cutting_type = 'CUT_ELEM_POLY'.");
   params.addParam<subdomain_id_type>(
       "tri_elem_subdomain_shift",
       "Customized id shift to define subdomain ids of the converted triangular elements.");
@@ -78,6 +85,7 @@ XYMeshLineCutter::XYMeshLineCutter(const InputParameters & parameters)
             ? getParam<std::vector<boundary_id_type>>("other_boundaries_to_conform")
             : std::vector<boundary_id_type>()),
     _tri_elem_subdomain_name_suffix(getParam<SubdomainName>("tri_elem_subdomain_name_suffix")),
+    _poly_elem_subdomain_name_suffix(getParam<SubdomainName>("poly_elem_subdomain_name_suffix")),
     _tri_elem_subdomain_shift(isParamValid("tri_elem_subdomain_shift")
                                   ? getParam<subdomain_id_type>("tri_elem_subdomain_shift")
                                   : Moose::INVALID_BLOCK_ID),
@@ -161,7 +169,7 @@ XYMeshLineCutter::generate()
         mooseError("In XYMeshLineCutter with 'CUT_ELEM_TRI' mode, " + (std::string)e.what());
     }
   }
-  else
+  else if (_cutting_type == CutType::MOV_NODE)
   {
     try
     {
@@ -186,6 +194,26 @@ XYMeshLineCutter::generate()
     }
     MooseMeshXYCuttingUtils::quasiTriElementsFixer(
         mesh, subdomain_ids_set, tri_subdomain_id_shift, _tri_elem_subdomain_name_suffix);
+  }
+  else // CUT_ELEM_POLY
+  {
+    try
+    {
+      MooseMeshXYCuttingUtils::lineRemoverCutElemPoly(mesh,
+                                                      _cut_line_params,
+                                                      tri_subdomain_id_shift,
+                                                      _poly_elem_subdomain_name_suffix,
+                                                      block_id_to_remove,
+                                                      new_boundary_id_tmp);
+    }
+    catch (MooseException & e)
+    {
+      if (((std::string)e.what()).compare("The new subdomain name already exists in the mesh.") ==
+          0)
+        paramError("poly_elem_subdomain_name_suffix", e.what());
+      else
+        mooseError("In XYMeshLineCutter with 'CUT_ELEM_POLY' mode, " + (std::string)e.what());
+    }
   }
 
   // Then rename the temporary boundary id to _new_boundary_id
