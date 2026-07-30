@@ -154,7 +154,7 @@ public:
 
     /// The element's subdomain ID
     SubdomainID subdomain_id;
-    /// Evaluated element qualities qualities
+    /// Evaluated element qualities
     std::vector<std::pair<libMesh::ElemQuality, Real>> qualities;
     /// The dimensionality of the element
     unsigned short dim;

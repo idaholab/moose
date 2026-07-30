@@ -14,7 +14,7 @@
       min_parallel = 4
       max_parallel = 4
 
-      detail = "outputs all information be default"
+      detail = "outputs all information by default"
     []
 
     [limit_items_out]
@@ -70,7 +70,7 @@
                   Outputs/file_base=elem_qualities_out'
       skip_keys = 'part number_of_parts'
 
-      detail = "includes selected elem quality information"
+      detail = "includes selected element quality information"
     []
 
     [sideset_all]
@@ -111,7 +111,7 @@
                   Outputs/file_base=sideset_qualities_out'
       skip_keys = 'part number_of_parts'
 
-      detail = "includes selected sideset quality information"
+      detail = "includes selected element side quality information on sidesets"
     []
 
     [subdomain_all]
@@ -152,7 +152,7 @@
                   Outputs/file_base=subdomain_qualities_out'
       skip_keys = 'part number_of_parts'
 
-      detail = "includes selected subdomain quality information"
+      detail = "includes selected element quality information on subdomains"
     []
   []
 
@@ -166,7 +166,7 @@
                   Reporters/mesh_info/elem_items=points'
       expect_err = "elem_items: Should not be provided without an elems item enabled"
 
-      detail = 'requesting elem items without requesting elem'
+      detail = 'requesting specific element information items without requesting element information'
     []
 
     [elem_qualities_no_elems]
@@ -176,7 +176,7 @@
                   Reporters/mesh_info/elem_qualities=min_angle'
       expect_err = "elem_qualities: Should not be provided without an elems item enabled"
 
-      detail = 'requesting elem quality items without requesting elems'
+      detail = 'requesting element quality information items without requesting element information'
     []
 
     [sideset_items_no_sidesets]
@@ -186,7 +186,7 @@
                   Reporters/mesh_info/sideset_items=elems'
       expect_err = "sideset_items: Should not be provided without a sidesets item enabled"
 
-      detail = 'requesting sideset items without requesting sidesets'
+      detail = 'requesting specific sideset information items without requesting sideset information'
     []
 
     [sideset_qualities_no_sidesets]
@@ -196,7 +196,7 @@
                   Reporters/mesh_info/sideset_qualities=min_min_angle'
       expect_err = "sideset_qualities: Should not be provided without a sidesets item enabled"
 
-      detail = 'requesting sideset quality items without requesting sidesets'
+      detail = 'requesting element quality information items on sidesets without requesting sideset information'
     []
 
     [subdomain_items_no_subdomains]
@@ -206,7 +206,7 @@
                   Reporters/mesh_info/subdomain_items=elems'
       expect_err = "subdomain_items: Should not be provided without a subdomains item enabled"
 
-      detail = 'requesting subdomain items without requesting subdomains'
+      detail = 'requesting specific subdomain information items without requesting subdomain information'
     []
 
     [subdomain_qualities_no_subdomains]
@@ -216,7 +216,7 @@
                   Reporters/mesh_info/subdomain_qualities=min_min_angle'
       expect_err = "subdomain_qualities: Should not be provided without a subdomains item enabled"
 
-      detail = 'requesting subdomain quality items without requesting subdomains'
+      detail = 'requesting element quality information items on subdomains without requesting subdomain information'
     []
   []
 []
