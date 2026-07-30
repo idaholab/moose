@@ -111,7 +111,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   _finder.FindPoints(_points, _points_ordering);
 
   bool fe_boundary_discontinuous =
-      _var.FESpace()->FEColl()->GetContType() == mfem::FiniteElementCollection::DISCONTINUOUS;
+      _var.FESpace()->FEColl()->GetContType() != mfem::FiniteElementCollection::CONTINUOUS;
 
   // check all points were found
   mfem::Array<unsigned int> point_codes = _finder.GetCode();
