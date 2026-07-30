@@ -20,12 +20,12 @@
  * [ProblemComposer]
  * []
  */
-class AddMFEMProblemOperatorAction : public MooseObjectAction
+class AddMFEMProblemComposerAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddMFEMProblemOperatorAction(const InputParameters & parameters);
+  AddMFEMProblemComposerAction(const InputParameters & parameters);
 
   void act() override;
 };
