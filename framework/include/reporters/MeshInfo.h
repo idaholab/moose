@@ -140,18 +140,37 @@ public:
   struct ElemInfo : public ElemContainingInfo<dof_id_type>
   {
     ElemInfo() = default;
-    ElemInfo(const dof_id_type id) : ElemContainingInfo<dof_id_type>(id) {}
+    ElemInfo(const dof_id_type id, const SubdomainID subdomain_id)
+      : ElemContainingInfo<dof_id_type>(id), subdomain_id(subdomain_id)
+    {
+    }
 
     /// The element's subdomain ID
     SubdomainID subdomain_id;
     /// Evaluated element qualities qualities
     std::vector<std::pair<libMesh::ElemQuality, Real>> qualities;
+    /// The dimensionality of the element
+    unsigned short dim;
+    /// The element mapping type
+    libMesh::ElemMappingType elem_mapping_type;
     /// The element type
     libMesh::ElemType elem_type;
-    /// The element's nodes
-    std::vector<dof_id_type> nodes;
+    /// The maximum vertex seperation for the element
+    Real hmax;
+    /// The minimum vertex seperation for the element
+    Real hmin;
+    /// The ID of each neighbor (indexed by side)
+    std::vector<dof_id_type> neighbor_ids;
+    /// The IDs of each node
+    std::vector<dof_id_type> node_ids;
+    /// The number of sides on the element
+    unsigned int num_sides;
     /// The element's points
     std::vector<Point> points;
+    /// The processor ID the element is on
+    processor_id_type processor_id;
+    /// Unique ID of the element
+    unique_id_type unique_id;
   };
 
   /**
@@ -199,9 +218,17 @@ public:
 
     /// Markers for whether or not a single item should be output
     ///@{
+    bool dim = false;
+    bool elem_mapping_type = false;
     bool elem_type = false;
-    bool nodes = false;
+    bool hmax = false;
+    bool hmin = false;
+    bool neighbor_ids = false;
+    bool node_ids = false;
+    bool num_sides = false;
     bool points = false;
+    bool processor_id = false;
+    bool unique_id = false;
     ///@}
     /// Element qualities that should be output
     std::vector<libMesh::ElemQuality> qualities;

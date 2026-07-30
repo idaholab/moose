@@ -25,18 +25,12 @@
   []
 []
 
-[Adaptivity]
-  initial_marker = marker
-  [Markers/marker]
-    type = BoxMarker
-    bottom_left = '0 0 0'
-    top_right = '1 0.5 0'
-    inside = 'refine'
-    outside = 'do_nothing'
-  []
+[Variables/u]
 []
 
-[Variables/u]
+[AuxVariables/v]
+  order = CONSTANT
+  family = MONOMIAL
 []
 
 [Executioner]

@@ -55,7 +55,8 @@ MeshInfo::validParams()
   // Elem parameters
   {
     {
-      MultiMooseEnum items("all bounding_box elem_type nodes points volume");
+      MultiMooseEnum items("all bounding_box dim elem_mapping_type elem_type hmax hmin "
+                           "neighbor_ids node_ids num_sides points processor_id unique_id volume");
       params.addParam<MultiMooseEnum>(
           "elem_items", items, "Items to include when outputting elem information");
     }
@@ -215,9 +216,17 @@ MeshInfo::DomainInfoItems::DomainInfoItems(const MultiMooseEnum & items,
 MeshInfo::ElemInfoItems::ElemInfoItems(const MultiMooseEnum & items,
                                        const MultiMooseEnum & qualities)
   : MeshInfo::ElemContainingInfoItems(items),
+    dim(MeshInfo::hasItem("dim", items)),
+    elem_mapping_type(MeshInfo::hasItem("elem_mapping_type", items)),
     elem_type(MeshInfo::hasItem("elem_type", items)),
-    nodes(MeshInfo::hasItem("nodes", items)),
-    points(MeshInfo::hasItem("points", items))
+    hmax(MeshInfo::hasItem("hmax", items)),
+    hmin(MeshInfo::hasItem("hmin", items)),
+    neighbor_ids(MeshInfo::hasItem("neighbor_ids", items)),
+    node_ids(MeshInfo::hasItem("node_ids", items)),
+    num_sides(MeshInfo::hasItem("num_sides", items)),
+    points(MeshInfo::hasItem("points", items)),
+    processor_id(MeshInfo::hasItem("processor_id", items)),
+    unique_id(MeshInfo::hasItem("unique_id", items))
 {
   std::copy_if(MeshInfo::elem_qualities.begin(),
                MeshInfo::elem_qualities.end(),
@@ -262,40 +271,67 @@ MeshInfo::possiblyAddElemInfo()
     if (value_ptr)
       value_ptr->map.clear();
 
+  /// Helper for inserting an element into a map
+  const auto map_insert = [](auto & map, const auto id, const auto subdomain_id) -> ElemInfo &
+  {
+    mooseAssert(!map.count(id), "Should not exist in map");
+    return map
+        .emplace(std::piecewise_construct,
+                 std::forward_as_tuple(id),
+                 std::forward_as_tuple(id, subdomain_id))
+        .first->second;
+  };
+
   const auto & items = _elem_infos.items;
+
+#define set_simple(name, elem_function_name)                                                       \
+  if (items.name)                                                                                  \
+  entry.name = elem.elem_function_name()
 
   // Fill the local information
   std::map<dof_id_type, ElemInfo> local_info;
   for (const auto elem_ptr : *_fe_problem.mesh().getActiveLocalElementRange())
   {
     auto & elem = *elem_ptr;
-    mooseAssert(!local_info.count(elem.id()), "Should not exist in map");
+    auto & entry = map_insert(local_info, elem.id(), elem.subdomain_id());
 
-    auto & entry = local_info[elem.id()];
-    entry.id = elem.id();
-    entry.subdomain_id = elem.subdomain_id();
     entry.qualities.reserve(items.qualities.size());
     for (const auto quality : items.qualities)
       entry.qualities.emplace_back(quality, elem.quality(quality));
-    if (items.bounding_box)
-      entry.bounding_box = elem.loose_bounding_box();
-    if (items.volume)
-      entry.volume = elem.volume();
-    if (items.elem_type)
-      entry.elem_type = elem.type();
-    if (items.nodes)
+
+    set_simple(bounding_box, loose_bounding_box);
+    set_simple(volume, volume);
+    set_simple(dim, dim);
+    set_simple(elem_mapping_type, mapping_type);
+    set_simple(elem_type, type);
+    set_simple(hmax, hmax);
+    set_simple(hmin, hmin);
+    if (items.neighbor_ids)
     {
-      entry.nodes.reserve(elem.n_nodes());
-      for (const auto & node : elem.node_ref_range())
-        entry.nodes.push_back(node.id());
+      entry.neighbor_ids.reserve(elem.n_neighbors());
+      for (const auto neighbor_ptr : elem.neighbor_ptr_range())
+        entry.neighbor_ids.push_back(neighbor_ptr ? neighbor_ptr->id()
+                                                  : libMesh::DofObject::invalid_id);
     }
+    if (items.node_ids)
+    {
+      entry.node_ids.reserve(elem.n_nodes());
+      for (const auto & node : elem.node_ref_range())
+        entry.node_ids.push_back(node.id());
+    }
+    set_simple(num_sides, n_sides);
     if (items.points)
     {
       entry.points.reserve(elem.n_nodes());
       for (const auto & node : elem.node_ref_range())
         entry.points.emplace_back(node);
     }
+    set_simple(processor_id, processor_id);
+    if (items.unique_id)
+      entry.unique_id =
+          elem.valid_unique_id() ? elem.unique_id() : libMesh::DofObject::invalid_unique_id;
   }
+#undef set_simple
 
   // For local, copy over everything we have. It's just local information.
   if (local_ptr)
@@ -312,10 +348,7 @@ MeshInfo::possiblyAddElemInfo()
         data.emplace_back(id, info.subdomain_id);
       comm().gather(0, data);
       for (const auto & [id, subdomain_id] : data)
-      {
-        auto & entry = global_ptr->map.emplace(id, id).first->second;
-        entry.subdomain_id = subdomain_id;
-      }
+        map_insert(global_ptr->map, id, subdomain_id);
     }
 
     const auto gather = [&](const auto && get_value, const auto && set_value)
@@ -338,8 +371,6 @@ MeshInfo::possiblyAddElemInfo()
             std::vector<std::pair<std::underlying_type_t<libMesh::ElemQuality>, Real>> values;
             values.reserve(info.qualities.size());
             values.insert(values.end(), info.qualities.begin(), info.qualities.end());
-            // for (const auto & [quality, value] : info.qualities)
-            //   values.emplace_back(quality, value);
             return values;
           },
           [](auto & info, const auto & value)
@@ -352,29 +383,48 @@ MeshInfo::possiblyAddElemInfo()
     // bounding_box
     if (items.bounding_box)
       gather([](const auto & info)
-             { return std::make_pair(info.bounding_box.min(), info.bounding_box.max()); },
+             { return static_cast<const std::pair<Point, Point> &>(info.bounding_box); },
              [](auto & info, const auto & value)
-             {
-               info.bounding_box.min() = value.first;
-               info.bounding_box.max() = value.second;
-             });
-    // elem_type
-    if (items.elem_type)
-      gather([](const auto & info) { return static_cast<int>(info.elem_type); },
-             [](auto & info, const auto & value)
-             { info.elem_type = static_cast<libMesh::ElemType>(value); });
+             { static_cast<std::pair<Point, Point> &>(info.bounding_box) = value; });
+
+#define gather_simple(name)                                                                        \
+  if (items.name)                                                                                  \
+  gather([](const auto & info) { return info.name; },                                              \
+         [](auto & info, const auto & value) { info.name = value; })
+#define gather_enum(name)                                                                          \
+  if (items.name)                                                                                  \
+  gather([](const auto & info)                                                                     \
+         { return static_cast<std::underlying_type_t<decltype(ElemInfo::name)>>(info.name); },     \
+         [](auto & info, const auto & value)                                                       \
+         { info.name = static_cast<decltype(ElemInfo::name)>(value); })
+
     // volume
-    if (items.volume)
-      gather([](const auto & info) { return info.volume; },
-             [](auto & info, const auto & value) { info.volume = value; });
-    // nodes
-    if (items.nodes)
-      gather([](const auto & info) { return info.nodes; },
-             [](auto & info, const auto & value) { info.nodes = value; });
+    gather_simple(volume);
+    // dim
+    gather_simple(dim);
+    // elem_mapping_type
+    gather_enum(elem_mapping_type);
+    // elem_type
+    gather_enum(elem_type);
+    // hmax
+    gather_simple(hmax);
+    // hmin
+    gather_simple(hmin);
+    // neighbor_ids
+    gather_simple(neighbor_ids);
+    // node_ids
+    gather_simple(node_ids);
+    // num_sides
+    gather_simple(num_sides);
     // points
-    if (items.points)
-      gather([](const auto & info) { return info.points; },
-             [](auto & info, const auto & value) { info.points = value; });
+    gather_simple(points);
+    // processor_id
+    gather_simple(processor_id);
+    // unique_id
+    gather_simple(unique_id);
+
+#undef gather_simple
+#undef gather_enum
   }
 }
 
@@ -605,12 +655,13 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
 void
 MeshInfo::execute()
 {
-  if (_num_dofs)
-    *_num_dofs = _equation_systems.n_dofs();
-  if (_num_dofs_nl)
-    *_num_dofs_nl = _nonlinear_system.n_dofs();
-  if (_num_dofs_aux)
-    *_num_dofs_aux = _aux_system.n_dofs();
+#define set_value(variable, value)                                                                 \
+  if (variable)                                                                                    \
+  *variable = value
+
+  set_value(_num_dofs, _equation_systems.n_dofs());
+  set_value(_num_dofs_nl, _nonlinear_system.n_dofs());
+  set_value(_num_dofs_aux, _aux_system.n_dofs());
   if (_num_dofs_constrained)
   {
     *_num_dofs_constrained = 0;
@@ -618,20 +669,15 @@ MeshInfo::execute()
       *_num_dofs_constrained += _equation_systems.get_system(s).n_constrained_dofs();
   }
 
-  if (_num_elem)
-    *_num_elem = _mesh.n_elem();
-  if (_num_node)
-    *_num_node = _mesh.n_nodes();
-  if (_num_local_dofs)
-    *_num_local_dofs = _nonlinear_system.n_local_dofs() + _aux_system.n_local_dofs();
-  if (_num_local_dofs_nl)
-    *_num_local_dofs_nl = _nonlinear_system.n_local_dofs();
-  if (_num_local_dofs_aux)
-    *_num_local_dofs_aux = _aux_system.n_local_dofs();
-  if (_num_local_elem)
-    *_num_local_elem = _mesh.n_local_elem();
-  if (_num_local_node)
-    *_num_local_node = _mesh.n_local_nodes();
+  set_value(_num_elem, _mesh.n_elem());
+  set_value(_num_node, _mesh.n_nodes());
+  set_value(_num_local_dofs, _nonlinear_system.n_local_dofs() + _aux_system.n_local_dofs());
+  set_value(_num_local_dofs_nl, _nonlinear_system.n_local_dofs());
+  set_value(_num_local_dofs_aux, _aux_system.n_local_dofs());
+  set_value(_num_local_elem, _mesh.n_local_elem());
+  set_value(_num_local_node, _mesh.n_local_nodes());
+
+#undef set_value
 
   possiblyAddElemInfo();
   possiblyAddDomainInfo(_sideset_infos);
@@ -648,6 +694,29 @@ MeshInfo::hasItem(const std::string & name, const MultiMooseEnum & items)
 }
 
 /// JSON serialization for info maps
+#define info_json_simple(name)                                                                     \
+  if (items.name)                                                                                  \
+  info_json[#name] = info.name
+#define info_json_enum(name)                                                                       \
+  if (items.name)                                                                                  \
+  info_json[#name] = libMesh::Utility::enum_to_string(info.name)
+#define info_json_id(name, invalid_value)                                                          \
+  if (items.name)                                                                                  \
+  {                                                                                                \
+    if (info.name == invalid_value)                                                                \
+      info_json[#name] = nullptr;                                                                  \
+    else                                                                                           \
+      info_json[#name] = info.name;                                                                \
+  }
+#define info_json_ids(name, invalid_value)                                                         \
+  if (items.name)                                                                                  \
+    for (const auto id : info.name)                                                                \
+    {                                                                                              \
+      if (id == invalid_value)                                                                     \
+        info_json[#name].push_back(nullptr);                                                       \
+      else                                                                                         \
+        info_json[#name].push_back(id);                                                            \
+    }
 template <class InfoType>
 void
 toJSONInfoBase(nlohmann::json & json, const InfoType & info)
@@ -656,13 +725,13 @@ toJSONInfoBase(nlohmann::json & json, const InfoType & info)
 }
 template <class InfoType, class InfoItemsType>
 void
-toJSONElemContainingInfo(nlohmann::json & json, const InfoType & info, const InfoItemsType & items)
+toJSONElemContainingInfo(nlohmann::json & info_json,
+                         const InfoType & info,
+                         const InfoItemsType & items)
 {
-  toJSONInfoBase(json, info);
-  if (items.bounding_box)
-    json["bounding_box"] = info.bounding_box;
-  if (items.volume)
-    json["volume"] = info.volume;
+  toJSONInfoBase(info_json, info);
+  info_json_simple(bounding_box);
+  info_json_simple(volume);
 }
 void
 to_json(nlohmann::json & json, const MeshInfo::ElemInfoMap & info_map)
@@ -680,15 +749,28 @@ to_json(nlohmann::json & json, const MeshInfo::ElemInfoMap & info_map)
     if (info.qualities.size())
       for (const auto & [quality, value] : info.qualities)
         info_json["qualities"][elemQualityToString(quality)] = value;
+    // dim
+    info_json_simple(dim);
+    // elem_mapping_type
+    info_json_enum(elem_mapping_type);
     // elem_type
-    if (items.elem_type)
-      info_json["elem_type"] = libMesh::Utility::enum_to_string(info.elem_type);
-    // nodes
-    if (items.nodes)
-      info_json["nodes"] = info.nodes;
+    info_json_enum(elem_type);
+    // hmax
+    info_json_simple(hmax);
+    // hmin
+    info_json_simple(hmin);
+    // neighbor_ids
+    info_json_ids(neighbor_ids, libMesh::DofObject::invalid_id);
+    // node_ids
+    info_json_ids(node_ids, libMesh::DofObject::invalid_id);
+    // num_sides
+    info_json_simple(num_sides);
     // points
-    if (items.points)
-      info_json["points"] = info.points;
+    info_json_simple(points);
+    // processor_id
+    info_json_simple(processor_id);
+    // unique_id
+    info_json_id(unique_id, libMesh::DofObject::invalid_unique_id);
 
     json.push_back(std::move(info_json));
   }
@@ -738,21 +820,21 @@ toJSONDomainInfoMap(nlohmann::json & json, const DomainInfoMapType & info_map)
       info_json["elem_types"] = elem_types;
     }
     // max_volume
-    if (items.max_volume)
-      info_json["max_volume"] = info.max_volume;
+    info_json_simple(max_volume);
     // min_volume
-    if (items.min_volume)
-      info_json["min_volume"] = info.min_volume;
+    info_json_simple(min_volume);
     // min_volume
-    if (items.num_elems)
-      info_json["num_elems"] = info.num_elems;
+    info_json_simple(num_elems);
     // processor_ids
-    if (items.processor_ids)
-      info_json["processor_ids"] = info.processor_ids;
+    info_json_simple(processor_ids);
 
     json.push_back(std::move(info_json));
   }
 }
+#undef info_json_simple
+#undef info_json_enum
+#undef info_json_id
+#undef info_json_ids
 void
 to_json(nlohmann::json & json, const MeshInfo::SidesetInfoMap & info_map)
 {
@@ -807,11 +889,19 @@ void
 dataStore(std::ostream & stream, MeshInfo::ElemInfo & info, void *)
 {
   dataStoreElemContainingInfo(stream, info);
-  dataStore(stream, info.subdomain_id, nullptr);
   dataStore(stream, info.qualities, nullptr);
+  dataStore(stream, info.dim, nullptr);
+  dataStore(stream, info.elem_mapping_type, nullptr);
   dataStore(stream, info.elem_type, nullptr);
-  dataStore(stream, info.nodes, nullptr);
+  dataStore(stream, info.hmax, nullptr);
+  dataStore(stream, info.hmin, nullptr);
+  dataStore(stream, info.neighbor_ids, nullptr);
+  dataStore(stream, info.node_ids, nullptr);
+  dataStore(stream, info.num_sides, nullptr);
   dataStore(stream, info.points, nullptr);
+  dataStore(stream, info.processor_id, nullptr);
+  dataStore(stream, info.subdomain_id, nullptr);
+  dataStore(stream, info.unique_id, nullptr);
 }
 template <typename T>
 void
@@ -855,11 +945,19 @@ void
 dataLoad(std::istream & stream, MeshInfo::ElemInfo & info, void *)
 {
   dataLoadElemContainingInfo(stream, info);
-  dataLoad(stream, info.subdomain_id, nullptr);
   dataLoad(stream, info.qualities, nullptr);
+  dataLoad(stream, info.dim, nullptr);
+  dataLoad(stream, info.elem_mapping_type, nullptr);
   dataLoad(stream, info.elem_type, nullptr);
-  dataLoad(stream, info.nodes, nullptr);
+  dataLoad(stream, info.hmax, nullptr);
+  dataLoad(stream, info.hmin, nullptr);
+  dataLoad(stream, info.neighbor_ids, nullptr);
+  dataLoad(stream, info.node_ids, nullptr);
+  dataLoad(stream, info.num_sides, nullptr);
   dataLoad(stream, info.points, nullptr);
+  dataLoad(stream, info.processor_id, nullptr);
+  dataLoad(stream, info.subdomain_id, nullptr);
+  dataLoad(stream, info.unique_id, nullptr);
 }
 template <typename T>
 void
