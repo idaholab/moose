@@ -25,10 +25,6 @@
 namespace Moose::MFEM
 {
 class CoefficientManager;
-class LinearSolverBase;
-class ComplexEquationSystem;
-class EigenproblemEquationSystem;
-class TimeDependentEquationSystem;
 
 /**
  * Owns the weak-form mathematics of a MOOSE MFEM problem.
@@ -159,12 +155,12 @@ public:
    */
   mfem::Array<int> & GetEssentialBoundaryMarkers(const std::string & var_name);
 
-  /// @returns A pointer to the complex equation system, nullptr if not such
-  virtual const ComplexEquationSystem * IsComplex() const { return nullptr; }
-  /// @returns A pointer to the eigenproblem equation system, nullptr if not such
-  virtual const EigenproblemEquationSystem * IsEigen() const { return nullptr; }
-  /// @returns A pointer to the time-dependent equation system, nullptr if not such
-  virtual const TimeDependentEquationSystem * IsTimeDependent() const { return nullptr; }
+  /// @returns Whether this EquationSystem includes complex components
+  virtual bool IsComplex() const { return false; }
+  /// @returns Whether this EquationSystem represents an eigenproblem
+  virtual bool IsEigen() const { return false; }
+  /// @returns Whether this EquationSystem has time-dependent components
+  virtual bool IsTimeDependent() const { return false; }
   /// @returns Whether this is a multivariate (maybe mixed) equation system
   bool IsMultivariate() const { return _test_var_names.size() > 1; }
   /// @returns Whether nonlinear integrators are present in the equation system
