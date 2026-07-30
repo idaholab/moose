@@ -145,8 +145,6 @@ LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
   // Cache the RHS contribution
   if (!_cached_rhs_contribution)
   {
-    const auto state_arg = determineState();
-
     // Get the gradients from the adjacent cells
     const auto grad_elem = _gradient_field.gradient(*_current_face_info->elemInfo());
     const auto grad_neighbor = _gradient_field.gradient(*_current_face_info->neighborInfo());

@@ -12,7 +12,6 @@
 #include "SolverSystem.h"
 #include "LinearFVGradientInterface.h"
 #include "PerfGraphInterface.h"
-#include "GradientLimiterType.h"
 
 #include <set>
 

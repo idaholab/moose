@@ -405,8 +405,7 @@ LinearAssemblySegregatedSolve::initialSetup()
 void
 LinearAssemblySegregatedSolve::updatePressureGradient()
 {
-  mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
-  _pressure_system.updateFVGradient(_rc_uo->pressureGradientField());
+  _pressure_system.computeGradients();
 }
 
 std::pair<unsigned int, Real>
