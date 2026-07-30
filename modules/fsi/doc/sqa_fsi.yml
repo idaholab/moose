@@ -1,7 +1,9 @@
 directories:
     - ${MOOSE_DIR}/modules/fsi/test/tests
+    - ${MOOSE_DIR}/modules/fsi/unit/src
 specs:
     - tests
+    - '*.unit_tests'
 dependencies:
     - framework
 repo: moose

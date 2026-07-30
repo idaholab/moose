@@ -26,6 +26,12 @@
     requirement = "The system shall include a tool for testing requirement information for software quality documentation."
   []
 
+  [unit_test_sqa]
+    type = PythonUnitTest
+    input = test_unit_test_sqa.py
+    requirement = "The system shall enforce requirement, design, and issue traceability for new C++ unit tests."
+  []
+
   [SQAReport]
     type = PythonUnitTest
     input = test_SQAReport.py

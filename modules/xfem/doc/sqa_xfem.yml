@@ -1,9 +1,11 @@
 directories:
     - ${MOOSE_DIR}/modules/xfem/test/tests
+    - ${MOOSE_DIR}/modules/xfem/unit/src
 dependencies:
     - framework
     - tensor_mechanics
 specs:
     - tests
+    - '*.unit_tests'
 repo: moose
 reports: !include ${MOOSE_DIR}/modules/xfem/doc/sqa_reports.yml

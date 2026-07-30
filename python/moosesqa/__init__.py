@@ -11,6 +11,7 @@ from .check_syntax import check_syntax, file_is_stub, find_md_file
 from .get_requirements import get_requirements_from_tests, get_requirements_from_file
 from .get_requirements import number_requirements, get_test_specification
 from .check_requirements import check_requirements
+from .check_unit_test_sqa import check_unit_test_sqa, discover_google_tests
 from .SQAReport import SQAReport
 from .SQADocumentReport import SQADocumentReport
 from .SQARequirementReport import SQARequirementReport, SQARequirementDiffReport
