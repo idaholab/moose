@@ -33,7 +33,7 @@
                   "momentum pressure-gradient consumers."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
-    issues = '#32995'
+    issues = '#32999'
   []
   [energy_boussinesq]
     type = 'Exodiff'
