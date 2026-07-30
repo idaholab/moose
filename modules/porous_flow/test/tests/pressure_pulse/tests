@@ -10,21 +10,39 @@
   []
   [pressure_pulse_1d_lumped_not_nodal]
     type = 'RunException'
-    input = 'pressure_pulse_1d.i'
-    cli_args = "Kernels/active=mass0 Variables/pp/family=MONOMIAL Variables/pp/order=CONSTANT BCs/active=''"
-    expect_err = "The variable 'pp' is not a nodal .Lagrange. variable"
+    input = 'pressure_pulse_1d_nonnodal_local_var.i'
+    cli_args = "Kernels/active='mass0 flux lumped_on_conc'"
+    expect_err = "The variable 'conc' is not a nodal .Lagrange. variable.*mass lumping"
     issues = '#33122 #33370'
     design = 'porous_flow/mass_lumping.md PorousFlowDictator.md'
     requirement = 'The system shall produce an error if a mass-lumped PorousFlow kernel is applied to a non-nodal variable.'
   []
   [pressure_pulse_1d_upwind_not_nodal]
     type = 'RunException'
-    input = 'pressure_pulse_1d.i'
-    cli_args = "Kernels/active=flux Variables/pp/family=MONOMIAL Variables/pp/order=CONSTANT BCs/active=''"
-    expect_err = "The variable 'pp' is not a nodal .Lagrange. variable"
+    input = 'pressure_pulse_1d_nonnodal_local_var.i'
+    cli_args = "Kernels/active='mass0 flux upwind_on_conc'"
+    expect_err = "The variable 'conc' is not a nodal .Lagrange. variable.*full upwinding"
     issues = '#33122 #33370'
     design = 'porous_flow/upwinding.md PorousFlowDictator.md'
     requirement = 'The system shall produce an error if a fully-upwinded PorousFlow flux kernel is applied to a non-nodal variable.'
+  []
+  [pressure_pulse_1d_nonnodal_local_var]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_nonnodal_local_var.i'
+    csvdiff = 'pressure_pulse_1d_nonnodal_local_var.csv'
+    cli_args = "Kernels/active='mass0 flux conc_dot'"
+    issues = '#33370'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md PorousFlowDictator.md'
+    requirement = 'The system shall permit an element-local PorousFlow variable that is only a local unknown, since no nodal material reads it.'
+  []
+  [pressure_pulse_1d_2phase_mixed_families]
+    type = 'RunException'
+    input = 'pressure_pulse_1d_2phase.i'
+    cli_args = "Variables/ppgas/family=MONOMIAL Variables/ppgas/order=CONSTANT"
+    expect_err = "it reads 'phase1_porepressure' at the nodes, but the variable supplied to it ..ppgas.. is not a nodal .Lagrange. variable"
+    issues = '#33370'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md PorousFlowDictator.md'
+    requirement = 'The system shall produce an error if a variable that a nodal PorousFlow material reads at the nodes is not nodal, even when the other PorousFlow variables are nodal.'
   []
   [pressure_pulse_1d_action]
     type = 'CSVDiff'

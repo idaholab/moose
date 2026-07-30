@@ -37,6 +37,10 @@ PorousFlow1PhaseFullySaturatedTempl<is_ad>::PorousFlow1PhaseFullySaturatedTempl(
                    ? _dictator.porousFlowVariableNum(_porepressure_varnum)
                    : 0)
 {
+  // These are read with coupledGenericDofValue when at_nodes = true, so they must be
+  // nodal (Lagrange) variables.  See #33370.
+  if (this->_nodal_material)
+    this->checkNodalVariables({"porepressure"});
   if (_num_phases != 1)
     mooseError("The Dictator proclaims that the number of phases is ",
                _dictator.numPhases(),

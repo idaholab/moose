@@ -101,8 +101,8 @@ PorousFlowDarcyBaseTempl<is_ad>::PorousFlowDarcyBaseTempl(const InputParameters 
     mooseError("The variable '",
                _var.name(),
                "' is not a nodal (Lagrange) variable.  This kernel uses full upwinding, which "
-               "requires a nodal variable.  For non-nodal variables use the non-upwinded "
-               "PorousFlowFullySaturated* kernels or Kuzmin-Turek (KT) stabilisation instead.");
+               "requires a nodal variable.  ",
+               PorousFlowDictator::nonNodalAdvice());
 
 #ifdef LIBMESH_HAVE_TBB_API
   if (libMesh::n_threads() > 1)

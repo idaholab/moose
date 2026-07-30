@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowLumpedKernelBase.h"
+#include "PorousFlowDictator.h"
 
 template <bool is_ad>
 PorousFlowLumpedKernelBaseTempl<is_ad>::PorousFlowLumpedKernelBaseTempl(
@@ -21,8 +22,8 @@ PorousFlowLumpedKernelBaseTempl<is_ad>::PorousFlowLumpedKernelBaseTempl(
     mooseError("The variable '",
                _var.name(),
                "' is not a nodal (Lagrange) variable.  This kernel uses mass lumping, which "
-               "requires a nodal variable.  For non-nodal variables use the non-lumped "
-               "PorousFlowFullySaturated* kernels instead.");
+               "requires a nodal variable.  ",
+               PorousFlowDictator::nonNodalAdvice());
 }
 
 template <bool is_ad>

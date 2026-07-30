@@ -73,6 +73,10 @@ PorousFlowFluidStateTempl<is_ad>::PorousFlowFluidStateTempl(const InputParameter
     _Zidx(_fs.getZIndex()),
     _Xidx(_fs.getXIndex())
 {
+  // These are read with coupledGenericDofValue when at_nodes = true, so they must be
+  // nodal (Lagrange) variables.  See #33370.
+  if (this->_nodal_material)
+    this->checkNodalVariables({"gas_porepressure", "z"});
   // Check that the number of phases in the fluidstate class is also provided in the Dictator
   if (_fs.numPhases() != _num_phases)
     mooseError(name(),
