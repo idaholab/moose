@@ -3659,8 +3659,11 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
     }
   }
 
-  // The argument can alias several different reusable Assembly Jacobian blocks, so clear the
-  // selected block after caching its entries.
+  // These Assembly-owned Jacobian blocks are accumulation buffers. Some paths reuse a block after
+  // caching without an intervening prepare call (and therefore without resize zeroing it), so
+  // clearing here prevents stale contributions from being accumulated and cached again. Keeping
+  // the clear here also avoids duplicating it at every element, neighbor, nonlocal, and mortar
+  // cache call site.
   jac_block.zero();
 }
 
@@ -3720,8 +3723,11 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
     }
   }
 
-  // The argument can alias several different reusable Assembly Jacobian blocks, so clear the
-  // selected block after caching its entries.
+  // These Assembly-owned Jacobian blocks are accumulation buffers. Some paths reuse a block after
+  // caching without an intervening prepare call (and therefore without resize zeroing it), so
+  // clearing here prevents stale contributions from being accumulated and cached again. Keeping
+  // the clear here also avoids duplicating it at every element, neighbor, nonlocal, and mortar
+  // cache call site.
   jac_block.zero();
 }
 
