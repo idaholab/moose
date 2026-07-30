@@ -169,7 +169,7 @@ public:
     // then get it and build the operator
     InputParameters _problem_operator_params =
         _factory.getValidParams("CustomDummyProblemComposer");
-    _mfem_problem->addMFEMProblemOperator(
+    _mfem_problem->addMFEMProblemComposer(
         "CustomDummyProblemComposer", "custom_problem_operator", _problem_operator_params);
     _problem_composer = _mfem_problem->getProblemComposer();
     _problem_operator = _problem_composer->createProblemOperator(*_mfem_problem);
