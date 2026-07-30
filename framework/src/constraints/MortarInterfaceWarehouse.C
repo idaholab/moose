@@ -50,7 +50,8 @@ MortarInterfaceWarehouse::createMortarInterface(
     const bool correct_edge_dropping,
     const Real minimum_projection_angle,
     const MooseEnum & triangulation,
-    const bool triangulate_triangles)
+    const bool triangulate_triangles,
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -83,6 +84,9 @@ MortarInterfaceWarehouse::createMortarInterface(
     if (existing.triangulate_triangles != triangulate_triangles)
       mooseError("We do not currently support multiple values of 'triangulate_triangles' on the "
                  "same boundary primary-secondary surface pair.");
+    if (existing.mortar_3d_qp_mapping != mortar_3d_qp_mapping)
+      mooseError("We do not currently support multiple values of 'mortar_3d_qp_mapping' on the "
+                 "same boundary primary-secondary surface pair.");
   }
   else
   {
@@ -97,11 +101,13 @@ MortarInterfaceWarehouse::createMortarInterface(
                                                     correct_edge_dropping,
                                                     minimum_projection_angle,
                                                     triangulation_mode,
-                                                    triangulate_triangles),
+                                                    triangulate_triangles,
+                                                    mortar_3d_qp_mapping),
         periodic,
         debug,
         triangulation_mode,
-        triangulate_triangles};
+        triangulate_triangles,
+        mortar_3d_qp_mapping};
     config.amg->initOutput();
     mortar_interfaces.emplace(boundary_key, std::move(config));
   }

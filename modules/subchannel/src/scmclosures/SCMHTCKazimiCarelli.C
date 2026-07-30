@@ -35,6 +35,7 @@ SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args
 {
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
   const auto Pe = pre.Re * pre.Pr;
+  const auto turbulent_Pe = turbulentReynoldsNumber(pre) * pre.Pr;
 
   if (Pe < 10 || Pe > 5000)
     flagSolutionWarning("Peclet number (Pe) out of range for the Kazimi-Carelli correlation.");
@@ -43,7 +44,7 @@ SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args
     flagSolutionWarning(
         "Pitch over pin diameter ratio out of range for the Kazimi-Carelli correlation.");
 
-  const auto NuT = 4.0 + 0.33 * std::pow(pre.poD, 3.8) * std::pow((Pe / 1e2), 0.86) +
+  const auto NuT = 4.0 + 0.33 * std::pow(pre.poD, 3.8) * std::pow((turbulent_Pe / 1e2), 0.86) +
                    0.16 * std::pow(pre.poD, 5);
   return blendTurbulentNusseltNumber(pre, NuT);
 }

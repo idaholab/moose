@@ -42,6 +42,56 @@
     partial = True
     min_parallel = 2
   []
+  [reference-interpolation]
+    design = 'AutomaticMortarGeneration.md EqualValueConstraint.md'
+    issues = '#33367'
+    requirement = 'The system shall preserve fixed-mesh regression results for the primal error, '
+                  'Lagrange multiplier error, and element size when 3D mortar quadrature points '
+                  'are mapped by parent-face reference interpolation on'
+    [hex20]
+      type = 'CSVDiff'
+      capabilities = 'ad_size>=200'
+      input = 'continuity_sphere_hex.i'
+      csvdiff = 'continuity_sphere_hex20_reference_interpolation.csv'
+      cli_args = 'Mesh/file/file=spheres_hex20.e Variables/T/order=SECOND '
+                 'Constraints/mortar/mortar_3d_qp_mapping=reference_interpolation '
+                 'Constraints/mortar/triangulation=centroid '
+                 'Constraints/mortar/triangulate_triangles=true '
+                 'Postprocessors/active="L2u L2lambda h" Outputs/exodus=false Outputs/csv=true '
+                 'Outputs/file_base=continuity_sphere_hex20_reference_interpolation'
+      detail = 'a curved HEX20 volume mesh with QUAD8 mortar-interface faces,'
+      min_parallel = 2
+    []
+    [hex27]
+      type = 'CSVDiff'
+      capabilities = 'ad_size>=200'
+      input = 'continuity_sphere_hex.i'
+      csvdiff = 'continuity_sphere_hex27_reference_interpolation.csv'
+      cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND '
+                 'Constraints/mortar/mortar_3d_qp_mapping=reference_interpolation '
+                 'Constraints/mortar/triangulation=centroid '
+                 'Constraints/mortar/triangulate_triangles=true '
+                 'Postprocessors/active="L2u L2lambda h" Outputs/exodus=false Outputs/csv=true '
+                 'Outputs/file_base=continuity_sphere_hex27_reference_interpolation'
+      detail = 'a curved HEX27 volume mesh with QUAD9 mortar-interface faces, and'
+      min_parallel = 2
+    []
+    [tet10]
+      type = 'CSVDiff'
+      capabilities = 'ad_size>=100'
+      input = 'continuity_tet.i'
+      csvdiff = 'continuity_tet10_reference_interpolation.csv'
+      cli_args = 'Mesh/second_order=true Mesh/left_block/elem_type=TET10 '
+                 'Mesh/right_block/elem_type=TET10 Variables/T/order=SECOND '
+                 'Variables/lambda/family=LAGRANGE Variables/lambda/order=SECOND '
+                 'Constraints/mortar/mortar_3d_qp_mapping=reference_interpolation '
+                 'Constraints/mortar/triangulation=centroid '
+                 'Constraints/mortar/triangulate_triangles=true '
+                 'Postprocessors/active="L2u L2lambda h" Outputs/exodus=false Outputs/csv=true '
+                 'Outputs/file_base=continuity_tet10_reference_interpolation'
+      detail = 'a TET10 volume mesh with TRI6 mortar-interface faces.'
+    []
+  []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
     input = 'continuity_sphere_hex.i'

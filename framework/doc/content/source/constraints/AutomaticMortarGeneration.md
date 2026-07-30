@@ -44,4 +44,51 @@ Elements defined on second order geometries are curvilinear so to simplify the '
 
 Quadrature points defined on mortar segments (which live on linearized elements) are mapped back to second order elements following an analogous but reverse procedure to the one illustrated above; points are mapped from linearized elements to first order sub-elements then subsequently transformed to the original second order elements.
 
+### Quadrature Point Mapping
+
+The [!param](/Constraints/EqualValueConstraint/mortar_3d_qp_mapping) parameter on a directly
+specified mortar consumer selects how a quadrature point on a 3D mortar segment is mapped to
+reference coordinates on the primary and secondary parent faces. This selection has no effect on 2D
+mortar interfaces. Every mortar consumer on the same primary-secondary boundary pair must select
+the same mode; MOOSE reports an input error when the selections differ.
+
+Let $\boldsymbol{\eta}_q$ be a quadrature point in the reference triangle of a mortar segment,
+$N_a^m$ the three linear mortar-segment shape functions, and $\boldsymbol{x}_a^m$ the physical
+mortar-segment vertices. The corresponding physical point on the planar mortar segment is
+
+!equation id=mortar-segment-quadrature-point
+\boldsymbol{x}_m(\boldsymbol{\eta}_q) =
+\sum_{a=1}^{3} N_a^m(\boldsymbol{\eta}_q)\boldsymbol{x}_a^m.
+
+Let $i \in \{p,s\}$ denote the primary or secondary parent face. With `normal_projection`, MOOSE
+finds the local sub-face coordinate $\hat{\boldsymbol{\xi}}_{i,q}$ on each parent-face linearization
+by solving
+
+!equation id=normal-projection-quadrature-mapping
+\left[\boldsymbol{x}_{i,\mathrm{lin}}(\hat{\boldsymbol{\xi}}_{i,q}) -
+\boldsymbol{x}_m(\boldsymbol{\eta}_q)\right] \times \boldsymbol{n}_m = \boldsymbol{0},
+\qquad i \in \{p,s\},
+
+where $\boldsymbol{n}_m$ is the mortar-segment normal. This projects the mortar quadrature point
+along $\boldsymbol{n}_m$ onto each local first-order parent-face linearization. MOOSE then transforms
+$\hat{\boldsymbol{\xi}}_{i,q}$ to the parent-face reference coordinate
+$\boldsymbol{\xi}_{i,q}$ used to evaluate the finite element fields.
+
+With `reference_interpolation`, each retained mortar-segment vertex $a$ stores its primary and
+secondary parent-face reference coordinates $\boldsymbol{\xi}_{i,a}$ recovered during clipping.
+MOOSE interpolates those coordinates directly:
+
+!equation id=reference-interpolation-quadrature-mapping
+\boldsymbol{\xi}_{i,q} =
+\sum_{a=1}^{3} N_a^m(\boldsymbol{\eta}_q)\boldsymbol{\xi}_{i,a},
+\qquad
+\boldsymbol{x}_{i,q} = \boldsymbol{x}_i(\boldsymbol{\xi}_{i,q}),
+\qquad i \in \{p,s\}.
+
+This mode preserves the barycentric correspondence established at the clipped mortar-segment
+vertices; it does not project the physical quadrature point again. On curved parent faces, the two
+evaluation points lie on their respective finite element faces but need not align along
+$\boldsymbol{n}_m$. MOOSE reports an error if a retained mortar segment cannot build a complete
+reference map; it does not fall back to `normal_projection`.
+
 !bibtex bibliography
