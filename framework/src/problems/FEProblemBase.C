@@ -1176,7 +1176,10 @@ FEProblemBase::initialSetup()
       TIME_SECTION("ICinitialSetup", 5, "Setting Up Initial Conditions");
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      {
         _ics.initialSetup(tid);
+        _fv_ics.initialSetup(tid);
+      }
 
       _scalar_ics.initialSetup();
     }
