@@ -25,6 +25,7 @@ InputParameters
 CHTHandler::validParams()
 {
   auto params = emptyInputParameters();
+  params += NonADFunctorInterface::validParams();
   params.addParam<std::vector<BoundaryName>>(
       "cht_interfaces",
       {},
@@ -64,10 +65,17 @@ CHTHandler::validParams()
       {},
       "The relaxation factors for the boundary flux when being updated on the solid side.");
 
+  params.addParam<std::vector<MooseFunctorName>>(
+      "thermal_resistance",
+      std::vector<MooseFunctorName>({"0"}),
+      "The custom area-normalized thermal resistance at each interface, in m^2*K/W. "
+      "Provide one value to use for all CHT interfaces or one value per entry in "
+      "cht_interfaces.");
+
   params.addParamNamesToGroup(
       "cht_interfaces max_cht_fpi cht_heat_flux_tolerance cht_fluid_temperature_relaxation "
       "cht_solid_temperature_relaxation cht_fluid_flux_relaxation "
-      "cht_solid_flux_relaxation",
+      "cht_solid_flux_relaxation thermal_resistance",
       "Conjugate Heat Transfer");
 
   return params;
@@ -75,6 +83,7 @@ CHTHandler::validParams()
 
 CHTHandler::CHTHandler(const InputParameters & params)
   : MooseObject(params),
+    NonADFunctorInterface(this),
     _problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _mesh(_problem.mesh()),
@@ -85,6 +94,23 @@ CHTHandler::CHTHandler(const InputParameters & params)
 {
   if (isParamSetByUser("cht_interfaces") && !_cht_boundary_names.size())
     paramError("cht_interfaces", "You must declare at least one interface!");
+
+  const auto & thermal_resistance_names =
+      getParam<std::vector<MooseFunctorName>>("thermal_resistance");
+  if (thermal_resistance_names.size() != 1 &&
+      thermal_resistance_names.size() != _cht_boundary_names.size())
+    paramError("thermal_resistance",
+               "Provide either one thermal resistance for all CHT interfaces or one value per "
+               "entry in cht_interfaces.");
+
+  _thermal_resistance.reserve(_cht_boundary_names.size());
+  for (const auto bd_index : index_range(_cht_boundary_names))
+  {
+    const auto & thermal_resistance_name =
+        thermal_resistance_names.size() == 1 ? thermal_resistance_names[0]
+                                             : thermal_resistance_names[bd_index];
+    _thermal_resistance.push_back(&getFunctorByName<Real>(thermal_resistance_name));
+  }
 }
 
 void
@@ -300,6 +326,7 @@ CHTHandler::setupConjugateHeatTransferContainers()
   _cht_face_info.resize(_cht_boundary_ids.size());
   _boundary_heat_flux.clear();
   _boundary_temperature.clear();
+  _boundary_effective_temperature.clear();
   _integrated_boundary_heat_flux.clear();
 
   for (const auto bd_index : index_range(_cht_boundary_ids))
@@ -345,6 +372,17 @@ CHTHandler::setupConjugateHeatTransferContainers()
             {std::move(solid_bd_temperature), std::move(fluid_bd_temperature)}));
     auto & temperature_container = _boundary_temperature.back();
 
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_effective_temperature(
+        _problem.mesh(), combined_set, "interface_temperature_to_solid_" + bd_name);
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_effective_temperature(
+        _problem.mesh(), combined_set, "interface_temperature_to_fluid_" + bd_name);
+
+    _boundary_effective_temperature.push_back(
+        std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
+            {std::move(solid_bd_effective_temperature),
+             std::move(fluid_bd_effective_temperature)}));
+    auto & effective_temperature_container = _boundary_effective_temperature.back();
+
     // Time to register the functors on all of the threads
     for (const auto tid : make_range(libMesh::n_threads()))
     {
@@ -354,6 +392,12 @@ CHTHandler::setupConjugateHeatTransferContainers()
           "interface_temperature_solid_" + bd_name, temperature_container[NS::CHTSide::SOLID], tid);
       _problem.addFunctor(
           "interface_temperature_fluid_" + bd_name, temperature_container[NS::CHTSide::FLUID], tid);
+      _problem.addFunctor("interface_temperature_to_solid_" + bd_name,
+                          effective_temperature_container[NS::CHTSide::SOLID],
+                          tid);
+      _problem.addFunctor("interface_temperature_to_fluid_" + bd_name,
+                          effective_temperature_container[NS::CHTSide::FLUID],
+                          tid);
     }
 
     // Initialize the containers, they will be filled with correct values soon.
@@ -363,6 +407,7 @@ CHTHandler::setupConjugateHeatTransferContainers()
       {
         flux_container[region_index][fi->id()] = 0.0;
         temperature_container[region_index][fi->id()] = 0.0;
+        effective_temperature_container[region_index][fi->id()] = 0.0;
       }
   }
 }
@@ -374,17 +419,24 @@ CHTHandler::initializeCHTCouplingFields()
   {
     const auto & bd_fi_container = _cht_face_info[bd_index];
     auto & temperature_container = _boundary_temperature[bd_index];
+    auto & effective_temperature_container = _boundary_effective_temperature[bd_index];
 
-    for (const auto region_index : make_range(2))
-    {
-      // Can't be const considering we will update members from here
-      auto bc = _cht_boundary_conditions[bd_index][region_index];
-      for (const auto & fi : bd_fi_container)
+    // Do two passes because one CHT BC may depend on a functor initialized by the other side.
+    for (unsigned int init_pass = 0; init_pass < 2; ++init_pass)
+      for (const auto region_index : make_range(2))
       {
-        bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_system_numbers[region_index])));
-        temperature_container[1 - region_index][fi->id()] = bc->computeBoundaryValue();
+        auto bc = _cht_boundary_conditions[bd_index][region_index];
+
+        for (const auto & fi : bd_fi_container)
+        {
+          bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_system_numbers[region_index])));
+
+          const auto boundary_temperature = bc->computeBoundaryValue();
+
+          temperature_container[region_index][fi->id()] = boundary_temperature;
+          effective_temperature_container[1 - region_index][fi->id()] = boundary_temperature;
+        }
       }
-    }
   }
 }
 
@@ -407,8 +459,10 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
 
     // Fetching the right container here, if side is fluid we fetch "heat_flux_to_fluid"
     auto & flux_container = _boundary_heat_flux[bd_index][side];
-    // Fetching the other side's contaienr here, if side is fluid we fetch the solid temperature
+    // Raw temperature of the other side, e.g. if side is fluid, this is the solid temperature
     auto & temperature_container = _boundary_temperature[bd_index][other_side];
+    // Effective temperature seen by this side after the thermal resistance drop
+    auto & effective_temperature_container = _boundary_effective_temperature[bd_index][side];
     // We will also update the integrated flux for output info
     auto & integrated_flux = _integrated_boundary_heat_flux[bd_index][side];
     // We are recomputing this so, time to zero this out
@@ -428,10 +482,19 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
       other_kernel->setCurrentFaceArea(1.0);
       other_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_system_numbers[other_side])));
 
-      // T_new = relaxation * T_boundary + (1-relaxation) * T_old
-      temperature_container[fi->id()] =
-          temperature_relaxation * other_bc->computeBoundaryValue() +
-          (1 - temperature_relaxation) * temperature_container[fi->id()];
+      const auto boundary_temperature = other_bc->computeBoundaryValue();
+
+      const auto thermal_resistance =
+          (*_thermal_resistance[bd_index])(Moose::FaceArg{fi,
+                                                         Moose::FV::LimiterType::CentralDifference,
+                                                         true,
+                                                         false,
+                                                         &fi->elem(),
+                                                         nullptr},
+                                          Moose::currentState());
+
+      if (thermal_resistance < 0.0)
+        paramError("thermal_resistance", "Thermal resistance must be non-negative.");
 
       // Flux_new = relaxation * Flux_boundary + (1-relaxation) * Flux_old,
       // minus sign is due to the normal differences
@@ -452,11 +515,48 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
               *_cht_pm_radiation_boundary_conditions[bd_index][sys_i]);
         }
 
-      flux_container[fi->id()] =
+      const auto relaxed_flux =
           flux_relaxation * flux + (1 - flux_relaxation) * flux_container[fi->id()];
+      flux_container[fi->id()] = relaxed_flux;
+
+      // Store the raw physical wall temperature of the other side.
+      // temperature_container[fi->id()] =
+      //     temperature_relaxation * boundary_temperature +
+      //     (1 - temperature_relaxation) * temperature_container[fi->id()];
+
+      // Store the temperature seen by this side after the thermal resistance drop.
+      // The plus sign matches the sign convention of computeBoundaryFlux() used here.
+      effective_temperature_container[fi->id()] =
+          temperature_relaxation * (boundary_temperature - thermal_resistance * relaxed_flux) +
+          (1 - temperature_relaxation) * effective_temperature_container[fi->id()];
+
+      // std::cout << "CHT face = " << fi->id() << std::endl;
+      // std::cout << "bd = " << _cht_boundary_names[bd_index] << std::endl;
+      // std::cout << "side = " << side << std::endl;
+      // std::cout << "other_side = " << other_side << std::endl;
+
+      // std::cout << "T_boundary_raw = " << boundary_temperature << std::endl;
+      // std::cout << "R = " << thermal_resistance << std::endl;
+      // std::cout << "q_raw = " << flux << std::endl;
+      // std::cout << "q_relaxed = " << relaxed_flux << std::endl;
+      // std::cout << "Rq = " << thermal_resistance * relaxed_flux << std::endl;
+
+      // //std::cout << "T_raw_container = " << temperature_container[fi->id()] << std::endl;
+      // std::cout << "T_eff_minus = "
+      //           << boundary_temperature - thermal_resistance * relaxed_flux
+      //           << std::endl;
+
+      // std::cout << "T_eff_plus = "
+      //           << boundary_temperature + thermal_resistance * relaxed_flux
+      //           << std::endl;
+      // std::cout << "T_effective_container = "
+      //           << effective_temperature_container[fi->id()]
+      //           << std::endl;
+
+      // std::cout << "--------------------------------" << std::endl;
 
       // We do the integral here
-      integrated_flux += flux * fi->faceArea() * fi->faceCoord();
+      integrated_flux += relaxed_flux * fi->faceArea() * fi->faceCoord();
     }
   }
 }
