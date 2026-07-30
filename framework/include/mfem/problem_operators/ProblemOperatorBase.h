@@ -71,7 +71,6 @@ protected:
   void SolveWithOperator(mfem::Operator & system_operator,
                          const mfem::Vector & rhs,
                          mfem::Vector & x,
-                         const bool nonlinear,
                          mfem::Operator * linear_operator = nullptr);
 
   /// Reference to the current problem.

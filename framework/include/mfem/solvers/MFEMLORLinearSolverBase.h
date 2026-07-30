@@ -131,7 +131,7 @@ LORLinearSolverBase<MFEMSolverType>::SetupLOR(
     mooseError("LOR solver setup requires an EquationSystem to be defined.");
   if (equation_system->IsComplex())
     mooseError("LOR solve is not supported for complex equation systems.");
-  if (equation_system->GetTestVarNames().size() > 1)
+  if (equation_system->IsMultivariate())
     mooseError("LOR solve is only supported for single-variable systems");
 
   const auto & test_var_name = equation_system->GetTestVarNames().at(0);

@@ -170,11 +170,6 @@ public:
   /// @returns Whether nonlinear integrators are present in the equation system
   bool IsNonlinear() const { return _non_linear; }
 
-  /**
-   * Whether this a complex equation system
-   */
-  virtual bool IsComplex() const { return false; }
-
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
 
