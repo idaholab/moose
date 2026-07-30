@@ -3,7 +3,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/cube_hex3.e
+  file = ../mesh/small_fichera.mesh
 []
 
 [Problem]
@@ -98,7 +98,7 @@
 
 [Kernels]
   [curlcurl]
-    type = MFEMNLCurlCurlKernel
+    type = MFEMCurlCurlKernel
     variable = e_field
   []
   [mass]
@@ -121,15 +121,14 @@
   []
   [lin]
     type = MFEMGMRESSolver
-    preconditioner = jacobi
-    l_tol = 1e-12
+    preconditioner = matrix_free_ams
+    l_tol = 1e-6
   []
   [native_mfem_nl]
     type = MFEMNewtonNonlinearSolver
-    max_its = 100
-    abs_tol = 1.0e-10
-    rel_tol = 1.0e-9
-    print_level = 1
+    max_its = 10
+    abs_tol = 1.0e-15
+    rel_tol = 1.0e-15
   []
 []
 

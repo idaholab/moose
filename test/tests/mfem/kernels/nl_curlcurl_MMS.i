@@ -110,8 +110,9 @@
 [Solvers]
   [lin]
     type = MFEMGMRESSolver
-    preconditioner = jacobi
-    l_tol = 1e-12
+    preconditioner = matrix_free_ams
+    l_tol = 1e-6
+    l_max_its = 200
   []
   [native_mfem_nl]
     type = MFEMNewtonNonlinearSolver
@@ -131,7 +132,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/NLCurlCurl
+    file_base = OutputData/NLCurlCurlPartial
     vtk_format = ASCII
   []
 []

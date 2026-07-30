@@ -290,6 +290,34 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                         aux_rhs,
                         /*copy_interior=*/true);
 
+  // do the same with the nonlinear operator as well. This should
+  // add in the contributions to the RHS we were previously missing
+  if (_non_linear and (_assembly_level==mfem::AssemblyLevel::PARTIAL)) {
+    // i think we can get away with sending a dummy op down into
+    // mfem::Operator::FormLinearSystem, since we want op/aux_a to
+    // represent the linear portion.
+    mfem::Operator* oper; // dummy operator to pass downwards
+    mfem::Operator* nlf = _nlfs.Get(test_var_name); // implicit cast
+
+    // I note that this doesn't overwrite aux_rhs that we have from before,
+    // since we ultimately end up at ConstrainedOperator::EliminateRHS (at
+    // least in the PA route). This does aux_rhs -= z (z being a temp vector)
+    // in operator.cpp:575. So hopefully, we don't need another aux_rhs to
+    // make sure this is correct
+    nlf->FormLinearSystem(
+      _ess_tdof_lists.at(0),
+      *_var_ess_constraints.at(0),
+      *_lfs.Get(test_var_name),
+      oper,
+      aux_x,
+      aux_rhs,
+      true
+    );
+
+    // Delete oper in case of memory leaks
+    delete oper;
+  }
+
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
   trueX.SyncFromBlocks();
@@ -414,7 +442,21 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
   {
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
-    nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+
+    // perform some elimination
+    mfem::Operator* A;
+    nlf->FormSystemOperator(_ess_tdof_lists.at(i), A);
+
+    // I think we have to cast to ConstrainedOperator here
+    mfem::ConstrainedOperator* cA = dynamic_cast<mfem::ConstrainedOperator*>(A);
+    if (cA)
+      cA->SetDiagonalPolicy(DIAG_ZERO); // Let the linear part handle this
+
+    A->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+
+    // this is the original behaviour, not necessary now
+    // nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
 }
@@ -454,9 +496,8 @@ mfem::Operator &
 EquationSystem::GetGradient(const mfem::Vector & u) const
 {
   _linearization_point = &u;
-  // hack to get it to do what i want
-  if (_assembly_level == mfem::AssemblyLevel::PARTIAL and _test_var_names.size() == 1 and
-      _nlfs.Has(_test_var_names.at(0)))
+  if (_assembly_level == mfem::AssemblyLevel::PARTIAL && _test_var_names.size() == 1 &&
+      _nlfs.Has(_test_var_names.at(0)) && _blfs.Has(_test_var_names.at(0)) and _non_linear)
   {
     // Keep GridFunctions in sync for coefficients used by nonlinear integrators.
     const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(u), _block_true_offsets);
@@ -465,16 +506,15 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
     const auto & test_var_name = _test_var_names.at(0);
     auto nlf = _nlfs.Get(test_var_name);
 
+    mfem::Operator* nlf_grad = &nlf->GetGradient(u);
+
+    // does it cast into constrained operator?
+    mfem::ConstrainedOperator* c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator*>( nlf_grad );
+    if (c_nlf_grad) c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+
     // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
     _sumOperator = std::make_unique<SumOperatorExtension>(
-        &nlf->GetGradient(u), 1.0, _system_operator->Ptr(), 1.0);
-
-    // static int pa_print = 0;
-    // if (pa_print++<1) {
-    //   std::ofstream os("pa_matrix.txt");
-    //   _sumOperator->PrintMatlab(os);
-    //   os.close();
-    // }
+        nlf_grad, 1.0, _system_operator->Ptr(), 1.0, nlf);
 
     return *_sumOperator;
   }
@@ -488,13 +528,6 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
   }
   else
     _jacobian = _linear_operator;
-
-  // static int fa_print = 0;
-  // if (fa_print++<1) {
-  //   std::ofstream os("fa_matrix.txt");
-  //   _jacobian.Ptr()->PrintMatlab(os);
-  //   os.close();
-  // }
 
   return *_jacobian;
 }

@@ -32,6 +32,10 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
 {
   height = op.Height();
   width = op.Width();
+
+  mfem::OperatorJacobiSmoother* smoother = new mfem::OperatorJacobiSmoother(0.25);
+  smoother->SetOperator(op);
+
   // The constructor of mfem::MatrixFreeAMS requires the target operator to be known, so this
   // constructs the solver
   auto matrix_free_ams = std::make_unique<mfem::MatrixFreeAMS>(*_aform,
@@ -42,7 +46,8 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
                                                                nullptr,
                                                                _ess_bdr_markers,
                                                                _inner_pi_its,
-                                                               _inner_g_its);
+                                                               _inner_g_its,
+                                                               smoother);
   _matrix_free_ams = std::move(matrix_free_ams);
 }
 } // namespace Moose::MFEM
