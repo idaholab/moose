@@ -2,10 +2,10 @@
   design = 'syntax/Problem/index.md'
   issues = '#29632'
   [MFEMCurlCurl]
-    type = XMLDiff
+    type = CSVDiff
     input = curlcurl.i
-    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
-                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv '
+              'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -13,28 +13,27 @@
     recover = false
   []
   [MFEMCurlCurlPartial]
-    type = XMLDiff
+    type = CSVDiff
     input = curlcurl.i
-    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
-                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_db_dt_field_0001.csv '
+              'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
     cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial'
     requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    abs_zero = 1e-6
   []
   [MFEMDiffusion]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion.i
-    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
-                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion/diffusion_line_sample_0001.csv'
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
+    abs_zero = 1e-6
   []
   [MFEMDiffusion1D]
     type = CSVDiff
@@ -44,6 +43,7 @@
                'Mesh/uniform_refine=5 '
                'BCs/bottom/boundary=1 '
                'BCs/top/boundary=2 '
+               'VectorPostprocessors/active="" '
                'Outputs/active=csv Outputs/csv=true '
                'Outputs/file_base=OutputData/Diffusion1D'
     requirement = 'The system shall have the ability to solve a 1D diffusion problem using MFEM.'
@@ -78,35 +78,33 @@
     []
   []
   [MFEMDiffusionPartial]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion.i
-    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
-              'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion/diffusion_partial_line_sample_0001.csv'
     cli_args = 'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
-               'Executioner/assembly_level=partial'
+               'Executioner/assembly_level=partial '
+               'Outputs/CSV/file_base=OutputData/Diffusion/diffusion_partial'
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     abs_zero = 8e-10
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMDiffusionMatFree]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion.i
-    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
-              'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion/diffusion_mat_free_line_sample_0001.csv'
     cli_args = 'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/device=ceed-cpu '
-               'Executioner/assembly_level=none'
+               'Executioner/assembly_level=none '
+               'Outputs/CSV/file_base=OutputData/Diffusion/diffusion_mat_free'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
-    abs_zero = 2e-10
     capabilities = 'mfem'
-    max_parallel = 1
     recover = false
+    abs_zero = 2e-10
   []
   [MFEMDiffusionPartialMultiGPUAwareMPI]
     type = CSVDiff
@@ -143,83 +141,82 @@
     recover = false
   []
   [MFEMGradDiv]
-    type = XMLDiff
+    type = CSVDiff
     input = graddiv.i
-    xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
-                OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/GradDiv/graddiv_F_line_sample_0001.csv '
+              'OutputData/GradDiv/graddiv_divF_line_sample_0001.csv'
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     errors = 'foobarbaz' # allow cuda errors I guess?
   []
   [MFEMHeatConduction]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
+               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
   [MFEMHeatConductionElement]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConductionElement/heatconductionelement_line_sample_0001.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0002.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0003.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
                'Solvers/inactive="boomeramg" '
+               'Outputs/CSV/file_base=OutputData/HeatConductionElement/heatconductionelement '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=element'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     valgrind = none
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
   [MFEMHeatConductionMatFree]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0001.csv '
+              'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0002.csv '
+              'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0003.csv '
+              'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
-               'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
+               'Solvers/inactive="boomeramg" '
+               'Outputs/CSV/file_base=OutputData/HeatConductionMatFree/heat_conduction_mat_free '
                'Executioner/assembly_level=none '
                'Executioner/device=ceed-cpu'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
     valgrind = none
-    max_parallel = 1
     recover = false
     restep = false
   []
   [MFEMHeatTransfer]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
-                OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    csvdiff = 'OutputData/HeatTransfer/heattransfer_line_sample_0001.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0002.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0003.csv'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
@@ -233,14 +230,17 @@
     compute_devices = 'cpu cuda'
   []
   [MFEMMixedHeatTransfer]
-    type = XMLDiff
+    type = CSVDiff
     input = mixed_heattransfer.i
-    xmldiff = 'OutputData/MixedHeatTransfer/Run0/Run0.pvd
-                OutputData/MixedHeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    csvdiff = 'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0001.csv '
+              'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0002.csv '
+              'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0003.csv '
+              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0001.csv '
+              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0002.csv '
+              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0003.csv'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []

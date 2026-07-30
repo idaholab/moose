@@ -89,10 +89,20 @@
   []
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'potential'
+    start_point = '0 0.5 -0.5'
+    end_point = '0 0.5 0.5'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/DomainPotentialTransfer
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/DomainSubmeshTransfer/potential
   []
 []

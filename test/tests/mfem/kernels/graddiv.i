@@ -115,10 +115,27 @@
   device = "cpu"
 []
 
+[VectorPostprocessors]
+  [F_line_sample]
+    type = MFEMLineValueSampler
+    variable = 'F'
+    start_point = '0 0 0'
+    end_point = '8 1 1'
+    num_points = 101
+  []
+  [divF_line_sample]
+    type = MFEMLineValueSampler
+    variable = 'divF'
+    start_point = '0.01 0.013 0.014'
+    end_point = '7.98 0.99 0.97'
+    num_points = 114
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/GradDiv
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/GradDiv/graddiv
   []
 []
