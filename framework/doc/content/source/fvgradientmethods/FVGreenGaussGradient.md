@@ -3,7 +3,7 @@
 ## Overview
 
 This method computes gradients for cell-centered linear finite-volume variables using the
-Green-Gauss theorem. For a cell $C$ with
+Green-Gauss theorem [!cite](moukalled2016finite). For a cell $C$ with
 volume $V_C$, the method approximates the gradient of a cell-centered field $\phi$ as
 
 !equation
@@ -27,7 +27,7 @@ should use the same gradient settings.
 The optional [!param](/FVGradientMethods/FVGreenGaussGradient/limiter) parameter controls whether
 MOOSE limits the Green-Gauss gradient before using it. With `limiter = none`, the Green-Gauss result
 is used directly. With `limiter = venkatakrishnan`, MOOSE first computes the Green-Gauss gradient
-and then applies the Venkatakrishnan limiter. A limiter can reduce overshoots near steep solution
+and then applies the Venkatakrishnan limiter [!cite](venkatakrishnan1993). A limiter can reduce overshoots near steep solution
 changes.
 
 ## Example Syntax
