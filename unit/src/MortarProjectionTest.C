@@ -60,6 +60,8 @@ projectPoint(const ElemType parent_type,
   for (const auto first : index_range(parent_points))
     for (const auto second : make_range(first + 1, parent_points.size()))
       parent_scale = std::max(parent_scale, (parent_points[second] - parent_points[first]).norm());
+  // This keeps the segment nondegenerate at every parent scale while placing its centroid at the
+  // target.
   const Real segment_scale = parent_scale * 1e-4;
 
   auto segment = Elem::build(TRI3);
@@ -82,8 +84,8 @@ projectPoint(const ElemType parent_type,
     Moose::Mortar::projectQPoints3d(
         segment_ptr, parent_ptr, subpatch_index, quadrature, mapped_points);
   else
-    Moose::Mortar::projectQPoints3d(segment_ptr,
-                                    parent_ptr,
+    Moose::Mortar::projectQPoints3d(*segment_ptr,
+                                    *parent_ptr,
                                     subpatch_index,
                                     projection_normal,
                                     clipping_area_tolerance,
@@ -97,6 +99,7 @@ projectPoint(const ElemType parent_type,
 void
 expectPointNear(const Point & actual, const Point & expected, const Real tolerance = 1e-10)
 {
+  // The default matches the normalized inverse projection tolerance.
   for (const auto component : make_range(unsigned(LIBMESH_DIM)))
     EXPECT_NEAR(actual(component), expected(component), tolerance);
 }
@@ -111,6 +114,8 @@ TEST(MortarProjectionTest, DistortedQuadSelectsInDomainRootAtAllScales)
   const Point base_target(1.0865728771728467, -2.3242274706887325, 0);
   const Point expected(-0.9970323331851889, -0.9181493063418376);
 
+  // The scale and translation sweep incurs slightly more roundoff while remaining below the
+  // clipping tolerance.
   for (const Real scale : {1e-9, 1.0, 1e9})
   {
     const Point translation = scale * Point(2.3, -1.7, 0.4);
@@ -123,6 +128,18 @@ TEST(MortarProjectionTest, DistortedQuadSelectsInDomainRootAtAllScales)
         expected,
         2e-9);
   }
+}
+
+TEST(MortarProjectionTest, ReverseEliminationRecoversInDomainRoot)
+{
+  const std::vector<Point> quadrilateral = {
+      Point(-1, -0.5, 0), Point(1, -1.5, 0), Point(1, 1.5, 0), Point(-1, 0.5, 0)};
+  const Point reference_point(0.2, 0.3);
+  // The first eliminant also yields xi = -2, where reconstructing eta is singular.
+  expectPointNear(
+      projectPoint(
+          QUAD4, quadrilateral, mapPoint(QUAD4, quadrilateral, reference_point), Point(0, 0, 1)),
+      reference_point);
 }
 
 TEST(MortarProjectionTest, DirectTriangleAndAffineQuadrilateral)
@@ -152,8 +169,9 @@ TEST(MortarProjectionTest, ClippingToleranceControlsBoundarySnapping)
   MortarSegmentHelper helper(
       high_aspect_quad, Point(), Point(0, 0, 1), MortarSegmentTriangulationMode::Centroid, false);
   const Real clipping_area_tolerance = helper.areaTolerance();
-  EXPECT_NEAR(clipping_area_tolerance, 2e-14, 1e-26);
+  EXPECT_DOUBLE_EQ(clipping_area_tolerance, 2e-14);
 
+  // This exterior point remains within the clipping-consistent physical residual tolerance.
   const Point tolerance_sized_reference(0.2, 1 + 1.5e-8);
   expectPointNear(projectPoint(QUAD4,
                                high_aspect_quad,
@@ -188,5 +206,5 @@ TEST(MortarProjectionTest, InvalidGeometryAndClippingData)
   MortarSegmentHelper helper(
       secondary_nodes, Point(), supplied_normal, MortarSegmentTriangulationMode::Centroid, false);
   EXPECT_EQ(helper.normal(), supplied_normal);
-  EXPECT_NEAR(helper.areaTolerance(), 4e-8, 1e-20);
+  EXPECT_DOUBLE_EQ(helper.areaTolerance(), 4e-8);
 }

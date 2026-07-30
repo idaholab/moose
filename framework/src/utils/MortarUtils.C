@@ -27,10 +27,14 @@ namespace Mortar
 {
 namespace
 {
+// These cutoffs identify degeneracy in normalized polynomial coefficients and Jacobians above
+// floating-point roundoff.
 constexpr Real coefficient_tolerance = 1e-14;
 constexpr Real jacobian_tolerance = 1e-12;
+// Root deduplication and projection validation preserve ten-digit normalized inverse consistency.
 constexpr Real root_tolerance = 1e-10;
 constexpr Real projection_tolerance = 1e-10;
+// This matches the reference-space tolerance used when clipping mortar segments.
 constexpr Real minimum_reference_tolerance = 1e-8;
 
 bool
@@ -508,36 +512,36 @@ projectQPoints3d(const Elem * const msm_elem,
   if (!isFinite(normal) || normal.norm() == 0)
     mooseException("Cannot determine a normal for degenerate mortar segment ", msm_elem->id(), ".");
 
-  projectQPoints3d(msm_elem, primal_elem, sub_elem_index, normal, 0, qrule_msm, q_pts);
+  projectQPoints3d(*msm_elem, *primal_elem, sub_elem_index, normal, 0, qrule_msm, q_pts);
 }
 
 void
-projectQPoints3d(const Elem * const msm_elem,
-                 const Elem * const primal_elem,
+projectQPoints3d(const Elem & msm_elem,
+                 const Elem & primal_elem,
                  const unsigned int sub_elem_index,
                  const Point & projection_normal,
                  const Real clipping_area_tolerance,
                  const QBase & qrule_msm,
                  std::vector<Point> & q_pts)
 {
-  if (msm_elem->type() != TRI3)
+  if (msm_elem.type() != TRI3)
     mooseError("3D mortar quadrature projection requires a TRI3 mortar segment, but segment ",
-               msm_elem->id(),
+               msm_elem.id(),
                " has type ",
-               libMesh::Utility::enum_to_string<ElemType>(msm_elem->type()),
+               libMesh::Utility::enum_to_string<ElemType>(msm_elem.type()),
                ".");
 
-  const auto sub_elem = msm_elem->get_extra_integer(sub_elem_index);
-  const auto sub_elem_node_indices = getMortarSubElementNodeIndices(*primal_elem, sub_elem);
-  const auto sub_elem_type = subElementType(primal_elem->type(), sub_elem);
+  const auto sub_elem = msm_elem.get_extra_integer(sub_elem_index);
+  const auto sub_elem_node_indices = getMortarSubElementNodeIndices(primal_elem, sub_elem);
+  const auto sub_elem_type = subElementType(primal_elem.type(), sub_elem);
 
   if (!isFinite(projection_normal))
-    mooseException("Invalid projection-plane normal for mortar segment ", msm_elem->id(), ".");
+    mooseException("Invalid projection-plane normal for mortar segment ", msm_elem.id(), ".");
   const Real normal_norm = projection_normal.norm();
   if (!std::isfinite(normal_norm) || normal_norm == 0)
-    mooseException("Invalid projection-plane normal for mortar segment ", msm_elem->id(), ".");
+    mooseException("Invalid projection-plane normal for mortar segment ", msm_elem.id(), ".");
   if (!std::isfinite(clipping_area_tolerance) || clipping_area_tolerance < 0)
-    mooseError("Invalid clipping area tolerance for mortar segment ", msm_elem->id(), ".");
+    mooseError("Invalid clipping area tolerance for mortar segment ", msm_elem.id(), ".");
   const Point normal = projection_normal / normal_norm;
 
   // Express the subpatch in a normalized clipping-plane basis before analytical inversion, making
@@ -548,8 +552,8 @@ projectQPoints3d(const Elem * const msm_elem,
   for (const auto first : index_range(sub_elem_node_indices))
   {
     const auto second = (first + 1) % sub_elem_node_indices.size();
-    const Point edge = primal_elem->point(sub_elem_node_indices[second]) -
-                       primal_elem->point(sub_elem_node_indices[first]);
+    const Point edge = primal_elem.point(sub_elem_node_indices[second]) -
+                       primal_elem.point(sub_elem_node_indices[first]);
     const Point projected_edge = edge - (edge * normal) * normal;
     const Real projected_edge_length = projected_edge.norm();
     minimum_edge_length = std::min(minimum_edge_length, projected_edge_length);
@@ -565,7 +569,7 @@ projectQPoints3d(const Elem * const msm_elem,
     mooseException("Parent subpatch ",
                    sub_elem,
                    " of element ",
-                   primal_elem->id(),
+                   primal_elem.id(),
                    " is singular when projected along the mortar clipping normal.");
 
   // Convert the helper's physical area tolerance to the normalized projection-residual scale.
@@ -573,19 +577,19 @@ projectQPoints3d(const Elem * const msm_elem,
       minimum_reference_tolerance, clipping_area_tolerance / (minimum_edge_length * length_scale));
   const Point first_tangent = longest_projected_edge / length_scale;
   const Point second_tangent = normal.cross(first_tangent).unit();
-  const Point origin = primal_elem->point(sub_elem_node_indices[0]);
+  const Point origin = primal_elem.point(sub_elem_node_indices[0]);
 
   std::array<Point, 4> projected_nodes = {};
   for (const auto node : index_range(sub_elem_node_indices))
   {
-    const Point offset = primal_elem->point(sub_elem_node_indices[node]) - origin;
+    const Point offset = primal_elem.point(sub_elem_node_indices[node]) - origin;
     projected_nodes[node] =
         Point((offset * first_tangent) / length_scale, (offset * second_tangent) / length_scale);
   }
 
   const BilinearMap quadrilateral_map =
       sub_elem_type == QUAD4
-          ? prepareQuadrilateralMap(projected_nodes, *msm_elem, *primal_elem, sub_elem)
+          ? prepareQuadrilateralMap(projected_nodes, msm_elem, primal_elem, sub_elem)
           : BilinearMap();
 
   for (const auto qp : make_range(qrule_msm.n_points()))
@@ -593,16 +597,16 @@ projectQPoints3d(const Elem * const msm_elem,
     const Point mortar_reference_point = qrule_msm.qp(qp);
     if (!isFinite(mortar_reference_point))
       mooseError("Mortar segment ",
-                 msm_elem->id(),
+                 msm_elem.id(),
                  " has a non-finite quadrature point at index ",
                  qp,
                  ".");
 
     Point physical_mortar_point;
-    for (const auto node : make_range(msm_elem->n_nodes()))
+    for (const auto node : make_range(msm_elem.n_nodes()))
       physical_mortar_point +=
           Moose::fe_lagrange_2D_shape(TRI3, FIRST, node, mortar_reference_point) *
-          msm_elem->point(node);
+          msm_elem.point(node);
 
     const Point target_offset = physical_mortar_point - origin;
     const Point projected_target((target_offset * first_tangent) / length_scale,
@@ -614,13 +618,13 @@ projectQPoints3d(const Elem * const msm_elem,
       for (const auto node : make_range(sub_elem_node_indices.size()))
         translated_nodes[node] -= projected_target;
       sub_elem_reference_point = inverseMapTriangle(
-          translated_nodes, *msm_elem, *primal_elem, sub_elem, qp, clipping_tolerance);
+          translated_nodes, msm_elem, primal_elem, sub_elem, qp, clipping_tolerance);
     }
     else
       sub_elem_reference_point = inverseMapQuadrilateral(quadrilateral_map,
                                                          projected_target,
-                                                         *msm_elem,
-                                                         *primal_elem,
+                                                         msm_elem,
+                                                         primal_elem,
                                                          sub_elem,
                                                          qp,
                                                          clipping_tolerance);
@@ -630,15 +634,15 @@ projectQPoints3d(const Elem * const msm_elem,
     for (const auto node : index_range(sub_elem_node_indices))
       parent_reference_point +=
           Moose::fe_lagrange_2D_shape(sub_elem_type, FIRST, node, sub_elem_reference_point) *
-          primal_elem->master_point(sub_elem_node_indices[node]);
+          primal_elem.master_point(sub_elem_node_indices[node]);
 
     if (!isFinite(parent_reference_point) ||
-        !primal_elem->on_reference_element(parent_reference_point, minimum_reference_tolerance))
+        !primal_elem.on_reference_element(parent_reference_point, minimum_reference_tolerance))
     {
       std::ostringstream message;
       message << "the recovered parent reference point " << parent_reference_point
               << " is outside the parent domain";
-      projectionFailure(*msm_elem, *primal_elem, sub_elem, qp, message.str());
+      projectionFailure(msm_elem, primal_elem, sub_elem, qp, message.str());
     }
 
     q_pts.push_back(parent_reference_point);

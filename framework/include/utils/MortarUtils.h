@@ -57,8 +57,8 @@ void projectQPoints3d(const Elem * msm_elem,
  * @param projection_normal Exact, not necessarily unit, normal supplied to the clipping helper
  * @param clipping_area_tolerance Physical area tolerance used by the clipping helper
  */
-void projectQPoints3d(const Elem * msm_elem,
-                      const Elem * primal_elem,
+void projectQPoints3d(const Elem & msm_elem,
+                      const Elem & primal_elem,
                       unsigned int sub_elem_index,
                       const Point & projection_normal,
                       Real clipping_area_tolerance,
@@ -214,15 +214,15 @@ loopOverMortarSegments(
           const auto & projection_data =
               amg.subpatchProjectionData(*msinfo.secondary_elem, secondary_sub_elem);
 
-          projectQPoints3d(msm_elem,
-                           msinfo.secondary_elem,
+          projectQPoints3d(*msm_elem,
+                           *msinfo.secondary_elem,
                            secondary_sub_elem_index,
                            projection_data.normal,
                            projection_data.area_tolerance,
                            *qrule_msm,
                            secondary_xi_pts);
-          projectQPoints3d(msm_elem,
-                           msinfo.primary_elem,
+          projectQPoints3d(*msm_elem,
+                           *msinfo.primary_elem,
                            primary_sub_elem_index,
                            projection_data.normal,
                            projection_data.area_tolerance,
