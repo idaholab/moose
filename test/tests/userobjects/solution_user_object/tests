@@ -4,6 +4,7 @@
 
   [discontinuous_value_solution_uo_p1]
     type = 'Exodiff'
+    max_parallel = 1
     input = 'discontinuous_value_solution_uo_p1.i'
     exodiff = 'discontinuous_value_solution_uo_p1.e'
 
@@ -36,6 +37,7 @@
   [point_value_wrapper_time_reader]
     type = CSVDiff
     input = point_value_wrapper_time_reader.i
+    recover = false
     csvdiff = point_value_wrapper_time_reader_out.csv
     prereq = point_value_wrapper_time_source
     issues = '#31766'
