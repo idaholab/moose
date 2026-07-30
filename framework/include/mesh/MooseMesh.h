@@ -187,6 +187,8 @@ public:
    *
    * The base implementation writes the libMesh checkpoint mesh.
    * Derived classes may extend this to write additional backend-specific files.
+   *
+   * @return The additional backend-specific files written by the derived class.
    */
   virtual std::vector<std::filesystem::path>
   writeRecoveryFiles(const std::filesystem::path & file_base);

@@ -11,22 +11,22 @@
 
 #pragma once
 
-#include "MFEMSamplerBase.h"
+#include "MFEMVariableSamplerBase.h"
 
 /**
  * MFEM VectorPostprocessor base class for sampling a complex-valued variable at
  * a set of points. For each vector component of the variable, two
  * output columns are produced: "<var>_real_<i>" and "<var>_imag_<i>".
  *
- * Subclasses supply the point locations (e.g. MFEMComplexPointValueSampler).
+ * Subclasses supply the point locations.
  */
-class MFEMComplexValueSamplerBase : public MFEMSamplerBase
+class MFEMComplexVariableValueSamplerBase : public MFEMVariableSamplerBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexValueSamplerBase(const InputParameters & parameters,
-                              const std::vector<Point> & points);
+  MFEMComplexVariableValueSamplerBase(const InputParameters & parameters,
+                                      const std::vector<Point> & points);
 
   /// Interpolate the real and imaginary parts of the complex variable.
   void execute() override;
@@ -35,7 +35,7 @@ protected:
   void finalizeValues() override;
 
 private:
-  bool isFESpaceDiscontinuous() const override;
+  int getFESpaceContinuityType() const override;
 
   /// Complex grid function being sampled.
   const mfem::ParComplexGridFunction & _var;

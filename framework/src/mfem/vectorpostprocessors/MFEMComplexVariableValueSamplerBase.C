@@ -9,21 +9,21 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMComplexValueSamplerBase.h"
+#include "MFEMComplexVariableValueSamplerBase.h"
 #include "MFEMProblem.h"
 #include "MFEMVectorUtils.h"
 
 #include "mfem/fem/fespace.hpp"
 
 InputParameters
-MFEMComplexValueSamplerBase::validParams()
+MFEMComplexVariableValueSamplerBase::validParams()
 {
-  return MFEMSamplerBase::validParams();
+  return MFEMVariableSamplerBase::validParams();
 }
 
-MFEMComplexValueSamplerBase::MFEMComplexValueSamplerBase(const InputParameters & parameters,
-                                                         const std::vector<Point> & points)
-  : MFEMSamplerBase(parameters, points),
+MFEMComplexVariableValueSamplerBase::MFEMComplexVariableValueSamplerBase(
+    const InputParameters & parameters, const std::vector<Point> & points)
+  : MFEMVariableSamplerBase(parameters, points),
     _var(*getMFEMProblem().getComplexGridFunction(_var_name)),
     _real_interp_vals(points.size()),
     _imag_interp_vals(points.size())
@@ -41,21 +41,21 @@ MFEMComplexValueSamplerBase::MFEMComplexValueSamplerBase(const InputParameters &
   }
 }
 
-bool
-MFEMComplexValueSamplerBase::isFESpaceDiscontinuous() const
+int
+MFEMComplexVariableValueSamplerBase::getFESpaceContinuityType() const
 {
-  return _var.real().FESpace()->FEColl()->GetContType() != mfem::FiniteElementCollection::CONTINUOUS;
+  return _var.real().FESpace()->FEColl()->GetContType();
 }
 
 void
-MFEMComplexValueSamplerBase::execute()
+MFEMComplexVariableValueSamplerBase::execute()
 {
   _finder.Interpolate(_var.real(), _real_interp_vals);
   _finder.Interpolate(_var.imag(), _imag_interp_vals);
 }
 
 void
-MFEMComplexValueSamplerBase::finalizeValues()
+MFEMComplexVariableValueSamplerBase::finalizeValues()
 {
   _real_interp_vals.HostReadWrite();
   _imag_interp_vals.HostReadWrite();
@@ -64,7 +64,7 @@ MFEMComplexValueSamplerBase::finalizeValues()
   const auto num_points = _declared_points[0].get().size();
   const auto val_fespace_ordering = _var.real().FESpace()->GetOrdering();
   for (const auto i_dim : index_range(_declared_real_vals))
-    for (const auto i_point : index_range(_declared_points[0].get()))
+    for (const auto i_point : make_range(num_points))
     {
       const auto idx =
           Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);

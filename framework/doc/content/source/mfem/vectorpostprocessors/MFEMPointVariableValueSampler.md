@@ -1,10 +1,10 @@
-# MFEMPointValueSampler
+# MFEMPointVariableValueSampler
 
 !if! function=hasCapability('mfem')
 
 ## Overview
 
-This class performs accurate interpolation of scalar and vector quantities at a
+This class performs interpolation of real scalar and vector variables at a
 set of specified points using MFEM's
 [`FindPointsGSLIB`](https://mfem.org/howto/findpts/) `gslib` interpolation.
 
@@ -12,11 +12,11 @@ set of specified points using MFEM's
 
 !listing mfem/vectorpostprocessors/point_value_sampler/point_value_sampler_diffusion.i block=VectorPostprocessors
 
-!syntax parameters /VectorPostprocessors/MFEMPointValueSampler
+!syntax parameters /VectorPostprocessors/MFEMPointVariableValueSampler
 
-!syntax inputs /VectorPostprocessors/MFEMPointValueSampler
+!syntax inputs /VectorPostprocessors/MFEMPointVariableValueSampler
 
-!syntax children /VectorPostprocessors/MFEMPointValueSampler
+!syntax children /VectorPostprocessors/MFEMPointVariableValueSampler
 
 !if-end!
 

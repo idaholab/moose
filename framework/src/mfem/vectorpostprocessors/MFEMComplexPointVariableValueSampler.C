@@ -9,14 +9,14 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMComplexPointValueSampler.h"
+#include "MFEMComplexPointVariableValueSampler.h"
 
-registerMooseObject("MooseApp", MFEMComplexPointValueSampler);
+registerMooseObject("MooseApp", MFEMComplexPointVariableValueSampler);
 
 InputParameters
-MFEMComplexPointValueSampler::validParams()
+MFEMComplexPointVariableValueSampler::validParams()
 {
-  InputParameters params = MFEMComplexValueSamplerBase::validParams();
+  InputParameters params = MFEMComplexVariableValueSamplerBase::validParams();
   params.addClassDescription("Sample a complex MFEM variable at specific points, outputting "
                              "real and imaginary parts as separate columns.");
   params.addRequiredParam<std::vector<Point>>("points",
@@ -24,8 +24,9 @@ MFEMComplexPointValueSampler::validParams()
   return params;
 }
 
-MFEMComplexPointValueSampler::MFEMComplexPointValueSampler(const InputParameters & parameters)
-  : MFEMComplexValueSamplerBase(parameters, parameters.get<std::vector<Point>>("points"))
+MFEMComplexPointVariableValueSampler::MFEMComplexPointVariableValueSampler(
+    const InputParameters & parameters)
+  : MFEMComplexVariableValueSamplerBase(parameters, parameters.get<std::vector<Point>>("points"))
 {
 }
 

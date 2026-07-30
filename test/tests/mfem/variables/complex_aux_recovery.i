@@ -20,7 +20,7 @@
 []
 
 [VectorPostprocessors/complex_state_sample]
-  type = MFEMComplexPointValueSampler
+  type = MFEMComplexPointVariableValueSampler
   variable = complex_state
   points = '2.125 0 -1.375'
   execute_on = TIMESTEP_END

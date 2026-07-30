@@ -1,7 +1,7 @@
 [Tests]
-  design = 'MFEMLineValueSampler.md'
+  design = 'MFEMLineVariableValueSampler.md'
   issues = '#31249'
-  [MFEMLineValueSamplerDiffusion]
+  [MFEMLineVariableValueSamplerDiffusion]
     type = CSVDiff
     input = line_value_sampler_diffusion.i
     cli_args = Outputs/active=
@@ -11,12 +11,25 @@
     recover = false
     compute_devices = 'cpu cuda'
   []
-  [MFEMLineValueSamplerCurlCurl]
+  [MFEMLineVariableValueSamplerCurlCurl]
     type = CSVDiff
     input = line_value_sampler_curlcurl.i
     cli_args = Outputs/active=
     csvdiff = 'line_value_sampler_curlcurl_out_line_sample_0001.csv'
     requirement = 'The system shall have the ability to interpolate vectors at points along a line using MFEM.'
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    # The sampled line includes element interfaces in an H(curl) space.
+    allow_warnings = true
+  []
+  [MFEMLineVariableValueSamplerTooFewPoints]
+    type = RunException
+    input = line_value_sampler_diffusion.i
+    cli_args = 'VectorPostprocessors/line_sample/num_points=1'
+    expect_err = 'In MFEMLineVariableValueSampler "line_sample": line must have at least 2 points'
+    requirement = 'The system shall identify the input block when a line variable sampler is '
+                  'configured with fewer than two points.'
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'

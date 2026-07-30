@@ -11,19 +11,19 @@
 
 #pragma once
 
-#include "MFEMSamplerBase.h"
+#include "MFEMVariableSamplerBase.h"
 
 /**
  * MFEM VectorPostprocessor base class for sampling a real-valued variable at a
- * set of points. Subclasses supply the point locations (e.g. MFEMPointValueSampler,
- * MFEMLineValueSampler).
+ * set of points. Subclasses supply the point locations.
  */
-class MFEMValueSamplerBase : public MFEMSamplerBase
+class MFEMVariableValueSamplerBase : public MFEMVariableSamplerBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMValueSamplerBase(const InputParameters & parameters, const std::vector<Point> & points);
+  MFEMVariableValueSamplerBase(const InputParameters & parameters,
+                               const std::vector<Point> & points);
 
   /// Interpolate the real variable at all query points.
   void execute() override;
@@ -32,7 +32,7 @@ protected:
   void finalizeValues() override;
 
 private:
-  bool isFESpaceDiscontinuous() const override;
+  int getFESpaceContinuityType() const override;
 
   /// Grid function being sampled.
   const mfem::GridFunction & _var;

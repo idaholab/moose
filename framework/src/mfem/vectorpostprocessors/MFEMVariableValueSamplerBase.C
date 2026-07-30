@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMValueSamplerBase.h"
+#include "MFEMVariableValueSamplerBase.h"
 
 #include "MFEMProblem.h"
 #include "MFEMVectorUtils.h"
@@ -18,20 +18,20 @@
 #include "mfem/fem/fespace.hpp"
 
 InputParameters
-MFEMValueSamplerBase::validParams()
+MFEMVariableValueSamplerBase::validParams()
 {
-  return MFEMSamplerBase::validParams();
+  return MFEMVariableSamplerBase::validParams();
 }
 
-MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
-                                           const std::vector<Point> & points)
-  : MFEMSamplerBase(parameters, points),
+MFEMVariableValueSamplerBase::MFEMVariableValueSamplerBase(const InputParameters & parameters,
+                                                           const std::vector<Point> & points)
+  : MFEMVariableSamplerBase(parameters, points),
     _var(*getMFEMProblem().getGridFunction(_var_name)),
     _interp_vals(points.size())
 {
   // declare value vectors for outputting
   const auto val_dim = _var.VectorDim();
-  for (int i = 0; i < val_dim; i++)
+  for (const auto i : make_range(val_dim))
   {
     auto & declared = this->declareVector(_var_name + "_" + std::to_string(i));
     declared.resize(points.size());
@@ -39,28 +39,28 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   }
 }
 
-bool
-MFEMValueSamplerBase::isFESpaceDiscontinuous() const
+int
+MFEMVariableValueSamplerBase::getFESpaceContinuityType() const
 {
-  return _var.FESpace()->FEColl()->GetContType() != mfem::FiniteElementCollection::CONTINUOUS;
+  return _var.FESpace()->FEColl()->GetContType();
 }
 
 void
-MFEMValueSamplerBase::execute()
+MFEMVariableValueSamplerBase::execute()
 {
   _finder.Interpolate(_var, _interp_vals);
 }
 
 void
-MFEMValueSamplerBase::finalizeValues()
+MFEMVariableValueSamplerBase::finalizeValues()
 {
   _interp_vals.HostReadWrite();
 
   const auto val_dims = _var.VectorDim();
   const auto num_points = _declared_points[0].get().size();
   const auto val_fespace_ordering = _var.FESpace()->GetOrdering();
-  for (int i_dim = 0; i_dim < val_dims; i_dim++)
-    for (size_t i_point = 0; i_point < num_points; i_point++)
+  for (const auto i_dim : make_range(val_dims))
+    for (const auto i_point : make_range(num_points))
     {
       const auto mfem_idx =
           Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
