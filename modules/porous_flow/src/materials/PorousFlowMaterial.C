@@ -47,6 +47,39 @@ PorousFlowMaterial::PorousFlowMaterial(const InputParameters & parameters)
 }
 
 void
+PorousFlowMaterial::checkNodalVariables(const std::vector<std::string> & coupled_var_params) const
+{
+  // When this is a nodal Material, the named parameters are read with coupledGenericDofValue, ie
+  // once per node of the current element, so the variables supplied to them must be nodal
+  // (Lagrange).  For an element-local variable there is no nodal value to read, and the loop over
+  // nodes runs off the end of its value array.
+  //
+  // Only the named parameters are checked, because a Material's other coupled variables may
+  // legitimately be non-nodal:
+  //  - those read behind an _is_*_nodal check, which falls back to quadpoint values (eg xnacl in
+  //    PorousFlowFluidState, x in PorousFlowMultiComponentFluid, the mass fractions in
+  //    PorousFlowMassFraction);
+  //  - a PorousFlow variable that is a purely local unknown and never reaches a nodal Material at
+  //    all (eg the adsorbed concentration in the desorption tests, which has no flux term).
+  for (const auto & param : coupled_var_params)
+  {
+    if (!isCoupled(param))
+      continue;
+    for (const auto i : make_range(coupledComponents(param)))
+    {
+      const auto * const var = getFieldVar(param, i);
+      if (!var->isNodal())
+        mooseError("This Material has at_nodes = true, so it reads '",
+                   param,
+                   "' at the nodes, but the variable supplied to it ('",
+                   var->name(),
+                   "') is not a nodal (Lagrange) variable.  ",
+                   PorousFlowDictator::nonNodalAdvice());
+    }
+  }
+}
+
+void
 PorousFlowMaterial::initialSetup()
 {
   if (!_nodal_material)

@@ -152,6 +152,13 @@ public:
   bool isFV() const;
 
   /**
+   * Explanation, for inclusion in an error message, of why a PorousFlow object requires nodal
+   * (Lagrange) variables.  Shared by the objects that impose that requirement so that they all
+   * explain it the same way.
+   */
+  static std::string nonNodalAdvice();
+
+  /**
    * Check if the simulation includes derivatives of permeability
    * Note: when the permeability is constant, expensive tensor calculations
    * can be ignored in Jacobian calculations

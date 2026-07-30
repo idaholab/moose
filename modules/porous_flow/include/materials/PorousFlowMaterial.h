@@ -43,6 +43,16 @@ public:
   virtual void initialSetup() override;
 
 protected:
+  /**
+   * Error if this is a nodal Material but a variable supplied to one of the named coupled-variable
+   * parameters is not nodal (Lagrange).  Call this from the constructor of a derived class, naming
+   * exactly those parameters the class reads with coupledGenericDofValue when at_nodes = true.
+   * Parameters read behind an _is_*_nodal check must not be named, since those fall back to
+   * quadpoint values and so accept non-nodal variables.
+   * @param coupled_var_params names of the coupled-variable parameters that must be nodal
+   */
+  void checkNodalVariables(const std::vector<std::string> & coupled_var_params) const;
+
   /// Correctly sizes nodal materials, then initialises using Material::initStatefulProperties
   virtual void initStatefulProperties(unsigned int n_points) override;
 

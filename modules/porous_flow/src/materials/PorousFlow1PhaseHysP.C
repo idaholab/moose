@@ -36,6 +36,8 @@ PorousFlow1PhaseHysP::PorousFlow1PhaseHysP(const InputParameters & parameters)
                    ? _dictator.porousFlowVariableNum(_porepressure_varnum)
                    : 0)
 {
+  checkNodalVariables({"porepressure"});
+
   if (_num_phases != 1)
     mooseError("The Dictator proclaims that the number of phases is ",
                _dictator.numPhases(),

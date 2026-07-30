@@ -228,3 +228,10 @@ PorousFlowDictator::feTypeName(const FEType & fe_type)
   return Utility::enum_to_string<Order>(fe_type.order) + " " +
          Utility::enum_to_string<FEFamily>(fe_type.family);
 }
+
+std::string
+PorousFlowDictator::nonNodalAdvice()
+{
+  return "PorousFlow has no discontinuous-Galerkin finite-element discretisation, so an "
+         "element-local variable (eg CONSTANT MONOMIAL) cannot be used here.";
+}
