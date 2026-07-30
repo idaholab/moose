@@ -284,8 +284,8 @@
 
   # mortar contact solver options
   petsc_options = '-snes_converged_reason'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       mumps'
+  petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'preonly    lu       mumps'
 
   nl_rel_tol = 1e-7
   nl_max_its = 20
