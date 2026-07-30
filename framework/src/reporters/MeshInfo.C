@@ -81,7 +81,7 @@ MeshInfo::validParams()
     // [sideset,subdomain]_items
     {
       MultiMooseEnum items(
-          "all bounding_box elems elem_types min_volume max_volume num_elems volume");
+          "all bounding_box elems elem_types min_volume max_volume num_elems processor_ids volume");
       for (const auto & name : domain_names)
         params.addParam<MultiMooseEnum>(
             name + "_items", items, "Items to include when outputting " + name + " information");
@@ -203,7 +203,8 @@ MeshInfo::DomainInfoItems::DomainInfoItems(const MultiMooseEnum & items,
     elem_types(MeshInfo::hasItem("elem_types", items)),
     max_volume(MeshInfo::hasItem("max_volume", items)),
     min_volume(MeshInfo::hasItem("min_volume", items)),
-    num_elems(MeshInfo::hasItem("num_elems", items))
+    num_elems(MeshInfo::hasItem("num_elems", items)),
+    processor_ids(MeshInfo::hasItem("processor_ids", items))
 {
   std::copy_if(MeshInfo::domain_qualities.begin(),
                MeshInfo::domain_qualities.end(),
@@ -416,6 +417,8 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
       const Real volume = compute_volume ? elem.volume() : 0;
       if (items.bounding_box)
         entry.bounding_box.union_with(elem.loose_bounding_box());
+      if (items.volume)
+        entry.volume += volume;
       for (const auto & quality : items.qualities)
         quality.updateValue(entry.qualities, elem.quality(quality.elemQuality()));
       if (items.elems)
@@ -428,8 +431,8 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
         entry.max_volume = std::max(entry.max_volume, volume);
       if (items.num_elems)
         ++entry.num_elems;
-      if (items.volume)
-        entry.volume += volume;
+      if (items.processor_ids)
+        entry.processor_ids.insert(elem.processor_id());
     };
 
     // Add elements for subdomains and sidesets
@@ -481,6 +484,10 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
              { return std::make_pair(info.bounding_box.min(), info.bounding_box.max()); },
              [](auto & info, const auto & value)
              { info.bounding_box.union_with(BoundingBox(value.first, value.second)); });
+    // volume
+    if (items.volume)
+      gather([](const auto & info) { return info.volume; },
+             [](auto & info, const auto & value) { info.volume += value; });
     // qualities
     if (items.qualities.size())
       gather(
@@ -544,10 +551,15 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
     if (items.num_elems)
       gather([](const auto & info) { return info.num_elems; },
              [](auto & info, const auto & value) { info.num_elems += value; });
-    // volume
-    if (items.volume)
-      gather([](const auto & info) { return info.volume; },
-             [](auto & info, const auto & value) { info.volume += value; });
+    // processor_ids
+    if (items.processor_ids)
+      gather(
+          [](const auto & info)
+          {
+            mooseAssert(info.processor_ids.size() == 1, "Should have exactly one pid");
+            return *info.processor_ids.begin();
+          },
+          [](auto & info, const auto & value) { info.processor_ids.insert(value); });
 
     // If we haven't gathered anything at all (no items), we didn't insert
     // any IDs so we need to do that now
@@ -734,6 +746,9 @@ toJSONDomainInfoMap(nlohmann::json & json, const DomainInfoMapType & info_map)
     // min_volume
     if (items.num_elems)
       info_json["num_elems"] = info.num_elems;
+    // processor_ids
+    if (items.processor_ids)
+      info_json["processor_ids"] = info.processor_ids;
 
     json.push_back(std::move(info_json));
   }
@@ -810,6 +825,7 @@ dataStoreDomainInfo(std::ostream & stream, T & info)
   dataStore(stream, info.min_volume, nullptr);
   dataStore(stream, info.max_volume, nullptr);
   dataStore(stream, info.num_elems, nullptr);
+  dataStore(stream, info.processor_ids, nullptr);
 }
 void
 dataStore(std::ostream & stream, MeshInfo::SidesetInfo & info, void *)
@@ -857,6 +873,7 @@ dataLoadDomainInfo(std::istream & stream, T & info)
   dataLoad(stream, info.min_volume, nullptr);
   dataLoad(stream, info.max_volume, nullptr);
   dataLoad(stream, info.num_elems, nullptr);
+  dataLoad(stream, info.processor_ids, nullptr);
 }
 void
 dataLoad(std::istream & stream, MeshInfo::SidesetInfo & info, void *)

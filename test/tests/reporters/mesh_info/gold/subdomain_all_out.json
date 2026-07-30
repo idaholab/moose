@@ -73,6 +73,9 @@
                         "min_volume": 0.007022858705364182,
                         "name": "foo",
                         "num_elems": 24,
+                        "processor_ids": [
+                            0
+                        ],
                         "qualities": {
                             "max_jacobian": 0.015514930279253882,
                             "max_max_angle": 90.0,
@@ -145,6 +148,10 @@
                         "max_volume": 0.0227154094218556,
                         "min_volume": 0.006611882063148393,
                         "num_elems": 40,
+                        "processor_ids": [
+                            2,
+                            3
+                        ],
                         "qualities": {
                             "max_jacobian": 0.0227154094218556,
                             "max_max_angle": 90.0,
@@ -236,6 +243,10 @@
                         "min_volume": 0.0037322350532374483,
                         "name": "foo",
                         "num_elems": 60,
+                        "processor_ids": [
+                            0,
+                            1
+                        ],
                         "qualities": {
                             "max_jacobian": 0.015514930279253882,
                             "max_max_angle": 90.0,

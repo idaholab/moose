@@ -126,6 +126,8 @@ public:
     Real max_volume = 0;
     /// Number of elements
     std::size_t num_elems = 0;
+    /// Processors the elements are on
+    std::set<processor_id_type> processor_ids;
   };
   /// Information storage for a single sideset
   using SidesetInfo = DomainInfo<BoundaryID, std::pair<dof_id_type, unsigned int>>;
@@ -183,6 +185,7 @@ public:
     bool max_volume = false;
     bool min_volume = false;
     bool num_elems = false;
+    bool processor_ids = false;
     ///@}
 
     /// Bounded element qualities that should be output
