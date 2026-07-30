@@ -31,8 +31,7 @@ FVAdvectedMUSCLDeferredCorrection::validParams()
   return params;
 }
 
-FVAdvectedMUSCLDeferredCorrection::FVAdvectedMUSCLDeferredCorrection(
-    const InputParameters & params)
+FVAdvectedMUSCLDeferredCorrection::FVAdvectedMUSCLDeferredCorrection(const InputParameters & params)
   : FVInterpolationMethod(params),
     _gradient_method_name(getParam<GradientMethodName>("gradient_method")),
     _deferred_correction_factor(getParam<Real>("deferred_correction_factor"))

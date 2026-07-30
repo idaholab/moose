@@ -63,7 +63,6 @@ getLinearFVGradientMethod(SystemBase & sys, const GradientMethodName & method_na
 
   return fe_problem.getFVGradientMethod(method_name);
 }
-
 }
 
 template <typename OutputType>

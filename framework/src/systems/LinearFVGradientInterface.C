@@ -195,15 +195,12 @@ LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMeth
   mooseAssert(_linear_fv_gradient_method_scratch.size() == container.values.size(),
               "Method scratch and value gradient containers must have the same size.");
 
-  method.computeGradient(_sys,
-                         container.next_values,
-                         _linear_fv_gradient_method_scratch,
-                         container.variable_numbers);
+  method.computeGradient(
+      _sys, container.next_values, _linear_fv_gradient_method_scratch, container.variable_numbers);
 }
 
 void
-LinearFVGradientInterface::finalizeLinearFVGradientContainer(
-    LinearFVGradientContainer & container)
+LinearFVGradientInterface::finalizeLinearFVGradientContainer(LinearFVGradientContainer & container)
 {
   mooseAssert(container.next_values.size() == container.values.size(),
               "Next and current gradient containers must have the same size.");
