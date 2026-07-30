@@ -64,6 +64,16 @@ class VariableShapeGradient
 {
 public:
   /**
+   * Get the gradient of the current shape function in reference space
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The reference-space gradient of the shape function
+   */
+  KOKKOS_FUNCTION const Real3 &
+  reference(AssemblyDatum & datum, unsigned int i, unsigned int qp) const;
+
+  /**
    * Get the gradient of the current shape function
    * @param datum The AssemblyDatum object of the current thread
    * @param i The element-local DOF index
@@ -72,16 +82,24 @@ public:
    */
   KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
-    auto & elem = datum.elem();
-    auto side = datum.side();
-    auto fe = is_test ? datum.ife() : datum.jfe();
-
-    return datum.J(qp) *
-           (side == libMesh::invalid_uint
-                ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp));
+    return datum.J(qp) * reference(datum, i, qp);
   }
 };
+
+template <bool is_test>
+KOKKOS_FUNCTION const Real3 &
+VariableShapeGradient<is_test>::reference(AssemblyDatum & datum,
+                                          unsigned int i,
+                                          unsigned int qp) const
+{
+  auto & elem = datum.elem();
+  auto side = datum.side();
+  auto fe = is_test ? datum.ife() : datum.jfe();
+
+  return side == libMesh::invalid_uint
+             ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+             : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+}
 
 using VariablePhiValue = VariableShapeValue<false>;
 using VariablePhiGradient = VariableShapeGradient<false>;
@@ -120,6 +138,16 @@ class VectorVariableShapeGradient
 {
 public:
   /**
+   * Get the gradient of the current vector shape function in reference space
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The reference-space gradient of the vector shape function
+   */
+  KOKKOS_FUNCTION const Real33 &
+  reference(AssemblyDatum & datum, unsigned int i, unsigned int qp) const;
+
+  /**
    * Get the gradient of the current vector shape function
    * @param datum The AssemblyDatum object of the current thread
    * @param i The element-local DOF index
@@ -128,18 +156,24 @@ public:
    */
   KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
-    auto & elem = datum.elem();
-    auto side = datum.side();
-    auto fe = is_test ? datum.ife() : datum.jfe();
-
-    auto grad =
-        side == libMesh::invalid_uint
-            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
-
-    return grad * datum.J(qp).transpose();
+    return reference(datum, i, qp) * datum.J(qp).transpose();
   }
 };
+
+template <bool is_test>
+KOKKOS_FUNCTION const Real33 &
+VectorVariableShapeGradient<is_test>::reference(AssemblyDatum & datum,
+                                                unsigned int i,
+                                                unsigned int qp) const
+{
+  auto & elem = datum.elem();
+  auto side = datum.side();
+  auto fe = is_test ? datum.ife() : datum.jfe();
+
+  return side == libMesh::invalid_uint
+             ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+             : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+}
 
 template <bool is_test>
 class VectorVariableShapeCurl

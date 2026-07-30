@@ -143,10 +143,11 @@ KernelGrad::computeResidualInternal(const Derived & kernel, AssemblyDatum & datu
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real3 value = datum.JxW(qp) * kernel.template precomputeQpResidual<Derived>(qp, datum);
+          Real3 value = datum.J(qp).transpose() *
+                        (datum.JxW(qp) * kernel.template precomputeQpResidual<Derived>(qp, datum));
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += value * _grad_test(datum, i, qp);
+            local_re[i] += value * _grad_test.reference(datum, i, qp);
         }
       });
 }
@@ -161,10 +162,12 @@ KernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datu
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real3 value = datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum);
+          Real3 value =
+              datum.J(qp).transpose() *
+              (datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum));
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += value * _grad_test(datum, i, qp);
+            local_ke[i] += value * _grad_test.reference(datum, i, qp);
         }
       });
 }
@@ -179,11 +182,12 @@ KernelGrad::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real3 value = datum.JxW(qp) * kernel.template precomputeQpOffDiagJacobian<Derived>(
-                                            j, datum.jvar(), qp, datum);
+          Real3 value = datum.J(qp).transpose() *
+                        (datum.JxW(qp) * kernel.template precomputeQpOffDiagJacobian<Derived>(
+                                             j, datum.jvar(), qp, datum));
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += value * _grad_test(datum, i, qp);
+            local_ke[i] += value * _grad_test.reference(datum, i, qp);
         }
       });
 }

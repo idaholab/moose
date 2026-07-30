@@ -105,10 +105,12 @@ VectorKernelGrad::computeResidualInternal(const Derived & kernel, AssemblyDatum 
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real33 value = datum.JxW(qp) * kernel.template precomputeQpResidual<Derived>(qp, datum);
+          Real33 value =
+              (datum.JxW(qp) * kernel.template precomputeQpResidual<Derived>(qp, datum)) *
+              datum.J(qp);
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += value.contract(_grad_test(datum, i, qp));
+            local_re[i] += value.contract(_grad_test.reference(datum, i, qp));
         }
       });
 }
@@ -124,10 +126,11 @@ VectorKernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum 
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
           Real33 value =
-              datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum);
+              (datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(j, qp, datum)) *
+              datum.J(qp);
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += value.contract(_grad_test(datum, i, qp));
+            local_ke[i] += value.contract(_grad_test.reference(datum, i, qp));
         }
       });
 }
@@ -143,11 +146,12 @@ VectorKernelGrad::computeOffDiagJacobianInternal(const Derived & kernel,
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real33 value = datum.JxW(qp) * kernel.template precomputeQpOffDiagJacobian<Derived>(
-                                             j, datum.jvar(), qp, datum);
+          Real33 value = (datum.JxW(qp) * kernel.template precomputeQpOffDiagJacobian<Derived>(
+                                              j, datum.jvar(), qp, datum)) *
+                         datum.J(qp);
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i] += value.contract(_grad_test(datum, i, qp));
+            local_ke[i] += value.contract(_grad_test.reference(datum, i, qp));
         }
       });
 }

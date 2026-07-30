@@ -312,8 +312,10 @@ FESystem::operator()(const ThreadID tid) const
       auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
 
       value += vector * phi(i, qp);
-      grad += vector * (grad_phi(i, qp) * jacobian);
+      grad += vector * grad_phi(i, qp);
     }
+
+    grad = grad * jacobian;
 
     getVectorQpVectorValue(info, qp_offset + qp, var, tag) = value;
     getVectorQpVectorGrad(info, qp_offset + qp, var, tag) = grad;
@@ -334,8 +336,10 @@ FESystem::operator()(const ThreadID tid) const
       auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
 
       value += vector * phi(i, qp);
-      grad += vector * (jacobian * grad_phi(i, qp));
+      grad += vector * grad_phi(i, qp);
     }
+
+    grad = jacobian * grad;
 
     getVectorQpValue(info, qp_offset + qp, var, tag) = value;
     getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;

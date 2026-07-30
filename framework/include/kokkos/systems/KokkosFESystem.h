@@ -465,8 +465,10 @@ FESystem::getVectorQpADGrad(const ElementInfo info,
     auto & grad_phi = kokkosAssembly().getGradPhi(info.subdomain, info.type, fe);
 
     for (unsigned int i = 0; i < n_dofs; ++i)
-      grad += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) *
-              (jacobian * grad_phi(i, qp));
+      grad +=
+          getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) * grad_phi(i, qp);
+
+    grad = jacobian * grad;
   }
 
   return grad;
@@ -545,8 +547,9 @@ FESystem::getVectorQpGradFace(const ElementInfo info,
   Real3 grad = 0;
 
   for (unsigned int i = 0; i < n_dofs; ++i)
-    grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
-            (jacobian * grad_phi(i, qp));
+    grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) * grad_phi(i, qp);
+
+  grad = jacobian * grad;
 
   return grad;
 }
@@ -566,8 +569,9 @@ FESystem::getVectorQpVectorGradFace(const ElementInfo info,
   Real33 grad = 0;
 
   for (unsigned int i = 0; i < n_dofs; ++i)
-    grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
-            (grad_phi(i, qp) * jacobian.transpose());
+    grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) * grad_phi(i, qp);
+
+  grad = grad * jacobian.transpose();
 
   return grad;
 }
@@ -588,8 +592,9 @@ FESystem::getVectorQpADGradFace(const ElementInfo info,
   ADReal3 grad = ADReal(0);
 
   for (unsigned int i = 0; i < n_dofs; ++i)
-    grad += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) *
-            (jacobian * grad_phi(i, qp));
+    grad += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) * grad_phi(i, qp);
+
+  grad = jacobian * grad;
 
   return grad;
 }
