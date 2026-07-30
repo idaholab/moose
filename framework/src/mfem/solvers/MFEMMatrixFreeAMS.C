@@ -62,9 +62,9 @@ MFEMMatrixFreeAMS::validParams()
       "1.",
       "Name of scalar coefficient used in mass component of target equation system.");
   params.addParam<unsigned int>(
-      "inner_pi_iterations", 0, "Number of CG iterations on auxiliary Pi space.");
+      "inner_pi_iterations", 2, "Number of CG iterations on auxiliary Pi space.");
   params.addParam<unsigned int>(
-      "inner_g_iterations", 1, "Number of CG iterations on auxiliary G space.");
+      "inner_g_iterations", 2, "Number of CG iterations on auxiliary G space.");
   // mfem::MatrixFreeAMS is always an LOR solver
   params.setParameters("low_order_refined", true);
   params.suppressParameter<bool>("low_order_refined");
