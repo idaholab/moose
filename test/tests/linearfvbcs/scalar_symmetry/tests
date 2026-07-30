@@ -1,6 +1,6 @@
 [Tests]
   design = 'LinearFVAdvectionDiffusionFunctorRobinBC.md'
-  issues = '#30866 #32995'
+  issues = '#30866 #32999'
 
   [diffusion-1d-symmetry]
     type = MMSTest
