@@ -1,27 +1,27 @@
-# MFEM Problem Composer System
+# MFEMProblemComposer System
 
 The `MFEMProblemComposer` is a builder/adapter class that is used for constructing
 problem-operators with custom inputs. This class is specifically intended for composing
 user defined custom operators which may be raw `mfem::Operator`'s optimised for specific
 purposes e.g. MHD with customised inputs. The Operators may need thin layer access to the MOOSE
-multi-physics system. As of yet only a single problem operator per MFEM problem is used, even if
-multiple are defined. The ProblemOperatorBuilder classes are built within the MFEMProblem class 
-however the ProblemOperatos are built and owned by the MFEM executioners.
+multi-physics system. As of yet only a single problem operator per `MFEMProblem` is used, even if
+multiple are defined. The ProblemOperatorBuilder classes are built within the `MFEMProblem` class 
+however the `ProblemOperator`s are built and owned by the MFEM executioners.
 
-## Steady problem composer
+## SteadyProblemComposer
 
-The `SteadyProblemComposer` class is the default of the MFEMSteady executioner and does
+The `SteadyProblemComposer` class is the default of the `MFEMSteady` executioner and does
 not need to be declared explicitly. The `SteadyProblemComposer` class uses systematic
-logic to build one of 3 possible ProblemOperators they are the `EquationSystemProblemOperator`,
+logic to build one of 3 possible `ProblemOperator`s they are the `EquationSystemProblemOperator`,
 `ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
 
-## Transient problem composer
+## TransientProblemComposer
 
 The `TransientProblemComposer` class is the default of the MFEMTransient executioner and
 does not need to be declared explicitly. The `TransientProblemComposer` class builds 
 the `TimeDependentEquationSystemProblemOperator`.
 
-## Custom problem operator composer example
+## CustomProblemComposer example
 
 The custom problem operator example will follow the `MFEMCustomProblemOperator.C` unit-test which
 is based on MFEM's [ex0p](https://github.com/mfem/mfem/blob/master/examples/ex0p.cpp). Firstly a
@@ -51,7 +51,7 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 
 ```
 
-As the problemOperator is built by the MFEM executioners all registered entities in
+As the problem operator is built by the MFEM executioners all registered entities in
 [`MFEMProblem`](mfem/problem/MFEMProblem.md) have been built e.g. the `ParGridFunctions`.
 A custom operator builder function should be added in the case of non-linear problems where the
 operator is rebuilt. In the non-linear case the user would have to override and populate the
@@ -170,7 +170,7 @@ void CustomDummyProblemOperator::Solve() override
 ```
 
 Once the `ProblemOperator` has been built the `ProblemComposer` class is needed,
-this class is constructed by `MFEMProblem` and called by the executioner. The builder class
+this class is constructed by `MFEMProblem` and called by the executioner. The composer class
 must inherit from `ProblemComposerBase` making it an `MFEMObject` and by proxy a 
 `MooseObject` thus it has a fixed signature constructor and destructor, it has one method
 that has a fixed signature that is called by the executioner. All of the code must
@@ -202,7 +202,7 @@ public:
 ```
 
 The `validParams()` method can be used to generate custom inputs for the problem operator,
-the inputs can be then put in the ProblemComposer block of the input files.
+the inputs can be then put in the `MFEMProblemComposer` block of the input files.
 
 ```cpp
 namespace Moose::MFEM
@@ -240,7 +240,7 @@ CustomDummyProblemComposer::CustomDummyProblemComposer(
 ```
 
 The last method to be built is the `createProblemOperator` it simply returns a shared pointer
-to the ProblemOperator that was defined earlier, this method is called by the executioner,
+to the `ProblemOperator` that was defined earlier, this method is called by the executioner,
 and the resulting object is owned by the executioner.
 
 ```cpp
@@ -254,7 +254,7 @@ CustomDummyProblemComposer::createProblemOperator(MFEMProblem & mfemProb) overri
 };
 ```
 
-Once the object has been defined, the new `ProblemOperatorBuilder` object must be registered
+Once the object has been defined, the new `ProblemOperatorComposer` object must be registered
 to the MooseApp system:
 
 ```cpp

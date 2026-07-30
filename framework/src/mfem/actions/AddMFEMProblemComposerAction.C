@@ -9,29 +9,29 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "AddMFEMProblemOperatorAction.h"
+#include "AddMFEMProblemComposerAction.h"
 #include "MFEMProblem.h"
 
-registerMooseAction("MooseApp", AddMFEMProblemOperatorAction, "add_mfem_problem_operator");
+registerMooseAction("MooseApp", AddMFEMProblemComposerAction, "add_mfem_problem_composer");
 
 InputParameters
-AddMFEMProblemOperatorAction::validParams()
+AddMFEMProblemComposerAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a Problem Operator builder to the MFEM problem.");
+  params.addClassDescription("Add a Problem Composer to the MFEM problem.");
   return params;
 }
 
-AddMFEMProblemOperatorAction::AddMFEMProblemOperatorAction(const InputParameters & parameters)
+AddMFEMProblemComposerAction::AddMFEMProblemComposerAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }
 
 void
-AddMFEMProblemOperatorAction::act()
+AddMFEMProblemComposerAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).addMFEMProblemOperator(_type, _name, _moose_object_pars);
+    static_cast<MFEMProblem &>(*_problem).addMFEMProblemComposer(_type, _name, _moose_object_pars);
 }
 
 #endif

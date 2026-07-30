@@ -154,7 +154,7 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
 }
 
 void
-MFEMProblem::addMFEMProblemOperator(const std::string & user_object_name,
+MFEMProblem::addMFEMProblemComposer(const std::string & user_object_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {

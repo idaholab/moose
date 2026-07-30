@@ -39,12 +39,12 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _last_solve_converged(false)
 {
   // If no ProblemOperators have been added by the user, add a default
-  if (_mfem_problem.problemOperatorBuilderIsEmpty() == true)
+  if (_mfem_problem.problemComposerIsEmpty() == true)
   {
     InputParameters _default_params = _factory.getValidParams("SteadyProblemComposer");
     std::string _name = "default_steady";
     std::string _type = "SteadyProblemComposer";
-    _mfem_problem.addMFEMProblemOperator(_type, _name, _default_params);
+    _mfem_problem.addMFEMProblemComposer(_type, _name, _default_params);
   }
   addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
 }
