@@ -331,12 +331,12 @@ f(w_{ij}) = \frac{dw_{ij}}{dt} L_{ij} + \frac{L_{ij} }{\Delta z} \Delta (w_{ij} 
 \frac{w_{ij}|w_{ij}|}{\rho^*}= 0.
 \end{equation}
 
-The main unknown variable in this non linear residual is the crossflow $w_{ij}$. The combined residual function calculates the non linear residual $f(w_{ij})$ after it updates the other main flow variables, such as mass flow $\dot{m}_i$,  turbulent crossflow $w'_{ij}$, pressure drop  $\Delta P_i$ and pressure $P_i$, using the current $w_{ij}$ as needed. So every time this function is called by the Newton solver the flow variables get updated. This affords the solution of all flow variables at the same time. $P_i$ is the local pressure minus the exit pressure, $P_i (z) - P_{exit}$, so at the exit $P_{i}$ is zero. The hybrid algorithm is presented in [stencil].
+The main unknown variable in this non linear residual is the crossflow $w_{ij}$. The combined residual function calculates the non linear residual $f(w_{ij})$ after it updates the other main flow variables, such as mass flow $\dot{m}_i$,  turbulent crossflow $w'_{ij}$, pressure drop  $\Delta P_i$ and pressure $P_i$, using the current $w_{ij}$ as needed. So every time this function is called by the Newton solver the flow variables get updated. This affords the solution of all flow variables at the same time. $P_i$ is the local pressure minus the exit pressure, $P_i (z) - P_{exit}$, so at the exit $P_{i}$ is zero. The hybrid algorithm is presented in [scm-solver-flowchart].
 
-!media subchannel/getting_started/stencil.png
+!media media_scripts/scm_solver_flowchart.py
     style=width:60%;margin-bottom:2%;margin:auto;
-    id=stencil
-    caption=SCM hybrid numerical scheme
+    id=scm-solver-flowchart
+    caption=SCM solver iteration scheme
 
 For each outer pressure iteration, blocks are visited sequentially from the assembly inlet to the
 outlet. Within a block, SCM first refreshes the flow solution and then solves the enthalpy equation,
