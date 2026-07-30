@@ -36,7 +36,6 @@
 #include "LinearFVFluxKernel.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVBoundaryCondition.h"
-#include "GradientLimiterType.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"

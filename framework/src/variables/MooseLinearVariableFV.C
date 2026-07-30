@@ -21,7 +21,6 @@
 #include "FVUtils.h"
 #include "FVFluxBC.h"
 #include "FVDirichletBCBase.h"
-#include "GreenGaussGradient.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 #include "FVGradientMethod.h"

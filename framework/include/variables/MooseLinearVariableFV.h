@@ -236,9 +236,6 @@ protected:
   /// Boolean to check if this variable needs gradient computations.
   bool _needs_cell_gradients;
 
-  /// Temporary storage for the cell gradient to avoid unnecessary allocations.
-  mutable RealVectorValue _cell_gradient;
-
   /// Owning concrete system pointers. One will be null.
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
