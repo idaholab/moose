@@ -355,7 +355,8 @@ PenetrationThread::operator()(const NodeIdRange & range)
 
         p_info[best_i]->_closest_point = best_point;
         p_info[best_i]->_distance =
-            (MooseUtils::absoluteFuzzyGreaterEqual(p_info[best_i]->_distance, 0.0) ? 1.0 : -1.0) * std::sqrt(min_distance_sq);
+            (MooseUtils::absoluteFuzzyGreaterEqual(p_info[best_i]->_distance, 0.0) ? 1.0 : -1.0) *
+            std::sqrt(min_distance_sq);
         if (_do_normal_smoothing)
           mooseError("Normal smoothing not implemented with point locator code");
         Point normal = (best_point - node).unit();
@@ -502,7 +503,10 @@ PenetrationThread::operator()(const NodeIdRange & range)
 
               p_info[face_index]->_closest_point = closest_point;
               p_info[face_index]->_distance =
-                (MooseUtils::absoluteFuzzyGreaterEqual(p_info[face_index]->_distance, 0.0) ? 1.0 : -1.0) * closest_distance;
+                  (MooseUtils::absoluteFuzzyGreaterEqual(p_info[face_index]->_distance, 0.0)
+                       ? 1.0
+                       : -1.0) *
+                  closest_distance;
               // Calculate the normal as the vector from the ridge to the point only if we're not
               // doing normal
               // smoothing.  Normal smoothing will average out the normals on its own.
