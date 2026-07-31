@@ -218,7 +218,7 @@ def undefined(arg, *args, **kwargs):
 
 # Read MOOSE_DIR/framework/doc/packages_config.yml to grab defaults
 packages_config = os.path.join(MOOSE_DIR, "framework", "doc", "packages_config.yml")
-packages_yaml = {"default_mpi": "mpich"}
+packages_yaml = {"mpi_default": "mpich"}
 if os.path.exists(packages_config):
     with open(packages_config, "r", encoding="utf-8") as pkg_file:
         packages_yaml.update(yaml.safe_load(pkg_file))
@@ -228,7 +228,7 @@ JINJA_CONFIG = {
     "pin_compatible": undefined,
     "pin_subpackage": undefined,
     "compiler": undefined,
-    "mpi": undefined(packages_yaml["default_mpi"]),
+    "mpi": undefined(packages_yaml["mpi_default"]),
     "moose_libgfortran": undefined("libgfortran"),
     "moose_libgfortran5": undefined("libgfortran5"),
     "moose_petsc": undefined("moose-petsc"),

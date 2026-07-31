@@ -123,6 +123,13 @@ class PackageTextReplace(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page, settings):
-        content = self.extension.get(info["subcommand"], dict())
+        package = info["subcommand"]
+        assert isinstance(package, str)
+
+        content = self.extension.get(package, None)
+        if content is None:
+            raise KeyError(f"Package {package} does not exist")
+
         tokens.String(parent, content=str(content))
+
         return parent

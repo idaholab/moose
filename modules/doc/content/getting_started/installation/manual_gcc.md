@@ -1,8 +1,8 @@
 ## GCC
 
 !style! halign=left
-We need a modern C++17 capable compiler. Our minimum requirements are: GCC [!package!minimum_gcc],
-Clang [!package!minimum_clang]. This section will focus on building a GCC [!package!gcc] compiler
+We need a modern C++17 capable compiler. Our minimum requirements are: GCC [!package!gcc_min],
+Clang [!package!clang_min]. This section will focus on building a GCC [!package!gcc_apptainer] compiler
 stack.
 !style-end!
 

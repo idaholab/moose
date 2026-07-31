@@ -251,13 +251,11 @@ def setupOptions(options: argparse.Namespace) -> Tuple[argparse.Namespace, dict]
             "MooseDocs.extensions.navigation",
             "MooseDocs.extensions.sqa",
             "MooseDocs.extensions.civet",
-            "MooseDocs.extensions.gitutils",
         ]
     else:
         options.disable += [
             "MooseDocs.extensions.sqa",
             "MooseDocs.extensions.civet",
-            "MooseDocs.extensions.gitutils",
         ]
 
     for name in options.disable:
