@@ -12,14 +12,18 @@
 
 #include "libmesh/enum_to_string.h"
 #include "libmesh/fe_interface.h"
+#include "metaphysicl/dualnumberarray.h"
+#include "Eigen/Dense"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <limits>
-#include <sstream>
 #include <string>
 #include <vector>
+
+using MetaPhysicL::NumberArray;
+
+typedef DualNumber<Real, NumberArray<2, Real>> Dual2;
 
 namespace Moose
 {
@@ -27,15 +31,14 @@ namespace Mortar
 {
 namespace
 {
-// These cutoffs identify degeneracy in normalized polynomial coefficients and Jacobians above
-// floating-point roundoff.
+// These cutoffs identify degeneracy in normalized coefficients and Jacobians above roundoff.
 constexpr Real coefficient_tolerance = 1e-14;
 constexpr Real jacobian_tolerance = 1e-12;
-// Root deduplication and projection validation preserve ten-digit normalized inverse consistency.
+// Root and residual tolerances preserve ten-digit normalized inverse consistency.
 constexpr Real root_tolerance = 1e-10;
-constexpr Real projection_tolerance = 1e-10;
+constexpr Real inverse_residual_tolerance = 1e-10;
 // This matches the reference-space tolerance used when clipping mortar segments.
-constexpr Real minimum_reference_tolerance = 1e-8;
+constexpr Real mortar_reference_tolerance = 1e-8;
 
 bool
 isFinite(const Point & point)
@@ -53,7 +56,6 @@ struct PolynomialRoots
 {
   std::array<Real, 2> values = {};
   unsigned int count = 0;
-  bool indeterminate = false;
 };
 
 struct BilinearMap
@@ -63,18 +65,7 @@ struct BilinearMap
   Point eta;
   Point mixed;
   Real scale = 0;
-  bool affine = false;
 };
-
-Point
-evaluateBilinear(const BilinearMap & map,
-                 const Point & translated_center,
-                 const Real xi,
-                 const Real eta)
-{
-  return translated_center + xi * map.xi + eta * map.eta + xi * eta * map.mixed;
-}
-
 }
 
 std::vector<unsigned int>
@@ -174,6 +165,12 @@ subElementType(const ElemType parent_type, const unsigned int sub_elem)
   }
 }
 
+Real
+quadrilateralReferenceViolation(const Point & point)
+{
+  return std::max({Real(0), -1 - point(0), point(0) - 1, -1 - point(1), point(1) - 1});
+}
+
 [[noreturn]] void
 projectionFailure(const Elem & msm_elem,
                   const Elem & parent_elem,
@@ -195,34 +192,13 @@ projectionFailure(const Elem & msm_elem,
                  reason);
 }
 
-[[noreturn]] void
-projectionGeometryFailure(const Elem & msm_elem,
-                          const Elem & parent_elem,
-                          const unsigned int sub_elem,
-                          const std::string & reason)
-{
-  mooseException("Unable to prepare 3D mortar projection from mortar segment ",
-                 msm_elem.id(),
-                 " to subpatch ",
-                 sub_elem,
-                 " of parent element ",
-                 parent_elem.id(),
-                 " (",
-                 libMesh::Utility::enum_to_string<ElemType>(parent_elem.type()),
-                 "): ",
-                 reason);
-}
-
 PolynomialRoots
 realPolynomialRoots(const Real quadratic, const Real linear, const Real constant)
 {
   PolynomialRoots roots;
   const Real scale = std::max({std::abs(quadratic), std::abs(linear), std::abs(constant)});
   if (scale == 0)
-  {
-    roots.indeterminate = true;
     return roots;
-  }
 
   const Real a = quadratic / scale;
   const Real b = linear / scale;
@@ -259,27 +235,93 @@ realPolynomialRoots(const Real quadratic, const Real linear, const Real constant
   return roots;
 }
 
-Real
-quadReferenceViolation(const Point & point)
+Point
+evaluateBilinear(const BilinearMap & map, const Point & target, const Real xi, const Real eta)
 {
-  return std::max({Real(0), -1 - point(0), point(0) - 1, -1 - point(1), point(1) - 1});
+  return map.center - target + xi * map.xi + eta * map.eta + xi * eta * map.mixed;
+}
+
+template <std::size_t N>
+void
+projectToNormalizedPlane(const Elem & msm_elem,
+                         const Elem & parent_elem,
+                         const std::vector<unsigned int> & sub_elem_node_indices,
+                         const Point & normal,
+                         const Point & target,
+                         const unsigned int sub_elem,
+                         const unsigned int qp,
+                         const char * const sub_elem_name,
+                         std::array<Point, N> & projected_nodes,
+                         Point & projected_target)
+{
+  mooseAssert(sub_elem_node_indices.size() == N, "Unexpected mortar subpatch node count.");
+
+  Point longest_projected_edge;
+  Real length_scale = 0;
+  for (const auto first : index_range(sub_elem_node_indices))
+  {
+    const auto second = (first + 1) % sub_elem_node_indices.size();
+    const Point edge = parent_elem.point(sub_elem_node_indices[second]) -
+                       parent_elem.point(sub_elem_node_indices[first]);
+    const Point projected_edge = edge - (edge * normal) * normal;
+    if (projected_edge.norm() > length_scale)
+    {
+      length_scale = projected_edge.norm();
+      longest_projected_edge = projected_edge;
+    }
+  }
+
+  if (!std::isfinite(length_scale) || length_scale == 0)
+    projectionFailure(msm_elem,
+                      parent_elem,
+                      sub_elem,
+                      qp,
+                      std::string("the projected ") + sub_elem_name + " is singular");
+
+  const Point first_tangent = longest_projected_edge / length_scale;
+  const Point second_tangent = normal.cross(first_tangent).unit();
+  const Point origin = parent_elem.point(sub_elem_node_indices[0]);
+
+  for (const auto node : index_range(sub_elem_node_indices))
+  {
+    const Point offset = parent_elem.point(sub_elem_node_indices[node]) - origin;
+    projected_nodes[node] =
+        Point((offset * first_tangent) / length_scale, (offset * second_tangent) / length_scale);
+  }
+  const Point target_offset = target - origin;
+  projected_target = Point((target_offset * first_tangent) / length_scale,
+                           (target_offset * second_tangent) / length_scale);
 }
 
 Point
-inverseMapTriangle(const std::array<Point, 4> & points,
-                   const Elem & msm_elem,
-                   const Elem & parent_elem,
-                   const unsigned int sub_elem,
-                   const unsigned int qp,
-                   const Real clipping_tolerance)
+analyticalTriangleInverse(const Elem & msm_elem,
+                          const Elem & parent_elem,
+                          const std::vector<unsigned int> & sub_elem_node_indices,
+                          const Point & normal,
+                          const Point & target,
+                          const unsigned int sub_elem,
+                          const unsigned int qp)
 {
-  const Point first_edge = points[1] - points[0];
-  const Point second_edge = points[2] - points[0];
+  std::array<Point, 3> projected_nodes;
+  Point projected_target;
+  projectToNormalizedPlane(msm_elem,
+                           parent_elem,
+                           sub_elem_node_indices,
+                           normal,
+                           target,
+                           sub_elem,
+                           qp,
+                           "TRI3",
+                           projected_nodes,
+                           projected_target);
+
+  const Point first_edge = projected_nodes[1] - projected_nodes[0];
+  const Point second_edge = projected_nodes[2] - projected_nodes[0];
   const Real determinant = cross2D(first_edge, second_edge);
   if (std::abs(determinant) <= jacobian_tolerance)
     projectionFailure(msm_elem, parent_elem, sub_elem, qp, "the projected TRI3 is singular");
 
-  const Point right_hand_side = -points[0];
+  const Point right_hand_side = projected_target - projected_nodes[0];
   const Real xi = cross2D(right_hand_side, second_edge) / determinant;
   const Real eta = cross2D(first_edge, right_hand_side) / determinant;
   if (!std::isfinite(xi) || !std::isfinite(eta))
@@ -287,8 +329,8 @@ inverseMapTriangle(const std::array<Point, 4> & points,
 
   const Point unsnapped_result(xi, eta);
   const Point unsnapped_residual =
-      points[0] + unsnapped_result(0) * first_edge + unsnapped_result(1) * second_edge;
-  if (unsnapped_residual.norm() > projection_tolerance)
+      projected_nodes[0] + xi * first_edge + eta * second_edge - projected_target;
+  if (unsnapped_residual.norm() > inverse_residual_tolerance)
     projectionFailure(
         msm_elem, parent_elem, sub_elem, qp, "the TRI3 inverse does not satisfy the projection");
 
@@ -296,21 +338,27 @@ inverseMapTriangle(const std::array<Point, 4> & points,
   const Real violation = std::max({Real(0), -barycentric[0], -barycentric[1], -barycentric[2]});
   if (violation == 0)
     return unsnapped_result;
+  if (violation > mortar_reference_tolerance)
+    projectionFailure(
+        msm_elem, parent_elem, sub_elem, qp, "the TRI3 inverse is outside the subpatch");
 
+  // A clipping-sized violation is roundoff at an edge: clamp all barycentric coordinates and
+  // renormalize to preserve their partition of unity.
   for (auto & coordinate : barycentric)
     coordinate = std::clamp(coordinate, Real(0), Real(1));
-  const Real sum = barycentric[0] + barycentric[1] + barycentric[2];
+  const Real barycentric_sum = barycentric[0] + barycentric[1] + barycentric[2];
   for (auto & coordinate : barycentric)
-    coordinate /= sum;
+    coordinate /= barycentric_sum;
 
   const Point result(barycentric[1], barycentric[2]);
-  const Point residual = points[0] + result(0) * first_edge + result(1) * second_edge;
-  if (residual.norm() > clipping_tolerance)
+  const Point snapped_residual =
+      projected_nodes[0] + result(0) * first_edge + result(1) * second_edge - projected_target;
+  if (snapped_residual.norm() > mortar_reference_tolerance)
     projectionFailure(msm_elem,
                       parent_elem,
                       sub_elem,
                       qp,
-                      "the validated TRI3 inverse does not satisfy the projection equation");
+                      "the snapped TRI3 inverse does not satisfy the projection");
   return result;
 }
 
@@ -318,7 +366,8 @@ BilinearMap
 prepareQuadrilateralMap(const std::array<Point, 4> & points,
                         const Elem & msm_elem,
                         const Elem & parent_elem,
-                        const unsigned int sub_elem)
+                        const unsigned int sub_elem,
+                        const unsigned int qp)
 {
   BilinearMap map;
   map.center = 0.25 * (points[0] + points[1] + points[2] + points[3]);
@@ -327,9 +376,8 @@ prepareQuadrilateralMap(const std::array<Point, 4> & points,
   map.mixed = 0.25 * (points[0] - points[1] + points[2] - points[3]);
   map.scale = std::max({map.xi.norm(), map.eta.norm(), map.mixed.norm()});
   if (!std::isfinite(map.scale) || map.scale == 0)
-    projectionGeometryFailure(
-        msm_elem, parent_elem, sub_elem, "the projected QUAD4 has invalid coefficients");
-  map.affine = map.mixed.norm() <= coefficient_tolerance * map.scale;
+    projectionFailure(
+        msm_elem, parent_elem, sub_elem, qp, "the projected QUAD4 has invalid coefficients");
 
   // The bilinear Jacobian is affine, so nonzero corner determinants with one sign exclude folding.
   Real orientation = 0;
@@ -338,12 +386,11 @@ prepareQuadrilateralMap(const std::array<Point, 4> & points,
     {
       const Real determinant = cross2D(map.xi + eta * map.mixed, map.eta + xi * map.mixed);
       if (std::abs(determinant) <= jacobian_tolerance)
-        projectionGeometryFailure(
-            msm_elem, parent_elem, sub_elem, "the projected QUAD4 is singular");
+        projectionFailure(msm_elem, parent_elem, sub_elem, qp, "the projected QUAD4 is singular");
       if (orientation == 0)
         orientation = std::copysign(1.0, determinant);
       else if (orientation * determinant < 0)
-        projectionGeometryFailure(msm_elem, parent_elem, sub_elem, "the projected QUAD4 is folded");
+        projectionFailure(msm_elem, parent_elem, sub_elem, qp, "the projected QUAD4 is folded");
     }
   return map;
 }
@@ -354,117 +401,125 @@ inverseMapQuadrilateral(const BilinearMap & map,
                         const Elem & msm_elem,
                         const Elem & parent_elem,
                         const unsigned int sub_elem,
-                        const unsigned int qp,
-                        const Real clipping_tolerance)
+                        const unsigned int qp)
 {
-  const Point translated_center = map.center - target;
-  std::array<Point, 2> candidates;
-  std::array<Point, 2> snapped_candidates;
-  unsigned int candidate_count = 0;
-  unsigned int snapped_candidate_count = 0;
-  bool use_reverse_elimination = false;
-  bool too_many_candidates = false;
-  bool too_many_snapped_candidates = false;
-  auto store_candidate = [&](const Point & candidate,
-                             auto & stored_candidates,
-                             auto & stored_candidate_count,
-                             auto & overflow)
+  std::vector<Point> strict_candidates;
+  std::vector<Point> tolerance_candidates;
+
+  auto store_candidate = [](const Point & candidate, auto & candidates)
   {
-    for (const auto existing_candidate : make_range(stored_candidate_count))
-      if ((candidate - stored_candidates[existing_candidate]).norm() <= root_tolerance)
-        return;
-    if (stored_candidate_count == stored_candidates.size())
-    {
-      overflow = true;
-      return;
-    }
-    stored_candidates[stored_candidate_count++] = candidate;
+    if (std::none_of(candidates.begin(),
+                     candidates.end(),
+                     [&candidate](const Point & existing)
+                     { return (candidate - existing).norm() <= root_tolerance; }))
+      candidates.push_back(candidate);
   };
+
   auto add_candidate = [&](const Real xi, const Real eta)
   {
     Point candidate(xi, eta);
     if (!isFinite(candidate))
+      return;
+
+    if (evaluateBilinear(map, target, xi, eta).norm() > inverse_residual_tolerance)
+      return;
+
+    const Real violation = quadrilateralReferenceViolation(candidate);
+    if (violation == 0)
     {
-      use_reverse_elimination = true;
+      store_candidate(candidate, strict_candidates);
       return;
     }
-    if (evaluateBilinear(map, translated_center, xi, eta).norm() > projection_tolerance)
-    {
-      use_reverse_elimination = true;
+    if (violation > mortar_reference_tolerance)
       return;
-    }
-    const Real violation = quadReferenceViolation(candidate);
-    if (violation > 0)
-    {
-      // Permit snapping only when the boundary point still satisfies the clipping tolerance.
-      candidate(0) = std::clamp(candidate(0), Real(-1), Real(1));
-      candidate(1) = std::clamp(candidate(1), Real(-1), Real(1));
-      if (evaluateBilinear(map, translated_center, candidate(0), candidate(1)).norm() >
-          clipping_tolerance)
-        return;
-      store_candidate(
-          candidate, snapped_candidates, snapped_candidate_count, too_many_snapped_candidates);
-    }
-    else
-      store_candidate(candidate, candidates, candidate_count, too_many_candidates);
+
+    // Only tolerance-sized exterior roots may be snapped, and the snapped point must still
+    // satisfy the normalized projection equation.
+    const Point unsnapped_candidate = candidate;
+    candidate(0) = std::clamp(candidate(0), Real(-1), Real(1));
+    candidate(1) = std::clamp(candidate(1), Real(-1), Real(1));
+    if (evaluateBilinear(map, target, candidate(0), candidate(1)).norm() >
+        mortar_reference_tolerance)
+      return;
+    store_candidate(unsnapped_candidate, tolerance_candidates);
   };
 
-  if (map.affine)
+  // Enumerate both eliminations because one reconstruction direction can be singular at a root.
+  const auto xi_roots =
+      realPolynomialRoots(cross2D(map.xi, map.mixed),
+                          cross2D(map.center - target, map.mixed) + cross2D(map.xi, map.eta),
+                          cross2D(map.center - target, map.eta));
+  const Real direction_tolerance_sq =
+      coefficient_tolerance * coefficient_tolerance * map.scale * map.scale;
+  for (const auto root : make_range(xi_roots.count))
   {
-    const Point right_hand_side = -translated_center;
-    const Real determinant = cross2D(map.xi, map.eta);
-    add_candidate(cross2D(right_hand_side, map.eta) / determinant,
-                  cross2D(map.xi, right_hand_side) / determinant);
-  }
-  else
-  {
-    // Eliminate eta first; reverse the elimination if that form is indeterminate or cannot
-    // reconstruct and validate every root.
-    const auto xi_roots =
-        realPolynomialRoots(cross2D(map.xi, map.mixed),
-                            cross2D(translated_center, map.mixed) + cross2D(map.xi, map.eta),
-                            cross2D(translated_center, map.eta));
-    use_reverse_elimination = xi_roots.indeterminate;
-    const Real direction_tolerance_sq =
-        coefficient_tolerance * coefficient_tolerance * map.scale * map.scale;
-    for (const auto root : make_range(xi_roots.count))
-    {
-      const Real xi = xi_roots.values[root];
-      const Point eta_direction = map.eta + xi * map.mixed;
-      const Real denominator = eta_direction.norm_sq();
-      if (denominator > direction_tolerance_sq)
-        add_candidate(xi, ((-translated_center - xi * map.xi) * eta_direction) / denominator);
-      else
-        use_reverse_elimination = true;
-    }
-    if (use_reverse_elimination)
-    {
-      const auto eta_roots =
-          realPolynomialRoots(cross2D(map.eta, map.mixed),
-                              cross2D(translated_center, map.mixed) + cross2D(map.eta, map.xi),
-                              cross2D(translated_center, map.xi));
-      for (const auto root : make_range(eta_roots.count))
-      {
-        const Real eta = eta_roots.values[root];
-        const Point xi_direction = map.xi + eta * map.mixed;
-        const Real denominator = xi_direction.norm_sq();
-        if (denominator > direction_tolerance_sq)
-          add_candidate(((-translated_center - eta * map.eta) * xi_direction) / denominator, eta);
-      }
-    }
+    const Real xi = xi_roots.values[root];
+    const Point eta_direction = map.eta + xi * map.mixed;
+    const Real denominator = eta_direction.norm_sq();
+    if (denominator > direction_tolerance_sq)
+      add_candidate(xi, (((target - map.center) - xi * map.xi) * eta_direction) / denominator);
   }
 
-  // Prefer the exact in-domain inverse over a clipping-tolerance candidate.
-  if (candidate_count == 1 && !too_many_candidates)
-    return candidates[0];
+  const auto eta_roots =
+      realPolynomialRoots(cross2D(map.eta, map.mixed),
+                          cross2D(map.center - target, map.mixed) + cross2D(map.eta, map.xi),
+                          cross2D(map.center - target, map.xi));
+  for (const auto root : make_range(eta_roots.count))
+  {
+    const Real eta = eta_roots.values[root];
+    const Point xi_direction = map.xi + eta * map.mixed;
+    const Real denominator = xi_direction.norm_sq();
+    if (denominator > direction_tolerance_sq)
+      add_candidate((((target - map.center) - eta * map.eta) * xi_direction) / denominator, eta);
+  }
 
-  if (candidate_count == 0 && snapped_candidate_count == 1 && !too_many_snapped_candidates)
-    return snapped_candidates[0];
+  // A true in-domain root takes precedence over a clipping-tolerance boundary candidate.
+  if (strict_candidates.size() == 1)
+    return strict_candidates[0];
+  if (strict_candidates.empty() && tolerance_candidates.size() == 1)
+  {
+    auto candidate = tolerance_candidates[0];
+    candidate(0) = std::clamp(candidate(0), Real(-1), Real(1));
+    candidate(1) = std::clamp(candidate(1), Real(-1), Real(1));
+    return candidate;
+  }
 
-  std::ostringstream message;
-  message << "expected one in-domain QUAD4 inverse but found " << candidate_count
-          << " feasible and " << snapped_candidate_count << " clipping-tolerance candidates";
-  projectionFailure(msm_elem, parent_elem, sub_elem, qp, message.str());
+  projectionFailure(msm_elem,
+                    parent_elem,
+                    sub_elem,
+                    qp,
+                    "the analytical fallback did not find one unique in-domain QUAD4 inverse");
+}
+
+Point
+analyticalQuadrilateralInverse(const Elem & msm_elem,
+                               const Elem & parent_elem,
+                               const std::vector<unsigned int> & sub_elem_node_indices,
+                               const Point & normal,
+                               const Point & target,
+                               const unsigned int sub_elem,
+                               const unsigned int qp)
+{
+  std::array<Point, 4> projected_nodes;
+  Point projected_target;
+  projectToNormalizedPlane(msm_elem,
+                           parent_elem,
+                           sub_elem_node_indices,
+                           normal,
+                           target,
+                           sub_elem,
+                           qp,
+                           "QUAD4",
+                           projected_nodes,
+                           projected_target);
+
+  return inverseMapQuadrilateral(
+      prepareQuadrilateralMap(projected_nodes, msm_elem, parent_elem, sub_elem, qp),
+      projected_target,
+      msm_elem,
+      parent_elem,
+      sub_elem,
+      qp);
 }
 }
 
@@ -504,148 +559,202 @@ projectQPoints3d(const Elem * const msm_elem,
                  const QBase & qrule_msm,
                  std::vector<Point> & q_pts)
 {
-  // This compatibility path has no clipping metadata, so reconstruct the segment normal and use
-  // the base reference tolerance.
-  const Point first_edge = msm_elem->point(0) - msm_elem->point(1);
-  const Point second_edge = msm_elem->point(2) - msm_elem->point(1);
-  const Point normal = second_edge.cross(first_edge);
-  if (!isFinite(normal) || normal.norm() == 0)
-    mooseException("Cannot determine a normal for degenerate mortar segment ", msm_elem->id(), ".");
+  const auto msm_elem_order = msm_elem->default_order();
+  const auto msm_elem_type = msm_elem->type();
 
-  projectQPoints3d(*msm_elem, *primal_elem, sub_elem_index, normal, 0, qrule_msm, q_pts);
-}
+  // Get normal to linearized element, could store and query but computation is easy
+  const Point e1 = msm_elem->point(0) - msm_elem->point(1);
+  const Point e2 = msm_elem->point(2) - msm_elem->point(1);
+  const Point normal = e2.cross(e1).unit();
 
-void
-projectQPoints3d(const Elem & msm_elem,
-                 const Elem & primal_elem,
-                 const unsigned int sub_elem_index,
-                 const Point & projection_normal,
-                 const Real clipping_area_tolerance,
-                 const QBase & qrule_msm,
-                 std::vector<Point> & q_pts)
-{
-  if (msm_elem.type() != TRI3)
-    mooseError("3D mortar quadrature projection requires a TRI3 mortar segment, but segment ",
-               msm_elem.id(),
-               " has type ",
-               libMesh::Utility::enum_to_string<ElemType>(msm_elem.type()),
-               ".");
+  // Get sub-elem (for second order meshes, otherwise trivial)
+  const auto sub_elem = msm_elem->get_extra_integer(sub_elem_index);
+  const ElemType primal_type = primal_elem->type();
+  const ElemType sub_elem_type = subElementType(primal_type, sub_elem);
 
-  const auto sub_elem = msm_elem.get_extra_integer(sub_elem_index);
-  const auto sub_elem_node_indices = getMortarSubElementNodeIndices(primal_elem, sub_elem);
-  const auto sub_elem_type = subElementType(primal_elem.type(), sub_elem);
-
-  if (!isFinite(projection_normal))
-    mooseException("Invalid projection-plane normal for mortar segment ", msm_elem.id(), ".");
-  const Real normal_norm = projection_normal.norm();
-  if (!std::isfinite(normal_norm) || normal_norm == 0)
-    mooseException("Invalid projection-plane normal for mortar segment ", msm_elem.id(), ".");
-  if (!std::isfinite(clipping_area_tolerance) || clipping_area_tolerance < 0)
-    mooseError("Invalid clipping area tolerance for mortar segment ", msm_elem.id(), ".");
-  const Point normal = projection_normal / normal_norm;
-
-  // Express the subpatch in a normalized clipping-plane basis before analytical inversion, making
-  // tolerances independent of translation and element scale.
-  Point longest_projected_edge;
-  Real length_scale = 0;
-  Real minimum_edge_length = std::numeric_limits<Real>::max();
-  for (const auto first : index_range(sub_elem_node_indices))
+  // Transforms quadrature point from first order sub-elements (in case of second-order)
+  // to primal element
+  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi)
   {
-    const auto second = (first + 1) % sub_elem_node_indices.size();
-    const Point edge = primal_elem.point(sub_elem_node_indices[second]) -
-                       primal_elem.point(sub_elem_node_indices[first]);
-    const Point projected_edge = edge - (edge * normal) * normal;
-    const Real projected_edge_length = projected_edge.norm();
-    minimum_edge_length = std::min(minimum_edge_length, projected_edge_length);
-    if (projected_edge_length > length_scale)
+    switch (primal_type)
     {
-      length_scale = projected_edge_length;
-      longest_projected_edge = projected_edge;
+      case TRI3:
+        return Point(nu, xi, 0);
+      case QUAD4:
+        return Point(nu, xi, 0);
+      case TRI6:
+      case TRI7:
+        switch (sub_elem)
+        {
+          case 0:
+            return Point(0.5 * nu, 0.5 * xi, 0);
+          case 1:
+            return Point(0.5 * (1 - xi), 0.5 * (nu + xi), 0);
+          case 2:
+            return Point(0.5 * (1 + nu), 0.5 * xi, 0);
+          case 3:
+            return Point(0.5 * nu, 0.5 * (1 + xi), 0);
+          default:
+            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
+        }
+      case QUAD8:
+        switch (sub_elem)
+        {
+          case 0:
+            return Point(nu - 1, xi - 1, 0);
+          case 1:
+            return Point(nu + xi, xi - 1, 0);
+          case 2:
+            return Point(1 - xi, nu + xi, 0);
+          case 3:
+            return Point(nu - 1, nu + xi, 0);
+          case 4:
+            return Point(0.5 * (nu - xi), 0.5 * (nu + xi), 0);
+          default:
+            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
+        }
+      case QUAD9:
+        switch (sub_elem)
+        {
+          case 0:
+            return Point(0.5 * (nu - 1), 0.5 * (xi - 1), 0);
+          case 1:
+            return Point(0.5 * (nu + 1), 0.5 * (xi - 1), 0);
+          case 2:
+            return Point(0.5 * (nu + 1), 0.5 * (xi + 1), 0);
+          case 3:
+            return Point(0.5 * (nu - 1), 0.5 * (xi + 1), 0);
+          default:
+            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
+        }
+      default:
+        mooseError("transform_qp: Face element type: ",
+                   libMesh::Utility::enum_to_string<ElemType>(primal_type),
+                   " invalid for 3D mortar");
     }
-  }
+  };
 
-  if (!std::isfinite(length_scale) || !std::isfinite(minimum_edge_length) || length_scale == 0 ||
-      minimum_edge_length == 0)
-    mooseException("Parent subpatch ",
-                   sub_elem,
-                   " of element ",
-                   primal_elem.id(),
-                   " is singular when projected along the mortar clipping normal.");
+  // Get sub-elem node indices
+  const auto sub_elem_node_indices = getMortarSubElementNodeIndices(*primal_elem, sub_elem);
 
-  // Convert the helper's physical area tolerance to the normalized projection-residual scale.
-  const Real clipping_tolerance = std::max(
-      minimum_reference_tolerance, clipping_area_tolerance / (minimum_edge_length * length_scale));
-  const Point first_tangent = longest_projected_edge / length_scale;
-  const Point second_tangent = normal.cross(first_tangent).unit();
-  const Point origin = primal_elem.point(sub_elem_node_indices[0]);
-
-  std::array<Point, 4> projected_nodes = {};
-  for (const auto node : index_range(sub_elem_node_indices))
+  // Loop through quadrature points on msm_elem
+  for (auto qp : make_range(qrule_msm.n_points()))
   {
-    const Point offset = primal_elem.point(sub_elem_node_indices[node]) - origin;
-    projected_nodes[node] =
-        Point((offset * first_tangent) / length_scale, (offset * second_tangent) / length_scale);
-  }
+    // Get physical point on msm_elem to project
+    Point x0;
+    for (auto n : make_range(msm_elem->n_nodes()))
+      x0 += Moose::fe_lagrange_2D_shape(msm_elem_type,
+                                        msm_elem_order,
+                                        n,
+                                        static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp))) *
+            msm_elem->point(n);
 
-  const BilinearMap quadrilateral_map =
-      sub_elem_type == QUAD4
-          ? prepareQuadrilateralMap(projected_nodes, msm_elem, primal_elem, sub_elem)
-          : BilinearMap();
-
-  for (const auto qp : make_range(qrule_msm.n_points()))
-  {
-    const Point mortar_reference_point = qrule_msm.qp(qp);
-    if (!isFinite(mortar_reference_point))
-      mooseError("Mortar segment ",
-                 msm_elem.id(),
-                 " has a non-finite quadrature point at index ",
-                 qp,
-                 ".");
-
-    Point physical_mortar_point;
-    for (const auto node : make_range(msm_elem.n_nodes()))
-      physical_mortar_point +=
-          Moose::fe_lagrange_2D_shape(TRI3, FIRST, node, mortar_reference_point) *
-          msm_elem.point(node);
-
-    const Point target_offset = physical_mortar_point - origin;
-    const Point projected_target((target_offset * first_tangent) / length_scale,
-                                 (target_offset * second_tangent) / length_scale);
-    Point sub_elem_reference_point;
     if (sub_elem_type == TRI3)
     {
-      auto translated_nodes = projected_nodes;
-      for (const auto node : make_range(sub_elem_node_indices.size()))
-        translated_nodes[node] -= projected_target;
-      sub_elem_reference_point = inverseMapTriangle(
-          translated_nodes, msm_elem, primal_elem, sub_elem, qp, clipping_tolerance);
+      const Point sub_elem_point = analyticalTriangleInverse(
+          *msm_elem, *primal_elem, sub_elem_node_indices, normal, x0, sub_elem, qp);
+      const Point parent_point = transform_qp(sub_elem_point(0), sub_elem_point(1));
+      if (!isFinite(parent_point) ||
+          !primal_elem->on_reference_element(parent_point, mortar_reference_tolerance))
+        projectionFailure(*msm_elem,
+                          *primal_elem,
+                          sub_elem,
+                          qp,
+                          "the recovered TRI3 point is outside the parent face");
+      q_pts.push_back(parent_point);
+      continue;
     }
-    else
-      sub_elem_reference_point = inverseMapQuadrilateral(quadrilateral_map,
-                                                         projected_target,
-                                                         msm_elem,
-                                                         primal_elem,
-                                                         sub_elem,
-                                                         qp,
-                                                         clipping_tolerance);
 
-    // Map the first-order subpatch coordinate through its vertices in the parent reference domain.
-    Point parent_reference_point;
-    for (const auto node : index_range(sub_elem_node_indices))
-      parent_reference_point +=
-          Moose::fe_lagrange_2D_shape(sub_elem_type, FIRST, node, sub_elem_reference_point) *
-          primal_elem.master_point(sub_elem_node_indices[node]);
+    // Use msm_elem quadrature point as initial guess
+    // (will be correct for aligned meshes)
+    Dual2 xi1{};
+    xi1.value() = qrule_msm.qp(qp)(0);
+    xi1.derivatives()[0] = 1.0;
+    Dual2 xi2{};
+    xi2.value() = qrule_msm.qp(qp)(1);
+    xi2.derivatives()[1] = 1.0;
+    VectorValue<Dual2> xi(xi1, xi2, 0);
+    unsigned int current_iterate = 0, max_iterates = 10;
 
-    if (!isFinite(parent_reference_point) ||
-        !primal_elem.on_reference_element(parent_reference_point, minimum_reference_tolerance))
+    // Project qp from mortar segments to first order sub-elements (elements in case of first order
+    // geometry)
+    do
     {
-      std::ostringstream message;
-      message << "the recovered parent reference point " << parent_reference_point
-              << " is outside the parent domain";
-      projectionFailure(msm_elem, primal_elem, sub_elem, qp, message.str());
+      VectorValue<Dual2> x1;
+      for (auto n : make_range(sub_elem_node_indices.size()))
+        x1 += Moose::fe_lagrange_2D_shape(sub_elem_type, FIRST, n, xi) *
+              primal_elem->point(sub_elem_node_indices[n]);
+      auto u = x1 - x0;
+
+      VectorValue<Dual2> F(u(1) * normal(2) - u(2) * normal(1),
+                           u(2) * normal(0) - u(0) * normal(2),
+                           u(0) * normal(1) - u(1) * normal(0));
+
+      Real projection_tolerance(1e-10);
+
+      // Normalize tolerance with quantities involved in the projection.
+      // Absolute projection tolerance is loosened for displacements larger than those on the order
+      // of one. Tightening the tolerance for displacements of smaller orders causes this tolerance
+      // to not be reached in a number of tests.
+      if (!u.is_zero() && u.norm().value() > 1.0)
+        projection_tolerance *= u.norm().value();
+
+      if (MetaPhysicL::raw_value(F).norm() < projection_tolerance)
+        break;
+
+      RealEigenMatrix J(3, 2);
+      J << F(0).derivatives()[0], F(0).derivatives()[1], F(1).derivatives()[0],
+          F(1).derivatives()[1], F(2).derivatives()[0], F(2).derivatives()[1];
+      RealEigenVector f(3);
+      f << F(0).value(), F(1).value(), F(2).value();
+      const RealEigenVector dxi = -J.colPivHouseholderQr().solve(f);
+
+      xi(0) += dxi(0);
+      xi(1) += dxi(1);
+    } while (++current_iterate < max_iterates);
+
+    const Point newton_sub_elem_point(xi(0).value(), xi(1).value());
+    const Point newton_parent_point =
+        transform_qp(newton_sub_elem_point(0), newton_sub_elem_point(1));
+    const bool newton_point_is_valid =
+        current_iterate < max_iterates && isFinite(newton_sub_elem_point) &&
+        isFinite(newton_parent_point) &&
+        quadrilateralReferenceViolation(newton_sub_elem_point) == 0 &&
+        primal_elem->on_reference_element(newton_parent_point, mortar_reference_tolerance);
+
+    if (newton_point_is_valid)
+    {
+      q_pts.push_back(newton_parent_point);
+      continue;
     }
 
-    q_pts.push_back(parent_reference_point);
+    if (sub_elem_type == QUAD4)
+    {
+      // Newton can converge to the exterior root of a distorted bilinear QUAD.
+      const Point fallback_point = analyticalQuadrilateralInverse(
+          *msm_elem, *primal_elem, sub_elem_node_indices, normal, x0, sub_elem, qp);
+      const Point parent_point = transform_qp(fallback_point(0), fallback_point(1));
+      if (!isFinite(parent_point) ||
+          !primal_elem->on_reference_element(parent_point, mortar_reference_tolerance))
+        projectionFailure(*msm_elem,
+                          *primal_elem,
+                          sub_elem,
+                          qp,
+                          "the recovered point is outside the parent face");
+      q_pts.push_back(parent_point);
+      continue;
+    }
+
+    if (current_iterate == max_iterates)
+      mooseError("Newton iteration for mortar quadrature mapping msm element: ",
+                 msm_elem->id(),
+                 " to elem: ",
+                 primal_elem->id(),
+                 " didn't converge. MSM element volume: ",
+                 msm_elem->volume());
+
+    projectionFailure(
+        *msm_elem, *primal_elem, sub_elem, qp, "the Newton result is outside the parent face");
   }
 }
 }

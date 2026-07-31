@@ -472,7 +472,6 @@ AutomaticMortarGeneration::clear()
   _secondary_node_and_elem_to_xi2_primary_elem.clear();
   _primary_node_and_elem_to_xi1_secondary_elem.clear();
   _msm_elem_to_info.clear();
-  _secondary_elem_to_subpatch_projection_data.clear();
   _lower_elem_to_side_id.clear();
   _mortar_interface_coupling.clear();
   _secondary_node_to_nodal_normal.clear();
@@ -500,26 +499,6 @@ AutomaticMortarGeneration::mortarSegmentReferencePoints(const Elem & mortar_segm
                ". The mortar segment info and reference-point maps are not aligned.");
 
   return reference_points_it->second;
-}
-
-const SubpatchProjectionData &
-AutomaticMortarGeneration::subpatchProjectionData(const Elem & secondary_elem,
-                                                  const unsigned int sub_elem) const
-{
-  const auto elem_it = _secondary_elem_to_subpatch_projection_data.find(&secondary_elem);
-  if (elem_it == _secondary_elem_to_subpatch_projection_data.end())
-    mooseError("No 3D mortar subpatch projection data were stored for secondary element ",
-               secondary_elem.id(),
-               ".");
-
-  if (sub_elem >= elem_it->second.size())
-    mooseError("Invalid 3D mortar secondary subpatch index ",
-               sub_elem,
-               " for secondary element ",
-               secondary_elem.id(),
-               ".");
-
-  return elem_it->second[sub_elem];
 }
 
 void
@@ -1294,13 +1273,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
       std::vector<std::unique_ptr<MortarSegmentHelper>> mortar_segment_helper(
           secondary_side_elem->n_sub_elem());
-      std::vector<SubpatchProjectionData> * subpatch_projection_data = nullptr;
-      if (!use_reference_interpolation)
-      {
-        auto & data = _secondary_elem_to_subpatch_projection_data[secondary_side_elem];
-        data.resize(secondary_side_elem->n_sub_elem());
-        subpatch_projection_data = &data;
-      }
       const auto nodal_normals = getNodalNormals(*secondary_side_elem);
 
       /**
@@ -1361,11 +1333,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         else
           mortar_segment_helper[sel] = std::make_unique<MortarSegmentHelper>(
               std::move(nodes), center, normal, _triangulation_mode, _triangulate_triangles);
-
-        // Retain the helper's exact clipping metadata for assembly-time QP projection.
-        if (subpatch_projection_data)
-          (*subpatch_projection_data)[sel] = {mortar_segment_helper[sel]->normal(),
-                                              mortar_segment_helper[sel]->areaTolerance()};
       }
 
       /**

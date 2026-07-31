@@ -130,14 +130,9 @@ public:
   const Point & center() const { return _center; }
 
   /**
-   * Get the exact normal supplied for projection and clipping.
+   * Get the unit normal of the projection plane.
    */
   const Point & normal() const { return _normal; }
-
-  /**
-   * Get the area tolerance used for clipping.
-   */
-  Real areaTolerance() const { return _area_tol; }
 
   /**
    * Get area fraction remaining after clipping against primary elements
@@ -194,7 +189,7 @@ private:
   Point _center;
 
   /**
-   * Exact normal supplied for projection and clipping
+   * Unit normal of the plane used to project and clip the linearized secondary subpatch.
    */
   Point _normal;
 

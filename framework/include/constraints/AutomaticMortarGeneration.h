@@ -62,15 +62,6 @@ struct MortarSegmentReferencePoints
 };
 
 /**
- * Exact clipping data retained per secondary subpatch for normal projection during assembly.
- */
-struct SubpatchProjectionData
-{
-  Point normal;
-  Real area_tolerance;
-};
-
-/**
  * This class is a container/interface for the objects involved in
  * automatic generation of mortar spaces.
  */
@@ -336,12 +327,6 @@ public:
     return _msm_elem_to_info;
   }
 
-  /**
-   * Return the data stored when a secondary subpatch was clipped.
-   */
-  const SubpatchProjectionData & subpatchProjectionData(const Elem & secondary_elem,
-                                                        unsigned int sub_elem) const;
-
   int dim() const { return _mesh.mesh_dimension(); }
 
   /// Return the 3D mortar quadrature-point mapping method.
@@ -485,10 +470,6 @@ private:
   /// structs. This gets filled in by the call to
   /// build_mortar_segment_mesh().
   std::unordered_map<const Elem *, MortarSegmentInfo> _msm_elem_to_info;
-
-  /// Clipping data indexed by secondary face and subpatch, allocated only for normal projection.
-  std::unordered_map<const Elem *, std::vector<SubpatchProjectionData>>
-      _secondary_elem_to_subpatch_projection_data;
 
   /// Keeps track of the mapping between lower-dimensional elements and
   /// the side_id of the interior_parent which they are.

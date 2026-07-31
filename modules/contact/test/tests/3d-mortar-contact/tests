@@ -48,12 +48,9 @@
       type = 'CSVDiff'
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
-      csvdiff = 'frictionless-mortar-3d-action-second_contact-pressure_FINAL.csv'
+      csvdiff = 'frictionless-mortar-3d-action-second_contact-pressure_0002.csv'
       mesh_mode = 'REPLICATED' # see issue 24255
-      cli_args = 'Contact/mortar/segment_quadrature="fifth" Outputs/csv=false '
-                 'Outputs/final/type=CSV Outputs/final/execute_on=FINAL '
-                 'Outputs/final/create_final_symlink=true Outputs/final/show=contact-pressure '
-                 'Outputs/file_base=frictionless-mortar-3d-action-second'
+      cli_args = 'Contact/mortar/segment_quadrature="fifth" Outputs/file_base=frictionless-mortar-3d-action-second'
       detail = 'mortar quadrature designed to integrate quadratic polynomials on triangles'
       rel_err = 5.0e-5
       abs_zero = 1.0e-5

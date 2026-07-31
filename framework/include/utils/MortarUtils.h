@@ -30,9 +30,7 @@ std::vector<unsigned int> getMortarSubElementNodeIndices(const Elem & parent_ele
                                                          unsigned int sub_elem);
 
 /**
- * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements.
- * This compatibility overload reconstructs the segment normal because clipping metadata is
- * unavailable.
+ * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
  * @param msm_elem The mortar segment element that we will be mapping quadrature points from
  * @param primal_elem The "persistent" mesh element (e.g. it exists on the simulation's MooseMesh)
  * that we will be mapping quadrature points for. This can be either an element on the secondary or
@@ -49,19 +47,6 @@ std::vector<unsigned int> getMortarSubElementNodeIndices(const Elem & parent_ele
 void projectQPoints3d(const Elem * msm_elem,
                       const Elem * primal_elem,
                       unsigned int sub_elem_index,
-                      const QBase & qrule_msm,
-                      std::vector<Point> & q_pts);
-
-/**
- * 3D projection operator using the data retained when constructing the mortar segment.
- * @param projection_normal Exact, not necessarily unit, normal supplied to the clipping helper
- * @param clipping_area_tolerance Physical area tolerance used by the clipping helper
- */
-void projectQPoints3d(const Elem & msm_elem,
-                      const Elem & primal_elem,
-                      unsigned int sub_elem_index,
-                      const Point & projection_normal,
-                      Real clipping_area_tolerance,
                       const QBase & qrule_msm,
                       std::vector<Point> & q_pts);
 
@@ -208,26 +193,14 @@ loopOverMortarSegments(
                                     primary_xi_pts);
         else
         {
-          // Invert each parent-face linearization independently while reusing the exact secondary
-          // clipping direction for both.
-          const auto secondary_sub_elem = msm_elem->get_extra_integer(secondary_sub_elem_index);
-          const auto & projection_data =
-              amg.subpatchProjectionData(*msinfo.secondary_elem, secondary_sub_elem);
-
-          projectQPoints3d(*msm_elem,
-                           *msinfo.secondary_elem,
+          // Map independently because the parent-face linearizations differ.
+          projectQPoints3d(msm_elem,
+                           msinfo.secondary_elem,
                            secondary_sub_elem_index,
-                           projection_data.normal,
-                           projection_data.area_tolerance,
                            *qrule_msm,
                            secondary_xi_pts);
-          projectQPoints3d(*msm_elem,
-                           *msinfo.primary_elem,
-                           primary_sub_elem_index,
-                           projection_data.normal,
-                           projection_data.area_tolerance,
-                           *qrule_msm,
-                           primary_xi_pts);
+          projectQPoints3d(
+              msm_elem, msinfo.primary_elem, primary_sub_elem_index, *qrule_msm, primary_xi_pts);
         }
       }
 
@@ -352,7 +325,7 @@ loopOverMortarSegments(
       act();
 
     } // End loop over msm segments on secondary face elem
-  } // End loop over (active) secondary elems
+  }   // End loop over (active) secondary elems
 }
 
 /**

@@ -11,6 +11,8 @@
 
 #include "MortarSegmentHelper.h"
 #include "MortarUtils.h"
+#include "MooseException.h"
+#include "MooseUnitUtils.h"
 
 #include "libmesh/elem.h"
 
@@ -73,6 +75,37 @@ protected:
       EXPECT_LE((first[i] - second[i]).norm(), tolerance) << "point index " << i;
   }
 };
+
+TEST_F(MortarSegmentHelperTest, projectedQuadrilateralValidation)
+{
+  const std::vector<Point> convex = {
+      Point(-1., -1.), Point(1., -0.8), Point(0.9, 1.), Point(-0.8, 0.9)};
+  const std::vector<Point> folded = {
+      Point(-1., -1.), Point(1., -1.), Point(-1., 1.), Point(1., 1.)};
+  const std::vector<Point> singular = {
+      Point(-1., -1.), Point(1., -1.), Point(1., 1.), Point(1., 1.)};
+
+  auto segment_helper = helper(convex);
+  EXPECT_FALSE(segment_helper.clipPoly(convex).empty());
+
+  EXPECT_THROW_MSG_CONTAINS(helper(folded),
+                            MooseException,
+                            "projected secondary mortar quadrilateral is folded, singular, or "
+                            "non-injective");
+  EXPECT_THROW_MSG_CONTAINS(helper(singular),
+                            MooseException,
+                            "projected secondary mortar quadrilateral is folded, singular, or "
+                            "non-injective");
+
+  EXPECT_THROW_MSG_CONTAINS(segment_helper.clipPoly(folded),
+                            MooseException,
+                            "projected primary mortar quadrilateral is folded, singular, or "
+                            "non-injective");
+  EXPECT_THROW_MSG_CONTAINS(segment_helper.clipPoly(singular),
+                            MooseException,
+                            "projected primary mortar quadrilateral is folded, singular, or "
+                            "non-injective");
+}
 
 TEST_F(MortarSegmentHelperTest, triangleReferenceRecoverySnapsOnlyToleranceViolations)
 {
