@@ -128,7 +128,7 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
 {
   // Node ownership can follow a higher-dimensional parent, so the query may be a secondary face,
   // its interior parent, or a paired primary parent. Start from every associated secondary face so
-  // the coupling graph contains the complete nodal-normal support in either row direction.
+  // the ghosting graph contains the complete remote nodal-normal support in either row direction.
   std::vector<const Elem *> secondary_lower_elem_candidates;
   if (query_elem->subdomain_id() == secondary_subdomain_id)
     secondary_lower_elem_candidates.push_back(query_elem);

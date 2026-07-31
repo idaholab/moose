@@ -20,7 +20,7 @@
     max_parallel = 2
     mesh_mode = DISTRIBUTED
     design = 'ContactAction.md PenaltyFrictionUserObject.md AutomaticMortarGeneration.md'
-    requirement = 'Distributed three-dimensional mortar-penalty friction shall assemble and solve across a fully overlapping, partitioned QUAD4 node star.'
+    requirement = 'Distributed three-dimensional mortar-penalty friction shall assemble and solve on a fully overlapping, partitioned QUAD4 interface.'
   []
 
   [mortar_penalty_friction_jacobian]
@@ -54,7 +54,7 @@
     capabilities = 'ad_size>=200'
     max_parallel = 1
     design = 'ContactAction.md AutomaticMortarGeneration.md'
-    requirement = 'Active TET10 contact with TRI6 mortar faces shall support the secondary face-star normal construction.'
+    requirement = 'Quasistatic mortar contact shall assemble and solve with active TET10 elements and TRI6 interface faces when sufficient AD storage is available.'
   []
 
   [hex27_quad9]
@@ -66,6 +66,6 @@
     max_parallel = 1
     mesh_mode = REPLICATED
     design = 'ContactAction.md AutomaticMortarGeneration.md'
-    requirement = 'Active HEX27 contact with QUAD9 mortar faces shall support the secondary face-star normal construction when sufficient AD storage is available.'
+    requirement = 'Quasistatic mortar contact shall execute with active HEX27 elements and QUAD9 interface faces when sufficient AD storage is available.'
   []
 []

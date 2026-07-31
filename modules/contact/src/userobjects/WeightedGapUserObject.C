@@ -60,6 +60,8 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
 
+  // A valid penetration_tolerance identifies augmented-Lagrange contact, which retains frozen
+  // normal directions.
   if (getParam<bool>("use_nodal_normal_derivatives") && !isParamValid("penetration_tolerance"))
     includeNodalNormalDerivatives();
 }
