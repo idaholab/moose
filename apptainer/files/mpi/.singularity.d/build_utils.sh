@@ -52,24 +52,3 @@ clean_system_packages() {
         rm -rf /var/lib/apt/lists/*
     fi
 }
-
-# Determine the default value for -march for a build. Needed
-# because older compilers (GCC 9, our minimum) do not support
-# things like "x86-64-v3".
-default_march() {
-    if ! command -v mpicxx >/dev/null 2>&1; then
-        echo "mpicxx not found" >&2
-        return 1
-    fi
-
-    COMPILER="$(mpicxx -show | awk '{print $1}')"
-
-    if "$COMPILER" --version | grep -qi "gcc\|g++"; then
-        GCC_MAJOR=$("$COMPILER" -dumpfullversion -dumpversion | cut -d. -f1)
-        if [ "$GCC_MAJOR" -lt 10 ]; then
-            echo "haswell"
-            return 0
-        fi
-    fi
-    echo "x86-64-v3"
-}
