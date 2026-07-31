@@ -30,12 +30,34 @@
     recover = false
     compute_devices = 'cpu cuda'
   []
-  [MFEMValueSamplerBoundaryDiscontinuousWarning]
+  [MFEMValueSamplerBoundaryDiscontinuousWarningRT]
+    type = RunException
+    input = point_value_sampler_boundary_warn.i
+    cli_args = 'VectorPostprocessors/point_sample/variable=rt_vector'
+    expect_err = "MFEMValueSamplerBase found a point on an element boundary but the FE space is discontinuous at boundaries"
+    issues = '#32988'
+    requirement = "The system shall issue a warning if an attempt is made to sample an RT variable near an element boundary."
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+  [MFEMValueSamplerBoundaryDiscontinuousWarningND]
+    type = RunException
+    input = point_value_sampler_boundary_warn.i
+    cli_args = 'VectorPostprocessors/point_sample/variable=nd_vector'
+    expect_err = "MFEMValueSamplerBase found a point on an element boundary but the FE space is discontinuous at boundaries"
+    issues = '#32988'
+    requirement = "The system shall issue a warning if an attempt is made to sample an ND variable near an element boundary."
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+  [MFEMValueSamplerBoundaryDiscontinuousWarningL2]
     type = RunException
     input = point_value_sampler_boundary_warn.i
     expect_err = "MFEMValueSamplerBase found a point on an element boundary but the FE space is discontinuous at boundaries"
     issues = '#32988'
-    requirement = "The system shall issue a warning if an attempt is made to sample a variable near a boundary when the variable is discontinuous across boundaries."
+    requirement = "The system shall issue a warning if an attempt is made to sample an L2 variable near an element boundary."
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'

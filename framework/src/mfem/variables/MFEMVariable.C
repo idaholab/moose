@@ -27,7 +27,7 @@ MFEMVariable::validParams()
                                    "The finite element space this variable is defined on.");
   params.addParam<std::string>(
       "fespace_hierarchy",
-      "Name of a FESpaceHierarchy; the variable lives on its finest level. "
+      "Name of a MFEMFESpaceHierarchy the variable lives on its finest level. "
       "Mutually exclusive with 'fespace'.");
   // Require moose variable parameters (not used!)
   params += MooseVariableBase::validParams();

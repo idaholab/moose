@@ -19,7 +19,7 @@ MFEMOperatorJacobiSmoother::validParams()
 {
   InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
-  params.addParam<double>(
+  params.addParam<mfem::real_t>(
       "damping",
       1.0,
       "Damping factor omega for the scaled-Jacobi iteration y = omega * D^{-1} * x. "
@@ -36,7 +36,7 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 void
 MFEMOperatorJacobiSmoother::ConstructSolver()
 {
-  _solver = std::make_unique<mfem::OperatorJacobiSmoother>(getParam<double>("damping"));
+  _solver = std::make_unique<mfem::OperatorJacobiSmoother>(getParam<mfem::real_t>("damping"));
   _solver->iterative_mode = getParam<bool>("use_initial_guess");
 }
 

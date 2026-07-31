@@ -284,6 +284,7 @@
     abs_zero = 2e-7
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
+    valgrind = heavy
     recover = false
   []
   [MFEMDarcy]

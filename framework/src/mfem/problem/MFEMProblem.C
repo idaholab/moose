@@ -42,16 +42,13 @@ getMFEMSolverDependencies(const InputParameters & parameters)
 
   for (const auto & [param_name, _] : parameters)
   {
-    if (parameters.isPrivate(param_name) || !parameters.isParamValid(param_name))
+    if (parameters.isPrivate(param_name))
       continue;
 
-    if (parameters.have_parameter<MFEMSolverName>(param_name))
-      dependencies.push_back(parameters.get<MFEMSolverName>(param_name));
-    else if (parameters.have_parameter<std::vector<MFEMSolverName>>(param_name))
-    {
-      const auto & names = parameters.get<std::vector<MFEMSolverName>>(param_name);
-      dependencies.insert(dependencies.end(), names.begin(), names.end());
-    }
+    if (auto * name = parameters.queryParam<MFEMSolverName>(param_name))
+      dependencies.push_back(*name);
+    else if (auto * names = parameters.queryParam<std::vector<MFEMSolverName>>(param_name))
+      dependencies.insert(dependencies.end(), names->begin(), names->end());
   }
 
   return dependencies;
@@ -139,9 +136,8 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  if (!_mfem_solver_definitions.emplace(name, MFEMSolverDefinition{solver_type, &parameters})
-           .second)
-    mooseError("Multiple MFEM solvers named '", name, "' were provided.");
+  mooseAssert(!_mfem_solver_definitions.count(name), "Multiple MFEM solvers named '" + name + "'.");
+  _mfem_solver_definitions.emplace(name, MFEMSolverDefinition{solver_type, &parameters});
 }
 
 void
@@ -185,8 +181,8 @@ MFEMProblem::resolveMFEMSolvers()
   }
 
   auto & problem_data = getProblemData();
-  problem_data.jacobian_solver = nullptr;
-  problem_data.nonlinear_solver = nullptr;
+  mooseAssert(!problem_data.jacobian_solver, "MFEM linear solver driver already assigned");
+  mooseAssert(!problem_data.nonlinear_solver, "MFEM nonlinear solver driver already assigned");
 
   for (const auto & solver_name : *sorted_solver_names)
   {
@@ -312,7 +308,7 @@ MFEMProblem::addFESpace(const std::string & type,
   if (getProblemData().fespace_hierarchies.Has(name))
     mooseError("Cannot add FESpace '",
                name,
-               "': a FESpaceHierarchy with the same name already exists. "
+               "': an MFEMFESpaceHierarchy with the same name already exists. "
                "FESpaces and FESpaceHierarchies share the fespaces namespace.");
 
   auto & mfem_fespace = *addObject<MFEMFESpace>(type, name, parameters).front();
@@ -328,7 +324,7 @@ MFEMProblem::addFESpaceHierarchy(const std::string & type,
                                  InputParameters & parameters)
 {
   if (getProblemData().fespaces.Has(name))
-    mooseError("Cannot add FESpaceHierarchy '",
+    mooseError("Cannot add MFEMFESpaceHierarchy '",
                name,
                "': a FESpace with the same name already exists. "
                "FESpaces and FESpaceHierarchies share the fespaces namespace.");
@@ -341,9 +337,7 @@ MFEMProblem::addFESpaceHierarchy(const std::string & type,
   // variables can say `fespace = <hierarchy_name>` without a separate FESpace definition.
   // The aliasing shared_ptr keeps the hierarchy alive as long as this entry lives.
   auto finest = std::shared_ptr<mfem::ParFiniteElementSpace>(
-      hierarchy_shared,
-      &static_cast<mfem::ParFiniteElementSpace &>(
-          hierarchy_obj->getHierarchy().GetFinestFESpace()));
+      hierarchy_shared, &hierarchy_obj->getHierarchy().GetFinestFESpace());
   getProblemData().fespaces.Register(name, finest);
 }
 
