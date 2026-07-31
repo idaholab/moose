@@ -373,16 +373,12 @@ EquationSystem::ApplyDomainBLFIntegrators(
     {
       mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
 
-      if (integ && kernel->IsDGKernel())
-        // AddInteriorFaceIntegrator doesn't have the overload for passing in the
-        // boundary markers as well
-        form->AddInteriorFaceIntegrator(std::move(integ));
-
-      else if (integ)
+      if (integ)
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
-        kernel->isSubdomainRestricted()
+        kernel->isDGKernel() ? form->AddInteriorFaceIntegrator(std::move(integ))
+        : kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
       }
@@ -408,7 +404,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     {
       mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
 
-      if (integ && bc->IsDGBC())
+      if (integ && bc->isDGBC())
         bc->isBoundaryRestricted()
             ? form->AddBdrFaceIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBdrFaceIntegrator(std::move(integ));

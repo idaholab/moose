@@ -44,7 +44,7 @@ public:
   /// Method to disambiguate whether we have a regular kernel or a DG Kernel.
   /// DG Kernels are added to (Bi)linear forms with a different method, so
   /// we first perform this check to see what we are dealing with.
-  virtual bool IsDGKernel() const { return false; }
+  virtual bool isDGKernel() const { return false; }
 
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.

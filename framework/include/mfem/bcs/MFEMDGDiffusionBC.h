@@ -26,7 +26,7 @@ public:
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 
-  virtual bool IsDGBC() const override { return true; }
+  virtual bool isDGBC() const override { return true; }
 
 protected:
   int _fe_order;

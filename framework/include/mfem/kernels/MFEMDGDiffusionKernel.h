@@ -21,7 +21,7 @@ public:
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
-  virtual bool IsDGKernel() const override { return true; }
+  virtual bool isDGKernel() const override { return true; }
 
 protected:
   int _fe_order;
