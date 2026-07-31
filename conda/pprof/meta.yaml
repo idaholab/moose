@@ -1,5 +1,5 @@
 {% set version = "2026.05.06_92041b7" %}
-{% set build = 0 %}
+{% set build = 1 %}
 
 package:
   name: moose-pprof

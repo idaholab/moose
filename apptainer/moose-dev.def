@@ -1,71 +1,61 @@
-{#- Required jinja arguments                                                                  -#}
-{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
-{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
-{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
-{#- NEML2_GIT_SHA: The git SHA to use for neml2                                               -#}
-{#- NEML2_GIT_REMOTE: The git remote to use to get neml2                                      -#}
-{#- WASP_GIT_SHA: The git SHA to use for WASP                                                 -#}
-{#- WASP_GIT_REMOTE: The git remote to use to get WASP                                        -#}
+{#-
+   Required jinja arguments:
 
-{#- Optional jinja arguments                                                                  -#}
-{#- CONDUIT_GIT_SHA: The git SHA to use for conduit                                           -#}
-{#- CONDUIT_GIT_REMOTE: The git remote to use to get conduit                                  -#}
-{#- CONDUIT_OPTIONS: Options to pass to conduit build                                         -#}
-{#- MFEM_GIT_SHA: The git SHA to use for MFEM                                                 -#}
-{#- MFEM_GIT_REMOTE: The git remote to use to get MFEM                                        -#}
-{#- MFEM_OPTIONS: Options to pass to mfem build                                               -#}
-{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
-{#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
-{#- PYTORCH_GIT_SHA: The git SHA to use for pytorch                                           -#}
-{#- PYTORCH_GIT_REMOTE: The git remote to use to get pytorch                                  -#}
-{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
-{#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
-{#- WITH_FMU: Whether or not to install python fmu utilities (default: false)                 -#}
-{#- WITHOUT_PYTORCH: Set to anything to not build/download pytorch and neml2                  -#}
+   - APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)
+   - APPTAINER_FROM: The From to use (path to an image or an oras URI)
+   - MOOSE_DIR: Path on the host to the MOOSE repository
+   - NEML2_GIT_SHA: The git SHA to use for neml2
+   - NEML2_GIT_REMOTE: The git remote to use to get neml2
+   - WASP_GIT_SHA: The git SHA to use for WASP
+   - WASP_GIT_REMOTE: The git remote to use to get WASP
 
-{#- Set WITH_MFEM default if not set                                                          -#}
-{%- if WITH_MFEM is not defined %}
-{%- set WITH_MFEM = '1' %}
-{%- endif %}
+   Optional jinja arguments:
 
-{#- The within-container build directory to use                                               -#}
-{%- set ROOT_BUILD_DIR = '/root/build' -%}
+   - CONDUIT_GIT_SHA: The git SHA to use for conduit
+   - CONDUIT_GIT_REMOTE: The git remote to use to get conduit
+   - CONDUIT_OPTIONS: Options to pass to conduit build
+   - MFEM_GIT_SHA: The git SHA to use for MFEM
+   - MFEM_GIT_REMOTE: The git remote to use to get MFEM
+   - MFEM_OPTIONS: Options to pass to mfem build
+   - MOOSE_JOBS: Number of jobs to pass to the builds
+   - OPTFLAGS: Optimization flags to set when building
+   - PROFILING: Whether or not to build with gperftools (truthy, default: false)
+   - PYTORCH_GIT_SHA: The git SHA to use for pytorch
+   - PYTORCH_GIT_REMOTE: The git remote to use to get pytorch
+   - SKIP_FINGERPRINTS: Set to skip fingerprint verification (truthy, default: false)
+   - WITH_MFEM: Whether or not to build mfem (truthy, default: true)
+   - WITH_FMU: Whether or not to install python fmu utilities (truthy, default: false)
+   - WITHOUT_PYTORCH: Whether to not build pytorch and neml2 (truthy, default: false)
+-#}
 
-{#- The installation location for gperftools                                                  -#}
-{%- set GPERF_DIR = '/opt/gperftools' -%}
-{#- The installation location for pprof                                                       -#}
-{%- set PPROF_DIR = '/opt/pprof' -%}
-{#- The installation location for libtorch                                                    -#}
-{%- set LIBTORCH_DIR = '/opt/libtorch' -%}
-{#- The script used to install conduit                                                        -#}
-{%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh' -%}
-{#- The installation location for conduit                                                     -#}
-{%- set CONDUIT_DIR = '/opt/conduit' -%}
-{#- The script used to install mfem                                                           -#}
-{%- set MFEM_BUILD_SCRIPT = 'update_and_rebuild_mfem.sh' -%}
-{#- The installation location for mfem                                                        -#}
-{%- set MFEM_DIR = '/opt/mfem' -%}
-{#- The script used to install wasp                                                           -#}
-{%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
-{#- The installation location for wasp                                                        -#}
-{%- set WASP_DIR = '/opt/wasp' -%}
-{#- The script used to install neml2                                                          -#}
-{%- set NEML2_BUILD_SCRIPT = 'update_and_rebuild_neml2.sh' -%}
-{#- The installation location for neml2                                                       -#}
-{%- set NEML2_DIR = '/opt/neml2' -%}
-{#- The installation location for uv                                                          -#}
-{%- set UV_DIR = '/opt/uv' -%}
-{#- The installation location for python                                                      -#}
-{%- set PYTHON_DIR = '/opt/python' -%}
-{#- The installation location for code-server                                                 -#}
-{%- set CODE_SERVER_DIR = '/opt/code-server' -%}
+{#- Set defaults for any variables not provided                #}
+{%- set PROFILING         = PROFILING | default(false)         %}
+{%- set SKIP_FINGERPRINTS = SKIP_FINGERPRINTS | default(false) %}
+{%- set WITH_MFEM         = WITH_MFEM | default(true)          %}
+{%- set WITH_FMU          = WITH_FMU | default(false)          %}
+{%- set WITHOUT_PYTORCH   = WITHOUT_PYTORCH | default(false)   %}
 
-{#- The files directory for this definition                                                   -#}
-{%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
+{#- Installation locations and build scripts for third-party dependencies -#}
+{%- set CODE_SERVER_DIR      = '/opt/code-server'                         -%}
+{%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh'            -%}
+{%- set CONDUIT_DIR          = '/opt/conduit'                             -%}
+{%- set FILES_DIR            = MOOSE_DIR + '/apptainer/files/moose-dev'   -%}
+{%- set GPERF_DIR            = '/opt/gperftools'                          -%}
+{%- set LIBTORCH_DIR         = '/opt/libtorch'                            -%}
+{%- set MFEM_BUILD_SCRIPT    = 'update_and_rebuild_mfem.sh'               -%}
+{%- set MFEM_DIR             = '/opt/mfem'                                -%}
+{%- set NEML2_BUILD_SCRIPT   = 'update_and_rebuild_neml2.sh'              -%}
+{%- set NEML2_DIR            = '/opt/neml2'                               -%}
+{%- set PPROF_DIR            = '/opt/pprof'                               -%}
+{%- set PYTHON_DIR           = '/opt/python'                              -%}
+{%- set ROOT_BUILD_DIR       = '/root/build'                              -%}
+{%- set UV_DIR               = '/opt/uv'                                  -%}
+{%- set WASP_BUILD_SCRIPT    = 'update_and_rebuild_wasp.sh'               -%}
+{%- set WASP_DIR             = '/opt/wasp'                                -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
-{%- if SKIP_FINGERPRINTS is not defined %}
+{%- if not SKIP_FINGERPRINTS | to_bool %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
@@ -77,30 +67,28 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
 
-{%- if WITH_MFEM %}
+{%- if WITH_MFEM | to_bool %}
     test -d {{ CONDUIT_DIR }} && export CONDUIT_DIR={{ CONDUIT_DIR }}
     test -d {{ MFEM_DIR }} && export MFEM_DIR={{ MFEM_DIR }}
 {%- endif %}
 
-{% if WITHOUT_PYTORCH is not defined %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     test -d {{ LIBTORCH_DIR }} && export LIBTORCH_DIR={{ LIBTORCH_DIR }}
     test -d {{ NEML2_DIR }} && export NEML2_DIR={{ NEML2_DIR }}
 {%- endif %}
 
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
     # For profiling
     export GPERF_DIR={{ GPERF_DIR }}
     export PATH={{ PPROF_DIR }}/bin:$PATH
     export METHOD=oprof
 {%- endif %}
 
-%post
-    umask 022
+%post -c /bin/bash
+    set -uexo pipefail
 
-    # So that piping things to tee fails
-    set -o pipefail
-    # Be careful about unknown variables
-    set -u
+    source /.singularity.d/build_utils.sh
+    update_system_packages
 
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
@@ -108,11 +96,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Individual versions for packages to install, in the order
     # in which they are installed below.
     # code-server and code-server plugins
-    CODE_SERVER_VERSION=4.123.0
+    CODE_SERVER_VERSION=4.128.0
     MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.2
     # python
     PYTHON_VERSION=3.14.6
-{% if WITH_FMU %}
+{% if WITH_FMU | to_bool %}
     # PyFMI python package and its dependencies
     FMI_LIBRARY_VERSION=3.0.4
     ASSIMULO_VERSION=3.8.0
@@ -120,11 +108,18 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # PythonFMU python package
     PYTHONFMU_VERSION=0.7.0
 {%- endif %}
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
     # pprof and its dependencies
     GPERFTOOLS_VERSION=2.18.1
     GO_VERSION=1.26.1
     PPROF_SHA=a0b0bb1d4134f37be44de6c328680339b0fc13ad
+{%- endif %}
+
+    # Optimization flags
+{%- if OPTFLAGS is not defined %}
+    OPTFLAGS=("-march=$(default_march)" "-mtune=generic")
+{%- else %}
+    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
 {%- endif %}
 
     # Special setup for OpenMPI
@@ -148,7 +143,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
                 export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
             fi
             if mpiexec --version | grep -q hwloc; then
-                dnf install -y hwloc-gui
+                if is_rocky; then
+                    dnf install -y hwloc-gui
+                elif is_ubuntu; then
+                    apt-get install -y --no-install-recommends hwloc-nox
+                fi
             fi
         )
     fi
@@ -169,11 +168,18 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
         CODE_SERVER_DIR={{ CODE_SERVER_DIR }}
 
-        # Install code-server rpm
-        CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
-        curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
-        rpm -i ${CODE_SERVER_FILE}
-        rm ${CODE_SERVER_FILE}
+        # Install code-server
+        if is_rocky; then
+            CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
+            curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
+            rpm -i ${CODE_SERVER_FILE}
+            rm ${CODE_SERVER_FILE}
+        elif is_ubuntu; then
+            CODE_SERVER_FILE=code-server_${CODE_SERVER_VERSION}_amd64.deb
+            curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
+            apt install ./${CODE_SERVER_FILE}
+            rm ${CODE_SERVER_FILE}
+        fi
 
         # Setup directory for code-server extensions. The extensions folder can be
         # filled by other applications as they wish to have extensions auto installed
@@ -208,6 +214,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         mkdir -p ${WASP_LOGS}
         WASP_SRC_DIR=${WASP_SRC_DIR} \
             ${ROOT_BUILD_DIR}/{{ WASP_BUILD_SCRIPT }} \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
                 -DCMAKE_INSTALL_PREFIX:STRING=${WASP_DIR} 2>&1 | tee ${WASP_LOGS}/build.log
 
         # Cleanup
@@ -256,7 +263,7 @@ EOF
         ${PYTHON_DIR}/bin/pip install -r /root/requirements.txt && rm /root/requirements.txt
     )
 
-{% if WITH_FMU %}
+{% if WITH_FMU | to_bool %}
     # Install fmi-library dependency for pyfmi
     FMI_LIBRARY_DIR=/opt/fmi-library
     (
@@ -370,7 +377,7 @@ EOF
     )
 {%- endif %}
 
-{% if WITHOUT_PYTORCH is not defined %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     # Build libtorch
     (
         cd ${ROOT_BUILD_DIR}
@@ -414,8 +421,8 @@ EOF
             "$PYTORCH_SRC_DIR" \
             "$LIBTORCH_BUILD_DIR" \
             "$LIBTORCH_DIR" \
-            -DCMAKE_C_FLAGS="-w" \
-            -DCMAKE_CXX_FLAGS="-w" \
+            -DCMAKE_C_FLAGS="-w ${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="-w ${OPTFLAGS[*]}" \
             "${LIBTORCH_FLAGS[@]}" 2>&1 | tee ${LIBTORCH_LOGS}/cmake.log
         build_libtorch "$LIBTORCH_BUILD_DIR" "$MOOSE_JOBS" 2>&1 | tee ${LIBTORCH_LOGS}/build.log
         install_libtorch "$LIBTORCH_BUILD_DIR" "$LIBTORCH_DIR" 2>&1 | tee ${LIBTORCH_LOGS}/install.log
@@ -426,7 +433,7 @@ EOF
     )
 {%- endif %}
 
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
     # Install gperftools
     (
         cd ${ROOT_BUILD_DIR}
@@ -482,7 +489,7 @@ EOF
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
     fi
 
-{% if WITHOUT_PYTORCH is not defined %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     # Build neml2
     (
         cd ${ROOT_BUILD_DIR}
@@ -498,7 +505,7 @@ EOF
         git checkout {{ NEML2_GIT_SHA }}
         git submodule update --init --recursive --depth 1
 
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
         METHODS="oprof"
 {%- else %}
         METHODS="opt devel dbg"
@@ -514,14 +521,16 @@ EOF
         LIBTORCH_DIR={{ LIBTORCH_DIR }} \
         WASP_DIR={{ WASP_DIR }} \
             ${NEML2_BUILD_SCRIPT} \
-                --skip-submodule-update 2>&1 | tee ${NEML2_LOGS}/build.log
+                --skip-submodule-update \
+                -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${NEML2_LOGS}/build.log
 
         # Cleanup
         rm -rf ${NEML2_SRC_DIR} ${NEML2_BUILD_SCRIPT}
     )
 {%- endif %}
 
-{%- if WITH_MFEM %}
+{%- if WITH_MFEM | to_bool %}
     # Build conduit
     (
         cd ${ROOT_BUILD_DIR}
@@ -545,6 +554,8 @@ EOF
         CONDUIT_DIR=${CONDUIT_DIR} \
         CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} \
             ${CONDUIT_BUILD_SCRIPT} \
+                -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
                 "${CONDUIT_OPTIONS[@]}" 2>&1 | tee ${CONDUIT_LOGS}/build.log
 
         # Cleanup
@@ -588,6 +599,8 @@ EOF
         MFEM_SRC_DIR=${MFEM_SRC_DIR} \
         CONDUIT_DIR={{ CONDUIT_DIR }} \
             ${MFEM_BUILD_SCRIPT} \
+                -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
                 "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_LOGS}/build.log
 
         # Cleanup
@@ -596,10 +609,15 @@ EOF
 {%- endif %}
 
     # Install node.js. Requested by dschwen for bison
-    dnf install -y nodejs npm
+    INSTALLS=("nodejs" "npm")
+    if is_rocky; then
+        dnf install -y "${INSTALLS[@]}"
+    elif is_ubuntu; then
+        apt-get install -y --no-install-recommends "${INSTALLS[@]}"
+    fi
 
     # Clean up
-    dnf clean all
+    clean_system_packages
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
@@ -614,7 +632,7 @@ EOF
     # mfem
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
-{% if WITHOUT_PYTORCH is not defined %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     # libtorch
     {{ MOOSE_DIR }}/scripts/configure_libtorch.sh {{ ROOT_BUILD_DIR }}/configure_libtorch.sh
     # neml2

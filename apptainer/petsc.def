@@ -1,29 +1,34 @@
-{#- Required jinja arguments                                                                  -#}
-{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
-{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
-{#- PETSC_GIT_SHA: The git SHA to use for PETSc                                               -#}
-{#- PETSC_GIT_REMOTE: The git remote to use to get PETSc                                      -#}
+{#-
+   Required jinja arguments:
 
-{#- Optional jinja arguments                                                                  -#}
-{#- MOOSE_JOBS: Number of jobs to pass to the PETSc build script                              -#}
-{#- MPI_FLAVOUR: The flavour of MPI to use (options: mpich, openmpi; default: mpich)          -#}
-{#- PETSC_OPTIONS: Options to pass to the PETSc build script                                  -#}
-{#- PROFILING: Set to anything to build for profiling (set petsc flags)                       -#}
-{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
+   - APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)
+   - APPTAINER_FROM: The From to use (path to an image or an oras URI)
+   - MOOSE_DIR: Path on the host to the MOOSE repository
+   - PETSC_GIT_REMOTE: The git remote to use to get PETSc
+   - PETSC_GIT_SHA: The git SHA to use for PETSc
 
-{#- The within-container build directory to use                                               -#}
-{%- set ROOT_BUILD_DIR = '/root/build' -%}
+   Optional jinja arguments:
 
-{#- The installation location for PETSc                                                       -#}
-{%- set PETSC_DIR = '/opt/petsc' -%}
+   - MOOSE_JOBS: Number of jobs to pass to the PETSc build script
+   - MPI_FLAVOUR: The flavour of MPI to use (options: mpich, openmpi; default: mpich)
+   - OPTFLAGS: Optimization flags to set when building
+   - PETSC_OPTIONS: Options to pass to the PETSc build script
+   - PROFILING: Whether or not to build with gperftools (truthy, default: false)
+   - SKIP_FINGERPRINTS: Set to skip fingerprint verification (truthy, default: false)
+-#}
 
-{%- if MPI_FLAVOUR is not defined %}
-{%- set MPI_FLAVOUR = 'mpich' -%}
-{%- endif %}
+{#- Set defaults for any variables not provided                -#}
+{%- set PROFILING         = PROFILING | default(false)         -%}
+{%- set MPI_FLAVOUR = MPI_FLAVOUR | default('mpich')           -%}
+{%- set SKIP_FINGERPRINTS = SKIP_FINGERPRINTS | default(false) -%}
+
+{#- Installation locations and build scripts for third-party dependencies -#}
+{%- set PETSC_DIR = '/opt/petsc'                                          -%}
+{%- set ROOT_BUILD_DIR = '/root/build'                                    -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
-{%- if SKIP_FINGERPRINTS is not defined %}
+{%- if not SKIP_FINGERPRINTS | to_bool %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
@@ -40,11 +45,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     export PETSC_DIR={{ PETSC_DIR }}
 
-%post
-    # So that piping things to tee fails
-    set -o pipefail
-    # Be careful about unknown variables
-    set -u
+%post -c /bin/bash
+    set -uexo pipefail
+
+    source /.singularity.d/build_utils.sh
+    update_system_packages
 
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
@@ -66,8 +71,19 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Additional installs needed for petsc with cuda
     if [ -n "${CUDA_DIR:-}" ]; then
-        dnf install -y libX11-devel
+        if is_rocky; then
+            dnf install -y libX11-devel
+        else
+            apt-get install -y --no-install-recommends libx11-dev
+        fi
     fi
+
+    # Optimization flags
+{%- if OPTFLAGS is not defined %}
+    OPTFLAGS=("-O2" "-march=$(default_march)" "-mtune=generic")
+{%- else %}
+    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
+{%- endif %}
 
     # Clone PETSc
     cd ${ROOT_BUILD_DIR}
@@ -79,7 +95,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Load PETSc options, split by word so that globbing works correctly
     IFS=' ' read -r -a PETSC_OPTIONS <<< "{{ PETSC_OPTIONS }}"
-{%- if PROFILING is defined %}
+{% if PROFILING | to_bool %}
     # Flags needed for profiling
     PETSC_OPTIONS+=(
         "--CFLAGS=-fno-omit-frame-pointer"
@@ -119,6 +135,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     PETSC_PREFIX=${PETSC_DIR} \
     PETSC_SRC_DIR=${PETSC_SRC_DIR} \
         ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh \
+            --with-cc="$CC" \
+            --with-cxx="$CXX" \
+            --with-fc="$FC" \
+            COPTFLAGS="${OPTFLAGS[*]}" \
+            CXXOPTFLAGS="${OPTFLAGS[*]}" \
+            FOPTFLAGS="${OPTFLAGS[*]}" \
             "${PETSC_OPTIONS[@]}" 2>&1 | tee ${PETSC_LOGS}/build.log
 
 {%- if MPI_FLAVOUR == "openmpi" %}
@@ -138,7 +160,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
-    dnf clean all
+    clean_system_packages
 
 %files
     {{ MOOSE_DIR }}/scripts/configure_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/configure_petsc.sh

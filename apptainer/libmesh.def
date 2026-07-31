@@ -1,35 +1,38 @@
-{#- Required jinja arguments                                                                  -#}
-{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
-{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
-{#- LIBMESH_GIT_SHA: The git SHA to use for libmesh                                           -#}
-{#- LIBMESH_GIT_REMOTE: The git remote to use to get libmesh                                  -#}
-{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
-{#- vtk_url: URL to download VTK                                                              -#}
-{#- vtk_sha256: The shasum for downloaded file                                                -#}
-{#- vtk_vtk_friendly_version: The short version name. vtk_vtk_ is not a typo                  -#}
+{#-
+   Required jinja arguments:
 
-{#- Optional jinja arguments                                                                  -#}
-{#- LIBMESH_OPTIONS: Options to pass to the libMesh build script                              -#}
-{#- MOOSE_JOBS: Number of jobs to pass to the libMesh build script                            -#}
-{#- METHODS: Methods to build (defaults to all methods)                                       -#}
-{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
+   - APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)
+   - APPTAINER_FROM: The From to use (path to an image or an oras URI)
+   - LIBMESH_GIT_REMOTE: The git remote to use to get libmesh
+   - LIBMESH_GIT_SHA: The git SHA to use for libmesh
+   - PETSC_GIT_SHA: The git SHA to use for PETSc
+   - vtk_url: URL to download VTK
+   - vtk_sha256: The shasum for the VTK download file
+   - vtk_vtk_friendly_version: The short version name for VTK; vtk_vtk_ is not a typo
 
-{#- The within-container build directory to use                                               -#}
-{%- set ROOT_BUILD_DIR = '/root/build' -%}
+   Optional jinja arguments:
 
-{#- The installation location for libMesh                                                     -#}
-{%- set LIBMESH_DIR = '/opt/libmesh' -%}
+   - LIBMESH_OPTIONS: Options to pass to the libMesh build script
+   - METHODS: Methods to build (default: dbg devel oprof opt)
+   - MOOSE_JOBS: Number of jobs to pass to the libmesh build script
+   - OPTFLAGS: Optimization flags to set when building
+   - SKIP_FINGERPRINTS: Set to skip fingerprint verification (truthy, default: false)
+-#}
 
-{#- The installation location for VTK                                                         -#}
-{%- set VTK_DIR = '/opt/vtk' -%}
+{#- Set defaults for any variables not provided                      -#}
+{%- set METHODS           = METHODS | default("dbg devel oprof opt") -%}
+{%- set SKIP_FINGERPRINTS = SKIP_FINGERPRINTS | default(false)       -%}
 
-{#- Libmesh install scripts                                                                   -#}
-{%- set LIBMESH_BUILD_SCRIPT = 'update_and_rebuild_libmesh.sh' -%}
-{%- set LIBMESH_CONFIGURE_SCRIPT = 'configure_libmesh.sh' -%}
+{#- Installation locations and build scripts for third-party dependencies -#}
+{%- set LIBMESH_BUILD_SCRIPT = 'update_and_rebuild_libmesh.sh'            -%}
+{%- set LIBMESH_CONFIGURE_SCRIPT = 'configure_libmesh.sh'                 -%}
+{%- set LIBMESH_DIR = '/opt/libmesh'                                      -%}
+{%- set ROOT_BUILD_DIR = '/root/build'                                    -%}
+{%- set VTK_DIR = '/opt/vtk'                                              -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
-{%- if SKIP_FINGERPRINTS is not defined %}
+{%- if not SKIP_FINGERPRINTS | to_bool %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
@@ -39,11 +42,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
     export VTKLIB_DIR={{ VTK_DIR }}/lib
 
-%post
-    # So that piping things to tee fails
-    set -o pipefail
-    # Be careful about unknown variables
-    set -u
+%post -c /bin/bash
+    set -uexo pipefail
+
+    source /.singularity.d/build_utils.sh
 
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
@@ -52,6 +54,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "${CUDA_DIR:-}" ]; then
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
     fi
+
+    # Optimization flags
+{%- if OPTFLAGS is not defined %}
+    OPTFLAGS=("-march=$(default_march)" "-mtune=generic")
+{%- else %}
+    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
+{%- endif %}
 
     # Build VTK
     (
@@ -92,7 +101,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DVTK_GROUP_ENABLE_Rendering:STRING=DONT_WANT \
             -DVTK_GROUP_ENABLE_Qt::STRING=NO \
             -DVTK_GROUP_ENABLE_Views:STRING=NO \
-            -DVTK_GROUP_ENABLE_Web:STRING=NO 2>&1 | tee ${VTK_LOGS}/cmake.log
+            -DVTK_GROUP_ENABLE_Web:STRING=NO \
+            -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${VTK_LOGS}/cmake.log
         cmake --build . --parallel ${MOOSE_JOBS} 2>&1 | tee ${VTK_LOGS}/build.log
         cmake --install . 2>&1 | tee ${VTK_LOGS}/install.log
 
@@ -118,7 +129,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         git submodule update --init --depth 1 --recursive
 
         # Determine libMesh flags and options
-        METHODS="{{ METHODS or "opt dbg oprof devel" }}"
+        METHODS="{{ METHODS }}"
         IFS=' ' read -r -a LIBMESH_ARR_OPTIONS <<< "{{ LIBMESH_OPTIONS }}"
         SUB_LDFLAGS=""
         if [ -n "${CUDA_DIR:-}" ]; then
@@ -140,7 +151,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         METHODS=${METHODS} \
             ./scripts/{{ LIBMESH_BUILD_SCRIPT }} \
                 "${LIBMESH_ARR_OPTIONS[@]}" \
-                --skip-submodule-update 2>&1 | tee ${LIBMESH_LOGS}/build.log
+                --skip-submodule-update \
+                CFLAGS="${OPTFLAGS[*]}" \
+                CXXFLAGS="${OPTFLAGS[*]}" \
+                FCFLAGS="${OPTFLAGS[*]}" \
+                libmesh_CFLAGS="${OPTFLAGS[*]}" \
+                libmesh_CXXFLAGS="${OPTFLAGS[*]}" \
+                libmesh_FCFLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${LIBMESH_LOGS}/build.log
         cp ${LIBMESH_SRC_DIR}/build/config.log ${LIBMESH_LOGS}/
 
         # Cleanup
@@ -151,7 +168,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Cleanup
     rm -rf ${ROOT_BUILD_DIR}
-    dnf clean all
 
 %files
     {{ MOOSE_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }}
