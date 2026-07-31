@@ -14,6 +14,7 @@
 #include "Attributes.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
+#include "MFEMWeakForm.h"
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
@@ -177,6 +178,23 @@ public:
   void addImagComponentToBC(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters);
+
+  /**
+   * Add an MFEM WeakForm to the problem.
+   */
+  void addWeakForm(const std::string & type, const std::string & name, InputParameters & parameters)
+  {
+    addObject<MFEMWeakForm>(type, name, parameters);
+  }
+
+  /**
+   * Add an MFEM EquationSystem to the problem.
+   */
+  // void addEquationSystem(const std::string & type, const std::string & name, InputParameters &
+  // parameters)
+  // {
+
+  // }
 
   /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
