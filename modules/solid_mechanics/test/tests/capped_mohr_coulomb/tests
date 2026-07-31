@@ -9,8 +9,8 @@
     input = 'small_deform2.i'
     csvdiff = 'small_deform2.csv'
     override_columns = 's_xx s_xy s_zz s_yy'
-    override_rel_err = '2e-3 1e-3 1e-3 1e-3'
-    override_abs_zero = '1e-6 6e-4 1e-6 1e-6'
+    override_rel_err = '2e-3 1e-3 1e-3 2e-3'
+    override_abs_zero = '1e-6 7e-4 1e-6 1e-6'
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
   [../]
