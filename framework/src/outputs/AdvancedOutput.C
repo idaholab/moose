@@ -24,6 +24,7 @@
 #include "Restartable.h"
 #include "VectorPostprocessor.h"
 
+#include "libmesh/equation_systems.h"
 #include "libmesh/fe_interface.h"
 
 using namespace libMesh;
@@ -33,6 +34,13 @@ using namespace libMesh;
 // function.
 namespace
 {
+bool
+isElementalDataFEType(const FEType & type, const FEProblemBase & problem)
+{
+  return EquationSystems::is_elemental_data_fe_type(type) &&
+         (!type.p_refinement || !problem.doingPRefinement());
+}
+
 void
 addAdvancedOutputParams(InputParameters & params)
 {
@@ -440,20 +448,18 @@ AdvancedOutput::initAvailableLists()
       }
 
       const FEType type = var.feType();
+      const bool is_elemental_data = isElementalDataFEType(type, *_problem_ptr);
       for (unsigned int i = 0; i < var.count(); ++i)
       {
         VariableName vname = var_name;
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        if (type.order == CONSTANT && !type.p_refinement && type.family != MONOMIAL_VEC)
+        if (is_elemental_data && FEInterface::field_type(type) != TYPE_VECTOR)
           _execute_data["elemental"].available.insert(vname);
         else if (FEInterface::field_type(type) == TYPE_VECTOR)
         {
-          const auto geom_type =
-              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT) && !type.p_refinement)
-                  ? "elemental"
-                  : "nodal";
+          const auto geom_type = is_elemental_data ? "elemental" : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:
@@ -528,20 +534,18 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       MooseVariableFEBase & var = _problem_ptr->getVariable(
           0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       const FEType type = var.feType();
+      const bool is_elemental_data = isElementalDataFEType(type, *_problem_ptr);
       for (unsigned int i = 0; i < var.count(); ++i)
       {
         VariableName vname = var_name;
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        if (type.order == CONSTANT && !type.p_refinement && type.family != MONOMIAL_VEC)
+        if (is_elemental_data && FEInterface::field_type(type) != TYPE_VECTOR)
           _execute_data["elemental"].show.insert(vname);
         else if (FEInterface::field_type(type) == TYPE_VECTOR)
         {
-          const auto geom_type =
-              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT) && !type.p_refinement)
-                  ? "elemental"
-                  : "nodal";
+          const auto geom_type = is_elemental_data ? "elemental" : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:
@@ -584,30 +588,32 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       MooseVariableFEBase & var = _problem_ptr->getVariable(
           0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       const FEType type = var.feType();
+      const bool is_elemental_data = isElementalDataFEType(type, *_problem_ptr);
       for (unsigned int i = 0; i < var.count(); ++i)
       {
         VariableName vname = var_name;
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        if (type.order == CONSTANT)
+        if (is_elemental_data && FEInterface::field_type(type) != TYPE_VECTOR)
           _execute_data["elemental"].hide.insert(vname);
         else if (FEInterface::field_type(type) == TYPE_VECTOR)
         {
+          const auto geom_type = is_elemental_data ? "elemental" : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:
             case 1:
-              _execute_data["nodal"].hide.insert(vname);
+              _execute_data[geom_type].hide.insert(vname);
               break;
             case 2:
-              _execute_data["nodal"].hide.insert(vname + "_x");
-              _execute_data["nodal"].hide.insert(vname + "_y");
+              _execute_data[geom_type].hide.insert(vname + "_x");
+              _execute_data[geom_type].hide.insert(vname + "_y");
               break;
             case 3:
-              _execute_data["nodal"].hide.insert(vname + "_x");
-              _execute_data["nodal"].hide.insert(vname + "_y");
-              _execute_data["nodal"].hide.insert(vname + "_z");
+              _execute_data[geom_type].hide.insert(vname + "_x");
+              _execute_data[geom_type].hide.insert(vname + "_y");
+              _execute_data[geom_type].hide.insert(vname + "_z");
               break;
           }
         }

@@ -24,6 +24,7 @@
 
 #include "libmesh/utility.h"
 #include "libmesh/elem.h"
+#include "libmesh/equation_systems.h"
 #include "libmesh/string_to_enum.h"
 
 // External includes
@@ -62,8 +63,7 @@ namespace
 bool
 defaultPRefinement(const libMesh::Order order, const libMesh::FEFamily family)
 {
-  if (order == libMesh::CONSTANT &&
-      (family == libMesh::MONOMIAL || family == libMesh::MONOMIAL_VEC))
+  if (libMesh::EquationSystems::is_elemental_data_fe_type(libMesh::FEType(order, family)))
     return false;
 
   switch (family)
