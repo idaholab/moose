@@ -108,15 +108,16 @@ TEST(MortarProjectionTest, DistortedQuadFallsBackToStrictInDomainRootAtAllScales
   }
 }
 
-TEST(MortarProjectionTest, ReverseEliminationRecoversInDomainRoot)
+TEST(MortarProjectionTest, SingularExteriorXiRootStillRecoversInteriorRoot)
 {
   const std::vector<Point> quadrilateral = {
       Point(-1, -0.5, 0), Point(1, -1.5, 0), Point(1, 1.5, 0), Point(-1, 0.5, 0)};
   const Point reference_point(0.2, 0.3);
   const Point physical_target(reference_point(0),
                               reference_point(1) * (1 + 0.5 * reference_point(0)));
-  // The first eliminant also yields xi = -2, where reconstruction is singular. The chosen eta
-  // makes the least-squares Newton update vanish there, forcing reverse elimination.
+  // The xi eliminant also yields xi = -2, where eta reconstruction is singular. Starting Newton
+  // there makes its least-squares update vanish; the eta pass remains an orientation-independent
+  // numerical safeguard.
   const Point mortar_reference_point(-2, 2 * (-2 - reference_point(0)) / physical_target(1));
   const Point actual =
       projectPoint(QUAD4, quadrilateral, physical_target, 0, mortar_reference_point);

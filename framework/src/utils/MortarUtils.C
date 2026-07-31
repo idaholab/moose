@@ -362,6 +362,7 @@ analyticalTriangleInverse(const Elem & msm_elem,
   return result;
 }
 
+// The four points are projected QUAD4 vertices in libMesh node order.
 BilinearMap
 prepareQuadrilateralMap(const std::array<Point, 4> & points,
                         const Elem & msm_elem,
