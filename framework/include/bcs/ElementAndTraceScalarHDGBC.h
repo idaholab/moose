@@ -11,18 +11,18 @@
 
 #include "ADIntegratedBC.h"
 
-class TwoFieldScalarHDGAssemblyHelper;
+class ElementAndTraceScalarHDGAssemblyHelper;
 
 /**
- * Base boundary condition for two-field hybridized DG discretizations assembled with automatic
- * differentiation.
+ * Base boundary condition for element-and-trace scalar hybridized DG discretizations assembled
+ * with automatic differentiation.
  */
-class TwoFieldScalarHDGBC : public ADIntegratedBC
+class ElementAndTraceScalarHDGBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  TwoFieldScalarHDGBC(const InputParameters & parameters);
+  ElementAndTraceScalarHDGBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -34,11 +34,11 @@ public:
 
 private:
   /// Computes the boundary residual data using the supplied assembly helper.
-  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) = 0;
+  virtual void compute(ElementAndTraceScalarHDGAssemblyHelper & helper) = 0;
 
-  /// Returns the helper used for common two-field scalar HDG assembly.
-  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() = 0;
-  const TwoFieldScalarHDGAssemblyHelper & hdgHelper() const;
+  /// Returns the helper used for common element-and-trace scalar HDG assembly.
+  virtual ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() = 0;
+  const ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() const;
 
   virtual ADReal computeQpResidual() override { mooseError("this will never be called"); }
 
@@ -49,8 +49,8 @@ private:
   unsigned int _cached_side;
 };
 
-inline const TwoFieldScalarHDGAssemblyHelper &
-TwoFieldScalarHDGBC::hdgHelper() const
+inline const ElementAndTraceScalarHDGAssemblyHelper &
+ElementAndTraceScalarHDGBC::hdgHelper() const
 {
-  return const_cast<TwoFieldScalarHDGBC *>(this)->hdgHelper();
+  return const_cast<ElementAndTraceScalarHDGBC *>(this)->hdgHelper();
 }

@@ -24,7 +24,7 @@ using namespace libMesh;
 InputParameters
 DiffusionIPHDGAssemblyHelper::validParams()
 {
-  auto params = TwoFieldScalarHDGAssemblyHelper::validParams();
+  auto params = ElementAndTraceScalarHDGAssemblyHelper::validParams();
   params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
   params.addRequiredParam<Real>("alpha",
                                 "The stabilization coefficient required for discontinuous Galerkin "
@@ -41,7 +41,7 @@ DiffusionIPHDGAssemblyHelper::DiffusionIPHDGAssemblyHelper(
     const THREAD_ID tid,
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
-  : TwoFieldScalarHDGAssemblyHelper(
+  : ElementAndTraceScalarHDGAssemblyHelper(
         moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
     _grad_u_sol(_u_var.adGradSln()),
     _grad_scalar_phi_face(_u_var.gradPhiFace()),

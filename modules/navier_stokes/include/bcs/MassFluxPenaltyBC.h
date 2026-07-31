@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "TwoFieldScalarHDGBC.h"
+#include "ElementAndTraceScalarHDGBC.h"
 
 class MassFluxPenaltyIPHDGAssemblyHelper;
 
@@ -19,7 +19,7 @@ class MassFluxPenaltyIPHDGAssemblyHelper;
  * neighboring elements, which makes this class useful in tandem with hybridized discretizations
  * because it supports static condensation
  */
-class MassFluxPenaltyBC : public TwoFieldScalarHDGBC
+class MassFluxPenaltyBC : public ElementAndTraceScalarHDGBC
 {
 public:
   static InputParameters validParams();
@@ -27,8 +27,8 @@ public:
   MassFluxPenaltyBC(const InputParameters & parameters);
 
 private:
-  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
-  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) override;
+  virtual ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() override;
+  virtual void compute(ElementAndTraceScalarHDGAssemblyHelper & helper) override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<MassFluxPenaltyIPHDGAssemblyHelper> _iphdg_helper;

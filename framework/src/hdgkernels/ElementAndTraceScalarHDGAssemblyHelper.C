@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
 #include "Assembly.h"
 #include "MooseFunctor.h"
 #include "MooseVariableDependencyInterface.h"
@@ -20,14 +20,14 @@
 using namespace libMesh;
 
 InputParameters
-TwoFieldScalarHDGAssemblyHelper::validParams()
+ElementAndTraceScalarHDGAssemblyHelper::validParams()
 {
   auto params = emptyInputParameters();
   params.addRequiredParam<NonlinearVariableName>("face_variable", "The face variable");
   return params;
 }
 
-TwoFieldScalarHDGAssemblyHelper::TwoFieldScalarHDGAssemblyHelper(
+ElementAndTraceScalarHDGAssemblyHelper::ElementAndTraceScalarHDGAssemblyHelper(
     const MooseObject * const moose_obj,
     MooseVariableDependencyInterface * const mvdi,
     const TransientInterface * const ti,
@@ -67,20 +67,20 @@ TwoFieldScalarHDGAssemblyHelper::TwoFieldScalarHDGAssemblyHelper(
 }
 
 std::array<ADResidualsPacket, 2>
-TwoFieldScalarHDGAssemblyHelper::taggingData() const
+ElementAndTraceScalarHDGAssemblyHelper::taggingData() const
 {
   return {ADResidualsPacket{_scalar_re, _u_dof_indices, _u_var.scalingFactor()},
           ADResidualsPacket{_lm_re, _lm_u_dof_indices, _u_face_var.scalingFactor()}};
 }
 
 std::set<std::string>
-TwoFieldScalarHDGAssemblyHelper::additionalROVariables()
+ElementAndTraceScalarHDGAssemblyHelper::additionalROVariables()
 {
   return {_u_face_var.name()};
 }
 
 void
-TwoFieldScalarHDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
+ElementAndTraceScalarHDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
@@ -94,7 +94,7 @@ TwoFieldScalarHDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirich
 }
 
 void
-TwoFieldScalarHDGAssemblyHelper::lmPrescribedFlux(const Moose::Functor<Real> & flux_value)
+ElementAndTraceScalarHDGAssemblyHelper::lmPrescribedFlux(const Moose::Functor<Real> & flux_value)
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {

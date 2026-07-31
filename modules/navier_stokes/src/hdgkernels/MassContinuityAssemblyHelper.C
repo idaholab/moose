@@ -21,7 +21,7 @@ using namespace libMesh;
 InputParameters
 MassContinuityAssemblyHelper::validParams()
 {
-  auto params = TwoFieldScalarHDGAssemblyHelper::validParams();
+  auto params = ElementAndTraceScalarHDGAssemblyHelper::validParams();
   params.addRequiredCoupledVar("interior_velocity_vars",
                                "The velocity variables on the element interiors");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
@@ -39,7 +39,7 @@ MassContinuityAssemblyHelper::MassContinuityAssemblyHelper(
     const THREAD_ID tid,
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
-  : TwoFieldScalarHDGAssemblyHelper(
+  : ElementAndTraceScalarHDGAssemblyHelper(
         moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
     ADFunctorInterface(moose_obj),
     _coord_sys(assembly.coordSystem()),

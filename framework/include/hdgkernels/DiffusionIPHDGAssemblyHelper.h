@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
 
 /**
  * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
  * (IPDG-H), which is a type of HDG method, discretization of the diffusion equation. These routines
  * may be called by both HDG kernels and integrated boundary conditions.
  */
-class DiffusionIPHDGAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper
+class DiffusionIPHDGAssemblyHelper : public ElementAndTraceScalarHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();

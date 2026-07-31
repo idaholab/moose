@@ -17,7 +17,7 @@ using namespace libMesh;
 InputParameters
 AdvectionHDGAssemblyHelper::validParams()
 {
-  auto params = TwoFieldScalarHDGAssemblyHelper::validParams();
+  auto params = ElementAndTraceScalarHDGAssemblyHelper::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "velocity", "The cell-interior velocity material property used in the volume advection term");
   params.addRequiredParam<Real>(
@@ -34,7 +34,7 @@ AdvectionHDGAssemblyHelper::AdvectionHDGAssemblyHelper(
     const THREAD_ID tid,
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
-  : TwoFieldScalarHDGAssemblyHelper(
+  : ElementAndTraceScalarHDGAssemblyHelper(
         moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
     _velocity(getADMaterialProperty<RealVectorValue>("velocity")),
     _coeff(moose_obj->getParam<Real>("coeff"))

@@ -8,24 +8,24 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IPHDGPrescribedFluxBC.h"
-#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
 
 InputParameters
 IPHDGPrescribedFluxBC::validParams()
 {
-  auto params = TwoFieldScalarHDGBC::validParams();
+  auto params = ElementAndTraceScalarHDGBC::validParams();
   params.addRequiredParam<MooseFunctorName>(
       "prescribed_normal_flux", "The prescribed value of the flux dotted with the normal");
   return params;
 }
 
 IPHDGPrescribedFluxBC::IPHDGPrescribedFluxBC(const InputParameters & parameters)
-  : TwoFieldScalarHDGBC(parameters), _normal_flux(getFunctor<Real>("prescribed_normal_flux"))
+  : ElementAndTraceScalarHDGBC(parameters), _normal_flux(getFunctor<Real>("prescribed_normal_flux"))
 {
 }
 
 void
-IPHDGPrescribedFluxBC::compute(TwoFieldScalarHDGAssemblyHelper & helper)
+IPHDGPrescribedFluxBC::compute(ElementAndTraceScalarHDGAssemblyHelper & helper)
 {
   helper.resizeResiduals();
 

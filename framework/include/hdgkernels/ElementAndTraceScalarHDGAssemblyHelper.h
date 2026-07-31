@@ -29,24 +29,25 @@ class TransientInterface;
 struct ADResidualsPacket;
 
 /**
- * Method-neutral assembly data and operations for a two-field hybridized DG discretization.
+ * Method-neutral assembly data and operations for an element-and-trace scalar hybridized DG
+ * discretization.
  *
- * The two fields are an element-interior scalar and its facet trace. Derived helpers provide the
- * method-specific volume and face weak forms.
+ * The directly assembled variables are an element-interior scalar and its facet trace. Derived
+ * helpers provide the method-specific volume and face weak forms.
  */
-class TwoFieldScalarHDGAssemblyHelper : public ThreeMaterialPropertyInterface
+class ElementAndTraceScalarHDGAssemblyHelper : public ThreeMaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
 
-  TwoFieldScalarHDGAssemblyHelper(const MooseObject * moose_obj,
-                                  MooseVariableDependencyInterface * mvdi,
-                                  const TransientInterface * ti,
-                                  SystemBase & sys,
-                                  const Assembly & assembly,
-                                  THREAD_ID tid,
-                                  const std::set<SubdomainID> & blocks_ids,
-                                  const std::set<BoundaryID> & boundary_ids);
+  ElementAndTraceScalarHDGAssemblyHelper(const MooseObject * moose_obj,
+                                         MooseVariableDependencyInterface * mvdi,
+                                         const TransientInterface * ti,
+                                         SystemBase & sys,
+                                         const Assembly & assembly,
+                                         THREAD_ID tid,
+                                         const std::set<SubdomainID> & blocks_ids,
+                                         const std::set<BoundaryID> & boundary_ids);
 
   /// Resizes the element-interior and facet residual vectors for the current element.
   void resizeResiduals();
@@ -79,7 +80,7 @@ public:
    */
   std::set<std::string> additionalROVariables();
 
-  virtual ~TwoFieldScalarHDGAssemblyHelper() = default;
+  virtual ~ElementAndTraceScalarHDGAssemblyHelper() = default;
 
 protected:
   /// Transient state used to evaluate boundary functors.
@@ -159,7 +160,7 @@ protected:
 };
 
 inline void
-TwoFieldScalarHDGAssemblyHelper::resizeResiduals()
+ElementAndTraceScalarHDGAssemblyHelper::resizeResiduals()
 {
   _scalar_re.resize(_u_dof_indices.size());
   _lm_re.resize(_lm_u_dof_indices.size());

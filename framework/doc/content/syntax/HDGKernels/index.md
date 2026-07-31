@@ -54,9 +54,9 @@ standard boundary condition classes, see [syntax/BCs/index.md].
 
 `HDGKernel` is method-neutral and does not prescribe an algebraic layout. Physics term discretizations involving
 only one element-interior scalar and one scalar facet trace may instead derive from
-`TwoFieldScalarHDGKernel`, which provides common helper-backed automatic-differentiation assembly.
+`ElementAndTraceScalarHDGKernel`, which provides common helper-backed automatic-differentiation assembly.
 There are currently two HDG implementations in MOOSE: L-HDG and IP-HDG. The IP-HDG kernels and
-L-HDG scalar advection use the common assembly provided by `TwoFieldScalarHDGKernel`. L-HDG
+L-HDG scalar advection use the common assembly provided by `ElementAndTraceScalarHDGKernel`. L-HDG
 diffusion and flow kernels assemble their additional vector and coupled equation blocks directly
 through `HDGKernel`.
 L-HDG currently implements flow physics monolithically, e.g. the L-HDG discretization of the

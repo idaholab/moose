@@ -30,7 +30,7 @@ NavierStokesStressIPHDGPrescribedTractionBC::NavierStokesStressIPHDGPrescribedTr
 {
 }
 
-TwoFieldScalarHDGAssemblyHelper &
+ElementAndTraceScalarHDGAssemblyHelper &
 NavierStokesStressIPHDGPrescribedTractionBC::hdgHelper()
 {
   return *_iphdg_helper;

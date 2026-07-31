@@ -7,30 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TwoFieldScalarHDGAssemblyHelper.h"
-#include "TwoFieldScalarHDGKernel.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGKernel.h"
 #include "TaggingInterface.h"
 
 InputParameters
-TwoFieldScalarHDGKernel::validParams()
+ElementAndTraceScalarHDGKernel::validParams()
 {
   return HDGKernel::validParams();
 }
 
-TwoFieldScalarHDGKernel::TwoFieldScalarHDGKernel(const InputParameters & parameters)
+ElementAndTraceScalarHDGKernel::ElementAndTraceScalarHDGKernel(const InputParameters & parameters)
   : HDGKernel(parameters), _cached_elem(nullptr)
 {
 }
 
 void
-TwoFieldScalarHDGKernel::compute(TwoFieldScalarHDGAssemblyHelper & helper)
+ElementAndTraceScalarHDGKernel::compute(ElementAndTraceScalarHDGAssemblyHelper & helper)
 {
   helper.resizeResiduals();
   helper.scalarVolume();
 }
 
 void
-TwoFieldScalarHDGKernel::computeOnSide(TwoFieldScalarHDGAssemblyHelper & helper)
+ElementAndTraceScalarHDGKernel::computeOnSide(ElementAndTraceScalarHDGAssemblyHelper & helper)
 {
   helper.resizeResiduals();
   helper.scalarFace();
@@ -38,7 +38,7 @@ TwoFieldScalarHDGKernel::computeOnSide(TwoFieldScalarHDGAssemblyHelper & helper)
 }
 
 void
-TwoFieldScalarHDGKernel::computeResidual()
+ElementAndTraceScalarHDGKernel::computeResidual()
 {
   auto & helper = hdgHelper();
   compute(helper);
@@ -47,7 +47,7 @@ TwoFieldScalarHDGKernel::computeResidual()
 }
 
 void
-TwoFieldScalarHDGKernel::computeJacobian()
+ElementAndTraceScalarHDGKernel::computeJacobian()
 {
   auto & helper = hdgHelper();
   compute(helper);
@@ -56,7 +56,7 @@ TwoFieldScalarHDGKernel::computeJacobian()
 }
 
 void
-TwoFieldScalarHDGKernel::computeResidualAndJacobian()
+ElementAndTraceScalarHDGKernel::computeResidualAndJacobian()
 {
   auto & helper = hdgHelper();
   compute(helper);
@@ -65,7 +65,7 @@ TwoFieldScalarHDGKernel::computeResidualAndJacobian()
 }
 
 void
-TwoFieldScalarHDGKernel::computeResidualOnSide()
+ElementAndTraceScalarHDGKernel::computeResidualOnSide()
 {
   auto & helper = hdgHelper();
   computeOnSide(helper);
@@ -74,7 +74,7 @@ TwoFieldScalarHDGKernel::computeResidualOnSide()
 }
 
 void
-TwoFieldScalarHDGKernel::computeJacobianOnSide()
+ElementAndTraceScalarHDGKernel::computeJacobianOnSide()
 {
   auto & helper = hdgHelper();
   computeOnSide(helper);
@@ -83,7 +83,7 @@ TwoFieldScalarHDGKernel::computeJacobianOnSide()
 }
 
 void
-TwoFieldScalarHDGKernel::computeResidualAndJacobianOnSide()
+ElementAndTraceScalarHDGKernel::computeResidualAndJacobianOnSide()
 {
   auto & helper = hdgHelper();
   computeOnSide(helper);
@@ -92,13 +92,13 @@ TwoFieldScalarHDGKernel::computeResidualAndJacobianOnSide()
 }
 
 void
-TwoFieldScalarHDGKernel::jacobianSetup()
+ElementAndTraceScalarHDGKernel::jacobianSetup()
 {
   _cached_elem = nullptr;
 }
 
 void
-TwoFieldScalarHDGKernel::computeOffDiagJacobian(const unsigned int)
+ElementAndTraceScalarHDGKernel::computeOffDiagJacobian(const unsigned int)
 {
   if (_cached_elem != _current_elem)
   {
@@ -108,19 +108,19 @@ TwoFieldScalarHDGKernel::computeOffDiagJacobian(const unsigned int)
 }
 
 std::set<std::string>
-TwoFieldScalarHDGKernel::additionalROVariables()
+ElementAndTraceScalarHDGKernel::additionalROVariables()
 {
   return hdgHelper().additionalROVariables();
 }
 
 const std::unordered_set<unsigned int> &
-TwoFieldScalarHDGKernel::getMatPropDependencies() const
+ElementAndTraceScalarHDGKernel::getMatPropDependencies() const
 {
   return hdgHelper().getMatPropDependencies();
 }
 
 bool
-TwoFieldScalarHDGKernel::getMaterialPropertyCalled() const
+ElementAndTraceScalarHDGKernel::getMaterialPropertyCalled() const
 {
   return hdgHelper().getMaterialPropertyCalled();
 }

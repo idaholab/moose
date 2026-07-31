@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "TwoFieldScalarHDGBC.h"
+#include "ElementAndTraceScalarHDGBC.h"
 
 /**
  * Base class for imposing Dirichlet boundary conditions for interior penalty hybridizable
  * discontinuous Galerkin methods
  */
-class IPHDGDirichletBC : public TwoFieldScalarHDGBC
+class IPHDGDirichletBC : public ElementAndTraceScalarHDGBC
 {
 public:
   static InputParameters validParams();
@@ -25,7 +25,7 @@ private:
   /**
    * compute the AD residuals
    */
-  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) override;
+  virtual void compute(ElementAndTraceScalarHDGAssemblyHelper & helper) override;
 
   /// Functor computing the Dirichlet boundary value
   const Moose::Functor<Real> & _dirichlet_val;

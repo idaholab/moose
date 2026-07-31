@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "TwoFieldScalarHDGBC.h"
+#include "ElementAndTraceScalarHDGBC.h"
 
 /**
  * Implements a prescribed flux for an IP-HDG discretization
  */
-class IPHDGPrescribedFluxBC : public TwoFieldScalarHDGBC
+class IPHDGPrescribedFluxBC : public ElementAndTraceScalarHDGBC
 {
 public:
   static InputParameters validParams();
@@ -25,7 +25,7 @@ private:
   /**
    * compute the AD residuals
    */
-  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) override;
+  virtual void compute(ElementAndTraceScalarHDGAssemblyHelper & helper) override;
 
   /// Prescribed normal flux along the boundary. The default is 0 for a natural boundary
   /// condition

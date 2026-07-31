@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", AdvectionLHDGKernel);
 InputParameters
 AdvectionLHDGKernel::validParams()
 {
-  auto params = TwoFieldScalarHDGKernel::validParams();
+  auto params = ElementAndTraceScalarHDGKernel::validParams();
   params += AdvectionLHDGAssemblyHelper::validParams();
   params.addClassDescription("Adds element and interior face integrals for an L-HDG advection "
                              "term using cell and hybrid velocities, respectively.");
@@ -23,13 +23,13 @@ AdvectionLHDGKernel::validParams()
 }
 
 AdvectionLHDGKernel::AdvectionLHDGKernel(const InputParameters & params)
-  : TwoFieldScalarHDGKernel(params),
+  : ElementAndTraceScalarHDGKernel(params),
     _lhdg_helper(std::make_unique<AdvectionLHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
 }
 
-TwoFieldScalarHDGAssemblyHelper &
+ElementAndTraceScalarHDGAssemblyHelper &
 AdvectionLHDGKernel::hdgHelper()
 {
   return *_lhdg_helper;

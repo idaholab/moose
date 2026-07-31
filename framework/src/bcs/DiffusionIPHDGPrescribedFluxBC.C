@@ -29,7 +29,7 @@ DiffusionIPHDGPrescribedFluxBC::DiffusionIPHDGPrescribedFluxBC(const InputParame
 {
 }
 
-TwoFieldScalarHDGAssemblyHelper &
+ElementAndTraceScalarHDGAssemblyHelper &
 DiffusionIPHDGPrescribedFluxBC::hdgHelper()
 {
   return *_iphdg_helper;

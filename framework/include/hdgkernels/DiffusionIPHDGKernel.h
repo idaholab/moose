@@ -9,21 +9,21 @@
 
 #pragma once
 
-#include "TwoFieldScalarHDGKernel.h"
+#include "ElementAndTraceScalarHDGKernel.h"
 
 class DiffusionIPHDGAssemblyHelper;
 
 /**
  * Implements the diffusion equation for a interior penalty hybridized discretization
  */
-class DiffusionIPHDGKernel : public TwoFieldScalarHDGKernel
+class DiffusionIPHDGKernel : public ElementAndTraceScalarHDGKernel
 {
 public:
   static InputParameters validParams();
   DiffusionIPHDGKernel(const InputParameters & params);
 
 private:
-  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
+  virtual ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;

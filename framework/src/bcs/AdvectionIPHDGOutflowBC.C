@@ -15,7 +15,7 @@ registerMooseObject("MooseApp", AdvectionIPHDGOutflowBC);
 InputParameters
 AdvectionIPHDGOutflowBC::validParams()
 {
-  auto params = TwoFieldScalarHDGBC::validParams();
+  auto params = ElementAndTraceScalarHDGBC::validParams();
   params += AdvectionIPHDGAssemblyHelper::validParams();
   params.addClassDescription("Implements an outflow boundary condition for use with a hybridized "
                              "discretization of the advection equation");
@@ -27,7 +27,7 @@ AdvectionIPHDGOutflowBC::validParams()
 }
 
 AdvectionIPHDGOutflowBC::AdvectionIPHDGOutflowBC(const InputParameters & parameters)
-  : TwoFieldScalarHDGBC(parameters),
+  : ElementAndTraceScalarHDGBC(parameters),
     _iphdg_helper(std::make_unique<AdvectionIPHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
     _constrain_lm(getParam<bool>("constrain_lm"))
@@ -35,7 +35,7 @@ AdvectionIPHDGOutflowBC::AdvectionIPHDGOutflowBC(const InputParameters & paramet
 }
 
 void
-AdvectionIPHDGOutflowBC::compute(TwoFieldScalarHDGAssemblyHelper &)
+AdvectionIPHDGOutflowBC::compute(ElementAndTraceScalarHDGAssemblyHelper &)
 {
   _iphdg_helper->resizeResiduals();
 
@@ -45,7 +45,7 @@ AdvectionIPHDGOutflowBC::compute(TwoFieldScalarHDGAssemblyHelper &)
     _iphdg_helper->lmOutflow();
 }
 
-TwoFieldScalarHDGAssemblyHelper &
+ElementAndTraceScalarHDGAssemblyHelper &
 AdvectionIPHDGOutflowBC::hdgHelper()
 {
   return *_iphdg_helper;

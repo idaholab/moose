@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
 #include "ADFunctorInterface.h"
 
 template <typename>
@@ -21,7 +21,7 @@ class MooseVariableField;
  * neighboring elements, which makes this class useful in tandem with hybridized discretizations
  * because it supports static condensation
  */
-class MassFluxPenaltyIPHDGAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper,
+class MassFluxPenaltyIPHDGAssemblyHelper : public ElementAndTraceScalarHDGAssemblyHelper,
                                            public ADFunctorInterface
 {
 public:

@@ -15,21 +15,21 @@ registerMooseObject("NavierStokesApp", MassContinuityIPHDGBC);
 InputParameters
 MassContinuityIPHDGBC::validParams()
 {
-  auto params = TwoFieldScalarHDGBC::validParams();
+  auto params = ElementAndTraceScalarHDGBC::validParams();
   params.addClassDescription("Adds to mass conservation terms on boundary faces");
   params += MassContinuityAssemblyHelper::validParams();
   return params;
 }
 
 MassContinuityIPHDGBC::MassContinuityIPHDGBC(const InputParameters & parameters)
-  : TwoFieldScalarHDGBC(parameters),
+  : ElementAndTraceScalarHDGBC(parameters),
     _iphdg_helper(std::make_unique<MassContinuityAssemblyHelper>(
         this, this, this, _mesh, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs()))
 {
 }
 
 void
-MassContinuityIPHDGBC::compute(TwoFieldScalarHDGAssemblyHelper & helper)
+MassContinuityIPHDGBC::compute(ElementAndTraceScalarHDGAssemblyHelper & helper)
 {
   helper.resizeResiduals();
   helper.scalarFace();

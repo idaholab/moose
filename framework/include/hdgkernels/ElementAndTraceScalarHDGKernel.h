@@ -11,18 +11,18 @@
 
 #include "HDGKernel.h"
 
-class TwoFieldScalarHDGAssemblyHelper;
+class ElementAndTraceScalarHDGAssemblyHelper;
 
 /**
  * Base kernel for helper-backed HDG discretizations with an element-interior scalar and scalar
  * facet trace.
  */
-class TwoFieldScalarHDGKernel : public HDGKernel
+class ElementAndTraceScalarHDGKernel : public HDGKernel
 {
 public:
   static InputParameters validParams();
 
-  TwoFieldScalarHDGKernel(const InputParameters & parameters);
+  ElementAndTraceScalarHDGKernel(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -38,22 +38,22 @@ public:
   virtual bool getMaterialPropertyCalled() const override;
 
 private:
-  /// Returns the helper used for common two-field scalar HDG assembly.
-  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() = 0;
-  const TwoFieldScalarHDGAssemblyHelper & hdgHelper() const;
+  /// Returns the helper used for common element-and-trace scalar HDG assembly.
+  virtual ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() = 0;
+  const ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() const;
 
   /// Assembles the element-interior residual data.
-  void compute(TwoFieldScalarHDGAssemblyHelper & helper);
+  void compute(ElementAndTraceScalarHDGAssemblyHelper & helper);
 
   /// Assembles the face residual data.
-  void computeOnSide(TwoFieldScalarHDGAssemblyHelper & helper);
+  void computeOnSide(ElementAndTraceScalarHDGAssemblyHelper & helper);
 
   /// Used to assemble the complete AD Jacobian only once per element.
   const Elem * _cached_elem;
 };
 
-inline const TwoFieldScalarHDGAssemblyHelper &
-TwoFieldScalarHDGKernel::hdgHelper() const
+inline const ElementAndTraceScalarHDGAssemblyHelper &
+ElementAndTraceScalarHDGKernel::hdgHelper() const
 {
-  return const_cast<TwoFieldScalarHDGKernel *>(this)->hdgHelper();
+  return const_cast<ElementAndTraceScalarHDGKernel *>(this)->hdgHelper();
 }

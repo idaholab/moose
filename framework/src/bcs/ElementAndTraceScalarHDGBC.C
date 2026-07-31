@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TwoFieldScalarHDGAssemblyHelper.h"
-#include "TwoFieldScalarHDGBC.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGBC.h"
 #include "TaggingInterface.h"
 
 InputParameters
-TwoFieldScalarHDGBC::validParams()
+ElementAndTraceScalarHDGBC::validParams()
 {
   return ADIntegratedBC::validParams();
 }
 
-TwoFieldScalarHDGBC::TwoFieldScalarHDGBC(const InputParameters & parameters)
+ElementAndTraceScalarHDGBC::ElementAndTraceScalarHDGBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters), _cached_elem(nullptr), _cached_side(libMesh::invalid_uint)
 {
 }
 
 void
-TwoFieldScalarHDGBC::computeResidual()
+ElementAndTraceScalarHDGBC::computeResidual()
 {
   auto & helper = hdgHelper();
   compute(helper);
@@ -32,7 +32,7 @@ TwoFieldScalarHDGBC::computeResidual()
 }
 
 void
-TwoFieldScalarHDGBC::computeJacobian()
+ElementAndTraceScalarHDGBC::computeJacobian()
 {
   auto & helper = hdgHelper();
   compute(helper);
@@ -41,7 +41,7 @@ TwoFieldScalarHDGBC::computeJacobian()
 }
 
 void
-TwoFieldScalarHDGBC::computeResidualAndJacobian()
+ElementAndTraceScalarHDGBC::computeResidualAndJacobian()
 {
   auto & helper = hdgHelper();
   compute(helper);
@@ -50,14 +50,14 @@ TwoFieldScalarHDGBC::computeResidualAndJacobian()
 }
 
 void
-TwoFieldScalarHDGBC::jacobianSetup()
+ElementAndTraceScalarHDGBC::jacobianSetup()
 {
   _cached_elem = nullptr;
   _cached_side = libMesh::invalid_uint;
 }
 
 void
-TwoFieldScalarHDGBC::computeOffDiagJacobian(const unsigned int)
+ElementAndTraceScalarHDGBC::computeOffDiagJacobian(const unsigned int)
 {
   if ((_cached_elem != _current_elem) || (_cached_side != _current_side))
   {
@@ -68,13 +68,13 @@ TwoFieldScalarHDGBC::computeOffDiagJacobian(const unsigned int)
 }
 
 const std::unordered_set<unsigned int> &
-TwoFieldScalarHDGBC::getMatPropDependencies() const
+ElementAndTraceScalarHDGBC::getMatPropDependencies() const
 {
   return hdgHelper().getMatPropDependencies();
 }
 
 bool
-TwoFieldScalarHDGBC::getMaterialPropertyCalled() const
+ElementAndTraceScalarHDGBC::getMaterialPropertyCalled() const
 {
   return hdgHelper().getMaterialPropertyCalled();
 }

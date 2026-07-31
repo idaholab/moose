@@ -24,7 +24,7 @@ public:
   NavierStokesStressIPHDGPrescribedTractionBC(const InputParameters & parameters);
 
 private:
-  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
+  virtual ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<NavierStokesStressIPHDGAssemblyHelper> _iphdg_helper;

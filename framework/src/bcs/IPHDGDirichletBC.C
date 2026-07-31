@@ -8,24 +8,24 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IPHDGDirichletBC.h"
-#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
 
 InputParameters
 IPHDGDirichletBC::validParams()
 {
-  auto params = TwoFieldScalarHDGBC::validParams();
+  auto params = ElementAndTraceScalarHDGBC::validParams();
   params.addRequiredParam<MooseFunctorName>("functor",
                                             "The Dirichlet value for the primal variable");
   return params;
 }
 
 IPHDGDirichletBC::IPHDGDirichletBC(const InputParameters & params)
-  : TwoFieldScalarHDGBC(params), _dirichlet_val(getFunctor<Real>("functor"))
+  : ElementAndTraceScalarHDGBC(params), _dirichlet_val(getFunctor<Real>("functor"))
 {
 }
 
 void
-IPHDGDirichletBC::compute(TwoFieldScalarHDGAssemblyHelper & helper)
+IPHDGDirichletBC::compute(ElementAndTraceScalarHDGAssemblyHelper & helper)
 {
   helper.resizeResiduals();
 

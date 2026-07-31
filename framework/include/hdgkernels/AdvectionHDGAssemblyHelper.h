@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
 
 /**
- * Shared assembly for two-field hybridized DG discretizations of the advection equation.
+ * Shared assembly for element-and-trace scalar hybridized DG discretizations of the advection
+ * equation.
  *
  * Derived helpers provide the face velocity appropriate to their flow discretization.
  */
-class AdvectionHDGAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper
+class AdvectionHDGAssemblyHelper : public ElementAndTraceScalarHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();

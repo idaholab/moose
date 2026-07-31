@@ -23,7 +23,7 @@ public:
   NavierStokesStressIPHDGDirichletBC(const InputParameters & parameters);
 
 private:
-  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override { return *_iphdg_helper; }
+  virtual ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() override { return *_iphdg_helper; }
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<NavierStokesStressIPHDGAssemblyHelper> _iphdg_helper;
