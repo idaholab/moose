@@ -3138,6 +3138,8 @@ Assembly::cacheJacobian(const Residuals & residuals,
   for (const auto i : make_range(decltype(residuals.size())(1), residuals.size()))
   {
     const auto & current_dofs = residuals[i].derivatives().nude_indices();
+    // MetaPhysicL stores sparse derivative indices in sorted order, so equal index arrays identify
+    // rows with the same derivative support regardless of insertion order.
     if (current_dofs.size() != first_dofs.size() ||
         !std::equal(first_dofs.begin(), first_dofs.end(), current_dofs.begin()))
     {
@@ -3146,7 +3148,7 @@ Assembly::cacheJacobian(const Residuals & residuals,
     }
   }
 
-  // Keep the original common-layout path whenever every row has the same derivative support.
+  // Keep the common-layout path whenever every row has the same derivative support.
   if (supports_match)
     _column_indices.assign(first_dofs.begin(), first_dofs.end());
   else

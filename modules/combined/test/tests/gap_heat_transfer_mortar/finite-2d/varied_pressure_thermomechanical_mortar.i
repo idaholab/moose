@@ -270,6 +270,8 @@
   line_search = 'none'
 
   # mortar contact solver options
+  # Apply MUMPS directly to avoid a platform-sensitive Krylov path without changing the converged
+  # solution.
   petsc_options = '-snes_converged_reason -pc_svd_monitor'
   petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'preonly    lu       mumps'
