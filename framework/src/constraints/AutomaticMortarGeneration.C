@@ -1771,9 +1771,8 @@ AutomaticMortarGeneration::buildCouplingInformation()
   }
 
   // A face pair may produce several mortar segments. Remove repeated entries before communication.
-  for (auto & [processor, couplings] : coupling_info)
+  for (auto & [_, couplings] : coupling_info)
   {
-    libmesh_ignore(processor);
     std::sort(couplings.begin(), couplings.end());
     couplings.erase(std::unique(couplings.begin(), couplings.end()), couplings.end());
   }

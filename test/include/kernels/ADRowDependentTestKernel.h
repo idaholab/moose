@@ -11,7 +11,7 @@
 #include "ADKernel.h"
 
 /**
- * Test kernel whose residual rows have distinct AD derivative support.
+ * Test kernel whose residual rows have distinct or differently inserted AD derivative support.
  */
 class ADRowDependentTestKernel : public ADKernel
 {
@@ -24,4 +24,5 @@ protected:
   ADReal computeQpResidual() override;
 
   const MooseArray<ADReal> & _ad_dof_values;
+  const bool _reorder_equivalent_support;
 };
