@@ -22,7 +22,7 @@
                 "subdomains": [
                     {
                         "id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "max_max_angle": 90.0,
                             "min_min_angle": 90.0
                         }
@@ -30,7 +30,7 @@
                     {
                         "id": 1,
                         "name": "foo",
-                        "qualities": {
+                        "elem_qualities": {
                             "max_max_angle": 90.0,
                             "min_min_angle": 90.0
                         }

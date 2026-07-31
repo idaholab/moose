@@ -81,7 +81,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.00963355103616486,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -145,7 +145,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008670195932548372,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -209,7 +209,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007803176339293533,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -273,7 +273,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007022858705364182,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -337,7 +337,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010596906139781346,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -401,7 +401,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.00953721552580321,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -465,7 +465,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008583493973222885,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -529,7 +529,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0077251445759006,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -593,7 +593,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01165659675375949,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -657,7 +657,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01049093707838354,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -721,7 +721,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009441843370545183,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -785,7 +785,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008497659033490668,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -849,7 +849,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01282225642913544,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -913,7 +913,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011540030786221895,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -977,7 +977,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010386027707599702,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1041,7 +1041,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009347424936839734,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1105,7 +1105,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.014104482072048972,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1169,7 +1169,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012694033864844073,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1233,7 +1233,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011424630478359662,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1297,7 +1297,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0102821674305237,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1361,7 +1361,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.015514930279253882,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1425,7 +1425,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.013963437251328491,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1489,7 +1489,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012567093526195637,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1553,7 +1553,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011310384173576079,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1617,7 +1617,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006320572834827761,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1681,7 +1681,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006952630118310537,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1745,7 +1745,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007647893130141597,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1809,7 +1809,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008412682443155758,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1873,7 +1873,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009253950687471325,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -1937,7 +1937,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005688515551344988,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2001,7 +2001,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005119663996210497,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2065,7 +2065,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.00460769759658943,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2129,7 +2129,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.004146927836930508,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2193,7 +2193,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.003732235053237445,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2257,7 +2257,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0062573671064794865,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2321,7 +2321,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005631630395831546,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2385,7 +2385,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005068467356248372,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2449,7 +2449,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.004561620620623559,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2513,7 +2513,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.004105458558561189,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2577,7 +2577,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006883103817127441,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2641,7 +2641,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0061947934354147065,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2705,7 +2705,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005575314091873214,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2769,7 +2769,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005017782682685919,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2833,7 +2833,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.004516004414417313,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2897,7 +2897,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007571414198840185,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -2961,7 +2961,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006814272778956177,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3025,7 +3025,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006132845501060536,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3089,7 +3089,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005519560950954511,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3153,7 +3153,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.004967604855859044,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3217,7 +3217,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008328555618724197,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3281,7 +3281,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007495700056851789,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3345,7 +3345,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006746130051166584,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3409,7 +3409,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0060715170460499575,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3473,7 +3473,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.005464365341444943,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3537,7 +3537,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010179345756218466,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3601,7 +3601,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009161411180596624,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3665,7 +3665,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008245270062536975,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3729,7 +3729,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0074207430562832485,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3793,7 +3793,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006678668750654959,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3857,7 +3857,7 @@
                             }
                         ],
                         "processor_id": 1,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006010801875589443,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3921,7 +3921,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01706642330717927,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -3985,7 +3985,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01535978097646134,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4049,7 +4049,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0138238028788152,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4113,7 +4113,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012441422590933686,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4177,7 +4177,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01877306563789718,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4241,7 +4241,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01689575907410746,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4305,7 +4305,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.015206183166696708,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4369,7 +4369,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.013685564850027043,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4433,7 +4433,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.020650372201686917,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4497,7 +4497,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01858533498151822,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4561,7 +4561,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01672680148336639,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4625,7 +4625,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01505412133502976,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4689,7 +4689,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0227154094218556,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4753,7 +4753,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.020443868479670037,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4817,7 +4817,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01839948163170303,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4881,7 +4881,7 @@
                             }
                         ],
                         "processor_id": 2,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01655953346853273,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -4945,7 +4945,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011197280331840313,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5009,7 +5009,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012317008365024333,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5073,7 +5073,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.013548709201526777,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5137,7 +5137,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.014903580121679453,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5201,7 +5201,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010077552298656286,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5265,7 +5265,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009069797068790672,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5329,7 +5329,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008162817361911573,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5393,7 +5393,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007346535625720454,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5457,7 +5457,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.006611882063148386,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5521,7 +5521,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011085307528521906,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5585,7 +5585,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.00997677677566973,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5649,7 +5649,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008979099098102723,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5713,7 +5713,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008081189188292493,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5777,7 +5777,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007273070269463219,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5841,7 +5841,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012193838281374107,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5905,7 +5905,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010974454453236712,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -5969,7 +5969,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009877009007913003,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6033,7 +6033,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.00888930810712175,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6097,7 +6097,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008000377296409547,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6161,7 +6161,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.013413222109511513,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6225,7 +6225,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012071899898560381,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6289,7 +6289,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010864709908704301,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6353,7 +6353,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009778238917833922,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6417,7 +6417,7 @@
                             }
                         ],
                         "processor_id": 3,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008800415026050501,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6483,7 +6483,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.00963355103616486,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6547,7 +6547,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008670195932548372,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6611,7 +6611,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007803176339293533,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6675,7 +6675,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.007022858705364182,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6739,7 +6739,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010596906139781346,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6803,7 +6803,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.00953721552580321,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6867,7 +6867,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008583493973222885,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6931,7 +6931,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0077251445759006,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -6995,7 +6995,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01165659675375949,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7059,7 +7059,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01049093707838354,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7123,7 +7123,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009441843370545183,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7187,7 +7187,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.008497659033490668,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7251,7 +7251,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.01282225642913544,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7315,7 +7315,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011540030786221895,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7379,7 +7379,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.010386027707599702,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7443,7 +7443,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.009347424936839734,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7507,7 +7507,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.014104482072048972,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7571,7 +7571,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012694033864844073,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7635,7 +7635,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011424630478359662,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7699,7 +7699,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.0102821674305237,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7763,7 +7763,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.015514930279253882,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7827,7 +7827,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.013963437251328491,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7891,7 +7891,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.012567093526195637,
                             "max_angle": 90.0,
                             "min_angle": 90.0
@@ -7955,7 +7955,7 @@
                             }
                         ],
                         "processor_id": 0,
-                        "qualities": {
+                        "elem_qualities": {
                             "jacobian": 0.011310384173576079,
                             "max_angle": 90.0,
                             "min_angle": 90.0

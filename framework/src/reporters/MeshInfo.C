@@ -20,7 +20,7 @@
 registerMooseObject("MooseApp", MeshInfo);
 
 /// Element qualities with a bound (min or max) to support on domains (sidesets, subdomains)
-const std::vector<MeshInfo::DomainQuality> MeshInfo::domain_qualities{
+const std::vector<MeshInfo::DomainElemQuality> MeshInfo::domain_elem_qualities{
     {libMesh::ElemQuality::MIN_ANGLE, MeshInfo::BoundType::MIN},
     {libMesh::ElemQuality::MAX_ANGLE, MeshInfo::BoundType::MAX},
     {libMesh::ElemQuality::JACOBIAN, MeshInfo::BoundType::MIN},
@@ -58,7 +58,7 @@ MeshInfo::validParams()
       MultiMooseEnum items("all bounding_box dim elem_mapping_type elem_type hmax hmin "
                            "neighbor_ids node_ids num_sides points processor_id unique_id volume");
       params.addParam<MultiMooseEnum>(
-          "elem_items", items, "Items to include when outputting elem information");
+          "elem_items", items, "Items to include when outputting element information");
     }
 
     {
@@ -71,7 +71,9 @@ MeshInfo::validParams()
       std::sort(elem_qualities.begin(), elem_qualities.end());
       MultiMooseEnum items("all " + MooseUtils::stringJoin(elem_qualities, " "));
       params.addParam<MultiMooseEnum>(
-          "elem_qualities", items, "Element qualities to include when outputting elem information");
+          "elem_qualities",
+          items,
+          "Element quality metrics to include when outputting element information");
     }
   }
 
@@ -87,24 +89,25 @@ MeshInfo::validParams()
         params.addParam<MultiMooseEnum>(
             name + "_items", items, "Items to include when outputting " + name + " information");
     }
-    // [sideset,subdomain]_qualities
+    // [sideset,subdomain]_elem_qualities
     {
-      // Convert each entry in MeshInfo::domain_qualities to a human string, like:
+      // Convert each entry in MeshInfo::domain_elem_qualities to a human string, like:
       // {libMesh::ElemQuality::MIN_ANGLE, MeshInfo::BoundType::MIN} -> "min_min_angle"
-      std::vector<std::string> domain_qualities;
-      domain_qualities.reserve(MeshInfo::domain_qualities.size());
-      std::transform(MeshInfo::domain_qualities.begin(),
-                     MeshInfo::domain_qualities.end(),
-                     std::back_inserter(domain_qualities),
+      std::vector<std::string> domain_elem_qualities;
+      domain_elem_qualities.reserve(MeshInfo::domain_elem_qualities.size());
+      std::transform(MeshInfo::domain_elem_qualities.begin(),
+                     MeshInfo::domain_elem_qualities.end(),
+                     std::back_inserter(domain_elem_qualities),
                      [](const auto & v) { return v.itemName(); });
-      std::sort(domain_qualities.begin(), domain_qualities.end());
+      std::sort(domain_elem_qualities.begin(), domain_elem_qualities.end());
 
-      MultiMooseEnum items("all " + MooseUtils::stringJoin(domain_qualities, " "));
+      MultiMooseEnum items("all " + MooseUtils::stringJoin(domain_elem_qualities, " "));
       for (const auto & name : domain_names)
-        params.addParam<MultiMooseEnum>(name + "_qualities",
-                                        items,
-                                        "Element qualities to include when outputting " + name +
-                                            " information");
+        params.addParam<MultiMooseEnum>(
+            name + "_elem_qualities",
+            items,
+            "Bounded (min or max) element quality metrics to include when outputting " + name +
+                " information");
     }
   }
 
@@ -118,8 +121,8 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
     _sideset_items(getParam<MultiMooseEnum>("sideset_items")),
     _subdomain_items(getParam<MultiMooseEnum>("subdomain_items")),
     _elem_qualities(getParam<MultiMooseEnum>("elem_qualities")),
-    _sideset_qualities(getParam<MultiMooseEnum>("sideset_qualities")),
-    _subdomain_qualities(getParam<MultiMooseEnum>("subdomain_qualities")),
+    _sideset_elem_qualities(getParam<MultiMooseEnum>("sideset_elem_qualities")),
+    _subdomain_elem_qualities(getParam<MultiMooseEnum>("subdomain_elem_qualities")),
 
     _num_dofs(declareHelper<unsigned int>("num_dofs", REPORTER_MODE_REPLICATED)),
     _num_dofs_nl(declareHelper<unsigned int>("num_dofs_nonlinear", REPORTER_MODE_REPLICATED)),
@@ -137,9 +140,10 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
     _num_local_node(declareHelper<unsigned int>("num_local_nodes", REPORTER_MODE_DISTRIBUTED)),
 
     _elem_infos(initCombinedInfos<ElemInfos>("elems", _elem_items, _elem_qualities)),
-    _sideset_infos(initCombinedInfos<SidesetInfos>("sidesets", _sideset_items, _sideset_qualities)),
-    _subdomain_infos(
-        initCombinedInfos<SubdomainInfos>("subdomains", _subdomain_items, _subdomain_qualities)),
+    _sideset_infos(
+        initCombinedInfos<SidesetInfos>("sidesets", _sideset_items, _sideset_elem_qualities)),
+    _subdomain_infos(initCombinedInfos<SubdomainInfos>(
+        "subdomains", _subdomain_items, _subdomain_elem_qualities)),
 
     _equation_systems(_fe_problem.es()),
     _nonlinear_system(_fe_problem.es().get_system("nl0")),
@@ -153,33 +157,34 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
   if (_sideset_items.isValid() && !hasItem("sidesets", _items) &&
       !hasItem("local_sidesets", _items))
     paramError("sideset_items", "Should not be provided without a sidesets item enabled");
-  if (_sideset_qualities.isValid() && !hasItem("sidesets", _items) &&
+  if (_sideset_elem_qualities.isValid() && !hasItem("sidesets", _items) &&
       !hasItem("local_sidesets", _items))
-    paramError("sideset_qualities", "Should not be provided without a sidesets item enabled");
+    paramError("sideset_elem_qualities", "Should not be provided without a sidesets item enabled");
   if (_subdomain_items.isValid() && !hasItem("subdomains", _items) &&
       !hasItem("local_subdomains", _items))
     paramError("subdomain_items", "Should not be provided without a subdomains item enabled");
-  if (_subdomain_qualities.isValid() && !hasItem("subdomains", _items) &&
+  if (_subdomain_elem_qualities.isValid() && !hasItem("subdomains", _items) &&
       !hasItem("local_subdomains", _items))
-    paramError("subdomain_qualities", "Should not be provided without a subdomains item enabled");
+    paramError("subdomain_elem_qualities",
+               "Should not be provided without a subdomains item enabled");
 }
 
-MeshInfo::DomainQuality::DomainQuality(const libMesh::ElemQuality elem_quality,
-                                       const BoundType bound_type)
+MeshInfo::DomainElemQuality::DomainElemQuality(const libMesh::ElemQuality elem_quality,
+                                               const BoundType bound_type)
   : std::pair<libMesh::ElemQuality, BoundType>(elem_quality, bound_type)
 {
 }
 
 std::string
-MeshInfo::DomainQuality::itemName() const
+MeshInfo::DomainElemQuality::itemName() const
 {
   return (boundType() == BoundType::MAX ? std::string("max") : std::string("min")) + "_" +
          elemQualityToString(elemQuality());
 }
 
 void
-MeshInfo::DomainQuality::updateValue(std::map<DomainQuality, Real> & quality_map,
-                                     const Real value) const
+MeshInfo::DomainElemQuality::updateValue(std::map<DomainElemQuality, Real> & quality_map,
+                                         const Real value) const
 {
   static const Real default_max = 0;
   static const Real default_min = std::numeric_limits<Real>::max();
@@ -198,7 +203,7 @@ MeshInfo::ElemContainingInfoItems::ElemContainingInfoItems(const MultiMooseEnum 
 }
 
 MeshInfo::DomainInfoItems::DomainInfoItems(const MultiMooseEnum & items,
-                                           const MultiMooseEnum & qualities)
+                                           const MultiMooseEnum & elem_qualities)
   : MeshInfo::ElemContainingInfoItems(items),
     elems(MeshInfo::hasItem("elems", items)),
     elem_types(MeshInfo::hasItem("elem_types", items)),
@@ -207,14 +212,14 @@ MeshInfo::DomainInfoItems::DomainInfoItems(const MultiMooseEnum & items,
     num_elems(MeshInfo::hasItem("num_elems", items)),
     processor_ids(MeshInfo::hasItem("processor_ids", items))
 {
-  std::copy_if(MeshInfo::domain_qualities.begin(),
-               MeshInfo::domain_qualities.end(),
-               std::back_inserter(this->qualities),
-               [&](const auto & v) { return MeshInfo::hasItem(v.itemName(), qualities); });
+  std::copy_if(MeshInfo::domain_elem_qualities.begin(),
+               MeshInfo::domain_elem_qualities.end(),
+               std::back_inserter(this->elem_qualities),
+               [&](const auto & v) { return MeshInfo::hasItem(v.itemName(), elem_qualities); });
 }
 
 MeshInfo::ElemInfoItems::ElemInfoItems(const MultiMooseEnum & items,
-                                       const MultiMooseEnum & qualities)
+                                       const MultiMooseEnum & elem_qualities)
   : MeshInfo::ElemContainingInfoItems(items),
     dim(MeshInfo::hasItem("dim", items)),
     elem_mapping_type(MeshInfo::hasItem("elem_mapping_type", items)),
@@ -230,8 +235,9 @@ MeshInfo::ElemInfoItems::ElemInfoItems(const MultiMooseEnum & items,
 {
   std::copy_if(MeshInfo::elem_qualities.begin(),
                MeshInfo::elem_qualities.end(),
-               std::back_inserter(this->qualities),
-               [&](const auto v) { return MeshInfo::hasItem(elemQualityToString(v), qualities); });
+               std::back_inserter(this->elem_qualities),
+               [&](const auto v)
+               { return MeshInfo::hasItem(elemQualityToString(v), elem_qualities); });
 }
 
 template <typename InfoMapType, class InfoItemsType>
@@ -295,9 +301,9 @@ MeshInfo::possiblyAddElemInfo()
     auto & elem = *elem_ptr;
     auto & entry = map_insert(local_info, elem.id(), elem.subdomain_id());
 
-    entry.qualities.reserve(items.qualities.size());
-    for (const auto quality : items.qualities)
-      entry.qualities.emplace_back(quality, elem.quality(quality));
+    entry.elem_qualities.reserve(items.elem_qualities.size());
+    for (const auto quality : items.elem_qualities)
+      entry.elem_qualities.emplace_back(quality, elem.quality(quality));
 
     set_simple(bounding_box, loose_bounding_box);
     set_simple(volume, volume);
@@ -363,22 +369,22 @@ MeshInfo::possiblyAddElemInfo()
         set_value(global_ptr->map.at(id), value);
     };
 
-    // qualities
-    if (items.qualities.size())
+    // elem_qualities
+    if (items.elem_qualities.size())
       gather(
           [](const auto & info)
           {
             std::vector<std::pair<std::underlying_type_t<libMesh::ElemQuality>, Real>> values;
-            values.reserve(info.qualities.size());
-            values.insert(values.end(), info.qualities.begin(), info.qualities.end());
+            values.reserve(info.elem_qualities.size());
+            values.insert(values.end(), info.elem_qualities.begin(), info.elem_qualities.end());
             return values;
           },
           [](auto & info, const auto & value)
           {
-            info.qualities.reserve(value.size());
+            info.elem_qualities.reserve(value.size());
             for (const auto & [elem_quality, quality_value] : value)
-              info.qualities.emplace_back(static_cast<libMesh::ElemQuality>(elem_quality),
-                                          quality_value);
+              info.elem_qualities.emplace_back(static_cast<libMesh::ElemQuality>(elem_quality),
+                                               quality_value);
           });
     // bounding_box
     if (items.bounding_box)
@@ -469,8 +475,8 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
         entry.bounding_box.union_with(elem.loose_bounding_box());
       if (items.volume)
         entry.volume += volume;
-      for (const auto & quality : items.qualities)
-        quality.updateValue(entry.qualities, elem.quality(quality.elemQuality()));
+      for (const auto & quality : items.elem_qualities)
+        quality.updateValue(entry.elem_qualities, elem.quality(quality.elemQuality()));
       if (items.elems)
         entry.elems.emplace_back(std::move(elems_entry));
       if (items.elem_types)
@@ -538,17 +544,17 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
     if (items.volume)
       gather([](const auto & info) { return info.volume; },
              [](auto & info, const auto & value) { info.volume += value; });
-    // qualities
-    if (items.qualities.size())
+    // elem_qualities
+    if (items.elem_qualities.size())
       gather(
           [](const auto & info)
           {
-            std::vector<std::tuple<std::underlying_type_t<decltype(DomainQuality::first)>,
-                                   std::underlying_type_t<decltype(DomainQuality::second)>,
+            std::vector<std::tuple<std::underlying_type_t<decltype(DomainElemQuality::first)>,
+                                   std::underlying_type_t<decltype(DomainElemQuality::second)>,
                                    Real>>
                 values;
-            values.reserve(info.qualities.size());
-            for (const auto & [bounded_quality, value] : info.qualities)
+            values.reserve(info.elem_qualities.size());
+            for (const auto & [bounded_quality, value] : info.elem_qualities)
               values.emplace_back(
                   bounded_quality.elemQuality(), bounded_quality.boundType(), value);
             return values;
@@ -557,9 +563,9 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
           {
             for (const auto & [elem_quality, bound_type, quality_value] : value)
             {
-              const DomainQuality dq(static_cast<libMesh::ElemQuality>(elem_quality),
-                                     static_cast<BoundType>(bound_type));
-              dq.updateValue(info.qualities, quality_value);
+              const DomainElemQuality dq(static_cast<libMesh::ElemQuality>(elem_quality),
+                                         static_cast<BoundType>(bound_type));
+              dq.updateValue(info.elem_qualities, quality_value);
             }
           });
     // elems
@@ -745,10 +751,10 @@ to_json(nlohmann::json & json, const MeshInfo::ElemInfoMap & info_map)
     toJSONElemContainingInfo(info_json, info, items);
     info_json["subdomain_id"] = info.subdomain_id;
 
-    // qualities
-    if (info.qualities.size())
-      for (const auto & [quality, value] : info.qualities)
-        info_json["qualities"][elemQualityToString(quality)] = value;
+    // elem_qualities
+    if (info.elem_qualities.size())
+      for (const auto & [quality, value] : info.elem_qualities)
+        info_json["elem_qualities"][elemQualityToString(quality)] = value;
     // dim
     info_json_simple(dim);
     // elem_mapping_type
@@ -791,10 +797,10 @@ toJSONDomainInfoMap(nlohmann::json & json, const DomainInfoMapType & info_map)
 
     if (info.name.size())
       info_json["name"] = info.name;
-    // qualities
-    if (items.qualities.size())
-      for (const auto & [bounded_quality, value] : info.qualities)
-        info_json["qualities"][bounded_quality.itemName()] = value;
+    // elem_qualities
+    if (items.elem_qualities.size())
+      for (const auto & [bounded_quality, value] : info.elem_qualities)
+        info_json["elem_qualities"][bounded_quality.itemName()] = value;
     // elems
     if (items.elems)
     {
@@ -846,9 +852,9 @@ to_json(nlohmann::json & json, const MeshInfo::SubdomainInfoMap & info_map)
   toJSONDomainInfoMap(json, info_map);
 }
 
-/// Data store and load for DomainQuality
+/// Data store and load for DomainElemQuality
 void
-dataStore(std::ostream & stream, MeshInfo::DomainQuality & beq, void *)
+dataStore(std::ostream & stream, MeshInfo::DomainElemQuality & beq, void *)
 {
   int value;
 
@@ -859,7 +865,7 @@ dataStore(std::ostream & stream, MeshInfo::DomainQuality & beq, void *)
   dataStore(stream, value, nullptr);
 }
 void
-dataLoad(std::istream & stream, MeshInfo::DomainQuality & beq, void *)
+dataLoad(std::istream & stream, MeshInfo::DomainElemQuality & beq, void *)
 {
   int value;
 
@@ -889,7 +895,7 @@ void
 dataStore(std::ostream & stream, MeshInfo::ElemInfo & info, void *)
 {
   dataStoreElemContainingInfo(stream, info);
-  dataStore(stream, info.qualities, nullptr);
+  dataStore(stream, info.elem_qualities, nullptr);
   dataStore(stream, info.dim, nullptr);
   dataStore(stream, info.elem_mapping_type, nullptr);
   dataStore(stream, info.elem_type, nullptr);
@@ -909,7 +915,7 @@ dataStoreDomainInfo(std::ostream & stream, T & info)
 {
   dataStoreElemContainingInfo(stream, info);
   dataStore(stream, info.name, nullptr);
-  dataStore(stream, info.qualities, nullptr);
+  dataStore(stream, info.elem_qualities, nullptr);
   dataStore(stream, info.elems, nullptr);
   dataStore(stream, info.elem_types, nullptr);
   dataStore(stream, info.min_volume, nullptr);
@@ -945,7 +951,7 @@ void
 dataLoad(std::istream & stream, MeshInfo::ElemInfo & info, void *)
 {
   dataLoadElemContainingInfo(stream, info);
-  dataLoad(stream, info.qualities, nullptr);
+  dataLoad(stream, info.elem_qualities, nullptr);
   dataLoad(stream, info.dim, nullptr);
   dataLoad(stream, info.elem_mapping_type, nullptr);
   dataLoad(stream, info.elem_type, nullptr);
@@ -965,7 +971,7 @@ dataLoadDomainInfo(std::istream & stream, T & info)
 {
   dataLoadElemContainingInfo(stream, info);
   dataLoad(stream, info.name, nullptr);
-  dataLoad(stream, info.qualities, nullptr);
+  dataLoad(stream, info.elem_qualities, nullptr);
   dataLoad(stream, info.elems, nullptr);
   dataLoad(stream, info.elem_types, nullptr);
   dataLoad(stream, info.min_volume, nullptr);

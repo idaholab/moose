@@ -70,7 +70,7 @@
                   Outputs/file_base=elem_qualities_out'
       skip_keys = 'part number_of_parts'
 
-      detail = "includes selected element quality information"
+      detail = "includes selected element quality metrics"
     []
 
     [sideset_all]
@@ -84,7 +84,7 @@
       max_parallel = 4
       cli_args = 'Reporters/mesh_info/items="local_sidesets sidesets"
                   Reporters/mesh_info/sideset_items=all
-                  Reporters/mesh_info/sideset_qualities=all
+                  Reporters/mesh_info/sideset_elem_qualities=all
                   Outputs/file_base=sideset_all_out'
 
       detail = "includes all extra information about sidesets"
@@ -102,16 +102,16 @@
       detail = "includes selected extra information about sidesets"
     []
 
-    [sideset_qualities]
+    [sideset_elem_qualities]
       type = JSONDiff
       input = mesh_info.i
-      jsondiff = 'sideset_qualities_out.json'
+      jsondiff = 'sideset_elem_qualities_out.json'
       cli_args = 'Reporters/mesh_info/items="sidesets"
-                  Reporters/mesh_info/sideset_qualities="min_jacobian max_jacobian"
-                  Outputs/file_base=sideset_qualities_out'
+                  Reporters/mesh_info/sideset_elem_qualities="min_jacobian max_jacobian"
+                  Outputs/file_base=sideset_elem_qualities_out'
       skip_keys = 'part number_of_parts'
 
-      detail = "includes selected element side quality information on sidesets"
+      detail = "includes selected element side quality metrics on sidesets"
     []
 
     [subdomain_all]
@@ -125,7 +125,7 @@
       max_parallel = 4
       cli_args = 'Reporters/mesh_info/items="local_subdomains subdomains"
                   Reporters/mesh_info/subdomain_items=all
-                  Reporters/mesh_info/subdomain_qualities=all
+                  Reporters/mesh_info/subdomain_elem_qualities=all
                   Outputs/file_base=subdomain_all_out'
 
       detail = "includes all extra information about subdomains"
@@ -143,16 +143,16 @@
       detail = "includes selected extra information about subdomains"
     []
 
-    [subdomain_qualities]
+    [subdomain_elem_qualities]
       type = JSONDiff
       input = mesh_info.i
-      jsondiff = 'subdomain_qualities_out.json'
+      jsondiff = 'subdomain_elem_qualities_out.json'
       cli_args = 'Reporters/mesh_info/items="subdomains"
-                  Reporters/mesh_info/subdomain_qualities="min_min_angle max_max_angle"
-                  Outputs/file_base=subdomain_qualities_out'
+                  Reporters/mesh_info/subdomain_elem_qualities="min_min_angle max_max_angle"
+                  Outputs/file_base=subdomain_elem_qualities_out'
       skip_keys = 'part number_of_parts'
 
-      detail = "includes selected element quality information on subdomains"
+      detail = "includes selected element quality metrics on subdomains"
     []
   []
 
@@ -176,7 +176,7 @@
                   Reporters/mesh_info/elem_qualities=min_angle'
       expect_err = "elem_qualities: Should not be provided without an elems item enabled"
 
-      detail = 'requesting element quality information items without requesting element information'
+      detail = 'requesting element quality metrics without requesting element information'
     []
 
     [sideset_items_no_sidesets]
@@ -189,14 +189,14 @@
       detail = 'requesting specific sideset information items without requesting sideset information'
     []
 
-    [sideset_qualities_no_sidesets]
+    [sideset_elem_qualities_no_sidesets]
       type = RunException
       input = mesh_info.i
       cli_args = 'Reporters/mesh_info/items=subdomains
-                  Reporters/mesh_info/sideset_qualities=min_min_angle'
-      expect_err = "sideset_qualities: Should not be provided without a sidesets item enabled"
+                  Reporters/mesh_info/sideset_elem_qualities=min_min_angle'
+      expect_err = "sideset_elem_qualities: Should not be provided without a sidesets item enabled"
 
-      detail = 'requesting element quality information items on sidesets without requesting sideset information'
+      detail = 'requesting element quality metrics on sidesets without requesting sideset information'
     []
 
     [subdomain_items_no_subdomains]
@@ -209,14 +209,14 @@
       detail = 'requesting specific subdomain information items without requesting subdomain information'
     []
 
-    [subdomain_qualities_no_subdomains]
+    [subdomain_elem_qualities_no_subdomains]
       type = RunException
       input = mesh_info.i
       cli_args = 'Reporters/mesh_info/items=sidesets
-                  Reporters/mesh_info/subdomain_qualities=min_min_angle'
-      expect_err = "subdomain_qualities: Should not be provided without a subdomains item enabled"
+                  Reporters/mesh_info/subdomain_elem_qualities=min_min_angle'
+      expect_err = "subdomain_elem_qualities: Should not be provided without a subdomains item enabled"
 
-      detail = 'requesting element quality information items on subdomains without requesting subdomain information'
+      detail = 'requesting element quality metrics on subdomains without requesting subdomain information'
     []
   []
 []

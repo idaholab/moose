@@ -32,7 +32,7 @@ public:
   MeshInfo(const InputParameters & parameters);
 
   /**
-   * Type of a bound for DomainQuality (min or max).
+   * Type of a bound for DomainElemQuality (min or max).
    */
   enum BoundType : int
   {
@@ -44,10 +44,10 @@ public:
    * Key for a libMesh::ElemQuality quality type with a bound (min or max)
    * to be used over an entire domain (sideset or subdomain).
    */
-  struct DomainQuality : public std::pair<libMesh::ElemQuality, BoundType>
+  struct DomainElemQuality : public std::pair<libMesh::ElemQuality, BoundType>
   {
-    DomainQuality() = default;
-    DomainQuality(const libMesh::ElemQuality elem_quality, const BoundType bound_type);
+    DomainElemQuality() = default;
+    DomainElemQuality(const libMesh::ElemQuality elem_quality, const BoundType bound_type);
 
     /// Get the libMesh::ElemQuality entry
     ///@{
@@ -64,12 +64,12 @@ public:
     /// Get the name for this quality ([min,max]_[quality])
     std::string itemName() const;
     /// Update the value in the quality map
-    void updateValue(std::map<DomainQuality, Real> & quality_map, const Real value) const;
+    void updateValue(std::map<DomainElemQuality, Real> & quality_map, const Real value) const;
   };
 
   /// The qualities (ElemQuality and bound type) to include for
   /// domain quantities (subdomains and sidesets)
-  static const std::vector<DomainQuality> domain_qualities;
+  static const std::vector<DomainElemQuality> domain_elem_qualities;
   /// The qualities to include for elems
   static const std::vector<libMesh::ElemQuality> elem_qualities;
 
@@ -121,8 +121,8 @@ public:
 
     /// Name
     std::string name;
-    /// Bounded (min, max) element qualities
-    std::map<DomainQuality, Real> qualities;
+    /// Bounded (min, max) element quality metrics
+    std::map<DomainElemQuality, Real> elem_qualities;
     /// Elements in the domain
     std::vector<ElemsType> elems;
     /// Type(s) of elements in the domain
@@ -155,7 +155,7 @@ public:
     /// The element's subdomain ID
     SubdomainID subdomain_id;
     /// Evaluated element qualities
-    std::vector<std::pair<libMesh::ElemQuality, Real>> qualities;
+    std::vector<std::pair<libMesh::ElemQuality, Real>> elem_qualities;
     /// The dimensionality of the element
     unsigned short dim;
     /// The element mapping type
@@ -202,7 +202,7 @@ public:
   struct DomainInfoItems : public ElemContainingInfoItems
   {
     DomainInfoItems() = default;
-    DomainInfoItems(const MultiMooseEnum & items, const MultiMooseEnum & qualities);
+    DomainInfoItems(const MultiMooseEnum & items, const MultiMooseEnum & elem_qualities);
 
     /// Markers for whether or not a single item should be output
     ///@{
@@ -214,14 +214,14 @@ public:
     bool processor_ids = false;
     ///@}
 
-    /// Bounded (min, max) element qualities that should be output
-    std::vector<DomainQuality> qualities;
+    /// Bounded (min, max) element quality metrics that should be output
+    std::vector<DomainElemQuality> elem_qualities;
   };
 
   struct ElemInfoItems : public ElemContainingInfoItems
   {
     ElemInfoItems() = default;
-    ElemInfoItems(const MultiMooseEnum & items, const MultiMooseEnum & qualities);
+    ElemInfoItems(const MultiMooseEnum & items, const MultiMooseEnum & elem_qualities);
 
     /// Markers for whether or not a single item should be output
     ///@{
@@ -238,7 +238,7 @@ public:
     bool unique_id = false;
     ///@}
     /// Element qualities that should be output
-    std::vector<libMesh::ElemQuality> qualities;
+    std::vector<libMesh::ElemQuality> elem_qualities;
   };
 
   /**
@@ -321,9 +321,9 @@ protected:
   /// The requested sideset qualities
   const MultiMooseEnum & _elem_qualities;
   /// The requested sideset qualities
-  const MultiMooseEnum & _sideset_qualities;
+  const MultiMooseEnum & _sideset_elem_qualities;
   /// The requested subdomain qualities
-  const MultiMooseEnum & _subdomain_qualities;
+  const MultiMooseEnum & _subdomain_elem_qualities;
 
   /**
    * Helper to perform optional declaration based on if the item
@@ -395,11 +395,11 @@ void to_json(nlohmann::json &, const MeshInfo::SubdomainInfoMap &);
 ///@}
 
 /**
- * Data store and load for DomainQuality
+ * Data store and load for DomainElemQuality
  */
 ///@{
-void dataStore(std::ostream &, MeshInfo::DomainQuality &, void *);
-void dataLoad(std::istream &, MeshInfo::DomainQuality &, void *);
+void dataStore(std::ostream &, MeshInfo::DomainElemQuality &, void *);
+void dataLoad(std::istream &, MeshInfo::DomainElemQuality &, void *);
 ///@}
 
 /**

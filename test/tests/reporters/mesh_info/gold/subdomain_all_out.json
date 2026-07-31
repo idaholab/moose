@@ -76,7 +76,7 @@
                         "processor_ids": [
                             0
                         ],
-                        "qualities": {
+                        "elem_qualities": {
                             "max_jacobian": 0.015514930279253882,
                             "max_max_angle": 90.0,
                             "min_jacobian": 0.007022858705364182,
@@ -152,7 +152,7 @@
                             2,
                             3
                         ],
-                        "qualities": {
+                        "elem_qualities": {
                             "max_jacobian": 0.0227154094218556,
                             "max_max_angle": 90.0,
                             "min_jacobian": 0.006611882063148386,
@@ -247,7 +247,7 @@
                             0,
                             1
                         ],
-                        "qualities": {
+                        "elem_qualities": {
                             "max_jacobian": 0.015514930279253882,
                             "max_max_angle": 90.0,
                             "min_jacobian": 0.003732235053237445,

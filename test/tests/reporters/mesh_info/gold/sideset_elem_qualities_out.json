@@ -23,7 +23,7 @@
                     {
                         "id": 0,
                         "name": "bottom",
-                        "qualities": {
+                        "elem_qualities": {
                             "max_jacobian": 1.0,
                             "min_jacobian": 1.0
                         }
@@ -31,7 +31,7 @@
                     {
                         "id": 1,
                         "name": "right",
-                        "qualities": {
+                        "elem_qualities": {
                             "max_jacobian": 1.0,
                             "min_jacobian": 1.0
                         }
@@ -39,7 +39,7 @@
                     {
                         "id": 2,
                         "name": "top",
-                        "qualities": {
+                        "elem_qualities": {
                             "max_jacobian": 1.0,
                             "min_jacobian": 1.0
                         }
@@ -47,7 +47,7 @@
                     {
                         "id": 3,
                         "name": "left",
-                        "qualities": {
+                        "elem_qualities": {
                             "max_jacobian": 1.0,
                             "min_jacobian": 1.0
                         }
