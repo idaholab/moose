@@ -1,5 +1,24 @@
 [Tests]
   issues = '#10972 #25602'
+  [numerical_serd_gaussian]
+    type = CSVDiff
+    input = numerical_serd_gaussian.i
+    csvdiff = numerical_serd_gaussian_out.csv
+    rel_err = 1e-8
+    allow_test_objects = true
+    design = 'StrainEnergyRateDensity.md'
+    issues = '#30466'
+    requirement = 'Fifth-order Gaussian quadrature shall reproduce the analytical strain energy rate density for power-law creep.'
+  []
+  [numerical_serd_incremental]
+    type = CSVDiff
+    input = numerical_serd_incremental.i
+    csvdiff = numerical_serd_incremental_out.csv
+    rel_err = 1e-4
+    design = 'StrainEnergyRateDensity.md'
+    issues = '#30466'
+    requirement = 'Incremental trapezoidal integration with sufficiently small time steps shall converge to the analytical strain energy rate density for power-law creep.'
+  []
   [incr_elas]
     type = 'CSVDiff'
     input = 'incr_model.i'
