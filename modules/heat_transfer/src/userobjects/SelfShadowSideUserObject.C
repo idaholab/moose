@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SelfShadowSideUserObject.h"
+#include "MooseUtils.h"
 #include "RotationMatrix.h"
 
 #include "libmesh/parallel_algebra.h"
@@ -283,20 +284,34 @@ SelfShadowSideUserObject::check3DIllumination(const Point & qp, const SideIDType
     const auto y2 = p2(1);
     const auto y3 = p3(1);
 
+    // Scale the degeneracy tolerance by the projected-area terms so the check is independent of
+    // mesh size.
+    const auto denominator_term_1 = (y2 - y3) * (x1 - x3);
+    const auto denominator_term_2 = (x3 - x2) * (y1 - y3);
+    const auto denominator = denominator_term_1 + denominator_term_2;
+    const auto denominator_tolerance =
+        libMesh::TOLERANCE * (std::abs(denominator_term_1) + std::abs(denominator_term_2));
+    if (MooseUtils::absoluteFuzzyEqual(denominator, 0.0, denominator_tolerance))
+      continue;
+
     // compute barycentric coordinates
-    const auto a = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) /
-                   ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3));
-    const auto b = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) /
-                   ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3));
+    const auto a = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / denominator;
+    const auto b = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / denominator;
     const auto c = 1.0 - a - b;
 
-    // are we inside of the projected triangle?
-    if (0 <= a && a <= 1 && 0 <= b && b <= 1 && 0 <= c && c <= 1)
+    // Match the robust triangle-intersection predicate by treating barycentric coordinates within
+    // libMesh::TOLERANCE of an edge as on the triangle.
+    if (MooseUtils::absoluteFuzzyGreaterEqual(a, 0.0, libMesh::TOLERANCE) &&
+        MooseUtils::absoluteFuzzyLessEqual(a, 1.0, libMesh::TOLERANCE) &&
+        MooseUtils::absoluteFuzzyGreaterEqual(b, 0.0, libMesh::TOLERANCE) &&
+        MooseUtils::absoluteFuzzyLessEqual(b, 1.0, libMesh::TOLERANCE) &&
+        MooseUtils::absoluteFuzzyGreaterEqual(c, 0.0, libMesh::TOLERANCE) &&
+        MooseUtils::absoluteFuzzyLessEqual(c, 1.0, libMesh::TOLERANCE))
     {
       // Is the intersection it in front or behind the QP? (interpolate z using the barycentric
       // coordinates)
       const auto zs = a * p1(2) + b * p2(2) + c * p3(2);
-      if (z > zs)
+      if (MooseUtils::absoluteFuzzyGreaterThan(z, zs))
         return false;
     }
   }
