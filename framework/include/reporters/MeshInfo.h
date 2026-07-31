@@ -318,11 +318,11 @@ protected:
   const MultiMooseEnum & _sideset_items;
   /// The requested subdomain items
   const MultiMooseEnum & _subdomain_items;
-  /// The requested sideset qualities
+  /// The requested element quality metrics
   const MultiMooseEnum & _elem_qualities;
-  /// The requested sideset qualities
+  /// The requested element quality metrics, bounded over sidesets
   const MultiMooseEnum & _sideset_elem_qualities;
-  /// The requested subdomain qualities
+  /// The requested element quality metrics, bounded over subdomains
   const MultiMooseEnum & _subdomain_elem_qualities;
 
   /**
