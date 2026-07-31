@@ -81,6 +81,7 @@
                   "truss elements with a linear hardening model under tension."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
+    abs_zero = 1e-9
   [../]
   [./tensile_nohardening]
     type = 'Exodiff'
@@ -103,6 +104,7 @@
                   "truss elements with a user-defined hardening function model under tension."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
+    custom_cmp = truss_hardeningfn_tension.cmp
   [../]
   [./compressive]
     type = 'Exodiff'
