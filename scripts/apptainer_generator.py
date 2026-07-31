@@ -45,21 +45,25 @@ class ApptainerGenerator:
 
         self.package = self.packages[self.args.library]
         self.project = self.package.apptainer.name_base
-        self.name = self.package.apptainer.name
-        self.tag = self.package.apptainer.tag
         self.version = self.package.apptainer.tag
+
+        name = self.package.apptainer.name
+        if suffix := getattr(self.args, "suffix", None):
+            name += f"-{suffix}"
+        name += f"-{self.march_to_suffix(self.args.march)}"
+        self.name = name
 
         if hasattr(self.args, "modify") and self.args.modify is not None:
             self.def_path = os.path.abspath(self.args.modify)
         else:
             self.def_path = self.package.apptainer.def_path
 
-        if getattr(self.args, "suffix", None):
-            self.name = self.add_name_suffix(self.package, self.args.suffix)
+        tag = self.package.apptainer.tag
         if self.args.tag is not None:
-            self.tag = self.args.tag
+            tag = self.args.tag
         if self.args.tag_prefix is not None:
-            self.tag = f"{self.args.tag_prefix}-{self.tag}"
+            tag = f"{self.args.tag_prefix}-{self.tag}"
+        self.tag = tag
 
         if hasattr(self.args, "dir"):
             self.dir = os.path.abspath(self.args.dir)
@@ -88,8 +92,8 @@ class ApptainerGenerator:
             sys.exit(1)
         return args
 
-    @staticmethod
-    def parse_args(entities):
+    @classmethod
+    def parse_args(cls, entities):
         """
         Parses command line arguments.
         """
@@ -119,9 +123,17 @@ class ApptainerGenerator:
             parser.add_argument(
                 "--tag-prefix", type=str, help="Prefix to add to the tag"
             )
+            parser.add_argument(
+                "--march",
+                type=str,
+                help="Architecture to use for -march in compilation and as a tag suffix (default: %(default)s)",
+                default=cls.default_march(),
+            )
             if write:
                 parser.add_argument(
-                    "dir", help="The directory to perform actions in", default="."
+                    "dir",
+                    help="The directory to perform actions in (default: %(default)s)",
+                    default=".",
                 )
                 parser.add_argument(
                     "--overwrite", action="store_true", help="Overwrite any containers"
@@ -131,7 +143,7 @@ class ApptainerGenerator:
                     "--oras-url",
                     type=str,
                     default=oras_url_default,
-                    help="The ORAS URL to use; " + f"defaults to {oras_url_default}",
+                    help="The ORAS URL to use (default: %(default)s)",
                 )
                 parser.add_argument(
                     "--disable-cache",
@@ -160,6 +172,12 @@ class ApptainerGenerator:
                 "--local", action="store_true", help="Use a local dependency container"
             )
             parser.add_argument("--dep", type=str, help="Use this dependency instead")
+            parser.add_argument(
+                "--dep-march",
+                type=str,
+                help="Dependency architecture tag to use (default: %(default)s)",
+                default=cls.default_march(),
+            )
             parser.add_argument(
                 "--alt-dep-tag", type=str, help="An alternate dependency tag to pull"
             )
@@ -326,6 +344,21 @@ class ApptainerGenerator:
 
         return remote
 
+    @staticmethod
+    def default_march() -> str:
+        """Get the default architecture -march flag for this platform."""
+        machine = platform.machine()
+        if machine == "x86_64":
+            return "x86-64-v3"
+        raise NotImplementedError(f"Machine type {machine} is not supported")
+
+    @staticmethod
+    def march_to_suffix(march: str) -> str:
+        """Convert a -march flag to a suffix."""
+        if march.startswith("x86-64"):
+            return march.replace("-", "_")
+        return f"{platform.machine()}_{march.replace('-', '_')}"
+
     def run(self, command):
         """
         Prints a command to screen and then runs it
@@ -432,15 +465,6 @@ class ApptainerGenerator:
         print(process.stderr.decode("utf-8"), file=sys.stderr)
         raise Exception("Failed to check ORAS image existance")
 
-    @staticmethod
-    def add_name_suffix(package: Package, suffix: str) -> str:
-        """
-        Adds a suffix to the name for the given package
-        """
-        current_suffix = package.apptainer.name_suffix
-        new_suffix = suffix + "-" + package.apptainer.name_suffix
-        return package.apptainer.name.replace(current_suffix, new_suffix)
-
     def _find_dependency_package(self, library: str) -> Union[Package, None]:
         """
         Find the dependency package for the given library (if any)
@@ -455,10 +479,13 @@ class ApptainerGenerator:
         Finds the BootStrap and From options based on the given dependency
         """
         project = package.apptainer.name_base
-        name = package.apptainer.name
         tag = package.apptainer.tag
+
+        name_parts = [package.apptainer.name]
         if self.args.dep_suffix is not None:
-            name = self.add_name_suffix(package, self.args.dep_suffix)
+            name_parts.append(self.args.dep_suffix)
+        name_parts.append(self.march_to_suffix(self.args.dep_march))
+        name = "-".join(name_parts)
 
         # localimage (with --local option)
         if self.args.local:
@@ -695,7 +722,7 @@ class ApptainerGenerator:
         """
         Adds conditional apptainer definition vars to jinja data
         """
-        jinja_data["ARCH"] = platform.machine()
+        jinja_data["MARCH"] = self.args.march
 
         # Set application-related variables
         if self.args.library == "app":

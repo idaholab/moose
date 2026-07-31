@@ -3,6 +3,7 @@
 
    - APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)
    - APPTAINER_FROM: The From to use (path to an image or an oras URI)
+   - MARCH: Architecture to use for --march
    - MOOSE_DIR: Path on the host to the MOOSE repository
    - NEML2_GIT_SHA: The git SHA to use for neml2
    - NEML2_GIT_REMOTE: The git remote to use to get neml2
@@ -18,7 +19,7 @@
    - MFEM_GIT_REMOTE: The git remote to use to get MFEM
    - MFEM_OPTIONS: Options to pass to mfem build
    - MOOSE_JOBS: Number of jobs to pass to the builds
-   - OPTFLAGS: Optimization flags to set when building
+   - MTUNE: Tuning to use for --mtune (default: generic)
    - PROFILING: Whether or not to build with gperftools (truthy, default: false)
    - PYTORCH_GIT_SHA: The git SHA to use for pytorch
    - PYTORCH_GIT_REMOTE: The git remote to use to get pytorch
@@ -44,6 +45,7 @@
 {%- set LIBTORCH_DIR         = '/opt/libtorch'                            -%}
 {%- set MFEM_BUILD_SCRIPT    = 'update_and_rebuild_mfem.sh'               -%}
 {%- set MFEM_DIR             = '/opt/mfem'                                -%}
+{%- set MTUNE                = MTUNE | default('generic')                 -%}
 {%- set NEML2_BUILD_SCRIPT   = 'update_and_rebuild_neml2.sh'              -%}
 {%- set NEML2_DIR            = '/opt/neml2'                               -%}
 {%- set PPROF_DIR            = '/opt/pprof'                               -%}
@@ -116,11 +118,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
     # Optimization flags
-{%- if OPTFLAGS is not defined %}
-    OPTFLAGS=("-march=$(default_march)" "-mtune=generic")
-{%- else %}
-    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
-{%- endif %}
+    OPTFLAGS=("-march={{ MARCH }}" "-mtune={{ MTUNE }}")
 
     # Special setup for OpenMPI
     if [ -n "${MOOSE_OPENMPI_DIR:-}" ]; then
