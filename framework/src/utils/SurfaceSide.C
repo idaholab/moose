@@ -25,10 +25,10 @@ signedValueSideness(Real phi, const Real tolerance, const bool inside_is_negativ
   return SurfaceSide::OUTSIDE;
 }
 
-// This two-argument form is the primitive that holds the union precedence. The
-// vector form folds over it, and callers can fold provider queries one at a time to
-// stop as soon as the result reaches INSIDE (the maximal value), skipping further
-// (possibly expensive) queries once union membership is decided.
+// This two-argument form holds the union precedence. Callers fold their per-geometry
+// queries through it one at a time, which lets them stop as soon as the result reaches
+// INSIDE (the maximal value), skipping further (possibly expensive) queries once union
+// membership is decided.
 SurfaceSide
 unionSideness(const SurfaceSide a, const SurfaceSide b)
 {
@@ -38,13 +38,4 @@ unionSideness(const SurfaceSide a, const SurfaceSide b)
   if (a == SurfaceSide::ON || b == SurfaceSide::ON)
     return SurfaceSide::ON;
   return SurfaceSide::OUTSIDE;
-}
-
-SurfaceSide
-unionSideness(const std::vector<SurfaceSide> & sides)
-{
-  SurfaceSide result = SurfaceSide::OUTSIDE;
-  for (const auto side : sides)
-    result = unionSideness(result, side);
-  return result;
 }

@@ -30,12 +30,18 @@ classify(const bool all_nodes_active,
 }
 }
 
-// A fully active element is inside; a fully inactive element is outside. The
-// downstream inputs (lambda, mark_intercepted) do not override these.
+// A fully active element is inside; a fully inactive element is outside. The downstream
+// inputs do not override these: neither mark_intercepted nor the lambda endpoints (which
+// otherwise force intercepted/outside/inside) change the result.
 TEST(ClassifyPartialElementTest, FullyInsideOrOutside)
 {
   EXPECT_EQ(classify(true, false, 1.0, 0.5, true), INSIDE);
+  EXPECT_EQ(classify(true, false, 1.0, 0.0, false), INSIDE); // lambda 0 rejects a partial elem
+  EXPECT_EQ(classify(true, false, 1.0, 1.0, false), INSIDE);
+
   EXPECT_EQ(classify(false, true, 0.0, 0.5, true), OUTSIDE);
+  EXPECT_EQ(classify(false, true, 0.0, 1.0, false), OUTSIDE); // lambda 1 accepts a partial elem
+  EXPECT_EQ(classify(false, true, 0.0, 0.0, false), OUTSIDE);
 }
 
 // A partial element with mark_intercepted gets the intercepted subdomain, ahead of

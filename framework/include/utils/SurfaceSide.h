@@ -12,7 +12,6 @@
 #include "MooseTypes.h"
 
 #include <ostream>
-#include <vector>
 
 /// The side of a closed surface where a query point is located.
 enum class SurfaceSide
@@ -44,15 +43,6 @@ SurfaceSide signedValueSideness(Real phi, Real tolerance, bool inside_is_negativ
  * if either is ON, otherwise OUTSIDE (the INSIDE > ON > OUTSIDE precedence).
  */
 SurfaceSide unionSideness(SurfaceSide a, SurfaceSide b);
-
-/**
- * Combine per-geometry classifications into the classification against their union.
- *
- * A point is INSIDE the union if it is INSIDE any geometry; otherwise it is ON the
- * union if it is ON any geometry; otherwise it is OUTSIDE. This encodes the
- * INSIDE > ON > OUTSIDE precedence.
- */
-SurfaceSide unionSideness(const std::vector<SurfaceSide> & sides);
 
 /// Stream a human-readable name for a SurfaceSide value. Defined for debugging
 /// output and so test frameworks (e.g. gtest EXPECT_EQ) report the enumerator

@@ -11,6 +11,11 @@
 
 #include "SurfaceSide.h"
 
+#include "libmesh/int_range.h"
+
+#include <algorithm>
+#include <array>
+
 // signedValueSideness with the default signed-distance convention (negative inside).
 TEST(SurfaceSideTest, SignedValueInsideIsNegative)
 {
@@ -40,20 +45,16 @@ TEST(SurfaceSideTest, SignedValueInsideIsPositive)
   EXPECT_EQ(signedValueSideness(0.0, tol, false), SurfaceSide::ON);
 }
 
-// unionSideness follows the INSIDE > ON > OUTSIDE precedence.
+// unionSideness applies the OUTSIDE < ON < INSIDE precedence: the union side is the
+// higher-precedence of the two arguments, symmetrically. This is the truth table
+// PointInUnionCheckUO folds over per provider.
 TEST(SurfaceSideTest, Union)
 {
-  // Empty union classifies every point as outside.
-  EXPECT_EQ(unionSideness({}), SurfaceSide::OUTSIDE);
+  // Listed in increasing precedence, so the index doubles as the precedence rank and
+  // the expected union of any pair is the side at the larger of the two ranks.
+  const std::array by_precedence = {SurfaceSide::OUTSIDE, SurfaceSide::ON, SurfaceSide::INSIDE};
 
-  // All outside stays outside.
-  EXPECT_EQ(unionSideness({SurfaceSide::OUTSIDE, SurfaceSide::OUTSIDE}), SurfaceSide::OUTSIDE);
-
-  // Any ON (and no inside) is on.
-  EXPECT_EQ(unionSideness({SurfaceSide::OUTSIDE, SurfaceSide::ON}), SurfaceSide::ON);
-  EXPECT_EQ(unionSideness({SurfaceSide::ON, SurfaceSide::ON}), SurfaceSide::ON);
-
-  // Any INSIDE wins over ON and OUTSIDE, regardless of order.
-  EXPECT_EQ(unionSideness({SurfaceSide::ON, SurfaceSide::INSIDE}), SurfaceSide::INSIDE);
-  EXPECT_EQ(unionSideness({SurfaceSide::INSIDE, SurfaceSide::OUTSIDE}), SurfaceSide::INSIDE);
+  for (const auto i : index_range(by_precedence))
+    for (const auto j : index_range(by_precedence))
+      EXPECT_EQ(unionSideness(by_precedence[i], by_precedence[j]), by_precedence[std::max(i, j)]);
 }

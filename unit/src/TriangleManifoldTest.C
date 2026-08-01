@@ -13,8 +13,11 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/int_range.h"
 
 #include "gtest/gtest.h"
+
+#include <array>
 
 namespace
 {
@@ -28,9 +31,46 @@ addTri(libMesh::MeshBase & mesh, libMesh::Node * n0, libMesh::Node * n1, libMesh
   e->set_node(2, n2);
 }
 
+// The 12 outward-oriented triangles of an axis-aligned unit box (two per face), as node-index
+// triples into the 8 corners ordered n0..n7 = (0,0,0) (1,0,0) (1,1,0) (0,1,0) (0,0,1) (1,0,1)
+// (1,1,1) (0,1,1). The two +z (top) faces are entries [2] and [3].
+constexpr std::array<std::array<unsigned int, 3>, 12> cube_faces = {{{{0, 2, 1}}, // bottom -z
+                                                                     {{0, 3, 2}},
+                                                                     {{4, 5, 6}}, // top +z
+                                                                     {{4, 6, 7}},
+                                                                     {{0, 1, 5}}, // front -y
+                                                                     {{0, 5, 4}},
+                                                                     {{2, 3, 7}}, // back +y
+                                                                     {{2, 7, 6}},
+                                                                     {{0, 4, 7}}, // left -x
+                                                                     {{0, 7, 3}},
+                                                                     {{1, 2, 6}}, // right +x
+                                                                     {{1, 6, 5}}}};
+
+// Add the 8 corners of the unit box with minimum corner o to the mesh, returned in n0..n7 order.
+std::array<libMesh::Node *, 8>
+addCubeNodes(libMesh::MeshBase & mesh, const Point & o)
+{
+  return {mesh.add_point(o + Point(0, 0, 0)),
+          mesh.add_point(o + Point(1, 0, 0)),
+          mesh.add_point(o + Point(1, 1, 0)),
+          mesh.add_point(o + Point(0, 1, 0)),
+          mesh.add_point(o + Point(0, 0, 1)),
+          mesh.add_point(o + Point(1, 0, 1)),
+          mesh.add_point(o + Point(1, 1, 1)),
+          mesh.add_point(o + Point(0, 1, 1))};
+}
+
+// Add one watertight, outward-oriented unit cube (12 Tri3) with minimum corner o to a surface mesh.
+void
+addCube(libMesh::MeshBase & mesh, const Point & o)
+{
+  const auto n = addCubeNodes(mesh, o);
+  for (const auto & f : cube_faces)
+    addTri(mesh, n[f[0]], n[f[1]], n[f[2]]);
+}
+
 // Watertight unit cube [0,1]^3 as 12 Tri3 elements with outward normals.
-// Nodes: n[0]=(0,0,0) n[1]=(1,0,0) n[2]=(1,1,0) n[3]=(0,1,0)
-//        n[4]=(0,0,1) n[5]=(1,0,1) n[6]=(1,1,1) n[7]=(0,1,1)
 template <typename MeshClass = libMesh::ReplicatedMesh>
 std::unique_ptr<MeshClass>
 makeUnitCubeMesh(const Parallel::Communicator & comm)
@@ -39,28 +79,7 @@ makeUnitCubeMesh(const Parallel::Communicator & comm)
   mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(3);
 
-  libMesh::Node * n[8];
-  n[0] = mesh->add_point(Point(0, 0, 0));
-  n[1] = mesh->add_point(Point(1, 0, 0));
-  n[2] = mesh->add_point(Point(1, 1, 0));
-  n[3] = mesh->add_point(Point(0, 1, 0));
-  n[4] = mesh->add_point(Point(0, 0, 1));
-  n[5] = mesh->add_point(Point(1, 0, 1));
-  n[6] = mesh->add_point(Point(1, 1, 1));
-  n[7] = mesh->add_point(Point(0, 1, 1));
-
-  addTri(*mesh, n[0], n[2], n[1]); // bottom -z
-  addTri(*mesh, n[0], n[3], n[2]);
-  addTri(*mesh, n[4], n[5], n[6]); // top +z
-  addTri(*mesh, n[4], n[6], n[7]);
-  addTri(*mesh, n[0], n[1], n[5]); // front -y
-  addTri(*mesh, n[0], n[5], n[4]);
-  addTri(*mesh, n[2], n[3], n[7]); // back +y
-  addTri(*mesh, n[2], n[7], n[6]);
-  addTri(*mesh, n[0], n[4], n[7]); // left -x
-  addTri(*mesh, n[0], n[7], n[3]);
-  addTri(*mesh, n[1], n[2], n[6]); // right +x
-  addTri(*mesh, n[1], n[6], n[5]);
+  addCube(*mesh, Point(0, 0, 0));
 
   mesh->prepare_for_use();
   return mesh;
@@ -81,27 +100,11 @@ makeOpenCubeMesh(const Parallel::Communicator & comm)
   mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(3);
 
-  libMesh::Node * n[8];
-  n[0] = mesh->add_point(Point(0, 0, 0));
-  n[1] = mesh->add_point(Point(1, 0, 0));
-  n[2] = mesh->add_point(Point(1, 1, 0));
-  n[3] = mesh->add_point(Point(0, 1, 0));
-  n[4] = mesh->add_point(Point(0, 0, 1));
-  n[5] = mesh->add_point(Point(1, 0, 1));
-  n[6] = mesh->add_point(Point(1, 1, 1));
-  n[7] = mesh->add_point(Point(0, 1, 1));
-
-  addTri(*mesh, n[0], n[2], n[1]); // bottom -z
-  addTri(*mesh, n[0], n[3], n[2]);
-  // top face omitted
-  addTri(*mesh, n[0], n[1], n[5]); // front -y
-  addTri(*mesh, n[0], n[5], n[4]);
-  addTri(*mesh, n[2], n[3], n[7]); // back +y
-  addTri(*mesh, n[2], n[7], n[6]);
-  addTri(*mesh, n[0], n[4], n[7]); // left -x
-  addTri(*mesh, n[0], n[7], n[3]);
-  addTri(*mesh, n[1], n[2], n[6]); // right +x
-  addTri(*mesh, n[1], n[6], n[5]);
+  const auto n = addCubeNodes(*mesh, Point(0, 0, 0));
+  // Skip the two +z (top) faces, cube_faces[2] and [3], leaving the surface open there.
+  for (const auto i : index_range(cube_faces))
+    if (i != 2 && i != 3)
+      addTri(*mesh, n[cube_faces[i][0]], n[cube_faces[i][1]], n[cube_faces[i][2]]);
 
   mesh->prepare_for_use();
   return mesh;
@@ -162,34 +165,6 @@ makeDegenerateMesh(const Parallel::Communicator & comm)
   return mesh;
 }
 
-// Add one outward-oriented unit cube (12 Tri3) at the given origin to an existing surface mesh.
-void
-addCubeAt(libMesh::MeshBase & mesh, const Point & o)
-{
-  libMesh::Node * n[8];
-  n[0] = mesh.add_point(o + Point(0, 0, 0));
-  n[1] = mesh.add_point(o + Point(1, 0, 0));
-  n[2] = mesh.add_point(o + Point(1, 1, 0));
-  n[3] = mesh.add_point(o + Point(0, 1, 0));
-  n[4] = mesh.add_point(o + Point(0, 0, 1));
-  n[5] = mesh.add_point(o + Point(1, 0, 1));
-  n[6] = mesh.add_point(o + Point(1, 1, 1));
-  n[7] = mesh.add_point(o + Point(0, 1, 1));
-
-  addTri(mesh, n[0], n[2], n[1]); // bottom -z
-  addTri(mesh, n[0], n[3], n[2]);
-  addTri(mesh, n[4], n[5], n[6]); // top +z
-  addTri(mesh, n[4], n[6], n[7]);
-  addTri(mesh, n[0], n[1], n[5]); // front -y
-  addTri(mesh, n[0], n[5], n[4]);
-  addTri(mesh, n[2], n[3], n[7]); // back +y
-  addTri(mesh, n[2], n[7], n[6]);
-  addTri(mesh, n[0], n[4], n[7]); // left -x
-  addTri(mesh, n[0], n[7], n[3]);
-  addTri(mesh, n[1], n[2], n[6]); // right +x
-  addTri(mesh, n[1], n[6], n[5]);
-}
-
 // Two disjoint unit cubes ([0,1]^3 and [2,3]x[0,1]x[0,1]). Each is a closed component, so the mesh
 // is a valid (disconnected) closed 2-manifold along which a +x ray can cross more than twice.
 std::unique_ptr<libMesh::ReplicatedMesh>
@@ -199,8 +174,8 @@ makeTwoCubesMesh(const Parallel::Communicator & comm)
   mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(3);
 
-  addCubeAt(*mesh, Point(0, 0, 0));
-  addCubeAt(*mesh, Point(2, 0, 0));
+  addCube(*mesh, Point(0, 0, 0));
+  addCube(*mesh, Point(2, 0, 0));
 
   mesh->prepare_for_use();
   return mesh;
