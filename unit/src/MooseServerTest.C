@@ -74,36 +74,21 @@ protected:
 
 registerMooseObject("MooseUnitApp", TestDistribution);
 
-// app that will be registered and then selected with Application/type test
-class AppTypeTestApp : public MooseApp
-{
-public:
-  static InputParameters validParams()
-  {
-    InputParameters params = MooseApp::validParams();
-    params.addClassDescription("App to be selected through Application/type test.");
-    return params;
-  }
-  AppTypeTestApp(const InputParameters & parameters) : MooseApp(parameters)
-  {
-    Registry::registerObjectsTo(_factory, {"AppTypeTestApp"});
-  }
-};
-
-// distribution registered only to AppTypeTestApp for Application/type test
+// object registered only to OtherMooseUnitApp for Application/type testing
 class AppTypeTestDistribution : public TestDistribution
 {
 public:
   static InputParameters validParams()
   {
     InputParameters params = TestDistribution::validParams();
-    params.addClassDescription("Distribution registered only with AppTypeTestApp.");
+    params.addClassDescription("Distribution registered only to OtherMooseUnitApp.");
+
     return params;
   }
   AppTypeTestDistribution(const InputParameters & parameters) : TestDistribution(parameters) {}
 };
 
-registerMooseObject("AppTypeTestApp", AppTypeTestDistribution);
+registerMooseObject("OtherMooseUnitApp", AppTypeTestDistribution);
 
 class MooseServerTest : public ::testing::Test
 {
@@ -522,7 +507,6 @@ protected:
   // create moose_unit_app, moose_server, and test_input_path for all tests
   static void SetUpTestCase()
   {
-    registerApp(AppTypeTestApp);
     moose_unit_app = Moose::createMooseApp("MooseUnitApp", 0, nullptr);
     moose_server = std::make_unique<MooseServer>(*moose_unit_app);
     test_input_path = std::filesystem::current_path().string() + "/test.i";
@@ -2790,7 +2774,7 @@ TEST_F(MooseServerTest, ApplicationTypeUtilization)
   int doc_version = 11;
   std::string doc_text_change = R"INPUT(
 [Application]
-  type = AppTypeTestApp
+  type = OtherMooseUnitApp
 []
 [Mesh]
   type = GeneratedMesh
@@ -2848,7 +2832,7 @@ TEST_F(MooseServerTest, ApplicationTypeUtilization)
   EXPECT_EQ(doc_uri, response_uri);
   format_diagnostics(diagnostics_array, diagnostics_list_actual);
 
-  // check for diagnostic as TestDistribution is unusable to AppTypeTestApp
+  // check for diagnostic as OtherMooseUnitApp cannot have TestDistribution
   std::size_t diagnostics_size_expect = 1;
   std::string diagnostics_list_expect = R"INPUT(
 line:0 column:0 - A 'TestDistribution' is not a registered object.
@@ -2861,12 +2845,12 @@ MOOSE_LIBRARY_PATH environment variable.
   EXPECT_EQ(diagnostics_list_expect, "\n" + diagnostics_list_actual.str());
 
   // check server used Application block type value as type of app it built
-  EXPECT_EQ("AppTypeTestApp", moose_server->getCheckApp().type());
-  EXPECT_EQ("AppTypeTestApp", moose_server->getCheckApp().parser().getAppType());
+  EXPECT_EQ("OtherMooseUnitApp", moose_server->getCheckApp().type());
+  EXPECT_EQ("OtherMooseUnitApp", moose_server->getCheckApp().parser().getAppType());
 
   // completion checking --------------------------------------------------
 
-  // check completion - Distribution block type from AppTypeTestApp factory
+  // check completion - Distribution block type choice in OtherMooseUnitApp
   // AppTypeTestDistribution but not TestDistribution is registered for app
   int request_id = 43;
   int request_line = 10;
@@ -2878,32 +2862,31 @@ label: AppTypeTestDistribution text: AppTypeTestDistribution desc: Distribution 
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check completion - Application block type selection of registered apps
-  // AppTypeTestApp, MooseUnitApp, and OtherMooseUnitApp are all registered
+  // MooseUnitApp and OtherMooseUnitApp are two available Application types
   request_id = 44;
   request_line = 2;
   request_char = 9;
-  expect_count = 3;
+  expect_count = 2;
   expect_items = R"INPUT(
-label: AppTypeTestApp    text: AppTypeTestApp    desc: App to be selecte... pos: [2.9]-[2.23] kind: 25 format: snippet
-label: MooseUnitApp      text: MooseUnitApp      desc:                      pos: [2.9]-[2.23] kind: 25 format: snippet
-label: OtherMooseUnitApp text: OtherMooseUnitApp desc:                      pos: [2.9]-[2.23] kind: 25 format: snippet
+label: MooseUnitApp      text: MooseUnitApp      desc: Main MooseUnitApp... pos: [2.9]-[2.26] kind: 25 format: snippet
+label: OtherMooseUnitApp text: OtherMooseUnitApp desc: OtherMooseUnitApp... pos: [2.9]-[2.26] kind: 25 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // hover text checking --------------------------------------------------
 
-  // check hover - on AppTypeTestApp exclusive AppTypeTestDistribution type
+  // check hover - on AppTypeTestDistribution type within OtherMooseUnitApp
   request_id = 45;
   request_line = 10;
   request_char = 11;
-  std::string expect_text = "Distribution registered only with AppTypeTestApp.";
+  std::string expect_text = "Distribution registered only to OtherMooseUnitApp.";
   check_hover(request_id, doc_uri, request_line, request_char, expect_text);
 
-  // check hover - on Application block type parameter AppTypeTestApp value
+  // check hover - on OtherMooseUnitApp type value within Application block
   request_id = 46;
   request_line = 2;
   request_char = 9;
-  expect_text = "App to be selected through Application/type test.";
+  expect_text = "OtherMooseUnitApp description for testing.";
   check_hover(request_id, doc_uri, request_line, request_char, expect_text);
 
   // definition checking --------------------------------------------------
@@ -2934,7 +2917,7 @@ label: OtherMooseUnitApp text: OtherMooseUnitApp desc:                      pos:
   // check for location of AppTypeTestDistribution register in current file
   std::size_t definition_size_expect = 1;
   std::string definition_list_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [105.0]    location_end: [105.1000]
+document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [90.0]    location_end: [90.1000]
 )INPUT";
   EXPECT_EQ(definition_size_expect, definition_array.size());
   EXPECT_EQ(definition_list_expect, "\n" + definition_list_actual.str());
@@ -3014,7 +2997,7 @@ document_uri: "file://...absolute.../unit/test.i"    location_start: [27.15]    
   // check for diagnostic as Application block type BadApp is not available
   diagnostics_size_expect = 1;
   diagnostics_list_expect = R"INPUT(
-line:2 column:9 - 'BadApp' is not a registered application type. Registered application types are [AppTypeTestApp, MooseUnitApp, OtherMooseUnitApp].
+line:2 column:9 - 'BadApp' is not a registered application type. Registered application types are [MooseUnitApp, OtherMooseUnitApp].
 )INPUT";
   EXPECT_EQ(diagnostics_size_expect, diagnostics_array.size());
   EXPECT_EQ(diagnostics_list_expect, "\n" + diagnostics_list_actual.str());
