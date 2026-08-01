@@ -13,7 +13,6 @@
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
-#include "LinearFVAnisotropicDiffusion.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>

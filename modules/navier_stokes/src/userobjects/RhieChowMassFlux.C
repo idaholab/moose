@@ -19,6 +19,7 @@
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
+#include "LinearFVPressureFluxBC.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -42,8 +43,9 @@ RhieChowMassFlux::validParams()
   params.addRequiredParam<VariableName>("u", "The x-component of velocity");
   params.addParam<VariableName>("v", "The y-component of velocity");
   params.addParam<VariableName>("w", "The z-component of velocity");
-  params.addRequiredParam<std::string>("p_diffusion_kernel",
-                                       "The diffusion kernel acting on the pressure.");
+  params.addRequiredParam<std::string>(
+      "p_diffusion_kernel",
+      "The LinearFVPressureCorrectionDiffusion kernel acting on the pressure.");
 
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
 
@@ -165,7 +167,8 @@ RhieChowMassFlux::initialSetup()
   _p_diffusion_kernel = dynamic_cast<LinearFVPressureCorrectionDiffusion *>(flux_kernel[0]);
   if (!_p_diffusion_kernel)
     paramError("p_diffusion_kernel",
-               "The provided diffusion kernel should of type LinearFVAnisotropicDiffusion!");
+               "The provided diffusion kernel must be of type "
+               "LinearFVPressureCorrectionDiffusion.");
 }
 
 void
