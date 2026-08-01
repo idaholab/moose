@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMElementSubdomainModifierBase.h"
-#include "MooseUtils.h"
 
 InputParameters
 SBMElementSubdomainModifierBase::validParams()
@@ -45,15 +44,4 @@ SBMElementSubdomainModifierBase::SBMElementSubdomainModifierBase(const InputPara
   if (_mark_intercepted && _subdomain_id_intercepted == Moose::INVALID_BLOCK_ID)
     paramError("subdomain_id_intercepted",
                "This parameter must be specified when 'mark_intercepted' is true.");
-}
-
-bool
-SBMElementSubdomainModifierBase::isInactive(const Real active_fraction, const Real lambda)
-{
-  if (MooseUtils::absoluteFuzzyEqual(lambda, 0))
-    return true;
-  if (MooseUtils::absoluteFuzzyEqual(lambda, 1))
-    return false;
-
-  return MooseUtils::absoluteFuzzyGreaterThan(1.0 - active_fraction, lambda);
 }

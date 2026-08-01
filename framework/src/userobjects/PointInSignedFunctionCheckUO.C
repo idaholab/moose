@@ -9,8 +9,7 @@
 
 #include "PointInSignedFunctionCheckUO.h"
 #include "Function.h"
-
-#include <cmath>
+#include "SurfaceSide.h"
 
 registerMooseObject("MooseApp", PointInSignedFunctionCheckUO);
 
@@ -49,14 +48,5 @@ PointInSignedFunctionCheckUO::PointInSignedFunctionCheckUO(const InputParameters
 SurfaceSide
 PointInSignedFunctionCheckUO::sideness(const Point & p) const
 {
-  // Normalize so that negative always denotes the interior.
-  Real phi = _func.value(_t, p);
-  if (!_inside_is_negative)
-    phi = -phi;
-
-  if (phi < -_tolerance)
-    return SurfaceSide::INSIDE;
-  if (std::abs(phi) <= _tolerance)
-    return SurfaceSide::ON;
-  return SurfaceSide::OUTSIDE;
+  return signedValueSideness(_func.value(_t, p), _tolerance, _inside_is_negative);
 }

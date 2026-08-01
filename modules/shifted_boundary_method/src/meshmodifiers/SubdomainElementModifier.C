@@ -101,5 +101,6 @@ SubdomainElementModifier::computeSubdomainID()
   if (_mark_intercepted)
     return _subdomain_id_intercepted;
 
-  return isInactive(max_ratio, _lambda) ? Moose::INVALID_BLOCK_ID : *best_intercepted_subdomain;
+  return SBMUtils::isInactive(max_ratio, _lambda) ? Moose::INVALID_BLOCK_ID
+                                                  : *best_intercepted_subdomain;
 }

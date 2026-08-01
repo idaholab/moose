@@ -88,20 +88,10 @@ InterceptedElementModifier::computeSubdomainID()
                                     const bool all_nodes_inactive,
                                     const Real ratio_active) -> SubdomainID
   {
-    // Same-side nodes do not rule out a surface crossing the element or enclosing a region
-    // within it. Quadrature sampling detects most such cases, but may miss very small regions.
-    // Exact endpoint comparisons are intentional: activeElementFraction returns exactly zero
-    // or one when no or all quadrature points are active, respectively.
-    if (all_nodes_active && ratio_active == 1.0)
-      return _subdomain_id_inside;
-
-    if (all_nodes_inactive && ratio_active == 0.0)
-      return _subdomain_id_outside;
-
-    if (_mark_intercepted)
-      return _subdomain_id_intercepted;
-
-    return isInactive(ratio_active, _lambda) ? _subdomain_id_outside : _subdomain_id_inside;
+    const SBMUtils::ElementActivity activity{all_nodes_active, all_nodes_inactive, ratio_active};
+    const SBMUtils::ClassificationSubdomains subdomains{
+        _subdomain_id_inside, _subdomain_id_outside, _subdomain_id_intercepted};
+    return SBMUtils::classifyPartialElement(activity, subdomains, _mark_intercepted, _lambda);
   };
 
   switch (_in_out_test_type)

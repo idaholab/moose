@@ -22,14 +22,6 @@ public:
   SBMElementSubdomainModifierBase(const InputParameters & parameters);
 
 protected:
-  /**
-   * Return whether a partial element is inactive, i.e. its inactive fraction exceeds lambda.
-   *
-   * The endpoint handling preserves the convention that lambda zero rejects and lambda one
-   * accepts a partially active element.
-   */
-  static bool isInactive(Real active_fraction, Real lambda);
-
   /// Threshold applied to the inactive fraction of a partially active element
   const Real _lambda;
 

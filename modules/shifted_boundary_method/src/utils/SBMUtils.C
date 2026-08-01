@@ -9,6 +9,7 @@
 
 #include "SBMUtils.h"
 #include "Function.h"
+#include "MooseUtils.h"
 #include "FunctionInterface.h"
 #include "MooseParsedFunction.h"
 #include "UnsignedDistanceToSurfaceMesh.h"
@@ -44,6 +45,39 @@ activeElementFraction(const Elem & elem,
   }
 
   return active_measure / total_measure;
+}
+
+bool
+isInactive(const Real active_fraction, const Real lambda)
+{
+  if (MooseUtils::absoluteFuzzyEqual(lambda, 0))
+    return true;
+  if (MooseUtils::absoluteFuzzyEqual(lambda, 1))
+    return false;
+
+  return MooseUtils::absoluteFuzzyGreaterThan(1.0 - active_fraction, lambda);
+}
+
+SubdomainID
+classifyPartialElement(const ElementActivity & activity,
+                       const ClassificationSubdomains & subdomains,
+                       const bool mark_intercepted,
+                       const Real lambda)
+{
+  // Same-side nodes do not rule out a surface crossing the element or enclosing a region
+  // within it. Quadrature sampling detects most such cases, but may miss very small regions.
+  // Exact endpoint comparisons are intentional: activeElementFraction returns exactly zero
+  // or one when no or all quadrature points are active, respectively.
+  if (activity.all_nodes_active && activity.active_fraction == 1.0)
+    return subdomains.inside;
+
+  if (activity.all_nodes_inactive && activity.active_fraction == 0.0)
+    return subdomains.outside;
+
+  if (mark_intercepted)
+    return subdomains.intercepted;
+
+  return isInactive(activity.active_fraction, lambda) ? subdomains.outside : subdomains.inside;
 }
 
 bool

@@ -9,6 +9,7 @@
 
 #include "PointInUnionCheckUO.h"
 #include "UserObjectBase.h"
+#include "SurfaceSide.h"
 
 registerMooseObject("MooseApp", PointInUnionCheckUO);
 
@@ -57,19 +58,16 @@ PointInUnionCheckUO::PointInUnionCheckUO(const InputParameters & parameters)
 SurfaceSide
 PointInUnionCheckUO::sideness(const Point & p) const
 {
-  // Precedence: INSIDE beats ON beats OUTSIDE.
-  bool any_on = false;
+  // Fold the provider queries incrementally and stop at the first provider that
+  // reports INSIDE (the maximal union result). This avoids the remaining, possibly
+  // expensive (e.g. mesh ray-casting) provider queries once membership is decided.
+  SurfaceSide result = SurfaceSide::OUTSIDE;
   for (const auto * provider : _providers)
-    switch (provider->sideness(p))
-    {
-      case SurfaceSide::INSIDE:
-        return SurfaceSide::INSIDE;
-      case SurfaceSide::ON:
-        any_on = true;
-        break;
-      case SurfaceSide::OUTSIDE:
-        break;
-    }
+  {
+    result = unionSideness(result, provider->sideness(p));
+    if (result == SurfaceSide::INSIDE)
+      return result;
+  }
 
-  return any_on ? SurfaceSide::ON : SurfaceSide::OUTSIDE;
+  return result;
 }

@@ -9,8 +9,10 @@
 
 #include "gtest/gtest.h"
 #include "SurfaceEdge2.h"
+#include "SurfaceTri3.h"
 #include "MooseMesh.h"
 #include "libmesh/edge_edge2.h"
+#include "libmesh/face_tri3.h"
 #include "AdaptiveRayContainmentCheck.h"
 
 using namespace libMesh;
@@ -127,6 +129,103 @@ buildClosedPolygon(const std::vector<Point> & vertices,
     edges.push_back(std::move(edge));
   }
 }
+
+/// Build a closed axis-aligned box [lo, hi] as 12 outward-oriented TRI3 SurfaceElements (two per
+/// face), keeping the backing nodes/tris alive in the provided owners and appending each triangle
+/// centroid. The winding matches the outward-normal convention used elsewhere for closed surfaces.
+void
+buildTriBox(const Point & lo,
+            const Point & hi,
+            std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
+            std::vector<Point> & centroids,
+            std::vector<std::unique_ptr<Node>> & nodes,
+            std::vector<std::unique_ptr<Tri3>> & tris)
+{
+  const std::array<Point, 8> corners = {Point(lo(0), lo(1), lo(2)),
+                                        Point(hi(0), lo(1), lo(2)),
+                                        Point(hi(0), hi(1), lo(2)),
+                                        Point(lo(0), hi(1), lo(2)),
+                                        Point(lo(0), lo(1), hi(2)),
+                                        Point(hi(0), lo(1), hi(2)),
+                                        Point(hi(0), hi(1), hi(2)),
+                                        Point(lo(0), hi(1), hi(2))};
+
+  const std::size_t base = nodes.size();
+  for (const auto i : index_range(corners))
+    nodes.push_back(std::make_unique<Node>(corners[i], static_cast<dof_id_type>(base + i)));
+
+  const auto add_tri = [&](const std::size_t a, const std::size_t b, const std::size_t c)
+  {
+    auto tri = std::make_unique<Tri3>();
+    tri->set_node(0, nodes[base + a].get());
+    tri->set_node(1, nodes[base + b].get());
+    tri->set_node(2, nodes[base + c].get());
+    centroids.push_back(
+        (Point(*nodes[base + a]) + Point(*nodes[base + b]) + Point(*nodes[base + c])) / 3.0);
+    bd_elements.emplace_back(std::make_unique<SurfaceTri3>(tri.get()));
+    tris.push_back(std::move(tri));
+  };
+
+  add_tri(0, 2, 1); // bottom -z
+  add_tri(0, 3, 2);
+  add_tri(4, 5, 6); // top +z
+  add_tri(4, 6, 7);
+  add_tri(0, 1, 5); // front -y
+  add_tri(0, 5, 4);
+  add_tri(2, 3, 7); // back +y
+  add_tri(2, 7, 6);
+  add_tri(0, 4, 7); // left -x
+  add_tri(0, 7, 3);
+  add_tri(1, 2, 6); // right +x
+  add_tri(1, 6, 5);
+}
+}
+
+TEST(AdaptiveRayContainmentCheck, UnitCube3DUserRay)
+{
+  // 3D TRI3 closed surface, user-selected +x ray. Exercises the 3D ray-triangle crossing path that
+  // the 2D EDGE2 tests never reach.
+  std::vector<std::unique_ptr<SurfaceElement>> bd_elements;
+  std::vector<Point> centroids;
+  std::vector<std::unique_ptr<Node>> nodes;
+  std::vector<std::unique_ptr<Tri3>> tris;
+  buildTriBox(Point(0, 0, 0), Point(1, 1, 1), bd_elements, centroids, nodes, tris);
+
+  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  AdaptiveRayContainmentCheck check(bd_elements, centroids, ray_opts);
+
+  // z != y keeps the +x ray off the y == z face diagonal (a mesh-triangulation artifact a single
+  // fixed user ray would otherwise graze), so these are clean interior/exterior crossings.
+  EXPECT_EQ(check.sideness(Point(0.5, 0.5, 0.3)), SurfaceSide::INSIDE);
+  EXPECT_EQ(check.sideness(Point(1.5, 0.5, 0.3)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(check.sideness(Point(-0.5, 0.5, 0.3)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(check.sideness(Point(1.0, 0.5, 0.3)), SurfaceSide::ON); // on the +x face
+
+  // The resolved ray direction is the normalized user direction.
+  EXPECT_NEAR(check.rayDirection()(0), 1.0, 1e-12);
+  EXPECT_NEAR(check.rayDirection()(1), 0.0, 1e-12);
+  EXPECT_NEAR(check.rayDirection()(2), 0.0, 1e-12);
+}
+
+TEST(AdaptiveRayContainmentCheck, Box3DPcaRay)
+{
+  // Non-cubic 3D box so PCA has a well-defined maximum-variance axis; exercises the auto (PCA)
+  // direction selection and OBB path in 3D.
+  std::vector<std::unique_ptr<SurfaceElement>> bd_elements;
+  std::vector<Point> centroids;
+  std::vector<std::unique_ptr<Node>> nodes;
+  std::vector<std::unique_ptr<Tri3>> tris;
+  buildTriBox(Point(0, 0, 0), Point(4, 1, 1), bd_elements, centroids, nodes, tris);
+
+  const RayDirectionOptions ray_opts{RayDirectionMode::AUTO_PCA, Point()};
+  AdaptiveRayContainmentCheck check(bd_elements, centroids, ray_opts);
+
+  EXPECT_EQ(check.sideness(Point(2.0, 0.5, 0.5)), SurfaceSide::INSIDE);
+  EXPECT_EQ(check.sideness(Point(5.0, 0.5, 0.5)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(check.sideness(Point(-1.0, 0.5, 0.5)), SurfaceSide::OUTSIDE);
+
+  // The auto path resolves to a unit shooting direction.
+  EXPECT_NEAR(check.rayDirection().norm(), 1.0, 1e-12);
 }
 
 TEST(AdaptiveRayContainmentCheck, SymmetricLDiagonalVertexHits)
@@ -296,7 +395,7 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
 
   {
     AdaptiveRayContainmentCheck test_libmesh_eps(bd_elements, std::vector<Point>(), ray_opts);
-    EXPECT_TRUE(test_libmesh_eps.sideness(edge_point) == SurfaceSide::ON);
+    EXPECT_EQ(test_libmesh_eps.sideness(edge_point), SurfaceSide::ON);
   }
 
   {
@@ -304,7 +403,7 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
     AdaptiveRayContainmentCheck test_small_eps(
         bd_elements, std::vector<Point>(), ray_opts, small_eps);
     // Expect it is NOT considered ON due to small epsilon
-    EXPECT_TRUE(test_small_eps.sideness(edge_point) != SurfaceSide::ON);
+    EXPECT_NE(test_small_eps.sideness(edge_point), SurfaceSide::ON);
   }
 
   {
@@ -312,14 +411,14 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
     AdaptiveRayContainmentCheck test_large_eps(
         bd_elements, std::vector<Point>(), ray_opts, large_eps);
     // Expect it IS considered ON due to larger epsilon
-    EXPECT_TRUE(test_large_eps.sideness(edge_point) == SurfaceSide::ON);
+    EXPECT_EQ(test_large_eps.sideness(edge_point), SurfaceSide::ON);
   }
 
   Point edge_point2(1 + 1e-5, 0.5, 0.0);
 
   {
     AdaptiveRayContainmentCheck test_libmesh_eps(bd_elements, std::vector<Point>(), ray_opts);
-    EXPECT_TRUE(test_libmesh_eps.sideness(edge_point2) != SurfaceSide::ON);
+    EXPECT_NE(test_libmesh_eps.sideness(edge_point2), SurfaceSide::ON);
   }
 
   {
@@ -327,7 +426,7 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
     AdaptiveRayContainmentCheck test_small_eps(
         bd_elements, std::vector<Point>(), ray_opts, small_eps);
     // Expect it is NOT considered ON due to small epsilon
-    EXPECT_TRUE(test_small_eps.sideness(edge_point2) != SurfaceSide::ON);
+    EXPECT_NE(test_small_eps.sideness(edge_point2), SurfaceSide::ON);
   }
 
   {
@@ -335,7 +434,7 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
     AdaptiveRayContainmentCheck test_large_eps(
         bd_elements, std::vector<Point>(), ray_opts, large_eps);
     // Expect it IS considered ON due to larger epsilon
-    EXPECT_TRUE(test_large_eps.sideness(edge_point2) == SurfaceSide::ON);
+    EXPECT_EQ(test_large_eps.sideness(edge_point2), SurfaceSide::ON);
   }
 }
 

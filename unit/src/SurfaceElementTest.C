@@ -272,7 +272,12 @@ TEST(SurfaceElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
   EXPECT_FALSE(tri_base.intersect(missing));
 
   const Ball tri_ball = tri_base.computeBoundingBall();
-  EXPECT_GT(tri_ball.radius(), 0.0);
+  // Centroid-centered ball: center = (p0 + p1 + p2) / 3, radius = max vertex distance. For the
+  // right triangle (0,0,0)/(1,0,0)/(0,1,0) that is center (1/3, 1/3, 0) and radius sqrt(5)/3.
+  EXPECT_NEAR(tri_ball.center()(0), 1.0 / 3.0, 1e-12);
+  EXPECT_NEAR(tri_ball.center()(1), 1.0 / 3.0, 1e-12);
+  EXPECT_NEAR(tri_ball.center()(2), 0.0, 1e-12);
+  EXPECT_NEAR(tri_ball.radius(), std::sqrt(5.0) / 3.0, 1e-12);
 }
 
 TEST(SurfaceElementTest, UnsupportedGeometryDispatchersThrow)

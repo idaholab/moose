@@ -76,6 +76,10 @@ TEST(SBMSurfaceDistanceTest, Edge2TiltedDirection)
   // Distance vector should point along the normal direction.
   const double dot = dist(0) * n(0) + dist(1) * n(1);
   EXPECT_GT(dot, 0.0);
+  // The nearest point on the edge to (0.5, 0, 0) is its projection (0.25, 0.25, 0), so the
+  // distance vector has magnitude 0.25 * sqrt(2). Pinning the magnitude guards against a
+  // right-direction-but-wrong-length result.
+  EXPECT_NEAR(dist.norm(), 0.25 * std::sqrt(2.0), 1e-12);
 }
 
 TEST(SBMSurfaceDistanceTest, Tri3NormalProjection)

@@ -32,6 +32,46 @@ Real activeElementFraction(const Elem & elem,
                            Order qrule_order,
                            const std::function<bool(const libMesh::Point &)> & is_active);
 
+/// Return whether a partial element is inactive, i.e. its inactive fraction exceeds lambda.
+///
+/// The endpoint handling preserves the convention that lambda zero rejects and lambda one
+/// accepts a partially active element.
+bool isInactive(Real active_fraction, Real lambda);
+
+/// Measured activity state of a (possibly partial) element, used to classify it. All fields are
+/// raw measurements: the two node flags come from a nodal test and active_fraction from a
+/// quadrature test. They are complementary (neither implies the other): the node flags catch a
+/// surface that clips only a corner (fraction near one), and the fraction catches a surface
+/// enclosed in the interior (all nodes on one side).
+struct ElementActivity
+{
+  /// Whether all of the element's nodes are on the active (retained) side.
+  bool all_nodes_active;
+  /// Whether all of the element's nodes are on the inactive (removed) side.
+  bool all_nodes_inactive;
+  /// Fraction of the element's quadrature-weighted measure that is active, in [0, 1].
+  Real active_fraction;
+};
+
+/// The subdomain IDs a (possibly partial) element can be labeled with.
+struct ClassificationSubdomains
+{
+  SubdomainID inside;
+  SubdomainID outside;
+  SubdomainID intercepted;
+};
+
+/// Classify a (possibly partial) element into an inside/outside/intercepted subdomain.
+///
+/// An element with all nodes active and a fully active measure is inside; one with all nodes
+/// inactive and a fully inactive measure is outside. A remaining (partial) element is assigned
+/// the intercepted subdomain when mark_intercepted is true, and otherwise is resolved by the
+/// lambda threshold (see isInactive).
+SubdomainID classifyPartialElement(const ElementActivity & activity,
+                                   const ClassificationSubdomains & subdomains,
+                                   bool mark_intercepted,
+                                   Real lambda);
+
 /// Build a list of distance functions based on names specified in input.
 std::vector<const Function *>
 buildDistanceFunctions(const std::vector<FunctionName> & function_names,
