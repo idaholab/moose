@@ -50,6 +50,7 @@
   [key_sync]
     type = RunCommand
     command = 'python3 check_citation_keys.py'
+    min_slots = 2 # memory heavy
     requirement = "The system shall ensure that every citation key registered in source code is "
                   "defined in a documentation BibTeX file."
   []
