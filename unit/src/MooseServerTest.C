@@ -1215,7 +1215,7 @@ label: uniform_refine                         text: uniform_refine = ${1:0}     
 label: up_direction                           text: up_direction =                                      desc: Specify what axis... pos: [6.0]-[6.0] kind: 13 format: regular
 label: use_displaced_mesh                     text: use_displaced_mesh = ${1:true}                      desc: Create the displa... pos: [6.0]-[6.0] kind:  8 format: snippet
 label: use_split                              text: use_split = ${1:false}                              desc: Use split distrib... pos: [6.0]-[6.0] kind:  8 format: snippet
-label: *                                      text: [block_name]\n  type = $1\n  $0\n[]                 desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
+label: *                                      text: [${1:block_name}]\n  type = $2\n  $0\n[]            desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
 label: Partitioner                            text: [Partitioner]\n  type = $1\n  $0\n[]                desc: application named... pos: [6.0]-[6.0] kind: 22 format: snippet
 )INPUT";
 
@@ -1578,10 +1578,10 @@ TEST_F(MooseServerTest, CompletionPartialInputCases)
   int request_char = 6;
   std::size_t expect_count = 4;
   std::string expect_items = R"INPUT(
-label: ghosted_boundaries           text: ghosted_boundaries =            desc: Boundaries to be ... pos: [3.2]-[3.6] kind: 14 format: regular
-label: ghosted_boundaries_inflation text: ghosted_boundaries_inflation =  desc: If you are using ... pos: [3.2]-[3.6] kind: 14 format: regular
-label: ghosting_patch_size          text: ghosting_patch_size =           desc: The number of nea... pos: [3.2]-[3.6] kind: 14 format: regular
-label: *                            text: [ghos]\n  type = $1\n  $0\n[]   desc: custom user named... pos: [3.2]-[3.6] kind:  6 format: snippet
+label: ghosted_boundaries           text: ghosted_boundaries =               desc: Boundaries to be ... pos: [3.2]-[3.6] kind: 14 format: regular
+label: ghosted_boundaries_inflation text: ghosted_boundaries_inflation =     desc: If you are using ... pos: [3.2]-[3.6] kind: 14 format: regular
+label: ghosting_patch_size          text: ghosting_patch_size =              desc: The number of nea... pos: [3.2]-[3.6] kind: 14 format: regular
+label: *                            text: [${1:ghos}]\n  type = $2\n  $0\n[] desc: custom user named... pos: [3.2]-[3.6] kind:  6 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
