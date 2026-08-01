@@ -187,7 +187,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             find ${MFEM_DIR}/lib -name "libmfem*-$method*" -delete -print
         fi
         # neml2
-        if [ -n "$NEML2_DIR" ]; then
+        if [ -n "${NEML2_DIR:-}" ]; then
             if [ "$method" == "devel" ]; then
                 suffix="RelWithDebInfo"
             elif [ "$method" == "dbg" ]; then
