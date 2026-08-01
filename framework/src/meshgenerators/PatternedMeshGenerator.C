@@ -293,7 +293,10 @@ PatternedMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(
           *_row_meshes[0], stitch_bids[side], input_bids_unique[0][side]);
 
-  _row_meshes[0]->unset_is_prepared();
+  // This should become redundant once libMesh calls it properly from
+  // change_boundary_id()
+  _row_meshes[0]->unset_has_boundary_id_sets();
+
   return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);
 }
 

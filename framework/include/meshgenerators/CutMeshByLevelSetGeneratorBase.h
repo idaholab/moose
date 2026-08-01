@@ -94,11 +94,13 @@ protected:
    * @param new_on_plane_nodes A vector to record the pointers to the newly created nodes on the
    * cutting plane
    * @param new_point The position of the potential new node
+   * @param new_pid The processor id of the new node, if a new node is created
    * @return a pointer to the existing node or the newly created node
    */
   const Node * nonDuplicateNodeCreator(ReplicatedMesh & mesh,
                                        std::vector<const Node *> & new_on_plane_nodes,
-                                       const Point & new_point) const;
+                                       const Point & new_point,
+                                       processor_id_type new_pid) const;
 
   /**
    * Evaluate the level set function at a given point.

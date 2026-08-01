@@ -142,9 +142,14 @@ ElementGenerator::generate()
     for (const auto i_side : make_range(elem->n_sides()))
       mesh->get_boundary_info().add_side(elem.get(), i_side, i_side);
 
+  // We won't force a repartition for this
+  elem->processor_id() = 0;
+
   mesh->add_elem(std::move(elem));
-  // We just added an element
-  mesh->unset_is_prepared();
+
+  // But some other derived data may need recalculation
+  mesh->clear_point_locator();
+  mesh->unset_has_cached_elem_data();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

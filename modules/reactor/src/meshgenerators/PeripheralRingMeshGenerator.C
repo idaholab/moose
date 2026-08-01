@@ -482,7 +482,18 @@ PeripheralRingMeshGenerator::generate()
         _external_boundary_name;
   }
 
-  _input->unset_is_prepared();
+  // Our new mesh is still unprepared in nearly every way, but we're
+  // building Replicated so id counts are in sync and geometric
+  // ghosting work is irrelevant (we'll still reinit ghosting functors
+  // in case there's something fancy going on with algebraic
+  // ghosting), and we're not extending any NodeElem into edges so
+  // there are no new interior parent pointers to create.
+  _input->unset_has_neighbor_ptrs();
+  _input->unset_has_cached_elem_data();
+  _input->unset_has_reinit_ghosting_functors();
+  _input->unset_has_boundary_id_sets();
+  _input->clear_point_locator();
+
   return dynamic_pointer_cast<MeshBase>(_input);
 }
 

@@ -129,7 +129,7 @@ ParsedGenerateNodeset::generate()
   }
   boundary_info.nodeset_name(nodeset_ids[0]) = _nodeset_names[0];
 
-  // TODO: consider if a new nodeset actually impacts preparedness
-  mesh->unset_is_prepared();
+  // The BoundaryInfo will need to get the new id into caches
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

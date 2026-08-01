@@ -151,6 +151,6 @@ SubdomainPerElementGenerator::generate()
     elem->subdomain_id() = newid;
   }
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_cached_elem_data();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

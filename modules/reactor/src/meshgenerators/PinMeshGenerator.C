@@ -692,9 +692,7 @@ PinMeshGenerator::generate()
         *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
   }
 
-  // Mark mesh as not prepared, as block IDs were re-assigned in this method
-  (*_build_mesh)->unset_is_prepared();
-
+  // updateElementBlockNameId already marked mesh caches unprepared
   return std::move(*_build_mesh);
 }
 

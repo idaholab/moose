@@ -647,7 +647,9 @@ FlexiblePatternGenerator::generate()
     (*_build_mesh)->get_boundary_info().nodeset_name(_external_boundary_id) =
         _external_boundary_name;
   }
-  (*_build_mesh)->find_neighbors();
-  (*_build_mesh)->unset_is_prepared();
+
+  // Our utilities and subgenerators should already have marked the
+  // ways in which we're unprepared now.
+
   return std::move(*_build_mesh);
 }

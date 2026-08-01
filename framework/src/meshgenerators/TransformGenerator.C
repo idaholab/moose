@@ -117,7 +117,7 @@ TransformGenerator::generate()
       break;
   }
 
-  mesh->unset_is_prepared();
+  // MeshTools:: operations have already marked us as unprepared
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
