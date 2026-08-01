@@ -29,3 +29,9 @@ NavierStokesStressIPHDGPrescribedTractionBC::NavierStokesStressIPHDGPrescribedTr
         this, this, this, _mesh, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs()))
 {
 }
+
+ElementAndTraceScalarHDGAssemblyHelper &
+NavierStokesStressIPHDGPrescribedTractionBC::hdgHelper()
+{
+  return *_iphdg_helper;
+}

@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "IPHDGAssemblyHelper.h"
+#include "AdvectionHDGAssemblyHelper.h"
 
 /**
  * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
  * (IPDG-H), which is a type of HDG method, discretization of the advection equation. These routines
  * may be called by both HDG kernels and integrated boundary conditions.
  */
-class AdvectionIPHDGAssemblyHelper : public IPHDGAssemblyHelper
+class AdvectionIPHDGAssemblyHelper : public AdvectionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -30,52 +30,9 @@ public:
                                const std::set<SubdomainID> & block_ids,
                                const std::set<BoundaryID> & boundary_ids);
 
-  /**
-   * Computes a local residual vector for the weak form:
-   * (Dq, grad(w)) - (f, w)
-   * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
-   * a forcing function
-   */
-  virtual void scalarVolume() override;
-
-  /**
-   * Computes a local residual vector for the weak form:
-   * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
-   */
-  virtual void scalarFace() override;
-
-  /**
-   * Computes a local residual vector for the weak form:
-   * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
-   */
-  virtual void lmFace() override;
-
-  /**
-   * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
-   */
-  virtual void scalarDirichlet(const Moose::Functor<Real> & dirichlet_value) override;
-
-  /**
-   * prescribes an outflow condition
-   */
-  void lmOutflow();
-
 protected:
-  /**
-   * compute the face flux, e.g. the advected quantity times the velocity dotted with the normal
-   * @param qp The quadrature point index
-   * @param face_value The advected quantity evaluated right on the face, so either the trace
-   * unknown or a Dirichlet value
-   */
-  ADReal computeFlux(const unsigned int qp, const ADReal & face_value);
+  virtual ADRealVectorValue faceVelocity(unsigned int qp) const override;
 
-  /// The velocity in the element interior
-  const ADMaterialProperty<RealVectorValue> & _velocity;
-
-  /// The velocity on the element faces
+  /// Face evaluation of the H(div)-conforming cell velocity.
   const ADMaterialProperty<RealVectorValue> & _face_velocity;
-
-  /// The advected quantity value is this \p _coeff value multipled by the
-  /// variable/side_variable pair (for element upwind/downwind of the face respectively)
-  const Real _coeff;
 };
