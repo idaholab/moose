@@ -277,6 +277,8 @@
     capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu' # schemadiff with cuda
     max_parallel = 1 # schemadiff with multiple ranks
+    # diffs at 9e-4 with -march=x86-64-v3
+    rel_err = 2e-3
     recover = false
   []
   [MFEMGravityQuadratureFunction]
