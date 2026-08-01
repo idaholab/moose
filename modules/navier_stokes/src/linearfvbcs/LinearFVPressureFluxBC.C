@@ -19,8 +19,8 @@ LinearFVPressureFluxBC::validParams()
   params.addClassDescription(
       "Adds a fixed diffusive flux BC which can be used for the assembly of linear "
       "finite volume system and whose normal face gradient values are determined "
-      "using the H/A flux and a prescribed boundary velocity. This kernel is only designed "
-      "to work with advection-diffusion problems.");
+      "using the H/A flux and a prescribed boundary velocity. This boundary condition is only "
+      "designed to work with advection-diffusion problems.");
   params.addRequiredParam<MooseFunctorName>("HbyA_flux", "The total HbyA face flux value.");
   params.addRequiredParam<MooseFunctorName>(
       "Ainv", "The 1/A where A is the momentum system diagonal vector.");
@@ -71,7 +71,12 @@ LinearFVPressureFluxBC::computeRequiredPressureFlux() const
   if (_dim >= 3)
     boundary_velocity_dot_normal += (*_w)(face_arg, state) * normal(2);
 
-  required_pressure_flux += _rho(face_arg, state) * boundary_velocity_dot_normal;
+  // FaceInfo normals point from element to neighbor, so reverse the prescribed velocity flux when
+  // this boundary condition acts on the neighbor side of an internal face.
+  const Real boundary_normal_multiplier =
+      _current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0;
+  required_pressure_flux +=
+      _rho(face_arg, state) * boundary_normal_multiplier * boundary_velocity_dot_normal;
 
   return required_pressure_flux;
 }
@@ -89,7 +94,12 @@ LinearFVPressureFluxBC::computeBoundaryAinv() const
   for (const auto i : make_range(_dim))
     normal_ainv += normal(i) * normal(i) * face_ainv(i);
 
-  return std::max(normal_ainv, 1e-8);
+  if (normal_ainv <= 0.0)
+    mooseError("The boundary-normal Ainv coefficient must be positive, but its value is ",
+               normal_ainv,
+               ".");
+
+  return normal_ainv;
 }
 
 Real
