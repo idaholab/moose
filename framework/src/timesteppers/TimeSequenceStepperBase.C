@@ -45,10 +45,15 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
   if (_app.testCheckpointHalfTransient())
     _executioner.endTime() = _executioner.endTime() * 2.0 - _executioner.getStartTime();
 
+  // When restarting or recovering, we reload _time_sequence as restartable data
   if (_time_sequence.empty() || (!_app.isRestarting() && !_app.isRecovering()))
     updateSequence(times);
   else if (_app.isRecovering())
-    synchronizeCurrentStep(_time, _timestep_tolerance);
+    mooseAssert(_current_step < _time_sequence.size() &&
+                    _time_sequence[_current_step] - _time <= _timestep_tolerance &&
+                    (_current_step + 1 == _time_sequence.size() ||
+                     _time_sequence[_current_step + 1] - _time > _timestep_tolerance),
+                "The recovered current step must identify the last reached sequence time");
   else
   {
     if (!MooseUtils::absoluteFuzzyEqual(_executioner.getStartTime(), _time_sequence[0]))
