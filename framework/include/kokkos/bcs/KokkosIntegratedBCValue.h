@@ -22,9 +22,10 @@ namespace Moose::Kokkos
  *
  * i.e. the test function $(\psi_i)$ can be factored out for optimization.
  *
- * The user should still define computeQpResidual(), computeQpJacobian(), and
- * computeQpOffDiagJacobian(), but their signatures are different from the base class. The signature
- * of computeQpResidual() expected to be defined in the derived class is as follows:
+ * The user should now define precomputeQpResidual(), precomputeQpJacobian(), and
+ * precomputeQpOffDiagJacobian() which do not include the test function, instead of the original
+ * hooks. The signature of precomputeQpResidual() expected to be defined in the derived class is as
+ * follows:
  *
  * @tparam Derived The object type
  * @param qp The local quadrature point index
@@ -32,16 +33,19 @@ namespace Moose::Kokkos
  * @returns The component of the residual contribution that will be multiplied by the test function
  *
  * template <typename Derived>
- * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp,
- *                                        AssemblyDatum & datum) const;
+ * KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp,
+ *                                           AssemblyDatum & datum) const;
  *
- * The signature of computeQpJacobian() and computeQpOffDiagJacobian() can be found in the code
- * below.
+ * The signature of precomputeQpJacobian() and precomputeQpOffDiagJacobian() can be found in the
+ * code below.
  */
 class IntegratedBCValue : public IntegratedBC
 {
 public:
   static InputParameters validParams();
+
+  /// IntegratedBCValue hooks factor out the test function
+  static constexpr bool use_precompute_hooks = true;
 
   /**
    * Constructor
@@ -63,11 +67,11 @@ public:
    * function
    */
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* j */,
-                                         const unsigned int /* qp */,
-                                         AssemblyDatum & /* datum */) const
+  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int /* j */,
+                                            const unsigned int /* qp */,
+                                            AssemblyDatum & /* datum */) const
   {
-    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
+    ::Kokkos::abort("Default precomputeQpJacobian() should never be called. Make sure you properly "
                     "redefined this method in your class without typos.");
 
     return 0;
@@ -83,13 +87,13 @@ public:
    * test function
    */
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* j */,
-                                                const unsigned int /* jvar */,
-                                                const unsigned int /* qp */,
-                                                AssemblyDatum & /* datum */) const
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int /* j */,
+                                                   const unsigned int /* jvar */,
+                                                   const unsigned int /* qp */,
+                                                   AssemblyDatum & /* datum */) const
   {
     ::Kokkos::abort(
-        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
+        "Default precomputeQpOffDiagJacobian() should never be called. Make sure you properly "
         "redefined this method in your class without typos.");
 
     return 0;
@@ -105,12 +109,12 @@ public:
   template <typename Derived>
   static auto defaultJacobian()
   {
-    return &IntegratedBCValue::computeQpJacobian<Derived>;
+    return &IntegratedBCValue::precomputeQpJacobian<Derived>;
   }
   template <typename Derived>
   static auto defaultOffDiagJacobian()
   {
-    return &IntegratedBCValue::computeQpOffDiagJacobian<Derived>;
+    return &IntegratedBCValue::precomputeQpOffDiagJacobian<Derived>;
   }
   ///@}
 
@@ -139,7 +143,7 @@ IntegratedBCValue::computeResidualInternal(const Derived & bc, AssemblyDatum & d
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real value = datum.JxW(qp) * bc.template computeQpResidual<Derived>(qp, datum);
+          Real value = datum.JxW(qp) * bc.template precomputeQpResidual<Derived>(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _test(datum, i, qp);
@@ -157,7 +161,7 @@ IntegratedBCValue::computeJacobianInternal(const Derived & bc, AssemblyDatum & d
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real value = datum.JxW(qp) * bc.template computeQpJacobian<Derived>(j, qp, datum);
+          Real value = datum.JxW(qp) * bc.template precomputeQpJacobian<Derived>(j, qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_ke[i] += value * _test(datum, i, qp);
@@ -176,7 +180,7 @@ IntegratedBCValue::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDa
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
           Real value = datum.JxW(qp) *
-                       bc.template computeQpOffDiagJacobian<Derived>(j, datum.jvar(), qp, datum);
+                       bc.template precomputeQpOffDiagJacobian<Derived>(j, datum.jvar(), qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_ke[i] += value * _test(datum, i, qp);
