@@ -18,30 +18,22 @@
     design = 'RhieChowMassFlux.md'
   []
   [single-block]
-    type = RunApp
+    type = CSVDiff
     input = internal-neighbor.i
-    cli_args = "Mesh/blocks/dx='1' Mesh/blocks/ix='2' Mesh/blocks/subdomain_id='2' "
-               "Mesh/inactive='internal_inlet' "
-               "LinearFVBCs/prescribed-u/boundary='left top bottom' "
-               "LinearFVBCs/prescribed-v/boundary='left top bottom' "
-               "LinearFVBCs/pressure-flux/boundary='left top bottom' "
-               "Postprocessors/inlet-mass-flow/boundary='left' "
-               "Outputs/file_base=single-block"
+    cli_args = 'Outputs/file_base=pressure-flux-equivalence'
+    csvdiff = pressure-flux-equivalence.csv
+    abs_zero = 1e-10
     max_threads = 1
     requirement = "The system shall produce the reference pressure-flux solution on a single fluid block with an external inlet."
   []
   [multiblock]
-    type = RunApp
+    type = CSVDiff
     input = internal-neighbor.i
-    cli_args = 'Outputs/file_base=multiblock'
+    cli_args = "Mesh/inactive='delete_inlet_block' Outputs/file_base=pressure-flux-equivalence"
+    csvdiff = pressure-flux-equivalence.csv
+    abs_zero = 1e-10
+    prereq = single-block # Force ordering because both configurations produce the same CSV file.
     max_threads = 1
-    requirement = "The system shall produce a pressure-flux solution when the fluid cell is the neighbor of an internal inlet in a multiblock mesh."
-  []
-  [single-multiblock-equivalence]
-    type = RunApp
-    command = '../../../../../../../python/mooseutils/csvdiff.py single-block.csv multiblock.csv --relative-tolerance 1e-10 --abs-zero 1e-10'
-    prereq = 'single-block multiblock'
-    expect_out = 'Files are the same'
-    requirement = "The system shall produce equivalent pressure, velocity, and mass-flux results for single-block external and multiblock internal inlets."
+    requirement = "The system shall produce the same pressure, velocity, and mass-flux results when the fluid cell is the neighbor of an internal inlet in a multiblock mesh as for a single-block external inlet."
   []
 []

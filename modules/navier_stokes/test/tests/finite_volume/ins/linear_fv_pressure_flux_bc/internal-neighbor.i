@@ -1,11 +1,10 @@
-# Unit properties and speed give the exact constant plug-flow solution used by the error checks.
+# Unit properties and speed give the exact constant plug-flow solution used by the CSV comparisons.
 mu = 1
 rho = 1
 flow_block = 2
 inlet_speed = 1
 
 [Mesh]
-  parallel_type = replicated
   [blocks]
     type = CartesianMeshGenerator
     dim = 2
@@ -18,9 +17,14 @@ inlet_speed = 1
   [internal_inlet]
     type = SideSetsBetweenSubdomainsGenerator
     input = blocks
-    primary_block = 1
-    paired_block = ${flow_block}
+    primary_block = ${flow_block}
+    paired_block = 1
     new_boundary = internal_inlet
+  []
+  [delete_inlet_block]
+    type = BlockDeletionGenerator
+    input = internal_inlet
+    block = 1
   []
 []
 
