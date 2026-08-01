@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunApp import RunApp
+
 from TestHarness import util
 
 
@@ -22,6 +23,11 @@ class FileTester(RunApp):
             "gold_dir",
             "gold",
             'The directory where the "golden standard" files reside relative to the TEST_DIR: (default: ./gold/)',
+        )
+        params.addParam(
+            "output_dir",
+            "",
+            "The directory where test output files reside relative to the TEST_DIR: (default: ./)",
         )
         params.addParam(
             "abs_zero", 1e-10, "Absolute zero cutoff used in exo/csvdiff comparisons."
