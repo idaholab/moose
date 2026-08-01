@@ -1089,7 +1089,8 @@ public:
   /**
    * Query a parameter
    *
-   * If the parameter is not valid, nullptr will be returned
+   * If a parameter of the given name and type does not exist or if the
+   * parameter is not valid, nullptr will be returned
    *
    * @param name The name of the parameter
    * @return A pointer to the parameter value, if it exists
@@ -2309,7 +2310,7 @@ template <typename T>
 const T *
 InputParameters::queryParam(const std::string & name) const
 {
-  return isParamValid(name) ? &getParamHelper<T>(name, *this) : nullptr;
+  return have_parameter<T>(name) && isParamValid(name) ? &getParamHelper<T>(name, *this) : nullptr;
 }
 
 template <typename T>

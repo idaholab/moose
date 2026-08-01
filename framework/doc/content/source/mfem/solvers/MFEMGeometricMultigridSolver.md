@@ -16,6 +16,10 @@ using the requested [!param](/Solvers/MFEMGeometricMultigridSolver/assembly_leve
 This solver is intended for linear, single-variable equation systems. Nonlinear
 equation systems and mixed bilinear form contributions are not supported.
 
+## Example Input File Syntax
+
+!listing test/tests/mfem/solvers/pmg_diffusion.i block=Solvers
+
 !syntax parameters /Solvers/MFEMGeometricMultigridSolver
 
 !syntax inputs /Solvers/MFEMGeometricMultigridSolver

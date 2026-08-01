@@ -52,7 +52,6 @@ MFEMFESpaceHierarchy::buildHierarchy()
   const auto & base_fespace_object =
       getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace", fespace_name);
   _is_scalar = base_fespace_object.isScalar();
-  _is_vector = base_fespace_object.isVector();
 
   // Retrieve the base (coarsest) ParFiniteElementSpace from ProblemData.
   auto base_fespace = base_fespace_object.getFESpace();
