@@ -1,4 +1,4 @@
-# MFEMValueSamplerBase
+# MFEMVariableValueSamplerBase
 
 !if! function=hasCapability('mfem')
 
@@ -10,7 +10,7 @@ list of points or a line.
 
 ## Overview
 
-This class performs accurate interpolation using MFEM's `FindPointsGSLIB`
+This class performs interpolation using MFEM's `FindPointsGSLIB`
 `gslib` integration.
 
 !if-end!

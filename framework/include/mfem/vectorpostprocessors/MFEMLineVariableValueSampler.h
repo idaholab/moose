@@ -11,17 +11,18 @@
 
 #pragma once
 
-#include "MFEMValueSamplerBase.h"
+#include "MFEMVariableValueSamplerBase.h"
 
 /*
- * MFEM Postprocessor which samples values at points.
+ * MFEM Postprocessor which samples values at a set of points evenly
+ * distributed along a line.
  */
-class MFEMPointValueSampler : public MFEMValueSamplerBase
+class MFEMLineVariableValueSampler : public MFEMVariableValueSamplerBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMPointValueSampler(const InputParameters & parameters);
+  MFEMLineVariableValueSampler(const InputParameters & parameters);
 };
 
 #endif // MOOSE_MFEM_ENABLED

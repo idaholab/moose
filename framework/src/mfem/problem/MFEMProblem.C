@@ -22,6 +22,7 @@
 #include "MFEMNonlinearSolverBase.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
+#include "DataIO.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -68,7 +69,10 @@ MFEMProblem::validParams()
 }
 
 MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params), _num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))}
+  : ExternalProblem(params),
+    _num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))},
+    _solution_state_data(declareRestartableDataWithContext<Moose::MFEM::SolutionState>(
+        "mfem_solution_state", &_problem_data))
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
@@ -84,6 +88,15 @@ void
 MFEMProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
+
+  std::vector<MFEMExecutedObject *> objects;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("MFEMExecutedObject")
+      .condition<AttribThread>(0)
+      .queryInto(objects);
+  for (auto * const object : objects)
+    object->initialSetup();
 
   // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
   // setup pass because they are no longer initialized through the libMesh/MOOSE user-object path.
@@ -342,10 +355,25 @@ MFEMProblem::addFESpaceHierarchy(const std::string & type,
 }
 
 void
+MFEMProblem::validateVariableNumericType(const std::string & var_type,
+                                         const std::string & var_name) const
+{
+  const bool variable_is_complex = var_type == "MFEMComplexVariable";
+  const bool problem_is_complex = _num_type == NumericType::COMPLEX;
+  if (variable_is_complex != problem_is_complex)
+    paramError("numeric_type",
+               "The problem numeric type does not match primary MFEM variable '",
+               var_name,
+               "', which is ",
+               variable_is_complex ? "complex." : "real.");
+}
+
+void
 MFEMProblem::addVariable(const std::string & var_type,
                          const std::string & var_name,
                          InputParameters & parameters)
 {
+  validateVariableNumericType(var_type, var_name);
   addGridFunction(var_type, var_name, parameters);
   // MOOSE variables store DoFs for the trial variable and its time derivatives up to second order;
   // MFEM GridFunctions store data for only one set of DoFs each, so we must add additional

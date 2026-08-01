@@ -20,6 +20,11 @@
 
 #include <map>
 
+namespace Moose::MFEM
+{
+struct SolutionState;
+}
+
 class MFEMProblem : public ExternalProblem
 {
 public:
@@ -373,6 +378,12 @@ public:
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
 protected:
+  /**
+   * Verify that a primary variable's numeric type matches the problem's equation system.
+   */
+  void validateVariableNumericType(const std::string & var_type,
+                                   const std::string & var_name) const;
+
   struct MFEMSolverDefinition
   {
     std::string type;
@@ -397,6 +408,9 @@ protected:
    * declaring dependencies between solver objects.
    */
   std::map<std::string, MFEMSolverDefinition> _mfem_solver_definitions;
+
+  /// Restartable MFEM solution state associated with this problem.
+  Moose::MFEM::SolutionState & _solution_state_data;
 };
 
 template <typename T>

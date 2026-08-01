@@ -41,4 +41,24 @@
     max_parallel = 1 # idaholab/moose#32250
     min_slots = 2 # memory heavy
   []
+  [MFEMComplexVariableRequiresComplexNumericType]
+    type = RunException
+    input = complex.i
+    cli_args = 'Problem/numeric_type=real'
+    expect_err = "The problem numeric type does not match primary MFEM variable 'u', which is complex."
+    requirement = 'The system shall reject a complex-valued primary MFEM variable when the problem uses a real-valued equation system.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMRealVariableRequiresRealNumericType]
+    type = RunException
+    input = complex.i
+    cli_args = 'Variables/u/type=MFEMVariable'
+    expect_err = "The problem numeric type does not match primary MFEM variable 'u', which is real."
+    requirement = 'The system shall reject a real-valued primary MFEM variable when the problem uses a complex-valued equation system.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
 []
