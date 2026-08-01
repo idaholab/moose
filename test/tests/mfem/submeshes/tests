@@ -93,7 +93,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     valgrind = heavy
-    min_slots = 2 # memory heavy
+    min_slots = 3 # memory heavy
   []
   [MFEMVacuumCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
