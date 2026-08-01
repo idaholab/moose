@@ -1,0 +1,47 @@
+[Tests]
+  design = 'LinearFVPressureFluxBC.md'
+  issues = '#32719'
+
+  [nonpositive-ainv]
+    type = RunException
+    input = errors.i
+    cli_args = "LinearFVBCs/pressure_flux/v=0 FunctorMaterials/inverse_diagonal/prop_values='0 0 0'"
+    expect_err = 'The boundary-normal Ainv coefficient must be positive'
+    requirement = "The system shall reject a nonpositive boundary-normal inverse momentum diagonal in a pressure flux boundary condition."
+  []
+  [wrong-pressure-diffusion-type]
+    type = RunException
+    input = internal-neighbor.i
+    cli_args = 'LinearFVKernels/p_diffusion/type=LinearFVAnisotropicDiffusion'
+    expect_err = 'The provided diffusion kernel must be of type LinearFVPressureCorrectionDiffusion.'
+    requirement = "The system shall reject a generic anisotropic diffusion kernel when the Rhie-Chow mass-flux provider requires a pressure-correction diffusion kernel."
+    design = 'RhieChowMassFlux.md'
+  []
+  [single-block]
+    type = RunApp
+    input = internal-neighbor.i
+    cli_args = "Mesh/blocks/dx='1' Mesh/blocks/ix='2' Mesh/blocks/subdomain_id='2' "
+               "Mesh/inactive='internal_inlet' "
+               "LinearFVBCs/prescribed-u/boundary='left top bottom' "
+               "LinearFVBCs/prescribed-v/boundary='left top bottom' "
+               "LinearFVBCs/pressure-flux/boundary='left top bottom' "
+               "Postprocessors/inlet-mass-flow/boundary='left' "
+               "Outputs/file_base=single-block"
+    max_threads = 1
+    requirement = "The system shall produce the reference pressure-flux solution on a single fluid block with an external inlet."
+  []
+  [multiblock]
+    type = RunApp
+    input = internal-neighbor.i
+    cli_args = 'Outputs/file_base=multiblock'
+    max_threads = 1
+    requirement = "The system shall produce a pressure-flux solution when the fluid cell is the neighbor of an internal inlet in a multiblock mesh."
+  []
+  [single-multiblock-equivalence]
+    type = RunApp
+    command = '../../../../../../../python/mooseutils/csvdiff.py single-block.csv multiblock.csv --relative-tolerance 1e-10 --abs-zero 1e-10'
+    prereq = 'single-block multiblock'
+    expect_out = 'Files are the same'
+    requirement = "The system shall produce equivalent pressure, velocity, and mass-flux results for single-block external and multiblock internal inlets."
+  []
+[]

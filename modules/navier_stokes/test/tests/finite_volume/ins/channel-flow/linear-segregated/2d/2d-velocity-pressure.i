@@ -133,6 +133,16 @@ advected_interp_method = 'average'
     variable = pressure
     functor = 1.4
   []
+  [inlet_and_wall_pressure_flux]
+    type = LinearFVPressureFluxBC
+    boundary = 'left top bottom'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
+  []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = vel_x
