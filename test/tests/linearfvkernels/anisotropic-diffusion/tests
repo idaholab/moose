@@ -22,4 +22,14 @@
     requirement = 'The system shall display second-order convergence for anisotropic diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [anisotropic-neumann-rotated]
+    type = CSVDiff
+    input = anisotropic-diffusion-2d-neumann.i
+    csvdiff = anisotropic-diffusion-2d-neumann_out.csv
+    requirement = 'The system shall apply a prescribed anisotropic diffusive flux without adding extrapolated tangential-gradient contributions on rotated boundaries.'
+    design = 'LinearFVAnisotropicDiffusion.md'
+    issues = '#32719'
+    abs_zero = 1e-10
+    max_threads = 1
+  []
 []
