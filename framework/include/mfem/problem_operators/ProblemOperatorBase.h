@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "MFEMProblem.h"
 #include <functional>
 
+class MFEMProblem;
 namespace Moose::MFEM
 {
 
