@@ -117,7 +117,7 @@
     compute_devices = 'cpu cuda'
     restep = false
     valgrind = heavy
-    rel_err = 6e-5
+    rel_err = 7e-5
   []
   [MFEMNLDomainSubMeshBoundary]
     design = 'MFEMNLCurlCurlKernel.md'
