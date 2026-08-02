@@ -99,6 +99,26 @@ namespace Moose
 namespace PetscSupport
 {
 
+PetscOptionsScope::PetscOptionsScope(FEProblemBase & problem)
+  : _problem(problem), _pushed(false)
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_problem.getMooseApp().isUltimateMaster())
+  {
+    LibmeshPetscCallA(_problem.comm().get(), PetscOptionsPush(_problem.petscOptionsDatabase()));
+    _pushed = true;
+  }
+#endif
+}
+
+PetscOptionsScope::~PetscOptionsScope()
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (_pushed)
+    PetscCallAbort(_problem.comm().get(), PetscOptionsPop());
+#endif
+}
+
 namespace
 {
 
