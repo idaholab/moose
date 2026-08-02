@@ -30,12 +30,12 @@
   [c_integral_gaussian_serd]
     type = CSVDiff
     input = c_integral_gaussian_serd.i
-    cli_args = "DomainIntegral/inelastic_models='' DomainIntegral/use_existing_serd=true DomainIntegral/output_vpp=false Outputs/exodus=false Outputs/checkpoint=false Executioner/dt=0.005 Executioner/end_time=0.1 Executioner/num_steps=20"
+    cli_args = 'Materials/powerlawcrp/type=PowerLawCreepTest Materials/powerlawcrp/failure_step=1000000000 DomainIntegral/output_vpp=false Outputs/exodus=false Outputs/checkpoint=false Executioner/dt=0.005 Executioner/end_time=0.1 Executioner/num_steps=20'
     csvdiff = c_integral_gaussian_serd_out.csv
     rel_err = 1e-5
     allow_test_objects = true
     issues = '#30466'
-    requirement = 'The domain integral action shall use an existing strain energy rate density computed with fifth-order Gaussian quadrature.'
+    requirement = 'The domain integral action shall use a strain energy rate density computed with Gaussian quadrature.'
     capabilities = 'method!=dbg'
   []
   [c_integral_incremental_serd]

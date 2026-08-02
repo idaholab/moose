@@ -10,7 +10,9 @@ time rate of the strain energy density (see [`StrainEnergyDensity`](/StrainEnerg
   \label{eqn:sed_integral_def}
   \dot{u} = \int \boldsymbol{\sigma} : \textrm{d}\dot{\boldsymbol{\epsilon}}
 \end{equation}
-where $\boldsymbol{\sigma}$ is the stress tensor and $\dot{\boldsymbol{\epsilon}}$ is the strain rate. This expression is multiplied by $\frac{n}{n+1}$, where $n$ is the power law exponent of the material provided though the `inelastic_models` input parameter. This factor decreases the strain energy rate density to better capture the strain rate field around a crack under steady-state creep growth. This factor is primarily used to compute the C(t) integral, see [`FractureIntegrals`](/FractureIntegrals.md).
+where $\boldsymbol{\sigma}$ is the stress tensor and $\dot{\boldsymbol{\epsilon}}$ is the strain rate. The material supplied through `inelastic_models` evaluates this expression. For example, the power-law creep model uses its analytical solution. Creep models derived from `RadialReturnCreepStressUpdateBase` can instead implement the equivalent creep strain rate and use the base class Gaussian quadrature in effective-stress space; `serd_integration_order` selects the quadrature order.
+
+The strain energy rate density is primarily used to compute the C(t) integral, see [`FractureIntegrals`](/FractureIntegrals.md).
 
 The strain rate here is the sum of the elastic and inelastic (e.g. plastic, creep) strain rates.
 

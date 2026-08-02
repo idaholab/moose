@@ -1,12 +1,5 @@
 !include c_integral_2d.i
 
-[Materials]
-  [numerical_serd]
-    type = PowerLawNumericalStrainEnergyRateDensity
-    n_exponent = 2
-  []
-[]
-
 [Postprocessors]
   [serd]
     type = ElementAverageMaterialProperty
