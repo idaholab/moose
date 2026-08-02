@@ -18,6 +18,7 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
+#include "ProblemOperatorBase.h"
 
 #include <map>
 
@@ -182,18 +183,32 @@ public:
   /**
    * Add an MFEM WeakForm to the problem.
    */
-  void addWeakForm(const std::string & type, const std::string & name, InputParameters & parameters)
-  {
-    addObject<MFEMWeakForm>(type, name, parameters);
-  }
+  void
+  addWeakForm(const std::string & type, const std::string & name, InputParameters & parameters);
+
+  /// Returns a pointer to the operator's equation system.
+  virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
+
+  /// Add an MFEM problem operator. Takes ownership.
+  virtual void
+  addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
+
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
 
   /**
    * Set all MFEM EquationSystems to solve in this problem
    */
-  void setEquationSystems()
-  {
+  void setEquationSystems();
 
-  }
+  /**
+   * Set default MFEM EquationSystem for this problem
+   */
+  void setDefaultEquationSystem();
+
+  /**
+   * Set all MFEM ProblemOperators to solve in this problem
+   */
+  void setMFEMProblemOperators();
 
   /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
