@@ -545,7 +545,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
-  // add solver objects.
+  // add user-specified weak forms to build equation systems to solve.
   registerMooseObjectTask("add_mfem_weak_form", MFEMWeakForm, false);
   addTaskDependency("add_mfem_weak_form", "add_variable");
   addTaskDependency("add_mfem_weak_form", "add_kernel");
@@ -554,11 +554,15 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_weak_form", "add_mfem_complex_bc_components");
   addTaskDependency("add_mfem_weak_form", "add_mfem_fespace_hierarchies");
 
+  // Add equation system operators to solve.
+  registerTask("add_equation_systems", true);
+  addTaskDependency("add_equation_systems", "add_mfem_weak_form");
+
   // add solver objects.
   registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
   // addTaskDependency("add_mfem_problem_operator", "add_mfem_solver");
   addTaskDependency("add_mfem_solver", "add_variable");
-  addTaskDependency("add_mfem_solver", "add_mfem_weak_form");
+  addTaskDependency("add_mfem_solver", "add_equation_systems");
 
   registerTask("resolve_mfem_solvers", true);
   addTaskDependency("resolve_mfem_solvers", "add_mfem_solver");

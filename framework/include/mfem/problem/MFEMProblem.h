@@ -188,13 +188,12 @@ public:
   }
 
   /**
-   * Add an MFEM EquationSystem to the problem.
+   * Set all MFEM EquationSystems to solve in this problem
    */
-  // void addEquationSystem(const std::string & type, const std::string & name, InputParameters &
-  // parameters)
-  // {
+  void setEquationSystems()
+  {
 
-  // }
+  }
 
   /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
