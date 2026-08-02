@@ -50,6 +50,7 @@
       capabilities = 'mfem'
       compute_devices = 'cpu'
       restep = false
+      max_parallel = 10 # stacked_hexes.e has 10 elements; recovered MFEM meshes require a nonempty partition
       cli_args = 'BCs/active="linearized" '
                  'Outputs/CSV/file_base=NLHeatTransferLinearized '
     []
@@ -61,6 +62,7 @@
       capabilities = 'mfem'
       compute_devices = 'cpu'
       restep = false
+      max_parallel = 10 # stacked_hexes.e has 10 elements; recovered MFEM meshes require a nonempty partition
       prereq = 'MFEMNonLinearHeatTransfer/linearized'
     []
   []
