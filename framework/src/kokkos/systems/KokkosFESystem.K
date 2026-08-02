@@ -166,6 +166,7 @@ void
 FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 {
   auto var = nbc->variable().number();
+  auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
 
   if (!dofs.isAlloc())
   {
@@ -178,7 +179,8 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
     auto dof = _local_node_dof_index[var][node];
 
     if (dof != libMesh::DofObject::invalid_id)
-      dofs[dof] = true;
+      for (const auto i : make_range(num_dofs))
+        dofs[dof + i] = true;
   }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
