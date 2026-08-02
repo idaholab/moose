@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMLinearSolverBase.h"
+#include "MFEMLORLinearSolverBase.h"
 
 namespace Moose::MFEM
 {
@@ -37,6 +37,9 @@ public:
   void SetOperator(const mfem::Operator & op) override;
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
+    mooseAssert(_matrix_free_ams,
+                "MatrixFreeAMS preconditioner was not initialized with both the operator and "
+                "bilinear form before use.");
     _matrix_free_ams->Mult(x, y);
   }
 
@@ -54,18 +57,17 @@ private:
 /**
  * Wrapper for mfem::MatrixFreeAMS solver.
  */
-class MFEMMatrixFreeAMS : public Moose::MFEM::LinearSolverBase
+class MFEMMatrixFreeAMS : public Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>
 {
 public:
   static InputParameters validParams();
 
   MFEMMatrixFreeAMS(const InputParameters &);
 
-  /// Updates the solver with the bilinear form, as MFEMMatrixFreeAMS is an LOR-based solver
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
+  void ConstructSolver() override;
 
 protected:
-  void ConstructSolver() override;
+  virtual void SetSolverParameters(mfem::MatrixFreeAMS &) override {}
 
 private:
   mfem::Coefficient & _alpha_coef;

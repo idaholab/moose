@@ -25,10 +25,6 @@
 namespace Moose::MFEM
 {
 class CoefficientManager;
-class LinearSolverBase;
-class ComplexEquationSystem;
-class EigenproblemEquationSystem;
-class TimeDependentEquationSystem;
 
 /**
  * Owns the weak-form mathematics of a MOOSE MFEM problem.
@@ -80,15 +76,14 @@ public:
   virtual void ComputeNonlinearResidual(const mfem::Vector & u, mfem::Vector & residual) const;
   /// Get Jacobian at the provided vector of true DoFs of trial variables
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
+  /// Get operator handle for linear component of system operator
+  mfem::OperatorHandle & GetLinearOperator() const { return _linear_operator; };
 
   /// Update variable from solution vector after solve
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
 
-  /// Set whether the nonlinear solver driving this equation system requires Jacobian information.
-  void SetSolverRequiresGradient(bool requires_gradient)
-  {
-    _solver_requires_gradient = requires_gradient;
-  }
+  /// Set whether an external object (such as a nonlinear solver) requires Jacobian information for this EquationSystem.
+  void SetGradientRequired(bool requires_gradient) { _gradient_required = requires_gradient; }
 
   /// Set the coefficient manager to notify when trial variables are updated, so that stored
   /// projections of solution-dependent coefficients are invalidated.
@@ -102,12 +97,29 @@ public:
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
+  /// Getter for block true offsets associated with the EquationSystem operator
+  const mfem::Array<int> & GetBlockOffsets() const { return _block_true_offsets; }
+
   /**
-   * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
-   * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
-   * operator
+   * @returns a reference to the MFEM ParBilinearForm corresponding to test_var_name
    */
-  void PrepareLinearSolver(LinearSolverBase & solver);
+  mfem::ParBilinearForm & GetBilinearForm(const std::string & test_var_name)
+  {
+    return _blfs.GetRef(test_var_name);
+  }
+
+  /**
+   * @returns a reference to the MFEM ParGridFunction corresponding to trial_var_name
+   */
+  mfem::ParGridFunction & GetGridFunction(const std::string & trial_var_name)
+  {
+    return _gfuncs->GetRef(trial_var_name);
+  }
+
+  /**
+   * @returns Whether nonlinear integrators are present
+   */
+  bool Nonlinear() const { return _non_linear; }
 
   /// The true-DoF vector used for the most recent Jacobian linearization.
   const mfem::Vector & GetLinearizationPoint() const;
@@ -136,16 +148,19 @@ public:
    */
   mfem::Array<int> & GetEssentialBoundaryMarkers(const std::string & var_name);
 
-  /// @returns A pointer to the complex equation system, nullptr if not such
-  virtual const ComplexEquationSystem * IsComplex() const { return nullptr; }
-  /// @returns A pointer to the eigenproblem equation system, nullptr if not such
-  virtual const EigenproblemEquationSystem * IsEigen() const { return nullptr; }
-  /// @returns A pointer to the time-dependent equation system, nullptr if not such
-  virtual const TimeDependentEquationSystem * IsTimeDependent() const { return nullptr; }
+  /// @returns Whether this EquationSystem includes complex components
+  virtual bool IsComplex() const { return false; }
+  /// @returns Whether this EquationSystem represents an eigenproblem
+  virtual bool IsEigen() const { return false; }
+  /// @returns Whether this EquationSystem has time-dependent components
+  virtual bool IsTimeDependent() const { return false; }
   /// @returns Whether this is a multivariate (maybe mixed) equation system
   bool IsMultivariate() const { return _test_var_names.size() > 1; }
   /// @returns Whether nonlinear integrators are present in the equation system
   bool IsNonlinear() const { return _non_linear; }
+
+  /// Build all forms comprising this EquationSystem
+  virtual void BuildEquationSystem();
 
 protected:
   /// Add coupled variable to EquationSystem.
@@ -187,8 +202,6 @@ protected:
   virtual void BuildBilinearForms();
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
-  /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem();
 
   /// Form linear components of system based on on- and off-diagonal bilinear form
   /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
@@ -328,14 +341,13 @@ protected:
   mutable const mfem::Vector * _linearization_point = nullptr;
   // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
-  // Whether a nonlinear solver exists and whether it requires Jacobian/gradient information.
-  bool _solver_requires_gradient = false;
+  // Whether an external object (e.g. solver) requires Jacobian/gradient information.
+  bool _gradient_required = false;
   // Coefficient manager notified when trial variables are updated, so that stored projections
   // of solution-dependent coefficients are invalidated.
   CoefficientManager * _coefficient_manager = nullptr;
 
 private:
-  friend class ::MFEMProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };

@@ -16,7 +16,6 @@
 
 namespace Moose::MFEM
 {
-class EquationSystem;
 
 /**
  * Connects MFEMProblem's MOOSE solver objects to EquationSystem's mathematics.
@@ -67,10 +66,18 @@ public:
   mfem::BlockVector _true_x, _true_rhs;
 
 protected:
-  /// Solve the current equation system/operator using the configured nonlinear solver or linear
-  /// solver for a purely linear problem
+  /// Solve the current system operator using the configured nonlinear and linear solvers
+  void SolveWithOperator(mfem::Operator & system_operator,
+                         mfem::Operator & linear_operator,
+                         const mfem::Vector & rhs,
+                         mfem::Vector & x);
+
+  /// Solve the current system operator using system_operator.GetGradient(x) as the linear operator
   void
-  SolveWithOperator(EquationSystem & equation_system, const mfem::Vector & rhs, mfem::Vector & x);
+  SolveWithOperator(mfem::Operator & system_operator, const mfem::Vector & rhs, mfem::Vector & x)
+  {
+    return SolveWithOperator(system_operator, system_operator.GetGradient(x), rhs, x);
+  }
 
   /// Reference to the current problem.
   MFEMProblem & _problem;

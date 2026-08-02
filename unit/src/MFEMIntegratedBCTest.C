@@ -421,7 +421,7 @@ TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuilding
   TestEquationSystem eqn_system;
   eqn_system.AddKernel(diag_test);
   eqn_system.AddIntegratedBC(nonlinear);
-  eqn_system.SetSolverRequiresGradient(true);
+  eqn_system.SetGradientRequired(true);
 
   try
   {
