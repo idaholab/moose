@@ -558,6 +558,10 @@ addActionTypes(Syntax & syntax)
   registerTask("add_equation_systems", true);
   addTaskDependency("add_equation_systems", "add_mfem_weak_form");
 
+  registerTask("set_mfem_problem_operators", true);
+  addTaskDependency("set_mfem_problem_operators", "resolve_mfem_solvers");
+  addTaskDependency("set_mfem_problem_operators", "add_equation_systems");
+
   // add solver objects.
   registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
   // addTaskDependency("add_mfem_problem_operator", "add_mfem_solver");

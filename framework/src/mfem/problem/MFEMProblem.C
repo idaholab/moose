@@ -23,6 +23,8 @@
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "DataIO.h"
+#include "TimeDependentProblemOperator.h"
+#include "EigenproblemESProblemOperator.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -529,6 +531,105 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
   auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(
       addObject<MFEMBoundaryCondition>(kernel_name, name + "_imag", parameters).front());
   parent_ptr->setImagBC(bc_ptr);
+}
+
+/**
+ * Set all MFEM EquationSystems to solve in this problem
+ */
+void
+MFEMProblem::setEquationSystems()
+{
+  std::vector<MFEMWeakForm *> objs;
+  theWarehouse().query().condition<AttribSystem>("MFEMWeakForm").queryInto(objs);
+  if (objs.empty())
+    setDefaultEquationSystem();
+}
+
+void
+MFEMProblem::addWeakForm(const std::string & type,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  addObject<MFEMWeakForm>(type, name, parameters);
+}
+
+/// Returns a pointer to the operator's equation system.
+std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> &
+MFEMProblem::getProblemOperators()
+{
+  return _problem_operators;
+}
+
+/// Add an MFEM problem operator. Takes ownership.
+void
+MFEMProblem::addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator)
+{
+  _problem_operators.push_back(std::move(problem_operator));
+}
+
+void
+MFEMProblem::setDefaultEquationSystem()
+{
+  if (isTransient())
+  {
+    _problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
+        _problem_data.time_derivative_map);
+  }
+  else
+  {
+    if (getNumericType() == MFEMProblem::NumericType::REAL)
+    {
+      if (dynamic_cast<MFEMEigenproblem *>(this))
+        _problem_data.eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
+      else
+        _problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+    }
+    else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    {
+      _problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
+    }
+    else
+      mooseError("Unknown numeric type. "
+                 "Please set the Problem numeric type to either 'real' or 'complex'.");
+  }
+}
+
+void
+MFEMProblem::setMFEMProblemOperators()
+{
+  if (isTransient())
+  {
+    _problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
+        _problem_data.time_derivative_map);
+    auto problem_operator =
+        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(*this);
+    addProblemOperator(std::move(problem_operator));
+  }
+  else
+  {
+    if (getNumericType() == MFEMProblem::NumericType::REAL)
+    {
+      if (dynamic_cast<MFEMEigenproblem *>(this))
+      {
+        auto problem_operator = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(*this);
+        addProblemOperator(std::move(problem_operator));
+      }
+      else
+      {
+        auto problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this);
+        addProblemOperator(std::move(problem_operator));
+      }
+    }
+    else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    {
+      auto problem_operator =
+          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(*this);
+      addProblemOperator(std::move(problem_operator));
+    }
+    else
+      mooseError("Unknown numeric type. "
+                 "Please set the Problem numeric type to either 'real' or 'complex'.");
+  }
 }
 
 int
