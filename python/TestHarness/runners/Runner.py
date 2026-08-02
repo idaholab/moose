@@ -177,9 +177,9 @@ class Runner(OutputInterface):
         """
         return self.exit_code
 
-    def sendSignal(self, signal):
+    def sendSignal(self, signal, ready_output):
         """
-        Sends a signal to the process.
+        Sends a signal to the process after observing the ready output.
 
         Can be overridden.
         """
