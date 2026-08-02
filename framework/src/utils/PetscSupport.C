@@ -99,8 +99,7 @@ namespace Moose
 namespace PetscSupport
 {
 
-PetscOptionsScope::PetscOptionsScope(FEProblemBase & problem)
-  : _problem(problem), _pushed(false)
+PetscOptionsScope::PetscOptionsScope(FEProblemBase & problem) : _problem(problem), _pushed(false)
 {
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_problem.getMooseApp().isUltimateMaster())
