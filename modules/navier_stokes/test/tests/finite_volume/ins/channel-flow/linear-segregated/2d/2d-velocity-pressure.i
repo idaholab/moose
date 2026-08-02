@@ -103,6 +103,8 @@ advected_interp_method = 'average'
 []
 
 [LinearFVBCs]
+  inactive = 'inlet_and_wall_pressure_flux'
+
   [inlet-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'left'
