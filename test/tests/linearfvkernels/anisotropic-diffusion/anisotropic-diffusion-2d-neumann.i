@@ -58,22 +58,25 @@ bottom_flux = ${fparse -top_flux}
     functor = exact_solution
   []
   [right]
-    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    type = LinearFVAnisotropicDiffusionFunctorNeumannBC
     variable = u
     boundary = right
     functor = ${right_flux}
+    diffusion_tensor = diffusivity_tensor
   []
   [top]
-    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    type = LinearFVAnisotropicDiffusionFunctorNeumannBC
     variable = u
     boundary = top
     functor = ${top_flux}
+    diffusion_tensor = diffusivity_tensor
   []
   [bottom]
-    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    type = LinearFVAnisotropicDiffusionFunctorNeumannBC
     variable = u
     boundary = bottom
     functor = ${bottom_flux}
+    diffusion_tensor = diffusivity_tensor
   []
 []
 
@@ -100,11 +103,26 @@ bottom_flux = ${fparse -top_flux}
   []
 []
 
+[Convergence]
+  [linear]
+    type = IterationCountConvergence
+    # The tangential flux uses reconstructed gradients explicitly; twenty updates reduce that
+    # reconstruction error below the exact-solution comparison tolerance.
+    max_iterations = 20
+    converge_at_max_iterations = true
+  []
+[]
+
 [Executioner]
   type = Steady
   system_names = u_system
-  # This isolates the boundary-discretization error from the iterative linear-solver tolerance.
+  # Tight algebraic tolerances isolate the exact-solution comparison from the linear solve.
+  l_tol = 1e-10
   l_abs_tol = 1e-12
+  multi_system_fixed_point = true
+  multi_system_fixed_point_convergence = linear
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

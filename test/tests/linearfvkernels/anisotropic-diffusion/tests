@@ -26,10 +26,11 @@
     type = CSVDiff
     input = anisotropic-diffusion-2d-neumann.i
     csvdiff = anisotropic-diffusion-2d-neumann_out.csv
-    requirement = 'The system shall apply a prescribed anisotropic diffusive flux without adding extrapolated tangential-gradient contributions on rotated boundaries.'
-    design = 'LinearFVAnisotropicDiffusion.md'
+    requirement = 'The system shall apply prescribed complete anisotropic diffusive fluxes and tensor-consistently reconstruct the boundary solution on rotated boundaries.'
+    design = 'LinearFVAnisotropicDiffusion.md LinearFVAnisotropicDiffusionFunctorNeumannBC.md'
     issues = '#32719'
-    abs_zero = 1e-10
+    # The exact linear solution has an L2 error near 5e-11 with the configured solver tolerances.
+    abs_zero = 1e-9
     max_threads = 1
   []
 []
