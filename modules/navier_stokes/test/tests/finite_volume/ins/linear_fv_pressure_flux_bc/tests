@@ -7,6 +7,7 @@
     input = errors.i
     cli_args = "LinearFVBCs/pressure_flux/v=0 FunctorMaterials/inverse_diagonal/prop_values='-1 -1 -1'"
     expect_err = 'The boundary-normal Ainv coefficient must be nonnegative'
+    max_threads = 1
     requirement = "The system shall reject a negative boundary-normal inverse momentum diagonal in a pressure flux boundary condition."
   []
   [wrong-pressure-diffusion-type]
@@ -14,6 +15,7 @@
     input = internal-neighbor.i
     cli_args = 'LinearFVKernels/p_diffusion/type=LinearFVAnisotropicDiffusion'
     expect_err = 'The provided diffusion kernel must be of type LinearFVPressureCorrectionDiffusion.'
+    max_threads = 1
     requirement = "The system shall reject a generic anisotropic diffusion kernel when the Rhie-Chow mass-flux provider requires a pressure-correction diffusion kernel."
     design = 'RhieChowMassFlux.md'
   []
