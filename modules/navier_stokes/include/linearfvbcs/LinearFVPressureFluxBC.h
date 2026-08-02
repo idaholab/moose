@@ -15,7 +15,8 @@
  * Class implementing a flux boundary condition for linear finite
  * volume pressure variables used in the pressure corrector equation which is consistent with the
  * H/A flux and a prescribed boundary velocity. This allows the pressure boundary flux to be
- * consistent with a non-zero boundary mass flux.
+ * consistent with a non-zero boundary mass flux and the boundary pressure to be reconstructed for
+ * a diagonal anisotropic inverse momentum tensor.
  */
 class LinearFVPressureFluxBC : public LinearFVAdvectionDiffusionBC
 {
@@ -46,7 +47,7 @@ protected:
   /// Compute the required boundary pressure flux contribution
   Real computeRequiredPressureFlux() const;
 
-  /// Compute the scalar A^{-1} coefficient used in the pressure BC
+  /// Compute the scalar A^{-1} coefficient, which is zero before the first momentum assembly
   Real computeBoundaryAinv() const;
 
   /// The H/A flux functor for this BC (can be variable, function, etc)

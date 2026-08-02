@@ -53,6 +53,8 @@ LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameter
 
   if (_dim < 3 && _w)
     paramError("w", "The 'w' boundary velocity functor is only valid in 3D problems.");
+
+  _var.computeCellGradients();
 }
 
 Real
@@ -94,8 +96,8 @@ LinearFVPressureFluxBC::computeBoundaryAinv() const
   for (const auto i : make_range(_dim))
     normal_ainv += normal(i) * normal(i) * face_ainv(i);
 
-  if (normal_ainv <= 0.0)
-    mooseError("The boundary-normal Ainv coefficient must be positive, but its value is ",
+  if (normal_ainv < 0.0)
+    mooseError("The boundary-normal Ainv coefficient must be nonnegative, but its value is ",
                normal_ainv,
                ".");
 
@@ -105,19 +107,52 @@ LinearFVPressureFluxBC::computeBoundaryAinv() const
 Real
 LinearFVPressureFluxBC::computeBoundaryValue() const
 {
+  const auto state = determineState();
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
-  const Real distance = computeCellToFaceDistance();
+  const Real normal_ainv = computeBoundaryAinv();
 
-  return _var.getElemValue(*elem_info, determineState()) -
-         computeRequiredPressureFlux() / computeBoundaryAinv() * distance;
+  // Ainv is initialized to zero and is first populated by the momentum assembly. Until then, use
+  // the extrapolated cell pressure for the initial pressure-gradient calculation.
+  if (normal_ainv == 0.0)
+    return _var.getElemValue(*elem_info, state);
+
+  const Real distance = computeCellToFaceDistance();
+  const auto d_cf = computeCellToFaceVector();
+  const auto & face_normal = _current_face_info->normal();
+  const auto tangential_cell_to_face = d_cf - (d_cf * face_normal) * face_normal;
+
+  return _var.getElemValue(*elem_info, state) + computeBoundaryNormalGradient() * distance +
+         _var.gradSln(*elem_info, state) * tangential_cell_to_face;
 }
 
 Real
 LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
 {
-  return -computeRequiredPressureFlux() / computeBoundaryAinv();
+  const Real normal_ainv = computeBoundaryAinv();
+  if (normal_ainv == 0.0)
+    return 0.0;
+
+  const auto state = determineState();
+  const auto face_ainv = _Ainv(singleSidedFaceArg(_current_face_info), state);
+  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+  const Real boundary_normal_multiplier =
+      _current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0;
+  const auto boundary_normal = boundary_normal_multiplier * _current_face_info->normal();
+
+  RealVectorValue normal_scaled_ainv;
+  for (const auto i : make_range(_dim))
+    normal_scaled_ainv(i) = boundary_normal(i) * face_ainv(i);
+
+  // The prescribed pressure flux is the complete tensor-weighted flux. Subtract its tangential
+  // part only when inverting that flux to reconstruct the boundary-normal pressure gradient.
+  const auto tangential_ainv = normal_scaled_ainv - normal_ainv * boundary_normal;
+  const Real tangential_pressure_flux = tangential_ainv * _var.gradSln(*elem_info, state);
+
+  return (-computeRequiredPressureFlux() - tangential_pressure_flux) / normal_ainv;
 }
 
 Real
@@ -129,9 +164,10 @@ LinearFVPressureFluxBC::computeBoundaryValueMatrixContribution() const
 Real
 LinearFVPressureFluxBC::computeBoundaryValueRHSContribution() const
 {
-  const Real distance = computeCellToFaceDistance();
-
-  return -computeRequiredPressureFlux() / computeBoundaryAinv() * distance;
+  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+  return computeBoundaryValue() - _var.getElemValue(*elem_info, determineState());
 }
 
 Real
