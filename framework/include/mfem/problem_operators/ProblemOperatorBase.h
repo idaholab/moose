@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include "MFEMProblem.h"
 #include "PerfGraphInterface.h"
 #include <functional>
 
+class MFEMProblem;
 namespace Moose::MFEM
 {
 

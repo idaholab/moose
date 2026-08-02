@@ -31,14 +31,6 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem_data(_mfem_problem.getProblemData()),
     _mfem_problem_solve(*this, getProblemOperators())
 {
-  // If no ProblemOperators have been added by the user, add a default
-  if (!_mfem_problem.getProblemComposer())
-  {
-    std::string name = "__DefaultWeakFormProblemComposer";
-    InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
-    _mfem_problem.addMFEMProblemComposer("MFEMTimeDependentWeakFormProblemComposer", name, params);
-  }
-  addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
 }
 
 void
