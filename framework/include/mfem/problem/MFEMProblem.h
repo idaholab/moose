@@ -23,21 +23,9 @@
 
 namespace Moose::MFEM
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
 struct SolutionState;
-=======
 class ProblemComposerBase;
->>>>>>> 34ef824000 (changes to name from ProblemOperatorBuilders to MFEMProblemComposers, change of source files, names, unit test, directories, minimal change to documentation)
-}
-=======
-class ProblemOperatorBuilderBase;
-<<<<<<< HEAD
 };
->>>>>>> dd515131cb (Adding forward declarations of classes and adding necessary headers that are needed in non-unity files)
-=======
-}
->>>>>>> b234291b95 (removing a ;)
 
 class MFEMProblem : public ExternalProblem
 {
@@ -444,23 +432,13 @@ protected:
    */
   std::map<std::string, MFEMSolverDefinition> _mfem_solver_definitions;
 
-<<<<<<< HEAD
   /// Restartable MFEM solution state associated with this problem.
   Moose::MFEM::SolutionState & _solution_state_data;
-=======
+
   /**
    * The problem operator builders for this mfem problem.
    */
-<<<<<<< HEAD
-<<<<<<< HEAD
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> probOpBuilder;
->>>>>>> 56a2ff8acf (Hot fixes, rebuilding the ProblemOperator base class, the missing files and changes to MFEM problem)
-=======
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> _problem_operator_builders;
->>>>>>> 823bc201ee (Update framework/include/mfem/problem/MFEMProblem.h)
-=======
   std::vector<std::shared_ptr<Moose::MFEM::ProblemComposerBase>> _problem_composers;
->>>>>>> 34ef824000 (changes to name from ProblemOperatorBuilders to MFEMProblemComposers, change of source files, names, unit test, directories, minimal change to documentation)
 };
 
 template <typename T>
