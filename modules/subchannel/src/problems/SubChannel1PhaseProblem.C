@@ -1510,6 +1510,7 @@ SubChannel1PhaseProblem::computeT(int iblock)
     }
   }
 
+  // Set the temperature solution with relaxation if needed
   std::size_t i = 0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
