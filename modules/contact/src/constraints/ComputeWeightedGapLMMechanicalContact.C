@@ -87,7 +87,10 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
-    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
+    // UserObjectInterface returns const references; this constraint configures the UO before
+    // execution.
+    _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
+        getUserObject<WeightedGapUserObject>("weighted_gap_uo")))
 {
   _weighted_gap_uo.includeNodalNormalDerivatives();
 

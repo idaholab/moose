@@ -2367,7 +2367,10 @@ AutomaticMortarGeneration::computeADNodalNormals(
 
     auto nodal_normal = weighted_area_vector.unit();
     const auto & stored_normal = libmesh_map_find(_secondary_node_to_nodal_normal, secondary_node);
-    mooseAssert((MetaPhysicL::raw_value(nodal_normal) - stored_normal).norm() < 100 * TOLERANCE,
+    // The equivalent FE and AD evaluations can differ through operation ordering. This
+    // roundoff-level tolerance still detects normals reconstructed from a different geometry state.
+    mooseAssert((MetaPhysicL::raw_value(nodal_normal) - stored_normal).norm() <
+                    100 * TOLERANCE * TOLERANCE,
                 "The stored and AD secondary nodal normals must use the same geometry state.");
     // Set the raw value from the stored contact direction while retaining the derivatives produced
     // by the equivalent AD area-vector calculation.

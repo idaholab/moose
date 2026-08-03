@@ -93,6 +93,12 @@ tangent component in the target mesh; no single derivative size is appropriate f
 If the capacity is insufficient, reconfigure with a larger `--with-derivative-size` value and
 rebuild the MOOSE libraries and application consistently.
 
+Moving distributed contact can introduce matrix couplings that were not present during initial
+sparsity preallocation. For these problems, set
+[!param](/Problem/FEProblem/use_hash_table_matrix_assembly) to `true`. Relationship managers make
+the required remote interface elements available, while hash-table assembly accommodates changing
+couplings between degrees of freedom owned by the same process.
+
 !syntax description /Constraints/ComputeWeightedGapLMMechanicalContact
 
 !syntax parameters /Constraints/ComputeWeightedGapLMMechanicalContact

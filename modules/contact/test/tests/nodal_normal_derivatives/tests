@@ -11,10 +11,42 @@
     requirement = 'Mechanical mortar contact shall reject interpolated quadrature-point normals.'
   []
 
+  [unsupported_weighted_gap_uo]
+    type = RunException
+    input = unsupported_weighted_gap_uo.i
+    cli_args = 'Outputs/exodus=false'
+    expect_err = "Nodal-normal derivatives are not supported by user object 'czm_uo'."
+    max_parallel = 1
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact shall reject a weighted-gap user object that does not support nodal-normal derivatives.'
+  []
+
+  [nonnodal_displacement]
+    type = RunException
+    input = ../3d-mortar-contact/frictionless-mortar-3d.i
+    cli_args = 'Variables/disp_x/family=MONOMIAL Variables/disp_x/order=CONSTANT'
+    expect_err = 'Nodal-normal derivatives require a nodal displacement variable.'
+    max_parallel = 1
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact shall require nodal displacement variables when constructing nodal-normal derivatives.'
+  []
+
+  [cross_system_displacement]
+    type = RunException
+    input = ../3d-mortar-contact/frictionless-mortar-3d.i
+    cli_args = "Problem/nl_sys_names='displaced contact' Variables/disp_x/solver_sys=displaced "
+               "Variables/disp_y/solver_sys=contact Variables/disp_z/solver_sys=displaced "
+               "Variables/mortar_normal_lm/solver_sys=displaced Constraints/active=normal_lm"
+    expect_err = 'Nodal-normal derivatives require displacement variables in the nonlinear system assembled by this contact object.'
+    max_parallel = 1
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact shall reject displacement variables from a different nonlinear system when constructing nodal-normal derivatives.'
+  []
+
   [curved_3d_parallel]
     type = RunApp
     input = curved_3d_action.i
-    cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/Partitioner/nx=2 Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic Problem/error_on_jacobian_nonzero_reallocation=true'
+    cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/Partitioner/nx=2 Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic Problem/use_hash_table_matrix_assembly=true'
     expect_out = 'Solve Converged!'
     min_parallel = 2
     max_parallel = 2
@@ -55,6 +87,17 @@
     max_parallel = 1
     design = 'ContactAction.md AutomaticMortarGeneration.md'
     requirement = 'Quasistatic mortar contact shall assemble and solve with active TET10 elements and TRI6 interface faces when sufficient AD storage is available.'
+  []
+
+  [tri7_normal_derivatives]
+    type = RunApp
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=1 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/top_block/elem_type=TET14 Mesh/bottom_block/elem_type=TET14 Mesh/top_curve/z_function=z Mesh/bottom_curve/z_function=z Variables/disp_x/order=THIRD Variables/disp_y/order=THIRD Variables/disp_z/order=THIRD Contact/mortar/model=frictionless Problem/error_on_jacobian_nonzero_reallocation=false Executioner/end_time=0.05 Executioner/dt=0.05 Executioner/line_search=basic'
+    expect_out = 'Solve Converged!'
+    capabilities = 'ad_size>=200'
+    max_parallel = 1
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Quasistatic mortar contact shall execute with active TET14 elements and TRI7 interface faces when sufficient AD storage is available.'
   []
 
   [hex27_quad9]

@@ -52,8 +52,8 @@ public:
   bool usesNodalNormalDerivatives() const;
 
   /// Enable derivatives during construction of a supported quasistatic contact constraint.
-  /// Dynamic contact uses the same user object classes and intentionally leaves this disabled.
-  void includeNodalNormalDerivatives() const;
+  /// Other contact formulations intentionally leave this disabled.
+  void includeNodalNormalDerivatives();
 
   /**
    * Return the cached contact normal for the supplied lower-dimensional secondary element node.
@@ -211,7 +211,7 @@ protected:
   const bool _allow_nodal_normal_derivatives;
 
   /// Set once while supported contact constraints are constructed, before user object execution
-  mutable bool _use_nodal_normal_derivatives;
+  bool _use_nodal_normal_derivatives;
 
   /// Whether the weighted gap is associated with nodes or elements (like for a CONSTANT MONOMIAL
   /// Lagrange multiplier). We have this member so that we don't do virtual calls during inner
