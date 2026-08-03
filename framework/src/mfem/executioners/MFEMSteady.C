@@ -46,6 +46,35 @@ MFEMSteady::init()
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 
+  // If no ProblemOperators have been added by the user, add a default
+  if (getProblemOperators().empty())
+  {
+    if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
+    {
+      if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
+      {
+        auto problem_operator =
+            std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(_mfem_problem);
+        addProblemOperator(std::move(problem_operator));
+      }
+      else
+      {
+        auto problem_operator =
+            std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
+        addProblemOperator(std::move(problem_operator));
+      }
+    }
+    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    {
+      auto problem_operator =
+          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
+      addProblemOperator(std::move(problem_operator));
+    }
+    else
+      mooseError("Unknown numeric type. "
+                 "Please set the Problem numeric type to either 'real' or 'complex'.");
+  }
+
   if (_mfem_problem_data.nonlinear_solver)
     _mfem_problem_data.eqn_system->SetGradientRequired(
         _mfem_problem_data.nonlinear_solver->RequiresGradient());

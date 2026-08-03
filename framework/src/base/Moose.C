@@ -491,13 +491,13 @@ addActionTypes(Syntax & syntax)
   // clang-format on
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerTask("add_mfem_problem_operator", true);
-  addTaskDependency("add_mfem_problem_operator", "init_mesh");
-  addTaskDependency("add_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_bc", "add_mfem_problem_operator");
-  addTaskDependency("add_kernel", "add_mfem_problem_operator");
+  registerTask("set_mfem_equation_systems", true);
+  addTaskDependency("set_mfem_equation_systems", "init_mesh");
+  addTaskDependency("add_variable", "set_mfem_equation_systems");
+  addTaskDependency("add_aux_variable", "set_mfem_equation_systems");
+  addTaskDependency("add_elemental_field_variable", "set_mfem_equation_systems");
+  addTaskDependency("add_bc", "set_mfem_equation_systems");
+  addTaskDependency("add_kernel", "set_mfem_equation_systems");
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
@@ -564,7 +564,7 @@ addActionTypes(Syntax & syntax)
 
   // add solver objects.
   registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
-  // addTaskDependency("add_mfem_problem_operator", "add_mfem_solver");
+  // addTaskDependency("set_mfem_equation_systems", "add_mfem_solver");
   addTaskDependency("add_mfem_solver", "add_variable");
   addTaskDependency("add_mfem_solver", "add_equation_systems");
 
