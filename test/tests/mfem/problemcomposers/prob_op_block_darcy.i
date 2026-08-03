@@ -83,7 +83,7 @@
   []
 []
 
-[MFEMProblemComposer]
+[ProblemComposer]
   [default_steady]
     type = SteadyProblemComposer
   []

@@ -288,15 +288,15 @@ public:
    * Method to get the first Problem Composer object storing the
    * method that builds the ProblemOperator in the executioner.
    */
-  std::shared_ptr<Moose::MFEM::ProblemComposerBase> getProblemComposer()
+  std::shared_ptr<Moose::MFEM::ProblemComposerBase>& getProblemComposer()
   {
-    return _problem_composers[0];
+    return _problem_composer;
   }
 
   /**
    * Checks whether problem composer interface is empty.
    */
-  bool problemComposerIsEmpty() { return _problem_composers.size() == 0; };
+  bool problemComposerIsEmpty() { return _problem_composer == nullptr; };
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
@@ -438,7 +438,7 @@ protected:
   /**
    * The problem operator builders for this mfem problem.
    */
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemComposerBase>> _problem_composers;
+  std::shared_ptr<Moose::MFEM::ProblemComposerBase> _problem_composer;
 };
 
 template <typename T>

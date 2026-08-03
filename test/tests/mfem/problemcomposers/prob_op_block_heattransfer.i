@@ -89,7 +89,7 @@
   []
 []
 
-[MFEMProblemComposer]
+[ProblemComposer]
   [default_transient]
     type = TransientProblemComposer
   []

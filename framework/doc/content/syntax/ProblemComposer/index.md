@@ -1,34 +1,34 @@
-# MFEMProblemComposer System
+# ProblemComposer System
 
-The `MFEMProblemComposer` is a builder/adapter class that is used for constructing
-problem-operators with custom inputs. This class is specifically intended for composing
+The `ProblemComposer` system allows the user to construct
+problem operators with custom inputs. This class is specifically intended for composing
 user defined custom operators which may be raw `mfem::Operator`'s optimised for specific
-purposes e.g. MHD with customised inputs. The Operators may need thin layer access to the MOOSE
-multi-physics system. As of yet only a single problem operator per `MFEMProblem` is used, even if
-multiple are defined. The ProblemOperatorBuilder classes are built within the `MFEMProblem` class 
-however the `ProblemOperator`s are built and owned by the MFEM executioners.
+purposes e.g. MHD with customised inputs. The operators may need thin layer access to the MOOSE
+multi-physics system. As of yet, only a single problem operator object per [MFEMProblem.md] is used (even if
+multiple classes are defined). The [problem composer](ProblemComposerBase.md) classes are built within the [MFEMProblem.md] class 
+however the [ProblemOperator.md]s are built and owned by the MFEM executioners.
 
 ## SteadyProblemComposer
 
-The `SteadyProblemComposer` class is the default of the `MFEMSteady` executioner and does
-not need to be declared explicitly. The `SteadyProblemComposer` class uses systematic
-logic to build one of 3 possible `ProblemOperator`s they are the `EquationSystemProblemOperator`,
+The [SteadyProblemComposer.md] class is the default for the [MFEMSteady.md] executioner and does
+not need to be declared explicitly. The [SteadyProblemComposer.md] class uses systematic
+logic to build one of 3 possible `ProblemOperator`s: they are the `EquationSystemProblemOperator`,
 `ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
 
 ## TransientProblemComposer
 
-The `TransientProblemComposer` class is the default of the MFEMTransient executioner and
-does not need to be declared explicitly. The `TransientProblemComposer` class builds 
+The [TransientProblemComposer.md] class is the default for the [MFEMTransient.md] executioner and
+does not need to be declared explicitly. The [TransientProblemComposer.md] class builds 
 the `TimeDependentEquationSystemProblemOperator`.
 
-## CustomProblemComposer example
+## Using a custom problem composer to plug in a custom problem operator
 
-The custom problem operator example will follow the `MFEMCustomProblemOperator.C` unit-test which
-is based on MFEM's [ex0p](https://github.com/mfem/mfem/blob/master/examples/ex0p.cpp). Firstly a
-CustomProblemOperator class must be built, if the problem is steady i.e called from the `MFEMSteady` 
-executioner then the `ProblemOperator` class inherits from `Moose::MFEM::ProblemOperator`. If the
-CustomProblemOperator class is transient i.e. called from the `MFEMTransient` executioner then
-the class must inherit from `Moose::MFEM::TimeDependentProblemOperator`. For this case the problem
+This custom problem operator example will follow the `MFEMCustomProblemOperator.C` unit test which
+is based on MFEM's [ex0p](https://github.com/mfem/mfem/blob/master/examples/ex0p.cpp). Firstly, a
+custom [ProblemOperator.md] class must be built. If the problem is steady, i.e called from the [MFEMSteady.md]
+executioner, then the problem operator class inherits from `Moose::MFEM::ProblemOperator`. If the
+problem is transient, i.e. called from the [MFEMTransient.md] executioner, then
+the class must inherit from `Moose::MFEM::TimeDependentProblemOperator`. For this case, the problem
 is steady and an example class may look as follows:
 
 ```cpp
@@ -45,7 +45,7 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
     // Solve the equation
     virtual void Solve() override;
 
-    // Mult by the operator
+    // Apply the operator
     void Mult(const mfem::Vector & x, mfem::Vector & y) const override {};
 };
 
@@ -152,7 +152,7 @@ The solve method solves the linear/non-linear system that has been setup and pas
 data to the mfem `GridFunctions` so that the post-processors can view the results.
 During construction as the `Moose::MFEM::ProblemOperator` class was constructed as well,
 the class inherits a reference to the `MFEMProblem` namely `_problem_data` it can be used
-to acces `MFEMProblem` members.
+to access `MFEMProblem` members.
 
 ```cpp
 void CustomDummyProblemOperator::Solve() override
@@ -194,7 +194,7 @@ public:
 
   ~CustomDummyProblemComposer() = default;
 
-  /// Returns a pointer to the operator's equation system.
+  /// Returns a pointer to the problem operator.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem & mfem_problem) override;
 };

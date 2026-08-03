@@ -121,7 +121,7 @@ public:
 
   ~CustomDummyProblemComposer() = default;
 
-  /// Returns a pointer to the operator's equation system.
+  /// Returns a pointer to a freshly minted operator.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem & _mfem_problem) override
   {

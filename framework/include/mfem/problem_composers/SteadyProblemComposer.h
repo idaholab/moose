@@ -32,7 +32,7 @@ public:
 
   ~SteadyProblemComposer() = default;
 
-  /// Returns a pointer to the operator's equation system.
+  /// Returns a pointer to a freshly minted problem operator.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;
 };
 }

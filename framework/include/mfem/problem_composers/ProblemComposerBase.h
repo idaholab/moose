@@ -31,7 +31,7 @@ public:
 
   ~ProblemComposerBase() = default;
 
-  /// Returns a pointer to the operator's equation system.
+  /// Returns a pointer to a freshly minted problem operator.
   virtual std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem &) = 0;
 };
 }
