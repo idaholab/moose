@@ -126,8 +126,8 @@ refine = 1
       splitting = 'interior contact'
       splitting_type = schur
       petsc_options = '-snes_ksp_ew'
-      petsc_options_iname = '-ksp_gmres_restart -pc_fieldsplit_schur_fact_type -mat_mffd_err'
-      petsc_options_value = '200                full                           1e-5'
+      petsc_options_iname = '-ksp_gmres_restart -pc_fieldsplit_schur_fact_type'
+      petsc_options_value = '200                full'
       schur_pre = 'S'
     []
     [interior]
@@ -143,7 +143,7 @@ refine = 1
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   dt = 0.1
   end_time = 1
   abort_on_solve_fail = true
