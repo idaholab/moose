@@ -39,7 +39,7 @@
     type = 'CheckFiles'
     input = 'mesh_only.i'
     cli_args = 'Mesh/parallel_type=distributed --mesh-only 3d_chimney.cpa.gz'
-    check_files = '3d_chimney.cpa.gz/3/split-3-0.gz 3d_chimney.cpa.gz/3/split-3-1.gz 3d_chimney.cpa.gz/3/split-3-2.gz 3d_chimney.cpa.gz/meta_data_mesh.rd/data 3d_chimney.cpa.gz/meta_data_mesh.rd/header'
+    check_files = '3d_chimney.cpa.gz/3/split-3-0.gz 3d_chimney.cpa.gz/3/split-3-1.gz 3d_chimney.cpa.gz/3/split-3-2.gz 3d_chimney.cpa.gz/3/meta_data_mesh.rd/data 3d_chimney.cpa.gz/3/meta_data_mesh.rd/header'
     min_parallel = 3
     max_parallel = 3
     recover = false

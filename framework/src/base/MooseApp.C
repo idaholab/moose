@@ -97,6 +97,7 @@
 #include <filesystem>
 #include <cstdint>
 #include <iomanip>
+#include <limits>
 #include <set>
 #include <sstream>
 
@@ -110,11 +111,12 @@ const std::string split_mesh_input_fingerprint_name = "SYSTEM/_moose/split_mesh_
 const std::string split_mesh_input_summary_name = "SYSTEM/_moose/split_mesh_input_summary";
 
 /**
- * Computes a deterministic hash for canonicalized split mesh input data.
+ * Computes a deterministic 64-bit FNV-1a hash for canonicalized split mesh input data.
  */
 std::string
 stableHash(const std::string & value)
 {
+  // FNV-1a offset basis and prime. The 16-character hex output below represents all 64 bits.
   std::uint64_t hash = 14695981039346656037ULL;
   for (const auto c : value)
   {
@@ -171,7 +173,38 @@ appendParametersForSplitMeshFingerprint(std::ostringstream & oss,
 }
 
 /**
- * Collects canonical Mesh block field values from the parsed input file.
+ * Converts raw HIT field values into a stable representation for mesh input summaries.
+ */
+std::string
+canonicalHitValue(const std::string & value)
+{
+  std::istringstream input(value);
+  std::ostringstream output;
+  output << std::setprecision(std::numeric_limits<Real>::max_digits10);
+
+  std::string token;
+  bool first = true;
+  while (input >> token)
+  {
+    Real real_value = 0;
+    std::istringstream token_input(token);
+    token_input >> real_value;
+
+    if (!first)
+      output << " ";
+    first = false;
+
+    if (token_input && token_input.eof())
+      output << real_value;
+    else
+      output << token;
+  }
+
+  return output.str();
+}
+
+/**
+ * Collects Mesh block field values from the parsed input file.
  */
 class SplitMeshInputWalker : public hit::Walker
 {
@@ -185,15 +218,15 @@ public:
   walk(const std::string & fullpath, const std::string & /* nodepath */, hit::Node * n) override;
 
   /**
-   * Gets the collected input paths and normalized values.
+   * Gets the collected input paths and canonical values.
    */
-  const auto & values() const { return _values; }
+  const std::vector<std::pair<std::string, std::string>> & values() const { return _values; }
 
 private:
   /// Mesh input field paths excluded from the split mesh fingerprint.
   const std::set<std::string> & _ignored;
 
-  /// Collected pairs of input paths and normalized values.
+  /// Collected pairs of input paths and canonical values.
   std::vector<std::pair<std::string, std::string>> _values;
 };
 
@@ -210,7 +243,7 @@ SplitMeshInputWalker::walk(const std::string & fullpath,
 
   const auto * field = dynamic_cast<const hit::Field *>(n);
   mooseAssert(field, "Expected a HIT field");
-  _values.emplace_back(fullpath, MooseUtils::removeExtraWhitespace(field->val()));
+  _values.emplace_back(fullpath, canonicalHitValue(field->val()));
 }
 
 /**
@@ -2718,7 +2751,9 @@ MooseApp::splitMeshInputSummary()
   }
 
   const auto & mesh_generator_system = getMeshGeneratorSystem();
-  for (const auto & name : mesh_generator_system.getMeshGeneratorNames())
+  auto generator_names = mesh_generator_system.getMeshGeneratorNames();
+  std::sort(generator_names.begin(), generator_names.end());
+  for (const auto & name : generator_names)
   {
     const auto & generator = mesh_generator_system.getMeshGenerator(name);
     oss << "[MeshGenerator]\n";
@@ -2731,13 +2766,27 @@ MooseApp::splitMeshInputSummary()
 }
 
 std::string
-MooseApp::splitMeshInputFingerprint()
+MooseApp::splitMeshInputFingerprint(const std::string & summary)
 {
-  return stableHash(splitMeshInputSummary());
+  return stableHash(summary);
 }
 
-void
-MooseApp::prepareSplitMeshMetaData()
+std::filesystem::path
+MooseApp::splitMeshMetaDataFolderBase(const std::filesystem::path & folder_base)
+{
+  const auto split_count = std::to_string(n_processors());
+  if (folder_base.filename() == split_count)
+    return folder_base;
+
+  const auto split_count_folder = folder_base / split_count;
+  if (std::filesystem::exists(split_count_folder))
+    return split_count_folder;
+
+  return folder_base;
+}
+
+std::vector<std::filesystem::path>
+MooseApp::writeSplitMeshMetaData(const std::filesystem::path & folder_base)
 {
   auto add_or_update = [this](const std::string & name, const std::string & value)
   {
@@ -2748,21 +2797,25 @@ MooseApp::prepareSplitMeshMetaData()
     string_data->set() = value;
   };
 
-  add_or_update(split_mesh_input_fingerprint_name, splitMeshInputFingerprint());
-  add_or_update(split_mesh_input_summary_name, splitMeshInputSummary());
+  const auto summary = splitMeshInputSummary();
+  add_or_update(split_mesh_input_fingerprint_name, splitMeshInputFingerprint(summary));
+  add_or_update(split_mesh_input_summary_name, summary);
+
+  return writeRestartableMetaData(MooseApp::MESH_META_DATA, splitMeshMetaDataFolderBase(folder_base));
 }
 
 void
 MooseApp::checkSplitMeshMetaData(const std::filesystem::path & folder_base)
 {
   const auto & map_name = getRestartableDataMapName(MESH_META_DATA);
-  const auto meta_data_folder_base = metaDataFolderBase(folder_base, map_name);
+  const auto split_mesh_folder_base = splitMeshMetaDataFolderBase(folder_base);
+  const auto meta_data_folder_base = metaDataFolderBase(split_mesh_folder_base, map_name);
 
   if (!RestartableDataReader::isAvailable(meta_data_folder_base))
   {
     if (processor_id() == 0)
       mooseInfo("The pre-split mesh file '",
-                folder_base,
+                split_mesh_folder_base,
                 "' does not contain mesh meta data. The mesh input cannot be checked for "
                 "consistency with the pre-split mesh.");
     return;
@@ -2773,6 +2826,10 @@ MooseApp::checkSplitMeshMetaData(const std::filesystem::path & folder_base)
       split_mesh_input_fingerprint_name, nullptr, std::string());
   auto * fingerprint = fingerprint_data.get();
   split_mesh_meta_data.addData(std::move(fingerprint_data));
+  auto summary_data = std::make_unique<RestartableData<std::string>>(
+      split_mesh_input_summary_name, nullptr, std::string());
+  auto * summary = summary_data.get();
+  split_mesh_meta_data.addData(std::move(summary_data));
 
   RestartableDataReader reader(*this, split_mesh_meta_data, forceRestart());
   reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
@@ -2783,22 +2840,30 @@ MooseApp::checkSplitMeshMetaData(const std::filesystem::path & folder_base)
   {
     if (processor_id() == 0)
       mooseInfo("The pre-split mesh file '",
-                folder_base,
+                split_mesh_folder_base,
                 "' does not contain a mesh input fingerprint. The mesh input cannot be checked "
                 "for consistency with the pre-split mesh.");
     return;
   }
 
-  const auto current_fingerprint = splitMeshInputFingerprint();
+  const auto current_summary = splitMeshInputSummary();
+  const auto current_fingerprint = splitMeshInputFingerprint(current_summary);
   if (fingerprint->get() != current_fingerprint)
-    mooseError("The pre-split mesh file '",
-               folder_base,
-               "' was generated from different mesh input than the current run.\n\n",
-               "Stored mesh input fingerprint: ",
-               fingerprint->get(),
-               "\nCurrent mesh input fingerprint: ",
-               current_fingerprint,
-               "\n\nRegenerate the split mesh with --split-mesh, or run without --use-split.");
+  {
+    std::ostringstream oss;
+    oss << "The pre-split mesh file '" << split_mesh_folder_base
+        << "' was generated from different mesh input than the current run.\n\n"
+        << "Stored mesh input fingerprint: " << fingerprint->get()
+        << "\nCurrent mesh input fingerprint: " << current_fingerprint;
+
+    if (summary->loaded())
+      oss << "\n\nStored mesh input summary:\n" << summary->get();
+    oss << "\nCurrent mesh input summary:\n"
+        << current_summary
+        << "\nRegenerate the split mesh with --split-mesh, or run without --use-split.";
+
+    mooseError(oss.str());
+  }
 }
 
 void
