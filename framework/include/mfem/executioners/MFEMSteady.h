@@ -17,7 +17,7 @@
 #include "EquationSystemProblemOperator.h"
 #include "ComplexEquationSystemProblemOperator.h"
 
-class MFEMSteady : public Executioner, public Moose::MFEM::ProblemOperatorInterface
+class MFEMSteady : public Executioner
 {
 public:
   static InputParameters validParams();

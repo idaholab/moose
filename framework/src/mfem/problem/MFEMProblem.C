@@ -597,39 +597,37 @@ MFEMProblem::setDefaultEquationSystem()
 void
 MFEMProblem::setMFEMProblemOperators()
 {
-  // if (isTransient())
-  // {
-  //   _problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
-  //       _problem_data.time_derivative_map);
-  //   auto problem_operator =
-  //       std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(*this);
-  //   addProblemOperator(std::move(problem_operator));
-  // }
-  // else
-  // {
-  //   if (getNumericType() == MFEMProblem::NumericType::REAL)
-  //   {
-  //     if (dynamic_cast<MFEMEigenproblem *>(this))
-  //     {
-  //       auto problem_operator = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(*this);
-  //       addProblemOperator(std::move(problem_operator));
-  //     }
-  //     else
-  //     {
-  //       auto problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this);
-  //       addProblemOperator(std::move(problem_operator));
-  //     }
-  //   }
-  //   else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
-  //   {
-  //     auto problem_operator =
-  //         std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(*this);
-  //     addProblemOperator(std::move(problem_operator));
-  //   }
-  //   else
-  //     mooseError("Unknown numeric type. "
-  //                "Please set the Problem numeric type to either 'real' or 'complex'.");
-  // }
+  if (isTransient())
+  {
+    auto problem_operator =
+        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(*this);
+    addProblemOperator(std::move(problem_operator));
+  }
+  else
+  {
+    if (getNumericType() == MFEMProblem::NumericType::REAL)
+    {
+      if (dynamic_cast<MFEMEigenproblem *>(this))
+      {
+        auto problem_operator = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(*this);
+        addProblemOperator(std::move(problem_operator));
+      }
+      else
+      {
+        auto problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this);
+        addProblemOperator(std::move(problem_operator));
+      }
+    }
+    else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    {
+      auto problem_operator =
+          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(*this);
+      addProblemOperator(std::move(problem_operator));
+    }
+    else
+      mooseError("Unknown numeric type. "
+                 "Please set the Problem numeric type to either 'real' or 'complex'.");
+  }
 }
 
 int
