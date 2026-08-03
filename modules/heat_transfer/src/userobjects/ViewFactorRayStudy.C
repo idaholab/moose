@@ -97,7 +97,7 @@ ViewFactorRayStudy::ViewFactorRayStudy(const InputParameters & parameters)
     _internal_convention(getParam<MooseEnum>("internal_convention")),
     _ray_index_start_bnd_id(registerRayAuxData("start_bnd_id")),
     _ray_index_start_total_weight(registerRayAuxData("start_total_weight")),
-    _fe_face(FEBase::build(_mesh.dimension(), FEType(CONSTANT, MONOMIAL))),
+    _fe_face(FEBase::build(_mesh.dimension(), FEType(CONSTANT, MONOMIAL).set_p_refinement(false))),
     _q_face(QBase::build(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("face_type")),
                          _mesh.dimension() - 1,
                          Moose::stringToEnum<Order>(getParam<MooseEnum>("face_order")))),

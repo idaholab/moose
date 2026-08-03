@@ -16,6 +16,7 @@
 #include "MooseApp.h"
 #include "InputParameterWarehouse.h"
 #include "BlockRestrictable.h"
+#include "MooseUtils.h"
 
 #include "libmesh/variable.h"
 #include "libmesh/dof_map.h"
@@ -63,13 +64,8 @@ MooseVariableBase::validParams()
                                     "nl0",
                                     "If this variable is a solver variable, this is the "
                                     "solver system to which it should be added.");
-  params.addParam<bool>(
-      "disable_p_refinement",
-      "True to disable p-refinement for this variable. Note that because this happens on the "
-      "family basis, users need to have this flag consistently set for all variables in the same "
-      "family. Currently MOOSE disables p-refinement for variables in the following families by "
-      "default: LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN and "
-      "RATIONAL_BERNSTEIN.");
+  params.transferParam<bool>(AddVariableAction::validParams(), "p_refinement");
+  params.transferParam<bool>(AddVariableAction::validParams(), "disable_p_refinement");
 
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
@@ -96,8 +92,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     OutputInterface(parameters),
     SetupInterface(this),
     _sys(*getParam<SystemBase *>("_system_base")), // TODO: get from _fe_problem_base
-    _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+    _fe_type(MooseUtils::variableFEType(parameters)),
     _var_num(getParam<unsigned int>("_var_num")),
     _is_eigen(getParam<bool>("eigen")),
     _var_kind(getParam<Moose::VarKindType>("_var_kind")),
@@ -120,6 +115,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     paramError("family", "finite volume (fv=true) variables must be have MONOMIAL family");
   if (getParam<bool>("fv") && _fe_type.order != 0)
     paramError("order", "finite volume (fv=true) variables currently support CONST order only");
+  if (getParam<bool>("fv") && _fe_type.p_refinement)
+    paramError("p_refinement", "finite volume (fv=true) variables do not support p-refinement");
 
   if (isParamValid("array_var_component_names"))
   {

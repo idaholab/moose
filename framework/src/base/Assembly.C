@@ -90,7 +90,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _tid(tid),
     _mesh(sys.mesh()),
     _mesh_dimension(_mesh.dimension()),
-    _helper_type(_mesh.hasSecondOrderElements() ? SECOND : FIRST, LAGRANGE),
+    _helper_type(
+        FEType(_mesh.hasSecondOrderElements() ? SECOND : FIRST, LAGRANGE).set_p_refinement(false)),
     _user_added_fe_of_helper_type(false),
     _user_added_fe_face_of_helper_type(false),
     _user_added_fe_face_neighbor_of_helper_type(false),
@@ -141,39 +142,39 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _calculate_face_xyz(false),
     _calculate_curvatures(false),
     _calculate_ad_coord(false),
-    _have_p_refinement(false)
+    _prepared_for_p_refinement(false)
 {
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   _building_helpers = true;
   // Build fe's for the helpers
-  buildFE(FEType(helper_order, LAGRANGE));
-  buildFaceFE(FEType(helper_order, LAGRANGE));
-  buildNeighborFE(FEType(helper_order, LAGRANGE));
-  buildFaceNeighborFE(FEType(helper_order, LAGRANGE));
-  buildLowerDFE(FEType(helper_order, LAGRANGE));
+  buildFE(_helper_type);
+  buildFaceFE(_helper_type);
+  buildNeighborFE(_helper_type);
+  buildFaceNeighborFE(_helper_type);
+  buildLowerDFE(_helper_type);
   _building_helpers = false;
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current
   // mesh
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
-    _holder_fe_helper[dim] = _fe[dim][FEType(helper_order, LAGRANGE)];
-    _holder_fe_face_helper[dim] = _fe_face[dim][FEType(helper_order, LAGRANGE)];
-    _holder_fe_face_neighbor_helper[dim] = _fe_face_neighbor[dim][FEType(helper_order, LAGRANGE)];
-    _holder_fe_neighbor_helper[dim] = _fe_neighbor[dim][FEType(helper_order, LAGRANGE)];
+    _holder_fe_helper[dim] = _fe[dim][_helper_type];
+    _holder_fe_face_helper[dim] = _fe_face[dim][_helper_type];
+    _holder_fe_face_neighbor_helper[dim] = _fe_face_neighbor[dim][_helper_type];
+    _holder_fe_neighbor_helper[dim] = _fe_neighbor[dim][_helper_type];
   }
 
   for (unsigned int dim = 0; dim < _mesh_dimension; dim++)
-    _holder_fe_lower_helper[dim] = _fe_lower[dim][FEType(helper_order, LAGRANGE)];
+    _holder_fe_lower_helper[dim] = _fe_lower[dim][_helper_type];
 
   // request phi, dphi, xyz, JxW, etc. data
   helpersRequestData();
 
   // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
   // of discretization
-  _fe_msm = (_mesh_dimension == 2)
-                ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
-                : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
+  const auto mortar_helper_type =
+      FEType(_mesh_dimension == 2 ? helper_order : FIRST, LAGRANGE).set_p_refinement(false);
+  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, mortar_helper_type);
   // This FE object should not take part in p-refinement
   _fe_msm->add_p_level_in_reinit(false);
   _JxW_msm = &_fe_msm->get_JxW();
@@ -277,7 +278,10 @@ Assembly::buildFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe[dim][type])
+    {
       _fe[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe[dim][type]->get_phi();
     _fe[dim][type]->get_dphi();
@@ -303,7 +307,10 @@ Assembly::buildFaceFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face[dim][type])
+    {
       _fe_face[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_face[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_face[dim][type]->get_phi();
     _fe_face[dim][type]->get_dphi();
@@ -325,7 +332,10 @@ Assembly::buildNeighborFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_neighbor[dim][type])
+    {
       _fe_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_neighbor[dim][type]->get_phi();
     _fe_neighbor[dim][type]->get_dphi();
@@ -347,7 +357,10 @@ Assembly::buildFaceNeighborFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face_neighbor[dim][type])
+    {
       _fe_face_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_face_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_face_neighbor[dim][type]->get_phi();
     _fe_face_neighbor[dim][type]->get_dphi();
@@ -371,7 +384,10 @@ Assembly::buildLowerDFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
   {
     if (!_fe_lower[dim][type])
+    {
       _fe_lower[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_lower[dim][type]->get_phi();
     _fe_lower[dim][type]->get_dphi();
@@ -392,7 +408,10 @@ Assembly::buildLowerDDualFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
   {
     if (!_fe_lower[dim][type])
+    {
       _fe_lower[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_lower[dim][type]->get_dual_phi();
     _fe_lower[dim][type]->get_dual_dphi();
@@ -417,7 +436,10 @@ Assembly::buildVectorLowerDFE(FEType type) const
   for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
+    {
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
+      _vector_fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_lower[dim][type]->get_phi();
     _vector_fe_lower[dim][type]->get_dphi();
@@ -442,7 +464,10 @@ Assembly::buildVectorDualLowerDFE(FEType type) const
   for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
+    {
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
+      _vector_fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_lower[dim][type]->get_dual_phi();
     _vector_fe_lower[dim][type]->get_dual_dphi();
@@ -470,7 +495,10 @@ Assembly::buildVectorFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe[dim][type])
+    {
       _vector_fe[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe[dim][type]->get_phi();
     _vector_fe[dim][type]->get_dphi();
@@ -501,7 +529,11 @@ Assembly::buildVectorFaceFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face[dim][type])
-      _vector_fe_face[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+    {
+      _vector_fe_face[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe_face[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_face[dim][type]->get_phi();
     _vector_fe_face[dim][type]->get_dphi();
@@ -531,7 +563,11 @@ Assembly::buildVectorNeighborFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_neighbor[dim][type])
-      _vector_fe_neighbor[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+    {
+      _vector_fe_neighbor[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_neighbor[dim][type]->get_phi();
     _vector_fe_neighbor[dim][type]->get_dphi();
@@ -561,8 +597,11 @@ Assembly::buildVectorFaceNeighborFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face_neighbor[dim][type])
+    {
       _vector_fe_face_neighbor[dim][type] =
           FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe_face_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_face_neighbor[dim][type]->get_phi();
     _vector_fe_face_neighbor[dim][type]->get_dphi();
@@ -4798,12 +4837,10 @@ const MooseArray<ADReal> &
 Assembly::adCurvatures() const
 {
   _calculate_curvatures = true;
-  const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
-  const FEType helper_type(helper_order, LAGRANGE);
   // Must prerequest the second derivatives. Sadly because there is only one
   // _need_second_derivative map for both volumetric and face FE objects we must request both here
-  feSecondPhi<Real>(helper_type);
-  feSecondPhiFace<Real>(helper_type);
+  feSecondPhi<Real>(_helper_type);
+  feSecondPhiFace<Real>(_helper_type);
   return _ad_curvatures;
 }
 
@@ -4841,32 +4878,18 @@ Assembly::helpersRequestData()
 }
 
 void
-Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
+Assembly::preparePRefinement()
 {
-  if (_have_p_refinement)
+  if (_prepared_for_p_refinement)
     // Already performed tasks for p-refinement
     return;
 
-  const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
-  const FEType helper_type(helper_order, LAGRANGE);
-  auto process_fe =
-      [&disable_families](const unsigned int num_dimensionalities, auto & fe_container)
-  {
-    if (!disable_families.empty())
-      for (const auto dim : make_range(num_dimensionalities))
-      {
-        auto fe_container_it = fe_container.find(dim);
-        if (fe_container_it != fe_container.end())
-          for (auto & [fe_type, fe_ptr] : fe_container_it->second)
-            if (disable_families.count(fe_type.family))
-              fe_ptr->add_p_level_in_reinit(false);
-      }
-  };
-  auto process_fe_and_helpers = [process_fe, &helper_type](auto & unique_helper_container,
-                                                           auto & helper_container,
-                                                           const unsigned int num_dimensionalities,
-                                                           const bool user_added_helper_type,
-                                                           auto & fe_container)
+  const auto helper_type = _helper_type;
+  auto process_fe_and_helpers = [&helper_type](auto & unique_helper_container,
+                                               auto & helper_container,
+                                               const unsigned int num_dimensionalities,
+                                               const bool user_added_helper_type,
+                                               auto & fe_container)
   {
     unique_helper_container.resize(num_dimensionalities);
     for (const auto dim : make_range(num_dimensionalities))
@@ -4877,9 +4900,8 @@ Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
       unique_helper->add_p_level_in_reinit(false);
       helper_container[dim] = unique_helper.get();
 
-      // If the user did not request the helper type then we should erase it from our FE container
-      // so that they're not penalized (in the "we should be able to do p-refinement sense") for
-      // our perhaps silly helpers
+      // If the user did not request the helper type then we should erase the original helper FE
+      // from the ordinary FE container. The unique helper above replaces it for helper use.
       if (!user_added_helper_type)
       {
         auto & fe_container_dim = libmesh_map_find(fe_container, dim);
@@ -4889,8 +4911,6 @@ Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
         fe_container_dim.erase(fe_it);
       }
     }
-
-    process_fe(num_dimensionalities, fe_container);
   };
 
   // Handle scalar field families
@@ -4919,16 +4939,10 @@ Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
                          _mesh_dimension,
                          _user_added_fe_lower_of_helper_type,
                          _fe_lower);
-  // Handle vector field families
-  process_fe(_mesh_dimension + 1, _vector_fe);
-  process_fe(_mesh_dimension + 1, _vector_fe_face);
-  process_fe(_mesh_dimension + 1, _vector_fe_neighbor);
-  process_fe(_mesh_dimension + 1, _vector_fe_face_neighbor);
-  process_fe(_mesh_dimension, _vector_fe_lower);
 
   helpersRequestData();
 
-  _have_p_refinement = true;
+  _prepared_for_p_refinement = true;
 }
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,

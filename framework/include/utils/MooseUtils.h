@@ -22,6 +22,7 @@
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
+#include "libmesh/fe_type.h"
 #include "libmesh/int_range.h"
 #include "libmesh/tensor_tools.h"
 #include "metaphysicl/raw_type.h"
@@ -71,6 +72,9 @@ pathjoin(const std::filesystem::path & p, Args... args)
 /// @param input input to check / parse
 /// @param parsed_real pointer to a Real that gets set to the parsed real if it does parse to Real
 bool parsesToReal(const std::string & input, Real * parsed_real = nullptr);
+
+/// Returns the FEType encoded by the variable parameters, including its p-refinement setting
+libMesh::FEType variableFEType(const InputParameters & params);
 
 /// Returns the location of either a local repo run_tests script - or an
 /// installed test executor script if run_tests isn't found.
@@ -1050,12 +1054,11 @@ template <typename C, typename It, typename M1, typename M2>
 auto
 findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(start_iterator,
-                      container.end(),
-                      [&](auto & item) {
-                        return wildcardEqual(first, item.first) &&
-                               wildcardEqual(second, item.second);
-                      });
+  return std::find_if(
+      start_iterator,
+      container.end(),
+      [&](auto & item)
+      { return wildcardEqual(first, item.first) && wildcardEqual(second, item.second); });
 }
 
 /**

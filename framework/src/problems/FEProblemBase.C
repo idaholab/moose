@@ -2945,8 +2945,15 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
       // variable type
       if (var.type() != type)
       {
-        const auto stringifyType = [](FEType t)
-        { return Moose::stringify(t.family) + " of order " + Moose::stringify(t.order); };
+        const bool only_p_refinement_diff =
+            var.type().family == type.family && var.type().order == type.order;
+        const auto stringifyType = [only_p_refinement_diff](FEType t)
+        {
+          auto msg = Moose::stringify(t.family) + " of order " + Moose::stringify(t.order);
+          if (only_p_refinement_diff)
+            msg += t.p_refinement ? " with p-refinement" : " without p-refinement";
+          return msg;
+        };
 
         mooseError("Mismatching types are specified for ",
                    error_prefix,
@@ -3024,9 +3031,7 @@ FEProblemBase::addVariable(const std::string & var_type,
 {
   parallel_object_only();
 
-  const auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
-  const auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
-  const auto fe_type = FEType(order, family);
+  const auto fe_type = MooseUtils::variableFEType(params);
 
   const auto active_subdomains_vector =
       _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
@@ -3048,10 +3053,6 @@ FEProblemBase::addVariable(const std::string & var_type,
     _displaced_problem->addVariable(var_type, var_name, params, solver_system_number);
 
   _solver_var_to_sys_num[var_name] = solver_system_number;
-
-  markFamilyPRefinement(params);
-  if (_displaced_problem)
-    _displaced_problem->markFamilyPRefinement(params);
 }
 
 std::pair<bool, unsigned int>
@@ -3330,9 +3331,7 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
 {
   parallel_object_only();
 
-  const auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
-  const auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
-  const auto fe_type = FEType(order, family);
+  const auto fe_type = MooseUtils::variableFEType(params);
 
   const auto active_subdomains_vector =
       _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
@@ -3350,10 +3349,6 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
     _displaced_problem->addAuxVariable(var_type, var_name, params);
-
-  markFamilyPRefinement(params);
-  if (_displaced_problem)
-    _displaced_problem->markFamilyPRefinement(params);
 }
 
 void
@@ -3377,7 +3372,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
     return;
 
   std::string var_type;
-  if (type == FEType(0, MONOMIAL))
+  if (type.order == CONSTANT && type.family == MONOMIAL && !type.p_refinement)
     var_type = "MooseVariableConstMonomial";
   else if (type.family == SCALAR)
     var_type = "MooseVariableScalar";
@@ -3391,6 +3386,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
   params.set<MooseEnum>("order") = type.order.get_order();
   params.set<MooseEnum>("family") = Moose::stringify(type.family);
+  params.set<bool>("p_refinement") = type.p_refinement;
 
   if (active_subdomains)
     for (const SubdomainID & id : *active_subdomains)
@@ -3400,10 +3396,6 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
   _aux->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
-
-  markFamilyPRefinement(params);
-  if (_displaced_problem)
-    _displaced_problem->markFamilyPRefinement(params);
 }
 
 void
@@ -3424,6 +3416,7 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
   params.set<MooseEnum>("order") = type.order.get_order();
   params.set<MooseEnum>("family") = Moose::stringify(type.family);
+  params.set<bool>("p_refinement") = type.p_refinement;
   params.set<unsigned int>("components") = components;
 
   if (active_subdomains)
@@ -3434,10 +3427,6 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
   _aux->addVariable("ArrayMooseVariable", var_name, params);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable("ArrayMooseVariable", var_name, params);
-
-  markFamilyPRefinement(params);
-  if (_displaced_problem)
-    _displaced_problem->markFamilyPRefinement(params);
 }
 
 void
@@ -8781,7 +8770,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   if (_has_initialized_stateful &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
-    if (havePRefinement())
+    if (doingPRefinement())
       _mesh.buildPRefinementAndCoarseningMaps(_assembly[0][0].get());
 
     // Prolong properties onto newly refined elements' children

@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "MooseEnum.h"
 #include "MaterialProperty.h"
 #include "MultiMooseEnum.h"
 #include "InputParameters.h"
@@ -23,6 +24,8 @@
 
 #include "libmesh/utility.h"
 #include "libmesh/elem.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/string_to_enum.h"
 
 // External includes
 #include "pcrecpp.h"
@@ -55,6 +58,55 @@
 
 namespace MooseUtils
 {
+namespace
+{
+bool
+defaultPRefinement(const libMesh::Order order, const libMesh::FEFamily family)
+{
+  if (libMesh::EquationSystems::is_elemental_data_fe_type(libMesh::FEType(order, family)))
+    return false;
+
+  switch (family)
+  {
+    case libMesh::LAGRANGE:
+    case libMesh::NEDELEC_ONE:
+    case libMesh::RAVIART_THOMAS:
+    case libMesh::LAGRANGE_VEC:
+    case libMesh::CLOUGH:
+    case libMesh::BERNSTEIN:
+    case libMesh::RATIONAL_BERNSTEIN:
+      return false;
+
+    default:
+      return true;
+  }
+}
+}
+
+libMesh::FEType
+variableFEType(const InputParameters & params)
+{
+  const auto order =
+      libMesh::Utility::string_to_enum<libMesh::Order>(params.get<MooseEnum>("order"));
+  const auto family =
+      libMesh::Utility::string_to_enum<libMesh::FEFamily>(params.get<MooseEnum>("family"));
+
+  bool p_refinement = defaultPRefinement(order, family);
+  if (params.isParamValid("p_refinement"))
+    p_refinement = params.get<bool>("p_refinement");
+
+  if (params.isParamValid("disable_p_refinement"))
+  {
+    if (params.isParamSetByUser("p_refinement"))
+      params.paramError("disable_p_refinement",
+                        "Cannot be supplied together with 'p_refinement'. Use "
+                        "'p_refinement = false' instead.");
+    p_refinement = !params.get<bool>("disable_p_refinement");
+  }
+
+  return libMesh::FEType(order, family).set_p_refinement(p_refinement);
+}
+
 std::filesystem::path
 pathjoin(const std::filesystem::path & p)
 {
