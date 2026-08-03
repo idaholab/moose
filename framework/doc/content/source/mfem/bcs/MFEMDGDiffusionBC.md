@@ -17,6 +17,8 @@ A value of $\sigma = -1$ corresponds to a symmetric interior penalty DG method.
 
 !syntax parameters /BCs/MFEMDGDiffusionBC
 
+!syntax inputs /BCs/MFEMDGDiffusionBC
+
 !syntax children /BCs/MFEMDGDiffusionBC
 
 !if-end!

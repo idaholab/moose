@@ -404,16 +404,14 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     {
       mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
 
-      if (integ && bc->isDGBC())
-        bc->isBoundaryRestricted()
-            ? form->AddBdrFaceIntegrator(std::move(integ), bc->getBoundaryMarkers())
-            : form->AddBdrFaceIntegrator(std::move(integ));
-
-      else if (integ)
+      if (integ)
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
-        bc->isBoundaryRestricted()
+        bc->isDGBC() ? bc->isBoundaryRestricted()
+                           ? form->AddBdrFaceIntegrator(std::move(integ), bc->getBoundaryMarkers())
+                           : form->AddBdrFaceIntegrator(std::move(integ))
+        : bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
       }
