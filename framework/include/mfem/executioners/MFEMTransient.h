@@ -16,7 +16,7 @@
 #include "TimeDependentProblemOperator.h"
 #include "TransientBase.h"
 
-class MFEMTransient : public TransientBase, public Moose::MFEM::ProblemOperatorInterface
+class MFEMTransient : public TransientBase
 {
 public:
   static InputParameters validParams();

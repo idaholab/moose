@@ -32,7 +32,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   : Executioner(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solve(*this, getProblemOperators()),
+    _mfem_problem_solve(*this, _mfem_problem.getProblemOperators()),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
@@ -43,38 +43,6 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 void
 MFEMSteady::init()
 {
-  _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _mfem_problem.initialSetup();
-
-  // If no ProblemOperators have been added by the user, add a default
-  if (getProblemOperators().empty())
-  {
-    if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
-    {
-      if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
-      {
-        auto problem_operator =
-            std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(_mfem_problem);
-        addProblemOperator(std::move(problem_operator));
-      }
-      else
-      {
-        auto problem_operator =
-            std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
-        addProblemOperator(std::move(problem_operator));
-      }
-    }
-    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
-    {
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
-      addProblemOperator(std::move(problem_operator));
-    }
-    else
-      mooseError("Unknown numeric type. "
-                 "Please set the Problem numeric type to either 'real' or 'complex'.");
-  }
-
   if (_mfem_problem_data.nonlinear_solver)
     _mfem_problem_data.eqn_system->SetGradientRequired(
         _mfem_problem_data.nonlinear_solver->RequiresGradient());
@@ -87,11 +55,14 @@ MFEMSteady::init()
       _mfem_problem_data.cmplx_gridfunctions,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
-  for (const auto & problem_operator : getProblemOperators())
+  for (const auto & problem_operator : _mfem_problem.getProblemOperators())
   {
     problem_operator->SetGridFunctions();
     problem_operator->Init(_mfem_problem_data.true_solution);
   }
+
+  _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
+  _mfem_problem.initialSetup();
 }
 
 void
