@@ -9,6 +9,7 @@
 
 #include "MortarUtils.h"
 #include "MooseLagrangeHelpers.h"
+#include "MooseUtils.h"
 
 #include "libmesh/enum_to_string.h"
 #include "libmesh/fe_interface.h"
@@ -39,12 +40,6 @@ constexpr Real root_tolerance = 1e-10;
 constexpr Real inverse_residual_tolerance = 1e-10;
 // This matches the reference-space tolerance used when clipping mortar segments.
 constexpr Real mortar_reference_tolerance = 1e-8;
-
-bool
-isFinite(const Point & point)
-{
-  return std::isfinite(point(0)) && std::isfinite(point(1)) && std::isfinite(point(2));
-}
 
 Real
 cross2D(const Point & first, const Point & second)
@@ -419,7 +414,7 @@ inverseMapQuadrilateral(const BilinearMap & map,
   auto add_candidate = [&](const Real xi, const Real eta)
   {
     Point candidate(xi, eta);
-    if (!isFinite(candidate))
+    if (!MooseUtils::isFinitePoint(candidate))
       return;
 
     if (evaluateBilinear(map, target, xi, eta).norm() > inverse_residual_tolerance)
@@ -655,7 +650,7 @@ projectQPoints3d(const Elem * const msm_elem,
       const Point sub_elem_point = analyticalTriangleInverse(
           *msm_elem, *primal_elem, sub_elem_node_indices, normal, x0, sub_elem, qp);
       const Point parent_point = transform_qp(sub_elem_point(0), sub_elem_point(1));
-      if (!isFinite(parent_point) ||
+      if (!MooseUtils::isFinitePoint(parent_point) ||
           !primal_elem->on_reference_element(parent_point, mortar_reference_tolerance))
         projectionFailure(*msm_elem,
                           *primal_elem,
@@ -718,8 +713,8 @@ projectQPoints3d(const Elem * const msm_elem,
     const Point newton_parent_point =
         transform_qp(newton_sub_elem_point(0), newton_sub_elem_point(1));
     const bool newton_point_is_valid =
-        current_iterate < max_iterates && isFinite(newton_sub_elem_point) &&
-        isFinite(newton_parent_point) &&
+        current_iterate < max_iterates && MooseUtils::isFinitePoint(newton_sub_elem_point) &&
+        MooseUtils::isFinitePoint(newton_parent_point) &&
         quadrilateralReferenceViolation(newton_sub_elem_point) == 0 &&
         primal_elem->on_reference_element(newton_parent_point, mortar_reference_tolerance);
 
@@ -735,7 +730,7 @@ projectQPoints3d(const Elem * const msm_elem,
       const Point fallback_point = analyticalQuadrilateralInverse(
           *msm_elem, *primal_elem, sub_elem_node_indices, normal, x0, sub_elem, qp);
       const Point parent_point = transform_qp(fallback_point(0), fallback_point(1));
-      if (!isFinite(parent_point) ||
+      if (!MooseUtils::isFinitePoint(parent_point) ||
           !primal_elem->on_reference_element(parent_point, mortar_reference_tolerance))
         projectionFailure(*msm_elem,
                           *primal_elem,
