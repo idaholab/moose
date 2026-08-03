@@ -665,9 +665,12 @@ public:
                                        const std::filesystem::path & folder_base);
 
   /**
-   * Registers the current mesh input fingerprint in the mesh meta data map for split mesh output.
+   * Writes the current mesh input fingerprint and summary for split mesh output.
+   *
+   * @return The paths that were written
    */
-  void prepareSplitMeshMetaData();
+  std::vector<std::filesystem::path>
+  writeSplitMeshMetaData(const std::filesystem::path & folder_base);
 
   /**
    * Checks that the mesh input fingerprint stored with a pre-split mesh matches this run.
@@ -1486,11 +1489,14 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
-  /// Computes the current mesh input fingerprint for split mesh consistency checks
-  std::string splitMeshInputFingerprint();
-
   /// Computes the current canonical mesh input summary used for the split mesh fingerprint
   std::string splitMeshInputSummary();
+
+  /// Computes the current mesh input fingerprint from a canonical summary
+  std::string splitMeshInputFingerprint(const std::string & summary);
+
+  /// Returns the metadata location for split mesh fingerprint storage and checking
+  std::filesystem::path splitMeshMetaDataFolderBase(const std::filesystem::path & folder_base);
 
   /**
    * Internal function used to recursively create the executor objects.
