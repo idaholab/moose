@@ -103,17 +103,16 @@ offset = 1e-2
   type = Transient
   dt = 2.0
   dtmin = .1
-  solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
+  solve_type = 'NEWTON'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       NONZERO               1e-15                   mumps'
   l_max_its = 30
-  nl_max_its = 20
+  nl_max_its = 30
   nl_abs_tol = 1e-7
   line_search = 'none'
   end_time = 18
-  snesmf_reuse_base = false
+  abort_on_solve_fail = true
 []
 
 [Debug]
