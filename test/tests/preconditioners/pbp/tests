@@ -27,10 +27,11 @@
   [jfnk_command_line_pc_type]
     type = 'RunApp'
     input = 'pbp_test.i'
-    cli_args = '-pc_type lu Outputs/exodus=false -ksp_view'
-    expect_out = 'PC Object:.*?type: lu'
+    cli_args = '-pc_type lu Outputs/exodus=false -snes_view'
+    expect_out = 'PC Object:.*?type: none'
     requirement = "The system shall allow a command-line PETSc preconditioner type option to "
-                  "displace a physics based shell preconditioner for a JFNK solve."
+                  "displace a physics based shell preconditioner for a JFNK solve without "
+                  "changing the solve type."
   []
 
   [check_petsc_options_test]

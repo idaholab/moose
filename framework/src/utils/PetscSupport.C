@@ -201,18 +201,6 @@ prefixCommandLineOptionValue(::PetscOptions command_line_options,
 }
 
 bool
-commandLinePCTypeImpliesPreconditioningMatrix(::PetscOptions command_line_options,
-                                              const std::string & prefix)
-{
-  const auto pc_type = prefixCommandLineOptionValue(command_line_options, prefix, "-pc_type");
-  if (!pc_type)
-    return false;
-
-  const auto lower_pc_type = MooseUtils::toLower(*pc_type);
-  return lower_pc_type != "none" && lower_pc_type != "shell";
-}
-
-bool
 hasMatrixFreeSolveType(const FEProblemBase & problem)
 {
   for (const auto sys_index : make_range(problem.numSolverSystems()))
@@ -792,9 +780,6 @@ setSolveTypeFromCommandLine(FEProblemBase & fe_problem)
       fe_problem.solverParams(i)._type = Moose::ST_PJFNK;
     else if (prefixHasCommandLineOption(command_line_options, prefix, "-snes_mf"))
       fe_problem.solverParams(i)._type = Moose::ST_JFNK;
-    else if (fe_problem.solverParams(i)._type == Moose::ST_JFNK &&
-             commandLinePCTypeImpliesPreconditioningMatrix(command_line_options, prefix))
-      fe_problem.solverParams(i)._type = Moose::ST_PJFNK;
   }
 
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsDestroy(&command_line_options));

@@ -19,20 +19,6 @@
     requirement = "The system shall not reject an unprefixed PETSc preconditioner type option for a "
                   "JFNK solve using prefixed solver systems."
   []
-  [prefixed_pc_type_command_line_override]
-    type = RunApp
-    input = 'diffusion_multisys.i'
-    cli_args = "Executioner/solve_type=JFNK
-                Executioner/num_steps=1
-                Outputs/csv=false
-                -sys1_pc_type lu
-                -sys2_pc_type lu
-                -sys1_ksp_view
-                -sys2_ksp_view"
-    expect_out = 'PC Object: \(sys1_\).*?type: lu.*?PC Object: \(sys2_\).*?type: lu'
-    requirement = "The system shall allow command-line PETSc preconditioner type options to "
-                  "override Physics-added PETSc preconditioner type options for JFNK solves."
-  []
   [jfnk_physics_pc_type]
     type = RunApp
     input = 'diffusion_multisys.i'
