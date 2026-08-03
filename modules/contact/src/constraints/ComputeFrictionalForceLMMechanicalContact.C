@@ -65,7 +65,10 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
 ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalContact(
     const InputParameters & parameters)
   : ComputeWeightedGapLMMechanicalContact(parameters),
-    _weighted_velocities_uo(getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")),
+    // UserObjectInterface returns const references; this constraint configures the UO before
+    // execution.
+    _weighted_velocities_uo(const_cast<WeightedVelocitiesUserObject &>(
+        getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo"))),
     _c_t(getParam<Real>("c_t")),
     _friction_projection_degree(getParam<MooseEnum>("friction_projection_degree")
                                     .getEnum<Moose::Mortar::Contact::FrictionProjectionDegree>()),

@@ -39,6 +39,12 @@ NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParamete
                "combined with quadrature-point normal interpolation.");
 }
 
+bool
+NormalMortarMechanicalContact::hasHeterogeneousJacobianRowSupport() const
+{
+  return _weighted_gap_uo.usesNodalNormalDerivatives();
+}
+
 ADReal
 NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
@@ -56,12 +62,12 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // Get the _dof_to_weighted_gap map
       {
         const auto normal_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
-        const auto normal =
-            _weighted_gap_uo.usesNodalNormalDerivatives()
-                ? _weighted_gap_uo.contactNormal(*_lower_secondary_elem, normal_index)
-                : ADRealVectorValue(_normals[normal_index]);
+        if (_weighted_gap_uo.usesNodalNormalDerivatives())
+          return _test_secondary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
+                 _weighted_gap_uo.contactNormal(*_lower_secondary_elem, normal_index)(_component);
+
         return _test_secondary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
-               normal(_component);
+               _normals[normal_index](_component);
       }
 
     case Moose::MortarType::Primary:
@@ -69,12 +75,12 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // negative sign here
       {
         const auto normal_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
-        const auto normal =
-            _weighted_gap_uo.usesNodalNormalDerivatives()
-                ? _weighted_gap_uo.contactNormal(*_lower_secondary_elem, normal_index)
-                : ADRealVectorValue(_normals[normal_index]);
+        if (_weighted_gap_uo.usesNodalNormalDerivatives())
+          return -_test_primary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
+                 _weighted_gap_uo.contactNormal(*_lower_secondary_elem, normal_index)(_component);
+
         return -_test_primary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
-               normal(_component);
+               _normals[normal_index](_component);
       }
     default:
       return 0;

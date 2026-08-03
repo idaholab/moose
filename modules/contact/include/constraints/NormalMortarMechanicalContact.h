@@ -22,6 +22,7 @@ public:
 
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
+  bool hasHeterogeneousJacobianRowSupport() const override;
 
   /// The displacement component that this object applies to
   const MooseEnum _component;

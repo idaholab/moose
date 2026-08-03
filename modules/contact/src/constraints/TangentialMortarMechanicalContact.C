@@ -49,23 +49,15 @@ TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
                "normals and cannot be combined with quadrature-point normal interpolation.");
 }
 
+bool
+TangentialMortarMechanicalContact::hasHeterogeneousJacobianRowSupport() const
+{
+  return _weighted_velocities_uo.usesNodalNormalDerivatives();
+}
+
 ADReal
 TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
-  const auto tangent_component = [this](const unsigned int geometry_index)
-  {
-    if (_weighted_velocities_uo.usesNodalNormalDerivatives())
-    {
-      const auto tangents =
-          _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, geometry_index);
-      return tangents[_direction](_component) / tangents[_direction].norm();
-    }
-
-    const auto & tangents = amg().getNodalTangents(*_lower_secondary_elem);
-    return ADReal(tangents[_direction][geometry_index](_component) /
-                  tangents[_direction][geometry_index].norm());
-  };
-
   MooseEnum direction("direction_1 direction_2", "direction_1");
 
   const auto tangential_pressure =
@@ -85,13 +77,35 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
       {
-        const auto geometry_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
-        return _test_secondary[_i][_qp] * tangential_pressure * tangent_component(geometry_index);
+        const unsigned int tangent_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
+        if (_weighted_velocities_uo.usesNodalNormalDerivatives())
+        {
+          const auto tangents =
+              _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, tangent_index);
+          return _test_secondary[_i][_qp] * tangential_pressure * tangents[_direction](_component) /
+                 tangents[_direction].norm();
+        }
+
+        const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+        return _test_secondary[_i][_qp] * tangential_pressure *
+               nodal_tangents[_direction][tangent_index](_component) /
+               nodal_tangents[_direction][tangent_index].norm();
       }
     case Moose::MortarType::Primary:
     {
-      const auto geometry_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
-      return -_test_primary[_i][_qp] * tangential_pressure * tangent_component(geometry_index);
+      const unsigned int tangent_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
+      if (_weighted_velocities_uo.usesNodalNormalDerivatives())
+      {
+        const auto tangents =
+            _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, tangent_index);
+        return -_test_primary[_i][_qp] * tangential_pressure * tangents[_direction](_component) /
+               tangents[_direction].norm();
+      }
+
+      const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+      return -_test_primary[_i][_qp] * tangential_pressure *
+             nodal_tangents[_direction][tangent_index](_component) /
+             nodal_tangents[_direction][tangent_index].norm();
     }
     default:
       return 0;

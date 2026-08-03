@@ -15,7 +15,11 @@
 TEST(MortarNodalGeometryTest, weightedNormalAndHouseholderTangents)
 {
   constexpr dof_id_type derivative_index = 0;
+  // For central differences, this step balances truncation and roundoff; the derivative tolerance
+  // covers that approximation, while direct orthogonality checks use a roundoff-level tolerance.
   constexpr Real epsilon = 1e-7;
+  constexpr Real finite_difference_tolerance = 1e-8;
+  constexpr Real orthogonality_tolerance = 1e-14;
   constexpr Real coordinate = 0.4;
 
   const auto tangents = [](const auto & perturbed_coordinate)
@@ -41,21 +45,24 @@ TEST(MortarNodalGeometryTest, weightedNormalAndHouseholderTangents)
   for (const auto component : make_range(Moose::dim))
     EXPECT_NEAR(ad_normal(component).derivatives()[derivative_index],
                 normal_finite_difference(component),
-                1e-8);
+                finite_difference_tolerance);
 
   for (const auto direction : make_range(2))
   {
-    EXPECT_NEAR(MetaPhysicL::raw_value(ad_normal * ad_tangents[direction]), 0.0, 1e-14);
-    EXPECT_NEAR(MetaPhysicL::raw_value(ad_tangents[direction].norm()), 1.0, 1e-14);
+    EXPECT_NEAR(
+        MetaPhysicL::raw_value(ad_normal * ad_tangents[direction]), 0.0, orthogonality_tolerance);
+    EXPECT_NEAR(
+        MetaPhysicL::raw_value(ad_tangents[direction].norm()), 1.0, orthogonality_tolerance);
 
     const auto finite_difference =
         (plus_tangents[direction] - minus_tangents[direction]) / (2 * epsilon);
     for (const auto component : make_range(Moose::dim))
       EXPECT_NEAR(ad_tangents[direction](component).derivatives()[derivative_index],
                   finite_difference(component),
-                  1e-8);
+                  finite_difference_tolerance);
   }
-  EXPECT_NEAR(MetaPhysicL::raw_value(ad_tangents[0] * ad_tangents[1]), 0.0, 1e-14);
+  EXPECT_NEAR(
+      MetaPhysicL::raw_value(ad_tangents[0] * ad_tangents[1]), 0.0, orthogonality_tolerance);
 
   ADRealVectorValue singular_normal(-1.0, 0.0, 0.0);
   Moose::derivInsert(singular_normal(1).derivatives(), derivative_index, 1.0);

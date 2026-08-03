@@ -11,7 +11,7 @@
 #include "ADKernel.h"
 
 /**
- * Test kernel whose residual rows have distinct or differently inserted AD derivative support.
+ * Test kernel whose residual rows have distinct AD derivative support.
  */
 class ADRowDependentTestKernel : public ADKernel
 {
@@ -20,9 +20,16 @@ public:
 
   ADRowDependentTestKernel(const InputParameters & parameters);
 
+  void jacobianSetup() override;
+
 protected:
+  void computeJacobian() override;
+  void computeResidualAndJacobian() override;
+  void computeOffDiagJacobian(unsigned int) override;
   ADReal computeQpResidual() override;
 
   const MooseArray<ADReal> & _ad_dof_values;
-  const bool _reorder_equivalent_support;
+
+  /// Last element assembled through the off-diagonal Jacobian callback
+  const Elem * _last_jacobian_elem;
 };
