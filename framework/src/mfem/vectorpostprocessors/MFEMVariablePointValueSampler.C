@@ -9,16 +9,12 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMPointVariableValueSampler.h"
+#include "MFEMVariablePointValueSampler.h"
 
-registerMooseObject("MooseApp", MFEMPointVariableValueSampler);
-registerMooseObjectRenamed("MooseApp",
-                           MFEMPointValueSampler,
-                           "06/30/2027 24:00",
-                           MFEMPointVariableValueSampler);
+registerMooseObject("MooseApp", MFEMVariablePointValueSampler);
 
 InputParameters
-MFEMPointVariableValueSampler::validParams()
+MFEMVariablePointValueSampler::validParams()
 {
   InputParameters params = MFEMVariableValueSamplerBase::validParams();
 
@@ -29,7 +25,7 @@ MFEMPointVariableValueSampler::validParams()
   return params;
 }
 
-MFEMPointVariableValueSampler::MFEMPointVariableValueSampler(const InputParameters & parameters)
+MFEMVariablePointValueSampler::MFEMVariablePointValueSampler(const InputParameters & parameters)
   : MFEMVariableValueSamplerBase(parameters, parameters.get<std::vector<Point>>("points"))
 {
 }

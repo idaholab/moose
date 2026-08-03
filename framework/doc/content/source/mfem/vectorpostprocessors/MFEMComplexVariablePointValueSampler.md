@@ -1,4 +1,4 @@
-# MFEMComplexPointVariableValueSampler
+# MFEMComplexVariablePointValueSampler
 
 !if! function=hasCapability('mfem')
 
@@ -13,11 +13,11 @@ The real and imaginary parts of each sampled component are output as separate co
 
 !listing mfem/variables/complex_aux_recovery.i block=VectorPostprocessors
 
-!syntax parameters /VectorPostprocessors/MFEMComplexPointVariableValueSampler
+!syntax parameters /VectorPostprocessors/MFEMComplexVariablePointValueSampler
 
-!syntax inputs /VectorPostprocessors/MFEMComplexPointVariableValueSampler
+!syntax inputs /VectorPostprocessors/MFEMComplexVariablePointValueSampler
 
-!syntax children /VectorPostprocessors/MFEMComplexPointVariableValueSampler
+!syntax children /VectorPostprocessors/MFEMComplexVariablePointValueSampler
 
 !if-end!
 

@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMLineVariableValueSampler.h"
+#include "MFEMVariableLineValueSampler.h"
 
 #include "libmesh/point.h"
 #include "MooseError.h"
@@ -17,11 +17,7 @@
 
 #include <vector>
 
-registerMooseObject("MooseApp", MFEMLineVariableValueSampler);
-registerMooseObjectRenamed("MooseApp",
-                           MFEMLineValueSampler,
-                           "06/30/2027 24:00",
-                           MFEMLineVariableValueSampler);
+registerMooseObject("MooseApp", MFEMVariableLineValueSampler);
 
 namespace
 {
@@ -32,12 +28,10 @@ generateLinePoints(const Point & start_point,
                    const std::string & object_name)
 {
   if (num_points < 2)
-  {
-    mooseError("In MFEMLineVariableValueSampler \"",
+    mooseError("In MFEMVariableLineValueSampler \"",
                object_name,
                "\": line must have at least 2 points, "
-               "for single points use MFEMPointVariableValueSampler.");
-  }
+               "for single points use MFEMVariablePointValueSampler.");
 
   // initialize and populate vector with linearly-spaced points along line
   std::vector<Point> points;
@@ -54,7 +48,7 @@ generateLinePoints(const Point & start_point,
 }
 
 InputParameters
-MFEMLineVariableValueSampler::validParams()
+MFEMVariableLineValueSampler::validParams()
 {
   InputParameters params = MFEMVariableValueSamplerBase::validParams();
 
@@ -70,7 +64,7 @@ MFEMLineVariableValueSampler::validParams()
   return params;
 }
 
-MFEMLineVariableValueSampler::MFEMLineVariableValueSampler(const InputParameters & parameters)
+MFEMVariableLineValueSampler::MFEMVariableLineValueSampler(const InputParameters & parameters)
   : MFEMVariableValueSamplerBase(parameters,
                                  // can't call getParam as that requires initialized base class
                                  // so calling parameters.get directly

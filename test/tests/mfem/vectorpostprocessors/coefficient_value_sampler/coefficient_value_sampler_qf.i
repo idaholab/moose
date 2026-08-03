@@ -10,7 +10,7 @@
 
 [VectorPostprocessors]
   [quadrature_sample]
-    type = MFEMPointScalarCoefficientValueSampler
+    type = MFEMScalarCoefficientPointValueSampler
     coefficient = quadrature_coefficient
     points = '0.125 0.125 0'
   []

@@ -1,4 +1,4 @@
-# MFEMLineVariableValueSampler
+# MFEMVariableLineValueSampler
 
 !if! function=hasCapability('mfem')
 
@@ -12,11 +12,11 @@ along a specified line using MFEM's
 
 !listing mfem/vectorpostprocessors/line_value_sampler/line_value_sampler_diffusion.i block=VectorPostprocessors
 
-!syntax parameters /VectorPostprocessors/MFEMLineVariableValueSampler
+!syntax parameters /VectorPostprocessors/MFEMVariableLineValueSampler
 
-!syntax inputs /VectorPostprocessors/MFEMLineVariableValueSampler
+!syntax inputs /VectorPostprocessors/MFEMVariableLineValueSampler
 
-!syntax children /VectorPostprocessors/MFEMLineVariableValueSampler
+!syntax children /VectorPostprocessors/MFEMVariableLineValueSampler
 
 !if-end!
 

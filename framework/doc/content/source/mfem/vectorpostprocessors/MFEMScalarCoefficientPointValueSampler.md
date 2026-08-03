@@ -1,4 +1,4 @@
-# MFEMPointScalarCoefficientValueSampler
+# MFEMScalarCoefficientPointValueSampler
 
 !if! function=hasCapability('mfem')
 
@@ -25,11 +25,11 @@ arbitrary sample points and are rejected by this sampler.
 
 !listing mfem/vectorpostprocessors/coefficient_value_sampler/coefficient_value_sampler.i block=VectorPostprocessors
 
-!syntax parameters /VectorPostprocessors/MFEMPointScalarCoefficientValueSampler
+!syntax parameters /VectorPostprocessors/MFEMScalarCoefficientPointValueSampler
 
-!syntax inputs /VectorPostprocessors/MFEMPointScalarCoefficientValueSampler
+!syntax inputs /VectorPostprocessors/MFEMScalarCoefficientPointValueSampler
 
-!syntax children /VectorPostprocessors/MFEMPointScalarCoefficientValueSampler
+!syntax children /VectorPostprocessors/MFEMScalarCoefficientPointValueSampler
 
 !if-end!
 

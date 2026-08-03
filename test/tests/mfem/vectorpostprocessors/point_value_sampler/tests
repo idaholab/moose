@@ -1,5 +1,5 @@
 [Tests]
-  design = 'MFEMPointVariableValueSampler.md'
+  design = 'MFEMVariablePointValueSampler.md'
   issues = '#31249'
   [MFEMPointVariableValueSamplerDiffusion]
     type = CSVDiff
@@ -26,7 +26,7 @@
   [MFEMVariableValueSamplerPointNotFoundError]
     type = RunException
     input = point_value_sampler_point_not_found.i
-    expect_err = 'MFEMPointVariableValueSampler "point_sample" could not find point at'
+    expect_err = 'MFEMVariablePointValueSampler "point_sample" could not find point at'
     requirement = "The system shall issue an error if an attempt is made to sample at a point that is not inside the mesh."
     capabilities = 'mfem'
     recover = false
@@ -36,7 +36,7 @@
     type = RunException
     input = point_value_sampler_boundary_warn.i
     cli_args = 'VectorPostprocessors/point_sample/variable=rt_vector'
-    expect_err = 'MFEMPointVariableValueSampler "point_sample" found point .* on an element '
+    expect_err = 'MFEMVariablePointValueSampler "point_sample" found point .* on an element '
                  'boundary.*H\(div\).*continuous normal trace.*tangential component may differ '
                  'between elements.*element selected by GSLIB will supply the sampled value'
     issues = '#32988'
@@ -49,7 +49,7 @@
     type = RunException
     input = point_value_sampler_boundary_warn.i
     cli_args = 'VectorPostprocessors/point_sample/variable=nd_vector'
-    expect_err = 'MFEMPointVariableValueSampler "point_sample" found point .* on an element '
+    expect_err = 'MFEMVariablePointValueSampler "point_sample" found point .* on an element '
                  'boundary.*H\(curl\).*continuous tangential trace.*normal component may differ '
                  'between elements.*element selected by GSLIB will supply the sampled value'
     issues = '#32988'
@@ -61,7 +61,7 @@
   [MFEMValueSamplerBoundaryDiscontinuousWarningL2]
     type = RunException
     input = point_value_sampler_boundary_warn.i
-    expect_err = 'MFEMPointVariableValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
+    expect_err = 'MFEMVariablePointValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
     issues = '#32988'
     requirement = "The system shall issue a warning if an attempt is made to sample an L2 variable near an element boundary."
     capabilities = 'mfem'
@@ -71,11 +71,11 @@
   [MFEMComplexVariableValueSamplerPointNotFoundError]
     type = RunException
     input = complex_point_value_sampler_boundary_warn.i
-    cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexPointVariableValueSampler '
+    cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexVariablePointValueSampler '
                'VectorPostprocessors/point_sample/variable=l2_complex '
                'VectorPostprocessors/point_sample/points="0 0 1000"'
-    expect_err = 'MFEMComplexPointVariableValueSampler "point_sample" could not find point at'
-    design = 'MFEMComplexPointVariableValueSampler.md'
+    expect_err = 'MFEMComplexVariablePointValueSampler "point_sample" could not find point at'
+    design = 'MFEMComplexVariablePointValueSampler.md'
     issues = '#30076'
     requirement = "The system shall issue an error if a complex variable is sampled at a point that is not inside the mesh."
     capabilities = 'mfem'
@@ -85,10 +85,10 @@
   [MFEMComplexVariableValueSamplerBoundaryDiscontinuousWarning]
     type = RunException
     input = complex_point_value_sampler_boundary_warn.i
-    cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexPointVariableValueSampler '
+    cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexVariablePointValueSampler '
                'VectorPostprocessors/point_sample/variable=l2_complex'
-    expect_err = 'MFEMComplexPointVariableValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
-    design = 'MFEMComplexPointVariableValueSampler.md'
+    expect_err = 'MFEMComplexVariablePointValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
+    design = 'MFEMComplexVariablePointValueSampler.md'
     issues = '#30076 #32988'
     requirement = "The system shall issue a warning if a complex variable is sampled near a boundary where it is discontinuous."
     capabilities = 'mfem'
@@ -106,7 +106,7 @@
   [MFEMVariableValueSamplerBoundaryTolOnBoundary]
     type = RunException
     input = point_value_sampler_boundary_tol.i
-    expect_err = 'MFEMPointVariableValueSampler "point_sample" could not find point at'
+    expect_err = 'MFEMVariablePointValueSampler "point_sample" could not find point at'
     cli_args = 'VectorPostprocessors/point_sample/mesh_boundary_tolerance=1e-10'
     requirement = "The system shall issue an error for a point near but outside a boundary when the tolerance is tight."
     capabilities = 'mfem'

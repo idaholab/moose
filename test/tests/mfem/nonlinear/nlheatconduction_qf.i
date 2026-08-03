@@ -104,7 +104,7 @@ alpha = 1e-2
 
 [VectorPostprocessors]
   [centre_temperature]
-    type = MFEMPointVariableValueSampler
+    type = MFEMVariablePointValueSampler
     variable = 'temperature'
     points = '0.0 0.0 0.0'
     execute_on = TIMESTEP_END

@@ -30,7 +30,7 @@
 
 [VectorPostprocessors]
   [point_sample]
-    type = MFEMPointVariableValueSampler
+    type = MFEMVariablePointValueSampler
     variable = 'h1_scalar'
     points = '0 0 1000'
   []

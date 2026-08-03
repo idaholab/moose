@@ -9,12 +9,12 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMPointScalarCoefficientValueSampler.h"
+#include "MFEMScalarCoefficientPointValueSampler.h"
 
 #include "MFEMProblem.h"
 #include "SubProblem.h"
 
-registerMooseObject("MooseApp", MFEMPointScalarCoefficientValueSampler);
+registerMooseObject("MooseApp", MFEMScalarCoefficientPointValueSampler);
 
 namespace
 {
@@ -28,7 +28,7 @@ mainMesh(const InputParameters & parameters)
 }
 
 InputParameters
-MFEMPointScalarCoefficientValueSampler::validParams()
+MFEMScalarCoefficientPointValueSampler::validParams()
 {
   InputParameters params = MFEMSamplerBase::validParams();
   params.addClassDescription("Sample a real scalar MFEM coefficient at specific points.");
@@ -39,7 +39,7 @@ MFEMPointScalarCoefficientValueSampler::validParams()
   return params;
 }
 
-MFEMPointScalarCoefficientValueSampler::MFEMPointScalarCoefficientValueSampler(
+MFEMScalarCoefficientPointValueSampler::MFEMScalarCoefficientPointValueSampler(
     const InputParameters & parameters)
   : MFEMSamplerBase(parameters, parameters.get<std::vector<Point>>("points"), mainMesh(parameters)),
     _coefficient(nullptr),
@@ -50,7 +50,7 @@ MFEMPointScalarCoefficientValueSampler::MFEMPointScalarCoefficientValueSampler(
 }
 
 void
-MFEMPointScalarCoefficientValueSampler::initialSetup()
+MFEMScalarCoefficientPointValueSampler::initialSetup()
 {
   _coefficient = &getScalarCoefficient("coefficient");
   if (dynamic_cast<mfem::QuadratureFunctionCoefficient *>(_coefficient))
@@ -72,7 +72,7 @@ MFEMPointScalarCoefficientValueSampler::initialSetup()
 }
 
 void
-MFEMPointScalarCoefficientValueSampler::execute()
+MFEMScalarCoefficientPointValueSampler::execute()
 {
   mfem::Array<unsigned int> received_elements;
   mfem::Array<unsigned int> received_codes;
@@ -105,7 +105,7 @@ MFEMPointScalarCoefficientValueSampler::execute()
 }
 
 void
-MFEMPointScalarCoefficientValueSampler::finalizeValues()
+MFEMScalarCoefficientPointValueSampler::finalizeValues()
 {
   const auto * const interp_vals = _interp_vals.HostRead();
   for (const auto i : index_range(_declared_vals))
