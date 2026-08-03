@@ -42,7 +42,7 @@ generateLinePoints(const Point & start_point,
   // initialize and populate vector with linearly-spaced points along line
   std::vector<Point> points;
   points.reserve(num_points);
-  for (unsigned int i_point = 0; i_point < num_points; i_point++)
+  for (const auto i_point : make_range(num_points))
   {
     // fractional distance along line [0, 1]
     Real t = static_cast<Real>(i_point) / static_cast<Real>(num_points - 1);
