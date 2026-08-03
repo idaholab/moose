@@ -31,12 +31,13 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem_data(_mfem_problem.getProblemData()),
     _mfem_problem_solve(*this, _mfem_problem.getProblemOperators())
 {
+  _mfem_problem._default_assembly_level =
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>();
 }
 
 void
 MFEMTransient::init()
 {
-
   TransientBase::init();
 
   // verify that the requested time integration scheme is actually supported by MFEM transient
@@ -44,24 +45,6 @@ MFEMTransient::init()
     paramError("scheme",
                "Time Integration scheme \"" + stringify(getTimeScheme()) +
                    "\" is not supported by MFEMTransient Executioner.");
-
-  if (_mfem_problem_data.nonlinear_solver)
-    _mfem_problem_data.eqn_system->SetGradientRequired(
-        _mfem_problem_data.nonlinear_solver->RequiresGradient());
-
-  _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
-
-  // Set up initial conditions
-  _mfem_problem_data.eqn_system->Init(
-      _mfem_problem_data.gridfunctions,
-      _mfem_problem_data.cmplx_gridfunctions,
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
-
-  for (const auto & problem_operator : _mfem_problem.getProblemOperators())
-  {
-    problem_operator->SetGridFunctions();
-    problem_operator->Init(_mfem_problem_data.true_solution);
-  }
 }
 
 void
