@@ -358,9 +358,9 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
 
   // Classify a point on the x = 1 edge; the default constructor uses the libMesh tolerance, the
   // second form uses an explicit on-surface epsilon.
-  const auto side_default = [&](const Point & p)
+  const auto side_default = [&bd_elements, &ray_opts](const Point & p)
   { return AdaptiveRayContainmentCheck(bd_elements, std::vector<Point>(), ray_opts).sideness(p); };
-  const auto side_with_eps = [&](const Point & p, const Real eps)
+  const auto side_with_eps = [&bd_elements, &ray_opts](const Point & p, const Real eps)
   {
     return AdaptiveRayContainmentCheck(bd_elements, std::vector<Point>(), ray_opts, eps)
         .sideness(p);

@@ -39,7 +39,7 @@ protected:
   {
     return buildFunction("ParsedFunction",
                          name,
-                         [&](InputParameters & p) { p.set<std::string>("expression") = expr; });
+                         [&expr](InputParameters & p) { p.set<std::string>("expression") = expr; });
   }
 };
 

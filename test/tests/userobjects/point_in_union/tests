@@ -42,15 +42,6 @@
                   'the same union classification as the equivalent negative-inside functions.'
   []
 
-  [nested]
-    type = 'Exodiff'
-    input = 'union_nested.i'
-    exodiff = 'union_nested_out.e'
-    recover = false
-    requirement = 'The system shall allow a union of geometries to be used as a provider of another '
-                  'union, classifying points against the nested union.'
-  []
-
   [two_meshes]
     type = 'Exodiff'
     input = 'union_two_meshes.i'

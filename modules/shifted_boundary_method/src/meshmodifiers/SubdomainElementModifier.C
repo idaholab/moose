@@ -71,7 +71,8 @@ SubdomainElementModifier::computeSubdomainID()
     const Real ratio_active = SBMUtils::activeElementFraction(
         *elem,
         _qrule_order,
-        [&](const Point & point) { return checker->sideness(point) != SurfaceSide::OUTSIDE; });
+        [checker](const Point & point)
+        { return checker->sideness(point) != SurfaceSide::OUTSIDE; });
     // All nodes may be outside even when a closed geometry lies within the element or its surface
     // crosses the element. Retain the checker if either nodes or quadrature points find activity.
     const bool has_active_region = num_inside_nodes != 0 || ratio_active > 0.0;

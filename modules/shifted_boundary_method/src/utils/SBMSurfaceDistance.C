@@ -30,7 +30,7 @@ distanceFrom(const SurfaceElement & surface_elem, const Point & pt)
   // sufficient. Validated once here as a debug assert; callers build these from
   // supported surface meshes.
   mooseAssert(
-      [&]()
+      [&element]()
       {
         if (element.n_sides() == 0)
           return true;

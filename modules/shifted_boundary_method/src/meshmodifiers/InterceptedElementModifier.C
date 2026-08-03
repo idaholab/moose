@@ -84,9 +84,9 @@ InterceptedElementModifier::computeSubdomainID()
   if (!elem)
     mooseError("InterceptedElementModifier: _current_elem is null!");
 
-  const auto classify_element = [&](const bool all_nodes_active,
-                                    const bool all_nodes_inactive,
-                                    const Real ratio_active) -> SubdomainID
+  const auto classify_element = [this](const bool all_nodes_active,
+                                       const bool all_nodes_inactive,
+                                       const Real ratio_active) -> SubdomainID
   {
     const SBMUtils::ElementActivity activity{all_nodes_active, all_nodes_inactive, ratio_active};
     const SBMUtils::ClassificationSubdomains subdomains{
@@ -114,7 +114,7 @@ InterceptedElementModifier::computeSubdomainID()
       const bool all_nodes_inactive = (_is_domain_inside_surface && min_val > _threshold) ||
                                       (!_is_domain_inside_surface && max_val < _threshold);
 
-      const auto is_active = [&](const Point & point)
+      const auto is_active = [this](const Point & point)
       {
         const Real val = _parsed_function->value(_t, point);
         return (_is_domain_inside_surface && val < _threshold) ||
@@ -136,7 +136,7 @@ InterceptedElementModifier::computeSubdomainID()
       const unsigned int active_nodes =
           _is_domain_inside_surface ? inside_nodes : elem->n_nodes() - inside_nodes;
 
-      const auto is_active = [&](const Point & point)
+      const auto is_active = [this](const Point & point)
       {
         const bool is_inside = _in_out_test_base->ifInside(point);
         return _is_domain_inside_surface ? is_inside : !is_inside;
