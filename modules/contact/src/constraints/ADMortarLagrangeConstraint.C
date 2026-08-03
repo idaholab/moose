@@ -55,6 +55,12 @@ ADMortarLagrangeConstraint::initialSetup()
     _apply_derivative_threshold = false;
 }
 
+bool
+ADMortarLagrangeConstraint::hasHeterogeneousJacobianRowSupport() const
+{
+  return false;
+}
+
 void
 ADMortarLagrangeConstraint::computeResidual(Moose::MortarType mortar_type)
 {
@@ -191,5 +197,10 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   }
 
-  addJacobian(_assembly, residuals_lower, dof_indices_lower, scaling_factor);
+  // Nodal-normal derivatives can give each row a distinct secondary one-ring support.
+  if (hasHeterogeneousJacobianRowSupport())
+    addJacobianWithHeterogeneousRowSupport(
+        _assembly, residuals_lower, dof_indices_lower, scaling_factor);
+  else
+    addJacobian(_assembly, residuals_lower, dof_indices_lower, scaling_factor);
 }

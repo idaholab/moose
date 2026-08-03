@@ -67,7 +67,7 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
 }
 
 void
-WeightedGapUserObject::includeNodalNormalDerivatives() const
+WeightedGapUserObject::includeNodalNormalDerivatives()
 {
   if (_use_nodal_normal_derivatives)
     return;
