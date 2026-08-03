@@ -1,6 +1,5 @@
-# Purpose: Verify viscously regularized mode-I traction-separation output.
-# Assertion: The viscously regularized traction-separation response matches the CSV gold curve.
-# Why this exists: Protects the viscous regularization option of the bilinear cohesive law.
+# Purpose: Verify that a fully debonded interface (omega=1) re-establishes compressive contact on closure.
+# Verifies: damage stays at 1 after full decohesion; compressive traction is nonzero on recontact via penalty contact.
 
 [Mesh]
   [base]
@@ -104,8 +103,6 @@
   []
   [cohesive_traction_normal]
   []
-  [cohesive_traction_effective]
-  []
 []
 
 [AuxKernels]
@@ -127,12 +124,6 @@
     user_object = czm_uo
     cohesive_zone_quantity = cohesive_traction_normal
   []
-  [cohesive_traction_effective]
-    type = CohesiveZoneMortarUserObjectAux
-    variable = cohesive_traction_effective
-    user_object = czm_uo
-    cohesive_zone_quantity = cohesive_traction_effective
-  []
 []
 
 [BCs]
@@ -150,11 +141,13 @@
     variable = disp_x
     value = 0
   []
+  # Open past delta_f (=0.2mm at K=1000, N=50, GI_c=5) then reverse into compression.
+  # delta_f = 2*GI_c/N = 0.2; loading reaches 0.24 (full debond) then reverses to -0.096.
   [top]
     type = FunctionDirichletBC
     boundary = 100
     variable = disp_y
-    function = '0.3*t'
+    function = 'if(t<=0.8, 0.3*t, 0.24 - 0.48*(t-0.8))'
     preset = true
   []
   [roller_bottom_y]
@@ -206,7 +199,7 @@
     set_compressive_traction_to_zero = true
 
     friction_coefficient = 0.0
-    penalty = 0.0
+    penalty = 1e4
     penalty_friction = 0.0
 
     normal_strength = 'normal_strength'
@@ -215,7 +208,6 @@
     power_law_parameter = 2.0
     GI_c = 5
     GII_c = 5
-    viscosity = 1e-2
     displacements = 'disp_x disp_y'
   []
 []
@@ -282,15 +274,18 @@
     variable = cohesive_traction_normal
     block = secondary_lower
   []
-  [traction_eff]
-    type = ElementAverageValue
-    variable = cohesive_traction_effective
-    block = secondary_lower
-  []
   [cohesive_damage]
     type = ElementAverageValue
     variable = damage
     block = secondary_lower
+  []
+  # Total interface traction (CZM + penalty contact) from bulk stress equilibrium.
+  # After full debond (omega=1), CZM traction_n = 0, but this captures penalty contact compression.
+  [total_traction_y]
+    type = ADSidesetReaction
+    stress_tensor = stress
+    boundary = top_base
+    direction = '0 1 0'
   []
 []
 
@@ -320,9 +315,9 @@
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-11
   start_time = 0.0
-  dt = 0.01
-  end_time = 1.0
-  dtmin = 0.01
+  dt = 0.02
+  end_time = 1.36
+  dtmin = 0.02
 []
 
 [Outputs]

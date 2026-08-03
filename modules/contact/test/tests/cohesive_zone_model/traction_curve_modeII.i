@@ -48,16 +48,22 @@
     type = MeshCollectionGenerator
     inputs = 'base_id top_id'
   []
-  [top_node]
+  [top_left_node]
     type = ExtraNodesetGenerator
     coord = '0 2 0'
     input = combined
-    new_boundary = top_node
+    new_boundary = top_left_node
+  []
+  [top_right_node]
+    type = ExtraNodesetGenerator
+    coord = '1 2 0'
+    input = top_left_node
+    new_boundary = top_right_node
   []
   [bottom_node]
     type = ExtraNodesetGenerator
     coord = '-0.1 0 0'
-    input = top_node
+    input = top_right_node
     new_boundary = bottom_node
   []
 
@@ -160,11 +166,11 @@
 []
 
 [BCs]
-  [fix_x]
+  [fix_bottom_x]
     type = DirichletBC
     preset = true
     value = 0.0
-    boundary = bottom_node
+    boundary = bottom_base
     variable = disp_x
   []
   [top]
@@ -174,14 +180,14 @@
     function = '0.3*t'
     preset = true
   []
-  [top_y]
+  [top_y_rollers]
     type = DirichletBC
-    boundary = 100
+    boundary = 'top_left_node top_right_node'
     variable = disp_y
     value = 0
     preset = true
   []
-  [bottom]
+  [roller_bottom_y]
     type = DirichletBC
     boundary = bottom_base
     variable = disp_y
