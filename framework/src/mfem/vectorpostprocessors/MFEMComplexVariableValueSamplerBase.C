@@ -28,7 +28,7 @@ MFEMComplexVariableValueSamplerBase::MFEMComplexVariableValueSamplerBase(
     _real_interp_vals(points.size()),
     _imag_interp_vals(points.size())
 {
-  const auto val_dim = _var.real().VectorDim();
+  const auto val_dim = _var.VectorDim();
   for (const auto i : make_range(val_dim))
   {
     auto & real_declared = this->declareVector(_var_name + "_real_" + std::to_string(i));
@@ -44,7 +44,7 @@ MFEMComplexVariableValueSamplerBase::MFEMComplexVariableValueSamplerBase(
 int
 MFEMComplexVariableValueSamplerBase::getFESpaceContinuityType() const
 {
-  return _var.real().FESpace()->FEColl()->GetContType();
+  return _var.FESpace()->FEColl()->GetContType();
 }
 
 void
@@ -60,9 +60,9 @@ MFEMComplexVariableValueSamplerBase::finalizeValues()
   _real_interp_vals.HostReadWrite();
   _imag_interp_vals.HostReadWrite();
 
-  const auto val_dims = _var.real().VectorDim();
+  const auto val_dims = _var.VectorDim();
   const auto num_points = _declared_points[0].get().size();
-  const auto val_fespace_ordering = _var.real().FESpace()->GetOrdering();
+  const auto val_fespace_ordering = _var.FESpace()->GetOrdering();
   for (const auto i_dim : index_range(_declared_real_vals))
     for (const auto i_point : make_range(num_points))
     {
