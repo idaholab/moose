@@ -388,6 +388,10 @@ public:
   setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
   virtual void setNeighborSubdomainID(const Elem * elem, const THREAD_ID tid);
   virtual void prepareAssembly(const THREAD_ID tid) override;
+  /**
+   * Begin a fresh neighbor accumulation phase by sizing and zeroing the neighbor blocks.
+   */
+  virtual void prepareAssemblyNeighbor(const THREAD_ID tid);
 
   virtual void addGhostedElem(dof_id_type elem_id) override;
   virtual void addGhostedBoundary(BoundaryID boundary_id) override;

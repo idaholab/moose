@@ -378,7 +378,7 @@ protected:
    * Add a local Jacobian matrix
    */
   void addJacobian(Assembly & assembly,
-                   DenseMatrix<Real> & local_k,
+                   const DenseMatrix<Real> & local_k,
                    const std::vector<dof_id_type> & row_indices,
                    const std::vector<dof_id_type> & column_indices,
                    Real scaling_factor);
@@ -648,14 +648,13 @@ TaggingInterface::addJacobianElement(Assembly & assembly,
 
 inline void
 TaggingInterface::addJacobian(Assembly & assembly,
-                              DenseMatrix<Real> & local_k,
+                              const DenseMatrix<Real> & local_k,
                               const std::vector<dof_id_type> & row_indices,
                               const std::vector<dof_id_type> & column_indices,
                               const Real scaling_factor)
 {
-  for (const auto matrix_tag : _matrix_tags)
-    assembly.cacheJacobianBlock(
-        local_k, row_indices, column_indices, scaling_factor, Assembly::LocalDataKey{}, matrix_tag);
+  assembly.cacheJacobianBlock(
+      local_k, row_indices, column_indices, scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
 }
 
 template <typename T>

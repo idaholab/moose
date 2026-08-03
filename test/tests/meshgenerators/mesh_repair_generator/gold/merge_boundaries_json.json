@@ -3,11 +3,8 @@
         "mesh": {
             "type": "MeshInfo",
             "values": {
-                "sideset_elems": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo>>>"
-                },
                 "sidesets": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo>>>"
+                    "type": "MeshInfo::DomainInfoMap<short, MeshInfo::SidesetInfo>"
                 }
             }
         }
@@ -15,7 +12,6 @@
     "time_steps": [
         {
             "mesh": {
-                "sideset_elems": null,
                 "sidesets": null
             },
             "time": 0.0,
@@ -23,11 +19,9 @@
         },
         {
             "mesh": {
-                "sideset_elems": [
+                "sidesets": [
                     {
-                        "id": 0,
-                        "name": "side1",
-                        "sides": [
+                        "elems": [
                             {
                                 "elem_id": 0,
                                 "side": 0
@@ -36,12 +30,12 @@
                                 "elem_id": 1,
                                 "side": 0
                             }
-                        ]
+                        ],
+                        "id": 0,
+                        "name": "side1"
                     },
                     {
-                        "id": 2,
-                        "name": "side3",
-                        "sides": [
+                        "elems": [
                             {
                                 "elem_id": 2,
                                 "side": 2
@@ -58,12 +52,12 @@
                                 "elem_id": 7,
                                 "side": 1
                             }
-                        ]
+                        ],
+                        "id": 2,
+                        "name": "side3"
                     },
                     {
-                        "id": 3,
-                        "name": "side4",
-                        "sides": [
+                        "elems": [
                             {
                                 "elem_id": 0,
                                 "side": 3
@@ -80,12 +74,12 @@
                                 "elem_id": 7,
                                 "side": 2
                             }
-                        ]
+                        ],
+                        "id": 3,
+                        "name": "side4"
                     },
                     {
-                        "id": 4,
-                        "name": "side2",
-                        "sides": [
+                        "elems": [
                             {
                                 "elem_id": 4,
                                 "side": 0
@@ -94,23 +88,7 @@
                                 "elem_id": 5,
                                 "side": 0
                             }
-                        ]
-                    }
-                ],
-                "sidesets": [
-                    {
-                        "id": 0,
-                        "name": "side1"
-                    },
-                    {
-                        "id": 2,
-                        "name": "side3"
-                    },
-                    {
-                        "id": 3,
-                        "name": "side4"
-                    },
-                    {
+                        ],
                         "id": 4,
                         "name": "side2"
                     }

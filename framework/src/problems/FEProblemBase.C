@@ -1932,12 +1932,22 @@ FEProblemBase::prepareAssembly(const THREAD_ID tid)
   if (_has_nonlocal_coupling)
     _assembly[tid][_current_nl_sys->number()]->prepareNonlocal();
 
-  if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
+  if (_displaced_problem &&
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
   {
     _displaced_problem->prepareAssembly(tid);
     if (_has_nonlocal_coupling)
       _displaced_problem->prepareNonlocal(tid);
   }
+}
+
+void
+FEProblemBase::prepareAssemblyNeighbor(const THREAD_ID tid)
+{
+  _assembly[tid][_current_nl_sys->number()]->prepareNeighbor();
+
+  if (_displaced_problem && (_reinit_displaced_face || _reinit_displaced_neighbor))
+    _displaced_problem->prepareAssemblyNeighbor(tid);
 }
 
 void

@@ -19,12 +19,14 @@
 
 [Reporters/mesh_info]
   type = MeshInfo
-  items = sideset_elems
+  items = sidesets
+  sideset_items = elems
 []
 
 [Outputs]
   [out]
     type = JSON
+    execute_system_information_on = none
   []
 []
 

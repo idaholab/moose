@@ -35,6 +35,7 @@
     test_case = TestADR2DNeumann
     requirement = 'The system shall display second-order convergence for advection-diffusion-reaction problems with Neumann boundary conditions using a linear finite volume system on a two-dimensional orthogonal mesh.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-adr-2d-outflow]
     type = MMSTest

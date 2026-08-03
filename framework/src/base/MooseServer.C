@@ -200,6 +200,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // Setup the parser that will be used in the app
   auto parser = std::make_shared<Parser>(parse_file_path, document_text);
   mooseAssert(parser->getInputFileNames()[0] == parse_file_path, "Should be consistent");
+  parser->setAppType(_moose_app.type());
   parser->setCommandLineParams(command_line->buildHitParams());
   parser->setThrowOnError(true);
 
@@ -224,19 +225,51 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   if (!parse_success)
     return pass;
 
-  // Setup application options (including the Parser that succeeded)
-  InputParameters app_params = _moose_app.parameters();
-  app_params.set<std::shared_ptr<Parser>>("_parser") = parser;
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
-
   // Try to instantiate the application
   std::unique_ptr<MooseApp> app = nullptr;
-  const auto do_build_app = [this, &app_params, &app]()
+  const auto do_build_app = [this, &parse_file_path, &diagnostic, &parser, &command_line, &app]()
   {
-    app = AppFactory::instance().create(_moose_app.type(),
-                                        AppFactory::main_app_name,
-                                        app_params,
-                                        _moose_app.getCommunicator()->get());
+    // get app type from parser which is Application block type if provided
+    const std::string & app_type = parser->getAppType();
+
+    // error if Application type specified in input has not been registered
+    if (!AppFactory::instance().isRegistered(app_type))
+    {
+      // get line and column range of Application/type/value for diagnostic
+      int error_line_beg = 0, error_char_beg = 0, error_line_end = 0, error_char_end = 0;
+      if (auto app_type_field = parser->getRoot().find("Application/type");
+          app_type_field && app_type_field->filename() == parse_file_path)
+      {
+        auto app_type_value = app_type_field->getNodeView().first_child_by_name("value");
+        if (!app_type_value.is_null())
+        {
+          error_line_beg = app_type_value.line() - 1;
+          error_char_beg = app_type_value.column() - 1;
+          error_line_end = app_type_value.last_line() - 1;
+          error_char_end = app_type_value.last_column();
+        }
+      }
+
+      // build error message string with available app types for diagnostic
+      std::vector<std::string> app_types;
+      for (const auto & apps_iter : AppFactory::instance().registeredObjects())
+        app_types.push_back(apps_iter.first);
+      const auto message = "'" + app_type + "' is not a registered application type. Registered" +
+                           " application types are [" + MooseUtils::join(app_types, ", ") + "].";
+
+      // add diagnostic to get reported for Application/type not registered
+      diagnostic(message, error_line_beg, error_char_beg, error_line_end, error_char_end);
+      return;
+    }
+
+    // set up options from app type parameters with parser and command line
+    InputParameters app_params = AppFactory::instance().getValidParams(app_type);
+    app_params.set<std::shared_ptr<Parser>>("_parser") = parser;
+    app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
+
+    // create application to use for diagnostic checks and input assistance
+    app = AppFactory::instance().create(
+        app_type, AppFactory::main_app_name, app_params, _moose_app.getCommunicator()->get());
   };
   if (!try_catch(do_build_app))
   {
@@ -245,13 +278,15 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
     return pass;
   }
 
-  // Store the app
-  state->app = std::move(app);
-
-  // Run the application, which will run the Builder
-  const auto do_run_app = [this]() { getCheckApp().run(); };
-  if (!try_catch(do_run_app))
-    state->app.reset(); // destroy if we failed to build
+  // do not attempt to run application if it is null after build from error
+  if (app)
+  {
+    // store application when it is valid and then run it to invoke builder
+    state->app = std::move(app);
+    const auto do_run_app = [this]() { getCheckApp().run(); };
+    if (!try_catch(do_run_app))
+      state->app.reset();
+  }
 
   // add all resource files of document that will be registered with client
   addResourcesForDocument();
@@ -552,8 +587,8 @@ MooseServer::getActionParameters(InputParameters & valid_params,
                                  const std::string & object_path,
                                  std::set<std::string> & obj_act_tasks)
 {
-  Syntax & syntax = _moose_app.syntax();
-  ActionFactory & action_factory = _moose_app.getActionFactory();
+  Syntax & syntax = getRegistrationApp().syntax();
+  ActionFactory & action_factory = getRegistrationApp().getActionFactory();
 
   // get registered syntax path identifier using actual object context path
   bool is_parent;
@@ -597,8 +632,8 @@ MooseServer::getObjectParameters(InputParameters & valid_params,
                                  std::string object_type,
                                  const std::set<std::string> & obj_act_tasks)
 {
-  Syntax & syntax = _moose_app.syntax();
-  Factory & factory = _moose_app.getFactory();
+  Syntax & syntax = getRegistrationApp().syntax();
+  Factory & factory = getRegistrationApp().getFactory();
 
   // use type parameter default if it exists and is not provided from input
   if (object_type.empty() && valid_params.have_parameter<std::string>("type") &&
@@ -765,13 +800,14 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
                                 const std::string & filtering_prefix,
                                 bool request_on_block_decl)
 {
-  Syntax & syntax = _moose_app.syntax();
+  Syntax & syntax = getRegistrationApp().syntax();
 
   // set used to prevent reprocessing syntax paths for more than one action
   std::set<std::string> syntax_paths_processed;
 
   // build map of all syntax paths to names for subblocks and save to reuse
-  if (_syntax_to_subblocks.empty())
+  auto & metadata = getSyntaxMetadata();
+  if (metadata.syntax_to_subblocks.empty())
   {
     for (const auto & syntax_path_iter : syntax.getAssociatedActions())
     {
@@ -786,13 +822,13 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       {
         std::string subblock_name = syntax_path.substr(last_sep + 1);
         syntax_path = syntax_path.substr(0, last_sep);
-        _syntax_to_subblocks[syntax_path].insert(subblock_name);
+        metadata.syntax_to_subblocks[syntax_path].insert(subblock_name);
       }
     }
   }
 
   // get registered syntax from object path using map of paths to subblocks
-  std::string registered_syntax = syntax.isAssociated(object_path, nullptr, _syntax_to_subblocks);
+  auto registered_syntax = syntax.isAssociated(object_path, nullptr, metadata.syntax_to_subblocks);
 
   bool pass = true;
 
@@ -803,7 +839,7 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
     int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
                                              : wasp::lsp::m_text_format_plaintext;
 
-    for (const auto & subblock_name : _syntax_to_subblocks[registered_syntax])
+    for (const auto & subblock_name : metadata.syntax_to_subblocks[registered_syntax])
     {
       // filter subblock if it does not begin with prefix and one was given
       if (subblock_name != "*" && subblock_name.rfind(filtering_prefix, 0) != 0)
@@ -870,8 +906,8 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                              int replace_line_end,
                              int replace_char_end)
 {
-  Syntax & syntax = _moose_app.syntax();
-  Factory & factory = _moose_app.getFactory();
+  Syntax & syntax = getRegistrationApp().syntax();
+  Factory & factory = getRegistrationApp().getFactory();
 
   // get clean type for path associations and basic type for boolean values
   std::string dirty_type = valid_params.type(param_name);
@@ -912,6 +948,19 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
   else if (valid_params.have_parameter<std::vector<MooseEnum>>(param_name))
     getEnumsAndDocs(valid_params.get<std::vector<MooseEnum>>(param_name)[0], options_and_descs);
 
+  // otherwise if parameter is Application type then use all available apps
+  else if (object_path == "/Application" && param_name == "type")
+  {
+    for (const auto & apps_iter : AppFactory::instance().registeredObjects())
+    {
+      const std::string & app_name = apps_iter.first;
+      const InputParameters & app_params = apps_iter.second->buildParameters();
+      std::string app_description = app_params.getClassDescription();
+      MooseUtils::escape(app_description);
+      options_and_descs[app_name] = app_description;
+    }
+  }
+
   // otherwise if parameter name is type then use all verified object names
   else if (param_name == "type")
   {
@@ -947,20 +996,21 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
   else
   {
     // build map of parameter types to input lookup paths and save to reuse
-    if (_type_to_input_paths.empty())
+    auto & metadata = getSyntaxMetadata();
+    if (metadata.type_to_input_paths.empty())
     {
       for (const auto & associated_types_iter : syntax.getAssociatedTypes())
       {
         const std::string & type = associated_types_iter.second;
         const std::string & path = associated_types_iter.first;
-        _type_to_input_paths[type].insert(path);
+        metadata.type_to_input_paths[type].insert(path);
       }
     }
 
     // check for input lookup paths that are associated with parameter type
-    const auto & input_path_iter = _type_to_input_paths.find(clean_type);
+    const auto & input_path_iter = metadata.type_to_input_paths.find(clean_type);
 
-    if (input_path_iter != _type_to_input_paths.end())
+    if (input_path_iter != metadata.type_to_input_paths.end())
     {
       wasp::HITNodeView view_root = getRoot().getNodeView();
 
@@ -1111,7 +1161,7 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
                                                int line,
                                                int character)
 {
-  Factory & factory = _moose_app.getFactory();
+  Factory & factory = getRegistrationApp().getFactory();
 
   // return without any definition locations added when parser root is null
   auto root_ptr = queryRoot();
@@ -1216,24 +1266,25 @@ MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
                                            const std::string & clean_type,
                                            const std::string & val_string)
 {
-  Syntax & syntax = _moose_app.syntax();
+  Syntax & syntax = getRegistrationApp().syntax();
 
   // build map from parameter types to input lookup paths and save to reuse
-  if (_type_to_input_paths.empty())
+  auto & metadata = getSyntaxMetadata();
+  if (metadata.type_to_input_paths.empty())
   {
     for (const auto & associated_types_iter : syntax.getAssociatedTypes())
     {
       const std::string & type = associated_types_iter.second;
       const std::string & path = associated_types_iter.first;
-      _type_to_input_paths[type].insert(path);
+      metadata.type_to_input_paths[type].insert(path);
     }
   }
 
   // find set of input lookup paths that are associated with parameter type
-  const auto & input_path_iter = _type_to_input_paths.find(clean_type);
+  const auto & input_path_iter = metadata.type_to_input_paths.find(clean_type);
 
   // return without any definition locations added when no paths associated
-  if (input_path_iter == _type_to_input_paths.end())
+  if (input_path_iter == metadata.type_to_input_paths.end())
     return;
 
   // get root node from input to use in input lookups with associated paths
@@ -1287,8 +1338,8 @@ MooseServer::addLocationNodesToList(wasp::DataArray & defsOrRefsLocations,
 bool
 MooseServer::getHoverDisplayText(std::string & display_text, int line, int character)
 {
-  Factory & factory = _moose_app.getFactory();
-  Syntax & syntax = _moose_app.syntax();
+  Factory & factory = getRegistrationApp().getFactory();
+  Syntax & syntax = getRegistrationApp().syntax();
 
   // return and leave display text as empty string when parser root is null
   auto root_ptr = queryRoot();
@@ -1326,8 +1377,18 @@ MooseServer::getHoverDisplayText(std::string & display_text, int line, int chara
   std::set<std::string> obj_act_tasks;
   getAllValidParameters(valid_params, object_path, object_type, obj_act_tasks);
 
+  // use class description as display text when request is Application type
+  if (request_context.type() == wasp::VALUE && paramkey == "type" &&
+      object_path == "/Application" && AppFactory::instance().isRegistered(paramval))
+  {
+    InputParameters app_params = AppFactory::instance().getValidParams(paramval);
+    display_text = app_params.getClassDescription();
+    MooseUtils::escape(display_text);
+  }
+
   // use class description as display text when request is valid type value
-  if (request_context.type() == wasp::VALUE && paramkey == "type" && factory.isRegistered(paramval))
+  else if (request_context.type() == wasp::VALUE && paramkey == "type" &&
+           factory.isRegistered(paramval))
   {
     const InputParameters & object_params = factory.getValidParams(paramval);
     if (object_params.hasBase())
@@ -1393,7 +1454,7 @@ MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & referencesLocat
                                                int character,
                                                bool include_declaration)
 {
-  Syntax & syntax = _moose_app.syntax();
+  Syntax & syntax = getRegistrationApp().syntax();
 
   // return without adding any reference locations when parser root is null
   auto root_ptr = queryRoot();
@@ -1413,28 +1474,29 @@ MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & referencesLocat
     return true;
 
   // get input path and block name of declarator located at request context
-  const std::string & block_path = request_context.parent().path();
-  const std::string & block_name = request_context.parent().name();
+  const std::string & inp_path = request_context.parent().path();
+  const std::string & inp_name = request_context.parent().name();
 
   // build map from input lookup paths to parameter types and save to reuse
-  if (_input_path_to_types.empty())
+  auto & metadata = getSyntaxMetadata();
+  if (metadata.input_path_to_types.empty())
     for (const auto & associated_types_iter : syntax.getAssociatedTypes())
     {
       const std::string & path = associated_types_iter.first;
       const std::string & type = associated_types_iter.second;
-      _input_path_to_types[path].insert(type);
+      metadata.input_path_to_types[path].insert(type);
     }
 
   // get registered syntax from block path with map of input paths to types
   bool is_parent;
-  std::string registered_syntax = syntax.isAssociated(block_path, &is_parent, _input_path_to_types);
+  auto registered_syntax = syntax.isAssociated(inp_path, &is_parent, metadata.input_path_to_types);
 
   // return without adding any references if syntax has no types associated
-  if (is_parent || !_input_path_to_types.count(registered_syntax))
+  if (is_parent || !metadata.input_path_to_types.count(registered_syntax))
     return true;
 
   // get set of parameter types which are associated with registered syntax
-  const std::set<std::string> & target_types = _input_path_to_types.at(registered_syntax);
+  const std::set<std::string> & target_types = metadata.input_path_to_types.at(registered_syntax);
 
   // set used to gather nodes collected by value custom sorted by locations
   SortedLocationNodes match_nodes(
@@ -1447,7 +1509,7 @@ MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & referencesLocat
       });
 
   // walk input recursively and gather all nodes that match value and types
-  getNodesByValueAndTypes(match_nodes, view_root, block_name, target_types);
+  getNodesByValueAndTypes(match_nodes, view_root, inp_name, target_types);
 
   // return without adding any references if no nodes match value and types
   if (match_nodes.empty())
@@ -1737,7 +1799,7 @@ MooseServer::getCompletionItemKind(const InputParameters & valid_params,
                                    bool is_param)
 {
   // set up completion item kind value that client may use for icon in list
-  auto associated_types = _moose_app.syntax().getAssociatedTypes();
+  auto associated_types = getRegistrationApp().syntax().getAssociatedTypes();
   if (is_param && valid_params.isParamRequired(param_name) &&
       !valid_params.isParamValid(param_name))
     return wasp::lsp::m_comp_kind_event;
@@ -2095,6 +2157,20 @@ MooseServer::getCheckApp()
     return app;
   }
   mooseError("MooseServer::getCheckApp(): App not available");
+}
+
+MooseApp &
+MooseServer::getRegistrationApp()
+{
+  if (auto * app = queryCheckApp())
+    return *app;
+  return _moose_app;
+}
+
+MooseServer::SyntaxMetadata &
+MooseServer::getSyntaxMetadata()
+{
+  return _app_type_to_syntax_metadata[getRegistrationApp().type()];
 }
 
 const hit::Node &

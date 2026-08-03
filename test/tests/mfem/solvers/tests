@@ -23,7 +23,10 @@
   [MFEMPMGRejectsComplex]
     type = RunException
     input = pmg_diffusion.i
-    cli_args = 'Problem/numeric_type=complex'
+    cli_args = 'Problem/numeric_type=complex '
+               'Variables/concentration/type=MFEMComplexVariable '
+               'Variables/concentration/fespace=H1FESpace '
+               'BCs/active="" Kernels/active="" Postprocessors/active=""'
     expect_err = "GeometricMultigridSolver 'pmg': requires a real, non-eigen eq. system"
     requirement = 'The system shall reject an MFEM geometric multigrid preconditioner for a '
                   'complex equation system.'

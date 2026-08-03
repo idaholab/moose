@@ -29,13 +29,9 @@ TimeSequenceStepperFailTest::step()
 {
   TimeStepper::step();
 
-  // The goal is to fail exactly on the timestep which matches its
-  // original sequence point order, other than the initial condition.
-  // This can only happen once, since after you fail, you are no
-  // longer on the original time sequence (off by one or more).  Since
-  // this can only happen once, we only check the [1]th sequence
-  // point.  (Having fewer than two sequence points doesn't really
-  // make sense...)
+  // The goal is to fail exactly on the first timestep that matches an original sequence point.
+  // The retry time differs from that point, and the timestep index has advanced by the time the
+  // original point is reached, so this can only happen once.
   mooseAssert(_original_time_sequence.size() > 1, "Must have at least two sequence points!");
 
   if (_t_step == 1 && MooseUtils::absoluteFuzzyEqual(_time, _original_time_sequence[1]))

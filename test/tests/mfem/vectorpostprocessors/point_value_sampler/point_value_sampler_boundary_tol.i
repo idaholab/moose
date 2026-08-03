@@ -30,7 +30,7 @@
 
 [VectorPostprocessors]
   [point_sample]
-    type = MFEMPointValueSampler
+    type = MFEMPointVariableValueSampler
     variable = 'h1_scalar'
     # this point is considered found
     # unless tolerance is tightened, then it is outside the mesh

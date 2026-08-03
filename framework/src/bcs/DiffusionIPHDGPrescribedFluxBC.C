@@ -29,8 +29,8 @@ DiffusionIPHDGPrescribedFluxBC::DiffusionIPHDGPrescribedFluxBC(const InputParame
 {
 }
 
-IPHDGAssemblyHelper &
-DiffusionIPHDGPrescribedFluxBC::iphdgHelper()
+ElementAndTraceScalarHDGAssemblyHelper &
+DiffusionIPHDGPrescribedFluxBC::hdgHelper()
 {
   return *_iphdg_helper;
 }

@@ -271,7 +271,7 @@
       recover = false # Turns out this isn't working in HEAD - we have more work to properly recover a restart test #5877
       allow_warnings = true
 
-      detail = "that are restarted from a another."
+      detail = "that are restarted from another."
     []
   []
 []
