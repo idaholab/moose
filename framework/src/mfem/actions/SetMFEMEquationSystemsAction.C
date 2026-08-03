@@ -11,7 +11,7 @@
 
 #include "SetMFEMEquationSystemsAction.h"
 
-registerMooseAction("MooseApp", SetMFEMEquationSystemsAction, "add_mfem_equation_systems");
+registerMooseAction("MooseApp", SetMFEMEquationSystemsAction, "set_mfem_equation_systems");
 
 InputParameters
 SetMFEMEquationSystemsAction::validParams()
