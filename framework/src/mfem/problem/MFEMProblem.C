@@ -597,6 +597,16 @@ MFEMProblem::setDefaultEquationSystem()
 void
 MFEMProblem::setMFEMProblemOperators()
 {
+  if (_problem_data.nonlinear_solver)
+    _problem_data.eqn_system->SetGradientRequired(
+        _problem_data.nonlinear_solver->RequiresGradient());
+
+  _problem_data.eqn_system->SetCoefficientManager(_problem_data.coefficients);
+
+  // Set up initial conditions
+  _problem_data.eqn_system->Init(
+      _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions, _default_assembly_level);
+
   if (isTransient())
   {
     auto problem_operator =
@@ -627,6 +637,12 @@ MFEMProblem::setMFEMProblemOperators()
     else
       mooseError("Unknown numeric type. "
                  "Please set the Problem numeric type to either 'real' or 'complex'.");
+  }
+
+  for (const auto & problem_operator : getProblemOperators())
+  {
+    problem_operator->SetGridFunctions();
+    problem_operator->Init(_problem_data.true_solution);
   }
 }
 

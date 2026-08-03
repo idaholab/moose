@@ -38,29 +38,13 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
+  _mfem_problem._default_assembly_level =
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>();
 }
 
 void
 MFEMSteady::init()
 {
-  if (_mfem_problem_data.nonlinear_solver)
-    _mfem_problem_data.eqn_system->SetGradientRequired(
-        _mfem_problem_data.nonlinear_solver->RequiresGradient());
-
-  _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
-
-  // Set up initial conditions
-  _mfem_problem_data.eqn_system->Init(
-      _mfem_problem_data.gridfunctions,
-      _mfem_problem_data.cmplx_gridfunctions,
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
-
-  for (const auto & problem_operator : _mfem_problem.getProblemOperators())
-  {
-    problem_operator->SetGridFunctions();
-    problem_operator->Init(_mfem_problem_data.true_solution);
-  }
-
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 }
