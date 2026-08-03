@@ -69,18 +69,17 @@ Now we set up boundary conditions. Here, we choose scalar Dirichlet boundary con
 
 ### Problem Operators and Composers
 
-The problem operator applys an action on a vector this can be a solve of an equation system,
+The problem operator applies an action on a vector this can be a solve of an equation system,
 application of a preconditioner or any other custom operator the user may have. The problem
-composer is the systematic logical object that builds the problem operator by default there
-are two problem operator composer classes that are made automatically by inference of the 
-executioners and equation system, however they can be explicitly input with the following
-examples for steady:
+composer is the systematic logical object that builds the problem operator. By default, an [MFEMSteady.md]
+will instantiate a [SteadyProblemComposer.md], whereas an [MFEMTransient.md] executioner will instantiate a [TransientProblemComposer.md].
+However, problem composers can also be explicitly built like in the following examples, for steady:
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=/MFEMProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=/ProblemComposer
 
 and similarly for transient problems:
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=/MFEMProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=/ProblemComposer
 
 ### Solver and Executioner
 
