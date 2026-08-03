@@ -36,6 +36,14 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
 void
 MFEMTransient::init()
 {
+    // If no ProblemOperators have been added by the user, add a default
+  if (getProblemOperators().empty())
+  {
+    auto problem_operator =
+        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(_mfem_problem);
+    addProblemOperator(std::move(problem_operator));
+  }
+
   TransientBase::init();
 
   // verify that the requested time integration scheme is actually supported by MFEM transient
