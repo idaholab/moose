@@ -41,6 +41,7 @@ typedef std::variant<int,
 
 namespace libMesh
 {
+class BoundingBox;
 class Point;
 template <typename T>
 class DenseVector;
@@ -57,6 +58,7 @@ void to_json(nlohmann::json & json, const MooseApp & app); // MooseDocs:to_json
 
 namespace libMesh
 {
+void to_json(nlohmann::json & json, const BoundingBox & p);
 void to_json(nlohmann::json & json, const Point & p);
 void to_json(nlohmann::json & json, const DenseVector<Real> & vector);
 void to_json(nlohmann::json & json, const DenseMatrix<Real> & matrix);
