@@ -58,11 +58,23 @@
     input = combined
     new_boundary = top_node
   []
+  [top_roller_node]
+    type = ExtraNodesetGenerator
+    coord = '1 2 0'
+    input = top_node
+    new_boundary = top_roller_node
+  []
   [bottom_node]
     type = ExtraNodesetGenerator
     coord = '-0.1 0 0'
-    input = top_node
+    input = top_roller_node
     new_boundary = bottom_node
+  []
+  [bottom_roller_node]
+    type = ExtraNodesetGenerator
+    coord = '1.1 0 0'
+    input = bottom_node
+    new_boundary = bottom_roller_node
   []
 
   [secondary]
@@ -70,7 +82,7 @@
     new_block_id = 10001
     new_block_name = 'secondary_lower'
     sidesets = 'top_base'
-    input = bottom_node
+    input = bottom_roller_node
   []
   [primary]
     type = LowerDBlockFromSidesetGenerator
@@ -156,38 +168,52 @@
 []
 
 [BCs]
-  [fix_x]
+  [anchor_bottom_x]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = bottom_node
     variable = disp_x
   []
-  [fix_bottom_y]
+  [anchor_bottom_z]
+    type = DirichletBC
+    preset = true
+    value = 0.0
+    boundary = bottom_node
+    variable = disp_z
+  []
+  [roller_bottom_z]
+    type = DirichletBC
+    preset = true
+    value = 0.0
+    boundary = bottom_roller_node
+    variable = disp_z
+  []
+  [roller_bottom_y]
     type = DirichletBC
     boundary = bottom_base
     variable = disp_y
     value = 0
     preset = true
   []
-  [fix_bottom_z]
-    type = DirichletBC
-    boundary = bottom_base
-    variable = disp_z
-    value = 0
-    preset = true
-  []
-  [fix_top_x]
+  [anchor_top_x]
     type = DirichletBC
     preset = true
-    boundary = 100
+    boundary = top_node
     variable = disp_x
     value = 0
   []
-  [fix_top_z]
+  [anchor_top_z]
     type = DirichletBC
     preset = true
-    boundary = 100
+    boundary = top_node
+    variable = disp_z
+    value = 0
+  []
+  [roller_top_z]
+    type = DirichletBC
+    preset = true
+    boundary = top_roller_node
     variable = disp_z
     value = 0
   []

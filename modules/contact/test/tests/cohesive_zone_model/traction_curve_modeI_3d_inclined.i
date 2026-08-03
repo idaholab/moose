@@ -167,14 +167,6 @@
 []
 
 [BCs]
-  # Pin one node to remove rigid body x-translation
-  [fix_x]
-    type = DirichletBC
-    preset = true
-    value = 0.0
-    boundary = bottom_node
-    variable = disp_x
-  []
   # Fix bottom boundary in all directions
   [fix_bottom_x]
     type = DirichletBC
@@ -190,9 +182,9 @@
     value = 0
     preset = true
   []
-  [fix_bottom_z]
+  [anchor_bottom_z]
     type = DirichletBC
-    boundary = bottom_base
+    boundary = bottom_node
     variable = disp_z
     value = 0
     preset = true
@@ -214,10 +206,10 @@
     function = '0.21213203435596*t'
     preset = true
   []
-  [fix_top_z]
+  [anchor_top_z]
     type = DirichletBC
     preset = true
-    boundary = 100
+    boundary = top_node
     variable = disp_z
     value = 0
   []

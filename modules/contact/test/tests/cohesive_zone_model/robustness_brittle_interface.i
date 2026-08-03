@@ -140,17 +140,17 @@
 []
 
 [BCs]
-  [fix_x]
+  [anchor_bottom_x]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = bottom_node
     variable = disp_x
   []
-  [fix_top_x]
+  [anchor_top_x]
     type = DirichletBC
     preset = true
-    boundary = 100
+    boundary = top_node
     variable = disp_x
     value = 0
   []
@@ -161,7 +161,7 @@
     function = '0.3*t'
     preset = true
   []
-  [bottom]
+  [roller_bottom_y]
     type = DirichletBC
     boundary = bottom_base
     variable = disp_y

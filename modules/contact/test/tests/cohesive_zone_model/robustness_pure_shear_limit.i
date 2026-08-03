@@ -152,11 +152,11 @@
 []
 
 [BCs]
-  [fix_x]
+  [fix_bottom_x]
     type = DirichletBC
     preset = true
     value = 0.0
-    boundary = bottom_node
+    boundary = bottom_base
     variable = disp_x
   []
   # Near-zero normal opening to exercise the epsilon_tolerance path in computeModeMixity.
@@ -175,7 +175,7 @@
     function = '0.3*t'
     preset = true
   []
-  [bottom]
+  [roller_bottom_y]
     type = DirichletBC
     boundary = bottom_base
     variable = disp_y
