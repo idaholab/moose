@@ -42,6 +42,6 @@
     rel_err = 7e-06
     valgrind = NONE
     recover = false
-    requirement = 'The system will examine the subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
+    requirement = 'The system will examine the relaxed subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
   []
 []
