@@ -409,6 +409,11 @@ public:
    */
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
+  /**
+   * Default assembly level to use for EquationSystem assembly.
+   */
+  mfem::AssemblyLevel _default_assembly_level;
+
 protected:
   /**
    * Verify that a primary variable's numeric type matches the problem's equation system.
