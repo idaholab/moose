@@ -5,6 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADGeneralizedPlaneStrain.h"
 
@@ -17,8 +18,8 @@ InputParameters
 ADGeneralizedPlaneStrain::validParams()
 {
   InputParameters params = ADKernelScalarBase::validParams();
-  params.addClassDescription(
-      "Assembles the generalized plane strain scalar equation using automatic differentiation.");
+  params.addClassDescription("Assembles the integrated out-of-plane stress to the scalar residual "
+                             "for generalized plane strain using automatic differentiation.");
   params.renameCoupledVar("scalar_variable",
                           "scalar_out_of_plane_strain",
                           "Scalar variable for generalized plane strain");
@@ -26,10 +27,6 @@ ADGeneralizedPlaneStrain::validParams()
   params.addParam<FunctionName>("out_of_plane_pressure_function",
                                 "Function used to prescribe pressure (applied toward the body) in "
                                 "the out-of-plane direction");
-  params.addDeprecatedParam<FunctionName>(
-      "out_of_plane_pressure",
-      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction",
-      "This has been replaced by 'out_of_plane_pressure_function'");
   params.addParam<MaterialPropertyName>("out_of_plane_pressure_material",
                                         "0",
                                         "Material used to prescribe pressure (applied toward the "
@@ -37,12 +34,9 @@ ADGeneralizedPlaneStrain::validParams()
   MooseEnum out_of_plane_direction("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", out_of_plane_direction, "The direction of the out-of-plane strain");
-  params.addDeprecatedParam<Real>(
-      "factor",
-      "Scale factor applied to prescribed out-of-plane pressure (both material and function)",
-      "This has been replaced by 'pressure_factor'");
   params.addParam<Real>(
       "pressure_factor",
+      1.0,
       "Scale factor applied to prescribed out-of-plane pressure (both material and function)");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("compute_field_residuals") = false;
@@ -57,23 +51,11 @@ ADGeneralizedPlaneStrain::ADGeneralizedPlaneStrain(const InputParameters & param
     _stress(getADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _out_of_plane_pressure_function(parameters.isParamSetByUser("out_of_plane_pressure_function")
                                         ? &getFunction("out_of_plane_pressure_function")
-                                    : parameters.isParamSetByUser("out_of_plane_pressure")
-                                        ? &getFunction("out_of_plane_pressure")
                                         : nullptr),
     _out_of_plane_pressure_material(getMaterialProperty<Real>("out_of_plane_pressure_material")),
-    _pressure_factor(parameters.isParamSetByUser("pressure_factor")
-                         ? getParam<Real>("pressure_factor")
-                     : parameters.isParamSetByUser("factor") ? getParam<Real>("factor")
-                                                             : 1.0),
+    _pressure_factor(getParam<Real>("pressure_factor")),
     _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
-  if (parameters.isParamSetByUser("out_of_plane_pressure_function") &&
-      parameters.isParamSetByUser("out_of_plane_pressure"))
-    paramError("out_of_plane_pressure_function",
-               "Cannot specify both 'out_of_plane_pressure_function' and "
-               "'out_of_plane_pressure'");
-  if (parameters.isParamSetByUser("pressure_factor") && parameters.isParamSetByUser("factor"))
-    paramError("pressure_factor", "Cannot specify both 'pressure_factor' and 'factor'");
 }
 
 void

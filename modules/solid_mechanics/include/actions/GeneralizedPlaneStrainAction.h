@@ -21,8 +21,8 @@ public:
   void act() override;
 
 protected:
-  /// Return the first displacement component that is in the generalized plane
-  unsigned int inPlaneDisplacementIndex() const;
+  /// Return the first displacement component in the plane
+  unsigned int firstInPlaneDisplacementIndex() const;
 
   std::vector<VariableName> _displacements;
 

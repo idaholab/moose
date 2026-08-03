@@ -55,7 +55,6 @@ public:
    */
   void computeResidualAndJacobian() override;
 
-  /// Inform MOOSE that this kernel also computes a residual for its coupled scalar variable
   std::set<std::string> additionalROVariables() override;
 
 protected:

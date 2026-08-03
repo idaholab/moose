@@ -24,10 +24,10 @@ out-of-plane strain variable required for a generalized plane strain simulation.
 When the scalar variable named by
 [!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/scalar_out_of_plane_strain)
 does not exist, the action creates a `FIRST` order nonlinear scalar variable in
-nonlinear system `nl0`. If that scalar variable already exists in `nl0`, the
-action reuses it.
+the nonlinear system that contains the in-plane displacement variables. If that
+scalar variable already exists in that system, the action reuses it.
 
-!table id=gps_legacy_action_table caption=Legacy objects created by `GeneralizedPlaneStrainAction`
+!table id=gps_non_ad_action_table caption=Non-AD objects created by `GeneralizedPlaneStrainAction`
 | Object | Purpose |
 | --- | --- |
 | [GeneralizedPlaneStrainOffDiag.md] | Couples in-plane displacement variables and the scalar out-of-plane strain variable in the off-diagonal Jacobian. |
@@ -36,7 +36,7 @@ action reuses it.
 
 When
 [!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/use_automatic_differentiation)
-is `true`, the action creates exactly one AD object and skips the legacy
+is `true`, the action creates exactly one AD object and skips the non-AD
 UserObject, ScalarKernel, and off-diagonal Kernel objects.
 `ADKernelScalarBase` owns the scalar residual assembly in this mode; when
 [!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/use_displaced_mesh)
@@ -83,13 +83,8 @@ different from the default $z$ direction is given by:
 Parameters supplied at the `[Physics/SolidMechanics/GeneralizedPlaneStrain]` level act as
 defaults for the QuasiStatic Physics subblocks.
 
-The following test-spec block shows the standard small-strain generalized plane
-strain input run with automatic differentiation.
-
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/tests start=[generalized_plane_strain_small_ad] end=[] include-end=true
-
 The following standalone action input lets the action create the missing scalar
-out-of-plane strain variable in AD mode.
+out-of-plane strain variable for a model that uses AD.
 
 !listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_auto_scalar.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 

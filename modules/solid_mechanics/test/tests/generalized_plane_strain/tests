@@ -38,11 +38,13 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall support an automatic-differentiation generalized plane strain mechanics solution'
     design = 'ADComputePlaneSmallStrain.md'
+    issues = '#33415'
   []
   [generalized_plane_strain_small_ad_jacobian]
     type = 'PetscJacobianTester'
     input = 'generalized_plane_strain_small.i'
     run_sim = 'True'
+    prereq = generalized_plane_strain_small_ad
     ratio_tol = 1e-7
     difference_tol = 1e-2
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/use_automatic_differentiation=true '
@@ -52,6 +54,7 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall compute the Jacobian for an automatic-differentiation generalized plane strain mechanics solution'
     design = 'ADComputePlaneSmallStrain.md'
+    issues = '#33415'
   []
   [generalized_plane_strain_ref_resid_absolute_value_vector_tags]
     type = 'Exodiff'
@@ -74,6 +77,7 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall support an automatic-differentiation generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using absolute value vector tags.'
     design = 'ADComputePlaneSmallStrain.md'
+    issues = '#33415'
   []
   [generalized_plane_strain_ref_resid_extra_vector_tags]
     prereq = generalized_plane_strain_ref_resid_absolute_value_vector_tags
@@ -103,6 +107,7 @@
     custom_cmp = 'generalized.exodiff'
     requirement = 'The system shall support an automatic-differentiation generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using unbalanced kernel contributions.'
     design = 'ADComputePlaneSmallStrain.md'
+    issues = '#33415'
   []
   [generalized_plane_strain_increment]
     type = 'Exodiff'
@@ -125,6 +130,7 @@
                'Materials/stress/type=ADComputeStrainIncrementBasedStress'
     requirement = 'The system shall support an automatic-differentiation generalized plane strain mechanics solution with incremental strain'
     design = 'ADComputePlaneIncrementalStrain.md'
+    issues = '#33415'
   []
   [generalized_plane_strain_finite]
     type = 'Exodiff'
@@ -147,6 +153,7 @@
                'Materials/stress/type=ADComputeFiniteStrainElasticStress'
     requirement = 'The system shall support an automatic-differentiation generalized plane strain mechanics solution with finite strain'
     design = 'ADComputePlaneFiniteStrain.md'
+    issues = '#33415'
   []
   [generalized_plane_strain_squares]
     type = 'Exodiff'
@@ -179,12 +186,13 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall support setting up an automatic-differentiation generalized plane strain problem through an action'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#7840'
+    issues = '#7840 #33415'
   []
   [generalized_plane_strain_squares_ad_jacobian]
     type = 'PetscJacobianTester'
     input = 'generalized_plane_strain_squares.i'
     run_sim = 'True'
+    prereq = generalized_plane_strain_squares_ad
     ratio_tol = 1e-7
     difference_tol = 1e0
     cli_args = 'Physics/SolidMechanics/GeneralizedPlaneStrain/gps1/use_automatic_differentiation=true '
@@ -203,7 +211,7 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall compute the Jacobian for an automatic-differentiation generalized plane strain action with multiple action blocks'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#7840'
+    issues = '#7840 #33415'
   []
   [out_of_plane_pressure_function]
     type = 'Exodiff'
@@ -232,7 +240,7 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall support setting the out-of-plane pressure using a function for automatic-differentiation generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#7840'
+    issues = '#7840 #33415'
   []
   [out_of_plane_pressure_material]
     type = 'Exodiff'
@@ -264,13 +272,14 @@
     abs_zero = 1e-9
     requirement = 'The system shall support setting the out-of-plane pressure using a material property for automatic-differentiation generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#17250'
+    issues = '#17250 #33415'
     prereq = out_of_plane_pressure_function_ad
   []
   [out_of_plane_pressure_material_ad_jacobian]
     type = 'PetscJacobianTester'
     input = 'out_of_plane_pressure.i'
     run_sim = 'True'
+    prereq = generalized_plane_strain_auto_scalar
     ratio_tol = 1e-7
     difference_tol = 1e-1
     cli_args = 'Physics/SolidMechanics/GeneralizedPlaneStrain/gps/use_automatic_differentiation=true '
@@ -287,7 +296,7 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall compute the Jacobian for automatic-differentiation generalized plane strain with material-property out-of-plane pressure'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#17250'
+    issues = '#17250 #33415'
   []
   [generalized_plane_strain_scalar_vector]
     type = 'Exodiff'
@@ -322,7 +331,7 @@
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall support listing all of the out-of-plane strain variables in the automatic-differentiation strain calculator'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#7840'
+    issues = '#7840 #33415'
   []
   [generalized_plane_strain_auto_scalar]
     type = 'Exodiff'
@@ -333,18 +342,17 @@
     exodiff = 'out_of_plane_pressure_out.e'
     prereq = 'out_of_plane_pressure_material_ad'
     abs_zero = 1e-9
-    requirement = 'The system shall support automatic creation of the scalar out-of-plane strain variable for legacy generalized plane strain problems'
+    requirement = 'The system shall support automatic creation of the scalar out-of-plane strain variable for generalized plane strain problems without automatic differentiation'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#7840'
+    issues = '#7840 #33415'
   []
   [generalized_plane_strain_auto_scalar_ad]
     type = 'Exodiff'
     input = 'generalized_plane_strain_auto_scalar.i'
-    exodiff = 'out_of_plane_pressure_out.e'
-    prereq = 'generalized_plane_strain_auto_scalar'
+    exodiff = 'generalized_plane_strain_auto_scalar_out.e'
     abs_zero = 1e-9
     requirement = 'The system shall support automatic creation of the scalar out-of-plane strain variable for automatic-differentiation generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
-    issues = '#7840'
+    issues = '#7840 #33415'
   []
 []

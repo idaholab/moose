@@ -233,5 +233,4 @@
 
 [Outputs]
   exodus = true
-  file_base = out_of_plane_pressure_out
 []

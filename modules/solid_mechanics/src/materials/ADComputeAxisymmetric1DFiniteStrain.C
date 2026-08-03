@@ -84,7 +84,6 @@ ADComputeAxisymmetric1DFiniteStrain::computeGradDispYY()
 Real
 ADComputeAxisymmetric1DFiniteStrain::computeGradDispYYOld()
 {
-  using std::exp;
   if (_has_scalar_out_of_plane_strain)
     return exp((*_scalar_out_of_plane_strain_old[getCurrentSubblockIndex()])[0]) - 1.0;
   else

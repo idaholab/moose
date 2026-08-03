@@ -8,20 +8,20 @@ add two rotational degrees of freedom [!citep](Abaqus2014gps) or include the
 anticlastic problem associated with out-of-plane shear [!citep](Adams1984gps, Li1999gps).
 
 The [solid mechanics module](solid_mechanics/index.md) implements the form with
-one extra degree of freedom representing the direct out-of-plane strain
+one extra degree of freedom representing the out-of-plane strain
 [!citep](Li2005gps).
 
 ## Formulation
 
-For the usual $x$-$y$ model plane, the $z$ axis is the out-of-plane direction.
-Under generalized plane strain conditions, the in-plane stresses are not
-functions of $z$, and the direct out-of-plane strain is represented by a scalar
-variable. The model is solved on a 2D domain.
+With generalized plane strain, the model is solved for a 2D domain. For the usual
+$x$-$y$ model plane, the $z$ axis is the out-of-plane direction. The out-of-plane
+strain is represented by a scalar variable.
 
 The formulation also works when the model plane is $x$-$z$ or $y$-$z$. In those
-cases the out-of-plane direction is the $y$ axis or $x$ axis, respectively. In
-RZ axisymmetry, the out-of-plane generalized plane strain direction is the axial
-$y$ direction.
+cases the out-of-plane direction is the $y$ axis or $x$ axis, respectively.
+
+When generalized plane strain is used for axisymmetric models, the solution domain is 1D,
+and the out-of-plane strain direction is the axial $y$ direction.
 
 ## $x$-$y$ plane generalized plane strain problem
 
@@ -113,8 +113,8 @@ weighting.
 
 ### Implementation
 
-The out-of-plane strain is a scalar variable in the standard system of equations
-for a mechanics problem, where $\boldsymbol{u}_x$ and $\boldsymbol{u}_y$
+The out-of-plane strain is a scalar variable included as an additional unknown
+in the standard system of equations for a mechanics problem, where $\boldsymbol{u}_x$ and $\boldsymbol{u}_y$
 represent the displacement vectors in the $x$ and $y$ directions, and
 $\boldsymbol{f}_x$ and $\boldsymbol{f}_y$ represent the corresponding reaction
 forces. For a two-dimensional model in the $x$-$y$ plane, the partitioned
@@ -189,40 +189,20 @@ Objects specific for generalized plane strain:
 
 - [Strain Calculations](solid_mechanics/Strains.md): in-plane strain calculation and formation of full strain tensor considering the scalar out-of-plane strain
 
-Objects specific to the AD generalized plane strain path:
+Objects specific to generalized plane strain with automatic differentiation:
 
 - [ADGeneralizedPlaneStrain.md]: scalar out-of-plane equilibrium condition and
-  AD coupling terms
+  automatic differentiation (AD) coupling terms
 
-!table id=gps_legacy_objects caption=Legacy generalized plane strain objects created by the action
-| Object | Role |
-| --- | --- |
-| [GeneralizedPlaneStrainOffDiag.md] | Off-diagonal coupling between in-plane displacement variables and the scalar out-of-plane strain. |
-| [GeneralizedPlaneStrain.md] | Scalar out-of-plane equilibrium residual. |
-| [GeneralizedPlaneStrainUserObject.md] | Residual and diagonal Jacobian data for the scalar kernel. |
-
-!table id=gps_ad_objects caption=AD generalized plane strain objects created by the action
-| Object | Role |
-| --- | --- |
-| [ADGeneralizedPlaneStrain.md] | Scalar out-of-plane equilibrium residual and AD coupling terms. |
-
-The AD path requires AD stress materials. [ADGeneralizedPlaneStrain.md] owns the
-scalar residual assembly through `ADKernelScalarBase`, including displaced-mesh
-quadrature weights when requested. The out-of-plane pressure material used by
-[ADGeneralizedPlaneStrain.md] is a regular `Real` material property, so it is
-treated as derivative-free in the scalar equation.
+The AD variant of this system requires AD stress materials, although the out-of-plane pressure is
+provided as a regular `Real` material property, so it is treated as being derivative-free.
 
 ## How to Use Generalized Plane Strain
 
 The [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) can be used to set up a generalized plane strain model. The [QuasiStaticSolidMechanicsPhysics](/QuasiStaticSolidMechanicsPhysics.md) which considers the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) as Meta-Action can also be used.
 
-The following test-spec block shows a modern QuasiStatic small-strain input run
-in AD mode.
-
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/tests start=[generalized_plane_strain_small_ad] end=[] include-end=true
-
-The following standalone action input uses AD mode and lets the action create the
-missing scalar out-of-plane strain variable.
+The following example input demonstrates usage of the action with AD, and in this
+case the action creates the scalar out-of-plane strain variable.
 
 !listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_auto_scalar.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 

@@ -6,24 +6,24 @@
 
 This action simplifies the input syntax for creating a generalized plane strain
 model. It creates the objects associated with the scalar out-of-plane strain
-variable and the out-of-plane equilibrium equation. Use
-[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/use_automatic_differentiation)
-to select the AD construction path.
+variable and the out-of-plane equilibrium equation.
 
 ## Constructed Objects
 
-In legacy mode, the action creates the same UserObject, ScalarKernel, and
-off-diagonal Kernel objects used by existing generalized plane strain inputs.
+Without automatic differentiation, the action creates the UserObject,
+ScalarKernel, and off-diagonal Kernel objects listed below.
 
-!table id=gps_legacy_action_objects caption=Legacy objects created by `GeneralizedPlaneStrainAction`
+!table id=gps_non_ad_action_objects caption=Non-AD objects created by `GeneralizedPlaneStrainAction`
 | Object | Purpose |
 | --- | --- |
 | [GeneralizedPlaneStrainOffDiag.md] | Couples the in-plane displacement variables and the scalar out-of-plane strain variable in the off-diagonal Jacobian. |
 | [GeneralizedPlaneStrain.md] | Assembles the scalar out-of-plane equilibrium residual. |
 | [GeneralizedPlaneStrainUserObject.md] | Computes the residual and diagonal Jacobian data used by the scalar kernel. |
 
-In AD mode, the action creates exactly one [ADGeneralizedPlaneStrain.md] object.
-The legacy UserObject, ScalarKernel, and off-diagonal Kernel objects are not
+With
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/use_automatic_differentiation),
+the action creates exactly one [ADGeneralizedPlaneStrain.md] object.
+The non-AD UserObject, ScalarKernel, and off-diagonal Kernel objects are not
 created because `ADKernelScalarBase` assembles the scalar residual and its
 couplings through automatic differentiation. When
 [!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/use_displaced_mesh)
@@ -37,9 +37,10 @@ assembly.
 
 The action also creates the scalar out-of-plane strain variable when it is
 missing. The automatically created scalar variable is a `FIRST` order nonlinear
-scalar variable in nonlinear system `nl0`. If the named scalar variable already
-exists in `nl0`, the action reuses it. A field variable or a scalar variable in a
-different nonlinear system with the same name is rejected.
+scalar variable in the nonlinear system that contains the in-plane displacement
+variables. If the named scalar variable already exists in that system, the
+action reuses it. A field variable or a scalar variable in a different
+nonlinear system with the same name is rejected.
 
 ## Out-of-Plane Pressure
 
@@ -49,11 +50,13 @@ The residual assembled for the scalar out-of-plane strain is
 \end{equation}
 where $p_o$ is the out-of-plane pressure. Positive pressure is applied toward the
 body. The pressure may be supplied with
-[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_pressure_function)
-or with
-[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_pressure_material).
-In AD mode, the pressure material is read as a regular `Real` material property,
-so it does not add derivatives to the scalar equation.
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_pressure_function),
+with
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_pressure_material),
+or with both; the two contributions are summed and scaled by
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/pressure_factor).
+With automatic differentiation, the pressure material is read as a regular
+`Real` material property, so it does not add derivatives to the scalar equation.
 
 ## Generalized Plane Strain and Reference Residual
 
@@ -67,14 +70,9 @@ The reference scalar variable is set using the `AuxScalarKernel` [Generalized Pl
 
 ## Example Input Syntax
 
-The following test-spec block shows a modern QuasiStatic generalized plane
-strain input run in AD mode.
-
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/tests start=[generalized_plane_strain_small_ad] end=[] include-end=true
-
 The following input shows a standalone
 `[Physics/SolidMechanics/GeneralizedPlaneStrain]` action block. The action
-creates the missing scalar out-of-plane strain variable in AD mode.
+creates the missing scalar out-of-plane strain variable for a model that uses AD.
 
 !listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_auto_scalar.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 

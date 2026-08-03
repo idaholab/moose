@@ -18,7 +18,8 @@
     exodiff = 'axisymmetric_gps_incremental_out.e'
     prereq = axisymmetric_gps_incremental
     design = 'GeneralizedPlaneStrainAction.md source/materials/ComputeAxisymmetric1DIncrementalStrain.md'
-    requirement = 'The system shall support AD generalized plane strain with incremental strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
+    requirement = 'The system shall support automatic-differentiation generalized plane strain with incremental strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
+    issues = '#33415'
   []
   [axisymmetric_gps_incremental_ad_jacobian]
     type = 'PetscJacobianTester'
@@ -29,7 +30,8 @@
     ratio_tol = 1e-7
     difference_tol = 1e-4
     design = 'source/kernels/ADStressDivergenceRZTensors.md source/kernels/ADGeneralizedPlaneStrain.md source/materials/ComputeAxisymmetric1DIncrementalStrain.md'
-    requirement = 'The system shall compute the Jacobian for AD 1D axisymmetric generalized plane strain with incremental strain.'
+    requirement = 'The system shall compute the Jacobian for automatic-differentiation 1D axisymmetric generalized plane strain with incremental strain.'
+    issues = '#33415'
   []
   [axisymmetric_gps_small]
     type = 'Exodiff'
@@ -49,7 +51,8 @@
     exodiff = 'axisymmetric_gps_small_out.e'
     prereq = axisymmetric_gps_small
     design = 'GeneralizedPlaneStrainAction.md source/materials/ComputeAxisymmetric1DSmallStrain.md'
-    requirement = 'The system shall support AD generalized plane strain with small strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
+    requirement = 'The system shall support automatic-differentiation generalized plane strain with small strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
+    issues = '#33415'
   []
   [axisymmetric_gps_small_ad_jacobian]
     type = 'PetscJacobianTester'
@@ -58,7 +61,8 @@
     ratio_tol = 1e-7
     difference_tol = 1e-4
     design = 'source/kernels/ADStressDivergenceRZTensors.md source/kernels/ADGeneralizedPlaneStrain.md source/materials/ComputeAxisymmetric1DSmallStrain.md'
-    requirement = 'The system shall compute the Jacobian for AD 1D axisymmetric generalized plane strain with small strain.'
+    requirement = 'The system shall compute the Jacobian for automatic-differentiation 1D axisymmetric generalized plane strain with small strain.'
+    issues = '#33415'
   []
   [axisymmetric_gps_finite]
     type = 'Exodiff'
@@ -78,7 +82,8 @@
     exodiff = 'axisymmetric_gps_finite_out.e'
     prereq = axisymmetric_gps_finite
     design = 'GeneralizedPlaneStrainAction.md source/materials/ComputeAxisymmetric1DFiniteStrain.md'
-    requirement = 'The system shall support AD generalized plane strain with finite strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
+    requirement = 'The system shall support automatic-differentiation generalized plane strain with finite strain for 1D meshes using the SolidMechanics/QuasiStatic Physics.'
+    issues = '#33415'
   []
   [axisymmetric_gps_finite_ad_jacobian]
     type = 'PetscJacobianTester'
@@ -89,7 +94,8 @@
     ratio_tol = 1e-6
     difference_tol = 2e-1
     design = 'source/kernels/ADStressDivergenceRZTensors.md source/kernels/ADGeneralizedPlaneStrain.md source/materials/ComputeAxisymmetric1DFiniteStrain.md'
-    requirement = 'The system shall compute the Jacobian for AD 1D axisymmetric generalized plane strain with finite strain.'
+    requirement = 'The system shall compute the Jacobian for automatic-differentiation 1D axisymmetric generalized plane strain with finite strain.'
+    issues = '#33415'
   []
   [axisymmetric_plane_strain_incremental]
     type = 'Exodiff'

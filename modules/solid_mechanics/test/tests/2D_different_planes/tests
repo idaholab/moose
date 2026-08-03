@@ -107,7 +107,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_xy_small_ad]
+  [gps_xy_small_ad]
     type = Exodiff
     input = 'gps_xy.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/use_automatic_differentiation=true
@@ -121,8 +121,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the x-y plane for small strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_xy_incremental]
     type = Exodiff
     input = 'gps_xy.i'
@@ -135,7 +135,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_xy_incremental_ad]
+  [gps_xy_incremental_ad]
     type = Exodiff
     input = 'gps_xy.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/incremental=true
@@ -150,8 +150,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the x-y plane for incremental strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_xy_finite]
     type = Exodiff
     input = 'gps_xy.i'
@@ -165,7 +165,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_xy_finite_ad]
+  [gps_xy_finite_ad]
     type = Exodiff
     input = 'gps_xy.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
@@ -181,8 +181,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the x-y plane for finite strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_xz_small]
     type = Exodiff
     input = 'gps_xz.i'
@@ -192,7 +192,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_xz_small_ad]
+  [gps_xz_small_ad]
     type = Exodiff
     input = 'gps_xz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/use_automatic_differentiation=true
@@ -206,8 +206,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the x-z plane for small strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_xz_incremental]
     type = Exodiff
     input = 'gps_xz.i'
@@ -220,7 +220,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_xz_incremental_ad]
+  [gps_xz_incremental_ad]
     type = Exodiff
     input = 'gps_xz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/incremental=true
@@ -235,8 +235,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the x-z plane for incremental strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_xz_finite]
     type = Exodiff
     input = 'gps_xz.i'
@@ -250,7 +250,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_xz_finite_ad]
+  [gps_xz_finite_ad]
     type = Exodiff
     input = 'gps_xz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
@@ -266,8 +266,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the x-z plane for finite strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_yz_small]
     type = Exodiff
     input = 'gps_yz.i'
@@ -277,7 +277,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_yz_small_ad]
+  [gps_yz_small_ad]
     type = Exodiff
     input = 'gps_yz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/use_automatic_differentiation=true
@@ -291,8 +291,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the y-z plane for small strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_yz_incremental]
     type = Exodiff
     input = 'gps_yz.i'
@@ -305,7 +305,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_yz_incremental_ad]
+  [gps_yz_incremental_ad]
     type = Exodiff
     input = 'gps_yz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/incremental=true
@@ -320,8 +320,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the y-z plane for incremental strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_yz_finite]
     type = Exodiff
     input = 'gps_yz.i'
@@ -335,7 +335,7 @@
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
   [../]
-  [./gps_yz_finite_ad]
+  [gps_yz_finite_ad]
     type = Exodiff
     input = 'gps_yz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/strain=FINITE
@@ -351,8 +351,8 @@
     abs_zero = 1e-7
     requirement = 'The system shall solve generalized plane strain in the y-z plane for finite strain using automatic differentiation.'
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./planestrain_jacobian_xy]
     type = 'PetscJacobianTester'
     input = 'planestrain_jacobian_testing_xy.i'
@@ -389,7 +389,7 @@
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
   [../]
-  [./gps_jacobian_xy_ad]
+  [gps_jacobian_xy_ad]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_xy.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/use_automatic_differentiation=true
@@ -402,8 +402,8 @@
     difference_tol = 1e-4
     requirement = 'The system shall compute the correct Jacobian for generalized plane strain in the x-y plane using automatic differentiation.'
     design = 'source/kernels/ADStressDivergenceTensors.md modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_jacobian_xz]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_xz.i'
@@ -413,7 +413,7 @@
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
   [../]
-  [./gps_jacobian_xz_ad]
+  [gps_jacobian_xz_ad]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_xz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/use_automatic_differentiation=true
@@ -426,8 +426,8 @@
     difference_tol = 1e-4
     requirement = 'The system shall compute the correct Jacobian for generalized plane strain in the x-z plane using automatic differentiation.'
     design = 'source/kernels/ADStressDivergenceTensors.md modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
   [./gps_jacobian_yz]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_yz.i'
@@ -437,7 +437,7 @@
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
   [../]
-  [./gps_jacobian_yz_ad]
+  [gps_jacobian_yz_ad]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_yz.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/generalized_plane_strain/use_automatic_differentiation=true
@@ -450,6 +450,6 @@
     difference_tol = 1e-4
     requirement = 'The system shall compute the correct Jacobian for generalized plane strain in the y-z plane using automatic differentiation.'
     design = 'source/kernels/ADStressDivergenceTensors.md modules/solid_mechanics/generalized_plane_strain.md'
-    issues = '#11257'
-  [../]
+    issues = '#11257 #33415'
+  []
 []

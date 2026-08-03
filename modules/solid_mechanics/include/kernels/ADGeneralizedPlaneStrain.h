@@ -5,6 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
@@ -14,8 +15,8 @@
 class Function;
 
 /**
- * Assembles the out-of-plane stress resultant equation for generalized plane strain using
- * automatic differentiation.
+ * Assembles the contributions of the area integral performed over the elements
+ * to the residual for the out-of-plane strain scalar variable using automatic differentiation.
  */
 class ADGeneralizedPlaneStrain : public ADKernelScalarBase
 {

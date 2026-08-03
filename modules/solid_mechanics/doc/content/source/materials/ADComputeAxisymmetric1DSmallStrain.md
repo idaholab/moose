@@ -4,41 +4,34 @@
 
 ## Description
 
-`ADComputeAxisymmetric1DSmallStrain` computes the total small strain for a 1D
+`ADComputeAxisymmetric1DSmallStrain` computes the small total strain for a 1D
 axisymmetric generalized plane strain model using automatic differentiation.
-It is the AD counterpart to [ComputeAxisymmetric1DSmallStrain.md].
+It is the AD counterpart to [ComputeAxisymmetric1DSmallStrain.md] and supplies
+strains with all derivatives required to form an exact Jacobian.
 
-This material assumes symmetry about the $z$ axis and must be used on blocks
-with `COORD_TYPE = RZ`. The radial coordinate is the physical $x$ coordinate.
-The radial strain is stored in the `xx` component, the generalized plane strain
-component is stored in `yy`, and the hoop strain is stored in `zz`.
+!include modules/solid_mechanics/common/supplementalAxisymmetric1DStrainOverview.md
 
 The out-of-plane strain can be supplied by either
 [!param](/Materials/ADComputeAxisymmetric1DSmallStrain/scalar_out_of_plane_strain)
 or [!param](/Materials/ADComputeAxisymmetric1DSmallStrain/out_of_plane_strain),
-but not both. With
-[!param](/Materials/ADComputeAxisymmetric1DSmallStrain/scalar_out_of_plane_strain),
-the coupled scalar variable commonly comes from a
+but not both. Scalar out-of-plane strain values are commonly used by
 [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
-model. If multiple scalar components are coupled,
+models. If multiple scalar components are coupled,
 [!param](/Materials/ADComputeAxisymmetric1DSmallStrain/subblock_index_provider)
-selects the component for the current element; otherwise component 0 is used.
+selects which scalar component applies to the current element; without that
+user object, component 0 is used.
 
-The small-strain components are
-\begin{equation}
-  \epsilon_{rr} = u_{r,r}, \qquad
-  \epsilon_{zz} = \epsilon^{op}, \qquad
-  \epsilon_{\theta \theta} = \frac{u_r}{X_r},
-\end{equation}
-where $\epsilon^{op}$ is the supplied out-of-plane strain.
+## 1D Axisymmetric Strain Formulation
+
+!include modules/solid_mechanics/common/supplementalAxisymmetric1DSmallStrainFormulation.md
 
 ## Example Input File Syntax
 
-The following generalized plane strain test shows the corresponding non-AD
-material block using a scalar out-of-plane strain. The same strain block
-parameters apply to `ADComputeAxisymmetric1DSmallStrain`.
+The following generalized plane strain input uses the QuasiStatic Physics with
+automatic differentiation; the action selects `ADComputeAxisymmetric1DSmallStrain`
+as the strain calculator.
 
-!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Materials/strain
+!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymmetric_gps_ad_jacobian.i block=Physics/SolidMechanics/QuasiStatic
 
 !syntax parameters /Materials/ADComputeAxisymmetric1DSmallStrain
 

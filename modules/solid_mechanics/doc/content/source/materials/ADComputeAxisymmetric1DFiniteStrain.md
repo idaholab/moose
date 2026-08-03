@@ -7,33 +7,26 @@
 `ADComputeAxisymmetric1DFiniteStrain` computes the finite strain increment and
 rotation increment for a 1D axisymmetric generalized plane strain model using
 automatic differentiation. It is the AD counterpart to
-[ComputeAxisymmetric1DFiniteStrain.md].
+[ComputeAxisymmetric1DFiniteStrain.md] and supplies strains with all
+derivatives required to form an exact Jacobian. Current displacement and
+out-of-plane strain values are AD values; the old state values used to form the
+finite strain increment remain regular values.
 
-This material assumes symmetry about the $z$ axis and must be used on blocks
-with `COORD_TYPE = RZ`. The radial coordinate is the physical $x$ coordinate.
-The radial deformation component is stored in `xx`, the generalized plane
-strain component is stored in `yy`, and the hoop deformation component is
-stored in `zz`.
+!include modules/solid_mechanics/common/supplementalAxisymmetric1DStrainOverview.md
 
 The out-of-plane strain can be supplied by either
 [!param](/Materials/ADComputeAxisymmetric1DFiniteStrain/scalar_out_of_plane_strain)
 or [!param](/Materials/ADComputeAxisymmetric1DFiniteStrain/out_of_plane_strain),
-but not both. With
-[!param](/Materials/ADComputeAxisymmetric1DFiniteStrain/scalar_out_of_plane_strain),
-the coupled scalar variable commonly comes from a
+but not both. Scalar out-of-plane strain values are commonly used by
 [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
-model. If multiple scalar components are coupled,
+models. If multiple scalar components are coupled,
 [!param](/Materials/ADComputeAxisymmetric1DFiniteStrain/subblock_index_provider)
-selects the component for the current element; otherwise component 0 is used.
+selects which scalar component applies to the current element; without that
+user object, component 0 is used.
 
-The finite-strain deformation components are
-\begin{equation}
-  A_{rr} = u_{r,r}, \qquad
-  A_{zz} = \exp \left( \epsilon^{op} \right) - 1, \qquad
-  A_{\theta \theta} = \frac{u_r}{X_r},
-\end{equation}
-where $\epsilon^{op}$ is the supplied out-of-plane strain. The out-of-plane
-component uses $\exp(\epsilon^{op}) - 1$.
+## 1D Axisymmetric Strain Formulation
+
+!include modules/solid_mechanics/common/supplementalAxisymmetric1DFiniteStrainFormulation.md
 
 ## Example Input File Syntax
 
