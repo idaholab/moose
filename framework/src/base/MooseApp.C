@@ -2790,9 +2790,16 @@ MooseApp::writeSplitMeshMetaData(const std::filesystem::path & folder_base)
 {
   auto add_or_update = [this](const std::string & name, const std::string & value)
   {
-    auto data = std::make_unique<RestartableData<std::string>>(name, nullptr, value);
-    auto & stored_data = registerRestartableData(std::move(data), 0, false, MESH_META_DATA);
-    auto * string_data = dynamic_cast<RestartableData<std::string> *>(&stored_data);
+    RestartableDataValue * stored_data = nullptr;
+    if (hasRestartableMetaData(name, MESH_META_DATA))
+      stored_data = &getRestartableMetaData(name, MESH_META_DATA, 0);
+    else
+    {
+      auto data = std::make_unique<RestartableData<std::string>>(name, nullptr, value);
+      stored_data = &registerRestartableData(std::move(data), 0, false, MESH_META_DATA);
+    }
+
+    auto * string_data = dynamic_cast<RestartableData<std::string> *>(stored_data);
     mooseAssert(string_data, "Unexpected restartable data type");
     string_data->set() = value;
   };
@@ -2801,7 +2808,8 @@ MooseApp::writeSplitMeshMetaData(const std::filesystem::path & folder_base)
   add_or_update(split_mesh_input_fingerprint_name, splitMeshInputFingerprint(summary));
   add_or_update(split_mesh_input_summary_name, summary);
 
-  return writeRestartableMetaData(MooseApp::MESH_META_DATA, splitMeshMetaDataFolderBase(folder_base));
+  return writeRestartableMetaData(MooseApp::MESH_META_DATA,
+                                  splitMeshMetaDataFolderBase(folder_base));
 }
 
 void

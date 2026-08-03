@@ -196,6 +196,11 @@
     command = 'python3 edit_split_mesh_metadata.py remove-metadata foo_no_metadata.cpa.gz/3'
     prereq = 'make_split_no_metadata'
     recover = false
+
+    issues = '#31129'
+    design = 'Mesh/splitting.md'
+    requirement = 'A split mesh metadata directory can be removed to test compatibility with '
+                  'legacy split meshes.'
   []
 
   [use_split_no_metadata]
@@ -231,6 +236,11 @@
     command = 'python3 edit_split_mesh_metadata.py drop-fingerprint foo_no_fingerprint.cpa.gz/3'
     prereq = 'make_split_no_fingerprint'
     recover = false
+
+    issues = '#31129'
+    design = 'Mesh/splitting.md'
+    requirement = 'A split mesh input fingerprint can be removed to test compatibility with split '
+                  'meshes that only contain older mesh metadata.'
   []
 
   [use_split_no_fingerprint]
