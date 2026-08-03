@@ -60,15 +60,6 @@ MFEMScalarCoefficientPointValueSampler::initialSetup()
                "points.");
 
   MFEMSamplerBase::initialSetup();
-
-  const auto & point_codes = _finder.GetCode();
-  for (const auto i : index_range(_query_points))
-    if (PointLocationCode(point_codes[i]) == PointLocationCode::BORDER)
-      mooseWarning(typeAndName(),
-                   " found point ",
-                   _query_points[i],
-                   " on an element boundary. An arbitrary coefficient may be discontinuous "
-                   "there, so the element selected by GSLIB will supply the sampled value.");
 }
 
 void

@@ -13,18 +13,6 @@
     recover = false
   []
 
-  [coefficient_boundary_warning]
-    type = RunException
-    input = coefficient_value_sampler_boundary.i
-    cli_args = 'FunctorMaterials/right/prop_values=20'
-    expect_err = 'MFEMScalarCoefficientPointValueSampler "boundary_sample" found point .* on an '
-                 'element boundary.*element selected by GSLIB will supply the sampled value'
-    requirement = 'The system shall warn that GSLIB selects the element used to evaluate an MFEM '
-                  'coefficient at an element boundary.'
-    capabilities = 'mfem'
-    recover = false
-  []
-
   [coefficient_boundary_sampling]
     type = CSVDiff
     input = coefficient_value_sampler_boundary.i
