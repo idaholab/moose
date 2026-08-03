@@ -25,7 +25,7 @@ namespace Moose::MFEM
 {
 struct SolutionState;
 class ProblemComposerBase;
-};
+}
 
 class MFEMProblem : public ExternalProblem
 {
