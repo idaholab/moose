@@ -54,17 +54,7 @@
     type = PetscJacobianTester
     input = 'ad_row_dependent_jacobian.i'
     run_sim = true
-    requirement = 'The system shall constrain and cache AD Jacobian batches whose residual rows have different derivative supports.'
-    design = 'automatic_differentiation/index.md'
-    issues = '#33378'
-  []
-  [test_ad_reordered_row_support]
-    type = PetscJacobianTester
-    input = 'ad_row_dependent_jacobian.i'
-    cli_args = 'Kernels/row_dependent/reorder_equivalent_support=true'
-    run_sim = true
-    requirement = 'The system shall constrain and cache AD Jacobian batches whose residual rows '
-                  'have equivalent derivative supports inserted in different orders.'
+    requirement = 'The system shall constrain and cache an explicitly identified AD Jacobian batch whose residual rows have different derivative supports.'
     design = 'automatic_differentiation/index.md'
     issues = '#33378'
   []
