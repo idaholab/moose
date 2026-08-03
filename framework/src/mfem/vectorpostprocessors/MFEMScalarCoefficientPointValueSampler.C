@@ -76,15 +76,7 @@ MFEMScalarCoefficientPointValueSampler::execute()
   for (const auto i : make_range(received_elements.Size()))
   {
     mfem::IntegrationPoint integration_point;
-    if (mesh_dim == 1)
-      integration_point.Set1(received_reference_points[i]);
-    else if (mesh_dim == 2)
-      integration_point.Set2(received_reference_points[2 * i],
-                             received_reference_points[2 * i + 1]);
-    else
-      integration_point.Set3(received_reference_points[3 * i],
-                             received_reference_points[3 * i + 1],
-                             received_reference_points[3 * i + 2]);
+    integration_point.Set(&received_reference_points[mesh_dim * i], mesh_dim);
 
     auto & transformation = *_mesh.GetElementTransformation(received_elements[i]);
     transformation.SetIntPoint(&integration_point);
