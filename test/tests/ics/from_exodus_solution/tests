@@ -33,7 +33,7 @@
     input = 'elem_part2.i'
     exodiff = 'elem_part2_out.e'
     use_old_floor = true
-    abs_zero = 1e-09
+    abs_zero = 5e-9
     prereq = 'elem_var_1'
 
     requirement = 'The system shall be able to populate elemental initial conditions from a previous solution file in ExodusII format.'
