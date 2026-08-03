@@ -130,6 +130,15 @@ Please see the following for descriptions of more exotic tests/examples
 
 - [laser_welding.md]
 
+### Flow-Transport Compatibility
+
+Coupling this flow discretization to scalar transport adds a space-selection
+requirement in which the scalar space should match the pressure space $W_h = Q_h$ in order
+to be compatible. This is
+because mass conservation is not exact for the reason that the space of the divergence of the velocity,
+which is not continuous, does not match the pressure space, which is continuous.
+See [compatible flow and scalar transport](dgfe.md#compatible-flow-and-scalar-transport)
+for a couple of references on the topic.
 
 ### Other numerical discretization schemes implemented
 

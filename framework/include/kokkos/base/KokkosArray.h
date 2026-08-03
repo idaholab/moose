@@ -911,7 +911,7 @@ ArrayBase<T, dimension, index_type>::destroy()
 
   _size = 0;
 
-  for (unsigned int i = 0; i < dimension; ++i)
+  for (const auto i : make_range(dimension))
   {
     _n[i] = 0;
     _s[i] = 0;
@@ -942,7 +942,7 @@ ArrayBase<T, dimension, index_type>::shallowCopy(const ArrayBase<T, dimension, i
 
   _size = array._size;
 
-  for (unsigned int i = 0; i < dimension; ++i)
+  for (const auto i : make_range(dimension))
   {
     _n[i] = array._n[i];
     _s[i] = array._s[i];
@@ -1071,7 +1071,7 @@ ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type
   {
     _s[0] = 1;
 
-    for (unsigned int i = 1; i < dimension; ++i)
+    for (const auto i : make_range(1u, dimension))
       _s[i] = _s[i - 1] * _n[i - 1];
   }
   else
@@ -1370,7 +1370,7 @@ template <typename T, unsigned int dimension, typename index_type>
 void
 ArrayBase<T, dimension, index_type>::copyToDeviceNested()
 {
-  for (index_type i = 0; i < _size; ++i)
+  for (const auto i : make_range(_size))
     copyToDeviceInner(_host_data[i]);
 
   copyToDevice();
@@ -1391,23 +1391,17 @@ ArrayBase<T, dimension, index_type>::deepCopy(const ArrayBase<T, dimension, inde
 
   createInternal<false>(n, array._is_host_alloc, array._is_device_alloc);
 
-  if constexpr (ArrayDeepCopy<T>::value)
-  {
-    for (index_type i = 0; i < _size; ++i)
-      emplaceAt(i, array._host_data[i]);
+  if (_is_host_alloc)
+    for (const auto i : make_range(_size))
+      if (array.isSlotConstructed(i))
+        emplaceAt(i, array._host_data[i]);
 
+  if (ArrayDeepCopy<T>::value)
     copyToDevice();
-  }
-  else
-  {
-    if (_is_host_alloc)
-      std::memcpy(_host_data, array._host_data, _size * sizeof(T));
+  else if (_is_device_alloc)
+    copyInternal<MemSpace, MemSpace>(_device_data, array._device_data, _size);
 
-    if (_is_device_alloc)
-      copyInternal<MemSpace, MemSpace>(_device_data, array._device_data, _size);
-  }
-
-  for (unsigned int i = 0; i < dimension; ++i)
+  for (const auto i : make_range(dimension))
   {
     _d[i] = array._d[i];
     _s[i] = array._s[i];
@@ -1456,7 +1450,7 @@ dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array
   unsigned int dim = dimension;
   dataStore(stream, dim, nullptr);
 
-  for (unsigned int dim = 0; dim < dimension; ++dim)
+  for (const auto dim : make_range(dimension))
   {
     auto n = array.n(dim);
     dataStore(stream, n, nullptr);
@@ -1472,7 +1466,7 @@ dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array
 
     array.copyOut(data, MemcpyType::DEVICE_TO_HOST, array.size());
 
-    for (index_type i = 0; i < array.size(); ++i)
+    for (const auto i : make_range(array.size()))
       dataStore(stream, data[i], context);
 
     std::free(data);
@@ -1517,7 +1511,7 @@ dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array,
   std::vector<index_type> from_n(dimension);
   std::vector<index_type> n(dimension);
 
-  for (unsigned int dim = 0; dim < dimension; ++dim)
+  for (const auto dim : make_range(dimension))
   {
     dataLoad(stream, from_n[dim], nullptr);
     n[dim] = array.n(dim);
@@ -1776,7 +1770,12 @@ public:
     this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
 
     if (host)
-      std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+    {
+      if constexpr (std::is_trivially_copyable<T>())
+        std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+      else
+        std::copy(vector.begin(), vector.end(), this->begin());
+    }
 
     if (device)
       this->template copyInternal<MemSpace, ::Kokkos::HostSpace>(

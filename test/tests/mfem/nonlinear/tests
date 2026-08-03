@@ -49,8 +49,8 @@
       csvdiff = 'NLHeatTransferLinearized_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
+      max_parallel = 10 # stacked_hexes.e has 10 elements; recovered MFEM meshes require a nonempty partition
       cli_args = 'BCs/active="linearized" '
                  'Outputs/CSV/file_base=NLHeatTransferLinearized '
     []
@@ -61,8 +61,9 @@
       csvdiff = 'NLHeatTransfer_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
+      max_parallel = 10 # stacked_hexes.e has 10 elements; recovered MFEM meshes require a nonempty partition
+      prereq = 'MFEMNonLinearHeatTransfer/linearized'
     []
   []
   [MFEMNonLinearHeatConduction]
@@ -78,7 +79,6 @@
                 NLHeatConduction_centre_temperature_0050.csv'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    recover = false
     restep = false
   []
   [MFEMNonLinearHeatConductionQuadratureFunction]

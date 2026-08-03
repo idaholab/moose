@@ -43,6 +43,8 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
                               const std::string & var_name,
                               InputParameters & parameters)
 {
+  validateVariableNumericType(var_type, var_name);
+
   // Reject names that would collide with the mode-suffix convention or with any
   // already-registered eigenmode storage entry.
   const auto num_modes = getParam<int>("num_modes");

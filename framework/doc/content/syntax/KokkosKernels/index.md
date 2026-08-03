@@ -113,42 +113,41 @@ See the following source codes of `KokkosBodyForce` for another example of a ker
 
 [Similarly to the original MOOSE](syntax/Kernels/index.md#optimized), Kokkos-MOOSE provides `Moose::Kokkos::KernelValue` and `Moose::Kokkos::KernelGrad` for creating an optimized kernel by factoring out test functions in residual and Jacobian calculations.
 It is strongly encouraged to leverage these optimized kernel objects whenever possible for best performance.
-However, the usage of optimized kernel objects is slightly different from the original MOOSE.
-Instead of `precomputeQpResidual()` and `precomputeQpJacobian()`, you should still define `computeQpResidual()` and `computeQpJacobian()`, but with different signatures from those in `Moose::Kokkos::Kernel`.
+These objects use `precomputeQpResidual()`, `precomputeQpJacobian()`, and `precomputeQpOffDiagJacobian()` hooks with signatures that differ from those in `Moose::Kokkos::Kernel`.
 The signatures of these hook methods are as follows:
 
 - For `Moose::Kokkos::KernelValue`,
 
 ```cpp
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp,
-                                       AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp,
+                                          AssemblyDatum & datum) const;
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
-                                       const unsigned int qp,
-                                       AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
+                                          const unsigned int qp,
+                                          AssemblyDatum & datum) const;
 template <typename Derived>
-KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int j,
-                                              const unsigned int jvar,
-                                              const unsigned int qp,
-                                              AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
+                                                 const unsigned int jvar,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 ```
 
 - For `Moose::Kokkos::KernelGrad`,
 
 ```cpp
 template <typename Derived>
-KOKKOS_FUNCTION Real3 computeQpResidual(const unsigned int qp,
-                                        AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp,
+                                           AssemblyDatum & datum) const;
 template <typename Derived>
-KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int j,
-                                        const unsigned int qp,
-                                        AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
+                                           const unsigned int qp,
+                                           AssemblyDatum & datum) const;
 template <typename Derived>
-KOKKOS_FUNCTION Real3 computeQpOffDiagJacobian(const unsigned int j,
-                                               const unsigned int jvar,
-                                               const unsigned int qp,
-                                               AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real3 precomputeQpOffDiagJacobian(const unsigned int j,
+                                                  const unsigned int jvar,
+                                                  const unsigned int qp,
+                                                  AssemblyDatum & datum) const;
 ```
 
 See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffusionPrecompute` for examples of optimized kernels:

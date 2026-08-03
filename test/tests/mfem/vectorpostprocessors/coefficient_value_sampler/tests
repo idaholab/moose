@@ -1,0 +1,48 @@
+[Tests]
+  design = 'MFEMPointScalarCoefficientValueSampler.md'
+  issues = '#33439'
+
+  [coefficient_sampling]
+    type = CSVDiff
+    input = coefficient_value_sampler.i
+    csvdiff = 'coefficient_value_sampler_out_function_sample_0001.csv
+               coefficient_value_sampler_out_material_sample_0001.csv'
+    requirement = 'The system shall evaluate real scalar MFEM function and material coefficients '
+                  'at arbitrary points.'
+    capabilities = 'mfem'
+    recover = false
+  []
+
+  [coefficient_boundary_warning]
+    type = RunException
+    input = coefficient_value_sampler_boundary.i
+    cli_args = 'FunctorMaterials/right/prop_values=20'
+    expect_err = 'MFEMPointScalarCoefficientValueSampler "boundary_sample" found point .* on an '
+                 'element boundary.*element selected by GSLIB will supply the sampled value'
+    requirement = 'The system shall warn that GSLIB selects the element used to evaluate an MFEM '
+                  'coefficient at an element boundary.'
+    capabilities = 'mfem'
+    recover = false
+  []
+
+  [coefficient_boundary_sampling]
+    type = CSVDiff
+    input = coefficient_value_sampler_boundary.i
+    csvdiff = 'coefficient_value_sampler_boundary_out_boundary_sample_0001.csv'
+    requirement = 'The system shall evaluate an MFEM coefficient at an element boundary.'
+    capabilities = 'mfem'
+    allow_warnings = true
+    recover = false
+  []
+
+  [quadrature_coefficient_rejection]
+    type = RunException
+    input = coefficient_value_sampler_qf.i
+    expect_err = 'Quadrature-function-backed coefficients can only be evaluated at the quadrature '
+                 'points configured by their quadrature rule'
+    requirement = 'The system shall reject arbitrary-point sampling of an MFEM coefficient backed '
+                  'by values defined only at configured quadrature points.'
+    capabilities = 'mfem'
+    recover = false
+  []
+[]

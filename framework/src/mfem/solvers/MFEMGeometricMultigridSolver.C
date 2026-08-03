@@ -126,7 +126,7 @@ MFEMGeometricMultigridSolver::ParseAssemblyLevel(const std::string & s) const
 }
 
 void
-MFEMGeometricMultigridSolver::SetOperator(mfem::Operator & op)
+MFEMGeometricMultigridSolver::SetOperatorImpl(mfem::Operator & op)
 {
   BuildMultigrid(op);
 }

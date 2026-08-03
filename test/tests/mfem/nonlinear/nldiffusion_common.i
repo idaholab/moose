@@ -69,7 +69,7 @@
 [VectorPostprocessors]
   active = ''
   [point_sample]
-    type = MFEMPointValueSampler
+    type = MFEMPointVariableValueSampler
     variable = concentration
     points = '0.5 0.25 0
               0.5 0.50 0

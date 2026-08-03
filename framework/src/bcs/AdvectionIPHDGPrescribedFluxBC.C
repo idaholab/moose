@@ -29,8 +29,8 @@ AdvectionIPHDGPrescribedFluxBC::AdvectionIPHDGPrescribedFluxBC(const InputParame
 {
 }
 
-IPHDGAssemblyHelper &
-AdvectionIPHDGPrescribedFluxBC::iphdgHelper()
+ElementAndTraceScalarHDGAssemblyHelper &
+AdvectionIPHDGPrescribedFluxBC::hdgHelper()
 {
   return *_iphdg_helper;
 }

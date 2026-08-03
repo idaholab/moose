@@ -36,7 +36,6 @@ public:
 
   std::shared_ptr<Moose::MFEM::EquationSystem> eqn_system{nullptr};
   std::shared_ptr<Moose::MFEM::NonlinearSolverBase> nonlinear_solver{nullptr};
-
   std::shared_ptr<Moose::MFEM::LinearSolverBase> jacobian_solver{nullptr};
 
   Moose::MFEM::FECollections fecs;

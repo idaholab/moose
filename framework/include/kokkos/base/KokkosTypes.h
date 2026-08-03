@@ -21,6 +21,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/tensor_tools.h"
+#include "libmesh/tensor_value.h"
 
 namespace Moose::Kokkos
 {
@@ -42,7 +43,7 @@ struct Vector3
   Vector3(const libMesh::TypeVector<T> & vector);
   KOKKOS_INLINE_FUNCTION Vector3() { *this = T{}; }
   KOKKOS_INLINE_FUNCTION Vector3(const T & scalar) { *this = scalar; }
-  KOKKOS_INLINE_FUNCTION Vector3(const Vector3<T> & vector) { *this = vector; }
+  KOKKOS_INLINE_FUNCTION Vector3(const Vector3<T> & vector) = default;
   KOKKOS_INLINE_FUNCTION Vector3(const T & x, const T & y, const T & z);
 
   KOKKOS_INLINE_FUNCTION Vector3<T> operator-() const;
@@ -78,15 +79,19 @@ struct Real33
 #ifdef MOOSE_KOKKOS_SCOPE
   KOKKOS_INLINE_FUNCTION Real33() { *this = 0; }
   KOKKOS_INLINE_FUNCTION Real33(const Real scalar) { *this = scalar; }
-  KOKKOS_INLINE_FUNCTION Real33(const Real33 & tensor) { *this = tensor; }
+  KOKKOS_INLINE_FUNCTION Real33(const Real33 & tensor) = default;
+  Real33(const libMesh::TypeTensor<Real> & tensor) { *this = tensor; }
 
   KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i, unsigned int j) { return a[i][j]; }
   KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i, unsigned int j) const { return a[i][j]; }
 
+  Real33 & operator=(const libMesh::TypeTensor<Real> & tensor);
   KOKKOS_INLINE_FUNCTION Real33 & operator=(const Real33 & tensor);
   KOKKOS_INLINE_FUNCTION Real33 & operator=(const Real scalar);
   KOKKOS_INLINE_FUNCTION void operator+=(const Real33 tensor);
+  KOKKOS_INLINE_FUNCTION void operator*=(const Real scalar);
 
+  KOKKOS_INLINE_FUNCTION Real contract(const Real33 tensor) const;
   KOKKOS_INLINE_FUNCTION void identity(const unsigned int dim = 3);
   KOKKOS_INLINE_FUNCTION Real determinant(const unsigned int dim = 3) const;
   KOKKOS_INLINE_FUNCTION Real33 inverse(const unsigned int dim = 3) const;
@@ -313,18 +318,28 @@ Vector3<Real>::cartesian_product(const Real3 vector) const
 {
   Real33 tensor;
 
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       tensor(i, j) = v[i] * vector.v[j];
 
   return tensor;
 }
 
+inline Real33 &
+Real33::operator=(const libMesh::TypeTensor<Real> & tensor)
+{
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      a[i][j] = tensor(i, j);
+
+  return *this;
+}
+
 KOKKOS_INLINE_FUNCTION Real33 &
 Real33::operator=(const Real33 & tensor)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       a[i][j] = tensor.a[i][j];
 
   return *this;
@@ -333,8 +348,8 @@ Real33::operator=(const Real33 & tensor)
 KOKKOS_INLINE_FUNCTION Real33 &
 Real33::operator=(const Real scalar)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       a[i][j] = scalar;
 
   return *this;
@@ -343,9 +358,29 @@ Real33::operator=(const Real scalar)
 KOKKOS_INLINE_FUNCTION void
 Real33::operator+=(const Real33 tensor)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       a[i][j] += tensor.a[i][j];
+}
+
+KOKKOS_INLINE_FUNCTION void
+Real33::operator*=(const Real scalar)
+{
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
+      a[i][j] *= scalar;
+}
+
+KOKKOS_INLINE_FUNCTION Real
+Real33::contract(const Real33 tensor) const
+{
+  Real value = 0;
+
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
+      value += a[i][j] * tensor.a[i][j];
+
+  return value;
 }
 
 KOKKOS_INLINE_FUNCTION void
@@ -414,8 +449,8 @@ Real33::transpose() const
 {
   Real33 tr_mat;
 
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
       tr_mat(i, j) = a[j][i];
 
   return tr_mat;
@@ -441,17 +476,49 @@ operator*(const Real33 left, const Real3 right)
           left(2, 0) * right.v[0] + left(2, 1) * right.v[1] + left(2, 2) * right.v[2]};
 }
 
+KOKKOS_INLINE_FUNCTION ADReal3
+operator*(const Real33 left, const ADReal3 & right)
+{
+  return {left(0, 0) * right(0) + left(0, 1) * right(1) + left(0, 2) * right(2),
+          left(1, 0) * right(0) + left(1, 1) * right(1) + left(1, 2) * right(2),
+          left(2, 0) * right(0) + left(2, 1) * right(1) + left(2, 2) * right(2)};
+}
+
+KOKKOS_INLINE_FUNCTION ADReal3
+operator*(const ADReal3 & left, const Real33 right)
+{
+  return {left(0) * right(0, 0) + left(1) * right(1, 0) + left(2) * right(2, 0),
+          left(0) * right(0, 1) + left(1) * right(1, 1) + left(2) * right(2, 1),
+          left(0) * right(0, 2) + left(1) * right(1, 2) + left(2) * right(2, 2)};
+}
+
 KOKKOS_INLINE_FUNCTION Real33
 operator*(const Real33 left, const Real33 right)
 {
   Real33 mul;
 
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      for (unsigned int k = 0; k < 3; ++k)
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    for (unsigned int j = 0; j < Moose::dim; ++j)
+      for (unsigned int k = 0; k < Moose::dim; ++k)
         mul(i, j) += left(i, k) * right(k, j);
 
   return mul;
+}
+
+KOKKOS_INLINE_FUNCTION Real33
+operator*(const Real left, Real33 right)
+{
+  right *= left;
+
+  return right;
+}
+
+KOKKOS_INLINE_FUNCTION Real33
+operator*(Real33 left, const Real right)
+{
+  left *= right;
+
+  return left;
 }
 
 KOKKOS_INLINE_FUNCTION Real3
@@ -518,6 +585,17 @@ KOKKOS_INLINE_FUNCTION ADReal
 operator*(const ADReal3 & left, const Real3 right)
 {
   return left(0) * right(0) + left(1) * right(1) + left(2) * right(2);
+}
+
+KOKKOS_INLINE_FUNCTION Real3
+curlFromVectorGradient(const Real33 grad, const unsigned int dim)
+{
+  if (dim < 2)
+    return 0;
+  else if (dim == 2)
+    return Real3(0, 0, grad(1, 0) - grad(0, 1));
+  else
+    return Real3(grad(2, 1) - grad(1, 2), grad(0, 2) - grad(2, 0), grad(1, 0) - grad(0, 1));
 }
 
 #endif

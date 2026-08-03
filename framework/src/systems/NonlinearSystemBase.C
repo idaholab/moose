@@ -2542,6 +2542,10 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
               {
                 constraints_applied = true;
 
+                // Begin the diagonal node-face constraint accumulation phase for neighbor Jacobian
+                // blocks.
+                _fe_problem.prepareAssemblyNeighbor(0);
+
                 nfc->prepareShapes(nfc->variable().number());
                 nfc->prepareNeighborShapes(nfc->variable().number());
 
@@ -2606,8 +2610,10 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
                           nfc->variable().number(), jvar->number(), this->number()))
                     continue;
 
-                  // Need to zero out the matrices first
+                  // Begin the off-diagonal node-face constraint accumulation phase for
+                  // element and neighbor Jacobian blocks.
                   _fe_problem.prepareAssembly(0);
+                  _fe_problem.prepareAssemblyNeighbor(0);
 
                   nfc->prepareShapes(nfc->variable().number());
                   nfc->prepareNeighborShapes(jvar->number());
@@ -2721,6 +2727,11 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
           _fe_problem.setNeighborSubdomainID(elem2, tid);
           subproblem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
+          // Begin the element-element constraint accumulation phase for element and neighbor
+          // Jacobian blocks.
+          _fe_problem.prepareAssembly(tid);
+          _fe_problem.prepareAssemblyNeighbor(tid);
+
           ec->prepareShapes(ec->variable().number());
           ec->prepareNeighborShapes(ec->variable().number());
 
@@ -2765,9 +2776,6 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
             // This reinits the variables that exist on the secondary node
             _fe_problem.reinitNodeFace(&secondary_node, secondary_id, 0);
 
-            // This will set aside residual and jacobian space for the variables that have dofs
-            // on the secondary node
-            _fe_problem.prepareAssembly(0);
             _fe_problem.reinitOffDiagScalars(0);
 
             for (const auto & nec : constraints)
@@ -2775,6 +2783,11 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
               if (nec->shouldApply())
               {
                 constraints_applied = true;
+
+                // Begin the diagonal node-element constraint accumulation phase for
+                // element and neighbor Jacobian blocks.
+                _fe_problem.prepareAssembly(0);
+                _fe_problem.prepareAssemblyNeighbor(0);
 
                 nec->_jacobian = &jacobian_to_view;
                 nec->prepareShapes(nec->variable().number());
@@ -2822,8 +2835,10 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
                           nec->variable().number(), jvar->number(), this->number()))
                     continue;
 
-                  // Need to zero out the matrices first
+                  // Begin the off-diagonal node-element constraint accumulation phase for
+                  // element and neighbor Jacobian blocks.
                   _fe_problem.prepareAssembly(0);
+                  _fe_problem.prepareAssemblyNeighbor(0);
 
                   nec->prepareShapes(nec->variable().number());
                   nec->prepareNeighborShapes(jvar->number());

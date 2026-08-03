@@ -435,6 +435,35 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
 
 // Kernel, NodalKernel, BC
 
+namespace Moose::Kokkos
+{
+
+template <typename Object>
+bool
+hasUserJacobianHook()
+{
+  if constexpr (Object::use_precompute_hooks)
+    return &Object::template precomputeQpJacobian<Object> !=
+           Object::template defaultJacobian<Object>();
+  else
+    return &Object::template computeQpJacobian<Object> !=
+           Object::template defaultJacobian<Object>();
+}
+
+template <typename Object>
+bool
+hasUserOffDiagJacobianHook()
+{
+  if constexpr (Object::use_precompute_hooks)
+    return &Object::template precomputeQpOffDiagJacobian<Object> !=
+           Object::template defaultOffDiagJacobian<Object>();
+  else
+    return &Object::template computeQpOffDiagJacobian<Object> !=
+           Object::template defaultOffDiagJacobian<Object>();
+}
+
+} // namespace Moose::Kokkos
+
 #define callRegisterKokkosResidualObjectFunction(classname, objectname)                            \
   static char registerKokkosResidualObject##classname()                                            \
   {                                                                                                \
@@ -443,13 +472,10 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
     DispatcherRegistry::addDispatcher<classname::ResidualLoop, classname>(objectname);             \
     DispatcherRegistry::addDispatcher<classname::JacobianLoop, classname>(objectname);             \
     DispatcherRegistry::addDispatcher<classname::OffDiagJacobianLoop, classname>(objectname);      \
-    DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(                                    \
-        objectname,                                                                                \
-        &classname::computeQpJacobian<classname> != classname::defaultJacobian<classname>());      \
+    DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(objectname,                         \
+                                                               hasUserJacobianHook<classname>());  \
     DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
-        objectname,                                                                                \
-        &classname::computeQpOffDiagJacobian<classname> !=                                         \
-            classname::defaultOffDiagJacobian<classname>());                                       \
+        objectname, hasUserOffDiagJacobianHook<classname>());                                      \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

@@ -9,23 +9,23 @@
 
 #pragma once
 
-#include "IPHDGBC.h"
+#include "ElementAndTraceScalarHDGBC.h"
 
 /**
  * Implements a prescribed flux for an IP-HDG discretization
  */
-class IPHDGPrescribedFluxBC : public IPHDGBC
+class IPHDGPrescribedFluxBC : public ElementAndTraceScalarHDGBC
 {
 public:
   static InputParameters validParams();
 
   IPHDGPrescribedFluxBC(const InputParameters & parameters);
 
-protected:
+private:
   /**
    * compute the AD residuals
    */
-  virtual void compute() override;
+  virtual void compute(ElementAndTraceScalarHDGAssemblyHelper & helper) override;
 
   /// Prescribed normal flux along the boundary. The default is 0 for a natural boundary
   /// condition
