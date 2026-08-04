@@ -34,7 +34,7 @@ public:
   /// Persistent true-DoF solution vector backing trial grid functions after problem operator init.
   mfem::BlockVector true_solution;
 
-  std::shared_ptr<Moose::MFEM::EquationSystem> eqn_system{nullptr};
+  std::vector<std::shared_ptr<Moose::MFEM::EquationSystem>> eqn_systems;
   std::shared_ptr<Moose::MFEM::NonlinearSolverBase> nonlinear_solver{nullptr};
   std::shared_ptr<Moose::MFEM::LinearSolverBase> jacobian_solver{nullptr};
 
