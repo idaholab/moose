@@ -125,7 +125,8 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
   const Real normal_ainv = computeBoundaryAinv();
 
   // Ainv is initialized to zero and is first populated by the momentum assembly. Until then, use
-  // the extrapolated cell pressure for the initial pressure-gradient calculation.
+  // the cell pressure (1 term expansion) for the initial pressure-gradient
+  // calculation.
   if (normal_ainv == 0.0)
     return _var.getElemValue(*elem_info, state);
 
@@ -134,6 +135,7 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
   const auto & face_normal = _current_face_info->normal();
   const auto tangential_cell_to_face = d_cf - (d_cf * face_normal) * face_normal;
 
+  // Return the 2-term expansion for the boundary value
   return _var.getElemValue(*elem_info, state) + computeBoundaryNormalGradient() * distance +
          _var.gradSln(*elem_info, state) * tangential_cell_to_face;
 }
