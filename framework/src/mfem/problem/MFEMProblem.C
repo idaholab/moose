@@ -248,56 +248,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                   InputParameters & parameters)
 {
   auto bc = addObject<MFEMBoundaryCondition>(bc_name, name, parameters).front();
-  const auto & mfem_bc = *bc;
-
-  if (dynamic_cast<const MFEMIntegratedBC *>(&mfem_bc))
-  {
-    auto integrated_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddIntegratedBC(std::move(integrated_bc));
-    else
-      mooseError("Cannot add integrated BC with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else if (dynamic_cast<const MFEMComplexIntegratedBC *>(&mfem_bc))
-  {
-    auto integrated_bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddComplexIntegratedBC(std::move(integrated_bc));
-    else
-      mooseError("Cannot add complex integrated BC with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else if (dynamic_cast<const MFEMComplexEssentialBC *>(&mfem_bc))
-  {
-    auto essential_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddComplexEssentialBCs(std::move(essential_bc));
-    else
-      mooseError("Cannot add boundary condition with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else if (dynamic_cast<const MFEMEssentialBC *>(&mfem_bc))
-  {
-    auto essential_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddEssentialBC(std::move(essential_bc));
-    else
-      mooseError("Cannot add boundary condition with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else
-  {
-    mooseError("Unsupported bc of type '", bc_name, "' and name '", name, "' detected.");
-  }
+  _weak_form->addBoundaryCondition(bc);
 }
 
 void
@@ -454,29 +405,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
                        InputParameters & parameters)
 {
   auto kernel = addObject<MFEMKernel>(kernel_name, name, parameters).front();
-  const auto & kernel_object = *kernel;
-
-  if (dynamic_cast<const MFEMComplexKernel *>(&kernel_object))
-  {
-    auto complex_kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(kernel);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddComplexKernel(std::move(complex_kernel));
-    else
-      mooseError("Cannot add complex kernel with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else
-  {
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddKernel(std::move(kernel));
-    else
-      mooseError("Cannot add kernel with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
+  _weak_form->addKernel(kernel);
 }
 
 void
@@ -541,16 +470,19 @@ MFEMProblem::setEquationSystems()
 {
   // std::vector<MFEMWeakForm *> objs;
   // theWarehouse().query().condition<AttribSystem>("MFEMWeakForm").queryInto(objs);
+  getProblemData().eqn_systems.push_back(_weak_form->createEquationSystem());
+
   // if (objs.empty())
-    setDefaultEquationSystem();
+  //   setDefaultEquationSystem();
 }
 
 void
-MFEMProblem::addWeakForm(const std::string & type,
-                         const std::string & name,
-                         InputParameters & parameters)
+MFEMProblem::addWeakForm()
 {
-  addObject<MFEMWeakForm>(type, name, parameters);
+  const std::string type("MFEMWeakForm");
+  const std::string name("DefaultWeakForm");
+  InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
+  _weak_form = addObject<MFEMWeakForm>(type, name, parameters).front();
 }
 
 /// Returns a pointer to the operator's equation system.
@@ -568,45 +500,8 @@ MFEMProblem::addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase
 }
 
 void
-MFEMProblem::setDefaultEquationSystem()
-{
-  if (isTransient())
-  {
-    _problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
-        _problem_data.time_derivative_map);
-  }
-  else
-  {
-    if (getNumericType() == MFEMProblem::NumericType::REAL)
-    {
-      if (dynamic_cast<MFEMEigenproblem *>(this))
-        _problem_data.eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-      else
-        _problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-    }
-    else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
-    {
-      _problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-    }
-    else
-      mooseError("Unknown numeric type. "
-                 "Please set the Problem numeric type to either 'real' or 'complex'.");
-  }
-}
-
-void
 MFEMProblem::setMFEMProblemOperators()
 {
-  if (_problem_data.nonlinear_solver)
-    _problem_data.eqn_system->SetGradientRequired(
-        _problem_data.nonlinear_solver->RequiresGradient());
-
-  _problem_data.eqn_system->SetCoefficientManager(_problem_data.coefficients);
-
-  // Set up initial conditions
-  _problem_data.eqn_system->Init(
-      _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions, _default_assembly_level);
-
   if (isTransient())
   {
     auto problem_operator =
