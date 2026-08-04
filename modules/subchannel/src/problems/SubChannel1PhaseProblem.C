@@ -92,32 +92,33 @@ SubChannel1PhaseProblem::validParams()
       "mass_flow_equation_relaxation",
       1.0,
       "mass_flow_equation_relaxation > 0 & mass_flow_equation_relaxation <= 1",
-      "Equation relaxation factor for mass flow rate in the coupled implicit solve");
+      "Equation relaxation factor for mass flow rate in the implicit non-segregated solve");
   params.addRangeCheckedParam<Real>(
       "pressure_equation_relaxation",
       1.0,
       "pressure_equation_relaxation > 0 & pressure_equation_relaxation <= 1",
-      "Equation relaxation factor for pressure in the coupled implicit solve");
+      "Equation relaxation factor for pressure in the implicit non-segregated solve");
   params.addRangeCheckedParam<Real>(
       "crossflow_equation_relaxation",
       0.1,
       "crossflow_equation_relaxation > 0 & crossflow_equation_relaxation <= 1",
-      "Equation relaxation factor for crossflow in the coupled implicit solve");
+      "Equation relaxation factor for crossflow in the implicit non-segregated solve");
   params.addRangeCheckedParam<Real>(
       "mass_flow_relaxation",
       1.0,
       "mass_flow_relaxation > 0 & mass_flow_relaxation <= 1",
-      "Post-solve relaxation factor for mass flow rate updates in the coupled implicit solve");
+      "Post-solve relaxation factor for mass flow rate updates in the implicit non-segregated "
+      "solve");
   params.addRangeCheckedParam<Real>(
       "pressure_relaxation",
       1.0,
       "pressure_relaxation > 0 & pressure_relaxation <= 1",
-      "Post-solve relaxation factor for pressure updates in the coupled implicit solve");
+      "Post-solve relaxation factor for pressure updates in the implicit non-segregated solve");
   params.addRangeCheckedParam<Real>(
       "crossflow_relaxation",
       1.0,
       "crossflow_relaxation > 0 & crossflow_relaxation <= 1",
-      "Post-solve relaxation factor for crossflow updates in the coupled implicit solve");
+      "Post-solve relaxation factor for crossflow updates in the implicit non-segregated solve");
   params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
@@ -243,6 +244,21 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     paramError("pin_HTC_closure", "required when a pin mesh exists.");
   if (_duct_mesh_exist && !isParamValid("duct_HTC_closure"))
     paramError("duct_HTC_closure", "required when a duct mesh exists.");
+  if (!_implicit_bool && !_segregated_bool)
+    paramError("segregated", "A non-segregated solve requires 'implicit = true'.");
+  if (_segregated_bool)
+    for (const auto * relaxation_param : {"mass_flow_equation_relaxation",
+                                          "pressure_equation_relaxation",
+                                          "crossflow_equation_relaxation",
+                                          "mass_flow_relaxation",
+                                          "pressure_relaxation",
+                                          "crossflow_relaxation"})
+      if (params.isParamSetByUser(relaxation_param))
+        paramError(relaxation_param,
+                   "The '",
+                   relaxation_param,
+                   "' parameter is only used by the implicit non-segregated solve. Set "
+                   "'implicit = true' and 'segregated = false' to use it.");
   // NOTE: The four quantities below are 0 for processor_id != 0
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();

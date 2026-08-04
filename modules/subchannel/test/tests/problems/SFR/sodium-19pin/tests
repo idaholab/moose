@@ -23,6 +23,20 @@
     allow_warnings = true
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
+  [invalid_segregated_relaxation]
+    type = RunException
+    input = test19_implicit.i
+    cli_args = 'SubChannel/mass_flow_relaxation=0.5 Outputs/exodus=false Outputs/csv=false'
+    expect_err = "The 'mass_flow_relaxation' parameter is only used by the implicit non-segregated solve\."
+    requirement = 'The system shall reject monolithic relaxation controls when using a segregated solve.'
+  []
+  [invalid_explicit_nonsegregated]
+    type = RunException
+    input = test19_explicit.i
+    cli_args = 'SubChannel/segregated=false Outputs/exodus=false Outputs/csv=false'
+    expect_err = "A non-segregated solve requires 'implicit = true'\."
+    requirement = 'The system shall reject a non-segregated solve when implicit assembly is disabled.'
+  []
   [test_implicit_tiny_dt]
     type = RunApp
     input = test19_monolithic.i
