@@ -229,15 +229,22 @@ The collocated discretization of the variables is presented in [fig:dis] . $i,j$
 \end{bmatrix}
 \end{equation}
 
-For a segregated solve, this is equivalent to:
+Let $\ell$ denote the current flow-linearization iteration and let $\vec{b}_{m,\mathrm{in}}$
+contain the known block-inlet mass flow in the first row for each channel and zero in the remaining
+rows. Also define $D_V=\operatorname{diag}(V_{i,k}/\Delta t)$. If density and crossflow are lagged,
+the segregated mass equation is
 
 \begin{equation}
 \label{mass-dis3}
-\boldsymbol{M_{mm}} \vec{\dot{m}} = \vec{b_m} - \boldsymbol{M_{mw}}\vec{w}
+\boldsymbol{M_{mm}} \vec{\dot{m}}^{(\ell+1)} =
+\vec{b}_{m,\mathrm{in}} - D_V
+\left(\vec{\rho}^{(\ell)}-\vec{\rho}^{n}\right)
+- \boldsymbol{M_{mw}}\vec{w}^{(\ell)}.
 \end{equation}
 
-In the transient monolithic solve, the new-time density in the mass-conservation equation is also
-linearized with respect to pressure at constant enthalpy:
+In the transient monolithic solve, enthalpy is fixed during each flow solve. The new-time density
+is therefore linearized about the current flow iterate. The solver pressure $P=p-p_{\mathrm{exit}}$
+has the same increment as the absolute pressure $p$, so
 
 \begin{equation}
 \left(\frac{\partial \rho}{\partial p}\right)_h =
@@ -248,13 +255,60 @@ linearized with respect to pressure at constant enthalpy:
 \label{density-pressure-derivative}
 \end{equation}
 
-The corresponding pressure block gives the monolithic mass equation
+and
+
+\begin{equation}
+\label{density-pressure-linearization}
+\rho_{i,k}^{(\ell+1)} \approx \rho_{i,k}^{(\ell)} +
+\left(\frac{\partial \rho}{\partial p}\right)_{h,i,k}^{(\ell)}
+\left(P_{i,k}^{(\ell+1)}-P_{i,k}^{(\ell)}\right).
+\end{equation}
+
+Substitution into [mass-dis] gives the intermediate mass-flow equation
+
+\begin{equation}
+\begin{aligned}
+\dot{m}_{i,k}^{(\ell+1)} ={}& \dot{m}_{i,k-1}^{(\ell+1)}
+- \sum_j w_{ij,k}^{(\ell+1)}
+- \frac{V_{i,k}}{\Delta t}\left(\rho_{i,k}^{(\ell)}-\rho_{i,k}^{n}\right) \\
+&- \frac{V_{i,k}}{\Delta t}
+\left(\frac{\partial \rho}{\partial p}\right)_{h,i,k}^{(\ell)}
+\left(P_{i,k}^{(\ell+1)}-P_{i,k}^{(\ell)}\right).
+\end{aligned}
+\label{mass-density-to-mdot}
+\end{equation}
+
+The pressure block is defined by its action on a pressure vector,
+
+\begin{equation}
+\left(\boldsymbol{M_{mp}}^{(\ell)}\vec{P}\right)_{i,k} =
+\frac{V_{i,k}}{\Delta t}
+\left(\frac{\partial \rho}{\partial p}\right)_{h,i,k}^{(\ell)} P_{i,k},
+\label{mass-pressure-block}
+\end{equation}
+
+for rows whose downstream pressure is an unknown. The right-hand side of the mass equation is
+modified by the same linearization:
+
+\begin{equation}
+\vec{b}_m^{(\ell)} = \vec{b}_{m,\mathrm{in}}
+- D_V\left(\vec{\rho}^{(\ell)}-\vec{\rho}^{n}\right)
++ \boldsymbol{M_{mp}}^{(\ell)}\vec{P}^{(\ell)}.
+\label{mass-rhs}
+\end{equation}
+
+Thus the linearization modifies both the matrix and $\vec{b}_m$; the
+$\boldsymbol{M_{mp}}^{(\ell)}\vec{P}^{(\ell)}$ correction makes the Taylor approximation recover
+the lagged density at the linearization point.
+
+Moving the new pressure contribution in [mass-density-to-mdot] to the left-hand side gives the
+first block row of the monolithic solver:
 
 \begin{equation}
 \label{mass-dis-monolithic}
-\boldsymbol{M_{mm}}\vec{\dot{m}} +
-\boldsymbol{M_{mp}}\vec{P} +
-\boldsymbol{M_{mw}}\vec{w} = \vec{b_m}.
+\boldsymbol{M_{mm}}\vec{\dot{m}}^{(\ell+1)} +
+\boldsymbol{M_{mp}}^{(\ell)}\vec{P}^{(\ell+1)} +
+\boldsymbol{M_{mw}}\vec{w}^{(\ell+1)} = \vec{b}_m^{(\ell)}.
 \end{equation}
 
 Here $\boldsymbol{M_{mp}}$ is assembled when density and energy are computed in a transient
@@ -420,22 +474,22 @@ In this case, the governing mass, axial momentum and crossflow momentum  conserv
 \vec{h}
 \end{bmatrix} =
 \begin{bmatrix}
-\vec{b_m}\\
+\vec{b}_m\\
 \vec{b_p} \\
 \vec{b_w} \\
 \vec{b_h}
 \end{bmatrix}
 \end{equation}
 
-The pressure coupling $\boldsymbol{M_{mp}}$ is the transient density linearization described in
-[density-pressure-derivative]. Since the enthalpy governing equations are uncoupled from the other
-equations in this otherwise monolithic system (enthalpy is coupled to the flow equations through
-the fluid-property update), enthalpy is lagged and solved separately. The flow system retrieves
-$\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a block; $\vec{\Delta P}$
-is not explicitly calculated. The coupled flow system is solved with PETSc FGMRES and a field-split
-preconditioner. SCM checks the PETSc convergence reason for both the coupled flow and enthalpy
-linear solves and reports the reason, iteration count, and residual norm instead of accepting a
-diverged solution.
+The first block row is [mass-dis-monolithic], with $\boldsymbol{M_{mp}}$ defined by
+[mass-pressure-block] and $\vec{b}_m$ defined by [mass-rhs]. Since the enthalpy governing equations
+are uncoupled from the other equations in this otherwise monolithic system (enthalpy is coupled to
+the flow equations through the fluid-property update), enthalpy is lagged and solved separately.
+The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a
+block; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
+FGMRES and a field-split preconditioner. SCM checks the PETSc convergence reason for both the
+coupled flow and enthalpy linear solves and reports the reason, iteration count, and residual norm
+instead of accepting a diverged solution.
 
 As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to maintain realizability. A distinctive feature of this method is the introduction of a *weak relaxation* logic that stabilizes and accelerates convergence of the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and $crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks $M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing equations. Note that the solution is influenced by the stabilization method and its coefficients.
 
