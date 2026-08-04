@@ -9,6 +9,8 @@
 
 #include "TriangleManifoldTest.h"
 #include "MooseUnitUtils.h"
+#include "PointContainmentClassifier.h"
+#include "SurfaceElementSet.h"
 
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
@@ -87,6 +89,26 @@ makeUnitCubeMesh(const Parallel::Communicator & comm)
 
 template std::unique_ptr<libMesh::ReplicatedMesh>
 makeUnitCubeMesh<libMesh::ReplicatedMesh>(const Parallel::Communicator &);
+
+// Unit cube whose -x face diagonal is n0--n7 while its +x face diagonal is n2--n5. A +x ray
+// through y == z grazes only the -x diagonal, producing conflicting opposite-ray parities.
+std::unique_ptr<libMesh::ReplicatedMesh>
+makeAmbiguousRayCubeMesh(const Parallel::Communicator & comm)
+{
+  auto mesh = std::make_unique<libMesh::ReplicatedMesh>(comm);
+  mesh->set_mesh_dimension(2);
+  mesh->set_spatial_dimension(3);
+
+  const auto n = addCubeNodes(*mesh, Point(0, 0, 0));
+  for (const auto i : make_range(10u))
+    addTri(*mesh, n[cube_faces[i][0]], n[cube_faces[i][1]], n[cube_faces[i][2]]);
+  addTri(*mesh, n[1], n[2], n[5]);
+  addTri(*mesh, n[2], n[6], n[5]);
+
+  mesh->prepare_for_use();
+  return mesh;
+}
+
 #ifndef NDEBUG
 template std::unique_ptr<libMesh::DistributedMesh>
 makeUnitCubeMesh<libMesh::DistributedMesh>(const Parallel::Communicator &);
@@ -331,3 +353,29 @@ TEST_F(TriangleManifoldTest, distributedMesh)
                             "Input manifold mesh must be serialized.");
 }
 #endif
+
+TEST_F(TriangleManifoldTest, classifierFixedXRayHasNoRayDirection)
+{
+  // fixed_x_ray builds a TriangleManifold backend (no SurfaceElementSet needed), which has no
+  // ray-casting backend, so rayDirection() must error.
+  auto mesh = makeUnitCubeMesh(_app->comm());
+  PointContainmentClassifier classifier(*mesh, nullptr, PointContainmentMethod::FIXED_X_RAY, 1e-10);
+
+  EXPECT_MOOSEERROR_MSG_CONTAINS(classifier.rayDirection(),
+                                 "fixed_x_ray method has no ray-casting backend");
+}
+
+TEST_F(TriangleManifoldTest, classifierAmbiguousUserSelectedRay)
+{
+  auto mesh = makeAmbiguousRayCubeMesh(_app->comm());
+  const auto surface_set = SurfaceElementSet::fromMesh(*mesh);
+  PcaRayOptions options;
+  options.ray_direction = {RayDirectionMode::USER_SPECIFIED, Point(1, 0, 0)};
+  PointContainmentClassifier classifier(
+      *mesh, &surface_set, PointContainmentMethod::USER_SELECTED_RAY, 1e-10, options);
+
+  // Future plan: give shared TRI3 edges half-open ownership in the 3D crossing count, then change
+  // this regression to expect INSIDE instead of an ambiguity error.
+  EXPECT_MOOSEERROR_MSG_CONTAINS(classifier.sideness(Point(0.5, 0.25, 0.25)),
+                                 "ambiguous (grazing or tangent) intersection");
+}

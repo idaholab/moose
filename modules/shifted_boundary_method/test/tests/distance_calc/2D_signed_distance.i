@@ -65,9 +65,19 @@ n_seg = 64
     point_containment_method = user_selected_ray
     ray_direction = '1 0 0'
   []
+  [SignedFunctionTest]
+    type = PointInSignedFunctionCheckUO
+    function = level_set
+  []
 []
 
 [Functions]
+  [level_set]
+    # Const level set that is > 0, so if we union with this, it does not change any behavior
+    # (IN/OUT/ON still remain).
+    type = ConstantFunction
+    value = 1
+  []
   [dist_square]
     type = UnsignedDistanceToSurfaceMesh
     builder = TreeBuilder

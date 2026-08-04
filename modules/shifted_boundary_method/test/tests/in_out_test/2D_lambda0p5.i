@@ -39,6 +39,13 @@ n_seg = 48
   final_generator = 'gen'
 []
 
+[Functions]
+  [level_set]
+    type = ParsedFunction
+    expression = '((x - ${cx}) / ${a})^2 + ((y - ${cy}) / ${b})^2 - 1'
+  []
+[]
+
 [UserObjects]
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
@@ -49,6 +56,10 @@ n_seg = 48
   [inout_test]
     type = PointInPolyhedronCheckUO
     builder = TreeBuilder
+  []
+  [signed_function_test]
+    type = PointInSignedFunctionCheckUO
+    function = level_set
   []
 []
 

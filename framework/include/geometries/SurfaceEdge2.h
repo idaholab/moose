@@ -19,8 +19,16 @@ public:
   /// Constructor
   explicit SurfaceEdge2(const Elem * elem);
 
-  // Resolve name ambiguity between base classes.
-  using LineSegment::computeBoundingBall;
+  // Resolve name ambiguity between base classes. The using-declaration also keeps
+  // LineSegment's two-argument intersect() overloads reachable, which the override
+  // below would otherwise hide.
   using LineSegment::intersect;
   using SurfaceElement::normal;
+
+  // Satisfy the SurfaceElement interface by forwarding to the LineSegment primitive.
+  bool intersect(const LineSegment & line_segment) const override
+  {
+    return LineSegment::intersect(line_segment);
+  }
+  Ball computeBoundingBall() const override { return LineSegment::computeBoundingBall(); }
 };

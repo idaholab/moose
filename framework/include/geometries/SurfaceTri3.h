@@ -19,8 +19,16 @@ public:
   /// Constructor
   explicit SurfaceTri3(const Elem * elem);
 
-  // Resolve name ambiguity between base classes.
+  // Resolve name ambiguity between base classes. The using-declaration also keeps
+  // Triangle's two-argument intersect() overload reachable, which the override
+  // below would otherwise hide.
   using SurfaceElement::normal;
-  using Triangle::computeBoundingBall;
   using Triangle::intersect;
+
+  // Satisfy the SurfaceElement interface by forwarding to the Triangle primitive.
+  bool intersect(const LineSegment & line_segment) const override
+  {
+    return Triangle::intersect(line_segment);
+  }
+  Ball computeBoundingBall() const override { return Triangle::computeBoundingBall(); }
 };

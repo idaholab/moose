@@ -18,10 +18,11 @@ class LineSegment;
 ///
 /// Wraps a libMesh boundary element (an EDGE2 in 2D or a TRI3 in 3D) together
 /// with its precomputed unit normal and provides the geometric queries needed by
-/// point-containment and distance algorithms. Concrete derived classes
-/// (SurfaceEdge2, SurfaceTri3) also derive from a GeometryBase primitive
-/// (LineSegment, Triangle), to which intersect() and computeBoundingBall()
-/// dispatch via dynamic_cast.
+/// point-containment and distance algorithms. intersect() and
+/// computeBoundingBall() are pure virtual here so that callers can issue them
+/// through a SurfaceElement reference without knowing the concrete geometry;
+/// concrete derived classes (SurfaceEdge2, SurfaceTri3) also derive from a
+/// GeometryBase primitive (LineSegment, Triangle) and forward to it.
 class SurfaceElement
 {
 public:
@@ -43,9 +44,9 @@ public:
 
   /**
    * Check if the given line segment intersects this surface element.
-   * Delegates to the underlying geometry via dynamic_cast.
+   * Implemented by derived classes by forwarding to their geometry primitive.
    */
-  bool intersect(const LineSegment & line_segment) const;
+  virtual bool intersect(const LineSegment & line_segment) const = 0;
 
   /// Getter of expected embedding solving mesh dimension
   /// Because the surface element is a face of the embedding mesh, its dimension is
@@ -54,9 +55,9 @@ public:
 
   /**
    * Compute a bounding ball for this surface element.
-   * Delegates to the underlying geometry via dynamic_cast.
+   * Implemented by derived classes by forwarding to their geometry primitive.
    */
-  Ball computeBoundingBall() const;
+  virtual Ball computeBoundingBall() const = 0;
 
   /**
    * Compute the length of the element bounding-box diagonal projected onto

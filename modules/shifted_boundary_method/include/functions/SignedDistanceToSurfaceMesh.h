@@ -11,7 +11,7 @@
 
 #include "UnsignedDistanceToSurfaceMesh.h"
 
-class PointInPolyhedronCheckUO;
+class PointInSurfaceCheckInterface;
 
 /**
  * Computes the signed distance to a surface mesh using KDTree nearest
@@ -39,5 +39,5 @@ public:
 
 private:
   /// user object for in-out test
-  const PointInPolyhedronCheckUO * _in_out_test;
+  const PointInSurfaceCheckInterface * _in_out_test;
 };

@@ -11,24 +11,12 @@
 #include "SurfaceEdge2.h"
 #include "SurfaceTri3.h"
 #include "MooseMesh.h"
-#include "MooseUnitUtils.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/edge_edge2.h"
 #include "LineSegment.h"
 #include "Ball.h"
 
 using namespace libMesh;
-
-// Minimal SurfaceElement subclass that is neither LineSegment nor Triangle.
-// Used to drive the unsupported-geometry mooseError branches in
-// SurfaceElement::intersect and ::computeBoundingBall. The dispatchers
-// under test short-circuit before touching the normal, so the supplied
-// placeholder normal is never inspected.
-class SurfaceElementUnsupportedForTest : public SurfaceElement
-{
-public:
-  using SurfaceElement::SurfaceElement;
-};
 
 namespace
 {
@@ -229,9 +217,8 @@ TEST(SurfaceElementTest, ProjectedBoundingBoxDiagonalTilted3D)
 TEST(SurfaceElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
 {
   // Exercise SurfaceElement::intersect / computeBoundingBall through a
-  // base-class reference; the `using` declarations in the derived classes
-  // otherwise route direct calls to LineSegment/Triangle and bypass these
-  // dispatchers.
+  // base-class reference, so that the derived overrides are reached by virtual
+  // dispatch rather than by the direct-call path a concrete-type reference takes.
   const auto edge_owner = makeEdge2(Point(0.0, 0.0, 0.0), Point(1.0, 0.0, 0.0));
   SurfaceEdge2 surface_edge(edge_owner.edge.get());
   const SurfaceElement & edge_base = surface_edge;
@@ -261,20 +248,4 @@ TEST(SurfaceElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
   EXPECT_NEAR(tri_ball.center()(1), 1.0 / 3.0, 1e-12);
   EXPECT_NEAR(tri_ball.center()(2), 0.0, 1e-12);
   EXPECT_NEAR(tri_ball.radius(), std::sqrt(5.0) / 3.0, 1e-12);
-}
-
-TEST(SurfaceElementTest, UnsupportedGeometryDispatchersThrow)
-{
-  // Drive a SurfaceElement subclass that is neither LineSegment nor Triangle
-  // through the base-class dispatchers; both intersect() and
-  // computeBoundingBall() must mooseError on the unsupported geometry type.
-  const auto owner = makeEdge2(Point(0.0, 0.0, 0.0), Point(1.0, 0.0, 0.0));
-
-  // Placeholder unit normal; the dispatchers under test never consult it.
-  SurfaceElementUnsupportedForTest surf(owner.edge.get(), Point(0.0, 0.0, 1.0));
-  const SurfaceElement & base = surf;
-
-  LineSegment line(Point(0.5, -1.0, 0.0), Point(0.5, 1.0, 0.0));
-  EXPECT_MOOSEERROR_MSG_CONTAINS(base.intersect(line), "unsupported geometry type");
-  EXPECT_MOOSEERROR_MSG_CONTAINS(base.computeBoundingBall(), "unsupported geometry type");
 }

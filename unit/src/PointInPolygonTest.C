@@ -16,6 +16,8 @@
 #include "libmesh/face_tri3.h"
 #include "AdaptiveRayContainmentCheck.h"
 
+#include <limits>
+
 using namespace libMesh;
 
 namespace
@@ -390,4 +392,34 @@ TEST(AdaptiveRayContainmentCheck, EmptyBoundaryElementsThrow)
   EXPECT_MOOSEERROR_MSG_CONTAINS(
       AdaptiveRayContainmentCheck(empty_bd_elements, std::vector<Point>(), ray_opts),
       "must not be empty");
+}
+
+TEST(AdaptiveRayContainmentCheck, NonFiniteRayDirectionThrows)
+{
+  // A user-selected ray_direction with a non-finite (NaN or +/-inf) component must be rejected.
+  // This is exercised as a unit test rather than an input-file RunException test because the HIT
+  // parser itself rejects "nan"/"inf"-family literals for a Real field, so an input file can
+  // never reach this constructor check.
+  std::vector<std::unique_ptr<SurfaceElement>> bd_elements;
+  std::vector<std::unique_ptr<Node>> nodes;
+  std::vector<std::unique_ptr<Edge2>> edges;
+  buildClosedPolygon(
+      {Point(0.0, 0.0, 0.0), Point(1.0, 0.0, 0.0), Point(1.0, 1.0, 0.0), Point(0.0, 1.0, 0.0)},
+      bd_elements,
+      nodes,
+      edges);
+
+  // A NaN component in the user-specified ray direction must be rejected.
+  const RayDirectionOptions nan_ray_opts{RayDirectionMode::USER_SPECIFIED,
+                                         Point(std::numeric_limits<Real>::quiet_NaN(), 0.0, 0.0)};
+  EXPECT_MOOSEERROR_MSG_CONTAINS(
+      AdaptiveRayContainmentCheck(bd_elements, std::vector<Point>(), nan_ray_opts),
+      "must be finite");
+
+  // An infinity component in the user-specified ray direction must be rejected.
+  const RayDirectionOptions inf_ray_opts{RayDirectionMode::USER_SPECIFIED,
+                                         Point(0.0, std::numeric_limits<Real>::infinity(), 0.0)};
+  EXPECT_MOOSEERROR_MSG_CONTAINS(
+      AdaptiveRayContainmentCheck(bd_elements, std::vector<Point>(), inf_ray_opts),
+      "must be finite");
 }

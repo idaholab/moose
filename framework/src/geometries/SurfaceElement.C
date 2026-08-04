@@ -8,9 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SurfaceElement.h"
-#include "Ball.h"
-#include "GeometryBase.h"
-#include "LineSegment.h"
 
 #include <algorithm>
 
@@ -44,22 +41,4 @@ SurfaceElement::getProjectedBoundingBoxDiagonal(const Point & normal_dir) const
     }
 
   return max_projected;
-}
-
-bool
-SurfaceElement::intersect(const LineSegment & line_segment) const
-{
-  if (const auto * geom = dynamic_cast<const GeometryBase *>(this))
-    return geom->intersect(line_segment);
-
-  mooseError("SurfaceElement::intersect: unsupported geometry type");
-}
-
-Ball
-SurfaceElement::computeBoundingBall() const
-{
-  if (const auto * geom = dynamic_cast<const GeometryBase *>(this))
-    return geom->computeBoundingBall();
-
-  mooseError("SurfaceElement::computeBoundingBall: unsupported geometry type");
 }

@@ -12,7 +12,7 @@
 #include "SBMElementSubdomainModifierBase.h"
 
 class Function;
-class PointInPolyhedronCheckUO;
+class PointInSurfaceCheckInterface;
 
 enum class DistanceType
 {
@@ -35,6 +35,10 @@ protected:
   const Function * _parsed_function;
 
 private:
+  /// Fetches the "in_out_test" user object and validates it implements the
+  /// point-in-surface check interface; only called when that parameter is user-set.
+  const PointInSurfaceCheckInterface * getCheckedInOutTest();
+
   /// IDs for subdomain classification (inside)
   SubdomainID _subdomain_id_inside;
   /// IDs for subdomain classification (outside)
@@ -49,7 +53,7 @@ private:
   bool _is_domain_inside_surface;
 
   /// user object for in-out test
-  const PointInPolyhedronCheckUO * _in_out_test_base;
+  const PointInSurfaceCheckInterface * _in_out_test_base;
 
   /// How to classify the element to be inside or outside
   /// 1. SIGNED_DISTANCE: use the signed distance function to classify the element

@@ -79,7 +79,7 @@ BoundaryMeshBuilder::initialSetup()
 }
 
 void
-BoundaryMeshBuilder::buildDefaultSet()
+BoundaryMeshBuilder::buildDefaultSet() const
 {
   _set = std::make_unique<SurfaceElementSet>(SurfaceElementSet::fromMesh(*_mesh));
 }
@@ -108,7 +108,7 @@ BoundaryMeshBuilder::surfaceElementSet() const
   // Build the whole-mesh set on first use so backends that never need it (e.g.
   // the fixed_x_ray TriangleManifold engine) pay no allocation for it.
   if (!_set)
-    const_cast<BoundaryMeshBuilder *>(this)->buildDefaultSet();
+    buildDefaultSet();
 
   if (!_set)
     mooseError("BoundaryMeshBuilder '", name(), "': buildDefaultSet() did not initialize _set.");

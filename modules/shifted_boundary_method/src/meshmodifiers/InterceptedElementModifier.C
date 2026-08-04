@@ -10,7 +10,8 @@
 #include "InterceptedElementModifier.h"
 #include "SBMUtils.h"
 #include "Function.h"
-#include "PointInPolyhedronCheckUO.h"
+#include "PointInSurfaceCheckInterface.h"
+#include "UserObjectBase.h"
 
 registerMooseObject("ShiftedBoundaryMethodApp", InterceptedElementModifier);
 
@@ -48,10 +49,23 @@ InterceptedElementModifier::InterceptedElementModifier(const InputParameters & p
     _subdomain_id_outside(getParam<SubdomainID>("subdomain_id_outside")),
     _threshold(getParam<Real>("threshold")),
     _is_domain_inside_surface(getParam<bool>("is_domain_inside_surface")),
-    _in_out_test_base(isParamSetByUser("in_out_test")
-                          ? &getUserObject<PointInPolyhedronCheckUO>("in_out_test")
-                          : nullptr)
+    _in_out_test_base(isParamSetByUser("in_out_test") ? getCheckedInOutTest() : nullptr)
 {
+}
+
+const PointInSurfaceCheckInterface *
+InterceptedElementModifier::getCheckedInOutTest()
+{
+  const UserObjectBase & base = getUserObjectBase("in_out_test");
+  const auto * check = dynamic_cast<const PointInSurfaceCheckInterface *>(&base);
+  if (!check)
+    paramError("in_out_test",
+               "'",
+               base.name(),
+               "' (type ",
+               base.type(),
+               ") does not implement the point-in-surface check interface.");
+  return check;
 }
 
 /// @brief Initial setup for the InterceptedElementModifier class to read in the Gmsh file
@@ -130,7 +144,7 @@ InterceptedElementModifier::computeSubdomainID()
     {
       unsigned int inside_nodes = 0;
       for (const auto node : make_range(elem->n_nodes()))
-        if (_in_out_test_base->ifInside(elem->point(node)))
+        if (_in_out_test_base->contains(elem->point(node)))
           ++inside_nodes;
 
       const unsigned int active_nodes =
@@ -138,7 +152,7 @@ InterceptedElementModifier::computeSubdomainID()
 
       const auto is_active = [this](const Point & point)
       {
-        const bool is_inside = _in_out_test_base->ifInside(point);
+        const bool is_inside = _in_out_test_base->contains(point);
         return _is_domain_inside_surface ? is_inside : !is_inside;
       };
 

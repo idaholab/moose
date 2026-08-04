@@ -39,11 +39,8 @@ public:
   /// The resolved ray direction used by the ray-casting backend.
   Point rayDirection() const { return _classifier->rayDirection(); }
 
-  /// Whether the point is inside or on the surface. (ON is treated as inside.)
-  virtual bool ifInside(const Point & p) const { return contains(p); }
-
   /// 1 for INSIDE/ON, 0 for OUTSIDE -- usable directly by SpatialUserObjectAux.
-  virtual Real spatialValue(const Point & p) const override { return ifInside(p) ? 1.0 : 0.0; }
+  virtual Real spatialValue(const Point & p) const override { return contains(p) ? 1.0 : 0.0; }
 
 protected:
   /// Builder that owns the surface mesh and SurfaceElementSet.

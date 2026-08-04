@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#33397'
+  issues = '#33397 #33398'
   design = 'PointInUnionCheckUO.md PointInSignedFunctionCheckUO.md '
            'PointInPolyhedronCheckUO.md'
 
@@ -40,6 +40,15 @@
     requirement = 'The system shall classify points against a signed level-set function whose '
                   'positive values denote the interior when inside_is_negative is false, producing '
                   'the same union classification as the equivalent negative-inside functions.'
+  []
+
+  [nested]
+    type = 'Exodiff'
+    input = 'union_nested.i'
+    exodiff = 'union_nested_out.e'
+    recover = false
+    requirement = 'The system shall allow a union of geometries to be used as a provider of another '
+                  'union, classifying points against the nested union.'
   []
 
   [two_meshes]

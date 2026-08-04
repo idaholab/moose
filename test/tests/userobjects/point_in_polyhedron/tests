@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#33397'
+  issues = '#33397 #33398'
   design = 'PointInPolyhedronCheckUO.md BoundaryMeshBuilder.md '
            'SpatialUserObjectVectorPostprocessor.md'
 

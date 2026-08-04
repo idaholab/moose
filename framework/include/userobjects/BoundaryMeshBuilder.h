@@ -57,7 +57,7 @@ protected:
   /// overridden: subclasses that need a different grouping should build it
   /// under their own name and leave this hook alone, so that this whole-mesh
   /// set is still correctly built for any caller going through the base class.
-  virtual void buildDefaultSet();
+  virtual void buildDefaultSet() const;
 
   /**
    * Whether the boundary mesh is "closed" -- i.e. has no open edges or faces.

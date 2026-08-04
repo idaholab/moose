@@ -72,10 +72,8 @@ PointInSubdomainCheckUO::initialSetup()
 
     // fixed_x_ray is rejected in the constructor, so only the ray backends reach here;
     // the facade's mesh argument is used only by fixed_x_ray and is unreferenced.
-    auto checker = std::make_unique<PointContainmentClassifier>(
+    _subdomain_id_checkers[subdomain_id] = std::make_unique<PointContainmentClassifier>(
         _builder.mesh(), &set, _method, _tolerance, options);
-    _subdomain_checkers_view.emplace(subdomain_id, checker.get());
-    _subdomain_id_checkers[subdomain_id] = std::move(checker);
   }
 }
 
@@ -96,10 +94,10 @@ PointInSubdomainCheckUO::whichSubdomain(const Point & p) const
 {
   // A point can be reported INSIDE or ON more than one subdomain when subdomain surfaces overlap
   // or the point lies exactly on a shared interface. That is ambiguous for a single-subdomain
-  // query, so collect every match (in ascending id order via the id-ordered view) and error
+  // query, so collect every match (in ascending id order via the id-ordered map) and error
   // unless there is exactly one.
   std::vector<subdomain_id_type> matches;
-  for (const auto & [subdomain_id, checker] : _subdomain_checkers_view)
+  for (const auto & [subdomain_id, checker] : _subdomain_id_checkers)
   {
     const SurfaceSide side = checker->sideness(p);
     if (side == SurfaceSide::INSIDE || side == SurfaceSide::ON)

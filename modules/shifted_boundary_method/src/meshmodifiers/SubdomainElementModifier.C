@@ -67,7 +67,7 @@ SubdomainElementModifier::computeSubdomainID()
       continue;
     }
 
-    const auto * const checker = checker_ptr;
+    const auto * const checker = checker_ptr.get();
     const Real ratio_active = SBMUtils::activeElementFraction(
         *elem,
         _qrule_order,

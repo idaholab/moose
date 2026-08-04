@@ -41,8 +41,9 @@ class Communicator;
  * The sequence of pairs is usually supplied in the order main axis, secondary axis, then minor
  * axis (in other class).
  */
-struct OrientedBoundingBox
+class OrientedBoundingBox
 {
+public:
   // --- Construction ---
 
   /// Default-constructs an *empty* box (zero dimension, no axes).

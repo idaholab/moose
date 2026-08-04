@@ -1,6 +1,6 @@
 [Tests]
   design = 'SubdomainElementModifier.md SurfaceMeshBySubdomainBuilder.md PointInSubdomainCheckUO.md'
-  issues = '#31937'
+  issues = '#33397 #33398'
 
   [grain_corner]
     type = Exodiff

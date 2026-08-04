@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SignedDistanceToSurfaceMesh.h"
-#include "PointInPolyhedronCheckUO.h"
+#include "PointInSurfaceCheckInterface.h"
+#include "UserObjectBase.h"
 
 registerMooseObject("ShiftedBoundaryMethodApp", SignedDistanceToSurfaceMesh);
 
@@ -35,17 +36,25 @@ SignedDistanceToSurfaceMesh::initialSetup()
 {
   // Lazy (Deferred) initialization
   UnsignedDistanceToSurfaceMesh::initialSetup();
-  _in_out_test = &getUserObject<PointInPolyhedronCheckUO>("in_out_test");
+  const UserObjectBase & base = getUserObjectBase("in_out_test");
+  _in_out_test = dynamic_cast<const PointInSurfaceCheckInterface *>(&base);
+  if (!_in_out_test)
+    paramError("in_out_test",
+               "'",
+               base.name(),
+               "' (type ",
+               base.type(),
+               ") does not implement the point-in-surface check interface.");
 }
 
 Real
 SignedDistanceToSurfaceMesh::value(Real t, const Point & p) const
 {
-  return UnsignedDistanceToSurfaceMesh::value(t, p) * (_in_out_test->ifInside(p) ? -1.0 : 1.0);
+  return UnsignedDistanceToSurfaceMesh::value(t, p) * (_in_out_test->contains(p) ? -1.0 : 1.0);
 }
 
 RealGradient
 SignedDistanceToSurfaceMesh::gradient(Real t, const Point & p) const
 {
-  return UnsignedDistanceToSurfaceMesh::gradient(t, p) * (_in_out_test->ifInside(p) ? -1.0 : 1.0);
+  return UnsignedDistanceToSurfaceMesh::gradient(t, p) * (_in_out_test->contains(p) ? -1.0 : 1.0);
 }

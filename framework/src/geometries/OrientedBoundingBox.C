@@ -25,7 +25,7 @@ OrientedBoundingBox::OrientedBoundingBox() = default;
 
 OrientedBoundingBox::OrientedBoundingBox(const std::vector<std::pair<Point, Point>> & axis_pairs)
 {
-  _dim = axis_pairs.size();
+  _dim = static_cast<unsigned int>(axis_pairs.size());
   mooseAssert(_dim == 2 || _dim == 3, "OrientedBoundingBox requires 2 or 3 axis pairs");
   _dirs.resize(_dim);
   _len.resize(_dim);

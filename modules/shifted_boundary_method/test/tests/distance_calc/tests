@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#31937'
+  issues = '#31937 #33397 #33398'
   design = 'UnsignedDistanceToSurfaceMesh.md SignedDistanceToSurfaceMesh.md ShortestDistanceToSurface.md'
 
   [distance_test]
@@ -50,6 +50,20 @@
       detail = 'a signed distance field in 2D using a point-in-polyhedron in-out test to set the '
                'sign, including a gradient that points outward across the surface on both the '
                'interior and exterior sides.'
+    []
+
+    [2D_signed_distance_union_in_out_test]
+      type = Exodiff
+      input = '2D_signed_distance.i'
+      cli_args = 'UserObjects/UnionTest/type=PointInUnionCheckUO '
+                 'UserObjects/UnionTest/providers="InOutTest SignedFunctionTest" '
+                 'Functions/sign_dist_square/in_out_test=UnionTest'
+      exodiff = '2D_signed_distance_out.e'
+      prereq = 'distance_test/2D_signed_distance'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'a signed distance field whose sign is supplied by a union checker through the '
+               'point-in-surface check interface.'
     []
 
   []
