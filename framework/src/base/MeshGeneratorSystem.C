@@ -413,12 +413,25 @@ MeshGeneratorSystem::executeMeshGenerators()
   {
     for (const auto & generator : generator_set)
     {
+      mooseAssert(comm().verify(generator->typeAndName().size()) &&
+                      comm().verify(generator->typeAndName()),
+                  "Mesh generator generation is parallel inconsistent; about to execute "
+                      << generator->typeAndName());
+
       const auto & name = generator->name();
       if (_verbose)
         _app._console << " [DBG] Executing mesh generator (" << COLOR_GREEN << std::setw(20) << name
                       << COLOR_DEFAULT << ") in type (" << COLOR_GREEN << generator->type()
                       << COLOR_DEFAULT << ")" << std::endl;
       auto current_mesh = generator->generateInternal();
+
+      mooseAssert(comm().verify(current_mesh->is_prepared()),
+                  "Mesh prepared state after " << generator->typeAndName()
+                                               << " is parallel inconsistent");
+      mooseAssert(comm().verify(generator->typeAndName().size()) &&
+                      comm().verify(generator->typeAndName()),
+                  "Mesh generator generation is parallel inconsistent; just executed "
+                      << generator->typeAndName());
 
       // Only generating data for this generator
       if (generator->isDataOnly())
