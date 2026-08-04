@@ -35,7 +35,7 @@ MFEMVariableSamplerBase::validParams()
   InputParameters params = MFEMSamplerBase::validParams();
   MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "variable", "The variable that this VectorPostprocessor samples");
-  MooseEnum avg_type(getL2AverageTypeOptions(), "ARITHMETIC", false);
+  MooseEnum avg_type(getL2AverageTypeOptions(), "ARITHMETIC");
   params.addParam<MooseEnum>("side_interpolation_type",
                              avg_type,
                              "Average type used when sampling L2 functions at element boundaries.");

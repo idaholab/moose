@@ -11,18 +11,17 @@
 
 #pragma once
 
-#include "MFEMComplexVariableValueSamplerBase.h"
+#include "MFEMVariableValueSamplerBase.h"
 
-/**
- * Samples a complex-valued MFEM variable at specific points.
- * Outputs real and imaginary parts as separate VPP columns.
+/*
+ * MFEM Postprocessor which samples values at points.
  */
-class MFEMComplexPointVariableValueSampler : public MFEMComplexVariableValueSamplerBase
+class MFEMVariablePointValueSampler : public MFEMVariableValueSamplerBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexPointVariableValueSampler(const InputParameters & parameters);
+  MFEMVariablePointValueSampler(const InputParameters & parameters);
 };
 
 #endif // MOOSE_MFEM_ENABLED

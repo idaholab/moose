@@ -105,7 +105,7 @@
 
 [VectorPostprocessors]
   [line_sample]
-    type = MFEMLineVariableValueSampler
+    type = MFEMVariableLineValueSampler
     variable = 'temperature'
     start_point = '0.0 0.5 0.5'
     end_point = '1.0 0.5 0.5'

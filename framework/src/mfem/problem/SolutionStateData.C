@@ -12,10 +12,6 @@
 #include "DataIO.h"
 #include "MFEMProblemData.h"
 
-#include "libmesh/int_range.h"
-
-using libMesh::make_range;
-
 namespace
 {
 void
@@ -80,7 +76,7 @@ dataLoad(std::istream & stream, Moose::MFEM::SolutionState & /*state*/, void * c
 
   int num_gridfunctions = 0;
   dataLoad(stream, num_gridfunctions, context);
-  for (int i = 0; i < num_gridfunctions; ++i)
+  for ([[maybe_unused]] const auto i : make_range(num_gridfunctions))
   {
     std::string name;
     dataLoad(stream, name, context);
@@ -90,7 +86,7 @@ dataLoad(std::istream & stream, Moose::MFEM::SolutionState & /*state*/, void * c
 
   int num_complex_gridfunctions = 0;
   dataLoad(stream, num_complex_gridfunctions, context);
-  for (int i = 0; i < num_complex_gridfunctions; ++i)
+  for ([[maybe_unused]] const auto i : make_range(num_complex_gridfunctions))
   {
     std::string name;
     dataLoad(stream, name, context);

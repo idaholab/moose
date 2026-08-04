@@ -28,7 +28,7 @@ MFEMHypreBoomerAMG::validParams()
       "fespace", "H1 FESpace to use in HypreBoomerAMG setup for elasticity problems.");
   params.addParam<mfem::real_t>(
       "strength_threshold", 0.25, "HypreBoomerAMG strong threshold. Defaults to 0.25.");
-  MooseEnum errmode("ignore=0 warn=1 abort=2", "abort", false);
+  MooseEnum errmode("ignore=0 warn=1 abort=2", "abort");
   params.addParam<MooseEnum>("error_mode", errmode, "Set the behavior for treating hypre errors.");
   return params;
 }

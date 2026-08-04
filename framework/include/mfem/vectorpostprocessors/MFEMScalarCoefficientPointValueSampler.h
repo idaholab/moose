@@ -16,12 +16,12 @@
 /**
  * Samples a real scalar MFEM coefficient at specified points.
  */
-class MFEMPointScalarCoefficientValueSampler : public MFEMSamplerBase
+class MFEMScalarCoefficientPointValueSampler : public MFEMSamplerBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMPointScalarCoefficientValueSampler(const InputParameters & parameters);
+  MFEMScalarCoefficientPointValueSampler(const InputParameters & parameters);
 
   /// Checks point locations and warns when GSLIB selects an element at a boundary.
   void initialSetup() override;
