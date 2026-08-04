@@ -137,7 +137,8 @@ getBoundaryIDs(const MeshBase & mesh,
     bool has_boundary_id_sets = mesh.preparation().has_boundary_id_sets;
     mesh.comm().min(has_boundary_id_sets);
 
-    const auto & bids = has_boundary_id_sets ? boundary_info.get_global_boundary_ids() : boundary_info.get_boundary_ids();
+    const auto & bids = has_boundary_id_sets ? boundary_info.get_global_boundary_ids()
+                                             : boundary_info.get_boundary_ids();
     current_max_boundary_id = bids.empty() ? 0 : *(bids.rbegin());
 
     if (!has_boundary_id_sets)

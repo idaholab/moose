@@ -123,7 +123,8 @@ BreakBoundaryOnSubdomainGenerator::generate()
       {
         if (breaking_boundary_ids.count(boundary_id) > 0)
         {
-          BoundaryName bname = boundary_info.get_sideset_name(boundary_id) + "_to_" + subdomain_name;
+          BoundaryName bname =
+              boundary_info.get_sideset_name(boundary_id) + "_to_" + subdomain_name;
           auto bid = boundary_info.get_id_by_name(bname);
           boundary_info.add_side(elem, side, bid);
         }
