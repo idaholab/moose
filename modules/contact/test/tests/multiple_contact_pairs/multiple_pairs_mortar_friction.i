@@ -112,7 +112,6 @@ offset = 1e-2
   nl_abs_tol = 1e-7
   line_search = 'none'
   end_time = 18
-  abort_on_solve_fail = true
 []
 
 [Debug]
