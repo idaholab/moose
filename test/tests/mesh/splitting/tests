@@ -193,7 +193,7 @@
 
   [remove_split_no_metadata]
     type = 'RunCommand'
-    command = 'python3 edit_split_mesh_metadata.py remove-metadata foo_no_metadata.cpa.gz/3'
+    command = 'rm -rf foo_no_metadata.cpa.gz/3/meta_data_mesh.rd'
     prereq = 'make_split_no_metadata'
     recover = false
 

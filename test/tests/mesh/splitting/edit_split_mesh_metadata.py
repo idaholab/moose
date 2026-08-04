@@ -8,11 +8,10 @@
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
 import argparse
-import shutil
 import struct
 from pathlib import Path
 
-FINGERPRINT_NAME = "SYSTEM/_moose/split_mesh_input_fingerprint"
+FINGERPRINT_NAME = "MeshMetaData/split_mesh/input_fingerprint"
 
 
 def metadata_dir(split_dir):
@@ -106,20 +105,13 @@ def drop_fingerprint(split_dir):
     data_path.write_bytes(new_data)
 
 
-def remove_metadata(split_dir):
-    shutil.rmtree(metadata_dir(split_dir))
-
-
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("operation", choices=("drop-fingerprint", "remove-metadata"))
+    parser.add_argument("operation", choices=("drop-fingerprint",))
     parser.add_argument("split_dir")
     args = parser.parse_args()
 
-    if args.operation == "drop-fingerprint":
-        drop_fingerprint(args.split_dir)
-    else:
-        remove_metadata(args.split_dir)
+    drop_fingerprint(args.split_dir)
 
 
 if __name__ == "__main__":
