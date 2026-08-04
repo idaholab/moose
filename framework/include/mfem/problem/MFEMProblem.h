@@ -183,8 +183,9 @@ public:
   /**
    * Add an MFEM WeakForm to the problem.
    */
-  void addWeakForm();
-  std::shared_ptr<MFEMWeakForm> _weak_form{nullptr};
+  void addWeakForm(const std::string & weak_form_name,
+                   const std::string & name,
+                   InputParameters & parameters);
 
   /// Returns a pointer to the operator's equation system.
   virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();

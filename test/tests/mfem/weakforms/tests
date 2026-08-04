@@ -1,0 +1,13 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  issues = '#33468'
+  [MFEMSteadyWeakForm]
+    type = CSVDiff
+    input = steady_weakform.i
+    csvdiff = 'OutputData/Darcy.csv'
+    requirement = 'The system shall have the ability to mixed steady state FE problem using a user-specified block manually adding kernels and BCs to the solved weak form.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+[]
