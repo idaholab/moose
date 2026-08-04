@@ -26,7 +26,7 @@
     type = MFEMDiffusionKernel
     variable = concentration
   []
-  [dg_domain]
+  [forcing]
     type = MFEMDomainLFKernel
     variable = concentration
   []
