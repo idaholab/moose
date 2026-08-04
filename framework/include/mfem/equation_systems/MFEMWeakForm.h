@@ -31,12 +31,13 @@ public:
   /// Constructs the EquationSystem.
   std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem();
 
-  void addBoundaryCondition(std::shared_ptr<MFEMBoundaryCondition> bc);
+  void addBoundaryCondition(const std::string & name, std::shared_ptr<MFEMBoundaryCondition> bc);
 
-  void addKernel(std::shared_ptr<MFEMKernel> kernel);
+  void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel);
 
 private:
-  /// Stores the constructed EquationSystem.
+  /// Stores the constructed EquationSystem. Intentionally marked private to ensure
+  /// other objects in the problem do not use it prior to full initialisation.
   mutable std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
 };
 
