@@ -257,13 +257,13 @@ The corresponding pressure block gives the monolithic mass equation
 \boldsymbol{M_{mw}}\vec{w} = \vec{b_m}.
 \end{equation}
 
-Here $\boldsymbol{M_{mp}}$ is present when density and energy are computed in a transient solve and
-is zero for a steady solve. The constant-enthalpy derivative includes both the direct pressure
-dependence of density and the temperature response required to hold enthalpy fixed. This is
-important for [PBSodiumFluidProperties.md] and other fluids even when a density model has little or
-no direct pressure dependence at constant temperature. Including this block removes an
-$\mathcal{O}(1/\Delta t)$ pressure fixed-point feedback that otherwise becomes unstable as the time
-step decreases.
+Here $\boldsymbol{M_{mp}}$ is assembled when density and energy are computed in a transient
+monolithic solve and is zero for a steady solve. Its entries may also vanish for fluid models
+without pressure-dependent density or enthalpy. For fluids with a nonzero constant-enthalpy
+pressure derivative, the block captures an $\mathcal{O}(1/\Delta t)$ pressure-density coupling that
+would otherwise remain in the outer fixed-point iteration. In the current
+[PBSodiumFluidProperties.md] model, both $(\partial \rho / \partial p)_T$ and
+$(\partial h / \partial p)_T$ are zero, so $\boldsymbol{M_{mp}}=0$.
 
 Similarly for the other equations,
 

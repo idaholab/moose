@@ -126,6 +126,7 @@ protected:
   /// Computes Enthalpy per channel for block iblock
   virtual void computeh(int iblock) = 0;
   /// Computes and relaxes Temperature per channel for block iblock
+  /// @return The normalized norm of (T - T_prev).
   Real computeT(int iblock);
   /// Computes Density per channel for block iblock
   void computeRho(int iblock);

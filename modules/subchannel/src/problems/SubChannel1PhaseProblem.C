@@ -684,8 +684,9 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
         //   (d rho / d p)_h = (d rho / d p)_T
         //                      - (d rho / d T)_p (d h / d p)_T / (d h / d T)_p.
         //
-        // Without this Jacobian contribution the pressure fixed-point map contains an O(1 / dt)
-        // feedback that becomes unstable as the time step is reduced.
+        // Without this Jacobian contribution, pressure-density coupling remains in the outer
+        // fixed-point iteration and scales as O(1 / dt). As the time step decreases, the iteration
+        // can become increasingly slow or noncontractive and may require stronger relaxation.
         if (_TR && _compute_density && _compute_power && iz < last_node)
         {
           Real rho, drho_dp_T, drho_dT;
@@ -2783,8 +2784,6 @@ SubChannel1PhaseProblem::externalSolve()
 
       while (T_block_error > _T_tol && T_it < _T_maxit)
       {
-        // A value of one preserves the original ordering by refreshing the flow solution before
-        // every thermal update. Larger values opt into lagging flow during thermal subcycles.
         if (processor_id() == 0)
         {
           if (_segregated_bool)
@@ -2797,6 +2796,8 @@ SubChannel1PhaseProblem::externalSolve()
           }
         }
 
+        // A value of one preserves the original ordering by refreshing the flow solution before
+        // every thermal update. Larger values opt into lagging flow during thermal subcycles.
         for (const auto enthalpy_subcycle : make_range(_enthalpy_subcycles))
         {
           if (T_block_error <= _T_tol || T_it >= _T_maxit)

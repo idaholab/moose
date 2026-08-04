@@ -220,11 +220,12 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
       const Real turbulent_wire_correction =
           1 + ws_t * (ar / a_p) * Utility::pow<2>(std::tan(theta));
       if (!std::isfinite(turbulent_wire_correction) || turbulent_wire_correction < 0.0)
-        mooseError(name(),
-                   ": The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
-                   "non-negative and finite for an edge subchannel. Computed ",
-                   turbulent_wire_correction,
-                   ".");
+        mooseError(
+            name(),
+            ": The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
+            "non-negative and finite for an edge subchannel. Computed ",
+            turbulent_wire_correction,
+            ".");
       cT *= std::pow(turbulent_wire_correction, 1.41);
       // laminar friction factor equation constant - Edge subchannel
       cL *= (1 + ws_l * (ar / a_p) * Utility::pow<2>(std::tan(theta)));
@@ -239,11 +240,12 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
       const Real turbulent_wire_correction =
           1 + ws_t * (ar / a_p) * Utility::pow<2>(std::tan(theta));
       if (!std::isfinite(turbulent_wire_correction) || turbulent_wire_correction < 0.0)
-        mooseError(name(),
-                   ": The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
-                   "non-negative and finite for a corner subchannel. Computed ",
-                   turbulent_wire_correction,
-                   ".");
+        mooseError(
+            name(),
+            ": The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
+            "non-negative and finite for a corner subchannel. Computed ",
+            turbulent_wire_correction,
+            ".");
       cT *= std::pow(turbulent_wire_correction, 1.41);
       // laminar friction factor equation constant - Corner subchannel
       cL *= (1 + ws_l * (ar / a_p) * Utility::pow<2>(std::tan(theta)));
