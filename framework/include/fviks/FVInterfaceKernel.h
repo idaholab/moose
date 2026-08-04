@@ -79,6 +79,13 @@ public:
   void computeJacobian(const FaceInfo & fi) override;
   void computeResidualAndJacobian(const FaceInfo & fi) override;
 
+  /**
+   * Check that the face connects the two user-defined sides of this interface.
+   *
+   * @return Whether the FaceInfo element is on the user-defined first side
+   */
+  bool checkFaceIntegrity(const FaceInfo & fi) const;
+
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
 protected:

@@ -142,11 +142,46 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
   }
 }
 
+bool
+FVInterfaceKernel::checkFaceIntegrity(const FaceInfo & fi) const
+{
+  if (!fi.neighborPtr())
+    mooseError("FVInterfaceKernel '",
+               name(),
+               "' is being triggered on an external face with centroid ",
+               fi.faceCentroid(),
+               ". An interface kernel requires elements on both sides of the face.");
+
+  const auto elem_subdomain = fi.elem().subdomain_id();
+  const auto neighbor_subdomain = fi.neighbor().subdomain_id();
+
+  const bool elem_on_side1 =
+      _subdomain1.count(elem_subdomain) && _subdomain2.count(neighbor_subdomain);
+  const bool elem_on_side2 =
+      _subdomain2.count(elem_subdomain) && _subdomain1.count(neighbor_subdomain);
+
+  if (!elem_on_side1 && !elem_on_side2)
+    mooseError("FVInterfaceKernel '",
+               name(),
+               "' is being triggered on a face with centroid ",
+               fi.faceCentroid(),
+               " connecting subdomains ",
+               elem_subdomain,
+               " and ",
+               neighbor_subdomain,
+               ", but this face does not connect the subdomains specified by 'subdomain1' and "
+               "'subdomain2'.");
+
+  // If both orientations are valid because the user-defined subdomain sets overlap, preserve the
+  // existing behavior and treat the FaceInfo element as side 1.
+  return elem_on_side1;
+}
+
 void
 FVInterfaceKernel::setupData(const FaceInfo & fi)
 {
   _face_info = &fi;
-  _face_info_elem_on_side1 = _subdomain1.find(fi.elem().subdomain_id()) != _subdomain1.end();
+  _face_info_elem_on_side1 = checkFaceIntegrity(fi);
 
 #ifndef NDEBUG
   const auto ft1 = fi.faceType(std::make_pair(_var1.number(), _var1.sys().number()));
