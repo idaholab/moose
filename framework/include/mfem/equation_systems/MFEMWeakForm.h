@@ -14,6 +14,9 @@
 #include "MFEMObject.h"
 #include "EquationSystem.h"
 
+class MFEMBoundaryCondition;
+class MFEMKernel;
+
 /**
  * Constructs and stores an Moose::MFEM::EquationSystem object. Access using the
  * getFESpace() accessor.
@@ -26,7 +29,11 @@ public:
   MFEMWeakForm(const InputParameters & parameters);
 
   /// Constructs the EquationSystem.
-  std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem() const;
+  std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem();
+
+  void addBoundaryCondition(std::shared_ptr<MFEMBoundaryCondition> bc);
+
+  void addKernel(std::shared_ptr<MFEMKernel> kernel);
 
 private:
   /// Stores the constructed EquationSystem.
