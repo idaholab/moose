@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "Exodus.h"
 #include "AddOutputAction.h"
+#include "SplitMeshMetaData.h"
 
 #include <filesystem>
 
@@ -217,7 +218,7 @@ MeshOnlyAction::act()
     // Write mesh metadata
     if (processor_id() == 0)
     {
-      const auto filenames = _app.writeSplitMeshMetaData(mesh_file);
+      const auto filenames = SplitMeshMetaData(_app).write(mesh_file);
       Moose::out << "Mesh meta data written into "
                  << std::filesystem::absolute(filenames[0].parent_path()) << "." << std::endl;
     }

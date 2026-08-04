@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "MooseMesh.h"
+#include "SplitMeshMetaData.h"
 
 #include <filesystem>
 
@@ -99,7 +100,7 @@ SplitMeshAction::act()
     if (processor_id() == 0)
     {
       const auto split_folder = std::filesystem::path(fname) / std::to_string(n);
-      const auto filenames = _app.writeSplitMeshMetaData(split_folder);
+      const auto filenames = SplitMeshMetaData(_app).write(split_folder);
       Moose::out << "Mesh meta data written into "
                  << std::filesystem::absolute(filenames[0].parent_path()) << "." << std::endl;
     }
