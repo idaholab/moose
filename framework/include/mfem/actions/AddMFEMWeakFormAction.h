@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MooseObjectAction.h"
+#include "Action.h"
 
 /**
  * This class allows us to configure MFEM WeakForm in the input file.
@@ -24,7 +24,7 @@
  *   []
  * []
  */
-class AddMFEMWeakFormAction : public MooseObjectAction
+class AddMFEMWeakFormAction : public Action
 {
 public:
   static InputParameters validParams();
