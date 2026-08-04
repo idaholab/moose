@@ -240,7 +240,7 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
           1 + ws_t * (ar / a_p) * Utility::pow<2>(std::tan(theta));
       if (!std::isfinite(turbulent_wire_correction) || turbulent_wire_correction < 0.0)
         mooseError(name(),
-                   ": The base of the Cheng-Todreas turbulent wire correction must be "
+                   ": The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
                    "non-negative and finite for a corner subchannel. Computed ",
                    turbulent_wire_correction,
                    ".");
