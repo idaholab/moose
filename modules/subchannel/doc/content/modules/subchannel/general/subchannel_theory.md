@@ -183,10 +183,10 @@ For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$ [!cite](kyriakopoul
 
 ### Time grid discretization
 
-SCM uses a first-order backward Euler discretization for all temporal storage terms. Storage is evaluated at
-the downstream node of each axial control volume. Because this time discretization is implemented
-directly by SCM, selecting a MOOSE time integrator other than `ImplicitEuler` does not change it;
-SCM issues a warning when another time integrator is requested.
+SCM uses a first-order backward Euler discretization for all time-derivative terms. These terms are
+evaluated at the downstream node of each axial control volume. Because this time discretization is
+implemented directly by SCM, selecting a MOOSE time integrator other than `ImplicitEuler` does not
+change it; SCM issues a warning when another time integrator is requested.
 
 ### Spatial discretization
 
@@ -236,8 +236,8 @@ For a segregated solve, this is equivalent to:
 \boldsymbol{M_{mm}} \vec{\dot{m}} = \vec{b_m} - \boldsymbol{M_{mw}}\vec{w}
 \end{equation}
 
-In the transient monolithic solve, the new-time density in the storage term is also linearized with
-respect to pressure at constant enthalpy:
+In the transient monolithic solve, the new-time density in the mass-conservation equation is also
+linearized with respect to pressure at constant enthalpy:
 
 \begin{equation}
 \left(\frac{\partial \rho}{\partial p}\right)_h =
@@ -285,8 +285,8 @@ and in matrix form,
 \end{equation}
 
 where the matrix $\boldsymbol{M_{pm}}$ is calculated using the lagged values of the unknown variables
-$\vec{w}, \vec{\dot{m}}$. The axial-momentum storage term uses $\dot{m}_{i,k}$ at the downstream
-node for both the new and old time levels.
+$\vec{w}, \vec{\dot{m}}$. The time-derivative term in the axial-momentum equation uses
+$\dot{m}_{i,k}$ at the downstream node for both the new and old time levels.
 
 - Conservation of linear momentum in the lateral direction:
 
