@@ -33,4 +33,15 @@
     abs_zero = 1e-9
     max_threads = 1
   []
+  [anisotropic-neumann-one-term-zero-coefficient]
+    type = CSVDiff
+    input = anisotropic-diffusion-1d-zero-boundary-coefficient.i
+    csvdiff = anisotropic-diffusion-1d-zero-boundary-coefficient_out.csv
+    requirement = 'The system shall apply a prescribed complete anisotropic diffusive flux with a zero boundary-normal diffusion coefficient using a one-term boundary reconstruction.'
+    design = 'LinearFVAnisotropicDiffusion.md LinearFVAnisotropicDiffusionFunctorNeumannBC.md'
+    issues = '#32719'
+    # The constant solution is exact to roundoff with the configured direct solver.
+    abs_zero = 1e-12
+    max_threads = 1
+  []
 []

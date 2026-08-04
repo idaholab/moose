@@ -28,13 +28,23 @@
     max_threads = 1
     requirement = "The system shall produce the reference pressure-flux solution on a single fluid block with an external inlet."
   []
+  [single-block-one-term]
+    type = CSVDiff
+    input = internal-neighbor.i
+    cli_args = 'LinearFVBCs/pressure-flux/use_two_term_expansion=false Outputs/file_base=pressure-flux-equivalence'
+    csvdiff = pressure-flux-equivalence.csv
+    abs_zero = 1e-10
+    prereq = single-block # Force ordering because both configurations produce the same CSV file.
+    max_threads = 1
+    requirement = "The system shall produce the reference pressure-flux solution using a one-term boundary pressure reconstruction."
+  []
   [multiblock]
     type = CSVDiff
     input = internal-neighbor.i
     cli_args = "Mesh/inactive='delete_inlet_block' Outputs/file_base=pressure-flux-equivalence"
     csvdiff = pressure-flux-equivalence.csv
     abs_zero = 1e-10
-    prereq = single-block # Force ordering because both configurations produce the same CSV file.
+    prereq = single-block-one-term # Force ordering because these configurations produce the same CSV file.
     max_threads = 1
     requirement = "The system shall produce the same pressure, velocity, and mass-flux results when the fluid cell is the neighbor of an internal inlet in a multiblock mesh as for a single-block external inlet."
   []
