@@ -287,11 +287,6 @@ protected:
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
-  /**
-   * Whether this a complex equation system
-   */
-  virtual bool Complex() const { return false; }
-
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.
   std::vector<std::string> _coupled_var_names;
