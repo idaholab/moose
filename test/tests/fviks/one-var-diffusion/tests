@@ -26,6 +26,38 @@
     design = 'FVInterfaceKernels/index.md'
     requirement = 'The system shall report an error if a user does not specify a variable on the 2nd side of an interface, leading the system to assume that the variable on the 1st side of the interface should be used on the 2nd side, and the variable on the 1st side does not exist on the 2nd side.'
   []
+  [wrong_subdomain_pair]
+    type = RunException
+    input = test.i
+    cli_args = "FVInterfaceKernels/interface/subdomain1=1 FVInterfaceKernels/interface/subdomain2=1"
+    expect_err = "FVInterfaceKernel 'interface' .* connecting subdomains 0 and 1, but this face does not connect the subdomains specified by 'subdomain1' and 'subdomain2'\."
+    design = 'FVInterfaceKernels/index.md'
+    issues = '#33435'
+    requirement = 'The system shall report an error when a finite volume interface kernel executes on a face that does not connect its declared subdomains.'
+  []
+  [external_face]
+    type = RunException
+    input = test.i
+    cli_args = "FVInterfaceKernels/interface/boundary=right"
+    expect_err = "FVInterfaceKernel 'interface' is being triggered on an external face .* An interface kernel requires elements on both sides of the face\."
+    design = 'FVInterfaceKernels/index.md'
+    issues = '#33435'
+    requirement = 'The system shall report an error when a finite volume interface kernel executes on a face without a neighboring element.'
+  []
+  [reversed_orientation]
+    type = RunApp
+    input = test.i
+    cli_args = "FVInterfaceKernels/interface/boundary=secondary_interface "
+               "FVInterfaceKernels/interface/subdomain1=1 "
+               "FVInterfaceKernels/interface/subdomain2=0 "
+               "FVInterfaceKernels/interface/coeff1=right "
+               "FVInterfaceKernels/interface/coeff2=left "
+               "Outputs/exodus=false"
+    design = 'FVInterfaceKernels/index.md'
+    issues = '#33334 #33435'
+    requirement = 'The system shall execute a finite volume interface kernel when the FaceInfo element lies on the user-defined second side of the interface.'
+  []
+
   [first_order_convergence]
     requirement = 'The system shall be able to solve a diffusion problem with finite volumes with the domain split in half and show first order convergence due to its treatment of coefficient discontinuities both'
     design = 'FVOneVarDiffusionInterface.md'
