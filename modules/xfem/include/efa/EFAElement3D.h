@@ -100,8 +100,6 @@ public:
   std::set<EFANode *> getFaceNodes(unsigned int face_id) const;
   bool getFaceNodeParametricCoordinates(EFANode * node, std::vector<double> & xi_3d) const;
   EFAVolumeNode * getInteriorNode(unsigned int interior_node_id) const;
-  void removeEmbeddedNode(EFANode * emb_node, bool remove_for_neighbor);
-
   unsigned int numFaces() const;
   void setFace(unsigned int face_id, EFAFace * face);
   void createFaces();
