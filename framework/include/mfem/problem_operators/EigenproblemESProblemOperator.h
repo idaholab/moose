@@ -24,7 +24,7 @@ class EigenproblemESProblemOperator : public EquationSystemProblemOperator
 public:
   EigenproblemESProblemOperator(MFEMProblem & problem) : EquationSystemProblemOperator(problem)
   {
-    mooseAssert(std::dynamic_pointer_cast<EigenproblemEquationSystem>(_problem_data.eqn_system),
+    mooseAssert(std::dynamic_pointer_cast<EigenproblemEquationSystem>(_problem_data.eqn_systems[0]),
                 "MFEMProblemData::eqn_system is not an EigenproblemEquationSystem.");
   }
 
