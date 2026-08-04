@@ -288,7 +288,7 @@ public:
    * Method to get the first Problem Composer object storing the
    * method that builds the ProblemOperator in the executioner.
    */
-  std::shared_ptr<Moose::MFEM::ProblemComposerBase>& getProblemComposer()
+  std::shared_ptr<Moose::MFEM::ProblemComposerBase> & getProblemComposer()
   {
     return _problem_composer;
   }
