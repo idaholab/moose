@@ -470,17 +470,27 @@ MFEMProblem::setEquationSystems()
 {
   std::vector<MFEMWeakForm *> weak_forms;
   theWarehouse().query().condition<AttribSystem>("MFEMWeakForm").queryInto(weak_forms);
-  for (auto & weak_form : weak_forms)
+
+  if (weak_forms.empty()) // Add default MFEMWeakForm if none has been added by user
+  {
+    const std::string type("MFEMWeakForm");
+    const std::string name("__DefaultWeakForm");
+    InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
+    std::shared_ptr<MFEMWeakForm> weak_form =
+        addObject<MFEMWeakForm>(type, name, parameters).front();
     getProblemData().eqn_systems.push_back(weak_form->createEquationSystem());
+  }
+  else
+    for (auto & weak_form : weak_forms)
+      getProblemData().eqn_systems.push_back(weak_form->createEquationSystem());
 }
 
 void
-MFEMProblem::addWeakForm()
+MFEMProblem::addWeakForm(const std::string & weak_form_name,
+                         const std::string & name,
+                         InputParameters & parameters)
 {
-  const std::string type("MFEMWeakForm");
-  const std::string name("__DefaultWeakForm");
-  InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
-  _weak_form = addObject<MFEMWeakForm>(type, name, parameters).front();
+  addObject<MFEMWeakForm>(weak_form_name, name, parameters);
 }
 
 /// Returns a pointer to the operator's equation system.

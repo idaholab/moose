@@ -538,7 +538,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
-  registerTask("add_mfem_weak_form", true);
+  registerMooseObjectTask("add_mfem_weak_form", MFEMWeakForm, false);
   addTaskDependency("add_mfem_weak_form", "init_mesh");
   addTaskDependency("add_mfem_weak_form", "add_variable");
   addTaskDependency("add_mfem_weak_form", "add_aux_variable");
