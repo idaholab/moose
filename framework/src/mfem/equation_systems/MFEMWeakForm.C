@@ -70,7 +70,7 @@ MFEMWeakForm::MFEMWeakForm(const InputParameters & parameters)
     for (auto & [kernel_name, kernel] : problem_data.kernels)
       addKernel(kernel_name, kernel);
   else
-    for (const auto & kernel_name : _bc_names)
+    for (const auto & kernel_name : _kernel_names)
       addKernel(kernel_name, problem_data.kernels.GetShared(kernel_name));
 
   if (problem_data.nonlinear_solver)
