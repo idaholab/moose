@@ -248,7 +248,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                   InputParameters & parameters)
 {
   auto bc = addObject<MFEMBoundaryCondition>(bc_name, name, parameters).front();
-  _weak_form->addBoundaryCondition(bc);
+  _problem_data.bcs.Register(name, bc);
 }
 
 void
@@ -405,7 +405,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
                        InputParameters & parameters)
 {
   auto kernel = addObject<MFEMKernel>(kernel_name, name, parameters).front();
-  _weak_form->addKernel(kernel);
+  _problem_data.kernels.Register(name, kernel);
 }
 
 void
@@ -468,19 +468,17 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
 void
 MFEMProblem::setEquationSystems()
 {
-  // std::vector<MFEMWeakForm *> objs;
-  // theWarehouse().query().condition<AttribSystem>("MFEMWeakForm").queryInto(objs);
-  getProblemData().eqn_systems.push_back(_weak_form->createEquationSystem());
-
-  // if (objs.empty())
-  //   setDefaultEquationSystem();
+  std::vector<MFEMWeakForm *> weak_forms;
+  theWarehouse().query().condition<AttribSystem>("MFEMWeakForm").queryInto(weak_forms);
+  for (auto & weak_form : weak_forms)
+    getProblemData().eqn_systems.push_back(weak_form->createEquationSystem());
 }
 
 void
 MFEMProblem::addWeakForm()
 {
   const std::string type("MFEMWeakForm");
-  const std::string name("DefaultWeakForm");
+  const std::string name("__DefaultWeakForm");
   InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
   _weak_form = addObject<MFEMWeakForm>(type, name, parameters).front();
 }

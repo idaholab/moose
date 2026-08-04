@@ -491,15 +491,6 @@ addActionTypes(Syntax & syntax)
   // clang-format on
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerTask("add_mfem_weak_form", true);
-  addTaskDependency("add_mfem_weak_form", "init_mesh");
-  addTaskDependency("add_variable", "add_mfem_weak_form");
-  addTaskDependency("add_aux_variable", "add_mfem_weak_form");
-  addTaskDependency("add_elemental_field_variable", "add_mfem_weak_form");
-  addTaskDependency("add_bc", "add_mfem_weak_form");
-  addTaskDependency("add_kernel", "add_mfem_weak_form");
-
-  // registerTask("set_mfem_equation_systems", true);
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
@@ -547,15 +538,21 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
+  registerTask("add_mfem_weak_form", true);
+  addTaskDependency("add_mfem_weak_form", "init_mesh");
+  addTaskDependency("add_mfem_weak_form", "add_variable");
+  addTaskDependency("add_mfem_weak_form", "add_aux_variable");
+  addTaskDependency("add_mfem_weak_form", "add_elemental_field_variable");
+  addTaskDependency("add_mfem_weak_form", "add_kernel");
+  addTaskDependency("add_mfem_weak_form", "add_bc");
+  addTaskDependency("add_mfem_weak_form", "add_mfem_complex_kernel_components");
+  addTaskDependency("add_mfem_weak_form", "add_mfem_complex_bc_components");
+  addTaskDependency("add_mfem_weak_form", "add_mfem_fespace_hierarchies");
+
   // add user-specified weak forms to build equation systems to solve.
   registerTask("set_mfem_equation_systems", true);
   // registerMooseObjectTask("add_mfem_weak_form", MFEMWeakForm, false);
-  addTaskDependency("set_mfem_equation_systems", "add_variable");
-  addTaskDependency("set_mfem_equation_systems", "add_kernel");
-  addTaskDependency("set_mfem_equation_systems", "add_bc");
-  addTaskDependency("set_mfem_equation_systems", "add_mfem_complex_kernel_components");
-  addTaskDependency("set_mfem_equation_systems", "add_mfem_complex_bc_components");
-  addTaskDependency("set_mfem_equation_systems", "add_mfem_fespace_hierarchies");
+  addTaskDependency("set_mfem_equation_systems", "add_mfem_weak_form");
 
   // Add equation system operators to solve.
   // registerTask("add_equation_systems", true);
