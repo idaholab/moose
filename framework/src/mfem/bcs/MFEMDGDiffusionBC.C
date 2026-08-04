@@ -18,7 +18,7 @@ InputParameters
 MFEMDGDiffusionBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
-  params.addClassDescription("Boundary condition for DG Diffusion kernel");
+  params.addClassDescription("Applies a Dirichlet condition for DG diffusion");
   params.addParam<MFEMScalarCoefficientName>(
       "diffusion_coefficient", "1.0", "Name of property for diffusion coefficient k");
   params.addParam<MFEMScalarCoefficientName>(

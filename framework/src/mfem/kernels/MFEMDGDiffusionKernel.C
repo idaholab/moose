@@ -18,10 +18,7 @@ InputParameters
 MFEMDGDiffusionKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
-  params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
-                             "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$ "
-                             "arising from the weak form of the Laplacian operator "
-                             "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
+  params.addClassDescription("Adds the face integrator for DG diffusion");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.0", "Name of property for diffusion coefficient k");
   params.addParam<mfem::real_t>("sigma", -1.0, "Symmetry parameter. Typically +/- 1.0");
