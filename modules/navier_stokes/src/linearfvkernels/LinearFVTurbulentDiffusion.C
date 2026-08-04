@@ -113,7 +113,7 @@ LinearFVTurbulentDiffusion::computeBoundaryRHSContribution(const LinearFVBoundar
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction)
+  if (_use_nonorthogonal_correction && diff_bc->needsBoundaryNonorthogonalCorrection())
   {
     const auto correction_vector =
         _current_face_info->normal() -

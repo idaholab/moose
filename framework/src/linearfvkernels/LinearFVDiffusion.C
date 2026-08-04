@@ -203,7 +203,7 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
   // This should only be used for BCs where the gradient of the value is computed and
   // not prescribed.
 
-  if (_use_nonorthogonal_correction && diff_bc->useBoundaryGradientExtrapolation())
+  if (_use_nonorthogonal_correction && diff_bc->needsBoundaryNonorthogonalCorrection())
   {
     // We support internal boundaries as well. In that case we have to decide on which side
     // of the boundary we are on.

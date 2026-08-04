@@ -43,6 +43,8 @@ public:
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
+
 protected:
   /// Compute the required boundary pressure flux contribution
   Real computeRequiredPressureFlux() const;
