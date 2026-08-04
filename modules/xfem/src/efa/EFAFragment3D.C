@@ -210,7 +210,7 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & Em
                  " is shared by ",
                  emb_faces.size(),
                  " fragment faces in element ",
-                 (_host_elem ? (int)_host_elem->id() : -1),
+                 (_host_elem ? static_cast<int>(_host_elem->id()) : -1),
                  " (expected 2). Non-manifold fragment topology -- needs investigation.");
       }
       unsigned int counter = 0;

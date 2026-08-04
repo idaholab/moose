@@ -106,12 +106,11 @@ public:
   virtual void prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
                                         std::map<unsigned int, EFANode *> & EmbeddedNodes,
                                         std::vector<EFANode *> & invalid_emb_out) = 0;
-  /// Erase all references to emb_node from this element's edges, faces, fragments,
-  /// and interior nodes.  Used by the algorithm driver to globally purge dropped
-  /// embedded nodes from every element.  Single-hop neighbour propagation in
-  /// EFAElement3D::removeEmbeddedNode does not cover elements that received the
-  /// node via independent markCutFacesByGeometry() entries, so the driver walks
-  /// every element.  The driver does NOT free the EFANode object afterwards --
+  /// Erase all references to emb_node from this element's faces (including their edges)
+  /// and fragments.  Used by the algorithm driver to globally purge dropped
+  /// embedded nodes from every element.  The driver walks every element because
+  /// elements can receive the node through independent markCutFacesByGeometry()
+  /// entries.  The driver does NOT free the EFANode object afterwards --
   /// see ElementFragmentAlgorithm::updatePhysicalLinksAndFragments for why.
   virtual void purgeEmbeddedNodeReferences(EFANode * emb_node) = 0;
   virtual void updateFragments(const std::set<EFAElement *> & CrackTipElements,

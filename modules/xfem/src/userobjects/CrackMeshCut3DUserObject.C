@@ -22,6 +22,8 @@
 #include "libmesh/mesh_tools.h"
 #include "Function.h"
 
+#include <algorithm>
+
 registerMooseObject("XFEMApp", CrackMeshCut3DUserObject);
 
 InputParameters
@@ -213,8 +215,7 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
 
     std::vector<unsigned int> cut_edges;
     std::vector<Real> cut_pos;
-    std::vector<Point> cut_points;
-
+    std::vector<const Node *> cut_nodes;
     for (unsigned int j = 0; j < n_edges; j++)
     {
       // This returns the lowest-order type of side.
@@ -241,35 +242,33 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
         if (intersectWithEdge(*node1, *node2, vertices, intersection))
         {
           const Real position = getRelativePosition(*node1, *node2, intersection);
-          bool duplicate = false;
-          for (const auto & cut_point : cut_points)
-            if ((intersection - cut_point).norm() < Xfem::tol)
-            {
-              duplicate = true;
-              break;
-            }
 
-          if (!duplicate)
-          {
-            cut_edges.push_back(j);
-            cut_pos.push_back(position);
-            cut_points.push_back(intersection);
-            // A planar crack surface crosses each structural face edge at most once.
-            // Stop after the first valid hit so that adjacent cutter triangles sharing
-            // a cutter edge or vertex cannot produce a second entry for the same
-            // structural face edge (which would give cut_edges.size() > 2 for a
-            // legitimately two-edge cut and prevent the face from being marked cut,
-            // or - if the physical-distance duplicate check is slightly too tight -
-            // yield two entries for the same edge index that reach EFA and corrupt
-            // the cut-plane edge topology that EFAFace::sortEdges() requires).
+          // Intersections on two edges are duplicates only when both lie on their shared
+          // structural node. Distinct intersections close to that node must remain separate.
+          const Node * cut_node = nullptr;
+          if (position < Xfem::tol)
+            cut_node = node1;
+          else if (1.0 - position < Xfem::tol)
+            cut_node = node2;
+
+          if (cut_node &&
+              std::find(cut_nodes.begin(), cut_nodes.end(), cut_node) != cut_nodes.end())
             break;
-          }
+
+          cut_edges.push_back(j);
+          cut_pos.push_back(position);
+          cut_nodes.push_back(cut_node);
+          // A planar crack surface crosses each structural face edge at most once.
+          // Stop after the first valid hit so that adjacent cutter triangles sharing
+          // a cutter edge or vertex cannot produce a second entry for the same
+          // structural face edge.
+          break;
         }
       }
     }
 
     // if two edges of an element are cut, it is considered as an element being cut
-    if (cut_edges.size() == 2 && cut_edges[0] != cut_edges[1])
+    if (cut_edges.size() == 2)
     {
       elem_cut = true;
       Xfem::CutFace mycut;

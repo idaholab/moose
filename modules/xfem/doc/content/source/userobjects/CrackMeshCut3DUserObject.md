@@ -6,7 +6,7 @@
 
 This class: (1) reads in a mesh describing the crack surface, (2) uses the mesh to do initial cutting of 3D elements, and (3) grows the mesh incrementally based on prescribed growth functions. The code is interfaced with domain integral methods to allow nonplanar crack growth based on empirical propagation direction and speed laws.
 
-For crack-growth problems, [!param](/UserObjects/CrackMeshCut3DUserObject/size_control) sets the target spacing used when advancing and refining the cutter front, while[!param](/UserObjects/CrackMeshCut3DUserObject/min_elem_area) prevents the growth algorithm from adding very small or nearly degenerate triangles to the cutter mesh. The number of growth advances performed in one update is controlled by [!param](/UserObjects/CrackMeshCut3DUserObject/n_step_growth).
+For crack-growth problems, [!param](/UserObjects/CrackMeshCut3DUserObject/size_control) sets the target spacing used when advancing and refining the cutter front, while [!param](/UserObjects/CrackMeshCut3DUserObject/min_elem_area) prevents the growth algorithm from adding very small or nearly degenerate triangles to the cutter mesh. The number of growth advances performed in one update is controlled by [!param](/UserObjects/CrackMeshCut3DUserObject/n_step_growth).
 
 ## Surface-Cutting Segment, Active and Inactive Nodes
 
