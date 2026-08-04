@@ -42,6 +42,11 @@ NEML2ToMOOSEMaterialProperty<T>::validParams()
   params.addParam<std::string>(
       "neml2_parameter_derivative",
       "If supplied return the derivative of neml2_variable with respect to this");
+  params.addParam<std::string>(
+      "neml2_parameter_vjp",
+      "If supplied return the vector-Jacobian product between the gathered cotangent of the NEML2 "
+      "output variable and the derivative of that output variable with respect to this NEML2 model "
+      "parameter. The product is a scalar per quadrature point.");
 
   // provide an optional initialization of the moose property (because we don't really know if it is
   // going to become stateful or not)
@@ -63,7 +68,11 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
                : nullptr),
     _value(!isParamValid("neml2_input_derivative")
                ? (!isParamValid("neml2_parameter_derivative")
-                      ? _execute_neml2_model.getOutput(getParam<std::string>("from_neml2"))
+                      ? (!isParamValid("neml2_parameter_vjp")
+                             ? _execute_neml2_model.getOutput(getParam<std::string>("from_neml2"))
+                             : _execute_neml2_model.getOutputParameterVJP(
+                                   getParam<std::string>("from_neml2"),
+                                   getParam<std::string>("neml2_parameter_vjp")))
                       : _execute_neml2_model.getOutputParameterDerivative(
                             getParam<std::string>("from_neml2"),
                             getParam<std::string>("neml2_parameter_derivative")))

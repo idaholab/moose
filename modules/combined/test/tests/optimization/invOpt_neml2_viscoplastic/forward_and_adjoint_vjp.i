@@ -114,10 +114,11 @@
     parameter_types = 'FUNCTION FUNCTION FUNCTION FUNCTION'
     parameters = 'elasticity_E yield_sy Xrate_C flow_rate_eta'
     derivatives = 'neml2_stress neml2_strain'
-    parameter_derivatives = 'neml2_stress elasticity_E;
-                             neml2_stress yield_sy;
-                             neml2_stress Xrate_C;
-                             neml2_stress flow_rate_eta'
+    parameter_vjp_variable = 'neml2_stress'
+    parameter_vjp_cotangent = 'adjoint_strain_sr2'
+    parameter_vjp_parameters = 'elasticity_E yield_sy Xrate_C flow_rate_eta'
+    execution_order_group = -1
+    execute_on = 'LINEAR NONLINEAR TIMESTEP_END ADJOINT_TIMESTEP_END'
   []
 []
 
@@ -188,6 +189,11 @@
     displacements = 'adjoint_disp_x adjoint_disp_y adjoint_disp_z'
     base_name = 'adjoint'
   []
+  [convert_adjoint_strain]
+    type = RankTwoTensorToSymmetricRankTwoTensor
+    from = 'adjoint_mechanical_strain'
+    to = 'adjoint_strain_sr2'
+  []
 []
 
 [Functions]
@@ -244,33 +250,29 @@
 
 [VectorPostprocessors]
   [grad_E]
-    type = AdjointStrainSymmetricStressGradInnerProduct
-    stress_derivative_name = 'dneml2_stress/delasticity_E'
-    adjoint_strain_name = 'adjoint_mechanical_strain'
+    type = ElementOptimizationVJPInnerProduct
+    vjp_name = 'vjp_neml2_stress_elasticity_E'
     variable = dummy
     function = elasticity_E
     execute_on = ADJOINT_TIMESTEP_END
   []
   [grad_sigma_y]
-    type = AdjointStrainSymmetricStressGradInnerProduct
-    stress_derivative_name = 'dneml2_stress/dyield_sy'
-    adjoint_strain_name = 'adjoint_mechanical_strain'
+    type = ElementOptimizationVJPInnerProduct
+    vjp_name = 'vjp_neml2_stress_yield_sy'
     variable = dummy
     function = yield_sy
     execute_on = ADJOINT_TIMESTEP_END
   []
   [grad_C]
-    type = AdjointStrainSymmetricStressGradInnerProduct
-    stress_derivative_name = 'dneml2_stress/dXrate_C'
-    adjoint_strain_name = 'adjoint_mechanical_strain'
+    type = ElementOptimizationVJPInnerProduct
+    vjp_name = 'vjp_neml2_stress_Xrate_C'
     variable = dummy
     function = Xrate_C
     execute_on = ADJOINT_TIMESTEP_END
   []
   [grad_eta]
-    type = AdjointStrainSymmetricStressGradInnerProduct
-    stress_derivative_name = 'dneml2_stress/dflow_rate_eta'
-    adjoint_strain_name = 'adjoint_mechanical_strain'
+    type = ElementOptimizationVJPInnerProduct
+    vjp_name = 'vjp_neml2_stress_flow_rate_eta'
     variable = dummy
     function = flow_rate_eta
     execute_on = ADJOINT_TIMESTEP_END

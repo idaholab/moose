@@ -39,8 +39,6 @@
     type = AssociativePlasticFlow
   []
   [Xrate]
-    # No-static-recovery form of the Chaboche law. Do not switch this to
-    # ChabochePlasticHardening, which adds the required A and a recovery terms.
     type = FredrickArmstrongPlasticHardening
     back_stress = 'back_stress'
     C = 1.2e4

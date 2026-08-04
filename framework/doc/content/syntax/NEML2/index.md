@@ -24,7 +24,7 @@ Sub-blocks are used to specify multiple NEML2 material models used in the same s
 
 !listing test/tests/neml2/blocks_different_model.i block=NEML2
 
-In each sub-block, there are a total of 6 groups of parameters that can be specified:
+In each sub-block, there are a total of 7 groups of parameters that can be specified:
 
 1. Configuration of the model
 2. Transfer of input variables
@@ -32,6 +32,7 @@ In each sub-block, there are a total of 6 groups of parameters that can be speci
 4. Transfer of output variables
 5. Transfer of derivatives (of output variables w.r.t. input variables)
 6. Transfer of derivatives (of output variables w.r.t. model parameters)
+7. Transfer of vector-Jacobian products (of output variables w.r.t. model parameters)
 
 The configuration of model is controlled by parameters such as [!param](/NEML2/model), [!param](/NEML2/verbose), [!param](/NEML2/device), etc., each of which is explained in the syntax documentation at the bottom of the page.
 
@@ -50,6 +51,10 @@ All NEML2 output variables are retrieved and stored as MOOSE material properties
 For stateful variables, i.e., input variables needing values from previous time steps (usually with suffix `~N` with `N` being the number of steps backward in time), the corresponding MOOSE quantities from previous time steps are automatically retrieved. The advance of stateful variables is managed by the MOOSE native material system, unless [!param](/NEML2/manage_state_advance) is set to true, in which case NEML2 handles the storage and advance of stateful variables. Note that currently `manage_state_advance = true` is not compatible with mesh change events.
 
 It is worth noting that for [!param](/NEML2/derivatives) and [!param](/NEML2/parameter_derivatives), a pair of names must be specified for each entry. The first name in the pair denotes the quantity (NEML2 output variable) to take derivative of, and the second name in the pair denotes the quantity (NEML2 input variable or model parameter) to take derivative with respect to. Pairs are delimited by `;`.
+
+[!param](/NEML2/parameter_vjp_variable), [!param](/NEML2/parameter_vjp_cotangent) and [!param](/NEML2/parameter_vjp_parameters) request a vector-Jacobian product instead of a materialized derivative. [!param](/NEML2/parameter_vjp_variable) names the NEML2 output variable to differentiate, [!param](/NEML2/parameter_vjp_cotangent) names the MOOSE material property supplying the cotangent it is contracted against (for example an adjoint strain), and [!param](/NEML2/parameter_vjp_parameters) lists the model parameters to differentiate with respect to. Each listed parameter must be gathered from a MOOSE function so that it is batched per quadrature point; an unbatched parameter raises an error, because the reverse pass would otherwise sum the contribution over the entire domain instead of producing a per-quadrature-point value. Each contraction is retrieved as a `Real` MOOSE material property named `vjp_<parameter_vjp_variable>_<parameter>`. See [ElementOptimizationVJPInnerProduct.md] for how the property is consumed in an optimization gradient.
+
+[!param](/NEML2/execute_on) and [!param](/NEML2/execution_order_group) are forwarded from the block to the NEML2 model executor and to the gatherers it depends on, so the whole group runs on one shared execution schedule. This matters when the executor must also run outside the forward solve, for example on an adjoint execution flag to compute the vector-Jacobian products above.
 
 ## Inspect NEML2 information
 

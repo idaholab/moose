@@ -642,3 +642,124 @@ output as a second gold file, which is not advisable: quasi-Newton iterates vary
 MPI decomposition and compiler, and unlike the converged gradients they are large enough to be
 compared under relative error rather than absorbed by the absolute-zero cutoff.  That is the same
 platform-dependent failure described in [#sec:loadbearing].
+
+## NEML2 Vector-Jacobian Product Gradients id=sec:vjp
+
+[#sec:wiring] materializes a full derivative tensor, `dneml2_stress/d<parameter>`, for each inverted
+parameter and contracts it against the adjoint strain in one
+[AdjointStrainSymmetricStressGradInnerProduct.md] per parameter.
+[ElementOptimizationVJPInnerProduct.md] computes the same gradient, [!eqref](eq:neml2_grad), from a
+single vector-Jacobian product instead: the adjoint strain seeds one reverse-mode pass through the
+NEML2 model that yields the contraction against every requested parameter's stress derivative
+directly, without the derivative tensor itself ever being formed.
+`forward_and_adjoint_vjp.i` and `main_vjp.i` repeat this example end to end with that path; the
+`tests` spec runs it as `grad_check_vjp`, `recovery_vjp` and `vjp_unbatched_param_error`.
+
+### Mechanism id=sec:vjpmechanism
+
+NEML2 differentiates a tensor-valued output by reverse-mode automatic differentiation, seeding one
+reverse pass per basis cotangent of the output.  The materialized path in [#sec:wiring] uses NEML2's
+`jacrev` to build the full derivative tensor for each parameter, and because `neml2_stress` is a
+`SymmetricRankTwoTensor` with six Mandel components, that costs six reverse passes per parameter.
+Across the four inverted parameters, the materialized path runs 24 reverse passes to obtain the four
+derivative tensors.
+
+A vector-Jacobian product seeds a single reverse pass with the adjoint strain itself, rather than
+with a basis cotangent, and differentiates with respect to every requested parameter in that one
+pass.  The result is already the double contraction the gradient needs.  For the same four
+parameters and the same stress output, this example computes the gradient in one reverse pass in
+place of the materialized path's 24.
+
+### Input File Deltas id=sec:vjpdeltas
+
+The `[NEML2]` block trades the [!param](/NEML2/parameter_derivatives) list in [neml2_block] for
+three parameters: [!param](/NEML2/parameter_vjp_variable), [!param](/NEML2/parameter_vjp_cotangent)
+and [!param](/NEML2/parameter_vjp_parameters).
+
+!listing modules/combined/test/tests/optimization/invOpt_neml2_viscoplastic/forward_and_adjoint_vjp.i
+         block=NEML2
+         id=vjp_neml2_block
+         caption=The VJP request replacing the four parameter_derivatives pairs of [neml2_block].
+
+[!param](/NEML2/parameter_vjp_cotangent) must name a `SymmetricRankTwoTensor` material property, the
+same Mandel layout `neml2_stress` is in, so the adjoint strain needs the same conversion the forward
+strain gets in [materials]: a
+[RankTwoTensorToSymmetricRankTwoTensor](MandelConverter.md) material producing `adjoint_strain_sr2`
+from `adjoint_mechanical_strain`.
+
+!listing modules/combined/test/tests/optimization/invOpt_neml2_viscoplastic/forward_and_adjoint_vjp.i
+         block=Materials/convert_adjoint_strain
+         id=convert_adjoint_strain
+         caption=Converting the adjoint strain to the Mandel layout the cotangent must be in.
+
+The NEML2 executor is a `GENERAL` user object and [ElementOptimizationVJPInnerProduct.md] is an
+`ELEMENT` user object; within one execution order group MOOSE runs element user objects before
+general ones, the wrong order for a general producer feeding element consumers.
+[!param](/NEML2/execution_order_group) is set to $-1$ to force the executor to run first, and
+[!param](/NEML2/execute_on) is extended to `'LINEAR NONLINEAR TIMESTEP_END ADJOINT_TIMESTEP_END'`
+so the executor and the gatherers it depends on also run on the adjoint execution flag; see
+[#sec:vjploadbearing].
+
+!listing modules/combined/test/tests/optimization/invOpt_neml2_viscoplastic/forward_and_adjoint_vjp.i
+         block=VectorPostprocessors
+         id=vjp_vpps
+         caption=One ElementOptimizationVJPInnerProduct per inverted parameter, on ADJOINT_TIMESTEP_END.
+
+Each [ElementOptimizationVJPInnerProduct.md] reads
+[!param](/VectorPostprocessors/ElementOptimizationVJPInnerProduct/vjp_name) from the corresponding
+`vjp_neml2_stress_<parameter>` property and
+[!param](/VectorPostprocessors/ElementOptimizationVJPInnerProduct/function) from the same `Function`
+used by the materialized path, so [#sec:normalization] applies unchanged.  Every other block -- the
+mesh, the BCs, the model, `Functions`, `Reporters`, `DiracKernels` and the optimization driver in
+`main_vjp.i` -- is identical to [#sec:wiring].
+
+### Equivalence With the Materialized Path id=sec:vjpequivalence
+
+Both paths compute the same quantity, [!eqref](eq:neml2_grad), from the same forward solve.
+`grad_check_vjp` verifies the VJP gradient against a finite-difference gradient the same way
+`grad_check_viscoplastic` verifies the materialized one (see [#sec:gradcheck]), and `recovery_vjp`
+recovers the same four parameters `recovery_multiparam` recovers, from the same measurements and the
+same starting guess.  At the starting guess the two gradients agree with each other to machine
+precision: the `recovery_vjp` and `recovery_multiparam` gold files agree to about 12 significant
+digits, the remaining difference being floating-point round-off from a different summation order
+rather than a difference in the underlying calculus.  `recovery_vjp` is a regression test in its own
+right, checked at `rel_err = 1e-3` against its own gold rather than against the materialized path's.
+
+### Choosing Between the Two Paths id=sec:vjpchoice
+
+The materialized path produces the full derivative tensor `d<output>/d<parameter>`, so it is the
+right choice when that tensor itself is needed, or when the number of inverted parameters is small
+enough that the extra reverse passes do not matter.  The VJP path never forms that tensor: it stores
+one `Real` field per parameter instead of one `SymmetricRankTwoTensor` field per parameter, a
+sixfold reduction in stored components per parameter that grows with the parameter count, and it
+computes each parameter's contribution as part of one shared reverse pass instead of six passes of
+its own.  It is the right choice when the number of parameters is large enough, or memory tight
+enough, that the materialized derivative tensors become the constraint.
+
+### Unbatched Parameters and Work Schedulers id=sec:vjpunbatched
+
+A NEML2 model parameter named in [!param](/NEML2/parameter_vjp_parameters) must be batched per
+quadrature point, i.e. gathered from a MOOSE function, the same requirement [#sec:typetrap]
+describes for [!param](/NEML2/parameter_derivatives).  A parameter gathered from a scalar variable
+is unbatched, and a reverse pass through it would sum the contribution over the entire domain
+instead of returning one value per quadrature point.  That combination is a hard error rather than a
+silently wrong answer; `vjp_unbatched_param_error.i` triggers it deliberately, and
+`vjp_unbatched_param_error` is the regression test pinning the error message.
+
+A vector-Jacobian product also cannot be combined with a NEML2 work scheduler (see
+[Work scheduling and dispatching](syntax/NEML2/index.md)).  The reverse pass consumes the autograd
+graph of a single unchunked forward evaluation, and whether that graph survives dispatched, chunked
+evaluation has not been verified, so the combination is refused rather than silently returning a
+partial result.
+
+### Settings That Look Arbitrary: the Shared Execution Schedule id=sec:vjploadbearing
+
+The executor and the gatherers it depends on, including the cotangent gatherer for
+[!param](/NEML2/parameter_vjp_cotangent), must run on the same execution schedule, and nothing in
+the `[NEML2]` block enforces that once [!param](/NEML2/execute_on) is set by the user.  A
+user-supplied [!param](/NEML2/execute_on) that omits `LINEAR` reintroduces the empty-buffer failure
+class the shared schedule exists to prevent: a gatherer that does not run on the flag the executor
+evaluates on leaves its buffer empty, and the executor reads it anyway.  The symptom is a baffling
+zero-batch tensor expansion error from torch, an expand size mismatch such as `[0, 6, 6]` against
+`[N, -1, -1]`, raised at the first residual evaluation, with nothing in the message pointing back at
+[!param](/NEML2/execute_on).
