@@ -181,7 +181,14 @@ For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$ [!cite](kyriakopoul
 
 ## Discretization
 
-!! Intentional comment to provide extra spacing
+### Time grid discretization
+
+SCM uses a first-order backward Euler discretization for all temporal storage terms. Storage is evaluated at
+the downstream node of each axial control volume. Because this time discretization is implemented
+directly by SCM, selecting a MOOSE time integrator other than `ImplicitEuler` does not change it;
+SCM issues a warning when another time integrator is requested.
+
+### Spatial discretization
 
 The collocated discretization of the variables is presented in [fig:dis] . $i,j$ are the subchannel indexes. $ij$ is the name of the gap between subchannels $i,j$. $k$ is the index in the axial direction.
 
@@ -189,12 +196,6 @@ The collocated discretization of the variables is presented in [fig:dis] . $i,j$
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:dis
     caption=Subchannel collocated discretization.
-
-The governing equations are discretized as follows. In transient calculations, SCM uses a
-first-order backward Euler discretization for all temporal storage terms. Storage is evaluated at
-the downstream node of each axial control volume. Because this time discretization is implemented
-directly by SCM, selecting a MOOSE time integrator other than `ImplicitEuler` does not change it;
-SCM issues a warning when another time integrator is requested.
 
 - Conservation of mass:
 
@@ -381,11 +382,6 @@ pressure field has not converged, the block sweep starts again at the inlet; pre
 therefore requires multiple outer iterations to propagate upstream when several blocks are used.
 `P_maxit` and `T_maxit` limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
 the solver's automatic outer-iteration limit.
-
-Convergence status is local to the current solve attempt. Only the final pressure and temperature
-status is retained, so a transient step that fails and is retried with a smaller time step can
-subsequently report convergence. A failure in an earlier outer iteration likewise does not latch a
-permanent failure if a later iteration converges.
 
 ### Algorithm variations
 
