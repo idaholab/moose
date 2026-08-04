@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "MooseMain.h"
+#include "MooseUnitUtils.h"
 #include "XTermConstants.h"
 
 namespace
@@ -21,11 +22,11 @@ struct Args
   {
     _args.insert(_args.begin(), "/path/to/exe");
     for (auto & arg : _args)
-      _argv.push_back((char *)arg.data());
+      _argv.push_back(arg.data());
     _argv.push_back(nullptr);
   }
 
-  int argc() const { return _argv.size() - 1; }
+  int argc() const { return static_cast<int>(_argv.size()) - 1; }
   char ** argv() { return _argv.data(); }
 
   std::vector<std::string> _args;
@@ -35,10 +36,12 @@ struct Args
 
 TEST(ReferenceResidualConvergenceTest, quantityColors)
 {
+  Moose::UnitUtils::ScopedTestDirectory test_directory(
+      {"files/ReferenceResidualConvergenceTest/color.i"});
   const bool color_was_enabled = Moose::colorConsole();
 
   testing::internal::CaptureStdout();
-  Args args({"-i", "files/ReferenceResidualConvergenceTest/color.i", "--color", "on"});
+  Args args({"-i", (test_directory.path() / "color.i").string(), "--color", "on"});
   const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
   app->run();
   Moose::out << std::flush;
