@@ -64,6 +64,13 @@ startup, before momentum assembly has populated $A^{-1}$, $a_n$ is exactly zero.
 condition then uses the cell pressure as the boundary pressure and a zero normal gradient until a
 valid inverse momentum diagonal is available.
 
+The reconstruction can be disabled explicitly by setting
+[!param](/LinearFVBCs/LinearFVPressureFluxBC/use_two_term_expansion) to `false`. In that case, the
+boundary pressure is approximated by the adjacent cell pressure and the boundary-normal gradient
+used for reconstruction is zero. The complete pressure-diffusion flux imposed on the pressure
+equation is unchanged. This one-term option avoids division by $a_n$ for configurations in which
+the boundary-normal inverse momentum coefficient may remain zero.
+
 !syntax parameters /LinearFVBCs/LinearFVPressureFluxBC
 
 !syntax inputs /LinearFVBCs/LinearFVPressureFluxBC

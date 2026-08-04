@@ -24,6 +24,11 @@ LinearFVPressureFluxBC::validParams()
   params.addRequiredParam<MooseFunctorName>("HbyA_flux", "The total HbyA face flux value.");
   params.addRequiredParam<MooseFunctorName>(
       "Ainv", "The 1/A where A is the momentum system diagonal vector.");
+  params.addParam<bool>(
+      "use_two_term_expansion",
+      true,
+      "Whether to reconstruct the boundary pressure using the pressure flux and cell gradient. If "
+      "false, the boundary pressure is approximated by the adjacent cell pressure.");
   params.addRequiredParam<MooseFunctorName>("u", "The x-velocity functor on the boundary.");
   params.addParam<MooseFunctorName>("v", "The y-velocity functor on the boundary.");
   params.addParam<MooseFunctorName>("w", "The z-velocity functor on the boundary.");
@@ -37,6 +42,7 @@ LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameter
     _HbyA_flux(getFunctor<Real>("HbyA_flux")),
     _Ainv(getFunctor<RealVectorValue>("Ainv")),
     _dim(_subproblem.mesh().dimension()),
+    _two_term_expansion(getParam<bool>("use_two_term_expansion")),
     _u(getFunctor<Real>("u")),
     _v(parameters.isParamValid("v") ? &getFunctor<Real>("v") : nullptr),
     _w(parameters.isParamValid("w") ? &getFunctor<Real>("w") : nullptr),
@@ -54,7 +60,8 @@ LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameter
   if (_dim < 3 && _w)
     paramError("w", "The 'w' boundary velocity functor is only valid in 3D problems.");
 
-  _var.computeCellGradients();
+  if (_two_term_expansion)
+    _var.computeCellGradients();
 }
 
 Real
@@ -111,6 +118,10 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
+
+  if (!_two_term_expansion)
+    return _var.getElemValue(*elem_info, state);
+
   const Real normal_ainv = computeBoundaryAinv();
 
   // Ainv is initialized to zero and is first populated by the momentum assembly. Until then, use
@@ -130,6 +141,9 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
 Real
 LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
 {
+  if (!_two_term_expansion)
+    return 0.0;
+
   const Real normal_ainv = computeBoundaryAinv();
   if (normal_ainv == 0.0)
     return 0.0;

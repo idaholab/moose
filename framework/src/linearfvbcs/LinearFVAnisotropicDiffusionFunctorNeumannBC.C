@@ -18,6 +18,11 @@ LinearFVAnisotropicDiffusionFunctorNeumannBC::validParams()
   params.suppressParameter<MooseFunctorName>("diffusion_coeff");
   params.addRequiredParam<MooseFunctorName>("diffusion_tensor",
                                             "Functor describing a diagonal diffusion tensor.");
+  params.addParam<bool>(
+      "use_two_term_expansion",
+      true,
+      "Whether to reconstruct the boundary value using the prescribed flux and cell gradient. If "
+      "false, the boundary value is approximated by the adjacent cell value.");
   params.addClassDescription(
       "Adds a prescribed anisotropic diffusive flux boundary condition to a linear finite "
       "volume system and reconstructs the boundary value using a diagonal diffusion tensor.");
@@ -27,6 +32,7 @@ LinearFVAnisotropicDiffusionFunctorNeumannBC::validParams()
 LinearFVAnisotropicDiffusionFunctorNeumannBC::LinearFVAnisotropicDiffusionFunctorNeumannBC(
     const InputParameters & parameters)
   : LinearFVAdvectionDiffusionFunctorNeumannBC(parameters),
+    _two_term_expansion(getParam<bool>("use_two_term_expansion")),
     _diffusion_tensor(getFunctor<RealVectorValue>("diffusion_tensor"))
 {
 }
@@ -38,6 +44,11 @@ LinearFVAnisotropicDiffusionFunctorNeumannBC::computeBoundaryValue() const
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
+  const auto cell_value = _var.getElemValue(*elem_info, state);
+
+  if (!_two_term_expansion)
+    return cell_value;
+
   const auto boundary_normal =
       (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0) *
       _current_face_info->normal();
@@ -45,14 +56,16 @@ LinearFVAnisotropicDiffusionFunctorNeumannBC::computeBoundaryValue() const
   const auto tangential_cell_to_face =
       cell_to_face - (cell_to_face * boundary_normal) * boundary_normal;
 
-  return _var.getElemValue(*elem_info, state) +
-         computeBoundaryNormalGradient() * computeCellToFaceDistance() +
+  return cell_value + computeBoundaryNormalGradient() * computeCellToFaceDistance() +
          _var.gradSln(*elem_info, state) * tangential_cell_to_face;
 }
 
 Real
 LinearFVAnisotropicDiffusionFunctorNeumannBC::computeBoundaryNormalGradient() const
 {
+  if (!_two_term_expansion)
+    return 0.0;
+
   const auto state = determineState();
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()

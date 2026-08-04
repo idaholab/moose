@@ -30,6 +30,14 @@ normal gradient and boundary value, but it is not added to the kernel residual b
 prescribed $g_b$ already contains the complete anisotropic flux. The same diffusion tensor functor
 should be supplied to this boundary condition and to [LinearFVAnisotropicDiffusion.md].
 
+By default, the boundary value is reconstructed with the normal gradient above and the tangential
+cell-gradient contribution. Setting
+[!param](/LinearFVBCs/LinearFVAnisotropicDiffusionFunctorNeumannBC/use_two_term_expansion) to
+`false` instead approximates the boundary value with the adjacent cell value and reports a zero
+boundary-normal gradient. The prescribed complete flux supplied to the diffusion kernel is
+unchanged. This one-term option avoids division by $a_n$ when the boundary-normal diffusion
+coefficient is zero.
+
 !syntax parameters /LinearFVBCs/LinearFVAnisotropicDiffusionFunctorNeumannBC
 
 !syntax inputs /LinearFVBCs/LinearFVAnisotropicDiffusionFunctorNeumannBC

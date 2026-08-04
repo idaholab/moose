@@ -36,6 +36,9 @@ public:
   virtual Real computeBoundaryValueRHSContribution() const override;
 
 protected:
+  /// Whether to reconstruct the boundary value with the prescribed flux and cell gradient
+  const bool _two_term_expansion;
+
   /// The functor for the diagonal diffusion tensor
   const Moose::Functor<RealVectorValue> & _diffusion_tensor;
 };

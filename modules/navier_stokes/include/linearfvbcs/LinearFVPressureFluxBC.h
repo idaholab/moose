@@ -61,6 +61,9 @@ protected:
   /// Spatial dimension of the mesh
   const unsigned short _dim;
 
+  /// Whether to reconstruct the boundary pressure with the pressure flux and cell gradient
+  const bool _two_term_expansion;
+
   /// Velocity functors used to prescribe a boundary mass flux
   const Moose::Functor<Real> & _u;
   const Moose::Functor<Real> * const _v;
