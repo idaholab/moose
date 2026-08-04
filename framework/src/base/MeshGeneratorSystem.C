@@ -425,9 +425,11 @@ MeshGeneratorSystem::executeMeshGenerators()
                       << COLOR_DEFAULT << ")" << std::endl;
       auto current_mesh = generator->generateInternal();
 
-      mooseAssert(comm().verify(current_mesh->is_prepared()),
-                  "Mesh prepared state after " << generator->typeAndName()
-                                               << " is parallel inconsistent");
+      if (!generator->isDataOnly())
+        mooseAssert(comm().verify(current_mesh->is_prepared()),
+                    "Mesh prepared state after " << generator->typeAndName()
+                                                 << " is parallel inconsistent");
+
       mooseAssert(comm().verify(generator->typeAndName().size()) &&
                       comm().verify(generator->typeAndName()),
                   "Mesh generator generation is parallel inconsistent; just executed "
