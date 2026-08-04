@@ -76,7 +76,24 @@ void
 Action::timedAct()
 {
   TIME_SECTION(_act_timer);
+
+  const auto parallel_verify = [this](const bool libmesh_dbg_var(before))
+  {
+#ifndef NDEBUG
+    const std::string value = this->typeAndName() + "_" + _current_task;
+    if (!comm().verify(value.size()) || !comm().verify(value))
+      mooseError("Parallel inconsistency found ",
+                 before ? "before" : "after",
+                 " executing task ",
+                 _current_task);
+#endif
+  };
+
+  parallel_verify(true);
+
   act();
+
+  parallel_verify(false);
 }
 
 bool
