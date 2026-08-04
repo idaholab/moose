@@ -122,7 +122,7 @@
   [lin]
     type = MFEMGMRESSolver
     preconditioner = matrix_free_ams
-    l_tol = 1e-6
+    l_tol = 1e-16
   []
   [native_mfem_nl]
     type = MFEMNewtonNonlinearSolver

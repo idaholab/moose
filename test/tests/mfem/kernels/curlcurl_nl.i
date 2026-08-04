@@ -125,7 +125,7 @@
   [lin]
     type = MFEMGMRESSolver
     preconditioner = matrix_free_ams
-    l_tol = 1e-6
+    l_tol = 1e-16
   []
   [native_mfem_nl]
     type = MFEMNewtonNonlinearSolver
@@ -144,7 +144,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/CurlCurlNL
+    file_base = OutputData/CurlCurl # name is changing so we can use schemadiff test
     vtk_format = ASCII
   []
 []

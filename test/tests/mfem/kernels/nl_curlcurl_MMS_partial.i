@@ -126,12 +126,13 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
+  assembly_level = partial
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/NLCurlCurlMMS
+    file_base = OutputData/NLCurlCurlMMSPartial
     vtk_format = ASCII
   []
 []
