@@ -14,6 +14,8 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
+#include <limits>
+
 TEST(MooseUtils, camelCaseToUnderscore)
 {
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("Foo"), "foo");
@@ -555,4 +557,20 @@ TEST(MooseUtils, isZero)
   EXPECT_TRUE(!MooseUtils::isZero(ADRealTensorValue(1)));
   EXPECT_TRUE(!MooseUtils::isZero(std::vector<Real>(1, 1)));
   EXPECT_TRUE(!MooseUtils::isZero(std::array<Real, 1>{{1}}));
+}
+
+TEST(MooseUtils, IsFinitePoint)
+{
+  const Point finite_point;
+  EXPECT_TRUE(MooseUtils::isFinitePoint(finite_point));
+
+  for (const auto i : make_range(LIBMESH_DIM))
+  {
+    Point nonfinite_point;
+    nonfinite_point(i) = std::numeric_limits<Real>::quiet_NaN();
+    EXPECT_FALSE(MooseUtils::isFinitePoint(nonfinite_point));
+
+    nonfinite_point(i) = std::numeric_limits<Real>::infinity();
+    EXPECT_FALSE(MooseUtils::isFinitePoint(nonfinite_point));
+  }
 }

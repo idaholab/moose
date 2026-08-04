@@ -92,6 +92,14 @@
       detail = 'a TET10 volume mesh with TRI6 mortar-interface faces.'
     []
   []
+  [normal-projection-distorted-quad]
+    type = 'RunApp'
+    input = 'normal_projection_distorted_quad.i'
+    design = 'AutomaticMortarGeneration.md'
+    issues = '#33438'
+    requirement = 'The system shall not produce an out-of-bounds error when normal-projecting '
+                  'retained 3D mortar quadrature points to distorted QUAD4 parent faces.'
+  []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
     issues = '#33282'

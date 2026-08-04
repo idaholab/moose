@@ -83,10 +83,24 @@ by solving
 \boldsymbol{x}_m(\boldsymbol{\eta}_q)\right] \times \boldsymbol{n}_m = \boldsymbol{0},
 \qquad i \in \{p,s\},
 
-where $\boldsymbol{n}_m$ is the mortar-segment normal. This projects the mortar quadrature point
-along $\boldsymbol{n}_m$ onto each local first-order parent-face linearization. MOOSE then transforms
+where $\boldsymbol{n}_m$ is the mortar-segment normal. Before clipping, MOOSE verifies that each
+projected QUAD4 sub-element has an invertible bilinear map. TRI3 sub-elements use a direct affine
+inverse. For QUAD4 sub-elements, MOOSE first solves the projection with Newton's method and keeps
+the Newton coordinate when it lies inside the sub-element without a relaxed bounds tolerance.
+Otherwise, MOOSE solves the bilinear map
+
+!equation
+\boldsymbol{x}(\xi,\eta)=\boldsymbol{a}+\boldsymbol{b}\xi+\boldsymbol{c}\eta+
+\boldsymbol{d}\xi\eta
+
+analytically and requires one valid root in the sub-element reference domain. A root no more than
+the clipping tolerance outside the domain may be snapped to the boundary only when its physical
+round-trip remains consistent. This fallback avoids accepting an exterior root when a distorted
+bilinear QUAD4 also has an in-domain inverse. MOOSE then transforms
 $\hat{\boldsymbol{\xi}}_{i,q}$ to the parent-face reference coordinate
-$\boldsymbol{\xi}_{i,q}$ used to evaluate the finite element fields.
+$\boldsymbol{\xi}_{i,q}$ used to evaluate the finite element fields. This procedure projects onto
+the same faceted sub-elements used for clipping; it is not an exact normal projection onto the full
+curved parent face.
 
 With `reference_interpolation`, each retained mortar-segment vertex $a$ stores its primary and
 secondary parent-face reference coordinates $\boldsymbol{\xi}_{i,a}$ recovered during clipping.
