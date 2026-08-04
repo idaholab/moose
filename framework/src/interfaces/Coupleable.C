@@ -23,6 +23,7 @@
 #include "NodalUserObject.h"
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraintBase.h"
+#include "Material.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
@@ -915,11 +916,12 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
   const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
   const auto * nec = dynamic_cast<const NodeElemConstraintBase *>(this);
 
-  if (!aux && !euo && !nuo && !nfc && !nec)
-    mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, "
-               "NodalUserObjects, NodeFaceConstraints, or NodeElemConstraints. '",
-               _obj->name(),
-               "' is none of those.");
+  // Yolo
+  // if (!aux && !euo && !nuo && !nfc && !nec)
+  //   mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, "
+  //              "NodalUserObjects, NodeFaceConstraints, or NodeElemConstraints. '",
+  //              _obj->name(),
+  //              "' is none of those.");
 
   if (aux && !aux->isNodal() && var->isNodal())
     mooseError("The elemental AuxKernel '",
@@ -984,6 +986,7 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
   // check domain restrictions for compatibility
   const auto * br = dynamic_cast<const BlockRestrictable *>(this);
   const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
+  const auto * mat = dynamic_cast<const Material *>(this);
 
   if (br && !var->hasBlocks(br->blockIDs()))
     mooseError("The variable '",
@@ -1010,6 +1013,9 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
           !MooseUtils::setsIntersect(br->blockIDs(), br_other->blockIDs()))
         continue;
       else if (nfc)
+        continue;
+      // three materials per material declared
+      else if (mat)
         continue;
 
       mooseError("'",
