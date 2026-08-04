@@ -59,7 +59,7 @@ namespace MooseUtils
 bool
 isFinitePoint(const Point & point)
 {
-  for (const auto component : make_range(LIBMESH_DIM))
+  for (const auto component : make_range(Moose::dim))
     if (!std::isfinite(point(component)))
       return false;
 

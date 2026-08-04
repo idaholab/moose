@@ -166,7 +166,7 @@ const auto set_scalar_component_value = [](auto & value, const hit::Field & fiel
                                 std::to_string(vec.size()) + " component(s) but should have " +
                                 std::to_string(LIBMESH_DIM));
 
-  for (const auto d : make_range(LIBMESH_DIM))
+  for (const auto d : make_range(Moose::dim))
     value(d) = Real(vec[d]);
 };
 
@@ -238,8 +238,8 @@ static auto realtensorvalue = registry.add<RealTensorValue>(
                                     "': size is " + std::to_string(vec.size()) + " but should be " +
                                     std::to_string(LIBMESH_DIM * LIBMESH_DIM));
 
-      for (const auto i : make_range(LIBMESH_DIM))
-        for (const auto j : make_range(LIBMESH_DIM))
+      for (const auto i : make_range(Moose::dim))
+        for (const auto j : make_range(Moose::dim))
           value(i, j) = Real(vec[i * LIBMESH_DIM + j]);
     });
 // ReporterName
@@ -265,7 +265,7 @@ const auto set_vector_component_value = [](auto & value, const hit::Field & fiel
   const std::size_t size = vec.size() / LIBMESH_DIM;
   value.resize(size);
   for (const auto i : make_range(size))
-    for (const auto d : make_range(LIBMESH_DIM))
+    for (const auto d : make_range(Moose::dim))
       value[i](d) = vec[i * LIBMESH_DIM + d];
 };
 
@@ -409,7 +409,7 @@ const auto set_double_vector_component_value = [](auto & value, const hit::Field
     const std::size_t size = vec_entry.size() / LIBMESH_DIM;
     value_entry.resize(size);
     for (const auto j : make_range(size))
-      for (const auto d : make_range(LIBMESH_DIM))
+      for (const auto d : make_range(Moose::dim))
         value_entry[j](d) = vec_entry[j * LIBMESH_DIM + d];
   }
 };
