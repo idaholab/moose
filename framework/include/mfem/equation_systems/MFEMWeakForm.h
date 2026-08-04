@@ -39,6 +39,9 @@ private:
   /// Stores the constructed EquationSystem. Intentionally marked private to ensure
   /// other objects in the problem do not use it prior to full initialisation.
   mutable std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
+
+  std::vector<MFEMBoundaryConditionName> _bc_names;
+  std::vector<MFEMKernelName> _kernel_names;
 };
 
 #endif
