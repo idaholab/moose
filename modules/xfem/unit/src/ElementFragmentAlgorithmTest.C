@@ -9,10 +9,7 @@
 
 #include "gtest/gtest.h"
 
-#include <exception>
-
 #include "MooseUtils.h"
-#include "MooseException.h"
 #include "ElementFragmentAlgorithm.h"
 #include "EFAElement3D.h"
 #include "EFAFace.h"
@@ -3376,7 +3373,7 @@ TEST(ElementFragmentAlgorithm, test7a)
   CheckNodes(embedded_nodes, en_gold);
 }
 
-TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseOnSharedEdgeCurrentFailure)
+TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseOnSharedEdge)
 {
   ElementFragmentAlgorithm mesh(Moose::out);
 
@@ -3384,9 +3381,7 @@ TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseOnSharedEdgeCurrentFail
   // node 0 = (0,0,0), node 1 = (1,0,0), node 2 = (1,1,0), node 3 = (0,1,0)
   // node 4 = (0,0,1), node 5 = (1,0,1), node 6 = (1,1,1), node 7 = (0,1,1)
   //
-  // This unit test does not reproduce the full application propagation history across multiple
-  // structural elements. It reproduces the local condition at the exact throw site in
-  // EFAElement3D::addFaceEdgeCut():
+  // Reproduce the local condition in EFAElement3D::addFaceEdgeCut():
   //   two different faces of the same HEX8 reference the same physical edge point, and the second
   //   path arrives with a different embedded node pointer.
   //
@@ -3415,12 +3410,50 @@ TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseOnSharedEdgeCurrentFail
   base_elem->addFaceEdgeCut(5, 3, 0.5, &embedded_a, embedded_nodes, false, true);
   ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
   ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(face5_edge3->getEmbeddedNode(0), &embedded_a);
+  ASSERT_EQ(face4_edge2->getEmbeddedNode(0), &embedded_a);
 
   // Revisit the same physical edge through the other face with a different embedded node.
-  // Current code throws here. The intended behavior after the fix is to reuse the existing
-  // embedded node on that edge/position instead of erroring out, so this test is expected to
-  // fail until that logic is changed.
   base_elem->addFaceEdgeCut(4, 2, 0.5, &embedded_b, embedded_nodes, false, true);
   ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
   ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(face5_edge3->getEmbeddedNode(0), &embedded_a);
+  ASSERT_EQ(face4_edge2->getEmbeddedNode(0), &embedded_a);
+}
+
+TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseAcrossNeighborPropagation)
+{
+  ElementFragmentAlgorithm mesh(Moose::out);
+
+  // Two HEX8 elements sharing the face with global nodes 1, 4, 10, and 13.
+  mesh.add3DElement({0, 1, 4, 3, 9, 10, 13, 12}, 0);
+  mesh.add3DElement({1, 2, 5, 4, 10, 11, 14, 13}, 1);
+  mesh.updateEdgeNeighbors();
+
+  auto * elem0 = dynamic_cast<EFAElement3D *>(mesh.getElemByID(0));
+  auto * elem1 = dynamic_cast<EFAElement3D *>(mesh.getElemByID(1));
+  ASSERT_NE(elem0, nullptr);
+  ASSERT_NE(elem1, nullptr);
+
+  // Element 0 face 2 edge 0 and element 1 face 4 edge 0 represent the same physical edge
+  // between global nodes 1 and 4, with opposite face-local orientations.
+  auto * elem0_edge = elem0->getFace(2)->getEdge(0);
+  auto * elem1_edge = elem1->getFace(4)->getEdge(0);
+  std::map<unsigned int, EFANode *> embedded_nodes;
+  EFANode embedded_a(1000, EFANode::N_CATEGORY_EMBEDDED);
+  EFANode embedded_b(1001, EFANode::N_CATEGORY_EMBEDDED);
+
+  // Simulate a cut that arrived through a recursive path and therefore did not propagate to the
+  // neighboring element.
+  elem0->addFaceEdgeCut(2, 0, 0.5, &embedded_a, embedded_nodes, false, true);
+  ASSERT_EQ(elem0_edge->getEmbeddedNode(0), &embedded_a);
+  ASSERT_EQ(elem1_edge->numEmbeddedNodes(), 0u);
+
+  // A later independent path reaches the neighbor with a different node and propagates back. The
+  // existing neighboring cut supplies the node used for the new copy of the physical edge.
+  elem1->addFaceEdgeCut(4, 0, 0.5, &embedded_b, embedded_nodes, true, true);
+  ASSERT_EQ(elem0_edge->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(elem1_edge->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(elem0_edge->getEmbeddedNode(0), &embedded_a);
+  ASSERT_EQ(elem1_edge->getEmbeddedNode(0), &embedded_a);
 }

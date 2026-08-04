@@ -872,11 +872,8 @@ void
 EFAElement3D::purgeEmbeddedNodeReferences(EFANode * emb_node)
 {
   // Strip all references to emb_node from this element's fragments and element
-  // faces.  Equivalent to removeEmbeddedNode(emb_node, false) but separated as
-  // its own entry point so the driver can iterate every element to clean
-  // long-range propagation (>1 hop from the element where the node was
-  // identified as invalid).  No neighbour propagation here -- the driver visits
-  // every element.
+  // faces. The driver iterates every element to clean long-range propagation
+  // (>1 hop from the element where the node was identified as invalid).
   for (unsigned int i = 0; i < _fragments.size(); ++i)
     _fragments[i]->removeEmbeddedNode(emb_node);
   for (unsigned int i = 0; i < _faces.size(); ++i)
@@ -1443,33 +1440,6 @@ EFAElement3D::getInteriorNode(unsigned int interior_node_id) const
     return _interior_nodes[interior_node_id];
   else
     EFAError("interior_node_id out of bounds");
-}
-
-void
-EFAElement3D::removeEmbeddedNode(EFANode * emb_node, bool remove_for_neighbor)
-{
-  for (unsigned int i = 0; i < _fragments.size(); ++i)
-    _fragments[i]->removeEmbeddedNode(emb_node);
-
-  for (unsigned int i = 0; i < _faces.size(); ++i)
-    _faces[i]->removeEmbeddedNode(emb_node);
-
-  if (remove_for_neighbor)
-  {
-    for (unsigned int i = 0; i < numFaces(); ++i)
-    {
-      for (unsigned int j = 0; j < numFaceNeighbors(i); ++j)
-        getFaceNeighbor(i, j)->removeEmbeddedNode(emb_node, false);
-
-      // Also clean up edge-only neighbors -- elements that share only an edge of face i,
-      // not the full face. Without this, freeing the embedded node here leaves dangling
-      // pointers in those neighbors' face edges and causes use-after-free downstream
-      // (e.g. in EFAFragment3D::removeInvalidEmbeddedNodes or EFAElement3D::getMasterInfo).
-      for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
-        for (unsigned int k = 0; k < numEdgeNeighbors(i, j); ++k)
-          getEdgeNeighbor(i, j, k)->removeEmbeddedNode(emb_node, false);
-    }
-  }
 }
 
 unsigned int
