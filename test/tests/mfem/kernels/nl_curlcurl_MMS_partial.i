@@ -15,6 +15,8 @@
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
+    closed_basis=GaussLobatto
+    open_basis=IntegratedGLL
   []
   [HDivFESpace]
     type = MFEMVectorFESpace
@@ -98,28 +100,20 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [matrix_free_ams]
     type = MFEMMatrixFreeAMS
   []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
-  []
-[]
-
-[Solvers]
   [lin]
     type = MFEMGMRESSolver
     preconditioner = matrix_free_ams
     l_tol = 1e-16
-    l_max_its = 10000
   []
   [native_mfem_nl]
     type = MFEMNewtonNonlinearSolver
-    max_its = 100
+    max_its = 10
     abs_tol = 1.0e-15
     rel_tol = 1.0e-15
-    print_level = 1
   []
 []
 
@@ -132,7 +126,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/NLCurlCurlMMSPartial
+    file_base = OutputData/NLCurlCurlMMS
     vtk_format = ASCII
   []
 []

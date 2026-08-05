@@ -16,6 +16,8 @@
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
+    closed_basis=GaussLobatto
+    open_basis=IntegratedGLL
   []
   [HDivFESpace]
     type = MFEMVectorFESpace
@@ -112,16 +114,10 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [matrix_free_ams]
     type = MFEMMatrixFreeAMS
   []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
-  []
-[]
-
-[Solvers]
   [lin]
     type = MFEMGMRESSolver
     preconditioner = matrix_free_ams
@@ -138,7 +134,6 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
-  assembly_level = partial
 []
 
 [Outputs]

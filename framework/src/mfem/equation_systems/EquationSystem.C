@@ -292,7 +292,7 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
 
   // do the same with the nonlinear operator as well. This should
   // add in the contributions to the RHS we were previously missing
-  if (_non_linear and (_assembly_level==mfem::AssemblyLevel::PARTIAL)) {
+  if (_non_linear and _nlfs.Has(test_var_name)) {
     // i think we can get away with sending a dummy op down into
     // mfem::Operator::FormLinearSystem, since we want op/aux_a to
     // represent the linear portion.
@@ -368,6 +368,25 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                               aux_rhs,
                               /*copy_interior=*/true);
         trueX.GetBlock(j) = aux_x;
+
+        // Do the same with the nlf
+        if (_non_linear and _nlfs.Has(test_var_name))
+        {
+          // see comments in formsystemoperator
+          mfem::Operator* oper; // dummy operator to pass downwards
+          mfem::Operator* nlf = _nlfs.Get(test_var_name); // implicit cast
+          nlf->FormLinearSystem(
+            _ess_tdof_lists.at(j),
+            *_var_ess_constraints.at(j),
+            *_lfs.Get(test_var_name),
+            oper,
+            aux_x,
+            aux_rhs,
+            true
+          );
+
+          delete oper;
+        }
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
