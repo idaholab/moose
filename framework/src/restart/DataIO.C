@@ -21,6 +21,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/enum_solver_package.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/bounding_box.h"
 
 using namespace libMesh;
 
@@ -300,10 +301,13 @@ void
 dataStore(std::ostream & stream, Point & p, void * context)
 {
   for (const auto i : make_range(Moose::dim))
-  {
-    Real r = p(i);
-    dataStore(stream, r, context);
-  }
+    dataStore(stream, p(i), context);
+}
+
+void
+dataStore(std::ostream & stream, libMesh::BoundingBox & bbox, void * context)
+{
+  storeHelper(stream, static_cast<std::pair<Point, Point> &>(bbox), context);
 }
 
 template <>
@@ -669,11 +673,13 @@ void
 dataLoad(std::istream & stream, Point & p, void * context)
 {
   for (const auto i : make_range(Moose::dim))
-  {
-    Real r = 0;
-    dataLoad(stream, r, context);
-    p(i) = r;
-  }
+    dataLoad(stream, p(i), context);
+}
+
+void
+dataLoad(std::istream & stream, libMesh::BoundingBox & bbox, void * context)
+{
+  loadHelper(stream, static_cast<std::pair<Point, Point> &>(bbox), context);
 }
 
 template <>

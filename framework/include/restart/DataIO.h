@@ -55,6 +55,7 @@ class TensorValue;
 class Elem;
 class FEType;
 class Point;
+class BoundingBox;
 }
 
 #ifdef MOOSE_MFEM_ENABLED
@@ -219,6 +220,8 @@ dataStore(std::ostream & /*stream*/, T *& /*v*/, void * /*context*/)
 }
 
 void dataStore(std::ostream & stream, Point & p, void * context);
+
+void dataStore(std::ostream & stream, libMesh::BoundingBox & p, void * context);
 
 template <typename T, typename U>
 inline void
@@ -1143,6 +1146,8 @@ loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context)
 }
 
 void dataLoad(std::istream & stream, Point & p, void * context);
+
+void dataLoad(std::istream & stream, libMesh::BoundingBox & p, void * context);
 
 #ifndef TIMPI_HAVE_STRING_PACKING
 /**
