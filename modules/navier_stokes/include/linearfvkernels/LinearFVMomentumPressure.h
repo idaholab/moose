@@ -11,6 +11,8 @@
 
 #include "LinearFVElementalKernel.h"
 
+class LinearFVGradientReader;
+
 /**
  * Kernel that adds the component of the pressure gradient in the momentum
  * equations to the right hand side.
@@ -38,4 +40,7 @@ protected:
 
   /// Pointer to the linear finite volume pressure variable
   MooseLinearVariableFV<Real> & _pressure_var;
+
+  /// Pressure gradient field used by this kernel.
+  const LinearFVGradientReader & _pressure_gradient_field;
 };

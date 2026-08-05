@@ -12,6 +12,7 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
+#include "LinearFVGradientInterface.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
 
@@ -34,9 +35,9 @@ LinearFVMomentumPressure::validParams()
 LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & params)
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
-    _pressure_var(getPressureVariable(NS::pressure))
+    _pressure_var(getPressureVariable(NS::pressure)),
+    _pressure_gradient_field(_pressure_var.computeCellGradients())
 {
-  _pressure_var.computeCellGradients();
 }
 
 MooseLinearVariableFV<Real> &
@@ -60,5 +61,6 @@ LinearFVMomentumPressure::computeMatrixContribution()
 Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
-  return -_pressure_var.gradSlnComponent(*_current_elem_info, _index) * _current_elem_volume;
+  const Real pressure_gradient = _pressure_gradient_field.component(*_current_elem_info, _index);
+  return -pressure_gradient * _current_elem_volume;
 }

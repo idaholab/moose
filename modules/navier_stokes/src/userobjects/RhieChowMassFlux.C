@@ -89,6 +89,9 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _body_force_kernel_names(
         getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
     _rho(getFunctor<Real>(NS::density)),
+    _pressure_system(nullptr),
+    _pressure_gradient_field(nullptr),
+    _global_pressure_system_number(0),
     _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method")),
     _pressure_diffusion_interp_method(getParam<MooseEnum>("pressure_diffusion_interpolation") ==
                                               "harmonic"
@@ -126,13 +129,22 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
 void
 RhieChowMassFlux::linkMomentumPressureSystems(
     const std::vector<LinearSystem *> & momentum_systems,
-    const LinearSystem & pressure_system,
+    LinearSystem & pressure_system,
     const std::vector<unsigned int> & momentum_system_numbers)
 {
   _momentum_systems = momentum_systems;
   _momentum_system_numbers = momentum_system_numbers;
   _pressure_system = &pressure_system;
   _global_pressure_system_number = _pressure_system->number();
+
+  auto * const pressure_var =
+      dynamic_cast<MooseLinearVariableFVReal *>(&_pressure_system->getVariable(0, _p->number()));
+  if (!pressure_var)
+    mooseError("The pressure variable in system '",
+               _pressure_system->name(),
+               "' must be a MooseLinearVariableFVReal.");
+
+  _pressure_gradient_field = &pressure_var->computeCellGradients();
 
   _momentum_implicit_systems.clear();
   for (auto & system : _momentum_systems)
@@ -313,6 +325,16 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
   return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
 }
 
+const LinearFVGradientReader &
+RhieChowMassFlux::pressureGradientField() const
+{
+  if (!_pressure_gradient_field)
+    mooseError(
+        "The pressure gradient field has not been registered for RhieChowMassFlux '", name(), "'.");
+
+  return *_pressure_gradient_field;
+}
+
 Real
 RhieChowMassFlux::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                         const FaceInfo & fi,
@@ -403,7 +425,7 @@ RhieChowMassFlux::computeFaceMassFlux()
 void
 RhieChowMassFlux::computeCellVelocity()
 {
-  auto & pressure_gradient = _pressure_system->linearFVGradientContainer();
+  const auto & pressure_gradient = pressureGradientComponents();
 
   // We set the dof value in the solution vector the same logic applies:
   // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
@@ -736,9 +758,19 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
   if (updated_pressure)
   {
     _grad_p_current.clear();
-    for (const auto & component : _pressure_system->linearFVGradientContainer())
+    for (const auto & component : pressureGradientComponents())
       _grad_p_current.push_back(component->clone());
   }
 
+  if (_grad_p_current.empty())
+    for (const auto & component : pressureGradientComponents())
+      _grad_p_current.push_back(component->clone());
+
   return _grad_p_current;
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::pressureGradientComponents() const
+{
+  return pressureGradientField().components();
 }

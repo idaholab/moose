@@ -460,7 +460,7 @@ AuxiliarySystem::compute(ExecFlagType type)
     kokkosCompute(type);
 #endif
 
-    if (!_raw_grad_container.empty())
+    if (hasLinearFVGradients())
     {
       solution().close();
       _sys.update();
