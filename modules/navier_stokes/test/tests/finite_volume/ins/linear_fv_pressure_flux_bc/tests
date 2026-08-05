@@ -19,6 +19,15 @@
     requirement = "The system shall reject a generic anisotropic diffusion kernel when the Rhie-Chow mass-flux provider requires a pressure-correction diffusion kernel."
     design = 'RhieChowMassFlux.md'
   []
+  [mixed-velocity-bc-types]
+    type = RunException
+    input = internal-neighbor.i
+    cli_args = "LinearFVBCs/active='prescribed-u prescribed-v outlet-pressure outlet-u outlet-v' LinearFVBCs/prescribed-v/boundary='top bottom'"
+    expect_err = 'All velocity components must either have Dirichlet boundary conditions or non-Dirichlet boundary conditions'
+    max_threads = 1
+    requirement = "The system shall reject mixed Dirichlet and non-Dirichlet velocity boundary conditions when using the legacy pressure boundary treatment."
+    design = 'RhieChowMassFlux.md'
+  []
   [single-block]
     type = CSVDiff
     input = internal-neighbor.i

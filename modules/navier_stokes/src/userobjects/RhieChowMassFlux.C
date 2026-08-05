@@ -18,6 +18,7 @@
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVPressureFluxBC.h"
 
@@ -136,6 +137,35 @@ RhieChowMassFlux::linkMomentumPressureSystems(
   }
 
   setupMeshInformation();
+
+  std::set<BoundaryID> velocity_boundary_ids;
+  for (const auto dim_i : make_range(_dim))
+    for (const auto & [boundary_id, _] : _vel[dim_i]->getBoundaryConditionMap())
+      velocity_boundary_ids.insert(boundary_id);
+
+  const auto is_dirichlet =
+      [](const MooseLinearVariableFVReal & variable, const BoundaryID boundary_id)
+  {
+    return dynamic_cast<const LinearFVAdvectionDiffusionFunctorDirichletBC *>(
+               variable.getBoundaryCondition(boundary_id)) != nullptr;
+  };
+
+  // The legacy boundary HbyA reconstruction uses the x-velocity BC as a proxy for every velocity
+  // component, so all components must have the same Dirichlet classification on those boundaries.
+  for (const auto boundary_id : velocity_boundary_ids)
+  {
+    const auto * const pressure_bc = _p->getBoundaryCondition(boundary_id);
+    if (dynamic_cast<const LinearFVPressureFluxBC *>(pressure_bc))
+      continue;
+
+    const bool velocity_is_dirichlet = is_dirichlet(*_vel[0], boundary_id);
+    for (const auto dim_i : make_range(_dim))
+      if (is_dirichlet(*_vel[dim_i], boundary_id) != velocity_is_dirichlet)
+        mooseError("All velocity components must either have Dirichlet boundary conditions or "
+                   "non-Dirichlet boundary conditions on boundary '",
+                   _moose_mesh.getBoundaryName(boundary_id),
+                   "' when the pressure boundary condition is not a LinearFVPressureFluxBC.");
+  }
 }
 
 void
