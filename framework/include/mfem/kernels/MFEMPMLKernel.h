@@ -1,4 +1,4 @@
-//* This file is part of the MOOSE framework
+//* This file is comp of the MOOSE framework
 //* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -28,18 +28,18 @@
  * the stretch direction from point to point. It is complex symmetric rather than Hermitian, so
  * both tensors are formed with the plain transpose.
  *
- * The result is scaled by a base scalar coefficient, and only its real or imaginary part is
+ * The result is scaled by a base scalar coefficient, and only its real or imaginary comp is
  * returned, as the complex system is assembled from two real bilinear forms.
  */
 class MFEMPMLMatrixCoefficient : public mfem::MatrixCoefficient
 {
 public:
-  enum Tensor
+  enum TensorType
   {
     CURL,
     FIELD
   };
-  enum Part
+  enum ComplexComponent
   {
     RE,
     IM
@@ -47,13 +47,13 @@ public:
 
   MFEMPMLMatrixCoefficient(const MFEMPMLStretchVector & stretch,
                            mfem::Coefficient & base_coefficient,
-                           Tensor tensor,
-                           Part part)
+                           TensorType tensor,
+                           ComplexComponent comp)
     : mfem::MatrixCoefficient(stretch.dim()),
-      _stretch(stretch),
+      _stretch_vec(stretch),
       _base_coefficient(base_coefficient),
       _tensor(tensor),
-      _part(part)
+      _comp(comp)
   {
   }
 
@@ -62,10 +62,10 @@ public:
             const mfem::IntegrationPoint & ip) override;
 
 private:
-  const MFEMPMLStretchVector & _stretch;
+  const MFEMPMLStretchVector & _stretch_vec;
   mfem::Coefficient & _base_coefficient;
-  const Tensor _tensor;
-  const Part _part;
+  const TensorType _tensor;
+  const ComplexComponent _comp;
 };
 
 /**
@@ -77,17 +77,17 @@ class MFEMPMLScalarCoefficient : public mfem::Coefficient
 public:
   MFEMPMLScalarCoefficient(const MFEMPMLStretchVector & stretch,
                            mfem::Coefficient & base_coefficient,
-                           MFEMPMLMatrixCoefficient::Part part)
-    : _stretch(stretch), _base_coefficient(base_coefficient), _part(part)
+                           MFEMPMLMatrixCoefficient::ComplexComponent comp)
+    : _stretch_vec(stretch), _base_coefficient(base_coefficient), _comp(comp)
   {
   }
 
   double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 
 private:
-  const MFEMPMLStretchVector & _stretch;
+  const MFEMPMLStretchVector & _stretch_vec;
   mfem::Coefficient & _base_coefficient;
-  const MFEMPMLMatrixCoefficient::Part _part;
+  const MFEMPMLMatrixCoefficient::ComplexComponent _comp;
 };
 
 /**
@@ -99,14 +99,15 @@ class MFEMPMLKernel : public MFEMComplexKernel
 {
 public:
   static InputParameters validParams();
-  MFEMPMLKernel(const InputParameters & parameters, MFEMPMLMatrixCoefficient::Tensor tensor);
+  MFEMPMLKernel(const InputParameters & parameters, MFEMPMLMatrixCoefficient::TensorType tensor);
 
   mfem::BilinearFormIntegrator * getRealBFIntegrator() override;
   mfem::BilinearFormIntegrator * getImagBFIntegrator() override;
 
 protected:
-  /// Build the operator integrator for the real or imaginary part of the stretched coefficient.
-  virtual mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) = 0;
+  /// Build the operator integrator for the real or imaginary comp of the stretched coefficient.
+  virtual mfem::BilinearFormIntegrator *
+  makeIntegrator(MFEMPMLMatrixCoefficient::ComplexComponent comp) = 0;
 
   /// The stretch for this layer, declared as a vector coefficient under a reserved name the first
   /// time it is asked for and shared by every kernel acting on the same layer thereafter, so that
@@ -119,7 +120,7 @@ protected:
   /// Base scalar coefficient, such as the reluctivity or the mass coefficient.
   mfem::Coefficient & _base_coefficient;
   /// Declared before the coefficients below, which hold a reference to it.
-  MFEMPMLStretchVector & _stretch;
+  MFEMPMLStretchVector & _stretch_vec;
   MFEMPMLMatrixCoefficient _matrix_re;
   MFEMPMLMatrixCoefficient _matrix_im;
   MFEMPMLScalarCoefficient _scalar_re;

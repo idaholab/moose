@@ -38,11 +38,11 @@ MFEMPMLMatrixCoefficient::Eval(mfem::DenseMatrix & K,
                                mfem::ElementTransformation & T,
                                const mfem::IntegrationPoint & ip)
 {
-  const int dim = _stretch.dim();
+  const int dim = _stretch_vec.dim();
   T.SetIntPoint(&ip);
 
   mfem::DenseMatrix stretch_gradient;
-  _stretch.stretchGradient(T, stretch_gradient);
+  _stretch_vec.stretchGradient(T, stretch_gradient);
 
   const ComplexMatrix jacobian = stretchJacobian(stretch_gradient, dim);
   const ComplexMatrix product = jacobian.transpose() * jacobian;
@@ -55,7 +55,7 @@ MFEMPMLMatrixCoefficient::Eval(mfem::DenseMatrix & K,
   K.SetSize(dim);
   for (const auto a : make_range(dim))
     for (const auto b : make_range(dim))
-      K(a, b) = base * ((_part == RE) ? tensor(a, b).real() : tensor(a, b).imag());
+      K(a, b) = base * ((_comp == RE) ? tensor(a, b).real() : tensor(a, b).imag());
 }
 
 double
@@ -64,11 +64,11 @@ MFEMPMLScalarCoefficient::Eval(mfem::ElementTransformation & T, const mfem::Inte
   T.SetIntPoint(&ip);
 
   mfem::DenseMatrix stretch_gradient;
-  _stretch.stretchGradient(T, stretch_gradient);
+  _stretch_vec.stretchGradient(T, stretch_gradient);
 
   const Complex value = _base_coefficient.Eval(T, ip) /
-                        stretchJacobian(stretch_gradient, _stretch.dim()).determinant();
-  return (_part == MFEMPMLMatrixCoefficient::RE) ? value.real() : value.imag();
+                        stretchJacobian(stretch_gradient, _stretch_vec.dim()).determinant();
+  return (_comp == MFEMPMLMatrixCoefficient::RE) ? value.real() : value.imag();
 }
 
 InputParameters
@@ -87,21 +87,21 @@ MFEMPMLKernel::validParams()
 }
 
 MFEMPMLKernel::MFEMPMLKernel(const InputParameters & parameters,
-                             MFEMPMLMatrixCoefficient::Tensor tensor)
+                             MFEMPMLMatrixCoefficient::TensorType tensor)
   : MFEMComplexKernel(parameters),
     _base_coefficient(getScalarCoefficient("coefficient")),
-    _stretch(getStretch()),
-    _matrix_re(_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::RE),
-    _matrix_im(_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::IM),
-    _scalar_re(_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::RE),
-    _scalar_im(_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::IM)
+    _stretch_vec(getStretch()),
+    _matrix_re(_stretch_vec, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::RE),
+    _matrix_im(_stretch_vec, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::IM),
+    _scalar_re(_stretch_vec, _base_coefficient, MFEMPMLMatrixCoefficient::RE),
+    _scalar_im(_stretch_vec, _base_coefficient, MFEMPMLMatrixCoefficient::IM)
 {
 }
 
 std::string
 MFEMPMLKernel::stretchName()
 {
-  std::string name = "_pml_stretch";
+  std::string name = "_pml_stretch_vec";
   for (const auto attribute : getSubdomainAttributes())
     name += "_" + std::to_string(attribute);
 
