@@ -564,7 +564,7 @@ TEST(MooseUtils, IsFinitePoint)
   const Point finite_point;
   EXPECT_TRUE(MooseUtils::isFinitePoint(finite_point));
 
-  for (const auto i : make_range(LIBMESH_DIM))
+  for (const auto i : make_range(Moose::dim))
   {
     Point nonfinite_point;
     nonfinite_point(i) = std::numeric_limits<Real>::quiet_NaN();
