@@ -24,14 +24,15 @@ public:
   MFEMPMLCurlCurlKernel(const InputParameters & parameters);
 
 protected:
-  mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) override
+  mfem::BilinearFormIntegrator *
+  makeIntegrator(MFEMPMLMatrixCoefficient::ComplexComponent comp) override
   {
     // In two dimensions the curl of a vector field is a scalar, so this term picks up only the
     // inverse determinant of the stretch rather than the full tensor.
-    if (_stretch.dim() == 2)
-      return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _scalar_re
+    if (_stretch_vec.dim() == 2)
+      return new mfem::CurlCurlIntegrator(comp == MFEMPMLMatrixCoefficient::RE ? _scalar_re
                                                                                : _scalar_im);
-    return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _matrix_re
+    return new mfem::CurlCurlIntegrator(comp == MFEMPMLMatrixCoefficient::RE ? _matrix_re
                                                                              : _matrix_im);
   }
 };

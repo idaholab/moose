@@ -20,34 +20,34 @@ MFEMPMLStretchVector::MFEMPMLStretchVector(mfem::ParMesh & mesh,
     _dim(mesh.Dimension()),
     _decay_coefficient(decay_coefficient),
     _decay_polynomial(decay_polynomial),
-    // W is a polynomial of degree decay_polynomial in the harmonic coordinate, so a space of at
+    // W is a polynomial of degree decay_polynomial in the harmonic coordinate psi, so a space of at
     // least that degree interpolates it exactly where the layer lies between parallel surfaces.
-    _collection(std::max(2, static_cast<int>(std::ceil(decay_polynomial))), _dim),
-    _scalar_space(&mesh, &_collection),
-    _vector_space(&mesh, &_collection, _dim),
-    _harmonic_coordinate(&_scalar_space),
-    _displacement(&_vector_space)
+    _h1_coll(std::max(2, static_cast<int>(std::ceil(decay_polynomial))), _dim),
+    _h1_scalar_fes(&mesh, &_h1_coll),
+    _h1_vector_fes(&mesh, &_h1_coll, _dim),
+    _psi(&_h1_scalar_fes),
+    _W_h1(&_h1_vector_fes)
 {
   solveHarmonicCoordinate(mesh, pml_attributes, comm);
   checkFoliation(mesh, pml_attributes, comm);
-  _displacement.ProjectDiscCoefficient(*this, mfem::GridFunction::ARITHMETIC);
+  _W_h1.ProjectDiscCoefficient(*this, mfem::GridFunction::ARITHMETIC);
 }
 
 void
-MFEMPMLStretchVector::Eval(mfem::Vector & displacement,
+MFEMPMLStretchVector::Eval(mfem::Vector & W,
                            mfem::ElementTransformation & transformation,
                            const mfem::IntegrationPoint & integration_point)
 {
   transformation.SetIntPoint(&integration_point);
-  const double depth = _harmonic_coordinate.GetValue(transformation, integration_point);
-  _harmonic_coordinate.GetGradient(transformation, displacement);
-  const double slope = displacement.Norml2();
+  const double depth = _psi.GetValue(transformation, integration_point);
+  _psi.GetGradient(transformation, W);
+  const double slope = W.Norml2();
 
   // Outside the layer the harmonic coordinate is flat, so it carries no direction to stretch along.
   if (depth <= 0.0 || slope == 0.0)
-    displacement = 0.0;
+    W = 0.0;
   else
-    displacement *= _decay_coefficient * std::pow(depth, _decay_polynomial) / slope;
+    W *= _decay_coefficient * std::pow(depth, _decay_polynomial) / slope;
 }
 
 void
@@ -73,8 +73,8 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
   }
   MPI_Allreduce(MPI_IN_PLACE, lateral.GetData(), n_boundary_attributes, MPI_INT, MPI_MAX, comm);
 
-  mfem::Array<int> interior_marker(_scalar_space.GetVSize());
-  mfem::Array<int> outer_marker(_scalar_space.GetVSize());
+  mfem::Array<int> interior_marker(_h1_scalar_fes.GetVSize());
+  mfem::Array<int> outer_marker(_h1_scalar_fes.GetVSize());
   interior_marker = 0;
   outer_marker = 0;
 
@@ -82,7 +82,7 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
   for (const auto e : make_range(mesh.GetNE()))
     if (!in_pml(mesh.GetAttribute(e)))
     {
-      _scalar_space.GetElementDofs(e, dofs);
+      _h1_scalar_fes.GetElementDofs(e, dofs);
       for (const auto d : dofs)
         interior_marker[d] = 1;
     }
@@ -96,7 +96,7 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
       continue;
 
     ++n_outer_faces;
-    _scalar_space.GetBdrElementDofs(b, dofs);
+    _h1_scalar_fes.GetBdrElementDofs(b, dofs);
     for (const auto d : dofs)
       outer_marker[d] = 1;
   }
@@ -108,35 +108,34 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
                "the mesh, and that the boundary capping the layer does not share its attribute "
                "with a boundary of the rest of the domain.");
 
-  _scalar_space.Synchronize(interior_marker);
-  _scalar_space.Synchronize(outer_marker);
+  _h1_scalar_fes.Synchronize(interior_marker);
+  _h1_scalar_fes.Synchronize(outer_marker);
 
-  _harmonic_coordinate = 0.0;
-  mfem::Array<int> essential_marker(_scalar_space.GetVSize());
-  for (const auto d : make_range(_scalar_space.GetVSize()))
+  _psi = 0.0;
+  mfem::Array<int> essential_marker(_h1_scalar_fes.GetVSize());
+  for (const auto d : make_range(_h1_scalar_fes.GetVSize()))
   {
     essential_marker[d] = interior_marker[d] || outer_marker[d];
     if (outer_marker[d])
-      _harmonic_coordinate(d) = 1.0;
+      _psi(d) = 1.0;
   }
 
   mfem::Array<int> essential_true_marker, essential_true_dofs;
-  _scalar_space.GetRestrictionMatrix()->BooleanMult(essential_marker, essential_true_marker);
+  _h1_scalar_fes.GetRestrictionMatrix()->BooleanMult(essential_marker, essential_true_marker);
   mfem::FiniteElementSpace::MarkerToList(essential_true_marker, essential_true_dofs);
 
   // Every degree of freedom outside the layer is essential, so assembling over the whole mesh
   // leaves the same reduced system as assembling over the layer alone.
-  mfem::ParBilinearForm laplacian(&_scalar_space);
+  mfem::ParBilinearForm laplacian(&_h1_scalar_fes);
   laplacian.AddDomainIntegrator(new mfem::DiffusionIntegrator);
   laplacian.Assemble();
 
-  mfem::ParLinearForm rhs(&_scalar_space);
+  mfem::ParLinearForm rhs(&_h1_scalar_fes);
   rhs = 0.0;
 
   mfem::OperatorPtr system;
   mfem::Vector solution, load;
-  laplacian.FormLinearSystem(
-      essential_true_dofs, _harmonic_coordinate, rhs, system, solution, load);
+  laplacian.FormLinearSystem(essential_true_dofs, _psi, rhs, system, solution, load);
 
   mfem::HypreBoomerAMG preconditioner(*system.As<mfem::HypreParMatrix>());
   preconditioner.SetPrintLevel(0);
@@ -153,7 +152,7 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
     mooseError("MFEMPMLStretchVector: the solve for the harmonic coordinate of the perfectly "
                "matched layer did not converge.");
 
-  laplacian.RecoverFEMSolution(solution, rhs, _harmonic_coordinate);
+  laplacian.RecoverFEMSolution(solution, rhs, _psi);
 }
 
 void
@@ -169,9 +168,9 @@ MFEMPMLStretchVector::checkFoliation(mfem::ParMesh & mesh,
     if (pml_attributes.Find(mesh.GetAttribute(e)) == -1)
       continue;
 
-    auto & transformation = *_scalar_space.GetElementTransformation(e);
+    auto & transformation = *_h1_scalar_fes.GetElementTransformation(e);
     transformation.SetIntPoint(&mfem::Geometries.GetCenter(transformation.GetGeometryType()));
-    _harmonic_coordinate.GetGradient(transformation, gradient);
+    _psi.GetGradient(transformation, gradient);
 
     const double norm = gradient.Norml2();
     smallest = std::min(smallest, norm);
