@@ -1,27 +1,48 @@
-# Kim-Kim-Suzuki Example for three or more components
+# Kim-Kim-Suzuki Example for Three or More Components
 
-!listing modules/phase_field/examples/kim-kim-suzuki/kks_example_ternary.i
+!listing modules/phase_field/examples/kim-kim-suzuki/kks_example_ternary.i id=kks-ternary-example caption=Two-phase ternary KKS input.
 
-When additional chemical components are added to the KKS model, a Cahn-Hilliard
-equation must be added for each additional component. (For $n$ components, $n-1$
-Cahn-Hilliard equations are required). Each additional Cahn-Hilliard equation
-requires the kernels:
+This example is a two-phase ternary system. It tracks two independent
+concentrations because the three component mole fractions sum to one. More
+generally, a substitutional system with $C$ chemical components requires
+$C-1$ independent Cahn-Hilliard equations. Each Cahn-Hilliard equation in the
+global phase-concentration solve requires the kernels:
 
-- [`KKSSplitCHCRes`](/KKSSplitCHCRes.md)
-- [`CoupledTimeDerivative`](/CoupledTimeDerivative.md)
-- [`SplitCHWRes`](/SplitCHWRes.md)
+- [KKSSplitCHCRes.md]
+- [CoupledTimeDerivative.md]
+- [SplitCHWRes.md]
 
-To enforce the composition and chemical potential constraints, each additional component also requires the kernels
+To enforce the concentration and chemical-potential constraints, each
+independent concentration also requires:
 
-- [`KKSPhaseConcentration`](KKSPhaseConcentration.md)
-- [`KKSPhaseChemicalPotential`](KKSPhaseChemicalPotential.md)
+- one [KKSPhaseConcentration.md]; and
+- one [KKSPhaseChemicalPotential.md].
 
 The Allen-Cahn equation is also modified when additional components are added. The residual becomes
 
 \begin{equation}
-R=-\frac{dh}{d\eta} \left(F_a-F_b- \sum_{i=1}^{n-1} \frac{dF_a}{dc_{ia}}(c_{ia}-c_{ib})\right) + w\frac{dg}{d\eta}.
+R=-\frac{dh}{d\eta} \left(F_a-F_b- \sum_{i=1}^{N} \frac{dF_a}{dc_{ia}}(c_{ia}-c_{ib})\right) + w\frac{dg}{d\eta}.
 \end{equation}
 
-where $n$ is the number of components. A single [`KKSACBulkF`](KKSACBulkF.md) kernel is
-needed as in the 2-component case, and an additional [`KKSACBulkC`](KKSACBulkC.md)
-kernel must added for each additional component.
+where $N=C-1$ is the number of independent concentrations. A single
+[KKSACBulkF.md] kernel is needed as in the binary case, and one
+[KKSACBulkC.md] kernel is added for each independent concentration.
+
+## Multiphase generalization
+
+For $P>2$, replace the two-phase concentration and Allen-Cahn objects with
+[KKSMultiPhaseConcentration.md], [KKSMultiACBulkF.md], and
+[KKSMultiACBulkC.md]. For every independent concentration, use one
+`KKSMultiPhaseConcentration`, $P-1$ `KKSPhaseChemicalPotential` kernels that
+connect all phases, and one `KKSMultiACBulkC` in every order-parameter
+equation. The complete object layout is described on [KKS.md].
+
+The nested alternative uses [KKSPhaseConcentrationMultiPhaseMaterial.md] and
+[KKSPhaseConcentrationMultiPhaseDerivatives.md] to solve all phase
+concentrations locally, together with the `NestedKKSMulti` kernels for the
+global equations.
+
+!alert note title=Example scope
+The input listed above demonstrates multiple components in a two-phase model.
+Three-phase ternary examples for both phase-concentration solution approaches
+are provided with [KKSAction.md].

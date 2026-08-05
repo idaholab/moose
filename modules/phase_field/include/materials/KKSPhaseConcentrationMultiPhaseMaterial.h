@@ -47,7 +47,7 @@ protected:
   std::vector<MaterialPropertyName> _ci_names;
   std::vector<MaterialProperty<Real> *> _prop_ci;
   std::vector<const MaterialProperty<Real> *> _ci_old;
-  std::vector<Real> _ci_IC;
+  const std::vector<const VariableValue *> _ci_IC;
   ///@}
 
   ///@{Derivative of free energies wrt phase concentrations \f$ \frac d{dc_i} F_i \f$
