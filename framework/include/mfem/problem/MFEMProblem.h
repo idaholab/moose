@@ -187,24 +187,28 @@ public:
                    const std::string & name,
                    InputParameters & parameters);
 
-  /// Returns a pointer to the operator's equation system.
-  virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
-
-  /// Add an MFEM problem operator. Takes ownership.
-  virtual void
-  addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
-
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
-
-  /**
-   * Set all MFEM EquationSystems to solve in this problem
-   */
-  void setEquationSystems();
-
   /**
    * Add default weak form if none has been added by the user
    */
   virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm();
+
+  /**
+   * Set all MFEM EquationSystems for this problem
+   */
+  void setEquationSystems();
+
+  /**
+   * Get vector of all ProblemOperators added to this problem.
+   */
+  virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
+
+  /**
+   * Add an MFEM problem operator. Takes ownership.
+   */
+  virtual void
+  addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
+
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
 
   /**
    * Set all MFEM ProblemOperators to solve in this problem
