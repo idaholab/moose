@@ -1,0 +1,66 @@
+[Tests]
+  issues = '#26920'
+  design = 'invOptNEML2Viscoplastic.md'
+  [grad_check_viscoplastic]
+    type = TaoGradientTester
+    input = main.i
+    capabilities = 'neml2'
+    max_rel_tol = 1e-4
+    max_threads = 1
+    requirement = 'The system shall verify the adjoint parameter gradient of a NEML2 viscoplastic '
+                  'material against a finite difference gradient for all four inverted material '
+                  'parameters simultaneously.'
+  []
+  [recovery_multiparam]
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
+    capabilities = 'libtorch & neml2'
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    requirement = 'The system shall recover the Youngs modulus, yield stress, kinematic hardening '
+                  'modulus and viscous reference stress of a NEML2 viscoplastic material from '
+                  'displacement measurements using gradient based optimization started from an '
+                  'off-truth initial guess.'
+  []
+  [grad_check_vjp]
+    type = TaoGradientTester
+    input = main_vjp.i
+    capabilities = 'neml2'
+    max_rel_tol = 1e-4
+    max_threads = 1
+    design = 'ElementOptimizationVJPInnerProduct.md'
+    issues = '#26920'
+    requirement = 'The system shall verify the adjoint parameter gradient of a NEML2 viscoplastic '
+                  'material computed via a vector-Jacobian product against a finite difference '
+                  'gradient for all four inverted material parameters simultaneously.'
+  []
+  [recovery_vjp]
+    type = CSVDiff
+    input = main_vjp.i
+    csvdiff = main_vjp_out_OptimizationReporter_0001.csv
+    capabilities = 'libtorch & neml2'
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    prereq = grad_check_vjp
+    design = 'ElementOptimizationVJPInnerProduct.md'
+    issues = '#26920'
+    requirement = 'The system shall recover the Youngs modulus, yield stress, kinematic hardening '
+                  'modulus and viscous reference stress of a NEML2 viscoplastic material from '
+                  'displacement measurements using gradient based optimization with a '
+                  'vector-Jacobian product gradient, matching the recovery obtained with the '
+                  'materialized parameter derivative path.'
+  []
+  [vjp_unbatched_param_error]
+    type = RunException
+    input = vjp_unbatched_param_error.i
+    expect_err = "is not batched, but a vector-Jacobian product with respect to it was requested"
+    prereq = recovery_vjp
+    design = 'ElementOptimizationVJPInnerProduct.md'
+    issues = '#26920'
+    requirement = 'The system shall report an error when a vector-Jacobian product is requested '
+                  'for a NEML2 model parameter that is not batched.'
+  []
+[]
