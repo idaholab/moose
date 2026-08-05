@@ -11,7 +11,7 @@
 
 #include "AddMFEMWeakFormAction.h"
 
-registerMooseAction("MooseApp", AddMFEMWeakFormAction, "add_mfem_weak_form");
+registerMooseAction("MooseApp", AddMFEMWeakFormAction, "add_mfem_weak_forms");
 
 InputParameters
 AddMFEMWeakFormAction::validParams()
