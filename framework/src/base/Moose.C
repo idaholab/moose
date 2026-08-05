@@ -538,39 +538,35 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
-  registerMooseObjectTask("add_mfem_weak_form", MFEMWeakFormBase, false);
-  addTaskDependency("add_mfem_weak_form", "init_mesh");
-  addTaskDependency("add_mfem_weak_form", "add_variable");
-  addTaskDependency("add_mfem_weak_form", "add_aux_variable");
-  addTaskDependency("add_mfem_weak_form", "add_elemental_field_variable");
-  addTaskDependency("add_mfem_weak_form", "add_kernel");
-  addTaskDependency("add_mfem_weak_form", "add_bc");
-  addTaskDependency("add_mfem_weak_form", "add_mfem_complex_kernel_components");
-  addTaskDependency("add_mfem_weak_form", "add_mfem_complex_bc_components");
-  addTaskDependency("add_mfem_weak_form", "add_mfem_fespace_hierarchies");
+  // add user-specified weak forms to build equation systems used in this problem
+  registerMooseObjectTask("add_mfem_weak_forms", MFEMWeakFormBase, false);
+  addTaskDependency("add_mfem_weak_forms", "init_mesh");
+  addTaskDependency("add_mfem_weak_forms", "add_variable");
+  addTaskDependency("add_mfem_weak_forms", "add_aux_variable");
+  addTaskDependency("add_mfem_weak_forms", "add_elemental_field_variable");
+  addTaskDependency("add_mfem_weak_forms", "add_kernel");
+  addTaskDependency("add_mfem_weak_forms", "add_bc");
+  addTaskDependency("add_mfem_weak_forms", "add_mfem_complex_kernel_components");
+  addTaskDependency("add_mfem_weak_forms", "add_mfem_complex_bc_components");
+  addTaskDependency("add_mfem_weak_forms", "add_mfem_fespace_hierarchies");
 
-  // add user-specified weak forms to build equation systems to solve.
+  // build MFEM EquationSystems from MFEMWeakForms used in this problem
   registerTask("set_mfem_equation_systems", true);
-  // registerMooseObjectTask("add_mfem_weak_form", MFEMWeakForm, false);
-  addTaskDependency("set_mfem_equation_systems", "add_mfem_weak_form");
+  addTaskDependency("set_mfem_equation_systems", "add_mfem_weak_forms");
 
-  // Add equation system operators to solve.
-  // registerTask("add_equation_systems", true);
-  // addTaskDependency("add_equation_systems", "add_mfem_weak_form");
-
-  registerTask("set_mfem_problem_operators", true);
-  addTaskDependency("set_mfem_problem_operators", "resolve_mfem_solvers");
-  addTaskDependency("set_mfem_problem_operators", "set_mfem_equation_systems");
-
-  // add solver objects.
+  // add solver objects
   registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
-  // addTaskDependency("set_mfem_equation_systems", "add_mfem_solver");
-  addTaskDependency("add_mfem_solver", "add_variable");
   addTaskDependency("add_mfem_solver", "set_mfem_equation_systems");
 
+  // resolve dependency order between added solver objects
   registerTask("resolve_mfem_solvers", true);
   addTaskDependency("resolve_mfem_solvers", "add_mfem_solver");
   addTaskDependency("init_problem", "resolve_mfem_solvers");
+
+  // set all MFEM ProblemOperators to be executed in this problem
+  registerTask("set_mfem_problem_operators", true);
+  addTaskDependency("set_mfem_problem_operators", "resolve_mfem_solvers");
+  addTaskDependency("set_mfem_problem_operators", "set_mfem_equation_systems");
 #endif
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics
@@ -844,7 +840,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CreateApplicationBlockAction", "Application");
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerSyntaxTask("AddMFEMWeakFormAction", "WeakForms/*", "add_mfem_weak_form");
+  registerSyntaxTask("AddMFEMWeakFormAction", "WeakForms/*", "add_mfem_weak_forms");
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   registerSyntaxTask(
