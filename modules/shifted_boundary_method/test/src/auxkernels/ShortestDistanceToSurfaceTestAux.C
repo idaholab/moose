@@ -44,7 +44,7 @@ ShortestDistanceToSurfaceTestAux::validParams()
   params.addParam<UserObjectName>(
       "builder",
       "Optional SBMSurfaceMeshBuilder; when supplied, initialSetup queries "
-      "getCentroids() so coverage tests can touch that otherwise-unused getter.");
+      "surfaceElementSet().centroids() so coverage tests can touch that path.");
 
   params.addClassDescription("Test-only AuxKernel that exposes ShortestDistanceToSurface accessors "
                              "(trueNormal, *ByIndex, *ByFunc) for coverage testing.");
@@ -75,7 +75,7 @@ ShortestDistanceToSurfaceTestAux::ShortestDistanceToSurfaceTestAux(
 void
 ShortestDistanceToSurfaceTestAux::initialSetup()
 {
-  if (_builder && _builder->getCentroids().empty())
+  if (_builder && _builder->surfaceElementSet().centroids().empty())
     mooseError("ShortestDistanceToSurfaceTestAux: builder '",
                _builder->name(),
                "' returned no centroids.");

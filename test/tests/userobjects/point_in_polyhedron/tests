@@ -1,0 +1,212 @@
+[Tests]
+  issues = '#33397 #33398'
+  design = 'PointInPolyhedronCheckUO.md BoundaryMeshBuilder.md '
+           'SpatialUserObjectVectorPostprocessor.md'
+
+  [fixed_x_ray]
+    type = 'Exodiff'
+    input = 'fixed_x_ray.i'
+    exodiff = 'fixed_x_ray_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify points as inside or outside a closed 3D TRI3 surface '
+                  'mesh using the fixed_x_ray (TriangleManifold) point-in-polyhedron method.'
+  []
+
+  [spatial_point_sampling]
+    type = 'CSVDiff'
+    input = 'fixed_x_ray.i'
+    cli_args = 'Outputs/file_base=spatial_point_sampling'
+    csvdiff = 'spatial_point_sampling_point_containment_0000.csv'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall report one for points inside or on a closed surface and zero '
+                  'for points outside it when a point-containment user object is sampled at '
+                  'specified locations by a spatial user object vector postprocessor.'
+  []
+
+  [fixed_x_ray_debug_files_ignored]
+    type = 'CheckFiles'
+    input = 'fixed_x_ray.i'
+    cli_args = 'UserObjects/in_out_test/obb_file_name=should_not_be_written_obb.e '
+               'UserObjects/in_out_test/ray_file_name=should_not_be_written_ray.e '
+               'Outputs/file_base=fixed_x_ray_dbg'
+    expect_out = 'fixed_x_ray does not produce OBB/ray debug files'
+    check_not_exists = 'should_not_be_written_obb.e should_not_be_written_ray.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall report via an informational message that requested OBB and ray '
+                  'debug files are ignored, and shall write no such files, when they are requested '
+                  'with the fixed_x_ray point-in-polyhedron method, because that method does not '
+                  'produce them.'
+  []
+
+  [fixed_x_ray_rejects_non_tri3]
+    type = 'RunException'
+    input = 'fixed_x_ray_non_tri3.i'
+    expect_err = 'fixed_x_ray .* supports only TRI3 surface elements'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall report an error when the fixed_x_ray point-in-polyhedron method '
+                  'is applied to a surface mesh that contains element types other than TRI3, since '
+                  'that method supports triangulated surfaces only.'
+  []
+
+  [pca_ray_2d]
+    type = 'Exodiff'
+    input = 'pca_ray_2d.i'
+    exodiff = 'pca_ray_2d_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify points as inside or outside a closed two-dimensional '
+                  'EDGE2 surface mesh using the default pca_ray point-in-polyhedron method.'
+  []
+
+  [pca_ray_2d_msh]
+    type = 'Exodiff'
+    input = 'pca_ray_2d_msh.i'
+    exodiff = 'pca_ray_2d_msh_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify points as inside or outside a closed, non-convex '
+                  'two-dimensional EDGE2 surface mesh read from a file using the default pca_ray '
+                  'point-in-polyhedron method.'
+  []
+
+  [pca_ray_2d_symmetric_msh]
+    type = 'Exodiff'
+    input = 'pca_ray_2d_msh.i'
+    cli_args = 'Mesh/surface_mesh/file=l_shape_symmetric.msh '
+               'Outputs/file_base=pca_ray_2d_symmetric_msh'
+    exodiff = 'pca_ray_2d_symmetric_msh.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify points against a symmetric L-shaped closed EDGE2 '
+                  'surface mesh whose symmetry axis coincides with the auto-selected pca_ray '
+                  'direction, resolving the diagonal rays that pass through boundary vertices '
+                  'without an undecidable result.'
+  []
+
+  [pca_ray_3d_stl]
+    type = 'Exodiff'
+    input = 'pca_ray_3d_stl.i'
+    exodiff = 'pca_ray_3d_stl_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify points as inside or outside a closed three-dimensional '
+                  'TRI3 surface mesh read from an STL file using the default pca_ray '
+                  'point-in-polyhedron method.'
+  []
+
+  [user_selected_ray]
+    requirement = 'The system shall use the ray direction supplied to the user_selected_ray '
+                  'point-in-polyhedron method exactly, rather than the automatically selected '
+                  'direction, by'
+    [honored_neg_x]
+      type = 'CSVDiff'
+      input = 'user_ray_direction.i'
+      cli_args = 'UserObjects/in_out_test/ray_direction="-1 0 0" Outputs/file_base=user_ray_neg_x'
+      csvdiff = 'user_ray_neg_x.csv'
+      mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+      recover = false
+      detail = 'reporting a negative axis direction as given, which the auto (PCA) direction would '
+               'not match,'
+    []
+    [honored_oblique]
+      type = 'CSVDiff'
+      input = 'user_ray_direction.i'
+      cli_args = 'UserObjects/in_out_test/ray_direction="1 1 0" Outputs/file_base=user_ray_oblique'
+      csvdiff = 'user_ray_oblique.csv'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'accepting and normalizing an oblique (non-axis) direction, and'
+    []
+    [oblique_matches_auto]
+      type = 'Exodiff'
+      input = 'pca_ray_2d.i'
+      cli_args = 'UserObjects/in_out_test/point_containment_method=user_selected_ray '
+                 'UserObjects/in_out_test/ray_direction="1 1 0"'
+      exodiff = 'pca_ray_2d_out.e'
+      prereq = 'pca_ray_2d'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'producing the same closed-surface in-out result from an oblique direction as the '
+               'automatically selected direction.'
+    []
+  []
+
+  [user_ray_rejects_out_of_plane]
+    type = 'RunException'
+    input = 'pca_ray_2d.i'
+    cli_args = 'UserObjects/in_out_test/point_containment_method=user_selected_ray '
+               'UserObjects/in_out_test/ray_direction="0 0 1"'
+    expect_err = 'ray_direction for a 2D surface must lie in the mesh plane'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report an error when a user_selected_ray direction for a 2D '
+                  'surface mesh has a nonzero out-of-plane (z) component, since such a ray cannot '
+                  'test containment in the mesh plane.'
+  []
+
+  [fixed_x_ray_rejects_2d]
+    type = 'RunException'
+    input = 'pca_ray_2d.i'
+    cli_args = 'UserObjects/in_out_test/point_containment_method=fixed_x_ray'
+    expect_err = 'fixed_x_ray .* supports only 3D TRI3 surface meshes'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report an error when the fixed_x_ray point-in-polyhedron method '
+                  'is applied to a two-dimensional (EDGE2) surface mesh, since that method supports '
+                  'three-dimensional triangulated surfaces only.'
+  []
+
+  [invalid_parameters]
+    requirement = 'The system shall report an error for an invalid point-in-polyhedron parameter '
+                  'combination, namely'
+    [leaf_max_size]
+      type = 'RunException'
+      input = 'fixed_x_ray.i'
+      cli_args = 'UserObjects/in_out_test/leaf_max_size=0'
+      expect_err = 'leaf_max_size.*must be greater than zero'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'a non-positive KD-tree leaf size,'
+    []
+    [negative_tolerance]
+      type = 'RunException'
+      input = 'fixed_x_ray.i'
+      cli_args = 'UserObjects/in_out_test/tolerance=-1'
+      expect_err = 'tolerance.*must be greater than zero'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'a negative surface tolerance,'
+    []
+    [zero_tolerance]
+      type = 'RunException'
+      input = 'fixed_x_ray.i'
+      cli_args = 'UserObjects/in_out_test/tolerance=0'
+      expect_err = 'tolerance.*must be greater than zero'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'a zero surface tolerance,'
+    []
+    [user_ray_without_direction]
+      type = 'RunException'
+      input = 'fixed_x_ray.i'
+      cli_args = 'UserObjects/in_out_test/point_containment_method=user_selected_ray'
+      expect_err = 'ray_direction.*must be set to a non-zero vector'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'the user_selected_ray method without a ray direction, and'
+    []
+    [ray_direction_wrong_method]
+      type = 'RunException'
+      input = 'fixed_x_ray.i'
+      cli_args = 'UserObjects/in_out_test/ray_direction="1 0 0"'
+      expect_err = 'ray_direction.*is only used by point_containment_method = user_selected_ray'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'a ray direction supplied to a method other than user_selected_ray.'
+    []
+  []
+[]

@@ -1,0 +1,170 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "InterceptedElementModifier.h"
+#include "SBMUtils.h"
+#include "Function.h"
+#include "PointInSurfaceCheckInterface.h"
+#include "UserObjectBase.h"
+
+registerMooseObject("ShiftedBoundaryMethodApp", InterceptedElementModifier);
+
+InputParameters
+InterceptedElementModifier::validParams()
+{
+  InputParameters params = SBMElementSubdomainModifierBase::validParams();
+
+  params.addClassDescription("Marks elements as inside, outside, or intercepted based on a given "
+                             "distance function or geometry.");
+
+  params.addParam<FunctionName>("signed_dist_function", "Signed Distance Function to evaluate");
+
+  params.addRequiredParam<SubdomainID>("subdomain_id_inside", "ID for inside elements.");
+  params.addRequiredParam<SubdomainID>("subdomain_id_outside", "ID for outside elements.");
+
+  params.addParam<Real>("threshold", 0, "Threshold for inside/outside classification.");
+  params.addRequiredParam<bool>(
+      "is_domain_inside_surface",
+      "When true, the retained (inside) domain is the region enclosed by the surface (signed "
+      "distance below 'threshold', or points reported inside by the in-out test); when false, the "
+      "retained domain is the region outside the surface.");
+
+  params.addParam<UserObjectName>("in_out_test", "The name of the in-out test user object");
+
+  return params;
+}
+
+InterceptedElementModifier::InterceptedElementModifier(const InputParameters & parameters)
+  : SBMElementSubdomainModifierBase(parameters),
+    _parsed_function(isParamSetByUser("signed_dist_function")
+                         ? &getFunctionByName(parameters.get<FunctionName>("signed_dist_function"))
+                         : nullptr),
+    _subdomain_id_inside(getParam<SubdomainID>("subdomain_id_inside")),
+    _subdomain_id_outside(getParam<SubdomainID>("subdomain_id_outside")),
+    _threshold(getParam<Real>("threshold")),
+    _is_domain_inside_surface(getParam<bool>("is_domain_inside_surface")),
+    _in_out_test_base(isParamSetByUser("in_out_test") ? getCheckedInOutTest() : nullptr)
+{
+}
+
+const PointInSurfaceCheckInterface *
+InterceptedElementModifier::getCheckedInOutTest()
+{
+  const UserObjectBase & base = getUserObjectBase("in_out_test");
+  const auto * check = dynamic_cast<const PointInSurfaceCheckInterface *>(&base);
+  if (!check)
+    paramError("in_out_test",
+               "'",
+               base.name(),
+               "' (type ",
+               base.type(),
+               ") does not implement the point-in-surface check interface.");
+  return check;
+}
+
+/// @brief Initial setup for the InterceptedElementModifier class to read in the Gmsh file
+/// NOTE: this function should be overrided
+void
+InterceptedElementModifier::initialSetup()
+{
+  // Run the base class setup (reinitialize subdomains/variables, moving boundary maps,
+  // reinitialization strategy, and parameter consistency checks) before our own.
+  SBMElementSubdomainModifierBase::initialSetup();
+
+  // Exactly one geometry source must be provided.
+  if (_in_out_test_base && _parsed_function)
+    mooseError("InterceptedElementModifier: provide exactly one geometry source, but both "
+               "'signed_dist_function' and 'in_out_test' were set.");
+
+  if (_in_out_test_base)
+    _in_out_test_type = DistanceType::GEOMETRY;
+  else if (_parsed_function)
+    _in_out_test_type = DistanceType::SIGNED_DISTANCE;
+  else
+    mooseError("InterceptedElementModifier: provide exactly one geometry source, but neither "
+               "'signed_dist_function' nor 'in_out_test' was set.");
+}
+
+SubdomainID
+InterceptedElementModifier::computeSubdomainID()
+{
+  const Elem * elem = _current_elem;
+  if (!elem)
+    mooseError("InterceptedElementModifier: _current_elem is null!");
+
+  const auto classify_element = [this](const bool all_nodes_active,
+                                       const bool all_nodes_inactive,
+                                       const Real ratio_active) -> SubdomainID
+  {
+    const SBMUtils::ElementActivity activity{all_nodes_active, all_nodes_inactive, ratio_active};
+    const SBMUtils::ClassificationSubdomains subdomains{
+        _subdomain_id_inside, _subdomain_id_outside, _subdomain_id_intercepted};
+    return SBMUtils::classifyPartialElement(activity, subdomains, _mark_intercepted, _lambda);
+  };
+
+  switch (_in_out_test_type)
+  {
+    case DistanceType::SIGNED_DISTANCE:
+    {
+      Real min_val = std::numeric_limits<Real>::max();
+      Real max_val = std::numeric_limits<Real>::lowest();
+
+      for (const auto node : make_range(elem->n_nodes()))
+      {
+        const Real val = _parsed_function->value(_t, elem->point(node));
+        min_val = std::min(min_val, val);
+        max_val = std::max(max_val, val);
+      }
+
+      const bool all_nodes_active = (_is_domain_inside_surface && max_val < _threshold) ||
+                                    (!_is_domain_inside_surface && min_val > _threshold);
+
+      const bool all_nodes_inactive = (_is_domain_inside_surface && min_val > _threshold) ||
+                                      (!_is_domain_inside_surface && max_val < _threshold);
+
+      const auto is_active = [this](const Point & point)
+      {
+        const Real val = _parsed_function->value(_t, point);
+        return (_is_domain_inside_surface && val < _threshold) ||
+               (!_is_domain_inside_surface && val > _threshold);
+      };
+
+      const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+
+      return classify_element(all_nodes_active, all_nodes_inactive, ratio_active);
+    }
+
+    case DistanceType::GEOMETRY:
+    {
+      unsigned int inside_nodes = 0;
+      for (const auto node : make_range(elem->n_nodes()))
+        if (_in_out_test_base->contains(elem->point(node)))
+          ++inside_nodes;
+
+      const unsigned int active_nodes =
+          _is_domain_inside_surface ? inside_nodes : elem->n_nodes() - inside_nodes;
+
+      const auto is_active = [this](const Point & point)
+      {
+        const bool is_inside = _in_out_test_base->contains(point);
+        return _is_domain_inside_surface ? is_inside : !is_inside;
+      };
+
+      const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+
+      return classify_element(active_nodes == elem->n_nodes(), active_nodes == 0, ratio_active);
+    }
+
+    case DistanceType::NONE:
+      mooseError("InterceptedElementModifier: DistanceType::NONE is invalid in "
+                 "computeSubdomainID().");
+  }
+
+  mooseError("InterceptedElementModifier: unhandled DistanceType in computeSubdomainID().");
+}

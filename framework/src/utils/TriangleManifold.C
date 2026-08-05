@@ -13,6 +13,7 @@
 #include "MooseError.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/mesh_tet_interface.h"
 #include "libmesh/unstructured_mesh.h"
 
 #include <algorithm>
@@ -72,14 +73,27 @@ TriangleManifold::TriangleManifold(MeshBase & mesh, const Real surface_tolerance
 bool
 TriangleManifold::contains(const Point & point) const
 {
+  // ON and INSIDE both count as contained; only OUTSIDE is excluded.
+  return sideness(point) != SurfaceSide::OUTSIDE;
+}
+
+SurfaceSide
+TriangleManifold::sideness(const Point & point) const
+{
   // Most points are rejected here before we perform any per-triangle work.
   if (!pointInsideBoundingBox(point))
-    return false;
+    return SurfaceSide::OUTSIDE;
 
-  // By design, near-surface points count as inside for downstream subdomain tagging.
+  // Near-surface points are resolved before parity counting.
   if (pointOnSurface(point))
-    return true;
+    return SurfaceSide::ON;
 
+  return classifyByParity(point);
+}
+
+SurfaceSide
+TriangleManifold::classifyByParity(const Point & point) const
+{
   // Candidate filtering keeps the parity test from touching every triangle in large surfaces.
   const auto candidates = rayCandidates(point);
   unsigned int num_hits = 0;
@@ -101,11 +115,11 @@ TriangleManifold::contains(const Point & point) const
         break;
       case RayIntersection::Ambiguous:
         // Edge and vertex grazing hits are exactly where parity counting becomes brittle.
-        return containsBySolidAngle(point);
+        return containsBySolidAngle(point) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
     }
   }
 
-  return num_hits % 2;
+  return (num_hits % 2) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
 }
 
 void
@@ -114,6 +128,8 @@ TriangleManifold::finalize()
   // Validate that the mesh can be used as a manifold
   // We use the same logic as determining if the mesh can the tetrahedralized.
   auto umesh = dynamic_cast<UnstructuredMesh *>(&_mesh);
+  if (!umesh)
+    mooseError("TriangleManifold requires an UnstructuredMesh to validate the surface manifold.");
   TriangleManifoldUtils::SurfaceChecker checker(*umesh);
   auto msg = checker.improveAndValidate();
   if (!msg.empty())

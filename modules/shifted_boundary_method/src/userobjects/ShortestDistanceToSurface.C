@@ -20,6 +20,8 @@ ShortestDistanceToSurface::validParams()
       "surfaces",
       "Functions defining the surfaces to measure distance to; each must be a ParsedFunction "
       "level set or an UnsignedDistanceToSurfaceMesh.");
+  params.addParam<bool>(
+      "signed_distance", false, "Whether the distance functions are signed or unsigned.");
   params.addClassDescription(
       "Computes the shortest distance vector and true normal to one or more surfaces defined by "
       "parsed level-set functions and/or mesh-based distance functions.");
@@ -27,10 +29,19 @@ ShortestDistanceToSurface::validParams()
 }
 
 ShortestDistanceToSurface::ShortestDistanceToSurface(const InputParameters & parameters)
-  : ThreadedGeneralUserObject(parameters)
+  : ThreadedGeneralUserObject(parameters), _signed_distance(getParam<bool>("signed_distance"))
 {
   const auto function_names = getParam<std::vector<FunctionName>>("surfaces");
   _distance_functions = SBMUtils::buildDistanceFunctions(function_names, *this);
+}
+
+Real
+ShortestDistanceToSurface::value(Real t, const Point & p) const
+{
+  if (!_signed_distance)
+    return distanceVector(p).norm();
+
+  return SBMUtils::unionSignedDistance(_distance_functions, t, p);
 }
 
 RealVectorValue

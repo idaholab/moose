@@ -11,138 +11,98 @@
 #include "MooseMesh.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/edge_edge2.h"
+#include "libmesh/int_range.h"
 #include "SBMUtils.h"
 #include <libmesh/serial_mesh.h>
 
+#include <array>
+#include <utility>
+
 using namespace libMesh;
 
+namespace
+{
+// Add the points to the mesh (node id == index) and return the created nodes.
+std::vector<Node *>
+addNodes(MeshBase & mesh, const std::vector<Point> & points)
+{
+  std::vector<Node *> node_ptrs;
+  for (const auto i : index_range(points))
+    node_ptrs.push_back(mesh.add_point(points[i], i)); // Mesh owns the node
+  return node_ptrs;
+}
+
+// Finalize the mesh (with neighbor info) and return SBMUtils' watertightness verdict.
+bool
+isWatertight(MeshBase & mesh)
+{
+  mesh.prepare_for_use(false);
+
+  std::vector<const Elem *> raw_ptrs;
+  for (const auto * el : mesh.active_local_element_ptr_range())
+    raw_ptrs.push_back(el);
+  return SBMUtils::checkWatertightnessFromRawElems(raw_ptrs);
+}
+
+// Build an EDGE2 loop from the given points and 2-node connectivity, then test watertightness.
+bool
+edgeLoopIsWatertight(const Parallel::Communicator & comm,
+                     const std::vector<Point> & points,
+                     const std::vector<std::pair<unsigned int, unsigned int>> & edges)
+{
+  SerialMesh mesh(comm);
+  const auto nodes = addNodes(mesh, points);
+  for (const auto & [id0, id1] : edges)
+  {
+    auto edge = new Edge2();
+    edge->set_node(0, nodes[id0]);
+    edge->set_node(1, nodes[id1]);
+    mesh.add_elem(edge); // Mesh owns the element
+  }
+  return isWatertight(mesh);
+}
+
+// Build a TRI3 surface from the given points and 3-node connectivity, then test watertightness.
+bool
+triSurfaceIsWatertight(const Parallel::Communicator & comm,
+                       const std::vector<Point> & points,
+                       const std::vector<std::array<unsigned int, 3>> & faces)
+{
+  SerialMesh mesh(comm);
+  const auto nodes = addNodes(mesh, points);
+  for (const auto & f : faces)
+  {
+    auto tri = new Tri3();
+    tri->set_node(0, nodes[f[0]]);
+    tri->set_node(1, nodes[f[1]]);
+    tri->set_node(2, nodes[f[2]]);
+    mesh.add_elem(tri); // Mesh owns the element
+  }
+  return isWatertight(mesh);
+}
+}
+
+// Unit square boundary: an open loop (missing the closing edge) is not watertight; the closed loop
+// is.
 TEST(WaterTightTest, TwoDGeoOpenAndClose)
 {
   libMesh::Parallel::Communicator comm(MPI_COMM_SELF);
-  std::vector<Point> points = {
-      Point(0.0, 0.0, 0.0), // p0
-      Point(1.0, 0.0, 0.0), // p1
-      Point(1.0, 1.0, 0.0), // p2
-      Point(0.0, 1.0, 0.0)  // p3
-  };
+  const std::vector<Point> points = {
+      Point(0.0, 0.0, 0.0), Point(1.0, 0.0, 0.0), Point(1.0, 1.0, 0.0), Point(0.0, 1.0, 0.0)};
 
-  // (a) Test open geometry (missing last edge)
-  {
-    auto mesh = std::make_unique<libMesh::SerialMesh>(comm);
-    std::vector<Node *> node_ptrs;
-
-    for (unsigned int i = 0; i < points.size(); ++i)
-      node_ptrs.push_back(mesh->add_point(points[i], i)); // Mesh owns the node
-
-    std::vector<std::pair<unsigned int, unsigned int>> open_edges = {{0, 1}, {1, 2}, {2, 3}};
-    for (const auto & [id1, id2] : open_edges)
-    {
-      auto edge = new Edge2();
-      edge->set_node(0) = node_ptrs[id1];
-      edge->set_node(1) = node_ptrs[id2];
-      mesh->add_elem(edge); // Mesh owns the element
-    }
-
-    mesh->prepare_for_use(false); // Neighbor info setup
-
-    std::vector<const Elem *> raw_ptrs;
-    for (const auto * el : mesh->active_local_element_ptr_range())
-      raw_ptrs.push_back(el);
-
-    EXPECT_FALSE(SBMUtils::checkWatertightnessFromRawElems(raw_ptrs));
-  }
-
-  // (b) Test closed geometry
-  {
-    auto mesh = std::make_unique<libMesh::SerialMesh>(comm);
-    std::vector<Node *> node_ptrs;
-
-    for (unsigned int i = 0; i < points.size(); ++i)
-      node_ptrs.push_back(mesh->add_point(points[i], i)); // Mesh owns the node
-
-    std::vector<std::pair<unsigned int, unsigned int>> closed_edges = {
-        {0, 1}, {1, 2}, {2, 3}, {3, 0}};
-    for (const auto & [id1, id2] : closed_edges)
-    {
-      auto edge = new Edge2();
-      edge->set_node(0) = node_ptrs[id1];
-      edge->set_node(1) = node_ptrs[id2];
-      mesh->add_elem(edge); // Mesh owns the element
-    }
-
-    mesh->prepare_for_use(false); // Neighbor info setup
-
-    std::vector<const Elem *> raw_ptrs;
-    for (const auto * el : mesh->active_local_element_ptr_range())
-      raw_ptrs.push_back(el);
-
-    EXPECT_TRUE(SBMUtils::checkWatertightnessFromRawElems(raw_ptrs));
-  }
+  EXPECT_FALSE(edgeLoopIsWatertight(comm, points, {{0, 1}, {1, 2}, {2, 3}}));
+  EXPECT_TRUE(edgeLoopIsWatertight(comm, points, {{0, 1}, {1, 2}, {2, 3}, {3, 0}}));
 }
 
+// Tetrahedron surface: three of the four triangular faces leave an opening (not watertight); all
+// four close it.
 TEST(WaterTightTest, ThreeDGeoOpenAndClose)
 {
   libMesh::Parallel::Communicator comm(MPI_COMM_SELF);
-  std::vector<Point> points = {
-      Point(0.0, 0.0, 0.0), // p0
-      Point(1.0, 0.0, 0.0), // p1
-      Point(1.0, 1.0, 0.0), // p2
-      Point(0.0, 1.0, 0.0)  // p3
-  };
+  const std::vector<Point> points = {
+      Point(0.0, 0.0, 0.0), Point(1.0, 0.0, 0.0), Point(1.0, 1.0, 0.0), Point(0.0, 1.0, 0.0)};
 
-  // (a) Test open geometry (missing last edge)
-  {
-    auto mesh = std::make_unique<libMesh::SerialMesh>(comm);
-    std::vector<Node *> node_ptrs;
-
-    for (unsigned int i = 0; i < points.size(); ++i)
-      node_ptrs.push_back(mesh->add_point(points[i], i)); // Mesh owns the node
-
-    std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> open_faces = {
-        {0, 1, 2}, {0, 1, 3}, {1, 2, 3}};
-    for (const auto & [id1, id2, id3] : open_faces)
-    {
-      auto tri = new Tri3();
-      tri->set_node(0) = node_ptrs[id1];
-      tri->set_node(1) = node_ptrs[id2];
-      tri->set_node(2) = node_ptrs[id3];
-      mesh->add_elem(tri); // Mesh owns the element
-    }
-
-    mesh->prepare_for_use(false); // Neighbor info setup
-
-    std::vector<const Elem *> raw_ptrs;
-    for (const auto * el : mesh->active_local_element_ptr_range())
-      raw_ptrs.push_back(el);
-
-    EXPECT_FALSE(SBMUtils::checkWatertightnessFromRawElems(raw_ptrs));
-  }
-
-  // (b) Test closed geometry
-  {
-    auto mesh = std::make_unique<libMesh::SerialMesh>(comm);
-    std::vector<Node *> node_ptrs;
-
-    for (unsigned int i = 0; i < points.size(); ++i)
-      node_ptrs.push_back(mesh->add_point(points[i], i)); // Mesh owns the node
-
-    std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> closed_faces = {
-        {0, 1, 2}, {0, 1, 3}, {1, 2, 3}, {0, 2, 3}};
-    for (const auto & [id1, id2, id3] : closed_faces)
-    {
-      auto tri = new Tri3();
-      tri->set_node(0) = node_ptrs[id1];
-      tri->set_node(1) = node_ptrs[id2];
-      tri->set_node(2) = node_ptrs[id3];
-      mesh->add_elem(tri); // Mesh owns the element
-    }
-
-    mesh->prepare_for_use(false); // Neighbor info setup
-
-    std::vector<const Elem *> raw_ptrs;
-    for (const auto * el : mesh->active_local_element_ptr_range())
-      raw_ptrs.push_back(el);
-
-    EXPECT_TRUE(SBMUtils::checkWatertightnessFromRawElems(raw_ptrs));
-  }
+  EXPECT_FALSE(triSurfaceIsWatertight(comm, points, {{{0, 1, 2}}, {{0, 1, 3}}, {{1, 2, 3}}}));
+  EXPECT_TRUE(
+      triSurfaceIsWatertight(comm, points, {{{0, 1, 2}}, {{0, 1, 3}}, {{1, 2, 3}}, {{0, 2, 3}}}));
 }

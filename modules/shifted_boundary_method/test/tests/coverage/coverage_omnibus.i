@@ -115,7 +115,7 @@ nx = 16
     method = true_normal
     component = x
     variable = true_normal_x
-    # Exercises SBMSurfaceMeshBuilder::getCentroids() (no production caller).
+    # Exercises SBMSurfaceMeshBuilder::surfaceElementSet().centroids().
     builder = TreeBuilder
     execute_on = 'INITIAL'
   []

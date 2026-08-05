@@ -10,10 +10,11 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "SurfaceSide.h"
 
 #include "libmesh/bounding_box.h"
-#include "libmesh/face_tri3.h"
-#include "libmesh/mesh_tet_interface.h"
+#include "libmesh/mesh_base.h"
+#include "libmesh/point_locator_base.h"
 
 #include <iosfwd>
 #include <memory>
@@ -61,6 +62,17 @@ public:
   bool contains(const Point & point) const;
 
   /**
+   * Classify a query point relative to the manifold surface.
+   *
+   * On-surface points (within `surface_tolerance` of the surface) are reported as
+   * SurfaceSide::ON; this is checked before parity counting. Otherwise the fixed
+   * +x ray parity test (with solid-angle fallback) resolves INSIDE vs OUTSIDE.
+   *
+   * @return SurfaceSide::INSIDE, ::OUTSIDE, or ::ON.
+   */
+  SurfaceSide sideness(const Point & point) const;
+
+  /**
    * @return The manifold bounding box.
    */
   const libMesh::BoundingBox & boundingBox() const { return _bounding_box; };
@@ -102,6 +114,11 @@ private:
 
   /// Robust fallback containment query based on accumulated solid angle.
   bool containsBySolidAngle(const Point & point) const;
+
+  /// Resolve INSIDE vs OUTSIDE via the fixed +x ray parity test (with solid-angle
+  /// fallback for ambiguous grazing hits). Assumes the point is neither outside the
+  /// bounding box nor on the surface; those cases are handled by sideness().
+  SurfaceSide classifyByParity(const Point & point) const;
 
   /// Get the subset of triangles whose yz extents may intersect the query ray.
   std::vector<dof_id_type> rayCandidates(const Point & point) const;
