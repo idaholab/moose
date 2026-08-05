@@ -30,8 +30,7 @@ protected:
 
   virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) override;
 
-private:
-  /// Stores the constructed EquationSystem. Intentionally marked private to ensure
+  /// Stores the constructed EquationSystem. Intentionally marked protected to ensure
   /// other objects in the problem do not use it prior to full initialisation.
   mutable std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
 };
