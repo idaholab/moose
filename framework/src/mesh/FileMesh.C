@@ -13,6 +13,7 @@
 #include "Moose.h"
 #include "MooseApp.h"
 #include "FileMeshGenerator.h"
+#include "SplitMeshMetaData.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_tools.h"
@@ -145,6 +146,9 @@ FileMesh::buildMesh()
 
       if (getParam<bool>("clear_spline_nodes"))
         MeshTools::clear_spline_nodes(getMesh());
+
+      if (_is_split)
+        SplitMeshMetaData(_app).check(_file_name);
 
       _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
 
