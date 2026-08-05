@@ -808,6 +808,20 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [line_sink01_total_mobility]
+    type = 'PetscJacobianTester'
+    input = 'line_sink01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    # Each borehole's one point is also its bottom point, so its wellbore pressure is exactly
+    # bottom_p_or_t, and all three here flow for every value the ICs can take.  dirac3 (fluid_phase
+    # 0, alongside its enthalpy and mass-fraction weightings) and dirac7 (fluid_phase 1) inject, so
+    # they take the total mobility; dirac2 produces, so it keeps the phase mobility
+    cli_args = 'DiracKernels/dirac3/use_mobility=true Executioner/num_steps=1'
+    requirement = 'The system shall compute all Jacobian entries of physics kernels for a Peaceman line sink, with 2-phase, 3-components, when the flux into the porespace is weighted by the total mobility of all phases and the flux out of it by the mobility of one phase.'
+    issues = '#33845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [line_sink02]
     type = 'PetscJacobianTester'
     input = 'line_sink02.i'
