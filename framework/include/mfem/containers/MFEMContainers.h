@@ -32,6 +32,7 @@ class MFEMBoundaryCondition;
 
 namespace Moose::MFEM
 {
+class EquationSystem;
 
 /// Lightweight adaptor over an std::map from strings to pointer to T
 template <typename T>
@@ -247,6 +248,8 @@ using ComplexGridFunctions = NamedFieldsMap<mfem::ParComplexGridFunction>;
 using FESpaceHierarchies = NamedFieldsMap<mfem::ParFiniteElementSpaceHierarchy>;
 using Kernels = NamedFieldsMap<MFEMKernel>;
 using BoundaryConditions = NamedFieldsMap<MFEMBoundaryCondition>;
+using EquationSystems = NamedFieldsMap<EquationSystem>;
+
 } // namespace Moose::MFEM
 
 #endif
