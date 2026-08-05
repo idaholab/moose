@@ -5,8 +5,8 @@ offset = 0.00
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
   # scaling=1/E so physical c_normal (= scalingFactor * C_nn_harmonic ~ 1)
-  # is far smaller than the default c_normal=1e6, making the gap visible.
-  scaling = 1e-4
+  # remains well scaled while the fixed default c_normal=1e6 does not track stiffness.
+  scaling = 1e-8
 []
 
 [Mesh]
@@ -134,7 +134,7 @@ offset = 0.00
   [tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1'
-    youngs_modulus = 1.0e4
+    youngs_modulus = 1.0e8
     poissons_ratio = 0.0
   []
   [stress]
@@ -144,7 +144,7 @@ offset = 0.00
   [tensor_1000]
     type = ComputeIsotropicElasticityTensor
     block = '2'
-    youngs_modulus = 1e5
+    youngs_modulus = 1e9
     poissons_ratio = 0.0
   []
   [stress_1000]
