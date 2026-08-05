@@ -9,9 +9,12 @@
 
 #include "CrackMeshCut3DUserObject.h"
 
+#include "LineSegment.h"
+#include "RayTracing.h"
 #include "XFEMFuncs.h"
 #include "MooseError.h"
 #include "libmesh/libmesh_common.h"
+#include "libmesh/int_range.h"
 #include "libmesh/string_to_enum.h"
 #include "MooseMesh.h"
 #include "MooseEnum.h"
@@ -147,9 +150,7 @@ CrackMeshCut3DUserObject::meshChanged()
 void
 CrackMeshCut3DUserObject::initialize()
 {
-  // this is from gometricCutObject
-  _marked_elems_2d.clear();
-  _marked_elems_3d.clear();
+  MeshCutUserObjectBase::initialize();
 
   _is_mesh_modified = false;
 
@@ -200,6 +201,7 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
 // planar mesh
 {
   bool elem_cut = false;
+  std::vector<Xfem::CutFace> candidate_cut_faces;
 
   if (elem->dim() != _elem_dim)
     mooseError("The structural mesh to be cut by a surface mesh must be 3D!");
@@ -243,6 +245,23 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
         {
           const Real position = getRelativePosition(*node1, *node2, intersection);
 
+          bool duplicate_on_edge = false;
+          for (const auto k : index_range(cut_edges))
+            if (cut_edges[k] == j)
+            {
+              if (std::abs(cut_pos[k] - position) < Xfem::tol)
+              {
+                duplicate_on_edge = true;
+                break;
+              }
+
+              // EFA cannot represent two distinct cuts on one fragment-boundary edge. Ignore
+              // this element instead of selecting one intersection based on cutter-element order.
+              return false;
+            }
+          if (duplicate_on_edge)
+            continue;
+
           // Intersections on two edges are duplicates only when both lie on their shared
           // structural node. Distinct intersections close to that node must remain separate.
           const Node * cut_node = nullptr;
@@ -253,16 +272,11 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
 
           if (cut_node &&
               std::find(cut_nodes.begin(), cut_nodes.end(), cut_node) != cut_nodes.end())
-            break;
+            continue;
 
           cut_edges.push_back(j);
           cut_pos.push_back(position);
           cut_nodes.push_back(cut_node);
-          // A planar crack surface crosses each structural face edge at most once.
-          // Stop after the first valid hit so that adjacent cutter triangles sharing
-          // a cutter edge or vertex cannot produce a second entry for the same
-          // structural face edge.
-          break;
         }
       }
     }
@@ -277,9 +291,11 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
       mycut._face_edge.push_back(cut_edges[1]);
       mycut._position.push_back(cut_pos[0]);
       mycut._position.push_back(cut_pos[1]);
-      cut_faces.push_back(mycut);
+      candidate_cut_faces.push_back(mycut);
     }
   }
+
+  cut_faces.insert(cut_faces.end(), candidate_cut_faces.begin(), candidate_cut_faces.end());
   return elem_cut;
 }
 
@@ -322,41 +338,9 @@ CrackMeshCut3DUserObject::intersectWithEdge(const Point & p1,
           &plane_point[0], &planenormal[0], &edge_point1[0], &edge_point2[0], &cut_point[0]) == 1)
   {
     Point temp_p(cut_point[0], cut_point[1], cut_point[2]);
-    if (isInsideCutPlane(vertices, temp_p) && isInsideEdge(p1, p2, temp_p))
+    if (isInsideCutPlane(vertices, temp_p, normal) && isInsideEdge(p1, p2, temp_p))
     {
       pint = temp_p;
-      has_intersection = true;
-    }
-  }
-  return has_intersection;
-}
-
-bool
-CrackMeshCut3DUserObject::findIntersection(const Point & p1,
-                                           const Point & p2,
-                                           const std::vector<Point> & vertices,
-                                           Point & pint) const
-{
-  bool has_intersection = false;
-
-  Plane elem_plane(vertices[0], vertices[1], vertices[2]);
-  Point point = vertices[0];
-  Point normal = elem_plane.unit_normal(point);
-
-  std::array<Real, 3> plane_point = {{point(0), point(1), point(2)}};
-  std::array<Real, 3> planenormal = {{normal(0), normal(1), normal(2)}};
-  std::array<Real, 3> p_begin = {{p1(0), p1(1), p1(2)}};
-  std::array<Real, 3> p_end = {{p2(0), p2(1), p2(2)}};
-  std::array<Real, 3> cut_point = {{0.0, 0.0, 0.0}};
-
-  if (Xfem::plane_normal_line_exp_int_3d(
-          &plane_point[0], &planenormal[0], &p_begin[0], &p_end[0], &cut_point[0]) == 1)
-  {
-    Point p(cut_point[0], cut_point[1], cut_point[2]);
-    Real dotp = ((p - p1) * (p2 - p1)) / ((p2 - p1) * (p2 - p1));
-    if (isInsideCutPlane(vertices, p) && dotp > 1)
-    {
-      pint = p;
       has_intersection = true;
     }
   }
@@ -392,12 +376,10 @@ CrackMeshCut3DUserObject::isTriAreaAboveTol(const Point & p1,
 
 bool
 CrackMeshCut3DUserObject::isInsideCutPlane(const std::vector<Point> & vertices,
-                                           const Point & p) const
+                                           const Point & p,
+                                           const Point & normal) const
 {
   unsigned int n_node = vertices.size();
-
-  Plane elem_plane(vertices[0], vertices[1], vertices[2]);
-  Point normal = elem_plane.unit_normal(vertices[0]);
 
   bool inside = false;
   unsigned int counter = 0;
@@ -753,6 +735,10 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
         // https://doi.org/10.1016/j.engfracmech.2019.106713
         // Equation 6
         int ind = index[j];
+        if (ind < 0)
+          mooseError("Active cutter-mesh node ",
+                     _active_boundary[i][j],
+                     " is not present in the crack-front points used for stress-based growth.");
         Real ki = _ki_vpp->at(ind);
         Real kii = _kii_vpp->at(ind);
         Real sqrt_k = std::sqrt(ki * ki + 8 * kii * kii);
@@ -794,8 +780,11 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
       mooseError("This growth_dir_method is not pre-defined!");
 
     // Boundary nodes copy direction from their connected active neighbor
-    if (_inactive_boundary_pos.size() != 0 && temp.size() > 0)
+    if (_inactive_boundary_pos.size() != 0)
     {
+      mooseAssert(!temp.empty(),
+                  "An active boundary segment with inactive endpoints must contain an active "
+                  "interior node.");
       temp.insert(temp.begin(), temp.front());
       temp.push_back(temp.back());
     }
@@ -824,6 +813,7 @@ void
 CrackMeshCut3DUserObject::growFront()
 {
   _front.clear();
+  _front_boundary_node_indices.clear();
 
   mooseAssert(!(_cfd && _active_boundary.size() != 1),
               "crack-front-definition using the cutter mesh only supports one active crack front "
@@ -851,6 +841,7 @@ CrackMeshCut3DUserObject::growFront()
   for (unsigned int i = 0; i < _active_boundary.size(); ++i)
   {
     std::vector<dof_id_type> temp;
+    std::vector<unsigned int> temp_boundary_node_indices;
 
     unsigned int i2 = _active_boundary[i].size();
     for (unsigned int j = 0; j < i2; ++j)
@@ -862,6 +853,7 @@ CrackMeshCut3DUserObject::growFront()
       if (git != grown_node_map.end())
       {
         temp.push_back(git->second);
+        temp_boundary_node_indices.push_back(j);
         continue;
       }
 
@@ -876,7 +868,7 @@ CrackMeshCut3DUserObject::growFront()
       for (unsigned int k = 0; k < 3; ++k)
         x(k) = this_point(k) + dir(k) * growth_increment;
 
-      x = projectInteriorInactiveEndpoint(i, j, i2, x);
+      x = projectInteriorInactiveEndpoint(j, i2, this_point, x);
 
       // For an inactive endpoint, require the post-projection displacement to be at least
       // 50% of the active neighbor's growth length. If it falls short, leave the inactive
@@ -886,16 +878,21 @@ CrackMeshCut3DUserObject::growFront()
       {
         id = orig_id;
         temp.push_back(id);
+        temp_boundary_node_indices.push_back(j);
       }
       else
       {
+        const auto old_front_size = temp.size();
         id = appendAdvancedFrontNodeCheckingDegenerateTriangles(i, j, orig_id, x, temp);
+        temp_boundary_node_indices.insert(
+            temp_boundary_node_indices.end(), temp.size() - old_front_size, j);
         updateTrackedCrackFrontPoint(orig_id, id);
       }
       grown_node_map[orig_id] = id;
     }
 
     _front.push_back(temp);
+    _front_boundary_node_indices.push_back(temp_boundary_node_indices);
   }
 }
 
@@ -939,6 +936,9 @@ CrackMeshCut3DUserObject::computeGrowthIncrement(unsigned int front_node_index,
         mooseError("Inactive crackfront node is not connected to a neighbor.");
       }
 
+      if (front_point_index[front_node_index] == -1)
+        return 0.0;
+
       return _growth_inc_reporter->at(front_point_index[front_node_index]);
     }
   }
@@ -947,95 +947,123 @@ CrackMeshCut3DUserObject::computeGrowthIncrement(unsigned int front_node_index,
 }
 
 Point
-CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int /*segment_index*/,
-                                                          unsigned int front_node_index,
+CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int front_node_index,
                                                           unsigned int front_size,
+                                                          const Point & previous_point,
                                                           const Point & candidate_point) const
 {
   if (!isInactiveEndpoint(front_node_index, front_size))
     return candidate_point;
 
-  // The inactive endpoint already inherits the active neighbor's direction and growth
-  // increment (see findActiveBoundaryDirection() and computeGrowthIncrement()), so
-  // candidate_point = previous-step inactive position + active_dir * active_growth_length.
-  // No adjustment is needed if the candidate is still outside the body.
-  if ((*_pl)(candidate_point) == nullptr)
+  std::vector<Elem *> intersected_elems;
+  std::vector<LineSegment> segments;
+  Moose::elementsIntersectedByLine(
+      candidate_point, previous_point, _mesh, *_pl, intersected_elems, segments);
+
+  // An empty traversal means that the candidate is outside the body.
+  if (intersected_elems.empty())
     return candidate_point;
 
-  // Candidate has crossed into the body. Snap it to the nearest point on the body's
-  // sideset-tagged exterior, then push 0.1 * _size_control outward (away from the
-  // candidate's interior position) so it lands reliably above the free surface.
-  ConstBndElemRange & bnd_range = *_mesh.getBoundaryElementRange();
-  Point closest_pt;
-  Real best_dist2 = std::numeric_limits<Real>::max();
-  for (const auto & belem : bnd_range)
+  // The previous endpoint was outside the body. The ray traversal follows face-connected
+  // elements from the interior candidate toward that point, so its last element contains the
+  // exterior face crossed by the endpoint's growth path. Include its point neighbors because the
+  // closest projection can lie on a boundary face adjacent to the crossed face. This is the same
+  // local boundary patch used by nearest-node geometric searches.
+  const Elem * terminal_elem = intersected_elems.back();
+  std::vector<dof_id_type> patch_elem_ids = {terminal_elem->id()};
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  for (const auto & node : terminal_elem->node_ref_range())
   {
-    const Elem * elem = belem->_elem;
-    std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
-    std::vector<Point> vertices;
-    for (unsigned int i = 0; i < curr_side->n_nodes(); ++i)
-      vertices.push_back(*(curr_side->node_ptr(i)));
-    // Boundary sides of 3D elements are always 2D polygons with at least 3 vertices
-    // (triangle for tet sides, quad for hex sides, etc.). The plane and edge math below
-    // depends on this.
-    mooseAssert(vertices.size() >= 3, "Boundary face has fewer than 3 vertices");
+    const auto node_elem_it = node_to_elem_map.find(node.id());
+    if (node_elem_it != node_to_elem_map.end())
+      patch_elem_ids.insert(
+          patch_elem_ids.end(), node_elem_it->second.begin(), node_elem_it->second.end());
+  }
+  std::sort(patch_elem_ids.begin(), patch_elem_ids.end());
+  patch_elem_ids.erase(std::unique(patch_elem_ids.begin(), patch_elem_ids.end()),
+                       patch_elem_ids.end());
 
-    // Perpendicular projection of candidate onto the face plane.
-    Point fn = (vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]);
-    const Real fn_norm = fn.norm();
-
-    if (fn_norm <= libMesh::TOLERANCE)
-      continue;
-    fn /= fn_norm;
-    Point face_pt = candidate_point - ((candidate_point - vertices[0]) * fn) * fn;
-
-    // If the perpendicular lands outside the polygon, fall back to the closest point on
-    // any of its edges. This is needed for growth into a corner or on faceted surfaces.
-    if (!isInsideCutPlane(vertices, face_pt))
+  Point closest_pt;
+  Point closest_face_normal;
+  Real best_dist2 = std::numeric_limits<Real>::max();
+  std::vector<Point> vertices;
+  std::unique_ptr<const Elem> face;
+  for (const auto elem_id : patch_elem_ids)
+  {
+    const Elem * elem = _mesh.elemPtr(elem_id);
+    for (const auto side : libMesh::make_range(elem->n_sides()))
     {
-      const unsigned int nv = vertices.size();
-      Real best_edge_d2 = std::numeric_limits<Real>::max();
-      Point best_edge_pt = vertices[0];
-      for (unsigned int i = 0; i < nv; ++i)
+      // XFEM-created crack faces can be neighborless, but only faces registered in BoundaryInfo
+      // belong to the exterior boundary of the original body mesh.
+      if (elem->neighbor_ptr(side) || _mesh.getBoundaryIDs(elem, side).empty())
+        continue;
+
+      elem->side_ptr(face, side);
+      mooseAssert(face->n_nodes() >= 3, "Boundary face has fewer than 3 nodes");
+      vertices.clear();
+      vertices.reserve(face->n_nodes());
+      for (const auto node : libMesh::make_range(face->n_nodes()))
+        vertices.push_back(face->point(node));
+
+      Point face_normal = (vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]);
+      const Real face_normal_norm = face_normal.norm();
+      if (face_normal_norm <= libMesh::TOLERANCE * libMesh::TOLERANCE)
+        continue;
+      face_normal /= face_normal_norm;
+
+      Point face_pt =
+          candidate_point - ((candidate_point - vertices[0]) * face_normal) * face_normal;
+      if (!isInsideCutPlane(vertices, face_pt, face_normal))
       {
-        const Point & a = vertices[i];
-        const Point & b = vertices[(i + 1) % nv];
-        const Point ab = b - a;
-        const Real len2 = ab * ab;
-        Real t = 0.0;
-        if (len2 > libMesh::TOLERANCE)
-          t = std::max(Real(0), std::min(Real(1), ((candidate_point - a) * ab) / len2));
-        const Point edge_pt = a + t * ab;
-        const Real d2 = (edge_pt - candidate_point).norm_sq();
-        if (d2 < best_edge_d2)
+        Real best_edge_dist2 = std::numeric_limits<Real>::max();
+        for (const auto node : index_range(vertices))
         {
-          best_edge_d2 = d2;
-          best_edge_pt = edge_pt;
+          const Point & a = vertices[node];
+          const Point & b = vertices[(node + 1) % vertices.size()];
+          const Point edge = b - a;
+          const Real edge_length2 = edge.norm_sq();
+          Real position = 0.0;
+          if (edge_length2 > libMesh::TOLERANCE * libMesh::TOLERANCE)
+            position =
+                std::max(Real(0), std::min(Real(1), ((candidate_point - a) * edge) / edge_length2));
+          const Point edge_pt = a + position * edge;
+          const Real edge_dist2 = (edge_pt - candidate_point).norm_sq();
+          if (edge_dist2 < best_edge_dist2)
+          {
+            best_edge_dist2 = edge_dist2;
+            face_pt = edge_pt;
+          }
         }
       }
-      face_pt = best_edge_pt;
-    }
 
-    const Real d2 = (face_pt - candidate_point).norm_sq();
-    if (d2 < best_dist2)
-    {
-      best_dist2 = d2;
-      closest_pt = face_pt;
+      const Real d2 = (face_pt - candidate_point).norm_sq();
+      if (d2 < best_dist2)
+      {
+        best_dist2 = d2;
+        closest_pt = face_pt;
+        closest_face_normal = face_normal;
+        if ((elem->vertex_average() - vertices[0]) * closest_face_normal > 0)
+          closest_face_normal *= -1;
+      }
     }
   }
 
-  // No sidesets i.e. bnd_range.size()==0; so no faces for inactive node projection
+  // A degenerate edge or vertex hit can prevent the simple framework traversal from identifying
+  // one terminal exterior face. Keep the previous known-outside endpoint in that case.
   if (best_dist2 == std::numeric_limits<Real>::max())
-    return candidate_point;
+    return previous_point;
 
-  // Outward direction: candidate is inside the body, so the surface point lies outward
-  // from the candidate. The straight line from candidate through closest_pt exits the body.
   Point outward = closest_pt - candidate_point;
   const Real on = outward.norm();
   if (on > libMesh::TOLERANCE)
     outward /= on;
+  else
+    outward = closest_face_normal;
 
-  return closest_pt + outward * (0.1 * _size_control);
+  // Move one tenth of the cutter size control beyond the face so the endpoint is unambiguously
+  // outside despite point-locator tolerances.
+  const Point projected_point = closest_pt + outward * (0.1 * _size_control);
+  return (*_pl)(projected_point) ? previous_point : projected_point;
 }
 
 dof_id_type
@@ -1141,8 +1169,13 @@ CrackMeshCut3DUserObject::refineFront()
 {
   std::vector<std::vector<dof_id_type>> new_front(_front.begin(), _front.end());
 
+  mooseAssert(_front.size() == _front_boundary_node_indices.size(),
+              "Each front segment must have a boundary-node index map.");
+
   for (unsigned int ifront = 0; ifront < _front.size(); ++ifront)
   {
+    mooseAssert(_front[ifront].size() == _front_boundary_node_indices[ifront].size(),
+                "Each front node must map to an active-boundary node.");
     unsigned int i1 = _front[ifront].size() - 1;
     if (_inactive_boundary_pos.size() == 0)
       i1 = _front[ifront].size();
@@ -1187,7 +1220,7 @@ CrackMeshCut3DUserObject::refineFront()
         }
 
         // Get the corresponding old boundary node for area check
-        unsigned int ab_idx = (i - 1 < _active_boundary[ifront].size()) ? i - 1 : 0;
+        const unsigned int ab_idx = _front_boundary_node_indices[ifront][i - 1];
         Point ab_pt = *_cutter_mesh->node_ptr(_active_boundary[ifront][ab_idx]);
 
         for (unsigned int j = 0; j < n; ++j)
@@ -1463,7 +1496,8 @@ CrackMeshCut3DUserObject::getFrontPointsIndex() const
   {
     dof_id_type id = _active_boundary[ibnd][j];
     auto it = std::find(_crack_front_points.begin(), _crack_front_points.end(), id);
-    index[j] = std::distance(_crack_front_points.begin(), it);
+    if (it != _crack_front_points.end())
+      index[j] = std::distance(_crack_front_points.begin(), it);
   }
 
   return index;
