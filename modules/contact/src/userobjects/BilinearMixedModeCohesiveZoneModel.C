@@ -20,6 +20,7 @@
 #include "ADReal.h"
 #include "CohesiveZoneModelTools.h"
 #include <Eigen/Core>
+#include <cmath>
 
 registerMooseObject("ContactApp", BilinearMixedModeCohesiveZoneModel);
 
@@ -128,6 +129,7 @@ BilinearMixedModeCohesiveZoneModel::initialize()
 
   // Avoid accumulating interpolation over the time step
   _dof_to_mode_mixity_ratio.clear();
+  _dof_to_local_czm_traction.clear();
   _dof_to_normal_strength.clear();
   _dof_to_shear_strength.clear();
   _dof_to_GI_c.clear();
@@ -167,6 +169,10 @@ BilinearMixedModeCohesiveZoneModel::computeCZMTraction(const Node * const node)
       -(1.0 - libmesh_map_find(_dof_to_damage, node->id()).first) * _penalty_stiffness_czm *
           delta_active -
       _penalty_stiffness_czm * (_set_compressive_traction_to_zero ? 0.0 : delta_inactive);
+
+  // Save local-frame traction before the base class overwrites this map with global traction.
+  // Raw values only: this map feeds auxiliary output, so derivatives are not needed.
+  _dof_to_local_czm_traction[node] = MetaPhysicL::raw_value(_dof_to_czm_traction[node]);
 }
 
 void
@@ -353,11 +359,108 @@ BilinearMixedModeCohesiveZoneModel::getLocalDisplacementNormal(const Node * cons
 Real
 BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangential(const Node * const node) const
 {
+  return getLocalDisplacementTangentialOne(node);
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangentialOne(const Node * const node) const
+{
   const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
   const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
 
   if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
     return MetaPhysicL::raw_value(it->second(1) / it2->second.second);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangentialTwo(const Node * const node) const
+{
+  const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
+    return MetaPhysicL::raw_value(it->second(2) / it2->second.second);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangentialEffective(
+    const Node * const node) const
+{
+  using std::sqrt;
+
+  const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
+  {
+    // Take raw values before the sqrt: the AD derivative of sqrt divides by zero
+    // when the tangential jump is exactly zero (e.g. pure mode I or post-debond).
+    const auto tangential_one = MetaPhysicL::raw_value(it->second(1) / it2->second.second);
+    const auto tangential_two = MetaPhysicL::raw_value(it->second(2) / it2->second.second);
+    return sqrt(tangential_one * tangential_one + tangential_two * tangential_two);
+  }
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionNormal(const Node * const node) const
+{
+  const auto it = _dof_to_local_czm_traction.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_local_czm_traction.end())
+    return it->second(0);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionTangentialMagnitude(
+    const Node * const node) const
+{
+  using std::sqrt;
+
+  const auto it = _dof_to_local_czm_traction.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_local_czm_traction.end())
+    return sqrt(it->second(1) * it->second(1) + it->second(2) * it->second(2));
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionTangentialOne(const Node * const node) const
+{
+  const auto it = _dof_to_local_czm_traction.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_local_czm_traction.end())
+    return it->second(1);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionTangentialTwo(const Node * const node) const
+{
+  const auto it = _dof_to_local_czm_traction.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_local_czm_traction.end())
+    return it->second(2);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionEffective(const Node * const node) const
+{
+  const auto it = _dof_to_local_czm_traction.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_local_czm_traction.end())
+    return it->second.norm();
   else
     return 0.0;
 }
