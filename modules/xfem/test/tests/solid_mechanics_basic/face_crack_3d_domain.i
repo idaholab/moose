@@ -1,5 +1,5 @@
 # Dummy problem that does not solve equilibrium problem
-# Cracks driven by presecribed stress and strain fields.
+# Cracks driven by prescribed stress and strain fields.
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -15,7 +15,7 @@ fname = 'tet_block'
 E = 207000
 nu = 0.3
 
-# Prescribed stress field.  The default mirrors the former top_y traction ramp:
+# Prescribed stress field. The default mirrors the former top_y traction ramp:
 #   sigma_yy = sigma0 + sigma_z_slope * z
 # Change these constants or sigma_yy_function to prescribe a different field.
 sigma0 = 20
@@ -23,7 +23,7 @@ sigma_z_slope = 500
 
 [Mesh]
   #---- CUTTER MESH
-  [cicle_outline]
+  [circle_outline]
     type = ParsedCurveGenerator
     x_formula = '${rad}*cos(t)'
     y_formula = '${rad}*sin(t)'
@@ -33,7 +33,7 @@ sigma_z_slope = 500
   []
   [circle_surface]
     type = XYDelaunayGenerator
-    boundary = 'cicle_outline'
+    boundary = 'circle_outline'
     desired_area = 0.001
     output_subdomain_id = 1
   []
@@ -69,21 +69,7 @@ sigma_z_slope = 500
     transform = TRANSLATE
     vector_value = '0 -0.0001 0'
   []
-  [pin]
-    type = ExtraNodesetGenerator
-    input = FEM_mesh_move
-    new_boundary = 'pin'
-    coord = '${fparse 2*rad} ${fparse -rad} ${fparse rad}'
-    use_closest_node = true
-  []
-  [center]
-    type = ExtraNodesetGenerator
-    input = pin
-    new_boundary = 'center'
-    coord = '0 ${fparse rad} 0'
-    use_closest_node = true
-  []
-  final_generator = center
+  final_generator = FEM_mesh_move
 []
 
 [Problem]
@@ -93,7 +79,7 @@ sigma_z_slope = 500
 []
 
 [AuxVariables]
-  # dummy displacement for DomainIntegral
+  # Dummy displacements for DomainIntegral.
   [disp_x]
     initial_condition=0
   []
@@ -106,11 +92,6 @@ sigma_z_slope = 500
 []
 
 [Functions]
-  [zero]
-    type = ConstantFunction
-    value = 0
-  []
-
   # Nonzero prescribed Cauchy stress component.
   [sigma_yy_function]
     type = ParsedFunction
@@ -118,7 +99,7 @@ sigma_z_slope = 500
   []
 
   # A compatible small-strain tensor for DomainIntegral objects that request the
-  # elastic_strain material property.  For the default uniaxial stress field this
+  # elastic_strain material property. For the default uniaxial stress field this
   # is Hooke's-law compliance: eps_yy = sigma_yy / E,
   # eps_xx = eps_zz = -nu * sigma_yy / E.
   [eps_xx_function]
@@ -136,6 +117,7 @@ sigma_z_slope = 500
 []
 
 [Materials]
+  # Prescribed stress used by the interaction integral.
   [prescribed_stress]
     type = GenericFunctionRankTwoTensor
     tensor_name = stress
@@ -148,7 +130,7 @@ sigma_z_slope = 500
     tensor_name = elastic_strain
     tensor_functions = 'eps_xx_function 0 0 0 eps_yy_function 0 0 0 eps_zz_function'
   []
-  # dummy strain needed by strainEnergyDensity for InteractionIntegral
+  # Dummy strain needed by strainEnergyDensity for InteractionIntegral.
   [prescribed_mechanical_strain]
     type = GenericConstantRankTwoTensor
     tensor_name = mechanical_strain

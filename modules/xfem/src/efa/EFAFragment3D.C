@@ -138,7 +138,7 @@ EFAFragment3D::isEdgeConnected(EFAFragment * other_fragment) const
 }
 
 void
-EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
+EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & /*EmbeddedNodes*/,
                                           std::vector<EFANode *> & invalid_emb_out)
 {
   // Detect and handle three classes of embedded-node configurations.
@@ -224,8 +224,6 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & Em
         invalid_emb_out.push_back(emb_node);
     }
   }
-  // Silence unused-parameter warnings when no invalid emb is collected.
-  (void)EmbeddedNodes;
 }
 
 void
@@ -513,8 +511,8 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
 
   // Collect ALL lone edges from every fragment face.
   //
-  // The original code called loneEdgeOnFace() which returns only the FIRST lone edge
-  // per face.  That assumption breaks when the fragment contains sub-faces of a
+  // The original implementation collected only the first lone edge per face. That
+  // assumption breaks when the fragment contains sub-faces of a
   // previously-established cut-plane face (i.e., crack growth cuts through a face that
   // was itself created as the cut-plane in an earlier growth step).  Such sub-faces
   // inherit multiple perimeter edges from the old cut-plane polygon; all of those
@@ -543,16 +541,6 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
   new_frag->addFace(cut_face);
   new_frag->findFacesAdjacentToFaces();
   return new_frag;
-}
-
-EFAEdge *
-EFAFragment3D::loneEdgeOnFace(unsigned int face_id) const
-{
-  // if any face edge is not shared by any other face, we call it a lone edge
-  for (unsigned int i = 0; i < _faces[face_id]->numEdges(); ++i)
-    if (_faces_adjacent_to_faces[face_id][i] == nullptr)
-      return _faces[face_id]->getEdge(i);
-  return nullptr;
 }
 
 void

@@ -874,10 +874,10 @@ EFAElement3D::purgeEmbeddedNodeReferences(EFANode * emb_node)
   // Strip all references to emb_node from this element's fragments and element
   // faces. The driver iterates every element to clean long-range propagation
   // (>1 hop from the element where the node was identified as invalid).
-  for (unsigned int i = 0; i < _fragments.size(); ++i)
-    _fragments[i]->removeEmbeddedNode(emb_node);
-  for (unsigned int i = 0; i < _faces.size(); ++i)
-    _faces[i]->removeEmbeddedNode(emb_node);
+  for (auto * fragment : _fragments)
+    fragment->removeEmbeddedNode(emb_node);
+  for (auto * face : _faces)
+    face->removeEmbeddedNode(emb_node);
 }
 
 void
@@ -2143,9 +2143,10 @@ EFAElement3D::checkNeighborFaceCut(unsigned int face_id,
       unsigned int emb_id = neigh_edge->getEmbeddedNodeIndex(position, from_node);
       EFANode * old_emb = neigh_edge->getEmbeddedNode(emb_id);
 
-      // Same edge and same position on a neighboring face should canonicalize to the existing
-      // embedded node, regardless of which propagation path discovered it first.
-      local_embedded = old_emb;
+      // Preserve the caller-supplied node or the first matching neighbor so the result does not
+      // depend on the order in which subsequent neighbors are visited.
+      if (!local_embedded)
+        local_embedded = old_emb;
     }
   } // en_iter
 }

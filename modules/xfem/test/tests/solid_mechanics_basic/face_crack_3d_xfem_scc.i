@@ -49,5 +49,5 @@
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh
   []
-  execute_on=final
+  execute_on = final
 []

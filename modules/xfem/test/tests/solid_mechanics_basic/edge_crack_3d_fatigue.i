@@ -4,6 +4,7 @@
     growth_increment_name = "growth_increment"
     cycles_to_max_growth_increment_name = "fatigue"
     crackMeshCut3DUserObject_name = cut_mesh
+    # Use 0.1001 to avoid a >= tie at the 0.1 growth boundary.
     max_growth_increment = 0.1001
     paris_law_c = 1e-13
     paris_law_m = 2.5

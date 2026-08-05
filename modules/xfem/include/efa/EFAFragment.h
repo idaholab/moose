@@ -27,10 +27,8 @@ public:
   virtual unsigned int getNumCutNodes() const = 0;
   virtual std::set<EFANode *> getAllNodes() const = 0;
   virtual bool isConnected(EFAFragment * other_fragment) const = 0;
-  /// Identify embedded nodes that should be dropped, appending them to
-  /// invalid_emb_out.  2D fragments may also perform their (local) cleanup
-  /// in-place; 3D fragments only collect, leaving the actual removal/free to a
-  /// global sweep in the EFA driver.
+  /// Identify invalid embedded nodes, removing fragment-local references when possible and
+  /// appending nodes that require element-global cleanup to invalid_emb_out.
   virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
                                           std::vector<EFANode *> & invalid_emb_out) = 0;
 
