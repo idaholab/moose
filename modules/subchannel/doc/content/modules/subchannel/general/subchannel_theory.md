@@ -231,15 +231,15 @@ The collocated discretization of the variables is presented in [fig:dis] . $i,j$
 
 Let $\ell$ denote the current flow-linearization iteration and let $\vec{b}_{m,\mathrm{in}}$
 contain the known block-inlet mass flow in the first row for each channel and zero in the remaining
-rows. Also define $D_V=\operatorname{diag}(V_{i,k}/\Delta t)$. If density and crossflow are lagged,
-the segregated mass equation is
+rows. Also define $D_V=\operatorname{diag}(V_{i,k}/\Delta t)$. In the monolithic flow solve,
+neither crossflow nor new-time density is lagged, so the mass equation is
 
 \begin{equation}
 \label{mass-dis3}
-\boldsymbol{M_{mm}} \vec{\dot{m}}^{(\ell+1)} =
+\boldsymbol{M_{mm}} \vec{\dot{m}}^{(\ell+1)} +
+\boldsymbol{M_{mw}}\vec{w}^{(\ell+1)} =
 \vec{b}_{m,\mathrm{in}} - D_V
-\left(\vec{\rho}^{(\ell)}-\vec{\rho}^{n}\right)
-- \boldsymbol{M_{mw}}\vec{w}^{(\ell)}.
+\left(\vec{\rho}^{(\ell+1)}-\vec{\rho}^{n}\right).
 \end{equation}
 
 In the transient monolithic solve, enthalpy is fixed during each flow solve. The new-time density
@@ -264,7 +264,8 @@ and
 \left(P_{i,k}^{(\ell+1)}-P_{i,k}^{(\ell)}\right).
 \end{equation}
 
-Substitution into [mass-dis] gives the intermediate mass-flow equation
+Substitution of [density-pressure-linearization] into [mass-dis3] gives the intermediate mass-flow
+equation
 
 \begin{equation}
 \begin{aligned}
@@ -299,7 +300,7 @@ modified by the same linearization:
 
 Thus the linearization modifies both the matrix and $\vec{b}_m$; the
 $\boldsymbol{M_{mp}}^{(\ell)}\vec{P}^{(\ell)}$ correction makes the Taylor approximation recover
-the lagged density at the linearization point.
+the current-iterate density when $\vec{P}^{(\ell+1)}=\vec{P}^{(\ell)}$.
 
 Moving the new pressure contribution in [mass-density-to-mdot] to the left-hand side gives the
 first block row of the monolithic solver:
