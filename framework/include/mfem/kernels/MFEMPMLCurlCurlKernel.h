@@ -15,8 +15,7 @@
 
 /**
  * Perfectly matched layer curl curl integrator: (c1 curl u, curl v) with c1 = det(J)^-1 J^T J
- * scaled by the base reluctivity coefficient, where J is the Jacobian of the radial coordinate
- * stretch.
+ * scaled by the base reluctivity coefficient, where J is the Jacobian of the coordinate stretch.
  */
 class MFEMPMLCurlCurlKernel : public MFEMPMLKernel
 {

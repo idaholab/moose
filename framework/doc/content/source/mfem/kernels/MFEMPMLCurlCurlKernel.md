@@ -20,53 +20,52 @@ field is a scalar, so $\det(J)^{-1} J^T J$ reduces to the scalar $\det(J)^{-1}$.
 
 ## PML coordinate stretch
 
-Inside the layer the radial coordinate is analytically continued into the complex plane. Depth is
-measured along the straight line from a reference point $\vec p_0$ through the evaluation point
-$\vec x$. That ray meets the inner surface of the layer at a distance $r_{\mathrm{in}}$ from
-$\vec p_0$ and the outer surface of the mesh at $r_{\mathrm{out}}$, so with $r = |\vec x - \vec p_0|$
+Inside the layer the coordinates are analytically continued into the complex plane. The direction of
+that continuation, and the depth into the layer, both come from a harmonic coordinate $\psi$ solved
+for once when the kernel is set up:
 
 !equation
-L = r_{\mathrm{out}} - r_{\mathrm{in}}, \qquad s = r - r_{\mathrm{in}}
+\nabla^2 \psi = 0 \,\, \mathrm{in} \,\, \Omega_{\mathrm{PML}}, \qquad
+\psi = 0 \,\, \mathrm{on} \,\, \Gamma_{\mathrm{in}}, \qquad
+\psi = 1 \,\, \mathrm{on} \,\, \Gamma_{\mathrm{out}}
 
-are the thickness of the layer and the depth into it along that ray. Writing the stretched radius as
-$\tilde r = r + \mathrm{i}\, g(s)$, the stretch is diagonal in the local radial and tangential frame,
-
-!equation
-g(s) = \frac{\alpha\, s^{\,n}}{L^{\,n}}, \qquad
-J_r = 1 + \mathrm{i}\, \frac{n\, \alpha}{L^{\,n}}\, s^{\,n-1}, \qquad
-J_t = 1 + \mathrm{i}\, \frac{g(s)}{r}
-
-where $J_r = \mathrm{d}\tilde r/\mathrm{d}r$ acts along the ray and $J_t = \tilde r / r$ acts
-perpendicular to it. In Cartesian coordinates this is the full symmetric tensor
+with no flux through any remaining lateral wall. The level sets of $\psi$ foliate the layer whatever
+its shape, interpolating smoothly between the shape of its inner surface and that of its outer
+surface, and
 
 !equation
-J = J_r\, \hat r \otimes \hat r + J_t\, (I - \hat r \otimes \hat r), \qquad
-\det(J) = J_r\, J_t^{\,d-1}
+\hat n = \frac{\nabla \psi}{|\nabla \psi|}
 
-for $d$ spatial dimensions, with $\hat r$ the unit vector from $\vec p_0$ towards $\vec x$. Outside
-the layer $s \le 0$, giving $J_r = J_t = 1$ and no stretch.
+is their unit normal. Each point of the layer is then displaced into the complex plane along that
+normal,
+
+!equation
+\tilde{\vec x} = \vec x + \mathrm{i}\, \vec W, \qquad
+\vec W = \alpha\, \psi^{\,n}\, \hat n, \qquad
+J = I + \mathrm{i} \nabla \vec W
+
+Outside the layer $\psi = 0$,
+giving $J = I$ and no stretch.
 
 The two profile parameters control the absorption:
 
-- `decay_coefficient` $\alpha$ sets the overall magnitude of the imaginary (absorbing) part of the
-  stretch; it scales the imaginary parts of $J_r$ and $J_t$ linearly. Physically it corresponds to a
-  tuning constant divided by the wavenumber.
-- `decay_polynomial` $n$ sets how the absorption grows with depth: the imaginary part of $J_r$
-  varies as $s^{\,n-1}$, normalised by $L^{\,n}$ and pre-multiplied by $n$.
+- `decay_coefficient` $\alpha$ is the total imaginary displacement across the layer, so an outgoing
+  wave that crosses it, reflects off the outer boundary and returns is attenuated by
+  $\exp(-2 k \alpha)$. Physically it corresponds to a tuning constant divided by the wavenumber.
+- `decay_polynomial` $n$ sets how the absorption grows with depth. It must exceed one, so that both
+  $\vec W$ and its derivative vanish at the inner surface and the layer starts smoothly.
 
-Because the stretch is measured along rays rather than along the coordinate axes, the layer need not
-be Cartesian or planar. Its geometry is taken from the mesh: the layer is this kernel's `block`, its
+The geometry of the layer is taken entirely from the mesh: the layer is this kernel's `block`, its
 inner surface is the set of faces separating that block from the rest of the domain, and its outer
-surface is the exterior boundary of the mesh. No layer thickness has to be supplied.
-
-The reference point is set with `reference_point` and defaults to the barycenter of the mesh. It
-must lie inside the mesh and outside the layer, and both surfaces must be star shaped about it, so
-that every ray crosses the inner surface before the outer one. These conditions are checked when the
-kernel is set up.
+surface is the exterior boundary of the mesh, excluding any boundary that also borders the rest of
+the domain and therefore runs alongside the layer rather than capping it. The layer need not be
+Cartesian, planar, star shaped or of uniform thickness. Its inner and outer surfaces should be
+convex, which guarantees that $\psi$ has no stagnation point at which the stretch direction would be
+undefined; this is checked when the kernel is set up.
 
 ## Example Input File Syntax
 
-!listing mfem/complex/radial_pml.i block=/Kernels
+!listing mfem/complex/pml.i block=/Kernels
 
 !syntax parameters /Kernels/MFEMPMLCurlCurlKernel
 

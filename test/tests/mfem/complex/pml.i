@@ -134,6 +134,12 @@ z_center = 0
 [Outputs]
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/RadialPML
+    file_base = OutputData/PML
   []
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/PML
+    vtk_format = ASCII
+  []
+
 []
