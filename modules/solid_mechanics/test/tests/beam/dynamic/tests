@@ -115,8 +115,7 @@
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_inertia_damping_ti.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
-    # machine=x86_64: see #26848
-    capabilities = 'superlu & machine=x86_64'
+    capabilities = 'superlu'
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements in the presence of nodal mass,"
                   " nodal inertia and Rayleigh damping when using the velocity and"

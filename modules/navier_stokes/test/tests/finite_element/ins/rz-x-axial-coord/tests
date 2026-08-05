@@ -28,8 +28,6 @@
       input = 'hand-coded-jac-pipe-flow.i'
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization,'
       exodiff = 'hand-coded-jac-pipe-flow_out.e'
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
     [natural]
       type = 'Exodiff'
@@ -38,8 +36,6 @@
       exodiff = 'pipe-flow-natural-bc_out.e'
       # velocity_y diffs at value 1.06e-10 relative 2.66e-5 with -march=x86-64-v3
       abs_zero = 1e-9
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
     [natural_hand]
       type = 'Exodiff'
@@ -48,8 +44,6 @@
       exodiff = 'hand-coded-jac-pipe-flow-natural-bc_out.e'
       # velocity_y diffs at value 1.10e-10 relative 2.86e-5 with -march=x86-64-v3
       abs_zero = 1e-9
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
   []
   [rz_traction]
@@ -62,8 +56,6 @@
       # velocity_y diffs at value 1.06e-10 relative 6.60e-6 with -march=x86-64-v3
       abs_zero = 1e-9
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via automatic differentiation, without PSPG and SUPG stabilization,'
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
     [dirichlet_unstablized_hand]
       type = 'Exodiff'
@@ -73,8 +65,6 @@
       # velocity_y diffs at value 1.06e-10 relative 6.80e-6 with -march=x86-64-v3
       abs_zero = 1e-9
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, without PSPG and SUPG stabilization,'
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
     [dirichlet]
       type = 'Exodiff'
@@ -98,8 +88,6 @@
       # velocity_y diffs at value -1.39e-10 relative 4.86e-5 with -march=x86-64-v3
       abs_zero = 1e-9
       cli_args = 'GlobalParams/viscous_form=traction Outputs/file_base=natural-traction'
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
     [natural_hand]
       type = 'Exodiff'
@@ -109,8 +97,6 @@
       # velocity_y diffs at value -1.39e-10 relative 4.84e-5 with -march=x86-64-v3
       abs_zero = 1e-9
       cli_args = 'GlobalParams/laplace=false Kernels/x_momentum/type=INSMomentumTractionFormRZ Kernels/y_momentum/type=INSMomentumTractionFormRZ Outputs/file_base=natural-hand-traction'
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
   []
 []
