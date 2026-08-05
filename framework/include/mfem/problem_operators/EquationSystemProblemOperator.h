@@ -35,7 +35,7 @@ class EquationSystemProblemOperator : public ProblemOperator, public EquationSys
 {
 public:
   EquationSystemProblemOperator(MFEMProblem & problem)
-    : ProblemOperator(problem), _equation_system(_problem_data.eqn_systems[0])
+    : ProblemOperator(problem), _equation_system(_problem_data.eqn_systems.begin()->second)
   {
   }
 
