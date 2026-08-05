@@ -32,8 +32,15 @@ public:
                            const std::string & var_name,
                            InputParameters & parameters) override;
 
-  /// Returns the coefficient used to scale the right-hand side of the eigenproblem equation.
+  /**
+   * Returns the coefficient used to scale the right-hand side of the eigenproblem equation.
+   */
   Moose::MFEM::EigenRHSCoefficient getRHSCoefficient();
+
+  /**
+   * Add default weak form if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm() override;
 };
 
 #endif

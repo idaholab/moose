@@ -203,6 +203,11 @@ public:
   void setEquationSystems();
 
   /**
+   * Add default weak form if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm();
+
+  /**
    * Set all MFEM ProblemOperators to solve in this problem
    */
   void setMFEMProblemOperators();
