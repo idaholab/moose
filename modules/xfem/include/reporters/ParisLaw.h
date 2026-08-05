@@ -28,9 +28,6 @@ protected:
   const Real _paris_law_m;
   ///@}
 
-  /// The name of the reporter with K_II fracture integral values
-  const std::vector<Real> & _kii_vpp;
-
   /// Vector containing number of cycles to reach max_growth_increment postprocessor for each crack front point
   Real & _dn;
 
