@@ -351,6 +351,11 @@ prettyCppType(const T * obj = nullptr)
 }
 
 /**
+ * Returns whether every coordinate of a point is finite.
+ */
+bool isFinitePoint(const Point & point);
+
+/**
  * This routine is a simple helper function for searching a map by values instead of keys
  */
 template <typename T1, typename T2>

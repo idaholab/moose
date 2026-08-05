@@ -1,10 +1,10 @@
-# MFEM diffusion problem sampled with MFEMPointVariableValueSampler.
+# MFEM diffusion problem sampled with MFEMVariablePointValueSampler.
 
 !include ../../kernels/diffusion.i
 
 [VectorPostprocessors]
   [point_sample]
-    type = MFEMPointVariableValueSampler
+    type = MFEMVariablePointValueSampler
     variable = 'concentration'
     points = '2.125 0 -1.375  2.125 0 1.125'
   []

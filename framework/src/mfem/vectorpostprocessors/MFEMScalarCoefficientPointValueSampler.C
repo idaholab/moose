@@ -9,12 +9,12 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMPointScalarCoefficientValueSampler.h"
+#include "MFEMScalarCoefficientPointValueSampler.h"
 
 #include "MFEMProblem.h"
 #include "SubProblem.h"
 
-registerMooseObject("MooseApp", MFEMPointScalarCoefficientValueSampler);
+registerMooseObject("MooseApp", MFEMScalarCoefficientPointValueSampler);
 
 namespace
 {
@@ -28,7 +28,7 @@ mainMesh(const InputParameters & parameters)
 }
 
 InputParameters
-MFEMPointScalarCoefficientValueSampler::validParams()
+MFEMScalarCoefficientPointValueSampler::validParams()
 {
   InputParameters params = MFEMSamplerBase::validParams();
   params.addClassDescription("Sample a real scalar MFEM coefficient at specific points.");
@@ -39,7 +39,7 @@ MFEMPointScalarCoefficientValueSampler::validParams()
   return params;
 }
 
-MFEMPointScalarCoefficientValueSampler::MFEMPointScalarCoefficientValueSampler(
+MFEMScalarCoefficientPointValueSampler::MFEMScalarCoefficientPointValueSampler(
     const InputParameters & parameters)
   : MFEMSamplerBase(parameters, parameters.get<std::vector<Point>>("points"), mainMesh(parameters)),
     _coefficient(nullptr),
@@ -50,7 +50,7 @@ MFEMPointScalarCoefficientValueSampler::MFEMPointScalarCoefficientValueSampler(
 }
 
 void
-MFEMPointScalarCoefficientValueSampler::initialSetup()
+MFEMScalarCoefficientPointValueSampler::initialSetup()
 {
   _coefficient = &getScalarCoefficient("coefficient");
   if (dynamic_cast<mfem::QuadratureFunctionCoefficient *>(_coefficient))
@@ -60,19 +60,10 @@ MFEMPointScalarCoefficientValueSampler::initialSetup()
                "points.");
 
   MFEMSamplerBase::initialSetup();
-
-  const auto & point_codes = _finder.GetCode();
-  for (const auto i : index_range(_query_points))
-    if (PointLocationCode(point_codes[i]) == PointLocationCode::BORDER)
-      mooseWarning(typeAndName(),
-                   " found point ",
-                   _query_points[i],
-                   " on an element boundary. An arbitrary coefficient may be discontinuous "
-                   "there, so the element selected by GSLIB will supply the sampled value.");
 }
 
 void
-MFEMPointScalarCoefficientValueSampler::execute()
+MFEMScalarCoefficientPointValueSampler::execute()
 {
   mfem::Array<unsigned int> received_elements;
   mfem::Array<unsigned int> received_codes;
@@ -85,15 +76,7 @@ MFEMPointScalarCoefficientValueSampler::execute()
   for (const auto i : make_range(received_elements.Size()))
   {
     mfem::IntegrationPoint integration_point;
-    if (mesh_dim == 1)
-      integration_point.Set1(received_reference_points[i]);
-    else if (mesh_dim == 2)
-      integration_point.Set2(received_reference_points[2 * i],
-                             received_reference_points[2 * i + 1]);
-    else
-      integration_point.Set3(received_reference_points[3 * i],
-                             received_reference_points[3 * i + 1],
-                             received_reference_points[3 * i + 2]);
+    integration_point.Set(&received_reference_points[mesh_dim * i], mesh_dim);
 
     auto & transformation = *_mesh.GetElementTransformation(received_elements[i]);
     transformation.SetIntPoint(&integration_point);
@@ -105,7 +88,7 @@ MFEMPointScalarCoefficientValueSampler::execute()
 }
 
 void
-MFEMPointScalarCoefficientValueSampler::finalizeValues()
+MFEMScalarCoefficientPointValueSampler::finalizeValues()
 {
   const auto * const interp_vals = _interp_vals.HostRead();
   for (const auto i : index_range(_declared_vals))

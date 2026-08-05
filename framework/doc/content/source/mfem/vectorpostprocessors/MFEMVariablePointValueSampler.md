@@ -1,4 +1,4 @@
-# MFEMPointVariableValueSampler
+# MFEMVariablePointValueSampler
 
 !if! function=hasCapability('mfem')
 
@@ -12,11 +12,11 @@ set of specified points using MFEM's
 
 !listing mfem/vectorpostprocessors/point_value_sampler/point_value_sampler_diffusion.i block=VectorPostprocessors
 
-!syntax parameters /VectorPostprocessors/MFEMPointVariableValueSampler
+!syntax parameters /VectorPostprocessors/MFEMVariablePointValueSampler
 
-!syntax inputs /VectorPostprocessors/MFEMPointVariableValueSampler
+!syntax inputs /VectorPostprocessors/MFEMVariablePointValueSampler
 
-!syntax children /VectorPostprocessors/MFEMPointVariableValueSampler
+!syntax children /VectorPostprocessors/MFEMVariablePointValueSampler
 
 !if-end!
 

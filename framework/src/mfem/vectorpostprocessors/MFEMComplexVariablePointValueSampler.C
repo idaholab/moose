@@ -9,12 +9,12 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMComplexPointVariableValueSampler.h"
+#include "MFEMComplexVariablePointValueSampler.h"
 
-registerMooseObject("MooseApp", MFEMComplexPointVariableValueSampler);
+registerMooseObject("MooseApp", MFEMComplexVariablePointValueSampler);
 
 InputParameters
-MFEMComplexPointVariableValueSampler::validParams()
+MFEMComplexVariablePointValueSampler::validParams()
 {
   InputParameters params = MFEMComplexVariableValueSamplerBase::validParams();
   params.addClassDescription("Sample a complex MFEM variable at specific points, outputting "
@@ -24,7 +24,7 @@ MFEMComplexPointVariableValueSampler::validParams()
   return params;
 }
 
-MFEMComplexPointVariableValueSampler::MFEMComplexPointVariableValueSampler(
+MFEMComplexVariablePointValueSampler::MFEMComplexVariablePointValueSampler(
     const InputParameters & parameters)
   : MFEMComplexVariableValueSamplerBase(parameters, parameters.get<std::vector<Point>>("points"))
 {
