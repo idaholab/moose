@@ -110,6 +110,7 @@
 #include "MooseVariableFV.h"
 #include "MooseLinearVariableFV.h"
 #include "FVBoundaryCondition.h"
+#include "FVFluxBC.h"
 #include "LinearFVBoundaryCondition.h"
 #include "FVInterfaceKernel.h"
 #include "Reporter.h"
@@ -263,6 +264,12 @@ FEProblemBase::validParams()
                         "and/or multiple DirichletBCs per sideset");
 
   params.addParam<bool>(
+      "fv_face_integrity_check",
+      true,
+      "Set to false to disable checking that FV flux boundary conditions and FV interface "
+      "kernels are applied to faces with valid variable ownership and interface topology.");
+
+  params.addParam<bool>(
       "material_dependency_check", true, "Set to false to disable material dependency check");
   params.addParam<bool>("parallel_barrier_messaging",
                         false,
@@ -374,7 +381,7 @@ FEProblemBase::validParams()
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
       "boundary_restricted_elem_integrity_check material_coverage_check "
-      "material_coverage_block_list fv_bcs_integrity_check "
+      "material_coverage_block_list fv_bcs_integrity_check fv_face_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
@@ -493,6 +500,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
     _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
+    _fv_face_integrity_check(getParam<bool>("fv_face_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
 #ifndef NDEBUG
@@ -1479,6 +1487,56 @@ FEProblemBase::initialSetup()
     ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
     BoundaryElemIntegrityCheckThread beict(*this, uo_query);
     Threads::parallel_reduce(bnd_elems, beict);
+  }
+
+  if (_fv_face_integrity_check)
+  {
+    TIME_SECTION("FVFaceIntegrityCheck", 5);
+
+    auto check_fv_face_integrity = [this](MooseMesh & fv_mesh, const bool on_displaced)
+    {
+      auto flux_bc_base_query = theWarehouse().query();
+      flux_bc_base_query.condition<AttribSystem>("FVFluxBC");
+      flux_bc_base_query.condition<AttribDisplaced>(on_displaced);
+      flux_bc_base_query.condition<AttribThread>(0);
+      TheWarehouse::QueryCache<AttribBoundaries> flux_bc_query(flux_bc_base_query);
+
+      auto interface_kernel_base_query = theWarehouse().query();
+      interface_kernel_base_query.condition<AttribSystem>("FVInterfaceKernel");
+      interface_kernel_base_query.condition<AttribDisplaced>(on_displaced);
+      interface_kernel_base_query.condition<AttribThread>(0);
+      TheWarehouse::QueryCache<AttribBoundaries> interface_kernel_query(
+          interface_kernel_base_query);
+
+      std::vector<FVFluxBC *> flux_bcs;
+      std::vector<FVInterfaceKernel *> interface_kernels;
+
+      for (auto face_it = fv_mesh.ownedFaceInfoBegin();
+           face_it != fv_mesh.ownedFaceInfoEnd();
+           ++face_it)
+      {
+        const FaceInfo & fi = **face_it;
+
+        for (const auto boundary_id : fi.boundaryIDs())
+        {
+          auto boundary_key = std::make_tuple(boundary_id, false);
+
+          flux_bc_query.queryInto(flux_bcs, boundary_key);
+          for (const auto * const flux_bc : flux_bcs)
+            flux_bc->checkFaceIntegrity(fi);
+
+          interface_kernel_query.queryInto(interface_kernels, boundary_key);
+          for (const auto * const interface_kernel : interface_kernels)
+            interface_kernel->checkFaceIntegrity(fi);
+        }
+      }
+    };
+
+    if (haveFV())
+      check_fv_face_integrity(mesh(), false);
+
+    if (_displaced_problem && _displaced_problem->haveFV())
+      check_fv_face_integrity(_displaced_problem->mesh(), true);
   }
 
   if (!_app.isRecovering())
