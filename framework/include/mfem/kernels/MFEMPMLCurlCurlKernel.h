@@ -28,7 +28,7 @@ protected:
   {
     // In two dimensions the curl of a vector field is a scalar, so this term picks up only the
     // inverse determinant of the stretch rather than the full tensor.
-    if (_stretch->dim() == 2)
+    if (_stretch.dim() == 2)
       return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _scalar_re
                                                                                : _scalar_im);
     return new mfem::CurlCurlIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _matrix_re
