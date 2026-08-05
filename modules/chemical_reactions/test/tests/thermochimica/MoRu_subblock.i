@@ -11,27 +11,27 @@
 []
 
 [ChemicalComposition]
-  tunit = K
-  punit = atm
-  munit = moles
-  is_fv = true
+  temperature_unit = K
+  pressure_unit = atm
+  composition_unit = moles
+  evaluation_location = elemental
   temperature = T
   [block_0]
     block = '0'
     elements = 'Mo Ru'
-    thermofile = Kaye_NobleMetals.dat
+    thermodynamic_database = Kaye_NobleMetals.dat
     output_phases = 'BCCN HCPN'
     output_species = 'BCCN:Mo'
-    is_fv = false
-    output_species_unit = mole_fraction
+    evaluation_location = nodal
+    species_output_unit = mole_fraction
   []
   [block_1]
     block = '1'
     elements = 'Fe O'
-    thermofile = FeTiVO.dat
+    thermodynamic_database = FeTiVO.dat
     output_phases = 'gas_ideal'
     output_species = 'SlagBsoln:Fe2O3'
-    output_species_unit = moles
+    species_output_unit = moles
   []
 []
 

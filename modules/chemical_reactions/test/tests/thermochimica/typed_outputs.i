@@ -1,0 +1,235 @@
+[Mesh]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 2
+  []
+[]
+
+[ChemicalComposition]
+  [thermo]
+    elements = 'Mo Ru'
+    thermodynamic_database = Kaye_NobleMetals.dat
+    temperature_unit = K
+    pressure_unit = atm
+    composition_unit = moles
+    temperature = 2250
+
+    [Outputs]
+      [Phases]
+        [hcp_amount]
+          phase = HCPN
+        []
+        [bcc_phase_fraction]
+          phase = BCCN
+          unit = mole_fraction
+        []
+        [hcp_phase_fraction]
+          phase = HCPN
+          unit = mole_fraction
+        []
+      []
+      [Species]
+        [hcp_mo_fraction]
+          phase = HCPN
+          species = Mo
+          unit = mole_fraction
+        []
+        [hcp_mo_moles]
+          phase = HCPN
+          species = Mo
+          unit = moles
+        []
+      []
+      [ElementPotentials]
+        [mo_chemical_potential]
+          element = Mo
+        []
+      []
+      [VaporPressures]
+        [mo_vapor_pressure]
+          phase = gas_ideal
+          species = Mo
+        []
+      []
+      [ElementDistribution]
+        [mo_in_hcp]
+          phase = HCPN
+          element = Mo
+          variable = hcp_mo_element_amount
+        []
+        [mo_in_bcc_fraction]
+          phase = BCCN
+          element = Mo
+          unit = fraction
+        []
+        [mo_in_hcp_fraction]
+          phase = HCPN
+          element = Mo
+          unit = fraction
+        []
+      []
+      [ChemicalPotentials]
+        [hcp_mo_species_potential]
+          phase = HCPN
+          species = Mo
+        []
+      []
+      [PhaseGibbsEnergies]
+        [hcp_gibbs_energy]
+          phase = HCPN
+        []
+        [hcp_molar_gibbs_energy]
+          phase = HCPN
+          unit = joules_per_mole
+        []
+      []
+      [PhaseDrivingForces]
+        [bcc_driving_force]
+          phase = BCCN
+        []
+        [hcp_driving_force]
+          phase = HCPN
+        []
+      []
+      [SystemGibbsEnergies]
+        [system_gibbs_energy]
+        []
+      []
+      [SystemProperties]
+        [system_enthalpy]
+          property = enthalpy
+        []
+        [system_entropy]
+          property = entropy
+        []
+        [system_heat_capacity]
+          property = heat_capacity
+        []
+      []
+    []
+  []
+[]
+
+[ICs]
+  [Mo]
+    type = FunctionIC
+    variable = Mo
+    function = '0.8*(1-x)+4.3*x'
+  []
+  [Ru]
+    type = FunctionIC
+    variable = Ru
+    function = '0.2*(1-x)+4.5*x'
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+[Postprocessors]
+  [hcp_amount]
+    type = NodalVariableValue
+    variable = hcp_amount
+    nodeid = 1
+  []
+  [hcp_mo_fraction]
+    type = NodalVariableValue
+    variable = hcp_mo_fraction
+    nodeid = 1
+  []
+  [bcc_phase_fraction]
+    type = NodalVariableValue
+    variable = bcc_phase_fraction
+    nodeid = 1
+  []
+  [hcp_phase_fraction]
+    type = NodalVariableValue
+    variable = hcp_phase_fraction
+    nodeid = 1
+  []
+  [hcp_mo_moles]
+    type = NodalVariableValue
+    variable = hcp_mo_moles
+    nodeid = 1
+  []
+  [mo_chemical_potential]
+    type = NodalVariableValue
+    variable = mo_chemical_potential
+    nodeid = 1
+  []
+  [mo_vapor_pressure]
+    type = NodalVariableValue
+    variable = mo_vapor_pressure
+    nodeid = 1
+  []
+  [hcp_mo_element_amount]
+    type = NodalVariableValue
+    variable = hcp_mo_element_amount
+    nodeid = 1
+  []
+  [mo_in_bcc_fraction]
+    type = NodalVariableValue
+    variable = mo_in_bcc_fraction
+    nodeid = 1
+  []
+  [mo_in_hcp_fraction]
+    type = NodalVariableValue
+    variable = mo_in_hcp_fraction
+    nodeid = 1
+  []
+  [hcp_mo_species_potential]
+    type = NodalVariableValue
+    variable = hcp_mo_species_potential
+    nodeid = 1
+  []
+  [hcp_gibbs_energy]
+    type = NodalVariableValue
+    variable = hcp_gibbs_energy
+    nodeid = 1
+  []
+  [hcp_molar_gibbs_energy]
+    type = NodalVariableValue
+    variable = hcp_molar_gibbs_energy
+    nodeid = 1
+  []
+  [bcc_driving_force]
+    type = NodalVariableValue
+    variable = bcc_driving_force
+    nodeid = 1
+  []
+  [hcp_driving_force]
+    type = NodalVariableValue
+    variable = hcp_driving_force
+    nodeid = 1
+  []
+  [system_gibbs_energy]
+    type = NodalVariableValue
+    variable = system_gibbs_energy
+    nodeid = 1
+  []
+  [system_enthalpy]
+    type = NodalVariableValue
+    variable = system_enthalpy
+    nodeid = 1
+  []
+  [system_entropy]
+    type = NodalVariableValue
+    variable = system_entropy
+    nodeid = 1
+  []
+  [system_heat_capacity]
+    type = NodalVariableValue
+    variable = system_heat_capacity
+    nodeid = 1
+  []
+[]
+
+[Outputs]
+  csv = true
+[]
