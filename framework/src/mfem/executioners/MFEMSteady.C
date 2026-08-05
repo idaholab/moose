@@ -43,9 +43,10 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   {
     if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
     {
-      if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
+      if (auto * eigen_problem = dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
       {
-        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
+        _mfem_problem_data.eqn_system =
+            std::make_shared<Moose::MFEM::EigenproblemEquationSystem>(*eigen_problem);
         auto problem_operator =
             std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(_mfem_problem);
         addProblemOperator(std::move(problem_operator));
