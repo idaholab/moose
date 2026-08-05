@@ -108,13 +108,18 @@ protected:
   /// Build the operator integrator for the real or imaginary part of the stretched coefficient.
   virtual mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) = 0;
 
-  /// Construct the stretch from the mesh, this kernel's block and the input parameters.
-  std::unique_ptr<MFEMPMLStretchVector> makeStretch();
+  /// The stretch for this layer, declared as a vector coefficient under a reserved name the first
+  /// time it is asked for and shared by every kernel acting on the same layer thereafter, so that
+  /// the harmonic coordinate is solved for once rather than once per kernel.
+  MFEMPMLStretchVector & getStretch();
+
+  /// Reserved coefficient name identifying the stretch for this layer and these profile parameters.
+  std::string stretchName();
 
   /// Base scalar coefficient, such as the reluctivity or the mass coefficient.
   mfem::Coefficient & _base_coefficient;
   /// Declared before the coefficients below, which hold a reference to it.
-  std::unique_ptr<MFEMPMLStretchVector> _stretch;
+  MFEMPMLStretchVector & _stretch;
   MFEMPMLMatrixCoefficient _matrix_re;
   MFEMPMLMatrixCoefficient _matrix_im;
   MFEMPMLScalarCoefficient _scalar_re;
