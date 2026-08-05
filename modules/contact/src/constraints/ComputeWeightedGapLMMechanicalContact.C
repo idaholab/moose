@@ -63,6 +63,8 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  params.set<bool>("ghost_point_neighbors") = true;
+  params.suppressParameter<bool>("ghost_point_neighbors");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
@@ -85,12 +87,22 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
-    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
+    // UserObjectInterface returns const references; this constraint configures the UO before
+    // execution.
+    _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
+        getUserObject<WeightedGapUserObject>("weighted_gap_uo")))
 {
+  _weighted_gap_uo.includeNodalNormalDerivatives();
+
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
         "use_displaced_mesh",
         "'use_displaced_mesh' must be true for the ComputeWeightedGapLMMechanicalContact object");
+
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Mechanical mortar contact uses normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
 
   if (!_var->isNodal())
     if (_var->feType().order != static_cast<Order>(0))

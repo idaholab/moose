@@ -191,6 +191,13 @@ i.e. the "sparse size" (stored as a `_dynamic_N` data member) of its
 data containers will never exceed what is required for the run-time problem,
 e.g. 18 for the 2D second-order solid mechanics example.
 
+Objects that intentionally assemble a constrained batch of AD residual rows
+with different derivative supports must use the heterogeneous-row Jacobian
+caching API. That path forms the union of derivative indices so that libMesh
+can constrain the complete local matrix before its nonzero entries are cached.
+The ordinary Jacobian path assumes a common derivative support and does not
+inspect every row in optimized builds.
+
 ## AD in MOOSE
 
 As mentioned in above, MetaPhysicL is a forward-mode [!ac](AD)

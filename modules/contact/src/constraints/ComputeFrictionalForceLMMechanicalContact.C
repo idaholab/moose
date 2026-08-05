@@ -56,7 +56,10 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
 ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalContact(
     const InputParameters & parameters)
   : ComputeWeightedGapLMMechanicalContact(parameters),
-    _weighted_velocities_uo(getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")),
+    // UserObjectInterface returns const references; this constraint configures the UO before
+    // execution.
+    _weighted_velocities_uo(const_cast<WeightedVelocitiesUserObject &>(
+        getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo"))),
     _c_t(getParam<Real>("c_t")),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
@@ -73,6 +76,8 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
+  _weighted_velocities_uo.includeNodalNormalDerivatives();
+
   if (parameters.isParamSetByUser("mu") && _has_friction_function)
     paramError(
         "mu",

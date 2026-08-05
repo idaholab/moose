@@ -54,6 +54,18 @@ WeightedVelocitiesUserObject::WeightedVelocitiesUserObject(const InputParameters
                "'use_displaced_mesh' must be true for the WeightedVelocitiesUserObject object");
 }
 
+std::array<ADRealVectorValue, 2>
+WeightedVelocitiesUserObject::contactTangents(const Elem & lower_secondary_elem,
+                                              const unsigned int nodal_index) const
+{
+  mooseAssert(nodal_index < lower_secondary_elem.n_nodes(),
+              "Nodal tangent index must refer to a node on the secondary element.");
+  mooseAssert(usesNodalNormalDerivatives(),
+              "AD contact tangents should only be requested while recording nodal-normal "
+              "derivatives.");
+  return Moose::Mortar::householderTangents(contactNormal(lower_secondary_elem, nodal_index));
+}
+
 void
 WeightedVelocitiesUserObject::computeQpProperties()
 {
@@ -105,25 +117,40 @@ WeightedVelocitiesUserObject::computeQpIProperties()
 {
   WeightedGapUserObject::computeQpIProperties();
 
-  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
   // Get the _dof_to_weighted_tangential_velocity map
   const DofObject * const dof =
       _is_weighted_gap_nodal ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                              : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  _dof_to_weighted_tangential_velocity[dof][0] +=
-      (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
-  _dof_to_real_tangential_velocity[dof][0] +=
-      (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[0][_i];
-
-  // Get the _dof_to_weighted_tangential_velocity map for a second direction
-  if (_3d)
+  if (usesNodalNormalDerivatives())
   {
-    _dof_to_weighted_tangential_velocity[dof][1] +=
-        (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
+    const auto tangents = contactTangents(*_lower_secondary_elem, _i);
+    for (const auto direction : make_range(_3d ? 2 : 1))
+    {
+      _dof_to_weighted_tangential_velocity[dof][direction] +=
+          (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * tangents[direction];
+      _dof_to_real_tangential_velocity[dof][direction] +=
+          (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * tangents[direction];
+    }
+  }
+  else
+  {
+    const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
 
-    _dof_to_real_tangential_velocity[dof][1] +=
-        (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[1][_i];
+    _dof_to_weighted_tangential_velocity[dof][0] +=
+        (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
+    _dof_to_real_tangential_velocity[dof][0] +=
+        (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[0][_i];
+
+    // Get the _dof_to_weighted_tangential_velocity map for a second direction
+    if (_3d)
+    {
+      _dof_to_weighted_tangential_velocity[dof][1] +=
+          (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
+
+      _dof_to_real_tangential_velocity[dof][1] +=
+          (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[1][_i];
+    }
   }
 }
 
