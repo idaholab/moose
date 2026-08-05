@@ -539,10 +539,7 @@ MFEMProblem::setMFEMProblemOperators()
   }
 
   for (const auto & problem_operator : getProblemOperators())
-  {
-    problem_operator->SetGridFunctions();
     problem_operator->Init(_problem_data.true_solution);
-  }
 }
 
 int
