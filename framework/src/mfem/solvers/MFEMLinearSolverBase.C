@@ -21,13 +21,22 @@ LinearSolverBase::validParams()
   InputParameters params = SolverBase::validParams();
   params.addClassDescription(
       "Base class for defining linear mfem::Solver derived classes for Moose.");
+  params.addParam<std::string>(
+      "equation_system",
+      "",
+      "Optional parameter specifying the name of the weak form corresponding to the equation "
+      "system providing context for this operator. If not provided, the first found system will be "
+      "used instead.");
   return params;
 }
 
 LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
   : SolverBase(parameters),
     _preconditioner{nullptr},
-    _equation_system(getMFEMProblem().getProblemData().eqn_systems.begin()->second)
+    _equation_system(isParamSetByUser("equation_system")
+                         ? getMFEMProblem().getProblemData().eqn_systems.GetShared(
+                               getParam<std::string>("equation_system"))
+                         : getMFEMProblem().getProblemData().eqn_systems.begin()->second)
 {
 }
 
