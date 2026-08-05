@@ -468,8 +468,8 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
 void
 MFEMProblem::setEquationSystems()
 {
-  std::vector<MFEMWeakForm *> weak_forms;
-  theWarehouse().query().condition<AttribSystem>("MFEMWeakForm").queryInto(weak_forms);
+  std::vector<MFEMWeakFormBase *> weak_forms;
+  theWarehouse().query().condition<AttribSystem>("MFEMWeakFormBase").queryInto(weak_forms);
 
   if (weak_forms.empty()) // Add default MFEMWeakForm if none has been added by user
   {
@@ -490,7 +490,7 @@ MFEMProblem::addWeakForm(const std::string & weak_form_name,
                          const std::string & name,
                          InputParameters & parameters)
 {
-  addObject<MFEMWeakForm>(weak_form_name, name, parameters);
+  addObject<MFEMWeakFormBase>(weak_form_name, name, parameters);
 }
 
 /// Returns a pointer to the operator's equation system.
