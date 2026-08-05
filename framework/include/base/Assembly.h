@@ -24,6 +24,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem_side_builder.h"
 
+#include <algorithm>
 #include <unordered_map>
 
 // libMesh forward declarations
@@ -1259,6 +1260,17 @@ public:
                      Real scaling_factor,
                      LocalDataKey,
                      const std::set<TagID> & matrix_tags);
+
+  /**
+   * Process AD residual rows whose derivative supports differ. This method forms a common column
+   * layout before applying libMesh constraints.
+   */
+  template <typename Residuals, typename Indices>
+  void cacheJacobianWithHeterogeneousRowSupport(const Residuals & residuals,
+                                                const Indices & row_indices,
+                                                Real scaling_factor,
+                                                LocalDataKey,
+                                                const std::set<TagID> & matrix_tags);
 
   /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
@@ -3172,6 +3184,57 @@ Assembly::cacheJacobian(const Residuals & residuals,
   for (const auto i : index_range(_row_indices))
     for (const auto j : index_range(_column_indices))
       cacheJacobian(_row_indices[i], _column_indices[j], _element_matrix(i, j), {}, matrix_tags);
+}
+
+template <typename Residuals, typename Indices>
+void
+Assembly::cacheJacobianWithHeterogeneousRowSupport(const Residuals & residuals,
+                                                   const Indices & input_row_indices,
+                                                   const Real scaling_factor,
+                                                   LocalDataKey,
+                                                   const std::set<TagID> & matrix_tags)
+{
+  mooseAssert(residuals.size() == input_row_indices.size(),
+              "The number of residuals should match the number of dof indices");
+
+  if (!computingJacobian() || matrix_tags.empty())
+    return;
+
+  // libMesh constraints require one column layout shared by every residual row.
+  std::size_t combined_support_size = 0;
+  for (const auto i : index_range(residuals))
+    combined_support_size += residuals[i].derivatives().nude_indices().size();
+
+  _column_indices.clear();
+  _column_indices.reserve(combined_support_size);
+  for (const auto i : index_range(residuals))
+  {
+    const auto & current_dofs = residuals[i].derivatives().nude_indices();
+    _column_indices.insert(_column_indices.end(), current_dofs.begin(), current_dofs.end());
+  }
+  std::sort(_column_indices.begin(), _column_indices.end());
+  _column_indices.erase(std::unique(_column_indices.begin(), _column_indices.end()),
+                        _column_indices.end());
+
+  if (_column_indices.empty())
+    return;
+
+  _row_indices.assign(input_row_indices.begin(), input_row_indices.end());
+  _element_matrix.resize(_row_indices.size(), _column_indices.size());
+  for (const auto i : index_range(_row_indices))
+  {
+    const auto & sparse_derivatives = residuals[i].derivatives();
+    for (const auto j : index_range(_column_indices))
+      _element_matrix(i, j) = sparse_derivatives[_column_indices[j]] * scaling_factor;
+  }
+
+  _dof_map.constrain_element_matrix(_element_matrix, _row_indices, _column_indices);
+
+  for (const auto i : index_range(_row_indices))
+    for (const auto j : index_range(_column_indices))
+      // Cache only entries that remain nonzero after applying constraints.
+      if (_element_matrix(i, j) != 0.0)
+        cacheJacobian(_row_indices[i], _column_indices[j], _element_matrix(i, j), {}, matrix_tags);
 }
 
 template <typename Residuals, typename Indices>
