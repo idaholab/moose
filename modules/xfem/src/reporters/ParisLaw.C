@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParisLaw.h"
-#include "VectorPostprocessorInterface.h"
 #include "MathUtils.h"
 #include <limits>
 
@@ -25,8 +24,6 @@ ParisLaw::validParams()
       "fracture integral VectorPostprocessors.");
   params.addRequiredParam<Real>("paris_law_c", "parameter C in the Paris law for fatigue");
   params.addRequiredParam<Real>("paris_law_m", "parameter m in the Paris law for fatigue");
-  params.addParam<VectorPostprocessorName>(
-      "kii_vectorpostprocessor", "II_KII_1", "Name of the vectorpostprocessor that computes K_II");
   params.addParam<ReporterValueName>(
       "growth_increment_name",
       "growth_increment",
@@ -42,8 +39,6 @@ ParisLaw::ParisLaw(const InputParameters & parameters)
   : CrackGrowthReporterBase(parameters),
     _paris_law_c(getParam<Real>("paris_law_c")),
     _paris_law_m(getParam<Real>("paris_law_m")),
-    _kii_vpp(getVectorPostprocessorValue(
-        "kii_vectorpostprocessor", getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))),
     _dn(declareValueByName<Real>(getParam<ReporterValueName>("cycles_to_max_growth_increment_name"),
                                  REPORTER_MODE_ROOT)),
     _growth_increment(declareValueByName<std::vector<Real>>(
