@@ -372,7 +372,8 @@ EquationSystem::ApplyDomainBLFIntegrators(
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
-        kernel->isSubdomainRestricted()
+        kernel->isDGKernel() ? form->AddInteriorFaceIntegrator(std::move(integ))
+        : kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
       }
@@ -402,7 +403,10 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
-        bc->isBoundaryRestricted()
+        bc->isDGBC() ? bc->isBoundaryRestricted()
+                           ? form->AddBdrFaceIntegrator(std::move(integ), bc->getBoundaryMarkers())
+                           : form->AddBdrFaceIntegrator(std::move(integ))
+        : bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
       }
