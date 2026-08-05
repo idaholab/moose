@@ -27,7 +27,7 @@ LinearSolverBase::validParams()
 LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
   : SolverBase(parameters),
     _preconditioner{nullptr},
-    _equation_system(getMFEMProblem().getProblemData().eqn_systems[0])
+    _equation_system(getMFEMProblem().getProblemData().eqn_systems.begin()->second)
 {
 }
 

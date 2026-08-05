@@ -23,7 +23,7 @@ public:
   ComplexEquationSystemProblemOperator(MFEMProblem & problem)
     : EquationSystemProblemOperator(problem),
       _equation_system{std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(
-          _problem_data.eqn_systems[0])}
+          _problem_data.eqn_systems.begin()->second)}
   {
   }
 

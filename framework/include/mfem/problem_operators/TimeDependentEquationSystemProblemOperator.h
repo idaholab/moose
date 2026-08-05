@@ -25,8 +25,8 @@ class TimeDependentEquationSystemProblemOperator : public TimeDependentProblemOp
 public:
   TimeDependentEquationSystemProblemOperator(MFEMProblem & problem)
     : TimeDependentProblemOperator(problem),
-      _equation_system(
-          std::dynamic_pointer_cast<TimeDependentEquationSystem>(_problem_data.eqn_systems[0]))
+      _equation_system(std::dynamic_pointer_cast<TimeDependentEquationSystem>(
+          _problem_data.eqn_systems.begin()->second))
   {
   }
 
