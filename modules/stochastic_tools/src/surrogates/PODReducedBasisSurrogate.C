@@ -55,6 +55,10 @@ PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & param
 void
 PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params)
 {
+  if (!isReady())
+    mooseError(
+        "POD-RB surrogate '", name(), "' does not have basis vectors and reduced operators.");
+
   if (!_initialized)
   {
     // The containers are initialized (if needed).
@@ -75,6 +79,10 @@ PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params,
                                            DenseVector<Real> & inp_vector,
                                            std::string var_name)
 {
+  if (!isReady())
+    mooseError(
+        "POD-RB surrogate '", name(), "' does not have basis vectors and reduced operators.");
+
   if (!_initialized)
   {
     // The containers are initialized (if needed).
@@ -87,6 +95,23 @@ PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params,
 
   // Reconstructing the approximate solutions for every variable.
   reconstructApproximateSolution(inp_vector, var_name);
+}
+
+bool
+PODReducedBasisSurrogate::isReady() const
+{
+  if (_base.empty() || _red_operators.empty())
+    return false;
+
+  for (const auto & bases : _base)
+    if (bases.empty())
+      return false;
+
+  for (const auto & op : _red_operators)
+    if (op.m() == 0 || op.n() == 0)
+      return false;
+
+  return true;
 }
 
 void

@@ -1,5 +1,5 @@
 [Tests]
-  issues = "#15538"
+  issues = "#15538 #24527"
   design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md "
            "PODSamplerSolutionTransfer.md PODResidualTransfer.md"
 
@@ -36,6 +36,15 @@
       allow_test_objects = true
       csvdiff = 'trainer_and_surr_out_res_0002.csv'
       detail = 'and doing both together in one input file.'
+      max_parallel = 3 # We need fewer processors than samples
+    []
+    [train_and_load_initial]
+      type = RunApp
+      input = trainer_and_surr.i
+      cli_args = "Trainers/pod_rb/execute_on='initial timestep_begin final' "
+                 "VectorPostprocessors/res/execute_on='initial final'"
+      allow_test_objects = true
+      detail = 'and safely handling INITIAL execution before training data is available.'
       max_parallel = 3 # We need fewer processors than samples
     []
   []
