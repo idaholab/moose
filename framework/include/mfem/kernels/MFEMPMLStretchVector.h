@@ -43,7 +43,7 @@ public:
 
   int dim() const { return _dim; }
 
-  void Eval(mfem::Vector & displacement,
+  void Eval(mfem::Vector & W,
             mfem::ElementTransformation & transformation,
             const mfem::IntegrationPoint & integration_point) override;
 
@@ -51,7 +51,7 @@ public:
   void stretchGradient(mfem::ElementTransformation & transformation,
                        mfem::DenseMatrix & gradient) const
   {
-    _displacement.GetVectorGradient(transformation, gradient);
+    _W_h1.GetVectorGradient(transformation, gradient);
   }
 
 private:
@@ -69,11 +69,11 @@ private:
   const int _dim;
   const double _decay_coefficient;
   const double _decay_polynomial;
-  mfem::H1_FECollection _collection;
-  mfem::ParFiniteElementSpace _scalar_space;
-  mfem::ParFiniteElementSpace _vector_space;
-  mfem::ParGridFunction _harmonic_coordinate;
-  mfem::ParGridFunction _displacement;
+  mfem::H1_FECollection _h1_coll;
+  mfem::ParFiniteElementSpace _h1_scalar_fes;
+  mfem::ParFiniteElementSpace _h1_vector_fes;
+  mfem::ParGridFunction _psi;
+  mfem::ParGridFunction _W_h1;
 };
 
 #endif

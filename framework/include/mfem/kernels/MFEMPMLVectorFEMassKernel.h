@@ -24,9 +24,10 @@ public:
   MFEMPMLVectorFEMassKernel(const InputParameters & parameters);
 
 protected:
-  mfem::BilinearFormIntegrator * makeIntegrator(MFEMPMLMatrixCoefficient::Part part) override
+  mfem::BilinearFormIntegrator *
+  makeIntegrator(MFEMPMLMatrixCoefficient::ComplexComponent comp) override
   {
-    return new mfem::VectorFEMassIntegrator(part == MFEMPMLMatrixCoefficient::RE ? _matrix_re
+    return new mfem::VectorFEMassIntegrator(comp == MFEMPMLMatrixCoefficient::RE ? _matrix_re
                                                                                  : _matrix_im);
   }
 };
