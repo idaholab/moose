@@ -24,6 +24,7 @@
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/enum_elem_quality.h"
 #include "libmesh/enum_elem_type.h"
 
 #include "LibtorchUtils.h"
@@ -137,6 +138,8 @@ inline void dataStore(std::ostream & stream, EnumType & enum_type, void * ctx) \
 dataStoreEnum(libMesh::FEFamily, int)
 dataStoreEnum(libMesh::ParallelType, int)
 dataStoreEnum(Moose::CoordinateSystemType, int)
+dataStoreEnum(libMesh::ElemQuality, int)
+dataStoreEnum(libMesh::ElemType, int)
 dataStoreEnum(libMesh::ElemMappingType, unsigned char)
 
 template <>
@@ -681,6 +684,8 @@ inline void dataLoad(std::istream & stream, EnumType & enum_type, void * ctx) \
 dataLoadEnum(libMesh::FEFamily, int)
 dataLoadEnum(libMesh::ParallelType, int)
 dataLoadEnum(Moose::CoordinateSystemType, int)
+dataLoadEnum(libMesh::ElemQuality, int)
+dataLoadEnum(libMesh::ElemType, int)
 dataLoadEnum(libMesh::ElemMappingType, unsigned char)
 
 template <>
