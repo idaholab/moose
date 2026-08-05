@@ -48,9 +48,8 @@ protected:
   /// The advected quantity
   AdvectedQuantityEnum _advected_quantity;
 
-  /// The constant specific heat value. Only needed for temperature advection, with
-  /// the assumption of constant cp.
-  const Real _cp;
+  /// The specific heat functor. Only needed for temperature advection.
+  const Moose::Functor<Real> * const _specific_heat;
 
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
@@ -63,6 +62,9 @@ private:
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
   Real _face_mass_flux;
+
+  /// Container for the specific heat on the face
+  Real _face_specific_heat;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;

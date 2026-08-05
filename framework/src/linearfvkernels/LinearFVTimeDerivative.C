@@ -19,6 +19,12 @@ LinearFVTimeDerivative::validParams()
                              "time derivative term in a partial differential equation.");
   params.addParam<MooseFunctorName>(
       "factor", 1.0, "A multiplier on the variable within the time derivative.");
+  params.addParam<bool>(
+      "use_old_state_factor_for_rhs",
+      false,
+      "Use old, older, etc. factor states in the time-derivative right hand side. This represents "
+      "the product time derivative d(factor * variable) / dt while preserving the current factor "
+      "on the matrix contribution.");
   return params;
 }
 
@@ -26,19 +32,21 @@ LinearFVTimeDerivative::LinearFVTimeDerivative(const InputParameters & params)
   : LinearFVElementalKernel(params),
     _factor(getFunctor<Real>("factor")),
     _time_integrator(_sys.getTimeIntegrator(_var_num)),
+    _use_old_state_factor_for_rhs(getParam<bool>("use_old_state_factor_for_rhs")),
     _factor_history(_time_integrator.numStatesRequired(), 0.0),
     _state_args(_time_integrator.numStatesRequired(), determineState())
 {
   // In case we need older states
   for (const auto i : index_range(_state_args))
-    _state_args[i] = Moose::StateArg(i, Moose::SolutionIterationType::Time);
+    _state_args[i] = Moose::StateArg(i + (_use_old_state_factor_for_rhs ? 1 : 0),
+                                     Moose::SolutionIterationType::Time);
 }
 
 Real
 LinearFVTimeDerivative::computeMatrixContribution()
 {
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
-  return _time_integrator.timeDerivativeMatrixContribution(_factor(elem_arg, _state_args[0])) *
+  return _time_integrator.timeDerivativeMatrixContribution(_factor(elem_arg, determineState())) *
          _current_elem_volume;
 }
 

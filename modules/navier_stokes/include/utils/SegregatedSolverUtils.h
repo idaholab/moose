@@ -20,20 +20,25 @@ namespace NS
 namespace FV
 {
 /**
- * Relax the matrix to ensure diagonal dominance, we hold onto the difference in diagonals
- * for later use in relaxing the right hand side. For the details of this relaxation process, see
+ * Relax the matrix diagonal for equation under-relaxation, optionally adding the extra
+ * segregated-solver diagonal-dominance enforcement. We hold onto the difference in diagonals for
+ * later use in relaxing the right hand side. For the details of the dominance-enforcement
+ * process, see
  *
  * Juretic, Franjo. Error analysis in finite volume CFD. Diss.
  * Imperial College London (University of London), 2005.
  *
  * @param matrix_in The matrix that needs to be relaxed
  * @param relaxation_parameter The scale which described how much the matrix is relaxed
- * @param diff_diagonal A vector holding the $A_{diag}-A_{diag, relaxed}$ entries for further
+ * @param diff_diagonal A vector holding the $A_{diag, relaxed}-A_{diag}$ entries for further
  *                      use in the relaxation of the right hand side
+ * @param enforce_diagonal_dominance Whether to additionally enlarge the diagonal so that it is at
+ *                                   least as large as the off-diagonal absolute row sum.
  */
 void relaxMatrix(SparseMatrix<Number> & matrix_in,
                  const Real relaxation_parameter,
-                 NumericVector<Number> & diff_diagonal);
+                 NumericVector<Number> & diff_diagonal,
+                 const bool enforce_diagonal_dominance = true);
 
 /**
  * Relax the right hand side of an equation, this needs to be called once and the system matrix

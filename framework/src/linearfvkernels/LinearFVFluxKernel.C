@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVFluxKernel.h"
+#include "LinearFVAssemblyConsumer.h"
 #include "LinearFVBoundaryCondition.h"
 
 InputParameters
@@ -50,15 +51,17 @@ LinearFVFluxKernel::addMatrixContribution()
     // (diagonal).
     const auto elem_matrix_contribution = computeElemMatrixContribution();
     const auto neighbor_matrix_contribution = computeNeighborMatrixContribution();
+    const bool elem_has_blocks = hasBlocks(_current_face_info->elemInfo()->subdomain_id());
+    const bool neighbor_has_blocks = hasBlocks(_current_face_info->neighborInfo()->subdomain_id());
 
     // Populate matrix
-    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
+    if (elem_has_blocks)
     {
       _matrix_contribution(0, 0) = elem_matrix_contribution;
       _matrix_contribution(0, 1) = neighbor_matrix_contribution;
     }
 
-    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
+    if (neighbor_has_blocks)
     {
       _matrix_contribution(1, 0) = -elem_matrix_contribution;
       _matrix_contribution(1, 1) = -neighbor_matrix_contribution;
@@ -73,19 +76,9 @@ LinearFVFluxKernel::addMatrixContribution()
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    if (_current_face_info->boundaryIDs().size() > 1)
-      mooseError("We currently don't support multiple boundary conditions for the same variable on "
-                 "the same face. Current face center : " +
-                 Moose::stringify(_current_face_info->faceCentroid()) +
-                 " boundaries specified: " + Moose::stringify(_current_face_info->boundaryIDs()));
-
-    LinearFVBoundaryCondition * bc_pointer =
-        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
-
+    LinearFVBoundaryCondition * bc_pointer = _var.getBoundaryCondition(*_current_face_info);
     if (bc_pointer || _force_boundary_execution)
     {
-      if (bc_pointer)
-        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
       const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
 
       // We allow internal (for the mesh) boundaries too, so we have to check on which side we
@@ -93,6 +86,11 @@ LinearFVFluxKernel::addMatrixContribution()
       if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
       {
         const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
+
+        if (!_matrices.empty())
+          if (auto * consumer = assemblyConsumer())
+            consumer->addBoundaryMatrixContribution(
+                _current_face_info->id(), dof_id_elem, matrix_contribution);
 
         // We add the contributions to every tagged matrix
         for (auto & matrix : _matrices)
@@ -102,6 +100,11 @@ LinearFVFluxKernel::addMatrixContribution()
       {
         const auto dof_id_neighbor =
             _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
+
+        if (!_matrices.empty())
+          if (auto * consumer = assemblyConsumer())
+            consumer->addBoundaryMatrixContribution(
+                _current_face_info->id(), dof_id_neighbor, matrix_contribution);
 
         // We add the contributions to every tagged matrix
         for (auto & matrix : _matrices)
@@ -125,11 +128,13 @@ LinearFVFluxKernel::addRightHandSideContribution()
     // Compute the entries which will go to the neighbor and element positions.
     const auto elem_rhs_contribution = computeElemRightHandSideContribution();
     const auto neighbor_rhs_contribution = computeNeighborRightHandSideContribution();
+    const bool elem_has_blocks = hasBlocks(_current_face_info->elemInfo()->subdomain_id());
+    const bool neighbor_has_blocks = hasBlocks(_current_face_info->neighborInfo()->subdomain_id());
 
     // Populate right hand side
-    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
+    if (elem_has_blocks)
       _rhs_contribution(0) = elem_rhs_contribution;
-    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
+    if (neighbor_has_blocks)
       _rhs_contribution(1) = neighbor_rhs_contribution;
 
     // We add the contributions to every tagged vector
@@ -141,19 +146,9 @@ LinearFVFluxKernel::addRightHandSideContribution()
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    if (_current_face_info->boundaryIDs().size() > 1)
-      mooseError("We currently don't support multiple boundary conditions for the same variable on "
-                 "the same face. Current face center : " +
-                 Moose::stringify(_current_face_info->faceCentroid()) +
-                 " boundaries specified: " + Moose::stringify(_current_face_info->boundaryIDs()));
-    LinearFVBoundaryCondition * bc_pointer =
-        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
-
+    LinearFVBoundaryCondition * bc_pointer = _var.getBoundaryCondition(*_current_face_info);
     if (bc_pointer || _force_boundary_execution)
     {
-      if (bc_pointer)
-        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
-
       const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
 
       // We allow internal (for the mesh) boundaries too, so we have to check on which side we
@@ -185,15 +180,6 @@ LinearFVFluxKernel::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
     return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
   else
     return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
-}
-
-Moose::FaceArg
-LinearFVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
-                                       const Moose::FV::LimiterType limiter_type,
-                                       const bool correct_skewness) const
-{
-  mooseAssert(fi, "FaceInfo should not be null!");
-  return makeFace(*fi, limiter_type, true, correct_skewness);
 }
 
 Real

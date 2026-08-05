@@ -5,71 +5,102 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
 #include "WCNSFVFlowPhysicsBase.h"
 #include "WCNSFVTurbulencePhysics.h"
 
+class RhieChowMassFlux;
+class UserObject;
+
 /**
  * Creates all the objects needed to solve the Navier-Stokes equations with the SIMPLE algorithm
- * using the linear finite volume discretization
- * Currently does not implement:
- * - friction
- * - other momentum sources and sinks
- * - porous media
- * - transients
+ * using the linear finite volume discretization.
+ *
+ * Derived classes may override the protected hooks to customize selected pressure, momentum, and
+ * boundary-condition objects while reusing the stock linear-FV flow setup.
  */
-class WCNSLinearFVFlowPhysics final : public WCNSFVFlowPhysicsBase
+class WCNSLinearFVFlowPhysics : public WCNSFVFlowPhysicsBase
 {
 public:
   static InputParameters validParams();
 
   WCNSLinearFVFlowPhysics(const InputParameters & parameters);
 
-  virtual std::vector<UserObjectName> getSuppliedUserObjects() const override;
-
 protected:
-  virtual void initializePhysicsAdditional() override;
+  void initializePhysicsAdditional() override;
+  void addSolverVariables() override;
+  void addFVKernels() override;
+  void addUserObjects() override;
+  void addFunctorMaterials() override;
 
-private:
-  virtual void addSolverVariables() override;
-  virtual void addFVInterpolationMethods() override;
-  virtual void addFVKernels() override;
-  virtual void addUserObjects() override;
-
-  /// Function adding kernels for the incompressible pressure correction equation
   void addPressureCorrectionKernels();
 
-  /**
-   * Functions adding kernels for the incompressible momentum equation
-   * If the material properties are not constant, these can be used for
-   * weakly-compressible simulations (except the Boussinesq kernel) as well.
-   */
   void addMomentumTimeKernels() override;
-  void addMomentumFluxKernels();
-  virtual void addMomentumPressureKernels() override;
-  virtual void addMomentumGravityKernels() override;
-  virtual void addMomentumFrictionKernels() override;
-  virtual void addMomentumBoussinesqKernels() override;
+  virtual void addMomentumFluxKernels();
+  void addMomentumPressureKernels() override;
+  void addMomentumGravityKernels() override;
+  void addMomentumFrictionKernels() override;
+  void addMomentumBoussinesqKernels() override;
+  virtual void addMomentumConditioningKernels() {}
+  virtual void addMomentumReducedPressureKernels() {}
 
-  virtual void addInletBC() override;
-  virtual void addOutletBC() override;
-  virtual void addWallsBC() override;
-  virtual void addSeparatorBC() override {}
+  void addInletBC() override;
+  void addOutletBC() override;
+  void addWallsBC() override;
+  void addSeparatorBC() override {}
 
-  virtual bool hasForchheimerFriction() const override { return false; };
+  bool hasForchheimerFriction() const override { return false; }
 
-  virtual void addRhieChowUserObjects() override;
-  virtual void addFunctorMaterials() override;
+  void addRhieChowUserObjects() override;
 
-  virtual MooseFunctorName getLinearFrictionCoefName() const override
-  {
-    mooseError("Not implemented");
-  }
+  MooseFunctorName getLinearFrictionCoefName() const override { mooseError("Not implemented"); }
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
+
+  virtual void addAdditionalUserObjects() {}
+  virtual bool useMomentumContinuityErrorSink() const { return false; }
+  virtual bool shouldAddMomentumPressureKernels() const { return true; }
+  virtual bool shouldAddMomentumReducedPressureKernels() const { return false; }
+  virtual MooseFunctorName pressureDiffusionTensorName() const { return "Ainv"; }
+  virtual MooseFunctorName pressureDivergenceFluxName() const { return "HbyA"; }
+  virtual bool pressureDivergenceFluxIsIntegrated() const { return false; }
+  virtual std::string momentumTimeKernelType() const { return "LinearFVTimeDerivative"; }
+  virtual std::string momentumTimeDensityParameterName() const { return "factor"; }
+  virtual void setMomentumTimeKernelParams(InputParameters & params) const;
+  void setVelocitySolverVariableParams(InputParameters & params) const;
+  void setVelocityVariableParams(InputParameters & params) const;
+  virtual std::string rhieChowUserObjectType() const { return "RhieChowMassFlux"; }
+  virtual bool rhieChowUserObjectAppliesToBlocks(const RhieChowMassFlux & rc_obj) const;
+  virtual bool isCompatibleRhieChowUserObject(const UserObject & obj) const;
+  virtual void checkIncompatibleRhieChowUserObject(const RhieChowMassFlux & rc_obj) const;
+  virtual void setRhieChowUserObjectParams(InputParameters & params) const;
+  virtual std::string momentumFluxKernelType() const { return "LinearWCNSFVMomentumFlux"; }
+  virtual MooseFunctorName momentumFluxMassFluxFunctorName() const { return ""; }
+  virtual bool momentumFluxMassFluxFunctorIsIntegrated() const { return false; }
+  virtual std::string momentumOutletBCType(const BoundaryName & boundary,
+                                           const MooseEnum & momentum_outlet_type) const;
+  virtual void setMomentumOutletBCParams(InputParameters & params,
+                                         const BoundaryName & boundary,
+                                         const MooseEnum & momentum_outlet_type,
+                                         unsigned int component) const;
+  virtual std::string pressureOutletBCType(const BoundaryName & boundary,
+                                           const MooseEnum & momentum_outlet_type) const;
+  virtual void setPressureOutletBCParams(InputParameters & params,
+                                         const BoundaryName & boundary,
+                                         const MooseEnum & momentum_outlet_type) const;
+  virtual MooseFunctorName wallPressureSymmetryFluxName() const { return "HbyA"; }
+  virtual void addWallPressureBC(const BoundaryName & boundary,
+                                 const MooseEnum & momentum_wall_type);
+  virtual bool shouldAddWallPressureTwoTermExpansion() const
+  {
+    return getParam<bool>("pressure_two_term_bc_expansion");
+  }
+  virtual MooseFunctorName inletVelocityFunctorName(const BoundaryName & boundary,
+                                                    unsigned int component) const;
+  virtual MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,
+                                                   unsigned int component) const;
 
   /// Whether to use the correction term for non-orthogonality
   const bool _non_orthogonal_correction;

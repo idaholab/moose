@@ -17,6 +17,8 @@
 #include "MooseVariableDependencyInterface.h"
 #include "FVRelationshipManagerInterface.h"
 
+class LinearFVAssemblyConsumer;
+
 /**
  * Base class for finite volume kernels that contribute to a linear
  * systems.
@@ -35,6 +37,12 @@ public:
 
   virtual const MooseLinearVariableFV<Real> & variable() const override { return _var; }
 
+  /// Set an optional observer that receives native FV assembly contributions.
+  static void setAssemblyConsumer(LinearFVAssemblyConsumer * consumer);
+
+  /// Access the optional observer that receives native FV assembly contributions.
+  static LinearFVAssemblyConsumer * assemblyConsumer();
+
 protected:
   /// Utility routine to request cell gradient computation on a variable
   void requestVariableCellGradient(const std::string & variable_name);
@@ -47,4 +55,7 @@ protected:
 
   /// Cache for the system number
   const unsigned int _sys_num;
+
+private:
+  static LinearFVAssemblyConsumer * _assembly_consumer;
 };

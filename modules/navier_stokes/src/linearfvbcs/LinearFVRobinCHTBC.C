@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVRobinCHTBC.h"
+#include "NSFVUtils.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", LinearFVRobinCHTBC);
@@ -44,25 +45,21 @@ LinearFVRobinCHTBC::LinearFVRobinCHTBC(const InputParameters & parameters)
 Real
 LinearFVRobinCHTBC::computeBoundaryValue() const
 {
-  const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                             ? _current_face_info->elemInfo()
-                             : _current_face_info->neighborInfo();
+  const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
 
-  return _var.getElemValue(*elem_info, determineState());
+  return _var.getElemValue(elem_info, determineState());
 }
 
 Real
 LinearFVRobinCHTBC::computeBoundaryNormalGradient() const
 {
-  const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                             ? _current_face_info->elemInfo()
-                             : _current_face_info->neighborInfo();
+  const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
   const auto state = determineState();
   const auto current_face = singleSidedFaceArg(_current_face_info);
-  const auto surface_temperature_face = functorFaceArg(_surface_temperature, _current_face_info);
-  const auto incoming_flux_face = functorFaceArg(_incoming_flux, _current_face_info);
+  const auto surface_temperature_face = functorFaceArg(_surface_temperature, *_current_face_info);
+  const auto incoming_flux_face = functorFaceArg(_incoming_flux, *_current_face_info);
 
-  return (_htc(current_face, state) * (_var.getElemValue(*elem_info, determineState()) -
+  return (_htc(current_face, state) * (_var.getElemValue(elem_info, determineState()) -
                                        _surface_temperature(surface_temperature_face, state)) +
           _incoming_flux(incoming_flux_face, state)) /
          _k(current_face, state);
@@ -99,8 +96,8 @@ LinearFVRobinCHTBC::computeBoundaryGradientRHSContribution() const
 {
   const auto state = determineState();
   const auto current_face = singleSidedFaceArg(_current_face_info);
-  const auto surface_temperature_face = functorFaceArg(_surface_temperature, _current_face_info);
-  const auto incoming_flux_face = functorFaceArg(_incoming_flux, _current_face_info);
+  const auto surface_temperature_face = functorFaceArg(_surface_temperature, *_current_face_info);
+  const auto incoming_flux_face = functorFaceArg(_incoming_flux, *_current_face_info);
 
   return _htc(current_face, state) * _surface_temperature(surface_temperature_face, state) +
          _incoming_flux(incoming_flux_face, state);

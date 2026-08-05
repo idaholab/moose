@@ -8,9 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVKernel.h"
+#include "LinearFVAssemblyConsumer.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "FEProblemBase.h"
+
+LinearFVAssemblyConsumer * LinearFVKernel::_assembly_consumer = nullptr;
 
 InputParameters
 LinearFVKernel::validParams()
@@ -39,6 +42,18 @@ LinearFVKernel::LinearFVKernel(const InputParameters & params)
     _sys_num(_sys.number())
 {
   addMooseVariableDependency(&_var);
+}
+
+void
+LinearFVKernel::setAssemblyConsumer(LinearFVAssemblyConsumer * consumer)
+{
+  _assembly_consumer = consumer;
+}
+
+LinearFVAssemblyConsumer *
+LinearFVKernel::assemblyConsumer()
+{
+  return _assembly_consumer;
 }
 
 void

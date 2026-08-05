@@ -198,9 +198,7 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
     // Sadly, this returns -b so we multiply with -1
     rhs.scale(-1.0);
 
-    // Still need to relax the right hand side with the same vector
-    NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
-    NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
+    applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
