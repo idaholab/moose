@@ -314,6 +314,11 @@
     requirement = 'The system shall provide a common interface for storing and retrieving output that supports sanitization
     issues = '#27562'
   []
+  [subprocess_runner_signal]
+    type = PythonUnitTest
+    input = test_SubprocessRunner.py
+    requirement = 'The system shall wait for specified application output before delivering a signal.'
+  []
   [test_method]
     type = PythonUnitTest
     input = test_GetExecutable.py
