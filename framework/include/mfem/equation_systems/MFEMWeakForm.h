@@ -11,37 +11,29 @@
 
 #pragma once
 
-#include "MFEMObject.h"
-#include "EquationSystem.h"
-
-class MFEMBoundaryCondition;
-class MFEMKernel;
+#include "MFEMWeakFormBase.h"
 
 /**
- * Constructs and stores an Moose::MFEM::EquationSystem object. Access using the
- * getFESpace() accessor.
+ * Constructs and stores an Moose::MFEM::EquationSystem object.
  */
-class MFEMWeakForm : public MFEMObject
+class MFEMWeakForm : public MFEMWeakFormBase
 {
 public:
-  static InputParameters validParams();
-
   MFEMWeakForm(const InputParameters & parameters);
 
   /// Constructs the EquationSystem.
-  std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem();
+  virtual std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem() override;
 
-  void addBoundaryCondition(const std::string & name, std::shared_ptr<MFEMBoundaryCondition> bc);
+protected:
+  virtual void addBoundaryCondition(const std::string & name,
+                                    std::shared_ptr<MFEMBoundaryCondition> bc) override;
 
-  void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel);
+  virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) override;
 
 private:
   /// Stores the constructed EquationSystem. Intentionally marked private to ensure
   /// other objects in the problem do not use it prior to full initialisation.
   mutable std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
-
-  std::vector<MFEMBoundaryConditionName> _bc_names;
-  std::vector<MFEMKernelName> _kernel_names;
 };
 
 #endif
