@@ -476,8 +476,24 @@ MFEMProblem::setEquationSystems()
     const std::string type("MFEMWeakForm");
     const std::string name("__DefaultWeakForm");
     InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
-    std::shared_ptr<MFEMWeakForm> weak_form =
-        addObject<MFEMWeakForm>(type, name, parameters).front();
+    std::shared_ptr<MFEMWeakFormBase> weak_form{nullptr};
+    if (isTransient())
+      weak_form =
+          addObject<MFEMWeakFormBase>("MFEMTimeDependentWeakForm", "__DefaultWeakForm", parameters)
+              .front();
+    else
+    {
+      if (getNumericType() == MFEMProblem::NumericType::REAL)
+        weak_form =
+            addObject<MFEMWeakFormBase>("MFEMWeakForm", "__DefaultWeakForm", parameters).front();
+      else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
+        weak_form =
+            addObject<MFEMWeakFormBase>("MFEMComplexWeakForm", "__DefaultWeakForm", parameters)
+                .front();
+      else
+        mooseError("Unknown numeric type. "
+                   "Please set the Problem numeric type to either 'real' or 'complex'.");
+    }
     getProblemData().eqn_systems.Register(weak_form->name(), weak_form->createEquationSystem());
   }
   else
