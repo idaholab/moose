@@ -46,12 +46,13 @@ SecantSolve::allocateStorage(const bool primary)
   if (primary)
   {
     _xn_m1_tagid =
-        _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
+        _problem.addVectorTag(Moose::PREVIOUS_MULTIAPP_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
     _fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
     _xn_m2_tagid = _problem.addVectorTag("xn_m2", Moose::VECTOR_TAG_SOLUTION);
     _fxn_m2_tagid = _problem.addVectorTag("fxn_m2", Moose::VECTOR_TAG_SOLUTION);
 
-    _transformed_sys->needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
+    _transformed_sys->needSolutionState(
+        1, Moose::SolutionIterationType::MultiAppFixedPoint, PARALLEL);
     _transformed_sys->addVector(_fxn_m1_tagid, false, PARALLEL);
     _transformed_sys->addVector(_xn_m2_tagid, false, PARALLEL);
     _transformed_sys->addVector(_fxn_m2_tagid, false, PARALLEL);
@@ -113,7 +114,7 @@ SecantSolve::saveVariableValues(const bool primary)
   xn_m2 = xn_m1;
 
   // Before a solve, solution is a sequence term, after a solve, solution is the evaluated term
-  // Primary is copied back by _transformed_sys->copyPreviousFixedPointSolutions()
+  // Primary is copied back by _transformed_sys->copyPreviousMultiAppFixedPointSolutions()
   if (!primary)
     xn_m1 = solution;
 
