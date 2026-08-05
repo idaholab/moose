@@ -36,6 +36,9 @@ protected:
 
   virtual void addKernel(const std::string & name, std::shared_ptr<MFEMKernel> kernel) = 0;
 
+  /// Initialise the equation system. TODO: move all setup into EquationSystem constructors
+  void initEquationSystem(std::shared_ptr<Moose::MFEM::EquationSystem> equation_system);
+
   std::vector<MFEMBoundaryConditionName> _bc_names;
   std::vector<MFEMKernelName> _kernel_names;
 };
