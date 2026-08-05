@@ -34,6 +34,10 @@ FileOutput::validParams()
       "name for a subapp input to set it.");
   params.addParam<std::string>("file_base_suffix", "Suffix to add to the file base");
   params.addParam<bool>(
+      "append_object_name",
+      true,
+      "Append the output object name to the default file base when using full output syntax.");
+  params.addParam<bool>(
       "append_date", false, "When true the date and time are appended to the output filename.");
   params.addParam<std::string>("append_date_format",
                                "The format of the date/time to append, if not given UTC format "
@@ -48,7 +52,7 @@ FileOutput::validParams()
                                             "strings.  This is helpful in outputting only a subset "
                                             "of outputs when using MultiApps.");
   params.addParamNamesToGroup(
-      "file_base append_date append_date_format padding output_if_base_contains",
+      "file_base append_object_name append_date append_date_format padding output_if_base_contains",
       "File name customization");
 
   return params;
