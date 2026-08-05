@@ -309,6 +309,7 @@ Requirements:
     moose_test:
         directories:
             - test/tests
+            - unit/src
 
     stork:
         directories:

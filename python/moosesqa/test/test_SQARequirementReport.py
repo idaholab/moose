@@ -7,6 +7,7 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
+import os
 import unittest
 import mock
 import logging
@@ -28,6 +29,38 @@ class TestSQARequirementReport(unittest.TestCase):
         r = reporter.getReport()
         self.assertEqual(reporter.status, SQAReport.Status.PASS)
         self.assertIn("moosesqa OK", r)
+
+    @mock.patch("mooseutils.colorText", side_effect=lambda t, c, **kwargs: t)
+    def testGoogleTest(self, color_text):
+        root = mooseutils.git_root_dir()
+        metadata = os.path.join(root, "unit", "src", "MooseUtilsTest.unit_tests")
+        git_ls_files = mooseutils.git_ls_files
+
+        def include_pending_metadata(*args, **kwargs):
+            files = git_ls_files(*args, **kwargs)
+            if os.path.abspath(args[0]) == os.path.dirname(metadata):
+                files.add(metadata)
+            return files
+
+        with mock.patch(
+            "mooseutils.git_ls_files", side_effect=include_pending_metadata
+        ):
+            reporter = SQARequirementReport(
+                title="GoogleTest",
+                directories=["unit/src"],
+                specs=["*.unit_tests"],
+            )
+            report = reporter.getReport()
+
+        self.assertEqual(reporter.status, SQAReport.Status.PASS)
+        self.assertIn("GoogleTest OK", report)
+        self.assertTrue(
+            any(
+                filename.endswith("unit/src/MooseUtilsTest.unit_tests")
+                and name == "camel_case_to_underscore"
+                for filename, name, _ in reporter.test_names
+            )
+        )
 
     @mock.patch(
         "mooseutils.colorText", side_effect=lambda t, c, **kwargs: "{}:{}".format(c, t)

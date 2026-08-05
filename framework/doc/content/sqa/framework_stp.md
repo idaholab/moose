@@ -69,6 +69,11 @@ All tests defined within [!ac](MOOSE) or MOOSE-based application must be execute
 all revisions and releases of the software. All test cases within one test specification (a "tests"
 file) are expected to run in the order defined. The specifications may be executed in any order.
 
+C++ unit tests are declared with GoogleTest macros in `unit/src` source files. Their SQA records are
+stored in matching `*.unit_tests` [!ac](HIT) files and use the declaration's `Suite.Case` identifier.
+Parameterized instantiations are evidence for the associated `TEST_P`, `TYPED_TEST`, or
+`TYPED_TEST_P` declaration and do not create additional requirements.
+
 ### Required Ranges of input parameters
 
 Test cases are created by contributors during the change control process. The independent reviewer
@@ -146,6 +151,12 @@ The Test Harness includes a suite of "Tester" types to enable complete testing o
 MOOSE-based applications. For each of the types, the Test Harness is able to execute the application
 with a developer designed input and verify the correct result automatically.  A complete list of the
 built-in Testers is included here:
+
+C++ unit tests use their existing aggregate GoogleTest executables. Each unit executable is invoked
+once, GoogleTest executes all selected logical declarations and parameterized instances, and its
+process status and per-test output provide the acceptance evidence. The SQA metadata checker
+statically verifies that each new logical declaration has traceability metadata; it does not add a
+Test Harness tester or execute a unit binary once per requirement.
 
 !! testers-begin
 

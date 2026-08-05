@@ -112,6 +112,37 @@ in a manner to shield day-to-day development from any associated burdens. Howeve
 that all new code is documented in a specific manner to meet the guidelines, please refer to
 [framework/documenting.md] for additional information.
 
+#### C++ unit-test SQA metadata
+
+Every new logical GoogleTest in a MOOSE-owned `unit/src` directory must have requirement, design,
+and issue metadata. Place the metadata in a sibling [!ac](HIT) file whose name matches the source:
+`Foo.C` or `Foo.K` uses `Foo.unit_tests`. For example:
+
+```
+[Tests]
+  [camel_case_to_underscore]
+    type = GoogleTest
+    unit_test = MooseUtils.camelCaseToUnderscore
+    requirement = 'The system shall convert camel-case identifiers to lower-case underscore-separated identifiers.'
+    design = 'MooseUtils.md'
+    issues = '#33325'
+  []
+[]
+```
+
+The `unit_test` value is the `Suite.Case` pair declared by `TEST`, `TEST_F`, `TEST_P`,
+`TYPED_TEST`, or `TYPED_TEST_P`. Parameterized instantiations share the declaration's record and
+must not receive separate records. A grouped requirement may use nested `detail` blocks, but every
+leaf block must set `type = GoogleTest` and identify exactly one logical declaration with
+`unit_test`.
+
+Run `scripts/check_unit_test_sqa.py` to find missing, duplicate, or stale mappings. Existing unit
+tests that have not yet been documented are listed in
+`python/moosesqa/legacy_unit_tests.yml`. New entries in that manifest are prohibited. To backfill
+an existing test, add its sibling metadata file and remove its manifest entry in the same change.
+A rename is treated as a new test and therefore requires real metadata rather than a renamed legacy
+entry.
+
 ### 5. Consider Adding a MOOSE Newsletter Entry
 
 The [MOOSE Newsletter](newsletter/index.md optional=True) is a monthly digest of MOOSE bugfixes, changes, updates,
