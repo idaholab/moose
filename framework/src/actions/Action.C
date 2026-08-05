@@ -77,7 +77,7 @@ Action::timedAct()
 {
   TIME_SECTION(_act_timer);
 
-  const auto parallel_verify = [this](const bool libmesh_dbg_var(before))
+  const auto parallel_verify = [libmesh_dbg_var(this)](const bool libmesh_dbg_var(before))
   {
 #ifndef NDEBUG
     const std::string value = this->typeAndName() + "_" + _current_task;
