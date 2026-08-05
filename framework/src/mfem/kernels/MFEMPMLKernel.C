@@ -90,22 +90,42 @@ MFEMPMLKernel::MFEMPMLKernel(const InputParameters & parameters,
                              MFEMPMLMatrixCoefficient::Tensor tensor)
   : MFEMComplexKernel(parameters),
     _base_coefficient(getScalarCoefficient("coefficient")),
-    _stretch(makeStretch()),
-    _matrix_re(*_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::RE),
-    _matrix_im(*_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::IM),
-    _scalar_re(*_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::RE),
-    _scalar_im(*_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::IM)
+    _stretch(getStretch()),
+    _matrix_re(_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::RE),
+    _matrix_im(_stretch, _base_coefficient, tensor, MFEMPMLMatrixCoefficient::IM),
+    _scalar_re(_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::RE),
+    _scalar_im(_stretch, _base_coefficient, MFEMPMLMatrixCoefficient::IM)
 {
 }
 
-std::unique_ptr<MFEMPMLStretchVector>
-MFEMPMLKernel::makeStretch()
+std::string
+MFEMPMLKernel::stretchName()
 {
-  return std::make_unique<MFEMPMLStretchVector>(getMFEMProblem().mesh().getMFEMParMesh(),
-                                                getSubdomainAttributes(),
-                                                getParam<Real>("decay_coefficient"),
-                                                getParam<Real>("decay_polynomial"),
-                                                getMFEMProblem().getComm());
+  std::string name = "_pml_stretch";
+  for (const auto attribute : getSubdomainAttributes())
+    name += "_" + std::to_string(attribute);
+
+  return name + "_" + std::to_string(getParam<Real>("decay_coefficient")) + "_" +
+         std::to_string(getParam<Real>("decay_polynomial"));
+}
+
+MFEMPMLStretchVector &
+MFEMPMLKernel::getStretch()
+{
+  auto & coefficients = getMFEMProblem().getCoefficients();
+  const std::string name = stretchName();
+
+  // A coefficient declared without blocks counts as defined on every one of them, so this asks
+  // whether another kernel acting on the same layer has already built the stretch.
+  if (coefficients.vectorPropertyIsDefined(name, std::to_string(getSubdomainAttributes()[0])))
+    return dynamic_cast<MFEMPMLStretchVector &>(coefficients.getVectorCoefficient(name));
+
+  return coefficients.declareVector<MFEMPMLStretchVector>(name,
+                                                          getMFEMProblem().mesh().getMFEMParMesh(),
+                                                          getSubdomainAttributes(),
+                                                          getParam<Real>("decay_coefficient"),
+                                                          getParam<Real>("decay_polynomial"),
+                                                          getMFEMProblem().getComm());
 }
 
 mfem::BilinearFormIntegrator *
