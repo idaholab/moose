@@ -79,8 +79,6 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under tension."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    capabilities = 'machine=x86_64'
     abs_zero = 1e-9
   [../]
   [./tensile_nohardening]
@@ -91,8 +89,6 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under tension."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    capabilities = 'machine=x86_64'
   [../]
   [./tensile_hardeningfn]
     type = 'Exodiff'
@@ -102,8 +98,6 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under tension."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    capabilities = 'machine=x86_64'
     custom_cmp = truss_hardeningfn_tension.cmp
   [../]
   [./compressive]
@@ -114,8 +108,6 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under compression."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    capabilities = 'machine=x86_64'
   [../]
   [./compressive_nohardening]
     type = 'Exodiff'
@@ -125,8 +117,6 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under compression."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    capabilities = 'machine=x86_64'
   [../]
   [./compressive_hardeningfn]
     type = 'Exodiff'
@@ -136,8 +126,6 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under compression."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    capabilities = 'machine=x86_64'
   [../]
   [./error_nohardening]
     type = 'RunException'

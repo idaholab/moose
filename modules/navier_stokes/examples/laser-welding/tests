@@ -10,8 +10,7 @@
       allow_test_objects = true
       cli_args = "Executioner/num_steps=4 Postprocessors/active='' Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
       valgrind = 'heavy'
-      # machine=x86_64: see #26848
-      capabilities = 'strumpack & machine=x86_64'
+      capabilities = 'strumpack'
       # error_T diffs relative 8.9e-6 with -march=x86-64-v3
       abs_zero = 5e-8
       detail = 'in two dimensions, using a finite element discretization for all variables, and'
@@ -24,8 +23,7 @@
       cli_args = "Executioner/num_steps=4 Mesh/elem_type=QUAD9 Variables/vel/order=SECOND Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND  Postprocessors/active='' BCs/surface_tension/include_gradient_terms=false BCs/weld_flux/x_beam_coord=-0.35e-3 surfacetemp=2800 timestep=1e-6 Outputs/file_base=2d_curvature_out  Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
       valgrind = 'heavy'
       heavy = true
-      # machine=x86_64: see #26848
-      capabilities = 'strumpack & machine=x86_64'
+      capabilities = 'strumpack'
       min_parallel = 8 # mesh refinement is very sensitive to number of cores here and before the 4th step we dont see deformation
       max_parallel = 8 # mesh refinement is very sensitive to number of cores here and before the 4th step we dont see deformation
       detail = 'in two dimensions, using a curvature-enabling second order mesh with finite element discretization, and'
