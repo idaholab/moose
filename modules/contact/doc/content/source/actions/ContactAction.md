@@ -28,6 +28,11 @@ interpolations for quadratic-element mortar contact and show that corner-node/li
 pressure fields can avoid inconsistencies that arise with quadratic contact pressure interpolations
 while retaining good convergence [!cite](puso2008segment).
 
+Quasistatic Coulomb LM mortar contact provides mutually exclusive elastic-slip and friction-
+coefficient regularizations for matching first-order nodal multiplier spaces. See
+[ComputeFrictionalForceLMMechanicalContact](ComputeFrictionalForceLMMechanicalContact.md) for their
+equations and restrictions.
+
 For node-to-segment mechanical contact, the action offers the possibility to automatically set up
 mechanical contact pairs given a maximum distance between contacting boundary centroids.
 To use that option, the user must set `automatic_pairing_method = CENTROID`.
