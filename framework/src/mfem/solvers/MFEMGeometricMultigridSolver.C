@@ -78,7 +78,7 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
     _coarse_solver_name(getParam<MFEMSolverName>("coarse_solver"))
 {
   auto & problem = getMFEMProblem();
-  auto eq_sys = problem.getProblemData().eqn_systems[0];
+  auto eq_sys = problem.getProblemData().eqn_systems.begin()->second;
 
   if (eq_sys->IsEigen() || eq_sys->IsComplex())
     mooseError("GeometricMultigridSolver '", name(), "': requires a real, non-eigen eq. system");
@@ -135,7 +135,7 @@ void
 MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 {
   auto & problem = getMFEMProblem();
-  auto eq_sys = problem.getProblemData().eqn_systems[0];
+  auto eq_sys = problem.getProblemData().eqn_systems.begin()->second;
 
   if (eq_sys->IsNonlinear() || eq_sys->IsMultivariate())
     mooseError("GeometricMultigridSolver '", name(), "': requires a univariate, linear eq. system");

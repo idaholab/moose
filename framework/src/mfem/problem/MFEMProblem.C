@@ -478,11 +478,11 @@ MFEMProblem::setEquationSystems()
     InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
     std::shared_ptr<MFEMWeakForm> weak_form =
         addObject<MFEMWeakForm>(type, name, parameters).front();
-    getProblemData().eqn_systems.push_back(weak_form->createEquationSystem());
+    getProblemData().eqn_systems.Register(weak_form->name(), weak_form->createEquationSystem());
   }
   else
     for (auto & weak_form : weak_forms)
-      getProblemData().eqn_systems.push_back(weak_form->createEquationSystem());
+      getProblemData().eqn_systems.Register(weak_form->name(), weak_form->createEquationSystem());
 }
 
 void
