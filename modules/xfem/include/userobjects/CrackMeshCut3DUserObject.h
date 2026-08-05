@@ -109,9 +109,6 @@ protected:
   /// The structural mesh must be 3D only
   const unsigned int _elem_dim = 3;
 
-  /// Used to define intersection points
-  const Real _const_intersection = 0.01;
-
   /// Used for cutter mesh refinement and front advancement
   const Real _size_control;
 
@@ -153,6 +150,9 @@ protected:
   /// New boundary after growth
   std::vector<std::vector<dof_id_type>> _front;
 
+  /// Active-boundary node index associated with each node in _front
+  std::vector<std::vector<unsigned int>> _front_boundary_node_indices;
+
   /// Indicator that shows if the cutting mesh is modified or not in this calculation step
   bool _is_mesh_modified;
 
@@ -168,14 +168,6 @@ protected:
                                  Point & point) const;
 
   /**
-    Find directional intersection along the positive extension of the vector from p1 to p2
-   */
-  bool findIntersection(const Point & p1,
-                        const Point & p2,
-                        const std::vector<Point> & vertices,
-                        Point & point) const;
-
-  /**
     Check if point p is inside the edge p1-p2
    */
   bool isInsideEdge(const Point & p1, const Point & p2, const Point & p) const;
@@ -188,15 +180,16 @@ protected:
   /**
     Check if point p is inside a plane
    */
-  bool isInsideCutPlane(const std::vector<Point> & _vertices, const Point & p) const;
+  bool isInsideCutPlane(const std::vector<Point> & vertices,
+                        const Point & p,
+                        const Point & normal) const;
 
   /**
-    Compute the area of a triangle defined by three points.
-    Returns true if the area is above min_elem_area.
+    Check whether the area of the triangle defined by three points is at least min_elem_area.
     @param p1 first vertex of the triangle
     @param p2 second vertex of the triangle
     @param p3 third vertex of the triangle
-    @return true if the triangle area exceeds the minimum threshold
+    @return true if the triangle area is at least the minimum threshold
    */
   bool isTriAreaAboveTol(const Point & p1, const Point & p2, const Point & p3) const;
 
@@ -255,15 +248,15 @@ protected:
   /**
     Project an inactive endpoint back outside the structural mesh if its proposed position lands
     inside the volume.
-    @param segment_index index of the active boundary segment
     @param front_node_index index of the node within the active boundary segment
     @param front_size number of nodes in the active boundary segment
+    @param previous_point endpoint position before growth
     @param candidate_point proposed grown node position
     @return the adjusted point position
    */
-  Point projectInteriorInactiveEndpoint(unsigned int segment_index,
-                                        unsigned int front_node_index,
+  Point projectInteriorInactiveEndpoint(unsigned int front_node_index,
                                         unsigned int front_size,
+                                        const Point & previous_point,
                                         const Point & candidate_point) const;
 
   /**

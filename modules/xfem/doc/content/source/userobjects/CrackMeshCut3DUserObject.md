@@ -8,7 +8,7 @@ This class: (1) reads in a mesh describing the crack surface, (2) uses the mesh 
 
 For crack-growth problems, [!param](/UserObjects/CrackMeshCut3DUserObject/size_control) sets the target spacing used when advancing and refining the cutter front, while [!param](/UserObjects/CrackMeshCut3DUserObject/min_elem_area) prevents the growth algorithm from adding very small or nearly degenerate triangles to the cutter mesh. The number of growth advances performed in one update is controlled by [!param](/UserObjects/CrackMeshCut3DUserObject/n_step_growth).
 
-## Surface-Cutting Segment, Active and Inactive Nodes
+## Active and Inactive Cutter-Boundary Nodes
 
 When a crack reaches a free surface of the body, only part of the cutter-mesh boundary lies inside the FEM volume. The cutter boundary is therefore partitioned into one or more *active boundary segments*, each consisting of a contiguous list of nodes bracketed by *inactive endpoints*:
 
@@ -31,14 +31,14 @@ Each active node advances in the direction and by the increment determined by th
 candidate = previous_inactive_position + active_direction * active_growth_length
 ```
 
-### Keeping the inactive node above the free surface
+### Keeping the inactive node outside the body
 
 After computing the candidate, the algorithm checks whether it still lies outside the body:
 
 1. **Candidate outside the body.** The inactive node has moved into free space and no correction is required; the candidate is used as the new position.
-2. **Candidate inside the body.** Growth would push the inactive node into the FEM volume (typical when the free surface curves toward the cutter or when the cutter enters a concave corner). The candidate is snapped to the closest point on the body's exterior surface and then nudged outward by `0.1 * size_control` so the result lies reliably above the free surface for the next step's classification.
+2. **Candidate inside the body.** Growth would push the inactive node into the FEM volume (typical when the free surface curves toward the cutter or when the cutter enters a concave corner). The candidate is snapped to the closest point on the body's exterior surface and then nudged outward by `0.1 * size_control` so the result lies reliably outside the body for the next step's classification.
 
-For every face on the body's exterior, the algorithm computes the point on that face closest to the candidate. This is the perpendicular projection of the candidate onto the face's plane when that projection lies within the face's polygon; otherwise it is the nearest point on one of the polygon's edges. The face whose closest point is nearest to the candidate is selected, and that point becomes the snap location. The same rule covers two important cases without special handling:
+To limit the exterior-face search, the algorithm traces the segment from the interior candidate toward the endpoint's previous outside position by walking through face-connected FEM elements. It then searches the exterior faces on the terminal element and its point neighbors. For each face in this local boundary patch, the algorithm computes the point closest to the candidate. This is the perpendicular projection of the candidate onto the face's plane when that projection lies within the face's polygon; otherwise it is the nearest point on one of the polygon's edges. The face whose closest point is nearest to the candidate is selected, and that point becomes the snap location. The same rule covers two important cases without special handling:
 
 - **Curved free surfaces.** Because the curved surface is tiled by many small flat polygons, the candidate naturally snaps to the polygon of the tiling that is closest to it; the snap point varies smoothly across the curvature.
 - **Concave corners.** When the candidate is just past a corner edge shared between two adjacent faces, the edge-fallback gives the same point on that shared edge for both faces. The outward nudge then pushes the inactive node into the empty space outside the corner rather than burying it back inside either face.
@@ -62,6 +62,8 @@ This active/inactive logic governs only the cutter-mesh growth algorithm — tha
 ## Example Input Syntax
 
 This example shows the `Mesh` block in [list:mesh] needed for creating the cutter mesh along with the `CrackMeshCut3DUserObject` block in [list:cutobject].  The mesh block in [list:mesh] defines two separate meshes.  The cutter mesh is created in the `read_in_cutter_mesh` block and must have [!param](/Mesh/FileMeshGenerator/save_with_name) set in order to specify this mesh in `CrackMeshCut3DUserObject` shown in [list:cutobject] using [!param](/UserObjects/CrackMeshCut3DUserObject/mesh_generator_name).  The mesh used by the FEM simulation is specifed in the `FEM_mesh` block in this example and [!param](/Mesh/MeshGeneratorMesh/final_generator)`=FEM_mesh` must be set because only the `FEM_mesh` will be used for the finite-element solution and the mesh created by `read_in_cutter_mesh` will be ignored by the solution.
+
+The surface-growth regression inputs prescribe compatible stress and strain material properties without solving for equilibrium so that [DomainIntegralAction.md] can drive cutter growth directly.
 
 !listing test/tests/solid_mechanics_basic/edge_crack_3d_domain.i id=list:mesh block=Mesh caption=Setting up the mesh block contain simulation and cutter meshes.
 

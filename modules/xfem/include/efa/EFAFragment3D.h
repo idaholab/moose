@@ -34,15 +34,15 @@ private:
 
 public:
   // override pure virtual methods
-  virtual void switchNode(EFANode * new_node, EFANode * old_node);
-  virtual bool containsNode(EFANode * node) const;
-  virtual unsigned int getNumCuts() const;
-  virtual unsigned int getNumCutNodes() const;
-  virtual std::set<EFANode *> getAllNodes() const;
-  virtual bool isConnected(EFAFragment * other_fragment) const;
+  void switchNode(EFANode * new_node, EFANode * old_node) override;
+  bool containsNode(EFANode * node) const override;
+  unsigned int getNumCuts() const override;
+  unsigned int getNumCutNodes() const override;
+  std::set<EFANode *> getAllNodes() const override;
+  bool isConnected(EFAFragment * other_fragment) const override;
   virtual bool isEdgeConnected(EFAFragment * other_fragment) const;
-  virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
-                                          std::vector<EFANode *> & invalid_emb_out);
+  void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                  std::vector<EFANode *> & invalid_emb_out) override;
 
   // EFAfragment3D specific methods
   void combine_tip_faces();
@@ -68,6 +68,5 @@ private:
                                   unsigned int startOldFaceID,
                                   std::vector<std::vector<EFAFace *>> & subfaces,
                                   std::set<EFAFace *> & claimed_subfaces);
-  EFAEdge * loneEdgeOnFace(unsigned int face_id) const;
   void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAFace * elem_face);
 };

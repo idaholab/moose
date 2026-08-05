@@ -161,8 +161,7 @@ XFEM::addGeomMarkedElem2D(const unsigned int elem_id,
                           const Xfem::GeomMarkedElemInfo2D geom_info,
                           const unsigned int interface_id)
 {
-  Elem * elem = _mesh->elem_ptr(elem_id);
-  _geom_marked_elems_2d[elem->id()].push_back(geom_info);
+  _geom_marked_elems_2d[elem_id].push_back(geom_info);
   _geom_marker_id_elems[interface_id].insert(elem_id);
 }
 
@@ -171,8 +170,7 @@ XFEM::addGeomMarkedElem3D(const unsigned int elem_id,
                           const Xfem::GeomMarkedElemInfo3D geom_info,
                           const unsigned int interface_id)
 {
-  Elem * elem = _mesh->elem_ptr(elem_id);
-  _geom_marked_elems_3d[elem->id()].push_back(geom_info);
+  _geom_marked_elems_3d[elem_id].push_back(geom_info);
   _geom_marker_id_elems[interface_id].insert(elem_id);
 }
 

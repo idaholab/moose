@@ -39,10 +39,10 @@
 []
 
 [Outputs]
-  file_base=${fname}_offset_${offset}_spin_${spin}
+  file_base = ${fname}_offset_${offset}_spin_${spin}
   [xfemcutter]
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh
   []
-  execute_on=final
+  execute_on = final
 []
