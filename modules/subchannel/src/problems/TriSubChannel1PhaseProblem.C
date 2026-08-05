@@ -34,14 +34,14 @@ TriSubChannel1PhaseProblem::TriSubChannel1PhaseProblem(const InputParameters & p
 {
   // Initializing heat conduction system
   LibmeshPetscCall(createPetscMatrix(
-      _hc_axial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_axial_heat_conduction_rhs, _block_size * _n_channels));
+      _hc_axial_heat_conduction_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_axial_heat_conduction_rhs, _n_cells * _n_channels));
   LibmeshPetscCall(createPetscMatrix(
-      _hc_radial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_radial_heat_conduction_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _hc_sweep_enthalpy_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_sweep_enthalpy_rhs, _block_size * _n_channels));
+      _hc_radial_heat_conduction_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_radial_heat_conduction_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_hc_sweep_enthalpy_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_sweep_enthalpy_rhs, _n_cells * _n_channels));
 }
 
 TriSubChannel1PhaseProblem::~TriSubChannel1PhaseProblem()
@@ -322,28 +322,25 @@ TriSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch) 
 }
 
 void
-TriSubChannel1PhaseProblem::computeh(int iblock)
+TriSubChannel1PhaseProblem::computeh()
 {
-  unsigned int last_node = (iblock + 1) * _block_size;
-  unsigned int first_node = iblock * _block_size + 1;
+  unsigned int last_node = _n_cells;
+  unsigned int first_node = 1;
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
 
-  if (iblock == 0)
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
   {
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
+    auto h_out = _fp->h_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+    if (h_out < 0)
     {
-      auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      auto h_out = _fp->h_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
-      if (h_out < 0)
-      {
-        mooseError(
-            name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", 0);
-      }
-      _h_soln->set(node, h_out);
+      mooseError(
+          name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", 0);
     }
+    _h_soln->set(node, h_out);
   }
 
   if (!_implicit_bool)
@@ -1098,7 +1095,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     if (_verbose_subchannel)
-      _console << "Block: " << iblock << " - Enthalpy conservation matrix assembled" << std::endl;
+      _console << "Enthalpy conservation matrix assembled" << std::endl;
     // RHS
     LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_time_derivative_rhs));
     LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_advective_derivative_rhs));
