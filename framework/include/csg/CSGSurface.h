@@ -41,14 +41,6 @@ public:
   CSGSurface(const std::string & name);
 
   /**
-   * @brief Construct a new CSGSurface
-   *
-   * @param name unique name of surface
-   * @param surf_type surface type
-   */
-  CSGSurface(const std::string & name, const std::string & surf_type);
-
-  /**
    * Destructor
    */
   virtual ~CSGSurface() = default;
@@ -58,7 +50,10 @@ public:
    *
    * @return type of surface
    */
-  const std::string & getSurfaceType() const { return _surface_type; }
+  const std::string getSurfaceType() const
+  {
+    return MooseUtils::prettyCppType(libMesh::demangle(typeid(*this).name()));
+  }
 
   /**
    * @brief Get the coefficients that define the surface
@@ -94,6 +89,17 @@ public:
    */
   const std::string & getName() const { return _name; }
 
+  /**
+   * @brief Whether this surface is an engineering unit.
+   *
+   * Returns false for a plain CSGSurface; overridden to return true by the
+   * engineering unit types. Used to avoid a dynamic_cast on the common
+   * plain-surface comparison path (see operator==).
+   *
+   * @return true if this object is a CSGEngUnit, otherwise false
+   */
+  virtual bool isEngUnit() const { return false; }
+
   /// Operator overload for checking if two CSGSurface objects are equal
   bool operator==(const CSGSurface & other) const;
 
@@ -114,10 +120,6 @@ protected:
 
   /// Name of surface
   std::string _name;
-
-  /// Type of surface that is being represented
-  /// string is taken directly from the surface class name
-  const std::string _surface_type;
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;
