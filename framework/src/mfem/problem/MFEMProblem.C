@@ -473,32 +473,46 @@ MFEMProblem::setEquationSystems()
 
   if (weak_forms.empty()) // Add default MFEMWeakForm if none has been added by user
   {
-    const std::string type("MFEMWeakForm");
-    const std::string name("__DefaultWeakForm");
-    InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
-    std::shared_ptr<MFEMWeakFormBase> weak_form{nullptr};
-    if (isTransient())
-      weak_form =
-          addObject<MFEMWeakFormBase>("MFEMTimeDependentWeakForm", "__DefaultWeakForm", parameters)
-              .front();
-    else
-    {
-      if (getNumericType() == MFEMProblem::NumericType::REAL)
-        weak_form =
-            addObject<MFEMWeakFormBase>("MFEMWeakForm", "__DefaultWeakForm", parameters).front();
-      else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
-        weak_form =
-            addObject<MFEMWeakFormBase>("MFEMComplexWeakForm", "__DefaultWeakForm", parameters)
-                .front();
-      else
-        mooseError("Unknown numeric type. "
-                   "Please set the Problem numeric type to either 'real' or 'complex'.");
-    }
+    std::shared_ptr<MFEMWeakFormBase> weak_form = addDefaultWeakForm();
     getProblemData().eqn_systems.Register(weak_form->name(), weak_form->createEquationSystem());
   }
   else
     for (auto & weak_form : weak_forms)
       getProblemData().eqn_systems.Register(weak_form->name(), weak_form->createEquationSystem());
+}
+
+std::shared_ptr<MFEMWeakFormBase>
+MFEMProblem::addDefaultWeakForm()
+{
+  const std::string type("MFEMWeakForm");
+  const std::string name("__DefaultWeakForm");
+  InputParameters parameters = _factory.getValidParams("MFEMWeakForm");
+  std::shared_ptr<MFEMWeakFormBase> weak_form{nullptr};
+  if (isTransient())
+    weak_form =
+        addObject<MFEMWeakFormBase>("MFEMTimeDependentWeakForm", "__DefaultWeakForm", parameters)
+            .front();
+  else
+  {
+    if (getNumericType() == MFEMProblem::NumericType::REAL)
+    {
+      if (dynamic_cast<MFEMEigenproblem *>(this))
+        weak_form =
+            addObject<MFEMWeakFormBase>("MFEMEigenproblemWeakForm", "__DefaultWeakForm", parameters)
+                .front();
+      else
+        weak_form =
+            addObject<MFEMWeakFormBase>("MFEMWeakForm", "__DefaultWeakForm", parameters).front();
+    }
+    else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
+      weak_form =
+          addObject<MFEMWeakFormBase>("MFEMComplexWeakForm", "__DefaultWeakForm", parameters)
+              .front();
+    else
+      mooseError("Unknown numeric type. "
+                 "Please set the Problem numeric type to either 'real' or 'complex'.");
+  }
+  return weak_form;
 }
 
 void
