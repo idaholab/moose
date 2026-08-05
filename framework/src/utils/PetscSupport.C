@@ -158,6 +158,67 @@ petscOptionsHasName(::PetscOptions options,
   return found;
 }
 
+void
+insertCommandLinePetscOptions(::PetscOptions options)
+{
+  int argc;
+  char ** args;
+
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscGetArgs(&argc, &args));
+  std::vector<const char *> cl_args(args + 1, args + argc);
+  const auto cl_argc = libMesh::cast_int<int>(cl_args.size());
+
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsInsertArgs(options, cl_argc, cl_args.data()));
+}
+
+::PetscOptions
+commandLinePetscOptions()
+{
+  ::PetscOptions command_line_options;
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsCreate(&command_line_options));
+  insertCommandLinePetscOptions(command_line_options);
+  return command_line_options;
+}
+
+#define checkPrefix(prefix)                                                                        \
+  mooseAssert(prefix[0] == '-',                                                                    \
+              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
+  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
+              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
+  mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
+
+bool
+prefixHasCommandLineOption(::PetscOptions command_line_options,
+                           const std::string & prefix,
+                           const std::string & option)
+{
+  checkPrefix(prefix);
+  return prefix == "-" ? petscOptionsHasName(command_line_options, option)
+                       : petscOptionsHasName(command_line_options, option, prefix.substr(1));
+}
+
+std::optional<std::string>
+prefixCommandLineOptionValue(::PetscOptions command_line_options,
+                             const std::string & prefix,
+                             const std::string & option)
+{
+  checkPrefix(prefix);
+
+  char value[PETSC_MAX_PATH_LEN];
+  PetscBool set = PETSC_FALSE;
+  const auto petsc_prefix = prefix == "-" ? std::string() : prefix.substr(1);
+  const char * const prefix_ptr = petsc_prefix.empty() ? nullptr : petsc_prefix.c_str();
+  LibmeshPetscCallA(
+      PETSC_COMM_WORLD,
+      PetscOptionsGetString(
+          command_line_options, prefix_ptr, option.c_str(), value, sizeof(value), &set));
+
+  if (set)
+    return value;
+
+  return std::nullopt;
+}
+
 bool
 hasMatrixFreeSolveType(const FEProblemBase & problem)
 {
@@ -278,6 +339,17 @@ stringify(const MffdType & t)
   return "";
 }
 
+std::optional<std::string>
+commandLinePetscOptionValue(const std::string & prefix, const std::string & option)
+{
+  auto command_line_options = commandLinePetscOptions();
+
+  const auto result = prefixCommandLineOptionValue(command_line_options, '-' + prefix, option);
+
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsDestroy(&command_line_options));
+  return result;
+}
+
 void
 setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont_add_these_options)
 {
@@ -329,19 +401,8 @@ addPetscOptionsFromCommandline(FEProblemBase * const problem)
 {
   // commandline options always win
   // the options from a user commandline will overwrite the existing ones if any conflicts
-  int argc;
-  char ** args;
-
-  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscGetArgs(&argc, &args));
-  std::vector<const char *> cl_args(args + 1, args + argc);
-  const auto cl_argc = libMesh::cast_int<int>(cl_args.size());
-
-  ::PetscOptions command_line_options;
-  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsCreate(&command_line_options));
-  LibmeshPetscCallA(PETSC_COMM_WORLD,
-                    PetscOptionsInsertArgs(command_line_options, cl_argc, cl_args.data()));
-  LibmeshPetscCallA(PETSC_COMM_WORLD,
-                    PetscOptionsInsertArgs(LIBMESH_PETSC_NULLPTR, cl_argc, cl_args.data()));
+  auto command_line_options = commandLinePetscOptions();
+  insertCommandLinePetscOptions(LIBMESH_PETSC_NULLPTR);
 
   if (!problem)
   {
@@ -677,20 +738,16 @@ petscSetDefaults(FEProblemBase & problem)
   }
 }
 
+void setSolveTypeFromCommandLine(FEProblemBase & fe_problem);
+
 void
 processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParameters & params)
 {
   setSolveTypeFromParams(fe_problem, params);
+  setSolveTypeFromCommandLine(fe_problem);
   setLineSearchFromParams(fe_problem, params);
   setMFFDTypeFromParams(fe_problem, params);
 }
-
-#define checkPrefix(prefix)                                                                        \
-  mooseAssert(prefix[0] == '-',                                                                    \
-              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
-  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
-              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
-  mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
 
 void
 storePetscOptions(FEProblemBase & fe_problem,
@@ -728,6 +785,23 @@ setSolveTypeFromParams(FEProblemBase & fe_problem, const InputParameters & param
     for (const auto i : make_range(fe_problem.numNonlinearSystems()))
       fe_problem.solverParams(i)._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
   }
+}
+
+void
+setSolveTypeFromCommandLine(FEProblemBase & fe_problem)
+{
+  auto command_line_options = commandLinePetscOptions();
+
+  for (const auto i : make_range(fe_problem.numNonlinearSystems()))
+  {
+    const auto prefix = '-' + fe_problem.getSolverSystem(i).prefix();
+    if (prefixHasCommandLineOption(command_line_options, prefix, "-snes_mf_operator"))
+      fe_problem.solverParams(i)._type = Moose::ST_PJFNK;
+    else if (prefixHasCommandLineOption(command_line_options, prefix, "-snes_mf"))
+      fe_problem.solverParams(i)._type = Moose::ST_JFNK;
+  }
+
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsDestroy(&command_line_options));
 }
 
 void

@@ -15,7 +15,6 @@
 #include "MooseEnum.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
-#include "PetscSupport.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/equation_systems.h"
