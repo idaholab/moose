@@ -1,0 +1,60 @@
+[Tests]
+  design = 'LinearFVPressureFluxBC.md'
+  issues = '#32719'
+
+  [negative-ainv]
+    type = RunException
+    input = errors.i
+    cli_args = "LinearFVBCs/pressure_flux/v=0 FunctorMaterials/inverse_diagonal/prop_values='-1 -1 -1'"
+    expect_err = 'The boundary-normal Ainv coefficient must be nonnegative'
+    max_threads = 1
+    requirement = "The system shall reject a negative boundary-normal inverse momentum diagonal in a pressure flux boundary condition."
+  []
+  [wrong-pressure-diffusion-type]
+    type = RunException
+    input = internal-neighbor.i
+    cli_args = 'LinearFVKernels/p_diffusion/type=LinearFVAnisotropicDiffusion'
+    expect_err = 'The provided diffusion kernel must be of type LinearFVPressureCorrectionDiffusion.'
+    max_threads = 1
+    requirement = "The system shall reject a generic anisotropic diffusion kernel when the Rhie-Chow mass-flux provider requires a pressure-correction diffusion kernel."
+    design = 'RhieChowMassFlux.md'
+  []
+  [mixed-velocity-bc-types]
+    type = RunException
+    input = internal-neighbor.i
+    cli_args = "LinearFVBCs/active='prescribed-u prescribed-v outlet-pressure outlet-u outlet-v' LinearFVBCs/prescribed-v/boundary='top bottom'"
+    expect_err = 'All velocity components must either have Dirichlet boundary conditions or non-Dirichlet boundary conditions'
+    max_threads = 1
+    requirement = "The system shall reject mixed Dirichlet and non-Dirichlet velocity boundary conditions when using the legacy pressure boundary treatment."
+    design = 'RhieChowMassFlux.md'
+  []
+  [single-block]
+    type = CSVDiff
+    input = internal-neighbor.i
+    cli_args = 'Outputs/file_base=pressure-flux-equivalence'
+    csvdiff = pressure-flux-equivalence.csv
+    abs_zero = 1e-10
+    max_threads = 1
+    requirement = "The system shall produce the reference pressure-flux solution on a single fluid block with an external inlet."
+  []
+  [single-block-one-term]
+    type = CSVDiff
+    input = internal-neighbor.i
+    cli_args = 'LinearFVBCs/pressure-flux/use_two_term_expansion=false Outputs/file_base=pressure-flux-equivalence'
+    csvdiff = pressure-flux-equivalence.csv
+    abs_zero = 1e-10
+    prereq = single-block # Force ordering because both configurations produce the same CSV file.
+    max_threads = 1
+    requirement = "The system shall produce the reference pressure-flux solution using a one-term boundary pressure reconstruction."
+  []
+  [multiblock]
+    type = CSVDiff
+    input = internal-neighbor.i
+    cli_args = "Mesh/inactive='delete_inlet_block' Outputs/file_base=pressure-flux-equivalence"
+    csvdiff = pressure-flux-equivalence.csv
+    abs_zero = 1e-10
+    prereq = single-block-one-term # Force ordering because these configurations produce the same CSV file.
+    max_threads = 1
+    requirement = "The system shall produce the same pressure, velocity, and mass-flux results when the fluid cell is the neighbor of an internal inlet in a multiblock mesh as for a single-block external inlet."
+  []
+[]
