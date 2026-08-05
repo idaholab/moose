@@ -122,30 +122,23 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   const auto hit_error_message_diagnostic =
       [&diagnostic, &zero_line_diagnostic, &parse_file_path](const hit::ErrorMessage & err)
   {
-    // Has a filename
-    if (err.filename)
+    // error has filename that matches document currently getting processed
+    if (err.filename && *err.filename == parse_file_path)
     {
-      // For the open file
-      if (*err.filename == parse_file_path)
+      // Has line information that is valid
+      if (err.lineinfo && err.lineinfo->start_line && err.lineinfo->start_column &&
+          err.lineinfo->end_line && err.lineinfo->end_column)
       {
-        // Has line information that is valid
-        if (err.lineinfo && err.lineinfo->start_line && err.lineinfo->start_column &&
-            err.lineinfo->end_line && err.lineinfo->end_column)
-        {
-          diagnostic(err.message,
-                     err.lineinfo->start_line - 1,
-                     err.lineinfo->start_column - 1,
-                     err.lineinfo->end_line - 1,
-                     err.lineinfo->end_column - 1);
-          return;
-        }
-      }
-      // Has a file but not for this file, no diagnostic
-      else
+        diagnostic(err.message,
+                   err.lineinfo->start_line - 1,
+                   err.lineinfo->start_column - 1,
+                   err.lineinfo->end_line - 1,
+                   err.lineinfo->end_column - 1);
         return;
+      }
     }
 
-    // Don't have a filename, or have a filename that is this file without line info
+    // no filename, or filename not matching this document, or no line info
     zero_line_diagnostic(err.prefixed_message);
   };
 
@@ -858,8 +851,10 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       {
         doc_string = "custom user named block";
         insert_text = (request_on_block_decl ? "" : "[") +
-                      (filtering_prefix.size() ? filtering_prefix : "block_name") + "]" +
-                      req_params + "\n  " + (client_snippet_support ? "$0" : "") + "\n[]";
+                      std::string(client_snippet_support ? "${1:" : "") +
+                      (filtering_prefix.size() ? filtering_prefix : "block_name") +
+                      (client_snippet_support ? "}" : "") + "]" + req_params + "\n  " +
+                      (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
@@ -1875,6 +1870,12 @@ MooseServer::getRequiredParamsText(const std::string & subblock_path,
   // walk over collection of all parameters and build text of ones required
   std::string required_param_text;
   std::size_t param_index = 1;
+
+  // increment parameter tab stop index when adding custom user named block
+  // this will allow first stop to be placeholder selecting that block name
+  if (subblock_type.empty() && !subblock_path.empty() && subblock_path.back() == '*')
+    param_index++;
+
   for (const auto & valid_params_iter : valid_params)
   {
     // skip parameter if deprecated, private, defaulted, optional, existing
