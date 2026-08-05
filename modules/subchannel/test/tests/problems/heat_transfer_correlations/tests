@@ -6,6 +6,7 @@
     [dittus_boelter]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'dittus_boelter.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
@@ -18,6 +19,7 @@
     [dittus_boelter_Presser]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'dittus_boelter_Presser.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
@@ -30,6 +32,7 @@
     [dittus_boelter_Weisman]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'dittus_boelter_Weisman.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
@@ -42,6 +45,7 @@
     [gnielinski]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'gnielinski.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
@@ -54,17 +58,19 @@
     [negative_htc_error]
       type = RunException
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       expect_err = 'The heat transfer coefficient must be non-negative and finite\.'
       capabilities = 'method!=dbg'
       valgrind = NONE
       recover = false
       max_parallel = 1
       detail = 'and reject non-physical heat transfer coefficients from HTC closures.'
-      cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski wire_diameter=0.003 Outputs/file_base=negative_htc_error'
+      cli_args = 'SubChannel/pin_HTC_closure=negative-htc SubChannel/duct_HTC_closure=negative-htc Outputs/file_base=negative_htc_error'
     []
     [kazimi_carelli]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'kazimi-carelli.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
@@ -77,6 +83,7 @@
     [schad_modified]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'schad-modified.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
@@ -89,6 +96,7 @@
     [graber_rieger]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'graber-rieger.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
@@ -101,6 +109,7 @@
     [borishanskii]
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
       csvdiff  = 'borishanskii.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
