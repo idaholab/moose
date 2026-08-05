@@ -35,4 +35,33 @@ MFEMWeakFormBase::MFEMWeakFormBase(const InputParameters & parameters)
 {
 }
 
+void
+MFEMWeakFormBase::initEquationSystem(std::shared_ptr<Moose::MFEM::EquationSystem> equation_system)
+{
+  auto & problem_data = getMFEMProblem().getProblemData();
+  if (_bc_names.empty()) // default to all BCs added by user
+    for (auto & [bc_name, bc] : problem_data.bcs)
+      addBoundaryCondition(bc_name, bc);
+  else
+    for (const auto & bc_name : _bc_names)
+      addBoundaryCondition(bc_name, problem_data.bcs.GetShared(bc_name));
+
+  if (_kernel_names.empty()) // default to all kernels added by user
+    for (auto & [kernel_name, kernel] : problem_data.kernels)
+      addKernel(kernel_name, kernel);
+  else
+    for (const auto & kernel_name : _kernel_names)
+      addKernel(kernel_name, problem_data.kernels.GetShared(kernel_name));
+
+  if (problem_data.nonlinear_solver)
+    equation_system->SetGradientRequired(problem_data.nonlinear_solver->RequiresGradient());
+
+  equation_system->SetCoefficientManager(problem_data.coefficients);
+
+  // Set up initial conditions
+  equation_system->Init(problem_data.gridfunctions,
+                        problem_data.cmplx_gridfunctions,
+                        getMFEMProblem()._default_assembly_level);
+}
+
 #endif
