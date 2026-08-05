@@ -28,17 +28,17 @@ public:
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 
-  virtual dof_id_type computeElementWeight(Elem & elm);
+  virtual dof_id_type computeElementWeight(Elem & elm) const;
 
-  virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side);
+  virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side) const;
 
   using Partitioner::partition;
 
   virtual void partition(MeshBase & mesh, const unsigned int n) override;
 
-  bool applySideWeight() { return _apply_side_weight; }
+  bool applySideWeight() const { return _apply_side_weight; }
 
-  bool applyElementEeight() { return _apply_element_weight; }
+  bool applyElementWeight() const { return _apply_element_weight; }
 
   static void partitionGraph(const Parallel::Communicator & comm,
                              const std::vector<std::vector<dof_id_type>> & graph,
@@ -52,7 +52,7 @@ public:
   /**
    * Called immediately before partitioning
    */
-  virtual void initialize(MeshBase & /* mesh */){};
+  virtual void initialize(MeshBase & /* mesh */) {}
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
