@@ -161,6 +161,9 @@ offset = 0.00
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.4
+    # Retain the geometry used before the mortar subpatch-plane default changed so this test
+    # isolates physical scaling from the newer geometric-plane behavior.
+    mortar_3d_subpatch_plane = AVERAGED_NODAL_NORMAL
   []
 []
 
