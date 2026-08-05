@@ -7,7 +7,7 @@
 !style halign=left
 The `ConcentricCircleMeshGenerator` object is used to generate a 2D mesh for concentric circles.
 Users can refine the mesh by providing a high number of rings for each specified concentric circle
-region or a high number of sectors in each quadrant. The test, [concentric_circle_mesh_generator.i](test/tests/meshgenerators/concentric_circle_mesh_generator/concentric_circle_mesh_generator.i),
+region or a high number of sectors in each quadrant. The test, [!file text=concentric_circle_mesh_generator.i](test/tests/meshgenerators/concentric_circle_mesh_generator/concentric_circle_mesh_generator.i),
 explains the use of the `ConcentricCircleMeshGenerator` object. To execute the test, only generating
 a 2D mesh:
 

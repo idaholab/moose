@@ -66,7 +66,7 @@ through, but some of the important ones are:
   - Stateful class member variables in objects. Typically, this can be resolved
     by checking if the current timestep is greater than the previous timestep
     the object was run on. See
-    [Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
+    [!file text=Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
     example.
   - Specifying `Executioner/abort_on_solve_fail=true` in the test input or
     in the command line arguments (`cli_args`).

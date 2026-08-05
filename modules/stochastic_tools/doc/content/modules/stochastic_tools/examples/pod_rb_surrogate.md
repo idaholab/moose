@@ -70,7 +70,7 @@ when $\textbf{r}\in\Omega_i$ and 0 otherwise.
 
 ## Solving the problem without uncertain parameters
 
-The first step towards creating a POD-RB surrogate model is the generation of a [full-order problem](surrogates/pod_rb/2d_multireg/sub.i)
+The first step towards creating a POD-RB surrogate model is the generation of a [!file text=full-order problem](surrogates/pod_rb/2d_multireg/sub.i)
 which can solve [fom_problem] with fixed parameters.
 There are +three important factors+ that need to be considered while preparing the input file for this problem:
 
@@ -103,11 +103,11 @@ There are +three important factors+ that need to be considered while preparing t
 
 For the details of the training procedure of a POD-RB surrogate, see [PODReducedBasisTrainer.md].
 The first step is the collection of data, which involves the repeated execution of the
-[full-order problem](surrogates/pod_rb/2d_multireg/sub.i)
+[!file text=full-order problem](surrogates/pod_rb/2d_multireg/sub.i)
 with different parameter combinations and the saving of the full solution vectors.
 These solution vectors are often referred to as snapshots and this naming is preferred in
 this example as well.
-This step is managed by the [main input file](surrogates/pod_rb/2d_multireg/trainer.i) which creates parameter samples,
+This step is managed by the [!file text=main input file](surrogates/pod_rb/2d_multireg/trainer.i) which creates parameter samples,
 transfers them to the sub-application and collects the results from the
 completed computations.
 
@@ -166,10 +166,10 @@ without the need to repeat the training process.
 
 ## Evaluation of surrogate models
 
-To evaluate surrogate models, a new [main input file](surrogates/pod_rb/2d_multireg/surr.i) has to be created.
+To evaluate surrogate models, a new [!file text=main input file](surrogates/pod_rb/2d_multireg/surr.i) has to be created.
 In this example, the same distributions are defined for the parameters as used in the training phase.
 Therefore, the content of the `Distributions` block is identical to the
-one in the [trainer input file](surrogates/pod_rb/2d_multireg/trainer.i).
+one in the [!file text=trainer input file](surrogates/pod_rb/2d_multireg/trainer.i).
 As a next step, new samples are generated using these distributions. Again, a [LatinHypercubeSampler.md]
 is employed for this task, however this time the number of samples is increased to 1000 since the
 surrogates are orders of magnitudes faster than the full-order model.

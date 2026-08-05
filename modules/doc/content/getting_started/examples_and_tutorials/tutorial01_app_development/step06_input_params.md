@@ -8,7 +8,7 @@ This step introduces the class used to a define a unique set of parameters for a
 
 ## Input Parameters
 
-Every `MooseObject` includes a set of custom parameters within a single [`InputParameters`](framework/include/utils/InputParameters.h) object whose values may be controlled by its user via an input file. These parameters are defined in the `validParams()` method. This method is `static` to allow for it to be called independently and prior to object construction. The output is then parsed and verified by the core systems of MOOSE before it becomes accessible to the constructor methods and other members for each instance of the associated `MooseObject`.
+Every `MooseObject` includes a set of custom parameters within a single [!file text=`InputParameters`](framework/include/utils/InputParameters.h) object whose values may be controlled by its user via an input file. These parameters are defined in the `validParams()` method. This method is `static` to allow for it to be called independently and prior to object construction. The output is then parsed and verified by the core systems of MOOSE before it becomes accessible to the constructor methods and other members for each instance of the associated `MooseObject`.
 
 ### Declaring Valid Parameters
 

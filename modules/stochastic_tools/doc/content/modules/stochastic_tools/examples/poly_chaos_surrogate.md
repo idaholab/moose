@@ -12,7 +12,7 @@ Polynomial chaos (PC) is a stochastic element method. Its formulation is similar
 
 This section describes how to set up an input for a [PolynomialChaosTrainer](PolynomialChaosTrainer.md). There are three aspects that need to be known before setting up the input file.
 
-1. A sub app needs to be built, defining the physics of the problem, this example uses a [heat conduction model](examples/surrogates/sub.i) described in the previous section.
+1. A sub app needs to be built, defining the physics of the problem, this example uses a [!file text=heat conduction model](examples/surrogates/sub.i) described in the previous section.
 2. Uncertain parameters need to be identified with a defined probability distribution.
 3. Quantities of interest need to be defined, for now, these come in the form of postprocessors from the sub app.
 
@@ -68,10 +68,10 @@ Outputting the data after training a PC trainer is exactly the same as outputtin
 
 ### Example Input Files
 
-- [examples/surrogates/poly_chaos_uniform_mc.i]
-- [examples/surrogates/poly_chaos_uniform_quad.i]
-- [examples/surrogates/poly_chaos_normal_mc.i]
-- [examples/surrogates/poly_chaos_normal_quad.i]
+- [!file](examples/surrogates/poly_chaos_uniform_mc.i)
+- [!file](examples/surrogates/poly_chaos_uniform_quad.i)
+- [!file](examples/surrogates/poly_chaos_normal_mc.i)
+- [!file](examples/surrogates/poly_chaos_normal_quad.i)
 
 ## Evaluation and Statistics
 
@@ -89,7 +89,7 @@ Evaluating a polynomial chaos surrogate model is exactly the same as any other t
 
 !listing examples/surrogates/poly_chaos_normal.i block=Distributions Samplers caption=Defining sampler for evaluation -- Normal distributions
 
-!listing examples/surrogates/poly_chaos_uniform.i block=samp caption=Evaluating surrogate with [EvaluateSurrogate](EvaluateSurrogate.C)
+!listing examples/surrogates/poly_chaos_uniform.i block=samp caption=Evaluating surrogate with [!file](EvaluateSurrogate.C)
 
 ### Statistics and Sensitivities
 
@@ -103,8 +103,8 @@ Sobol statistics are a metric of the global sensitivity of each parameter, or a 
 
 ### Example Input Files
 
-- [examples/surrogates/poly_chaos_uniform.i]
-- [examples/surrogates/poly_chaos_normal.i]
+- [!file](examples/surrogates/poly_chaos_uniform.i)
+- [!file](examples/surrogates/poly_chaos_normal.i)
 
 ## Results and Analysis
 
