@@ -17,23 +17,7 @@
 
 registerMooseObject("MooseApp", MFEMWeakForm);
 
-InputParameters
-MFEMWeakForm::validParams()
-{
-  InputParameters params = MFEMObject::validParams();
-  params.registerBase("MFEMWeakForm");
-  params.registerSystemAttributeName("MFEMWeakForm");
-  params.addParam<std::vector<MFEMBoundaryConditionName>>(
-      "bcs", {}, "List of boundary conditions to add to the weak form");
-  params.addParam<std::vector<MFEMKernelName>>(
-      "kernels", {}, "List of kernels to add to the weak form");
-  return params;
-}
-
-MFEMWeakForm::MFEMWeakForm(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    _bc_names(getParam<std::vector<MFEMBoundaryConditionName>>("bcs")),
-    _kernel_names(getParam<std::vector<MFEMKernelName>>("kernels"))
+MFEMWeakForm::MFEMWeakForm(const InputParameters & parameters) : MFEMWeakFormBase(parameters)
 {
   auto & problem_data = getMFEMProblem().getProblemData();
   if (getMFEMProblem().isTransient())
