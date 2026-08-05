@@ -503,6 +503,7 @@ class SyntaxParameterCommand(SyntaxCommandBase):
         obj_syntax, param_name = info[MarkdownReader.INLINE].rsplit("/", 1)
         settings["syntax"] = obj_syntax
         settings["_param"] = param_name
+        settings["_external"] = getattr(page, "external", False)
         return SyntaxCommandBase.createToken(self, parent, info, page, settings)
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -513,9 +514,20 @@ class SyntaxParameterCommand(SyntaxCommandBase):
         elif obj.parameters:
             parameters.update(obj.parameters)
 
+        obj_syntax = settings["syntax"]
         param_name = settings["_param"]
-        if param_name not in parameters:
-            obj_syntax = settings["syntax"]
+        param_external = settings["_external"]
+
+        if param_external:
+            msg = "The parameter '{}/{}' is being invoked using the '!param' command on a page ({}) associated with content marked 'external' and will be skipped. If this is not intended, please check 'doc/config.yml' in your application.".format(
+                obj_syntax, param_name, page.local
+            )
+            # Display warning and return parameter name as content placeholder (to leave no gaps in
+            # rendered page)
+            LOG.warning(msg)
+            return tokens.String(parent, content="{}/{}".format(obj_syntax, param_name))
+
+        if param_name not in parameters and not param_external:
             results = mooseutils.levenshteinDistance(param_name, parameters.keys(), 5)
             msg = "Unable to locate the parameter '{}/{}', did you mean:\n".format(
                 obj_syntax, param_name
