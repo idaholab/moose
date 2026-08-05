@@ -43,6 +43,7 @@ public:
 
   int dim() const { return _dim; }
 
+  using mfem::VectorCoefficient::Eval;
   void Eval(mfem::Vector & W,
             mfem::ElementTransformation & transformation,
             const mfem::IntegrationPoint & integration_point) override;
