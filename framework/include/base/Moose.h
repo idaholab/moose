@@ -203,6 +203,11 @@ extern bool _warnings_are_errors;
 extern bool _deprecated_is_error;
 
 /**
+ * Variable to suppress informational messages.
+ */
+extern bool _suppress_info;
+
+/**
  * Variable to turn on exceptions during mooseError(), should only be used within MOOSE unit tests
  * or when about to perform threaded operations because exception throwing in threaded regions is
  * safe while aborting is inherently not when singletons are involved (e.g. what thread is
