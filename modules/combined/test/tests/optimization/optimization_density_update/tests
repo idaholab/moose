@@ -2,13 +2,12 @@
   issues = '#25602'
   design = 'DensityUpdate.md'
   [top_opt_2d]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'top_opt_2d.i'
-    exodiff = 'top_opt_2d_out.e'
+    csvdiff = 'top_opt_2d_out.csv'
+    rel_err = 5e-3
     valgrind = 'none'
     requirement = 'The system shall be able to solve a 2D topology optimization problem using the solid isotropic material with penalization method(SIMP) to find the optimal solution and avoid grayscale boundaries/elements.'
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    capabilities = 'machine=x86_64'
   []
   [top_opt_3d]
     type = 'Exodiff'

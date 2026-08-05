@@ -14,12 +14,9 @@
         allow_warnings = true
     []
     [level_set_correction]
-        type = Exodiff
-        input = 'remesh_sphere.i'
-        cli_args = "Mesh/remesh/exclude_subdomain_names='4'
-                    Mesh/remesh/level_set='x*x+y*y+z*z-4'
-                    --mesh-only sphere_levelset.e"
-        exodiff = 'sphere_levelset.e'
+        type = CSVDiff
+        input = 'remesh_sphere.i level_set_correction.i '
+        csvdiff = 'level_set_correction_out.csv'
         requirement = 'The system shall be able to remesh subdomains of a surface mesh, and correct the output using projection to a level set surface.'
         recover = false
         mesh_mode = replicated

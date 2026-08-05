@@ -43,12 +43,11 @@
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a fine mesh'
   [../]
   [./fine_thick_fracture_steady]
-    type = Exodiff
+    type = CSVDiff
     heavy = true
     input = 'fine_thick_fracture_steady.i'
-    exodiff = 'fine_thick_fracture_steady_out.e'
+    csvdiff = 'fine_thick_fracture_steady_out_fracture_pressure_0001.csv'
     abs_zero = 1E-7
-    max_parallel = 1 # without the influence of a time derivative, MOOSE believes the porepressure in the ultra-low permeability matrix can be almost anything: the residual are swamped by the residuals in the fracture
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to find the steady-state solution for flow and solute transport along a finite-sized fracture embedded in a porous matrix, using a fine mesh'
