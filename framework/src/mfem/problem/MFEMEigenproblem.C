@@ -113,4 +113,14 @@ MFEMEigenproblem::resolveMFEMSolvers()
                "' is not an eigensolver, but the problem is marked as an eigenproblem.");
 }
 
+std::shared_ptr<MFEMWeakFormBase>
+MFEMEigenproblem::addDefaultWeakForm()
+{
+  InputParameters parameters = _factory.getValidParams("MFEMEigenproblemWeakForm");
+  mooseAssert(getNumericType() == MFEMProblem::NumericType::REAL,
+              "Complex MFEM eigenproblems are not currently supported.");
+  return addObject<MFEMWeakFormBase>("MFEMEigenproblemWeakForm", "__DefaultWeakForm", parameters)
+      .front();
+}
+
 #endif
