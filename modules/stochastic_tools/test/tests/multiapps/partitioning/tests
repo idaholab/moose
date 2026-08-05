@@ -18,6 +18,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       min_parallel = 6
+      prereq = full_solve/normal_less_procs
       detail = 'with more processors than rows in normal mode;'
     []
     [normal_min_procs]
@@ -27,6 +28,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       min_parallel = 4
+      prereq = full_solve/normal_more_procs
       detail = 'with specified minimum processors per app in normal mode;'
     []
     [reset_less_procs]
@@ -36,6 +38,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       max_parallel = 5
+      prereq = full_solve/normal_min_procs
       detail = 'with less processors than rows in batch-reset mode;'
     []
     [reset_more_procs]
@@ -45,6 +48,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       min_parallel = 6
+      prereq = full_solve/reset_less_procs
       detail = 'with more processors than rows in batch-reset mode;'
     []
     [reset_min_procs]
@@ -54,6 +58,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       min_parallel = 4
+      prereq = full_solve/reset_more_procs
       detail = 'with specified minimum processors per app in batch-reset mode;'
     []
     [restore_less_procs]
@@ -63,6 +68,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       max_parallel = 5
+      prereq = full_solve/reset_min_procs
       detail = 'with less processors than rows in batch-restore mode;'
     []
     [restore_more_procs]
@@ -72,6 +78,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       min_parallel = 6
+      prereq = full_solve/restore_less_procs
       detail = 'with more processors than rows in batch-restore mode;'
     []
     [restore_min_procs]
@@ -81,6 +88,7 @@
       allow_test_objects = true
       csvdiff = main_out_vpp_0001.csv
       min_parallel = 4
+      prereq = full_solve/restore_more_procs
       detail = 'with specified minimum processors per app in batch-restore mode;'
     []
     [error_min_procs]
@@ -113,6 +121,7 @@
       allow_test_objects = true
       csvdiff = 'main_transient_out_vpp_0001.csv main_transient_out_vpp_0002.csv main_transient_out_vpp_0003.csv'
       min_parallel = 6
+      prereq = transient/normal_less_procs
       detail = 'with more processors than rows in normal mode;'
     []
     [normal_min_procs]
@@ -122,6 +131,7 @@
       allow_test_objects = true
       csvdiff = 'main_transient_out_vpp_0001.csv main_transient_out_vpp_0002.csv main_transient_out_vpp_0003.csv'
       min_parallel = 4
+      prereq = transient/normal_more_procs
       detail = 'with specified minimum processors per app in normal mode;'
     []
     [restore_less_procs]
@@ -131,6 +141,7 @@
       allow_test_objects = true
       csvdiff = 'main_transient_out_vpp_0001.csv main_transient_out_vpp_0002.csv main_transient_out_vpp_0003.csv'
       max_parallel = 5
+      prereq = transient/normal_min_procs
       detail = 'with less processors than rows in batch-restore mode;'
     []
     [restore_more_procs]
@@ -140,6 +151,7 @@
       allow_test_objects = true
       csvdiff = 'main_transient_out_vpp_0001.csv main_transient_out_vpp_0002.csv main_transient_out_vpp_0003.csv'
       min_parallel = 6
+      prereq = transient/restore_less_procs
       detail = 'with more processors than rows in batch-restore mode;'
     []
     [restore_min_procs]
@@ -149,6 +161,7 @@
       allow_test_objects = true
       csvdiff = 'main_transient_out_vpp_0001.csv main_transient_out_vpp_0002.csv main_transient_out_vpp_0003.csv'
       min_parallel = 4
+      prereq = transient/restore_more_procs
       detail = 'with specified minimum processors per app in batch-restore mode;'
     []
     [error_min_procs]

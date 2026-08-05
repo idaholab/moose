@@ -158,4 +158,19 @@ TEST(DataIOTest, emptyTorchTensor)
   EXPECT_EQ(loaded_tensor.numel(), 0);
 }
 
+TEST(DataIOTest, undefinedTorchTensor)
+{
+  auto tensor = torch::Tensor();
+
+  std::stringstream ss;
+  dataStore(ss, tensor, nullptr);
+  EXPECT_EQ(tensor.defined(), false);
+
+  ss.seekg(0, std::ios::beg);
+  torch::Tensor loaded_tensor;
+  dataLoad(ss, loaded_tensor, nullptr);
+
+  EXPECT_EQ(loaded_tensor.defined(), false);
+}
+
 #endif

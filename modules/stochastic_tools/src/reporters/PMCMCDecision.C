@@ -52,11 +52,13 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
         isParamValid("output_value")
             ? &declareValue<std::vector<Real>>("outputs_required", REPORTER_MODE_DISTRIBUTED)
             : nullptr),
+    _data_prev(declareRestartableData<DenseMatrix<Real>>("data_prev")),
+    _var_prev(declareRestartableData<std::vector<Real>>("var_prev")),
+    _outputs_prev(declareRestartableData<std::vector<Real>>("outputs_prev")),
     _output_value(isParamValid("output_value") ? &getReporterValue<std::vector<Real>>(
                                                      "output_value", REPORTER_MODE_DISTRIBUTED)
                                                : nullptr),
-    _local_comm(_sampler.getLocalComm()),
-    _check_step(std::numeric_limits<int>::max())
+    _check_step(declareRestartableData<int>("check_step", std::numeric_limits<int>::max()))
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
@@ -165,18 +167,14 @@ PMCMCDecision::execute()
   }
 
   // Gather inputs and outputs from the sampler and subApps
-  DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
-  for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
-  {
-    const auto data = _sampler.getNextLocalRow();
-    for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-      data_in(ss, j) = data[j];
-  }
-  _local_comm.sum(data_in.get_values());
+  DenseMatrix<Real> data_in = _sampler.getGlobalSamples();
   if (!usingGP())
   {
-    (*_outputs_required) = *_output_value;
-    _local_comm.allgather((*_outputs_required));
+    mooseAssert(_output_value->size() >= _sampler.getNumberOfLocalRows(),
+                "Incorrectly sized outputs.");
+    _outputs_required->assign(_output_value->begin(),
+                              _output_value->begin() + _sampler.getNumberOfLocalRows());
+    _communicator.allgather((*_outputs_required));
   }
 
   // Compute the evidence and transitimkon vectors

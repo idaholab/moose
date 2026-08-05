@@ -56,9 +56,12 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
                                              : nullptr),
     _variance_bound(getParam<Real>("variance_bound")),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
+    _new_var_samples(declareRecoverableData<std::vector<Real>>("new_var_samples")),
+    _rnd_vec(declareRecoverableData<std::vector<Real>>("rnd_vec")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
     _seed_index(0),
-    _rand_index(0)
+    _rand_index(0),
+    _new_samples_confg(declareRecoverableData<std::vector<std::vector<Real>>>("new_samples_confg"))
 {
   // Filling the `priors` vector with the user-provided distributions.
   for (const DistributionName & name :
@@ -133,9 +136,17 @@ PMCMCBase::executeSetUp()
   // Filling the new_samples vector of vectors with new proposal samples
   proposeSamples();
 
+  // At the first step, override with user-provided initial values
+  if (_t_step < 1)
+    for (unsigned int i = 0; i < _num_parallel_proposals; ++i)
+      _new_samples[i] = _initial_values;
+
   // Draw random numbers to facilitate decision making later on
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     _rnd_vec[j] = random();
+
+  // Combine the proposed samples with experimental configurations
+  combineWithExperimentalConfig();
 }
 
 Real
@@ -212,14 +223,7 @@ PMCMCBase::getVarPrior() const
 }
 
 Real
-PMCMCBase::computeSample(dof_id_type row_index, dof_id_type col_index)
+PMCMCBase::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
-  if (_t_step < 1)
-    for (unsigned int i = 0; i < _num_parallel_proposals; ++i)
-      _new_samples[i] = _initial_values;
-
-  // Combine the proposed samples with experimental configurations
-  combineWithExperimentalConfig();
-
   return _new_samples_confg[row_index][col_index];
 }

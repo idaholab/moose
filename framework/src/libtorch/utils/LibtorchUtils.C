@@ -105,6 +105,9 @@ moveToLibtorchDevice(torch::Tensor & tensor, const torch::DeviceType device_type
 torch::Tensor
 toCPUContiguous(const torch::Tensor & tensor)
 {
+  if (!tensor.defined())
+    return torch::Tensor();
+
   // CPU accessors can handle strides, but data_ptr()-based reads require dense logical order.
   return tensor.detach().to(tensor.options().device(at::kCPU)).contiguous();
 }

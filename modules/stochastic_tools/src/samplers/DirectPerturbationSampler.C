@@ -102,7 +102,7 @@ DirectPerturbationSampler::getNominalValue(const Real param_index) const
 }
 
 Real
-DirectPerturbationSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+DirectPerturbationSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   return _parameter_vectors[row_index][col_index];
 }

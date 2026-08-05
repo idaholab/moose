@@ -54,8 +54,12 @@ ParallelSubsetSimulation::ParallelSubsetSimulation(const InputParameters & param
     _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _count_max(std::floor(1 / _subset_probability)),
-    _subset(0),
-    _is_sampling_completed(false)
+    _subset(declareRecoverableData<unsigned int>("subset", 0)),
+    _is_sampling_completed(declareRecoverableData<bool>("is_sampling_completed", false)),
+    _inputs_sto(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_sto")),
+    _outputs_sto(declareRecoverableData<std::vector<Real>>("outputs_sto")),
+    _inputs_sorted(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_sorted")),
+    _markov_seed(declareRecoverableData<std::vector<std::vector<Real>>>("markov_seed"))
 {
   // Fixing the number of rows to the number of processors
   const dof_id_type nchains = isParamValid("num_parallel_chains")
@@ -176,7 +180,7 @@ ParallelSubsetSimulation::executeSetUp()
 }
 
 Real
-ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index)
+ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   unsigned int seed_value = _step > 0 ? (_step - 1) * 2 : 0;
   const dof_id_type n = row_index * getNumberOfCols() + col_index;

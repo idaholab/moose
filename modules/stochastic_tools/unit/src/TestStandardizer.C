@@ -172,4 +172,14 @@ TEST(StochasticTools, standardizerDataStoreLoad)
   EXPECT_TRUE(torch::allclose(loaded.getStdDev(), stored.getStdDev()));
 }
 
+TEST(StochasticTools, standardizerEmptyDataStoreLoad)
+{
+  StochasticTools::Standardizer stored;
+  std::stringbuf buffer;
+  std::iostream stream(&buffer);
+  dataStore(stream, stored, nullptr);
+  StochasticTools::Standardizer loaded;
+  dataLoad(stream, loaded, nullptr);
+}
+
 #endif

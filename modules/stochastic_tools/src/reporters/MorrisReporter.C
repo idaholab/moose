@@ -227,7 +227,7 @@ MorrisReporterContext<DataType>::finalize()
   {
     dof_id_type traj = p / (nc + 1);
     dof_id_type tind = p % (nc + 1);
-    const std::vector<Real> row = _sampler.getNextLocalRow();
+    const std::vector<Real> row = _sampler.getSampleRow(p + _sampler.getLocalRowBegin());
     for (unsigned int k = 0; k < nc; ++k)
       x(tind, k) = row[k];
     y[tind] = _data[p + offset];

@@ -69,7 +69,7 @@ QuadratureSampler::QuadratureSampler(const InputParameters & parameters) : Sampl
 }
 
 Real
-QuadratureSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+QuadratureSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   return _grid->quadraturePoint(row_index, col_index);
 }

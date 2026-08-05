@@ -54,7 +54,9 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
     _sampler(getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
-    _number_of_sampler_rows(_sampler.getNumberOfRows())
+    _number_of_sampler_rows(_sampler.getNumberOfRows()),
+    _batch_backup(
+        declareRestartableData<std::vector<std::vector<std::unique_ptr<Backup>>>>("batch_backup"))
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
     paramError("mode",
@@ -88,7 +90,7 @@ SamplerTransientMultiApp::initialSetup()
   TransientMultiApp::initialSetup();
 
   // Perform initial backup for the batch sub-applications
-  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE && !_app.isRecovering())
   {
     dof_id_type n = _rank_config.num_local_sims;
     _batch_backup.resize(n);
@@ -145,8 +147,6 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
        i < _rank_config.first_local_sim_index + _rank_config.num_local_sims;
        ++i)
   {
-    updateRowData(_local_batch_app_index);
-
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
       for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
       {
@@ -154,9 +154,13 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
         _apps[j]->finalizeRestore();
       }
 
+    // With multiple processors per app, there are no local rows for non-root processors
+    std::vector<Real> row_data;
+    if (isRootProcessor())
+      row_data = _sampler.getSampleRow(i);
     SamplerFullSolveMultiApp::execBatchTransfers(to_transfers,
                                                  i,
-                                                 _row_data,
+                                                 row_data,
                                                  MultiAppTransfer::TO_MULTIAPP,
                                                  _fe_problem.verboseMultiApps(),
                                                  _console);
@@ -174,7 +178,7 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 
     SamplerFullSolveMultiApp::execBatchTransfers(from_transfers,
                                                  i,
-                                                 _row_data,
+                                                 row_data,
                                                  MultiAppTransfer::FROM_MULTIAPP,
                                                  _fe_problem.verboseMultiApps(),
                                                  _console);
@@ -224,39 +228,15 @@ SamplerTransientMultiApp::getCommandLineArgs(const unsigned int local_app)
   {
     // Since we only store param_names in cli_args, we need to find the values for each param from
     // sampler data and combine them to get full command line option strings.
-    updateRowData(_mode == StochasticTools::MultiAppMode::NORMAL ? local_app
-                                                                 : _local_batch_app_index);
+    dof_id_type row_index;
+    if (_mode == StochasticTools::MultiAppMode::NORMAL)
+      row_index = local_app + _first_local_app;
+    else
+      row_index = _local_batch_app_index + _rank_config.first_local_sim_index;
     args = SamplerFullSolveMultiApp::sampledCommandLineArgs(
-        _row_data, TransientMultiApp::getCommandLineArgs(local_app));
+        _sampler.getSampleRow(row_index), TransientMultiApp::getCommandLineArgs(local_app));
   }
 
   _my_communicator.broadcast(args);
   return args;
-}
-
-void
-SamplerTransientMultiApp::updateRowData(dof_id_type local_index)
-{
-  if (!isRootProcessor())
-    return;
-
-  mooseAssert(local_index < _sampler.getNumberOfLocalRows(),
-              "Local index must be less than number of local rows.");
-
-  if (_row_data.empty() ||
-      (_local_row_index == _sampler.getNumberOfLocalRows() - 1 && local_index == 0))
-  {
-    mooseAssert(local_index == 0,
-                "The first time calling updateRowData must have a local index of 0.");
-    _local_row_index = 0;
-    _row_data = _sampler.getNextLocalRow();
-  }
-  else if (local_index - _local_row_index == 1)
-  {
-    _local_row_index++;
-    _row_data = _sampler.getNextLocalRow();
-  }
-
-  mooseAssert(local_index == _local_row_index,
-              "Local index must be equal or one greater than the index previously called.");
 }
