@@ -1,0 +1,3 @@
+time,absolute_error,analytic_form_pressure_drop,analytic_mdot,analytic_pressure_drop,analytic_wall_pressure_drop,friction_pressure_drop,mdot_absolute_error,mdot_out,relative_error
+0,0,4.0112471655329,0.008,63.285783435903,59.274536270371,0,0,0,0
+1,7.105427357601e-15,4.0112471655329,0.008,63.285783435903,59.274536270371,63.285783435903,0,0.008,1.1227525317432e-16

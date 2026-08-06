@@ -1,13 +1,22 @@
 [Tests]
   design = 'SCMFrictionPressureDrop.md'
   issues = '#33497'
-  [area_homogenization]
+  [analytic_test]
     type = CSVDiff
-    input = test.i
-    csvdiff = test_out.csv
+    input = analytic_test.i
+    csvdiff = analytic_test_out.csv
     recover = false
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system shall report a cross-sectionally homogenized subchannel friction pressure loss that preserves the total axial friction force.'
+    requirement = 'The system shall report an aera-averaged friction pressure equivalent to the analytic solution.'
+  []
+  [analytic_multichannel_multilayer_test]
+    type = CSVDiff
+    input = analytic_multichannel_multilayer_test.i
+    csvdiff = analytic_multichannel_multilayer_test_out.csv
+    recover = false
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall report an aera-averaged friction pressure equivalent to the analytic solution with multiple, different cross section channels.'
   []
 []
