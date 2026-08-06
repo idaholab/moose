@@ -100,6 +100,14 @@
     requirement = 'The system shall not produce an out-of-bounds error when normal-projecting '
                   'retained 3D mortar quadrature points to distorted QUAD4 parent faces.'
   []
+  [displaced-mortar-jacobian-update]
+    type = 'RunApp'
+    input = 'displaced_mortar_jacobian_update.i'
+    design = 'FEProblemBase.md AutomaticMortarGeneration.md'
+    issues = '#33503'
+    requirement = 'The system shall rebuild displaced mortar segment meshes after updating the '
+                  'displaced parent mesh during standalone Jacobian assembly.'
+  []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
     issues = '#33282'
