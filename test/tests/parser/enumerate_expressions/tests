@@ -1,0 +1,39 @@
+[Tests]
+  design = 'Parser.md'
+  issues = '#33509'
+
+  [expand]
+    type = CSVDiff
+    input = enumerate.i
+    csvdiff = enumerate_out_names_0001.csv
+    requirement = 'The system shall expand an enumerate brace expression into an inclusive list of prefixed names.'
+  []
+  [mismatched_prefix]
+    type = RunException
+    input = enumerate.i
+    cli_args = "Reporters/names/string_vector_values='${enumerate block0 another_block3}'"
+    expect_err = "enumerate error: prefixes of 'block0' and 'another_block3' do not match"
+    requirement = 'The system shall report an error if the prefixes of an enumerate brace expression do not match.'
+  []
+  [descending]
+    type = RunException
+    input = enumerate.i
+    cli_args = "Reporters/names/string_vector_values='${enumerate block3 block0}'"
+    expect_err = "enumerate error: last index of 'block0' is smaller than first index of 'block3'"
+    requirement = 'The system shall report an error if the last index of an enumerate brace expression is smaller than the first.'
+  []
+  [no_integer]
+    type = RunException
+    input = enumerate.i
+    cli_args = "Reporters/names/string_vector_values='${enumerate block block3}'"
+    expect_err = "enumerate error: argument 'block' does not end in an integer"
+    requirement = 'The system shall report an error if an enumerate brace expression argument does not end in an integer.'
+  []
+  [wrong_arg_count]
+    type = RunException
+    input = enumerate.i
+    cli_args = "Reporters/names/string_vector_values='${enumerate block0}'"
+    expect_err = "enumerate error: Expected 2 arguments"
+    requirement = 'The system shall report an error if an enumerate brace expression does not receive exactly two arguments.'
+  []
+[]
