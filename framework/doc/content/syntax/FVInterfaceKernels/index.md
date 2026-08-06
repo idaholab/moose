@@ -7,6 +7,10 @@ orientation of an interface with `subdomain1` and `subdomain2`. `variable1` must
 `subdomain1`, and `variable2` must be defined on `subdomain2`. If `variable2` is omitted,
 `variable1` is used on both sides.
 
+During initial setup, MOOSE verifies that every boundary face assigned to an
+`FVInterfaceKernel` connects the configured `subdomain1` and `subdomain2` sets. This reports
+malformed or overextended interface sidesets before residual evaluation begins.
+
 ## Developer contract
 
 Derived `FVInterfaceKernel` objects operate entirely in the user-defined side-1/side-2
@@ -22,7 +26,9 @@ The protected side-oriented accessors are:
 - `elem1()` and `elem2()`, which return the elements on sides 1 and 2;
 - `centroid1()` and `centroid2()`, which return their centroids;
 - `elemArg1()` and `elemArg2()`, which create element functor arguments; and
-- `faceArg1()` and `faceArg2()`, which create explicitly one-sided face functor arguments.
+- `faceArg1()` and `faceArg2()`, which create explicitly one-sided face functor arguments. The
+  checked `faceArg1(functor)` and `faceArg2(functor)` overloads also verify that the functor is
+  defined on the requested logical side.
 
 `interpolateValue(method, value1, value2)` interpolates a value from each user-defined side while
 accounting for the geometric orientation of the current `FaceInfo`. For example, a diffusion
@@ -46,9 +52,12 @@ FVFooInterface::computeQpResidual()
 }
 ```
 
-Use `faceArg1()` or `faceArg2()` when a functor must be evaluated from one particular side rather
-than interpolated across the interface. This is important for discontinuous or block-restricted
-functors.
+Use the checked `faceArg1(functor)` or `faceArg2(functor)` overloads when a functor must be
+evaluated from one particular side rather than interpolated across the interface. These overloads
+preserve the requested logical side and report an error if the functor is not defined there. The
+no-functor overloads remain available when constructing a one-sided argument that is not
+immediately tied to a particular functor. This distinction is important for discontinuous or
+block-restricted functors.
 
 !alert! note
 When using an `FVInterfaceKernel` to connect variables that belong to different nonlinear systems,
