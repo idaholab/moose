@@ -140,6 +140,62 @@ UnitsConversionEvaler::eval(hit::Field * n,
   return ss.str();
 }
 
+std::string
+EnumerateEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+{
+  std::vector<std::string> argv;
+  argv.insert(argv.begin(), args.begin(), args.end());
+
+  if (argv.size() != 2)
+  {
+    exp.errors.emplace_back(
+        "enumerate error: Expected 2 arguments ${enumerate first_name last_name} in '" +
+            n->fullpath() + "'",
+        n);
+    return n->val();
+  }
+
+  std::array<std::string, 2> prefix;
+  std::array<int, 2> number;
+  for (const auto i : make_range(2))
+  {
+    const auto & arg = argv[i];
+    if (arg.empty() || !std::isdigit(static_cast<unsigned char>(arg.back())))
+    {
+      exp.errors.emplace_back("enumerate error: argument '" + arg +
+                                  "' does not end in an integer in '" + n->fullpath() + "'",
+                              n);
+      return n->val();
+    }
+    const auto pos = arg.find_last_not_of("0123456789");
+    prefix[i] = (pos == std::string::npos) ? "" : arg.substr(0, pos + 1);
+    number[i] = MooseUtils::convert<int>(arg.substr(prefix[i].size()));
+  }
+
+  if (prefix[0] != prefix[1])
+  {
+    exp.errors.emplace_back("enumerate error: prefixes of '" + argv[0] + "' and '" + argv[1] +
+                                "' do not match in '" + n->fullpath() + "'",
+                            n);
+    return n->val();
+  }
+
+  if (number[1] < number[0])
+  {
+    exp.errors.emplace_back("enumerate error: last index of '" + argv[1] +
+                                "' is smaller than first index of '" + argv[0] + "' in '" +
+                                n->fullpath() + "'",
+                            n);
+    return n->val();
+  }
+
+  std::vector<std::string> names;
+  for (const auto i : make_range(number[0], number[1] + 1))
+    names.push_back(prefix[0] + std::to_string(i));
+
+  return MooseUtils::stringJoin(names);
+}
+
 Parser::Parser(const std::vector<std::string> & input_filenames,
                const std::optional<std::vector<std::string>> & input_text /* = {} */)
   : _root(nullptr),
@@ -415,12 +471,14 @@ Parser::parse()
     hit::ReplaceEvaler repl;
     FuncParseEvaler fparse_ev;
     UnitsConversionEvaler units_ev;
+    EnumerateEvaler enumerate_ev;
     hit::BraceExpander exw;
     exw.registerEvaler("raw", raw);
     exw.registerEvaler("env", env);
     exw.registerEvaler("fparse", fparse_ev);
     exw.registerEvaler("replace", repl);
     exw.registerEvaler("units", units_ev);
+    exw.registerEvaler("enumerate", enumerate_ev);
     getRoot().walk(&exw);
     for (auto & var : exw.used)
       _extracted_vars.insert(var);
