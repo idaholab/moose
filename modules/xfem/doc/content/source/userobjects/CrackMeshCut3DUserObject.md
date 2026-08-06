@@ -27,9 +27,10 @@ The crack front used by [DomainIntegralAction.md] and the propagation laws is co
 
 Each active node advances in the direction and by the increment determined by the growth law (function-prescribed or hoop-stress-based). The inactive endpoints are not driven by their own growth law; instead they inherit growth direction and increment from the active neighbor they are connected to.  So the candidate position for an inactive endpoint is
 
-```
-candidate = previous_inactive_position + active_direction * active_growth_length
-```
+\begin{equation}
+\boldsymbol{x}_{\mathrm{candidate}} = \boldsymbol{x}_{\mathrm{previous}} +
+\boldsymbol{d}_{\mathrm{active}} \Delta a_{\mathrm{active}}.
+\end{equation}
 
 ### Keeping the inactive node outside the body
 
@@ -47,14 +48,15 @@ To limit the exterior-face search, the algorithm traces the segment from the int
 
 After the projection step, the inactive endpoint's actual displacement from its previous position to the new position is compared against half of the active neighbor's growth length. If
 
-```
-||new_position - previous_inactive_position|| < 0.5 * active_growth_length
-```
+\begin{equation}
+\left\lVert \boldsymbol{x}_{\mathrm{new}} - \boldsymbol{x}_{\mathrm{previous}} \right\rVert
+< 0.5 \Delta a_{\mathrm{active}}.
+\end{equation}
 
 the inactive node is left at its current location and the existing node is reused for the new crack-front element. This avoids producing degenerate sliver triangles when projection clips the inactive motion almost back to where it started (for example, when an inactive endpoint is pressed against a wall and growth would only push it deeper). When this rule fires, the connection between the old front and the new front shares a node at that endpoint, and the zero-area sliver triangle that would otherwise be generated is dropped by the existing minimum-area filter.
 
 !alert note
-The closest-point projection only considers surfaces tagged into a sideset. A free surface that exists geometrically but is not assigned to any sideset will be invisible to this projection, and an inactive endpoint pushed into the body through such an untagged surface will not be corrected. When meshing for crack-growth simulations, every exterior face that the cutter can interact with should be assigned to a sideset.
+The closest-point projection only considers exterior faces registered in the mesh `BoundaryInfo`. If the local boundary patch contains no registered exterior face, or if the outward nudge still lies inside the body, the endpoint remains at its previous known-outside position. When meshing for crack-growth simulations, every exterior face that the cutter can interact with should be assigned to a sideset.
 
 !alert note
 This active/inactive logic governs only the cutter-mesh growth algorithm — that is, how the cutter advances and where its free-surface endpoints are placed each step. The XFEM cutting itself is unaffected: every FEM element intersected by the cutter mesh is cut normally regardless of whether the intersection happens near an active interior, an inactive endpoint, or a reused node.
