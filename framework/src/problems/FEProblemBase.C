@@ -7955,6 +7955,9 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
         {
           computeSystems(EXEC_PRE_DISPLACE);
           _displaced_problem->updateMesh();
+          // Displaced mortar segments must use the same coordinates as their parent elements.
+          if (_mortar_data->hasDisplacedObjects())
+            updateMortarMesh();
         }
 
         for (unsigned int tid = 0; tid < n_threads; tid++)
