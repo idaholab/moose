@@ -1,0 +1,3 @@
+time,absolute_error,analytic_pressure_drop,friction_pressure_drop,pressure_in,pressure_out,relative_error,solution_absolute_error,solved_pressure_drop
+0,0,69,0,0,0,0,0,0
+1,0,69,69,69,0,0,1.4210854715202e-14,69
