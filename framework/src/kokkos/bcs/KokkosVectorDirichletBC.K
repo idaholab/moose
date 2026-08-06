@@ -25,13 +25,6 @@ KokkosVectorDirichletBC::validParams()
 }
 
 KokkosVectorDirichletBC::KokkosVectorDirichletBC(const InputParameters & parameters)
-  : Moose::Kokkos::VectorNodalBC(parameters),
-    _values_host(getParam<RealVectorValue>("values")),
-    _values(_values_host)
-{
-}
-
-KokkosVectorDirichletBC::KokkosVectorDirichletBC(const KokkosVectorDirichletBC & object)
-  : Moose::Kokkos::VectorNodalBC(object), _values_host(object._values_host), _values(_values_host)
+  : Moose::Kokkos::VectorNodalBC(parameters), _values(getParam<RealVectorValue>("values"))
 {
 }
