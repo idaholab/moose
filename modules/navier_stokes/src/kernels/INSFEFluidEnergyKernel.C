@@ -138,6 +138,28 @@ INSFEFluidEnergyKernel::computeQpOffDiagJacobian(unsigned int jvar)
   Real jac = 0.;
   switch (m)
   {
+    case 0:
+    {
+      // pressure variable: differentiate convection and SUPG terms through EOS (rho, h)
+      Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
+      Real rho, drho_dp, drho_dT;
+      _eos.rho_from_p_T(_pressure[_qp], _u[_qp], rho, drho_dp, drho_dT);
+      if (_conservative_form)
+      {
+        Real h, dh_dp, dh_dT;
+        _eos.h_from_p_T(_pressure[_qp], _u[_qp], h, dh_dp, dh_dT);
+        jac -= (drho_dp * h + rho * dh_dp) * _phi[_j][_qp] * vec_vel * _grad_test[_i][_qp];
+      }
+      else
+        jac += drho_dp * _cp[_qp] * _phi[_j][_qp] * vec_vel * _grad_u[_qp] * _test[_i][_qp];
+      // SUPG contribution (strong form uses non-conservative convection regardless of form)
+      Real transient_supg = _bTransient ? porosity * drho_dp * _cp[_qp] * _u_dot[_qp] : 0.0;
+      Real convection_supg = drho_dp * _cp[_qp] * vec_vel * _grad_u[_qp];
+      jac += _phi[_j][_qp] * _taue[_qp] * _vel_elem * _grad_test[_i][_qp] *
+             (transient_supg + convection_supg);
+      break;
+    }
+
     case 1:
     case 2:
     case 3:

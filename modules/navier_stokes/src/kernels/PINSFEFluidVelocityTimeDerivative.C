@@ -37,6 +37,10 @@ PINSFEFluidVelocityTimeDerivative::PINSFEFluidVelocityTimeDerivative(
     _temperature(coupledValue("temperature")),
     _temperature_dot(coupledDot("temperature")),
     _pressure_dot(coupledDot("pressure")),
+    _d_pressure_dot_du(coupledDotDu("pressure")),
+    _d_temperature_dot_du(coupledDotDu("temperature")),
+    _pressure_var_number(coupled("pressure")),
+    _temperature_var_number(coupled("temperature")),
     _rho(getMaterialProperty<Real>("rho_fluid")),
     _eos(getUserObject<SinglePhaseFluidProperties>("eos"))
 {
@@ -70,4 +74,19 @@ PINSFEFluidVelocityTimeDerivative::computeQpJacobian()
   }
 
   return jac;
+}
+
+Real
+PINSFEFluidVelocityTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (_conservative_form)
+  {
+    Real rho, drho_dp, drho_dT;
+    _eos.rho_from_p_T(_pressure[_qp], _temperature[_qp], rho, drho_dp, drho_dT);
+    if (jvar == _pressure_var_number)
+      return _u[_qp] * drho_dp * _d_pressure_dot_du[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    else if (jvar == _temperature_var_number)
+      return _u[_qp] * drho_dT * _d_temperature_dot_du[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  }
+  return 0.0;
 }

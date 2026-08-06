@@ -35,6 +35,8 @@ PINSFEFluidTemperatureTimeDerivative::PINSFEFluidTemperatureTimeDerivative(
     _conservative_form(getParam<bool>("conservative_form")),
     _pressure(coupledValue("pressure")),
     _pressure_dot(coupledDot("pressure")),
+    _d_pressure_dot_du(coupledDotDu("pressure")),
+    _pressure_var_number(coupled("pressure")),
     _porosity(coupledValue("porosity")),
     _rho(getMaterialProperty<Real>("rho_fluid")),
     _cp(getMaterialProperty<Real>("cp_fluid")),
@@ -66,8 +68,26 @@ PINSFEFluidTemperatureTimeDerivative::computeQpJacobian()
     Real rho, drho_dp, drho_dT;
     _eos.rho_from_p_T(_pressure[_qp], _u[_qp], rho, drho_dp, drho_dT);
     Real drho_dt = drho_dT * _u_dot[_qp] + drho_dp * _pressure_dot[_qp];
+    // d(u)/dT = phi_j contribution
     jac += _porosity[_qp] * _cp[_qp] * _phi[_j][_qp] * drho_dt * _test[_i][_qp];
+    // d(drho_dt)/dT = drho_dT * d(T_dot)/dT_j contribution
+    jac += _porosity[_qp] * _cp[_qp] * _u[_qp] * drho_dT * _du_dot_du[_qp] * _phi[_j][_qp] *
+           _test[_i][_qp];
   }
 
   return jac;
+}
+
+Real
+PINSFEFluidTemperatureTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (_conservative_form && jvar == _pressure_var_number)
+  {
+    Real rho, drho_dp, drho_dT;
+    _eos.rho_from_p_T(_pressure[_qp], _u[_qp], rho, drho_dp, drho_dT);
+    // d(drho_dt)/dp = drho_dp * d(p_dot)/dp_j contribution from the conservative term
+    return _porosity[_qp] * _cp[_qp] * _u[_qp] * drho_dp * _d_pressure_dot_du[_qp] * _phi[_j][_qp] *
+           _test[_i][_qp];
+  }
+  return 0.0;
 }
