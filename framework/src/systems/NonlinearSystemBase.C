@@ -82,6 +82,7 @@
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
 #include "AutomaticMortarGeneration.h"
+#include "ScopedVectorTagAssociation.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -2058,6 +2059,13 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
     }
   }
   PARALLEL_CATCH;
+}
+
+void
+NonlinearSystemBase::applyNodalBCsResidual(NumericVector<Number> & residual)
+{
+  ScopedVectorTagAssociation residual_tag(*this, residualVectorTag());
+  computeNodalBCsResidual(residual);
 }
 
 void
