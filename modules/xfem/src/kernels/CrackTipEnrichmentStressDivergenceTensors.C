@@ -11,11 +11,13 @@
 #include "ElasticityTensorTools.h"
 
 registerMooseObject("XFEMApp", CrackTipEnrichmentStressDivergenceTensors);
+registerMooseObject("XFEMApp", ADCrackTipEnrichmentStressDivergenceTensors);
 
+template <bool is_ad>
 InputParameters
-CrackTipEnrichmentStressDivergenceTensors::validParams()
+CrackTipEnrichmentStressDivergenceTensorsTempl<is_ad>::validParams()
 {
-  InputParameters params = ALEKernel::validParams();
+  InputParameters params = CrackTipEnrichmentStressDivergenceTensorsParent<is_ad>::validParams();
   params.addClassDescription("Enrich stress divergence kernel for small-strain simulations");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction the variable "
@@ -34,17 +36,25 @@ CrackTipEnrichmentStressDivergenceTensors::validParams()
   return params;
 }
 
-CrackTipEnrichmentStressDivergenceTensors::CrackTipEnrichmentStressDivergenceTensors(
-    const InputParameters & parameters)
-  : ALEKernel(parameters),
-    EnrichmentFunctionCalculation(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
-    _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _component(getParam<unsigned int>("component")),
-    _enrichment_component(getParam<unsigned int>("enrichment_component")),
-    _nenrich_disp(coupledComponents("enrichment_displacements")),
-    _ndisp(coupledComponents("displacements")),
+template <bool is_ad>
+CrackTipEnrichmentStressDivergenceTensorsTempl<
+    is_ad>::CrackTipEnrichmentStressDivergenceTensorsTempl(const InputParameters & parameters)
+  : CrackTipEnrichmentStressDivergenceTensorsParent<is_ad>(parameters),
+    EnrichmentFunctionCalculation(
+        &this->template getUserObject<CrackFrontDefinition>("crack_front_definition")),
+    _base_name(this->isParamValid("base_name")
+                   ? this->template getParam<std::string>("base_name") + "_"
+                   : ""),
+    _stress(this->template getGenericMaterialPropertyByName<RankTwoTensor, is_ad>(_base_name +
+                                                                                  "stress")),
+    _Jacobian_mult(nullptr),
+    _deformation_gradient(nullptr),
+    _deformation_gradient_old(nullptr),
+    _rotation_increment(nullptr),
+    _component(this->template getParam<unsigned int>("component")),
+    _enrichment_component(this->template getParam<unsigned int>("enrichment_component")),
+    _nenrich_disp(this->coupledComponents("enrichment_displacements")),
+    _ndisp(this->coupledComponents("displacements")),
     _B(4),
     _dBX(4),
     _dBx(4),
@@ -53,15 +63,20 @@ CrackTipEnrichmentStressDivergenceTensors::CrackTipEnrichmentStressDivergenceTen
 {
   _enrich_disp_var.resize(_nenrich_disp);
   for (unsigned int i = 0; i < _nenrich_disp; ++i)
-    _enrich_disp_var[i] = coupled("enrichment_displacements", i);
+    _enrich_disp_var[i] = this->coupled("enrichment_displacements", i);
 
   _disp_var.resize(_ndisp);
   for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var[i] = coupled("displacements", i);
+    _disp_var[i] = this->coupled("displacements", i);
+
+  if constexpr (!is_ad)
+    _Jacobian_mult =
+        &this->template getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult");
 }
 
-Real
-CrackTipEnrichmentStressDivergenceTensors::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+CrackTipEnrichmentStressDivergenceTensorsTempl<is_ad>::computeQpResidual()
 {
   crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
 
@@ -79,8 +94,17 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpResidual()
           _test[_i][_qp] * grad_B);
 }
 
+template <>
 Real
-CrackTipEnrichmentStressDivergenceTensors::computeQpJacobian()
+CrackTipEnrichmentStressDivergenceTensorsTempl<true>::computeQpJacobian()
+{
+  mooseError("Internal error: computeQpJacobian called on AD version of "
+             "CrackTipEnrichmentStressDivergenceTensors");
+}
+
+template <>
+Real
+CrackTipEnrichmentStressDivergenceTensorsTempl<false>::computeQpJacobian()
 {
   crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
   crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_j), _BJ);
@@ -103,11 +127,20 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpJacobian()
       _phi[_j][_qp] * grad_B;
 
   return ElasticityTensorTools::elasticJacobian(
-      _Jacobian_mult[_qp], _component, _component, grad_test, grad_phi);
+      (*_Jacobian_mult)[_qp], _component, _component, grad_test, grad_phi);
 }
 
+template <>
 Real
-CrackTipEnrichmentStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
+CrackTipEnrichmentStressDivergenceTensorsTempl<true>::computeQpOffDiagJacobian(unsigned int)
+{
+  mooseError("Internal error: computeQpOffDiagJacobian called on AD version of "
+             "CrackTipEnrichmentStressDivergenceTensors");
+}
+
+template <>
+Real
+CrackTipEnrichmentStressDivergenceTensorsTempl<false>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   unsigned int coupled_component = 0;
   unsigned int coupled_enrichment_component = 0;
@@ -156,7 +189,7 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int
                                _phi[_j][_qp] * grad_B_phi;
 
     return ElasticityTensorTools::elasticJacobian(
-        _Jacobian_mult[_qp], _component, coupled_component, grad_test, grad_phi);
+        (*_Jacobian_mult)[_qp], _component, coupled_component, grad_test, grad_phi);
   }
   else if (active)
   {
@@ -176,8 +209,11 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int
         _test[_i][_qp] * grad_B_test;
 
     return ElasticityTensorTools::elasticJacobian(
-        _Jacobian_mult[_qp], _component, coupled_component, grad_test, _grad_phi[_j][_qp]);
+        (*_Jacobian_mult)[_qp], _component, coupled_component, grad_test, _grad_phi[_j][_qp]);
   }
 
   return 0;
 }
+
+template class CrackTipEnrichmentStressDivergenceTensorsTempl<false>;
+template class CrackTipEnrichmentStressDivergenceTensorsTempl<true>;
