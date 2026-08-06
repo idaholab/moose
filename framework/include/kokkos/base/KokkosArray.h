@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "KokkosArrayView.h"
+
 #ifdef MOOSE_KOKKOS_SCOPE
 #include "KokkosHeader.h"
 #endif
@@ -1561,7 +1563,8 @@ dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array,
  */
 ///@{
 template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
-class Array : public ArrayBase<T, dimension, index_type>
+class Array : public ArrayBase<T, dimension, index_type>,
+              public ArrayView<Array<T, dimension, index_type, layout>, dimension>
 {
 #ifdef MOOSE_KOKKOS_SCOPE
   usingKokkosArrayBaseMembers(T, dimension, index_type);
@@ -1707,7 +1710,9 @@ Array<T, dimension, index_type, layout>::linearIndex(indices... i) const
 #endif
 
 template <typename T, typename index_type>
-class Array<T, 1, index_type, LayoutType::LEFT> : public ArrayBase<T, 1, index_type>
+class Array<T, 1, index_type, LayoutType::LEFT>
+  : public ArrayBase<T, 1, index_type>,
+    public ArrayView<Array<T, 1, index_type, LayoutType::LEFT>, 1>
 {
 #ifdef MOOSE_KOKKOS_SCOPE
   usingKokkosArrayBaseMembers(T, 1, index_type);

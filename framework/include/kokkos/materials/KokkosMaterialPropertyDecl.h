@@ -30,9 +30,10 @@ class MaterialPropertyValueBase;
 template <typename T, unsigned int dimension>
 class MaterialPropertyValue;
 
-class Datum;
 class Assembly;
 class Mesh;
+class Datum;
+class AssemblyDatum;
 
 /**
  * Property constant options
@@ -287,6 +288,16 @@ public:
    */
   KOKKOS_FUNCTION MaterialPropertyValue<T, dimension> operator()(const Datum & datum,
                                                                  const unsigned int qp) const;
+
+  /**
+   * Get an array view of the property values of a quadrature point
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The array view of the property values
+   */
+  template <unsigned int D = dimension,
+            std::enable_if_t<D == dimension && (D == 1 || D == 2), int> = 0>
+  KOKKOS_FUNCTION auto array(const AssemblyDatum & datum, unsigned int qp) const;
 #endif
 
   virtual std::type_index propertyType() override

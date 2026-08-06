@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "KokkosArrayView.h"
 #include "KokkosDatum.h"
 
 #include "MooseError.h"
@@ -105,6 +106,14 @@ using VariablePhiValue = VariableShapeValue<false>;
 using VariablePhiGradient = VariableShapeGradient<false>;
 using VariableTestValue = VariableShapeValue<true>;
 using VariableTestGradient = VariableShapeGradient<true>;
+using ArrayVariablePhiValue = VariablePhiValue;
+using ArrayVariablePhiGradient = VariablePhiGradient;
+using ArrayVariableTestValue = VariableTestValue;
+using ArrayVariableTestGradient = VariableTestGradient;
+using ADArrayVariablePhiValue = ArrayVariablePhiValue;
+using ADArrayVariablePhiGradient = ArrayVariablePhiGradient;
+using ADArrayVariableTestValue = ArrayVariableTestValue;
+using ADArrayVariableTestGradient = ArrayVariableTestGradient;
 using ADVariablePhiValue = VariablePhiValue;
 using ADVariablePhiGradient = VariablePhiGradient;
 using ADVariableTestValue = VariableTestValue;
@@ -287,23 +296,29 @@ public:
    * Get the current variable value
    * @param datum The Datum object of the current thread
    * @param idx The local quadrature point or DOF index
-   * @param comp The variable component
-   * @returns The variable value
+   * @returns The variable value for the active component, or component zero when the datum does not
+   * have an active component
    */
-  KOKKOS_FUNCTION auto operator()(Datum & datum, unsigned int idx, unsigned int comp = 0) const
-  {
-    return get(datum, idx, comp);
-  }
+  template <typename DatumType>
+  KOKKOS_FUNCTION auto operator()(DatumType & datum, unsigned int idx) const;
 
   /**
-   * Get the current variable value
-   * @param datum The AssemblyDatum object of the current thread
+   * Get a selected component of the current variable value
+   * @param datum The Datum object of the current thread
    * @param idx The local quadrature point or DOF index
    * @param comp The variable component
-   * @returns The variable value
+   * @returns The selected component of the variable value
    */
-  KOKKOS_FUNCTION auto
-  operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp = 0) const;
+  template <typename DatumType>
+  KOKKOS_FUNCTION auto operator()(DatumType & datum, unsigned int idx, unsigned int comp) const;
+
+  /**
+   * Get a view of all variable components for array arithmetic
+   * @param datum The AssemblyDatum object of the current thread
+   * @param idx The local quadrature point or DOF index
+   * @returns The all-component variable view
+   */
+  KOKKOS_FUNCTION auto array(AssemblyDatum & datum, unsigned int idx) const;
 
   /**
    * Get the Kokkos variable
@@ -338,6 +353,38 @@ private:
 };
 
 template <bool is_ad>
+template <typename DatumType>
+KOKKOS_FUNCTION auto
+VariableValueTempl<is_ad>::operator()(DatumType & datum, const unsigned int idx) const
+{
+  static_assert(std::is_base_of_v<Datum, DatumType>, "DatumType must derive from Datum");
+
+  if constexpr (std::is_base_of_v<AssemblyDatum, DatumType>)
+    return (*this)(datum, idx, datum.comp());
+  else
+    return (*this)(datum, idx, 0);
+}
+
+template <bool is_ad>
+template <typename DatumType>
+KOKKOS_FUNCTION auto
+VariableValueTempl<is_ad>::operator()(DatumType & datum,
+                                      const unsigned int idx,
+                                      const unsigned int comp) const
+{
+  static_assert(std::is_base_of_v<Datum, DatumType>, "DatumType must derive from Datum");
+
+  if constexpr (is_ad && std::is_base_of_v<AssemblyDatum, DatumType>)
+  {
+    const Real seed =
+        datum.do_derivatives() && _var.coupled() && _var.sys(comp) == datum.sys() ? _seed[comp] : 0;
+    return get(datum, idx, comp, seed);
+  }
+  else
+    return get(datum, idx, comp);
+}
+
+template <bool is_ad>
 VariableValueTempl<is_ad>::VariableValueTempl(const VariableValueTempl<is_ad> & object)
   : _var(object._var), _seed(object._seed), _dof(object._dof)
 {
@@ -363,23 +410,6 @@ VariableValueTempl<is_ad>::operator=(const VariableValueTempl<is_ad> & object)
   _dof = object._dof;
 
   return *this;
-}
-
-template <bool is_ad>
-KOKKOS_FUNCTION auto
-VariableValueTempl<is_ad>::operator()(AssemblyDatum & datum,
-                                      unsigned int idx,
-                                      unsigned int comp) const
-{
-  if constexpr (is_ad)
-  {
-    Real seed =
-        datum.do_derivatives() && _var.coupled() && _var.sys(comp) == datum.sys() ? _seed[comp] : 0;
-
-    return get(datum, idx, comp, seed);
-  }
-  else
-    return get(datum, idx, comp);
 }
 
 template <bool is_ad>
@@ -508,23 +538,29 @@ public:
    * Get the current variable gradient
    * @param datum The Datum object of the current thread
    * @param qp The local quadrature point index
-   * @param comp The variable component
-   * @returns The variable gradient
+   * @returns The variable gradient for the active component, or component zero when the datum does
+   * not have an active component
    */
-  KOKKOS_FUNCTION auto operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const
-  {
-    return get(datum, qp, comp);
-  }
+  template <typename DatumType>
+  KOKKOS_FUNCTION auto operator()(DatumType & datum, unsigned int qp) const;
 
   /**
-   * Get the current variable gradient
-   * @param datum The AssemblyDatum object of the current thread
+   * Get a selected component of the current variable gradient
+   * @param datum The Datum object of the current thread
    * @param qp The local quadrature point index
    * @param comp The variable component
-   * @returns The variable gradient
+   * @returns The selected component of the variable gradient
    */
-  KOKKOS_FUNCTION auto
-  operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp = 0) const;
+  template <typename DatumType>
+  KOKKOS_FUNCTION auto operator()(DatumType & datum, unsigned int qp, unsigned int comp) const;
+
+  /**
+   * Get a view of all variable component gradients for array arithmetic
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The all-component variable gradient view
+   */
+  KOKKOS_FUNCTION auto array(AssemblyDatum & datum, unsigned int qp) const;
 
   /**
    * Get the Kokkos variable
@@ -555,6 +591,38 @@ private:
 };
 
 template <bool is_ad>
+template <typename DatumType>
+KOKKOS_FUNCTION auto
+VariableGradientTempl<is_ad>::operator()(DatumType & datum, const unsigned int qp) const
+{
+  static_assert(std::is_base_of_v<Datum, DatumType>, "DatumType must derive from Datum");
+
+  if constexpr (std::is_base_of_v<AssemblyDatum, DatumType>)
+    return (*this)(datum, qp, datum.comp());
+  else
+    return (*this)(datum, qp, 0);
+}
+
+template <bool is_ad>
+template <typename DatumType>
+KOKKOS_FUNCTION auto
+VariableGradientTempl<is_ad>::operator()(DatumType & datum,
+                                         const unsigned int qp,
+                                         const unsigned int comp) const
+{
+  static_assert(std::is_base_of_v<Datum, DatumType>, "DatumType must derive from Datum");
+
+  if constexpr (is_ad && std::is_base_of_v<AssemblyDatum, DatumType>)
+  {
+    const Real seed =
+        datum.do_derivatives() && _var.coupled() && _var.sys(comp) == datum.sys() ? _seed[comp] : 0;
+    return get(datum, qp, comp, seed);
+  }
+  else
+    return get(datum, qp, comp);
+}
+
+template <bool is_ad>
 VariableGradientTempl<is_ad>::VariableGradientTempl(const VariableGradientTempl<is_ad> & object)
   : _var(object._var), _seed(object._seed)
 {
@@ -579,23 +647,6 @@ VariableGradientTempl<is_ad>::operator=(const VariableGradientTempl<is_ad> & obj
   _var = object._var;
 
   return *this;
-}
-
-template <bool is_ad>
-KOKKOS_FUNCTION auto
-VariableGradientTempl<is_ad>::operator()(AssemblyDatum & datum,
-                                         unsigned int qp,
-                                         unsigned int comp) const
-{
-  if constexpr (is_ad)
-  {
-    Real seed =
-        datum.do_derivatives() && _var.coupled() && _var.sys(comp) == datum.sys() ? _seed[comp] : 0;
-
-    return get(datum, qp, comp, seed);
-  }
-  else
-    return get(datum, qp, comp);
 }
 
 template <bool is_ad>
@@ -637,10 +688,73 @@ VariableGradientTempl<is_ad>::get(Datum & datum,
   return grad;
 }
 
+/**
+ * Bound context for the components of a variable value or gradient
+ */
+template <typename VariableContext>
+class VariableArrayContext
+{
+public:
+  /**
+   * Constructor
+   * @param variable The variable value or gradient accessor
+   * @param datum The AssemblyDatum object of the current thread
+   * @param idx The local quadrature point or DOF index
+   */
+  KOKKOS_FUNCTION VariableArrayContext(const VariableContext & variable,
+                                       AssemblyDatum & datum,
+                                       const unsigned int idx)
+    : _variable(variable), _datum(datum), _idx(idx)
+  {
+  }
+
+  /**
+   * Get a selected component
+   * @param comp The variable component
+   * @returns The selected component
+   */
+  KOKKOS_FUNCTION auto operator()(const unsigned int comp) const
+  {
+    return _variable(_datum, _idx, comp);
+  }
+
+  /**
+   * Get the number of components
+   * @returns The number of components
+   */
+  KOKKOS_FUNCTION unsigned int n(const unsigned int) const
+  {
+    return _variable.variable().components();
+  }
+
+private:
+  const VariableContext & _variable;
+  AssemblyDatum & _datum;
+  const unsigned int _idx;
+};
+
+template <bool is_ad>
+KOKKOS_FUNCTION auto
+VariableValueTempl<is_ad>::array(AssemblyDatum & datum, const unsigned int idx) const
+{
+  return ArrayContextView<VariableArrayContext<VariableValueTempl<is_ad>>, 1, true>(
+      VariableArrayContext<VariableValueTempl<is_ad>>(*this, datum, idx), datum.comp());
+}
+
+template <bool is_ad>
+KOKKOS_FUNCTION auto
+VariableGradientTempl<is_ad>::array(AssemblyDatum & datum, const unsigned int qp) const
+{
+  return ArrayContextView<VariableArrayContext<VariableGradientTempl<is_ad>>, 1, true>(
+      VariableArrayContext<VariableGradientTempl<is_ad>>(*this, datum, qp), datum.comp());
+}
+
 using VariableValue = VariableValueTempl<false>;
 using ADVariableValue = VariableValueTempl<true>;
 using VariableGradient = VariableGradientTempl<false>;
 using ADVariableGradient = VariableGradientTempl<true>;
+using ArrayVariableValue = VariableValue;
+using ArrayVariableGradient = VariableGradient;
 
 class VectorVariableValue
 {
