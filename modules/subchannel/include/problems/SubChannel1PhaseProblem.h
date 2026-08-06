@@ -44,6 +44,8 @@ public:
   const SCMHTCClosureBase * getDuctHTCClosure() const { return _duct_HTC_closure; }
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
   const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
+  /// Return the cross-sectionally homogenized friction and local-form pressure loss
+  Real getFrictionPressureDrop() const;
 
   /// structure with the needed information to compute the friction factor at a specific subchannel cell
   struct FrictionStruct
@@ -153,9 +155,10 @@ protected:
   void detectDeformation();
 
   /// Functions that computes the interpolation scheme given the Peclet number
-  PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
-  PetscScalar
-  computeInterpolatedValue(PetscScalar topValue, PetscScalar botValue, PetscScalar Peclet = 0.0);
+  PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0) const;
+  PetscScalar computeInterpolatedValue(PetscScalar topValue,
+                                       PetscScalar botValue,
+                                       PetscScalar Peclet = 0.0) const;
 
   /// inline function that is used to define the gravity direction
   Real computeGravityDir(const MooseEnum & dir) const

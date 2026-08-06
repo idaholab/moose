@@ -436,7 +436,7 @@ SubChannel1PhaseProblem::solverSystemConverged(const unsigned int)
 }
 
 PetscScalar
-SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
+SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet) const
 {
   switch (_interpolation_scheme)
   {
@@ -458,10 +458,118 @@ SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
 PetscScalar
 SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
                                                   PetscScalar botValue,
-                                                  PetscScalar Peclet)
+                                                  PetscScalar Peclet) const
 {
   PetscScalar alpha = computeInterpolationCoefficients(Peclet);
   return alpha * botValue + (1.0 - alpha) * topValue;
+}
+
+Real
+SubChannel1PhaseProblem::getFrictionPressureDrop() const
+{
+  // Local form-loss coefficients are stored per subchannel and axial cell. The selected
+  // coefficient depends on the flow direction, just as it does in the momentum equation.
+  const auto k_grid = _subchannel_mesh.getKGrid();
+  Real pressure_drop = 0.0;
+
+  // Homogenize each axial cell independently before summing along the assembly. The reduction
+  // preserves the total friction force at each level so the result can be applied as a pressure
+  // loss in a coupled one-dimensional momentum equation.
+  for (const auto iz : make_range((unsigned)1, _n_cells + 1))
+  {
+    Real total_flow_area = 0.0;
+    Real total_friction_force = 0.0;
+
+    for (const auto i_ch : make_range(_n_channels))
+    {
+      const auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      const auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+      const Real dz = _z_grid[iz] - _z_grid[iz - 1];
+
+      // Reconstruct the interpolation used by the implicit axial momentum equation. This 0.5 is
+      // the initial Peclet-number estimate used by that solver; it is not directly a 50/50
+      // interpolation coefficient. The fixed schemes ignore Pe and return their prescribed
+      // weight. The exponential scheme uses this seed to estimate the cell properties and
+      // friction factor needed to calculate its flow-dependent Peclet number below.
+      Real Pe = 0.5;
+      if (_interpolation_scheme == 3)
+      {
+        const Real S_mid =
+            computeInterpolatedValue((*_S_flow_soln)(node_out), (*_S_flow_soln)(node_in), 0.5);
+        const Real w_perim_mid =
+            computeInterpolatedValue((*_w_perim_soln)(node_out), (*_w_perim_soln)(node_in), 0.5);
+        const Real mdot_mid =
+            computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
+        const Real mu_mid =
+            computeInterpolatedValue((*_mu_soln)(node_out), (*_mu_soln)(node_in), 0.5);
+        const Real D_h_mid = 4.0 * S_mid / w_perim_mid;
+        const Real Re_mid = mdot_mid / S_mid * D_h_mid / mu_mid;
+        const FrictionStruct friction_args(i_ch, Re_mid, S_mid, w_perim_mid);
+        const Real f_D_mid = _friction_closure->computeFrictionFactor(friction_args);
+        const Real k = (*_mdot_soln)(node_out) >= 0.0 ? k_grid[i_ch][iz - 1] : k_grid[i_ch][iz];
+        // Replace the seed with the flow-dependent value whenever its sign is defined. At zero
+        // midpoint mass flow, retain the seed to avoid dividing by zero. The momentum solve uses
+        // the same initial seed; this guard additionally prevents an undefined flow-direction
+        // calculation in the postprocessor.
+        if (std::abs(mdot_mid) > 0.0)
+          Pe = mdot_mid / std::abs(mdot_mid) / (0.5 * (f_D_mid * dz / D_h_mid + k));
+      }
+
+      // Evaluate the cell properties and friction factor at the same interpolated state used by
+      // the momentum solve. This keeps the reported loss consistent with the converged solution
+      // rather than recomputing it from inlet- or outlet-only properties.
+      const Real alpha = computeInterpolationCoefficients(Pe);
+      const Real rho = computeInterpolatedValue((*_rho_soln)(node_out), (*_rho_soln)(node_in), Pe);
+      const Real mu = computeInterpolatedValue((*_mu_soln)(node_out), (*_mu_soln)(node_in), Pe);
+      const Real S =
+          computeInterpolatedValue((*_S_flow_soln)(node_out), (*_S_flow_soln)(node_in), Pe);
+      const Real w_perim =
+          computeInterpolatedValue((*_w_perim_soln)(node_out), (*_w_perim_soln)(node_in), Pe);
+      const Real D_h = 4.0 * S / w_perim;
+      const Real mdot =
+          computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
+      const Real Re = mdot / S * D_h / mu;
+      const FrictionStruct friction_args(i_ch, Re, S, w_perim);
+      const Real f_D = _friction_closure->computeFrictionFactor(friction_args);
+      const Real k = (*_mdot_soln)(node_out) >= 0.0 ? k_grid[i_ch][iz - 1] : k_grid[i_ch][iz];
+
+      // The momentum equation stores friction as an axial force. Reconstruct that force using
+      // the formulation selected by the subchannel problem, then homogenize the summed force
+      // over the total flow area below.
+      Real friction_force;
+      if (_implicit_bool)
+      {
+        // The implicit system linearizes one mass-flow factor at the cell outlet and interpolates
+        // the other factor between the inlet and outlet nodes.
+        const Real coefficient =
+            0.5 * (f_D * dz / D_h + k) * std::abs((*_mdot_soln)(node_out)) / (S * rho);
+        friction_force = coefficient *
+                         (alpha * (*_mdot_soln)(node_in) + (1.0 - alpha) * (*_mdot_soln)(node_out));
+      }
+      else
+        // The explicit system evaluates the quadratic mass-flow term directly at the outlet.
+        friction_force = 0.5 * (f_D * dz / D_h + k) *
+                         (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
+                         (S * (*_rho_soln)(node_out));
+
+      // Add the force magnitude rather than a mass-flow-weighted pressure. The local mass-flow
+      // distribution, including any redistribution caused by crossflow, is already represented
+      // in friction_force. Weighting by mass flow again would overemphasize high-flow channels.
+      total_flow_area += S;
+      total_friction_force += std::abs(friction_force);
+    }
+
+    if (total_flow_area <= 0.0)
+      mooseError(name(), ": cannot homogenize a friction loss over zero total flow area.");
+
+    // Dividing the summed resistance force by the summed area gives the pressure loss that
+    // produces the same total force in a reduced one-dimensional momentum equation:
+    //
+    //   delta_p_homogenized * total_flow_area = total_friction_force.
+    pressure_drop += total_friction_force / total_flow_area;
+  }
+
+  return pressure_drop;
 }
 
 void
