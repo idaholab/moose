@@ -1743,6 +1743,17 @@ public:
   {
     *this = vector;
   }
+  /**
+   * Constructor
+   * Initialize and allocate a real array by copying a real Eigen vector
+   * This allocates and copies to both host and device data
+   * @param vector The real Eigen vector to copy
+   */
+  template <typename U = T, std::enable_if_t<std::is_same_v<U, Real>, int> = 0>
+  Array(const RealEigenVector & vector) : ArrayBase<T, 1, index_type>(LayoutType::LEFT)
+  {
+    *this = vector;
+  }
 #endif
 
   /**
@@ -1782,6 +1793,28 @@ public:
           this->deviceData(), vector.data(), this->size());
   }
   /**
+   * Copy a real Eigen vector variable
+   * This re-initializes and re-allocates the array with the size of the vector
+   * @tparam host Whether to allocate and copy to the host data
+   * @tparam device Whether to allocate and copy to the device data
+   * @param vector The real Eigen vector variable to copy
+   */
+  template <bool host,
+            bool device,
+            typename U = T,
+            std::enable_if_t<std::is_same_v<U, Real>, int> = 0>
+  void copyEigenVector(const RealEigenVector & vector)
+  {
+    this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
+
+    if (host)
+      std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+
+    if (device)
+      this->template copyInternal<MemSpace, ::Kokkos::HostSpace>(
+          this->deviceData(), vector.data(), this->size());
+  }
+  /**
    * Copy a standard set variable
    * This re-initializes and re-allocates array with the size of the set
    * @tparam host Whether to allocate and copy to the host data
@@ -1804,6 +1837,18 @@ public:
   auto & operator=(const std::vector<T> & vector)
   {
     copyVector<true, true>(vector);
+
+    return *this;
+  }
+  /**
+   * Copy a real Eigen vector variable
+   * This allocates and copies to both host and device data
+   * @param vector The real Eigen vector variable to copy
+   */
+  template <typename U = T, std::enable_if_t<std::is_same_v<U, Real>, int> = 0>
+  auto & operator=(const RealEigenVector & vector)
+  {
+    copyEigenVector<true, true>(vector);
 
     return *this;
   }
