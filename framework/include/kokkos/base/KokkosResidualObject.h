@@ -562,8 +562,8 @@ ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) co
 {
   Real local_re[MAX_CACHED_DOF];
 
-  const auto scaling_factor =
-      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+  const auto scaling_factor = kokkosSystem(_kokkos_var.sys(datum.comp()))
+                                  .getVariableScalingFactor(_kokkos_var.var(datum.comp()));
 
   unsigned int stride = MAX_CACHED_DOF * datum.num_local_threads();
   unsigned int num_batches = datum.n_dofs() / stride;
@@ -601,8 +601,8 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
 {
   Real local_ke[MAX_CACHED_DOF];
 
-  const auto scaling_factor =
-      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+  const auto scaling_factor = kokkosSystem(_kokkos_var.sys(datum.comp()))
+                                  .getVariableScalingFactor(_kokkos_var.var(datum.comp()));
 
   for (unsigned int j = datum.local_thread_id(); j < datum.n_jdofs();
        j += datum.num_local_threads())

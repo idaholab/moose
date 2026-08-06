@@ -49,7 +49,7 @@ struct JaggedArrayInnerDim
  * @tparam layout The memory layout type
  */
 template <typename T, unsigned int inner, LayoutType layout>
-class JaggedArrayInnerData
+class JaggedArrayInnerData : public ArrayView<JaggedArrayInnerData<T, inner, layout>, inner>
 {
 public:
   /**

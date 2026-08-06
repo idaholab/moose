@@ -92,8 +92,15 @@ FESystem::setupCoupling()
     auto & fsce = _system.feProblem().fieldScalarCouplingEntries(0, nl_system->number());
 
     for (const auto & [ivar, jvar] : ce)
-      if (ivar->number() != jvar->number())
-        field_coupling[ivar->number()].push_back(jvar->number());
+      for (const auto icomp : make_range(ivar->count()))
+        for (const auto jcomp : make_range(jvar->count()))
+        {
+          const auto ivar_num = ivar->number() + icomp;
+          const auto jvar_num = jvar->number() + jcomp;
+
+          if (ivar_num != jvar_num)
+            field_coupling[ivar_num].push_back(jvar_num);
+        }
 
     for (const auto & [ivar, jvar] : fsce)
       scalar_coupling[ivar->number()].push_back(jvar->number());
@@ -215,17 +222,19 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 
   for (const auto variable : nbc->variables())
   {
-    auto var = variable->number();
-    auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
+    const auto first_var = variable->number();
+    const auto num_vars = variable->count();
+    const auto num_dofs = _var_is_vector[first_var] ? kokkosAssembly().getDimension() : 1;
 
     for (auto node : nbc->getContiguousNodes())
-    {
-      auto dof = _local_node_dof_index[var][node];
+      for (const auto comp : make_range(num_vars))
+      {
+        const auto dof = _local_node_dof_index[first_var + comp][node];
 
-      if (dof != libMesh::DofObject::invalid_id)
-        for (const auto i : make_range(num_dofs))
-          dofs[dof + i] = true;
-    }
+        if (dof != libMesh::DofObject::invalid_id)
+          for (const auto i : make_range(num_dofs))
+            dofs[dof + i] = true;
+      }
   }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
