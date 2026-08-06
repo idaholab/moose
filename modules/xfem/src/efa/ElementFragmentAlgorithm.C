@@ -282,38 +282,8 @@ ElementFragmentAlgorithm::addFragFaceIntersection(
 void
 ElementFragmentAlgorithm::updatePhysicalLinksAndFragments()
 {
-  // Three phases.  prepareForFragmentUpdate may classify an embedded node
-  // in three ways (see EFAFragment3D::removeInvalidEmbeddedNodes):
-  //   - Class A (lone-edge, emb_faces.size() == 1): handled fragment-locally
-  //     inside prepareForFragmentUpdate; the EFANode stays alive and in
-  //     _embedded_nodes, and does NOT appear in invalid_emb here.
-  //   - Class B (over-shared, emb_faces.size() > 2): aborts via EFAError --
-  //     non-manifold fragment topology that has not been observed in any
-  //     failing input and is left as an error to avoid masking upstream bugs.
-  //   - Class C (phantom cut, counter == 0, emb_faces.size() == 2): appended
-  //     to invalid_emb; handled globally in phase (2) below.
-  //
-  //  (1) prepareForFragmentUpdate on every element: combine crack-tip faces
-  //      and collect class C invalid embedded nodes into invalid_emb.  No
-  //      state shared across elements is mutated for class C yet.
-  //
-  //  (2) Global sweep for class C: for each element, purge all invalid embedded-node
-  //      references from its edges/faces/fragments. The nodes remain in the
-  //      _embedded_nodes ownership registry until destruction. The
-  //      walk-all-elements is required because the same embedded node can
-  //      sit on edges of elements that are more than one hop from the
-  //      element where it was identified as invalid: each
-  //      markCutFacesByGeometry entry on an element propagates the cut only
-  //      one hop, but multiple independent entries can spread the same node
-  //      across a wider set of elements.  Single-hop propagation inside
-  //      EFAElement3D::removeEmbeddedNode is therefore insufficient. Retaining
-  //      each registry entry also prevents its ID from being reused while
-  //      inherited cut-plane faces may still reference the node as an endpoint.
-  //
-  //  (3) updateFragments on every element to actually split.  Because every
-  //      class C node has already been purged from every element's faces and
-  //      fragments (and class A has been fixed fragment-locally), no split
-  //      can capture a doomed node as a face vertex.
+  // Sweep every element because independent single-hop cut propagation can leave the same phantom
+  // embedded node referenced more than one element away from where it was grouped.
   std::vector<EFANode *> invalid_emb;
   std::map<unsigned int, EFAElement *>::iterator eit;
   for (eit = _elements.begin(); eit != _elements.end(); ++eit)
