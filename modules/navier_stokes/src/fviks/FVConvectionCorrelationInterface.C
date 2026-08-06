@@ -49,23 +49,15 @@ FVConvectionCorrelationInterface::FVConvectionCorrelationInterface(const InputPa
 ADReal
 FVConvectionCorrelationInterface::computeQpResidual()
 {
-  // If variable1 is fluid and variable 1 is on elem or
-  // if variable2 is fluid and variable 2 is on elem
-  // the fluid element will be elem otherwise it is the neighbor
-  const Elem * elem_on_fluid_side =
-      (elemIsOne() && _var1_is_fluid) || (!elemIsOne() && !_var1_is_fluid)
-          ? &_face_info->elem()
-          : _face_info->neighborPtr();
+  const Elem * elem_on_fluid_side = _var1_is_fluid ? &elem1() : &elem2();
 
   const Elem * bulk_elem;
   const auto state = determineState();
   if (!_use_wall_cell)
   {
     Point p = _face_info->faceCentroid();
-    Point du = Point(MetaPhysicL::raw_value(_normal));
-    du *= _bulk_distance;
-    // The normal always points outwards from the elem (towards the neighbor)
-    if (elem_on_fluid_side == &_face_info->elem())
+    const Point du = normal() * _bulk_distance;
+    if (_var1_is_fluid)
       p -= du;
     else
       p += du;
@@ -80,15 +72,11 @@ FVConvectionCorrelationInterface::computeQpResidual()
   mooseAssert((_var1_is_fluid ? var1() : var2()).hasBlocks(bulk_elem->subdomain_id()),
               "The fluid temperature is not defined at bulk_distance from the wall.");
 
-  const auto fluid_side = singleSidedFaceArg(_var1_is_fluid ? var1() : var2(), _face_info);
-  const auto solid_side = singleSidedFaceArg(_var1_is_fluid ? var2() : var1(), _face_info);
+  const auto fluid_side = _var1_is_fluid ? faceArg1() : faceArg2();
+  const auto solid_side = _var1_is_fluid ? faceArg2() : faceArg1();
 
   const auto bulk_elem_arg = makeElemArg(bulk_elem);
 
-  /// We make sure that the gradient*normal part is addressed
-  auto multipler =
-      _normal * (_face_info->faceCentroid() - bulk_elem->vertex_average()) > 0 ? 1 : -1;
-
-  return multipler * _htc(fluid_side, state) *
+  return (_var1_is_fluid ? 1 : -1) * _htc(fluid_side, state) *
          (_temp_fluid(bulk_elem_arg, state) - _temp_solid(solid_side, state));
 }

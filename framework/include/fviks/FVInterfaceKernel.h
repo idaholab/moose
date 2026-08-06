@@ -83,7 +83,9 @@ public:
 
 protected:
   /**
-   * @return Interface residual terms. The result will be multiplied by the face area
+   * @return The residual contribution for variable1 on subdomain1. The result will be multiplied
+   * by the face area and the opposite contribution will be applied to variable2 on subdomain2
+   * when both variables belong to the same nonlinear system.
    */
   virtual ADReal computeQpResidual() = 0;
 
@@ -98,11 +100,6 @@ protected:
    * Variable 2 and any other data associated with the 2nd side should exist on these subdomains
    */
   const std::set<SubdomainID> & sub2() const { return _subdomain2; }
-
-  /**
-   * @return Whether the \p FaceInfo element is on the 1st side of the interface
-   */
-  virtual bool elemIsOne() const { return _elem_is_one; }
 
   /**
    * @return Variable 1
@@ -125,54 +122,79 @@ protected:
   void setupData(const FaceInfo & fi);
 
   /**
-   * Process the provided residual given \p var_num and whether this is on the neighbor side
+   * Add a residual contribution to variable1 on subdomain1
    */
-  void addResidual(Real resid, unsigned int var_num, bool neighbor);
-
-  using TaggingInterface::addJacobian;
-  /**
-   * Process the derivatives for the provided residual and dof index
-   */
-  void addJacobian(const ADReal & resid, dof_id_type dof_index, Real scaling_factor);
+  void addResidualToVariable1(Real residual);
 
   /**
-   * @return A structure that contains information about the face info element and skewness
-   * correction for use with functors
+   * Add a residual contribution to variable2 on subdomain2
    */
-  Moose::ElemArg elemArg(bool correct_skewness = false) const;
+  void addResidualToVariable2(Real residual);
 
   /**
-   * @return A structure that contains information about the face info neighbor and skewness
-   * correction for use with functors
+   * Add a residual and its Jacobian contribution to variable1 on subdomain1
    */
-  Moose::ElemArg neighborArg(bool correct_skenewss = false) const;
+  void addResidualAndJacobianToVariable1(const ADReal & residual);
 
   /**
-   * Determine the single sided face argument when evaluating a functor on a face.
-   * This is used to perform evaluations of material properties with the actual face values of
-   * their dependences, rather than interpolate the material property to the boundary.
-   * @param fi the FaceInfo for this face
-   * @param limiter_type the limiter type, to be specified if more than the default average
-   *        interpolation is required for the parameters of the functor
-   * @param correct_skewness whether to perform skew correction at the face
+   * Add a residual and its Jacobian contribution to variable2 on subdomain2
    */
-  Moose::FaceArg singleSidedFaceArg(
-      const MooseVariableFV<Real> & variable,
-      const FaceInfo * fi = nullptr,
-      Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
-      bool correct_skewness = false,
-      const Moose::StateArg * state_limiter = nullptr) const;
+  void addResidualAndJacobianToVariable2(const ADReal & residual);
+
+  /**
+   * @return The face normal oriented from subdomain1 toward subdomain2
+   */
+  Point normal() const;
+
+  ///@{
+  /**
+   * @return The element on the corresponding user-defined side of the interface
+   */
+  const Elem & elem1() const;
+  const Elem & elem2() const;
+  ///@}
+
+  ///@{
+  /**
+   * @return The element centroid on the corresponding user-defined side of the interface
+   */
+  const Point & centroid1() const;
+  const Point & centroid2() const;
+  ///@}
+
+  ///@{
+  /**
+   * @return An element argument for the corresponding user-defined side of the interface
+   */
+  Moose::ElemArg elemArg1(bool correct_skewness = false) const;
+  Moose::ElemArg elemArg2(bool correct_skewness = false) const;
+  ///@}
+
+  ///@{
+  /**
+   * @return A face argument explicitly restricted to the corresponding user-defined side
+   */
+  Moose::FaceArg
+  faceArg1(Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+           bool correct_skewness = false,
+           const Moose::StateArg * state_limiter = nullptr) const;
+  Moose::FaceArg
+  faceArg2(Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+           bool correct_skewness = false,
+           const Moose::StateArg * state_limiter = nullptr) const;
+  ///@}
+
+  /**
+   * Interpolate values from the two user-defined sides to the face
+   */
+  ADReal interpolateValue(Moose::FV::InterpMethod method,
+                          const ADReal & value1,
+                          const ADReal & value2) const;
 
   /// To be consistent with FE interfaces we introduce this quadrature point member. However, for FV
   /// calculations there should every only be one qudrature point and it should be located at the
   /// face centroid
   const unsigned int _qp = 0;
-
-  /// The normal. This always points out of the \p FaceInfo element. Note, however that we multiply
-  /// the result of \p computeQpResidual by -1 before summing into the \p FaceInfo neighbor residual
-  /// such that the neighbor residual feels as if this data member is pointing out of the neighbor
-  /// element
-  ADRealVectorValue _normal;
 
   /// The face that this object is currently operating on. Always set to something non-null before
   /// calling \p computeQpResidual
@@ -180,9 +202,6 @@ protected:
 
   /// Thread id
   const THREAD_ID _tid;
-
-  /// Whether the current element is associated with variable/subdomain 1 or 2
-  bool _elem_is_one;
 
   /// The SubProblem
   SubProblem & _subproblem;
@@ -194,8 +213,23 @@ protected:
   Assembly & _assembly;
 
 private:
+  /**
+   * Process the provided residual given \p var_num and whether this is on the neighbor side
+   */
+  void addResidual(Real residual, unsigned int var_num, bool neighbor);
+
+  /**
+   * Process the provided residual and its derivatives for a variable on a user-defined side
+   */
+  void addResidualAndJacobian(const ADReal & residual,
+                              const MooseVariableFV<Real> & variable,
+                              bool side_is_one);
+
   std::set<SubdomainID> _subdomain1;
   std::set<SubdomainID> _subdomain2;
+
+  /// Whether the current FaceInfo element is on the user-defined first side
+  bool _face_info_elem_on_side1 = false;
 
   const MooseMesh & _mesh;
 };
