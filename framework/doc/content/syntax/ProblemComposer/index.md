@@ -42,6 +42,9 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
     // Constructor
     CustomDummyProblemOperator(MFEMProblem & prob, ...);
 
+    // Set up the problem
+    virtual void Init(mfem::BlockVector) override;
+
     // Solve the equation
     virtual void Solve() override;
 
@@ -86,6 +89,9 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
     // Constructor
     CustomDummyProblemOperator(MFEMProblem & prob0);
 
+    // Set up the problem
+    virtual void Init(mfem::BlockVector) override;
+
     // Solve the equation
     virtual void Solve() override;
 
@@ -98,12 +104,18 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 Once the member variables are declared, the next thing is to set-up the problem. The
 `Forms` need access to the FE-Spaces and the post processors need access to the `GridFunction`s.
 Both the FE-Spaces and `GridFunction`s are owned by the `MFEMProblem` and need to be retrieved
-for usage in the `ProblemOperator`, assuming for this example that the FE-Space and `GridFunction`
-that we are interested in have an expected name then the constructor may look like this:
+for usage in the `ProblemOperator`, assuming for this example that the FE-Space and `GridFunction`s
+that we are interested in have an expected name. The constructor can only be used to retrieve custom
+input parameters, retrieveing FE-Spaces and GridFunctions has to be done in the `Init` function
+this is because the executioner is on of the first things that is built, before even the variables
+and FE-spaces so they cannot be accessed upon construction of the operator.
 
 ```cpp
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0):
   : Moose::MFEM::ProblemOperator(prob0), ...
+{}
+
+CustomDummyProblemOperator::Init(mfem::BlockVector &)
 {
   // Retrieve the FE-space and gridFunction
   const std::string fe_space_name = "h1";
@@ -116,12 +128,15 @@ CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0):
 };
 ```
 
-The rest of the constructor mirrors the MFEM ex0p example, i.e. build the forms, add the
+The rest of the `Init` function mirrors the MFEM ex0p example, i.e. build the forms, add the
 integrators, assemble the forms and form the linear system:
 
 ```cpp
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
   : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
+{}
+
+CustomDummyProblemOperator::Init(mfem::BlockVector &)
 {
   // Retrieve the FE-space and gridFunction
   const std::string fe_space_name = "h1";

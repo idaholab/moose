@@ -10,7 +10,7 @@ when called by an [MFEMSteady.md] executioner object. It builds one of `Equation
 
 !listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=Problem ProblemComposer
 
-!syntax parameters /MFEMProblemComposer/AddMFEMProblemComposerAction
+!syntax parameters /ProblemComposer/AddMFEMProblemComposerAction
 
 !if-end!
 

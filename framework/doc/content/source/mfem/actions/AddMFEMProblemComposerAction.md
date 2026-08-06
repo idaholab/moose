@@ -17,7 +17,7 @@ Only has an effect if the `Problem` type is set to [MFEMProblem.md].
 
 !listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=Problem ProblemComposer
 
-!syntax parameters /MFEMProblemComposer/AddMFEMProblemComposerAction
+!syntax parameters /ProblemComposer/AddMFEMProblemComposerAction
 
 !if-end!
 

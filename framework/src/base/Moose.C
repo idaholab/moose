@@ -494,13 +494,13 @@ addActionTypes(Syntax & syntax)
   registerTask("add_mfem_problem_operator", true);
   registerMooseObjectTask("add_mfem_problem_composer", Moose::MFEM::ProblemComposerBase, false);
   addTaskDependency("add_mfem_problem_operator", "add_mfem_problem_composer");
-  addTaskDependency("add_mfem_problem_composer", "init_mesh");
-  addTaskDependency("add_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_bc", "add_mfem_problem_operator");
-  addTaskDependency("add_kernel", "add_mfem_problem_operator");
-  addTaskDependency("setup_executioner", "add_mfem_problem_composer");
+  addTaskDependency("add_mfem_problem_composer","init_mesh");
+  addTaskDependency("add_variable", "add_mfem_problem_composer");
+  addTaskDependency("add_aux_variable", "add_mfem_problem_composer");
+  addTaskDependency("add_elemental_field_variable", "add_mfem_problem_composer");
+  addTaskDependency("add_bc", "add_mfem_problem_composer");
+  addTaskDependency("add_kernel", "add_mfem_problem_composer");
+  addTaskDependency("setup_executioner","add_mfem_problem_composer");
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
