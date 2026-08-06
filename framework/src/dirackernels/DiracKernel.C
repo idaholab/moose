@@ -15,6 +15,7 @@
 #include "SystemBase.h"
 #include "Problem.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/quadrature.h"
@@ -143,6 +144,28 @@ DiracKernelTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
     }
 
     accumulateTaggedLocalMatrix();
+  }
+}
+
+template <typename T>
+void
+DiracKernelTempl<T>::computeResidualAndJacobian()
+{
+  computeResidual();
+
+  const auto subdomain = _current_elem->subdomain_id();
+
+  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid, _sys.number()))
+  {
+    const unsigned int ivar = ivariable->number();
+    const unsigned int jvar = jvariable->number();
+
+    if (ivar != _var.number() || !ivariable->activeOnSubdomain(subdomain) ||
+        !jvariable->activeOnSubdomain(subdomain) || jvariable->numberOfDofs() == 0)
+      continue;
+
+    prepareShapes(jvar);
+    computeOffDiagJacobian(jvar);
   }
 }
 
