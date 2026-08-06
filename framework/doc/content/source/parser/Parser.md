@@ -13,6 +13,10 @@ building any MOOSE objects.
 
 See [Includes](input_syntax.md optional=True)
 
+## Brace expressions
+
+See [Brace Expressions](input_syntax.md optional=True)
+
 ## Multiple inputs
 
 When multiple inputs are supplied to a MOOSE application, the parser will read
