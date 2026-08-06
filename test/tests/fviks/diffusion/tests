@@ -27,4 +27,13 @@
     input = multisystem.i
     exodiff = 'multisystem_out.e'
   []
+
+  [invalid-extended-sideset]
+    type = RunException
+    input = invalid_extended_sideset.i
+    expect_err = "FVInterfaceKernel 'interface' is being triggered on a face .* connecting subdomains 1 and 2, but this face does not connect the subdomains specified by 'subdomain1' and 'subdomain2'\."
+    requirement = 'The system shall report an error when a finite volume interface kernel sideset extends beyond the configured pair of subdomains.'
+    design = 'FVDiffusionInterface.md FVInterfaceKernels/index.md'
+    issues = '#21346 #33435'
+  []
 []
