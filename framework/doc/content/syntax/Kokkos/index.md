@@ -352,12 +352,18 @@ For arithmetic values, there exists `Moose::Kokkos::Scalar` which is a derived c
 For const types, those operators will be undefined.
 For example, a postprocessor value which is always provided as read-only can be held by `Moose::Kokkos::Scalar<const PostprocessorValue>` or its alias `Moose::Kokkos::PostprocessorValue`.
 
+Some CPU types such as `RealEigenVector` cannot be used on GPU at all, so their instances cannot simply be copied to GPU.
+`Moose::Kokkos::ReferenceWrapper` is in fact a specialization of `Moose::Kokkos::DualReferenceWrapper` with the same CPU and GPU types.
+`Moose::Kokkos::DualReferenceWrapper<H, D>` holds the reference of a CPU variable of type `H` and a GPU-compatible instance of type `D` constructed from it, following the same synchronization through the copy constructor.
+Since the two types differ, the access is explicit: `host()` returns the CPU reference, and `device()` returns the GPU instance and is only callable on GPU.
+
 !listing framework/include/kokkos/base/KokkosReferenceWrapper.h
          id=kokkos_reference_wrapper_source
-         caption=The `Moose::Kokkos::ReferenceWrapper` source code.
+         caption=The `Moose::Kokkos::DualReferenceWrapper` and `Moose::Kokkos::ReferenceWrapper` source code.
 
 !alert note
 The data type should be copy-constructable.
+For `Moose::Kokkos::DualReferenceWrapper<H, D>`, `D` should be constructable from `H`.
 
 ### Static Polymorphism id=kokkos_crtp
 
