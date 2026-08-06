@@ -75,6 +75,7 @@ DynamicSolidMechanicsPhysics::validParams()
   params.addParamNamesToGroup("hht_alpha newmark_beta newmark_gamma",
                               "Time integration parameters");
 
+  params.addParam<bool>("implicit", true, "Using an implicit time integrator.");
   return params;
 }
 
@@ -89,6 +90,7 @@ void
 DynamicSolidMechanicsPhysics::act()
 {
   const std::array<std::string, 3> dir{{"x", "y", "z"}};
+  const auto implicit = getParam<bool>("implicit");
 
   if (_velocities.size() < _ndisp)
     paramError("velocities", "Supply one velocity variable per displacement direction");
@@ -150,7 +152,7 @@ DynamicSolidMechanicsPhysics::act()
   }
 
   // add inertia kernel
-  if (_current_task == "add_kernel")
+  if (_current_task == "add_kernel" && implicit)
   {
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
@@ -158,11 +160,11 @@ DynamicSolidMechanicsPhysics::act()
       auto params = _factory.getValidParams(kernel_type);
 
       params.set<NonlinearVariableName>("variable") = _displacements[i];
-      params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
-      params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
       params.set<bool>("use_displaced_mesh") = false;
       params.set<Real>("beta") = getParam<Real>("newmark_beta");
       params.set<Real>("gamma") = getParam<Real>("newmark_gamma");
+      params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
+      params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
       params.set<Real>("alpha") = getParam<Real>("hht_alpha");
       params.set<MaterialPropertyName>("eta") =
           getParam<MaterialPropertyName>("mass_damping_coefficient");
