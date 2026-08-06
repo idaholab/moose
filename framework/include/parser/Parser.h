@@ -175,6 +175,17 @@ public:
   void setCommandLineParams(const std::vector<std::string> & params);
 
   /**
+   * Sets the paths of parameters/blocks that should be removed from the
+   * parsed input (input file(s) + command line overrides) once parsing
+   * is complete.
+   *
+   * Removal happens after command line HIT arguments have been merged in,
+   * so this can also be used to remove a parameter that was only set via
+   * the command line.
+   */
+  void setRemoveParams(const std::vector<std::string> & paths);
+
+  /**
    * @return The file name of the last input
    */
   const std::string & getLastInputFileName() const;
@@ -247,6 +258,9 @@ private:
 
   /// The command line HIT parameters (if any)
   std::optional<std::vector<std::string>> _command_line_params;
+
+  /// The paths of parameters/blocks to remove after parsing (if any)
+  std::optional<std::vector<std::string>> _remove_params;
 
   /// Variables that have been extracted during brace expansion
   std::set<std::string> _extracted_vars;
