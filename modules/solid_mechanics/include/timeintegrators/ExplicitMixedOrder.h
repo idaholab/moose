@@ -116,7 +116,10 @@ protected:
   void
   computeTimeDerivativeHelper(T & u_dot, T2 & u_dotdot, const T3 & u_old, const T4 & u_older) const;
 
-  void computeICs();
+  virtual void computeICs();
+
+  // Central difference time step, used in velocity += acceleration * centralDifferenceDt()
+  virtual Real centralDifferenceDt();
 };
 
 template <typename T, typename T2, typename T3, typename T4>
