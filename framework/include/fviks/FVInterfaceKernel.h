@@ -191,6 +191,31 @@ protected:
            const Moose::StateArg * state_limiter = nullptr) const;
   ///@}
 
+  ///@{
+  /**
+   * Return a face argument explicitly restricted to the corresponding user-defined side after
+   * verifying that the supplied functor is defined on that side.
+   *
+   * @param functor the functor that will be evaluated with the returned face argument
+   * @param limiter_type the limiter that defines how to perform interpolations to the face
+   * @param correct_skewness whether to apply skew correction
+   * @param state_limiter optional state used by the limiter
+   */
+  template <typename FunctorType>
+  Moose::FaceArg
+  faceArg1(const FunctorType & functor,
+           Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+           bool correct_skewness = false,
+           const Moose::StateArg * state_limiter = nullptr) const;
+
+  template <typename FunctorType>
+  Moose::FaceArg
+  faceArg2(const FunctorType & functor,
+           Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+           bool correct_skewness = false,
+           const Moose::StateArg * state_limiter = nullptr) const;
+  ///@}
+
   /**
    * Interpolate values from the two user-defined sides to the face
    */
@@ -240,3 +265,41 @@ private:
 
   const MooseMesh & _mesh;
 };
+
+template <typename FunctorType>
+inline Moose::FaceArg
+FVInterfaceKernel::faceArg1(const FunctorType & functor,
+                            const Moose::FV::LimiterType limiter_type,
+                            const bool correct_skewness,
+                            const Moose::StateArg * state_limiter) const
+{
+  if (!functor.hasFaceSide(*_face_info, _face_info_elem_on_side1))
+    mooseError("The functor '",
+               functor.functorName(),
+               "' is not defined on side 1 of FVInterfaceKernel '",
+               name(),
+               "' at face centroid ",
+               _face_info->faceCentroid(),
+               ".");
+
+  return faceArg1(limiter_type, correct_skewness, state_limiter);
+}
+
+template <typename FunctorType>
+inline Moose::FaceArg
+FVInterfaceKernel::faceArg2(const FunctorType & functor,
+                            const Moose::FV::LimiterType limiter_type,
+                            const bool correct_skewness,
+                            const Moose::StateArg * state_limiter) const
+{
+  if (!functor.hasFaceSide(*_face_info, !_face_info_elem_on_side1))
+    mooseError("The functor '",
+               functor.functorName(),
+               "' is not defined on side 2 of FVInterfaceKernel '",
+               name(),
+               "' at face centroid ",
+               _face_info->faceCentroid(),
+               ".");
+
+  return faceArg2(limiter_type, correct_skewness, state_limiter);
+}
