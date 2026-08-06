@@ -21,6 +21,15 @@ struct DataStorage : public UniqueStorage<DataType>
   FRIEND_TEST(DataIOTest, uniqueStorage);
 };
 
+enum class DataIOTestEnum
+{
+  FIRST,
+  SECOND
+};
+
+dataStoreEnum(DataIOTestEnum, int)
+dataLoadEnum(DataIOTestEnum, int)
+
 void
 dataStore(std::ostream & stream, DataType & v, void * context)
 {
@@ -56,6 +65,19 @@ void
 dataLoad(std::istream & stream, DataStorage & v, void * context)
 {
   loadHelper(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+}
+
+TEST(DataIOTest, enumClass)
+{
+  DataIOTestEnum stored = DataIOTestEnum::SECOND;
+  std::stringstream stream;
+  dataStore(stream, stored, nullptr);
+
+  stream.seekg(0, std::ios::beg);
+  DataIOTestEnum loaded = DataIOTestEnum::FIRST;
+  dataLoad(stream, loaded, nullptr);
+
+  EXPECT_EQ(stored, loaded);
 }
 
 TEST(DataIOTest, uniqueStorage)

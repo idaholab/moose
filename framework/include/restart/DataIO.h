@@ -210,6 +210,16 @@ dataStore(std::ostream & stream, T & v, void * /*context*/)
   mooseAssert(!stream.bad(), "Failed to store");
 }
 
+// clang-format off
+#define dataStoreEnum(EnumType, IntType) \
+template <> \
+inline void dataStore(std::ostream & stream, EnumType & enum_type, void * ctx) \
+{ \
+  auto stored = static_cast<IntType>(enum_type); \
+  dataStore(stream, stored, ctx); \
+}
+// clang-format on
+
 template <typename T>
 inline void
 dataStore(std::ostream & /*stream*/, T *& /*v*/, void * /*context*/)
@@ -586,6 +596,17 @@ dataLoad(std::istream & stream, T & v, void * /*context*/)
   stream.read((char *)&v, sizeof(v));
   mooseAssert(!stream.bad(), "Failed to load");
 }
+
+// clang-format off
+#define dataLoadEnum(EnumType, IntType) \
+template <> \
+inline void dataLoad(std::istream & stream, EnumType & enum_type, void * ctx) \
+{ \
+  IntType loaded; \
+  dataLoad(stream, loaded, ctx); \
+  enum_type = static_cast<EnumType>(loaded); \
+}
+// clang-format on
 
 template <typename T>
 void
