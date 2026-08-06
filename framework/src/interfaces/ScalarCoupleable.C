@@ -84,7 +84,7 @@ ScalarCoupleable::ScalarCoupleable(const ScalarCoupleable & object,
 bool
 ScalarCoupleable::isCoupledScalar(const std::string & var_name_in, unsigned int i) const
 {
-  const auto var_name = _sc_parameters.checkForRename(var_name_in);
+  const auto & var_name = _sc_parameters.checkForRename(var_name_in);
 
   auto it = _coupled_scalar_vars.find(var_name);
   if (it != _coupled_scalar_vars.end())
@@ -314,7 +314,7 @@ ScalarCoupleable::coupledScalarDotDotDu(const std::string & var_name, const unsi
 void
 ScalarCoupleable::checkVar(const std::string & var_name_in) const
 {
-  const auto var_name = _sc_parameters.checkForRename(var_name_in);
+  const auto & var_name = _sc_parameters.checkForRename(var_name_in);
 
   auto it = _sc_coupled_vars.find(var_name);
   if (it != _sc_coupled_vars.end())
@@ -335,7 +335,7 @@ ScalarCoupleable::checkVar(const std::string & var_name_in) const
 const MooseVariableScalar *
 ScalarCoupleable::getScalarVar(const std::string & var_name_in, const unsigned int comp) const
 {
-  const auto var_name = _sc_parameters.checkForRename(var_name_in);
+  const auto & var_name = _sc_parameters.checkForRename(var_name_in);
 
   const auto it = _coupled_scalar_vars.find(var_name);
   if (it != _coupled_scalar_vars.end())
@@ -367,7 +367,7 @@ ScalarCoupleable::validateExecutionerType(const std::string & name,
 unsigned int
 ScalarCoupleable::coupledScalarComponents(const std::string & var_name_in) const
 {
-  const auto var_name = _sc_parameters.checkForRename(var_name_in);
+  const auto & var_name = _sc_parameters.checkForRename(var_name_in);
 
   const auto it = _coupled_scalar_vars.find(var_name);
   if (it != _coupled_scalar_vars.end())

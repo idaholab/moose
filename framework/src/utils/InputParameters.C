@@ -86,7 +86,7 @@ InputParameters::addClassDescription(const std::string & doc_string)
 void
 InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   if (!inserted_only)
   {
@@ -108,7 +108,7 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
 std::optional<std::string>
 InputParameters::queryDeprecatedParamMessage(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   if (_show_deprecated_message)
   {
     auto deprecation_message = [this](const auto & name, const auto & message) -> std::string
@@ -323,7 +323,7 @@ InputParameters::addRequiredCoupledVar(const std::string & name, const std::stri
 std::string
 InputParameters::getDocString(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   std::string doc_string;
   auto it = _params.find(name);
@@ -342,7 +342,7 @@ InputParameters::getDocString(const std::string & name_in) const
 void
 InputParameters::setDocString(const std::string & name_in, const std::string & doc)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   auto it = _params.find(name);
   if (it == _params.end())
@@ -355,28 +355,28 @@ InputParameters::setDocString(const std::string & name_in, const std::string & d
 std::string
 InputParameters::getDocUnit(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return _params.at(name)._doc_unit;
 }
 
 void
 InputParameters::setDocUnit(const std::string & name_in, const std::string & doc_unit)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   _params[name]._doc_unit = doc_unit;
 }
 
 bool
 InputParameters::isParamRequired(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return _params.count(name) > 0 && _params.at(name)._required;
 }
 
 void
 InputParameters::makeParamNotRequired(const std::string & name_in)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   if (_params.count(name))
     _params[name]._required = false;
@@ -385,7 +385,7 @@ InputParameters::makeParamNotRequired(const std::string & name_in)
 bool
 InputParameters::isParamValid(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   if (have_parameter<MooseEnum>(name))
     return get<MooseEnum>(name).isValid();
   else if (have_parameter<std::vector<MooseEnum>>(name))
@@ -417,14 +417,14 @@ InputParameters::isParamValid(const std::string & name_in) const
 bool
 InputParameters::isParamSetByAddParam(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return _params.count(name) > 0 && _params.at(name)._set_by_add_param;
 }
 
 bool
 InputParameters::isParamDeprecated(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return _params.count(name) > 0 && !_params.at(name)._deprecation_message.empty();
 }
 
@@ -448,7 +448,7 @@ InputParameters::areAllRequiredParamsValid() const
 bool
 InputParameters::isPrivate(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return _params.count(name) > 0 && _params.at(name)._is_private;
 }
 
@@ -460,7 +460,7 @@ InputParameters::declareControllable(const std::string & input_names,
   MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
   for (auto & name_in : names)
   {
-    const auto name = checkForRename(name_in);
+    const auto & name = checkForRename(name_in);
     auto map_iter = _params.find(name);
     if (map_iter != _params.end()) // error is handled by checkParams method
     {
@@ -477,14 +477,14 @@ InputParameters::declareControllable(const std::string & input_names,
 bool
 InputParameters::isControllable(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return _params.count(name) > 0 && _params.at(name)._controllable;
 }
 
 const std::set<ExecFlagType> &
 InputParameters::getControllableExecuteOnTypes(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return at(name)._controllable_flags;
 }
 
@@ -594,7 +594,7 @@ InputParameters::checkParams(const std::string & parsing_syntax)
   std::vector<std::string> required_param_errors;
   for (const auto & it : *this)
   {
-    const auto param_name = checkForRename(it.first);
+    const auto & param_name = checkForRename(it.first);
     if (!isParamValid(param_name) && isParamRequired(param_name))
     {
       // check if an old, deprecated name exists for this parameter that may be specified
@@ -791,21 +791,21 @@ InputParameters::getFileBase(const std::optional<std::string> & param_name) cons
 bool
 InputParameters::isRangeChecked(const std::string & param_name) const
 {
-  const auto name = checkForRename(param_name);
+  const auto & name = checkForRename(param_name);
   return !_params.find(name)->second._range_function.empty();
 }
 
 std::string
 InputParameters::rangeCheckedFunction(const std::string & param_name) const
 {
-  const auto name = checkForRename(param_name);
+  const auto & name = checkForRename(param_name);
   return _params.at(name)._range_function;
 }
 
 bool
 InputParameters::hasDefault(const std::string & param_name) const
 {
-  const auto name = checkForRename(param_name);
+  const auto & name = checkForRename(param_name);
   if (hasDefaultCoupledValue(name))
     return true;
   // If it has a default, it's already valid
@@ -833,7 +833,7 @@ void
 InputParameters::setCoupledVar(const std::string & coupling_name,
                                const std::vector<VariableName> & values)
 {
-  const auto actual_name = checkForRename(coupling_name);
+  const auto & actual_name = checkForRename(coupling_name);
 
   if (!hasCoupledVar(actual_name))
     mooseError("Unable to set coupled variable parameter '",
@@ -846,7 +846,7 @@ InputParameters::setCoupledVar(const std::string & coupling_name,
 const std::vector<VariableName> &
 InputParameters::getCoupledVar(const std::string & coupling_name) const
 {
-  const auto actual_name = checkForRename(coupling_name);
+  const auto & actual_name = checkForRename(coupling_name);
 
   if (!hasCoupledVar(actual_name))
     mooseError("Unable to get coupled variable parameter '",
@@ -866,7 +866,7 @@ InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 void
 InputParameters::defaultCoupledValue(const std::string & coupling_name, Real value, unsigned int i)
 {
-  const auto actual_name = checkForRename(coupling_name);
+  const auto & actual_name = checkForRename(coupling_name);
   _params[actual_name]._coupled_default.resize(i + 1);
   _params[actual_name]._coupled_default[i] = value;
   _params[actual_name]._have_coupled_default = true;
@@ -915,7 +915,7 @@ InputParameters::getAutoBuildVectors() const
 std::string
 InputParameters::type(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   if (!_values.count(name))
     mooseError("Parameter \"", name, "\" not found.\n\n", *this);
 
@@ -929,7 +929,7 @@ InputParameters::type(const std::string & name_in) const
 std::string
 InputParameters::getMooseType(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   std::string var;
 
   if (have_parameter<VariableName>(name))
@@ -959,7 +959,7 @@ InputParameters::getMooseType(const std::string & name_in) const
 std::vector<std::string>
 InputParameters::getVecMooseType(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   std::vector<std::string> svars;
 
   if (have_parameter<std::vector<VariableName>>(name))
@@ -1106,7 +1106,7 @@ InputParameters::commandLineParamSet(const std::string & name, const CommandLine
 std::string
 InputParameters::getGroupName(const std::string & param_name_in) const
 {
-  const auto param_name = checkForRename(param_name_in);
+  const auto & param_name = checkForRename(param_name_in);
   auto it = _params.find(param_name);
   if (it != _params.end())
     return it->second._group;
@@ -1240,7 +1240,7 @@ InputParameters::applyParameter(const InputParameters & common,
   // of messages
   _show_deprecated_message = false;
 
-  const auto local_name = checkForRename(common_name);
+  const auto & local_name = checkForRename(common_name);
 
   // Extract the properties from the local parameter for the current common parameter name
   const bool local_exist = _values.find(local_name) != _values.end();
@@ -1292,7 +1292,7 @@ InputParameters::paramSetByUser(const std::string & name) const
 bool
 InputParameters::isParamSetByUser(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   // Invalid; for sure not set by the user
   if (!isParamValid(name))
     return false;
@@ -1309,14 +1309,14 @@ InputParameters::isParamSetByUser(const std::string & name_in) const
 bool
 InputParameters::isParamDefined(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   return _params.count(name) > 0;
 }
 
 const std::string &
 InputParameters::getDescription(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   auto it = _params.find(name);
   if (it == _params.end())
     mooseError("No parameter exists with the name ", name);
@@ -1576,7 +1576,7 @@ const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
                                            const InputParameters & pars)
 {
-  const auto name = pars.checkForRename(name_in);
+  const auto & name = pars.checkForRename(name_in);
   return pars.get<MooseEnum>(name);
 }
 
@@ -1585,7 +1585,7 @@ const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in,
                                                 const InputParameters & pars)
 {
-  const auto name = pars.checkForRename(name_in);
+  const auto & name = pars.checkForRename(name_in);
   return pars.get<MultiMooseEnum>(name);
 }
 
@@ -1593,14 +1593,14 @@ void
 InputParameters::setReservedValues(const std::string & name_in,
                                    const std::set<std::string> & reserved)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   _params[name]._reserved_values = reserved;
 }
 
 std::set<std::string>
 InputParameters::reservedValues(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   auto it = _params.find(name);
   if (it == _params.end())
     return std::set<std::string>();
@@ -1665,7 +1665,7 @@ InputParameters::checkParamName(const std::string & name) const
 bool
 InputParameters::shouldIgnore(const std::string & name_in)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   auto it = _params.find(name);
   if (it != _params.end())
     return it->second._ignore;
@@ -1833,7 +1833,7 @@ InputParameters::deprecateCoupledVar(const std::string & old_name,
   renameCoupledVarInternal(old_name, new_name, "", removal_date);
 }
 
-std::string
+const std::string &
 InputParameters::checkForRename(const std::string & name) const
 {
   if (auto it = _old_to_new_name_and_dep.find(name); it != _old_to_new_name_and_dep.end())
