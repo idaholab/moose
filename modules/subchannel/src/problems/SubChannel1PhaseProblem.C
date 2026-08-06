@@ -148,6 +148,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
+    _Wij_old(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij_old")),
     _g_grav(9.81),
     _kij(_subchannel_mesh.getKij()),
     _one(1.0),
@@ -198,9 +199,10 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   {
     _Wij.resize(_n_gaps, _n_cells + 1);
     _Wij.zero();
+    _Wij_old.resize(_n_gaps, _n_cells + 1);
+    _Wij_old.zero();
   }
-  _Wij_old.resize(_n_gaps, _n_cells + 1);
-  _Wij_old.zero();
+
   _WijPrime.resize(_n_gaps, _n_cells + 1);
   _WijPrime.zero();
   _Wij_residual_matrix.resize(_n_gaps, _block_size);
