@@ -12,7 +12,7 @@ derivatives required to form an exact Jacobian. Current displacement and
 out-of-plane strain values are AD values; the old state values used to form the
 finite strain increment remain regular values.
 
-!include modules/solid_mechanics/common/supplementalAxisymmetric1DStrainOverview.md
+!template load file=modules/solid_mechanics/common/Axisymmetric1DStrainOverview.md.template
 
 The out-of-plane strain can be supplied by either
 [!param](/Materials/ADComputeAxisymmetric1DFiniteStrain/scalar_out_of_plane_strain)
@@ -26,7 +26,7 @@ user object, component 0 is used.
 
 ## 1D Axisymmetric Strain Formulation
 
-!include modules/solid_mechanics/common/supplementalAxisymmetric1DFiniteStrainFormulation.md
+!template load file=modules/solid_mechanics/common/Axisymmetric1DFiniteStrainFormulation.md.template
 
 ## Example Input File Syntax
 

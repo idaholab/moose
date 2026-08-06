@@ -189,21 +189,8 @@ Objects specific for generalized plane strain:
 
 - [Strain Calculations](solid_mechanics/Strains.md): in-plane strain calculation and formation of full strain tensor considering the scalar out-of-plane strain
 
-Objects specific to generalized plane strain with automatic differentiation:
-
-- [ADGeneralizedPlaneStrain.md]: scalar out-of-plane equilibrium condition and
-  automatic differentiation (AD) coupling terms
-
-The AD variant of this system requires AD stress materials, although the out-of-plane pressure is
-provided as a regular `Real` material property, so it is treated as being derivative-free.
-
 ## How to Use Generalized Plane Strain
 
 The [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) can be used to set up a generalized plane strain model. The [QuasiStaticSolidMechanicsPhysics](/QuasiStaticSolidMechanicsPhysics.md) which considers the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) as Meta-Action can also be used.
-
-The following example input demonstrates usage of the action with AD, and in this
-case the action creates the scalar out-of-plane strain variable.
-
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_auto_scalar.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 
 !bibtex bibliography

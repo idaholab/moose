@@ -9,7 +9,7 @@ axisymmetric generalized plane strain model using automatic differentiation.
 It is the AD counterpart to [ComputeAxisymmetric1DSmallStrain.md] and supplies
 strains with all derivatives required to form an exact Jacobian.
 
-!include modules/solid_mechanics/common/supplementalAxisymmetric1DStrainOverview.md
+!template load file=modules/solid_mechanics/common/Axisymmetric1DStrainOverview.md.template
 
 The out-of-plane strain can be supplied by either
 [!param](/Materials/ADComputeAxisymmetric1DSmallStrain/scalar_out_of_plane_strain)
@@ -23,7 +23,7 @@ user object, component 0 is used.
 
 ## 1D Axisymmetric Strain Formulation
 
-!include modules/solid_mechanics/common/supplementalAxisymmetric1DSmallStrainFormulation.md
+!template load file=modules/solid_mechanics/common/Axisymmetric1DSmallStrainFormulation.md.template
 
 ## Example Input File Syntax
 

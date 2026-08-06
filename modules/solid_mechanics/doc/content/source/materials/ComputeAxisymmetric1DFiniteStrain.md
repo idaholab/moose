@@ -10,7 +10,7 @@ the solid mechanics action is used with `use_automatic_differentiation = true`,
 the action instead selects the AD counterpart,
 [ADComputeAxisymmetric1DFiniteStrain.md].
 
-!include modules/solid_mechanics/common/supplementalAxisymmetric1DStrainOverview.md
+!template load file=modules/solid_mechanics/common/Axisymmetric1DStrainOverview.md.template
 
 The out-of-plane strain can be supplied by either
 [!param](/Materials/ComputeAxisymmetric1DFiniteStrain/scalar_out_of_plane_strain)
@@ -24,7 +24,7 @@ user object, component 0 is used.
 
 ## 1D Axisymmetric Strain Formulation
 
-!include modules/solid_mechanics/common/supplementalAxisymmetric1DFiniteStrainFormulation.md
+!template load file=modules/solid_mechanics/common/Axisymmetric1DFiniteStrainFormulation.md.template
 
 ## Example Input File Syntax
 
