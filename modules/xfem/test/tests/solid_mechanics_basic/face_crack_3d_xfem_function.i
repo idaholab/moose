@@ -39,7 +39,7 @@
 []
 
 [Outputs]
-  file_base = face_crack_function_off_${offset}_spin_${spin}
+  file_base = ${fname}_function_offset_${offset}_spin_${spin}_tilt_${tilt}
   [xfemcutter]
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh

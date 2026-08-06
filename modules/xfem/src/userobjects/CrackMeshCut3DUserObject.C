@@ -101,8 +101,8 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
 
   if (_grow)
   {
-    if (!isParamSetByUser("size_control"))
-      paramError("size_control", "Crack growth needs size control.");
+    if (!isParamSetByUser("size_control") || _size_control <= 0)
+      paramError("size_control", "Crack growth needs a positive size_control.");
     if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");

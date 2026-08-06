@@ -369,22 +369,8 @@ EFAFragment3D::split()
         break;
       }
     } // i
-    // Pass a shared "claimed" set to both connectSubfaces calls so an EFAFace*
-    // picked by call 1 cannot also be picked by call 2.  Without this guard,
-    // an uncut subface (a single EFAFace returned by EFAFace::split for an
-    // unintersected fragment face) that is adjacency-reachable from both
-    // starting halves ends up appended to BOTH new fragments' _faces vectors.
-    // Both fragments' destructors then delete the same EFAFace*, freeing its
-    // EFAEdges twice and aborting in EFAFace::~EFAFace.  Two halves of the
-    // same cut face are NOT blocked (they are distinct pointers stored in
-    // subfaces[i][0] and subfaces[i][1]).
-    std::set<EFAFace *> claimed_subfaces;
-    claimed_subfaces.insert(start_face1);
-    claimed_subfaces.insert(start_face2);
-    EFAFragment3D * new_frag1 =
-        connectSubfaces(start_face1, startOldFaceID, all_subfaces, claimed_subfaces);
-    EFAFragment3D * new_frag2 =
-        connectSubfaces(start_face2, startOldFaceID, all_subfaces, claimed_subfaces);
+    EFAFragment3D * new_frag1 = connectSubfaces(start_face1, startOldFaceID, all_subfaces);
+    EFAFragment3D * new_frag2 = connectSubfaces(start_face2, startOldFaceID, all_subfaces);
     new_fragments.push_back(new_frag1);
     new_fragments.push_back(new_frag2);
   }
@@ -459,8 +445,7 @@ EFAFragment3D::getNodeInfo(std::vector<std::vector<unsigned int>> & face_node_in
 EFAFragment3D *
 EFAFragment3D::connectSubfaces(EFAFace * start_face,
                                unsigned int startOldFaceID,
-                               std::vector<std::vector<EFAFace *>> & subfaces,
-                               std::set<EFAFace *> & claimed_subfaces)
+                               std::vector<std::vector<EFAFace *>> & subfaces)
 {
   // this method is only called in EFAfragment3D::split()
   std::vector<bool> contributed(subfaces.size(), false);
@@ -480,9 +465,6 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
         bool adjacent_found = false;
         for (unsigned int j = 0; j < subfaces[i].size(); ++j)
         {
-          // Skip subfaces already taken by a prior connectSubfaces call.
-          if (claimed_subfaces.count(subfaces[i][j]))
-            continue;
           for (unsigned int k = 0; k < frag_faces.size(); ++k)
           {
             if (subfaces[i][j]->isAdjacent(frag_faces[k]))
@@ -490,7 +472,6 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
               adjacent_found = true;
               contributed[i] = true;
               frag_faces.push_back(subfaces[i][j]);
-              claimed_subfaces.insert(subfaces[i][j]);
               num_contrib_faces += 1;
               break;
             }

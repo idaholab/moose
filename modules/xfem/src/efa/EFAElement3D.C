@@ -2142,11 +2142,11 @@ EFAElement3D::checkNeighborFaceCut(unsigned int face_id,
     {
       unsigned int emb_id = neigh_edge->getEmbeddedNodeIndex(position, from_node);
       EFANode * old_emb = neigh_edge->getEmbeddedNode(emb_id);
-
-      // Preserve the caller-supplied node or the first matching neighbor so the result does not
-      // depend on the order in which subsequent neighbors are visited.
-      if (!local_embedded)
-        local_embedded = old_emb;
+      // The existing neighboring cut owns this physical intersection. Replace any references to
+      // a different caller-supplied node before using the existing node on the new edge copy.
+      if (local_embedded && local_embedded != old_emb)
+        switchEmbeddedNode(old_emb, local_embedded);
+      local_embedded = old_emb;
     }
   } // en_iter
 }

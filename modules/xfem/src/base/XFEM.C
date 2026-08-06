@@ -400,11 +400,10 @@ XFEM::markCutEdgesByGeometry()
   bool marked_edges = false;
   bool marked_nodes = false;
 
-  for (const auto & gme : _geom_marked_elems_2d)
+  for (const auto & [elem_id, geom_infos] : _geom_marked_elems_2d)
   {
-    const dof_id_type elem_id = gme.first;
     const Elem * elem = _mesh->elem_ptr(elem_id);
-    for (const auto & gmei : gme.second)
+    for (const auto & gmei : geom_infos)
     {
       EFAElement2D * EFAElem = getEFAElem2D(elem);
 
@@ -857,11 +856,10 @@ XFEM::markCutFacesByGeometry()
 {
   bool marked_faces = false;
 
-  for (const auto & gme : _geom_marked_elems_3d)
+  for (const auto & [elem_id, geom_infos] : _geom_marked_elems_3d)
   {
-    const dof_id_type elem_id = gme.first;
     const Elem * elem = _mesh->elem_ptr(elem_id);
-    for (const auto & gmei : gme.second)
+    for (const auto & gmei : geom_infos)
     {
       EFAElement3D * EFAElem = getEFAElem3D(elem);
 
