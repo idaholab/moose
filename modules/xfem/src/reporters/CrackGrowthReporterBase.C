@@ -24,6 +24,9 @@ CrackGrowthReporterBase::validParams()
       "the max growth size at the crack front in each increment of a fatigue simulation");
   params.addParam<VectorPostprocessorName>(
       "ki_vectorpostprocessor", "II_KI_1", "The name of the vectorpostprocessor that contains KI");
+  params.addParam<VectorPostprocessorName>("kii_vectorpostprocessor",
+                                           "II_KII_1",
+                                           "The name of the vectorpostprocessor that contains KII");
 
   // these flags must must match those used by the InteractionIntegral set in the
   // DomainIntegralAction
@@ -41,6 +44,8 @@ CrackGrowthReporterBase::CrackGrowthReporterBase(const InputParameters & paramet
     _max_growth_increment(getParam<Real>("max_growth_increment")),
     _ki_vpp(getVectorPostprocessorValue(
         "ki_vectorpostprocessor", getParam<VectorPostprocessorName>("ki_vectorpostprocessor"))),
+    _kii_vpp(getVectorPostprocessorValue(
+        "kii_vectorpostprocessor", getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))),
     _ki_x(getVectorPostprocessorValue("ki_vectorpostprocessor", "x")),
     _ki_y(getVectorPostprocessorValue("ki_vectorpostprocessor", "y")),
     _ki_z(getVectorPostprocessorValue("ki_vectorpostprocessor", "z")),
@@ -48,29 +53,35 @@ CrackGrowthReporterBase::CrackGrowthReporterBase(const InputParameters & paramet
     _x(declareValueByName<std::vector<Real>>("x", REPORTER_MODE_ROOT)),
     _y(declareValueByName<std::vector<Real>>("y", REPORTER_MODE_ROOT)),
     _z(declareValueByName<std::vector<Real>>("z", REPORTER_MODE_ROOT)),
-    _id(declareValueByName<std::vector<Real>>("id", REPORTER_MODE_ROOT))
+    _id(declareValueByName<std::vector<Real>>("id", REPORTER_MODE_ROOT)),
+    _ki(declareValueByName<std::vector<Real>>("ki", REPORTER_MODE_ROOT)),
+    _kii(declareValueByName<std::vector<Real>>("kii", REPORTER_MODE_ROOT))
 {
 }
 
 void
 CrackGrowthReporterBase::execute()
 {
-  copyCoordinates();
+  copyVectorPostprocessorValues();
   std::vector<int> index = getCutterMeshIndices();
   computeGrowth(index);
 }
 
 void
-CrackGrowthReporterBase::copyCoordinates() const
+CrackGrowthReporterBase::copyVectorPostprocessorValues() const
 {
   _x.resize(_ki_x.size());
   _y.resize(_ki_y.size());
   _z.resize(_ki_z.size());
   _id.resize(_ki_id.size());
+  _ki.resize(_ki_vpp.size());
+  _kii.resize(_kii_vpp.size());
   std::copy(_ki_x.begin(), _ki_x.end(), _x.begin());
   std::copy(_ki_y.begin(), _ki_y.end(), _y.begin());
   std::copy(_ki_z.begin(), _ki_z.end(), _z.begin());
   std::copy(_ki_id.begin(), _ki_id.end(), _id.begin());
+  std::copy(_ki_vpp.begin(), _ki_vpp.end(), _ki.begin());
+  std::copy(_kii_vpp.begin(), _kii_vpp.end(), _kii.begin());
 }
 
 std::vector<int>

@@ -17,6 +17,8 @@
 #include "EFAElement3D.h"
 #include "EFAError.h"
 
+#include <set>
+
 EFAFragment3D::EFAFragment3D(EFAElement3D * host,
                              bool create_faces,
                              const EFAElement3D * from_host,
@@ -136,12 +138,37 @@ EFAFragment3D::isEdgeConnected(EFAFragment * other_fragment) const
 }
 
 void
-EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes)
+EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & /*EmbeddedNodes*/,
+                                          std::vector<EFANode *> & invalid_emb_out)
 {
-  // N.B. this method is only called before we update fragments
-  // N.B. an embedded node is valid IF at least one of its host faces is exterior and has more than
-  // 1 cuts
-  // TODO: the invalid cases are generalized from 2D. The method may need improvements in 3D
+  // Detect and handle three classes of embedded-node configurations.
+  //
+  // (A) Lone-edge (emb_faces.size() == 1):
+  //     A cut-intersection embedded node should sit on edges of exactly 2 fragment
+  //     faces (an element edge is shared by 2 faces in a closed fragment manifold).
+  //     A count of 1 is the signature of a multi-cut conflict in addFaceEdgeCut,
+  //     where the `fragmentFaceAlreadyCut` gate blocks the second cut's symmetric
+  //     propagation across a shared element edge.  We CANNOT drop the EFANode
+  //     globally: the same node may sit as a valid cut vertex on another element's
+  //     fragment (split() will use it as a cut-plane vertex on that other element,
+  //     and getMasterInfo there must still find it).  It may also serve as an
+  //     edge endpoint in inherited cut-plane faces.  Instead we fix this fragment
+  //     locally by erasing the spurious edge intersection.  The EFANode object
+  //     stays alive; other elements that reference it correctly are not perturbed;
+  //     this element's element-face edges still list the node so that future
+  //     getMasterInfo(node) can locate it.
+  //
+  // (B) Over-shared (emb_faces.size() > 2):
+  //     Non-manifold topology -- the same embedded node sits on edges of more
+  //     than 2 fragment faces.  Has not been observed in any failing case; the
+  //     local-cleanup approach is unproven here and could mask an upstream bug.
+  //     We abort with EFAError until a reproducer exists.
+  //
+  // (C) Spurious "phantom" cut (size == 2 but no exterior face has multiple cuts):
+  //     The 2D-style criterion from the original code.  Here the embedded node
+  //     genuinely should be dropped wholesale -- it is not part of any real cut
+  //     surface that reaches an exterior face.  These are returned via
+  //     invalid_emb_out for the algorithm driver to remove globally.
   if (hasFaceWithOneCut())
   {
     // build a local inverse map for all emb cut nodes in this fragment
@@ -154,15 +181,38 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & Em
           emb_inverse_map[emb_node].push_back(_faces[i]);
         }
 
-    // find all invalid embedded nodes
-    std::vector<EFANode *> invalid_emb;
     std::map<EFANode *, std::vector<EFAFace *>>::iterator it;
     for (it = emb_inverse_map.begin(); it != emb_inverse_map.end(); ++it)
     {
       EFANode * emb_node = it->first;
       std::vector<EFAFace *> & emb_faces = it->second;
-      if (emb_faces.size() != 2)
-        EFAError("one embedded node must be owned by 2 faces");
+      if (emb_faces.size() == 1)
+      {
+        // Class A (lone-edge): the topological signature of a multi-cut
+        // conflict in addFaceEdgeCut (see the file header).  Locally erase
+        // the spurious intersection so this fragment becomes consistent.
+        // We do NOT touch EmbeddedNodes, _host_elem element faces, neighbours,
+        // or invalid_emb_out -- the EFANode is valid global state and may be a
+        // correct cut on other elements' fragments.
+        for (EFAFace * lone_face : emb_faces)
+          lone_face->removeEmbeddedNode(emb_node);
+        continue;
+      }
+      if (emb_faces.size() > 2)
+      {
+        // Over-shared: the same embedded node is reported on edges of more
+        // than 2 fragment faces.  This is a non-manifold topology that has
+        // not been characterised in any failing case we've seen, and silently
+        // dropping it could mask a different upstream bug.  Keep the abort
+        // until a reproducer is in hand.
+        EFAError("EFAFragment3D::removeInvalidEmbeddedNodes: embedded node ",
+                 emb_node->id(),
+                 " is shared by ",
+                 emb_faces.size(),
+                 " fragment faces in element ",
+                 (_host_elem ? static_cast<int>(_host_elem->id()) : -1),
+                 " (expected 2). Non-manifold fragment topology -- needs investigation.");
+      }
       unsigned int counter = 0;
       for (unsigned int i = 0; i < emb_faces.size(); ++i)
       {
@@ -171,15 +221,8 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & Em
           counter += 1; // count the appropriate emb's faces
       }
       if (counter == 0)
-        invalid_emb.push_back(emb_node);
+        invalid_emb_out.push_back(emb_node);
     }
-
-    // delete all invalid emb nodes
-    for (unsigned int i = 0; i < invalid_emb.size(); ++i)
-    {
-      Efa::deleteFromMap(EmbeddedNodes, invalid_emb[i]);
-      _host_elem->removeEmbeddedNode(invalid_emb[i], true); // also remove from neighbors
-    }                                                       // i
   }
 }
 
@@ -447,12 +490,26 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
     new_frag->addFace(frag_faces[i]);
   new_frag->findFacesAdjacentToFaces();
 
+  // Collect ALL lone edges from every fragment face.
+  //
+  // The original implementation collected only the first lone edge per face. That
+  // assumption breaks when the fragment contains sub-faces of a
+  // previously-established cut-plane face (i.e., crack growth cuts through a face that
+  // was itself created as the cut-plane in an earlier growth step).  Such sub-faces
+  // inherit multiple perimeter edges from the old cut-plane polygon; all of those
+  // perimeter edges are "lone" in the new fragment because no adjacent sub-face claims
+  // them.  Collecting only the first lone edge per face leaves the remaining perimeter
+  // edges out of the new cut-plane edge set, producing an open chain that cannot be
+  // sorted into a cycle by sortEdges().
+  //
+  // Collecting all lone edges is always correct: in the normal case every fragment face
+  // contributes exactly one lone edge (the single new cut edge), so the result is
+  // identical to the old behaviour.  In the multi-growth case, every lone edge on every
+  // face is a genuine boundary of the new cut plane and must appear in the cycle.
   for (unsigned int i = 0; i < new_frag->numFaces(); ++i)
-  {
-    EFAEdge * lone_edge = new_frag->loneEdgeOnFace(i);
-    if (lone_edge != nullptr) // valid edge
-      cut_plane_edges.push_back(new EFAEdge(*lone_edge));
-  }
+    for (unsigned int j = 0; j < new_frag->getFace(i)->numEdges(); ++j)
+      if (new_frag->getAdjacentFace(i, j) == nullptr)
+        cut_plane_edges.push_back(new EFAEdge(*new_frag->getFace(i)->getEdge(j)));
 
   EFAFace * cut_face = new EFAFace(cut_plane_edges.size());
   for (unsigned int i = 0; i < cut_plane_edges.size(); ++i)
@@ -465,16 +522,6 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
   new_frag->addFace(cut_face);
   new_frag->findFacesAdjacentToFaces();
   return new_frag;
-}
-
-EFAEdge *
-EFAFragment3D::loneEdgeOnFace(unsigned int face_id) const
-{
-  // if any face edge is not shared by any other face, we call it a lone edge
-  for (unsigned int i = 0; i < _faces[face_id]->numEdges(); ++i)
-    if (_faces_adjacent_to_faces[face_id][i] == nullptr)
-      return _faces[face_id]->getEdge(i);
-  return nullptr;
 }
 
 void

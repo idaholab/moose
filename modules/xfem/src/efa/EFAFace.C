@@ -15,6 +15,7 @@
 #include "EFAFragment2D.h"
 #include "EFAFuncs.h"
 #include "EFAError.h"
+#include <sstream>
 
 EFAFace::EFAFace(unsigned int n_nodes, unsigned int num_interior_face_nodes)
   : _num_nodes(n_nodes),
@@ -329,6 +330,30 @@ EFAFace::sortEdges()
         break;
       }
     } // j
+    // If no edge was found that continues the chain, the cut-plane edge set does
+    // not form a connected cycle - report a diagnostic instead of segfaulting on
+    // the nullptr dereference that would occur in the next iteration.
+    if (ordered_edges[i] == nullptr)
+    {
+      std::ostringstream oss;
+      oss << "EFAFace::sortEdges(): cut-plane edge set does not form a connected cycle.\n";
+      oss << "  " << _num_edges << " lone edges were collected; chain breaks after position "
+          << (i - 1) << ".\n";
+      oss << "  Edge list (node0 -> node1):\n";
+      for (unsigned int k = 0; k < _num_edges; ++k)
+        oss << "    edge[" << k << "]: node " << _edges[k]->getNode(0)->id() << " -> node "
+            << _edges[k]->getNode(1)->id() << "\n";
+      oss << "  Ordered so far:\n";
+      for (unsigned int k = 0; k < i; ++k)
+        oss << "    ordered[" << k << "]: node " << ordered_edges[k]->getNode(0)->id()
+            << " -> node " << ordered_edges[k]->getNode(1)->id() << "\n";
+      oss << "  Looking for an edge whose nodes include node "
+          << ordered_edges[i - 1]->getNode(1)->id() << " - none found.\n";
+      oss << "This usually means a structural-face intersection produced a duplicate or\n"
+          << "topologically invalid edge pair (two hits on the same structural-face edge,\n"
+          << "or a face with more than one lone edge contributing to the cut plane).";
+      EFAError(oss.str());
+    }
   }   // i
   _edges = ordered_edges;
 }
