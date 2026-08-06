@@ -84,11 +84,21 @@ protected:
   /// Save stateful variables for on-device state advance
   void advanceState();
 
+  /// Seed managed history that is not yet in the device cache (i.e. on the first step) so a
+  /// stateful model can be evaluated before advanceState() has populated the cache
+  void seedUncachedHistory();
+
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
 
-  /// Advance state on device (rather than via MOSOE material properties)
+  /// Advance state on device (rather than via MOOSE material properties)
   const bool _manage_state_advance;
+
+  /// State variables whose uncached history seeds to the second-order identity instead of zero
+  const std::vector<std::string> _identity_seeded_state;
+
+  /// Previous step size, used to enforce a constant dt under manage_state_advance
+  Real _dt_prev = -1;
 
   /// Dump input tensor info on failure to aid debugging
   const bool _debug_inputs_on_failure;
