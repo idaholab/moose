@@ -1,0 +1,35 @@
+[Tests]
+  design = 'MortarPerformance.md ComputeFrictionalForceLMMechanicalContact.md '
+           'ComputeWeightedGapLMMechanicalContact.md'
+  issues = '#32856'
+  requirement = 'The system shall provide a controlled unit-pressure-scale frictional mortar '
+                'performance workload for both nonlinear complementarity formulations.'
+  [hsw]
+    type = RunApp
+    input = controlled.i
+    cli_args = 'name=performance_controlled_hsw'
+    allow_test_objects = true
+    validation_test = performance_validation.py
+    validation_csv = performance_controlled_hsw.csv
+    validation_end_time = 1600
+    validation_dt = 1
+    validation_max_nonlinear_iterations = 8000
+    validation_max_residual_evaluations = 9600
+    validation_max_linear_iterations = 8001
+  []
+  [ac]
+    type = RunApp
+    input = controlled.i
+    prereq = hsw
+    cli_args = 'name=performance_controlled_ac'
+    allow_test_objects = true
+    validation_test = performance_validation.py
+    validation_csv = performance_controlled_ac.csv
+    validation_comparison_csv = performance_controlled_hsw.csv
+    validation_end_time = 1600
+    validation_dt = 1
+    validation_max_nonlinear_iterations = 8000
+    validation_max_residual_evaluations = 9600
+    validation_max_linear_iterations = 8001
+  []
+[]
