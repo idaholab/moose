@@ -4,7 +4,7 @@
   [generate]
     requirement = 'The system shall support the ability to create a mesh element-wise by specifying '
                   'points, element types, and connectivity,'
-    issues = '#11640 #30158 '
+    issues = '#11640 #13950 #30158'
 
     [single_element_no_ss]
       type = 'Exodiff'
@@ -34,7 +34,16 @@
       exodiff = 'chained_in.e'
       recover = false
 
-      detail = 'resulting in a mesh with multiple disconnected elements.'
+      detail = 'resulting in a mesh with multiple disconnected subdomains, or'
+    []
+    [multi_elem_connected]
+      type = 'Exodiff'
+      input = 'connected.i'
+      cli_args = '--mesh-only connected_in.e'
+      exodiff = 'connected_in.e'
+      recover = false
+
+      detail = 'resulting in a connected multi-element mesh when coincident interface nodes are merged.'
     []
   []
   [polys]
