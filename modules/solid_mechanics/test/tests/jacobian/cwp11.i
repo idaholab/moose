@@ -9,19 +9,15 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
+    eigenstrain_names = ini_stress
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-  [../]
-[]
 
 [UserObjects]
   [./coh]
@@ -62,10 +58,6 @@
     type = ComputeIsotropicElasticityTensor
     lambda = 1.0
     shear_modulus = 2.0
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    eigenstrain_names = ini_stress
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress

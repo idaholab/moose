@@ -1,5 +1,9 @@
 # Tests for application of out-of-plane pressure in generalized plane strain.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   [./square]
     type = GeneratedMeshGenerator
@@ -7,14 +11,9 @@
     nx = 2
     ny = 2
   [../]
-  displacements = 'disp_x disp_y'
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
   [./scalar_strain_zz]
     order = FIRST
     family = SCALAR
@@ -75,25 +74,16 @@
   [../]
 []
 
-[Physics]
-  [SolidMechanics]
-    [./GeneralizedPlaneStrain]
-      [./gps]
-        use_displaced_mesh = true
-        displacements = 'disp_x disp_y'
-        scalar_out_of_plane_strain = scalar_strain_zz
-        out_of_plane_pressure_function = traction_function
-        pressure_factor = 1e5
-      [../]
-    [../]
-  [../]
-[]
-
-[Kernels]
-  [SolidMechanics]
-    use_displaced_mesh = false
-    displacements = 'disp_x disp_y'
+[Physics/SolidMechanics/QuasiStatic]
+  [./gps]
+    add_variables = true
     save_in = 'saved_x saved_y'
+    strain = small
+    incremental = false
+    planar_formulation = GENERALIZED_PLANE_STRAIN
+    scalar_out_of_plane_strain = scalar_strain_zz
+    out_of_plane_pressure_function = traction_function
+    pressure_factor = 1e5
   [../]
 []
 
@@ -185,11 +175,6 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
-  [./strain]
-    type = ComputePlaneSmallStrain
-    displacements = 'disp_x disp_y'
-    scalar_out_of_plane_strain = scalar_strain_zz
   [../]
   [./stress]
     type = ComputeLinearElasticStress

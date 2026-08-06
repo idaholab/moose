@@ -25,11 +25,12 @@
   []
 []
 
-[Kernels]
-  [SolidMechanics]
-#Stress divergence kernels
-    displacements = 'disp_x disp_y disp_z'
-   []
+[Physics/SolidMechanics/QuasiStatic]
+  [all]
+    add_variables = false
+    incremental = false
+    strain = small
+  []
 []
 
 [AuxVariables]
@@ -131,11 +132,6 @@
     youngs_modulus = 24e6 #psi
     poissons_ratio = 0.33
     type = ComputeIsotropicElasticityTensor
-  []
-  [strain]
-    #Computes the strain, assuming small strains
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
   []
   [stress]
     #Computes the stress, using linear elasticity

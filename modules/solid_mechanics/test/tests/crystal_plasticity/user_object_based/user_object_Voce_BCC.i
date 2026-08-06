@@ -2,28 +2,23 @@
   type = GeneratedMesh
   dim = 2
   elem_type = QUAD4
-  displacements = 'disp_x disp_y'
   nx = 2
   ny = 2
 []
 
 [GlobalParams]
+  displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y'
-    use_displaced_mesh = true
-  [../]
-[]
 
 [AuxVariables]
   [./stress_yy]
@@ -166,10 +161,6 @@
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_voce'
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP

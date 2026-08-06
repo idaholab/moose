@@ -5,6 +5,9 @@
 [Mesh]
   type = FileMesh
   file = truss_hex.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -181,10 +184,6 @@
 []
 
 [Kernels]
-  [SolidMechanics]
-    block = 1000
-    displacements = 'disp_x disp_y disp_z'
-  [../]
 []
 
 [Physics/SolidMechanics/LineElement/QuasiStatic]
@@ -199,17 +198,21 @@
    [../]
 []
 
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = false
+    incremental = false
+    strain = small
+    block = 1000
+  [../]
+[]
+
 [Materials]
    [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 1000
     youngs_modulus = 1e6
     poissons_ratio = 0
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-    block = 1000
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

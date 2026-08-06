@@ -128,21 +128,6 @@
   []
 []
 
-[Variables]
-  [disp_x]
-    order = FIRST
-    family = LAGRANGE
-  []
-  [disp_y]
-    order = FIRST
-    family = LAGRANGE
-  []
-  [disp_z]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
 [AuxVariables]
   [./stress_xx]
     order = CONSTANT
@@ -176,10 +161,14 @@
 
 []
 
-[Kernels]
-  [SolidMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
   [../]
 []
+
 
 [AuxKernels]
   [./stress_xx]
@@ -287,9 +276,6 @@
     poissons_ratio = 0.3333333333333333
   [../]
 
-  [./strain]
-    type = ComputeIncrementalStrain
-  [../]
 
   [creep]
     type = PowerLawCreepStressUpdate
