@@ -1,0 +1,51 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+
+#include "CriticalCrackGrowth.h"
+
+registerMooseObject("XFEMApp", CriticalCrackGrowth);
+
+InputParameters
+CriticalCrackGrowth::validParams()
+{
+  InputParameters params = CrackGrowthReporterBase::validParams();
+  params.addClassDescription(
+      "Computes crack growth increments at active crack front points using a critical mixed-mode "
+      "stress intensity factor criterion.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "k_critical", "k_critical>0", "Critical fracture toughness.");
+  params.addParam<ReporterValueName>(
+      "growth_increment_name",
+      "growth_increment",
+      "Reporter value name for the crack growth increments at the crack front points.");
+  return params;
+}
+
+CriticalCrackGrowth::CriticalCrackGrowth(const InputParameters & parameters)
+  : CrackGrowthReporterBase(parameters),
+    _k_critical(getParam<Real>("k_critical")),
+    _growth_increment(declareValueByName<std::vector<Real>>(
+        getParam<ReporterValueName>("growth_increment_name"), REPORTER_MODE_ROOT))
+{
+}
+
+void
+CriticalCrackGrowth::computeGrowth(std::vector<int> & index)
+{
+  _growth_increment.assign(_ki_vpp.size(), 0.0);
+
+  for (const auto i : index_range(_ki_vpp))
+  {
+    if (index[i] == -1 || _ki_vpp[i] <= 0.0)
+      continue;
+
+    const Real effective_k_squared = _ki_vpp[i] * _ki_vpp[i] + _kii_vpp[i] * _kii_vpp[i];
+    if (effective_k_squared > _k_critical * _k_critical)
+      _growth_increment[i] = _max_growth_increment;
+  }
+}

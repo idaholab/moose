@@ -89,6 +89,16 @@
       capabilities = 'unique_id'
       detail = ' growth speeds determined by the stress corrosion cracking maximum growth length, or'
     []
+    [critical_growth]
+      type = JSONDiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_critical_growth.i'
+      cli_args = 'fname=hex_block Executioner/end_time=2'
+      jsondiff = 'face_crack_critical_growth_out.json'
+      capabilities = 'unique_id'
+      design = 'CriticalCrackGrowth.md'
+      detail = ' mixed growth along a circular crack front over two increments, with points above '
+               'critical fracture toughness growing and points below it remaining stationary, or'
+    []
     [mhs]
       type = Exodiff
       input = 'edge_crack_3d_domain.i edge_crack_3d_mhs.i'
