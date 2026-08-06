@@ -28,7 +28,7 @@ inner-product notation, is given by:
 \begin{equation}
 \begin{aligned}
 (\nabla u_h, \nabla \phi_i) + (\nabla v \cdot \nabla u, \phi_i)= 0 \quad \forall  \phi_i \\
-(\nabla\vec{v}, \nabla\phi_i)= 0 \quad \forall  \phi_i
+(\nabla v_h, \nabla\phi_i)= 0 \quad \forall  \phi_i
 \end{aligned}
 \end{equation}
 
@@ -56,7 +56,7 @@ First, the mesh is defined by loading a file "mug.e".
 
 !listing examples/ex03_coupling/ex03.i block=Mesh
 
-Then, the two variables are defined: "diffused" and "convected", which refer to $u$ and $v$
+Then, the two variables are defined: "convected" and "diffused", which refer to $u$ and $v$
 from the problem statement, respectively. Both variables in this case are assigned to utilize
 linear Lagrange shape functions, but they could each use different shape functions and/or orders.
 
@@ -67,7 +67,9 @@ the `ExampleConvection` `Kernel` created above. It is important to point out tha
 `Diffusion` terms, the same code is utilized; two instances of the C++ object are created to
 application of the code to two variables.  Additionally, the actual coupling of the equations
 takes place in the `ExampleConvection` object. The `some_variable` input parameter was created in
-the `ExampleConvection` `Kernel` and here is assigned to utilize the `diffused` variable.
+the `ExampleConvection` `Kernel` and here is assigned to utilize the `diffused` variable. This
+applies the gradient of the `diffused` variable, $\nabla v$, to the equation for the `convected`
+variable, $u$.
 
 !listing examples/ex03_coupling/ex03.i block=Kernels
 
