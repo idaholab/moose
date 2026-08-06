@@ -1,9 +1,8 @@
 # SCMFrictionPressureDrop
 
-!syntax description /Postprocessors/SCMFrictionPressureDrop
-
-The `SCMFrictionPressureDrop` postprocessor reports the cross-sectionally homogenized pressure
-loss caused by axial wall friction and local form losses in a subchannel assembly. It excludes
+The `SCMFrictionPressureDrop` postprocessor reports the area averaged homogenized pressure
+loss caused by axial wall friction (from the pin surface and duct) and local form losses in a
+subchannel assembly from the inlet to the outlet surface. It excludes
 axial acceleration, transient momentum storage, crossflow, and gravity terms.
 
 !alert note
@@ -23,10 +22,10 @@ f_{D,i,z}\frac{\Delta z}{D_{h,i,z}} + K_{i,z}
 \right)
 \frac{|\dot m_{i,z}^{\mathrm{out}}|}
      {2\rho_{i,z}S_{i,z}^2}
-\left|
+\left(
 \alpha_{i,z}\dot m_{i,z}^{\mathrm{in}}
 + (1-\alpha_{i,z})\dot m_{i,z}^{\mathrm{out}}
-\right|.
+\right).
 \end{equation}
 
 Here, $\alpha$ is the momentum solver's spatial interpolation coefficient. The explicit

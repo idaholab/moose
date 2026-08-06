@@ -549,16 +549,18 @@ SubChannel1PhaseProblem::getFrictionPressureDrop() const
                          (alpha * (*_mdot_soln)(node_in) + (1.0 - alpha) * (*_mdot_soln)(node_out));
       }
       else
+      {
         // The explicit system evaluates the quadratic mass-flow term directly at the outlet.
-        friction_force = 0.5 * (f_D * dz / D_h + k) *
-                         (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
-                         (S * (*_rho_soln)(node_out));
+        const Real coefficient = 0.5 * (f_D * dz / D_h + k) * std::abs((*_mdot_soln)(node_out)) /
+                                 (S * (*_rho_soln)(node_out));
+        friction_force = coefficient * (*_mdot_soln)(node_out);
+      }
 
       // Add the force magnitude rather than a mass-flow-weighted pressure. The local mass-flow
       // distribution, including any redistribution caused by crossflow, is already represented
       // in friction_force. Weighting by mass flow again would overemphasize high-flow channels.
       total_flow_area += S;
-      total_friction_force += std::abs(friction_force);
+      total_friction_force += friction_force;
     }
 
     if (total_flow_area <= 0.0)

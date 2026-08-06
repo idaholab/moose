@@ -17,8 +17,8 @@ SCMFrictionPressureDrop::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription(
-      "Reports the cross-sectionally homogenized pressure loss due to axial wall friction and "
-      "local form losses in a subchannel assembly.");
+      "Reports the surface average pressure loss across the whole subchannel assembly due to axial "
+      "wall friction and local form losses.");
   return params;
 }
 

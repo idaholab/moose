@@ -131,6 +131,7 @@ P_out = 1.0e5
   n_blocks = 1
 
   implicit = false
+  segregated = false
   interpolation_scheme = central_difference
   gravity = none
 
