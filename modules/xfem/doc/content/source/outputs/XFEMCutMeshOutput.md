@@ -12,7 +12,7 @@ When an XFEM run aborts inside the EFA cut-marking / fragment update phase (for 
 
 Setting [!param](/Outputs/XFEMCutMeshOutput/execute_on) to `xfem_mark` on the `XFEMCutMeshOutput` writes the cutter mesh at the XFEM marking phase, which runs *before* the fragment update.  The resulting Exodus file therefore reflects the cutter geometry that XFEM is about to apply.  Viewing this file in ParaView lets you see exactly where the crack-growth surface is at the moment of the abort -- often the geometry reveals overlapping cut surfaces, near-degenerate triangles, or an unexpected crack-front location that drove the failure.
 
-This output is purely diagnostic; remove or revert to `final` once the underlying input is fixed, since it produces an additional Exodus file per cut iteration.
+This setting is purely diagnostic.  Set [!param](/Outputs/XFEMCutMeshOutput/execute_on) back to `final` once the underlying input is fixed, because `xfem_mark` writes an additional Exodus file on every cut iteration.
 
 ## Example Input Syntax
 
