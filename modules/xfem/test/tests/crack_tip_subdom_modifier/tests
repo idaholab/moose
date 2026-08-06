@@ -1,0 +1,33 @@
+[Tests]
+  design = 'CrackTipNodeLayerSubdomainModifier.md SidesetAroundSubdomainUpdater.md'
+  issues = '#xfem_sif'
+
+  [crack_tip_subdom_modifier_propagation]
+    requirement = 'The XFEM module shall dynamically assign an enriched subdomain around '
+                  'the crack tip using node-connectivity layers as the crack propagates, '
+                  'and keep the enriched interface boundary consistent with the updated '
+                  'subdomains.'
+
+    [exodiff]
+      type = Exodiff
+      input = 'elastic_test_sub_e_AD.i'
+      exodiff = 'sub_en_2layer_test.e-s005'
+      map = false
+      capabilities = 'unique_id & superlu'
+
+      detail = 'where the final Exodus output preserves the expected IDs, and'
+    []
+
+    [csvdiff]
+      type = CSVDiff
+      input = 'elastic_test_sub_e_AD.i'
+      csvdiff = 'sub_en_2layer_test.csv'
+      capabilities = 'unique_id & superlu'
+      prereq = 'crack_tip_subdom_modifier_propagation/exodiff'
+      delete_output_before_running = false
+      should_execute = false
+
+      detail = 'where the interaction integral values match the CSV reference.'
+    []
+  []
+[]
