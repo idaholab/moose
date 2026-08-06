@@ -25,6 +25,11 @@ public:
 
   ViewFactorObjectSurfaceRadiation(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual std::vector<std::vector<Real>> setViewFactors() override;
+
+  /// View factor object
+  const ViewFactorBase * _view_factor_uo;
 };

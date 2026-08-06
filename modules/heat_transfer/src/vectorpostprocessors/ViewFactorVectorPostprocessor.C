@@ -47,6 +47,11 @@ ViewFactorVectorPostprocessor::ViewFactorVectorPostprocessor(const InputParamete
   if (isParamValid("surface_radiation_object_name") && isParamValid("view_factor_object_name"))
     mooseError("The parameters 'surface_radiation_object_name' and 'view_factor_object_name' "
                "cannot both be provided. Please delete 'surface_radiation_object_name'.");
+
+  if (_view_factor_uo)
+    declareExecutionOrderGroupDependency(*_view_factor_uo);
+  if (_glsr_uo)
+    declareExecutionOrderGroupDependency(*_glsr_uo);
 }
 
 void

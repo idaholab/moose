@@ -94,6 +94,14 @@ is 0 (zero). Negative values can be specified to force user object execution *be
 positive values can be uses to create execution groups that run *after* the default group. Execution
 order groups apply to all `execute_on` flags specified for a given object.
 
+Developers may enforce some `execution_order_group` dependency in a user object `uo` using the
+`declareExecutionOrderGroupDependency(other_uo)` method; an error is reported:
+
+- If the type of `other_uo` executes before the type of `uo` in the sequence above,
+  then `execution_order_group` of `uo` must be greater than or equal to that of `other_uo`.
+- If the type of `other_uo` executes at the same step or after the type of `uo` in the sequence above,
+  then `execution_order_group` of `uo` must be greater than that of `other_uo`.
+
 ## Restartable Data
 
 Since UserObjects often create and store large data structures, the developer of a UserObject

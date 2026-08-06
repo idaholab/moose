@@ -30,10 +30,19 @@ ViewFactorObjectSurfaceRadiation::ViewFactorObjectSurfaceRadiation(
 {
 }
 
+void
+ViewFactorObjectSurfaceRadiation::initialSetup()
+{
+  // After resolving https://github.com/idaholab/moose/issues/7879, this can made into
+  // a reference and all of this can be done in the constructor
+  _view_factor_uo = &getUserObject<ViewFactorBase>("view_factor_object_name");
+
+  declareExecutionOrderGroupDependency(*_view_factor_uo);
+}
+
 std::vector<std::vector<Real>>
 ViewFactorObjectSurfaceRadiation::setViewFactors()
 {
-  const ViewFactorBase & view_factor_uo = getUserObject<ViewFactorBase>("view_factor_object_name");
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("boundary");
   std::vector<std::vector<Real>> vf(_n_sides);
 
@@ -42,7 +51,7 @@ ViewFactorObjectSurfaceRadiation::setViewFactors()
     vf[i].resize(_n_sides);
 
     for (unsigned int j = 0; j < _n_sides; ++j)
-      vf[i][j] = view_factor_uo.getViewFactor(boundary_names[i], boundary_names[j]);
+      vf[i][j] = _view_factor_uo->getViewFactor(boundary_names[i], boundary_names[j]);
   }
   return vf;
 }

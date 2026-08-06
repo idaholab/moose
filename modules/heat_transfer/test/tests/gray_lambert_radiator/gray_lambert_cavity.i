@@ -30,11 +30,6 @@
     normalize_view_factor = true
     normalization_method = inverse_row_sum
     view_factor_tol = 0.05
-    # Without changing from 'TIMESTEP_END' to 'INITIAL' here, this test would
-    # diff, since GrayLambertSurfaceRadiationBase objects currently set their
-    # view factors in initial() (and finalize() of this view factor object has
-    # not yet executed). See https://github.com/idaholab/moose/issues/32611.
-    # Alternatively we can keep 'TIMESTEP_END' and do 'execution_order_group = -1'.
     execute_on = 'INITIAL'
   []
   [./gray_lambert]

@@ -33,6 +33,7 @@ GrayLambertSurfaceRadiationPP::GrayLambertSurfaceRadiationPP(const InputParamete
     _return_type(getParam<MooseEnum>("return_type")),
     _bnd_id(_fe_problem.mesh().getBoundaryID(getParam<BoundaryName>("boundary")))
 {
+  declareExecutionOrderGroupDependency(_glsr_uo);
 }
 
 PostprocessorValue

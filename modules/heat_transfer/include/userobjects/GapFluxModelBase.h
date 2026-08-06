@@ -37,6 +37,8 @@ public:
   virtual void finalize() final{};
   virtual void threadJoin(const UserObject &) final{};
 
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 6; }
+
 protected:
   mutable unsigned int _qp;
   mutable ADReal _gap_width;
