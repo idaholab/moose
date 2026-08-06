@@ -17,16 +17,14 @@ public:
   static InputParameters validParams();
 
   KokkosVectorDirichletBC(const InputParameters & parameters);
-  KokkosVectorDirichletBC(const KokkosVectorDirichletBC & object);
 
   template <typename Derived>
   KOKKOS_FUNCTION Moose::Kokkos::Real3 computeQpResidual(const unsigned int qp,
                                                          AssemblyDatum & datum) const
   {
-    return _u(datum, qp) - _values;
+    return _u(datum, qp) - _values.device();
   }
 
 protected:
-  const RealVectorValue & _values_host;
-  const Moose::Kokkos::Real3 _values;
+  const Moose::Kokkos::DualReferenceWrapper<const RealVectorValue, Moose::Kokkos::Real3> _values;
 };
