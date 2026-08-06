@@ -1,0 +1,11 @@
+[Tests]
+  design = 'SCMBulkOutletTemperature.md'
+  issues = '#33512'
+  [analytic]
+    type = CSVDiff
+    input = 'analytic_test.i'
+    csvdiff = 'analytic_test_out.csv'
+    recover = False
+    requirement = 'The system shall be able to compute the outlet temperature from a mass-flow averaged outlet enthalpy.'
+  []
+[]
