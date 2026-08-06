@@ -12,7 +12,7 @@
 #include "GeneralReporter.h"
 
 /**
- *  Base class for subcritical crack growth reporters
+ * Base class for crack growth reporters
  */
 class CrackMeshCut3DUserObject;
 class CrackGrowthReporterBase : public GeneralReporter
