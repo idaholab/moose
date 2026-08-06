@@ -10,7 +10,7 @@
 
 !listing test/tests/mfem/problemcomposers/prob_op_mfem_multiple_timesequences.i block=Problem ProblemComposer
 
-!syntax parameters /MFEMProblemComposer/AddMFEMProblemComposerAction
+!syntax parameters /ProblemComposer/AddMFEMProblemComposerAction
 
 !if-end!
 

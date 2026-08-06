@@ -44,6 +44,12 @@ public:
   // The constructor
   CustomDummyProblemOperator(MFEMProblem & problem);
 
+  // The destructor
+  ~CustomDummyProblemOperator() = default;
+
+  // The initialisation function
+  virtual void Init(mfem::BlockVector &) override;
+
   // Solve the equation
   virtual void Solve() override;
 

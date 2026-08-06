@@ -50,6 +50,9 @@ public:
   // The constructor
   CustomDummyProblemOperator(MFEMProblem & problem);
 
+  // The initialisation function
+  virtual void Init(mfem::BlockVector &) override;
+
   // Solve the equation
   virtual void Solve() override
   {
@@ -76,12 +79,16 @@ public:
 // The custom operator constructor
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
   : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
+{};
+
+// Initialise the operator
+void CustomDummyProblemOperator::Init(mfem::BlockVector &)
 {
   // Retrieve the FE-space and gridFunction
   const std::string _fe_space_name = "h1";
   const std::string _grid_function_name = "var0";
-  auto _fes = prob0.getProblemData().fespaces.GetShared(_fe_space_name);
-  auto _grid_function = prob0.getProblemData().gridfunctions.GetShared(_grid_function_name);
+  auto _fes = _problem.getProblemData().fespaces.GetShared(_fe_space_name);
+  auto _grid_function = _problem.getProblemData().gridfunctions.GetShared(_grid_function_name);
 
   // Boundary conditions
   *_grid_function = 0.00;
@@ -173,6 +180,8 @@ public:
         "CustomDummyProblemComposer", "custom_problem_operator", _problem_operator_params);
     _problem_composer = _mfem_problem->getProblemComposer();
     _problem_operator = _problem_composer->createProblemOperator(*_mfem_problem);
+    mfem::BlockVector dummy_vec;
+    _problem_operator->Init(dummy_vec);
   };
 
 protected:

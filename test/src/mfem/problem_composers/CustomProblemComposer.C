@@ -20,13 +20,13 @@ CustomProblemComposer::validParams()
 {
   InputParameters params = ProblemComposerBase::validParams();
   return params;
-};
+}
 
 std::shared_ptr<ProblemOperatorBase>
 CustomProblemComposer::createProblemOperator(MFEMProblem & _mfem_problem)
 {
   return std::make_shared<CustomDummyProblemOperator>(_mfem_problem);
-};
+}
 };
 
 #endif
