@@ -70,4 +70,12 @@
     expect_err = "Boundary ID 1 corresponds to different boundary names on the input meshes! On the first mesh it corresponds to `right` while on the second mesh it corresponds to `bazinga`."
     input = 'stitched_mesh_generator_sameid.i'
   []
+  [failed_stitch]
+    type = RunException
+    design = 'meshgenerators/StitchMeshGenerator.md'
+    issues = '#27758'
+    requirement = "The system shall throw an error if the mesh is not stitched along the full stitch boundary."
+    expect_err = "not fully internal: one or more elements on this boundary does not have a neighbor"
+    input = 'failed_stitch.i'
+  []
 []
