@@ -32,6 +32,15 @@ EquationSystemProblemOperator::Solve()
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }
 
+mfem::real_t
+EquationSystemProblemOperator::computeResidualL2Norm()
+{
+  mfem::Vector residual;
+  GetEquationSystem()->Mult(_true_x, residual);
+  residual -= _true_rhs;
+  return residual.Norml2();
+}
+
 void
 EquationSystemProblemOperator::FormEquationSystemOperator()
 {

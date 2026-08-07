@@ -18,6 +18,10 @@
 #include "SecantSolve.h"
 #include "SteffensenSolve.h"
 
+#ifdef MOOSE_MFEM_ENABLED
+#include "MFEMFixedPointSolve.h"
+#endif
+
 // C++ includes
 #include <vector>
 #include <limits>
@@ -80,6 +84,13 @@ Executioner::Executioner(const InputParameters & parameters)
     mooseInfo("This Executioner does not support --test-restep; solve will behave as normal");
 
   // Instantiate the SolveObject for the MultiApp fixed point iteration algorithm
+  #ifdef MOOSE_MFEM_ENABLED
+  if (_fe_problem.feBackend() == Moose::FEBackend::MFEM)
+  {
+    _fixed_point_solve = std::make_unique<MFEMFixedPointSolve>(*this);
+    return;
+  }
+  #endif
   if (_iteration_method == "picard")
     _fixed_point_solve = std::make_unique<PicardSolve>(*this);
   else if (_iteration_method == "secant")

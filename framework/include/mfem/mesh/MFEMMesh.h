@@ -99,6 +99,11 @@ private:
    * Use the accessors instead.
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
+
+  /**
+   * Holds name of variable used for previous displacement
+   */  
+  mfem::GridFunction _old_displacement;
 };
 
 inline const mfem::ParMesh &

@@ -18,12 +18,12 @@
 InputParameters
 SecantSolve::validParams()
 {
-  InputParameters params = FixedPointSolve::validParams();
+  InputParameters params = LibMeshFixedPointSolve::validParams();
 
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
+SecantSolve::SecantSolve(Executioner & ex) : LibMeshFixedPointSolve(ex)
 {
   _transformed_pps_values.resize(_transformed_pps.size());
   for (size_t i = 0; i < _transformed_pps.size(); i++)
@@ -223,7 +223,7 @@ SecantSolve::transformPostprocessors(const bool primary)
 }
 
 void
-SecantSolve::transformVariables(const std::set<dof_id_type> & target_dofs, const bool primary)
+SecantSolve::transformVariables(const bool primary)
 {
   Real relaxation_factor;
   TagID fxn_m1_tagid;
@@ -256,7 +256,7 @@ SecantSolve::transformVariables(const std::set<dof_id_type> & target_dofs, const
   NumericVector<Number> & fxn_m1 = _transformed_sys->getVector(fxn_m1_tagid);
   fxn_m1 = solution;
 
-  for (const auto & dof : target_dofs)
+  for (const auto & dof : (primary ? _transformed_dofs : _secondary_transformed_dofs))
   {
     // Avoid 0 denominator issue
     Real new_value = fxn_m1(dof);

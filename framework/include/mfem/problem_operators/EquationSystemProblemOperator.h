@@ -41,7 +41,8 @@ public:
 
   virtual void SetGridFunctions() override;
   virtual void Solve() override;
-
+  virtual mfem::real_t computeResidualL2Norm() override;
+  
   [[nodiscard]] virtual EquationSystem * GetEquationSystem() const override
   {
     mooseAssert(_equation_system, "No EquationSystem in EquationSystemProblemOperator.");

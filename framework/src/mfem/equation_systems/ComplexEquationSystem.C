@@ -274,15 +274,6 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
-// Equation system Mult
-void
-ComplexEquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
-{
-  _linear_operator->Mult(x, residual);
-  x.HostRead();
-  residual.HostRead();
-}
-
 void
 ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const
 {
