@@ -54,6 +54,26 @@ PerfNode::childrenMemory() const
   return children_memory;
 }
 
+namespace
+{
+template <typename Rep, typename Period>
+void
+dataStore(std::ostream & stream, std::chrono::duration<Rep, Period> & v, void * ctx)
+{
+  Rep tick_count = v.count();
+  ::dataStore(stream, tick_count, ctx);
+}
+
+template <typename Rep, typename Period>
+void
+dataLoad(std::istream & stream, std::chrono::duration<Rep, Period> & v, void * ctx)
+{
+  Rep tick_count;
+  ::dataLoad(stream, tick_count, ctx);
+  v = std::chrono::duration<Rep, Period>(tick_count);
+}
+}
+
 void
 dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, void *)
 {

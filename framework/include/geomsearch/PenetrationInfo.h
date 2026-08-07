@@ -112,3 +112,7 @@ template <>
 void dataStore(std::ostream & stream, PenetrationInfo *& pinfo, void * context);
 template <>
 void dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context);
+
+// clang-format off
+dataStoreEnum(PenetrationInfo::MECH_STATUS_ENUM, int)
+dataLoadEnum(PenetrationInfo::MECH_STATUS_ENUM, int)
