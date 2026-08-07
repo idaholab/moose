@@ -359,6 +359,8 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       if (test_var_name == trial_var_name)
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+
+        // let's do something crazy. cast to operator first
         auto blf = _blfs.Get(test_var_name);
         blf->FormLinearSystem(_ess_tdof_lists.at(j),
                               *_var_ess_constraints.at(j),
@@ -370,15 +372,22 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         trueX.GetBlock(j) = aux_x;
 
         // Do the same with the nlf
+        // By the time we get to here, the linear form has been modified, and it's
+        // the same as aux_rhs. It correctly holds the contributions from the linear
+        // kernels. Now we just need to add in the nonlinear stuff.
         if (_non_linear and _nlfs.Has(test_var_name))
         {
+          // make a copy of aux_rhs, since this has all the values
+          // we'd like to see in our lf
+          mfem::Vector aux_rhs_copy(aux_rhs);
+
           // see comments in formsystemoperator
           mfem::Operator* oper; // dummy operator to pass downwards
           mfem::Operator* nlf = _nlfs.Get(test_var_name); // implicit cast
           nlf->FormLinearSystem(
             _ess_tdof_lists.at(j),
             *_var_ess_constraints.at(j),
-            *_lfs.Get(test_var_name),
+            aux_rhs_copy,
             oper,
             aux_x,
             aux_rhs,
@@ -462,19 +471,19 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
 
-    // perform some elimination
-    mfem::Operator* A;
-    nlf->FormSystemOperator(_ess_tdof_lists.at(i), A);
+    // if (_assembly_level == mfem::AssemblyLevel::PARTIAL) {
+    if (true) {
+      // perform some elimination
+      mfem::Operator* A;
+      nlf->FormSystemOperator(_ess_tdof_lists.at(i), A);
 
-    // I think we have to cast to ConstrainedOperator here
-    mfem::ConstrainedOperator* cA = dynamic_cast<mfem::ConstrainedOperator*>(A);
-    if (cA)
-      cA->SetDiagonalPolicy(DIAG_ZERO); // Let the linear part handle this
+      // I think we have to cast to ConstrainedOperator here
+      mfem::ConstrainedOperator* cA = dynamic_cast<mfem::ConstrainedOperator*>(A);
+      if (cA)
+        cA->SetDiagonalPolicy(DIAG_ZERO); // Let the linear part handle this
 
-    A->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
-
-    // this is the original behaviour, not necessary now
-    // nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+      A->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+    }
 
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
