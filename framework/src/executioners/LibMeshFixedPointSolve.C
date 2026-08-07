@@ -63,7 +63,7 @@ LibMeshFixedPointSolve::updateVariableDoFsForTransform(
   {
     // Snag all of the local dof indices for all of these variables
     AllLocalDofIndicesThread aldit(_problem, transformed_var_names);
-    libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
+    const libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
     if (primary)

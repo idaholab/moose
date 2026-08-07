@@ -252,10 +252,6 @@ FixedPointSolve::solve()
   updateVariableDoFsForTransform(_transformed_vars, true);
   // Prepare to relax variables as a subapp
   updateVariableDoFsForTransform(_secondary_transformed_variables, false);
-  if (_secondary_relaxation_factor != 1.0 || !dynamic_cast<PicardSolve *>(this))
-  {
-    // To detect a new time step
-
   if (_has_fixed_point_its)
   {
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
