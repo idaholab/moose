@@ -78,11 +78,11 @@ public:
 
 // The custom operator constructor
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
-  : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
-{};
+  : Moose::MFEM::ProblemOperator(prob0), _one(1.000) {};
 
 // Initialise the operator
-void CustomDummyProblemOperator::Init(mfem::BlockVector &)
+void
+CustomDummyProblemOperator::Init(mfem::BlockVector &)
 {
   // Retrieve the FE-space and gridFunction
   const std::string _fe_space_name = "h1";

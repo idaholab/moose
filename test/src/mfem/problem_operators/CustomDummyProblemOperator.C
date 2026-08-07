@@ -16,7 +16,8 @@
 // The custom operator constructor
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
   : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
-{}
+{
+}
 
 void
 CustomDummyProblemOperator::Init(mfem::BlockVector &)
