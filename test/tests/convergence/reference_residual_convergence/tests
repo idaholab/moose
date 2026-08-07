@@ -167,8 +167,8 @@
   [unscale]
     type = RunApp
     input = 'formatting.i'
-    cli_args = 'scaling=true'
-    expect_out = '\(a,\s*b,\s*variable_f\)->\s*res:\s*\033\[39m5\.00e\+06\033\[39m\s+ref:\s*6\.12e\+06\s+res/ref:\s*\033\[39m8\.16e-01\033\[39m'
+    cli_args = 'scaling=true --color off'
+    expect_out = '\(a,\s*b,\s*variable_f\)->\s*res:\s*5\.00e\+06\s+ref:\s*6\.12e\+06\s+res/ref:\s*8\.16e-01'
     requirement = 'The system shall be able to use a reference residual to converge to and reverse variable scaling to output the actual residual, while allowing variable scaling.'
   []
 
