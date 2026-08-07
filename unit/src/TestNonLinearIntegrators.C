@@ -135,7 +135,7 @@ public:
       _nlf(nlf_),
 
       _x1(height),
-      _ess_tdof_list(ess_tdof_list_){};
+      _ess_tdof_list(ess_tdof_list_) {};
 
   /// Set current dt, v, x values - needed to compute action and Jacobian.
   void SetParameters(double dt_, const mfem::Vector * x0_)

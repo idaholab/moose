@@ -154,6 +154,14 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
 }
 
 void
+MFEMProblem::addMFEMProblemComposer(const std::string & type,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+  _problem_composer = addObject<Moose::MFEM::ProblemComposerBase>(type, name, parameters).front();
+}
+
+void
 MFEMProblem::resolveMFEMSolvers()
 {
   if (_mfem_solver_definitions.empty())
