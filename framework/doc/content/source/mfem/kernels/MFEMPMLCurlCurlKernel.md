@@ -61,7 +61,8 @@ surface is the exterior boundary of the mesh, excluding any boundary that also b
 the domain and therefore runs alongside the layer rather than capping it. The layer need not be
 Cartesian, planar, star shaped or of uniform thickness. Its inner and outer surfaces should be
 convex, which guarantees that $\psi$ has no stagnation point at which the stretch direction would be
-undefined; this is checked when the kernel is set up.
+undefined; a coarse check for this runs when the kernel is set up.
+
 
 ## Example Input File Syntax
 

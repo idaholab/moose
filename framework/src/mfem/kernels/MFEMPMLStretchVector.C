@@ -169,20 +169,20 @@ MFEMPMLStretchVector::checkFoliation(mfem::ParMesh & mesh,
       continue;
 
     auto & transformation = *_h1_scalar_fes.GetElementTransformation(e);
+    const double size = mesh.GetElementSize(e);
+
     transformation.SetIntPoint(&mfem::Geometries.GetCenter(transformation.GetGeometryType()));
     _psi.GetGradient(transformation, gradient);
 
-    const double norm = gradient.Norml2();
-    smallest = std::min(smallest, norm);
-    largest = std::max(largest, norm);
+    const double crossing = size * gradient.Norml2();
+    smallest = std::min(smallest, crossing);
+    largest = std::max(largest, crossing);
   }
 
   MPI_Allreduce(MPI_IN_PLACE, &smallest, 1, MPI_DOUBLE, MPI_MIN, comm);
   MPI_Allreduce(MPI_IN_PLACE, &largest, 1, MPI_DOUBLE, MPI_MAX, comm);
 
-  // The gradient scales with the reciprocal of the local thickness of the layer, so a ratio this
-  // extreme is a stagnation point rather than a merely thick part of it.
-  if (smallest <= 1e-6 * largest)
+  if (smallest <= 1e-4 * largest)
     mooseError("MFEMPMLStretchVector: the harmonic coordinate of the perfectly matched layer "
                "stagnates, so the direction of the coordinate stretch is undefined there. The "
                "inner and outer surfaces of the layer must be convex.");

@@ -79,10 +79,17 @@ MFEMPMLKernel::validParams()
       "Base class for perfectly matched layer complex bilinear form kernels.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of the base scalar coefficient to scale the integrator by.");
-  params.addRequiredParam<Real>(
+  params.addRequiredRangeCheckedParam<Real>(
       "decay_coefficient",
+      "decay_coefficient > 0",
       "Decay coefficient of the layer, equal to the tuning constant divided by the wavenumber.");
-  params.addParam<Real>("decay_polynomial", 2.0, "Polynomial order of the stretch profile.");
+  params.addRangeCheckedParam<Real>(
+      "decay_polynomial",
+      2.0,
+      "decay_polynomial > 1",
+      "Polynomial order of the stretch profile. It must exceed one so that the displacement and "
+      "its derivative both vanish where the layer meets the rest of the domain, leaving nothing "
+      "for a wave entering the layer to reflect off.");
   return params;
 }
 
