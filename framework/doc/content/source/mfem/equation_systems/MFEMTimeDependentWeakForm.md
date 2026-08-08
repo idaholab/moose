@@ -12,6 +12,12 @@ all kernels and boundary conditions added in the input file.
 This class is intended to help separate out MOOSE-specific setup from the MFEM assembly of the
 linear or nonlinear system used downstream in MFEM solvers.
 
+!syntax parameters /WeakForms/MFEMTimeDependentWeakForm
+
+!syntax inputs /WeakForms/MFEMTimeDependentWeakForm
+
+!syntax children /WeakForms/MFEMTimeDependentWeakForm
+
 !if-end!
 
 !else

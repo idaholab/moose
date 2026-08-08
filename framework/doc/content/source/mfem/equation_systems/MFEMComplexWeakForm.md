@@ -11,6 +11,12 @@ executioner, a default `MFEMComplexWeakForm` object will be created to set up a
 This class is intended to help separate out MOOSE-specific setup from the MFEM assembly of the
 linear or nonlinear system used downstream in MFEM solvers.
 
+!syntax parameters /WeakForms/MFEMComplexWeakForm
+
+!syntax inputs /WeakForms/MFEMComplexWeakForm
+
+!syntax children /WeakForms/MFEMComplexWeakForm
+
 !if-end!
 
 !else
