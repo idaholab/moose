@@ -70,9 +70,9 @@ public:
 protected:
   void buildObjects()
   {
-    InputParameters mesh_params = _factory.getValidParams("MFEMMesh");
+    InputParameters mesh_params = _factory.getValidParams("MFEMFileMesh");
     mesh_params.set<MeshFileName>("file") = "../test/tests/mfem/mesh/beam-tet.mesh";
-    _mfem_mesh_ptr = _factory.createUnique<MFEMMesh>("MFEMMesh", "moose_mesh", mesh_params);
+    _mfem_mesh_ptr = _factory.createUnique<MFEMMesh>("MFEMFileMesh", "moose_mesh", mesh_params);
     _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
     _mfem_mesh_ptr->buildMesh();
 
