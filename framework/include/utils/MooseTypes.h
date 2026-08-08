@@ -1289,6 +1289,8 @@ MooseDerivativeStringClass(MFEMVectorCoefficientName);
 MooseDerivativeStringClass(MFEMMatrixCoefficientName);
 MooseDerivativeStringClass(MFEMFESpaceName);
 MooseDerivativeStringClass(MFEMSolverName);
+MooseDerivativeStringClass(MFEMKernelName);
+MooseDerivativeStringClass(MFEMBoundaryConditionName);
 ///@}
 #endif
 /**

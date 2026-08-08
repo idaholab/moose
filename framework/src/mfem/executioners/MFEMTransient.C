@@ -29,17 +29,10 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
   : TransientBase(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solve(*this, getProblemOperators())
+    _mfem_problem_solve(*this, _mfem_problem.getProblemOperators())
 {
-  // If no ProblemOperators have been added by the user, add a default
-  if (getProblemOperators().empty())
-  {
-    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
-        _mfem_problem_data.time_derivative_map);
-    auto problem_operator =
-        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(_mfem_problem);
-    addProblemOperator(std::move(problem_operator));
-  }
+  _mfem_problem._default_assembly_level =
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>();
 }
 
 void
@@ -52,24 +45,6 @@ MFEMTransient::init()
     paramError("scheme",
                "Time Integration scheme \"" + stringify(getTimeScheme()) +
                    "\" is not supported by MFEMTransient Executioner.");
-
-  if (_mfem_problem_data.nonlinear_solver)
-    _mfem_problem_data.eqn_system->SetGradientRequired(
-        _mfem_problem_data.nonlinear_solver->RequiresGradient());
-
-  _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
-
-  // Set up initial conditions
-  _mfem_problem_data.eqn_system->Init(
-      _mfem_problem_data.gridfunctions,
-      _mfem_problem_data.cmplx_gridfunctions,
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
-
-  for (const auto & problem_operator : getProblemOperators())
-  {
-    problem_operator->SetGridFunctions();
-    problem_operator->Init(_mfem_problem_data.true_solution);
-  }
 }
 
 void
