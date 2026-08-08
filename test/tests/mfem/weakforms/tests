@@ -1,5 +1,5 @@
 [Tests]
-  design = 'syntax/Problem/index.md'
+  design = 'syntax/WeakForms/index.md'
   issues = '#33468'
   [MFEMSteadyWeakForm]
     type = CSVDiff
