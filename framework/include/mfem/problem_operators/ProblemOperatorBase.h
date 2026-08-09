@@ -17,6 +17,8 @@
 #include <functional>
 
 class MFEMProblem;
+struct MFEMProblemData;
+
 namespace Moose::MFEM
 {
 
