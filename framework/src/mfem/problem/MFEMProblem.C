@@ -23,8 +23,8 @@
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "DataIO.h"
-#include "TimeDependentProblemOperator.h"
-#include "EigenproblemESProblemOperator.h"
+#include "ComplexEquationSystemProblemOperator.h"
+#include "TimeDependentEquationSystemProblemOperator.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -528,32 +528,15 @@ void
 MFEMProblem::setMFEMProblemOperators()
 {
   if (isTransient())
-  {
-    auto problem_operator =
-        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(*this);
-    addProblemOperator(std::move(problem_operator));
-  }
+    addProblemOperator(
+        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(*this));
   else
   {
     if (getNumericType() == MFEMProblem::NumericType::REAL)
-    {
-      if (dynamic_cast<MFEMEigenproblem *>(this))
-      {
-        auto problem_operator = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(*this);
-        addProblemOperator(std::move(problem_operator));
-      }
-      else
-      {
-        auto problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this);
-        addProblemOperator(std::move(problem_operator));
-      }
-    }
+      addProblemOperator(std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this));
     else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
-    {
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(*this);
-      addProblemOperator(std::move(problem_operator));
-    }
+      addProblemOperator(
+          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(*this));
     else
       mooseError("Unknown numeric type. "
                  "Please set the Problem numeric type to either 'real' or 'complex'.");

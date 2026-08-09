@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ProblemOperatorBase.h"
+#include "MFEMProblem.h"
 
 class MFEMProblem;
 
