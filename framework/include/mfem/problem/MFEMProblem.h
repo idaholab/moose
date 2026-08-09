@@ -206,15 +206,12 @@ public:
   /**
    * Add an MFEM problem operator. Takes ownership.
    */
-  virtual void
-  addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
-
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
+  void addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
 
   /**
    * Set all MFEM ProblemOperators to solve in this problem
    */
-  void setMFEMProblemOperators();
+  virtual void setMFEMProblemOperators();
 
   /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
@@ -471,6 +468,10 @@ protected:
    * The problem operator builders for this mfem problem.
    */
   std::shared_ptr<MFEMProblemComposer> _problem_composer;
+  /**
+   * Vector of MFEM problem operators executed in this problem.
+   */
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
 };
 
 template <typename T>

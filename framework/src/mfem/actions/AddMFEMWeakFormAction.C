@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "AddMFEMWeakFormAction.h"
+#include "MFEMProblem.h"
 
 registerMooseAction("MooseApp", AddMFEMWeakFormAction, "add_mfem_weak_forms");
 

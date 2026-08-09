@@ -11,6 +11,7 @@
 
 #include "MFEMTimeDependentWeakForm.h"
 #include "TimeDependentEquationSystem.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMTimeDependentWeakForm);
 
