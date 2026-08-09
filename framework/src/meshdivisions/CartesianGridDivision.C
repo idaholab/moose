@@ -114,7 +114,7 @@ CartesianGridDivision::initialize()
   // Examine mesh bounding box to see if the mesh may not be fully contained
   _mesh_fully_indexed = true;
   if (!_outside_grid_counts_as_border)
-    for (auto i : make_range(LIBMESH_DIM))
+    for (auto i : make_range(Moose::dim))
     {
       if (_center_positions)
       {

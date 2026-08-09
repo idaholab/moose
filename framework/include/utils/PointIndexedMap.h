@@ -20,7 +20,7 @@ struct PointIndexedMap
 {
   PointIndexedMap(const Point & mesh_max_coords)
   {
-    for (auto i : make_range(LIBMESH_DIM))
+    for (auto i : make_range(Moose::dim))
       normalization(i) =
           MooseUtils::absoluteFuzzyEqual(mesh_max_coords(i), 0) ? 1 : mesh_max_coords(i);
   }

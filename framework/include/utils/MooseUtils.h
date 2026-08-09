@@ -383,7 +383,7 @@ absoluteFuzzyEqual(const Point & v1,
                    const Point & v2,
                    const Real tol = libMesh::TOLERANCE * libMesh::TOLERANCE)
 {
-  for (const auto i : make_range(LIBMESH_DIM))
+  for (const auto i : make_range(Moose::dim))
     if (std::abs(v1(i) - v2(i)) > tol)
       return false;
   return true;
