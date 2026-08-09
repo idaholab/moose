@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "SetMFEMEquationSystemsAction.h"
+#include "MFEMProblem.h"
 
 registerMooseAction("MooseApp", SetMFEMEquationSystemsAction, "set_mfem_equation_systems");
 

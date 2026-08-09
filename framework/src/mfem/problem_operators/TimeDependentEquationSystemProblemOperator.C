@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "TimeDependentEquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {

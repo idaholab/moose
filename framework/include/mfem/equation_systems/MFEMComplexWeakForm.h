@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMWeakFormBase.h"
+#include "ComplexEquationSystem.h"
 
 /**
  * Constructs and stores an Moose::MFEM::ComplexEquationSystem object.
