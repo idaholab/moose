@@ -10,7 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMEigenproblemWeakForm.h"
-#include "TimeDependentEquationSystem.h"
+#include "EigenproblemEquationSystem.h"
 
 registerMooseObject("MooseApp", MFEMEigenproblemWeakForm);
 
