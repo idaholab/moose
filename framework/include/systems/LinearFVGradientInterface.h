@@ -100,7 +100,7 @@ protected:
                                         LinearFVGradientContainer & container);
 
   /**
-   * Replace the current field values with previously computed values.
+   * Replace the current gradient storage with the freshly computed new gradients.
    * @param container Method container whose gradient values should be finalized.
    */
   void finalizeLinearFVGradientContainer(LinearFVGradientContainer & container);

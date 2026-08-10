@@ -39,7 +39,7 @@ LinearFVScalarAdvection::LinearFVScalarAdvection(const InputParameters & params)
     _adv_interp_method(getFVAdvectedInterpolationMethod(
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _gradient_field(_adv_interp_method.needsGradients()
-                        ? &_var.computeCellGradients(_adv_interp_method.gradientMethodName())
+                        ? &_var.requestCellGradients(_adv_interp_method.gradientMethodName())
                         : nullptr),
     _volumetric_face_flux(0.0),
     _u_slip(isParamValid("u_slip") ? &getFunctor<ADReal>("u_slip") : nullptr),

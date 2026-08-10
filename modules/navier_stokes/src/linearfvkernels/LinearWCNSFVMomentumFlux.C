@@ -60,7 +60,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _advected_gradient_field(
         _adv_interp_method.needsGradients()
-            ? &_var.computeCellGradients(_adv_interp_method.gradientMethodName())
+            ? &_var.requestCellGradients(_adv_interp_method.gradientMethodName())
             : nullptr),
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
@@ -69,7 +69,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _index(getParam<MooseEnum>("momentum_component")),
     _velocity_vars{nullptr, nullptr, nullptr},
     _gradient_field(_use_nonorthogonal_correction || _use_deviatoric_terms
-                        ? &_var.computeCellGradients()
+                        ? &_var.requestCellGradients()
                         : nullptr),
     _velocity_gradient_fields{nullptr, nullptr, nullptr},
     _coord_type(getBlockCoordSystem()),
@@ -114,7 +114,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
 
   if (_use_deviatoric_terms)
     for (const auto dir : make_range(_dim))
-      _velocity_gradient_fields[dir] = &velocity_vars[dir]->computeCellGradients();
+      _velocity_gradient_fields[dir] = &velocity_vars[dir]->requestCellGradients();
 }
 
 Real

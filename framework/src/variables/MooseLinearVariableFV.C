@@ -124,27 +124,27 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::computeCellGradients()
+MooseLinearVariableFV<OutputType>::requestCellGradients()
 {
   const auto & method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
-  const auto & reader = computeCellGradients(method);
+  const auto & reader = requestCellGradients(method);
   _gradient_reader = &reader;
   return reader;
 }
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::computeCellGradients(const GradientMethodName & method_name)
+MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name)
 {
   if (method_name.empty())
-    return computeCellGradients();
+    return requestCellGradients();
 
-  return computeCellGradients(getLinearFVGradientMethod(this->_sys, method_name));
+  return requestCellGradients(getLinearFVGradientMethod(this->_sys, method_name));
 }
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::computeCellGradients(const FVGradientMethod & method)
+MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method)
 {
   return registerCellGradientMethod(method);
 }
@@ -204,7 +204,7 @@ template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const StateArg & state) const
 {
-  mooseAssert(_gradient_reader, "Gradient requested without calling computeCellGradients().");
+  mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
   if (state.state != 0)
     gradientStateError(state);
 
@@ -217,7 +217,7 @@ MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
                                                     const unsigned int component) const
 {
   mooseAssert(_gradient_reader,
-              "Gradient component requested without calling computeCellGradients().");
+              "Gradient component requested without calling requestCellGradients().");
   return _gradient_reader->component(elem_info, component);
 }
 
@@ -225,7 +225,7 @@ template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & state) const
 {
-  mooseAssert(_gradient_reader, "Gradient requested without calling computeCellGradients().");
+  mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
   if (state.state != 0)
     gradientStateError(state);
 
