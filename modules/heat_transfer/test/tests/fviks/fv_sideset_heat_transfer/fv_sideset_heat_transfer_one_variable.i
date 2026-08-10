@@ -88,11 +88,24 @@
   []
 []
 
+[VectorPostprocessors]
+  [temperature]
+    type = LineValueSampler
+    variable = T
+    start_point = '0 0.5 0'
+    end_point = '2 0.5 0'
+    num_points = 7
+    sort_by = x
+    warn_discontinuous_face_values = false
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = NEWTON
 []
 
 [Outputs]
-  exodus = true
+  csv = true
+  execute_on = timestep_end
 []
