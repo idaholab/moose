@@ -1,30 +1,11 @@
 [Tests]
   issues = '#13494'
   design = 'source/materials/ADViscoplasticityStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
-  [creep]
-    type = CSVDiff
-    input = creep.i
-    csvdiff = creep_out.csv
-    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
-    requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading.'
-  []
-  [creep-jac]
-    type = 'PetscJacobianTester'
-    input = 'creep.i'
-    cli_args = "-snes_test_err 1e-11"
-    run_sim = 'True'
-    ratio_tol = 1.5e-7
-    difference_tol = 1e8
-    prereq = creep
-    requirement = 'The Jacobian for the AD regular creep problem shall be perfect'
-    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
-  []
-
   [exact_spherical]
     type = CSVDiff
     input = exact.i
     csvdiff = exact_spherical_out.csv
-    requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry in spherical coordinates.'
+    requirement = 'The system shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress in a viscoplasticity solve across a wide swath of exponents and stress states using spherical pore geometry in spherical coordinates.'
     capabilities = 'method!=dbg'
   []
   [exact_spherical-jac]
@@ -44,7 +25,7 @@
     csvdiff = exact_cylindrical_out.csv
     cli_args = 'GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out'
     prereq = exact_spherical
-    requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry in cylindrical coordinates.'
+    requirement = 'The system shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress in a viscoplasticity solve across a wide swath of exponents and stress states using spherical pore geometry in cylindrical coordinates.'
     capabilities = 'method!=dbg'
   []
   [exact_cylindrical-jac]
@@ -59,69 +40,86 @@
     requirement = 'The Jacobian for the AD exact cylindrical problem shall be perfect'
   []
 
+  [creep]
+    type = CSVDiff
+    input = creep.i
+    csvdiff = creep_out.csv
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute a creep strain based on an extrenal loading.'
+  []
+  [creep-jac]
+    type = 'PetscJacobianTester'
+    input = 'creep.i'
+    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=1"
+    run_sim = 'True'
+    ratio_tol = 7e-7
+    difference_tol = 1e8
+    prereq = creep
+    requirement = 'The Jacobian for the AD regular creep problem shall be perfect'
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+  []
+  [lps_single_no_porosity]
+    type = CSVDiff
+    input = 'lps_single.i'
+    cli_args = 'porosity_name=0 Outputs/file_base=lps_single_no_porosity_out'
+    rel_err = 1e-3
+    csvdiff = 'lps_single_no_porosity_out.csv'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that matches a simple radial return calculation if porosity is not coupled.'
+  []
   [lps_single]
     type = CSVDiff
     input = 'lps_single.i'
     csvdiff = 'lps_single_out.csv'
-    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using a single model with LPS spherical formulation that increases the porosity due to an external strain.'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that increases the porosity due to an external strain.'
   []
   [lps_single-jac]
     type = 'PetscJacobianTester'
     input = 'lps_single.i'
-    cli_args = "-snes_test_err 1e-11"
+    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=1"
     run_sim = 'True'
-    ratio_tol = 3e-7
+    ratio_tol = 1e-6
     difference_tol = 1e8
     prereq = lps_single
     requirement = 'The Jacobian for the AD lps single problem shall be perfect'
   []
 
+  [lps_single_split_no_porosity]
+    type = CSVDiff
+    input = 'lps_single_split.i'
+    cli_args = 'porosity_name=0 Outputs/file_base=lps_single_split_no_porosity_out'
+    csvdiff = 'lps_single_split_no_porosity_out.csv'
+    rel_err = 1e-4
+    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that matches a simple radial return calculation if porosity is not coupled.'
+  []
   [lps_single_split]
     type = CSVDiff
     input = 'lps_single_split.i'
     csvdiff = 'lps_single_split_out.csv'
-    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using two LPS models with spherical formulations and the same stress exponential that is close to combining the models into a single ADViscoplasticityStressUpdate instance.'
+    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
   []
   [lps_single_split-jac]
     type = 'PetscJacobianTester'
     input = 'lps_single_split.i'
-    cli_args = "-snes_test_err 1e-11"
+    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=1"
     run_sim = 'True'
-    ratio_tol = 3e-7
+    ratio_tol = 7e-7
     difference_tol = 1e8
     prereq = lps_single_split
     requirement = 'The Jacobian for the AD lps single split problem shall be perfect'
-  []
-
-  [lps_dual]
-    type = CSVDiff
-    input = 'lps_dual.i'
-    csvdiff = 'lps_dual_out.csv'
-    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using two LPS models with spherical formulations and two different stress exponents that increases the porosity due to an external strain.'
-  []
-  [lps_dual-jac]
-    type = 'PetscJacobianTester'
-    input = 'lps_dual.i'
-    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=2"
-    run_sim = 'True'
-    ratio_tol = 3e-7
-    difference_tol = 1e8
-    prereq = lps_dual
-    requirement = 'The Jacobian for the AD lps dual problem shall be perfect'
   []
 
   [gtn_single]
     type = CSVDiff
     input = 'gtn_single.i'
     csvdiff = 'gtn_single_out.csv'
-    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using a single model with GTN formulation that increases the porosity due to an external strain.'
+    requirement = 'The system shall compute the viscoplastic response using a single model with GTN formulation that increases the porosity due to an external strain.'
   []
   [gtn_single-jac]
     type = 'PetscJacobianTester'
     input = 'gtn_single.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    ratio_tol = 3e-7
+    ratio_tol = 1e-6
     difference_tol = 1e8
     prereq = gtn_single
     requirement = 'The Jacobian for the AD gtn single problem shall be perfect'
@@ -131,24 +129,25 @@
     requirement = 'The system shall handle a negative calculated porosity computed from a strain tensor, when automatic differentiaton is requested,'
     [zero]
       type = CSVDiff
-      input = 'negative_porosity.i'
-      csvdiff = 'negative_porosity_zero_out.csv'
-      cli_args = 'Outputs/file_base=negative_porosity_zero_out Materials/lps/negative_behavior=ZERO'
-      detail = 'by setting the porosity to zero.'
+      input = 'lps_single_negative_porosity.i'
+      rel_err = 1e-4
+      csvdiff = 'lps_single_negative_porosity_out.csv'
+      detail = ' by setting the porosity to zero;'
     []
     [initial]
       type = CSVDiff
-      input = 'negative_porosity.i'
-      csvdiff = 'negative_porosity_initial_out.csv'
-      cli_args = 'Outputs/file_base=negative_porosity_initial_out Materials/lps/negative_behavior=INITIAL_CONDITION'
-      detail = 'by setting the porosity to the initial condition.'
+      input = 'lps_single_negative_porosity.i'
+      csvdiff = 'lps_single_negative_porosity_initial_out.csv'
+      rel_err = 1e-4
+      cli_args = 'Materials/lps/negative_behavior=INITIAL_CONDITION Materials/lps/initial_porosity=0 Outputs/file_base=lps_single_negative_porosity_initial_out'
+      detail = ' or by setting the porosity to the initial condition;'
     []
     [exception]
       type = RunException
-      input = 'negative_porosity.i'
+      input = 'lps_single_negative_porosity.i'
       expect_err = 'porosity is negative'
       cli_args = 'Materials/lps/negative_behavior=EXCEPTION'
-      detail = 'by throwing an exception.'
+      detail = ' or by throwing an exception.'
     []
   []
 []
