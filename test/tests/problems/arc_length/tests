@@ -1,6 +1,6 @@
 [Tests]
   design = 'ArcLengthProblem.md ArcLengthHistory.md ArcLengthLoadParameter.md'
-  issues = '#31843'
+  issues = '#33523'
   # The continuation leaves below are pinned to max_parallel = 1 on purpose, not as an arbitrary
   # restriction. The path is traced with a serial -pc_type lu factorization, and the csv golds hold
   # one fixed path, so a rank count that changes how the linear solve is factored moves the
