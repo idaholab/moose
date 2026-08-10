@@ -125,6 +125,21 @@
     requirement = 'The Jacobian for the AD gtn single problem shall be perfect'
   []
 
+  [lps_single_nonsubstepping]
+    type = CSVDiff
+    input = 'lps_single_nonsubstepping.i'
+    csvdiff = 'lps_single_nonsubstepping_out.csv'
+    heavy = true
+    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
+  []
+  [lps_single_substepping]
+    type = CSVDiff
+    input = 'lps_single_substepping.i'
+    csvdiff = 'lps_single_substepping_out.csv'
+    rel_err = 5e-3
+    requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
+  []
+
   [negative]
     requirement = 'The system shall handle a negative calculated porosity computed from a strain tensor, when automatic differentiaton is requested,'
     [zero]

@@ -66,7 +66,7 @@ unit cell (void + material) is in fact compressible due to the void. Therefore, 
 $\dot{f}$ can be modeled simply based on overall dilatation:
 
 \begin{equation}
-  \dot{f} = (1-f)\text{tr}(\dot{\mathbf{E}})  
+  \dot{f} = (1-f)\text{tr}(\dot{\mathbf{E}})
 \end{equation}
 
 The exact result for average dissipation in the unit cell was correlated against an analytical
@@ -178,7 +178,7 @@ Here,  materials calculated by `ADViscoplasticityStressUpdate` are prepended wit
 separate their contributions to the overall system. Note, this is different than the `base_name`
 provided in the [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md)
 
-!listing modules/solid_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
+!listing modules/solid_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_single.i block=Materials
 
 !syntax parameters /Materials/ADViscoplasticityStressUpdate
 
