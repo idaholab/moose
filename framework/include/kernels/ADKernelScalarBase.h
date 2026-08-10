@@ -11,6 +11,8 @@
 
 #include "ADKernel.h"
 
+#include <set>
+
 /**
  * This ADKernel adds standardized methods for assembling to a primary
  * scalar variable associated with the primary variable of the ADKernel
@@ -52,6 +54,8 @@ public:
    * Computes residual and jacobian block for field and scalar variables
    */
   void computeResidualAndJacobian() override;
+
+  std::set<std::string> additionalROVariables() override;
 
 protected:
   /**
