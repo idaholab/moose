@@ -1,160 +1,56 @@
-# This test provides an example of combining two LPS viscoplasticity model.
-# The answer should be close, but not exactly the same, as lps_single.i
+# This test provides an example of an individual LPS viscoplasticity model
 
-[GlobalParams]
-  displacements = 'disp_x disp_y'
-[]
+!include creep.i
 
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 1
-  ny = 1
-  xmax = 0.002
-  ymax = 0.002
-[]
-
-[Physics/SolidMechanics/QuasiStatic/All]
-  strain = FINITE
-  add_variables = true
-  generate_output = 'strain_xx strain_yy strain_xy hydrostatic_stress vonmises_stress'
-  use_automatic_differentiation = true
-[]
-
-[Functions]
-  [./pull]
-    type = PiecewiseLinear
-    x = '0 0.1'
-    y = '0 1e-5'
-  [../]
-  [./tot_effective_viscoplasticity]
-    type = ParsedFunction
-    symbol_values = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
-    symbol_names = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
-    expression = 'lps_1_eff_creep_strain+lps_2_eff_creep_strain'
-  [../]
-[]
+porosity_name = porosity
 
 [Materials]
-  [./elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
-    youngs_modulus = 1e10
-    poissons_ratio = 0.3
-  [../]
-  [./stress]
-    type = ADComputeMultipleInelasticStress
-    inelastic_models = 'one two'
-    outputs = all
-  [../]
-  [./porosity]
-    type = ADPorosityFromStrain
-    initial_porosity = 0.1
-    inelastic_strain = 'combined_inelastic_strain'
-    outputs = 'all'
-  [../]
+  inactive = 'creep'
+  [stress]
+    inelastic_models := 'lps_one lps_two'
+  []
 
-  [./one]
+  [lps_one]
     type = ADViscoplasticityStressUpdate
-    coefficient = 'coef'
+    coefficient = 'coef_one'
     power = 3
-    base_name = 'lps_first'
     outputs = all
+    porosity_name = ${porosity_name}
     relative_tolerance = 1e-11
-  [../]
-  [./two]
+    base_name = one
+    negative_behavior = zero
+  []
+  [lps_two]
     type = ADViscoplasticityStressUpdate
-    coefficient = 'coef'
+    coefficient = 'coef_two'
     power = 3
-    base_name = 'lps_second'
     outputs = all
+    porosity_name = ${porosity_name}
     relative_tolerance = 1e-11
-  [../]
-  [./coef]
+    base_name = two
+    negative_behavior = zero
+  []
+  [coef_one]
     type = ADParsedMaterial
-    property_name = coef
-    # Example of creep power law
-    expression = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
-  [../]
-[]
-
-[BCs]
-  [./no_disp_x]
-    type = ADDirichletBC
-    variable = disp_x
-    boundary = left
-    value = 0.0
-  [../]
-  [./no_disp_y]
-    type = ADDirichletBC
-    variable = disp_y
-    boundary = bottom
-    value = 0.0
-  [../]
-  [./pull_disp_y]
-    type = ADFunctionDirichletBC
-    variable = disp_y
-    boundary = top
-    function = pull
-  [../]
-[]
-
-[Executioner]
-  type = Transient
-  solve_type = NEWTON
-  dt = 0.01
-  end_time = 0.12
+    property_name = coef_one
+    expression = '9e-19 * exp(-4e4 / 1.987 / 1200)'
+  []
+  [coef_two]
+    type = ADParsedMaterial
+    property_name = coef_two
+    expression = '1e-19 * exp(-4e4 / 1.987 / 1200)'
+  []
+  [effective_viscoplasticity]
+    type = ADParsedMaterial
+    property_name = effective_viscoplasticity
+    material_property_names = 'one_effective_viscoplasticity two_effective_viscoplasticity'
+    expression = 'one_effective_viscoplasticity + two_effective_viscoplasticity'
+    outputs = all
+  []
 []
 
 [Postprocessors]
-  [./disp_x]
-    type = SideAverageValue
-    variable = disp_x
-    boundary = right
-  [../]
-  [./disp_y]
-    type = SideAverageValue
-    variable = disp_y
-    boundary = top
-  [../]
-  [./avg_hydro]
-    type = ElementAverageValue
-    variable = hydrostatic_stress
-  [../]
-  [./avg_vonmises]
-    type = ElementAverageValue
-    variable = vonmises_stress
-  [../]
-  [./dt]
-    type = TimestepSize
-  [../]
-  [./num_lin]
-    type = NumLinearIterations
-    outputs = console
-  [../]
-  [./num_nonlin]
-    type = NumNonlinearIterations
-    outputs = console
-  [../]
-  [./lps_1_eff_creep_strain]
-    type = ElementAverageValue
-    variable = lps_first_effective_viscoplasticity
-    outputs = none
-  [../]
-  [./lps_2_eff_creep_strain]
-    type = ElementAverageValue
-    variable = lps_second_effective_viscoplasticity
-    outputs = none
-  [../]
-  [./eff_creep_strain_tot]
-    type = FunctionValuePostprocessor
-    function = tot_effective_viscoplasticity
-  [../]
-  [./porosity]
-    type = ElementAverageValue
-    variable = porosity
-  [../]
-[]
-
-[Outputs]
-  csv = true
+  [eff_creep_strain]
+    variable := effective_viscoplasticity
+  []
 []
