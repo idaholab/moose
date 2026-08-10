@@ -12,6 +12,7 @@
 #include "SystemBase.h"
 #include "MooseVariableFV.h"
 #include "Assembly.h"
+#include "MathFVUtils.h"
 
 InputParameters
 FVInterfaceKernel::validParams()
@@ -145,8 +146,7 @@ void
 FVInterfaceKernel::setupData(const FaceInfo & fi)
 {
   _face_info = &fi;
-  _normal = fi.normal();
-  _elem_is_one = _subdomain1.find(fi.elem().subdomain_id()) != _subdomain1.end();
+  _face_info_elem_on_side1 = _subdomain1.find(fi.elem().subdomain_id()) != _subdomain1.end();
 
 #ifndef NDEBUG
   const auto ft1 = fi.faceType(std::make_pair(_var1.number(), _var1.sys().number()));
@@ -154,11 +154,11 @@ FVInterfaceKernel::setupData(const FaceInfo & fi)
   constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
   constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
   constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;
-  mooseAssert(
-      (_elem_is_one && (ft1 == ft_elem || ft1 == ft_both) && (ft2 == ft_neigh || ft2 == ft_both)) ||
-          (!_elem_is_one && (ft1 == ft_neigh || ft1 == ft_both) &&
-           (ft2 == ft_elem || ft2 == ft_both)),
-      "Face type was not recognized. Check that the specified boundaries are interfaces.");
+  mooseAssert((_face_info_elem_on_side1 && (ft1 == ft_elem || ft1 == ft_both) &&
+               (ft2 == ft_neigh || ft2 == ft_both)) ||
+                  (!_face_info_elem_on_side1 && (ft1 == ft_neigh || ft1 == ft_both) &&
+                   (ft2 == ft_elem || ft2 == ft_both)),
+              "Face type was not recognized. Check that the specified boundaries are interfaces.");
 #endif
 }
 
@@ -171,14 +171,40 @@ FVInterfaceKernel::addResidual(const Real resid, const unsigned int var_num, con
 }
 
 void
-FVInterfaceKernel::addJacobian(const ADReal & resid,
-                               const dof_id_type dof_index,
-                               const Real scaling_factor)
+FVInterfaceKernel::addResidualToVariable1(const Real residual)
 {
-  addJacobian(_assembly,
-              std::array<ADReal, 1>{{resid}},
-              std::array<dof_id_type, 1>{{dof_index}},
-              scaling_factor);
+  addResidual(residual, _var1.number(), !_face_info_elem_on_side1);
+}
+
+void
+FVInterfaceKernel::addResidualToVariable2(const Real residual)
+{
+  addResidual(residual, _var2.number(), _face_info_elem_on_side1);
+}
+
+void
+FVInterfaceKernel::addResidualAndJacobian(const ADReal & residual,
+                                          const MooseVariableFV<Real> & variable,
+                                          const bool side_is_one)
+{
+  const bool variable_is_on_elem = side_is_one == _face_info_elem_on_side1;
+  const auto & dof_indices =
+      variable_is_on_elem ? variable.dofIndices() : variable.dofIndicesNeighbor();
+  mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+  addResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{residual}}, dof_indices, variable.scalingFactor());
+}
+
+void
+FVInterfaceKernel::addResidualAndJacobianToVariable1(const ADReal & residual)
+{
+  addResidualAndJacobian(residual, _var1, true);
+}
+
+void
+FVInterfaceKernel::addResidualAndJacobianToVariable2(const ADReal & residual)
+{
+  addResidualAndJacobian(residual, _var2, false);
 }
 
 void
@@ -192,9 +218,9 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
   // which is being assembled right now
   mooseAssert(_var1.sys().number() == _subproblem.currentNlSysNum(),
               "The interface kernel should contribute to the system which variable1 belongs to!");
-  addResidual(_elem_is_one ? r : -r, _var1.number(), _elem_is_one ? false : true);
+  addResidualToVariable1(r);
   if (_var1.sys().number() == _var2.sys().number())
-    addResidual(_elem_is_one ? -r : r, _var2.number(), _elem_is_one ? true : false);
+    addResidualToVariable2(-r);
 }
 
 void
@@ -214,49 +240,90 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
   // which is being assembled right now
   mooseAssert(_var1.sys().number() == _subproblem.currentNlSysNum(),
               "The interface kernel should contribute to the system which variable1 belongs to!");
-  addResidualsAndJacobian(_assembly,
-                          std::array<ADReal, 1>{{_elem_is_one ? r : -r}},
-                          _elem_is_one ? _var1.dofIndices() : _var1.dofIndicesNeighbor(),
-                          _var1.scalingFactor());
+  addResidualAndJacobianToVariable1(r);
   if (_var1.sys().number() == _var2.sys().number())
-    addResidualsAndJacobian(_assembly,
-                            std::array<ADReal, 1>{{_elem_is_one ? -r : r}},
-                            _elem_is_one ? _var2.dofIndicesNeighbor() : _var2.dofIndices(),
-                            _var2.scalingFactor());
+    addResidualAndJacobianToVariable2(-r);
+}
+
+Point
+FVInterfaceKernel::normal() const
+{
+  Point oriented_normal = _face_info->normal();
+  if (!_face_info_elem_on_side1)
+    oriented_normal *= -1;
+  return oriented_normal;
+}
+
+const Elem &
+FVInterfaceKernel::elem1() const
+{
+  return _face_info_elem_on_side1 ? _face_info->elem() : _face_info->neighbor();
+}
+
+const Elem &
+FVInterfaceKernel::elem2() const
+{
+  return _face_info_elem_on_side1 ? _face_info->neighbor() : _face_info->elem();
+}
+
+const Point &
+FVInterfaceKernel::centroid1() const
+{
+  return _face_info_elem_on_side1 ? _face_info->elemCentroid() : _face_info->neighborCentroid();
+}
+
+const Point &
+FVInterfaceKernel::centroid2() const
+{
+  return _face_info_elem_on_side1 ? _face_info->neighborCentroid() : _face_info->elemCentroid();
 }
 
 Moose::ElemArg
-FVInterfaceKernel::elemArg(const bool correct_skewness) const
+FVInterfaceKernel::elemArg1(const bool correct_skewness) const
 {
-  return {_face_info->elemPtr(), correct_skewness};
+  return {&elem1(), correct_skewness};
 }
 
 Moose::ElemArg
-FVInterfaceKernel::neighborArg(const bool correct_skewness) const
+FVInterfaceKernel::elemArg2(const bool correct_skewness) const
 {
-  return {_face_info->neighborPtr(), correct_skewness};
+  return {&elem2(), correct_skewness};
 }
 
 Moose::FaceArg
-FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
-                                      const FaceInfo * fi,
-                                      const Moose::FV::LimiterType limiter_type,
-                                      const bool correct_skewness,
-                                      const Moose::StateArg * state_limiter) const
+FVInterfaceKernel::faceArg1(const Moose::FV::LimiterType limiter_type,
+                            const bool correct_skewness,
+                            const Moose::StateArg * state_limiter) const
 {
-  if (!fi)
-    fi = _face_info;
+  return {_face_info,
+          limiter_type,
+          _face_info_elem_on_side1,
+          correct_skewness,
+          &elem1(),
+          state_limiter};
+}
 
-  const bool defined_on_elem_side = variable.hasBlocks(fi->elem().subdomain_id());
-  bool defined_on_neighbor_side = false;
-  if (fi->neighborPtr())
-    defined_on_neighbor_side = variable.hasBlocks(fi->neighbor().subdomain_id());
+Moose::FaceArg
+FVInterfaceKernel::faceArg2(const Moose::FV::LimiterType limiter_type,
+                            const bool correct_skewness,
+                            const Moose::StateArg * state_limiter) const
+{
+  return {_face_info,
+          limiter_type,
+          !_face_info_elem_on_side1,
+          correct_skewness,
+          &elem2(),
+          state_limiter};
+}
 
-  const Elem * const elem = defined_on_elem_side && defined_on_neighbor_side
-                                ? nullptr
-                                : (defined_on_elem_side ? fi->elemPtr() : fi->neighborPtr());
-
-  return {fi, limiter_type, true, correct_skewness, elem, state_limiter};
+ADReal
+FVInterfaceKernel::interpolateValue(const Moose::FV::InterpMethod method,
+                                    const ADReal & value1,
+                                    const ADReal & value2) const
+{
+  ADReal result;
+  Moose::FV::interpolate(method, result, value1, value2, *_face_info, _face_info_elem_on_side1);
+  return result;
 }
 
 bool
