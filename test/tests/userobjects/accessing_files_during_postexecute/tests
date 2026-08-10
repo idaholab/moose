@@ -1,0 +1,11 @@
+[Tests]
+  [accessing_files_postexecute]
+    type = 'RunApp'
+    input = 'simple_diffusion.i'
+    expect_out = "File found at 'simple_diffusion_exodus_out.e'."
+
+    issues = '#33525'
+    design = 'UserObjects/index.md'
+    requirement = 'The system shall support the ability for objects inheriting from GeneralUserObject to execute after output files are written.'
+  []
+[]

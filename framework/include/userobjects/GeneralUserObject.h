@@ -29,6 +29,12 @@ public:
 
   GeneralUserObject(const InputParameters & parameters);
 
+  /**
+   * Called during FEProblemBase::postExecute(). Intended for UserObjects that need the output files
+   * to be already written and available.
+   */
+  virtual void postExecute() {}
+
   ///@{
   /**
    * This method is not used and should not be used in a custom GeneralUserObject.

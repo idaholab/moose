@@ -6035,6 +6035,18 @@ FEProblemBase::postExecute()
 
   for (const auto & multi_app : multi_apps)
     multi_app->postExecute();
+
+  // Query all GeneralUserObjects (thread 0 only, since GeneralUserObjects are not threaded)
+  // and call postExecute() on any that override it.
+  std::vector<GeneralUserObject *> general_uos;
+  theWarehouse()
+      .query()
+      .condition<AttribThread>(0)
+      .condition<AttribInterfaces>(Interfaces::GeneralUserObject)
+      .queryInto(general_uos);
+
+  for (auto * uo : general_uos)
+    uo->postExecute();
 }
 
 void
