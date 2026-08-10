@@ -10,8 +10,7 @@
 #pragma once
 
 #include "Function.h"
-
-class SolutionUserObjectBase;
+#include "SolutionUserObjectBase.h"
 
 /** Function for reading a solution from file
  * Creates a function that extracts values from a solution read from a file,
@@ -61,7 +60,7 @@ protected:
   std::string _solution_object_var_name;
 
   /// Policy used when the imported solution is multivalued at the query point
-  const MooseEnum & _weighting_type;
+  const SolutionUserObjectBase::WeightingType _weighting_type;
 
   /// Factor to scale the solution by (default = 1)
   const Real _scale_factor;

@@ -731,7 +731,7 @@ Real
 SolutionUserObjectBase::pointValueWrapper(Real t,
                                           const Point & p,
                                           const std::string & var_name,
-                                          const MooseEnum & weighting_type,
+                                          WeightingType weighting_type,
                                           const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // first check if the FE type is continuous because in that case the value is
@@ -739,22 +739,25 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
   // shortcuts out
   const auto family = _system->variable_type(var_name).family;
 
-  if (weighting_type == 1 ||
-      (family != L2_LAGRANGE && family != MONOMIAL && family != L2_HIERARCHIC))
+  if (weighting_type == WeightingType::FOUND_FIRST ||
+      (family != L2_LAGRANGE && family != MONOMIAL && family != L2_HIERARCHIC &&
+       family != libMesh::XYZ))
     return pointValue(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
   std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name, subdomain_ids);
   switch (weighting_type)
   {
-    case 2:
+    case WeightingType::FOUND_FIRST:
+      break;
+    case WeightingType::AVERAGE:
     {
       Real average = 0.0;
       for (auto & v : values)
         average += v.second;
       return average / Real(values.size());
     }
-    case 4:
+    case WeightingType::SMALLEST_ELEMENT_ID:
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       Real selected_value = values.begin()->second;
@@ -766,7 +769,7 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
         }
       return selected_value;
     }
-    case 8:
+    case WeightingType::LARGEST_ELEMENT_ID:
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       Real selected_value = values.begin()->second;
@@ -909,11 +912,11 @@ SolutionUserObjectBase::pointValueGradientWrapper(
     Real t,
     const Point & p,
     const std::string & var_name,
-    const MooseEnum & weighting_type,
+    WeightingType weighting_type,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // the default weighting_type found_first shortcuts out
-  if (weighting_type == 1)
+  if (weighting_type == WeightingType::FOUND_FIRST)
     return pointValueGradient(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
@@ -921,14 +924,16 @@ SolutionUserObjectBase::pointValueGradientWrapper(
       discontinuousPointValueGradient(t, p, var_name, subdomain_ids);
   switch (weighting_type)
   {
-    case 2:
+    case WeightingType::FOUND_FIRST:
+      break;
+    case WeightingType::AVERAGE:
     {
       RealGradient average = RealGradient(0.0, 0.0, 0.0);
       for (auto & v : values)
         average += v.second;
       return average / Real(values.size());
     }
-    case 4:
+    case WeightingType::SMALLEST_ELEMENT_ID:
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       RealGradient selected_value = values.begin()->second;
@@ -940,7 +945,7 @@ SolutionUserObjectBase::pointValueGradientWrapper(
         }
       return selected_value;
     }
-    case 8:
+    case WeightingType::LARGEST_ELEMENT_ID:
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       RealGradient selected_value = values.begin()->second;

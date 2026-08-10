@@ -49,7 +49,8 @@ TestSolutionPointValueWrapper::TestSolutionPointValueWrapper(const InputParamete
     _point(getParam<Point>("point")),
     _evaluate_gradient(getParam<bool>("evaluate_gradient")),
     _gradient_component(getParam<MooseEnum>("gradient_component")),
-    _weighting_type(getParam<MooseEnum>("weighting_type")),
+    _weighting_type(
+        getParam<MooseEnum>("weighting_type").getEnum<SolutionUserObjectBase::WeightingType>()),
     _source_subdomain_ids(getParam<std::vector<subdomain_id_type>>("source_subdomain_ids"))
 {
 }

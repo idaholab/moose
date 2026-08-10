@@ -10,8 +10,7 @@
 #pragma once
 
 #include "GeneralPostprocessor.h"
-
-class SolutionUserObjectBase;
+#include "SolutionUserObjectBase.h"
 
 /**
  * Tests the policy-based point-value and point-gradient wrappers of
@@ -46,7 +45,7 @@ protected:
   const unsigned int _gradient_component;
 
   /// Policy used to reduce multiple element-specific values
-  const MooseEnum & _weighting_type;
+  const SolutionUserObjectBase::WeightingType _weighting_type;
 
   /// Optional numeric subdomain IDs in the imported source mesh
   const std::vector<subdomain_id_type> & _source_subdomain_ids;

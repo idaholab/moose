@@ -48,7 +48,8 @@ SolutionFunction::validParams()
 SolutionFunction::SolutionFunction(const InputParameters & parameters)
   : Function(parameters),
     _solution_object_ptr(nullptr),
-    _weighting_type(getParam<MooseEnum>("weighting_type")),
+    _weighting_type(
+        getParam<MooseEnum>("weighting_type").getEnum<SolutionUserObjectBase::WeightingType>()),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
 {
