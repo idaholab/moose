@@ -43,7 +43,10 @@ addBuiltInGradientMethodIfNeeded(FEProblemBase & fe_problem, const GradientMetho
     return;
 
   if (method_name == "green-gauss")
-    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name);
+  {
+    auto params = fe_problem.getMooseApp().getFactory().getValidParams("FVGreenGaussGradient");
+    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name, params);
+  }
   else if (method_name == "green-gauss-venkatakrishnan")
   {
     auto params = fe_problem.getMooseApp().getFactory().getValidParams("FVGreenGaussGradient");

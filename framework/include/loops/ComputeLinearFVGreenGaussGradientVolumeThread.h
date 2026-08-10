@@ -45,7 +45,7 @@ public:
    * @param fe_problem Reference to the problem
    * @param system The system which contains variables that need gradients.
    * @param input_gradient Scratch storage holding the unnormalized face sums.
-   * @param output_gradient Storage where normalized gradients are written.
+   * @param output_gradient Storage where normalized (with element volume) gradients are written.
    */
   ComputeLinearFVGreenGaussGradientVolumeThread(
       FEProblemBase & fe_problem,
@@ -95,7 +95,7 @@ protected:
   /// Unnormalized face-sum gradients to read from.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & _input_gradient;
 
-  /// Normalized gradients to write into.
+  /// Normalized (by cell volume) gradients to write into.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _output_gradient;
 
   /// Indices of the variables this producer should compute gradients for.
