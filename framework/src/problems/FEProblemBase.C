@@ -1508,16 +1508,18 @@ FEProblemBase::initialSetup()
 
     auto check_fv_face_integrity = [this](MooseMesh & fv_mesh, const bool on_displaced)
     {
-      auto flux_bc_base_query = theWarehouse().query();
-      flux_bc_base_query.condition<AttribSystem>("FVFluxBC");
-      flux_bc_base_query.condition<AttribDisplaced>(on_displaced);
-      flux_bc_base_query.condition<AttribThread>(0);
+      auto flux_bc_base_query = theWarehouse()
+                                    .query()
+                                    .condition<AttribSystem>("FVFluxBC")
+                                    .condition<AttribDisplaced>(on_displaced)
+                                    .condition<AttribThread>(0);
       TheWarehouse::QueryCache<AttribBoundaries> flux_bc_query(flux_bc_base_query);
 
-      auto interface_kernel_base_query = theWarehouse().query();
-      interface_kernel_base_query.condition<AttribSystem>("FVInterfaceKernel");
-      interface_kernel_base_query.condition<AttribDisplaced>(on_displaced);
-      interface_kernel_base_query.condition<AttribThread>(0);
+      auto interface_kernel_base_query = theWarehouse()
+                                             .query()
+                                             .condition<AttribSystem>("FVInterfaceKernel")
+                                             .condition<AttribDisplaced>(on_displaced)
+                                             .condition<AttribThread>(0);
       TheWarehouse::QueryCache<AttribBoundaries> interface_kernel_query(
           interface_kernel_base_query);
 
