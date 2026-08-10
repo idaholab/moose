@@ -165,6 +165,60 @@
                   'retried step applies half the load increment, and the run completes at a total '
                   'load factor equal to its end time.'
   []
+  [transient_softening]
+    type = 'CSVDiff'
+    input = 'transient_softening.i'
+    # The snap through of 'transient_cubic' above driven PAST both of its limit points instead of
+    # landing back on the rising branch within one step. 'end_on_max_continuation_steps' gives a
+    # transient step a second way to end: the step budget runs out and the step commits the part of
+    # its load increment the path actually traced rather than the whole of it. Past the peak that
+    # part is negative, so the load factor falls while the time keeps advancing, and the two stop
+    # being equal. That decoupling is the feature under test, not the tracing.
+    #
+    # 'dt' of 0.3 is what places the limit points on the inside of steps rather than at their ends:
+    # the peak of the path sits at a load parameter of 0.385, so the first step reaches 0.3 on the
+    # rising branch and ends the first way, and the second step cannot reach 0.6 at all and ends on
+    # its budget somewhere down the descending branch. 'lambda_min' is the step local floor and has
+    # to be negative for the descending branch to be reachable at all; -2 sits below the roughly
+    # -1.5 the second step is expected to reach.
+    #
+    # 'lambda_max' is deliberately left at its default of 1, which a transient run requires, because
+    # a step local load parameter spans the increment of one step there.
+    csvdiff = 'transient_softening_out_path.csv transient_softening_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    # The half transient checkpoint of a six step run is written at the end of the third step, which
+    # is one of the two steps that end on a spent budget, so what a recovered run resumes from is a
+    # load increment already narrowed to the part of it the path traced. That is the state this
+    # setting exists to cover here.
+    recover = true
+    # A rejected step leaves the increments it already recorded in the history, which is never
+    # reset, so a step the restep harness retries doubles the rows the path gold holds.
+    restep = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall trace an arc-length equilibrium path through both limit points '
+                  'of a snap-through problem across committed transient steps, ending the '
+                  'continuation of a step that has spent its step budget by committing the part of '
+                  'that step load increment the path traced instead of the whole of it, so that the '
+                  'load parameter falls below the value the step started from and stops equalling '
+                  'the time while the time keeps advancing, holding every committed state on the '
+                  'equilibrium curve and carrying the solution monotonically along the one-shot '
+                  'path, and shall resume that path from a recovery file written at such a step.'
+  []
+  [transient_softening_lambda_min_error]
+    type = 'RunException'
+    input = 'transient_softening.i'
+    cli_args = 'Problem/lambda_min=0'
+    expect_err = "'lambda_min' has to be negative"
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    requirement = 'The system shall report an error when an arc-length continuation is set up to '
+                  'end a transient step on a spent step budget with a load parameter floor that is '
+                  'not negative, which would hold every step at or above the load factor it started '
+                  'from and leave the descending branch that exit exists for impossible to trace.'
+  []
   [errors]
     requirement = 'The system shall report an error when an arc-length continuation problem is set '
                   'up with '

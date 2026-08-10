@@ -60,6 +60,31 @@ class ArcLengthNonlinearSystem;
  * again from the start of every step. 'lambda_max' is no longer a setting there, it has to be 1
  * because the step local load parameter spans the increment of one step.
  *
+ * 'end_on_max_continuation_steps' carries the softening branch exit above into a transient run,
+ * where it ends the continuation of every step. A step then has two endings: its step local load
+ * parameter reaches 1, which commits the whole load increment of that step, or the step budget runs
+ * out, which commits that increment scaled by the step local parameter the last converged increment
+ * reached. The second ending is what carries a path past the peak, because the step local parameter
+ * is free to fall there, which is also why 'lambda_min' has to be negative for the clamp to let it.
+ * A step that ends neither way is a failed step, and the TimeStepper cuts it back as it does any
+ * other.
+ *
+ * The load increment of a step is signed there, because the direction the path is travelled in has
+ * to survive a step boundary. PETSc's predictor carries that direction within a step alone, and
+ * every step opens with a step local parameter running 0 to 1 again, so a step following one that
+ * ended part way down a descending branch would read an increasing parameter as a climb back up the
+ * branch just traced. The problem remembers a direction of travel of plus or minus one, the load
+ * increment of a step is the time step size times it, and the tangent load carries that sign, which
+ * is what makes an increasing step local parameter mean travel the way the path was already going.
+ * A step ending at a step local parameter of 1 travelled forward the whole way and keeps the
+ * direction; a step ending on a spent budget with a negative net change turned around, and the way
+ * it came becomes the new forward.
+ *
+ * Time measures how much load change a step covers, up to the time step size of that step, in the
+ * direction of travel, rather than the load level itself. The load factor a step ends at is the
+ * time it ends at only while every step has ended at a step local parameter of 1 with the direction
+ * still forward, and it parts from the time as soon as one has not.
+ *
  * A transient path is not output per increment. The increment index stands in for the time while
  * an increment is output, and that pseudo time written alongside the time the steps advance would
  * corrupt the sequence of an output, so only the objects executed on EXEC_ARC_LENGTH_INCREMENT
@@ -94,13 +119,26 @@ public:
 
   /**
    * Arms the load increment the transient step about to be solved applies, which is the time step
-   * size, and restarts the numbering of the increments because every step traces a path of its
-   * own.
+   * size signed by the direction of travel, restarts the numbering of the increments because every
+   * step traces a path of its own, and clears the record of how the previous step ended.
    *
    * The executioner reaches this before every attempt at a step, so a step the TimeStepper cuts
    * back arms the smaller increment its retry applies.
    */
   virtual void onTimestepBegin() override;
+
+  /**
+   * Narrows the armed load increment of a transient step whose continuation ended on a spent step
+   * budget down to the part of that increment the path traced, leaving a step that reached the end
+   * of its increment with the whole of it, and turns the direction of travel around when that part
+   * ran against it.
+   *
+   * The executioner reaches this after the solve of a step, before the objects executed at the end
+   * of that step and before the checkpoint is written, so the load factor those objects report, the
+   * increment a recovered run commits and the direction it resumes travelling in all belong to the
+   * step that just ended.
+   */
+  virtual void onTimestepEnd() override;
 
   /**
    * Commits the load increment of the transient step that just converged along with the state that
@@ -122,6 +160,9 @@ public:
    * ends an increment that ran out of corrector iterations with, so the reason alone does not say
    * a path was traced to the end of its budget. The count of increments the path started is what
    * separates the two, because only a budget spent in full reaches the count it allows.
+   *
+   * This is where the two endings a transient step has are told apart, so it records the one it
+   * reports for onTimestepEnd().
    *
    * @param sys_num The solver system to report the convergence of
    * @return Whether that system converged
@@ -157,9 +198,11 @@ protected:
    * applies the load parameter itself wherever it needs the load at the current point.
    *
    * A transient step carries the load parameter over its own increment, where F is
-   * F_int + (Lambda_accum + lambda * dt) * R_load, so dF/dlambda is dt * R_load and the tangent
-   * load is scaled by the time step size. That factor is what makes the step local parameter, over
-   * its range of 0 to 1, trace the increment of that one step.
+   * F_int + (Lambda_accum + lambda * Delta) * R_load with Delta the signed load increment of the
+   * step, so dF/dlambda is Delta * R_load and the tangent load is scaled by it. The magnitude of
+   * Delta is what makes the step local parameter, over its range of 0 to 1, trace the increment of
+   * that one step, and its sign is what makes an increasing step local parameter mean travel in
+   * the remembered direction, so a step whose predecessor was descending descends as well.
    *
    * The load tag is reassembled here with FEProblemBase::computeResidualTags, which runs the
    * transfers, the MultiApps and the EXEC_LINEAR objects and controls along with the assembly. All
@@ -208,7 +251,8 @@ protected:
    *
    * PETSc restarts its load parameter at every solve, so a transient run reads it as the fraction
    * of the current step's increment that has been applied and adds the load factor the committed
-   * steps carry.
+   * steps carry. That fraction is kept so that a step ending short of its whole increment commits
+   * the same fraction the load factor reported here is composed with.
    *
    * @return The load factor to compose the residual and the Jacobian with
    */
@@ -236,14 +280,28 @@ protected:
   /// which a transient run restarts at every step because each traces a path of its own
   unsigned int _increment;
 
+  /// Whether the continuation of the transient step being solved ended on a spent step budget
+  /// instead of at the end of the load increment of that step
+  bool _ended_on_spent_budget;
+
   /// Whether the load has already been checked against the degrees of freedom the nodal BCs own
   bool _checked_load_on_constrained_dofs;
+
+  /// Step local load parameter of the most recent continuation state, which is the fraction of the
+  /// load increment of the transient step being solved that has been applied
+  Real _step_lambda;
+
+  /// Direction the equilibrium path is being travelled in, which is 1 or -1 and signs the load
+  /// increment of a step so that the step continues the way its predecessor was going. Restartable
+  /// so that a recovered run resumes travelling the way it left off
+  int & _path_direction;
 
   /// Load factor the committed transient steps carry, which is where the current step's increment
   /// starts. Restartable so that a recovered run resumes the path at the load it left it at
   Real & _lambda_accum;
 
-  /// Load increment the transient step being solved applies, and zero once it has been committed.
+  /// Signed load increment the transient step being solved applies, narrowed to the part of it the
+  /// path traced when the step ends on a spent step budget, and zero once it has been committed.
   /// Restartable because a step commits its increment only after the checkpoint has been written
   Real & _step_load_increment;
 #endif
