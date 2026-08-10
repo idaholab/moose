@@ -58,6 +58,81 @@
                   'load parameter history whose solution response steepens as the path approaches '
                   'a fold.'
   []
+  [transient_cubic]
+    type = 'CSVDiff'
+    input = 'transient_cubic.i'
+    csvdiff = 'transient_cubic_out_path.csv transient_cubic_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    # This is the snap through of 'cubic_snapthrough' above driven a step at a time instead of in
+    # one solve. Both limit points fall INSIDE the first step and that is the point of the leaf: the
+    # step targets a total load factor of 0.5, which the path reaches only on the far side of the
+    # snap, so a full path with two turning points is traced within one time step. The second step
+    # carries the load factor from 0.5 to 1 along the recovered branch and lands on the same
+    # equilibrium point the steady leaf ends at. 'lambda_min' is the step local floor, so the
+    # trough of -0.385 sits at -0.77 of the first step's own increment and -1 is the guard below it.
+    #
+    # The checkpoint of a step is written before the load increment of that step is committed, so a
+    # recovered run has to resume the path from the load factor the committed steps carry rather
+    # than from zero. Two steps of 0.5 put the harness half transient exactly on the step boundary
+    # in the middle of the path, which is what makes this leaf cover that.
+    recover = true
+    # A rejected step leaves the increments it already recorded in the history, which is never
+    # reset, so a step the restep harness retries doubles the rows the path gold holds.
+    restep = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall trace a complete arc-length continuation within every step of a '
+                  'transient run, taking the load increment of a step from its time step size so '
+                  'that the load factor a step ends at is the time it ends at, carrying the '
+                  'equilibrium path of a snap through problem through both of its limit points '
+                  'inside a single time step, reporting the load parameter as the total that the '
+                  'committed steps and the step being traced add up to so that it stays continuous '
+                  'across a step boundary, and resuming that path at a step boundary from a '
+                  'recovery file.'
+  []
+  [transient_cutback]
+    type = 'RunApp'
+    input = 'transient_cutback.i'
+    capabilities = 'petsc>=3.22.0'
+    # The load path of this input is a straight line on purpose, and deliberately NOT the snap
+    # through the leaves above trace. The arc length a transient step covers is
+    # sqrt((norm(du/dlambda) * dt)^2 + psi_squared), so cutting dt back shortens it only where the
+    # solution term dominates. Across a limit point the solution excursion is fixed by the shape of
+    # the path and does not shrink with dt at all, so a step whose target load factor lies past a
+    # limit point costs about the same number of continuation steps however far it is cut back. A
+    # cutback leaf written on the snap through would halve dt down to dtmin and die there instead of
+    # completing, so the cutback is exercised on a path a smaller increment really does make cheaper.
+    #
+    # u is exactly 10 * lambda at all five nodes, which makes the arc length of a step
+    # sqrt((10 * sqrt(5) * dt)^2 + 1) and the continuation spend ceil(that / step_size) steps: 23 at
+    # dt = 0.5 and 12 at dt = 0.25. max_continuation_steps = 17 sits between them, so the attempt at
+    # the full increment runs out of continuation steps and the halved retry does not.
+    #
+    # The matched sequence is the whole assertion: the full increment fails, IterationAdaptiveDT
+    # reports the cutback, the retried step carries half the load increment, the following step
+    # opens at the load factor the retried one committed, and the load parameter the run ends at is
+    # the end time.
+    expect_out = 'Time Step 1, time = 0\.5, dt = 0\.5[\s\S]*'
+                 'Solve Did NOT Converge[\s\S]*'
+                 'Solve failed, cutting timestep\.[\s\S]*'
+                 'Time Step 1, time = 0\.25, dt = 0\.25[\s\S]*'
+                 'Time Step 2, time = 0\.5, dt = 0\.25[\s\S]*'
+                 'Arc length increment 0, lambda = 0\.25[\s\S]*'
+                 '5\.000000e-01\s*\|\s*5\.000000e-01'
+    # the cutback happens in the first step, which the recovery half transient runs before the
+    # checkpoint, so the console of a recovered run does not carry the sequence matched above
+    recover = false
+    # the restep harness retries a step at the same time step size, which reorders that sequence
+    restep = false
+    max_parallel = 1
+    requirement = 'The system shall report a transient step whose arc-length continuation does not '
+                  'reach the end of its load increment within the allowed number of continuation '
+                  'steps as an unconverged step, so that the TimeStepper cuts the step back, the '
+                  'retried step applies half the load increment, and the run completes at a total '
+                  'load factor equal to its end time.'
+  []
   [errors]
     requirement = 'The system shall report an error when an arc-length continuation problem is set '
                   'up with '

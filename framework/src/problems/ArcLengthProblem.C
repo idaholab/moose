@@ -52,17 +52,23 @@ ArcLengthProblem::validParams()
   params.addParam<unsigned int>("max_continuation_steps",
                                 100,
                                 "Maximum number of continuation steps. The solve fails when the "
-                                "path does not reach 'lambda_max' within this many steps.");
+                                "path does not reach 'lambda_max' within this many steps, which in "
+                                "a transient run fails the time step and lets the TimeStepper cut "
+                                "the load increment back and retry it.");
   params.addParam<Real>("lambda_max",
                         1.0,
                         "Load parameter the continuation stops at. This is the only criterion the "
-                        "solver ends a completed path with.");
+                        "solver ends a completed path with. A transient run traces the load "
+                        "increment of a single step with a load parameter spanning 0 to 1, so this "
+                        "has to be 1 there.");
   params.addParam<Real>("lambda_min",
                         0.0,
                         "Lower clamp on the load parameter. A step that would take the load "
                         "parameter below this value is truncated to it. This is not an exit "
                         "criterion, so a path that descends to this value stays there until "
-                        "'max_continuation_steps' runs out.");
+                        "'max_continuation_steps' runs out. The clamp is on the parameter of the "
+                        "path being traced, so a transient run clamps how far a step may unload "
+                        "below the load factor it started from.");
   params.addRangeCheckedParam<Real>("psi_squared",
                                     1.0,
                                     "psi_squared >= 0",
@@ -89,6 +95,8 @@ ArcLengthProblem::ArcLengthProblem(const InputParameters & parameters)
     _correction_type(correctionType(getParam<MooseEnum>("correction_type"))),
     _increment(0),
     _checked_load_on_constrained_dofs(false),
+    _lambda_accum(declareRestartableData<Real>("lambda_accum", 0.0)),
+    _step_load_increment(declareRestartableData<Real>("step_load_increment", 0.0)),
 #endif
     _load_parameter(declareRestartableData<Real>("load_parameter", 0.0))
 {
@@ -198,6 +206,13 @@ ArcLengthProblem::checkProblemIntegrity()
                "'. Put vector_tags = '",
                getParam<TagName>("load_vector_tag"),
                "' on the residual object that carries the load.");
+
+  if (_transient && getParam<Real>("lambda_max") != 1.0)
+    paramError("lambda_max",
+               "'lambda_max' has to be 1 in a transient run. A time step there traces the load "
+               "increment of that step alone, with a load parameter that spans the increment over "
+               "a range of 0 to 1, and the load increment is set by the time step size instead. "
+               "Control the load with the TimeStepper and the end_time.");
 }
 
 PetscErrorCode
@@ -254,6 +269,34 @@ ArcLengthProblem::initPetscOutputAndSomeSolverSettings()
 }
 
 void
+ArcLengthProblem::onTimestepBegin()
+{
+  FEProblemBase::onTimestepBegin();
+
+  if (!_transient)
+    return;
+
+  // Taking the time step size as the load increment is what makes the load factor a step ends at
+  // the time it ends at, so cutting a step back cuts its load increment back in the same proportion
+  _step_load_increment = _dt;
+  _increment = 0;
+}
+
+void
+ArcLengthProblem::advanceState()
+{
+  FEProblemBase::advanceState();
+
+  if (!_transient)
+    return;
+
+  // Only a converged step is advanced, so nothing else has to establish that the increment armed
+  // for this step is one that was actually traced
+  _lambda_accum += _step_load_increment;
+  _step_load_increment = 0.0;
+}
+
+void
 ArcLengthProblem::computeResidualSys(NonlinearImplicitSystem & sys,
                                      const NumericVector<Number> & soln,
                                      NumericVector<Number> & residual)
@@ -261,8 +304,9 @@ ArcLengthProblem::computeResidualSys(NonlinearImplicitSystem & sys,
   FEProblemBase::computeResidualSys(sys, soln, residual);
 
   // The load objects assemble into the load tag during the evaluation above, which is what keeps
-  // them out of the residual MOOSE composes. Scaling that tag by the load parameter here makes
-  // the residual PETSc solves with F_int + lambda * R_load.
+  // them out of the residual MOOSE composes. Scaling that tag by the load factor here makes the
+  // residual PETSc solves with F_int + lambda * R_load, where a transient run composes the factor
+  // out of the load the committed steps carry and the increment of the step being traced.
   residual.add(updateLoadParameter(), _arclength_nl->getVector(_arclength_nl->loadVectorTag()));
   residual.close();
 }
@@ -275,7 +319,7 @@ ArcLengthProblem::computeJacobianSys(NonlinearImplicitSystem & sys,
   FEProblemBase::computeJacobianSys(sys, soln, jacobian);
 
   // The derivative of the load with respect to the solution is assembled into the load matrix tag
-  // during the evaluation above. Scaling it by the load parameter here keeps the Jacobian the
+  // during the evaluation above. Scaling it by the same load factor here keeps the Jacobian the
   // derivative of the residual composed in computeResidualSys.
   auto & load_jacobian = _arclength_nl->getMatrix(_arclength_nl->loadMatrixTag());
   // The matrix being added from has to be assembled
@@ -305,9 +349,12 @@ ArcLengthProblem::computeTangentLoad(Vec x, Vec q)
   // respect to the load parameter, and it builds Q that way for its own right hand side path,
   // where the residual gets lambda * b and Q gets b with a coefficient of one. F is
   // F_int + lambda * R_load here, so dF/dlambda is R_load and Q is the load tag negated, with no
-  // factor of lambda. SNESSolve_NEWTONAL zeroes Q before the callback, so this is all of it.
+  // factor of lambda. SNESSolve_NEWTONAL zeroes Q before the callback, so this is all of it. A
+  // transient step carries the load parameter over its own increment, which puts a factor of the
+  // time step size on dF/dlambda and is what makes the step local parameter trace that increment.
   PetscVector<Number> tangent_load(q, _communicator);
-  tangent_load.add(-1.0, _arclength_nl->getVector(_arclength_nl->loadVectorTag()));
+  tangent_load.add(_transient ? -_step_load_increment : -1.0,
+                   _arclength_nl->getVector(_arclength_nl->loadVectorTag()));
 }
 
 void
@@ -379,18 +426,24 @@ ArcLengthProblem::executeArcLengthIncrement(SNES snes)
 
   execute(EXEC_ARC_LENGTH_INCREMENT);
 
-  // The time of the solve does not move within the step the continuation is traced in, so the
-  // increment index stands in for it and every increment is written as a frame of its own
-  const Real solve_time = _time;
-  const int solve_step = _t_step;
-  _time = _increment;
-  _t_step = static_cast<int>(_increment);
+  // A transient run writes its output on the time the steps advance, and a pseudo time interleaved
+  // with that would corrupt the sequence of an output, so only the objects executed above record a
+  // transient path
+  if (!_transient)
+  {
+    // The time of the solve does not move within the step the continuation is traced in, so the
+    // increment index stands in for it and every increment is written as a frame of its own
+    const Real solve_time = _time;
+    const int solve_step = _t_step;
+    _time = _increment;
+    _t_step = static_cast<int>(_increment);
 
-  outputStep(EXEC_ARC_LENGTH_INCREMENT);
+    outputStep(EXEC_ARC_LENGTH_INCREMENT);
 
-  // Putting the time of the solve back leaves the output at the end of the step untouched
-  _time = solve_time;
-  _t_step = solve_step;
+    // Putting the time of the solve back leaves the output at the end of the step untouched
+    _time = solve_time;
+    _t_step = solve_step;
+  }
 
   ++_increment;
 }
@@ -409,9 +462,11 @@ ArcLengthProblem::updateLoadParameter()
 
   PetscReal lambda;
   LibmeshPetscCall(SNESNewtonALGetLoadParameter(snes, &lambda));
-  _load_parameter = lambda;
+  // PETSc restarts the load parameter at every solve, which is what makes it the fraction of a
+  // transient step's own increment that has been applied
+  _load_parameter = _transient ? _lambda_accum + lambda * _step_load_increment : lambda;
 
-  return lambda;
+  return _load_parameter;
 }
 
 const NumericVector<Number> &

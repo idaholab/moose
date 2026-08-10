@@ -26,6 +26,26 @@ continuation, at [!param](/Problem/ArcLengthProblem/lambda_max), has no incremen
 not reach the table — the last row stops short of it. [ArcLengthLoadParameter.md] executing on
 `TIMESTEP_END` reports that final value.
 
+Under a [Transient.md] executioner, where [ArcLengthProblem.md] traces a path per time step, the
+`lambda` column holds the total accumulated load factor rather than the step-local parameter of the
+step being traced, so the curve runs continuously across the steps instead of restarting at each one.
+The `increment` column counts the rows of the whole run, unlike the increment index the console banner
+prints, which restarts in every step.
+
+Every step publishes its first increment at a step-local load parameter of zero, so each one opens with
+a row at the equilibrium the previous step committed, which is the point the note above leaves out of
+that step's own rows. The repeat is harmless: the row carries a converged state, and the `lambda`
+column does not step backwards at it.
+
+!alert warning title=A rejected step leaves its increments in the table
+The history is never reset, so the increments a step records before it is rejected stay in the table
+and the retry appends its own after them. A run that cuts a step back therefore carries a dead branch
+in its path file at every cutback: rows belonging to an attempt the executioner discarded and then
+re-traced at a smaller load increment. The `lambda` column returns to the load factor of the last
+committed step where an abandoned attempt ends and its retry begins, so a curve plotted straight from
+the file doubles back on itself there. Read the file as a record of what the continuation tried
+rather than only of what it committed. The shipped tests set `restep = false` for this reason.
+
 ## Example Input File Syntax
 
 !listing test/tests/problems/arc_length/bratu_source.i block=VectorPostprocessors
