@@ -17,9 +17,7 @@ LinearFVVelocitySymmetryBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addClassDescription("Adds a symmetry boundary condition for the velocity.");
-  params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
-  params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
-  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
+  NS::addLinearFVVelocityVariableParams(params);
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -32,48 +30,19 @@ LinearFVVelocitySymmetryBC::validParams()
 LinearFVVelocitySymmetryBC::LinearFVVelocitySymmetryBC(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(dynamic_cast<const MooseLinearVariableFVReal *>(
-        &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("u")))),
-    _v_var(parameters.isParamValid("v")
-               ? dynamic_cast<const MooseLinearVariableFVReal *>(
-                     &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("v")))
-               : nullptr),
-    _w_var(parameters.isParamValid("w")
-               ? dynamic_cast<const MooseLinearVariableFVReal *>(
-                     &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("w")))
-               : nullptr),
+    _velocity_vars(NS::getLinearFVVelocityVariables(*this, _fv_problem, _tid, _dim)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
-  if (!_u_var)
-    paramError("u", "the u velocity must be a MooseLinearVariableFVReal.");
-
-  _vel_vars.push_back(_u_var);
-
-  if (_dim >= 2 && !_v_var)
-    paramError("v",
-               "In two or more dimensions, the v velocity must be supplied and it must be a "
-               "MooseLinearVariableFVReal.");
-
-  _vel_vars.push_back(_v_var);
-
-  if (_dim >= 3 && !_w_var)
-    paramError("w",
-               "In three-dimensions, the w velocity must be supplied and it must be a "
-               "MooseLinearVariableFVReal.");
-
-  _vel_vars.push_back(_w_var);
 }
 
 Real
 LinearFVVelocitySymmetryBC::computeBoundaryValue() const
 {
   // We allow internal boundaries too so we need to check which side we are on
-  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                             ? _current_face_info->elemInfo()
-                             : _current_face_info->neighborInfo();
+  const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
 
   // By default we approximate the boundary value with the neighboring cell value
-  auto boundary_value = _var.getElemValue(*elem_info, determineState());
+  auto boundary_value = _var.getElemValue(elem_info, determineState());
   auto reflected_boundary_value = boundary_value;
 
   // We don't have to flip the sign of the normal because we are subtacting normal*normal.
@@ -82,7 +51,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryValue() const
 
   for (const auto dim_i : make_range(_dim))
     reflected_boundary_value -=
-        scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
+        scaled_normal(dim_i) * _velocity_vars[dim_i]->getElemValue(elem_info, determineState());
 
   return 0.5 * (boundary_value + reflected_boundary_value);
 }
@@ -91,9 +60,7 @@ Real
 LinearFVVelocitySymmetryBC::computeBoundaryNormalGradient() const
 {
   // We allow internal boundaries too so we need to check which side we are on
-  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                             ? _current_face_info->elemInfo()
-                             : _current_face_info->neighborInfo();
+  const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
 
   Real boundary_normal_grad = 0.0;
 
@@ -103,7 +70,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryNormalGradient() const
 
   for (const auto dim_i : make_range(_dim))
     boundary_normal_grad +=
-        scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
+        scaled_normal(dim_i) * _velocity_vars[dim_i]->getElemValue(elem_info, determineState());
 
   return boundary_normal_grad / computeCellToFaceDistance();
 }
@@ -122,9 +89,7 @@ Real
 LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
 {
   // We allow internal boundaries too so we need to check which side we are on
-  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                             ? _current_face_info->elemInfo()
-                             : _current_face_info->neighborInfo();
+  const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
 
   // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   auto scaled_normal = _current_face_info->normal();
@@ -135,7 +100,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
   const auto normal_component_sq = normal_component * normal_component;
 
   return current_bd_value -
-         (1.0 - normal_component_sq) * _var.getElemValue(*elem_info, determineState());
+         (1.0 - normal_component_sq) * _var.getElemValue(elem_info, determineState());
 }
 
 Real
@@ -152,11 +117,9 @@ Real
 LinearFVVelocitySymmetryBC::computeBoundaryGradientRHSContribution() const
 {
   // We allow internal boundaries too so we need to check which side we are on
-  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                             ? _current_face_info->elemInfo()
-                             : _current_face_info->neighborInfo();
+  const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
 
-  auto boundary_value = _var.getElemValue(*elem_info, determineState());
+  auto boundary_value = _var.getElemValue(elem_info, determineState());
 
   // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   const auto normal_component = _current_face_info->normal()(_index);

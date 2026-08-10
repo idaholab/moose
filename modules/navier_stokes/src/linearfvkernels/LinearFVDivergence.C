@@ -19,11 +19,18 @@ LinearFVDivergence::validParams()
                              "the system matrix, only takes the divergence of a face flux field "
                              "and adds it to the right hand side of the linear system.");
   params.addRequiredParam<MooseFunctorName>("face_flux", "Functor for the face flux.");
+  params.addParam<bool>(
+      "face_flux_is_integrated",
+      false,
+      "Whether the supplied face flux already includes the face area. When false, the kernel "
+      "multiplies the functor value by the current face area.");
   return params;
 }
 
 LinearFVDivergence::LinearFVDivergence(const InputParameters & params)
-  : LinearFVFluxKernel(params), _face_flux(getFunctor<Real>("face_flux"))
+  : LinearFVFluxKernel(params),
+    _face_flux(getFunctor<Real>("face_flux")),
+    _face_flux_is_integrated(getParam<bool>("face_flux_is_integrated"))
 
 {
 }
@@ -73,7 +80,8 @@ LinearFVDivergence::computeFaceFlux()
   if (!_cached_rhs_contribution)
   {
     _cached_rhs_contribution = true;
-    _flux_rhs_contribution = _face_flux(face_arg, state_arg) * _current_face_area;
+    _flux_rhs_contribution =
+        _face_flux(face_arg, state_arg) * (_face_flux_is_integrated ? 1.0 : _current_face_area);
   }
 
   return _flux_rhs_contribution;

@@ -12,6 +12,8 @@
 #include "PhysicsBase.h"
 #include "MooseEnum.h"
 
+#include <functional>
+
 #define registerNavierStokesPhysicsBaseTasks(app_name, derived_name)                               \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_geometric_rm")
@@ -43,6 +45,14 @@ protected:
 
   /// Return the number of ghosting layers needed
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const = 0;
+
+  void addLinearFVScalarAdvectionKernel(
+      const LinearVariableName & variable,
+      const std::string & kernel_name,
+      const UserObjectName & rhie_chow_user_object,
+      const MooseEnum & advected_interp_method,
+      const std::vector<SubdomainName> & blocks,
+      const std::function<void(InputParameters &)> & extra_parameter_setup = {});
 
   /// Whether to define variables if they do not exist
   bool _define_variables;

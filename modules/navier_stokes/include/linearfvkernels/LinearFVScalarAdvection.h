@@ -12,13 +12,11 @@
 #include "LinearFVFluxKernel.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
-#include "FVAdvectedInterpolationMethod.h"
-#include "FVInterpolationMethodInterface.h"
 
 /**
  * An advection kernel that implements the advection term for the passive scalar transport equation.
  */
-class LinearFVScalarAdvection : public LinearFVFluxKernel, public FVInterpolationMethodInterface
+class LinearFVScalarAdvection : public LinearFVFluxKernel
 {
 public:
   static InputParameters validParams();
@@ -40,18 +38,15 @@ public:
 
 protected:
   /// The Rhie-Chow user object that provides us with the face velocity
-  const RhieChowMassFlux & _mass_flux_provider;
+  const RhieChowMassFlux * const _mass_flux_provider;
+
+  /// Optional directly supplied volumetric face-flux functor.
+  const Moose::Functor<Real> * const _face_flux;
 
 private:
-  /// The interpolation method to use for the advected quantity
-  const FVAdvectedInterpolationMethod & _adv_interp_method;
-
-  /// Cached weights/correction for the current face (refreshed in setupFaceData)
-  FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
-
-  /// Reusable gradient storage used when advected interpolation requires gradients.
-  VectorValue<Real> _elem_grad_storage;
-  VectorValue<Real> _neighbor_grad_storage;
+  /// Container for the current advected interpolation coefficients on the face to make sure
+  /// we don't compute it multiple times for different terms.
+  std::pair<Real, Real> _advected_interp_coeffs;
 
   /// Container for the velocity on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
@@ -66,4 +61,7 @@ private:
 
   /// Whether to use an additional slip velocity to compute the face flux
   bool _add_slip_model;
+
+  /// The interpolation method to use for the advected quantity
+  Moose::FV::InterpMethod _advected_interp_method;
 };

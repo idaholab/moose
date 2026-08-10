@@ -1,0 +1,1355 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\grad}{\nabla}
+\newcommand{\divergence}{\nabla\!\cdot}
+\newcommand{\curl}{\nabla\times}
+\newcommand{\bnd}{\operatorname{bound}}
+\newcommand{\sign}{\operatorname{sign}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\vol}{\mathcal{V}}
+\newcommand{\faces}{\mathcal{F}}
+\newcommand{\nb}{\mathcal{N}}
+
+\title{Mathematical and Numerical Formulation of the Sharp-Interface Free-Surface Dam-Break Model}
+\author{MOOSE Navier-Stokes Module}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document describes the mathematics and numerical implementation of the
+sharp-interface free-surface dam-break model used by
+\texttt{dam\_break\_openfoam\_geometry.i}.  The model is a two-phase,
+immiscible, incompressible, one-velocity volume-of-fluid formulation coupled to
+the MOOSE Navier-Stokes module through mixture-property functors, a
+reduced-pressure finite-volume pressure equation, a conservative
+alpha-consistent mass flux, and a Rhie-Chow pressure-velocity coupling.  The
+notation and several modeling ideas are intentionally close to common
+VOF/PIMPLE descriptions such as OpenFOAM's \texttt{interFoam} documentation,
+but the equations and numerical details below describe the MOOSE
+implementation used by this submodule.
+\end{abstract}
+
+\tableofcontents
+
+\section{Nomenclature}
+
+The nomenclature and principal symbols used in this document are the following:
+
+\begin{itemize}[leftmargin=2.5em]
+  \item \(\alpha\) (--) liquid volume fraction
+  \item \(\alpha_g=1-\alpha\) (--) gas volume fraction
+  \item \(\rho_l,\rho_g\) (kg\,m\(^{-3}\)) liquid and gas densities
+  \item \(\rho(\alpha)\) (kg\,m\(^{-3}\)) mixture density
+  \item \(\mu_l,\mu_g\) (Pa\,s) liquid and gas dynamic viscosities
+  \item \(\mu(\alpha)\) (Pa\,s) mixture dynamic viscosity
+  \item \(\mathbf{u}\) (m\,s\(^{-1}\)) mixture velocity
+  \item \(p\) (Pa) physical pressure
+  \item \(p_{rgh}\) (Pa) reduced pressure, \(p-\rho\mathbf{g}\cdot(\mathbf{x}-\mathbf{x}_{ref})\)
+  \item \(\mathbf{g}\) (m\,s\(^{-2}\)) gravitational acceleration
+  \item \(gh\) (m\(^2\)\,s\(^{-2}\)) gravitational head, \(\mathbf{g}\cdot(\mathbf{x}-\mathbf{x}_{ref})\)
+  \item \(c_\alpha\) (--) interface-compression coefficient
+  \item \(\mathbf{n}_{\alpha}\) (--) regularized interface normal
+  \item \(\delta_n\) (--) interface-normal regularization
+  \item \(P,N\) cell indices; \(P\) is owner/element, \(N\) is neighbor
+  \item \(f\) face index
+  \item \(V_P\) (m\(^3\)) cell volume
+  \item \(A_f\) (m\(^2\)) face area/measure
+  \item \(\mathbf{n}_f\) (--) unit face normal in owner-to-neighbor orientation
+  \item \(\varphi_f\) (m\,s\(^{-1}\)) volumetric normal flux density
+  \item \(F_f=A_f\varphi_f\) (m\(^3\)\,s\(^{-1}\)) integrated volumetric flux
+  \item \(F_{\alpha,f}\) (m\(^3\)\,s\(^{-1}\)) integrated volume-fraction flux
+  \item \(F_{\rho,f}\) (kg\,s\(^{-1}\)) integrated mass flux
+  \item \(F_{H/A,f}\) (m\(^3\)\,s\(^{-1}\)) integrated momentum-predictor flux
+  \item \(F_{p,f}\) (m\(^3\)\,s\(^{-1}\)) integrated pressure-equation flux
+  \item \(D_f\) face-normal pressure coefficient
+  \item \(rAU_P\) inverse momentum diagonal
+  \item \(N_s\) number of alpha subcycles
+  \item \(\Delta t\), \(\Delta t_s\) global and alpha-subcycle timesteps
+  \item \(Co_\alpha\) alpha Courant number
+  \item \(\lambda_f\) MULES-style face limiter
+  \item \(I_{\mathrm{backflow}}\) backflow indicator at an open boundary
+\end{itemize}
+
+\section{Dam-Break Configuration}
+
+The input represents the OpenFOAM-parity dam-break geometry:
+
+\begin{align}
+  a &= 0.05715\ \mathrm{m}, \\
+  L_x &= 10a, \\
+  L_y &= 1.25a,
+\end{align}
+
+with a \(400\times 50\) Cartesian finite-volume mesh.  The initial liquid column
+is
+
+\begin{equation}
+  0 \le x < a,
+  \qquad
+  0 \le y < a.
+\end{equation}
+
+The material constants are
+
+\begin{align}
+  \rho_l &= 998.19,
+  &
+  \rho_g &= 1.185, \\
+  \mu_l &= 10^{-3},
+  &
+  \mu_g &= 1.48\times 10^{-5},
+\end{align}
+
+and
+
+\begin{equation}
+  \mathbf{g}=(0,-9.81,0).
+\end{equation}
+
+The active numerical parameters in the free-surface path are
+
+\begin{align}
+  \Delta t &= 10^{-4}, &
+  N_{\alpha,\mathrm{sub}} &= 2, \\
+  c_\alpha &= 0.01, &
+  N_{\alpha,\mathrm{corr}} &= 1, \\
+  N_{\lambda,\mathrm{iter}} &= 6.
+\end{align}
+
+No surface-tension coefficient, turbulence model, energy equation, or phase
+change model is configured in this input.  The model is therefore a laminar,
+isothermal, immiscible, incompressible two-phase free-surface calculation.
+
+\section{Continuous Free-Surface Model}
+
+\subsection{Volume Fractions and Mixture Properties}
+
+The free surface is represented by the liquid volume fraction
+
+\begin{equation}
+  0 \le \alpha(\mathbf{x},t) \le 1.
+\end{equation}
+
+The gas fraction is
+
+\begin{equation}
+  \alpha_g = 1-\alpha.
+\end{equation}
+
+The mixture laws used by the Navier-Stokes kernels are affine in \(\alpha\):
+
+\begin{align}
+  \rho(\alpha)
+  &=
+  \alpha\rho_l + (1-\alpha)\rho_g
+  =
+  \rho_g + (\rho_l-\rho_g)\alpha,
+  \label{eq:rho-alpha}
+  \\
+  \mu(\alpha)
+  &=
+  \alpha\mu_l + (1-\alpha)\mu_g.
+  \label{eq:mu-alpha}
+\end{align}
+
+These mixture properties are exposed to the Navier-Stokes module as functor
+material properties.  Momentum, pressure, and boundary kernels consume the
+resulting \(\rho(\alpha)\) and \(\mu(\alpha)\) fields rather than owning a
+separate phase model.
+
+\subsection{Reduced Pressure}
+
+Define
+
+\begin{equation}
+  gh(\mathbf{x}) = \mathbf{g}\cdot(\mathbf{x}-\mathbf{x}_{ref}).
+\end{equation}
+
+The reduced pressure is
+
+\begin{equation}
+  p_{rgh}=p-\rho gh.
+  \label{eq:prgh}
+\end{equation}
+
+Taking a gradient gives
+
+\begin{equation}
+  \grad p
+  =
+  \grad p_{rgh}
+  +
+  gh\,\grad\rho
+  +
+  \rho\grad gh.
+\end{equation}
+
+Because \(\grad gh=\mathbf{g}\),
+
+\begin{equation}
+  -\grad p+\rho\mathbf{g}
+  =
+  -\grad p_{rgh}-gh\,\grad\rho.
+  \label{eq:reduced-pressure-force}
+\end{equation}
+
+Equation \eqref{eq:reduced-pressure-force} is the mathematical basis for the
+sharp-interface reduced-pressure force.  The pressure equation solves for the
+reduced pressure variable, and the density-gradient hydrostatic correction is
+handled explicitly through the sharp-interface face-flux machinery.
+
+\subsection{Governing Equations}
+
+The incompressibility constraint is
+
+\begin{equation}
+  \divergence\mathbf{u}=0.
+  \label{eq:div-free}
+\end{equation}
+
+The liquid volume fraction satisfies a conservative VOF equation with an
+interface-compression contribution,
+
+\begin{equation}
+  \frac{\partial\alpha}{\partial t}
+  +
+  \divergence(\alpha\mathbf{u})
+  +
+  \divergence\!\left[
+    c_\alpha\alpha(1-\alpha)\mathbf{u}_c
+  \right]
+  =
+  0.
+  \label{eq:continuous-alpha}
+\end{equation}
+
+In the MOOSE implementation, \(\mathbf{u}_c\) is not an independent field.
+Instead, the VOF corrector constructs a compressed face state from the transport
+flux direction, the interface normal, and \(c_\alpha\).  This is the same
+numerical role played by artificial compression in VOF/PIMPLE solvers such as
+OpenFOAM's \texttt{interFoam}: sharpen the smeared interface without introducing
+a physical mass flux.
+
+The reduced-pressure momentum equation is
+
+\begin{equation}
+  \frac{\partial(\rho\mathbf{u})}{\partial t}
+  +
+  \divergence(\rho\mathbf{u}\otimes\mathbf{u})
+  -
+  \divergence
+  \left[
+    \mu
+    \left(\grad\mathbf{u}+\grad\mathbf{u}^{T}\right)
+  \right]
+  =
+  -\grad p_{rgh}
+  -
+  gh\,\grad\rho.
+  \label{eq:momentum-prgh}
+\end{equation}
+
+The viscous stress above is written in the simplified incompressible laminar
+form used by this dam-break case.  If a future calculation enabled turbulence
+or surface tension, those terms would enter the momentum equation through the
+standard Navier-Stokes module kernels and materials; they are not active in the
+present input.
+
+\section{Initial and Boundary Data}
+
+The initial alpha field is the liquid-column indicator:
+
+\begin{equation}
+  \alpha(\mathbf{x},0)
+  =
+  \begin{cases}
+    1, & x<a\ \text{and}\ y<a, \\
+    0, & \text{otherwise}.
+  \end{cases}
+\end{equation}
+
+The initial velocity is
+
+\begin{equation}
+  \mathbf{u}(\mathbf{x},0)=\mathbf{0}.
+\end{equation}
+
+The initialized reduced pressure is
+
+\begin{equation}
+  p_{rgh}(\mathbf{x},0)
+  =
+  \begin{cases}
+    -(\rho_l-\rho_g)g(L_y-a), & x<a\ \text{and}\ y<a, \\
+    0, & \text{otherwise}.
+  \end{cases}
+  \label{eq:init-prgh}
+\end{equation}
+
+This is not an absolute hydrostatic pressure field; it is the supplied
+reduced-pressure state.  The startup projection described later repairs the
+discrete face flux while restoring this pressure vector.
+
+At solid walls,
+
+\begin{equation}
+  \mathbf{u}=\mathbf{0}.
+\end{equation}
+
+The wall pressure treatment imposes a pressure flux/normal-gradient constraint
+consistent with the pressure predictor.  In simplified notation,
+
+\begin{equation}
+  \frac{\partial p_{rgh}}{\partial n}
+  =
+  -\frac{F_{\mathrm{predictor},b}}{D_b},
+  \label{eq:wall-pressure-gradient}
+\end{equation}
+
+unless the Rhie-Chow object has already populated a constrained wall gradient,
+in which case the cached gradient is used directly.
+
+At the top outlet, the pressure condition is a reduced-pressure total-pressure
+condition,
+
+\begin{equation}
+  p_{rgh,b}
+  =
+  p_{ref}
+  -
+  \frac{1}{2}\rho_b
+  |\mathbf{u}_{n,b}|^2 I_{\mathrm{backflow}}
+  -
+  \rho_b gh_b.
+  \label{eq:top-prgh}
+\end{equation}
+
+The input sets \(p_{ref}=0\).  The alpha boundary condition is inlet-outlet:
+
+\begin{equation}
+  \alpha_b =
+  \begin{cases}
+    0, & F_b<0\quad\text{(backflow into the domain)},\\
+    \alpha_P + O(d_{Pb}\grad\alpha_P), & F_b\ge 0\quad\text{(outflow)}.
+  \end{cases}
+\end{equation}
+
+\section{Interface Geometry}
+
+The flow physics creates geometry functors from the alpha field.  The clipped
+alpha field used for interface indicators is
+
+\begin{equation}
+  \alpha_c=\min(\alpha_{\max},\max(\alpha_{\min},\alpha)).
+\end{equation}
+
+The near-interface indicator is
+
+\begin{equation}
+  \chi_I =
+  \begin{cases}
+    1, & \alpha_{I,lo}\le \alpha_c\le \alpha_{I,hi},\\
+    0, & \text{otherwise}.
+  \end{cases}
+\end{equation}
+
+The regularized interface normal is
+
+\begin{equation}
+  \mathbf{n}_{\alpha}
+  =
+  \frac{\grad\alpha}{|\grad\alpha|+\delta_n}.
+  \label{eq:interface-normal}
+\end{equation}
+
+For the dam-break case, this normal is consumed by the VOF compression
+correction through the face-oriented functor
+\texttt{flow\_interface\_unit\_normal\_face}.  The default regularization is
+\(\delta_n=10^{-8}\) unless changed by input.
+
+\section{Cell-Centered Finite-Volume Discretization}
+
+\subsection{Control-Volume Balance}
+
+Let \(P\) be a finite-volume cell with volume \(V_P\).  A generic conservation
+law
+
+\begin{equation}
+  \frac{\partial\psi}{\partial t}
+  +
+  \divergence\mathbf{j}_{\psi}
+  =
+  s_\psi
+\end{equation}
+
+integrates to
+
+\begin{equation}
+  V_P
+  \frac{\psi_P^{n+1}-\psi_P^n}{\Delta t}
+  +
+  \sum_{f\in\partial P}
+  J_{\psi,f}
+  =
+  V_P s_{\psi,P}.
+  \label{eq:fv-balance}
+\end{equation}
+
+For advective transport,
+
+\begin{equation}
+  J_{\psi,f}=F_f\psi_f,
+  \qquad
+  F_f=A_f\varphi_f.
+\end{equation}
+
+The face normal \(\mathbf{n}_f\) is oriented from the owner cell \(P\) to the
+neighbor cell \(N\).  Hence \(F_f>0\) is owner-to-neighbor transport.
+
+\subsection{Scalar Transport Matrix}
+
+The donor/upwind part of a scalar advection equation leads to a linear system
+
+\begin{equation}
+  a_P\psi_P+\sum_{N\in\nb(P)}a_N\psi_N=b_P.
+\end{equation}
+
+For a pure transient upwind advection equation, the owner-cell coefficients can
+be interpreted as
+
+\begin{align}
+  a_P
+  &=
+  \frac{V_P}{\Delta t}
+  +
+  \sum_{f\in\partial P}\max(F_f,0),
+  \\
+  a_N
+  &=
+  \min(F_f,0).
+\end{align}
+
+Boundary conditions contribute either matrix terms, source terms, or both.  The
+VOF corrector does not assemble this matrix; it acts after the upwind matrix
+solve by applying a conservative limited correction to the alpha flux.
+
+\subsection{Pressure Diffusion Operator}
+
+On an internal face, the pressure normal derivative can be decomposed into an
+orthogonal two-point part plus an explicit non-orthogonal correction:
+
+\begin{equation}
+  \left(\frac{\partial p}{\partial n}\right)_f
+  =
+  \frac{p_N-p_P}{\mathbf{d}_{PN}\cdot\mathbf{n}_f}
+  +
+  \mathbf{k}_f\cdot(\grad p)_f.
+\end{equation}
+
+The dam-break input disables orthogonality correction in the flow physics, so
+the dominant contribution is the two-point normal difference.  The pressure
+diffusion flux has the abstract form
+
+\begin{equation}
+  F_{p,f}
+  =
+  M_{P,f}p_P+M_{N,f}p_N-R_f,
+  \label{eq:pressure-discrete-flux}
+\end{equation}
+
+where \(M_{P,f}\) and \(M_{N,f}\) are matrix contributions from the pressure
+diffusion kernel, and \(R_f\) is its explicit right-hand-side contribution.
+
+\section{VOF Transport and Subcycling}
+
+\subsection{Alpha Courant Number}
+
+The VOF transport flux is frozen during each alpha solve.  The alpha Courant
+number used to decide whether more subcycles are needed is
+
+\begin{equation}
+  Co_{\alpha,P}
+  =
+  \frac{1}{2}
+  \frac{\Delta t}{V_P}
+  \sum_{f\in\partial P}
+  |F_f|.
+  \label{eq:alpha-courant}
+\end{equation}
+
+The global alpha Courant number is
+
+\begin{equation}
+  Co_\alpha=\max_P Co_{\alpha,P}.
+\end{equation}
+
+The number of alpha subcycles is
+
+\begin{equation}
+  N_s
+  =
+  \max
+  \left(
+    N_{\alpha,\mathrm{sub}},
+    \left\lceil
+      \frac{Co_\alpha}{Co_{\alpha,\max}}
+    \right\rceil
+  \right),
+  \qquad
+  \Delta t_s=\frac{\Delta t}{N_s}.
+  \label{eq:subcycles}
+\end{equation}
+
+For subcycle \(s\),
+
+\begin{align}
+  t_{old,s}&=t^n+s\Delta t_s,\\
+  t_s&=t^n+(s+1)\Delta t_s.
+\end{align}
+
+The old alpha state is advanced between subcycles but restored to the true
+timestep-old state after all subcycles.  This preserves the global time
+history expected by the transient Navier-Stokes machinery.
+
+\subsection{Donor Solve}
+
+For each subcycle, the base matrix solve computes an intermediate alpha
+\(\alpha_P^*\):
+
+\begin{equation}
+  \frac{V_P}{\Delta t_s}
+  \left(\alpha_P^*-\alpha_P^{old}\right)
+  +
+  \sum_{f\in\partial P}
+  F_f\alpha_{upwind,f}
+  =
+  0.
+  \label{eq:alpha-donor}
+\end{equation}
+
+The upwind state is
+
+\begin{equation}
+  \alpha_{upwind,f}
+  =
+  \begin{cases}
+    \alpha_P, & F_f\ge 0,\\
+    \alpha_N, & F_f<0,
+  \end{cases}
+  \label{eq:upwind-alpha}
+\end{equation}
+
+for internal faces.  Boundary faces use the active finite-volume boundary
+condition.
+
+The donor alpha flux is
+
+\begin{equation}
+  F_{\alpha,f}^{donor}=F_f\alpha_{upwind,f}.
+  \label{eq:donor-flux}
+\end{equation}
+
+The donor solve is monotone but diffusive.  The MOOSE sharp-interface VOF path
+therefore splits the final flux into
+
+\begin{equation}
+  F_{\alpha,f}^{final}
+  =
+  F_{\alpha,f}^{donor}
+  +
+  F_{\alpha,f}^{limited,corr}.
+  \label{eq:flux-split}
+\end{equation}
+
+The correction is a conservative face-flux correction, not a post-solve clip of
+cell values.  This distinction is essential: clipping cell alpha would generally
+destroy conservation, while a limited face flux preserves pairwise cancellation
+on internal faces.
+
+\section{High-Order Compression Flux}
+
+\subsection{High-Order Face State}
+
+For internal faces, the corrector evaluates a bounded Van Leer face value:
+
+\begin{equation}
+  \alpha_f^{HO}
+  =
+  \bnd\left(\alpha_f^{VanLeer}\right),
+  \qquad
+  \bnd(a)=\min(1,\max(0,a)).
+\end{equation}
+
+The linearly interpolated alpha used by the compression term is
+
+\begin{equation}
+  \alpha_f^{lin}
+  =
+  \bnd
+  \left[
+    g_C\alpha_P+(1-g_C)\alpha_N
+  \right],
+  \label{eq:linear-alpha-face}
+\end{equation}
+
+where \(g_C\) is the geometric interpolation weight stored on the face.
+
+\subsection{Compression State}
+
+Using the regularized interface normal \eqref{eq:interface-normal}, the
+compressed alpha face state is
+
+\begin{equation}
+  \alpha_f^{comp}
+  =
+  \bnd
+  \left[
+    \alpha_f^{HO}
+    +
+    c_\alpha
+    \sign(F_f)
+    \alpha_f^{lin}(1-\alpha_f^{lin})
+    \left(\mathbf{n}_{\alpha,f}\cdot\mathbf{n}_f\right)
+  \right].
+  \label{eq:compressed-alpha}
+\end{equation}
+
+The target alpha flux is
+
+\begin{equation}
+  F_{\alpha,f}^{target}
+  =
+  F_f\alpha_f^{comp}.
+  \label{eq:target-alpha-flux}
+\end{equation}
+
+The factor \(\alpha_f^{lin}(1-\alpha_f^{lin})\) localizes compression near the
+interface.  It vanishes in pure liquid and pure gas cells.  The sign of \(F_f\)
+orients the compression contribution with the transport direction, while
+\(\mathbf{n}_{\alpha,f}\cdot\mathbf{n}_f\) projects the interface normal onto
+the face normal.
+
+\subsection{Boundary Face Classification}
+
+The VOF corrector distinguishes internal, Dirichlet inflow, Dirichlet outflow,
+open outflow, and closed boundary faces.  A compact representation of the donor
+state is
+
+\begin{equation}
+  \alpha_{donor,f}
+  =
+  \begin{cases}
+    \alpha_P,
+      & F_f\ge 0,\\
+    \alpha_N,
+      & F_f<0,\quad f\ \text{internal},\\
+    \alpha_b,
+      & F_f<0,\quad f\ \text{Dirichlet inflow},\\
+    \alpha_b^{backflow},
+      & F_f<0,\quad f\ \text{open boundary backflow},\\
+    \alpha_P,
+      & f\ \text{closed}.
+  \end{cases}
+\end{equation}
+
+Closed faces do not contribute a correction flux.  On the top outlet of the
+dam-break case, backflow imposes gas, \(\alpha_b^{backflow}=0\), and outflow
+uses the extrapolated interior alpha state.
+
+\section{MULES-Style Bounded Flux Limiter}
+
+\subsection{Raw Correction}
+
+Let \(F_{\alpha,f}^{work}\) be the current working alpha flux.  At the start of
+the first correction sweep,
+
+\begin{equation}
+  F_{\alpha,f}^{work}=F_{\alpha,f}^{donor}.
+\end{equation}
+
+The raw correction is
+
+\begin{equation}
+  C_f
+  =
+  F_{\alpha,f}^{corr}
+  =
+  F_{\alpha,f}^{target}
+  -
+  F_{\alpha,f}^{work}.
+  \label{eq:raw-correction}
+\end{equation}
+
+If applied without limiting, the owner-cell update would be
+
+\begin{equation}
+  \Delta\alpha_{P,f}
+  =
+  -\frac{\Delta t_s}{V_P}C_f.
+  \label{eq:owner-correction-update}
+\end{equation}
+
+Thus \(C_f>0\) removes alpha from the owner cell and \(C_f<0\) adds alpha to
+the owner cell.  The neighbor cell receives the opposite signed update.
+
+\subsection{Local Admissible Bounds}
+
+The implementation initializes a hard admissible interval \([0,1]\), then
+tightens it with bounded neighbor or boundary values.  Let \(B_P\) be the set
+of such adjacent values collected for cell \(P\).  Define
+
+\begin{align}
+  \alpha_P^{lo}
+  &=
+  \max
+  \left(
+    0,\max_{\beta\in B_P}\bnd(\beta)
+  \right),
+  \\
+  \alpha_P^{hi}
+  &=
+  \min
+  \left(
+    1,\min_{\beta\in B_P}\bnd(\beta)
+  \right).
+\end{align}
+
+The correction capacity that can increase alpha is
+
+\begin{equation}
+  \Psi_P^{inc}
+  =
+  \frac{V_P}{\Delta t_s}
+  \max(0,\alpha_P^{lo}-\alpha_P^*),
+  \label{eq:psi-inc}
+\end{equation}
+
+and the correction capacity that can decrease alpha is
+
+\begin{equation}
+  \Psi_P^{dec}
+  =
+  \frac{V_P}{\Delta t_s}
+  \max(0,\alpha_P^*-\alpha_P^{hi}).
+  \label{eq:psi-dec}
+\end{equation}
+
+These names describe the effect on the cell alpha.  The source code stores the
+same quantities as two maps used to limit negative-inflow and positive-outflow
+corrections.
+
+\subsection{Cell Flux Sums}
+
+For cell \(P\), write \(C_{P,f}\) as the correction flux signed so that positive
+values remove alpha from \(P\).  The raw correction sums are
+
+\begin{align}
+  S_P^{out,+}
+  &=
+  \sum_{f\in\partial P}
+  \max(0,C_{P,f}),
+  \\
+  S_P^{in,-}
+  &=
+  \sum_{f\in\partial P}
+  \max(0,-C_{P,f}).
+\end{align}
+
+During limiter iteration \(m\), the already accepted limited sums are
+
+\begin{align}
+  S_{P,m}^{out,+}
+  &=
+  \sum_{f\in\partial P}
+  \max(0,\lambda_f^{(m)}C_{P,f}),
+  \\
+  S_{P,m}^{in,-}
+  &=
+  \sum_{f\in\partial P}
+  \max(0,-\lambda_f^{(m)}C_{P,f}).
+\end{align}
+
+The cell-side limiter estimates are
+
+\begin{align}
+  \lambda_P^{inc}
+  &=
+  \bnd
+  \left(
+    \frac{S_{P,m}^{out,+}+\Psi_P^{inc}}
+         {S_P^{in,-}+\epsilon}
+  \right),
+  \\
+  \lambda_P^{dec}
+  &=
+  \bnd
+  \left(
+    \frac{S_{P,m}^{in,-}+\Psi_P^{dec}}
+         {S_P^{out,+}+\epsilon}
+  \right),
+  \label{eq:cell-limiters}
+\end{align}
+
+where \(\epsilon=\sqrt{\mathrm{minReal}}\) in the implementation.
+
+\subsection{Face Limiter}
+
+For an internal face with owner \(P\), neighbor \(N\), and owner-oriented
+correction \(C_f\), the accepted face limiter is tightened as
+
+\begin{equation}
+  \lambda_f
+  \leftarrow
+  \begin{cases}
+    \min(\lambda_f,\lambda_P^{dec},\lambda_N^{inc}),
+      & C_f>0,\\
+    \min(\lambda_f,\lambda_P^{inc},\lambda_N^{dec}),
+      & C_f<0.
+  \end{cases}
+  \label{eq:face-limiter}
+\end{equation}
+
+On a boundary face, only the owner-side limiter participates, unless the face is
+closed.  On a processor-partition face, both ranks compute a limiter and the
+minimum is exchanged so the two sides apply the same \(\lambda_f\).
+
+The limited correction on alpha-correction sweep \(k\) is
+
+\begin{equation}
+  F_{\alpha,f}^{limited,corr}
+  =
+  w_k\lambda_f C_f,
+  \qquad
+  w_k=
+  \begin{cases}
+    1, & k=0,\\
+    0.5, & k>0.
+  \end{cases}
+  \label{eq:limited-correction}
+\end{equation}
+
+The dam-break input uses \(N_{\alpha,\mathrm{corr}}=1\), so \(w_0=1\).
+
+The owner and neighbor updates are
+
+\begin{align}
+  \Delta\alpha_P
+  &=
+  -\frac{\Delta t_s}{V_P}
+  F_{\alpha,f}^{limited,corr},
+  \\
+  \Delta\alpha_N
+  &=
+  +\frac{\Delta t_s}{V_N}
+  F_{\alpha,f}^{limited,corr}.
+\end{align}
+
+Therefore an internal face conserves integrated alpha exactly:
+
+\begin{equation}
+  V_P\Delta\alpha_P+V_N\Delta\alpha_N=0.
+\end{equation}
+
+After the update, the working flux is advanced:
+
+\begin{equation}
+  F_{\alpha,f}^{work}
+  \leftarrow
+  F_{\alpha,f}^{work}
+  +
+  F_{\alpha,f}^{limited,corr}.
+\end{equation}
+
+\section{Subcycle-Averaged Alpha and Mass Fluxes}
+
+The corrector publishes timestep-consistent subcycle-averaged face fluxes.  Let
+
+\begin{equation}
+  \theta_s=\frac{\Delta t_s}{\Delta t}.
+\end{equation}
+
+The published alpha flux is
+
+\begin{equation}
+  \bar{F}_{\alpha,f}
+  =
+  \sum_{s=0}^{N_s-1}
+  \theta_s F_{\alpha,f,s}^{work}.
+  \label{eq:published-alpha-flux}
+\end{equation}
+
+The alpha-consistent mass flux for subcycle \(s\) is
+
+\begin{equation}
+  F_{\rho,f,s}
+  =
+  \rho_g F_{f,s}
+  +
+  (\rho_l-\rho_g)
+  F_{\alpha,f,s}^{work}.
+  \label{eq:rho-flux-subcycle}
+\end{equation}
+
+The published mass flux is
+
+\begin{equation}
+  \bar{F}_{\rho,f}
+  =
+  \sum_{s=0}^{N_s-1}
+  \theta_s F_{\rho,f,s}.
+  \label{eq:published-rho-flux}
+\end{equation}
+
+This flux is exposed to the Navier-Stokes momentum equation as the conservative
+sharp-interface mass flux.  It is generally not equal to
+\(\rho_f\bar{F}_f\) with an independently interpolated \(\rho_f\).
+
+\section{Alpha-Consistent Density Conservation}
+
+From \eqref{eq:rho-alpha},
+
+\begin{equation}
+  V_P(\rho_P^{n+1}-\rho_P^n)
+  =
+  (\rho_l-\rho_g)
+  V_P(\alpha_P^{n+1}-\alpha_P^n).
+\end{equation}
+
+Using the conservative alpha update gives
+
+\begin{equation}
+  V_P(\rho_P^{n+1}-\rho_P^n)
+  =
+  -\Delta t
+  \sum_{f\in\partial P}
+  (\rho_l-\rho_g)\bar{F}_{\alpha,f}.
+\end{equation}
+
+The mass flux \eqref{eq:published-rho-flux} satisfies
+
+\begin{equation}
+  \sum_{f\in\partial P}\bar{F}_{\rho,f}
+  =
+  \rho_g
+  \sum_{f\in\partial P}\bar{F}_f
+  +
+  (\rho_l-\rho_g)
+  \sum_{f\in\partial P}\bar{F}_{\alpha,f}.
+\end{equation}
+
+For a pressure-corrected incompressible transport flux,
+
+\begin{equation}
+  \sum_{f\in\partial P}\bar{F}_f\approx 0,
+\end{equation}
+
+so
+
+\begin{equation}
+  V_P(\rho_P^{n+1}-\rho_P^n)
+  +
+  \Delta t
+  \sum_{f\in\partial P}
+  \bar{F}_{\rho,f}
+  \approx 0.
+  \label{eq:density-consistency}
+\end{equation}
+
+Equation \eqref{eq:density-consistency} is the central reason the
+free-surface submodule publishes \(\bar{F}_{\rho,f}\).  The momentum equation
+should see the same phase transport that updated \(\alpha\), especially for the
+large density ratio in the dam-break problem.
+
+\section{Momentum Predictor}
+
+For each velocity component \(i\), the segregated linearized momentum equation
+has the abstract form
+
+\begin{equation}
+  a_{P,i}u_{P,i}
+  +
+  \sum_{N\in\nb(P)}
+  a_{N,i}u_{N,i}
+  =
+  b_{P,i}
+  -
+  V_P(\grad p_{rgh})_{P,i}
+  +
+  V_P f_{rgh,P,i}.
+  \label{eq:momentum-discrete}
+\end{equation}
+
+Here
+
+\begin{equation}
+  \mathbf{f}_{rgh}=-gh\,\grad\rho
+\end{equation}
+
+is the reduced-pressure density-gradient force from
+\eqref{eq:reduced-pressure-force}.  Define
+
+\begin{equation}
+  rAU_{P,i}=\frac{1}{a_{P,i}}.
+\end{equation}
+
+The off-diagonal and explicit source contribution is grouped as \(H_{P,i}\),
+giving
+
+\begin{equation}
+  u_{P,i}
+  =
+  HbyA_{P,i}
+  -
+  rAU_{P,i}(\grad p_{rgh})_{P,i}
+  +
+  rAU_{P,i}f_{rgh,P,i},
+  \qquad
+  HbyA_{P,i}=rAU_{P,i}H_{P,i}.
+\end{equation}
+
+The pressure equation and Rhie-Chow correction use the same \(rAU\)-based face
+coefficient that comes from this momentum operator.  This consistency is more
+important than the precise algebraic splitting of \(H\) and \(A\): the pressure
+diffusion coefficient must correspond to the momentum predictor it corrects.
+
+\section{Pressure Equation}
+
+\subsection{Predictor and Hydrostatic Fluxes}
+
+The pressure equation is obtained by enforcing continuity on the pressure
+corrected face flux.  The predictor contribution is
+
+\begin{equation}
+  F_{H/A,f}
+  =
+  A_f
+  \left[
+    (\mathbf{HbyA})_f\cdot\mathbf{n}_f
+    +
+    \varphi_{ddtCorr,f}
+  \right],
+  \label{eq:fhbya}
+\end{equation}
+
+where \(\varphi_{ddtCorr,f}\) is the transient projection correction used when
+startup/predictor source terms are enabled.
+
+The explicit reduced-pressure hydrostatic contribution is
+
+\begin{equation}
+  F_{g,f}
+  =
+  A_f
+  \left[
+    -gh_f
+    (\grad_n\rho)_f
+    D_f
+  \right].
+  \label{eq:phig}
+\end{equation}
+
+The face-normal pressure coefficient is
+
+\begin{equation}
+  D_f=\mathbf{n}_f\cdot rAU_f\mathbf{n}_f.
+  \label{eq:pressure-coefficient}
+\end{equation}
+
+The pressure-divergence flux functor uses the sign convention
+
+\begin{equation}
+  F_{\phi H/A,f}
+  =
+  -(F_{H/A,f}+F_{g,f}).
+  \label{eq:stored-phi-hbya}
+\end{equation}
+
+\subsection{Pressure Correction Flux}
+
+After the pressure solve, the pressure diffusion flux is cached in the form
+\eqref{eq:pressure-discrete-flux}.  The corrected integrated volumetric flux is
+
+\begin{equation}
+  F_f^{corr}
+  =
+  -F_{\phi H/A,f}
+  +
+  F_{p,f}.
+  \label{eq:corrected-integrated-flux}
+\end{equation}
+
+The pressure equation enforces
+
+\begin{equation}
+  \sum_{f\in\partial P} F_f^{corr}=0.
+  \label{eq:pressure-continuity}
+\end{equation}
+
+The face flux density published for transport is
+
+\begin{equation}
+  \varphi_f^{corr}=\frac{F_f^{corr}}{A_f}.
+\end{equation}
+
+This value is the authoritative pressure-corrected volumetric transport flux.
+The next alpha solve freezes it into the VOF transport flux so alpha subcycles
+see a fixed velocity field.
+
+\section{Rhie-Chow Pressure-Velocity Coupling}
+
+On a collocated cell-centered mesh, simple interpolation of cell velocities to
+faces can decouple pressure and velocity.  A plain interpolated face flux
+
+\begin{equation}
+  \varphi_f^{lin}
+  =
+  \left[
+    g_C\mathbf{u}_P+(1-g_C)\mathbf{u}_N
+  \right]\cdot\mathbf{n}_f
+\end{equation}
+
+does not necessarily contain the nearest-neighbor pressure difference
+\((p_N-p_P)\).  The resulting pressure equation can admit an alternating
+checkerboard mode.
+
+Rhie-Chow interpolation restores a compact pressure-difference contribution:
+
+\begin{equation}
+  \varphi_f^{RC}
+  =
+  \varphi_f^{lin}
+  -
+  D_f
+  \left[
+    \frac{p_N-p_P}{\mathbf{d}_{PN}\cdot\mathbf{n}_f}
+    -
+    \overline{\grad p}_f\cdot\mathbf{n}_f
+  \right]
+  +
+  \varphi_{\mathrm{src},f}.
+  \label{eq:rhie-chow}
+\end{equation}
+
+Here \(\varphi_{\mathrm{src},f}\) collects explicit source corrections, including
+the sharp-interface hydrostatic contribution when it is enabled.  The bracketed
+term vanishes for a pressure field whose cell-to-cell difference and
+interpolated pressure gradient are consistent, but it penalizes pressure modes
+that are invisible to a simple collocated interpolation.
+
+The sharp-interface implementation keeps the face flux, not the reconstructed
+cell velocity, as the source of truth.  The cell-centered pressure-corrected
+velocity is reconstructed from face-normal pressure-correction scalars:
+
+\begin{equation}
+  \delta\mathbf{u}_P
+  \approx
+  rAU_P\,
+  \mathcal{R}_P
+  \left[
+    \frac{F_{p,f}+F_{g,f}}{A_fD_f}
+  \right],
+  \label{eq:velocity-writeback}
+\end{equation}
+
+where \(\mathcal{R}_P\) denotes the finite-volume reconstruction from face
+normal scalars to a cell vector.  This reconstructed velocity is used for the
+next momentum state and boundary evaluations, but it is not projected back to
+overwrite \(F_f^{corr}\).
+
+\section{Startup Projection}
+
+At the first timestep, the initial pressure and velocity fields may not produce
+a face flux that is discrete-continuity-consistent with the pressure operator
+and boundary constraints.  The startup projection solves a pressure-only
+continuity correction while preserving the supplied reduced-pressure field.
+
+Let \(p_0\) be the initialized reduced-pressure vector and let \(F_f^0\) be the
+initial predictor flux.  The startup projection computes an auxiliary pressure
+increment \(\pi\) such that
+
+\begin{equation}
+  \sum_{f\in\partial P}
+  \left[
+    F_f^0
+    -
+    A_fD_f
+    \left(\frac{\partial\pi}{\partial n}\right)_f
+  \right]
+  =
+  0.
+  \label{eq:startup-projection}
+\end{equation}
+
+The startup-corrected flux is
+
+\begin{equation}
+  F_f^{startup}
+  =
+  F_f^0
+  -
+  A_fD_f
+  \left(\frac{\partial\pi}{\partial n}\right)_f.
+\end{equation}
+
+After the projection, the pressure vector is restored:
+
+\begin{equation}
+  p_{rgh}^{after\ startup}=p_0.
+\end{equation}
+
+The startup guard suppresses the explicit hydrostatic and startup predictor
+source terms during this cleanup:
+
+\begin{equation}
+  F_{g,f}^{startup}=0,
+  \qquad
+  F_{ddtCorr,f}^{startup}=0.
+\end{equation}
+
+Thus the startup projection repairs continuity of the face flux without
+replacing the physical reduced-pressure initialization \eqref{eq:init-prgh}.
+
+\section{Coupling Contracts with the Navier-Stokes Module}
+
+The sharp-interface free-surface submodule does not replace the Navier-Stokes
+finite-volume discretization.  Instead, it supplies the mathematical fields
+that the standard Navier-Stokes kernels need:
+
+\begin{enumerate}[leftmargin=2.5em]
+  \item The scalar field \(\alpha\), from which \(\rho(\alpha)\) and
+        \(\mu(\alpha)\) are generated.
+  \item The interface normal \(\mathbf{n}_{\alpha}\), used only by the VOF
+        compression correction in this case.
+  \item The frozen alpha-transport flux \(F_f\), obtained from the previous
+        pressure-corrected volumetric face flux.
+  \item The bounded alpha flux \(\bar{F}_{\alpha,f}\), produced by the MULES-style
+        corrector.
+  \item The alpha-consistent mass flux \(\bar{F}_{\rho,f}\), consumed by
+        momentum advection.
+  \item The reduced-pressure face coefficients \(D_f\) and predictor fluxes
+        used by the pressure equation and pressure boundary conditions.
+\end{enumerate}
+
+The mathematical coupling order in one timestep is:
+
+\begin{enumerate}[leftmargin=2.5em]
+  \item freeze the latest pressure-corrected volumetric flux for alpha
+        transport;
+  \item solve the donor alpha equation \eqref{eq:alpha-donor};
+  \item apply the bounded correction \eqref{eq:limited-correction};
+  \item publish \(\bar{F}_{\alpha,f}\) and \(\bar{F}_{\rho,f}\);
+  \item update \(\rho(\alpha)\), \(\mu(\alpha)\), and interface geometry;
+  \item solve the momentum predictor \eqref{eq:momentum-discrete};
+  \item solve the pressure equation \eqref{eq:pressure-continuity};
+  \item publish \(F_f^{corr}\) for the next transport state.
+\end{enumerate}
+
+This order is the main correctness contract.  The momentum and pressure
+equations see material properties and mass fluxes consistent with the alpha
+field that was just transported.
+
+\section{Conservation and Boundedness}
+
+For any set of cells \(\Omega_h\), the alpha update satisfies
+
+\begin{equation}
+  \sum_{P\in\Omega_h}V_P\alpha_P^{n+1}
+  =
+  \sum_{P\in\Omega_h}V_P\alpha_P^n
+  -
+  \Delta t
+  \sum_{f\in\partial\Omega_h}
+  \bar{F}_{\alpha,f}.
+\end{equation}
+
+Internal face fluxes cancel pairwise.  Hence alpha changes only through the
+boundary of the selected cell set.
+
+The limiter is designed so that every explicit correction obeys the local
+admissible bounds:
+
+\begin{equation}
+  \alpha_P^{lo}
+  \le
+  \alpha_P^{new}
+  \le
+  \alpha_P^{hi},
+\end{equation}
+
+subject to the usual finite-precision and linear-solver tolerances.  Since the
+global hard bounds are included in the local interval, this also enforces
+
+\begin{equation}
+  0\le\alpha_P^{new}\le 1.
+\end{equation}
+
+The density conservation relation \eqref{eq:density-consistency} then connects
+bounded alpha transport to momentum advection through the published
+\(\bar{F}_{\rho,f}\).
+
+\section{Relation to the interFoam Pattern}
+
+The MOOSE formulation and OpenFOAM's \texttt{interFoam} share the same broad
+VOF/PIMPLE structure:
+
+\begin{itemize}[leftmargin=2.5em]
+  \item one velocity and one pressure field for two immiscible incompressible
+        phases;
+  \item volume-fraction transport with artificial compression;
+  \item bounded flux correction for alpha;
+  \item mixture density and viscosity computed from alpha;
+  \item pressure-velocity coupling through PIMPLE;
+  \item reduced pressure \(p_{rgh}\) for hydrostatic effects.
+\end{itemize}
+
+The MOOSE implementation described here is specialized around an
+alpha-consistent mass flux and a sharp-interface Rhie-Chow object.  The key
+implementation distinction is that the same limited alpha flux that updates
+\(\alpha\) also defines the density flux consumed by momentum.  This is a
+conservative coupling contract between the free-surface submodule and the
+Navier-Stokes finite-volume kernels.
+
+\section{References}
+
+\begin{thebibliography}{9}
+
+\bibitem{openfoam-interfoam}
+OpenCFD Ltd.,
+\emph{OpenFOAM User Guide: interFoam}.
+\url{https://www.openfoam.com/documentation/guides/latest/doc/guide-applications-solvers-multiphase-interFoam.html}
+
+\bibitem{moose-dam-break-input}
+MOOSE local input:
+\texttt{dam\_break\_openfoam\_geometry.i}.
+
+\bibitem{moose-algorithm-note}
+MOOSE local documentation:
+\texttt{modules/navier\_stokes/doc/content/modules/navier\_stokes/sharp\_interface\_dam\_break\_algorithm.md}.
+
+\bibitem{moose-vof-corrector}
+MOOSE local source:
+\texttt{modules/navier\_stokes/src/userobjects/ConservativeSharpInterfaceVOFMULESCorrector.C}.
+
+\bibitem{moose-rhiechow}
+MOOSE local source:
+\texttt{modules/navier\_stokes/src/userobjects/ConservativeSharpInterfaceRhieChowMassFluxBase.C}.
+
+\bibitem{moose-executioner}
+MOOSE local source:
+\texttt{modules/navier\_stokes/src/executioners/ReducedPressurePIMPLESolve.C}.
+
+\end{thebibliography}
+
+\end{document}

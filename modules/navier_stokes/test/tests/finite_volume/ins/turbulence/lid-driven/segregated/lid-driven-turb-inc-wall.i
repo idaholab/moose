@@ -5,7 +5,7 @@
 # Last Update: November, 2023
 # Turbulent model using:
 # k-epsilon model
-# Incremental wall function formulation (similar to OpenFOAM)
+# Incremental wall function formulation
 # SIMPLE Solve
 ##########################################################
 

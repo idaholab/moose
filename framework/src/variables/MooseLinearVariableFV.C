@@ -310,12 +310,8 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
 
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
     return Moose::FV::interpolate(*this, face, state);
-  else if (auto * bc_pointer = this->getBoundaryCondition(*fi->boundaryIDs().begin()))
-  {
-    mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
-    bc_pointer->setupFaceData(fi, face_type);
+  else if (auto * bc_pointer = this->getBoundaryCondition(*fi))
     return bc_pointer->computeBoundaryValue();
-  }
   // If no boundary condition is defined but we are evaluating on a boundary, just return the
   // element value
   else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
@@ -394,6 +390,24 @@ MooseLinearVariableFV<OutputType>::getBoundaryCondition(const BoundaryID bd_id) 
     return nullptr;
   else
     return iter->second;
+}
+
+template <typename OutputType>
+LinearFVBoundaryCondition *
+MooseLinearVariableFV<OutputType>::getBoundaryCondition(const FaceInfo & fi) const
+{
+  if (fi.boundaryIDs().empty())
+    return nullptr;
+
+  if (fi.boundaryIDs().size() > 1)
+    mooseError("We currently don't support multiple boundary conditions for the same variable on "
+               "the same face.");
+
+  auto * const bc = getBoundaryCondition(*fi.boundaryIDs().begin());
+  if (bc)
+    bc->setupFaceData(&fi, fi.faceType(std::make_pair(this->_var_num, this->_sys_num)));
+
+  return bc;
 }
 
 template <typename OutputType>

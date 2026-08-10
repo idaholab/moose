@@ -18,6 +18,7 @@ please refer to the below pages:
 - [Discontinuous Galerkin Finite Element](navier_stokes/dgfe.md)
 - [Hybridized Discontinuous Galerkin (HDG) Finite Element](inshdg.md)
 - [Hybrid Continuous/Discontinuous Galerkin Finite Element](navier_stokes/hcgdgfe.md)
+- [Dam-Break Comparison Scaling](dam_break_scaling.md)
 - [Compressible Finite Volume HLLC](CNSFVHLLCBase.md)
 - [Porous media Compressible Finite Volume Kurganov-Tadmor](PCNSFVKT.md)
 - [Porous media Compressible Finite Volume HLLC](PCNSFVHLLC.md)

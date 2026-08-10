@@ -24,21 +24,23 @@ namespace FV
 void
 relaxMatrix(SparseMatrix<Number> & matrix,
             const Real relaxation_parameter,
-            NumericVector<Number> & diff_diagonal)
+            NumericVector<Number> & diff_diagonal,
+            const bool enforce_diagonal_dominance)
 {
   PetscMatrix<Number> * mat = dynamic_cast<PetscMatrix<Number> *>(&matrix);
   mooseAssert(mat, "This should be a PetscMatrix!");
   PetscVector<Number> * diff_diag = dynamic_cast<PetscVector<Number> *>(&diff_diagonal);
   mooseAssert(diff_diag, "This should be a PetscVector!");
 
-  // Zero the diagonal difference vector
   *diff_diag = 0;
+  diff_diag->close();
 
-  // Get the diagonal of the matrix
   mat->get_diagonal(*diff_diag);
+  diff_diag->close();
 
-  // Create a copy of the diagonal for later use and cast it
+  // Create a copy of the diagonal for later use and cast it.
   auto original_diagonal = diff_diag->clone();
+  original_diagonal->close();
 
   // We cache the inverse of the relaxation parameter because doing divisions might
   // be more expensive for every row
@@ -62,29 +64,38 @@ relaxMatrix(SparseMatrix<Number> & matrix,
   std::vector<Real> new_diagonal(local_size, 0.0);
 
   {
-    PetscVectorReader diff_diga_reader(*diff_diag);
+    PetscVectorReader diagonal_reader(*diff_diag);
     for (const auto row_i : make_range(local_size))
     {
       const unsigned int global_index = matrix.row_start() + row_i;
+      const Real original_diagonal = diagonal_reader(global_index);
+
+      if (!enforce_diagonal_dominance)
+      {
+        new_diagonal[row_i] = inverse_relaxation * original_diagonal;
+        continue;
+      }
+
       std::vector<numeric_index_type> indices;
       std::vector<Real> values;
       mat->get_row(global_index, indices, values);
       const Real abs_sum = std::accumulate(
           values.cbegin(), values.cend(), 0.0, [](Real a, Real b) { return a + std::abs(b); });
-      const Real abs_diagonal = std::abs(diff_diga_reader(global_index));
+      const Real abs_diagonal = std::abs(original_diagonal);
       new_diagonal[row_i] = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
     }
   }
   diff_diag->insert(new_diagonal, indices);
+  diff_diag->close();
 
   // Time to modify the diagonal of the matrix. TODO: add this function to libmesh
   LibmeshPetscCallA(mat->comm().get(), MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES));
   mat->close();
-  diff_diag->close();
 
   // Finally, we can create (D*-D) vector which is used for the relaxation of the
   // right hand side later
   diff_diag->add(-1.0, *original_diagonal);
+  diff_diag->close();
 }
 
 void
@@ -97,6 +108,7 @@ relaxRightHandSide(NumericVector<Number> & rhs,
   // (D*-D) vector
   auto working_vector = diff_diagonal.clone();
   working_vector->pointwise_mult(solution, *working_vector);
+  working_vector->close();
 
   // The correction to the right hand side is just
   // (D*-D)*old_solution

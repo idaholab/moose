@@ -31,7 +31,10 @@ already used in [SIMPLE.md], the PISO iteration is the following:
    \vec{u}^{n+1} = - A^{-1}H(\vec{u}^{n}) -A^{-1}\nabla p^{n,*},
 
    and return to (1) until the maximum number of iterations is reached which can be set
-   using the [!param](/Executioner/PIMPLE/num_piso_iterations) parameter.
+   using the [!param](/Executioner/PIMPLE/num_piso_iterations) parameter. Optional
+   early termination of the inner loop can be enabled explicitly with
+   [!param](/Executioner/PIMPLE/piso_absolute_tolerance) and/or
+   [!param](/Executioner/PIMPLE/piso_relative_tolerance).
 
 ## Example Input Syntax
 

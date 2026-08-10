@@ -10,10 +10,7 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "FVAdvectedInterpolationMethod.h"
-#include "FVInterpolationMethodInterface.h"
-
-#include <array>
+#include "NSFVUtils.h"
 
 class RhieChowMassFlux;
 class LinearFVBoundaryCondition;
@@ -23,7 +20,7 @@ class LinearFVAdvectionDiffusionBC;
  * Kernel that implements the stress tensor and advection terms for the momentum
  * equation.
  */
-class LinearWCNSFVMomentumFlux : public LinearFVFluxKernel, public FVInterpolationMethodInterface
+class LinearWCNSFVMomentumFlux : public LinearFVFluxKernel
 {
 public:
   static InputParameters validParams();
@@ -96,6 +93,12 @@ protected:
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
 
+  /// Optional face-centered mass-flux functor used instead of the live Rhie-Chow mass flux
+  const Moose::Functor<Real> * const _mass_flux_functor;
+
+  /// Whether the optional face mass-flux functor is already multiplied by face area
+  const bool _mass_flux_is_integrated;
+
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
 
@@ -105,15 +108,9 @@ protected:
   /// Switch to enable/disable deviatoric parts in the stress term
   const bool _use_deviatoric_terms;
 
-  /// The interpolation method to use for the advected quantity
-  const FVAdvectedInterpolationMethod & _adv_interp_method;
-
-  /// Current advected interpolation contribution on the face
-  FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
-
-  /// Reusable gradient storage used when advected interpolation requires gradients.
-  VectorValue<Real> _elem_grad_storage;
-  VectorValue<Real> _neighbor_grad_storage;
+  /// Container for the current advected interpolation coefficients on the face to make sure
+  /// we don't compute it multiple times for different terms.
+  std::pair<Real, Real> _advected_interp_coeffs;
 
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
@@ -129,12 +126,15 @@ protected:
   /// The cached right hand side contribution
   Real _stress_rhs_contribution;
 
+  /// The interpolation method to use for the advected quantity
+  Moose::FV::InterpMethod _advected_interp_method;
+
   /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
   /// in the stress term
   const unsigned int _index;
 
   /// Velocity variables for each coordinate direction
-  std::array<const MooseLinearVariableFVReal *, 3> _velocity_vars;
+  const NS::LinearFVVelocityVariableArray _velocity_vars;
 
   /// Coordinate system of the blocks this kernel operates on
   const Moose::CoordinateSystemType _coord_type;

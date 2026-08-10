@@ -107,11 +107,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
           else if (current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
                    current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
           {
-            auto * bc_pointer =
-                _current_var->getBoundaryCondition(*face_info->boundaryIDs().begin());
-
-            if (bc_pointer)
-              bc_pointer->setupFaceData(face_info, current_face_type);
+            auto * bc_pointer = _current_var->getBoundaryCondition(*face_info);
 
             const auto * const elem_info = current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                                ? face_info->elemInfo()
