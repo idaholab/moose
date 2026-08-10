@@ -2454,9 +2454,15 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAssemblyEnd(sumWij_loc));
 
     // ---- robust scale measurements ----
-    PetscScalar min_mdot;
+    PetscScalar min_mdot, sum_mdot, avg_mdot;
+    PetscInt n;
     LibmeshPetscCall(VecAbs(_prod));
     LibmeshPetscCall(VecMin(_prod, NULL, &min_mdot));
+    LibmeshPetscCall(VecSum(_prod, &sum_mdot)); // Sum all entries
+    LibmeshPetscCall(VecGetSize(_prod, &n));    // Number of entries
+    avg_mdot = sum_mdot / static_cast<PetscScalar>(n);
+
+    V("Average estimated mdot: " + std::to_string(avg_mdot));
     V("Minimum estimated mdot: " + std::to_string(min_mdot));
 
     LibmeshPetscCall(VecAbs(sumWij_loc));
