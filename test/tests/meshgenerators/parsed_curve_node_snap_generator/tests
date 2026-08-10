@@ -1,0 +1,46 @@
+[Tests]
+  design = '/ParsedCurveNodeSnapGenerator.md'
+  issues = '#27545'
+  [snap_circle]
+    type = 'CSVDiff'
+    input = 'snap_circle.i'
+    csvdiff = 'snap_circle_out.csv'
+    # The regression this guards against is a snapper that leaves every node where it was, which
+    # would enclose the 32-sided polygon's area, 3.1214451522580520, instead of the golded
+    # 3.1410319388482: a relative gap of 6.2e-3, about 62 times this tolerance, so a silent no-op
+    # still fails by a wide margin, while 1.0e-8 discriminated no better and only tracked the
+    # last-digit platform noise in the snapped coordinates
+    rel_err = 1.0e-4
+    recover = false
+    mesh_mode = REPLICATED
+    requirement = 'The system shall move the nodes of a boundary onto the parametric curve that '
+                  'boundary was generated from, so that a quadrilateral mesh which approximates a '
+                  'unit circle by the chords of a 32-sided polygon, and therefore encloses the area '
+                  'of that polygon, 3.1214451522580520, encloses more than 3.14 once its nodes are '
+                  'snapped and so recovers the area of the circle those chords approximate.'
+  []
+  [errors]
+    requirement = 'The system shall report an error when snapping the nodes of a boundary onto a '
+                  'parametric curve'
+    [wrong_curve_generator_type]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = '--mesh-only snap_err.e
+                  Mesh/snap/curve_generator=triang'
+      expect_err = "The mesh generator 'triang' is of type 'XYFrontalDelaunayGenerator', but a ParsedCurveGenerator is required to define the curve\."
+      mesh_mode = REPLICATED
+      detail = 'if the mesh generator named to define that curve is not a parsed curve generator, '
+               'which is the only generator whose parameters define a curve to snap onto.'
+    []
+    [boundary_not_in_mesh]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = '--mesh-only snap_err.e
+                  Mesh/snap/boundary=not_a_boundary'
+      expect_err = "The boundary 'not_a_boundary' does not exist in the input mesh\."
+      mesh_mode = REPLICATED
+      detail = 'and if the named boundary is neither a sideset nor a nodeset of the input mesh, '
+               'which would otherwise leave every node where it was.'
+    []
+  []
+[]

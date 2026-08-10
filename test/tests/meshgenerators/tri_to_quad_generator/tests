@@ -1,0 +1,115 @@
+[Tests]
+  design = '/TriToQuadGenerator.md'
+  issues = '#27545'
+  [subdivision_all_quad]
+    type = Exodiff
+    input = 'subdivision_all_quad.i'
+    exodiff = 'subdivision_all_quad_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = REPLICATED
+    # The mesh-only console output pins the element count and the absence of any leftover triangle
+    expect_out = 'n_elem\(\)=96.*Mesh Element Type\(s\):\s+QUAD4\n'
+    requirement = 'The system shall convert a mesh of 32 triangles into a conformal mesh of 96 '
+                  'quadrilaterals with no inverted elements by splitting every triangle into three '
+                  'quadrilaterals built on its centroid and its edge midpoints.'
+  []
+  [recombine_ids]
+    type = Exodiff
+    input = 'recombine_ids.i'
+    exodiff = 'recombine_ids_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = REPLICATED
+    # The tri_id extra element integer is distinct for every triangle of the input mesh, so the
+    # gold records which of the two parents each merged quadrilateral inherited it from, and the
+    # mixed element type pins the presence of the triangles that recombination could not merge
+    expect_out = 'Mesh Element Type\(s\):\s+TRI3, QUAD4\n'
+    requirement = 'The system shall convert a mesh of triangles into quadrilaterals by merging '
+                  'adjacent pairs without merging across a subdomain interface or across an edge '
+                  'carrying a sideset, shall preserve the subdomain names, sidesets, nodesets and '
+                  'extra element integers of the input mesh, and shall move the triangles that '
+                  'could not be merged into a named subdomain.'
+  []
+  [all_quad_ids]
+    type = Exodiff
+    input = 'all_quad_ids.i'
+    exodiff = 'all_quad_ids_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = REPLICATED
+    # This is the contrasting case to recombine_ids, which runs the same mesh through the same
+    # merges and asserts that triangles are left over, so the absent TRI3 is what the elimination
+    # is worth and the binary gold alone would not state it
+    expect_out = 'Mesh Element Type\(s\):\s+QUAD4\n'
+    requirement = 'The system shall convert a mesh of triangles into a mesh consisting exclusively '
+                  'of quadrilaterals by merging adjacent pairs and then eliminating every triangle '
+                  'that could not be merged, and shall carry the subdomain names, sidesets, '
+                  'nodesets and extra element integers of the input mesh through that elimination, '
+                  'with the boundary ids of an edge that the elimination splits inherited by both '
+                  'halves of that edge.'
+  []
+  [errors]
+    requirement = 'The system shall report an error when converting a mesh of triangles into '
+                  'quadrilaterals'
+    [quad_input]
+      type = RunException
+      input = 'errors.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/gmg/elem_type=QUAD4'
+      expect_err = "is a QUAD4 element\. Only meshes consisting exclusively of TRI3 elements are supported"
+      mesh_mode = REPLICATED
+      detail = 'if the input mesh contains quadrilateral elements.'
+    []
+    [second_order_input]
+      type = RunException
+      input = 'errors.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/gmg/elem_type=TRI6'
+      expect_err = "is a TRI6 element\. Only meshes consisting exclusively of TRI3 elements are supported"
+      mesh_mode = REPLICATED
+      detail = 'if the input mesh contains second order triangles.'
+    []
+    [eta_min_not_positive]
+      type = RunException
+      input = 'errors.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/to_quad/eta_min=0'
+      expect_err = "CLI_ARGS: Range check failed for parameter Mesh/to_quad/eta_min; expression = 'eta_min > 0 & eta_min <= 1', value = 0"
+      mesh_mode = REPLICATED
+      detail = 'if the quality score required to merge a pair of triangles is not positive.'
+    []
+    [eta_min_above_one]
+      type = RunException
+      input = 'errors.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/to_quad/eta_min=1.5'
+      expect_err = "CLI_ARGS: Range check failed for parameter Mesh/to_quad/eta_min; expression = 'eta_min > 0 & eta_min <= 1', value = 1\.5"
+      mesh_mode = REPLICATED
+      detail = 'if the quality score required to merge a pair of triangles is greater than the '
+               'score of a perfect rectangle.'
+    []
+    [all_quad_with_subdivision]
+      type = RunException
+      input = 'errors.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/to_quad/algorithm=SUBDIVISION
+                  Mesh/to_quad/all_quad=true'
+      expect_err = "The 'all_quad' option is only available with the 'RECOMBINE' algorithm\."
+      mesh_mode = REPLICATED
+      detail = 'if the elimination of the triangles that could not be merged is requested with the '
+               'subdivision algorithm, which merges no triangle at all.'
+    []
+    [all_quad_with_tri_subdomain]
+      type = RunException
+      input = 'errors.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/to_quad/all_quad=true
+                  Mesh/to_quad/tri_subdomain_name=leftover_tris'
+      expect_err = "The 'all_quad' option leaves no triangle for 'tri_subdomain_name' to name\."
+      mesh_mode = REPLICATED
+      detail = 'if the elimination of the triangles that could not be merged is requested together '
+               'with a subdomain name for those triangles.'
+    []
+  []
+[]

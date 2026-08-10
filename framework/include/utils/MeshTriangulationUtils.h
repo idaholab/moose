@@ -74,4 +74,21 @@ triangulateWithDelaunay(MeshGenerator & mg,
                         std::unique_ptr<MeshBase> boundary_mesh,
                         std::vector<std::unique_ptr<MeshBase>> hole_meshes,
                         const XYDelaunayOptions & xyd_opts);
+
+/**
+ * Performs the subdomain and boundary naming, the boundary id remapping (outer boundary to 0 and
+ * hole i to i + 1), and the hole stitching on a mesh that has already been triangulated. This is
+ * shared by the Triangle-backed and the frontal triangulators.
+ * @param mg The calling mesh generator (used for paramError reporting)
+ * @param mesh The triangulated mesh, modified in place
+ * @param holes The hole meshes used by the triangulation (empty vector if no holes)
+ * @param holes_with_midpoints Whether the boundary of each hole carries midpoints, as reported by
+ * the libMesh MeshedHole built from that hole before the triangulation
+ * @param opts Triangulation options (see XYDelaunayOptions)
+ */
+void finalizeTriangulation(MeshGenerator & mg,
+                           UnstructuredMesh & mesh,
+                           std::vector<std::unique_ptr<MeshBase>> & holes,
+                           const std::vector<bool> & holes_with_midpoints,
+                           const XYDelaunayOptions & opts);
 }

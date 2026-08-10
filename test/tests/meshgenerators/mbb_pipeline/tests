@@ -1,0 +1,69 @@
+[Tests]
+  design = '/XYFrontalDelaunayGenerator.md /TriToQuadGenerator.md'
+  issues = '#27545'
+  [mbb_quads_yield_baseline]
+    requirement = 'The system shall mesh a rectangular domain containing three circular holes from '
+                  'its boundary curves alone by advancing a front that sizes triangles in the '
+                  'L-infinity norm of a cross field, merging adjacent pairs of those triangles into '
+                  'quadrilaterals, moving the triangles that could not be merged into a separate '
+                  'subdomain, and smoothing the mixed mesh that results, and shall report'
+    [quality]
+      type = 'CSVDiff'
+      input = 'mbb_pipeline.i'
+      csvdiff = 'mbb_pipeline_out.csv'
+      # The meshed area is fixed by the boundary polygons, but the element size and shape quality
+      # depend on the order the front places points in, so they are compared loosely
+      override_columns = 'avg_quality elem_size'
+      override_rel_err = '1.0e-1 1.0e-1'
+      override_abs_zero = '1.0e-10 1.0e-10'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'the meshed area, the average element size and the average element shape quality of '
+               'the mesh it produces.'
+    []
+    [split]
+      type = 'JSONDiff'
+      input = 'mbb_pipeline.i'
+      jsondiff = 'mbb_pipeline_json.json'
+      prereq = 'mbb_quads_yield_baseline/quality'
+      should_execute = false
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'the elements it merged into quadrilaterals separately from the elements it left as '
+               'triangles, which is the quadrilateral yield this pipeline is measured against.'
+    []
+  []
+  [mbb_all_quad]
+    requirement = 'The system shall mesh a rectangular domain containing three circular holes from '
+                  'its boundary curves alone by advancing a front that sizes triangles in the '
+                  'L-infinity norm of a cross field, merging adjacent pairs of those triangles into '
+                  'quadrilaterals, eliminating every triangle that could not be merged, and '
+                  'smoothing the mesh that results, and shall'
+    [quality]
+      type = 'CSVDiff'
+      input = 'mbb_all_quad.i'
+      csvdiff = 'mbb_all_quad_out.csv'
+      # The meshed area is fixed by the boundary polygons, but the element size and shape quality
+      # depend on the order the front places points in, so they are compared loosely
+      override_columns = 'avg_quality elem_size'
+      override_rel_err = '1.0e-1 1.0e-1'
+      override_abs_zero = '1.0e-10 1.0e-10'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'report the meshed area, the average element size and the average element shape '
+               'quality of the mesh it produces.'
+    []
+    [all_quad]
+      type = 'RunApp'
+      input = 'mbb_all_quad.i'
+      cli_args = '--mesh-only mbb_all_quad_in.e'
+      # The mesh-only console output is the only place the element types of the finished mesh are
+      # stated, and the absent TRI3 is the contrast against the mixed mesh the same domain yields
+      # when the elimination is not requested
+      expect_out = 'Mesh Element Type\(s\):\s+QUAD4\n'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'produce a mesh consisting exclusively of quadrilaterals.'
+    []
+  []
+[]

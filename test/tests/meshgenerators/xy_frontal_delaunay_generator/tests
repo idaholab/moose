@@ -1,0 +1,107 @@
+[Tests]
+  design = '/XYFrontalDelaunayGenerator.md'
+  issues = '#27545'
+  [frontal]
+    requirement = 'The system shall triangulate a planar region by advancing a front that places '
+                  'points at a target size ahead of the triangles that are still too large, '
+    [circle_linf]
+      type = 'Exodiff'
+      input = 'frontal_circle.i'
+      cli_args = '--mesh-only'
+      exodiff = 'frontal_circle_in.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'within a curved boundary with no corners, measuring the target size in the LINF '
+               'norm about a cross field solved over the domain so that the triangles are right '
+               'isosceles,'
+    []
+    [circle_l2_ab]
+      type = 'Exodiff'
+      input = 'frontal_circle.i'
+      cli_args = 'Mesh/triang/metric=L2
+                  Mesh/triang/orientation=BOUNDARY
+                  --mesh-only frontal_circle_l2_ab.e'
+      exodiff = 'frontal_circle_l2_ab.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'producing a different triangulation of that same boundary when the target size is '
+               'measured in the L2 norm instead, which places points that make the triangles '
+               'equilateral rather than right isosceles,'
+    []
+    [annulus_holes]
+      type = 'Exodiff'
+      input = 'frontal_annulus.i'
+      cli_args = '--mesh-only'
+      exodiff = 'frontal_annulus_in.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'within a boundary containing a hole, advancing a front from the hole as well as '
+               'from the outer boundary and carrying the user-provided hole boundary name onto the '
+               'sideset the hole leaves behind,'
+    []
+    [l_shape]
+      type = 'Exodiff'
+      input = 'frontal_l_shape.i'
+      cli_args = '--mesh-only'
+      exodiff = 'frontal_l_shape_in.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'within a polyline boundary that has a reentrant corner, which the front reaches '
+               'from two sides at once,'
+    []
+    [l_shape_boundary]
+      type = 'Exodiff'
+      input = 'frontal_l_shape.i'
+      cli_args = 'Mesh/triang/metric=LINF
+                  Mesh/triang/orientation=BOUNDARY
+                  --mesh-only frontal_l_shape_boundary.e'
+      exodiff = 'frontal_l_shape_boundary.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'and within that same reentrant boundary while taking the local frame the LINF norm '
+               'measures in from the nearest boundary segment, which needs no cross field solve.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error when asked to triangulate a planar region by '
+                  'advancing a front '
+    [distributed]
+      type = 'RunException'
+      input = 'frontal_l_shape.i'
+      cli_args = '--mesh-only frontal_err.e
+                  Mesh/parallel_type=distributed'
+      expect_err = 'is not implemented for distributed meshes'
+      mesh_mode = REPLICATED
+      detail = 'over a distributed mesh, which no single process holds enough of to advance the '
+               'front over,'
+    []
+    [redundant_area_limits]
+      type = 'RunException'
+      input = 'frontal_circle.i'
+      cli_args = '--mesh-only frontal_err.e
+                  Mesh/triang/desired_area_func=0.02'
+      expect_err = 'Only one of the three methods'
+      mesh_mode = REPLICATED
+      detail = 'with more than one of the methods that limit the element area,'
+    []
+    [stitch_holes_mismatch]
+      type = 'RunException'
+      input = 'frontal_annulus.i'
+      cli_args = '--mesh-only frontal_err.e
+                  Mesh/triang/stitch_holes="true true"'
+      expect_err = 'Need one stitch_holes entry per hole'
+      mesh_mode = REPLICATED
+      detail = 'with a number of stitching flags that does not match the number of holes,'
+    []
+    [quadratic_boundary]
+      type = 'RunException'
+      input = 'frontal_circle.i'
+      cli_args = '--mesh-only frontal_err.e
+                  Mesh/outer_bdy/edge_element_type=EDGE3'
+      expect_err = 'Only first order boundary elements are supported'
+      mesh_mode = REPLICATED
+      detail = 'and within a boundary of second order elements, which the first order triangles '
+               'this generator produces cannot follow.'
+    []
+  []
+[]
