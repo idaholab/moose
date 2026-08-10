@@ -1522,7 +1522,8 @@ FEProblemBase::initialSetup()
 
           flux_bc_query.queryInto(flux_bcs, boundary_key);
           for (const auto * const flux_bc : flux_bcs)
-            flux_bc->checkFaceIntegrity(fi);
+            if (flux_bc->checkVariableBoundaryIntegrity())
+              flux_bc->checkFaceIntegrity(fi);
 
           interface_kernel_query.queryInto(interface_kernels, boundary_key);
           for (const auto * const interface_kernel : interface_kernels)

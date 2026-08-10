@@ -25,6 +25,8 @@ public:
   static InputParameters validParams();
   INSFVScalarFieldSeparatorBC(const InputParameters & params);
 
+  bool checkVariableBoundaryIntegrity() const override { return false; }
+
   void computeResidual(const FaceInfo & /*fi*/) override {}
   void computeJacobian(const FaceInfo & /*fi*/) override {}
   void computeResidualAndJacobian(const FaceInfo & /*fi*/) override {}
