@@ -323,9 +323,7 @@ class TestParam(AppSyntaxTestCase):
 
         self.assertSize(ast, 1)
         self.assertToken(ast(0), "Paragraph", size=1)
-        self.assertToken(
-            ast(0, 0), "String", content="/Kernels/Diffusion/variable"
-        )
+        self.assertToken(ast(0, 0), "String", content="/Kernels/Diffusion/variable")
 
         self.assertEqual(len(cm.output), 1)
         self.assertIn(
