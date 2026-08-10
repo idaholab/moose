@@ -99,7 +99,7 @@ public:
   /**
    * Gradient method used by interpolations that require adjacent-cell gradients.
    *
-   * An empty name requests the variable's default gradient method.
+   * By default this will be a green-gauss gradient name.
    */
-  virtual GradientMethodName gradientMethodName() const { return ""; }
+  virtual GradientMethodName gradientMethodName() const { return "green-gauss"; }
 };
