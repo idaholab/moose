@@ -54,7 +54,7 @@
     # At this one-microsecond time step, omitting the transient pressure-density coupling drives
     # the outlet enthalpy negative during the first outer iteration. The ten-iteration limit gives
     # margin over the two iterations required with that coupling included.
-    cli_args = 'FluidProperties/sodium/type=SodiumSaturationFluidProperties ICs/mdot_ic/value=0.1 Executioner/type=Transient Executioner/dt=1e-6 Executioner/end_time=1e-6 Executioner/abort_on_solve_fail=true SubChannel/P_tol=1e-5 SubChannel/P_maxit=10 SubChannel/mass_flow_equation_relaxation=1 SubChannel/pressure_equation_relaxation=1 SubChannel/mass_flow_relaxation=1 SubChannel/pressure_relaxation=1 SubChannel/crossflow_relaxation=1 Outputs/exodus=false Outputs/csv=false'
+    cli_args = 'FluidProperties/sodium/type=SodiumSaturationFluidProperties Executioner/type=Transient Executioner/dt=1e-6 Executioner/end_time=1e-6 Executioner/abort_on_solve_fail=true SubChannel/P_tol=1e-5 SubChannel/P_maxit=10 SubChannel/mass_flow_equation_relaxation=1 SubChannel/pressure_equation_relaxation=1 SubChannel/mass_flow_relaxation=1 SubChannel/pressure_relaxation=1 SubChannel/crossflow_relaxation=1 Outputs/exodus=false Outputs/csv=false'
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
