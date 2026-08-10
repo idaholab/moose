@@ -20,6 +20,12 @@ public:
 
   ADViscoplasticityStressUpdate(const InputParameters & parameters);
 
+  enum class SubsteppingType
+  {
+    NONE,
+    INCREMENT_BASED
+  };
+
   using ADViscoplasticityStressUpdateBase::updateState;
 
   virtual void updateState(ADRankTwoTensor & strain_increment,
@@ -31,6 +37,20 @@ public:
                            const RankTwoTensor & elastic_strain_old,
                            bool compute_full_tangent_operator = false,
                            RankFourTensor & tangent_operator = _identityTensor) override;
+
+  virtual void updateStateSubstep(ADRankTwoTensor & strain_increment,
+                                  ADRankTwoTensor & inelastic_strain_increment,
+                                  const ADRankTwoTensor & rotation_increment,
+                                  ADRankTwoTensor & stress_new,
+                                  const RankTwoTensor & stress_old,
+                                  const ADRankFourTensor & elasticity_tensor,
+                                  const RankTwoTensor & elastic_strain_old,
+                                  bool compute_full_tangent_operator = false,
+                                  RankFourTensor & tangent_operator = _identityTensor) override;
+
+  virtual bool substeppingCapabilityEnabled() override;
+  virtual bool substeppingCapabilityRequested() override;
+  virtual void resetIncrementalMaterialProperties() override;
 
   virtual ADReal minimumPermissibleValue(const ADReal & effective_trial_stress) const override;
 
@@ -79,6 +99,32 @@ protected:
                                        const ADRankTwoTensor & dev_stress,
                                        const ADRankTwoTensor & stress);
 
+  /// Compute the gauge stress for the current stress invariants and porosity.
+  void computeGaugeStress(ADReal & gauge_stress, const ADReal & equiv_stress);
+
+  /// Perform one explicit viscoplastic update over the current local value of _dt.
+  void updateStateOneStep(ADRankTwoTensor & elastic_strain_increment,
+                          ADRankTwoTensor & inelastic_strain_increment,
+                          ADRankTwoTensor & stress,
+                          const ADRankFourTensor & elasticity_tensor,
+                          const ADRankTwoTensor & elastic_strain_old,
+                          ADReal & effective_inelastic_strain_increment);
+
+  /// Estimate the number of local constitutive substeps from the full-step trial stress.
+  unsigned int estimateNumberSubsteps(const ADRankTwoTensor & stress);
+
+  /// Integrate a prescribed number of explicit local constitutive substeps.
+  void updateStateSubstepInternal(ADRankTwoTensor & strain_increment,
+                                  ADRankTwoTensor & inelastic_strain_increment,
+                                  const ADRankTwoTensor & rotation_increment,
+                                  ADRankTwoTensor & stress_new,
+                                  const RankTwoTensor & stress_old,
+                                  const ADRankFourTensor & elasticity_tensor,
+                                  const RankTwoTensor & elastic_strain_old,
+                                  unsigned int total_number_substeps,
+                                  bool compute_full_tangent_operator = false,
+                                  RankFourTensor & tangent_operator = _identityTensor);
+
   /// Enum to choose which viscoplastic model to use
   const enum class ViscoplasticityModel { LPS, GTN } _model;
 
@@ -108,6 +154,21 @@ protected:
 
   /// Maximum value of equivalent stress above which an exception is thrown
   const Real _maximum_equivalent_stress;
+
+  /// Whether and how local explicit substepping is used
+  const SubsteppingType _use_substepping;
+
+  /// Target fraction of max_inelastic_increment in one local substep
+  const Real _substep_tolerance;
+
+  /// Whether a failed constitutive attempt is retried with more substeps
+  const bool _adaptive_substepping;
+
+  /// Maximum number of local constitutive substeps
+  const unsigned int _maximum_number_substeps;
+
+  /// Original global timestep, restored after local substepping
+  Real _dt_original;
 
   /// Container for hydrostatic stress
   ADReal _hydro_stress;
