@@ -41,6 +41,11 @@ class ArcLengthNonlinearSystem;
  * a per-increment record stops one increment short of it and a postprocessor executed on
  * EXEC_TIMESTEP_END is what reports that final value.
  *
+ * A softening branch never climbs back to 'lambda_max': past the peak the load parameter falls
+ * monotonically, so running out of continuation steps is the only end such a path has.
+ * 'end_on_max_continuation_steps' makes that budget the designed end of the path and reports a
+ * solve that spends the whole of it as a converged one.
+ *
  * A transient run traces one path per time step instead of one path for the whole simulation. The
  * load parameter PETSc solves for is step local there: it runs from 0 to 1 over the load increment
  * of the step alone, and the load factor the committed steps carry is added to it, so the residual
@@ -108,6 +113,20 @@ public:
    * at rather than the one the next step starts from.
    */
   virtual void advanceState() override;
+
+  /**
+   * Reports a solve that spent the whole of its continuation step budget as converged when
+   * 'end_on_max_continuation_steps' is set, and defers to the base class in every other case.
+   *
+   * SNESSolve_NEWTONAL ends a spent budget with SNES_DIVERGED_MAX_IT, which is also the reason it
+   * ends an increment that ran out of corrector iterations with, so the reason alone does not say
+   * a path was traced to the end of its budget. The count of increments the path started is what
+   * separates the two, because only a budget spent in full reaches the count it allows.
+   *
+   * @param sys_num The solver system to report the convergence of
+   * @return Whether that system converged
+   */
+  virtual bool solverSystemConverged(const unsigned int sys_num) override;
 
   /**
    * Forms the residual the standard way and adds the load tag to it, scaled by the load factor
@@ -208,6 +227,10 @@ protected:
 
   /// Scheme PETSc corrects an iterate back onto the arc-length constraint surface with
   const SNESNewtonALCorrectionType _correction_type;
+
+  /// Whether a continuation that spends the whole of its step budget ends the path successfully
+  /// instead of failing the solve
+  const bool _end_on_max_continuation_steps;
 
   /// Index of the continuation increment being published, counted from the start of the path,
   /// which a transient run restarts at every step because each traces a path of its own
