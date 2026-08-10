@@ -34,11 +34,11 @@ LinearFVGradientReader::LinearFVGradientReader(const SystemBase & sys,
 }
 
 Real
-LinearFVGradientReader::component(const ElemInfo & elem_info, const unsigned int component) const
+LinearFVGradientReader::component(const ElemInfo & elem_info, const unsigned int index) const
 {
-  mooseAssert(component < _components.size(), "Gradient component index out of range.");
+  mooseAssert(index < _components.size(), "Gradient component index out of range.");
 
-  return (*_components[component])(elem_info.dofIndices()[_system_number][_variable_number]);
+  return (*_components[index])(elem_info.dofIndices()[_system_number][_variable_number]);
 }
 
 RealVectorValue

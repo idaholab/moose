@@ -106,7 +106,7 @@ public:
   /**
    * Register this variable's default gradient method on the owning system and return its reader.
    */
-  const LinearFVGradientReader & computeCellGradients();
+  const LinearFVGradientReader & requestCellGradients();
 
   /**
    * Register a named gradient method on the owning system and return its reader.
@@ -114,13 +114,13 @@ public:
    * An empty name requests this variable's default gradient method.
    * @param method_name Gradient method name to register for this variable.
    */
-  const LinearFVGradientReader & computeCellGradients(const GradientMethodName & method_name);
+  const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name);
 
   /**
    * Register a specific gradient method on the owning system and return its reader.
    * @param method Gradient method to register for this variable.
    */
-  const LinearFVGradientReader & computeCellGradients(const FVGradientMethod & method);
+  const LinearFVGradientReader & requestCellGradients(const FVGradientMethod & method);
 
   /**
    * Check if cell gradient computations were requested for this variable.

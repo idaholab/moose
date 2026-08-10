@@ -139,7 +139,7 @@ RhieChowMassFlux::linkMomentumPressureSystems(
                _pressure_system->name(),
                "' must be a MooseLinearVariableFVReal.");
 
-  _pressure_gradient_field = &pressure_var->computeCellGradients();
+  _pressure_gradient_field = &pressure_var->requestCellGradients();
 
   _momentum_implicit_systems.clear();
   for (auto & system : _momentum_systems)

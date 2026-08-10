@@ -58,9 +58,9 @@ public:
   /**
    * Read one gradient component at an element.
    * @param elem_info Element whose cell-centered gradient should be read.
-   * @param component Spatial component of the gradient.
+   * @param index Index of the spatial component of the gradient.
    */
-  Real component(const ElemInfo & elem_info, unsigned int component) const;
+  Real component(const ElemInfo & elem_info, unsigned int index) const;
 
   /**
    * Read the full gradient at an element.

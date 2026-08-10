@@ -42,7 +42,7 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
                                    getParam<InterpolationMethodName>("coeff_interp_method"))
                              : nullptr),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
-    _gradient_field(_use_nonorthogonal_correction ? &_var.computeCellGradients() : nullptr),
+    _gradient_field(_use_nonorthogonal_correction ? &_var.requestCellGradients() : nullptr),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0),
     _cached_face_diffusivity(false),

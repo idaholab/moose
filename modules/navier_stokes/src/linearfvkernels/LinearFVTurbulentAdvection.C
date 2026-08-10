@@ -43,7 +43,7 @@ LinearFVTurbulentAdvection::LinearFVTurbulentAdvection(const InputParameters & p
     _adv_interp_method(getFVAdvectedInterpolationMethod(
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _gradient_field(_adv_interp_method.needsGradients()
-                        ? &_var.computeCellGradients(_adv_interp_method.gradientMethodName())
+                        ? &_var.requestCellGradients(_adv_interp_method.gradientMethodName())
                         : nullptr),
     _mass_face_flux(0.0),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))

@@ -50,7 +50,7 @@ LinearFVAnisotropicDiffusion::LinearFVAnisotropicDiffusion(const InputParameters
         isParamValid("use_nonorthogonal_correction_on_boundary")
             ? getParam<bool>("use_nonorthogonal_correction_on_boundary")
             : _use_nonorthogonal_correction),
-    _gradient_field(_var.computeCellGradients()),
+    _gradient_field(_var.requestCellGradients()),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0)
 {
