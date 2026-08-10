@@ -111,10 +111,11 @@ public:
   /**
    * Register a named gradient method on the owning system and return its reader.
    *
-   * An empty name requests this variable's default gradient method.
+   * By default this will be a green-gauss gradient name.
    * @param method_name Gradient method name to register for this variable.
    */
-  const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name);
+  const LinearFVGradientReader &
+  requestCellGradients(const GradientMethodName & method_name = "green-gauss");
 
   /**
    * Register a specific gradient method on the owning system and return its reader.
