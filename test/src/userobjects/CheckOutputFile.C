@@ -9,15 +9,7 @@
 
 #include "CheckOutputFile.h"
 
-#include "MooseApp.h"
-#include "MooseError.h"
-#include "OutputWarehouse.h"
-#include "Output.h"
 #include "FileOutput.h"
-
-#include <nlohmann/json.hpp>
-#include <curl/curl.h>
-#include <sys/stat.h>
 
 registerMooseObject("MooseTestApp", CheckOutputFile);
 
