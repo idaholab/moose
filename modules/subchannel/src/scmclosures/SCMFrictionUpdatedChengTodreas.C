@@ -71,6 +71,9 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
+  // Limit the Reynolds number used in the friction-factor correlation to avoid
+  // singular behavior at zero flow.
+  const Real Re_eff = std::max(Re, 1.0);
   const auto i_ch = friction_args.i_ch;
   const auto S = friction_args.S;
   const auto w_perim = friction_args.w_perim;
@@ -250,8 +253,8 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   // laminar friction factor and turbulent friction factor coefficients
   const Real bL = -1.0;
   const Real bT = -0.18;
-  auto fL = cL * std::pow(Re, bL);
-  auto fT = cT * std::pow(Re, bT);
+  auto fL = cL * std::pow(Re_eff, bL);
+  auto fT = cT * std::pow(Re_eff, bT);
 
   if (bulk_Re < ReL)
   {
@@ -276,6 +279,9 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
+  // Limit the Reynolds number used in the friction-factor correlation to avoid
+  // singular behavior at zero flow.
+  const Real Re_eff = std::max(Re, 1.0);
   const auto i_ch = friction_args.i_ch;
   /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
   Real aL, b1L, b2L, cL;
@@ -375,8 +381,8 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
   // laminar friction factor and turbulent friction factor coefficients
   const Real bL = -1.0;
   const Real bT = -0.18;
-  auto fL = cL * std::pow(Re, bL);
-  auto fT = cT * std::pow(Re, bT);
+  auto fL = cL * std::pow(Re_eff, bL);
+  auto fT = cT * std::pow(Re_eff, bT);
 
   if (bulk_Re < ReL)
   {
