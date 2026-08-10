@@ -73,8 +73,7 @@ FVConvectionCorrelationInterface::computeQpResidual()
               "The fluid temperature is not defined at bulk_distance from the wall.");
 
   const auto fluid_side = _var1_is_fluid ? faceArg1(_htc) : faceArg2(_htc);
-  const auto solid_side =
-      _var1_is_fluid ? faceArg2(_temp_solid) : faceArg1(_temp_solid);
+  const auto solid_side = _var1_is_fluid ? faceArg2(_temp_solid) : faceArg1(_temp_solid);
 
   const auto bulk_elem_arg = makeElemArg(bulk_elem);
 

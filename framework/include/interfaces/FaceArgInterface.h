@@ -97,10 +97,9 @@ FaceArgProducerInterface::makeFace(const FunctorType & functor,
     mooseError(
         "The functor '", functor.functorName(), "' is not defined on either side of the face.");
 
-  const Elem * const face_side =
-      defined_on_elem_side && defined_on_neighbor_side
-          ? nullptr
-          : (defined_on_elem_side ? fi.elemPtr() : fi.neighborPtr());
+  const Elem * const face_side = defined_on_elem_side && defined_on_neighbor_side
+                                     ? nullptr
+                                     : (defined_on_elem_side ? fi.elemPtr() : fi.neighborPtr());
 
   return {&fi, limiter_type, elem_is_upwind, correct_skewness, face_side, state_limiter};
 }

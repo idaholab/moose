@@ -1511,8 +1511,7 @@ FEProblemBase::initialSetup()
       std::vector<FVFluxBC *> flux_bcs;
       std::vector<FVInterfaceKernel *> interface_kernels;
 
-      for (auto face_it = fv_mesh.ownedFaceInfoBegin();
-           face_it != fv_mesh.ownedFaceInfoEnd();
+      for (auto face_it = fv_mesh.ownedFaceInfoBegin(); face_it != fv_mesh.ownedFaceInfoEnd();
            ++face_it)
       {
         const FaceInfo & fi = **face_it;
