@@ -71,8 +71,54 @@ SubChannel1PhaseProblem::validParams()
   params.addClassDescription("Base class of the subchannel solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
+  params.addRangeCheckedParam<int>(
+      "P_maxit",
+      0,
+      "P_maxit >= 0",
+      "Maximum number of pressure iterations; zero selects the solver's automatic limit");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
   params.addParam<int>("T_maxit", 100, "Maximum number of iterations for inner temperature loop");
+  params.addRangeCheckedParam<Real>(
+      "T_relaxation",
+      1.0,
+      "T_relaxation > 0 & T_relaxation <= 1",
+      "Relaxation factor for temperature updates in the inner thermal-hydraulic iteration");
+  params.addRangeCheckedParam<unsigned int>(
+      "enthalpy_subcycles",
+      1,
+      "enthalpy_subcycles > 0",
+      "Number of enthalpy, temperature, and property updates performed per flow solve");
+  params.addRangeCheckedParam<Real>(
+      "mass_flow_equation_relaxation",
+      1.0,
+      "mass_flow_equation_relaxation > 0 & mass_flow_equation_relaxation <= 1",
+      "Equation relaxation factor for mass flow rate in the implicit non-segregated solve");
+  params.addRangeCheckedParam<Real>(
+      "pressure_equation_relaxation",
+      1.0,
+      "pressure_equation_relaxation > 0 & pressure_equation_relaxation <= 1",
+      "Equation relaxation factor for pressure in the implicit non-segregated solve");
+  params.addRangeCheckedParam<Real>(
+      "crossflow_equation_relaxation",
+      0.1,
+      "crossflow_equation_relaxation > 0 & crossflow_equation_relaxation <= 1",
+      "Equation relaxation factor for crossflow in the implicit non-segregated solve");
+  params.addRangeCheckedParam<Real>(
+      "mass_flow_relaxation",
+      1.0,
+      "mass_flow_relaxation > 0 & mass_flow_relaxation <= 1",
+      "Post-solve relaxation factor for mass flow rate updates in the implicit non-segregated "
+      "solve");
+  params.addRangeCheckedParam<Real>(
+      "pressure_relaxation",
+      1.0,
+      "pressure_relaxation > 0 & pressure_relaxation <= 1",
+      "Post-solve relaxation factor for pressure updates in the implicit non-segregated solve");
+  params.addRangeCheckedParam<Real>(
+      "crossflow_relaxation",
+      1.0,
+      "crossflow_relaxation > 0 & crossflow_relaxation <= 1",
+      "Post-solve relaxation factor for crossflow updates in the implicit non-segregated solve");
   params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
@@ -124,8 +170,11 @@ SubChannel1PhaseProblem::validParams()
       "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)",
       "Use closure system instead.");
 
-  params.addParamNamesToGroup("P_tol T_tol T_maxit rtol atol dtol maxit",
-                              "Solver tolerances and iterations");
+  params.addParamNamesToGroup(
+      "P_tol P_maxit T_tol T_maxit T_relaxation enthalpy_subcycles "
+      "mass_flow_equation_relaxation pressure_equation_relaxation crossflow_equation_relaxation "
+      "mass_flow_relaxation pressure_relaxation crossflow_relaxation rtol atol dtol maxit",
+      "Solver tolerances and iterations");
   params.addParamNamesToGroup("implicit segregated staggered_pressure interpolation_scheme",
                               "Solution method");
   params.addParamNamesToGroup("fp friction_closure mixing_closure pin_HTC_closure duct_HTC_closure",
@@ -148,6 +197,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
+    _Wij_old(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij_old")),
     _g_grav(9.81),
     _kij(_subchannel_mesh.getKij()),
     _one(1.0),
@@ -157,8 +207,17 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _P_tol(getParam<Real>("P_tol")),
+    _P_maxit(getParam<int>("P_maxit")),
     _T_tol(getParam<Real>("T_tol")),
     _T_maxit(getParam<int>("T_maxit")),
+    _T_relaxation(getParam<Real>("T_relaxation")),
+    _enthalpy_subcycles(getParam<unsigned int>("enthalpy_subcycles")),
+    _mass_flow_equation_relaxation(getParam<Real>("mass_flow_equation_relaxation")),
+    _pressure_equation_relaxation(getParam<Real>("pressure_equation_relaxation")),
+    _crossflow_equation_relaxation(getParam<Real>("crossflow_equation_relaxation")),
+    _mass_flow_relaxation(getParam<Real>("mass_flow_relaxation")),
+    _pressure_relaxation(getParam<Real>("pressure_relaxation")),
+    _crossflow_relaxation(getParam<Real>("crossflow_relaxation")),
     _rtol(getParam<PetscReal>("rtol")),
     _atol(getParam<PetscReal>("atol")),
     _dtol(getParam<PetscReal>("dtol")),
@@ -186,6 +245,21 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     paramError("pin_HTC_closure", "required when a pin mesh exists.");
   if (_duct_mesh_exist && !isParamValid("duct_HTC_closure"))
     paramError("duct_HTC_closure", "required when a duct mesh exists.");
+  if (!_implicit_bool && !_segregated_bool)
+    paramError("segregated", "A non-segregated solve requires 'implicit = true'.");
+  if (_segregated_bool)
+    for (const auto * relaxation_param : {"mass_flow_equation_relaxation",
+                                          "pressure_equation_relaxation",
+                                          "crossflow_equation_relaxation",
+                                          "mass_flow_relaxation",
+                                          "pressure_relaxation",
+                                          "crossflow_relaxation"})
+      if (params.isParamSetByUser(relaxation_param))
+        paramError(relaxation_param,
+                   "The '",
+                   relaxation_param,
+                   "' parameter is only used by the implicit non-segregated solve. Set "
+                   "'implicit = true' and 'segregated = false' to use it.");
   // NOTE: The four quantities below are 0 for processor_id != 0
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
@@ -202,9 +276,10 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   {
     _Wij.resize(_n_gaps, _n_cells + 1);
     _Wij.zero();
+    _Wij_old.resize(_n_gaps, _n_cells + 1);
+    _Wij_old.zero();
   }
-  _Wij_old.resize(_n_gaps, _n_cells + 1);
-  _Wij_old.zero();
+
   _WijPrime.resize(_n_gaps, _n_cells + 1);
   _WijPrime.zero();
   _Wij_residual_matrix.resize(_n_gaps, _block_size);
@@ -220,6 +295,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   LibmeshPetscCall(createPetscMatrix(
       _mc_axial_convection_mat, _block_size * _n_channels, _block_size * _n_channels));
   LibmeshPetscCall(createPetscVector(_mc_axial_convection_rhs, _block_size * _n_channels));
+  LibmeshPetscCall(createPetscMatrix(
+      _mc_density_pressure_mat, _block_size * _n_channels, _block_size * _n_channels));
 
   // Axial momentum conservation components
   LibmeshPetscCall(createPetscMatrix(
@@ -389,6 +466,7 @@ SubChannel1PhaseProblem::cleanUp()
   LibmeshPetscCall(VecDestroy(&_prodp));
   LibmeshPetscCall(MatDestroy(&_mc_axial_convection_mat));
   LibmeshPetscCall(VecDestroy(&_mc_axial_convection_rhs));
+  LibmeshPetscCall(MatDestroy(&_mc_density_pressure_mat));
 
   // Axial momentum conservation components
   LibmeshPetscCall(MatDestroy(&_amc_turbulent_cross_flows_mat));
@@ -530,6 +608,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
   // Add to matrix if implicit
   else
   {
+    LibmeshPetscCall(MatZeroEntries(_mc_density_pressure_mat));
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       unsigned int iz_ind = iz - first_node;
@@ -617,6 +696,37 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
         LibmeshPetscCall(
             VecSetValues(_mc_axial_convection_rhs, 1, &row_vec, &value_vec, INSERT_VALUES));
 
+        // Linearize transient density with respect to pressure at constant enthalpy. The
+        // temperature response at constant h is required even for a rho(T)-only liquid model:
+        //
+        //   (d rho / d p)_h = (d rho / d p)_T
+        //                      - (d rho / d T)_p (d h / d p)_T / (d h / d T)_p.
+        //
+        // Without this Jacobian contribution, pressure-density coupling remains in the outer
+        // fixed-point iteration and scales as O(1 / dt). As the time step decreases, the iteration
+        // can become increasingly slow or noncontractive and may require stronger relaxation.
+        if (_TR && _compute_density && _compute_power && iz < last_node)
+        {
+          Real rho, drho_dp_T, drho_dT;
+          _fp->rho_from_p_T(
+              (*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out), rho, drho_dp_T, drho_dT);
+          Real h, dh_dp_T, dh_dT;
+          _fp->h_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out), h, dh_dp_T, dh_dT);
+          const Real drho_dp_h = drho_dp_T - drho_dT * dh_dp_T / dh_dT;
+          const PetscScalar pressure_coefficient = volume / _dt * drho_dp_h;
+          const PetscInt pressure_col = i_ch + _n_channels * (iz_ind + 1);
+          LibmeshPetscCall(MatSetValues(_mc_density_pressure_mat,
+                                        1,
+                                        &row_vec,
+                                        1,
+                                        &pressure_col,
+                                        &pressure_coefficient,
+                                        INSERT_VALUES));
+          const PetscScalar linearization_rhs = pressure_coefficient * (*_P_soln)(node_out);
+          LibmeshPetscCall(
+              VecSetValues(_mc_axial_convection_rhs, 1, &row_vec, &linearization_rhs, ADD_VALUES));
+        }
+
         // Imposing bottom boundary condition or adding of diagonal elements
         if (iz == first_node)
         {
@@ -653,6 +763,8 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
     }
     LibmeshPetscCall(MatAssemblyBegin(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyBegin(_mc_density_pressure_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_mc_density_pressure_mat, MAT_FINAL_ASSEMBLY));
 
     if (_segregated_bool)
     {
@@ -839,34 +951,16 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         // hydraulic diameter in the i direction
         auto Dh_i = 4.0 * S_interp / w_perim_interp;
 
-        /// Time derivative term
-        if (iz == first_node)
-        {
-          PetscScalar value_vec_tt = -1.0 * _TR * alpha * (*_mdot_soln)(node_in)*dz / _dt;
-          PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(
-              VecSetValues(_amc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));
-        }
-        else
-        {
-          PetscInt row_tt = i_ch + _n_channels * iz_ind;
-          PetscInt col_tt = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_tt = _TR * alpha * dz / _dt;
-          LibmeshPetscCall(MatSetValues(
-              _amc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
-        }
-
-        // Adding diagonal elements
+        // Keep temporal storage independent of the spatial interpolation scheme. Applying the
+        // upwind coefficient to this term puts the storage on the upstream node and leaves the
+        // first axial row without transient inertia in the upwind limit.
         PetscInt row_tt = i_ch + _n_channels * iz_ind;
         PetscInt col_tt = i_ch + _n_channels * iz_ind;
-        PetscScalar value_tt = _TR * (1.0 - alpha) * dz / _dt;
+        PetscScalar value_tt = _TR * dz / _dt;
         LibmeshPetscCall(MatSetValues(
             _amc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
 
-        // Adding RHS elements
-        PetscScalar mdot_old_interp =
-            computeInterpolatedValue(_mdot_soln->old(node_out), _mdot_soln->old(node_in), Pe);
-        PetscScalar value_vec_tt = _TR * mdot_old_interp * dz / _dt;
+        PetscScalar value_vec_tt = _TR * _mdot_soln->old(node_out) * dz / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(
             VecSetValues(_amc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));
@@ -1413,19 +1507,39 @@ SubChannel1PhaseProblem::computeP(int iblock)
   }
 }
 
-void
+Real
 SubChannel1PhaseProblem::computeT(int iblock)
 {
   const unsigned int last_node = (iblock + 1) * _block_size;
   const unsigned int first_node = iblock * _block_size + 1;
+  std::vector<Real> residual;
+  residual.reserve(_block_size * _n_channels);
+  Real residual_norm_sq = 0.0;
+  Real temperature_norm_sq = 0.0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      _T_soln->set(node, _fp->T_from_p_h((*_P_soln)(node) + _P_out, (*_h_soln)(node)));
+      const Real T = (*_T_soln)(node);
+      const Real T_from_ph = _fp->T_from_p_h((*_P_soln)(node) + _P_out, (*_h_soln)(node));
+      residual.push_back(T_from_ph - T);
+      residual_norm_sq += Utility::pow<2>(residual.back());
+      temperature_norm_sq += Utility::pow<2>(T);
     }
   }
+
+  // Set the temperature solution with relaxation if needed
+  std::size_t i = 0;
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+    {
+      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+      _T_soln->set(node, (*_T_soln)(node) + _T_relaxation * residual[i]);
+      ++i;
+    }
+
+  return std::sqrt(residual_norm_sq) / (std::sqrt(temperature_norm_sq) + 1e-14);
 }
 
 void
@@ -2040,6 +2154,25 @@ SubChannel1PhaseProblem::solveAndPopulateEnthalpy(
 
   // Solve
   LibmeshPetscCall(KSPSolve(ksp, rhs, x));
+  KSPConvergedReason reason;
+  LibmeshPetscCall(KSPGetConvergedReason(ksp, &reason));
+  if (reason < 0)
+  {
+    PetscInt iterations;
+    PetscReal residual_norm;
+    LibmeshPetscCall(KSPGetIterationNumber(ksp, &iterations));
+    LibmeshPetscCall(KSPGetResidualNorm(ksp, &residual_norm));
+    mooseError(name(),
+               ": enthalpy linear solve failed: ",
+               KSPConvergedReasons[reason],
+               " (",
+               static_cast<int>(reason),
+               ") after ",
+               iterations,
+               " iterations; residual norm = ",
+               residual_norm,
+               ".");
+  }
 
   // Scatter to _h_soln with sanity checks
   PetscScalar * xx = nullptr;
@@ -2166,27 +2299,31 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Net effect: the solved x satisfies
   //        A_ff x = rhs_f_original + ((1 - alpha)/alpha) * D * (x_old - x),
   // which damps updates toward x_old without changing the converged solution.
+  // This equation relaxation is independent of the optional post-solve solution relaxation.
   // -----------------------------------------------------------------------------
-  auto RelaxEquation =
-      [&](Mat A_ff, Vec rhs_f, Vec like_vec, Vec work, PetscScalar alpha, auto && populate)
+  auto relaxEquation =
+      [&](Mat diagonal_block, Vec rhs, Vec work, const Real relaxation, auto && populate)
   {
-    Vec d = nullptr;
-    LibmeshPetscCall(VecDuplicate(like_vec, &d));
+    if (relaxation == 1.0)
+      return;
 
-    // 1) A_ff: diag <- diag / alpha
-    LibmeshPetscCall(MatGetDiagonal(A_ff, d));
-    LibmeshPetscCall(VecScale(d, 1.0 / alpha));
-    LibmeshPetscCall(MatDiagonalSet(A_ff, d, INSERT_VALUES));
+    Vec diagonal = nullptr;
+    LibmeshPetscCall(VecDuplicate(rhs, &diagonal));
+
+    // 1) diagonal_block: diag <- diag / relaxation
+    LibmeshPetscCall(MatGetDiagonal(diagonal_block, diagonal));
+    LibmeshPetscCall(VecScale(diagonal, 1.0 / relaxation));
+    LibmeshPetscCall(MatDiagonalSet(diagonal_block, diagonal, INSERT_VALUES));
 
     // 2) work <- x_old (caller-provided populator)
     LibmeshPetscCall(populate(work));
 
-    // 3) rhs_f += (1 - alpha) * (diag .* work)
-    LibmeshPetscCall(VecScale(d, (1.0 - alpha)));
-    LibmeshPetscCall(VecPointwiseMult(work, work, d));
-    LibmeshPetscCall(VecAXPY(rhs_f, 1.0, work));
+    // 3) rhs += (1 - relaxation) * (diag .* work)
+    LibmeshPetscCall(VecScale(diagonal, 1.0 - relaxation));
+    LibmeshPetscCall(VecPointwiseMult(work, work, diagonal));
+    LibmeshPetscCall(VecAXPY(rhs, 1.0, work));
 
-    LibmeshPetscCall(VecDestroy(&d));
+    LibmeshPetscCall(VecDestroy(&diagonal));
   };
 
   // indices
@@ -2207,7 +2344,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // equation 0: Mass conservation
   AssembleEquation(/*f=*/0,
                    /*A0=*/_mc_axial_convection_mat,
-                   /*A1=*/nullptr,
+                   /*A1=*/_mc_density_pressure_mat,
                    /*A2=*/_mc_sumWij_mat,
                    /*rhs=*/_mc_axial_convection_rhs,
                    /*rhs_add=*/nullptr,
@@ -2359,55 +2496,46 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecDestroy(&sumWij_loc));
     LibmeshPetscCall(VecDestroy(&_Wij_loc_vec));
     LibmeshPetscCall(VecDestroy(&_Wij_old_loc_vec));
-
-    // ---- per-equation under-relaxation ----
-    const PetscScalar relaxation_factor_mdot = 1.0;
-    const PetscScalar relaxation_factor_P = 1.0;
-    const PetscScalar relaxation_factor_Wij = 0.1;
-
-    V("Relax mdot: " + std::to_string(relaxation_factor_mdot));
-    V("Relax P: " + std::to_string(relaxation_factor_P));
-    V("Relax Wij: " + std::to_string(relaxation_factor_Wij));
-
-    // mdot
-    RelaxEquation(mat_array[Idx(0, 0)],
-                  vec_array[0],
-                  vec_array[0],
-                  _prod,
-                  relaxation_factor_mdot,
-                  [&](Vec dst)
-                  {
-                    return populateVectorFromHandle<SolutionHandle>(
-                        dst, *_mdot_soln, first_node, last_node, _n_channels);
-                  });
-    V("mdot relaxed");
-
-    // pressure
-    RelaxEquation(mat_array[Idx(1, 1)],
-                  vec_array[1],
-                  vec_array[1],
-                  _prod,
-                  relaxation_factor_P,
-                  [&](Vec dst)
-                  {
-                    return populateVectorFromHandle<SolutionHandle>(
-                        dst, *_P_soln, first_node, last_node, _n_channels);
-                  });
-    V("P relaxed");
-
-    // crossflow
-    RelaxEquation(mat_array[Idx(2, 2)],
-                  vec_array[2],
-                  vec_array[2],
-                  _Wij_vec,
-                  relaxation_factor_Wij,
-                  [&](Vec dst)
-                  {
-                    return populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-                        dst, _Wij, first_node, last_node, _n_gaps);
-                  });
-    V("Wij relaxed");
   }
+
+  V("Relax mdot: " + std::to_string(_mass_flow_equation_relaxation));
+  V("Relax P: " + std::to_string(_pressure_equation_relaxation));
+  V("Relax Wij: " + std::to_string(_crossflow_equation_relaxation));
+
+  relaxEquation(mat_array[Idx(0, 0)],
+                vec_array[0],
+                _prod,
+                _mass_flow_equation_relaxation,
+                [&](Vec work)
+                {
+                  return populateVectorFromHandle<SolutionHandle>(
+                      work, *_mdot_soln, first_node, last_node, _n_channels);
+                });
+  V("mdot relaxed");
+
+  relaxEquation(mat_array[Idx(1, 1)],
+                vec_array[1],
+                _prodp,
+                _pressure_equation_relaxation,
+                [&](Vec work)
+                {
+                  // The pressure block represents the node below each axial momentum cell because
+                  // the outlet pressure is prescribed.
+                  return populateVectorFromHandle<SolutionHandle>(
+                      work, *_P_soln, first_node - 1, last_node - 1, _n_channels);
+                });
+  V("P relaxed");
+
+  relaxEquation(mat_array[Idx(2, 2)],
+                vec_array[2],
+                _Wij_vec,
+                _crossflow_equation_relaxation,
+                [&](Vec work)
+                {
+                  return populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+                      work, _Wij, first_node, last_node, _n_gaps);
+                });
+  V("Wij relaxed");
   V("Linear solver relaxed");
 
   // ======================== Create and configure KSP =========================
@@ -2421,6 +2549,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   KSP ksp;
   PC pc;
   LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
+  LibmeshPetscCall(KSPSetOptionsPrefix(ksp, "scm_coupled_"));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
@@ -2437,12 +2566,32 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(PCFieldSplitSetIS(pc, NULL, part));
     LibmeshPetscCall(ISDestroy(&part));
   }
+  LibmeshPetscCall(KSPSetFromOptions(ksp));
   V("Linear solver assembled");
 
   // ============================== Solve =====================================
   LibmeshPetscCall(VecDuplicate(b_nest, &x_nest));
   LibmeshPetscCall(VecSet(x_nest, 0.0));
   LibmeshPetscCall(KSPSolve(ksp, b_nest, x_nest));
+  KSPConvergedReason reason;
+  LibmeshPetscCall(KSPGetConvergedReason(ksp, &reason));
+  if (reason < 0)
+  {
+    PetscInt iterations;
+    PetscReal residual_norm;
+    LibmeshPetscCall(KSPGetIterationNumber(ksp, &iterations));
+    LibmeshPetscCall(KSPGetResidualNorm(ksp, &residual_norm));
+    mooseError(name(),
+               ": coupled mass/momentum linear solve failed: ",
+               KSPConvergedReasons[reason],
+               " (",
+               static_cast<int>(reason),
+               ") after ",
+               iterations,
+               " iterations; residual norm = ",
+               residual_norm,
+               ".");
+  }
 
   // destroy solver containers first
   LibmeshPetscCall(VecDestroy(&b_nest));
@@ -2467,6 +2616,50 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &sol_Wij));
   LibmeshPetscCall(VecCopy(loc_vecs[2], sol_Wij));
   V("Solution from coupled solver copied to solution vectors");
+
+  // Apply independent post-solve relaxation to the fixed-point solution update.
+  auto relaxSolution = [&](Vec solution, Vec old_solution, const Real relaxation)
+  {
+    LibmeshPetscCall(VecScale(solution, relaxation));
+    LibmeshPetscCall(VecAXPY(solution, 1.0 - relaxation, old_solution));
+  };
+  LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
+      _prod, *_mdot_soln, first_node, last_node, _n_channels));
+  LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
+      _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
+
+  // Measure the pressure update before post-solve relaxation so changing that relaxation does
+  // not change the meaning of the outer pressure tolerance.
+  Vec pressure_residual;
+  LibmeshPetscCall(VecDuplicate(sol_p, &pressure_residual));
+  LibmeshPetscCall(VecCopy(sol_p, pressure_residual));
+  LibmeshPetscCall(VecAXPY(pressure_residual, -1.0, _prodp));
+
+  const PetscScalar * residual_array;
+  const PetscScalar * old_pressure_array;
+  PetscInt pressure_size;
+  LibmeshPetscCall(VecGetSize(pressure_residual, &pressure_size));
+  LibmeshPetscCall(VecGetArrayRead(pressure_residual, &residual_array));
+  LibmeshPetscCall(VecGetArrayRead(_prodp, &old_pressure_array));
+  Real residual_norm_sq = 0.0;
+  Real pressure_norm_sq = 0.0;
+  for (PetscInt i = 0; i < pressure_size; ++i)
+  {
+    residual_norm_sq += Utility::pow<2>(residual_array[i]);
+    pressure_norm_sq += Utility::pow<2>(old_pressure_array[i] + _P_out);
+  }
+  LibmeshPetscCall(VecRestoreArrayRead(pressure_residual, &residual_array));
+  LibmeshPetscCall(VecRestoreArrayRead(_prodp, &old_pressure_array));
+  LibmeshPetscCall(VecDestroy(&pressure_residual));
+  _pressure_fixed_point_error =
+      std::max(_pressure_fixed_point_error,
+               std::sqrt(residual_norm_sq) / (std::sqrt(pressure_norm_sq) + 1e-14));
+
+  relaxSolution(sol_mdot, _prod, _mass_flow_relaxation);
+  relaxSolution(sol_p, _prodp, _pressure_relaxation);
+  LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+      _Wij_vec, _Wij, first_node, last_node, _n_gaps));
+  relaxSolution(sol_Wij, _Wij_vec, _crossflow_relaxation);
 
   // mass flow
   LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
@@ -2544,10 +2737,41 @@ SubChannel1PhaseProblem::externalSolve()
     if (_verbose_subchannel)
       _console << s << std::endl;
   };
+  auto saveValues = [&](const SolutionHandle & solution,
+                        const unsigned int first_node,
+                        const unsigned int last_node)
+  {
+    std::vector<Real> values;
+    values.reserve((last_node - first_node + 1) * _n_channels);
+    for (unsigned int iz = first_node; iz <= last_node; ++iz)
+      for (unsigned int i_ch = 0; i_ch < _n_channels; ++i_ch)
+        values.push_back(solution(_subchannel_mesh.getChannelNode(i_ch, iz)));
+    return values;
+  };
+  auto relativeChange = [&](const SolutionHandle & solution,
+                            const std::vector<Real> & old_values,
+                            const unsigned int first_node,
+                            const unsigned int last_node,
+                            const Real reference_offset)
+  {
+    Real difference_norm_sq = 0.0;
+    Real reference_norm_sq = 0.0;
+    std::size_t i = 0;
+    for (unsigned int iz = first_node; iz <= last_node; ++iz)
+      for (unsigned int i_ch = 0; i_ch < _n_channels; ++i_ch)
+      {
+        const Real value = solution(_subchannel_mesh.getChannelNode(i_ch, iz));
+        difference_norm_sq += Utility::pow<2>(value - old_values[i]);
+        reference_norm_sq += Utility::pow<2>(old_values[i] + reference_offset);
+        ++i;
+      }
+    return std::sqrt(difference_norm_sq) / (std::sqrt(reference_norm_sq) + 1e-14);
+  };
   V("Solution initialized");
   Real P_error = 1.0;
   unsigned int P_it = 0;
   unsigned int P_it_max;
+  bool temperature_converged = true;
 
   if (_segregated_bool)
     P_it_max = 20 * _n_blocks;
@@ -2557,16 +2781,16 @@ SubChannel1PhaseProblem::externalSolve()
   if ((_n_blocks == 1) && (_segregated_bool))
     P_it_max = 5;
 
+  if (_P_maxit > 0)
+    P_it_max = _P_maxit;
+
   while ((P_error > _P_tol && P_it < P_it_max))
   {
     P_it += 1;
-    if (P_it == P_it_max && _n_blocks != 1)
-    {
-      _console << "Reached maximum number of axial pressure iterations" << std::endl;
-      _converged = false;
-    }
+    temperature_converged = true;
+    _pressure_fixed_point_error = 0.0;
     _console << "Solving Outer Iteration : " << P_it << std::endl;
-    auto P_L2norm_old_axial = _P_soln->L2norm();
+    const auto P_old = saveValues(*_P_soln, 0, _n_cells);
     for (unsigned int iblock = 0; iblock < _n_blocks; iblock++)
     {
       int last_level = (iblock + 1) * _block_size;
@@ -2575,70 +2799,90 @@ SubChannel1PhaseProblem::externalSolve()
       auto T_it = 0;
       _console << "Solving Block: " << iblock << " From first level: " << first_level
                << " to last level: " << last_level << std::endl;
+
       while (T_block_error > _T_tol && T_it < _T_maxit)
       {
-        T_it += 1;
-        if (T_it == _T_maxit)
+        if (processor_id() == 0)
         {
-          _console << "Reached maximum number of temperature iterations for block: " << iblock
-                   << std::endl;
-          _converged = false;
+          if (_segregated_bool)
+            computeWijFromSolve(iblock);
+          else
+          {
+            LibmeshPetscCall(implicitPetscSolve(iblock));
+            computeWijPrime(iblock);
+            V("Done with main solve.");
+          }
         }
-        auto T_L2norm_old_block = _T_soln->L2norm();
-        // We are only computing quantities on rank 0
-        if (processor_id() > 0)
-          goto aux_close;
 
-        if (_segregated_bool)
+        // A value of one preserves the original ordering by refreshing the flow solution before
+        // every thermal update. Larger values opt into lagging flow during thermal subcycles.
+        for (const auto enthalpy_subcycle : make_range(_enthalpy_subcycles))
         {
-          computeWijFromSolve(iblock);
+          if (T_block_error <= _T_tol || T_it >= _T_maxit)
+            break;
+
+          V("Enthalpy subcycle: " + std::to_string(enthalpy_subcycle + 1));
+          T_it += 1;
+          const auto T_old = saveValues(*_T_soln, first_level, last_level);
+          // We are only computing quantities on rank 0
+          if (processor_id() > 0)
+          {
+            // Rank zero supplies the error through the maximum reduction below.
+            T_block_error = 0.0;
+            goto aux_close;
+          }
+
           if (_compute_power)
           {
             computeh(iblock);
-            computeT(iblock);
+            T_block_error = computeT(iblock);
+            V("Done with thermal solve.");
           }
+
+          V("Start updating thermophysical properties.");
+          if (_compute_density)
+            computeRho(iblock);
+          if (_compute_viscosity)
+            computeMu(iblock);
+          V("Done updating thermophysical properties.");
+
+          // We must do a global assembly to make sure data is parallel consistent before we do
+          // things like compute L2 norms
+        aux_close:
+          _aux->solution().close();
+
+          if (!_compute_power)
+            T_block_error =
+                relativeChange(*_T_soln, T_old, first_level, last_level, /*reference_offset=*/0.0);
+          _console << "T_block_error: " << T_block_error << std::endl;
+
+          // All processes must have the same iteration count
+          comm().max(T_block_error);
         }
-        else
-        {
-          LibmeshPetscCall(implicitPetscSolve(iblock));
-          computeWijPrime(iblock);
-          V("Done with main solve.");
-          if (_compute_power)
-          {
-            computeh(iblock);
-            computeT(iblock);
-          }
-          V("Done with thermal solve.");
-        }
-
-        V("Start updating thermophysical properties.");
-        if (_compute_density)
-          computeRho(iblock);
-        if (_compute_viscosity)
-          computeMu(iblock);
-        V("Done updating thermophysical properties.");
-
-        // We must do a global assembly to make sure data is parallel consistent before we do things
-        // like compute L2 norms
-      aux_close:
-        _aux->solution().close();
-
-        auto T_L2norm_new = _T_soln->L2norm();
-        T_block_error =
-            std::abs((T_L2norm_new - T_L2norm_old_block) / (T_L2norm_old_block + 1E-14));
-        _console << "T_block_error: " << T_block_error << std::endl;
-
-        // All processes must have the same iteration count
-        comm().max(T_block_error);
+      }
+      const bool block_converged = T_block_error <= _T_tol;
+      temperature_converged &= block_converged;
+      if (!block_converged)
+      {
+        _console << "Reached maximum number of temperature iterations for block: " << iblock
+                 << std::endl;
       }
     }
-    auto P_L2norm_new_axial = _P_soln->L2norm();
-    P_error =
-        std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + _P_out + 1E-14));
+    P_error = _segregated_bool ? relativeChange(*_P_soln, P_old, 0, _n_cells, _P_out)
+                               : _pressure_fixed_point_error;
+    comm().max(P_error);
     _console << "P_error :" << P_error << std::endl;
     V("Iteration:  " + std::to_string(P_it));
     V("Maximum iterations: " + std::to_string(P_it_max));
   }
+  // Cache only the final iteration status. Earlier outer iterations may fail their thermal
+  // tolerance and subsequently recover.
+  const bool pressure_converged = P_error <= _P_tol;
+  if (!pressure_converged)
+  {
+    _console << "Reached maximum number of axial pressure iterations" << std::endl;
+  }
+  _converged = pressure_converged && temperature_converged;
   // update old crossflow matrix
   _Wij_old = _Wij;
   _console << "Finished executing subchannel solver\n";
