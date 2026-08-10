@@ -40,6 +40,7 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
 
 protected:
   /// The H/A flux functor for this BC (can be variable, function, etc)

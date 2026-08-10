@@ -34,6 +34,7 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
 
 protected:
   /// Switch for enabling linear extrapolation for the boundary face value
