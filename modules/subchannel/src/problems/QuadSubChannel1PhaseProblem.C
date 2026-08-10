@@ -340,37 +340,17 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         // interpolation weight coefficient
         auto alpha = computeInterpolationCoefficients(0.5);
 
-        /// Time derivative term
-        if (iz == first_node)
-        {
-          PetscScalar value_vec_tt =
-              -1.0 * _TR * alpha * (*_rho_soln)(node_in) * (*_h_soln)(node_in)*volume / _dt;
-          PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(
-              VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));
-        }
-        else
-        {
-          PetscInt row_tt = i_ch + _n_channels * iz_ind;
-          PetscInt col_tt = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_tt = _TR * alpha * (*_rho_soln)(node_in)*volume / _dt;
-          LibmeshPetscCall(MatSetValues(
-              _hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
-        }
-
-        // Adding diagonal elements
+        // Keep temporal storage independent of the spatial interpolation scheme. Applying the
+        // upwind coefficient to this term puts the storage on the upstream node and makes the
+        // small-timestep matrix singular in the upwind limit.
         PetscInt row_tt = i_ch + _n_channels * iz_ind;
         PetscInt col_tt = i_ch + _n_channels * iz_ind;
-        PetscScalar value_tt = _TR * (1.0 - alpha) * (*_rho_soln)(node_out)*volume / _dt;
+        PetscScalar value_tt = _TR * (*_rho_soln)(node_out)*volume / _dt;
         LibmeshPetscCall(MatSetValues(
             _hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
 
-        // Adding RHS elements
-        PetscScalar rho_old_interp =
-            computeInterpolatedValue(_rho_soln->old(node_out), _rho_soln->old(node_in), 0.5);
-        PetscScalar h_old_interp =
-            computeInterpolatedValue(_h_soln->old(node_out), _h_soln->old(node_in), 0.5);
-        PetscScalar value_vec_tt = _TR * rho_old_interp * h_old_interp * volume / _dt;
+        PetscScalar value_vec_tt =
+            _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(
             VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));

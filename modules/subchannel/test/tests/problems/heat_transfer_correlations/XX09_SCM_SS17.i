@@ -95,6 +95,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [gnielinski]
     type = SCMHTCGnielinski
   []
+  [negative-htc]
+    type = SCMHTCNegativeTest
+  []
   [kazimi-carelli]
     type = SCMHTCKazimiCarelli
   []
