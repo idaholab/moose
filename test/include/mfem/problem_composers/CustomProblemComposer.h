@@ -35,6 +35,6 @@ public:
   /// Returns a pointer to a freshly minted operator.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & _mfem_problem) override;
 };
-};
+}
 
 #endif
