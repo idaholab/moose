@@ -1,5 +1,6 @@
 end_time = 1
 dt = ${fparse end_time / 10}
+strain = 1e-5
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -23,7 +24,7 @@ dt = ${fparse end_time / 10}
   [pull]
     type = PiecewiseLinear
     x = '0 ${end_time}'
-    y = '0 1e-5'
+    y = '0 ${strain}'
   []
 []
 
@@ -107,6 +108,7 @@ dt = ${fparse end_time / 10}
   []
   [dt]
     type = TimestepSize
+    outputs = console
   []
   [eff_creep_strain]
     type = ElementAverageValue
