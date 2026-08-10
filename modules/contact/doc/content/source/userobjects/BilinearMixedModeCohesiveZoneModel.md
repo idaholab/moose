@@ -14,7 +14,6 @@ those presented in previous technical reports ([!cite](martin2022implement,recue
 which are in turn based on existing discretization approaches ([!cite](wohlmuth2011variationally,
 puso2008segment)).
 
-
 ### Quadratic failure criterion
 
 The softening of the interface in the bilinear mixed mode traction separation law is given by a quadratic failure criterion. The onset of softening of the interface takes place when the traction state reaches the following equality:
@@ -49,10 +48,10 @@ The mixed mode relative displacement corresponding to the initiation of softenin
 \begin{equation}
 \tilde{\delta}_{m,j}^{0} =
 \left\{
-	\begin{array}{ll}
-		\tilde{\delta}_{N,j}^{0} \tilde{\delta}_{t2,j}^{0} \sqrt{\frac{1 + \tilde{\beta}^{2}}{\tilde{(\delta}_{t2,j}^{0})^2 + (\tilde{\beta} \tilde{\delta}_{N,j}^{0})^2}}  &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
-		\tilde{\delta}_{t2,j}^{0}  &  {if } \tilde{\delta}_{N,j}^{0}  < 0.
-	\end{array}
+ \begin{array}{ll}
+  \tilde{\delta}_{N,j}^{0} \tilde{\delta}_{t2,j}^{0} \sqrt{\frac{1 + \tilde{\beta}^{2}}{\tilde{(\delta}_{t2,j}^{0})^2 + (\tilde{\beta} \tilde{\delta}_{N,j}^{0})^2}}  &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
+  \tilde{\delta}_{t2,j}^{0}  &  {if } \tilde{\delta}_{N,j}^{0}  < 0.
+ \end{array}
 \right.
     \label{eq:mix_mode_rel_disp}
 \end{equation}
@@ -74,10 +73,10 @@ During the delamination or debonding process, a relative interface displacement 
 \begin{equation}
 \tilde{\delta}_{m,j}^{f} =
 \left\{
-	\begin{array}{ll}
-		\frac{2(1+\tilde{\beta}^{2})}{K \tilde{\delta}_{m,j}^{0}} \left[\left( \frac{1}{G_{IC}}\right)^{\alpha} + \left( \frac{\tilde{\beta}^{2}}{G_{IIC}}\right)^{\alpha}\right]^{\frac{-1}{\alpha}}   &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
-		\sqrt{\tilde{\delta}_{1,j}^{f} + \tilde{\delta}_{2,j}^{f}}  &  {if } \tilde{\delta}_{N,j}^{0} < 0.
-	\end{array}
+ \begin{array}{ll}
+  \frac{2(1+\tilde{\beta}^{2})}{K \tilde{\delta}_{m,j}^{0}} \left[\left( \frac{1}{G_{IC}}\right)^{\alpha} + \left( \frac{\tilde{\beta}^{2}}{G_{IIC}}\right)^{\alpha}\right]^{\frac{-1}{\alpha}}   &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
+  \sqrt{\tilde{\delta}_{1,j}^{f} + \tilde{\delta}_{2,j}^{f}}  &  {if } \tilde{\delta}_{N,j}^{0} < 0.
+ \end{array}
 \right.
     \label{eq:mix_mode_decohesion}
 \end{equation}
@@ -95,10 +94,10 @@ The mixed-mode total decohesion displacements are, for the BK criterion:
 \begin{equation}
 \tilde{\delta}_{m,j}^{f} =
 \left\{
-	\begin{array}{ll}
-		\frac{2}{K \tilde{\delta}_{m,j}^{0}} \left[ G_{IC} + \left(G_{IIC} - G_{IC}\left[\frac{\tilde{\beta}^{2}}{1 + \tilde{\beta}^{2}}\right]^{\eta}\right)\right]   &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
-		\sqrt{\tilde{\delta}_{1,j}^{f} + \tilde{\delta}_{2,j}^{f}}  &  {if } \tilde{\delta}_{N,j}^{0} < 0.
-	\end{array}
+ \begin{array}{ll}
+  \frac{2}{K \tilde{\delta}_{m,j}^{0}} \left[ G_{IC} + \left(G_{IIC} - G_{IC}\left[\frac{\tilde{\beta}^{2}}{1 + \tilde{\beta}^{2}}\right]^{\eta}\right)\right]   &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
+  \sqrt{\tilde{\delta}_{1,j}^{f} + \tilde{\delta}_{2,j}^{f}}  &  {if } \tilde{\delta}_{N,j}^{0} < 0.
+ \end{array}
 \right.
     \label{eq:bk_mix_mode_decohesion}
 \end{equation}
@@ -114,18 +113,18 @@ where $\tau_{l}$ is the $l$ component of the local traction and $D_{li}$ is an e
 \begin{equation}
  \tau_{l} =
 \left\{
-	\begin{array}{ll}
-		(1 - \omega) K \tilde{\delta}_{\text{active}}  &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
-		K \tilde{\delta}_{\text{inactive}}  &  {if } \tilde{\delta}_{N,j}^{0} < 0,
-	\end{array}
+ \begin{array}{ll}
+  (1 - \omega) K \tilde{\delta}_{\text{active}}  &  {if } \tilde{\delta}_{N,j}^{0} \geq 0, \\
+  K \tilde{\delta}_{\text{inactive}}  &  {if } \tilde{\delta}_{N,j}^{0} < 0,
+ \end{array}
 \right.
 \label{eq:constitutive}
 \end{equation}
 where $\tilde{\delta}_{\text{active}}$ represents the CZM weighted interface jump with shear components, i.e. it applies shear stiffness, and normal stiffness only if a gap exists. $\tilde{\delta}_{\text{inactive}}$ applies a normal traction that prevents interpenetration. A few notes about the previous equation:
 
-  - The action of $\delta_{\text{inactive}}$ can potentially be replaced with (mortar) mechanical contact enforcement. \\
-  - The local traction $\tau_{l}$ is computed nodally with weighted quantities, but is interpolated and applied on the primary and secondary surfaces using Lagrange interpolation functions. \\
-  - The constitutive model can be expanded as needed in the user object.
+- The action of $\delta_{\text{inactive}}$ can potentially be replaced with (mortar) mechanical contact enforcement. \\
+- The local traction $\tau_{l}$ is computed nodally with weighted quantities, but is interpolated and applied on the primary and secondary surfaces using Lagrange interpolation functions. \\
+- The constitutive model can be expanded as needed in the user object.
 
 The damage, $\omega$, is computed as follows (we omit the nodal subscript):
 \begin{equation}
@@ -138,11 +137,10 @@ The local-frame displacement jump and cohesive traction components can be output
 [CohesiveZoneMortarUserObjectAux](/CohesiveZoneMortarUserObjectAux.md). The tangential
 displacement jump effective value is the tangential magnitude, `sqrt(t1^2 + t2^2)`.
 The cohesive traction tangential magnitude uses the same tangential norm, while the cohesive
-traction effective value is the full local traction norm, `sqrt(tn^2 + t1^2 + t2^2)`.
+traction effective value is the full local traction norm, `sqrt(tn^2 + t1^2 + t2^2)`. In two dimensions, the second tangential component, `t2`, is zero.
 
-The local traction components follow the residual sign convention used by this mortar cohesive
-zone model. With the current convention, tensile opening gives a positive local normal jump and a
-negative local normal cohesive traction.
+The traction components in the local coordinate system follow the convention used internally
+in the model, which is that opening is positive and tensile traction is negative.
 
 ### Viscous regularization
 

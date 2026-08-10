@@ -25,9 +25,9 @@ Quantities that this object can output include:
 - `cohesive_traction_effective`: full local cohesive traction norm,
   `sqrt(tn^2 + t1^2 + t2^2)`.
 
-The local traction outputs follow the residual sign convention used by the mortar cohesive zone
-model. With the current convention, tensile opening gives a positive `local_normal_jump` and a
-negative `cohesive_traction_normal`.
+The traction components are output in the local coordinate system follow the convention used
+internally in the model, which is that for `local_normal_jump` opening is positive and for
+`cohesive_traction_normal` tensile traction is negative.
 
 !syntax parameters /AuxKernels/CohesiveZoneMortarUserObjectAux
 
