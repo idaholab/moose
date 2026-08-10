@@ -1,0 +1,112 @@
+[Tests]
+  design = 'ArcLengthProblem.md ArcLengthHistory.md ArcLengthLoadParameter.md'
+  issues = '#31843'
+  # The continuation leaves below are pinned to max_parallel = 1 on purpose, not as an arbitrary
+  # restriction. The path is traced with a serial -pc_type lu factorization, and the csv golds hold
+  # one fixed path, so a rank count that changes how the linear solve is factored moves the
+  # increment by increment values those golds record.
+  [cubic_snapthrough]
+    type = 'CSVDiff'
+    input = 'cubic_snapthrough.i'
+    csvdiff = 'cubic_snapthrough_out_path.csv cubic_snapthrough_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall trace an equilibrium path through the limit points of a snap '
+                  'through problem whose restoring force is a cubic function of the solution, '
+                  'recording a load parameter history that rises to the first limit point, falls '
+                  'through the snap, and recovers, a path that prescribed load stepping cannot '
+                  'trace.'
+  []
+  [cubic_snapthrough_increments]
+    type = 'CSVDiff'
+    input = 'cubic_snapthrough.i'
+    # The common csv output is switched off and a named CSV output is added in its place, so this
+    # leaf writes only the per increment file and cannot race 'cubic_snapthrough' above over the
+    # shared output names. The path history is already asserted there, so the vector
+    # postprocessors are left out here and only the postprocessor table is written.
+    cli_args = 'Outputs/csv=false '
+               'Outputs/increments/type=CSV '
+               'Outputs/increments/execute_on=ARC_LENGTH_INCREMENT '
+               'Outputs/increments/execute_vector_postprocessors_on=NONE'
+    csvdiff = 'cubic_snapthrough_increments.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # same reasoning as the leaf above: the values are accumulated one increment at a time
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall write an output file on every increment of an arc-length '
+                  'continuation, recording one row for each equilibrium point of the traced path '
+                  'with the increment index standing in for the time of the solve.'
+  []
+  [bratu_source]
+    type = 'CSVDiff'
+    input = 'bratu_source.i'
+    csvdiff = 'bratu_source_out_path.csv bratu_source_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall scale a solution dependent volumetric source and the Jacobian '
+                  'of that source by the load parameter of an arc-length continuation, recording a '
+                  'load parameter history whose solution response steepens as the path approaches '
+                  'a fold.'
+  []
+  [errors]
+    requirement = 'The system shall report an error when an arc-length continuation problem is set '
+                  'up with '
+    [no_load_error]
+      type = 'RunException'
+      input = 'errors.i'
+      expect_err = 'requires at least one residual object routed to the load vector tag'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'no residual object routed to the load vector tag,'
+    []
+    [pjfnk_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Executioner/solve_type=PJFNK'
+      expect_err = 'requires solve_type = NEWTON'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a matrix free solve type that never forms the Jacobian the continuation needs,'
+    []
+    [snes_type_override_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Executioner/petsc_options_iname=-snes_type '
+                 'Executioner/petsc_options_value=newtonls'
+      expect_err = '-snes_type is owned by ArcLengthProblem'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a nonlinear solver type that would replace the arc-length solver,'
+    []
+    [fused_residual_and_jacobian_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      expect_err = 'does not support'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a fused residual and Jacobian assembly that bypasses the load tag split and would '
+               'leave the load residual unscaled by the load parameter, and'
+    []
+    [double_tag_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Kernels/load/extra_vector_tags=arc_length_load'
+      expect_err = 'not with extra_vector_tags'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a load object that appends the load vector tag to its default tags instead of '
+               'replacing them, which would count the load twice.'
+    []
+  []
+[]

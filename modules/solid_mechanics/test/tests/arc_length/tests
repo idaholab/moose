@@ -1,0 +1,140 @@
+[Tests]
+  design = 'ArcLengthProblem.md ArcLengthHistory.md ArcLengthLoadParameter.md'
+  issues = '#31843'
+  # These two inputs are a pair and should be read against each other. Both are finite strain
+  # circular arches carrying a dead point load at the crown, and they differ in how the ends are
+  # held: 'arch_snapthrough' clamps the whole end cross sections, 'arch_snapback' pins a single mid
+  # surface node at each springing and leaves those cross sections free to rotate. Each sits at the
+  # rise where its own behaviour is cleanest. Together they record a four configuration result:
+  # PINNED ENDS TRADE THE CONNECTED INVERTED BRANCH FOR A NEGATIVE TROUGH SNAP BACK LOOP.
+  #
+  #   arch_snapthrough (clamped) reaches a deep dip and LANDS on the inverted stiffening branch. It
+  #   ends snapped through, in the inverted shape, with the load parameter back at its target.
+  #
+  #   arch_snapback (pinned) instead drives the load parameter to a deeply NEGATIVE trough, and part
+  #   way down that trough the apex displacement ITSELF REVERSES and the arch springs back toward
+  #   its original shape before the load parameter recovers. It never inverts.
+  #
+  # The pinned path is the only-arc-length-survives case: prescribed load stepping dies at the first
+  # limit point, and prescribed displacement stepping dies at the apex reversal, because neither the
+  # load nor the displacement is monotonic along it. Alone, each of these inputs looks like an
+  # arbitrary choice of support condition. As a pair they are a result, so do not change the support
+  # condition of either one without changing the other.
+  #
+  # That four configuration result was first calibrated on an earlier PARABOLIC arch family whose
+  # rise to span ratios these two circular arches reproduce (0.165 here, 0.11 there). Circular arches
+  # are the literature benchmark for arc-length continuation, so the geometry was moved onto circles,
+  # and the behaviour has now been MEASURED there: the clamped path peaks at 1.2807 and troughs at
+  # +0.5330, and the pinned path troughs at -2.1075 with the apex displacement reversing at increment
+  # 69. The committed path golds record those values, so the four configuration result is verified on
+  # these two inputs. Parabolic numbers still quoted in the blocks below are the calibration the
+  # guard rails were sized from, not predictions of these paths.
+  #
+  # Both meshes are AnnularMeshGenerator sectors placed so that the crown sits exactly at (0, radius)
+  # with no translation. nt must be EVEN so an angular division lands on the crown at 90 degrees,
+  # where both the point load and the apex postprocessor sit; an odd nt puts the crown at an element
+  # mid edge and smears the load across two nodes with no error reported. nr = 4 is even for the same
+  # reason radially, so a node ring falls exactly on the mid surface, and it keeps QUAD4 shear
+  # locking from putting the bending stiffness back. Do not coarsen either one.
+  #
+  # Both leaves are pinned to max_parallel = 1 on purpose, not as an arbitrary restriction. The path
+  # is traced with a serial -pc_type lu factorization, and the csv golds hold one fixed path, so a
+  # rank count that changes how the linear solve is factored moves the increment by increment values
+  # those golds record.
+  [arch_snapthrough]
+    type = 'CSVDiff'
+    input = 'arch_snapthrough.i'
+    csvdiff = 'arch_snapthrough_out_path.csv arch_snapthrough_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # The ends are clamped: both displacement components over the whole 'dmin' and 'dmax' end faces.
+    # That is not a stiffness preference, it is what gives the path a stable inverted branch to land
+    # on. AnnularMeshGenerator creates nodesets as well as sidesets under those two names, which is
+    # what these nodal DirichletBCs bind to. For what happens when the same arch is held on single
+    # support nodes instead, see 'arch_snapback' below; it does not invert at all.
+    #
+    # Those end faces carry ordinary strong DirichletBCs. That is safe in this input and is not safe
+    # in general: a strong row is overwritten after assembly, so a load tag entry landing in one
+    # would be dropped from the load, and the path would then be traced against a load the solver
+    # never applies. Here the load is a single point force at the crown and the load tag is exactly
+    # zero at every constrained dof, so no such row exists. Do not copy this pairing into an input
+    # whose load touches a constrained boundary.
+    #
+    # Clamped ends also suppress the antisymmetric modes that a rise to thickness ratio near 8 puts a
+    # bifurcation point close to, which the symmetric mesh and the centered load already keep the
+    # solver off. Should this ever fail with an LU zero pivot or a visibly asymmetric path, mesh half
+    # the arch against a symmetry BC rather than flattening it.
+    #
+    # lambda_min is a clamp on the load parameter, not an exit criterion. It has to sit BELOW the
+    # trough of the path, or the descending branch reflects off the floor and ping-pongs there until
+    # max_continuation_steps is exhausted and the solve dies with DIVERGED_MAX_IT. The clamped trough
+    # never goes negative: across the parabolic family it ROSE as the rise deepened, +0.44 and +0.58
+    # at the two rises measured, so it stays far above -4 and that floor is kept only as the guard.
+    # max_continuation_steps is the same kind of ceiling: the parabolic twin of this arch spent 93
+    # increments of the 0.06 step reaching lambda_max = 5, and 300 leaves room for a longer circular
+    # path. Raising lambda_max costs increments only on the inverted branch, which is stiff, so it is
+    # cheap; the peak sits near 1.4 and is in no danger of reaching the ceiling and reporting a
+    # converged path that never inverted.
+    #
+    # the path is traced one increment at a time through two limit points, so linear solver
+    # differences accumulate along it; this holds three digits, which no monotonic load path
+    # reproduces, while surviving compiler and PETSc jitter where the path turns
+    abs_zero = 1e-6
+    rel_err = 5e-4
+    requirement = 'The system shall trace the load displacement path of a finite strain circular '
+                  'arch with clamped ends that snaps through under a dead crown point load, '
+                  'carrying the arch from its initial curvature to an inverted shape within a '
+                  'single solve and recording a load parameter history that rises to a limit point, '
+                  'falls to a deep trough at less than half the peak as the arch snaps, and recovers '
+                  'to the target value along the inverted stiffening branch, a path that prescribed '
+                  'load stepping cannot trace.'
+  []
+  [arch_snapback]
+    type = 'CSVDiff'
+    input = 'arch_snapback.i'
+    csvdiff = 'arch_snapback_out_path.csv arch_snapback_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # This is the pinned twin of 'arch_snapthrough' above. The supports are single mid surface nodes
+    # at the two springings, selected by an ExtraNodesetGenerator at coordinates computed with
+    # fparse from the same radius and half angle the mesh is built from, so the geometry stays self
+    # consistent if either is retuned. use_closest_node is left at its default false so that a
+    # coordinate which misses a node fails loudly instead of silently snapping to a neighbour; the
+    # default 1e-6 tolerance is many orders above the round off between the fparse expression and
+    # the generator's own trigonometry. Constraining both components at those two nodes and nowhere
+    # else is what leaves the end cross sections free to rotate. Do not widen these BCs onto the
+    # 'dmin' and 'dmax' faces; that turns this input into a duplicate of the clamped one.
+    #
+    # lambda_min matters here in a way it does not for the clamped arch, because this path really
+    # does go deeply negative. The parabolic twin troughed at -2.13, so the floor must sit clearly
+    # BELOW that; -4 is used rather than -3 so a stiffer circular trough still has headroom. A floor
+    # above the trough does not truncate the path, it makes the descending branch reflect off the
+    # floor and ping-pong there until max_continuation_steps is exhausted. The parabolic twin took
+    # about 118 increments of the 0.06 step to reach lambda_max = 3, and 300 leaves ample room.
+    #
+    # lambda_max has the SAME failure shape at the other end, and it has now been MEASURED on this
+    # circular input: the recovery branch does not run away upward. It turns over at an UPPER limit
+    # point of about 3.59 near increment 121, then DESCENDS again to a second trough of about -2.17
+    # near increment 148. The pinned path is a CLOSED LOOP, so termination on this family is only
+    # meaningful BELOW the loop ceiling. A lambda_max above that ceiling can NEVER be crossed, and
+    # the continuation just cycles the loop until max_continuation_steps is spent, exactly the way
+    # a lambda_min floor set above the trough ping-pongs. lambda_max = 3 is crossed near increment
+    # 119, inside the expected 110 to 165 increment band, and it keeps 0.587 of margin below the
+    # turning point. Do NOT raise it: 3.5 would leave 0.087, and thin margin at a turning point is
+    # exactly what already cost this feature a wasted round on the lambda_min side.
+    #
+    # same tolerances and same reasoning as the clamped block: the path is traced one increment at a
+    # time, and this one turns twice in the load parameter and once in the apex displacement
+    abs_zero = 1e-6
+    rel_err = 5e-4
+    requirement = 'The system shall trace the load displacement path of a finite strain circular '
+                  'arch with pinned supports that snaps back under a dead crown point load, '
+                  'recording a load parameter history that rises to a limit point, falls through '
+                  'zero to a deeply negative trough during which the apex displacement itself '
+                  'reverses before the arch recovers, and then returns to the target value, a path '
+                  'that neither prescribed load stepping nor prescribed displacement stepping can '
+                  'trace.'
+  []
+[]
