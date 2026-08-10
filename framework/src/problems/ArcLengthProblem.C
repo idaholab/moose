@@ -92,11 +92,18 @@ ArcLengthProblem::validParams()
                         "the solve, which is what the default does. Set this to trace a softening "
                         "branch, where the load parameter falls monotonically past the peak and "
                         "'lambda_max' is never reachable, so the step budget is the end of the "
-                        "path. This is meant for single-solve path tracing: the exit is read off "
-                        "the count of increments a continuation traced, and a run that solves more "
-                        "than once carries that count past the budget and reports the solve as "
-                        "failed. A transient run takes its load increment from the time step size "
-                        "instead, so this is a one-shot setting.");
+                        "path. A transient run ends the continuation of every step this way and "
+                        "commits the load increment of a step scaled by the step local load "
+                        "parameter its last converged increment reached, which is what lets the "
+                        "load factor fall below the one the step started from, so 'lambda_min' has "
+                        "to be negative there. The direction of travel is remembered across steps "
+                        "so that a path descending at the end of one step keeps descending in the "
+                        "next, which makes the time measure the load change a run has covered "
+                        "rather than the load factor it has reached. The exit is read off the "
+                        "count of increments a "
+                        "continuation traced, so it needs a single solve per path: a setup that "
+                        "solves the same path more than once carries that count past the budget "
+                        "and reports the solve as failed.");
 
   params.addParamNamesToGroup("load_vector_tag load_matrix_tag", "Tagging");
   params.addParamNamesToGroup("step_size max_continuation_steps lambda_max lambda_min psi_squared "
@@ -112,7 +119,10 @@ ArcLengthProblem::ArcLengthProblem(const InputParameters & parameters)
     _correction_type(correctionType(getParam<MooseEnum>("correction_type"))),
     _end_on_max_continuation_steps(getParam<bool>("end_on_max_continuation_steps")),
     _increment(0),
+    _ended_on_spent_budget(false),
     _checked_load_on_constrained_dofs(false),
+    _step_lambda(0.0),
+    _path_direction(declareRestartableData<int>("path_direction", 1)),
     _lambda_accum(declareRestartableData<Real>("lambda_accum", 0.0)),
     _step_load_increment(declareRestartableData<Real>("step_load_increment", 0.0)),
 #endif
@@ -232,16 +242,14 @@ ArcLengthProblem::checkProblemIntegrity()
                "a range of 0 to 1, and the load increment is set by the time step size instead. "
                "Control the load with the TimeStepper and the end_time.");
 
-  if (_transient && _end_on_max_continuation_steps)
-    paramError("end_on_max_continuation_steps",
-               "'end_on_max_continuation_steps' is a path-tracing exit for the one-shot mode and "
-               "is not available in a transient run. A transient step's load increment is set by "
-               "its time step size, and the load factor the committed steps carry advances by that "
-               "whole increment once the step ends, so a step cut short by a spent continuation "
-               "budget would have applied part of its load increment while the load factor "
-               "advanced all of it, and the load factor reported from there on would no longer be "
-               "the load that was applied. Let such a step fail instead and let the TimeStepper "
-               "cut the load increment back.");
+  if (_transient && _end_on_max_continuation_steps && getParam<Real>("lambda_min") >= 0)
+    paramError("lambda_min",
+               "'lambda_min' has to be negative when 'end_on_max_continuation_steps' is set in a "
+               "transient run. The step local load parameter is what falls past the peak there, "
+               "and this clamp truncates a step that would take it below this value, so a floor at "
+               "or above zero holds every step at or above the load factor it started from and the "
+               "descending branch this setting is for cannot be traced. Set the floor to how far "
+               "below its starting load factor a single step is allowed to unload.");
 }
 
 PetscErrorCode
@@ -305,10 +313,35 @@ ArcLengthProblem::onTimestepBegin()
   if (!_transient)
     return;
 
-  // Taking the time step size as the load increment is what makes the load factor a step ends at
-  // the time it ends at, so cutting a step back cuts its load increment back in the same proportion
-  _step_load_increment = _dt;
+  // Taking the time step size as the magnitude of the load increment is what makes the load change
+  // a step covers the time it spans, so cutting a step back cuts its load increment back in the
+  // same proportion. The sign carries the direction of travel across the step boundary, which is
+  // where PETSc's own predictor, whose memory of it ends with the solve, does not reach.
+  _step_load_increment = _path_direction * _dt;
   _increment = 0;
+  _ended_on_spent_budget = false;
+}
+
+void
+ArcLengthProblem::onTimestepEnd()
+{
+  FEProblemBase::onTimestepEnd();
+
+  if (!_transient || !_ended_on_spent_budget)
+    return;
+
+  // The path stopped where the budget ran out instead of at the end of the load increment of the
+  // step, so what advanceState() commits is the part of that increment the path traced, signed by
+  // the direction the step travelled in. _step_lambda is the step local parameter the load factor
+  // reported from here on is composed with, so the load committed and the load reported match.
+  _step_load_increment *= _step_lambda;
+
+  // A step whose net change ran against its direction of travel turned around within itself, so
+  // the way it came is the new forward. A step that made no net change at all keeps the direction,
+  // there being nothing to read a turn off. This is resolved here rather than where the increment
+  // is committed because _step_lambda does not survive a checkpoint and the direction has to.
+  if (_step_lambda < 0)
+    _path_direction = -_path_direction;
 }
 
 void
@@ -345,7 +378,13 @@ ArcLengthProblem::solverSystemConverged(const unsigned int sys_num)
   // libMesh destroys the SNES at the end of a solve and asking for it again would build a new one,
   // so the reason comes from the cache libMesh keeps of it
   auto & solver = static_cast<PetscNonlinearSolver<Number> &>(*_arclength_nl->nonlinearSolver());
-  return solver.get_converged_reason() == SNES_DIVERGED_MAX_IT;
+  if (solver.get_converged_reason() != SNES_DIVERGED_MAX_IT)
+    return false;
+
+  // This is the one ending that leaves a transient step short of its whole load increment, and it
+  // is told apart from the other one here alone
+  _ended_on_spent_budget = true;
+  return true;
 }
 
 void
@@ -402,8 +441,10 @@ ArcLengthProblem::computeTangentLoad(Vec x, Vec q)
   // where the residual gets lambda * b and Q gets b with a coefficient of one. F is
   // F_int + lambda * R_load here, so dF/dlambda is R_load and Q is the load tag negated, with no
   // factor of lambda. SNESSolve_NEWTONAL zeroes Q before the callback, so this is all of it. A
-  // transient step carries the load parameter over its own increment, which puts a factor of the
-  // time step size on dF/dlambda and is what makes the step local parameter trace that increment.
+  // transient step carries the load parameter over its own increment, which puts that signed
+  // increment on dF/dlambda: its magnitude makes the step local parameter trace the increment of
+  // one step, and its sign makes an increasing step local parameter mean travel in the remembered
+  // direction, which is the only thing carrying that direction across a step boundary.
   PetscVector<Number> tangent_load(q, _communicator);
   tangent_load.add(_transient ? -_step_load_increment : -1.0,
                    _arclength_nl->getVector(_arclength_nl->loadVectorTag()));
@@ -515,8 +556,10 @@ ArcLengthProblem::updateLoadParameter()
   PetscReal lambda;
   LibmeshPetscCall(SNESNewtonALGetLoadParameter(snes, &lambda));
   // PETSc restarts the load parameter at every solve, which is what makes it the fraction of a
-  // transient step's own increment that has been applied
-  _load_parameter = _transient ? _lambda_accum + lambda * _step_load_increment : lambda;
+  // transient step's own increment that has been applied. Keeping it is what lets a step that ends
+  // short of that increment commit the same fraction the load factor below carries.
+  _step_lambda = lambda;
+  _load_parameter = _transient ? _lambda_accum + _step_lambda * _step_load_increment : lambda;
 
   return _load_parameter;
 }

@@ -90,13 +90,11 @@ while a corrector failure stops at the same point and fails the solve there. The
 indistinguishable, a corrector failing in the last permitted increment being reported converged
 exactly as a spent budget is.
 
-The parameter is a one-shot setting. A transient run takes its load increment from the time step size
-instead, and setting it under a [Transient.md] executioner is an error: the accumulated load factor
-advances by the whole load increment of a step once that step ends, so a step cut short by a spent
-budget would have applied part of its increment while the reported load factor advanced all of it,
-and the factor would no longer report the load actually applied. Let such a step fail and let the
-[TimeStepper](syntax/Executioner/TimeStepper/index.md) cut the load increment back, which
-[#per-timestep] describes.
+The exit is read off the number of increments a continuation traced, so it needs a single solve per
+path: a setup that solves the same path more than once carries the count past the budget and reports
+the solve as failed. A [Transient.md] executioner takes the setting as well, where it ends the
+continuation of every step rather than one whole path and changes what the load factor measures;
+[#softening-transient] describes that regime.
 
 This exit rests on PETSc's convergence reason alone, so the MOOSE-level checks that otherwise veto a
 converged solve stop applying once the budget is spent: a [Terminator.md] with `fail_mode = SOFT`, an
@@ -197,9 +195,10 @@ R(u, \lambda) = F_\mathrm{int}(u) + \left(\Lambda + \lambda \, \Delta t\right) R
 
 where $\Lambda$ is the load factor accumulated by the steps already committed, $\lambda$ is the
 step-local parameter the solver treats as the unknown, and $\Delta t$ is the time step size. The load
-increment of a step is its time step size. The load factor a step ends at is therefore the time it
-ends at: [!param](/Executioner/Transient/dt) is the load increment per step, and
-[!param](/Executioner/Transient/end_time) is the load factor the run finishes at.
+increment of a step is its time step size. As long as every step reaches the end of its increment and
+the load factor only climbs, the load factor a step ends at is the time it ends at: [!param](/Executioner/Transient/dt) is the load
+increment per step, and [!param](/Executioner/Transient/end_time) is the load factor the run finishes
+at.
 
 !listing test/tests/problems/arc_length/transient_cubic.i block=Executioner
 
@@ -255,7 +254,8 @@ parameter and so read differently than they do in a one-shot run:
   range rather than against [!param](/Executioner/Transient/dt).
 - [!param](/Problem/ArcLengthProblem/lambda_min) clamps the step-local parameter, so it bounds how far
   a step may unload below the load factor it started from. The default of 0 keeps the load factor from
-  falling below the value the step started at.
+  falling below the value the step started at; tracing a path past its peak requires a negative value
+  instead, which [#softening-transient] describes.
 
 [!param](/Problem/ArcLengthProblem/lambda_max) is not a setting here. The step-local parameter spans
 the increment of one step by construction, so the value it ends at is 1; any other value is an error
@@ -293,6 +293,40 @@ Trace the whole path in one [Steady.md] solve for:
 - a single complete equilibrium path of a path-independent problem, where committing nothing along the
   way costs nothing;
 - the per-increment animation of the path.
+
+### Tracing a softening path across time steps id=softening-transient
+
+[!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps) applies to a transient run as well,
+where it ends the continuation of every step and is what carries a path past its peak. A step then has
+two ways to finish: its step-local parameter reaches 1 and the step commits the whole load increment it
+was given, or the step spends [!param](/Problem/ArcLengthProblem/max_continuation_steps) and commits
+the net change it actually traced, which past the peak is a decrease. A step that does neither has
+failed, and the [TimeStepper](syntax/Executioner/TimeStepper/index.md) cuts it back as it would any
+other.
+
+The increment a step applies carries a direction of travel with it, and a step that ends having moved
+the load factor backward reverses that direction. The step after it therefore carries on the way the
+path was going rather than back up the branch it just came down.
+
+[!param](/Problem/ArcLengthProblem/lambda_min) has to be negative here and the problem errors if it is
+not. It bounds how far a single step may unload below the load factor it started from, so the default
+of zero forbids the descent this regime exists to trace.
+
+The load factor stops equalling the time as a result. A step moves the load factor by up to
+[!param](/Executioner/Transient/dt) of change in the direction it is travelling, so the two agree only
+while the path is still climbing and every step reaches the end of its increment; a step that reverses,
+or that ends short on a spent budget, parts them for the rest of the run. That is the intended reading
+rather than a defect — time measures how far along the path the run has come rather than the level of
+the load, and [!param](/Executioner/Transient/end_time) bounds how long the trace runs rather than
+where it ends.
+
+Choose between this and an ordinary transient run on whether the load the run is after is known to sit
+below collapse. A load schedule needs it to be: the factor equals the time throughout and
+[!param](/Executioner/Transient/end_time) is the load factor reached, which is predictable and simple
+to set. Path tracing does not: the peak is what the run is looking for and the path descends past it,
+which a schedule cannot represent at all because it advances monotonically by construction. Trace the
+path when it goes past its peak and the run needs both real time steps and the committed, irreversible
+state a damage or plasticity model accumulates along the way.
 
 ## Example Input File Syntax id=example
 
