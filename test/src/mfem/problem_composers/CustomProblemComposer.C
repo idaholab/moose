@@ -27,6 +27,6 @@ CustomProblemComposer::createProblemOperator(MFEMProblem & _mfem_problem)
 {
   return std::make_shared<CustomDummyProblemOperator>(_mfem_problem);
 }
-};
+}
 
 #endif
