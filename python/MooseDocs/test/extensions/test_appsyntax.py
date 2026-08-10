@@ -316,6 +316,25 @@ class TestParam(AppSyntaxTestCase):
         )
         self.assertIn("    /Kernels/Diffusion/", message)
 
+    def testExternal(self):
+        self._MooseDocsTestCase__text.external = True
+        with self.assertLogs(level=logging.WARNING) as cm:
+            ast = self.tokenize(self.TEXT)
+
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), "Paragraph", size=1)
+        self.assertToken(
+            ast(0, 0), "String", content="/Kernels/Diffusion/variable"
+        )
+
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn(
+            "The parameter '/Kernels/Diffusion/variable' is being invoked using "
+            "the '!param' command on a page (_text_) associated with content "
+            "marked 'external' and will be skipped.",
+            cm.output[0],
+        )
+
     def testUnit(self):
         all_types_showing_no_unit = [
             "double",
