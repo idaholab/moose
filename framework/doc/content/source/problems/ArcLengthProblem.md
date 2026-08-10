@@ -61,8 +61,8 @@ an interior point load has this property — or enforce the constraint weakly wi
 
 ## Where the continuation stops
 
-[!param](/Problem/ArcLengthProblem/lambda_max) is the only criterion that ends a path successfully:
-the continuation runs until the load parameter reaches it.
+[!param](/Problem/ArcLengthProblem/lambda_max) is by default the only criterion that ends a path
+successfully: the continuation runs until the load parameter reaches it.
 [!param](/Problem/ArcLengthProblem/lambda_min) is a clamp rather than an exit — an increment that
 would carry the load parameter below it is truncated back to it, and the path then sits at that value
 until the increment budget runs out.
@@ -74,6 +74,48 @@ way: [!param](/Problem/ArcLengthProblem/max_continuation_steps) increments are s
 gives up. The two are distinguishable while they happen — a path pinned at the floor reflects off it
 and ping-pongs, while a path whose ceiling sits above the top of a closed loop cycles around that loop
 indefinitely — so a run that never terminates is worth plotting before the step size is blamed.
+
+[!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps) makes a spent increment budget the
+successful end of a path rather than a failed solve. Past the peak of a strain-softening material — a
+damage model such as Mazars — the load parameter falls monotonically and never climbs back, so a
+[!param](/Problem/ArcLengthProblem/lambda_max) beyond the peak is unreachable on that branch and no
+stopping criterion is left for the path to meet. Tracing a softening response consequently ends as a
+diverged solve however faithfully the trace followed the branch. Setting this parameter makes the
+budget the designed end of the path instead: a continuation that runs its entire
+[!param](/Problem/ArcLengthProblem/max_continuation_steps) budget is reported converged, and a path
+whose corrector fails before the budget is spent still fails. To confirm a path ended at its budget
+rather than at a failed corrector, re-run it with a larger
+[!param](/Problem/ArcLengthProblem/max_continuation_steps): a genuine budget exit traces further,
+while a corrector failure stops at the same point and fails the solve there. The two are otherwise
+indistinguishable, a corrector failing in the last permitted increment being reported converged
+exactly as a spent budget is.
+
+The parameter is a one-shot setting. A transient run takes its load increment from the time step size
+instead, and setting it under a [Transient.md] executioner is an error: the accumulated load factor
+advances by the whole load increment of a step once that step ends, so a step cut short by a spent
+budget would have applied part of its increment while the reported load factor advanced all of it,
+and the factor would no longer report the load actually applied. Let such a step fail and let the
+[TimeStepper](syntax/Executioner/TimeStepper/index.md) cut the load increment back, which
+[#per-timestep] describes.
+
+This exit rests on PETSc's convergence reason alone, so the MOOSE-level checks that otherwise veto a
+converged solve stop applying once the budget is spent: a [Terminator.md] with `fail_mode = SOFT`, an
+invalid solution that [!param](/Problem/ArcLengthProblem/allow_invalid_solution) does not accept, and
+an exception raised during the solve no longer fail it. A run relying on one of them to abort does
+not abort here.
+
+Sizing the budget is a physical choice as a result rather than a safety margin.
+[!param](/Problem/ArcLengthProblem/lambda_max) has to be placed above the peak for the descending
+branch to be reached at all — set below it, the path stops on the way up and never turns — so it goes
+deliberately out of reach and [!param](/Problem/ArcLengthProblem/max_continuation_steps) becomes what
+ends the path, setting how far down the branch the trace travels.
+
+A Bratu source traced onto its descending branch pairs
+[!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps) with a
+[!param](/Problem/ArcLengthProblem/lambda_max) put out of reach, composed by including
+`bratu_source.i` and adjusting its continuation settings:
+
+!listing test/tests/problems/arc_length/bratu_softening.i block=Problem
 
 The step size is fixed: [!param](/Problem/ArcLengthProblem/step_size) is the arc length travelled per
 increment for the whole solve and there is no adaptivity. It has to be small enough for the sharpest
@@ -129,6 +171,9 @@ The whole continuation happens at a single solve time, so the index of the incre
 time on those frames and the pseudo-time in the file counts increments. Write them on the undisplaced
 mesh and warp in the viewer: `use_displaced = true` fragments the output into one file per frame. A
 transient run does not write these frames; see [#per-timestep].
+
+An [AuxKernels] object takes the flag as well, which is what a material field animated this way
+needs: left off it, the frames still render, carrying values from before the increment.
 
 Objects scheduled on `LINEAR` run once per tangent-load assembly in addition to the ordinary residual
 evaluations, because the load tag is reassembled every time PETSc asks for the tangent load.

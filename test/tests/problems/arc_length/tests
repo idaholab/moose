@@ -58,6 +58,38 @@
                   'load parameter history whose solution response steepens as the path approaches '
                   'a fold.'
   []
+  [bratu_softening]
+    type = 'CSVDiff'
+    input = 'bratu_softening.i'
+    # The bratu path of the leaf above, driven past its fold instead of stopped short of it.
+    # 'bratu_softening.i' includes the input of that leaf and overrides its continuation settings.
+    # The fold sits near a load parameter of 6.8, so putting 'lambda_max' above it at 8 puts the
+    # only other exit out of reach and leaves the step budget as the end of the path: the
+    # continuation climbs to the peak, turns, and traces the descending branch until the budget
+    # runs out. The larger 'step_size' is what covers the whole of that within the budget.
+    #
+    # The 'file_base' of that input moves every output name off the leaf above, which is frozen,
+    # so the two share no file.
+
+    # The path gold holds one row per continuation increment entered, so it holds exactly
+    # 'max_continuation_steps' rows only when every corrector along the path converged. A corrector
+    # that failed part way would end the solve on the same PETSc reason with a shorter history, so
+    # the row count is what separates a completed path from that.
+    csvdiff = 'bratu_softening_path.csv bratu_softening.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall end an arc-length continuation that has taken the full number '
+                  'of continuation steps it is allowed as a successful solve rather than a '
+                  'diverged one, so that a softening branch, whose load parameter falls past the '
+                  'peak and never reaches the maximum it would otherwise have to stop at, is '
+                  'traced to the end of the step budget, recording a load parameter history that '
+                  'rises to the fold, turns, and descends, with one row for every allowed '
+                  'continuation step.'
+  []
   [transient_cubic]
     type = 'CSVDiff'
     input = 'transient_cubic.i'
