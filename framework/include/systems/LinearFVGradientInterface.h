@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "LinearFVGradientReader.h"
 
 #include "libmesh/utility.h"
 
@@ -31,72 +32,8 @@ class NumericVector;
 }
 
 /**
- * Read-only view of one variable's cell-centered linear finite-volume gradient values.
- */
-class LinearFVGradientReader
-{
-public:
-  /// One vector per spatial component of the cell-centered gradient.
-  using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
-
-  /**
-   * @param sys System that owns the variables and gradient values.
-   * @param components Component vectors that store the gradient values.
-   * @param method Gradient method that produces the values read by this object.
-   * @param variable_number Variable number whose gradient this object reads.
-   */
-  LinearFVGradientReader(const SystemBase & sys,
-                         const GradientContainer & components,
-                         const FVGradientMethod & method,
-                         unsigned int variable_number);
-
-  /// Access the underlying component vectors keyed by spatial direction.
-  const GradientContainer & components() const { return _components; }
-
-  /// System whose DOF map indexes the stored values.
-  const SystemBase & system() const { return _sys; }
-
-  /// Method object that produces the stored values.
-  const FVGradientMethod & method() const { return _method; }
-
-  /**
-   * Read one gradient component at an element.
-   * @param elem_info Element whose cell-centered gradient should be read.
-   * @param component Spatial component of the gradient.
-   */
-  Real component(const ElemInfo & elem_info, unsigned int component) const;
-
-  /**
-   * Read the full gradient at an element.
-   * @param elem_info Element whose cell-centered gradient should be read.
-   */
-  RealVectorValue gradient(const ElemInfo & elem_info) const;
-
-  /**
-   * Read the full gradient interpolated to a face.
-   * @param fi Face whose interpolated gradient should be read.
-   */
-  RealVectorValue gradient(const FaceInfo & fi) const;
-
-private:
-  /// System whose dof map indexes the stored values.
-  const SystemBase & _sys;
-
-  /// System number cached for hot DOF lookups.
-  const unsigned int _system_number;
-
-  /// Component vectors keyed by spatial direction.
-  const GradientContainer & _components;
-
-  /// Method object that produces the stored values.
-  const FVGradientMethod & _method;
-
-  /// Variable number whose gradients are read by this object.
-  const unsigned int _variable_number;
-};
-
-/**
- * Registration, update, and allocation logic for linear finite-volume cell gradients. This interface should be inherited by system classes that may own linear finite-volume variables
+ * Registration, update, and allocation logic for linear finite-volume cell gradients. This
+ * interface should be inherited by system classes that may own linear finite-volume variables
  */
 class LinearFVGradientInterface
 {
@@ -107,7 +44,7 @@ public:
   LinearFVGradientInterface(SystemBase & sys) : _sys(sys) {}
 
   /**
-   * Register a variable for system-owned linear FV gradient values produced by a method object.
+   * Register a variable for gradient values produced by a method object.
    * @param variable_number Variable number whose gradient should be stored.
    * @param method Gradient method that computes the field values.
    */
@@ -132,7 +69,7 @@ protected:
    */
   void rebuildLinearFVGradientStorage();
 
-  /// Whether any linear finite-volume gradient fields have been registered on this system.
+  /// Whether any linear finite-volume gradient fields have been registered to this object.
   bool hasLinearFVGradients() const;
 
   /**

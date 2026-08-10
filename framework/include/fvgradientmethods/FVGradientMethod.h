@@ -62,7 +62,7 @@ public:
   /// Limiter selected for this method.
   Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
 
-protected:
+private:
   /**
    * Compute the method-specific gradient before this base class applies any limiter.
    *
@@ -77,7 +77,6 @@ protected:
       GradientContainer & scratch_gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const = 0;
 
-private:
   /// Limiter applied after method-specific pre-limiter gradient computation.
   const Moose::FV::GradientLimiterType _limiter_type;
 };

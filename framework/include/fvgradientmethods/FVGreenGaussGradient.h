@@ -20,7 +20,7 @@ public:
   static InputParameters validParams();
   FVGreenGaussGradient(const InputParameters & params);
 
-protected:
+private:
   void computeGradientWithoutLimiter(
       SystemBase & system,
       GradientContainer & output_gradient,
