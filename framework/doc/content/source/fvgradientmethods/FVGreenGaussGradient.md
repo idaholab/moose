@@ -13,7 +13,7 @@ where $f$ ranges over the cell faces, $\phi_f$ is the face value interpolated fr
 cell-centered values and boundary data, and $\mathbf{S}_f$ is the outward face area vector.
 
 Use this method when a linear FV variable or a gradient-based interpolation method needs gradients.
-MOOSE also provides two built-in method names for convenience:
+MOOSE also provides two built-in method names for convenient input into gradient method parameters:
 
 - `green-gauss`, equivalent to an `FVGreenGaussGradient` with `limiter = none`
 - `green-gauss-venkatakrishnan`, equivalent to an `FVGreenGaussGradient` with

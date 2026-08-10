@@ -48,7 +48,6 @@ RealVectorValue
 LinearFVGradientReader::gradient(const ElemInfo & elem_info) const
 {
   RealVectorValue value;
-  value.zero();
 
   for (const auto component_index : make_range(_sys.mesh().dimension()))
     value(component_index) = component(elem_info, component_index);
@@ -124,6 +123,8 @@ LinearFVGradientInterface::computeGradients()
 
   // Keep current values unchanged until every replacement has been computed so boundary
   // conditions consistently use gradients from the previous update.
+  // BCs may use cell gradients to compute the boundary face value, which is itself used to 
+  // compute cell gradients
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
     computeLinearFVGradientContainer(*method_container_pair.first, method_container_pair.second);
 

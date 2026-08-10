@@ -52,7 +52,7 @@ public:
    * @param system System that owns the variables and gradient storage.
    * @param output_gradient Component vectors where final gradients are written.
    * @param scratch_gradient Temporary component vectors available during the computation.
-   * @param variable_numbers Variable numbers whose gradients should be updated.
+   * @param variable_numbers Variable numbers (in the system) whose gradients should be updated.
    */
   void computeGradient(SystemBase & system,
                        GradientContainer & output_gradient,

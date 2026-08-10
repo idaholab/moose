@@ -33,7 +33,7 @@
                'Convergence/linear/max_iterations=4 '
                'Outputs/file_base=lagged-gradient-publication Outputs/exodus=false'
     csvdiff = 'lagged-gradient-publication.csv'
-    requirement = 'The system shall compute all linear finite volume gradient methods for a variable from the same lagged gradient values before replacing their current values.'
+    requirement = 'The system shall compute all linear finite volume gradient methods for a variable from the same lagged gradient values before updating the current value of the gradients.'
     max_threads = 1 # see libmesh issue #3808
   []
 

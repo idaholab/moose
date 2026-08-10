@@ -98,6 +98,6 @@ protected:
   /// Normalized gradients to write into.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _output_gradient;
 
-  /// Variables this producer should compute.
+  /// Indices of the variables this producer should compute gradients for.
   const std::unordered_set<unsigned int> & _gradient_variables;
 };
