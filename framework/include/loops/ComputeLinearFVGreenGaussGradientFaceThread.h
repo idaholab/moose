@@ -92,6 +92,6 @@ protected:
   /// old gradient is used while assembling the replacement gradient.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_gradient;
 
-  /// Variables this producer should compute.
+  /// Indices of the variables this producer should compute gradients for.
   const std::unordered_set<unsigned int> & _gradient_variables;
 };

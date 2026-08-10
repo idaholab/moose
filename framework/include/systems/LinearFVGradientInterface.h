@@ -96,8 +96,7 @@ private:
 };
 
 /**
- * Shared registration, update, and allocation logic for system-owned linear finite-volume cell
- * gradients.
+ * Registration, update, and allocation logic for linear finite-volume cell gradients. This interface should be inherited by system classes that may own linear finite-volume variables
  */
 class LinearFVGradientInterface
 {
