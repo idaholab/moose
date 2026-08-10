@@ -24,7 +24,8 @@ point are reachable and the load may fall along the way.
 solver, which it installs on the nonlinear solve. A whole path is traced within a single
 [Steady.md] solve: continuation increments are internal to that solve and are not time steps, so the
 number of them is bounded by [!param](/Problem/ArcLengthProblem/max_continuation_steps) rather than by
-any `Executioner` stepping parameter.
+any `Executioner` stepping parameter. Under a [Transient.md] executioner each time step runs a
+continuation of its own instead, which [#per-timestep] describes.
 
 ## Marking the load
 
@@ -126,7 +127,8 @@ animation:
 
 The whole continuation happens at a single solve time, so the index of the increment stands in for the
 time on those frames and the pseudo-time in the file counts increments. Write them on the undisplaced
-mesh and warp in the viewer: `use_displaced = true` fragments the output into one file per frame.
+mesh and warp in the viewer: `use_displaced = true` fragments the output into one file per frame. A
+transient run does not write these frames; see [#per-timestep].
 
 Objects scheduled on `LINEAR` run once per tangent-load assembly in addition to the ordinary residual
 evaluations, because the load tag is reassembled every time PETSc asks for the tangent load.
@@ -136,6 +138,116 @@ A diverged continuation writes no output at the end of the step. Adding
 `additional_execute_on = 'failed'` to a CSV output flushes the history that was recorded up to the
 point of failure, which is what shows whether the path was reflecting off
 [!param](/Problem/ArcLengthProblem/lambda_min) or circling a closed loop.
+
+## Per-timestep continuation id=per-timestep
+
+Under a [Transient.md] executioner the continuation runs once per time step rather than once for the
+whole run. Each step traces a path of its own with a step-local load parameter that goes from 0 to 1
+over the load increment of that step alone, and the load factor the committed steps carry is added to
+it:
+
+\begin{equation}
+R(u, \lambda) = F_\mathrm{int}(u) + \left(\Lambda + \lambda \, \Delta t\right) R_\mathrm{load}(u) = 0,
+\end{equation}
+
+where $\Lambda$ is the load factor accumulated by the steps already committed, $\lambda$ is the
+step-local parameter the solver treats as the unknown, and $\Delta t$ is the time step size. The load
+increment of a step is its time step size. The load factor a step ends at is therefore the time it
+ends at: [!param](/Executioner/Transient/dt) is the load increment per step, and
+[!param](/Executioner/Transient/end_time) is the load factor the run finishes at.
+
+!listing test/tests/problems/arc_length/transient_cubic.i block=Executioner
+
+That schedule applies the load in increments of 0.5 up to a load factor of 1 in this case.
+
+State commits at the end of every step, so stateful materials advance along the path and irreversible
+behaviour accumulates across steps, which a one-shot run cannot do because it commits nothing until
+the whole path has been traced. The accumulated load factor is restartable data, so a run recovered
+or restarted from a checkpoint resumes at the load factor of the last committed step and continues
+the path from there.
+
+!alert warning title=Explicit time integrators are not supported
+Arc-length continuation is quasi-static path tracing: the continuation itself brings every step to
+equilibrium. An explicit time integrator advances the problem state within a step, between its
+stages, which commits the load increment of that step before the step has been traced. Nothing in the
+code guards against this, because enumerating the explicit integrators is fragile and the combination
+has no physical meaning. Use an implicit time integrator.
+
+### Adapting and cutting back the load increment
+
+A step whose continuation does not reach the end of its load increment within
+[!param](/Problem/ArcLengthProblem/max_continuation_steps) increments reports the step unconverged.
+The executioner rejects that step, the [TimeStepper](syntax/Executioner/TimeStepper/index.md) cuts
+[!param](/Executioner/Transient/dt) back, and the step is retried with the smaller load increment
+armed in its place. Cutting the time step cuts the load increment in the same proportion, so whatever
+a `TimeStepper` does to the time step — growing it, shrinking it, cutting it back after a failure —
+it does to the load increment.
+
+A cutback does not, however, reduce the number of continuation increments a step needs when its load
+target lies past a limit point. The arc length a step covers is measured on the solution and the
+step-local load parameter together, and the solution excursion across a limit point is set by the
+shape of the equilibrium path rather than by the size of the load increment: it does not shrink with
+[!param](/Executioner/Transient/dt) at all. A step that has to cross a snap therefore costs about the
+same number of increments however far the time step is cut back. Cutback rescues a mismatch between
+the increment budget and the load target on the monotone stretches of a path, while
+[!param](/Problem/ArcLengthProblem/max_continuation_steps) has to be sized to cross a snap within a
+single step. Halving the time step is not a remedy for an under-sized increment budget at a limit
+point — the retries shrink the increment down to [!param](/Executioner/Transient/dtmin) and the step
+fails there instead.
+
+### Step-local settings
+
+[!param](/Problem/ArcLengthProblem/step_size),
+[!param](/Problem/ArcLengthProblem/max_continuation_steps),
+[!param](/Problem/ArcLengthProblem/psi_squared),
+[!param](/Problem/ArcLengthProblem/correction_type) and
+[!param](/Problem/ArcLengthProblem/lambda_min) each govern the continuation a single step traces and
+are applied again from the start of every step. Two of them are measured against the step-local
+parameter and so read differently than they do in a one-shot run:
+
+- [!param](/Problem/ArcLengthProblem/step_size) is arc length in the step-local coordinates, whose
+  load parameter spans 0 to 1 whatever the time step size is, so it is chosen against that fixed
+  range rather than against [!param](/Executioner/Transient/dt).
+- [!param](/Problem/ArcLengthProblem/lambda_min) clamps the step-local parameter, so it bounds how far
+  a step may unload below the load factor it started from. The default of 0 keeps the load factor from
+  falling below the value the step started at.
+
+[!param](/Problem/ArcLengthProblem/lambda_max) is not a setting here. The step-local parameter spans
+the increment of one step by construction, so the value it ends at is 1; any other value is an error
+rather than a knob, and where the run finishes is set with
+[!param](/Executioner/Transient/end_time) instead. No other `[Problem]` parameter changes meaning or
+stops having an effect.
+
+### Recording a transient path
+
+Objects carrying `ARC_LENGTH_INCREMENT` still execute at every increment, so
+[ArcLengthLoadParameter.md] and [ArcLengthHistory.md] sample the path at the same resolution they do
+in a one-shot run. The `Arc length increment n, lambda = ...` banner still prints at each of those
+boundaries, with the index restarting at zero in every step and the load factor reported as the
+running total.
+
+Writing a file per increment is disabled, though: the increment index stands in for the time on those
+frames, and that pseudo-time interleaved with the times the steps advance through would corrupt the
+sequence of an output. An [Outputs] sub-block carrying `ARC_LENGTH_INCREMENT` therefore writes nothing
+under a transient executioner. Ordinary transient output is unaffected — each step writes a frame at
+its own time, which is the load factor it reached — and tracing the path in one shot is the way to get
+the per-increment animation.
+
+### Choosing between the two modes
+
+Trace a path per time step for:
+
+- path-dependent behaviour, where plasticity, damage or any other stateful material has to advance
+  along the path;
+- a path that a fixed load increment cannot get through, where a cutback retries the step at a smaller
+  increment;
+- output on the real time axis, one frame per step.
+
+Trace the whole path in one [Steady.md] solve for:
+
+- a single complete equilibrium path of a path-independent problem, where committing nothing along the
+  way costs nothing;
+- the per-increment animation of the path.
 
 ## Example Input File Syntax id=example
 

@@ -41,6 +41,25 @@ class ArcLengthNonlinearSystem;
  * a per-increment record stops one increment short of it and a postprocessor executed on
  * EXEC_TIMESTEP_END is what reports that final value.
  *
+ * A transient run traces one path per time step instead of one path for the whole simulation. The
+ * load parameter PETSc solves for is step local there: it runs from 0 to 1 over the load increment
+ * of the step alone, and the load factor the committed steps carry is added to it, so the residual
+ * is F_int + (Lambda_accum + lambda * dt) * R_load. The load increment of a step is its time step
+ * size, which makes the load factor a step ends at the time it ends at and turns the TimeStepper,
+ * including the cutback that follows a step whose continuation runs out of steps, into control of
+ * the load increment. State commits at the end of a step, so stateful materials advance along the
+ * path and irreversible behavior accumulates across steps.
+ *
+ * 'step_size', 'max_continuation_steps', 'psi_squared', 'correction_type' and 'lambda_min' stay
+ * step local in a transient run: each governs the continuation a single step traces and is applied
+ * again from the start of every step. 'lambda_max' is no longer a setting there, it has to be 1
+ * because the step local load parameter spans the increment of one step.
+ *
+ * A transient path is not output per increment. The increment index stands in for the time while
+ * an increment is output, and that pseudo time written alongside the time the steps advance would
+ * corrupt the sequence of an output, so only the objects executed on EXEC_ARC_LENGTH_INCREMENT
+ * record a transient path.
+ *
  * PETSc added SNESNEWTONAL in 3.22.0, so this problem errors on an older PETSc.
  */
 class ArcLengthProblem : public FEProblemBase
@@ -51,7 +70,9 @@ public:
   ArcLengthProblem(const InputParameters & parameters);
 
   /**
-   * @return The load parameter lambda of the most recent continuation state
+   * @return The load factor of the most recent continuation state, which a transient run reports
+   * as the total the committed steps and the step being traced add up to so that it stays
+   * continuous across steps
    */
   Real loadParameter() const { return _load_parameter; }
 
@@ -67,16 +88,38 @@ public:
   virtual void initPetscOutputAndSomeSolverSettings() override;
 
   /**
-   * Forms the residual the standard way and adds the load tag to it, scaled by the load
-   * parameter, so that the solver is given F_int + lambda * R_load.
+   * Arms the load increment the transient step about to be solved applies, which is the time step
+   * size, and restarts the numbering of the increments because every step traces a path of its
+   * own.
+   *
+   * The executioner reaches this before every attempt at a step, so a step the TimeStepper cuts
+   * back arms the smaller increment its retry applies.
+   */
+  virtual void onTimestepBegin() override;
+
+  /**
+   * Commits the load increment of the transient step that just converged along with the state that
+   * step leaves behind.
+   *
+   * The executioner advances the state of a converged step only, so a step that was cut back and
+   * retried commits the increment of its successful attempt alone, and the state it advances ahead
+   * of the first step finds no increment armed to commit. It advances the state after the objects
+   * executed at the end of a step have run, so those still report the load factor the step ended
+   * at rather than the one the next step starts from.
+   */
+  virtual void advanceState() override;
+
+  /**
+   * Forms the residual the standard way and adds the load tag to it, scaled by the load factor
+   * updateLoadParameter() makes, so that the solver is given F_int + lambda * R_load.
    */
   virtual void computeResidualSys(libMesh::NonlinearImplicitSystem & sys,
                                   const NumericVector<libMesh::Number> & soln,
                                   NumericVector<libMesh::Number> & residual) override;
 
   /**
-   * Forms the Jacobian the standard way and adds the load matrix tag to it, scaled by the load
-   * parameter, which is the derivative of the residual computeResidualSys forms.
+   * Forms the Jacobian the standard way and adds the load matrix tag to it, scaled by the same
+   * load factor, which is the derivative of the residual computeResidualSys forms.
    */
   virtual void computeJacobianSys(libMesh::NonlinearImplicitSystem & sys,
                                   const NumericVector<libMesh::Number> & soln,
@@ -94,6 +137,11 @@ protected:
    * R_load and Q is the load residual with its sign flipped. Q carries no factor of lambda; PETSc
    * applies the load parameter itself wherever it needs the load at the current point.
    *
+   * A transient step carries the load parameter over its own increment, where F is
+   * F_int + (Lambda_accum + lambda * dt) * R_load, so dF/dlambda is dt * R_load and the tangent
+   * load is scaled by the time step size. That factor is what makes the step local parameter, over
+   * its range of 0 to 1, trace the increment of that one step.
+   *
    * The load tag is reassembled here with FEProblemBase::computeResidualTags, which runs the
    * transfers, the MultiApps and the EXEC_LINEAR objects and controls along with the assembly. All
    * of those therefore run once more per nonlinear iteration than they do in an ordinary solve.
@@ -105,13 +153,18 @@ protected:
 
   /**
    * Publishes the state of a converged continuation increment: syncs the iterate into the
-   * solution, caches the load parameter, and executes and outputs on EXEC_ARC_LENGTH_INCREMENT.
+   * solution, caches the load factor, and executes on EXEC_ARC_LENGTH_INCREMENT, outputting there
+   * as well outside a transient run.
    *
    * A whole continuation is traced within a single step of the solve, so every increment would be
    * output at the one time of that step and an output holding a frame per increment would keep
    * writing the same frame. The index of the increment, which only ever grows, stands in for the
    * time while the increment is output, and the time of the solve is put back before the solve
    * resumes so that the output at the end of the step is unaffected.
+   *
+   * A transient run already writes its output on the time the steps advance, and that pseudo time
+   * interleaved with it would corrupt the sequence of an output, so a transient path is recorded
+   * by the objects executed here and no increment of one is output.
    *
    * @param snes The solver being updated
    */
@@ -129,11 +182,16 @@ protected:
   void checkLoadOnConstrainedDofs();
 
   /**
-   * Reads the load parameter PETSc currently holds and caches it for loadParameter(). Evaluations
-   * made outside the continuation, where the arc-length solver does not own the SNES and there is
-   * no load parameter to read, report zero and leave the cache alone.
+   * Reads the load parameter PETSc currently holds, makes the load factor the residual and the
+   * Jacobian are composed with out of it, and caches that for loadParameter(). Evaluations made
+   * outside the continuation, where the arc-length solver does not own the SNES and there is no
+   * load parameter to read, report zero and leave the cache alone.
    *
-   * @return The load parameter to compose the residual and the Jacobian with
+   * PETSc restarts its load parameter at every solve, so a transient run reads it as the fraction
+   * of the current step's increment that has been applied and adds the load factor the committed
+   * steps carry.
+   *
+   * @return The load factor to compose the residual and the Jacobian with
    */
   Real updateLoadParameter();
 
@@ -151,14 +209,23 @@ protected:
   /// Scheme PETSc corrects an iterate back onto the arc-length constraint surface with
   const SNESNewtonALCorrectionType _correction_type;
 
-  /// Index of the continuation increment being published, counted from the start of the path
+  /// Index of the continuation increment being published, counted from the start of the path,
+  /// which a transient run restarts at every step because each traces a path of its own
   unsigned int _increment;
 
   /// Whether the load has already been checked against the degrees of freedom the nodal BCs own
   bool _checked_load_on_constrained_dofs;
+
+  /// Load factor the committed transient steps carry, which is where the current step's increment
+  /// starts. Restartable so that a recovered run resumes the path at the load it left it at
+  Real & _lambda_accum;
+
+  /// Load increment the transient step being solved applies, and zero once it has been committed.
+  /// Restartable because a step commits its increment only after the checkpoint has been written
+  Real & _step_load_increment;
 #endif
 
-  /// Load parameter of the most recent continuation state
+  /// Load factor of the most recent continuation state
   Real & _load_parameter;
 
 private:
