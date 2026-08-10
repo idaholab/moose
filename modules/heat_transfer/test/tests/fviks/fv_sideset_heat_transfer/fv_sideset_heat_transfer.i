@@ -3,11 +3,9 @@
     type = GeneratedMeshGenerator
     dim = 2
     nx = 6
-    ny = 5
+    ny = 3
     xmax = 2
     subdomain_ids = '0 0 0 1 1 1
-                     0 0 0 1 1 1
-                     0 0 0 1 1 1
                      0 0 0 1 1 1
                      0 0 0 1 1 1'
   []
@@ -18,10 +16,6 @@
     paired_block = 1
     new_boundary = interface
   []
-[]
-
-[Problem]
-  kernel_coverage_check = false
 []
 
 [Variables]
@@ -90,11 +84,24 @@
   []
 []
 
+[VectorPostprocessors]
+  [temperature]
+    type = LineValueSampler
+    variable = 'T_left T_right'
+    start_point = '0 0.5 0'
+    end_point = '2 0.5 0'
+    num_points = 7
+    sort_by = x
+    warn_discontinuous_face_values = false
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = NEWTON
 []
 
 [Outputs]
-  exodus = true
+  csv = true
+  execute_on = timestep_end
 []
