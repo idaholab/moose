@@ -62,23 +62,44 @@ FluidPropertiesApp::registerApps()
 
   registerApp(FluidPropertiesApp);
   MiscApp::registerApps();
+
+  [[maybe_unused]] const auto missing_fp_capability = [](const std::string & name)
+  { addBoolCapability(name + "app", false, "Fluid property app " + name + " is not available."); };
+
 #ifdef AIR_FP_ENABLED
   registerApp(AirApp);
+#else
+  missing_fp_capability("air");
 #endif
+
 #ifdef CARBON_DIOXIDE_FP_ENABLED
   registerApp(CarbonDioxideApp);
+#else
+  missing_fp_capability("carbondioxide");
 #endif
+
 #ifdef HELIUM_FP_ENABLED
   registerApp(HeliumApp);
+#else
+  missing_fp_capability("helium");
 #endif
+
 #ifdef NITROGEN_FP_ENABLED
   registerApp(NitrogenApp);
+#else
+  missing_fp_capability("nitrogen");
 #endif
+
 #ifdef POTASSIUM_FP_ENABLED
   registerApp(PotassiumApp);
+#else
+  missing_fp_capability("potassium");
 #endif
+
 #ifdef SODIUM_FP_ENABLED
   registerApp(SodiumApp);
+#else
+  missing_fp_capability("sodium");
 #endif
 }
 
