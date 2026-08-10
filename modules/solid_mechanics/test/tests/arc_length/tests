@@ -1,6 +1,6 @@
 [Tests]
   design = 'ArcLengthProblem.md ArcLengthHistory.md ArcLengthLoadParameter.md'
-  issues = '#31843'
+  issues = '#33523'
   # These two inputs are a pair and should be read against each other. Both are finite strain
   # circular arches carrying a dead point load at the crown, and they differ in how the ends are
   # held: 'arch_snapthrough' clamps the whole end cross sections, 'arch_snapback' pins a single mid
