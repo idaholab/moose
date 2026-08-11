@@ -1280,7 +1280,7 @@ public:
    * @param name The name to check for whether it is a renamed name
    * @return The new name if the incoming \p name is a renamed name, else \p name
    */
-  std::string checkForRename(const std::string & name) const;
+  const std::string & checkForRename(const std::string & name) const;
 
   /**
    * A wrapper around the \p Parameters base class method. Checks for parameter rename before
@@ -1460,14 +1460,14 @@ private:
 
   Metadata & at(const std::string & param_name)
   {
-    const auto param = checkForRename(param_name);
+    const auto & param = checkForRename(param_name);
     if (_params.count(param) == 0)
       mooseError("param '", param, "' not present in InputParams");
     return _params[param];
   }
   const Metadata & at(const std::string & param_name) const
   {
-    const auto param = checkForRename(param_name);
+    const auto & param = checkForRename(param_name);
     if (_params.count(param) == 0)
       mooseError("param '", param, "' not present in InputParams");
     return _params.at(param);
@@ -1595,7 +1595,7 @@ template <typename T>
 T &
 InputParameters::set(const std::string & name_in, bool quiet_mode)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   checkParamName(name);
   checkConsistentType<T>(name);
@@ -1790,7 +1790,7 @@ T
 InputParameters::getCheckedPointerParam(const std::string & name_in,
                                         const std::string & error_string) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   T param = this->get<T>(name);
 
@@ -2099,7 +2099,7 @@ template <typename T>
 void
 InputParameters::checkConsistentType(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   // If we don't currently have the Parameter, can't be any inconsistency
   InputParameters::const_iterator it = _values.find(name);
@@ -2122,7 +2122,7 @@ template <typename T>
 void
 InputParameters::suppressParameter(const std::string & name_in)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   if (!this->have_parameter<T>(name))
     mooseError("Unable to suppress nonexistent parameter: ", name);
 
@@ -2136,7 +2136,7 @@ template <typename T>
 void
 InputParameters::ignoreParameter(const std::string & name_in)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
   suppressParameter<T>(name);
   _params[name]._ignore = true;
 }
@@ -2145,7 +2145,7 @@ template <typename T>
 void
 InputParameters::makeParamRequired(const std::string & name_in)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   if (!this->have_parameter<T>(name))
     mooseError("Unable to require nonexistent parameter: ", name);
@@ -2157,7 +2157,7 @@ template <typename T>
 void
 InputParameters::makeParamNotRequired(const std::string & name_in)
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   if (!this->have_parameter<T>(name))
     mooseError("Unable to un-require nonexistent parameter: ", name);
@@ -2317,7 +2317,7 @@ template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name_in, const InputParameters & pars)
 {
-  const auto name = pars.checkForRename(name_in);
+  const auto & name = pars.checkForRename(name_in);
 
   if (!pars.isParamValid(name))
     pars.mooseError("The parameter \"", name, "\" is being retrieved before being set.");
@@ -2341,8 +2341,8 @@ template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>
 InputParameters::get(const std::string & param1_in, const std::string & param2_in) const
 {
-  const auto param1 = checkForRename(param1_in);
-  const auto param2 = checkForRename(param2_in);
+  const auto & param1 = checkForRename(param1_in);
+  const auto & param2 = checkForRename(param2_in);
 
   const auto & v1 = get<V1>(param1);
   const auto & v2 = get<V2>(param2);
@@ -2380,7 +2380,7 @@ template <typename T>
 bool
 InputParameters::isType(const std::string & name_in) const
 {
-  const auto name = checkForRename(name_in);
+  const auto & name = checkForRename(name_in);
 
   if (!_params.count(name))
     mooseError("Parameter \"", name, "\" is not valid.");
@@ -2391,7 +2391,8 @@ template <typename T>
 const T &
 InputParameters::get(std::string_view name_in) const
 {
-  const auto name = checkForRename(std::string(name_in));
+  const std::string name_str(name_in);
+  const auto & name = checkForRename(name_str);
 
   return Parameters::get<T>(name);
 }
@@ -2400,7 +2401,8 @@ template <typename T>
 bool
 InputParameters::have_parameter(std::string_view name_in) const
 {
-  const auto name = checkForRename(std::string(name_in));
+  const std::string name_str(name_in);
+  const auto & name = checkForRename(name_str);
 
   return Parameters::have_parameter<T>(name);
 }
@@ -2412,7 +2414,7 @@ InputParameters::transferParam(const InputParameters & source_params,
                                const std::string & new_name,
                                const std::string & new_description)
 {
-  const auto name = source_params.checkForRename(std::string(name_in));
+  const auto & name = source_params.checkForRename(name_in);
   const auto p_name = new_name.empty() ? name_in : new_name;
   if (!source_params.have_parameter<T>(name) && !source_params.hasCoupledVar(name))
     mooseError("The '",

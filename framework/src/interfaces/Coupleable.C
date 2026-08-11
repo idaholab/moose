@@ -153,7 +153,7 @@ Coupleable::Coupleable(const Coupleable & object, const Moose::Kokkos::FunctorCo
 bool
 Coupleable::isCoupled(const std::string & var_name_in, unsigned int i) const
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
 
   auto it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
@@ -182,7 +182,7 @@ Coupleable::isCoupledConstant(const std::string & var_name) const
 unsigned int
 Coupleable::coupledComponents(const std::string & var_name_in) const
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
 
   if (isCoupled(var_name))
   {
@@ -235,7 +235,7 @@ Coupleable::checkVar(const std::string & var_name_in,
                      unsigned int comp,
                      unsigned int comp_bound) const
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
   auto it = _c_coupled_scalar_vars.find(var_name);
   if (it != _c_coupled_scalar_vars.end())
   {
