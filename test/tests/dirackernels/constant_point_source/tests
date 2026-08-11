@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1695 #1696 #16033 #23442'
+  issues = '#1695 #1696 #16033 #23442 #26938'
   design = 'syntax/DiracKernels/index.md'
 
   [dim]
@@ -53,7 +53,6 @@
       exodiff = '2d_out.e'
       cli_args = 'Executioner/solve_type=NEWTON Executioner/residual_and_jacobian_together=true'
       prereq = 'dim/2D'
-      issues = '#26938'
       detail = 'in 2D when computing the residual and Jacobian together'
     []
   []
