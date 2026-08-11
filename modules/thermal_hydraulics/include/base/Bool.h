@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "DataIO.h"
+
 /**
  * A wrapper for the C++ boolean type which can be stored in vectors
  * in the same way as other C++ types.
@@ -32,3 +34,9 @@ struct Bool
 
   bool _value;
 };
+
+template <>
+void dataStore(std::ostream & stream, Bool & v, void * context);
+
+template <>
+void dataLoad(std::istream & stream, Bool & v, void * context);
