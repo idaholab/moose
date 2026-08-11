@@ -23,7 +23,6 @@ DuctedPinEngUnit::DuctedPinEngUnit(const std::string & name,
                                    const std::vector<std::vector<unsigned int>> & region_ids,
                                    const std::vector<Real> & axial_boundaries)
   : CSGCellEngUnit(name),
-    _geometry_type(geometry_type),
     _ring_radii(ring_radii),
     _duct_apothems(duct_apothems),
     _region_ids(region_ids),
@@ -55,17 +54,17 @@ DuctedPinEngUnit::DuctedPinEngUnit(const std::string & name,
     if (region_ids_radial.size() != n_radial)
       mooseError("Size of entry in region IDs must match the number of radial zones in pin");
 
-  if (_geometry_type != "Hex" && _geometry_type != "Square")
-    mooseError("Invalid geometry type for DuctedPinEngUnit");
+  _geometry_type = geometry_type;
 }
 
 std::unordered_map<std::string, AttributeVariant>
 DuctedPinEngUnit::getAttributes() const
 {
-  std::unordered_map<std::string, AttributeVariant> attr_map{{"duct_apothems", _duct_apothems},
-                                                             {"ring_radii", _ring_radii},
-                                                             {"region_ids", _region_ids},
-                                                             {"geometry_type", _geometry_type}};
+  std::unordered_map<std::string, AttributeVariant> attr_map{
+      {"duct_apothems", _duct_apothems},
+      {"ring_radii", _ring_radii},
+      {"region_ids", _region_ids},
+      {"geometry_type", getGeometryTypeString()}};
   if (_axial_boundaries.size())
     attr_map["axial_boundaries"] = _axial_boundaries;
   return attr_map;
@@ -75,7 +74,7 @@ std::unique_ptr<CSGCellEngUnit>
 DuctedPinEngUnit::clone() const
 {
   return std::make_unique<DuctedPinEngUnit>(
-      _name, _geometry_type, _ring_radii, _duct_apothems, _region_ids, _axial_boundaries);
+      _name, getGeometryTypeString(), _ring_radii, _duct_apothems, _region_ids, _axial_boundaries);
 }
 
 void
@@ -112,7 +111,7 @@ DuctedPinEngUnit::expandUnit()
   for (const auto i : index_range(_duct_apothems))
   {
     const auto unit_name = _name + "_radial_duct_" + std::to_string(i);
-    const auto n_sides = (_geometry_type == "Hex") ? 6 : 4;
+    const auto n_sides = (getGeometryTypeString() == "Hex") ? 6 : 4;
     std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
         std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, _duct_apothems[i]);
     auto & duct_unit = _internal_base->addEngUnit(std::move(duct_ptr));

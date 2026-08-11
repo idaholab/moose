@@ -72,10 +72,14 @@ protected:
    */
   void expandUnit() override;
 
-private:
-  /// Geometry type of pin cell structure (hex or square)
-  const std::string & _geometry_type;
+  /**
+   * @brief Get the geometry type as a string
+   *
+   * @return geometry type string
+   */
+  const std::string getGeometryTypeString() const { return _geometry_type; }
 
+private:
   /// List of ring radii of pin cell
   const std::vector<Real> _ring_radii;
 
@@ -87,6 +91,9 @@ private:
 
   /// Axial boundaries for an extruded pin cell
   std::vector<Real> _axial_boundaries;
+
+  /// Geometry type of pin cell structure (hex or square)
+  MooseEnum _geometry_type{"Hex Square"};
 };
 
 } // namespace CSG
