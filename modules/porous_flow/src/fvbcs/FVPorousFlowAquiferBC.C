@@ -138,16 +138,17 @@ FVPorousFlowAquiferBC::FVPorousFlowAquiferBC(const InputParameters & params)
                "Specify either aquifer_head or aquifer_pressure_at_datum, not both.");
 
   if (!has_head && !has_pdat)
-    mooseError("FVPorousFlowAquiferBC: one of aquifer_head or aquifer_pressure_at_datum must be "
-               "specified.");
+    paramError("aquifer_head",
+               "Either aquifer_head or aquifer_pressure_at_datum must be specified.");
 
   if (has_head && !isParamValid("aquifer_conductance"))
-    mooseError("FVPorousFlowAquiferBC: aquifer_conductance must be specified when using the "
-               "aquifer_head formulation.");
+    paramError("aquifer_conductance",
+               "This parameter must be specified when using the aquifer_head formulation.");
 
   if (!has_head && !isParamValid("aquifer_distance"))
-    mooseError("FVPorousFlowAquiferBC: aquifer_distance must be specified when using the "
-               "aquifer_pressure_at_datum formulation.");
+    paramError("aquifer_distance",
+               "This parameter must be specified when using the aquifer_pressure_at_datum "
+               "formulation.");
 
   if (has_head && _use_aquifer_perm)
     paramError("aquifer_permeability",

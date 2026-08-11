@@ -490,7 +490,7 @@
   [aquiferBC_exc_neither]
     type = RunException
     input = aquiferBC_exc.i
-    expect_err = 'PorousFlowAquiferBC: one of aquifer_head or aquifer_pressure_at_datum must be specified'
+    expect_err = 'Either aquifer_head or aquifer_pressure_at_datum must be specified'
     requirement = 'PorousFlowAquiferBC shall report an error when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
     issues = '#0'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
@@ -508,7 +508,7 @@
     type = RunException
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_head=10'
-    expect_err = 'PorousFlowAquiferBC: aquifer_conductance must be specified when using the aquifer_head formulation'
+    expect_err = 'aquifer_conductance:.*This parameter must be specified when using the aquifer_head formulation'
     requirement = 'PorousFlowAquiferBC shall report an error when aquifer_head is specified without aquifer_conductance.'
     issues = '#0'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
@@ -517,7 +517,7 @@
     type = RunException
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
-    expect_err = 'PorousFlowAquiferBC: aquifer_distance must be specified when using the aquifer_pressure_at_datum formulation'
+    expect_err = 'aquifer_distance:.*This parameter must be specified when using the aquifer_pressure_at_datum formulation'
     requirement = 'PorousFlowAquiferBC shall report an error when aquifer_pressure_at_datum is specified without aquifer_distance.'
     issues = '#0'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
@@ -552,7 +552,7 @@
   [fv_aquiferBC_exc_neither]
     type = RunException
     input = fv_aquiferBC_exc.i
-    expect_err = 'FVPorousFlowAquiferBC: one of aquifer_head or aquifer_pressure_at_datum must be specified'
+    expect_err = 'Either aquifer_head or aquifer_pressure_at_datum must be specified'
     requirement = 'FVPorousFlowAquiferBC shall report an error when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
     issues = '#0'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
@@ -570,7 +570,7 @@
     type = RunException
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_head=10'
-    expect_err = 'FVPorousFlowAquiferBC: aquifer_conductance must be specified when using the aquifer_head formulation'
+    expect_err = 'aquifer_conductance:.*This parameter must be specified when using the aquifer_head formulation'
     requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_head is specified without aquifer_conductance.'
     issues = '#0'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
@@ -579,7 +579,7 @@
     type = RunException
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
-    expect_err = 'FVPorousFlowAquiferBC: aquifer_distance must be specified when using the aquifer_pressure_at_datum formulation'
+    expect_err = 'aquifer_distance:.*This parameter must be specified when using the aquifer_pressure_at_datum formulation'
     requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_pressure_at_datum is specified without aquifer_distance.'
     issues = '#0'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'

@@ -15,17 +15,26 @@ fluid leaves the domain.
 
 The elevation $z$ is that of the +boundary-cell centroid+ (not the face centroid), computed
 from the user-supplied gravity vector as $z = -\mathbf{x}_{\mathrm{cell}} \cdot
-\hat{\mathbf{g}}$.  Because the FV pore pressure is a cell-centred quantity, comparing it
-with the aquifer pressure at the same (cell-centroid) elevation makes the flux exactly zero
-in hydrostatic equilibrium on boundaries of any orientation, including horizontal ones where
-the face centroid sits half a cell above or below the cell centroid.
+\hat{\mathbf{g}}$.  This is deliberate: the FV pore pressure is a cell-centred quantity, so
+evaluating the aquifer pressure at the cell-centroid elevation is what makes the flux exactly
+zero in hydrostatic equilibrium, on a boundary of any orientation.
+
+Using the face centroid instead would offset $P_{\mathrm{aq}}$ from $P_{\mathrm{cell}}$ by
+$\rho |\mathbf{g}| (z_{\mathrm{face}} - z_{\mathrm{cell}})$ and so drive a spurious flux
+through an equilibrated boundary.  That offset vanishes only when the two centroids sit at
+the same elevation.  For axis-aligned cells that is the case on a vertical boundary (face
+normal perpendicular to gravity), but not otherwise: on a horizontal boundary, such as the
+top or bottom of the domain, the face centroid sits half a cell height above or below the
+cell centroid, and on slanted or distorted cells the offset takes some intermediate value.
+All the other quantities entering the flux ($\rho$, $\mu$, $\chi$, $k_{\mathrm{r}}$ and the
+permeability) are likewise boundary-cell values, so the boundary condition is evaluated
+consistently at the cell centroid.
 
 The two reference-pressure formulations and the conductance treatment are identical to
 [`PorousFlowAquiferBC`](PorousFlowAquiferBC.md): exactly one of `aquifer_head` (with an
 explicit `aquifer_conductance`) or `aquifer_pressure_at_datum` (with `aquifer_distance`, and
 optionally `aquifer_permeability` to override the boundary-cell permeability) must be
-supplied.  All fluid properties ($\rho$, $\mu$, $\chi$, $k_{\mathrm{r}}$) are the
-boundary-cell values.
+supplied.
 
 Two differences from the FE object:
 

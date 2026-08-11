@@ -101,7 +101,7 @@ PorousFlowAquiferBC::PorousFlowAquiferBC(const InputParameters & parameters)
                                      : nullptr)
 {
   if (!_involves_fluid)
-    mooseError("PorousFlowAquiferBC: fluid_phase must be specified.");
+    paramError("fluid_phase", "This parameter must be specified.");
 
   const bool has_head = isParamValid("aquifer_head");
   const bool has_pdat = isParamValid("aquifer_pressure_at_datum");
@@ -111,16 +111,17 @@ PorousFlowAquiferBC::PorousFlowAquiferBC(const InputParameters & parameters)
                "Specify either aquifer_head or aquifer_pressure_at_datum, not both.");
 
   if (!has_head && !has_pdat)
-    mooseError("PorousFlowAquiferBC: one of aquifer_head or aquifer_pressure_at_datum must be "
-               "specified.");
+    paramError("aquifer_head",
+               "Either aquifer_head or aquifer_pressure_at_datum must be specified.");
 
   if (has_head && !isParamValid("aquifer_conductance"))
-    mooseError("PorousFlowAquiferBC: aquifer_conductance must be specified when using the "
-               "aquifer_head formulation.");
+    paramError("aquifer_conductance",
+               "This parameter must be specified when using the aquifer_head formulation.");
 
   if (!has_head && !isParamValid("aquifer_distance"))
-    mooseError("PorousFlowAquiferBC: aquifer_distance must be specified when using the "
-               "aquifer_pressure_at_datum formulation.");
+    paramError("aquifer_distance",
+               "This parameter must be specified when using the aquifer_pressure_at_datum "
+               "formulation.");
 
   if (has_head && _use_aquifer_perm)
     paramError("aquifer_permeability",
