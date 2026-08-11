@@ -1969,17 +1969,24 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
   // These residual objects are only computed in the separate residual/Jacobian paths. Erroring
   // here prevents them from being silently dropped, which would produce wrong answers
   if (_scalar_kernels.hasActiveObjects())
-    mooseError("residual_and_jacobian_together does not yet support ScalarKernels. Their "
-               "contributions would be silently dropped. Please use "
-               "residual_and_jacobian_together = false");
+    mooseDocumentedError("moose",
+                         33531,
+                         "residual_and_jacobian_together does not yet support ScalarKernels. Their "
+                         "contributions would be silently dropped. Please use "
+                         "residual_and_jacobian_together = false");
   if (_nodal_kernels.hasActiveBlockObjects() || _nodal_kernels.hasActiveBoundaryObjects())
-    mooseError("residual_and_jacobian_together does not yet support NodalKernels. Their "
-               "contributions would be silently dropped. Please use "
-               "residual_and_jacobian_together = false");
+    mooseDocumentedError("moose",
+                         33531,
+                         "residual_and_jacobian_together does not yet support NodalKernels. Their "
+                         "contributions would be silently dropped. Please use "
+                         "residual_and_jacobian_together = false");
   if (_constraints.hasActiveNodalConstraints())
-    mooseError("residual_and_jacobian_together does not yet support nodal constraints. Their "
-               "contributions would be silently dropped. Please use "
-               "residual_and_jacobian_together = false");
+    mooseDocumentedError(
+        "moose",
+        33531,
+        "residual_and_jacobian_together does not yet support nodal constraints. Their "
+        "contributions would be silently dropped. Please use "
+        "residual_and_jacobian_together = false");
 
   // Make matrix ready to use
   activateAllMatrixTags();
