@@ -20,7 +20,7 @@ namespace CSG
  * (concentric cylinders surrounded by one or more ducted regions) using basic
  * engineering-scale attrbutes, including geometry type (hex or square), ring radii,
  * duct apothems, axial boundaries, and radial and axial region ID names for each region
- * of the pin structure.
+ * of the pin structure. This engineering unit supports both 3D and 2D/infinite pin geometries.
  *
  * Implements:
  *   - expandUnit(): creates a universe that represents the pin cell structure
@@ -35,9 +35,12 @@ public:
    *
    * @param name unique name of the unit
    * @param geometry_type geometry type of pin cell ("Hex" or "Square")
-   * @param ring_radii list of ring radii of cylindrical pin regions
-   * @param duct_apothems list of duct apothems that surround cylindrical regions in pin
-   * @param region_ids 2-D vector of region IDs that represent each radial and axial region
+   * @param ring_radii list of ring radii of cylindrical pin regions, which need to be in ascending
+   *                   order
+   * @param duct_apothems list of duct apothems that surround cylindrical regions in pin, which need
+   *                      to be in ascending order
+   * @param region_ids 2-D vector of region IDs that represent each radial (cylindrical and ducted)
+   *                   region and axial region
    * @param axial_boundaries list of axial boundaries of extruded pin
    */
   DuctedPinEngUnit(const std::string & name,

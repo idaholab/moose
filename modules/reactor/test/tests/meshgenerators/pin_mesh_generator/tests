@@ -187,6 +187,7 @@
   design = 'meshgenerators/PinMeshGenerator.md'
   issues = '#31733'
   [csg]
+    design = 'CSGBase.md'
     requirement = 'The system shall generate the Constructive Solid Geometry (CSG) representation of a '
     [2d_hex]
       detail = '2D hexagonal pin'
@@ -335,6 +336,7 @@
     []
   []
   [csg_eng_unit]
+    design = 'CSGBase.md CSGEngUnit.md'
     requirement = 'The system shall generate the Monte Carlo engineering unit-based representation of a '
     [2d_hex]
       detail = '2D hexagonal pin'

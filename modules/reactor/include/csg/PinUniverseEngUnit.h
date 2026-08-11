@@ -21,10 +21,6 @@ namespace CSG
  * engineering-scale attrbutes, including ring radii and fill material names for each radial region
  * of the pin structure.
  *
- * NOTE: The number of fill material names should be one larger than the number of ring radii in the
- * pin. The extra material name represents the material fill that surrounds the region outside of
- * the outermost ring.
- *
  * Implements:
  *   - expandUnit(): creates a universe that represents the pin cell structure
  *   - clone(): returns a deep copy of the pin engineering unit
@@ -37,8 +33,14 @@ public:
    * @brief Constructor for PinUniverseEngUnit
    *
    * @param name unique name of the unit
-   * @param ring_radii list of ring radii of cylindrical pin regions
+   * @param ring_radii list of ring radii of cylindrical pin regions, which need to be in ascending
+   *                   order
    * @param fill_mats Vector of material names that represent the fill of each radial region
+   *
+   * @note The number of fill material names should be one larger than the number of ring radii in
+   * the pin. The extra material name represents the material fill that surrounds the region outside
+   * of the outermost ring.
+   *
    */
   PinUniverseEngUnit(const std::string & name,
                      const std::vector<Real> & ring_radii,

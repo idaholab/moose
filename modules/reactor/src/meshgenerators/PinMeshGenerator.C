@@ -707,8 +707,8 @@ PinMeshGenerator::generateCSG()
   std::vector<Real> duct_apothems = _duct_halfpitch;
   duct_apothems.push_back(_pitch / 2);
 
-  // Define new region_ids variable that stores region IDs as 2-D vector of unsigned int.
-  // This will get passed into the DuctedPinEngUnit constructor
+  // Create temporary region_ids variable that stores region IDs as 2-D vector of unsigned int.
+  // instead of subdomain_id_type, which is required by DuctedPinEngUnit constructor
   std::vector<std::vector<unsigned int>> region_ids;
   region_ids.resize(_region_ids.size());
   for (const auto i : index_range(_region_ids))
