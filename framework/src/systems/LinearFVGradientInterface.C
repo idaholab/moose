@@ -46,9 +46,6 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
   if (container.next_values.empty() && _sys.currentSolution())
     initializeContainer(container.next_values);
 
-  if (_linear_fv_gradient_method_scratch.empty() && _sys.currentSolution())
-    initializeContainer(_linear_fv_gradient_method_scratch);
-
   return LinearFVGradientReader(_sys, container.values, method, variable_number);
 }
 
@@ -133,16 +130,10 @@ LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMeth
   if (container.next_values.empty())
     initializeContainer(container.next_values);
 
-  if (_linear_fv_gradient_method_scratch.empty())
-    initializeContainer(_linear_fv_gradient_method_scratch);
-
   mooseAssert(container.next_values.size() == container.values.size(),
               "Next and current gradient containers must have the same size.");
-  mooseAssert(_linear_fv_gradient_method_scratch.size() == container.values.size(),
-              "Method scratch and value gradient containers must have the same size.");
 
-  method.computeGradient(
-      _sys, container.next_values, _linear_fv_gradient_method_scratch, container.variable_numbers);
+  method.computeGradient(_sys, container.next_values, container.variable_numbers);
 }
 
 void
@@ -156,8 +147,6 @@ LinearFVGradientInterface::finalizeLinearFVGradientContainer(LinearFVGradientCon
 void
 LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
-  _linear_fv_gradient_method_scratch.clear();
-
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
   {
     method_container_pair.second.values.clear();
@@ -166,8 +155,6 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 
   if (!hasLinearFVGradients())
     return;
-
-  initializeContainer(_linear_fv_gradient_method_scratch);
 
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
   {

@@ -50,8 +50,7 @@ public:
   ComputeLinearFVGreenGaussGradientVolumeThread(
       FEProblemBase & fe_problem,
       SystemBase & system,
-      const std::vector<std::unique_ptr<NumericVector<Number>>> & input_gradient,
-      std::vector<std::unique_ptr<NumericVector<Number>>> & output_gradient,
+      std::vector<std::unique_ptr<NumericVector<Number>>> & gradient,
       const std::unordered_set<unsigned int> & gradient_variables);
 
   /**
@@ -61,6 +60,9 @@ public:
    */
   ComputeLinearFVGreenGaussGradientVolumeThread(ComputeLinearFVGreenGaussGradientVolumeThread & x,
                                                 Threads::split split);
+
+  ~ComputeLinearFVGreenGaussGradientVolumeThread();
+
   using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
   /// Operator which is used to execute the thread over a certain iterator range.
   /// @param range The range of ElemInfos which should be computed.
@@ -92,11 +94,21 @@ protected:
   /// Pointer to the current variable
   MooseLinearVariableFV<Real> * _current_var;
 
-  /// Unnormalized face-sum gradients to read from.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & _input_gradient;
-
   /// Normalized (by cell volume) gradients to write into.
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _output_gradient;
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _gradient;
+
+  /**
+   * Writable local arrays for the component vectors.
+   * These are acquired by the root body before threaded execution. Split bodies share the
+   * pointers and write only to DOFs in their own element range.
+   */
+  std::vector<Real *> _gradient_data;
+
+  /**
+   * Whether this body owns the writable-array access.
+   * Only the root body restores the arrays; split bodies merely share the pointers.
+   */
+  const bool _owns_gradient_data;
 
   /// Indices of the variables this producer should compute gradients for.
   const std::unordered_set<unsigned int> & _gradient_variables;

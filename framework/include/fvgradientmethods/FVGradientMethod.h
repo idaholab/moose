@@ -50,13 +50,11 @@ public:
    * Compute the final gradient values for the requested variables.
    *
    * @param system System that owns the variables and gradient storage.
-   * @param output_gradient Component vectors where final gradients are written.
-   * @param scratch_gradient Temporary component vectors available during the computation.
+   * @param gradient Component vectors where final gradients are written.
    * @param variable_numbers Variable numbers (in the system) whose gradients should be updated.
    */
   void computeGradient(SystemBase & system,
-                       GradientContainer & output_gradient,
-                       GradientContainer & scratch_gradient,
+                       GradientContainer & gradient,
                        const std::unordered_set<unsigned int> & variable_numbers) const;
 
   /// Limiter selected for this method.
@@ -67,14 +65,12 @@ private:
    * Compute the method-specific gradient before this base class applies any limiter.
    *
    * @param system System that owns the variables and gradient storage.
-   * @param output_gradient Component vectors where pre-limiter gradients are written.
-   * @param scratch_gradient Temporary component vectors available during the computation.
+   * @param gradient Component vectors where pre-limiter gradients are written.
    * @param variable_numbers Variable numbers whose gradients should be updated.
    */
   virtual void computeGradientWithoutLimiter(
       SystemBase & system,
-      GradientContainer & output_gradient,
-      GradientContainer & scratch_gradient,
+      GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const = 0;
 
   /// Limiter applied after method-specific pre-limiter gradient computation.

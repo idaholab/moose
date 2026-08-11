@@ -108,9 +108,6 @@ protected:
   /// Reference to the system object
   SystemBase & _sys;
 
-  /// Reusable scratch space available to the method while computing replacement values.
-  GradientContainer _linear_fv_gradient_method_scratch;
-
   /// Gradient containers keyed by the method object that produces them.
   std::unordered_map<const FVGradientMethod *, LinearFVGradientContainer>
       _linear_fv_gradient_container_by_method;

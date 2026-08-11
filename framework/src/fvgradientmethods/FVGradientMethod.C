@@ -51,33 +51,19 @@ FVGradientMethod::FVGradientMethod(const InputParameters & params)
 
 void
 FVGradientMethod::computeGradient(SystemBase & system,
-                                  GradientContainer & output_gradient,
-                                  GradientContainer & scratch_gradient,
+                                  GradientContainer & gradient,
                                   const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  auto & pre_limiter_gradient =
-      _limiter_type == Moose::FV::GradientLimiterType::None ? output_gradient : scratch_gradient;
-  auto & method_scratch_gradient =
-      _limiter_type == Moose::FV::GradientLimiterType::None ? scratch_gradient : output_gradient;
-
-  if (_limiter_type != Moose::FV::GradientLimiterType::None)
-    mooseAssert(scratch_gradient.size() == output_gradient.size(),
-                "Scratch and output gradient containers must have the same size.");
-
-  for (auto & vec : pre_limiter_gradient)
+  for (auto & vec : gradient)
     vec->zero();
 
-  computeGradientWithoutLimiter(
-      system, pre_limiter_gradient, method_scratch_gradient, variable_numbers);
+  computeGradientWithoutLimiter(system, gradient, variable_numbers);
 
-  for (auto & vec : pre_limiter_gradient)
+  for (auto & vec : gradient)
     vec->close();
 
   if (_limiter_type == Moose::FV::GradientLimiterType::None)
     return;
-
-  for (auto & vec : output_gradient)
-    vec->zero();
 
   auto & fe_problem = system.feProblem();
   using ElemInfoRange = ComputeLinearFVLimitedGradientThread::ElemInfoRange;
@@ -87,11 +73,11 @@ FVGradientMethod::computeGradient(SystemBase & system,
   PARALLEL_TRY
   {
     ComputeLinearFVLimitedGradientThread limited_gradient_thread(
-        fe_problem, system, pre_limiter_gradient, output_gradient, _limiter_type, variable_numbers);
+        fe_problem, system, gradient, _limiter_type, variable_numbers);
     Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
   }
   fe_problem.checkExceptionAndStopSolve();
 
-  for (auto & vec : output_gradient)
+  for (auto & vec : gradient)
     vec->close();
 }

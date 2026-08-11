@@ -126,8 +126,9 @@ template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients()
 {
-  const auto & method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
-  const auto & reader = requestCellGradients(method);
+  const auto & reader =
+      requestCellGradients(getLinearFVGradientMethod(this->_sys, _default_gradient_method_name));
+
   _gradient_reader = &reader;
   return reader;
 }
@@ -136,9 +137,6 @@ template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name)
 {
-  if (method_name.empty())
-    return requestCellGradients();
-
   return requestCellGradients(getLinearFVGradientMethod(this->_sys, method_name));
 }
 
