@@ -14,7 +14,7 @@
 #include "MooseApp.h"
 #include "MooseMeshUtils.h"
 #include "Factory.h"
-#include "PinEngineeringUnit.h"
+#include "DuctedPinEngUnit.h"
 #include "libmesh/elem.h"
 
 registerMooseObject("ReactorApp", PinMeshGenerator);
@@ -708,7 +708,7 @@ PinMeshGenerator::generateCSG()
   duct_apothems.push_back(_pitch / 2);
 
   // Define new region_ids variable that stores region IDs as 2-D vector of unsigned int.
-  // This will get passed into the PinEngineeringUnit constructor
+  // This will get passed into the DuctedPinEngUnit constructor
   std::vector<std::vector<unsigned int>> region_ids;
   region_ids.resize(_region_ids.size());
   for (const auto i : index_range(_region_ids))
@@ -719,7 +719,7 @@ PinMeshGenerator::generateCSG()
     axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
 
   // Define pin engineering unit and add it to CSGBase
-  std::unique_ptr<CSG::PinEngineeringUnit> pin_ptr = std::make_unique<CSG::PinEngineeringUnit>(
+  std::unique_ptr<CSG::DuctedPinEngUnit> pin_ptr = std::make_unique<CSG::DuctedPinEngUnit>(
       name(), _mesh_geometry, _ring_radii, duct_apothems, region_ids, axial_boundaries);
   auto & pin_unit = csg_obj->addEngUnit(std::move(pin_ptr));
 

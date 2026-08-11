@@ -7,20 +7,21 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PinEngineeringUnit.h"
-#include "CSGZCylinder.h"
+#include "DuctedPinEngUnit.h"
+#include "PinUniverseEngUnit.h"
+#include "CSGNPolygonUnit.h"
 #include "RGMBEngUnitUtils.h"
 #include "CSGUtils.h"
 
 namespace CSG
 {
 
-PinEngineeringUnit::PinEngineeringUnit(const std::string & name,
-                                       const std::string & geometry_type,
-                                       const std::vector<Real> & ring_radii,
-                                       const std::vector<Real> & duct_apothems,
-                                       const std::vector<std::vector<unsigned int>> & region_ids,
-                                       const std::vector<Real> & axial_boundaries)
+DuctedPinEngUnit::DuctedPinEngUnit(const std::string & name,
+                                   const std::string & geometry_type,
+                                   const std::vector<Real> & ring_radii,
+                                   const std::vector<Real> & duct_apothems,
+                                   const std::vector<std::vector<unsigned int>> & region_ids,
+                                   const std::vector<Real> & axial_boundaries)
   : CSGCellEngUnit(name),
     _geometry_type(geometry_type),
     _ring_radii(ring_radii),
@@ -32,14 +33,17 @@ PinEngineeringUnit::PinEngineeringUnit(const std::string & name,
   if (_ring_radii.size() > 1)
     for (const auto i : make_range(_ring_radii.size() - 1))
       if (_ring_radii[i] >= _ring_radii[i + 1])
-        mooseError("Pin engineering unit must have ring radii defined in strictly ascending order");
+        mooseError(
+            "Ducted pin engineering unit must have ring radii defined in strictly ascending order");
 
   // Check duct apothems in ascending order
-  if (_duct_apothems.size() > 1)
+  if (_duct_apothems.size() == 0)
+    mooseError("At least one duct apothem needs to be defined in DuctedPinEngUnit");
+  else if (_duct_apothems.size() > 1)
     for (const auto i : make_range(_duct_apothems.size() - 1))
       if (_duct_apothems[i] >= _duct_apothems[i + 1])
-        mooseError(
-            "Pin engineering unit must have duct apothems defined in strictly ascending order");
+        mooseError("Ducted pin engineering unit must have duct apothems defined in strictly "
+                   "ascending order");
 
   // Check size of region ids
   unsigned int n_axial = _axial_boundaries.size() ? axial_boundaries.size() : 1;
@@ -52,11 +56,11 @@ PinEngineeringUnit::PinEngineeringUnit(const std::string & name,
       mooseError("Size of entry in region IDs must match the number of radial zones in pin");
 
   if (_geometry_type != "Hex" && _geometry_type != "Square")
-    mooseError("Invalid geometry type for PinEngineeringUnit");
+    mooseError("Invalid geometry type for DuctedPinEngUnit");
 }
 
 std::unordered_map<std::string, AttributeVariant>
-PinEngineeringUnit::getAttributes() const
+DuctedPinEngUnit::getAttributes() const
 {
   std::unordered_map<std::string, AttributeVariant> attr_map{{"duct_apothems", _duct_apothems},
                                                              {"ring_radii", _ring_radii},
@@ -68,52 +72,60 @@ PinEngineeringUnit::getAttributes() const
 }
 
 std::unique_ptr<CSGCellEngUnit>
-PinEngineeringUnit::clone() const
+DuctedPinEngUnit::clone() const
 {
-  return std::make_unique<PinEngineeringUnit>(
+  return std::make_unique<DuctedPinEngUnit>(
       _name, _geometry_type, _ring_radii, _duct_apothems, _region_ids, _axial_boundaries);
 }
 
 void
-PinEngineeringUnit::expandUnit()
+DuctedPinEngUnit::expandUnit()
 {
-  unsigned int radial_index = 0;
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGSurface>>> surfaces_by_radial_region;
+  const auto extruded_pin = _axial_boundaries.size() > 0;
+  unsigned int n_axial = _axial_boundaries.size() ? _axial_boundaries.size() : 1;
+  unsigned int n_ring = _ring_radii.size();
+  std::vector<std::reference_wrapper<const CSG::PinUniverseEngUnit>> pin_units_by_axial_region;
 
-  // Add surfaces corresponding to pin rings
-  for (const auto & radius : _ring_radii)
+  // Define pin universe engineering units for each axial level
+  if (n_ring)
   {
-    const auto surf_name = _name + "_radial_ring_" + std::to_string(radial_index);
-    std::unique_ptr<CSG::CSGSurface> ring_surf_ptr =
-        std::make_unique<CSG::CSGZCylinder>(surf_name, 0, 0, radius);
-    const auto & ring_surf = _internal_base->addSurface(std::move(ring_surf_ptr));
-    surfaces_by_radial_region.push_back({ring_surf});
-    ++radial_index;
+    for (const auto i : make_range(n_axial))
+    {
+      auto unit_name = _name + "_pin_unit";
+      if (extruded_pin)
+        unit_name += "_axial_" + std::to_string(i);
+      std::vector<std::string> pin_fill_mats;
+      for (const auto j : make_range(n_ring + 1))
+        pin_fill_mats.push_back("rgmb_region_" + std::to_string(_region_ids[i][j]));
+      std::unique_ptr<CSG::PinUniverseEngUnit> pin_ptr =
+          std::make_unique<CSG::PinUniverseEngUnit>(unit_name, _ring_radii, pin_fill_mats);
+      auto & pin_unit = _internal_base->addEngUnit(std::move(pin_ptr));
+      pin_units_by_axial_region.push_back(pin_unit);
+    }
   }
 
-  // Add surfaces corresponding to pin ducts
-  for (const auto & duct_apothem : _duct_apothems)
-  {
-    const auto & duct_surfaces = RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(
-        radial_index, _geometry_type, _name, duct_apothem, *_internal_base);
-    surfaces_by_radial_region.push_back(duct_surfaces);
-    ++radial_index;
-  }
-
-  // Define all radial regions
+  // Define CSGNPolygonUnit representing each duct unit and define all radial regions
+  // created by the ducts
   std::vector<CSG::CSGRegion> radial_regions;
   CSG::CSGRegion inner_region, outer_region;
-  for (const auto i : index_range(surfaces_by_radial_region))
+  std::vector<std::reference_wrapper<const CSG::CSGNPolygonUnit>> duct_units_by_radial_region;
+  for (const auto i : index_range(_duct_apothems))
   {
-    const auto & radial_surfaces = surfaces_by_radial_region[i];
+    const auto unit_name = _name + "_radial_duct_" + std::to_string(i);
+    const auto n_sides = (_geometry_type == "Hex") ? 6 : 4;
+    std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
+        std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, _duct_apothems[i]);
+    auto & duct_unit = _internal_base->addEngUnit(std::move(duct_ptr));
+    duct_units_by_radial_region.push_back(duct_unit);
+
     CSG::CSGRegion radial_region;
-    bool is_last_radial_region = i == surfaces_by_radial_region.size() - 1;
-    if (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+    bool is_last_radial_region = i == _duct_apothems.size() - 1;
+    if (i == 0)
     {
       if (!is_last_radial_region)
       {
         // We are in the innermost radial region, the radial region is inner_region
-        inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
+        inner_region = -duct_unit;
         radial_region = inner_region;
       }
     }
@@ -122,7 +134,7 @@ PinEngineeringUnit::expandUnit()
       // For all other regions, the radial region is the intersection of inner_region and
       // outer_region
       outer_region = ~inner_region;
-      inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
+      inner_region = -duct_unit;
       radial_region = is_last_radial_region ? outer_region : (inner_region & outer_region);
     }
     radial_regions.push_back(radial_region);
@@ -131,7 +143,6 @@ PinEngineeringUnit::expandUnit()
   // Define all axial surfaces and regions
   std::vector<CSG::CSGRegion> axial_regions;
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
-  const auto extruded_pin = _axial_boundaries.size() > 0;
   if (extruded_pin)
   {
     surfaces_by_axial_region =
@@ -159,12 +170,11 @@ PinEngineeringUnit::expandUnit()
   const auto & pin_univ = _internal_base->createUniverse(_name + "_univ");
   for (const auto i : index_range(radial_regions))
   {
+    const unsigned int radial_index = _ring_radii.size() + i;
     for (const auto j : make_range(extruded_pin ? axial_regions.size() : 1))
     {
       auto cell_region = radial_regions[i];
       auto cell_name = _name + "_cell_radial_" + std::to_string(i);
-      const auto region_id = _region_ids[j][i];
-      const auto mat_name = "rgmb_region_" + std::to_string(region_id);
       if (extruded_pin)
       {
         // update name and region with axial info only if extruded
@@ -178,13 +188,22 @@ PinEngineeringUnit::expandUnit()
         }
         cell_name += "_axial_" + std::to_string(j);
       }
-      _internal_base->createCell(cell_name, mat_name, cell_region, &pin_univ);
+      if (i == 0 && n_ring > 0)
+        // For first radial region where pin rings exist, we fill cell with pin universe unit
+        _internal_base->createCell(cell_name, pin_units_by_axial_region[j], cell_region, &pin_univ);
+      else
+      {
+        // Otherwise, we fill the region with a material name based on region ID for region
+        const auto region_id = _region_ids[j][radial_index];
+        const auto mat_name = "rgmb_region_" + std::to_string(region_id);
+        _internal_base->createCell(cell_name, mat_name, cell_region, &pin_univ);
+      }
     }
   }
 
   // Create new cell to bound universe based on pin outer boundaries and add this cell to the root
   // universe
-  auto pin_region = CSGUtils::getInnerRegion(surfaces_by_radial_region.back(), Point(0, 0, 0));
+  auto pin_region = -(duct_units_by_radial_region.back());
   if (extruded_pin)
   {
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();

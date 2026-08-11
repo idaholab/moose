@@ -12,46 +12,6 @@
 #include "ReactorGeometryMeshBuilderBase.h"
 
 std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(unsigned int radial_index,
-                                                    const std::string & mesh_geometry,
-                                                    const std::string & base_name,
-                                                    Real halfpitch,
-                                                    CSG::CSGBase & csg_obj)
-{
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>> duct_surfaces;
-  const auto n_azim_surfaces = mesh_geometry == "Square" ? 4 : 6;
-
-  // Convert halfpitch to radius (distance from vertex to center)
-  const Real angle_offset_degrees = mesh_geometry == "Square" ? 45. : 30.;
-  const Real angle_offset_radians = angle_offset_degrees * (M_PI / 180.);
-  const auto radius = halfpitch / std::cos(angle_offset_radians);
-
-  Real angle_increment_radians = 360. / n_azim_surfaces * (M_PI / 180.);
-
-  for (const auto i : make_range(n_azim_surfaces))
-  {
-    const auto surf_name =
-        base_name + "_radial_duct_" + std::to_string(radial_index) + "_surf_" + std::to_string(i);
-
-    // Define 3 points on the surface
-    const auto current_angle = i * angle_increment_radians + angle_offset_radians;
-    const auto next_angle = (i + 1) * angle_increment_radians + angle_offset_radians;
-    libMesh::Point p0(radius * std::cos(current_angle), radius * std::sin(current_angle), 0.);
-    libMesh::Point p1(radius * std::cos(next_angle), radius * std::sin(next_angle), 0.);
-    libMesh::Point p2 = (p0 + p1) / 2.;
-    // Place third point above the two others to form a vertical plane
-    p2(2) = angle_offset_degrees;
-
-    std::unique_ptr<CSG::CSGSurface> duct_surf_ptr =
-        std::make_unique<CSG::CSGPlane>(surf_name, p0, p1, p2);
-    const auto & duct_surf = csg_obj.addSurface(std::move(duct_surf_ptr));
-    duct_surfaces.push_back(duct_surf);
-  }
-
-  return duct_surfaces;
-}
-
-std::vector<std::reference_wrapper<const CSG::CSGSurface>>
 RGMBEngUnitUtils::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj,
                                         const std::vector<Real> & axial_boundaries)
 {

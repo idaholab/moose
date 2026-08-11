@@ -16,7 +16,7 @@ namespace CSG
 {
 
 /**
- * PinEngineeringUnit is a CSGCellEngUnit that represents a pin cell structure
+ * DuctedPinEngUnit is a CSGCellEngUnit that represents a pin cell structure
  * (concentric cylinders surrounded by one or more ducted regions) using basic
  * engineering-scale attrbutes, including geometry type (hex or square), ring radii,
  * duct apothems, axial boundaries, and radial and axial region ID names for each region
@@ -27,11 +27,11 @@ namespace CSG
  *   - clone(): returns a deep copy of the pin engineering unit
  *   - getAttributes(): returns duct_apothems, ring_radii, region_ids, and geometry_type
  */
-class PinEngineeringUnit : public CSGCellEngUnit
+class DuctedPinEngUnit : public CSGCellEngUnit
 {
 public:
   /**
-   * @brief Constructor for PinEngineeringUnit
+   * @brief Constructor for DuctedPinEngUnit
    *
    * @param name unique name of the unit
    * @param geometry_type geometry type of pin cell ("Hex" or "Square")
@@ -40,12 +40,12 @@ public:
    * @param region_ids 2-D vector of region IDs that represent each radial and axial region
    * @param axial_boundaries list of axial boundaries of extruded pin
    */
-  PinEngineeringUnit(const std::string & name,
-                     const std::string & geometry_type,
-                     const std::vector<Real> & ring_radii,
-                     const std::vector<Real> & duct_apothems,
-                     const std::vector<std::vector<unsigned int>> & region_ids,
-                     const std::vector<Real> & axial_boundaries);
+  DuctedPinEngUnit(const std::string & name,
+                   const std::string & geometry_type,
+                   const std::vector<Real> & ring_radii,
+                   const std::vector<Real> & duct_apothems,
+                   const std::vector<std::vector<unsigned int>> & region_ids,
+                   const std::vector<Real> & axial_boundaries);
   /**
    * @brief Return the pin engeering unit attributes for this object.
    *
@@ -59,7 +59,7 @@ protected:
   /**
    * @brief Return a deep copy of this unit.
    *
-   * @return unique_ptr to a new PinEngineeringUnit with identical parameters
+   * @return unique_ptr to a new DuctedPinEngUnit with identical parameters
    */
   std::unique_ptr<CSGCellEngUnit> clone() const override;
 

@@ -14,6 +14,7 @@
 #include "Factory.h"
 #include "libmesh/elem.h"
 #include "MooseMeshUtils.h"
+#include "CSGNPolygonUnit.h"
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
 #include "CSGUtils.h"
@@ -711,6 +712,7 @@ AssemblyMeshGenerator::generateCSG()
   duct_boundaries.push_back(getReactorParam<Real>(RGMB::assembly_pitch) / 2.);
   CSG::CSGRegion inner_region;
   const auto & assembly_univ = csg_obj->createUniverse(name() + "_univ");
+  const auto n_sides = (_geom_type == "Hex") ? 6 : 4;
   for (const auto i : index_range(duct_boundaries))
   {
     bool is_last_radial_region = i == duct_boundaries.size() - 1;
@@ -725,9 +727,11 @@ AssemblyMeshGenerator::generateCSG()
       std::string lat_cell_name = name() + "_lattice_cell";
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces = RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(
-            i, _geom_type, name(), duct_boundaries[i], *csg_obj);
-        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+        const auto unit_name = name() + "_radial_duct_" + std::to_string(i);
+        std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
+            std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, duct_boundaries[i]);
+        auto & duct_unit = csg_obj->addEngUnit(std::move(duct_ptr));
+        inner_region = -duct_unit;
       }
       if (_geom_type == "Hex")
       {
@@ -743,9 +747,11 @@ AssemblyMeshGenerator::generateCSG()
       CSG::CSGRegion radial_region = ~inner_region;
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces = RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(
-            i, _geom_type, name(), duct_boundaries[i], *csg_obj);
-        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+        const auto unit_name = name() + "_radial_duct_" + std::to_string(i);
+        std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
+            std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, duct_boundaries[i]);
+        auto & duct_unit = csg_obj->addEngUnit(std::move(duct_ptr));
+        inner_region = -duct_unit;
         radial_region &= inner_region;
       }
 
@@ -773,9 +779,11 @@ AssemblyMeshGenerator::generateCSG()
 
   // Create new cell to bound universe based on assembly outer boundaries, and add this cell
   // to the root universe
-  const auto & duct_surfaces = RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(
-      duct_boundaries.size() - 1, _geom_type, name(), duct_boundaries.back(), *csg_obj);
-  auto assembly_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+  const auto unit_name = name() + "_radial_duct_" + std::to_string(duct_boundaries.size() - 1);
+  std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
+      std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, duct_boundaries.back());
+  auto & duct_unit = csg_obj->addEngUnit(std::move(duct_ptr));
+  auto assembly_region = -duct_unit;
   if (extruded_assembly)
     assembly_region &= axial_extent;
   csg_obj->createCell(name() + "_root_cell", assembly_univ, assembly_region);
