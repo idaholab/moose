@@ -3,9 +3,9 @@
     type = MMSTest
     input = 'test.py'
     test_case = BrokenDomain
-    requirement = 'The system shall display second order convergence when applying weakly enforced matching Dirichlet and flux conditions.'
+    requirement = 'The system shall display second order convergence when applying weakly enforced matching Dirichlet and flux conditions, including evaluating a functor defined only on the opposite side of the face from its producer.'
     design = 'FVInterfaceKernels/index.md FVBCs/index.md'
-    issues = '#16756'
+    issues = '#16756 #33435'
   []
 
   [invalid_functor_side]
