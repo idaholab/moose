@@ -146,52 +146,42 @@ EnumerateEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   std::vector<std::string> argv;
   argv.insert(argv.begin(), args.begin(), args.end());
 
-  if (argv.size() != 2)
+  if (argv.size() != 3)
   {
     exp.errors.emplace_back(
-        "enumerate error: Expected 2 arguments ${enumerate first_name last_name} in '" +
+        "enumerate error: Expected 3 arguments ${enumerate prefix first_index last_index} in '" +
             n->fullpath() + "'",
         n);
     return n->val();
   }
 
-  std::array<std::string, 2> prefix;
-  std::array<int, 2> number;
+  const auto & prefix = argv[0];
+  std::array<int, 2> index;
   for (const auto i : make_range(2))
   {
-    const auto & arg = argv[i];
-    if (arg.empty() || !std::isdigit(static_cast<unsigned char>(arg.back())))
+    const auto & arg = argv[i + 1];
+    if (arg.empty() || arg.find_first_not_of("0123456789") != std::string::npos)
     {
-      exp.errors.emplace_back("enumerate error: argument '" + arg +
-                                  "' does not end in an integer in '" + n->fullpath() + "'",
+      exp.errors.emplace_back("enumerate error: index '" + arg +
+                                  "' is not a non-negative integer in '" + n->fullpath() + "'",
                               n);
       return n->val();
     }
-    const auto pos = arg.find_last_not_of("0123456789");
-    prefix[i] = (pos == std::string::npos) ? "" : arg.substr(0, pos + 1);
-    number[i] = MooseUtils::convert<int>(arg.substr(prefix[i].size()));
+    index[i] = MooseUtils::convert<int>(arg);
   }
 
-  if (prefix[0] != prefix[1])
+  if (index[1] < index[0])
   {
-    exp.errors.emplace_back("enumerate error: prefixes of '" + argv[0] + "' and '" + argv[1] +
-                                "' do not match in '" + n->fullpath() + "'",
-                            n);
-    return n->val();
-  }
-
-  if (number[1] < number[0])
-  {
-    exp.errors.emplace_back("enumerate error: last index of '" + argv[1] +
-                                "' is smaller than first index of '" + argv[0] + "' in '" +
+    exp.errors.emplace_back("enumerate error: last index " + argv[2] +
+                                " is smaller than first index " + argv[1] + " in '" +
                                 n->fullpath() + "'",
                             n);
     return n->val();
   }
 
   std::vector<std::string> names;
-  for (const auto i : make_range(number[0], number[1] + 1))
-    names.push_back(prefix[0] + std::to_string(i));
+  for (const auto i : make_range(index[0], index[1] + 1))
+    names.push_back(prefix + std::to_string(i));
 
   return MooseUtils::stringJoin(names);
 }

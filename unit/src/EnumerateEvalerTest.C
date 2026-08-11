@@ -23,49 +23,42 @@ expand(const std::string & input)
 
 TEST(EnumerateEvalerTest, expansion)
 {
-  const auto [value, errors] = expand("blocks = '${enumerate block0 block3}'");
+  const auto [value, errors] = expand("blocks = '${enumerate block 0 3}'");
   EXPECT_TRUE(errors.empty());
   EXPECT_EQ(value, "block0 block1 block2 block3");
 }
 
 TEST(EnumerateEvalerTest, singleElementRange)
 {
-  const auto [value, errors] = expand("blocks = '${enumerate block5 block5}'");
+  const auto [value, errors] = expand("blocks = '${enumerate block 5 5}'");
   EXPECT_TRUE(errors.empty());
   EXPECT_EQ(value, "block5");
 }
 
 TEST(EnumerateEvalerTest, mixedWithLiterals)
 {
-  const auto [value, errors] = expand("blocks = 'block0 ${enumerate block1 block4} block5'");
+  const auto [value, errors] = expand("blocks = 'block0 ${enumerate block 1 4} block5'");
   EXPECT_TRUE(errors.empty());
   EXPECT_EQ(value, "block0 block1 block2 block3 block4 block5");
 }
 
 TEST(EnumerateEvalerTest, wrongArgCount)
 {
-  const auto [value, errors] = expand("blocks = '${enumerate block0}'");
+  const auto [value, errors] = expand("blocks = '${enumerate block 0}'");
   ASSERT_EQ(errors.size(), 1);
-  EXPECT_NE(errors[0].message.find("Expected 2 arguments"), std::string::npos);
+  EXPECT_NE(errors[0].message.find("Expected 3 arguments"), std::string::npos);
 }
 
-TEST(EnumerateEvalerTest, noTrailingInteger)
+TEST(EnumerateEvalerTest, nonIntegerIndex)
 {
-  const auto [value, errors] = expand("blocks = '${enumerate block block3}'");
+  const auto [value, errors] = expand("blocks = '${enumerate breeder a 3}'");
   ASSERT_EQ(errors.size(), 1);
-  EXPECT_NE(errors[0].message.find("does not end in an integer"), std::string::npos);
-}
-
-TEST(EnumerateEvalerTest, mismatchedPrefix)
-{
-  const auto [value, errors] = expand("blocks = '${enumerate block0 anotherblock3}'");
-  ASSERT_EQ(errors.size(), 1);
-  EXPECT_NE(errors[0].message.find("do not match"), std::string::npos);
+  EXPECT_NE(errors[0].message.find("is not a non-negative integer"), std::string::npos);
 }
 
 TEST(EnumerateEvalerTest, descendingRange)
 {
-  const auto [value, errors] = expand("blocks = '${enumerate block3 block0}'");
+  const auto [value, errors] = expand("blocks = '${enumerate block 3 0}'");
   ASSERT_EQ(errors.size(), 1);
   EXPECT_NE(errors[0].message.find("is smaller than first index"), std::string::npos);
 }
