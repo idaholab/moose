@@ -108,10 +108,13 @@ SurfaceExtrusionComponent::addMeshGenerators()
       _awh.getAction<ActionComponent>(getParam<ComponentName>("connected_component"));
 
   // Create the base mesh for the component using a mesh generator
-  if (_dimension <= 1)
-    paramError("dimension", "0D and 1D surface extrusion not implemented");
+  if (_dimension == 0)
+    mooseError("0D surface extrusion not implemented");
   else
   {
+    if (_dimension == 1 && (isParamSetByUser("start_radial_extent") || isParamSetByUser("end_radial_extent")))
+      mooseWarning("1D surface extrusion currently does not support radial expansion");
+
     // Extract the surface mesh
     InputParameters lowD_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
     // use the own mesh generator to get the smallest mesh suitable
