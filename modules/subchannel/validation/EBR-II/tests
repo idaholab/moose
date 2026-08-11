@@ -5,7 +5,7 @@
     type = CSVDiff
     input = 'XX09_SCM_SS17.i'
     csvdiff  = 'XX09_SCM_SS17_out.csv'
-    heavy = true
+    # heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
     rel_err = 2.5e-5
