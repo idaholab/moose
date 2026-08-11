@@ -322,6 +322,26 @@
     issues = '#6845 #23609 #30662'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [fflux16]
+    type = 'PetscJacobianTester'
+    input = 'fflux16.i'
+    ratio_tol = 1E-7 # lots of chain rules here
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    requirement = 'The porous flow module shall compute all Jacobian entries of physics kernels (HEX27 elements, 2nd order displacements/1st order pressure) for the fluid flux, with 1-phase, 1-component, constant viscosity, Kozeny-Carman permeability, constant fluid-bulk modulus, Corey-relative permeability.'
+    issues = '#33502'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [fflux17]
+    type = 'PetscJacobianTester'
+    input = 'fflux17.i'
+    ratio_tol = 1E-6 # lots of chain rules here
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    requirement = 'The porous flow module shall compute all Jacobian entries of physics kernels (TET10 elements, 2nd order displacements/1st order pressure) for the fluid flux, with 1-phase, 1-component, constant viscosity, Kozeny-Carman permeability, constant fluid-bulk modulus, Corey-relative permeability.'
+    issues = '#33502'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [fflux01_fully_saturated]
     type = 'PetscJacobianTester'
     input = 'fflux01_fully_saturated.i'
