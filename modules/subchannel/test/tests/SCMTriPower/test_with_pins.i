@@ -59,8 +59,6 @@ num_cells = 40
   friction_closure = 'cheng'
   full_output = true
   mixing_closure = 'cheng_todreas'
-  P_tol = 1.0e-6
-  T_tol = 1.0e-5
 []
 
 [SCMClosures]
@@ -77,9 +75,6 @@ num_cells = 40
 []
 
 [ICs]
-
-
-
   [q_prime_ic]
     type = SCMTriPowerIC
     variable = q_prime
