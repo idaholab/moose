@@ -1,158 +1,48 @@
 {
   "cells": {
     "pin1_cell_radial_0": {
-      "fill": "rgmb_region_1",
-      "filltype": "CSG_MATERIAL",
-      "region_infix": [
-        "-pin1_radial_ring_0"
-      ],
-      "region_postfix": [
-        "pin1_radial_ring_0",
-        "-"
-      ]
-    },
-    "pin1_cell_radial_1": {
-      "fill": "rgmb_region_2",
-      "filltype": "CSG_MATERIAL",
-      "region_infix": [
-        "-pin1_radial_ring_1",
-        "&",
-        "~",
-        [
-          "-pin1_radial_ring_0"
-        ]
-      ],
-      "region_postfix": [
-        "pin1_radial_ring_1",
-        "-",
-        "pin1_radial_ring_0",
-        "-",
-        "~",
-        "&"
-      ]
-    },
-    "pin1_cell_radial_2": {
-      "fill": "rgmb_region_3",
-      "filltype": "CSG_MATERIAL",
-      "region_infix": [
-        "-pin1_radial_ring_2",
-        "&",
-        "~",
-        [
-          "-pin1_radial_ring_1"
-        ]
-      ],
-      "region_postfix": [
-        "pin1_radial_ring_2",
-        "-",
-        "pin1_radial_ring_1",
-        "-",
-        "~",
-        "&"
-      ]
-    },
-    "pin1_cell_radial_3": {
-      "fill": "rgmb_region_4",
-      "filltype": "CSG_MATERIAL",
-      "region_infix": [
-        "~",
-        [
-          "-pin1_radial_ring_2"
-        ]
-      ],
-      "region_postfix": [
-        "pin1_radial_ring_2",
-        "-",
-        "~"
-      ]
+      "fill": "pin1_pin_unit",
+      "filltype": "UNIVERSE",
+      "region_infix": [],
+      "region_postfix": []
     },
     "pin1_root_cell": {
       "fill": "pin1_univ",
       "filltype": "UNIVERSE",
       "region_infix": [
-        "+pin1_radial_duct_3_surf_0",
-        "&",
-        "+pin1_radial_duct_3_surf_1",
-        "&",
-        "+pin1_radial_duct_3_surf_2",
-        "&",
-        "+pin1_radial_duct_3_surf_3"
+        "-pin1_radial_duct_0"
       ],
       "region_postfix": [
-        "pin1_radial_duct_3_surf_0",
-        "+",
-        "pin1_radial_duct_3_surf_1",
-        "+",
-        "&",
-        "pin1_radial_duct_3_surf_2",
-        "+",
-        "&",
-        "pin1_radial_duct_3_surf_3",
-        "+",
-        "&"
+        "pin1_radial_duct_0",
+        "-"
       ]
     }
   },
-  "surfaces": {
-    "pin1_radial_duct_3_surf_0": {
-      "coefficients": {
-        "a": -7.815004783970186e-17,
-        "b": -1.0,
-        "c": 1.2335811384723962e-18,
-        "d": -0.7103149999999999
+  "units": {
+    "pin1_pin_unit": {
+      "attributes": {
+        "fill_mats": [
+          "rgmb_region_1",
+          "rgmb_region_2",
+          "rgmb_region_3",
+          "rgmb_region_4"
+        ],
+        "ring_radii": [
+          0.3385,
+          0.3705,
+          0.4665
+        ]
       },
-      "type": "CSG::CSGPlane"
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::PinUniverseEngUnit"
     },
-    "pin1_radial_duct_3_surf_1": {
-      "coefficients": {
-        "a": 1.0,
-        "b": -1.5630009567940372e-16,
-        "c": 0.0,
-        "d": -0.710315
+    "pin1_radial_duct_0": {
+      "attributes": {
+        "apothem": 0.710315,
+        "num_sides": 4
       },
-      "type": "CSG::CSGPlane"
-    },
-    "pin1_radial_duct_3_surf_2": {
-      "coefficients": {
-        "a": 1.5630009567940372e-16,
-        "b": 1.0,
-        "c": 0.0,
-        "d": -0.710315
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "pin1_radial_duct_3_surf_3": {
-      "coefficients": {
-        "a": -1.0,
-        "b": 2.344501435191056e-16,
-        "c": 1.2335811384723962e-18,
-        "d": -0.710315
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "pin1_radial_ring_0": {
-      "coefficients": {
-        "r": 0.3385,
-        "x0": 0.0,
-        "y0": 0.0
-      },
-      "type": "CSG::CSGZCylinder"
-    },
-    "pin1_radial_ring_1": {
-      "coefficients": {
-        "r": 0.3705,
-        "x0": 0.0,
-        "y0": 0.0
-      },
-      "type": "CSG::CSGZCylinder"
-    },
-    "pin1_radial_ring_2": {
-      "coefficients": {
-        "r": 0.4665,
-        "x0": 0.0,
-        "y0": 0.0
-      },
-      "type": "CSG::CSGZCylinder"
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
     }
   },
   "universes": {
@@ -164,10 +54,7 @@
     },
     "pin1_univ": {
       "cells": [
-        "pin1_cell_radial_0",
-        "pin1_cell_radial_1",
-        "pin1_cell_radial_2",
-        "pin1_cell_radial_3"
+        "pin1_cell_radial_0"
       ]
     }
   }

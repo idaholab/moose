@@ -28,7 +28,7 @@
         ]
       },
       "behavior": "CELL",
-      "unit_type": "CSG::PinEngineeringUnit"
+      "unit_type": "CSG::DuctedPinEngUnit"
     }
   },
   "universes": {
