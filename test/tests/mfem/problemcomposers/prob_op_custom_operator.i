@@ -35,15 +35,22 @@
   []
 []
 
+[Functions]
+  [exact_velocity]
+    type = ParsedVectorFunction
+    expression_x = '-exp(x) * sin(y)'
+  []
+[]
+
 [Executioner]
   type = MFEMSteady
   device = cpu
 []
 
 [Outputs]
-  [CustomOperatorError]
+  [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/CustomOperator
+    file_base = OutputData/prob_op_custom_operator
     vtk_format = ASCII
   []
 []
