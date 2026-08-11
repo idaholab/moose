@@ -13,6 +13,8 @@
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
 
+#include <algorithm>
+
 template <bool is_ad>
 InputParameters
 RadialReturnStressUpdateTempl<is_ad>::validParams()
@@ -80,6 +82,10 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _effective_inelastic_strain_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name +
         this->template getParam<std::string>("effective_inelastic_strain_name"))),
+    _effective_inelastic_strain_increment_state(this->template declareGenericProperty<Real, is_ad>(
+        this->_base_name + "effective_inelastic_strain_increment")),
+    _effective_inelastic_strain_increment_state_old(this->template getMaterialPropertyOld<Real>(
+        this->_base_name + "effective_inelastic_strain_increment")),
     _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
     _substep_tolerance(this->template getParam<Real>("substep_strain_tolerance")),
     _identity_two(RankTwoTensor::initIdentity),
@@ -126,6 +132,7 @@ void
 RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
+  _effective_inelastic_strain_increment_state[_qp] = 0.0;
 }
 
 template <bool is_ad>
@@ -139,10 +146,21 @@ RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(
 }
 
 template <bool is_ad>
+GenericReal<is_ad>
+RadialReturnStressUpdateTempl<is_ad>::initialGuess(
+    const GenericReal<is_ad> & effective_trial_stress)
+{
+  return std::min(_effective_inelastic_strain_increment_state_old[_qp],
+                  MetaPhysicL::raw_value(maximumPermissibleValue(effective_trial_stress)));
+}
+
+template <bool is_ad>
 void
 RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+  _effective_inelastic_strain_increment_state[_qp] =
+      _effective_inelastic_strain_increment_state_old[_qp];
 }
 
 template <bool is_ad>
@@ -280,6 +298,8 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   else
     inelastic_strain_increment.zero();
 
+  _effective_inelastic_strain_increment_state[_qp] = _effective_inelastic_strain_increment;
+
   if (_apply_strain)
   {
     strain_increment -= inelastic_strain_increment;
@@ -408,6 +428,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
 
   // update effective inelastic strain
   updateEffectiveInelasticStrain(sub_effective_inelastic_strain_increment);
+  _effective_inelastic_strain_increment_state[_qp] = sub_effective_inelastic_strain_increment;
 }
 
 template <bool is_ad>

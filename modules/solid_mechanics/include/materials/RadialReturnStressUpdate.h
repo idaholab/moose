@@ -192,6 +192,12 @@ protected:
                                        const GenericRankFourTensor<is_ad> & elasticity_tensor);
 
   /**
+   * Use the previous time step's converged inelastic strain increment as the initial guess.
+   */
+  virtual GenericReal<is_ad>
+  initialGuess(const GenericReal<is_ad> & effective_trial_stress) override;
+
+  /**
    * Calculate the derivative of the strain increment with respect to the updated stress.
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
@@ -219,8 +225,14 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
-  /// Stores the scalar effective inelastic strain increment from Newton iteration
+  /// Scalar effective inelastic strain increment from the current Newton iteration
   GenericReal<is_ad> _effective_inelastic_strain_increment;
+
+  /// Stateful scalar effective inelastic strain increment
+  GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain_increment_state;
+
+  /// Converged scalar effective inelastic strain increment from the previous time step
+  const MaterialProperty<Real> & _effective_inelastic_strain_increment_state_old;
 
   /**
    * Maximum allowable scalar inelastic strain increment, used to control the

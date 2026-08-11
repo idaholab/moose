@@ -120,6 +120,16 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
 
 template <bool is_ad>
 GenericReal<is_ad>
+IsotropicPlasticityStressUpdateTempl<is_ad>::initialGuess(
+    const GenericReal<is_ad> & effective_trial_stress)
+{
+  return _yield_condition > 0.0
+             ? RadialReturnStressUpdateTempl<is_ad>::initialGuess(effective_trial_stress)
+             : 0.0;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
 IsotropicPlasticityStressUpdateTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
