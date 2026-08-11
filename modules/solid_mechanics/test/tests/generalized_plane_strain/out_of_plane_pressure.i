@@ -29,40 +29,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Postprocessors]
@@ -77,73 +43,14 @@
 [Physics/SolidMechanics/QuasiStatic]
   [./gps]
     add_variables = true
-    save_in = 'saved_x saved_y'
     strain = small
     incremental = false
     planar_formulation = GENERALIZED_PLANE_STRAIN
     scalar_out_of_plane_strain = scalar_strain_zz
     out_of_plane_pressure_function = traction_function
     pressure_factor = 1e5
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
-
-  [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./strain_xy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_zz
-    index_i = 2
-    index_j = 2
+    generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
+    save_in = 'saved_x saved_y'
   [../]
 []
 

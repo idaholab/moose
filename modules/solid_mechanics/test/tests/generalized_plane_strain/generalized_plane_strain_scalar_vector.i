@@ -89,13 +89,11 @@
   [SolidMechanics]
     [./GeneralizedPlaneStrain]
       [./gps1]
-        use_displaced_mesh = true
         displacements = 'disp_x disp_y'
         scalar_out_of_plane_strain = scalar_strain_zz1
         block = '1'
       [../]
       [./gps2]
-        use_displaced_mesh = true
         displacements = 'disp_x disp_y'
         scalar_out_of_plane_strain = scalar_strain_zz2
         block = '2'

@@ -97,13 +97,13 @@ For different mesh subdomains to use different generalized plane strain conditio
 specify multiple subblocks with subdomain restrictions. This is useful when there
 are disconnected portions of the domain.
 
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Physics/SolidMechanics/QuasiStatic
 
 ### Specifying Out-of-Plane Direction
 
 An example of using generalized plane strain through the Solid Mechanics
-QuasiStatic physics block with an
-[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_direction)
+QuasiStatic physics block with 
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/out_of_plane_direction)
 different from the default $z$ direction is given by:
 
 !listing modules/solid_mechanics/test/tests/2D_different_planes/gps_xz.i block=Physics/SolidMechanics/QuasiStatic
