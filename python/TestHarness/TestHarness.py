@@ -546,10 +546,8 @@ class TestHarness:
 
         # Add extra capabilities that are known even though they might not
         # exist (if they are not set by the app). This is needed in specific
-        # when testing against known applications. For example, in the
-        # fluid_properties module, we check against "airapp". We don't want
-        # to error when "airapp" doesn't exist in the app because we know
-        # that it could actually be false.
+        # when testing against known applications, even though they might
+        # not be available.
         if test_root_params is not None and (
             known_capabilities := test_root_params.get("known_capabilities")
         ):
