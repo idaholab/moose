@@ -48,7 +48,12 @@ public:
                           const Moose::StateArg * state_limiter = nullptr) const;
 
   /**
-   * Create a face argument sided according to where the supplied functor is defined.
+   * Create a face argument according to where the supplied functor is defined.
+   *
+   * Unlike the overload above, which selects the face side according to the side reported by the
+   * face-producing object, this overload determines the face side from the supplied functor. This
+   * allows the resulting FaceArg to evaluate a functor that is defined only on the opposite side of
+   * the face from the producer.
    *
    * If the functor is defined on both sides, the face argument is left unsided. If it is defined
    * on only one side, that side is selected. An error is produced if the functor is defined on
