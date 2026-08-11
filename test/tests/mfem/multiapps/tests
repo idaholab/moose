@@ -36,5 +36,15 @@
       recover = false
       restep = false
     []
+    [MFEM_full_solve_fixed_point_steady]
+      type = CSVDiff
+      input = 'full_solve_fixed_point_steady.i'
+      csvdiff = 'full_solve_fixed_point_steady_out.csv'
+      detail = "with the MFEM parent and sub-application both using MFEMSteady while iterating on a fixed-point coupling."
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      restep = false
+    []
   []
 []

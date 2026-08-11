@@ -29,6 +29,7 @@ public:
 
   virtual void SetGridFunctions() override;
   virtual void Solve() override;
+  virtual mfem::real_t computeResidualL2Norm() override;
 
   [[nodiscard]] virtual Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override
   {

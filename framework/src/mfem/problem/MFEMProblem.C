@@ -10,6 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMProblem.h"
+#include "ProblemOperatorInterface.h"
+#include "Executioner.h"
 #include "MFEMVariable.h"
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
@@ -714,6 +716,17 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
   variable_params.set<MFEMFESpaceName>("fespace") = fes_name;
 
   return variable_params;
+}
+
+Real
+MFEMProblem::computeResidualL2Norm()
+{
+  mfem::real_t totalResidualNorm = 0.0;
+  Moose::MFEM::ProblemOperatorInterface * po_interface = dynamic_cast<Moose::MFEM::ProblemOperatorInterface *>(_app.getExecutioner());
+  for (const auto & problem_operator : po_interface->getProblemOperators())
+    totalResidualNorm += problem_operator->computeResidualL2Norm();
+  // Evaluate residual (Ax-b)
+  return totalResidualNorm;
 }
 
 void

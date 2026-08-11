@@ -9,18 +9,19 @@
 
 #pragma once
 
-#include "LibMeshFixedPointSolve.h"
-#include "NonlinearSystemBase.h"
+#include "FixedPointSolve.h"
 
 // System includes
 #include <string>
 
-class PicardSolve : public LibMeshFixedPointSolve
+class MFEMFixedPointSolve : public FixedPointSolve
 {
 public:
-  PicardSolve(Executioner & ex);
+  MFEMFixedPointSolve(Executioner & ex) : FixedPointSolve(ex){};
 
-  static InputParameters validParams();
+  virtual ~MFEMFixedPointSolve() = default;
+
+  virtual void initialSetup() override{};
 
   /**
    * Allocate storage for the fixed point algorithm.
@@ -30,21 +31,26 @@ public:
    * @param primary Whether this routine is to allocate storage for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void allocateStorage(const bool primary) override final;
+  virtual void allocateStorage(const bool /*primary*/) override{};
 
+  /// Print the convergence history of the coupling, at every fixed point iteration
   virtual void printFixedPointConvergenceHistory(
-      Real initial_norm,
-      const std::vector<Real> & timestep_begin_norms,
-      const std::vector<Real> & timestep_end_norms) const override final;
+      Real /*initial_norm*/,
+      const std::vector<Real> & /*timestep_begin_norms*/,
+      const std::vector<Real> & /*timestep_end_norms*/) const override{};
 
-private:
+protected:
+  virtual void
+  updateVariableDoFsForTransform(const std::vector<std::string> & /*transformed_var_names*/,
+                                 const bool /*primary*/) override{};
+
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
    *
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void saveVariableValues(const bool primary) override final;
+  virtual void saveVariableValues(const bool /*primary*/) override{};
 
   /**
    * Saves the current values of the postprocessors, and update the old(er) vectors.
@@ -52,15 +58,25 @@ private:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void savePostprocessorValues(const bool primary) override final;
+  virtual void savePostprocessorValues(const bool /*primary*/) override{};
+
+  /// Save both the variable and postprocessor values
+  virtual void saveAllValues(const bool /*primary*/) override{};
 
   /**
    * Use the fixed point algorithm transform instead of simply using the Picard update
+   * This routine can be used to alternate Picard iterations and fixed point algorithm
+   * updates based on the values of the variables before and after a solve / a Picard iteration.
    *
    * @param primary Whether this routine is used for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual bool useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary) override final;
+  virtual bool useFixedPointAlgorithmUpdateInsteadOfPicard(const bool /*primary*/) override
+  {
+    return false;
+  }
+
+  virtual void copyPreviousFixedPointSolutions() override{};
 
   /**
    * Use the fixed point algorithm to transform the postprocessors.
@@ -70,22 +86,15 @@ private:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformPostprocessors(const bool primary) override final;
+  virtual void transformPostprocessors(const bool /*primary*/) override{};
 
   /**
    * Use the fixed point algorithm to transform the variables.
    * If this routine is not called, the next value of the variables will just be from
    * the unrelaxed Picard fixed point algorithm.
    *
-   * @param transformed_dofs The dofs that will be affected by the algorithm
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformVariables(const bool primary) override final;
-
-  /// Vector tag id for the previous solution variable, as a main app
-  TagID _old_tag_id = Moose::INVALID_TAG_ID;
-
-  /// Vector tag id for the previous solution variable, as a sub app
-  TagID _secondary_old_tag_id = Moose::INVALID_TAG_ID;
+  virtual void transformVariables(const bool /*primary*/) override{};
 };

@@ -384,12 +384,15 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
   if (_non_linear)
   {
     ComputeNonlinearResidual(sol, residual);
-    _linear_operator->AddMult(sol, residual);
+    if (_linear_operator.Ptr())
+      _linear_operator->AddMult(sol, residual);
   }
   else
   {
-    residual = 0.0;
-    _linear_operator->Mult(sol, residual);
+    if (_linear_operator.Ptr())
+      _linear_operator->Mult(sol, residual);
+    else
+      residual = std::numeric_limits<mfem::real_t>::infinity();
   }
 
   sol.HostRead();
