@@ -30,6 +30,7 @@
       input = 'test.py'
       test_case = TestHarmonicQuads
       detail = 'second order convergence, when using a simple harmonic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
+      min_slots = 2
     []
   []
 []
