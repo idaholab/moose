@@ -149,7 +149,9 @@ CavityComponent::addMeshGenerators()
     // Extract the surface into a mesh, the format that the extruder expects it
     InputParameters lowD_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
     lowD_params.set<MeshGeneratorName>("input") = comp_final_mg;
-    const auto lowD_block_name = name() + "lowD_for_boundary_layer";
+    auto lowD_block_name = name() + "lowD_for_boundary_layer";
+    if (isParamValid("block"))
+      lowD_block_name = getParam<SubdomainName>("block") + "_transition_layer";
     lowD_params.set<SubdomainName>("new_block_name") = lowD_block_name;
     lowD_params.set<std::vector<BoundaryName>>("sidesets") = gathered_exerior_bdies;
     addMeshGenerator("LowerDBlockFromSidesetGenerator", "create_lowerD", lowD_params);
@@ -202,8 +204,8 @@ CavityComponent::addMeshGenerators()
     if (isParamValid("block"))
     {
       const auto block_name = getParam<SubdomainName>("block");
-      _blocks.push_back(block_name + "_to_tet");
-      _blocks.push_back(block_name + "_to_pyramid");
+      _blocks.push_back(block_name + "_transition_layer_to_tet");
+      _blocks.push_back(block_name + "_transition_layer_to_pyramid");
     }
   }
 
@@ -246,7 +248,7 @@ CavityComponent::addMeshGenerators()
     params.set<bool>("convert_holes_for_stitching") = true;
     // we can stitch to the components directly when not using a boundary layer
     if (getParam<unsigned int>("n_boundary_layers") == 0)
-      params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>(holes_mg.size(), true);
+      params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>(holes_mgs.size(), true);
     addMeshGenerator("XYZDelaunayGenerator", "tetrahedralization", params);
 
     // Stitch the tetrahedralization to the boundary layer
@@ -340,6 +342,7 @@ CavityComponent::addMeshGenerators()
 
       InputParameters proxy_del_params = _factory.getValidParams("DeleteElementsNearMeshGenerator");
       proxy_del_params.set<MeshGeneratorName>("input") = _mg_names.back();
+      std::cout << "Rm connected to " << _mg_names.back() << std::endl;
       // only delete from the cavity
       proxy_del_params.set<std::vector<SubdomainName>>("blocks_included") = _blocks;
       // reform the external boundary
@@ -358,6 +361,8 @@ CavityComponent::addMeshGenerators()
       }
     }
   }
+
+  // TODO: cavity is a connected component
 
   _top_mg_name = _mg_names.back();
 }
