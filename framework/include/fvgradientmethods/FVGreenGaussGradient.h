@@ -23,7 +23,6 @@ public:
 private:
   void computeGradientWithoutLimiter(
       SystemBase & system,
-      GradientContainer & output_gradient,
-      GradientContainer & scratch_gradient,
+      GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 };

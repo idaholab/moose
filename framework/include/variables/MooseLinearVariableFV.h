@@ -104,22 +104,17 @@ public:
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * Register this variable's default gradient method on the owning system and return its reader.
+   * Register the variable's configured default gradient method and return its reader.
    */
   const LinearFVGradientReader & requestCellGradients();
 
   /**
-   * Register a named gradient method on the owning system and return its reader.
-   *
-   * By default this will be a green-gauss gradient name.
-   * @param method_name Gradient method name to register for this variable.
+   * Register a named gradient method and return its reader.
    */
-  const LinearFVGradientReader &
-  requestCellGradients(const GradientMethodName & method_name = "green-gauss");
+  const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name);
 
   /**
-   * Register a specific gradient method on the owning system and return its reader.
-   * @param method Gradient method to register for this variable.
+   * Register a specific gradient method object and return its reader.
    */
   const LinearFVGradientReader & requestCellGradients(const FVGradientMethod & method);
 

@@ -26,7 +26,7 @@ class SystemBase;
 
 /**
  * Compute limited cell gradients for linear FV variables.
- * This thread currently supports limited gradients produced by scaling the unlimited gradients
+ * This thread currently supports gradients limited by scaling each cell gradient
  * with a per-cell limiter coefficient (e.g. Venkatakrishnan).
  */
 class ComputeLinearFVLimitedGradientThread
@@ -34,43 +34,43 @@ class ComputeLinearFVLimitedGradientThread
 public:
   /**
    * Class constructor.
-   * @param fe_problem Reference to the problem
+   * @param fe_problem Reference to the problem.
    * @param system The system whose variables are assembled by this thread.
-   * @param raw_gradient The unlimited gradient container used as limiter input.
-   * @param temporary_limited_gradient Scratch storage for limited gradients being assembled
-   * (used as output as well, but later swapped with another container).
-   * @param limiter_type The type of the limiter which should be computed.
+   * @param gradient Gradient storage to limit in place.
+   * @param limiter_type The type of limiter which should be computed.
    * @param requested_variables Variable numbers that requested this limiter.
    */
   ComputeLinearFVLimitedGradientThread(
       FEProblemBase & fe_problem,
       SystemBase & system,
-      const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_gradient,
-      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_limited_gradient,
+      std::vector<std::unique_ptr<NumericVector<Number>>> & gradient,
       const Moose::FV::GradientLimiterType limiter_type,
       const std::unordered_set<unsigned int> & requested_variables);
 
   /**
    * Splitting constructor.
-   * @param x Reference to the other thread
-   * @param split The thread split
+   * @param x Reference to the other thread.
+   * @param split The thread split.
    */
   ComputeLinearFVLimitedGradientThread(ComputeLinearFVLimitedGradientThread & x,
                                        Threads::split split);
 
+  ~ComputeLinearFVLimitedGradientThread();
+
   using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-  /// Operator which is used to execute the thread over a certain iterator range.
+
+  /// Apply the limiter over the provided element range.
   /// @param range The range of ElemInfos which should be computed.
   void operator()(const ElemInfoRange & range);
 
-  /// Join threads at the end of the execution
+  /// Join threads at the end of the execution.
   void join(const ComputeLinearFVLimitedGradientThread & y);
 
 protected:
-  /// Reference to the problem
+  /// Reference to the problem.
   FEProblemBase & _fe_problem;
 
-  /// The dimension of the domain
+  /// The dimension of the domain.
   const unsigned int _dim;
 
   /// The system wrapper this thread operates on.
@@ -82,21 +82,29 @@ protected:
   /// Global system number in the libMesh equation system.
   const unsigned int _system_number;
 
-  /// Reference to the unlimited gradient storage used as input for limiting.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & _raw_gradient;
+  /// Gradient storage limited in place.
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _gradient;
 
-  /// The type of the limiter we requested
+  /**
+   * Writable local arrays for the gradient component vectors.
+   *
+   * The root body acquires these before threaded execution. Split bodies share
+   * the pointers and modify only DOFs belonging to their own element range.
+   */
+  std::vector<Number *> _gradient_data;
+
+  /// Whether this body owns the writable-array access and must restore it.
+  const bool _owns_gradient_data;
+
+  /// The type of limiter requested.
   const Moose::FV::GradientLimiterType _limiter_type;
 
   /// Variable numbers that requested the current limiter.
   const std::unordered_set<unsigned int> & _requested_variables;
 
-  /// Thread ID
+  /// Thread ID.
   THREAD_ID _tid;
 
   /// Pointer to the current variable we are operating on.
   MooseLinearVariableFV<Real> * _current_var;
-
-  /// Reference to the temporary limited gradient storage
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_limited_gradient;
 };
