@@ -117,10 +117,10 @@ phase concentration and one phase order parameter per phase.
   concentration.
 - The [three-phase nested input](/kks_example_multiphase_nested.i) uses one
   independent concentration.
-- The [three-phase ternary global input](/kks_3phase_ternary_global.i) uses two
-  independent concentrations.
-- The [three-phase ternary nested input](/kks_3phase_ternary_nested.i) uses the
-  corresponding nested solve.
+- The [three-phase ternary global example](/kks_example_3phase_ternary_global.i)
+  uses two independent concentrations with circular initial phase regions.
+- The [three-phase ternary nested example](/kks_example_3phase_ternary_nested.i)
+  uses the corresponding nested solve.
 
 The [KKSAction.md] generates either the global or nested formulation from a
 common phase/component description. Both action regression tests exercise
