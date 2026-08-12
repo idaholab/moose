@@ -10,6 +10,19 @@
     max_threads = 1 # see libmesh issue #3808
     design = 'SIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md'
   []
+  [momentum-pressure-flux]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    cli_args = "LinearFVBCs/inactive='' Outputs/file_base=2d-velocity-pressure-flux_out"
+    exodiff = 2d-velocity-pressure-flux_out.e
+    requirement = "The system shall solve a high-viscosity, steady-state Navier-Stokes problem in a 2D "
+                  "channel with a nonzero prescribed inlet mass flux using a pressure flux boundary "
+                  "condition and the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    design = 'SIMPLE.md LinearFVPressureFluxBC.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md'
+    issues = '#32719'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i

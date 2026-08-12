@@ -201,7 +201,8 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
-  const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> & getBoundaryConditionMap()
+  const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> &
+  getBoundaryConditionMap() const
   {
     return _boundary_id_to_bc;
   }
