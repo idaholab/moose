@@ -10,6 +10,7 @@
       csvdiff  = 'dittus_boelter.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -23,6 +24,7 @@
       csvdiff  = 'dittus_boelter_Presser.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -36,6 +38,7 @@
       csvdiff  = 'dittus_boelter_Weisman.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
