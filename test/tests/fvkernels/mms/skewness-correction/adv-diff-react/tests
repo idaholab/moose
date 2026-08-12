@@ -12,6 +12,7 @@
     input = 'test.py'
     test_case = TestSkewnessCorrectedStencil
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion term in an advection diffusion problem.'
+    min_slots = 2
   []
   [skewcorrected-advection]
     type = MMSTest
