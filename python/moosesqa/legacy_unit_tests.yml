@@ -161,10 +161,14 @@ modules/fluid_properties/unit:
   - SodiumSaturationFluidPropertiesTest.isobaricSpecificHeat
   - SodiumSaturationFluidPropertiesTest.isochoricSpecificHeat
   - SodiumSaturationFluidPropertiesTest.molarMass
+  - SodiumSaturationFluidPropertiesTest.pressureExtension
   - SodiumSaturationFluidPropertiesTest.specificEnthalpy
+  - SodiumSaturationFluidPropertiesTest.specificEntropy
   - SodiumSaturationFluidPropertiesTest.specificInternalEnergy
+  - SodiumSaturationFluidPropertiesTest.temperatureFromPressureEnthalpy
   - SodiumSaturationFluidPropertiesTest.thermalConductivity
   - SodiumSaturationFluidPropertiesTest.viscosity
+  - SodiumSaturationFluidPropertiesTest.volumeEnergyAutomaticDifferentiation
   - StiffenedGasFluidPropertiesTest.testAllADReal
   - StiffenedGasFluidPropertiesTest.testAllReal
   - StiffenedGasTwoPhaseFluidPropertiesTest.test
@@ -1188,6 +1192,7 @@ unit:
   - DataFileUtilsTest.getPathStartsWithDotSlash
   - DataFileUtilsTest.getPathUnique
   - DataIOTest.emptyTorchTensor
+  - DataIOTest.enumClass
   - DataIOTest.torchTensor
   - DataIOTest.uniquePtrNumericVector
   - DataIOTest.uniqueStorage
@@ -1228,6 +1233,12 @@ unit:
   - EigenADRealTest.gebp_kernel
   - Enumerate.container
   - Enumerate.range
+  - EnumerateEvalerTest.descendingRange
+  - EnumerateEvalerTest.expansion
+  - EnumerateEvalerTest.mixedWithLiterals
+  - EnumerateEvalerTest.nonIntegerIndex
+  - EnumerateEvalerTest.singleElementRange
+  - EnumerateEvalerTest.wrongArgCount
   - ExecutorTests.ResultStr
   - FVInterpolationMethodTest.advectedFunctorOverloadsWithGradients
   - FVInterpolationMethodTest.advectedFunctorOverloadsWithoutGradients
@@ -1331,6 +1342,7 @@ unit:
   - InputParametersTest.checkControlParamPrivateError
   - InputParametersTest.checkControlParamTypeError
   - InputParametersTest.checkControlParamValidError
+  - InputParametersTest.checkForRename
   - InputParametersTest.checkIsParamDefined
   - InputParametersTest.checkParamName
   - InputParametersTest.checkRangeCheckedParam
@@ -1341,6 +1353,7 @@ unit:
   - InputParametersTest.commandLineParamKnownArg
   - InputParametersTest.commandLineParamSetNotCLParam
   - InputParametersTest.dataFileParams
+  - InputParametersTest.deprecateCoupledVar
   - InputParametersTest.fileNames
   - InputParametersTest.getCommandLineMetadataNotCLParam
   - InputParametersTest.getControllablePairs
@@ -1634,6 +1647,7 @@ unit:
   - MooseRandomTest.randSeq
   - MooseRandomTest.randl
   - MooseRandomTest.states
+  - MooseServerTest.ApplicationTypeUtilization
   - MooseServerTest.CompletionDocumentRootLevel
   - MooseServerTest.CompletionMeshDefaultedType
   - MooseServerTest.CompletionPartialInputCases
@@ -1657,6 +1671,7 @@ unit:
   - MooseServerTest.InitializeAndInitialized
   - MooseServerTest.PlottingExtensionRequests
   - MooseServerTest.WorkspaceResourceFileChanges
+  - MooseUtils.IsFinitePoint
   - MooseUtils.SemidynamicVector
   - MooseUtils.SemidynamicVectorInit
   - MooseUtils.convertStringInt
@@ -1687,8 +1702,14 @@ unit:
   - MooseUtilsTests.linearPartitionItems
   - MooseVariableDataReinitNodesTest.arrayVariableDofsMatchLibmesh
   - MooseVariableDataReinitNodesTest.scalarVariableDofsMatchLibmesh
+  - MortarProjectionTest.BoundaryOnlyQuadrilateralRootIsSnapped
+  - MortarProjectionTest.DistortedQuadFallsBackToStrictInDomainRootAtAllScales
+  - MortarProjectionTest.SingularExteriorXiRootStillRecoversInteriorRoot
+  - MortarProjectionTest.TriangleBoundaryViolationIsSnapped
+  - MortarProjectionTest.TriangleSubpatchRejectsPointOutsideLocalDomain
   - MortarSegmentHelperTest.centroidAndTriangleRetessellationCarryReferencePoints
   - MortarSegmentHelperTest.mappingDataDoesNotChangeSegmentGeometry
+  - MortarSegmentHelperTest.projectedQuadrilateralValidation
   - MortarSegmentHelperTest.quadrilateralReferenceRecovery
   - MortarSegmentHelperTest.quadrilateralReferenceRecoveryRejectsInvalidMaps
   - MortarSegmentHelperTest.referenceInterpolationMapsParallelSurfaceQuadraturePoints
