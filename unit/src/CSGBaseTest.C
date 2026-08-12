@@ -2557,7 +2557,67 @@ TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
 /// test CSGBase::joinOtherBase two passed names
 TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
 {
-  // Case 3: Create two CSGBase objects to join together with each root becoming a new universe
+  // Case 3(a): Create two CSGBase objects to join together with each root becoming a new universe
+  // This cases uses basic universes in the lattice
+
+  // CSGBase 1: only one cell containing a lattice of one universe, which lives in the ROOT_UNIVERSE
+  std::unique_ptr<CSGBase> base1 = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("s1", 1.0);
+  const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
+  // create a lattice of one universe
+  auto & univ_in_lat = base1->createUniverse("univ_in_lat");
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ_in_lat}};
+  std::unique_ptr<CSGCartesianLattice> lat_ptr =
+      std::make_unique<CSGCartesianLattice>("lat1", 1.0, univs);
+  const auto & lat = base1->addLattice(std::move(lat_ptr));
+  // create cell containing lattice
+  auto & c1 = base1->createCell("c1", lat, +surf1);
+
+  // CSGBase 2: two total unverses (ROOT_UNIVERSE and extra_univ) with a cell in each
+  std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("s2", 1.0);
+  const auto & surf2 = base2->addSurface(std::move(surf_ptr2));
+  auto & c2 = base2->createCell("c2", +surf2);
+  auto & extra_univ = base2->createUniverse("extra_univ");
+  auto & c3 = base2->createCell("c3", -surf2, &extra_univ);
+
+  // Joining: 5 universes will remain
+  // all cells from base1 ROOT_UNIVERSE will be moved to a new universe called "new_univ1"
+  // all cells from base2 ROOT_UNIVERSE will be moved to a new universe called "new_univ2"
+  // base1 ROOT_UNIVERSE will be empty
+  // the "extra_univ" from base2 and "univ_in_lat" from base1 will remain separate universes
+  std::string new_name1 = "new_univ1";
+  std::string new_name2 = "new_univ2";
+  base1->joinOtherBase(std::move(base2), false, new_name1, new_name2);
+
+  // expect 5 universes: root, extra, lat, new1 and new2
+  // 3 cells: 0 owned by root, 1 owned by new1, 1 owned by new2, 1 owned by extra
+  ASSERT_EQ(5, base1->getAllUniverses().size());
+  auto & root = base1->getRootUniverse();
+  ASSERT_EQ(3, base1->getAllCells().size());
+  // root should have 0 cells since all were moved
+  ASSERT_EQ(0, root.getAllCells().size());
+  // new_univ1 should have c1 from original root of base 1
+  auto new_univ1 = base1->getUniverseByName(new_name1);
+  ASSERT_TRUE(new_univ1.hasCell(c1.getName()));
+  // new_univ2 should have c2 from original root of base 2
+  auto new_univ2 = base1->getUniverseByName(new_name2);
+  ASSERT_TRUE(new_univ2.hasCell(c2.getName()));
+  // original existing extra universe should still only have c3
+  auto & new_extra = base1->getUniverseByName("extra_univ");
+  ASSERT_TRUE(new_extra.hasCell(c3.getName()));
+  ASSERT_EQ(1, new_extra.getAllCells().size());
+  // expect 2 surfaces
+  ASSERT_EQ(2, base1->getAllSurfaces().size());
+  // expect 1 lattice
+  ASSERT_EQ(1, base1->getAllLattices().size());
+}
+
+/// test CSGBase::joinOtherBase two passed names
+TEST(CSGBaseTest, joinOtherBaseTwoNewRootEngUnit)
+{
+  // Case 3(b): Create two CSGBase objects to join together with each root becoming a new universe
+  // This case uses universe engineering unit in the lattice
 
   // CSGBase 1: only one cell containing a lattice of one universe, which lives in the ROOT_UNIVERSE
   std::unique_ptr<CSGBase> base1 = std::make_unique<CSG::CSGBase>();
