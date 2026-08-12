@@ -395,17 +395,17 @@ FEProblemSolve::initialSetup()
   // Solution and aux systems may require copying back states due to 2 reasons:
   // 1. The need for an older state was indicated to the problem.
   // 2. Fixed point relaxation is to be performed.
-  for (const auto i : make_range(_problem.numSolverSystems()))
+  for (const auto i : index_range(_systems))
   {
+    const auto sys_num = _systems[i]->number();
     if (_perform_multi_sys_fp_relaxation[i])
-      _problem.needsPreviousMultiSystemFixedPointIterationSolution(true, i);
+      _problem.needsPreviousMultiSystemFixedPointIterationSolution(true, sys_num);
 
-    if (_problem.needsPreviousMultiSystemFixedPointIterationSolution(i))
+    if (_problem.needsPreviousMultiSystemFixedPointIterationSolution(sys_num))
     {
-      auto & sys = _problem.getSolverSystem(i);
-      sys.needSolutionState(
-          1, Moose::SolutionIterationType::MultiSystemFixedPoint, sys.solution().type());
-      _systems_to_copy_back_multi_sys_fp.insert(&sys);
+      _systems[i]->needSolutionState(
+          1, Moose::SolutionIterationType::MultiSystemFixedPoint, _systems[i]->solution().type());
+      _systems_to_copy_back_multi_sys_fp.insert(_systems[i]);
     }
   }
   if (_problem.needsPreviousMultiSystemFixedPointIterationAuxiliary())
