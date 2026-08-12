@@ -264,12 +264,12 @@ gamma = 1e5
 
 [FunctorMaterials]
   [top]
-    type = GenericConstantVectorFunctorMaterial
+    type = GenericVectorFunctorMaterial
     prop_names = top
     prop_values = '${U} 0 0'
   []
   [walls]
-    type = GenericConstantVectorFunctorMaterial
+    type = GenericVectorFunctorMaterial
     prop_names = walls
     prop_values = '0 0 0'
   []
