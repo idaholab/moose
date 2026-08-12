@@ -332,17 +332,23 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 Like surfaces and lattices, an engineering unit is defined by calling the specific constructor directly to create a unique pointer.
 This pointer is then added to the `CSGBase` instance using `addEngUnit()`, which will return a const reference to that engineering unit.
 The `addEngUnit()` method is a templated method, meaning that the return type will be a reference to the specific unit type if requested.
-An example of creating an N-sided polygon unit is shown below.
+An example of creating an [N-sided polygon unit](source/csg/CSGNPolygonUnit.md) is shown below.
 
 !listing CSGBaseTest.C start=define a 4-sided polygon end=addEngUnit include-end=true
 
 !listing CSGBaseTest.C start=make a 4-sided polygon with apothem length 2.0 end=addEngUnit include-end=true
 
+!alert! note title=Custom Engineering Units
+
+Instructions for how to define custom engineering units that behave as surfaces, cells, or universes, are provided in [source/csg/CSGEngUnit.md].
+
+!alert-end!
+
 #### Behavior
 
 Engineering units can behave as a `CSGSurface` (defined as a `CSGSurfaceEngUnit`), `CSGCell` (defined as a `CSGCellEngUnit`), or `CSGUniverse` (defined as a `CSGUniverseEngUnit`), depending on the specific engineering unit implementation and definition.
 This means that a unit with surface behavior can be used in place of any `CSGSurface` object, one with cell behavior can be used in place of any `CSGCell`, and a universe type in place of any `CSGUniverse`.
-For example, a standard `CSGCell` can have a region that is defined using a `CSGSurfaceEngUnit` (such as a `CSGNPolygonUnit`) instead of the individual planes, as shown in the example below.
+For example, a standard `CSGCell` can have a region that is defined using a `CSGSurfaceEngUnit` (such as a [`CSGNPolygonUnit`](source/csg/CSGNPolygonUnit.md)) instead of the individual planes, as shown in the example below.
 
 !listing CSGBaseTest.C start=make a cell that uses the polygon unit end=createCell include-end=true
 
@@ -416,28 +422,6 @@ It is allowable to define an expansion method for an engineering unit that creat
 If an engineering unit has [transformations](#transformations) applied to it, those transformations will be transferred to the appropriate expanded objects after expansion.
 For `CSGCellEngUnit` and `CSGUniverseEngUnit`, this means that the returned `CSGCell` and `CSGUniverse` will have the same transformations.
 For `CSGSurfaceEngUnit` types, this means that each new `CSGSurface` that is a part of the expanded `CSGRegion` will have the transformations applied.
-
-#### N-Sided Regular Polygon Unit
-
-The `CSGBase` class provides support for creating an N-sided regular polygon, but any custom unit type can also be defined by following the information in [source/csg/CSGEngUnit.md].
-To create a `CSGNPolygonUnit`, simply provide the constructor with the number of sides and length of the apothem (center-to-flat distance).
-This polygon is an infinite region along the z-axis assumed to be centered at the origin with the right-most edge parallel to the y-axis (shown in [!ref](fig:n-polygon-orientation)), but can be modified with the application of [transformations](#transformations).
-
-!media large_media/csg/n-sided-poly-orientation.png
-       id=fig:n-polygon-orientation
-       caption=Depiction of the assumed orientation of N-sided polygon engineering units.
-
-A `CSGNPolygonUnit` can then be used as a `CSGSurface` for any cell region definition and the "negative" half-space is considered to be the interior of the polygon.
-If expanded, the unit will be replaced with the interior region of a polygon defined by $N$ planes corresponding to the edges of the polygon.
-Below is an example of creating a square with a side length of 4.0 (apothem is 2.0) and using it as the region of a material cell.
-
-!listing CSGBaseTest.C start=make a cell that uses the polygon unit end=createCell include-end=true
-
-!alert! note title=Custom Engineering Units
-
-Instructions for how to define custom engineering units that behave as surfaces, cells, or universes, are provided in [source/csg/CSGEngUnit.md].
-
-!alert-end!
 
 ### Deletion Methods
 
