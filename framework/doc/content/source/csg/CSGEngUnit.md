@@ -1,6 +1,8 @@
 # Engineering Units
 
 Custom domain-specific engineering units can be defined such that they can be used in place of basic [!ac](CSG) components (surfaces, cells, and universes) in a `CSGBase` instance.
+The primary purpose of an engineering unit is to serve as a shortcut for a collection of multiple basic [!ac](CSG) components, defined through a small set of intuitive, human-readable attributes rather than by defining each of the underlying components by hand.
+
 To define a custom engineering unit, create a class that derives from one of the engineering unit class types: `CSGSurfaceEngUnit` for surface-like units, `CSGCellEngUnit` for cell-like units, and `CSGUniverseEngUnit` for universe-like units.
 Each of these classes derive from both the `CSGEngUnit` class and the corresponding base class (`CSGSurface`, `CSGCell`, and `CSGUniverse`, respectively).
 Therefore, any defined engineering unit can behave as the base component from which it derives, while benefiting from the functionality and convenience of being an engineering unit.
