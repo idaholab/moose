@@ -893,63 +893,66 @@ class TestHarness:
         else:
             return True
 
-    def shouldOutputMemory(self) -> bool:
-        """Whether or not memory should be output in the Job status."""
-        return self.scheduler.MONITOR_JOB_MEMORY and not self.options.no_memory_tracking
+    def shouldOutputCPUMemory(self) -> bool:
+        """Whether or not CPU memory should be output in the Job status."""
+        return self.scheduler.tracksCPUMemory()
+
+    def shouldOutputGPUMemory(self) -> bool:
+        """Whether or not CPU memory should be output in the Job status."""
+        return self.scheduler.tracksGPUMemory()
 
     def handleJobStatus(self, job, caveats=None):
         """
         The Scheduler is calling back the TestHarness to inform us of a status change.
         The job may or may not be finished yet (RUNNING), or failing, passing, etc.
         """
-        if self.options.show_last_run and job.isSkip():
+        if (self.options.show_last_run and job.isSkip()) or job.isSilent():
             return
-        elif not job.isSilent():
-            memory = None if self.shouldOutputMemory() else False
 
-            # Print results and perform any desired post job processing
-            if job.isFinished():
-                joint_status = job.getJointStatus()
-                self.error_code = self.error_code | joint_status.status_code
+        cpu_memory = None if self.shouldOutputCPUMemory() else False
+        gpu_memory = None if self.shouldOutputGPUMemory() else False
 
-                # perform printing of application output if so desired
-                output = job.getOutputForScreen()
-                if output:
-                    print(output)
+        # Helper for printing the job status for each branch
+        def print_status(**kwargs):
+            print(
+                util.formatJobResult(
+                    job,
+                    self.options,
+                    status_message=False,
+                    cpu_memory=cpu_memory,
+                    gpu_memory=gpu_memory,
+                    **kwargs,
+                ),
+                flush=True,
+            )
 
-                # Print status with caveats (if caveats not overridden)
-                caveats = True if caveats is None else caveats
-                print(
-                    util.formatJobResult(
-                        job, self.options, caveats=caveats, memory=memory
-                    ),
-                    flush=True,
-                )
+        # Print results and perform any desired post job processing
+        if job.isFinished():
+            joint_status = job.getJointStatus()
+            self.error_code = self.error_code | joint_status.status_code
 
-                # Store job as finished for printing
-                self.finished_jobs.append(job)
+            # perform printing of application output if so desired
+            output = job.getOutputForScreen()
+            if output:
+                print(output)
 
-                if job.isSkip():
-                    self.num_skipped += 1
-                elif job.isPass():
-                    self.num_passed += 1
-                elif job.isFail():
-                    self.num_failed += 1
-                else:
-                    self.num_pending += 1
-            # Just print current status without a status message
+            # Print status with caveats (if caveats not overridden)
+            print_status(caveats=(True if caveats is None else caveats))
+
+            # Store job as finished for printing
+            self.finished_jobs.append(job)
+
+            if job.isSkip():
+                self.num_skipped += 1
+            elif job.isPass():
+                self.num_passed += 1
+            elif job.isFail():
+                self.num_failed += 1
             else:
-                caveats = False if caveats is None else caveats
-                print(
-                    util.formatJobResult(
-                        job,
-                        self.options,
-                        status_message=False,
-                        caveats=caveats,
-                        memory=memory,
-                    ),
-                    flush=True,
-                )
+                self.num_pending += 1
+        # Just print current status without a status message
+        else:
+            print_status(caveats=(False if caveats is None else caveats))
 
     def getStats(self, time_total: float) -> dict:
         """
@@ -994,7 +997,7 @@ class TestHarness:
         jobs = [j for j in self.finished_jobs if (not j.isSkip() and j.getMaxMemory())]
         jobs = sorted(
             jobs,
-            key=lambda job: job.getMaxMemory() / job.getSlots(),
+            key=lambda job: job.getMaxMemory().cpu / job.getSlots(),
             reverse=True,
         )
         return jobs[0:num]
@@ -1053,39 +1056,44 @@ class TestHarness:
         if not self.finished_jobs:
             print("No tests ran")
 
+        def print_status(job, **kwargs):
+            print(
+                util.formatJobResult(job, self.options, **kwargs),
+                flush=True,
+            )
+
+        cpu_memory = None if self.shouldOutputCPUMemory() else False
+        gpu_memory = None if self.shouldOutputGPUMemory() else False
+
         # Longest jobs and longest folders
         if not self.options.dry_run and self.options.longest_jobs:
             longest_jobs = self.getLongestJobs(self.options.longest_jobs)
             if longest_jobs:
                 print(header(f"{self.options.longest_jobs} Longest Running Jobs"))
                 for job in longest_jobs:
-                    print(
-                        util.formatJobResult(
-                            job,
-                            self.options,
-                            caveats=True,
-                            timing=True,
-                            memory=None if self.shouldOutputMemory() else False,
-                        )
+                    print_status(
+                        job,
+                        timing=True,
+                        caveats=True,
+                        cpu_memory=cpu_memory,
+                        gpu_memory=gpu_memory,
                     )
 
             # Heaviest jobs by memory
-            if self.shouldOutputMemory() and (
+            if self.shouldOutputCPUMemory() and (
                 heaviest_jobs := self.getHeaviestJobs(self.options.longest_jobs)
             ):
                 print(
                     header(f"{self.options.longest_jobs} Heaviest Jobs (memory/slot)")
                 )
                 for job in heaviest_jobs:
-                    print(
-                        util.formatJobResult(
-                            job,
-                            self.options,
-                            caveats=True,
-                            timing=True,
-                            memory=True,
-                            memory_per_slot=True,
-                        )
+                    print_status(
+                        job,
+                        timing=True,
+                        caveats=True,
+                        cpu_memory=True,
+                        gpu_memory=(gpu_memory is True),
+                        memory_per_slot=True,
                     )
 
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
@@ -1100,7 +1108,11 @@ class TestHarness:
                     entry = util.FormatResultEntry(name=folder, timing=time)
                     print(
                         util.formatResult(
-                            entry, self.options, timing=True, memory=False
+                            entry,
+                            self.options,
+                            timing=True,
+                            cpu_memory=False,
+                            gpu_memory=False,
                         )
                     )
 
@@ -1115,7 +1127,7 @@ class TestHarness:
         if failed_jobs := [j for j in self.finished_jobs if j.isFail()]:
             print(header("Failed Tests"))
             for job in failed_jobs:
-                print((util.formatJobResult(job, self.options, caveats=True)))
+                print_status(job, caveats=True)
 
         time_total = (datetime.datetime.now() - self.start_time).total_seconds()
         stats = self.getStats(time_total)

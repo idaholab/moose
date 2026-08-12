@@ -159,3 +159,11 @@ class RunSlurm(RunHPC):
         if not search:
             raise Exception(f'Failed to parse job ID from "{result}"')
         return str(search.group(1))
+
+    def tracksCPUMemory(self) -> bool:
+        """
+        Whether or not CPU memory is being tracked.
+
+        Always valid with slurm.
+        """
+        return True

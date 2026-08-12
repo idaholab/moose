@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+from dataclasses import dataclass
 from threading import Lock
 from typing import TYPE_CHECKING, Optional
 
@@ -38,7 +39,7 @@ class Runner(OutputInterface):
         """The Scheduler options."""
         self.exit_code = None
         """The job's exit code, should be set after wait()."""
-        self._max_memory: Optional[int] = None
+        self._max_memory: Optional[Runner.MaxMemory] = None
         """The job's estimated max memory in bytes, if any."""
         self._max_memory_lock = Lock()
         """Thread lock for _max_memory."""
@@ -55,6 +56,15 @@ class Runner(OutputInterface):
         separately.
         """
 
+    @dataclass(slots=True)
+    class MaxMemory:
+        """Structure for storing a Job's max memory usage, CPU and GPU."""
+
+        cpu: int = 0
+        """The max CPU memory for the job, in bytes."""
+        gpu: Optional[int] = 0
+        """The max GPU memory for the job, in bytes."""
+
     @property
     def pid(self) -> Optional[int]:
         """Get the pid of the running local process, if any."""
@@ -62,7 +72,7 @@ class Runner(OutputInterface):
         return None
 
     @property
-    def max_memory(self) -> Optional[int]:
+    def max_memory(self) -> Optional[MaxMemory]:
         """
         Get the estimated max memory in bytes for the job.
 
@@ -71,9 +81,9 @@ class Runner(OutputInterface):
         with self._max_memory_lock:
             return self._max_memory
 
-    def updateMaxMemory(self, value: int) -> bool:
+    def updateMaxMemory(self, cpu_memory: int, gpu_memory: Optional[int]) -> bool:
         """
-        Update the max memory in bytes for the process, if greater.
+        Update the max CPU and GPU memory in bytes for the process, if greater.
 
         Should be used by derived runners to set the memory
         as it is running if available.
@@ -85,8 +95,15 @@ class Runner(OutputInterface):
         the value was greater than the current max memory).
         """
         with self._max_memory_lock:
-            if self._max_memory is None or value > self._max_memory:
-                self._max_memory = value
+            if self._max_memory is None:
+                self._max_memory = self.MaxMemory(cpu_memory, gpu_memory)
+            else:
+                if cpu_memory > self._max_memory.cpu:
+                    self._max_memory.cpu = cpu_memory
+                if gpu_memory is not None and (
+                    self._max_memory.gpu is None or gpu_memory > self._max_memory.gpu
+                ):
+                    self._max_memory.gpu = gpu_memory
                 return True
         return False
 

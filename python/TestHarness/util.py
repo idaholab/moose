@@ -18,7 +18,7 @@ import time
 import typing
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 from mooseutils import colorText
 
@@ -56,8 +56,10 @@ class FormatResultEntry:
     name: str
     # Timing for the entry, optional
     timing: Optional[float] = None
-    # Memory for the entry, optional
-    memory: Optional[int] = None
+    # CPU Memory for the entry, optional
+    cpu_memory: Optional[int] = None
+    # GPU memory for the entry, optional
+    gpu_memory: Optional[int] = None
     # JointStatus object for the entry, optional
     joint_status: Optional[str] = None
     # Detailed status message for the entry, optional
@@ -72,7 +74,8 @@ def formatResult(
     entry: FormatResultEntry,
     options,
     timing: Optional[bool] = None,
-    memory: Optional[bool] = None,
+    cpu_memory: Optional[bool] = None,
+    gpu_memory: Optional[bool] = None,
 ) -> str:
     """
     Helper for prenting a one-line result for something.
@@ -84,10 +87,12 @@ def formatResult(
         str(v) for v in list(OrderedDict.fromkeys(list(options.term_format)))
     ]
     # container for every printable item (message and color)
-    result = dict.fromkeys(term_format, (None, None))
+    result: dict[str, Tuple[Optional[str], Optional[str]]] = dict.fromkeys(
+        term_format, (None, None)
+    )
 
     # Helper for adding a formatted entry
-    def add(key: str, message: str, color: str = None) -> None:
+    def add(key: str, message: Optional[str], color: Optional[str] = None) -> None:
         assert key in result
         if message:
             if key.isupper():
@@ -138,22 +143,30 @@ def formatResult(
             int_len = len(str(int(actual)))
             precision = min(3, max(0, (4 - int_len)))
             message = "[" + "{0: <6}".format("%0.*fs" % (precision, actual)) + "]"
-        # Memory;
-        elif (
-            key_lower == "m"
-            and entry.timing is not None
-            and (options.timing or memory is True)
-            and memory is not False
-        ):
-            if entry.memory is not None or entry.timing == 0:
-                value = int(entry.memory * 2**-20) if entry.memory else 0
-                if value < 10000:
-                    message = f"[{value:>4}MB]"
+        # Memory (potentially multiple entries)
+        elif key_lower == "m" and entry.timing is not None:
+            # Helper for formatting a CPU or GPU memory entry
+            def format_memory(
+                memory_entry: Optional[int], condition: Optional[bool]
+            ) -> Optional[str]:
+                if not (options.timing or condition is True) or condition is False:
+                    return None
+                if memory_entry is not None or entry.timing == 0:
+                    value = int(memory_entry * 2**-20) if memory_entry else 0
+                    if value < 10000:
+                        message = f"{value:>4}MB"
+                    else:
+                        value = int(value / 1024)
+                        message = f"{value:>4}GB"
                 else:
-                    value = int(value / 1024)
-                    message = f"[{value:>4}GB]"
-            else:
-                message = "[   ?MB]"
+                    message = "   ?MB"
+                return message
+
+            if cpu_message := format_memory(entry.cpu_memory, cpu_memory):
+                if gpu_message := format_memory(entry.gpu_memory, gpu_memory):
+                    message = f"[C{cpu_message}] [G{gpu_message}]"
+                else:
+                    message = f"[{cpu_message}]"
 
         add(key, message, color)
 
@@ -200,7 +213,8 @@ def formatJobResult(
     options,
     status_message: bool = True,
     timing: Optional[bool] = None,
-    memory: Optional[bool] = None,
+    cpu_memory: Optional[bool] = None,
+    gpu_memory: Optional[bool] = None,
     memory_per_slot: bool = False,
     caveats: bool = False,
 ) -> str:
@@ -227,19 +241,33 @@ def formatJobResult(
         suffix = name.replace(first_directory, "", 1)
         name = prefix + suffix
 
-    max_memory = job.getMaxMemory()
-    if memory_per_slot and max_memory is not None:
-        max_memory = int(max_memory / job.getSlots())
+    max_cpu_memory = None
+    max_gpu_memory = None
+    if (job_max_memory := job.getMaxMemory()) is not None:
+        max_cpu_memory = job_max_memory.cpu
+        if memory_per_slot:
+            max_cpu_memory /= job.getSlots()
+        max_cpu_memory = int(max_cpu_memory)
+
+        if job_max_memory.gpu is not None:
+            max_gpu_memory = job_max_memory.gpu
+            if memory_per_slot:
+                max_gpu_memory /= job.getSlots()
+            max_gpu_memory = int(max_gpu_memory)
+
     entry = FormatResultEntry(
         name=name,
         timing=job.getTiming(),
-        memory=max_memory,
+        cpu_memory=max_cpu_memory,
+        gpu_memory=max_gpu_memory,
         joint_status=job.getJointStatus(),
         status_message=status_message,
         caveats=job.getCaveats() if caveats else [],
         caveat_color=joint_status.color if job.isFail() else "CYAN",
     )
-    return formatResult(entry, options, timing=timing, memory=memory)
+    return formatResult(
+        entry, options, timing=timing, cpu_memory=cpu_memory, gpu_memory=gpu_memory
+    )
 
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
