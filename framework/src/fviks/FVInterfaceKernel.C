@@ -172,8 +172,18 @@ FVInterfaceKernel::checkFaceIntegrity(const FaceInfo & fi) const
                ", but this face does not connect the subdomains specified by 'subdomain1' and "
                "'subdomain2'.");
 
-  // If both orientations are valid because the user-defined subdomain sets overlap, preserve the
-  // existing behavior and treat the FaceInfo element as side 1.
+  if (elem_on_side1 && elem_on_side2)
+    mooseError("FVInterfaceKernel '",
+               name(),
+               "' is being triggered on a face with centroid ",
+               fi.faceCentroid(),
+               " connecting subdomains ",
+               elem_subdomain,
+               " and ",
+               neighbor_subdomain,
+               ", but both orientations satisfy the user-defined 'subdomain1' and 'subdomain2' "
+               "restrictions, making the interface orientation ambiguous.");
+
   return elem_on_side1;
 }
 

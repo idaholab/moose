@@ -35,6 +35,16 @@
     issues = '#33435'
     requirement = 'The system shall report an error when a finite volume interface kernel executes on a face that does not connect its declared subdomains.'
   []
+  [ambiguous_orientation]
+    type = RunException
+    input = test.i
+    cli_args = "FVInterfaceKernels/interface/subdomain1='0 1' "
+              "FVInterfaceKernels/interface/subdomain2='0 1'"
+    expect_err = "both orientations satisfy the user-defined 'subdomain1' and 'subdomain2' restrictions, making the interface orientation ambiguous"
+    design = 'FVInterfaceKernels/index.md'
+    issues = '#33435'
+    requirement = 'The system shall report an error when overlapping finite volume interface kernel subdomain specifications make the interface orientation ambiguous.'
+  []
   [external_face]
     type = RunException
     input = test.i
