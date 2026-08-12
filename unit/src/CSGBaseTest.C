@@ -2460,7 +2460,6 @@ TEST(CSGBaseTest, joinOtherBaseJoinRoot)
   const auto & lat = base1->addLattice(std::move(lat_ptr));
   // create cell containing lattice
   auto & c1 = base1->createCell("c1", lat, +surf1);
-
   // CSGBase 2: two total unverses (ROOT_UNIVERSE and extra_univ) with a cell in each
   std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("s2", 1.0);
@@ -2564,7 +2563,6 @@ TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
   const auto & lat = base1->addLattice(std::move(lat_ptr));
   // create cell containing lattice
   auto & c1 = base1->createCell("c1", lat, +surf1);
-
   // CSGBase 2: two total unverses (ROOT_UNIVERSE and extra_univ) with a cell in each
   std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("s2", 1.0);
@@ -2680,7 +2678,6 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
   const auto & lat = base1->addLattice(std::move(lat_ptr));
   // create cell containing lattice
   auto & c1 = base1->createCell("c1", lat, +surf1);
-
   // CSGBase 2: two total unverses (ROOT_UNIVERSE and extra_univ) with a cell in each
   std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("s2", 1.0);
