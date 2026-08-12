@@ -1,0 +1,57 @@
+{
+  "cells": {
+    "pin1_cell_radial_0": {
+      "fill": "pin1_pin_unit",
+      "filltype": "UNIVERSE",
+      "region_infix": [],
+      "region_postfix": []
+    },
+    "pin1_root_cell": {
+      "fill": "pin1_univ",
+      "filltype": "UNIVERSE",
+      "region_infix": [
+        "-pin1_radial_duct_0"
+      ],
+      "region_postfix": [
+        "pin1_radial_duct_0",
+        "-"
+      ]
+    }
+  },
+  "units": {
+    "pin1_pin_unit": {
+      "attributes": {
+        "fill_mats": [
+          "rgmb_region_1",
+          "rgmb_region_2"
+        ],
+        "ring_radii": [
+          0.4665
+        ]
+      },
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::PinUniverseEngUnit"
+    },
+    "pin1_radial_duct_0": {
+      "attributes": {
+        "apothem": 0.710315,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "pin1_root_cell"
+      ],
+      "root": true
+    },
+    "pin1_univ": {
+      "cells": [
+        "pin1_cell_radial_0"
+      ]
+    }
+  }
+}
