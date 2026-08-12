@@ -817,3 +817,11 @@ class Scheduler(MooseObject):
     def appendStats(self) -> dict:
         """Entrypoint to add entries to the harness statistics"""
         return {}
+
+    def tracksCPUMemory(self) -> bool:
+        """Whether or not this Scheduler tracks CPU memory."""
+        return False
+
+    def tracksGPUMemory(self) -> bool:
+        """Whether or not this Scheduler tracks GPU memory."""
+        return False
