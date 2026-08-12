@@ -92,6 +92,7 @@ The expectation is that a `CSGUniverseEngUnit` replaces a collection of `CSGCell
 
 The implementation of `expandUnit` should populate the root universe of `_internal_base` with any cells necessary for the creation of the expanded `CSGUniverse` definition. The root universe of `_internal_base` will become the expanded universe used in the parent `CSGBase` object.
 After populating `_internal_base` with any necessary objects, the root universe, which is named `ROOT_UNIVERSE` by default, should be renamed to represent that it is the expanded universe (e.g. `_internal_base->renameRootUniverse("X_expanded_univ")`).
+If the root universe is not renamed, it could cause name conflict errors with the larger geometry when expanded as the default root universe name for the larger geometry is also `ROOT_UNIVERSE`.
 
 ## Example Implementation
 
