@@ -186,6 +186,32 @@ EnumerateEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   return MooseUtils::stringJoin(names);
 }
 
+std::string
+RepeatEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+{
+  std::vector<std::string> argv;
+  argv.insert(argv.begin(), args.begin(), args.end());
+
+  if (argv.size() != 2)
+  {
+    exp.errors.emplace_back(
+        "repeat error: Expected 2 arguments ${repeat name count} in '" + n->fullpath() + "'", n);
+    return n->val();
+  }
+
+  const auto & count_arg = argv[1];
+  if (count_arg.empty() || count_arg.find_first_not_of("0123456789") != std::string::npos)
+  {
+    exp.errors.emplace_back("repeat error: count '" + count_arg +
+                                "' is not a non-negative integer in '" + n->fullpath() + "'",
+                            n);
+    return n->val();
+  }
+
+  const std::vector<std::string> values(MooseUtils::convert<int>(count_arg), argv[0]);
+  return MooseUtils::stringJoin(values);
+}
+
 Parser::Parser(const std::vector<std::string> & input_filenames,
                const std::optional<std::vector<std::string>> & input_text /* = {} */)
   : _root(nullptr),
@@ -462,6 +488,7 @@ Parser::parse()
     FuncParseEvaler fparse_ev;
     UnitsConversionEvaler units_ev;
     EnumerateEvaler enumerate_ev;
+    RepeatEvaler repeat_ev;
     hit::BraceExpander exw;
     exw.registerEvaler("raw", raw);
     exw.registerEvaler("env", env);
@@ -469,6 +496,7 @@ Parser::parse()
     exw.registerEvaler("replace", repl);
     exw.registerEvaler("units", units_ev);
     exw.registerEvaler("enumerate", enumerate_ev);
+    exw.registerEvaler("repeat", repeat_ev);
     getRoot().walk(&exw);
     for (auto & var : exw.used)
       _extracted_vars.insert(var);
