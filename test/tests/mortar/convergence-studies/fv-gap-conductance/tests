@@ -9,6 +9,7 @@
       test_case = 'TestGapConductanceFirstOrder'
       detail = 'first order accuracy'
       required_python_packages = 'sympy'
+      min_slots = 2
     []
     [second_order]
       type = MMSTest
