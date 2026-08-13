@@ -29,7 +29,7 @@
   [unit_test_sqa]
     type = PythonUnitTest
     input = test_unit_test_sqa.py
-    requirement = "The system shall enforce requirement, design, and issue traceability for new C++ unit tests."
+    requirement = "The system shall enforce requirement, design, and issue traceability for C++ unit tests."
   []
 
   [SQAReport]
