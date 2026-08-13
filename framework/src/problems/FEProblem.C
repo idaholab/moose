@@ -119,6 +119,8 @@ FEProblem::addLineSearch(const InputParameters & parameters)
       ls_params.set<Real>("contact_ltol") = affect_ltol
                                                 ? parameters.get<Real>("contact_line_search_ltol")
                                                 : parameters.get<Real>("l_tol");
+      ls_params.set<MooseEnum>("backing_line_search") =
+          parameters.get<MooseEnum>("contact_line_search_backing");
       ls_params.set<FEProblem *>("_fe_problem") = this;
 
       _line_search =

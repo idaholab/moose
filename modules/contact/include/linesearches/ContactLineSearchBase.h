@@ -10,6 +10,7 @@
 #pragma once
 
 #include "LineSearch.h"
+#include "MooseEnum.h"
 
 class FEProblem;
 
@@ -30,6 +31,10 @@ class FEProblem;
  * beginning of the Newton solve, unnecessary computational expense is avoided. Then when the
  * contact set is resolved late in the Newton solve, the linear tolerance will return to the finer
  * tolerance set through the traditional `l_tol` parameter.
+ *
+ * The `contact_line_search_backing` parameter (`backing_line_search` internally) selects the
+ * standard PETSc SNES line search type (`basic`, `bt`, `l2`, or `cp`) that a subclass may use as
+ * the backing algorithm for a constraint-set-aware wrapper.
  */
 class ContactLineSearchBase : public LineSearch
 {
@@ -75,4 +80,7 @@ protected:
 
   /// Whether to modify the linear tolerance
   bool _affect_ltol;
+
+  /// The standard PETSc SNES line search type (basic, bt, l2, cp) a subclass backs itself with
+  MooseEnum _backing_line_search;
 };

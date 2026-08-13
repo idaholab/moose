@@ -91,6 +91,12 @@ FEProblemSolve::validParams()
                         "The linear relative tolerance to be used while the contact state is "
                         "changing between non-linear iterations. We recommend that this tolerance "
                         "be looser than the standard linear tolerance");
+  MooseEnum contact_line_search_backing("basic bt l2 cp", "bt");
+  params.addParam<MooseEnum>(
+      "contact_line_search_backing",
+      contact_line_search_backing,
+      "The standard PETSc SNES line search type the contact line search uses internally as its "
+      "backing algorithm. The default is provisional pending the backing-strategy sweep.");
 
   params += Moose::PetscSupport::getPetscValidParams();
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
@@ -186,7 +192,8 @@ FEProblemSolve::validParams()
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
       "Solver variable scaling");
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
-                              "contact_line_search_allowed_lambda_cuts",
+                              "contact_line_search_allowed_lambda_cuts "
+                              "contact_line_search_backing",
                               "Solver line search");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
