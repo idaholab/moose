@@ -27,7 +27,11 @@ ContactLineSearchBase::validParams()
   params.addRequiredParam<bool>("affect_ltol",
                                 "Whether to change the linear tolerance from the default value "
                                 "when the contact set is changing");
-  MooseEnum line_search_package("petsc moose");
+  MooseEnum backing_line_search("basic bt l2 cp");
+  params.addRequiredParam<MooseEnum>(
+      "backing_line_search",
+      backing_line_search,
+      "The standard PETSc SNES line search type used as the backing algorithm.");
   return params;
 }
 
@@ -36,7 +40,8 @@ ContactLineSearchBase::ContactLineSearchBase(const InputParameters & parameters)
     _user_ksp_rtol_set(false),
     _allowed_lambda_cuts(getParam<unsigned>("allowed_lambda_cuts")),
     _contact_ltol(getParam<Real>("contact_ltol")),
-    _affect_ltol(getParam<bool>("affect_ltol"))
+    _affect_ltol(getParam<bool>("affect_ltol")),
+    _backing_line_search(getParam<MooseEnum>("backing_line_search"))
 {
 }
 

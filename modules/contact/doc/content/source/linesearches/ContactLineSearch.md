@@ -16,6 +16,11 @@ with smaller values being used for smaller contact problems. This is to allow
 necessary residual increases when the transient problem requires significant
 changes in the contact state.
 
+Internally, the line search also stands up a standard PETSc `SNESLineSearch` of the type given by
+the `contact_line_search_backing` Executioner parameter (`basic`, `bt`, `l2`, or `cp`), under the
+`contact_backing_` PETSc options prefix. This backing line search is not yet consulted by the
+lambda-cut algorithm described below.
+
 When the contact set is changing, the user may optionally use a looser linear tolerance set by
 the `contact_line_search_ltol` parameter. Then when the contact set is changing during the
 beginning of the Newton solve, unnecessary computational expense is avoided. Then when the
