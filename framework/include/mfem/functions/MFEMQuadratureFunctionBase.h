@@ -11,19 +11,16 @@
 
 #pragma once
 
-#include "MFEMObject.h"
+#include "Function.h"
+#include "MFEMProblem.h"
 #include "MFEMQuadratureFunctionCoefficientBase.h"
-
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
 
 /**
  * Base class for MOOSE objects declaring an MFEM coefficient backed by precomputed values of a
  * source coefficient on quadrature points. Owns the quadrature space shared by the derived
  * scalar and vector variants and provides their common input parameters.
  */
-class MFEMQuadratureFunctionBase : public MFEMObject
+class MFEMQuadratureFunctionBase : public Function
 {
 public:
   static InputParameters validParams();
@@ -35,6 +32,8 @@ protected:
   /// coefficient (which is the sole owner of the resulting stored value).
   MFEMQuadratureFunctionCoefficientBase::UpdatePolicy updatePolicy() const;
 
+  /// reference to the MFEMProblem instance
+  MFEMProblem & _mfem_problem;
   /// Quadrature space defining the points at which the source coefficient values are stored.
   mfem::QuadratureSpace _qspace;
 };
