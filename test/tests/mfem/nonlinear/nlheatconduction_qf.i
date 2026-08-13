@@ -41,6 +41,13 @@ alpha = 1e-2
     symbol_names = 'alpha temperature'
     symbol_values = '${alpha} temperature'
   []
+  [qf_k]
+    type = MFEMScalarQuadratureFunction
+    coefficient = diffusivity_temperature_dependence
+    # the quadrature rule order matches the one used by DiffusionIntegrator for
+    # second-order H1 elements on quadrilaterals (2 * fe_order + dim - 1 = 5)
+    order = 5
+  []
 []
 
 [ICs]
@@ -48,16 +55,6 @@ alpha = 1e-2
     type = MFEMScalarIC
     coefficient = initial
     variable = temperature
-  []
-[]
-
-[QuadratureFunctions]
-  [qf_k]
-    type = MFEMScalarQuadratureFunction
-    coefficient = diffusivity_temperature_dependence
-    # the quadrature rule order matches the one used by DiffusionIntegrator for
-    # second-order H1 elements on quadrilaterals (2 * fe_order + dim - 1 = 5)
-    order = 5
   []
 []
 
