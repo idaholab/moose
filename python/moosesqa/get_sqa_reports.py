@@ -134,14 +134,16 @@ def get_sqa_unit_test_reports(root_dir=None):
         module_tracked = [
             filename
             for filename in tracked_files
-            if os.path.relpath(filename, root_dir).replace(os.sep, "/").startswith(prefix)
+            if os.path.relpath(filename, root_dir)
+            .replace(os.sep, "/")
+            .startswith(prefix)
         ]
         reports.append(
             SQAUnitTestReport(
                 title=module_root or root_title,
-                unit_root=os.path.join(root_dir, module_root)
-                if module_root
-                else root_dir,
+                unit_root=(
+                    os.path.join(root_dir, module_root) if module_root else root_dir
+                ),
                 legacy_manifest=legacy_manifest,
                 tracked_files=module_tracked,
             )
