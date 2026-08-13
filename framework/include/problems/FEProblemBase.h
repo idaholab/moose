@@ -2756,6 +2756,15 @@ public:
   bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
 
   /**
+   * @return whether to perform an integrity check for side user objects consuming interface
+   * material properties
+   */
+  bool sideUOInterfaceMatPropIntegrityCheck() const
+  {
+    return _side_uo_interface_mat_prop_integrity_check;
+  }
+
+  /**
    * @param fv_bcs_integrity_check Whether to perform a boundary condition integrity check for
    * finite volume
    */
@@ -3417,6 +3426,9 @@ protected:
   /// whether to perform checking of boundary restricted elemental object variable dependencies,
   /// e.g. whether the variable dependencies are defined on the selected boundaries
   const bool _boundary_restricted_elem_integrity_check;
+
+  /// Whether to check that side user objects do not consume interface material properties
+  const bool _side_uo_interface_mat_prop_integrity_check;
 
   /// Determines whether and which subdomains are to be checked to ensure that they have an active material
   CoverageCheckMode _material_coverage_check;
