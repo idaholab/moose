@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -526,6 +527,41 @@ struct ConstraintStateSets
 /// Derive the four named sets from a reconciled canonical map.
 ConstraintStateSets constraintStateSets(
     const std::unordered_map<dof_id_type, ConstraintState> & canonical);
+
+/**
+ * Directional derivative of an AD switching-function value along the Newton direction d_k
+ * (eq eq:switch-linearization): contracts \p q's sparse per-dof derivatives with the matching
+ * entries of \p direction. A dof with a nonzero derivative but no entry in \p direction
+ * contributes zero -- q may depend on dofs (e.g. primary-side displacements) that the caller's
+ * direction vector does not cover.
+ */
+Real directionalDerivative(const ADReal & q,
+                            const std::unordered_map<dof_id_type, Real> & direction);
+
+/**
+ * Predicted step length at which a switching function is expected to cross zero along the
+ * Newton direction (eq eq:event-length): alpha = -q / qdot. Returns std::nullopt when there is
+ * no admissible predicted crossing: qdot is exactly zero (q is locally flat along d_k, e.g.
+ * parallel to the switching surface), or the crossing falls outside (0, 1].
+ */
+std::optional<Real> eventStepLength(Real q, Real qdot);
+
+/// The first tied group of predicted switching events (eq eq:first-event-group): the smallest
+/// predicted step length alpha_min, and every dof whose predicted step length lies within
+/// tau_event of it. Treating the whole group as one event keeps the outcome independent of dof
+/// enumeration order.
+struct FirstEventGroup
+{
+  Real alpha_min;
+  std::unordered_set<dof_id_type> members;
+};
+
+/**
+ * Determine the first tied event group from a set of per-dof predicted step lengths (as
+ * produced by eventStepLength()). Returns std::nullopt if \p predicted_alphas is empty.
+ */
+std::optional<FirstEventGroup> firstEventGroup(
+    const std::unordered_map<dof_id_type, Real> & predicted_alphas, Real tau_event);
 }
 }
 }
