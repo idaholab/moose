@@ -11,7 +11,6 @@
 
 #include "MFEMVectorQuadratureFunction.h"
 #include "MFEMVectorQuadratureFunctionCoefficient.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorQuadratureFunction);
 
@@ -31,10 +30,17 @@ MFEMVectorQuadratureFunction::validParams()
 MFEMVectorQuadratureFunction::MFEMVectorQuadratureFunction(const InputParameters & parameters)
   : MFEMQuadratureFunctionBase(parameters), _qf(&_qspace)
 {
-  mfem::VectorCoefficient & source = getVectorCoefficient("vector_coefficient");
-  _qf.SetVDim(source.GetVDim());
-  getMFEMProblem().getCoefficients().declareVector<MFEMVectorQuadratureFunctionCoefficient>(
-      name(), source, _qf, updatePolicy(), name());
+  _mfem_problem.getCoefficients().declareVector<MFEMVectorQuadratureFunctionCoefficient>(
+      name(), _qf, updatePolicy(), name());
+}
+
+void
+MFEMVectorQuadratureFunction::initialSetup()
+{
+  auto & coeff = static_cast<MFEMVectorQuadratureFunctionCoefficient &>(
+      _mfem_problem.getCoefficients().getVectorCoefficient(name()));
+  coeff.SetSourceVectorCoefficient(&_mfem_problem.getCoefficients().getVectorCoefficient(
+      getParam<MFEMVectorCoefficientName>("vector_coefficient")));
 }
 
 #endif

@@ -615,7 +615,8 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else if ("MFEMParsedFunction" != type)
+  else if ("MFEMParsedFunction" != type && "MFEMScalarQuadratureFunction" != type &&
+           "MFEMVectorQuadratureFunction" != type)
   {
     mooseWarning("Could not identify whether function ",
                  type,

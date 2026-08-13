@@ -11,7 +11,6 @@
 
 #include "MFEMScalarQuadratureFunction.h"
 #include "MFEMScalarQuadratureFunctionCoefficient.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMScalarQuadratureFunction);
 
@@ -30,8 +29,17 @@ MFEMScalarQuadratureFunction::validParams()
 MFEMScalarQuadratureFunction::MFEMScalarQuadratureFunction(const InputParameters & parameters)
   : MFEMQuadratureFunctionBase(parameters), _qf(&_qspace)
 {
-  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarQuadratureFunctionCoefficient>(
-      name(), getScalarCoefficient("coefficient"), _qf, updatePolicy(), name());
+  _mfem_problem.getCoefficients().declareScalar<MFEMScalarQuadratureFunctionCoefficient>(
+      name(), _qf, updatePolicy(), name());
+}
+
+void
+MFEMScalarQuadratureFunction::initialSetup()
+{
+  auto & coeff = static_cast<MFEMScalarQuadratureFunctionCoefficient &>(
+      _mfem_problem.getCoefficients().getScalarCoefficient(name()));
+  coeff.SetSourceCoefficient(&_mfem_problem.getCoefficients().getScalarCoefficient(
+      getParam<MFEMScalarCoefficientName>("coefficient")));
 }
 
 #endif

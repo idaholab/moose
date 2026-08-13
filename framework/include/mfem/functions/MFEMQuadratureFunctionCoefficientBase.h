@@ -12,14 +12,10 @@
 #pragma once
 
 #include "MooseEnum.h"
-#include <string>
 
-namespace mfem
-{
-class QuadratureFunction;
-class ElementTransformation;
-class IntegrationPoint;
-}
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 /**
  * Shared lazy-update state for quadrature function coefficients. Holds the update policy and a

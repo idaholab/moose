@@ -24,6 +24,8 @@ public:
 
   MFEMVectorQuadratureFunction(const InputParameters & parameters);
 
+  void initialSetup() override;
+
 protected:
   /// Storage for the projected values of the source coefficient.
   mfem::QuadratureFunction _qf;
