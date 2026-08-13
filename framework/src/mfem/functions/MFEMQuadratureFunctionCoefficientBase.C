@@ -12,10 +12,6 @@
 #include "MFEMQuadratureFunctionCoefficientBase.h"
 #include "MooseError.h"
 
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 namespace
 {
 
