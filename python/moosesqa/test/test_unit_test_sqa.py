@@ -341,6 +341,9 @@ class TestDiscoverUnitTestDirectories(unittest.TestCase):
         self._temporary_directory.cleanup()
 
     def testRootAndNestedModule(self):
+        # A 'framework/' directory on disk marks this as the MOOSE repository itself, so
+        # the root-level ("") module's legacy manifest lives under framework/doc.
+        os.makedirs(os.path.join(self.root, "framework"))
         tracked = [
             "unit/src/Example.C",
             "modules/contact/unit/src/Example.C",
@@ -362,6 +365,16 @@ class TestDiscoverUnitTestDirectories(unittest.TestCase):
                     ),
                 ),
             ],
+        )
+
+    def testDownstreamAppRoot(self):
+        # No 'framework/' directory on disk: this is a downstream app, whose root-level
+        # ("") module's legacy manifest is a sibling 'doc/', like any other module.
+        tracked = ["unit/src/Example.C"]
+        results = discover_unit_test_directories(self.root, tracked_files=tracked)
+        self.assertEqual(
+            results,
+            [("", os.path.join(self.root, "doc", "legacy_unit_tests.yml"))],
         )
 
 

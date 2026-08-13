@@ -22,7 +22,7 @@ from .SQARequirementReport import SQARequirementReport, SQARequirementDiffReport
 from .SQADocumentReport import SQADocumentReport
 from .SQAMooseAppReport import SQAMooseAppReport
 from .SQAUnitTestReport import SQAUnitTestReport
-from .check_unit_test_sqa import discover_unit_test_directories
+from .check_unit_test_sqa import discover_unit_test_directories, is_moose_repository
 
 
 def get_sqa_reports(config_file, app_report=True, doc_report=True, req_report=True):
@@ -120,6 +120,12 @@ def get_sqa_unit_test_reports(root_dir=None):
     # by cwd alone would make the repository-root ('' module) check also sweep in every
     # other module's nested unit/src directory.
     tracked_files = list(mooseutils.git_ls_files(root_dir))
+    # For the root-level ("") module, 'framework' is only a meaningful title in the MOOSE
+    # repository itself; a downstream app's root-level unit tests are named for its own
+    # repository instead.
+    root_title = (
+        "framework" if is_moose_repository(root_dir) else os.path.basename(root_dir)
+    )
     reports = list()
     for module_root, legacy_manifest in discover_unit_test_directories(
         root_dir, tracked_files=tracked_files
@@ -132,7 +138,7 @@ def get_sqa_unit_test_reports(root_dir=None):
         ]
         reports.append(
             SQAUnitTestReport(
-                title=module_root or "framework",
+                title=module_root or root_title,
                 unit_root=os.path.join(root_dir, module_root)
                 if module_root
                 else root_dir,
