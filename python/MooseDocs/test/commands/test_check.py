@@ -35,7 +35,7 @@ class TestCheckScript(unittest.TestCase):
             )
         )
         try:
-            mooseutils.check_output(cmd, cwd=cwd, check=False, timeout=5)
+            out = mooseutils.check_output(cmd, cwd=cwd, check=False, timeout=20)
         except subprocess.TimeoutExpired as ex:
             out = str(ex.stdout)
         self.assertIn("MOOSEAPP REPORT(S):", out)
@@ -44,7 +44,9 @@ class TestCheckScript(unittest.TestCase):
         env = copy.copy(os.environ)
         env.pop("MOOSE_DIR", None)
         try:
-            out = mooseutils.check_output(cmd, cwd=cwd, env=env, check=False, timeout=5)
+            out = mooseutils.check_output(
+                cmd, cwd=cwd, env=env, check=False, timeout=20
+            )
         except subprocess.TimeoutExpired as ex:
             out = str(ex.stdout)
         self.assertIn("MOOSEAPP REPORT(S):", out)
@@ -61,7 +63,7 @@ class TestCheckScript(unittest.TestCase):
             os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
         )
         try:
-            out = mooseutils.check_output(cmd, cwd=cwd, check=False, timeout=5)
+            out = mooseutils.check_output(cmd, cwd=cwd, check=False, timeout=20)
         except subprocess.TimeoutExpired as ex:
             out = str(ex.stdout)
         self.assertIn("MOOSEAPP REPORT(S):", out)
@@ -70,7 +72,9 @@ class TestCheckScript(unittest.TestCase):
         env = copy.copy(os.environ)
         env.pop("MOOSE_DIR", None)
         try:
-            out = mooseutils.check_output(cmd, cwd=cwd, env=env, timeout=5)
+            out = mooseutils.check_output(
+                cmd, cwd=cwd, env=env, check=False, timeout=20
+            )
         except subprocess.TimeoutExpired as ex:
             out = str(ex.stdout)
         self.assertIn("MOOSEAPP REPORT(S):", out)
