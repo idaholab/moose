@@ -28,7 +28,7 @@
   [all]
     type = MFEMScalarDirichletBC
     variable = u
-    coefficient = 1.0
+    coefficient = 0.0
   []
 []
 

@@ -30,6 +30,29 @@ ComplexEigenproblemEquationSystem::ApplyEssentialBCs()
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
   ApplyComplexEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
   trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
+
+  // Reject nonzero Dirichlet BCs.
+  mfem::Vector ess_values;
+  trial_gf.real().GetTrueDofs(ess_values);
+  ess_values.SetSubVectorComplement(_ess_tdof_lists.at(0), 0.0);
+  mfem::real_t max_ess_value = ess_values.Normlinf();
+  trial_gf.imag().GetTrueDofs(ess_values);
+  ess_values.SetSubVectorComplement(_ess_tdof_lists.at(0), 0.0);
+  max_ess_value = std::max(max_ess_value, ess_values.Normlinf());
+  MPI_Allreduce(MPI_IN_PLACE,
+                &max_ess_value,
+                1,
+                mfem::MPITypeMap<mfem::real_t>::mpi_type,
+                MPI_MAX,
+                trial_gf.ParFESpace()->GetComm());
+  // Roundoff guard. Zero coefficients project to exactly zero.
+  if (max_ess_value > 10 * std::numeric_limits<mfem::real_t>::epsilon())
+    mooseError("Essential boundary conditions on variable '",
+               _trial_var_names.at(0),
+               "' prescribe a nonzero value. "
+               "An eigenproblem is homogeneous so only zero-valued essential boundary conditions "
+               "are meaningful. Set the "
+               "boundary coefficient to zero.");
 }
 
 void
