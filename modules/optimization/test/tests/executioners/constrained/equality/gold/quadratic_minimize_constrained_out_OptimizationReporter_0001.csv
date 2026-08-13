@@ -1,4 +1,4 @@
-equal,grad_equal,grad_results,measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,results,simulation_values
-0,0,0,0,0,0,0,0,0,0.6666956879817,0
-0,0,0,0,0,0,0,0,0,1.6666956879817,0
-0,0,0,0,0,0,0,0,0,2.6666956879817,0
+equal,grad_equal,grad_results,results
+0,0,0,0.66669568782122
+0,0,0,1.6666956885959
+0,0,0,2.6666956875294

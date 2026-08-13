@@ -339,4 +339,3 @@ OptimizationDataTempl<T>::computeMisfitValue()
 }
 
 template class OptimizationDataTempl<GeneralReporter>;
-template class OptimizationDataTempl<OptimizationReporterBase>;
