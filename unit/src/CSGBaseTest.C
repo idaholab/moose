@@ -1943,11 +1943,12 @@ TEST(CSGBaseTest, testExpandAllRecursive)
 
   // Expected cell/universe relationships after expansion
   //  - root universe should be empty (no cells leaked from universe unit expansion)
-  //  - expanded universe <name>_real_univ should contain <name>_c2, <name>_c1_unit_real_cell
+  //  - expanded universe <name>_expanded_root should contain <name>_c2, <name>_c1_unit_real_cell
   //    (recursively generated)
   //  - cell <name>_c1_unit_real_cell should use <name>_c1_unit_fill_univ for the cell fill
   //  - <name>_c1_unit_fill_univ should not contain any cells (used only as a fill)
-  std::string exp_univ_name = name + "_real_univ";
+  std::string exp_univ_name = name + "_expanded_root"; // universe eng unit's expanded root universe
+                                                       // should be automatically renamed to this
   auto exp_univ = csg_obj->getUniverseByName(exp_univ_name);
   auto root = csg_obj->getRootUniverse();
   auto exp_cell = csg_obj->getCellByName(name + "_c1_unit_real_cell");

@@ -1424,11 +1424,12 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
 const CSGUniverse &
 CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
 {
+  auto unit_name = unit.getName();
+
   // unit is const because the eng-unit API exposes only const references; re-fetch a mutable
   // reference to the same object from the owning universe list to perform the expansion, which
   // mutates and consumes the unit (expandUnit() is non-const).
-  auto & mutable_unit =
-      static_cast<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit.getName()));
+  auto & mutable_unit = static_cast<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit_name));
 
   // Derived class populates the unit's base object; the root of this base is the expanded universe
   // that will be used to replace this universe unit
@@ -1437,12 +1438,37 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   // Capture the name of the expanded universe (the unit base's root universe) before the join
   // getExpandedUniverse will validate that the root contains cells and was properly
   // implemented/expanded such that incoming cells and universes are all linked to the root.
-  const std::string expanded_name = mutable_unit.getExpandedUniverse().getName();
+  auto & pre_join_univ = mutable_unit.getExpandedUniverse();
+  auto expanded_name = pre_join_univ.getName();
+
+  // Check that the expanded name for the new root universe has been updated to something other than
+  // ROOT_UNIVERSE. If name was not already updated, issue a warning (debug) and update the name
+  // automatically. This only matters if the current root universe is also named ROOT_UNIVERSE
+  // so we only need to check if the name matches the root universe name (rather than explicitly
+  // checking for the name ROOT_UNIVERSE).
+
+  // release the incoming base object to be able to rename if necessary
+  auto unit_base = mutable_unit.releaseBase();
+  if (expanded_name == getRootUniverse().getName())
+  {
+    // root universe must be renamed
+    auto new_expanded_name = unit_name + "_expanded_root";
+#ifdef DEBUG
+    mooseWarning("Universe engineering unit " + unit_name +
+                 " has an expanded root universe named " + expanded_name +
+                 ", which is identical to the name of the current root universe. The expanded "
+                 "universe will be renamed " +
+                 new_expanded_name + ".");
+#endif
+
+    unit_base->renameRootUniverse(new_expanded_name);
+    expanded_name = new_expanded_name;
+  }
 
   // Join the unit's base into this: all objects are transferred and the incoming root is added as
   // a named non-root universe (expanded_name). If the root universe's name is not unique (i.e. it
   // was left named ROOT_UNIVERSE), this will throw an error.
-  joinOtherBase(mutable_unit.releaseBase(), false, expanded_name);
+  joinOtherBase(std::move(unit_base), false, expanded_name);
 
   // must get this by name after joining because the join method rebuilds the universe and the
   // previous reference from getExpandedUniverse is not valid anymore.

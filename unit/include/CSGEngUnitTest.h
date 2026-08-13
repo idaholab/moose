@@ -130,7 +130,6 @@ protected:
     std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
     auto & s1 = _internal_base->addSurface(std::move(s1_ptr));
     _internal_base->createCell(getName() + "_c2", +s1); // goes to root
-    _internal_base->renameRootUniverse(getName() + "_real_univ");
   }
 
 #ifdef MOOSE_UNIT_TEST

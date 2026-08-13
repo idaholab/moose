@@ -138,8 +138,8 @@ TEST(CSGEngUnitTest, testUnivUnit)
 
   /* Test the expandUnit() functionality */
   univ_unit.expandUnit();
-  // getExpandedUniverse() returns the internal base's root universe; check it was renamed
-  ASSERT_TRUE(univ_unit.getBase().getRootUniverse().getName() == new_name + "_real_univ");
+  // getExpandedUniverse() returns the internal base's root universe
+  ASSERT_TRUE(univ_unit.getBase().getRootUniverse() == univ_unit.getExpandedUniverse());
 }
 
 /**
