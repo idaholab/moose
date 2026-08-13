@@ -70,6 +70,15 @@
     compute_devices = 'cpu'
     recover = false
   []
+  [MFEMComplexEigenproblemInhomogeneousBC]
+    type = RunException
+    input = complex_diffusion_eigenproblem.i
+    cli_args = 'BCs/all/coefficient_imag=1.0'
+    expect_err = 'An eigenproblem is homogeneous so only zero-valued essential boundary conditions are meaningful'
+    requirement = 'The system shall report an error if an inhomogeneous essential boundary condition is applied to a complex-valued MFEM eigenproblem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+  []
   [MFEMComplexMagneticEigenproblem]
     type = CSVDiff
     input = complex_magnetic_eigenproblem.i

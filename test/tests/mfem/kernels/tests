@@ -307,6 +307,15 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMEigenproblemInhomogeneousBC]
+    type = RunException
+    input = diffusion_eigenproblem.i
+    cli_args = 'BCs/all/coefficient=1.0'
+    expect_err = 'An eigenproblem is homogeneous so only zero-valued essential boundary conditions are meaningful'
+    requirement = 'The system shall report an error if an inhomogeneous essential boundary condition is applied to an MFEM eigenproblem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+  []
   [MFEMMaxwellEigenproblem]
     type = CSVDiff
     input = maxwell_eigenproblem.i
