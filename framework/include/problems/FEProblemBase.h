@@ -3390,6 +3390,9 @@ protected:
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
   bool _fv_bcs_integrity_check;
 
+  /// Whether to check FV boundary and interface objects against the faces on which they execute
+  const bool _fv_face_integrity_check;
+
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;
 

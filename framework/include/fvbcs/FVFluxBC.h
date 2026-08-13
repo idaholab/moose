@@ -34,6 +34,13 @@ public:
   void computeJacobian(const FaceInfo & fi) override;
   void computeResidualAndJacobian(const FaceInfo & fi) override;
 
+  /**
+   * Check that this boundary condition's variable is defined on exactly one side of the face.
+   *
+   * @return the checked variable face type
+   */
+  FaceInfo::VarFaceNeighbors checkFaceIntegrity(const FaceInfo & fi) const;
+
   /// Update internal structures (normal, face type, etc) for the given face
   void updateCurrentFace(const FaceInfo & fi);
 
