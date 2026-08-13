@@ -345,7 +345,7 @@
                   'is in hydrostatic equilibrium with the far-field aquifer head, even when the '
                   'boundary has vertical extent. The pressure field must remain unchanged after '
                   'one timestep. This test fails with PorousFlowPiecewiseLinearSink and a scalar PT_shift.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC02]
@@ -357,7 +357,7 @@
     requirement = 'PorousFlowAquiferBC shall drain an over-pressured domain toward the aquifer '
                   'reference pressure. After many time constants (t >> tau) the pressure throughout '
                   'the domain shall converge to the aquifer reference pressure.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC03]
@@ -369,7 +369,7 @@
     requirement = 'PorousFlowAquiferBC shall recharge an under-pressured domain from the aquifer. '
                   'After many time constants (t >> tau) the pressure throughout the domain shall '
                   'converge to the aquifer reference pressure.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC04_aquifer]
@@ -381,7 +381,7 @@
     requirement = 'PorousFlowAquiferBC shall converge to the correct steady-state pressure on a '
                   'horizontal boundary when the nodal fluid density from PorousFlow is used for '
                   'the hydrostatic correction.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC04_pls]
@@ -394,7 +394,7 @@
     requirement = 'On a horizontal boundary PorousFlowAquiferBC and PorousFlowPiecewiseLinearSink '
                   'with a matching PT_shift shall converge to pressures within the test tolerance, '
                   'confirming near-equivalence of the two formulations for typical compressibility.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC05]
@@ -409,7 +409,7 @@
                   'on the vertical face sees zero pressure difference and the pressure field '
                   'remains unchanged. This test would fail with PorousFlowPiecewiseLinearSink '
                   'and a scalar PT_shift, which matches the aquifer pressure at only one elevation.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC06_default]
@@ -422,7 +422,7 @@
                   'the conductance from the boundary permeability material property. The '
                   'transient drainage at t = 2*tau shall match the analytic lumped-capacitor '
                   'solution based on the mesh permeability.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC06_override]
@@ -440,7 +440,7 @@
                   'permeability raised 100x but aquifer_permeability set to the original value, '
                   'the transient drainage shall be unchanged, demonstrating both the override '
                   'and that the parameter defaults to the boundary value when absent.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [fv_aquiferBC01]
@@ -454,7 +454,7 @@
                   'vertical and horizontal boundaries alike. Evaluating the aquifer pressure at '
                   'the cell-centroid elevation shall make the pressure field remain unchanged '
                   'after one timestep.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC02_default]
@@ -467,7 +467,7 @@
                   'compute the conductance from the boundary cell permeability material '
                   'property, and the transient drainage shall match the finite-element '
                   'PorousFlowAquiferBC result for the same problem.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC02_override]
@@ -484,7 +484,7 @@
                   'the conductance in place of the boundary cell permeability. With the mesh '
                   'permeability raised 100x but aquifer_permeability set to the original value, '
                   'the transient drainage shall be unchanged.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [aquiferBC_exc_neither]
@@ -492,7 +492,7 @@
     input = aquiferBC_exc.i
     expect_err = 'Either aquifer_head or aquifer_pressure_at_datum must be specified'
     requirement = 'PorousFlowAquiferBC shall report an error when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC_exc_both]
@@ -501,7 +501,7 @@
     cli_args = 'BCs/aquifer_exc/aquifer_head=10 BCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'Specify either aquifer_head or aquifer_pressure_at_datum, not both'
     requirement = 'PorousFlowAquiferBC shall report an error when both aquifer_head and aquifer_pressure_at_datum are specified.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC_exc_head_no_conductance]
@@ -510,7 +510,7 @@
     cli_args = 'BCs/aquifer_exc/aquifer_head=10'
     expect_err = 'aquifer_conductance:.*This parameter must be specified when using the aquifer_head formulation'
     requirement = 'PorousFlowAquiferBC shall report an error when aquifer_head is specified without aquifer_conductance.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC_exc_pressure_no_distance]
@@ -519,7 +519,7 @@
     cli_args = 'BCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'aquifer_distance:.*This parameter must be specified when using the aquifer_pressure_at_datum formulation'
     requirement = 'PorousFlowAquiferBC shall report an error when aquifer_pressure_at_datum is specified without aquifer_distance.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC_exc_negative_distance]
@@ -528,7 +528,7 @@
     cli_args = 'BCs/aquifer_exc/aquifer_pressure_at_datum=1e6 BCs/aquifer_exc/aquifer_distance=-1'
     expect_err = 'aquifer_distance > 0'
     requirement = 'PorousFlowAquiferBC shall report an error when aquifer_distance is non-positive, to prevent division by zero in the conductance formula.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC_exc_perm_with_head]
@@ -537,7 +537,7 @@
     cli_args = 'BCs/aquifer_exc/aquifer_head=10 BCs/aquifer_exc/aquifer_conductance=5e-9 BCs/aquifer_exc/aquifer_permeability=1e-10'
     expect_err = 'aquifer_permeability is only used with the aquifer_pressure_at_datum formulation'
     requirement = 'PorousFlowAquiferBC shall report an error when aquifer_permeability is specified with the aquifer_head formulation, in which the conductance is supplied directly.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [aquiferBC_exc_negative_permeability]
@@ -546,7 +546,7 @@
     cli_args = 'BCs/aquifer_exc/aquifer_pressure_at_datum=1e6 BCs/aquifer_exc/aquifer_distance=20000 BCs/aquifer_exc/aquifer_permeability=-1'
     expect_err = 'aquifer_permeability > 0'
     requirement = 'PorousFlowAquiferBC shall report an error when aquifer_permeability is non-positive.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
   [fv_aquiferBC_exc_neither]
@@ -554,7 +554,7 @@
     input = fv_aquiferBC_exc.i
     expect_err = 'Either aquifer_head or aquifer_pressure_at_datum must be specified'
     requirement = 'FVPorousFlowAquiferBC shall report an error when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC_exc_both]
@@ -563,7 +563,7 @@
     cli_args = 'FVBCs/aquifer_exc/aquifer_head=10 FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'Specify either aquifer_head or aquifer_pressure_at_datum, not both'
     requirement = 'FVPorousFlowAquiferBC shall report an error when both aquifer_head and aquifer_pressure_at_datum are specified.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC_exc_head_no_conductance]
@@ -572,7 +572,7 @@
     cli_args = 'FVBCs/aquifer_exc/aquifer_head=10'
     expect_err = 'aquifer_conductance:.*This parameter must be specified when using the aquifer_head formulation'
     requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_head is specified without aquifer_conductance.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC_exc_pressure_no_distance]
@@ -581,7 +581,7 @@
     cli_args = 'FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'aquifer_distance:.*This parameter must be specified when using the aquifer_pressure_at_datum formulation'
     requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_pressure_at_datum is specified without aquifer_distance.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC_exc_negative_distance]
@@ -590,7 +590,7 @@
     cli_args = 'FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6 FVBCs/aquifer_exc/aquifer_distance=-1'
     expect_err = 'aquifer_distance > 0'
     requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_distance is non-positive, to prevent division by zero in the conductance formula.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC_exc_perm_with_head]
@@ -599,7 +599,7 @@
     cli_args = 'FVBCs/aquifer_exc/aquifer_head=10 FVBCs/aquifer_exc/aquifer_conductance=5e-9 FVBCs/aquifer_exc/aquifer_permeability=1e-10'
     expect_err = 'aquifer_permeability is only used with the aquifer_pressure_at_datum formulation'
     requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_permeability is specified with the aquifer_head formulation, in which the conductance is supplied directly.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [fv_aquiferBC_exc_negative_permeability]
@@ -608,7 +608,7 @@
     cli_args = 'FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6 FVBCs/aquifer_exc/aquifer_distance=20000 FVBCs/aquifer_exc/aquifer_permeability=-1'
     expect_err = 'aquifer_permeability > 0'
     requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_permeability is non-positive.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
   [aquiferBC_s09]
@@ -621,7 +621,7 @@
                   'same conductance. The mass-fraction front advection profile shall be '
                   'identical to s09, confirming that PorousFlowAquiferBC can replace '
                   'PorousFlowPiecewiseLinearSink in this class of problem.'
-    issues = '#0'
+    issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
 []
