@@ -1,0 +1,33 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - ElementFragmentAlgorithm.test1a
+  - ElementFragmentAlgorithm.test1b
+  - ElementFragmentAlgorithm.test2a
+  - ElementFragmentAlgorithm.test2b
+  - ElementFragmentAlgorithm.test3
+  - ElementFragmentAlgorithm.test4
+  - ElementFragmentAlgorithm.test5a
+  - ElementFragmentAlgorithm.test5b
+  - ElementFragmentAlgorithm.test5c
+  - ElementFragmentAlgorithm.test6a
+  - ElementFragmentAlgorithm.test6b
+  - ElementFragmentAlgorithm.test6c
+  - ElementFragmentAlgorithm.test6d
+  - ElementFragmentAlgorithm.test6e
+  - ElementFragmentAlgorithm.test6f
+  - ElementFragmentAlgorithm.test6g
+  - ElementFragmentAlgorithm.test6h
+  - ElementFragmentAlgorithm.test6i
+  - ElementFragmentAlgorithm.test6j
+  - ElementFragmentAlgorithm.test6k
+  - ElementFragmentAlgorithm.test6l
+  - ElementFragmentAlgorithm.test6m
+  - ElementFragmentAlgorithm.test6n
+  - ElementFragmentAlgorithm.test6o
+  - ElementFragmentAlgorithm.test6p
+  - ElementFragmentAlgorithm.test6q
+  - ElementFragmentAlgorithm.test6r
+  - ElementFragmentAlgorithm.test6s
+  - ElementFragmentAlgorithm.test6t
+  - ElementFragmentAlgorithm.test6u
+  - ElementFragmentAlgorithm.test7a

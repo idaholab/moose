@@ -1,0 +1,18 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - ElemExtremaTest.Test
+  - RayTracingAngularQuadratureTest.BasicGetters
+  - RayTracingAngularQuadratureTest.Chebyshev
+  - RayTracingAngularQuadratureTest.Cone2D
+  - RayTracingAngularQuadratureTest.Cone3D
+  - RayTracingAngularQuadratureTest.FullRange2D
+  - RayTracingAngularQuadratureTest.FullRange3D
+  - RayTracingAngularQuadratureTest.HalfRange2D
+  - RayTracingAngularQuadratureTest.HalfRange3D
+  - RayTracingAngularQuadratureTest.gaussLegendre
+  - TraceRayToolsTest.atVertex
+  - TraceRayToolsTest.atVertexOnSide
+  - TraceRayToolsTest.findPointNeighbors
+  - TraceRayToolsTest.isWithinSegment
+  - TraceRayToolsTest.withinEdge
+  - TraceRayToolsTest.withinEdgeOnSide

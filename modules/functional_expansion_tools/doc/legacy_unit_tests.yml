@@ -1,0 +1,25 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - FunctionalExpansionsTest.Cartesian3D
+  - FunctionalExpansionsTest.CartesianConstructor
+  - FunctionalExpansionsTest.cylindricalDuoConstructorAxialX
+  - FunctionalExpansionsTest.cylindricalDuoConstructorAxialY
+  - FunctionalExpansionsTest.cylindricalDuoConstructorAxialZ
+  - FunctionalExpansionsTest.cylindricalDuoEvaluator
+  - FunctionalExpansionsTest.functionalBasisInterfaceCartesian
+  - FunctionalExpansionsTest.functionalBasisInterfaceCylindrical
+  - FunctionalExpansionsTest.hashIntVector
+  - FunctionalExpansionsTest.hashPoint
+  - FunctionalExpansionsTest.hashPointAndTime
+  - FunctionalExpansionsTest.hashRealVector
+  - FunctionalExpansionsTest.hashVararg
+  - FunctionalExpansionsTest.legendreConstructor
+  - FunctionalExpansionsTest.legendreSeriesOrthonormalEvaluation
+  - FunctionalExpansionsTest.legendreSeriesSqrtMuEvaluation
+  - FunctionalExpansionsTest.legendreSeriesStandardEvaluation
+  - FunctionalExpansionsTest.zernikeConstructor
+  - FunctionalExpansionsTest.zernikeSeriesEvaluationXY
+  - FunctionalExpansionsTest.zernikeSeriesEvaluationXZ
+  - FunctionalExpansionsTest.zernikeSeriesEvaluationYZ
+  - FunctionalExpansionsTest.zernikeSeriesSqrtMuEvaluation
+  - FunctionalExpansionsTest.zernikeSeriesStandardEvaluation

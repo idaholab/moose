@@ -21,6 +21,8 @@ LOG = logging.getLogger(__name__)
 from .SQARequirementReport import SQARequirementReport, SQARequirementDiffReport
 from .SQADocumentReport import SQADocumentReport
 from .SQAMooseAppReport import SQAMooseAppReport
+from .SQAUnitTestReport import SQAUnitTestReport
+from .check_unit_test_sqa import discover_unit_test_directories
 
 
 def get_sqa_reports(config_file, app_report=True, doc_report=True, req_report=True):
@@ -99,4 +101,43 @@ def _get_sqa_app_reports(config):
         kwargs.setdefault("title", name)
         reports.append(SQAMooseAppReport(**kwargs))
 
+    return reports
+
+
+def get_sqa_unit_test_reports(root_dir=None):
+    """
+    Build one SQAUnitTestReport per directory containing a unit/src subdirectory.
+
+    Input:
+        root_dir[str]: repository root to scan (default: mooseutils.git_root_dir())
+
+    Output:
+        List of SQAUnitTestReport objects, one per discovered unit/src directory.
+    """
+    root_dir = root_dir or mooseutils.git_root_dir()
+    # Gathered once and filtered per module below. This can't be left to each report's
+    # own tracked_files=None default: 'unit/src/...' is matched at any depth, so scoping
+    # by cwd alone would make the repository-root ('' module) check also sweep in every
+    # other module's nested unit/src directory.
+    tracked_files = list(mooseutils.git_ls_files(root_dir))
+    reports = list()
+    for module_root, legacy_manifest in discover_unit_test_directories(
+        root_dir, tracked_files=tracked_files
+    ):
+        prefix = module_root + "/" if module_root else "unit/"
+        module_tracked = [
+            filename
+            for filename in tracked_files
+            if os.path.relpath(filename, root_dir).replace(os.sep, "/").startswith(prefix)
+        ]
+        reports.append(
+            SQAUnitTestReport(
+                title=module_root or "framework",
+                unit_root=os.path.join(root_dir, module_root)
+                if module_root
+                else root_dir,
+                legacy_manifest=legacy_manifest,
+                tracked_files=module_tracked,
+            )
+        )
     return reports

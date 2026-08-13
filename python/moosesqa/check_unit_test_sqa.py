@@ -386,7 +386,10 @@ def _manifest_lines(filename):
 def _read_legacy_manifest(filename, root_dir):
     relative = os.path.relpath(filename, root_dir).replace(os.sep, "/")
     if not os.path.isfile(filename):
-        return {}, [Diagnostic(relative, 1, "legacy unit-test manifest is missing")]
+        # No manifest means no legacy exemptions, not an error: a directory with no
+        # unit/src GoogleTests has nothing to check, and one with tests and no manifest
+        # simply gets no grandfathering -- every test needs real SQA metadata.
+        return {}, []
 
     try:
         data = mooseutils.yaml_load(filename) or {}
@@ -440,13 +443,49 @@ def _read_legacy_manifest(filename, root_dir):
     return legacy, diagnostics
 
 
+def discover_unit_test_directories(root_dir, tracked_files=None):
+    """
+    Find every directory containing a unit/src subdirectory with GoogleTest sources.
+
+    Output:
+        Sorted list of (module_root, legacy_manifest) tuples, where module_root is the
+        path (relative to root_dir) of the directory containing 'unit/src' (an empty
+        string for the repository root itself), and legacy_manifest is the absolute path
+        to that directory's legacy manifest.
+    """
+    root_dir = os.path.abspath(root_dir)
+    repository_files = _relative_files(root_dir, tracked_files)
+
+    module_roots = set()
+    for relative, _ in repository_files:
+        if UNIT_TEST_SOURCE_RE.fullmatch(relative):
+            unit_directory = _unit_directory(relative)
+            module_roots.add(
+                "" if unit_directory == "unit" else unit_directory[: -len("/unit")]
+            )
+
+    results = []
+    for module_root in sorted(module_roots):
+        if module_root == "":
+            # Core framework unit tests live at the repository root ('unit/'), not under
+            # 'framework/', and there is no top-level 'doc/' directory -- so by convention
+            # their legacy manifest lives alongside framework's own SQA docs instead.
+            legacy_manifest = os.path.join(
+                root_dir, "framework", "doc", "legacy_unit_tests.yml"
+            )
+        else:
+            legacy_manifest = os.path.join(
+                root_dir, module_root, "doc", "legacy_unit_tests.yml"
+            )
+        results.append((module_root, legacy_manifest))
+    return results
+
+
 def check_unit_test_sqa(root_dir, legacy_manifest=None, tracked_files=None):
     """Check GoogleTest declarations against SQA metadata and the legacy manifest."""
     root_dir = os.path.abspath(root_dir)
     if legacy_manifest is None:
-        legacy_manifest = os.path.join(
-            root_dir, "python", "moosesqa", "legacy_unit_tests.yml"
-        )
+        legacy_manifest = os.path.join(root_dir, "doc", "legacy_unit_tests.yml")
     elif not os.path.isabs(legacy_manifest):
         legacy_manifest = os.path.join(root_dir, legacy_manifest)
 

@@ -12,7 +12,11 @@ import tempfile
 import unittest
 
 import mooseutils
-from moosesqa import check_unit_test_sqa, discover_google_tests
+from moosesqa import (
+    check_unit_test_sqa,
+    discover_google_tests,
+    discover_unit_test_directories,
+)
 
 
 class TestDiscoverGoogleTests(unittest.TestCase):
@@ -299,6 +303,67 @@ TEST(ExampleSuite, exampleCase) {}
             2,
         )
 
+    def testNoTestsNoManifest(self):
+        # A directory with nothing to check and no manifest is not an error.
+        diagnostics = check_unit_test_sqa(
+            self.root,
+            legacy_manifest=os.path.join(self.root, "missing.yml"),
+            tracked_files=[],
+        )
+        self.assertEqual(diagnostics, [])
+
+    def testMissingManifestNoGrandfathering(self):
+        # A missing manifest grants no legacy exemptions; every test needs metadata.
+        diagnostics = check_unit_test_sqa(
+            self.root,
+            legacy_manifest=os.path.join(self.root, "missing.yml"),
+            tracked_files=[self.source],
+        )
+        self.assertEqual(len(diagnostics), 1)
+        self.assertIn("has no SQA metadata", diagnostics[0].message)
+        self.assertEqual(diagnostics[0].filename, self.source)
+
+    def testDefaultManifestPath(self):
+        default_manifest = "doc/legacy_unit_tests.yml"
+        self._write(default_manifest, "unit:\n  - ExampleSuite.exampleCase\n")
+        diagnostics = check_unit_test_sqa(
+            self.root, tracked_files=[self.source, default_manifest]
+        )
+        self.assertEqual(diagnostics, [])
+
+
+class TestDiscoverUnitTestDirectories(unittest.TestCase):
+    def setUp(self):
+        self._temporary_directory = tempfile.TemporaryDirectory()
+        self.root = self._temporary_directory.name
+
+    def tearDown(self):
+        self._temporary_directory.cleanup()
+
+    def testRootAndNestedModule(self):
+        tracked = [
+            "unit/src/Example.C",
+            "modules/contact/unit/src/Example.C",
+        ]
+        results = discover_unit_test_directories(self.root, tracked_files=tracked)
+        self.assertEqual(
+            results,
+            [
+                (
+                    "",
+                    os.path.join(
+                        self.root, "framework", "doc", "legacy_unit_tests.yml"
+                    ),
+                ),
+                (
+                    "modules/contact",
+                    os.path.join(
+                        self.root, "modules", "contact", "doc", "legacy_unit_tests.yml"
+                    ),
+                ),
+            ],
+        )
+
 
 class TestRepositoryUnitTestSQA(unittest.TestCase):
     def testRepository(self):
@@ -309,16 +374,34 @@ class TestRepositoryUnitTestSQA(unittest.TestCase):
         new_metadata = os.path.join(root, "unit", "src", "MooseUtilsTest.unit_tests")
         if new_metadata not in tracked:
             tracked.append(new_metadata)
-        diagnostics = check_unit_test_sqa(root, tracked_files=tracked)
-        self.assertEqual(
-            diagnostics,
-            [],
-            "\n"
-            + "\n".join(
-                "{}:{}: {}".format(item.filename, item.line, item.message)
-                for item in diagnostics
-            ),
-        )
+
+        for module_root, legacy_manifest in discover_unit_test_directories(
+            root, tracked_files=tracked
+        ):
+            # Scope to this module's own files -- 'unit/src/' is matched at any depth,
+            # so an unfiltered list would let the root ("") case sweep in every other
+            # module's nested unit/src directory too.
+            prefix = module_root + "/" if module_root else "unit/"
+            module_tracked = [
+                filename
+                for filename in tracked
+                if os.path.relpath(filename, root).replace(os.sep, "/").startswith(
+                    prefix
+                )
+            ]
+            unit_root = os.path.join(root, module_root) if module_root else root
+            diagnostics = check_unit_test_sqa(
+                unit_root, legacy_manifest=legacy_manifest, tracked_files=module_tracked
+            )
+            self.assertEqual(
+                diagnostics,
+                [],
+                "{}:\n".format(module_root or "framework")
+                + "\n".join(
+                    "{}:{}: {}".format(item.filename, item.line, item.message)
+                    for item in diagnostics
+                ),
+            )
 
 
 if __name__ == "__main__":
