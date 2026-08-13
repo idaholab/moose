@@ -25,9 +25,9 @@ public:
   OptimizationReporterTest(const InputParameters & params);
 
   void initialSetup() override;
-  void initialize() override{};
+  void initialize() override {};
   void execute() override;
-  void finalize() override{};
+  void finalize() override {};
 
 private:
   /// Communicator used for operations

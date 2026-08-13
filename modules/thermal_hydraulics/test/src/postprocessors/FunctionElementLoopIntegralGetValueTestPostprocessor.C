@@ -10,7 +10,8 @@
 #include "FunctionElementLoopIntegralGetValueTestPostprocessor.h"
 #include "FunctionElementLoopIntegralUserObject.h"
 
-registerMooseObject("ThermalHydraulicsTestApp", FunctionElementLoopIntegralGetValueTestPostprocessor);
+registerMooseObject("ThermalHydraulicsTestApp",
+                    FunctionElementLoopIntegralGetValueTestPostprocessor);
 
 InputParameters
 FunctionElementLoopIntegralGetValueTestPostprocessor::validParams()

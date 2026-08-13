@@ -114,7 +114,7 @@ getMemoryStats(Stats & stats)
     else
       retval = true;
 
-      // resident size is reported as number of pages in /proc
+    // resident size is reported as number of pages in /proc
 #ifndef __WIN32__
     val[index_resident_size] *= sysconf(_SC_PAGE_SIZE);
 #endif

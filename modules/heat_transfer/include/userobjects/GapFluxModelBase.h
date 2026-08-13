@@ -34,8 +34,8 @@ public:
    */
   virtual ADReal computeFlux() const = 0;
 
-  virtual void finalize() final{};
-  virtual void threadJoin(const UserObject &) final{};
+  virtual void finalize() final {};
+  virtual void threadJoin(const UserObject &) final {};
 
 protected:
   mutable unsigned int _qp;

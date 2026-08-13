@@ -93,7 +93,6 @@ protected:
   ADMaterialProperty<RealVectorValue> & _grad_k;
 
 private:
-
   /// If a constant density should be used (would discard buoyancy effects)
   const bool _use_constant_density;
 };

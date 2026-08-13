@@ -47,10 +47,18 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   const Real rel_pert = REL_PERTURBATION;
   const Real fpert1 = 1 + rel_pert;
   const Real fpert2 = 1 - rel_pert;
-  const Real dvdp_T = (_fp_mix->v_from_p_T(p * fpert1, T, x) - _fp_mix->v_from_p_T(p * fpert2, T, x)) / (2 * rel_pert * p);
-  const Real dvdT_p = (_fp_mix->v_from_p_T(p, T * fpert1, x) - _fp_mix->v_from_p_T(p, T * fpert2, x)) / (2 * rel_pert * T);
-  const Real dsdp_T = (_fp_mix->s_from_p_T(p * fpert1, T, x) - _fp_mix->s_from_p_T(p * fpert2, T, x)) / (2 * rel_pert * p);
-  const Real dsdT_p = (_fp_mix->s_from_p_T(p, T * fpert1, x) - _fp_mix->s_from_p_T(p, T * fpert2, x)) / (2 * rel_pert * T);
+  const Real dvdp_T =
+      (_fp_mix->v_from_p_T(p * fpert1, T, x) - _fp_mix->v_from_p_T(p * fpert2, T, x)) /
+      (2 * rel_pert * p);
+  const Real dvdT_p =
+      (_fp_mix->v_from_p_T(p, T * fpert1, x) - _fp_mix->v_from_p_T(p, T * fpert2, x)) /
+      (2 * rel_pert * T);
+  const Real dsdp_T =
+      (_fp_mix->s_from_p_T(p * fpert1, T, x) - _fp_mix->s_from_p_T(p * fpert2, T, x)) /
+      (2 * rel_pert * p);
+  const Real dsdT_p =
+      (_fp_mix->s_from_p_T(p, T * fpert1, x) - _fp_mix->s_from_p_T(p, T * fpert2, x)) /
+      (2 * rel_pert * T);
   const Real dpdv_s = 1.0 / (dvdp_T - dvdT_p * dsdp_T / dsdT_p);
   const Real c_gold = v * std::sqrt(-dpdv_s);
   REL_TEST(_fp_mix->c_from_p_T(p, T, x), c_gold, REL_TOL_DERIVATIVE);

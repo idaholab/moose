@@ -18,7 +18,7 @@ public:
 
   TestSaveInMesh(const InputParameters & parameters);
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() {};
+  virtual void execute() {};
+  virtual void finalize() {};
 };

@@ -21,6 +21,7 @@ public:
   static InputParameters validParams();
   ReporterTimePointSource(const InputParameters & parameters);
   virtual void addPoints() override;
+
 protected:
   /// time-coordinates from reporter
   const std::vector<Real> & _coordt;
@@ -28,5 +29,4 @@ protected:
 private:
   /// The final time when we want to reverse the time index in function evaluation
   const Real & _reverse_time_end;
-
 };

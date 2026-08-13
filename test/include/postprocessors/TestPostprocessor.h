@@ -31,7 +31,7 @@ public:
   /**
    * These methods are intentionally empty
    */
-  virtual ~TestPostprocessor(){};
+  virtual ~TestPostprocessor() {};
   virtual void initialize() override {}
   virtual void execute() override {}
   ///@}

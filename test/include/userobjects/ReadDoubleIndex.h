@@ -21,9 +21,9 @@ public:
 
   ReadDoubleIndex(const InputParameters & params);
 
-  virtual void initialize(){};
+  virtual void initialize() {};
   virtual void execute();
-  virtual void finalize(){};
+  virtual void finalize() {};
 
 protected:
   const std::vector<std::vector<Real>> & _real_di;

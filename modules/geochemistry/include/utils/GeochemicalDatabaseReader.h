@@ -23,7 +23,7 @@
  */
 struct GeochemistryBasisSpecies
 {
-  GeochemistryBasisSpecies(){};
+  GeochemistryBasisSpecies() {};
 
   std::string name;
   std::map<std::string, Real> elements;
@@ -44,7 +44,7 @@ struct GeochemistryBasisSpecies
  */
 struct GeochemistryEquilibriumSpecies
 {
-  GeochemistryEquilibriumSpecies(){};
+  GeochemistryEquilibriumSpecies() {};
 
   std::string name;
   std::map<std::string, Real> basis_species;
@@ -67,7 +67,7 @@ struct GeochemistryEquilibriumSpecies
  */
 struct GeochemistryMineralSpecies
 {
-  GeochemistryMineralSpecies(){};
+  GeochemistryMineralSpecies() {};
 
   std::string name;
   Real molecular_volume;
@@ -90,7 +90,7 @@ struct GeochemistryMineralSpecies
  */
 struct GeochemistryGasSpecies
 {
-  GeochemistryGasSpecies(){};
+  GeochemistryGasSpecies() {};
 
   std::string name;
   std::map<std::string, Real> basis_species;
@@ -114,7 +114,7 @@ struct GeochemistryGasSpecies
  */
 struct GeochemistryRedoxSpecies
 {
-  GeochemistryRedoxSpecies(){};
+  GeochemistryRedoxSpecies() {};
 
   std::string name;
   std::map<std::string, Real> basis_species;
@@ -133,7 +133,7 @@ struct GeochemistryRedoxSpecies
  */
 struct GeochemistryOxideSpecies
 {
-  GeochemistryOxideSpecies(){};
+  GeochemistryOxideSpecies() {};
 
   std::string name;
   std::map<std::string, Real> basis_species;
@@ -150,7 +150,7 @@ struct GeochemistryOxideSpecies
  */
 struct GeochemistrySurfaceSpecies
 {
-  GeochemistrySurfaceSpecies(){};
+  GeochemistrySurfaceSpecies() {};
 
   std::string name;
   std::map<std::string, Real> basis_species;
@@ -169,7 +169,7 @@ struct GeochemistrySurfaceSpecies
  */
 struct GeochemistryDebyeHuckel
 {
-  GeochemistryDebyeHuckel(){};
+  GeochemistryDebyeHuckel() {};
 
   std::vector<Real> adh;
   std::vector<Real> bdh;
@@ -184,7 +184,7 @@ struct GeochemistryDebyeHuckel
  */
 struct GeochemistryElements
 {
-  GeochemistryElements(){};
+  GeochemistryElements() {};
 
   std::string name;
   Real molecular_weight;
@@ -197,9 +197,9 @@ struct GeochemistryElements
  */
 struct GeochemistryNeutralSpeciesActivity
 {
-  GeochemistryNeutralSpeciesActivity(){};
+  GeochemistryNeutralSpeciesActivity() {};
   GeochemistryNeutralSpeciesActivity(std::vector<std::vector<Real>> coeffs)
-    : a(coeffs[0]), b(coeffs[1]), c(coeffs[2]), d(coeffs[3]){};
+    : a(coeffs[0]), b(coeffs[1]), c(coeffs[2]), d(coeffs[3]) {};
 
   std::vector<Real> a;
   std::vector<Real> b;

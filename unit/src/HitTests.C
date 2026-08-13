@@ -77,7 +77,7 @@ struct LineCase
 class LineWalker : public hit::Walker
 {
 public:
-  LineWalker(int i, const std::vector<int> & want_lines) : _case(i), _want(want_lines){};
+  LineWalker(int i, const std::vector<int> & want_lines) : _case(i), _want(want_lines) {};
   virtual void
   walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
   {

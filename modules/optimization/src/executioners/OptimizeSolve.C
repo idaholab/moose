@@ -163,7 +163,7 @@ OptimizeSolve::taoSolve()
       mooseError("Invalid Tao solve type");
   }
 
-  // Set objective and gradient functions
+    // Set objective and gradient functions
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
   LibmeshPetscCallQ(TaoSetObjective(_tao, objectiveFunctionWrapper, this));
 #else

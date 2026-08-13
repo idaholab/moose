@@ -102,7 +102,7 @@ protected:
   /**
    * Called when the coefficients have been changed
    */
-  virtual void coefficientsChanged(){};
+  virtual void coefficientsChanged() {};
 
   /// An array of integer characteristics that can be used to check compatibility
   std::vector<std::size_t> & _characteristics;

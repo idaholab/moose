@@ -388,8 +388,8 @@ MultiAppGeometricInterpolationTransfer::interpolateTargetPoints(
         dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
         to_solution.set(dof, vals.front());
       } // point
-    }   // auto elem
-  }     // else
+    } // auto elem
+  } // else
 
   to_solution.close();
   to_sys.update();

@@ -216,7 +216,8 @@ Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
     std::transform(_syntax_to_actions.begin(),
                    _syntax_to_actions.end(),
                    std::inserter(_actions_to_syntax, _actions_to_syntax.begin()),
-                   [](const std::pair<std::string, ActionInfo> pair) {
+                   [](const std::pair<std::string, ActionInfo> pair)
+                   {
                      return std::make_pair(pair.second._action,
                                            std::make_pair(pair.first, pair.second._task));
                    });

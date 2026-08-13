@@ -22,7 +22,7 @@ public:
   static InputParameters validParams();
 
   QPointMarker(const InputParameters & parameters);
-  virtual ~QPointMarker(){};
+  virtual ~QPointMarker() {};
 
 protected:
   virtual MarkerValue computeQpMarker();

@@ -52,7 +52,7 @@ public:
   /**
    * Called immediately before partitioning
    */
-  virtual void initialize(MeshBase & /* mesh */){};
+  virtual void initialize(MeshBase & /* mesh */) {};
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;

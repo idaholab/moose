@@ -192,10 +192,8 @@ addScaled(const T & scalar,
 template <
     typename T,
     typename T2,
-    template <typename>
-    class W,
-    template <typename>
-    class W2,
+    template <typename> class W,
+    template <typename> class W2,
     typename std::enable_if<std::is_same<typename W<T>::index_type, unsigned int>::value &&
                                 std::is_same<typename W2<T2>::index_type, unsigned int>::value,
                             int>::type = 0>
@@ -207,10 +205,8 @@ dotProduct(const W<T> & a, const W2<T2> & b)
 
 template <typename T,
           typename T2,
-          template <typename>
-          class W,
-          template <typename>
-          class W2,
+          template <typename> class W,
+          template <typename> class W2,
           typename std::enable_if<std::is_same<typename W<T>::index_type,
                                                std::tuple<unsigned int, unsigned int>>::value &&
                                       std::is_same<typename W2<T2>::index_type,

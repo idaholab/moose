@@ -71,7 +71,7 @@ PorousFlow1PhasePTempl<is_ad>::computeQpProperties()
     (*_grads_qp)[_qp][0] = ds * _gradp_qp_var[_qp];
   }
 
-    // _porepressure is only dependent on _porepressure, and its derivative is 1
+  // _porepressure is only dependent on _porepressure, and its derivative is 1
   if constexpr (!is_ad)
     if (_dictator.isPorousFlowVariable(_porepressure_varnum))
     {
