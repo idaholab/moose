@@ -9,6 +9,7 @@
 
 #include "MortarContactUtils.h"
 
+#include <limits>
 #include <tuple>
 
 namespace Moose
@@ -271,6 +272,56 @@ constraintStateSets(const std::unordered_map<dof_id_type, ConstraintState> & can
     }
   }
   return sets;
+}
+
+Real
+directionalDerivative(const ADReal & q, const std::unordered_map<dof_id_type, Real> & direction)
+{
+  const auto & indices = q.derivatives().nude_indices();
+  const auto & data = q.derivatives().nude_data();
+
+  Real qdot = 0;
+  for (const auto i : index_range(indices))
+  {
+    const auto it = direction.find(indices[i]);
+    if (it != direction.end())
+      qdot += data[i] * it->second;
+  }
+  return qdot;
+}
+
+std::optional<Real>
+eventStepLength(const Real q, const Real qdot)
+{
+  if (qdot == 0)
+    return std::nullopt;
+
+  const Real alpha = -q / qdot;
+  if (alpha > 0 && alpha <= 1)
+    return alpha;
+  return std::nullopt;
+}
+
+std::optional<FirstEventGroup>
+firstEventGroup(const std::unordered_map<dof_id_type, Real> & predicted_alphas,
+                 const Real tau_event)
+{
+  if (predicted_alphas.empty())
+    return std::nullopt;
+
+  Real alpha_min = std::numeric_limits<Real>::max();
+  for (const auto & [dof_id, alpha] : predicted_alphas)
+  {
+    libmesh_ignore(dof_id);
+    alpha_min = std::min(alpha_min, alpha);
+  }
+
+  FirstEventGroup group;
+  group.alpha_min = alpha_min;
+  for (const auto & [dof_id, alpha] : predicted_alphas)
+    if (std::abs(alpha - alpha_min) <= tau_event)
+      group.members.insert(dof_id);
+  return group;
 }
 }
 }
