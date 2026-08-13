@@ -22,14 +22,9 @@ namespace
 bool
 SamePoint(const mfem::IntegrationPoint & a, const mfem::IntegrationPoint & b, const int dim)
 {
-  constexpr mfem::real_t tol = 1e-12;
-  mfem::real_t pa[3], pb[3];
-  a.Get(pa, dim);
-  b.Get(pb, dim);
-  for (int d = 0; d < dim; ++d)
-    if (std::abs(pa[d] - pb[d]) > tol)
-      return false;
-  return std::abs(a.weight - b.weight) < tol;
+  Point p(a.x, dim > 1 ? a.y : 0, dim > 2 ? a.z : 0);
+  Point q(b.x, dim > 1 ? b.y : 0, dim > 2 ? b.z : 0);
+  return MooseUtils::absoluteFuzzyEqual(p, q) && MooseUtils::absoluteFuzzyEqual(a.weight, b.weight);
 }
 }
 
