@@ -25,7 +25,7 @@
   [MFEMScalarQuadratureFunctionOrderMismatch]
     type = RunException
     input = quadrature_function_source.i
-    cli_args = 'QuadratureFunctions/qf_source/order=6'
+    cli_args = 'Functions/qf_source/order=6'
     expect_err = "Set 'order = 2'"
     design = 'MFEMScalarQuadratureFunction.md'
     issues = '#33291'

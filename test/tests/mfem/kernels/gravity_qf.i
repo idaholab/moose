@@ -64,7 +64,7 @@
   []
 []
 
-[QuadratureFunctions]
+[Functions]
   [qf_gravity]
     type = MFEMVectorQuadratureFunction
     vector_coefficient = gravitational_force_density
