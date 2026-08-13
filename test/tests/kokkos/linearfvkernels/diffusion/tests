@@ -58,5 +58,6 @@
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
     max_threads = 1
+    min_slots = 2
   []
 []
