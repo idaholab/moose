@@ -8,6 +8,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import tempfile
 import unittest
 import mock
 import types
@@ -153,6 +154,54 @@ class TestCheck(unittest.TestCase):
         self.assertNotIn("MOOSEAPP REPORT(S)", stdout.getvalue())
         self.assertNotIn("DOCUMENT REPORT(S)", stdout.getvalue())
         self.assertIn("REQUIREMENT REPORT(S)", stdout.getvalue())
+
+    def testCheckUnitReports(self):
+        opt = types.SimpleNamespace(
+            config="sqa_reports.yml",
+            reports=["unit"],
+            dump=None,
+            app_reports=None,
+            req_reports=None,
+            generate=["MooseTestApp"],
+            show_warnings=False,
+        )
+
+        with tempfile.TemporaryDirectory() as unit_root:
+            source = os.path.join(unit_root, "unit", "src", "Example.C")
+            os.makedirs(os.path.dirname(source), exist_ok=True)
+            with open(source, "w", encoding="utf-8") as stream:
+                stream.write("TEST(ExampleSuite, exampleCase) {}\n")
+
+            # PASS: no tracked sources, so nothing to check
+            pass_report = moosesqa.SQAUnitTestReport(
+                title="framework",
+                unit_root=unit_root,
+                legacy_manifest=os.path.join(unit_root, "missing.yml"),
+                tracked_files=[],
+            )
+            with mock.patch(
+                "moosesqa.get_sqa_unit_test_reports", return_value=[pass_report]
+            ):
+                with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
+                    status = check.main(opt)
+            self.assertIn("UNIT TEST REPORT(S)", stdout.getvalue())
+            self.assertFalse(status)
+
+            # ERROR: an undocumented GoogleTest with no legacy manifest
+            error_report = moosesqa.SQAUnitTestReport(
+                title="framework",
+                unit_root=unit_root,
+                legacy_manifest=os.path.join(unit_root, "missing.yml"),
+                tracked_files=[source],
+            )
+            with mock.patch(
+                "moosesqa.get_sqa_unit_test_reports", return_value=[error_report]
+            ):
+                with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
+                    status = check.main(opt)
+            self.assertIn("UNIT TEST REPORT(S)", stdout.getvalue())
+            self.assertIn("has no SQA metadata", stdout.getvalue())
+            self.assertTrue(status)
 
 
 if __name__ == "__main__":

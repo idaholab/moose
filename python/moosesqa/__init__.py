@@ -6,16 +6,21 @@ import logging
 logger = logging.getLogger("moosesqa")
 logger.addHandler(SilentRecordHandler())
 
-from .get_sqa_reports import get_sqa_reports
+from .get_sqa_reports import get_sqa_reports, get_sqa_unit_test_reports
 from .check_syntax import check_syntax, file_is_stub, find_md_file
 from .get_requirements import get_requirements_from_tests, get_requirements_from_file
 from .get_requirements import number_requirements, get_test_specification
 from .check_requirements import check_requirements
-from .check_unit_test_sqa import check_unit_test_sqa, discover_google_tests
+from .check_unit_test_sqa import (
+    check_unit_test_sqa,
+    discover_google_tests,
+    discover_unit_test_directories,
+)
 from .SQAReport import SQAReport
 from .SQADocumentReport import SQADocumentReport
 from .SQARequirementReport import SQARequirementReport, SQARequirementDiffReport
 from .SQAMooseAppReport import SQAMooseAppReport
+from .SQAUnitTestReport import SQAUnitTestReport
 from .Requirement import Requirement, Detail, TestSpecification
 from .LogHelper import LogHelper
 

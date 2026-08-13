@@ -136,12 +136,15 @@ must not receive separate records. A grouped requirement may use nested `detail`
 leaf block must set `type = GoogleTest` and identify exactly one logical declaration with
 `unit_test`.
 
-Run `scripts/check_unit_test_sqa.py` to find missing, duplicate, or stale mappings. Existing unit
-tests that have not yet been documented are listed in
-`python/moosesqa/legacy_unit_tests.yml`. New entries in that manifest are prohibited. To backfill
-an existing test, add its sibling metadata file and remove its manifest entry in the same change.
-A rename is treated as a new test and therefore requires real metadata rather than a renamed legacy
-entry.
+This is checked automatically, per module, by `moosedocs.py check` (the same command run in CI for
+MOOSE and downstream applications). Every directory containing a `unit/src` subdirectory is checked
+independently; existing unit tests that have not yet been documented are listed in that directory's
+own `doc/legacy_unit_tests.yml` (MOOSE's core framework tests, which live in the repository's
+top-level `unit/` directory, use `framework/doc/legacy_unit_tests.yml` instead). New entries in a
+legacy manifest are prohibited. To backfill an existing test, add its sibling metadata file and
+remove its manifest entry in the same change. A rename is treated as a new test and therefore
+requires real metadata rather than a renamed legacy entry. A module with unit tests but no legacy
+manifest receives no grandfathering at all: every one of its tests must have real SQA metadata.
 
 ### 5. Consider Adding a MOOSE Newsletter Entry
 
