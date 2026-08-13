@@ -21,14 +21,15 @@ void
 ComplexEigenproblemEquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(1);
+  _ess_markers.resize(1);
   mfem::ParComplexGridFunction & trial_gf = *(_cmplx_var_ess_constraints.at(0));
-  _global_ess_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-  _global_ess_markers = 0;
+  _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+  _ess_markers.at(0) = 0;
   trial_gf.Update();
   static_cast<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(_trial_var_names.at(0));
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
-  ApplyComplexEssentialBC(_trial_var_names.at(0), trial_gf, _global_ess_markers);
-  trial_gf.FESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(0));
+  ApplyComplexEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
+  trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
 }
 
 void
@@ -40,8 +41,8 @@ ComplexEigenproblemEquationSystem::FormEigenproblemMatrix(mfem::OperatorHandle &
   // Set the real-block diagonal to 1 on essential DoFs. The imaginary-block diagonal must stay 0 so
   // each essential DoF's sub-block of the monolithic [[Re,-Im],[Im,Re]] system is the identity and
   // the assembled matrix remains symmetric for the real-valued solve.
-  slf->real().EliminateEssentialBCDiag(_global_ess_markers, 1.0);
-  slf->imag().EliminateEssentialBCDiag(_global_ess_markers, 0.0);
+  slf->real().EliminateEssentialBCDiag(_ess_markers.at(0), 1.0);
+  slf->imag().EliminateEssentialBCDiag(_ess_markers.at(0), 0.0);
   slf->Finalize();
   std::unique_ptr<mfem::ComplexHypreParMatrix> cmat(slf->ParallelAssemble());
   mfem::HypreParMatrix * sysmat = cmat->GetSystemMatrix();
@@ -80,7 +81,7 @@ ComplexEigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
   // stiffness matrix are set to 1 and the mass matrix BC DoFs are set to a small value eps, such
   // that the eigenvalues associated with these DOFs are ~1/eps.
   // The imaginary part of the mass matrix is zero, is elimination needed?
-  m->real().EliminateEssentialBCDiag(_global_ess_markers, std::numeric_limits<mfem::real_t>::min());
+  m->real().EliminateEssentialBCDiag(_ess_markers.at(0), std::numeric_limits<mfem::real_t>::min());
   m->Finalize();
   std::unique_ptr<mfem::ComplexHypreParMatrix> cmat(m->ParallelAssemble());
   op.Reset(cmat->GetSystemMatrix());

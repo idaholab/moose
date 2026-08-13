@@ -35,7 +35,7 @@ public:
   void BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS);
 
 protected:
-  /// Mark external boundaries as essential for eigenproblem BC elimination
+  /// Mark user-declared essential boundaries for eigenproblem BC elimination
   virtual void ApplyEssentialBCs() override;
 
   /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
@@ -47,7 +47,6 @@ protected:
 private:
   friend class ComplexEigenproblemESProblemOperator;
 
-  mfem::Array<int> _global_ess_markers;
   /// Eigenproblem owning the right-hand-side coefficient, queried at assembly time.
   MFEMEigenproblem & _eigen_problem;
 };

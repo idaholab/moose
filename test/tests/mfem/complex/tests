@@ -59,6 +59,8 @@
     requirement = 'The system shall reject a real-valued primary MFEM variable when the problem uses a complex-valued equation system.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
+    recover = false
+  []
   [MFEMComplexDiffusionEigenproblem]
     type = CSVDiff
     input = complex_diffusion_eigenproblem.i
