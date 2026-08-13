@@ -47,47 +47,36 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
 }
 
 Real
-SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
+  const dof_id_type base_row = row_index / _num_matrices;
   const dof_id_type matrix_index = row_index % _num_matrices;
-
-  if (matrix_index == 0 && col_index == 0)
-  {
-    _row_a = _sampler_a.getNextLocalRow();
-    _row_b = _sampler_b.getNextLocalRow();
-    if (std::equal(_row_a.begin(), _row_a.end(), _row_b.begin()))
-      paramError("sampler_a", "The supplied sampler matrices must not be the same.");
-  }
 
   // M2 Matrix
   if (matrix_index == 0)
-    return _row_b[col_index];
+    return _sampler_b.getSample(base_row, col_index);
 
   // M1 Matrix
   else if (matrix_index == _num_matrices - 1)
-    return _row_a[col_index];
+    return _sampler_a.getSample(base_row, col_index);
 
   // N_-i Matrices
   else if (matrix_index > getNumberOfCols())
   {
     if (col_index == (matrix_index - getNumberOfCols() - 1))
-      return _row_b[col_index];
+      return _sampler_b.getSample(base_row, col_index);
     else
-      return _row_a[col_index];
+      return _sampler_a.getSample(base_row, col_index);
   }
 
   // N_i Matrices
-  else if (matrix_index <= getNumberOfCols())
+  else
   {
     if (col_index == matrix_index - 1)
-      return _row_a[col_index];
+      return _sampler_a.getSample(base_row, col_index);
     else
-      return _row_b[col_index];
+      return _sampler_b.getSample(base_row, col_index);
   }
-
-  mooseError("Invalid row and column index, if you are seeing this Zach messed up because this "
-             "should be impossible to reach.");
-  return 0;
 }
 
 LocalRankConfig

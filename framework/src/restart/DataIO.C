@@ -96,6 +96,8 @@ template <>
 void
 dataStore(std::ostream & stream, std::vector<bool> & v, void * context)
 {
+  std::size_t size = v.size();
+  dataStore(stream, size, nullptr);
   for (bool b : v)
     dataStore(stream, b, context);
 }
@@ -225,6 +227,12 @@ template <>
 void
 dataStore(std::ostream & stream, torch::Tensor & t, void * context)
 {
+  const bool defined = t.defined();
+  dataStore(stream, defined, nullptr);
+
+  if (!defined)
+    return;
+
   const auto tensor = LibtorchUtils::toCPUContiguous(t);
   mooseAssert(tensor.scalar_type() == at::kDouble,
               "Restart storage currently supports only double tensors.");
@@ -466,8 +474,15 @@ template <>
 void
 dataLoad(std::istream & stream, std::vector<bool> & v, void * context)
 {
-  for (bool b : v)
+  std::size_t size = 0;
+  dataLoad(stream, size, nullptr);
+  v.resize(size);
+  for (std::size_t i = 0; i < size; i++)
+  {
+    bool b;
     dataLoad(stream, b, context);
+    v[i] = b;
+  }
 }
 
 template <>
@@ -591,6 +606,14 @@ template <>
 void
 dataLoad(std::istream & stream, torch::Tensor & t, void * context)
 {
+  bool defined = false;
+  dataLoad(stream, defined, nullptr);
+  if (!defined)
+  {
+    t = torch::Tensor(); // undefined tensor
+    return;
+  }
+
   unsigned int rank = 0;
   dataLoad(stream, rank, nullptr);
 

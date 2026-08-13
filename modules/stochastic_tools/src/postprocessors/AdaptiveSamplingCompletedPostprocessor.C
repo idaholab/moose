@@ -31,6 +31,15 @@ AdaptiveSamplingCompletedPostprocessor::AdaptiveSamplingCompletedPostprocessor(
 }
 
 void
+AdaptiveSamplingCompletedPostprocessor::initialSetup()
+{
+  // On recovery, if the sampler already completed, terminate immediately so the
+  // transient loop does not execute an extra step beyond the original run.
+  if (_app.isRecovering() && _sampler.isAdaptiveSamplingCompleted())
+    _fe_problem.terminateSolve();
+}
+
+void
 AdaptiveSamplingCompletedPostprocessor::execute()
 {
   _sampling_completed = _sampler.isAdaptiveSamplingCompleted();

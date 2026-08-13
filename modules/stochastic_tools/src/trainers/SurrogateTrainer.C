@@ -228,7 +228,7 @@ SurrogateTrainer::executeTraining()
   for (_row = _sampler.getLocalRowBegin(); _row < _sampler.getLocalRowEnd(); ++_row)
   {
     // Need to do this manually in order to keep the iterators valid
-    const std::vector<Real> data = _sampler.getNextLocalRow();
+    const std::vector<Real> data = _sampler.getSampleRow(_row);
     for (unsigned int i = 0; i < _row_data.size(); ++i)
       _row_data[i] = data[i];
 
@@ -302,7 +302,7 @@ SurrogateTrainer::crossValidate()
 
     for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
     {
-      const std::vector<Real> row = _sampler.getNextLocalRow();
+      const std::vector<Real> row = _sampler.getSampleRow(p);
       if (skipped_row != _skip_indices.end() && p == *skipped_row)
       {
         for (unsigned int i = 0; i < _row_data.size(); ++i)

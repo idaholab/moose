@@ -11,6 +11,7 @@
 
 #include "Action.h"
 #include "Attributes.h"
+#include "MooseApp.h"
 #include "RestartableDataReader.h"
 #include "RestartableModelInterface.h"
 
@@ -65,20 +66,28 @@ template <typename T>
 void
 LoadModelDataAction<T>::load(const T & object)
 {
-  // Create the object that will load in data
-  RestartableDataReader reader(
-      _app, _app.getRestartableDataMap(object.modelMetaDataName()), _app.forceRestart());
-  reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+  if (object.hasExplicitModelData())
+  {
+    // Create the object that will load in data
+    RestartableDataReader reader(
+        _app, _app.getRestartableDataMap(object.modelMetaDataName()), _app.forceRestart());
+    reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
 
-  // Read the supplied file
-  const std::string filename = object.getModelDataFileName();
-  try
-  {
-    reader.setInput(filename);
-    reader.restore();
+    // Read the supplied file
+    const std::string filename = object.getModelDataFileName();
+    try
+    {
+      reader.setInput(filename);
+      reader.restore();
+    }
+    catch (...)
+    {
+      paramError("filename", "The supplied file '", filename, "' failed to load.");
+    }
   }
-  catch (...)
-  {
-    paramError("filename", "The supplied file '", filename, "' failed to load.");
-  }
+  else if (_app.isRecovering())
+    // Restore model data from the recover checkpoint into the already-declared map
+    _app.possiblyLoadRestartableMetaData(object.modelMetaDataName(),
+                                         _app.getRestartRecoverFileBase() +
+                                             MooseApp::checkpointSuffix());
 }

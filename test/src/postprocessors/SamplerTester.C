@@ -18,8 +18,8 @@ SamplerTester::validParams()
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
   MooseEnum test_type(
-      "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getGlobalSamples "
-      "getLocalSamples getNextLocalRow");
+      "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_row getGlobalSamples "
+      "getLocalSamples getSampleRow");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.suppressParameter<std::vector<OutputName>>("outputs");
@@ -48,11 +48,11 @@ SamplerTester::execute()
   if (_test_type == "getLocalSamples")
     _samples = _sampler.getLocalSamples();
 
-  if (_test_type == "getNextLocalRow")
+  if (_test_type == "getSampleRow")
     for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
-      std::vector<Real> row = _sampler.getNextLocalRow();
+      std::vector<Real> row = _sampler.getSampleRow(i);
 
-  if (_test_type == "rand_global_vs_next")
+  if (_test_type == "rand_global_vs_row")
   {
     mooseAssert(n_processors() == 1, "This test only works on one processor.");
 
@@ -62,7 +62,7 @@ SamplerTester::execute()
     // Iterate through some
     for (dof_id_type i = _sampler.getLocalRowBegin(); i < 7; ++i)
     {
-      std::vector<Real> row = _sampler.getNextLocalRow();
+      std::vector<Real> row = _sampler.getSampleRow(i);
       for (unsigned int j = 0; j < 8; j++)
       {
         assertEqual(row[j], global(i, j));
@@ -75,7 +75,7 @@ SamplerTester::execute()
     // Continue iteration
     for (dof_id_type i = 7; i < _sampler.getLocalRowEnd(); ++i)
     {
-      std::vector<Real> row = _sampler.getNextLocalRow();
+      std::vector<Real> row = _sampler.getSampleRow(i);
       for (unsigned int j = 0; j < 8; j++)
       {
         assertEqual(row[j], global(i, j));
@@ -97,7 +97,7 @@ SamplerTester::execute()
 
       for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
       {
-        std::vector<Real> row = _sampler.getNextLocalRow();
+        std::vector<Real> row = _sampler.getSampleRow(i);
         for (unsigned int j = 0; j < 8; j++)
         {
           assertEqual(row[j], global(i, j));
@@ -126,7 +126,7 @@ SamplerTester::execute()
 
         for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
         {
-          std::vector<Real> row = _sampler.getNextLocalRow();
+          std::vector<Real> row = _sampler.getSampleRow(i);
           for (unsigned int j = 0; j < 8; j++)
           {
             assertEqual(row[j], global(i, j));
@@ -151,7 +151,7 @@ SamplerTester::execute()
 
         for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
         {
-          std::vector<Real> row = _sampler.getNextLocalRow();
+          std::vector<Real> row = _sampler.getSampleRow(i);
           for (unsigned int j = 0; j < 8; j++)
           {
             assertEqual(row[j], global(i, j));
@@ -179,7 +179,7 @@ SamplerTester::execute()
 
         for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
         {
-          std::vector<Real> row = _sampler.getNextLocalRow();
+          std::vector<Real> row = _sampler.getSampleRow(i);
           for (unsigned int j = 0; j < 8; j++)
           {
             assertEqual(row[j], global(i, j));
@@ -202,7 +202,7 @@ SamplerTester::execute()
 
         for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
         {
-          std::vector<Real> row = _sampler.getNextLocalRow();
+          std::vector<Real> row = _sampler.getSampleRow(i);
           for (unsigned int j = 0; j < 8; j++)
           {
             assertEqual(row[j], global(i, j));
@@ -224,7 +224,7 @@ SamplerTester::execute()
 
         for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
         {
-          std::vector<Real> row = _sampler.getNextLocalRow();
+          std::vector<Real> row = _sampler.getSampleRow(i);
           for (unsigned int j = 0; j < 8; j++)
           {
             assertEqual(row[j], global(i, j));

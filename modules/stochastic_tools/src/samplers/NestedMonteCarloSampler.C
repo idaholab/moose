@@ -64,7 +64,7 @@ NestedMonteCarloSampler::NestedMonteCarloSampler(const InputParameters & paramet
 }
 
 Real
-NestedMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+NestedMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   const auto mod = _col_mod[col_index];
   const dof_id_type target_row = std::floor(row_index / mod) * mod;

@@ -43,7 +43,7 @@ InputMatrixSampler::executeSetUp()
 }
 
 Real
-InputMatrixSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+InputMatrixSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   // Checks to make sure that the row and column indices are not out of bounds
   // Static cast to avoid compiler warning and not lose information

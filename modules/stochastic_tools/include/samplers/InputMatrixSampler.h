@@ -28,7 +28,7 @@ public:
 
 protected:
   /// Return the sample for the given row and column
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
 private:
   /// Data read from input
