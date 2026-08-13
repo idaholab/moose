@@ -75,7 +75,7 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
         "mfem_solution_state", &_problem_data))
 {
   // Initialise Hypre for all MFEM problems.
-  mfem::Hypre::Init();
+  initHypre();
   // Disable multithreading for all MFEM problems (including any libMesh or MFEM subapps).
   libMesh::libMeshPrivateData::_n_threads = 1;
 #ifdef LIBMESH_HAVE_OPENMP
