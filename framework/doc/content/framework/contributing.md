@@ -136,8 +136,9 @@ must not receive separate records. A grouped requirement may use nested `detail`
 leaf block must set `type = GoogleTest` and identify exactly one logical declaration with
 `unit_test`.
 
-This is checked automatically, per module, by `moosedocs.py check` (the same command run in CI for
-MOOSE and downstream applications). Every directory containing a `unit/src` subdirectory is checked
+`moosedocs.py check` (the same command run in CI for MOOSE and downstream applications) verifies
+this metadata automatically, per module, matching each logical GoogleTest declaration to its
+sibling `unit_tests` entry. Every directory containing a `unit/src` subdirectory is checked
 independently; existing unit tests that have not yet been documented are listed in that directory's
 own `doc/legacy_unit_tests.yml` (MOOSE's core framework tests, which live in the repository's
 top-level `unit/` directory, use `framework/doc/legacy_unit_tests.yml` instead). New entries in a

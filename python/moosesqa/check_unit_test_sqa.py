@@ -443,6 +443,15 @@ def _read_legacy_manifest(filename, root_dir):
     return legacy, diagnostics
 
 
+def is_moose_repository(root_dir):
+    """
+    Determine whether root_dir is the MOOSE repository itself, as opposed to a
+    downstream application. Used to distinguish the root-level 'unit/' directory's
+    'framework' naming/layout from a downstream app's own repository root.
+    """
+    return os.path.isdir(os.path.join(root_dir, "framework"))
+
+
 def discover_unit_test_directories(root_dir, tracked_files=None):
     """
     Find every directory containing a unit/src subdirectory with GoogleTest sources.
@@ -464,12 +473,15 @@ def discover_unit_test_directories(root_dir, tracked_files=None):
                 "" if unit_directory == "unit" else unit_directory[: -len("/unit")]
             )
 
+    # In the MOOSE repository itself, the root-level 'unit/' directory belongs to
+    # 'framework', which keeps its own 'doc/' elsewhere -- so its legacy manifest lives
+    # under framework/doc instead. Downstream apps have no 'framework/' directory: their
+    # 'unit/' and 'doc/' are both siblings at the repository root, like any other module.
+    is_moose_repo = is_moose_repository(root_dir)
+
     results = []
     for module_root in sorted(module_roots):
-        if module_root == "":
-            # Core framework unit tests live at the repository root ('unit/'), not under
-            # 'framework/', and there is no top-level 'doc/' directory -- so by convention
-            # their legacy manifest lives alongside framework's own SQA docs instead.
+        if module_root == "" and is_moose_repo:
             legacy_manifest = os.path.join(
                 root_dir, "framework", "doc", "legacy_unit_tests.yml"
             )
