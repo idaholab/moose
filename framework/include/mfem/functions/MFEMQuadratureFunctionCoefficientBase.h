@@ -48,19 +48,11 @@ public:
 
   /// Mark the stored values as stale following a change of solution variables, forcing the
   /// source to be re-projected on next use.
-  void MarkSolutionChanged()
-  {
-    if (_update_policy == UpdatePolicy::NONLINEAR)
-      _dirty = true;
-  }
+  void MarkSolutionChanged() { _dirty |= _update_policy == UpdatePolicy::NONLINEAR; }
 
 protected:
   /// Mark the stored values as stale following a change of time.
-  void MarkTimeChanged()
-  {
-    if (_update_policy != UpdatePolicy::NONE)
-      _dirty = true;
-  }
+  void MarkTimeChanged() { _dirty |= _update_policy != UpdatePolicy::NONE; }
 
   /// Verify that the integration point @a ip supplied by a consuming integrator belongs to the
   /// same quadrature rule the values in @a qf are stored on. Errors, naming the quadrature order
