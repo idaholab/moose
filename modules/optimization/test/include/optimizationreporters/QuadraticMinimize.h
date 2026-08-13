@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "OptimizationReporter.h"
+#include "OptimizationReporterBase.h"
 
 /**
  * This form function simply represents a quadratic objective function:
  *    f(x) = val + \sum_{i=1}^N (x_i - a_i)^2
  * where val is the input objective value and a_i is the input solution.
  */
-class QuadraticMinimize : public OptimizationReporter
+class QuadraticMinimize : public OptimizationReporterBase
 {
 public:
   static InputParameters validParams();
@@ -24,6 +24,9 @@ public:
 
   virtual Real computeObjective() override;
   virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const override;
+
+protected:
+  void setICsandBounds() override;
 
 private:
   /// Input objective function value
