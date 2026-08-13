@@ -15,6 +15,7 @@ MOOSE run_tests.
 import argparse
 import logging
 
+from . import init_large_media
 from .commands import build, verify, check, generate, syntax, init
 from .common import log
 
@@ -50,10 +51,15 @@ def command_line_options() -> object:
     return parser.parse_args()
 
 
-def run():
+def run(large_media=True):
     """
     Parse the command line options and run the correct command.
+
+    The large_media kwarg controls whether the large_media submodule is initialized and
+    indexed, see MooseDocs.init_large_media().
     """
+    init_large_media(large_media)
+
     options = command_line_options()
     log.init_logging(getattr(logging, options.level))
 

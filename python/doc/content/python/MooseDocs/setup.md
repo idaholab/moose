@@ -77,13 +77,11 @@ documentation (see [framework/documenting.md]).
 
 By default, MooseDocs initializes and indexes the [large_media](https://github.com/idaholab/large_media)
 submodule, which contains the large image and video assets used by the MOOSE documentation. Applications
-that do not reference any `large_media` content can opt out of this by setting the
-`MOOSEDOCS_LARGE_MEDIA` environment variable to a false value (e.g. `false`, `0`, or `no`) before
-MooseDocs is imported. The most convenient place to do this is the application's `moosedocs.py`
-script, alongside the other environment variables it sets:
+that do not reference any `large_media` content can opt out of this by passing `large_media=False` to
+`main.run()` in the application's `moosedocs.py` script:
 
 ```python
-os.environ.setdefault("MOOSEDOCS_LARGE_MEDIA", "false")
+sys.exit(main.run(large_media=False))
 ```
 
 !alert note title=Only disable if unused
