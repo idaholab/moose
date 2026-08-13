@@ -67,9 +67,6 @@
     symbol_names = 'r p w c'
     symbol_values = 'r p 4 material'
   []
-[]
-
-[QuadratureFunctions]
   [qf_source]
     type = MFEMScalarQuadratureFunction
     coefficient = source
