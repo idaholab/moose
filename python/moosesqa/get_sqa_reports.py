@@ -120,6 +120,12 @@ def get_sqa_unit_test_reports(root_dir=None):
     # by cwd alone would make the repository-root ('' module) check also sweep in every
     # other module's nested unit/src directory.
     tracked_files = list(mooseutils.git_ls_files(root_dir))
+    # Computed once and reused for every module filtered below, rather than recomputing
+    # relpath() for every tracked file on every module iteration (O(modules * files)).
+    relative_tracked = [
+        (filename, os.path.relpath(filename, root_dir).replace(os.sep, "/"))
+        for filename in tracked_files
+    ]
     # For the root-level ("") module, 'framework' is only a meaningful title in the MOOSE
     # repository itself; a downstream app's root-level unit tests are named for its own
     # repository instead.
@@ -133,10 +139,8 @@ def get_sqa_unit_test_reports(root_dir=None):
         prefix = module_root + "/" if module_root else "unit/"
         module_tracked = [
             filename
-            for filename in tracked_files
-            if os.path.relpath(filename, root_dir)
-            .replace(os.sep, "/")
-            .startswith(prefix)
+            for filename, relative in relative_tracked
+            if relative.startswith(prefix)
         ]
         reports.append(
             SQAUnitTestReport(
