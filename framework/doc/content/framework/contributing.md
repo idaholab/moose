@@ -123,7 +123,7 @@ and issue metadata. Place the metadata in a sibling [!ac](HIT) file whose name m
   [camel_case_to_underscore]
     type = GoogleTest
     unit_test = MooseUtils.camelCaseToUnderscore
-    requirement = 'The system shall convert camel-case identifiers to lower-case underscore-separated identifiers.'
+    requirement = 'The system shall convert camel-case identifiers to lower-case, underscore-separated identifiers.'
     design = 'MooseUtils.md'
     issues = '#33325'
   []
@@ -141,7 +141,7 @@ MOOSE and downstream applications). Every directory containing a `unit/src` subd
 independently; existing unit tests that have not yet been documented are listed in that directory's
 own `doc/legacy_unit_tests.yml` (MOOSE's core framework tests, which live in the repository's
 top-level `unit/` directory, use `framework/doc/legacy_unit_tests.yml` instead). New entries in a
-legacy manifest are prohibited. To backfill an existing test, add its sibling metadata file and
+legacy manifest are prohibited. To backfill an existing test, add its sibling metadata file, and
 remove its manifest entry in the same change. A rename is treated as a new test and therefore
 requires real metadata rather than a renamed legacy entry. A module with unit tests but no legacy
 manifest receives no grandfathering at all: every one of its tests must have real SQA metadata.

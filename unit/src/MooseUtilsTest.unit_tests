@@ -2,7 +2,7 @@
   [camel_case_to_underscore]
     type = GoogleTest
     unit_test = MooseUtils.camelCaseToUnderscore
-    requirement = 'The system shall convert camel-case identifiers to lower-case underscore-separated identifiers.'
+    requirement = 'The system shall convert camel-case identifiers to lower-case, underscore-separated identifiers.'
     design = 'MooseUtils.md'
     issues = '#33325'
   []
