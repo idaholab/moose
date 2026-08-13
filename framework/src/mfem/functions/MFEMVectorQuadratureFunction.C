@@ -33,7 +33,6 @@ MFEMVectorQuadratureFunction::MFEMVectorQuadratureFunction(const InputParameters
 {
   mfem::VectorCoefficient & source = getVectorCoefficient("vector_coefficient");
   _qf.SetVDim(source.GetVDim());
-  _qf = 0.0;
   getMFEMProblem().getCoefficients().declareVector<MFEMVectorQuadratureFunctionCoefficient>(
       name(), source, _qf, updatePolicy(), name());
 }

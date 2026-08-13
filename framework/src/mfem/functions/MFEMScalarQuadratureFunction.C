@@ -30,8 +30,6 @@ MFEMScalarQuadratureFunction::validParams()
 MFEMScalarQuadratureFunction::MFEMScalarQuadratureFunction(const InputParameters & parameters)
   : MFEMQuadratureFunctionBase(parameters), _qf(&_qspace)
 {
-  // Zero-initialize the storage; real values are projected lazily on first use.
-  _qf = 0.0;
   getMFEMProblem().getCoefficients().declareScalar<MFEMScalarQuadratureFunctionCoefficient>(
       name(), getScalarCoefficient("coefficient"), _qf, updatePolicy(), name());
 }
