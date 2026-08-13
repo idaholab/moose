@@ -161,6 +161,8 @@ ComputeFrictionalForceLMMechanicalContact::post()
     else
       enforceConstraintOnDof(dof_object);
   }
+
+  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void
@@ -191,6 +193,8 @@ ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     else
       enforceConstraintOnDof(dof_object);
   }
+
+  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void

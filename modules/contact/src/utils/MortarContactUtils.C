@@ -117,6 +117,161 @@ communicateGaps(
   };
   TIMPI::push_parallel_vector_data(communicator, push_back_data, sent_back_action_functor);
 }
+
+ConstraintState
+combineConstraintStates(const ConstraintState a, const ConstraintState b)
+{
+  if (a != b)
+    mooseError("Contradictory constraint state observations for the same degree of freedom: ",
+               static_cast<unsigned int>(a),
+               " vs ",
+               static_cast<unsigned int>(b));
+  return a;
+}
+
+void
+communicateConstraintStates(
+    std::unordered_map<dof_id_type, ConstraintState> & dof_to_state,
+    const std::unordered_map<dof_id_type, processor_id_type> & owner_of,
+    const Parallel::Communicator & communicator,
+    const bool send_data_back)
+{
+  libmesh_parallel_only(communicator);
+  const auto our_proc_id = communicator.rank();
+
+  // We may have constraint-state observations that should go to other processes that own the
+  // dofs. The wire datum stores the enum as its underlying unsigned char, since TIMPI has no
+  // generic StandardType/Packing specialization for an arbitrary enum class.
+  using Datum = std::pair<dof_id_type, unsigned char>;
+  std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
+
+  for (const auto & [dof_id, state] : dof_to_state)
+  {
+    const auto owner = libmesh_map_find(owner_of, dof_id);
+    if (owner == our_proc_id)
+      continue;
+
+    push_data[owner].push_back({dof_id, static_cast<unsigned char>(state)});
+  }
+
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> pid_to_dof_id_for_sending_back;
+
+  // A contradiction is recorded rather than thrown immediately: throwing from inside this
+  // callback would exit the function on only the rank that happens to own the contradicting
+  // dof, before that rank reaches the send-back collective below. Every other rank, having
+  // detected no local contradiction, would then block forever in that collective waiting for a
+  // participant that already unwound its stack. Instead every rank finishes both communication
+  // rounds, agrees via a reduction on whether any rank saw a contradiction, and only then throws
+  // identically everywhere.
+  bool contradiction_detected = false;
+
+  auto action_functor = [our_proc_id,
+                          &dof_to_state,
+                          &pid_to_dof_id_for_sending_back,
+                          &contradiction_detected,
+                          send_data_back](const processor_id_type pid, const std::vector<Datum> & sent_data)
+  {
+    mooseAssert(pid != our_proc_id, "We do not send messages to ourself here");
+    libmesh_ignore(our_proc_id);
+
+    for (const auto & [dof_id, byte] : sent_data)
+    {
+      const auto state = static_cast<ConstraintState>(byte);
+      if (send_data_back)
+        pid_to_dof_id_for_sending_back[pid].push_back(dof_id);
+
+      const auto it = dof_to_state.find(dof_id);
+      if (it == dof_to_state.end())
+        dof_to_state.emplace(dof_id, state);
+      else if (it->second != state)
+        contradiction_detected = true;
+    }
+  };
+
+  TIMPI::push_parallel_vector_data(communicator, push_data, action_functor);
+
+  communicator.max(contradiction_detected);
+  if (contradiction_detected)
+    mooseError("Contradictory constraint state observations for the same degree of freedom.");
+
+  // Now send data back if requested
+  if (!send_data_back)
+    return;
+
+  std::unordered_map<processor_id_type, std::vector<Datum>> push_back_data;
+
+  for (const auto & [pid, dof_ids] : pid_to_dof_id_for_sending_back)
+  {
+    auto & pid_send_data = push_back_data[pid];
+    pid_send_data.reserve(dof_ids.size());
+    for (const auto dof_id : dof_ids)
+    {
+      const auto & canonical_state = libmesh_map_find(dof_to_state, dof_id);
+      pid_send_data.push_back({dof_id, static_cast<unsigned char>(canonical_state)});
+    }
+  }
+
+  auto sent_back_action_functor = [our_proc_id, &dof_to_state](
+                                       const processor_id_type libmesh_dbg_var(pid),
+                                       const std::vector<Datum> & sent_data)
+  {
+    mooseAssert(pid != our_proc_id, "We do not send messages to ourself here");
+    libmesh_ignore(our_proc_id);
+
+    for (const auto & [dof_id, byte] : sent_data)
+      dof_to_state[dof_id] = static_cast<ConstraintState>(byte);
+  };
+  TIMPI::push_parallel_vector_data(communicator, push_back_data, sent_back_action_functor);
+}
+
+ConstraintStateDiff
+symmetricDifference(const std::unordered_map<dof_id_type, ConstraintState> & prev,
+                     const std::unordered_map<dof_id_type, ConstraintState> & curr)
+{
+  ConstraintStateDiff diff;
+  for (const auto & [dof_id, curr_state] : curr)
+  {
+    const auto prev_state = libmesh_map_find(prev, dof_id);
+
+    if (prev_state == ConstraintState::OPEN && curr_state != ConstraintState::OPEN)
+      diff.newly_contact.push_back(dof_id);
+    if (prev_state != ConstraintState::OPEN && curr_state == ConstraintState::OPEN)
+      diff.newly_open.push_back(dof_id);
+    if (curr_state == ConstraintState::CONTACT_STICK &&
+        prev_state != ConstraintState::CONTACT_STICK)
+      diff.newly_stick.push_back(dof_id);
+    if (curr_state == ConstraintState::CONTACT_SLIP && prev_state != ConstraintState::CONTACT_SLIP)
+      diff.newly_slip.push_back(dof_id);
+  }
+  return diff;
+}
+
+ConstraintStateSets
+constraintStateSets(const std::unordered_map<dof_id_type, ConstraintState> & canonical)
+{
+  ConstraintStateSets sets;
+  for (const auto & [dof_id, state] : canonical)
+  {
+    switch (state)
+    {
+      case ConstraintState::OPEN:
+        sets.A_open.insert(dof_id);
+        break;
+      case ConstraintState::CONTACT_STICK:
+        sets.A_contact.insert(dof_id);
+        sets.A_stick.insert(dof_id);
+        break;
+      case ConstraintState::CONTACT_SLIP:
+        sets.A_contact.insert(dof_id);
+        sets.A_slip.insert(dof_id);
+        break;
+      case ConstraintState::CONTACT_UNCLASSIFIED:
+        sets.A_contact.insert(dof_id);
+        break;
+    }
+  }
+  return sets;
+}
 }
 }
 }

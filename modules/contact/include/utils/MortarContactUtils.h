@@ -30,6 +30,7 @@
 #include <array>
 #include <cmath>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace TIMPI
@@ -459,6 +460,72 @@ void communicateGaps(
     bool normalize_c,
     const Parallel::Communicator & communicator,
     bool send_data_back);
+
+/// Classification of a mortar dof's contact/friction state. A CONTACT_UNCLASSIFIED
+/// dof is in closed contact with no friction sub-state (frictionless normal contact);
+/// a frictional formulation instead classifies every closed dof as CONTACT_STICK or
+/// CONTACT_SLIP. The two families never legitimately mix for the same dof id.
+enum class ConstraintState : unsigned char
+{
+  OPEN,
+  CONTACT_STICK,
+  CONTACT_SLIP,
+  CONTACT_UNCLASSIFIED
+};
+
+/// Combine two locally-observed classifications of the same global dof.
+/// Returns the common state if both agree; mooseErrors on any disagreement.
+ConstraintState combineConstraintStates(ConstraintState a, ConstraintState b);
+
+/**
+ * Reconcile rank-local constraint-state observations, keyed by global dof id, into an
+ * identical canonical map on every rank that owns an entry.
+ * @param dof_to_state Map from global dof id to this rank's locally-observed state. Updated
+ * in place with the canonical (reconciled) state for every id this rank had an entry for.
+ * @param owner_of Map from global dof id to its owning rank; must contain an entry for every
+ * id present in dof_to_state (mirrors dof_object->processor_id() in
+ * communicateGaps/communicateVelocities, but this function has no DofObject/mesh dependency
+ * since the payload is a plain classification, not per-dof solution data).
+ * @param communicator Process communicator
+ * @param send_data_back Whether to send the canonical state back to every non-owning rank
+ * that had a local entry for that id
+ */
+void communicateConstraintStates(
+    std::unordered_map<dof_id_type, ConstraintState> & dof_to_state,
+    const std::unordered_map<dof_id_type, processor_id_type> & owner_of,
+    const Parallel::Communicator & communicator,
+    bool send_data_back);
+
+/// Global dof ids whose canonical constraint state changed between two reconciled snapshots.
+/// See symmetricDifference() for exact bucket semantics.
+struct ConstraintStateDiff
+{
+  std::vector<dof_id_type> newly_open, newly_contact, newly_stick, newly_slip;
+};
+
+/**
+ * Identify dofs whose canonical state changed between two reconciled snapshots of the same
+ * dof space (e.g. the same mortar interface, different Newton iteration/timestep). newly_open/
+ * newly_contact measure the open/closed transition; newly_stick/newly_slip measure entry into
+ * that specific sub-state regardless of whether the dof was previously open or already in
+ * contact (so CONTACT_STICK -> CONTACT_SLIP is newly_slip only, while OPEN -> CONTACT_STICK is
+ * both newly_contact and newly_stick). Every id in curr is looked up in prev via
+ * libmesh_map_find, which throws if the two snapshots are not of the same dof space.
+ */
+ConstraintStateDiff symmetricDifference(
+    const std::unordered_map<dof_id_type, ConstraintState> & prev,
+    const std::unordered_map<dof_id_type, ConstraintState> & curr);
+
+/// The four named constraint-state sets, derived from a reconciled canonical map.
+/// A_contact is the disjoint union of A_stick, A_slip, and the CONTACT_UNCLASSIFIED ids.
+struct ConstraintStateSets
+{
+  std::unordered_set<dof_id_type> A_open, A_contact, A_stick, A_slip;
+};
+
+/// Derive the four named sets from a reconciled canonical map.
+ConstraintStateSets constraintStateSets(
+    const std::unordered_map<dof_id_type, ConstraintState> & canonical);
 }
 }
 }
