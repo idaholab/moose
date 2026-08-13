@@ -398,9 +398,9 @@ class TestRepositoryUnitTestSQA(unittest.TestCase):
             module_tracked = [
                 filename
                 for filename in tracked
-                if os.path.relpath(filename, root).replace(os.sep, "/").startswith(
-                    prefix
-                )
+                if os.path.relpath(filename, root)
+                .replace(os.sep, "/")
+                .startswith(prefix)
             ]
             unit_root = os.path.join(root, module_root) if module_root else root
             diagnostics = check_unit_test_sqa(
