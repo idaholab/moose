@@ -47,14 +47,11 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
     print_level = 0
   []
-[]
-
-[Solvers]
   [LOBPCG]
     type = MFEMHypreLOBPCG
     preconditioner = boomeramg

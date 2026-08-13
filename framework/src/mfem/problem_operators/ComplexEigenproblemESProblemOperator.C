@@ -25,8 +25,8 @@ ComplexEigenproblemESProblemOperator::Solve()
 
   auto eigensolver =
       std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(_problem_data.jacobian_solver);
-  eigensolver->SetMassMatrix(_mass_rhs);
-  eigensolver->SetOperator(GetComplexEigenproblemEquationSystem()->_jacobian);
+  eigensolver->SetMassMatrix(*_mass_rhs);
+  eigensolver->SetOperator(*GetComplexEigenproblemEquationSystem()->_jacobian);
   eigensolver->Solve();
   RecoverEigenproblemSolution(eigensolver.get());
 }
