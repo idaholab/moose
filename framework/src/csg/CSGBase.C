@@ -1454,11 +1454,11 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
     // root universe must be renamed
     auto new_expanded_name = unit_name + "_expanded_root";
 #ifdef DEBUG
-    mooseWarning("Universe engineering unit " + unit_name +
-                 " has an expanded root universe named " + expanded_name +
-                 ", which is identical to the name of the current root universe. The expanded "
-                 "universe will be renamed " +
-                 new_expanded_name + ".");
+    mooseInfoRepeated("Universe engineering unit " + unit_name +
+                      " has an expanded root universe named " + expanded_name +
+                      ", which is identical to the name of the current root universe. The expanded "
+                      "universe will be renamed " +
+                      new_expanded_name + ".");
 #endif
 
     unit_base->renameRootUniverse(new_expanded_name);
