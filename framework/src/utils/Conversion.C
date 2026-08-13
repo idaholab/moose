@@ -454,8 +454,10 @@ stringify(SolutionIterationType t)
       return "time";
     case SolutionIterationType::Nonlinear:
       return "nonlinear";
-    case SolutionIterationType::FixedPoint:
-      return "fixed_point";
+    case SolutionIterationType::MultiAppFixedPoint:
+      return "multiapp_fixed_point";
+    case SolutionIterationType::MultiSystemFixedPoint:
+      return "multisystem_fixed_point";
     default:
       mooseError("Unhandled SolutionIterationType");
   }
