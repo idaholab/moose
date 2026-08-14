@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "MortarContactUtils.h"
 #include "NonlinearSystemBase.h"
+#include "LMWeightedGapUserObject.h"
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
@@ -96,8 +97,11 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
     // UserObjectInterface returns const references; this constraint configures the UO before
     // execution.
-    _weighted_gap_uo(const_cast<LMWeightedGapUserObject &>(
-        getUserObject<LMWeightedGapUserObject>("weighted_gap_uo")))
+    _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
+        getUserObject<WeightedGapUserObject>("weighted_gap_uo"))),
+    _lm_weighted_gap_uo(_use_derived_c_normal
+                            ? dynamic_cast<LMWeightedGapUserObject *>(&_weighted_gap_uo)
+                            : nullptr)
 {
   _weighted_gap_uo.includeNodalNormalDerivatives();
 
@@ -119,7 +123,13 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     paramError("c", "The user-supplied normal contact pressure scale must be positive and finite.");
 
   if (_use_derived_c_normal)
+  {
+    if (!_lm_weighted_gap_uo)
+      paramError("weighted_gap_uo",
+                 "'use_derived_c_normal' requires a weighted gap user object derived from "
+                 "LMWeightedGapUserObject.");
     _fe_problem.getNonlinearSystemBase(_sys.number()).requestKSPRightDiagonalScale();
+  }
 }
 
 ADReal
@@ -258,7 +268,7 @@ Real
 ComputeWeightedGapLMMechanicalContact::normalContactScale(const DofObject * const dof) const
 {
   const Real scale = _use_derived_c_normal
-                         ? libmesh_map_find(_weighted_gap_uo.dofToDerivedC(), dof)[0]
+                         ? libmesh_map_find(_lm_weighted_gap_uo->dofToDerivedC(), dof)[0]
                          : _c * (_normalize_c ? 1.0 : contactNormalization());
   if (!std::isfinite(scale) || scale <= 0.0)
     mooseError("Mortar contact requires positive, finite nodal normal pressure scales.");
