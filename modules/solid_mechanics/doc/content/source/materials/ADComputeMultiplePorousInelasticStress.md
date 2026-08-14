@@ -15,7 +15,7 @@ updated by,
 \begin{equation}
   \dot{f} = [1.0 - f] * \dot{\epsilon}_{in}.\text{tr}()
 \end{equation}
-The porosity can then in turn be used by [viscoplasticity methods](ADViscoplasticityStressUpdate.md)
+The porosity can then in turn be used by [viscoplasticity methods](PorousViscoplasticityStressUpdate.md)
 or other porosity dependent materials
 
 Refer to [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md) for the remainder of
