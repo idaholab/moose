@@ -9,53 +9,58 @@
 
 #pragma once
 
-#include "TimeDerivative.h"
+#include "GenericKernel.h"
 #include "PorousFlowDictator.h"
 
 /**
- * Kernel = desorped_mass * d(volumetric_strain)/dt
- * which is not lumped to the nodes
+ * Kernel = desorped_mass * rate_of_solid_volumetric_expansion
+ * where desorped_mass = (1 - porosity) * concentration
  */
-class PorousFlowDesorpedMassVolumetricExpansion : public TimeKernel
+template <bool is_ad>
+class PorousFlowDesorpedMassVolumetricExpansionTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowDesorpedMassVolumetricExpansion(const InputParameters & parameters);
+  PorousFlowDesorpedMassVolumetricExpansionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  /// Derivative of the residual with respect to the PorousFlow variable corresponding to jvar
+  Real computeQpJac(unsigned int jvar) const;
 
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
-  /// The MOOSE variable number of the concentration variable
+  /// MOOSE variable number of the concentration variable
   const unsigned int _conc_var_number;
 
-  /// The concentration variable
-  const VariableValue & _conc;
+  /// Concentration of the desorped species
+  const GenericVariableValue<is_ad> & _conc;
 
-  /// Porosity
-  const MaterialProperty<Real> & _porosity;
+  /// Porosity at the qps
+  const GenericMaterialProperty<Real, is_ad> & _porosity;
 
   /// d(porosity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
   /// d(porosity)/d(grad PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
-  /// strain rate
-  const MaterialProperty<Real> & _strain_rate_qp;
+  /// Strain rate (AD or non-AD depending on is_ad)
+  const GenericMaterialProperty<Real, is_ad> & _strain_rate_qp;
 
   /// d(strain rate)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient>> & _dstrain_rate_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_qp_dvar;
 
-  /**
-   * Derivative of the residual with respect to the Moose variable
-   * with variable number jvar.
-   * @param jvar take the derivative of the mass part of the residual wrt this variable number
-   */
-  Real computeQpJac(unsigned int jvar) const;
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowDesorpedMassVolumetricExpansionTempl<false>
+    PorousFlowDesorpedMassVolumetricExpansion;
+typedef PorousFlowDesorpedMassVolumetricExpansionTempl<true>
+    ADPorousFlowDesorpedMassVolumetricExpansion;

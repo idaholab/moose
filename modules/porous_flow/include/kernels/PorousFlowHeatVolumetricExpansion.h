@@ -9,22 +9,25 @@
 
 #pragma once
 
-#include "TimeDerivative.h"
+#include "PorousFlowLumpedKernelBase.h"
 #include "PorousFlowDictator.h"
 
 /**
- * Kernel = energy_density * d(volumetric_strain)/dt
- * which is lumped to the nodes
+ * Kernel = energy_density * rate_of_solid_volumetric_expansion
+ * where energy_density = (1 - porosity) * rock_energy_density
+ *   + porosity * sum_phases(density_phase * saturation_phase * internal_energy_phase)
+ * The energy density is lumped to the nodes.
  */
-class PorousFlowHeatVolumetricExpansion : public TimeKernel
+template <bool is_ad>
+class PorousFlowHeatVolumetricExpansionTempl : public PorousFlowLumpedKernelBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowHeatVolumetricExpansion(const InputParameters & parameters);
+  PorousFlowHeatVolumetricExpansionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
@@ -43,47 +46,47 @@ protected:
   /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
 
-  /// Porosity
-  const MaterialProperty<Real> & _porosity;
+  /// Porosity at the nodes
+  const GenericMaterialProperty<Real, is_ad> & _porosity;
 
-  /// d(porosity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
+  /// d(porosity)/d(PorousFlow variable) at the nodes
+  const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
-  /// d(porosity)/d(grad PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
+  /// d(porosity)/d(grad PorousFlow variable) at the qps
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
   /// The nearest qp to the node
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
   /// Nodal rock energy density
-  const MaterialProperty<Real> & _rock_energy_nodal;
+  const GenericMaterialProperty<Real, is_ad> & _rock_energy_nodal;
 
   /// d(nodal rock energy density)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _drock_energy_nodal_dvar;
+  const MaterialProperty<std::vector<Real>> * const _drock_energy_nodal_dvar;
 
   /// Nodal fluid density
-  const MaterialProperty<std::vector<Real>> * const _fluid_density;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const _fluid_density;
 
   /// d(nodal fluid density)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
   /// Nodal fluid saturation
-  const MaterialProperty<std::vector<Real>> * const _fluid_saturation_nodal;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const _fluid_saturation_nodal;
 
   /// d(nodal fluid saturation)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_saturation_nodal_dvar;
 
-  /// Internal energy of the phases, evaluated at the nodes
-  const MaterialProperty<std::vector<Real>> * const _energy_nodal;
+  /// Nodal fluid internal energy
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const _energy_nodal;
 
-  /// d(internal energy)/d(PorousFlow variable)
+  /// d(nodal fluid internal energy)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _denergy_nodal_dvar;
 
   /// Strain rate
-  const MaterialProperty<Real> & _strain_rate_qp;
+  const GenericMaterialProperty<Real, is_ad> & _strain_rate_qp;
 
   /// d(strain rate)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient>> & _dstrain_rate_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_qp_dvar;
 
   /**
    * Derivative of energy part of the residual with respect to the Variable
@@ -101,4 +104,10 @@ protected:
    * number
    */
   Real computedVolQpJac(unsigned int jvar);
+
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowHeatVolumetricExpansionTempl<false> PorousFlowHeatVolumetricExpansion;
+typedef PorousFlowHeatVolumetricExpansionTempl<true> ADPorousFlowHeatVolumetricExpansion;

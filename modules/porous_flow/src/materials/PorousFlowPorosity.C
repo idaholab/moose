@@ -163,10 +163,7 @@ PorousFlowPorosityTempl<is_ad>::PorousFlowPorosityTempl(const InputParameters & 
                   : nullptr)
 {
   // PorousFlowAqueousPreDisChemistry and PorousFlowAqueousPreDisMineral are not templated on is_ad,
-  // so the mineral concentration and reaction rate consumed below exist only as non-AD properties.
-  // When those materials are made AD capable, remove this guard, fetch _mineral_conc_old and
-  // _reaction_rate with getGenericMaterialProperty (leaving _dreaction_rate_dvar null for the AD
-  // path), and replace the chemistry/except23 test that covers this error with a Jacobian test.
+  // so the mineral concentration and reaction rate consumed below exist only as non-AD properties
   if constexpr (is_ad)
     if (_chemical)
       this->mooseError(
