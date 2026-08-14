@@ -508,7 +508,7 @@ PorousFlowDarcyBaseTempl<is_ad>::fullyUpwind(JacRes res_or_jac, unsigned int ph,
   std::vector<Real> dtotal_mass_out;
   std::vector<Real> dtotal_in;
 
-  // These accumulate Jacobian columns, so they must be sized by the column variable's 
+  // These accumulate Jacobian columns, so they must be sized by the column variable's
   // DOF count (_phi.size(), not by num_nodes = _test.size() (which is the row variable's)
   if constexpr (!is_ad)
     if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
