@@ -10,13 +10,15 @@
 #include "ComputeLineSearchObjectWrapper.h"
 
 #include "FEProblemBase.h"
+#include "LineSearch.h"
 
-ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
+ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem,
+                                                                unsigned int nl_sys_num)
+  : _fe_problem(fe_problem), _nl_sys_num(nl_sys_num)
 {
 }
 
 void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
 {
-  _fe_problem.lineSearch();
+  _fe_problem.getNonlinearSystemBase(_nl_sys_num).getLineSearch()->lineSearch();
 }

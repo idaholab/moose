@@ -978,8 +978,7 @@ enum LineSearchType
   LS_NONE,
   LS_BASIC,
   LS_SHELL,
-  LS_CONTACT,
-  LS_PROJECT,
+  LS_CUSTOM, ///< an object-based LineSearch is active for this system
   LS_L2,
   LS_BT,
   LS_CP

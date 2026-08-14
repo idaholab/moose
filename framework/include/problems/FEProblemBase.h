@@ -91,7 +91,6 @@ class Distribution;
 class Sampler;
 class KernelBase;
 class IntegratedBCBase;
-class LineSearch;
 class UserObject;
 class UserObjectBase;
 class FVInterpolationMethod;
@@ -809,24 +808,6 @@ public:
    * @param[in] params   Parameters to apply to Convergence parameters
    */
   void addDefaultSteadyStateConvergence(const InputParameters & params);
-
-  /**
-   * add a MOOSE line search
-   */
-  virtual void addLineSearch(const InputParameters & /*parameters*/)
-  {
-    mooseError("Line search not implemented for this problem type yet.");
-  }
-
-  /**
-   * execute MOOSE line search
-   */
-  virtual void lineSearch();
-
-  /**
-   * getter for the MOOSE line search
-   */
-  LineSearch * getLineSearch() override { return _line_search.get(); }
 
   /**
    * The following functions will enable MOOSE to have the capability to import distributions
@@ -3442,8 +3423,6 @@ protected:
 
   /// If or not PETSc options have been added to database
   bool _is_petsc_options_inserted;
-
-  std::shared_ptr<LineSearch> _line_search;
 
   std::unique_ptr<libMesh::ConstElemRange> _evaluable_local_elem_range;
   std::unique_ptr<libMesh::ConstElemRange> _nl_evaluable_local_elem_range;

@@ -151,7 +151,8 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _primary_secondary_jacobian(getParam<bool>("primary_secondary_jacobian")),
     _connected_secondary_nodes_jacobian(getParam<bool>("connected_secondary_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
-    _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(_subproblem.getLineSearch())),
+    _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(
+        _fe_problem.getNonlinearSystemBase(_sys.number()).getLineSearch())),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
     _augmented_lagrange_problem(
         dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem)),

@@ -253,10 +253,8 @@ stringify(const LineSearchType & t)
       return "bt";
     case LS_CP:
       return "cp";
-    case LS_CONTACT:
-      return "contact";
-    case LS_PROJECT:
-      return "project";
+    case LS_CUSTOM:
+      mooseError("LS_CUSTOM is never passed to PETSc and should not be stringified");
     case LS_INVALID:
       mooseError("Invalid LineSearchType");
   }
@@ -319,7 +317,7 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
 
-  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT && ls_type != Moose::LS_PROJECT)
+  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CUSTOM)
     setSinglePetscOptionIfAppropriate(
         dont_add_these_options, prefix_with_dash + "snes_linesearch_type", stringify(ls_type));
 }
@@ -740,26 +738,37 @@ setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & para
     for (const auto i : make_range(fe_problem.numNonlinearSystems()))
       if (fe_problem.solverParams(i)._line_search == Moose::LS_INVALID || line_search != "default")
       {
-        Moose::LineSearchType enum_line_search =
-            Moose::stringToEnum<Moose::LineSearchType>(line_search);
-        fe_problem.solverParams(i)._line_search = enum_line_search;
-        if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT)
-        {
-          NonlinearImplicitSystem * nl_system = dynamic_cast<NonlinearImplicitSystem *>(
-              &fe_problem.getNonlinearSystemBase(i).system());
-          if (!nl_system)
-            mooseError("You've requested a line search but you must be solving an EigenProblem. "
-                       "These two things are not consistent.");
-          PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
-              dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
-          if (!petsc_nonlinear_solver)
-            mooseError("Currently the MOOSE line searches all use Petsc, so you "
-                       "must use Petsc as your non-linear solver.");
-          petsc_nonlinear_solver->linesearch_object =
-              std::make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
-        }
+        // An object-based LineSearch may already be installed on this system by the deprecated
+        // line_search = 'contact'/'project' shim, which runs earlier than this. In that case its
+        // selection is not one of the plain PETSc-passthrough strings in the stringToEnum table,
+        // so skip that lookup entirely. A [LineSearch] block installs its object later (task
+        // add_line_search, after setup_executioner) and attaches it via attachLineSearchObject()
+        // directly from SetupLineSearchAction instead of through this function.
+        if (fe_problem.getNonlinearSystemBase(i).getLineSearch())
+          attachLineSearchObject(fe_problem, i);
+        else
+          fe_problem.solverParams(i)._line_search =
+              Moose::stringToEnum<Moose::LineSearchType>(line_search);
       }
   }
+}
+
+void
+attachLineSearchObject(FEProblemBase & fe_problem, unsigned int nl_sys_num)
+{
+  fe_problem.solverParams(nl_sys_num)._line_search = Moose::LS_CUSTOM;
+  NonlinearImplicitSystem * nl_system = dynamic_cast<NonlinearImplicitSystem *>(
+      &fe_problem.getNonlinearSystemBase(nl_sys_num).system());
+  if (!nl_system)
+    mooseError("You've requested a line search but you must be solving an EigenProblem. "
+               "These two things are not consistent.");
+  PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
+      dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
+  if (!petsc_nonlinear_solver)
+    mooseError("Currently the MOOSE line searches all use Petsc, so you "
+               "must use Petsc as your non-linear solver.");
+  petsc_nonlinear_solver->linesearch_object =
+      std::make_unique<ComputeLineSearchObjectWrapper>(fe_problem, nl_sys_num);
 }
 
 void

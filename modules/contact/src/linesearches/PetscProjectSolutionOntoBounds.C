@@ -28,10 +28,10 @@ PetscProjectSolutionOntoBounds::validParams()
 }
 
 PetscProjectSolutionOntoBounds::PetscProjectSolutionOntoBounds(const InputParameters & parameters)
-  : LineSearch(parameters), _nl(_fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0))
+  : LineSearch(parameters)
 {
   _solver = dynamic_cast<PetscNonlinearSolver<Real> *>(
-      _fe_problem.getNonlinearSystem(/*nl_sys_num=*/0).nonlinearSolver());
+      _fe_problem.getNonlinearSystem(_nl_sys_num).nonlinearSolver());
   if (!_solver)
     mooseError(
         "This line search operates only with Petsc, so Petsc must be your nonlinear solver.");
