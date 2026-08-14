@@ -11,25 +11,11 @@
 
 #include "CSGPlane.h"
 #include "CSGRegion.h"
+#include "CSGRegionTestHelper.h"
 
 #include "MooseUnitUtils.h"
 
 using namespace CSG;
-
-// helper function to convert infix JSON object to string representation
-std::string
-infixJSONToString(nlohmann::json infix_json)
-{
-  auto json_string = infix_json.dump();
-  // Remove quotation marks from string
-  json_string.erase(std::remove(json_string.begin(), json_string.end(), '\"'), json_string.end());
-  // Replace commas with a space
-  std::replace(json_string.begin(), json_string.end(), ',', ' ');
-  // Replace square brackets with parentheses
-  std::replace(json_string.begin(), json_string.end(), '[', '(');
-  std::replace(json_string.begin(), json_string.end(), ']', ')');
-  return json_string;
-}
 
 // Test each type of CSGRegion operator
 TEST(CSGRegionTest, testRegionOperators)
