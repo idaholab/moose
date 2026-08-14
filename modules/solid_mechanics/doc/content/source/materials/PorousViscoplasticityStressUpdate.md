@@ -9,9 +9,7 @@
 `PorousViscoplasticityStressUpdate` uses similar techniques as
 [ADRadialReturnStressUpdate](ADRadialReturnStressUpdate.md) to compute the gauge stress in order to
 correctly calculate the plastic strain in a porous material. `PorousViscoplasticityStressUpdate` must be
-used in conjunction with
-[ADComputeMultiplePorousInelasticStress](ADComputeMultiplePorousInelasticStress.md) in order to capture
-the porosity evolution.
+used in conjunction with [PorosityFromStrain](PorosityFromStrain.md) in order to capturethe porosity evolution.
 
 ### Notation
 
@@ -167,7 +165,7 @@ Once a solution for $\Lambda_n$ is found, the strain rate can be determined usin
 ## Example Input Files
 
 In all cases, `PorousViscoplasticityStressUpdate` must be combined with
-[ADComputeMultiplePorousInelasticStress](ADComputeMultiplePorousInelasticStress.md) in order to
+[PorosityFromStrain](PorosityFromStrain.md) in order to
 calculate the stress and capture the porosity evolution of the material:
 
 !listing modules/solid_mechanics/test/tests/porous_viscoplasticity_stress_update/lps_single.i block=Materials
@@ -178,7 +176,7 @@ variables or variable dependent materials are utilized to calculate coefficient.
 
 If several different stress exponents are required, separate `PorousViscoplasticityStressUpdate` must be
 specified, and combined in
-[ADComputeMultiplePorousInelasticStress](ADComputeMultiplePorousInelasticStress.md):
+[ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md):
 
 Here,  materials calculated by `PorousViscoplasticityStressUpdate` are prepended with `base_name` to
 separate their contributions to the overall system. Note, this is different than the `base_name`
