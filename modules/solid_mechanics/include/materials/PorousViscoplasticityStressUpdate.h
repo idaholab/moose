@@ -112,7 +112,7 @@ protected:
                           const GenericReal<is_ad> & equiv_stress);
 
   /// Hydrostatic stress driving the pore: matrix hydrostatic stress plus bubble pressure.
-  GenericReal<is_ad> effectiveHydroStress() const;
+  virtual GenericReal<is_ad> effectiveHydroStress() const;
 
   /// True when either deviatoric stress or gas/pore hydrostatic stress can drive viscoplasticity.
   bool hasViscoplasticDrive(const GenericReal<is_ad> & equiv_stress) const;
@@ -121,12 +121,12 @@ protected:
   GenericReal<is_ad> gaugeStressScale(const GenericReal<is_ad> & equiv_stress) const;
 
   /// Perform one explicit viscoplastic update over the current local value of _dt.
-  void updateStateOneStep(GenericRankTwoTensor<is_ad> & elastic_strain_increment,
-                          GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
-                          GenericRankTwoTensor<is_ad> & stress,
-                          const GenericRankFourTensor<is_ad> & elasticity_tensor,
-                          const GenericRankTwoTensor<is_ad> & elastic_strain_old,
-                          GenericReal<is_ad> & effective_inelastic_strain_increment);
+  virtual void updateStateOneStep(GenericRankTwoTensor<is_ad> & elastic_strain_increment,
+                                  GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                                  GenericRankTwoTensor<is_ad> & stress,
+                                  const GenericRankFourTensor<is_ad> & elasticity_tensor,
+                                  const GenericRankTwoTensor<is_ad> & elastic_strain_old,
+                                  GenericReal<is_ad> & effective_inelastic_strain_increment);
 
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
   unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
