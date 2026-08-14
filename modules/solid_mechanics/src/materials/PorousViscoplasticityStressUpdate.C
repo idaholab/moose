@@ -192,8 +192,6 @@ bool
 PorousViscoplasticityStressUpdateTempl<is_ad>::hasViscoplasticDrive(
     const GenericReal<is_ad> & equiv_stress) const
 {
-  using std::abs;
-
   if (equiv_stress > _minimum_stress_magnitude)
     return true;
 
@@ -205,8 +203,6 @@ GenericReal<is_ad>
 PorousViscoplasticityStressUpdateTempl<is_ad>::gaugeStressScale(
     const GenericReal<is_ad> & equiv_stress) const
 {
-  using std::abs;
-
   auto scale = equiv_stress;
   const auto hydro_scale = abs(effectiveHydroStress());
 
@@ -263,8 +259,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
     const GenericRankTwoTensor<is_ad> & elastic_strain_old,
     GenericReal<is_ad> & effective_inelastic_strain_increment)
 {
-  using std::sqrt;
-
   // Compute the matrix hydrostatic stress. Positive hydrostatic stress is tension.
   if (_pore_shape == PoreShapeModel::CYLINDRICAL)
     _hydro_stress = (stress(0, 0) + stress(1, 1)) / 2.0;
@@ -310,22 +304,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
 
     effective_inelastic_strain_increment = dpsi_dgauge * _dt;
   }
-
-  const auto new_dev_stress = stress.deviatoric();
-  const auto new_dev_stress_squared = new_dev_stress.doubleContraction(new_dev_stress);
-  const auto new_equiv_stress =
-      new_dev_stress_squared == 0.0 ? 0.0 : sqrt(1.5 * new_dev_stress_squared);
-
-  // Cut timestep if new stress is higher by a non-numerical noise amount. An additive 1 Pa is
-  // utilized ot protect for small differences and if equiv_stresses are zero
-  if (new_equiv_stress > equiv_stress + 1.0)
-    mooseException("In ",
-                   _name,
-                   ": updated equivalent stress (",
-                   MetaPhysicL::raw_value(new_equiv_stress),
-                   ") is greater than initial equivalent stress (",
-                   MetaPhysicL::raw_value(equiv_stress),
-                   "). Increase the number of local substeps or decrease the global time step.");
 }
 
 template <bool is_ad>
@@ -333,10 +311,6 @@ unsigned int
 PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubsteps(
     const GenericRankTwoTensor<is_ad> & stress)
 {
-  using std::ceil;
-  using std::pow;
-  using std::sqrt;
-
   if (_pore_shape == PoreShapeModel::CYLINDRICAL)
     _hydro_stress = (stress(0, 0) + stress(1, 1)) / 2.0;
   else
@@ -368,7 +342,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubsteps(
   if (estimated_effective_increment <= target_increment)
     return 1;
 
-  return static_cast<unsigned int>(ceil(estimated_effective_increment / target_increment));
+  return ceil(estimated_effective_increment / target_increment);
 }
 
 template <bool is_ad>
@@ -407,8 +381,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
 
   _dt = _dt_original / total_number_substeps;
 
-  const auto strain_increment_per_step =
-      strain_increment / static_cast<Real>(total_number_substeps);
+  const auto strain_increment_per_step = strain_increment / total_number_substeps;
 
   GenericRankTwoTensor<is_ad> sub_elastic_strain_old = elastic_strain_old;
   auto sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
@@ -599,10 +572,6 @@ GenericReal<is_ad>
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & equiv_stress, const GenericReal<is_ad> & trial_gauge)
 {
-  using std::abs;
-  using std::cosh;
-  using std::sinh;
-
   const auto effective_hydro_stress = effectiveHydroStress();
   const auto M = abs(effective_hydro_stress) / trial_gauge;
   const auto dM_dtrial_gauge = -M / trial_gauge;
@@ -657,8 +626,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeH(const Real n,
                                                         const GenericReal<is_ad> & M,
                                                         const bool derivative)
 {
-  using std::pow;
-
   const auto mod = pow(M * _pore_shape_factor, (n + 1.0) / n);
 
   if (derivative)
@@ -681,9 +648,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeDGaugeDSigma(
     const GenericRankTwoTensor<is_ad> & dev_stress,
     const GenericRankTwoTensor<is_ad> & /*stress*/)
 {
-  using std::abs;
-  using std::sinh;
-
   const auto effective_hydro_stress = effectiveHydroStress();
   const auto M = abs(effective_hydro_stress) / gauge_stress;
   const auto h = computeH(_power, M);
@@ -745,8 +709,6 @@ void
 PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
     GenericReal<is_ad> & gauge_stress, const GenericReal<is_ad> & equiv_stress)
 {
-  using std::sqrt;
-
   const auto effective_hydro_stress = effectiveHydroStress();
 
   if (_intermediate_porosity == 0.0)
@@ -772,8 +734,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeInelasticStrainIncrement(
     const GenericRankTwoTensor<is_ad> & dev_stress,
     const GenericRankTwoTensor<is_ad> & stress)
 {
-  using std::pow;
-
   computeGaugeStress(gauge_stress, equiv_stress);
 
   dpsi_dgauge = _coefficient[_qp] * pow(gauge_stress, _power);
