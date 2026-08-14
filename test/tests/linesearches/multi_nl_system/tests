@@ -1,0 +1,11 @@
+[Tests]
+  design = 'syntax/LineSearches/index.md'
+  [dispatch]
+    type = RunApp
+    input = multi_nl_system.i
+    expect_out = "(?=.*TestObjectLineSearch 'ls_u' invoked for nl_sys_num 0)(?=.*TestObjectLineSearch 'ls_v' invoked for nl_sys_num 1)"
+    requirement = 'The system shall dispatch each nonlinear system to its own LineSearch object '
+                  'when multiple nonlinear systems each select a LineSearch through a '
+                  '[LineSearch] block, rather than cross-wiring one system to another system.'
+  []
+[]
