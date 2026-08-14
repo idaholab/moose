@@ -167,6 +167,14 @@
     issues = "#10847"
     design = 'PorousFlowAqueousPreDisChemistry.md'
   []
+  [except23]
+    type = RunException
+    input = except23.i
+    expect_err = 'ADPorousFlowPorosity does not support chemical=true: the aqueous precipitation/dissolution materials are not AD'
+    requirement = "The system shall produce an error if a chemistry-dependent porosity is requested with automatic differentiation, because the aqueous precipitation-dissolution materials are not AD."
+    issues = "#10847 #33122"
+    design = 'PorousFlowPorosity.md'
+  []
   [precipitation]
     type = CSVDiff
     input = precipitation.i

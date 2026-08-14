@@ -13,9 +13,11 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowVolumetricStrain);
+registerMooseObject("PorousFlowApp", ADPorousFlowVolumetricStrain);
 
+template <bool is_ad>
 InputParameters
-PorousFlowVolumetricStrain::validParams()
+PorousFlowVolumetricStrainTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addParam<std::string>("base_name",
@@ -32,20 +34,26 @@ PorousFlowVolumetricStrain::validParams()
   return params;
 }
 
-PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & parameters)
+template <bool is_ad>
+PorousFlowVolumetricStrainTempl<is_ad>::PorousFlowVolumetricStrainTempl(
+    const InputParameters & parameters)
   : PorousFlowMaterialVectorBase(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "total_strain")),
     _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
     _ndisp(coupledComponents("displacements")),
     _disp_var_num(coupledIndices("displacements")),
 
-    _vol_strain_rate_qp(declareProperty<Real>("PorousFlow_volumetric_strain_rate_qp")),
-    _dvol_strain_rate_qp_dvar(
-        declareProperty<std::vector<RealGradient>>("dPorousFlow_volumetric_strain_rate_qp_dvar")),
-    _vol_total_strain_qp(declareProperty<Real>("PorousFlow_total_volumetric_strain_qp")),
-    _dvol_total_strain_qp_dvar(
-        declareProperty<std::vector<RealGradient>>("dPorousFlow_total_volumetric_strain_qp_dvar"))
+    _vol_strain_rate_qp(
+        declareGenericProperty<Real, is_ad>("PorousFlow_volumetric_strain_rate_qp")),
+    _dvol_strain_rate_qp_dvar(is_ad ? nullptr
+                                    : &declareProperty<std::vector<RealGradient>>(
+                                          "dPorousFlow_volumetric_strain_rate_qp_dvar")),
+    _vol_total_strain_qp(
+        declareGenericProperty<Real, is_ad>("PorousFlow_total_volumetric_strain_qp")),
+    _dvol_total_strain_qp_dvar(is_ad ? nullptr
+                                     : &declareProperty<std::vector<RealGradient>>(
+                                           "dPorousFlow_total_volumetric_strain_qp_dvar"))
 {
   if (_ndisp != _mesh.dimension())
     paramError("displacements", "The number of variables supplied must match the mesh dimension.");
@@ -54,27 +62,36 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
     mooseError("PorousFlowVolumetricStrain classes are only defined for at_nodes = false");
 }
 
+template <bool is_ad>
 void
-PorousFlowVolumetricStrain::initQpStatefulProperties()
+PorousFlowVolumetricStrainTempl<is_ad>::initQpStatefulProperties()
 {
   _vol_total_strain_qp[_qp] = 0.0;
 }
 
+template <bool is_ad>
 void
-PorousFlowVolumetricStrain::computeQpProperties()
+PorousFlowVolumetricStrainTempl<is_ad>::computeQpProperties()
 {
   _vol_total_strain_qp[_qp] = _total_strain[_qp].trace();
   _vol_strain_rate_qp[_qp] = (_vol_total_strain_qp[_qp] - _total_strain_old[_qp].trace()) / _dt;
 
-  // prepare the derivatives with zeroes
-  _dvol_strain_rate_qp_dvar[_qp].resize(_num_var, RealGradient());
-  _dvol_total_strain_qp_dvar[_qp].resize(_num_var, RealGradient());
-  for (unsigned i = 0; i < _ndisp; ++i)
-    if (_dictator.isPorousFlowVariable(_disp_var_num[i]))
-    {
-      // the i_th displacement is a PorousFlow variable
-      const unsigned int pvar = _dictator.porousFlowVariableNum(_disp_var_num[i]);
-      _dvol_strain_rate_qp_dvar[_qp][pvar](i) = 1.0 / _dt;
-      _dvol_total_strain_qp_dvar[_qp][pvar](i) = 1.0;
-    }
+  if constexpr (!is_ad)
+  {
+    // The AD path carries the derivatives with respect to the displacement variables inside the
+    // AD strain, so only the non-AD path needs to fill in these derivative material properties.
+    (*_dvol_strain_rate_qp_dvar)[_qp].resize(_num_var, RealGradient());
+    (*_dvol_total_strain_qp_dvar)[_qp].resize(_num_var, RealGradient());
+    for (unsigned i = 0; i < _ndisp; ++i)
+      if (_dictator.isPorousFlowVariable(_disp_var_num[i]))
+      {
+        // the i_th displacement is a PorousFlow variable
+        const unsigned int pvar = _dictator.porousFlowVariableNum(_disp_var_num[i]);
+        (*_dvol_strain_rate_qp_dvar)[_qp][pvar](i) = 1.0 / _dt;
+        (*_dvol_total_strain_qp_dvar)[_qp][pvar](i) = 1.0;
+      }
+  }
 }
+
+template class PorousFlowVolumetricStrainTempl<false>;
+template class PorousFlowVolumetricStrainTempl<true>;
