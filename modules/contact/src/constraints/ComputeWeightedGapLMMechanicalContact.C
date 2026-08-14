@@ -269,7 +269,7 @@ ComputeWeightedGapLMMechanicalContact::normalContactScale(const DofObject * cons
 {
   const Real scale = _use_derived_c_normal
                          ? libmesh_map_find(_lm_weighted_gap_uo->dofToDerivedC(), dof)[0]
-                         : _c * (_normalize_c ? 1.0 : contactNormalization());
+                         : _c;
   if (!std::isfinite(scale) || scale <= 0.0)
     mooseError("Mortar contact requires positive, finite nodal normal pressure scales.");
   return scale;
@@ -281,7 +281,8 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   const auto & weighted_gap = *_weighted_gap_ptr;
 
   const Real normal_scale = normalContactScale(dof);
-  const Real c = normal_scale / contactNormalization();
+  const Real c = (_use_derived_c_normal || _normalize_c) ? normal_scale / contactNormalization()
+                                                          : normal_scale;
 
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
