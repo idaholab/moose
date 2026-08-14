@@ -1,0 +1,34 @@
+[Tests]
+  issues = ''
+  design = 'outputs/OutputWarehouse.md'
+  [default_execute_based_on_dependency]
+    type = 'RunApp'
+    input = 'simple_diffusion.i'
+    expect_out = "File found at 'output_FINAL.e'."
+    requirement = 'The system shall support output objects being dependent on other output objects and inherent execution flag by default.'
+  []
+
+  [execute_after_dependency]
+    type = 'RunApp'
+    input = 'simple_diffusion.i'
+    expect_out = "File found at 'output_TIMESTEP_END.e'."
+    cli_args = "Outputs/exodus_out/execute_on='TIMESTEP_END' Outputs/exodus_out/file_base='output_TIMESTEP_END' Outputs/check_output_file/execute_on='FINAL'"
+    requirement = 'The system shall support output objects being dependent on other output objects and allowing them have different execute flags.'
+  []
+
+  [execute_before_dependency]
+    type = 'RunException'
+    input = 'simple_diffusion.i'
+    cli_args = "Outputs/check_output_file/execute_on='TIMESTEP_END' Outputs/exodus_out/file_base='output_FINAL_fail'"
+    expect_err = "OutputFileCheck: File not found at 'output_FINAL_fail.e'."
+    requirement = 'The system shall support the failure of outputs objects dependencies when dependent object execute before the independent object.'
+  []
+
+  [missing_dependency]
+    type = 'RunException'
+    input = 'simple_diffusion.i'
+    cli_args = "Outputs/active='check_output_file'"
+    expect_err = "Output object 'check_output_file' declares a dependency on 'exodus_out' but no output object with that name exists"
+    requirement = 'The system shall support the failure of outputs objects dependencies when the dependency is missing.'
+  []
+[]
