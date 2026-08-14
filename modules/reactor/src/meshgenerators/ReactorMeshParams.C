@@ -41,8 +41,7 @@ ReactorMeshParams::validParams()
       "The boundary ID to set on the outer radial boundary of a CoreMeshGenerator object");
   params.addParam<std::vector<Real>>("axial_regions", "Length of each axial region");
   params.addParam<std::vector<unsigned int>>(
-      "axial_mesh_intervals",
-      "Number of elements in the Z direction for each axial region");
+      "axial_mesh_intervals", "Number of elements in the Z direction for each axial region");
   params.addParam<bool>("region_id_as_block_name", false, "Set block names based on region id");
   params.addParam<bool>(
       "flexible_assembly_stitching",

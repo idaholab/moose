@@ -47,7 +47,7 @@ using namespace libMesh;
 class ExpressionBuilder
 {
 public:
-  ExpressionBuilder(){};
+  ExpressionBuilder() {};
 
   // forward delcarations
   class EBTerm;
@@ -62,7 +62,7 @@ public:
   class EBTermNode
   {
   public:
-    virtual ~EBTermNode(){};
+    virtual ~EBTermNode() {};
     virtual EBTermNode * clone() const = 0;
 
     virtual std::string stringify() const = 0;
@@ -81,7 +81,7 @@ public:
     T _value;
 
   public:
-    EBNumberNode(T value) : _value(value){};
+    EBNumberNode(T value) : _value(value) {};
     virtual EBNumberNode<T> * clone() const { return new EBNumberNode(_value); }
 
     virtual std::string stringify() const;
@@ -94,7 +94,7 @@ public:
     std::string _symbol;
 
   public:
-    EBSymbolNode(std::string symbol) : _symbol(symbol){};
+    EBSymbolNode(std::string symbol) : _symbol(symbol) {};
     virtual EBSymbolNode * clone() const { return new EBSymbolNode(_symbol); }
 
     virtual std::string stringify() const;
@@ -110,7 +110,7 @@ public:
     unsigned long _id;
 
   public:
-    EBTempIDNode(unsigned int id) : _id(id){};
+    EBTempIDNode(unsigned int id) : _id(id) {};
     virtual EBTempIDNode * clone() const { return new EBTempIDNode(_id); }
 
     virtual std::string stringify() const; // returns "[idnumber]"
@@ -121,7 +121,7 @@ public:
   class EBUnaryTermNode : public EBTermNode
   {
   public:
-    EBUnaryTermNode(EBTermNode * subnode) : _subnode(subnode){};
+    EBUnaryTermNode(EBTermNode * subnode) : _subnode(subnode) {};
     virtual ~EBUnaryTermNode() { delete _subnode; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
@@ -151,7 +151,7 @@ public:
     } _type;
 
     EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type)
-      : EBUnaryTermNode(subnode), _type(type){};
+      : EBUnaryTermNode(subnode), _type(type) {};
     virtual EBUnaryFuncTermNode * clone() const
     {
       return new EBUnaryFuncTermNode(_subnode->clone(), _type);
@@ -172,7 +172,7 @@ public:
     } _type;
 
     EBUnaryOpTermNode(EBTermNode * subnode, NodeType type)
-      : EBUnaryTermNode(subnode), _type(type){};
+      : EBUnaryTermNode(subnode), _type(type) {};
     virtual EBUnaryOpTermNode * clone() const
     {
       return new EBUnaryOpTermNode(_subnode->clone(), _type);
@@ -186,7 +186,7 @@ public:
   class EBBinaryTermNode : public EBTermNode
   {
   public:
-    EBBinaryTermNode(EBTermNode * left, EBTermNode * right) : _left(left), _right(right){};
+    EBBinaryTermNode(EBTermNode * left, EBTermNode * right) : _left(left), _right(right) {};
     virtual ~EBBinaryTermNode()
     {
       delete _left;
@@ -221,7 +221,7 @@ public:
     };
 
     EBBinaryOpTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
-      : EBBinaryTermNode(left, right), _type(type){};
+      : EBBinaryTermNode(left, right), _type(type) {};
     virtual EBBinaryOpTermNode * clone() const
     {
       return new EBBinaryOpTermNode(_left->clone(), _right->clone(), _type);
@@ -248,7 +248,7 @@ public:
     } _type;
 
     EBBinaryFuncTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
-      : EBBinaryTermNode(left, right), _type(type){};
+      : EBBinaryTermNode(left, right), _type(type) {};
     virtual EBBinaryFuncTermNode * clone() const
     {
       return new EBBinaryFuncTermNode(_left->clone(), _right->clone(), _type);
@@ -263,7 +263,7 @@ public:
   {
   public:
     EBTernaryTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right)
-      : EBBinaryTermNode(left, right), _middle(middle){};
+      : EBBinaryTermNode(left, right), _middle(middle) {};
     virtual ~EBTernaryTermNode() { delete _middle; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
@@ -282,7 +282,7 @@ public:
     } _type;
 
     EBTernaryFuncTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right, NodeType type)
-      : EBTernaryTermNode(left, middle, right), _type(type){};
+      : EBTernaryTermNode(left, middle, right), _type(type) {};
     virtual EBTernaryFuncTermNode * clone() const
     {
       return new EBTernaryFuncTermNode(_left->clone(), _middle->clone(), _right->clone(), _type);
@@ -366,12 +366,12 @@ public:
     __attribute__((noinline)) EBTerm()
       : _root(new EBTempIDNode(reinterpret_cast<unsigned long long>(this))) {};
 
-    EBTerm(const EBTerm & term) : _root(term.cloneRoot()){};
+    EBTerm(const EBTerm & term) : _root(term.cloneRoot()) {};
     ~EBTerm() { delete _root; };
 
   private:
     // construct a term from a node
-    EBTerm(EBTermNode * root) : _root(root){};
+    EBTerm(EBTermNode * root) : _root(root) {};
 
   public:
     // construct from number or string
@@ -525,7 +525,7 @@ public:
   class EBFunction
   {
   public:
-    EBFunction(){};
+    EBFunction() {};
 
     /// @{
     /// set the temporary argument list which is either used for evaluation

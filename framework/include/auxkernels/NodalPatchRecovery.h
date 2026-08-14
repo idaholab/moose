@@ -28,7 +28,7 @@ public:
   static InputParameters validParams();
 
   NodalPatchRecovery(const InputParameters & parameters);
-  virtual ~NodalPatchRecovery(){};
+  virtual ~NodalPatchRecovery() {};
   /**
    * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
    * material properties

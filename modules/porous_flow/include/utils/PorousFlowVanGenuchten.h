@@ -194,10 +194,10 @@ struct LowCapillaryPressureExtension
     : strategy(LowCapillaryPressureExtension::NONE),
       S(0.0),
       Pc(std::numeric_limits<Real>::max()),
-      dPc(std::numeric_limits<Real>::lowest()){};
+      dPc(std::numeric_limits<Real>::lowest()) {};
 
   LowCapillaryPressureExtension(const ExtensionStrategy & strategy, Real S, Real Pc, Real dPc)
-    : strategy(strategy), S(S), Pc(Pc), dPc(dPc){};
+    : strategy(strategy), S(S), Pc(Pc), dPc(dPc) {};
 };
 
 /**
@@ -224,10 +224,10 @@ struct HighCapillaryPressureExtension
     : strategy(HighCapillaryPressureExtension::NONE),
       S(1.0),
       Pc(0.0),
-      dPc(std::numeric_limits<Real>::lowest()){};
+      dPc(std::numeric_limits<Real>::lowest()) {};
 
   HighCapillaryPressureExtension(const ExtensionStrategy & strategy, Real S, Real Pc, Real dPc)
-    : strategy(strategy), S(S), Pc(Pc), dPc(dPc){};
+    : strategy(strategy), S(S), Pc(Pc), dPc(dPc) {};
 };
 
 /**

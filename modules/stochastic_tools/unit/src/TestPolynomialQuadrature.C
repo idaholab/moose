@@ -50,7 +50,7 @@ TEST(PolynomialQuadrature, legendre)
   {
     EXPECT_NEAR(xq[n], xq_ref[n], tol);
     EXPECT_NEAR(wq[n], wq_ref[n], tol);
-    }
+  }
 }
 
 TEST(PolynomialQuadrature, hermite)

@@ -20,7 +20,7 @@ public:
   static InputParameters validParams();
 
   DotCouplingKernel(const InputParameters & parameters);
-  virtual ~DotCouplingKernel(){};
+  virtual ~DotCouplingKernel() {};
 
 protected:
   virtual Real computeQpResidual() override;

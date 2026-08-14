@@ -38,7 +38,7 @@ public:
 
   PorousFlowCapillaryPressure(const InputParameters & parameters);
 
-  virtual void initialize() final{};
+  virtual void initialize() final {};
   virtual void initialSetup() override;
 
   /**

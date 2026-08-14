@@ -77,13 +77,13 @@ public:
   struct EBSDPointDataFunctor
   {
     virtual Real operator()(const EBSDPointData &) = 0;
-    virtual ~EBSDPointDataFunctor(){};
+    virtual ~EBSDPointDataFunctor() {};
   };
   /// Access functor base class for EBSDAvgData
   struct EBSDAvgDataFunctor
   {
     virtual Real operator()(const EBSDAvgData &) = 0;
-    virtual ~EBSDAvgDataFunctor(){};
+    virtual ~EBSDAvgDataFunctor() {};
   };
 
   // List of specialized access functors (one for each field in EBSDPointData)

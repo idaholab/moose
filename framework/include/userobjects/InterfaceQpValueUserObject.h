@@ -19,7 +19,7 @@ class InterfaceQpValueUserObject : public InterfaceQpUserObjectBase
 public:
   static InputParameters validParams();
   InterfaceQpValueUserObject(const InputParameters & parameters);
-  virtual ~InterfaceQpValueUserObject(){};
+  virtual ~InterfaceQpValueUserObject() {};
 
 protected:
   virtual Real computeRealValue(const unsigned int qp) override;

@@ -158,7 +158,7 @@ ElectrochemicalDefectMaterial::computeQpProperties()
         }
       }
       break;
-    }       // case 0; // PARABOLIC
+    } // case 0; // PARABOLIC
     case 1: // DILUTE
     {
       Real n_exp = std::exp((_w[_qp] - _z * _e * _v[_qp] * _v_scale) / _kB / _temp[_qp]);
@@ -177,13 +177,13 @@ ElectrochemicalDefectMaterial::computeQpProperties()
         }
       }
       break;
-    }       // case 1: // DILUTE
+    } // case 1: // DILUTE
     case 2: // IDEAL
     {
       mooseError("Ideal solution in solid is not yet supported in ElectrochemicalDefectMaterial");
       break;
     } // case 2: // IDEAL
-  }   // switch (_solid_energy)
+  } // switch (_solid_energy)
 
   // Calculate the susceptibilities
   _chi[_qp] = _hs[_qp] * _dnsdw[_qp] + _hv[_qp] * _dnvdw[_qp];

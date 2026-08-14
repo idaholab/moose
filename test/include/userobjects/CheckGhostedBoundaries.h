@@ -21,11 +21,11 @@ public:
 
   CheckGhostedBoundaries(const InputParameters & params);
 
-  virtual void initialSetup(){};
+  virtual void initialSetup() {};
 
-  virtual void initialize(){};
+  virtual void initialize() {};
   virtual void execute();
-  virtual void finalize(){};
+  virtual void finalize() {};
 
 private:
   dof_id_type _total_num_bdry_sides;

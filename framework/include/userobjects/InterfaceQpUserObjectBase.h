@@ -29,12 +29,12 @@ public:
   static MooseEnum valueOptions() { return MooseEnum("value rate increment", "value"); }
 
   InterfaceQpUserObjectBase(const InputParameters & parameters);
-  virtual ~InterfaceQpUserObjectBase(){};
+  virtual ~InterfaceQpUserObjectBase() {};
   virtual void initialSetup() override;
-  virtual void initialize() override{};
+  virtual void initialize() override {};
   virtual void execute() override;
-  virtual void finalize() override{};
-  virtual void threadJoin(const UserObject & /*uo*/) override{};
+  virtual void finalize() override {};
+  virtual void threadJoin(const UserObject & /*uo*/) override {};
 
   /**
    * method returning the quadrature point value

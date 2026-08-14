@@ -19,7 +19,7 @@ public:
   static InputParameters validParams();
 
   CircleMarker(const InputParameters & parameters);
-  virtual ~CircleMarker(){};
+  virtual ~CircleMarker() {};
 
 protected:
   virtual MarkerValue computeElementMarker();
