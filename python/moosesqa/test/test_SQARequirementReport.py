@@ -7,6 +7,8 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
+import os
+import tempfile
 import unittest
 import mock
 import logging
@@ -81,6 +83,32 @@ class TestSQARequirementReport(unittest.TestCase):
         self.assertIn("log_empty_design: 1", r)
         self.assertIn("log_empty_issues: 1", r)
         self.assertIn("log_duplicate_requirement: 2", r)
+
+    @mock.patch("mooseutils.colorText", side_effect=lambda t, c, **kwargs: t)
+    def testMissingDirectories(self, color_text):
+        missing = tempfile.mkdtemp()
+        os.rmdir(missing)
+
+        # 'directories' with a missing entry: skipped, valid entries still used
+        reporter = SQARequirementReport(
+            title="moosesqa",
+            directories=[missing, "python/moosesqa/test"],
+        )
+        r = reporter.getReport()
+        self.assertEqual(reporter.status, SQAReport.Status.WARNING)
+        self.assertIn("moosesqa WARNING", r)
+
+        # 'working_dirs' with a missing entry: skipped, no crash
+        reporter = SQARequirementReport(
+            title="moosesqa",
+            directories=["python/moosesqa/test"],
+            working_dirs=[
+                missing,
+                os.path.join(mooseutils.git_root_dir(), "python/doc/content"),
+            ],
+        )
+        r = reporter.getReport()
+        self.assertEqual(reporter.status, SQAReport.Status.WARNING)
 
 
 if __name__ == "__main__":
