@@ -27,11 +27,14 @@ MortarMeshUpdateTestProblem::MortarMeshUpdateTestProblem(const InputParameters &
 void
 MortarMeshUpdateTestProblem::computeJacobianTags(const std::set<TagID> & tags)
 {
+  // Only the standalone scaling Jacobian is expected to rebuild the displaced mortar mesh; ordinary
+  // Jacobian evaluations are preceded by a residual evaluation that already did so.
+  const bool computing_scaling = computingScalingJacobian();
   _updated_mortar_mesh = false;
   FEProblem::computeJacobianTags(tags);
 
-  if (!_updated_mortar_mesh)
-    mooseError("The displaced mortar mesh was not rebuilt during Jacobian assembly.");
+  if (computing_scaling && !_updated_mortar_mesh)
+    mooseError("The displaced mortar mesh was not rebuilt during the scaling Jacobian evaluation.");
 }
 
 void

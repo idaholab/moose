@@ -106,7 +106,7 @@
     design = 'FEProblemBase.md AutomaticMortarGeneration.md'
     issues = '#33503'
     requirement = 'The system shall rebuild displaced mortar segment meshes after updating the '
-                  'displaced parent mesh during standalone Jacobian assembly.'
+                  'displaced parent mesh when assembling a standalone automatic-scaling Jacobian.'
   []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
