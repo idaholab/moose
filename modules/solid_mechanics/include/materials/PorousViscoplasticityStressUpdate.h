@@ -10,15 +10,17 @@
 #pragma once
 
 #include "ViscoplasticityStressUpdateBase.h"
-#include "ADSingleVariableReturnMappingSolution.h"
+#include "SingleVariableReturnMappingSolution.h"
 
-class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase,
-                                      public ADSingleVariableReturnMappingSolution
+template <bool is_ad>
+class PorousViscoplasticityStressUpdateTempl
+  : public ViscoplasticityStressUpdateBaseTempl<is_ad>,
+    public SingleVariableReturnMappingSolutionTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ADViscoplasticityStressUpdate(const InputParameters & parameters);
+  PorousViscoplasticityStressUpdateTempl(const InputParameters & parameters);
 
   enum class SubsteppingType
   {
@@ -26,38 +28,41 @@ public:
     INCREMENT_BASED
   };
 
-  using ADViscoplasticityStressUpdateBase::updateState;
+  virtual void updateState(
+      GenericRankTwoTensor<is_ad> & strain_increment,
+      GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & rotation_increment,
+      GenericRankTwoTensor<is_ad> & stress_new,
+      const RankTwoTensor & stress_old,
+      const GenericRankFourTensor<is_ad> & elasticity_tensor,
+      const RankTwoTensor & elastic_strain_old,
+      bool compute_full_tangent_operator = false,
+      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
 
-  virtual void updateState(ADRankTwoTensor & strain_increment,
-                           ADRankTwoTensor & inelastic_strain_increment,
-                           const ADRankTwoTensor & rotation_increment,
-                           ADRankTwoTensor & stress_new,
-                           const RankTwoTensor & stress_old,
-                           const ADRankFourTensor & elasticity_tensor,
-                           const RankTwoTensor & elastic_strain_old,
-                           bool compute_full_tangent_operator = false,
-                           RankFourTensor & tangent_operator = _identityTensor) override;
-
-  virtual void updateStateSubstep(ADRankTwoTensor & strain_increment,
-                                  ADRankTwoTensor & inelastic_strain_increment,
-                                  const ADRankTwoTensor & rotation_increment,
-                                  ADRankTwoTensor & stress_new,
-                                  const RankTwoTensor & stress_old,
-                                  const ADRankFourTensor & elasticity_tensor,
-                                  const RankTwoTensor & elastic_strain_old,
-                                  bool compute_full_tangent_operator = false,
-                                  RankFourTensor & tangent_operator = _identityTensor) override;
+  virtual void updateStateSubstep(
+      GenericRankTwoTensor<is_ad> & strain_increment,
+      GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & rotation_increment,
+      GenericRankTwoTensor<is_ad> & stress_new,
+      const RankTwoTensor & stress_old,
+      const GenericRankFourTensor<is_ad> & elasticity_tensor,
+      const RankTwoTensor & elastic_strain_old,
+      bool compute_full_tangent_operator = false,
+      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
 
   virtual bool substeppingCapabilityEnabled() override;
   virtual bool substeppingCapabilityRequested() override;
   virtual void resetIncrementalMaterialProperties() override;
 
-  virtual ADReal minimumPermissibleValue(const ADReal & effective_trial_stress) const override;
+  virtual GenericReal<is_ad>
+  minimumPermissibleValue(const GenericReal<is_ad> & effective_trial_stress) const override;
 
-  virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const override;
+  virtual GenericReal<is_ad>
+  maximumPermissibleValue(const GenericReal<is_ad> & effective_trial_stress) const override;
 
-  virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
-                                        const ADReal & scalar_effective_inelastic_strain) override;
+  virtual Real
+  computeReferenceResidual(const GenericReal<is_ad> & effective_trial_stress,
+                           const GenericReal<is_ad> & scalar_effective_inelastic_strain) override;
 
 protected:
   /**
@@ -67,17 +72,19 @@ protected:
    * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual ADReal initialGuess(const ADReal & effective_trial_stress) override;
+  virtual GenericReal<is_ad>
+  initialGuess(const GenericReal<is_ad> & effective_trial_stress) override;
 
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
-  virtual ADReal computeResidual(const ADReal & effective_trial_stress,
-                                 const ADReal & scalar) override;
+  virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
+                                             const GenericReal<is_ad> & scalar) override;
 
-  virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
-                                   const ADReal & /*scalar*/) override
+  virtual GenericReal<is_ad>
+  computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
+                    const GenericReal<is_ad> & /*scalar*/) override
   {
     return _derivative;
   }
@@ -85,45 +92,57 @@ protected:
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
-  ADReal computeH(const Real n, const ADReal & gauge_stress, const bool derivative = false);
+  GenericReal<is_ad>
+  computeH(const Real n, const GenericReal<is_ad> & gauge_stress, const bool derivative = false);
 
-  ADRankTwoTensor computeDGaugeDSigma(const ADReal & gauge_stress,
-                                      const ADReal & equiv_stress,
-                                      const ADRankTwoTensor & dev_stress,
-                                      const ADRankTwoTensor & stress);
+  GenericRankTwoTensor<is_ad> computeDGaugeDSigma(const GenericReal<is_ad> & gauge_stress,
+                                                  const GenericReal<is_ad> & equiv_stress,
+                                                  const GenericRankTwoTensor<is_ad> & dev_stress,
+                                                  const GenericRankTwoTensor<is_ad> & stress);
 
-  void computeInelasticStrainIncrement(ADReal & gauge_stress,
-                                       ADReal & dpsi_dgauge,
-                                       ADRankTwoTensor & creep_strain_increment,
-                                       const ADReal & equiv_stress,
-                                       const ADRankTwoTensor & dev_stress,
-                                       const ADRankTwoTensor & stress);
+  void computeInelasticStrainIncrement(GenericReal<is_ad> & gauge_stress,
+                                       GenericReal<is_ad> & dpsi_dgauge,
+                                       GenericRankTwoTensor<is_ad> & creep_strain_increment,
+                                       const GenericReal<is_ad> & equiv_stress,
+                                       const GenericRankTwoTensor<is_ad> & dev_stress,
+                                       const GenericRankTwoTensor<is_ad> & stress);
 
   /// Compute the gauge stress for the current stress invariants and porosity.
-  void computeGaugeStress(ADReal & gauge_stress, const ADReal & equiv_stress);
+  void computeGaugeStress(GenericReal<is_ad> & gauge_stress,
+                          const GenericReal<is_ad> & equiv_stress);
+
+  /// Hydrostatic stress driving the pore: matrix hydrostatic stress plus bubble pressure.
+  GenericReal<is_ad> effectiveHydroStress() const;
+
+  /// True when either deviatoric stress or gas/pore hydrostatic stress can drive viscoplasticity.
+  bool hasViscoplasticDrive(const GenericReal<is_ad> & equiv_stress) const;
+
+  /// Positive stress scale used to initialize and bound the gauge-stress Newton solve.
+  GenericReal<is_ad> gaugeStressScale(const GenericReal<is_ad> & equiv_stress) const;
 
   /// Perform one explicit viscoplastic update over the current local value of _dt.
-  void updateStateOneStep(ADRankTwoTensor & elastic_strain_increment,
-                          ADRankTwoTensor & inelastic_strain_increment,
-                          ADRankTwoTensor & stress,
-                          const ADRankFourTensor & elasticity_tensor,
-                          const ADRankTwoTensor & elastic_strain_old,
-                          ADReal & effective_inelastic_strain_increment);
+  void updateStateOneStep(GenericRankTwoTensor<is_ad> & elastic_strain_increment,
+                          GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                          GenericRankTwoTensor<is_ad> & stress,
+                          const GenericRankFourTensor<is_ad> & elasticity_tensor,
+                          const GenericRankTwoTensor<is_ad> & elastic_strain_old,
+                          GenericReal<is_ad> & effective_inelastic_strain_increment);
 
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
-  unsigned int estimateNumberSubsteps(const ADRankTwoTensor & stress);
+  unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
 
   /// Integrate a prescribed number of explicit local constitutive substeps.
-  void updateStateSubstepInternal(ADRankTwoTensor & strain_increment,
-                                  ADRankTwoTensor & inelastic_strain_increment,
-                                  const ADRankTwoTensor & rotation_increment,
-                                  ADRankTwoTensor & stress_new,
-                                  const RankTwoTensor & stress_old,
-                                  const ADRankFourTensor & elasticity_tensor,
-                                  const RankTwoTensor & elastic_strain_old,
-                                  unsigned int total_number_substeps,
-                                  bool compute_full_tangent_operator = false,
-                                  RankFourTensor & tangent_operator = _identityTensor);
+  void updateStateSubstepInternal(
+      GenericRankTwoTensor<is_ad> & strain_increment,
+      GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & rotation_increment,
+      GenericRankTwoTensor<is_ad> & stress_new,
+      const RankTwoTensor & stress_old,
+      const GenericRankFourTensor<is_ad> & elasticity_tensor,
+      const RankTwoTensor & elastic_strain_old,
+      unsigned int total_number_substeps,
+      bool compute_full_tangent_operator = false,
+      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor);
 
   /// Enum to choose which viscoplastic model to use
   const enum class ViscoplasticityModel { LPS, GTN } _model;
@@ -141,15 +160,18 @@ protected:
   const Real _power_factor;
 
   /// Leading coefficient
-  const ADMaterialProperty<Real> & _coefficient;
+  const GenericMaterialProperty<Real, is_ad> & _coefficient;
+
+  /// Optional gas pressure in the pore/bubble
+  const GenericMaterialProperty<Real, is_ad> * const _additional_porosity_pressure;
 
   /// Gauge stress
-  ADMaterialProperty<Real> & _gauge_stress;
+  GenericMaterialProperty<Real, is_ad> & _gauge_stress;
 
-  /// Maximum ratio between the gauge stress and the equilvalent stress
+  /// Maximum ratio between the gauge stress and the equivalent stress/pressure scale
   const Real _maximum_gauge_ratio;
 
-  /// Minimum value of equivalent stress below which viscoplasticiy is not calculated
+  /// Minimum stress scale below which viscoplasticity is not calculated
   const Real _minimum_equivalent_stress;
 
   /// Maximum value of equivalent stress above which an exception is thrown
@@ -170,8 +192,8 @@ protected:
   /// Original global timestep, restored after local substepping
   Real _dt_original;
 
-  /// Container for hydrostatic stress
-  ADReal _hydro_stress;
+  /// Container for matrix hydrostatic stress
+  GenericReal<is_ad> _hydro_stress;
 
   /// Rank two identity tensor
   const RankTwoTensor _identity_two;
@@ -179,6 +201,11 @@ protected:
   /// Derivative of hydrostatic stress with respect to the stress tensor
   const RankTwoTensor _dhydro_stress_dsigma;
 
-  /// Container for _derivative
-  ADReal _derivative;
+  /// Container for dF/dLambda
+  GenericReal<is_ad> _derivative;
+
+  usingViscoplasticityStressUpdateBaseMembers;
 };
+
+typedef PorousViscoplasticityStressUpdateTempl<false> PorousViscoplasticityStressUpdate;
+typedef PorousViscoplasticityStressUpdateTempl<true> ADPorousViscoplasticityStressUpdate;
