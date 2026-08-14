@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest/gtest.h"
+#include "MooseUnitUtils.h"
 #include "SurfaceEdge2.h"
 #include "SurfaceTri3.h"
 #include "MooseMesh.h"
