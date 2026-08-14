@@ -118,7 +118,8 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
   if (!_use_derived_c_normal && (!std::isfinite(_c) || _c <= 0.0))
     paramError("c", "The user-supplied normal contact pressure scale must be positive and finite.");
 
-  _fe_problem.getNonlinearSystemBase(_sys.number()).requestKSPRightDiagonalScale();
+  if (_use_derived_c_normal)
+    _fe_problem.getNonlinearSystemBase(_sys.number()).requestKSPRightDiagonalScale();
 }
 
 ADReal
@@ -276,10 +277,12 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
-  _fe_problem.getNonlinearSystemBase(_sys.number())
-      .setKSPRightDiagonalScale(dof_index, normal_scale);
+  if (_use_derived_c_normal)
+    _fe_problem.getNonlinearSystemBase(_sys.number())
+        .setKSPRightDiagonalScale(dof_index, normal_scale);
 
-  const ADReal dof_residual = equationCompensation(*_var) * std::min(lm_value, weighted_gap * c);
+  const ADReal min_term = std::min(lm_value, weighted_gap * c);
+  const ADReal dof_residual = _use_derived_c_normal ? equationCompensation(*_var) * min_term : min_term;
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
