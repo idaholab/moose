@@ -172,10 +172,10 @@ protected:
   const Real _maximum_gauge_ratio;
 
   /// Minimum stress scale below which viscoplasticity is not calculated
-  const Real _minimum_equivalent_stress;
+  const Real _minimum_stress_magnitude;
 
   /// Maximum value of equivalent stress above which an exception is thrown
-  const Real _maximum_equivalent_stress;
+  const Real _maximum_stress_magnitude;
 
   /// Whether and how local explicit substepping is used
   const SubsteppingType _use_substepping;

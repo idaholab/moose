@@ -6,6 +6,12 @@ use_ad = true
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+  absolute_value_vector_tags = 'ref'
+[]
+
+
+[Problem]
+  extra_tag_vectors = 'ref'
 []
 
 [Mesh]
@@ -80,11 +86,21 @@ use_ad = true
   []
 []
 
+[Convergence]
+  [disp_ref_check]
+    type = ReferenceResidualConvergence
+    reference_vector = 'ref'
+    converge_on = 'disp_x disp_y'
+    group_variables = 'disp_x disp_y'
+  []
+[]
+
 [Executioner]
   type = Transient
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  nonlinear_convergence = disp_ref_check
   dt = ${dt}
   end_time = ${end_time}
 []
