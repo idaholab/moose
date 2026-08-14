@@ -61,23 +61,17 @@
 
 []
 
-[Kernels]
-  [SolidMechanics]
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = false
+    strain = small
+    incremental = false
+    newmark_beta = 0.25
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
   [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-  [../]
-  [./inertia_z]
-    type = InertialForce
-    variable = disp_z
-  [../]
-
 []
+
 
 [AuxKernels]
   [./accel_x] # These auxkernels are only to check output
@@ -181,9 +175,6 @@
     C_ijkl = '210e9 0'
   [../]
 
-  [./strain]
-    type = ComputeSmallStrain
-  [../]
 
   [./stress]
     type = ComputeLinearElasticStress

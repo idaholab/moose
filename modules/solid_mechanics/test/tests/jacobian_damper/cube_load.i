@@ -1,30 +1,16 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
   nx = 1
   ny = 1
   nz = 1
-  displacements = 'disp_x disp_y disp_z'
   # This test uses ElementalVariableValue postprocessors on specific
   # elements, so element numbering needs to stay unchanged
   allow_renumbering = false
-[]
-
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
 [AuxVariables]
@@ -47,12 +33,14 @@
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
+
 
 [AuxKernels]
   [./stress_yy]
@@ -117,10 +105,6 @@
     poissons_ratio = 0.3
     youngs_modulus = 2e5
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
   [../]
@@ -130,7 +114,6 @@
   [./disp_x_damp]
     type = ElementJacobianDamper
     max_increment = 0.002
-    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 

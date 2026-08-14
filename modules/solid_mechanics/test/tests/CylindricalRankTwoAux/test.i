@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   [file_mesh]
     type = FileMeshGenerator
@@ -9,13 +13,6 @@
     new_boundary = 10
     input = file_mesh
   []
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -39,11 +36,15 @@
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y'
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = false
+    eigenstrain_names = eigenstrain
   [../]
 []
+
 
 [AuxKernels]
   [./stress_rr]
@@ -85,12 +86,6 @@
     fill_method = symmetric_isotropic
     C_ijkl = '2.15e5 0.74e5'
     block = 1
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y'
-    block = 1
-    eigenstrain_names = eigenstrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress

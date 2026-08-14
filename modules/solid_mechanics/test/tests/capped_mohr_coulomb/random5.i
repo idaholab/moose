@@ -9,6 +9,10 @@
 #
 # A line of elements is perturbed randomly, and return to the yield surface at each quadpoint is checked
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -24,20 +28,14 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 
 [ICs]
@@ -148,10 +146,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100
     poissons_ratio = 0.3
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./capped_mc]
     type = CappedMohrCoulombStressUpdate

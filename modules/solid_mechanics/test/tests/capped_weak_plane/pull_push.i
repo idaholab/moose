@@ -17,19 +17,14 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-  [../]
-[]
 
 [BCs]
   [./no_x2]
@@ -377,9 +372,6 @@
     type = ComputeIsotropicElasticityTensor
     lambda = 6.4e9
     shear_modulus = 6.4e9 # young 16MPa, Poisson 0.25
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

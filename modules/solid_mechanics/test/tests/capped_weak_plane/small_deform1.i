@@ -8,6 +8,10 @@
 # stress_xz = 8*t
 # stress_xy = 6*t
 # stress_zz = 2*t
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -23,20 +27,14 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 [BCs]
   [./bottomx]
@@ -284,10 +282,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1'
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
