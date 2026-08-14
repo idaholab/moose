@@ -8,45 +8,69 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PointContainmentClassifier.h"
+#include "RayDirectionOptions.h"
 #include "SurfaceElementSet.h"
 #include "AdaptiveRayContainmentCheck.h"
 #include "TriangleManifold.h"
 #include "MooseError.h"
 
+namespace
+{
+PointContainmentClassifier::RayOptions
+defaultRayOptions(const PointContainmentClassifier::Method method)
+{
+  if (method == PointContainmentClassifier::Method::USER_SELECTED_RAY)
+    mooseError("PointContainmentClassifier: user_selected_ray requires explicit RayOptions.");
+
+  return {};
+}
+} // namespace
+
 PointContainmentClassifier::PointContainmentClassifier(MeshBase & mesh,
                                                        const SurfaceElementSet * set,
-                                                       PointContainmentMethod method,
-                                                       Real tolerance,
-                                                       const PcaRayOptions & pca)
+                                                       Method method,
+                                                       Real tolerance)
+  : PointContainmentClassifier(mesh, set, method, tolerance, defaultRayOptions(method))
+{
+}
+
+PointContainmentClassifier::PointContainmentClassifier(
+    MeshBase & mesh,
+    const SurfaceElementSet * set,
+    PointContainmentClassifier::Method method,
+    Real tolerance,
+    const PointContainmentClassifier::RayOptions & options)
   : _method(method)
 {
   switch (_method)
   {
-    case PointContainmentMethod::PCA_RAY:
-    case PointContainmentMethod::USER_SELECTED_RAY:
+    case PointContainmentClassifier::Method::PCA_RAY:
+    case PointContainmentClassifier::Method::USER_SELECTED_RAY:
     {
       if (!set)
         mooseError(
             "PointContainmentClassifier: a SurfaceElementSet is required for the pca_ray and "
             "user_selected_ray methods.");
 
-      // pca_ray uses AUTO_PCA; user_selected_ray passes the user's direction as USER_SPECIFIED.
-      // Both are carried in pca.ray_direction (a RayDirectionOptions).
+      const SurfaceGeometry::RayDirectionOptions ray_options{
+          _method == Method::PCA_RAY ? SurfaceGeometry::RayDirectionMode::AUTO_PCA
+                                     : SurfaceGeometry::RayDirectionMode::USER_SPECIFIED,
+          options.ray_direction};
       _pca = std::make_unique<AdaptiveRayContainmentCheck>(set->elements(),
                                                            set->centroids(),
-                                                           pca.ray_direction,
+                                                           ray_options,
                                                            tolerance,
-                                                           pca.leaf_max_size,
-                                                           pca.obb_file_name,
-                                                           pca.ray_file_name,
-                                                           pca.comm);
+                                                           options.leaf_max_size,
+                                                           options.obb_file_name,
+                                                           options.ray_file_name,
+                                                           options.comm);
 
       _bounding_box = set->boundingBox();
       _num_elements = set->size();
       break;
     }
 
-    case PointContainmentMethod::FIXED_X_RAY:
+    case PointContainmentClassifier::Method::FIXED_X_RAY:
     {
       _tri = std::make_unique<TriangleManifold>(mesh, tolerance);
       _bounding_box = _tri->boundingBox();
@@ -58,7 +82,7 @@ PointContainmentClassifier::PointContainmentClassifier(MeshBase & mesh,
 
 PointContainmentClassifier::~PointContainmentClassifier() = default;
 
-SurfaceSide
+SurfaceGeometry::SurfaceSide
 PointContainmentClassifier::sideness(const Point & point) const
 {
   if (_tri)

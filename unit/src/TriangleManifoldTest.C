@@ -233,15 +233,15 @@ TEST_F(TriangleManifoldTest, sideness)
   TriangleManifold manifold(*mesh, 1e-10);
 
   // Interior and clearly-exterior points resolve to INSIDE / OUTSIDE.
-  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.5)), SurfaceSide::INSIDE);
-  EXPECT_EQ(manifold.sideness(Point(1.5, 0.5, 0.5)), SurfaceSide::OUTSIDE);
-  EXPECT_EQ(manifold.sideness(Point(-0.5, 0.5, 0.5)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.5)), SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(manifold.sideness(Point(1.5, 0.5, 0.5)), SurfaceGeometry::SurfaceSide::OUTSIDE);
+  EXPECT_EQ(manifold.sideness(Point(-0.5, 0.5, 0.5)), SurfaceGeometry::SurfaceSide::OUTSIDE);
 
   // contains() maps INSIDE (and ON) to true, OUTSIDE to false.
   EXPECT_EQ(manifold.contains(Point(0.5, 0.5, 0.5)),
-            manifold.sideness(Point(0.5, 0.5, 0.5)) != SurfaceSide::OUTSIDE);
+            manifold.sideness(Point(0.5, 0.5, 0.5)) != SurfaceGeometry::SurfaceSide::OUTSIDE);
   EXPECT_EQ(manifold.contains(Point(1.5, 0.5, 0.5)),
-            manifold.sideness(Point(1.5, 0.5, 0.5)) != SurfaceSide::OUTSIDE);
+            manifold.sideness(Point(1.5, 0.5, 0.5)) != SurfaceGeometry::SurfaceSide::OUTSIDE);
 }
 
 TEST_F(TriangleManifoldTest, sidenessOnSurface)
@@ -251,8 +251,8 @@ TEST_F(TriangleManifoldTest, sidenessOnSurface)
 
   // Points on a face interior and at a vertex are categorized as ON, and still
   // count as contained.
-  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.0)), SurfaceSide::ON);
-  EXPECT_EQ(manifold.sideness(Point(0.0, 0.0, 0.0)), SurfaceSide::ON);
+  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.0)), SurfaceGeometry::SurfaceSide::ON);
+  EXPECT_EQ(manifold.sideness(Point(0.0, 0.0, 0.0)), SurfaceGeometry::SurfaceSide::ON);
   EXPECT_TRUE(manifold.contains(Point(0.5, 0.5, 0.0)));
 }
 
@@ -264,8 +264,8 @@ TEST_F(TriangleManifoldTest, sidenessSolidAngleFallback)
   // The +x and -x faces are each split by a diagonal from (x,0,0) to (x,1,1) (points where
   // y == z). A +x ray from a query with y == z hits exactly that shared edge, so the parity test
   // is ambiguous and the robust solid-angle fallback must resolve containment.
-  EXPECT_EQ(manifold.sideness(Point(0.5, 0.3, 0.3)), SurfaceSide::INSIDE);
-  EXPECT_EQ(manifold.sideness(Point(-0.5, 0.3, 0.3)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(manifold.sideness(Point(0.5, 0.3, 0.3)), SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(manifold.sideness(Point(-0.5, 0.3, 0.3)), SurfaceGeometry::SurfaceSide::OUTSIDE);
 }
 
 TEST_F(TriangleManifoldTest, sidenessOnEdge)
@@ -274,7 +274,7 @@ TEST_F(TriangleManifoldTest, sidenessOnEdge)
   TriangleManifold manifold(*mesh, 1e-6);
 
   // A point on a cube edge (the x=1, y=0 edge), within tolerance of the surface, is ON.
-  EXPECT_EQ(manifold.sideness(Point(1.0, 0.0, 0.5)), SurfaceSide::ON);
+  EXPECT_EQ(manifold.sideness(Point(1.0, 0.0, 0.5)), SurfaceGeometry::SurfaceSide::ON);
 }
 
 TEST_F(TriangleManifoldTest, multiCrossingTwoCubes)
@@ -287,9 +287,12 @@ TEST_F(TriangleManifoldTest, multiCrossingTwoCubes)
   // z = 0.3 (with y = 0.5) keeps every +x hit off the y == z face diagonals, so these are clean
   // multi-crossings exercising parity counting rather than the solid-angle fallback. From inside
   // the first cube the +x ray crosses three surfaces (exit cube 1, enter/exit cube 2): odd -> in.
-  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.3)), SurfaceSide::INSIDE);  // inside cube 1
-  EXPECT_EQ(manifold.sideness(Point(2.5, 0.5, 0.3)), SurfaceSide::INSIDE);  // inside cube 2
-  EXPECT_EQ(manifold.sideness(Point(1.5, 0.5, 0.3)), SurfaceSide::OUTSIDE); // between the cubes
+  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.3)),
+            SurfaceGeometry::SurfaceSide::INSIDE); // inside cube 1
+  EXPECT_EQ(manifold.sideness(Point(2.5, 0.5, 0.3)),
+            SurfaceGeometry::SurfaceSide::INSIDE); // inside cube 2
+  EXPECT_EQ(manifold.sideness(Point(1.5, 0.5, 0.3)),
+            SurfaceGeometry::SurfaceSide::OUTSIDE); // between the cubes
 }
 
 TEST_F(TriangleManifoldTest, boundingBox)
@@ -359,20 +362,32 @@ TEST_F(TriangleManifoldTest, classifierFixedXRayHasNoRayDirection)
   // fixed_x_ray builds a TriangleManifold backend (no SurfaceElementSet needed), which has no
   // ray-casting backend, so rayDirection() must error.
   auto mesh = makeUnitCubeMesh(_app->comm());
-  PointContainmentClassifier classifier(*mesh, nullptr, PointContainmentMethod::FIXED_X_RAY, 1e-10);
+  PointContainmentClassifier classifier(
+      *mesh, nullptr, PointContainmentClassifier::Method::FIXED_X_RAY, 1e-10);
 
   EXPECT_MOOSEERROR_MSG_CONTAINS(classifier.rayDirection(),
                                  "fixed_x_ray method has no ray-casting backend");
+}
+
+TEST_F(TriangleManifoldTest, classifierUserSelectedRayRequiresOptions)
+{
+  auto mesh = makeUnitCubeMesh(_app->comm());
+  const auto surface_set = SurfaceElementSet::fromMesh(*mesh);
+
+  EXPECT_MOOSEERROR_MSG_CONTAINS(
+      PointContainmentClassifier(
+          *mesh, &surface_set, PointContainmentClassifier::Method::USER_SELECTED_RAY, 1e-10),
+      "user_selected_ray requires explicit RayOptions");
 }
 
 TEST_F(TriangleManifoldTest, classifierAmbiguousUserSelectedRay)
 {
   auto mesh = makeAmbiguousRayCubeMesh(_app->comm());
   const auto surface_set = SurfaceElementSet::fromMesh(*mesh);
-  PcaRayOptions options;
-  options.ray_direction = {RayDirectionMode::USER_SPECIFIED, Point(1, 0, 0)};
+  PointContainmentClassifier::RayOptions options;
+  options.ray_direction = Point(1, 0, 0);
   PointContainmentClassifier classifier(
-      *mesh, &surface_set, PointContainmentMethod::USER_SELECTED_RAY, 1e-10, options);
+      *mesh, &surface_set, PointContainmentClassifier::Method::USER_SELECTED_RAY, 1e-10, options);
 
   // Future plan: give shared TRI3 edges half-open ownership in the 3D crossing count, then change
   // this regression to expect INSIDE instead of an ambiguity error.

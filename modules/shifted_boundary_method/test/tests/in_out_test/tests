@@ -228,6 +228,17 @@
                   'with neither an in-out test user object nor a signed distance function.'
   []
 
+  [in_out_test_wrong_type]
+    type = 'RunException'
+    input = '2D_lambda0p5.i'
+    cli_args = 'MeshModifiers/IntercpetedESM/in_out_test=TreeBuilder'
+    expect_err = 'does not implement the point-in-surface check interface'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report an error when an InterceptedElementModifier receives an '
+                  'in-out test user object that does not implement the point-in-surface check interface.'
+  []
+
   [both_geometry_sources]
     type = 'RunException'
     input = '2D_lambda0p5.i'

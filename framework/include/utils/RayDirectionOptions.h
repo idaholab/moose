@@ -11,6 +11,9 @@
 
 #include "libmesh/point.h"
 
+namespace SurfaceGeometry
+{
+
 /// How the ray-casting engine obtains its shooting direction.
 enum class RayDirectionMode
 {
@@ -27,3 +30,5 @@ struct RayDirectionOptions
   RayDirectionMode mode = RayDirectionMode::AUTO_PCA;
   libMesh::Point direction = libMesh::Point(0.0, 0.0, 0.0);
 };
+
+} // namespace SurfaceGeometry

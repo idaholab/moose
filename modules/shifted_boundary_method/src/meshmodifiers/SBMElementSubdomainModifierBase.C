@@ -27,9 +27,10 @@ SBMElementSubdomainModifierBase::validParams()
 
   params.addParam<bool>(
       "mark_intercepted", false, "Whether to assign a dedicated subdomain ID when intercepted.");
-  params.addParam<SubdomainID>("subdomain_id_intercepted",
-                               Moose::INVALID_BLOCK_ID,
-                               "The subdomain ID to assign to intercepted elements.");
+  params.addParam<SubdomainID>(
+      "subdomain_id_intercepted",
+      Moose::INVALID_BLOCK_ID,
+      "Whether to assign a dedicated subdomain ID to intercepted elements.");
 
   return params;
 }

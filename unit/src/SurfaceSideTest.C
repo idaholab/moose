@@ -22,17 +22,22 @@ TEST(SurfaceSideTest, SignedValueInsideIsNegative)
   const Real tol = 0.1;
 
   // Clearly interior / exterior values.
-  EXPECT_EQ(signedValueSideness(-1.0, tol, true), SurfaceSide::INSIDE);
-  EXPECT_EQ(signedValueSideness(1.0, tol, true), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(-1.0, tol, true),
+            SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(1.0, tol, true),
+            SurfaceGeometry::SurfaceSide::OUTSIDE);
 
   // Inside the on-surface band, including both band endpoints.
-  EXPECT_EQ(signedValueSideness(0.0, tol, true), SurfaceSide::ON);
-  EXPECT_EQ(signedValueSideness(-tol, tol, true), SurfaceSide::ON);
-  EXPECT_EQ(signedValueSideness(tol, tol, true), SurfaceSide::ON);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(0.0, tol, true), SurfaceGeometry::SurfaceSide::ON);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(-tol, tol, true),
+            SurfaceGeometry::SurfaceSide::ON);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(tol, tol, true), SurfaceGeometry::SurfaceSide::ON);
 
   // Just outside the band on either side.
-  EXPECT_EQ(signedValueSideness(-1.001 * tol, tol, true), SurfaceSide::INSIDE);
-  EXPECT_EQ(signedValueSideness(1.001 * tol, tol, true), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(-1.001 * tol, tol, true),
+            SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(1.001 * tol, tol, true),
+            SurfaceGeometry::SurfaceSide::OUTSIDE);
 }
 
 // signedValueSideness with inside_is_negative == false flips interior/exterior.
@@ -40,9 +45,12 @@ TEST(SurfaceSideTest, SignedValueInsideIsPositive)
 {
   const Real tol = 0.1;
 
-  EXPECT_EQ(signedValueSideness(1.0, tol, false), SurfaceSide::INSIDE);
-  EXPECT_EQ(signedValueSideness(-1.0, tol, false), SurfaceSide::OUTSIDE);
-  EXPECT_EQ(signedValueSideness(0.0, tol, false), SurfaceSide::ON);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(1.0, tol, false),
+            SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(-1.0, tol, false),
+            SurfaceGeometry::SurfaceSide::OUTSIDE);
+  EXPECT_EQ(SurfaceGeometry::signedValueSideness(0.0, tol, false),
+            SurfaceGeometry::SurfaceSide::ON);
 }
 
 // unionSideness applies the OUTSIDE < ON < INSIDE precedence: the union side is the
@@ -52,9 +60,12 @@ TEST(SurfaceSideTest, Union)
 {
   // Listed in increasing precedence, so the index doubles as the precedence rank and
   // the expected union of any pair is the side at the larger of the two ranks.
-  const std::array by_precedence = {SurfaceSide::OUTSIDE, SurfaceSide::ON, SurfaceSide::INSIDE};
+  const std::array by_precedence = {SurfaceGeometry::SurfaceSide::OUTSIDE,
+                                    SurfaceGeometry::SurfaceSide::ON,
+                                    SurfaceGeometry::SurfaceSide::INSIDE};
 
   for (const auto i : index_range(by_precedence))
     for (const auto j : index_range(by_precedence))
-      EXPECT_EQ(unionSideness(by_precedence[i], by_precedence[j]), by_precedence[std::max(i, j)]);
+      EXPECT_EQ(SurfaceGeometry::unionSideness(by_precedence[i], by_precedence[j]),
+                by_precedence[std::max(i, j)]);
 }

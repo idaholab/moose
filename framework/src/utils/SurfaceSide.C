@@ -11,6 +11,9 @@
 
 #include <cmath>
 
+namespace SurfaceGeometry
+{
+
 SurfaceSide
 signedValueSideness(Real phi, const Real tolerance, const bool inside_is_negative)
 {
@@ -39,3 +42,5 @@ unionSideness(const SurfaceSide a, const SurfaceSide b)
     return SurfaceSide::ON;
   return SurfaceSide::OUTSIDE;
 }
+
+} // namespace SurfaceGeometry

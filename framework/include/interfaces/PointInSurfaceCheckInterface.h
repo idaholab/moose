@@ -37,8 +37,11 @@ public:
   virtual ~PointInSurfaceCheckInterface() = default;
 
   /// Classify a point as INSIDE, ON, or OUTSIDE the surface(s).
-  virtual SurfaceSide sideness(const libMesh::Point & p) const = 0;
+  virtual SurfaceGeometry::SurfaceSide sideness(const libMesh::Point & p) const = 0;
 
   /// Whether the point is inside or on the surface(s). ON maps to true.
-  bool contains(const libMesh::Point & p) const { return sideness(p) != SurfaceSide::OUTSIDE; }
+  bool contains(const libMesh::Point & p) const
+  {
+    return sideness(p) != SurfaceGeometry::SurfaceSide::OUTSIDE;
+  }
 };

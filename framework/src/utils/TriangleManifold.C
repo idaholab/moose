@@ -74,24 +74,24 @@ bool
 TriangleManifold::contains(const Point & point) const
 {
   // ON and INSIDE both count as contained; only OUTSIDE is excluded.
-  return sideness(point) != SurfaceSide::OUTSIDE;
+  return sideness(point) != SurfaceGeometry::SurfaceSide::OUTSIDE;
 }
 
-SurfaceSide
+SurfaceGeometry::SurfaceSide
 TriangleManifold::sideness(const Point & point) const
 {
   // Most points are rejected here before we perform any per-triangle work.
   if (!pointInsideBoundingBox(point))
-    return SurfaceSide::OUTSIDE;
+    return SurfaceGeometry::SurfaceSide::OUTSIDE;
 
   // Near-surface points are resolved before parity counting.
   if (pointOnSurface(point))
-    return SurfaceSide::ON;
+    return SurfaceGeometry::SurfaceSide::ON;
 
   return classifyByParity(point);
 }
 
-SurfaceSide
+SurfaceGeometry::SurfaceSide
 TriangleManifold::classifyByParity(const Point & point) const
 {
   // Candidate filtering keeps the parity test from touching every triangle in large surfaces.
@@ -115,11 +115,13 @@ TriangleManifold::classifyByParity(const Point & point) const
         break;
       case RayIntersection::Ambiguous:
         // Edge and vertex grazing hits are exactly where parity counting becomes brittle.
-        return containsBySolidAngle(point) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
+        return containsBySolidAngle(point) ? SurfaceGeometry::SurfaceSide::INSIDE
+                                           : SurfaceGeometry::SurfaceSide::OUTSIDE;
     }
   }
 
-  return (num_hits % 2) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
+  return (num_hits % 2) ? SurfaceGeometry::SurfaceSide::INSIDE
+                        : SurfaceGeometry::SurfaceSide::OUTSIDE;
 }
 
 void

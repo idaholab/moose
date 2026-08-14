@@ -65,12 +65,12 @@ public:
    * Classify a query point relative to the manifold surface.
    *
    * On-surface points (within `surface_tolerance` of the surface) are reported as
-   * SurfaceSide::ON; this is checked before parity counting. Otherwise the fixed
+   * SurfaceGeometry::SurfaceSide::ON; this is checked before parity counting. Otherwise the fixed
    * +x ray parity test (with solid-angle fallback) resolves INSIDE vs OUTSIDE.
    *
-   * @return SurfaceSide::INSIDE, ::OUTSIDE, or ::ON.
+   * @return SurfaceGeometry::SurfaceSide::INSIDE, ::OUTSIDE, or ::ON.
    */
-  SurfaceSide sideness(const Point & point) const;
+  SurfaceGeometry::SurfaceSide sideness(const Point & point) const;
 
   /**
    * @return The manifold bounding box.
@@ -118,7 +118,7 @@ private:
   /// Resolve INSIDE vs OUTSIDE via the fixed +x ray parity test (with solid-angle
   /// fallback for ambiguous grazing hits). Assumes the point is neither outside the
   /// bounding box nor on the surface; those cases are handled by sideness().
-  SurfaceSide classifyByParity(const Point & point) const;
+  SurfaceGeometry::SurfaceSide classifyByParity(const Point & point) const;
 
   /// Get the subset of triangles whose yz extents may intersect the query ray.
   std::vector<dof_id_type> rayCandidates(const Point & point) const;

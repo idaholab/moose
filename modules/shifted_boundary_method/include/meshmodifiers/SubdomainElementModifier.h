@@ -11,7 +11,6 @@
 
 #include "SBMElementSubdomainModifierBase.h"
 #include "PointInSubdomainCheckUO.h" // UO with subdomain geometry checks
-#include "Function.h"
 
 class SubdomainElementModifier : public SBMElementSubdomainModifierBase
 {

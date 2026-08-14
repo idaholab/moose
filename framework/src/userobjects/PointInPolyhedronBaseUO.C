@@ -12,14 +12,14 @@
 namespace
 {
 /// Map the input-file enum string to the typed backend selector.
-PointContainmentMethod
+PointContainmentClassifier::Method
 methodFromEnum(const MooseEnum & method)
 {
   if (method == "pca_ray")
-    return PointContainmentMethod::PCA_RAY;
+    return PointContainmentClassifier::Method::PCA_RAY;
   if (method == "user_selected_ray")
-    return PointContainmentMethod::USER_SELECTED_RAY;
-  return PointContainmentMethod::FIXED_X_RAY;
+    return PointContainmentClassifier::Method::USER_SELECTED_RAY;
+  return PointContainmentClassifier::Method::FIXED_X_RAY;
 }
 }
 
@@ -79,30 +79,25 @@ PointInPolyhedronBaseUO::PointInPolyhedronBaseUO(const InputParameters & paramet
   const bool ray_direction_set = !_ray_direction.absolute_fuzzy_equals(Point(0.0, 0.0, 0.0));
 
   // user_selected_ray needs a direction; the other methods ignore it.
-  if (_method == PointContainmentMethod::USER_SELECTED_RAY && !ray_direction_set)
+  if (_method == PointContainmentClassifier::Method::USER_SELECTED_RAY && !ray_direction_set)
     paramError(
         "ray_direction",
         "must be set to a non-zero vector when point_containment_method = user_selected_ray.");
-  if (_method != PointContainmentMethod::USER_SELECTED_RAY && ray_direction_set)
+  if (_method != PointContainmentClassifier::Method::USER_SELECTED_RAY && ray_direction_set)
     paramError("ray_direction", "is only used by point_containment_method = user_selected_ray.");
 
   // The fixed_x_ray (TriangleManifold) backend does not emit OBB/ray debug files.
-  if (_method == PointContainmentMethod::FIXED_X_RAY &&
+  if (_method == PointContainmentClassifier::Method::FIXED_X_RAY &&
       (!_obb_file_name.empty() || !_ray_file_name.empty()))
     mooseInfo("point_containment_method = fixed_x_ray does not produce OBB/ray debug files; "
               "obb_file_name/ray_file_name will be ignored.");
 }
 
-PcaRayOptions
+PointContainmentClassifier::RayOptions
 PointInPolyhedronBaseUO::pcaRayOptions() const
 {
-  PcaRayOptions options;
-  // pca_ray auto-selects the direction (AUTO_PCA); user_selected_ray passes the user's
-  // direction through to the ray-casting engine to be used exactly (USER_SPECIFIED).
-  options.ray_direction.mode = (_method == PointContainmentMethod::USER_SELECTED_RAY)
-                                   ? RayDirectionMode::USER_SPECIFIED
-                                   : RayDirectionMode::AUTO_PCA;
-  options.ray_direction.direction = _ray_direction;
+  PointContainmentClassifier::RayOptions options;
+  options.ray_direction = _ray_direction;
   options.leaf_max_size = _leaf_max_size;
   options.obb_file_name = _obb_file_name;
   options.ray_file_name = _ray_file_name;

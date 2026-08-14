@@ -13,6 +13,9 @@
 
 #include <ostream>
 
+namespace SurfaceGeometry
+{
+
 /// The side of a closed surface where a query point is located.
 enum class SurfaceSide
 {
@@ -61,3 +64,5 @@ operator<<(std::ostream & os, const SurfaceSide & side)
   }
   return os;
 }
+
+} // namespace SurfaceGeometry

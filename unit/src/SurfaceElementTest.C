@@ -59,6 +59,15 @@ makeTri3(const Point & a, const Point & b, const Point & c)
 }
 }
 
+TEST(SurfaceElementTest, DegenerateElements)
+{
+  const auto edge_owner = makeEdge2(Point(0.0, 0.0, 0.0), Point(0.0, 0.0, 0.0));
+  EXPECT_MOOSEERROR_MSG_CONTAINS(SurfaceEdge2(edge_owner.edge.get()), "zero-length line segment");
+
+  const auto tri_owner = makeTri3(Point(0.0, 0.0, 0.0), Point(1.0, 0.0, 0.0), Point(2.0, 0.0, 0.0));
+  EXPECT_MOOSEERROR_MSG_CONTAINS(SurfaceTri3(tri_owner.tri.get()), "degenerate triangle");
+}
+
 TEST(SurfaceElementTest, Edge2Normal)
 {
   const auto owner = makeEdge2(Point(0.0, 0.0, 0.0), Point(1.0, 0.0, 0.0));
@@ -68,6 +77,12 @@ TEST(SurfaceElementTest, Edge2Normal)
   EXPECT_NEAR(n(0), 0.0, 1e-12);
   EXPECT_NEAR(n(2), 0.0, 1e-12);
   EXPECT_NEAR(std::abs(n(1)), 1.0, 1e-12);
+
+  const auto small_owner = makeEdge2(Point(0.0, 0.0, 0.0), Point(1e-12, 0.0, 0.0));
+  const Point small_n = SurfaceEdge2(small_owner.edge.get()).normal();
+  EXPECT_NEAR(small_n(0), 0.0, 1e-12);
+  EXPECT_NEAR(std::abs(small_n(1)), 1.0, 1e-12);
+  EXPECT_NEAR(small_n(2), 0.0, 1e-12);
 
   // Line crossing through (0.5, -1) to (0.5, 1)
   Point a(0.5, -1.0, 0.0);
@@ -91,6 +106,13 @@ TEST(SurfaceElementTest, Tri3Normal)
   EXPECT_NEAR(n(0), 0.0, 1e-12);
   EXPECT_NEAR(n(1), 0.0, 1e-12);
   EXPECT_NEAR(std::abs(n(2)), 1.0, 1e-12);
+
+  const auto small_owner =
+      makeTri3(Point(0.0, 0.0, 0.0), Point(1e-8, 0.0, 0.0), Point(0.0, 1e-8, 0.0));
+  const Point small_n = SurfaceTri3(small_owner.tri.get()).normal();
+  EXPECT_NEAR(small_n(0), 0.0, 1e-12);
+  EXPECT_NEAR(small_n(1), 0.0, 1e-12);
+  EXPECT_NEAR(std::abs(small_n(2)), 1.0, 1e-12);
 
   // Line from below passing through triangle center
   Point a(0.3, 0.3, -1.0);

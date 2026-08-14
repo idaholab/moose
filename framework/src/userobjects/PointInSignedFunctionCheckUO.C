@@ -45,8 +45,8 @@ PointInSignedFunctionCheckUO::PointInSignedFunctionCheckUO(const InputParameters
     paramError("tolerance", "must be greater than zero.");
 }
 
-SurfaceSide
+SurfaceGeometry::SurfaceSide
 PointInSignedFunctionCheckUO::sideness(const Point & p) const
 {
-  return signedValueSideness(_func.value(_t, p), _tolerance, _inside_is_negative);
+  return SurfaceGeometry::signedValueSideness(_func.value(_t, p), _tolerance, _inside_is_negative);
 }

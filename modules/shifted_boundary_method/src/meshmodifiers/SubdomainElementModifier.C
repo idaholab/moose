@@ -57,22 +57,22 @@ SubdomainElementModifier::computeSubdomainID()
   {
     unsigned int num_inside_nodes = 0;
     for (const auto i : make_range(elem->n_nodes()))
-      if (checker_ptr->sideness(elem->point(i)) != SurfaceSide::OUTSIDE)
+      if (checker_ptr->sideness(elem->point(i)) != SurfaceGeometry::SurfaceSide::OUTSIDE)
         ++num_inside_nodes;
-
-    if (num_inside_nodes == elem->n_nodes())
-    {
-      if (!fully_inside_subdomain || sub_id < *fully_inside_subdomain)
-        fully_inside_subdomain = sub_id;
-      continue;
-    }
 
     const auto * const checker = checker_ptr.get();
     const Real ratio_active = SBMUtils::activeElementFraction(
         *elem,
         _qrule_order,
         [checker](const Point & point)
-        { return checker->sideness(point) != SurfaceSide::OUTSIDE; });
+        { return checker->sideness(point) != SurfaceGeometry::SurfaceSide::OUTSIDE; });
+
+    if (num_inside_nodes == elem->n_nodes() && ratio_active == 1.0)
+    {
+      if (!fully_inside_subdomain || sub_id < *fully_inside_subdomain)
+        fully_inside_subdomain = sub_id;
+      continue;
+    }
     // All nodes may be outside even when a closed geometry lies within the element or its surface
     // crosses the element. Retain the checker if either nodes or quadrature points find activity.
     const bool has_active_region = num_inside_nodes != 0 || ratio_active > 0.0;

@@ -15,7 +15,7 @@
 /**
  * Common base class providing shared parameters and validation for
  * point-containment user objects. The input file selects a backend via the
- * `point_containment_method` enum; the typed PointContainmentMethod is exposed
+ * `point_containment_method` enum; the typed PointContainmentClassifier::Method is exposed
  * to subclasses along with the shared tuning/debug parameters.
  */
 class PointInPolyhedronBaseUO : public GeneralUserObject
@@ -31,10 +31,10 @@ public:
 protected:
   /// Assemble the ray-backend tuning/debug options from the shared parameters.
   /// (Ignored by the fixed_x_ray / TriangleManifold backend.)
-  PcaRayOptions pcaRayOptions() const;
+  PointContainmentClassifier::RayOptions pcaRayOptions() const;
 
   /// Selected point-containment backend.
-  const PointContainmentMethod _method;
+  const PointContainmentClassifier::Method _method;
 
   /// User-supplied ray direction (used only by user_selected_ray).
   const Point _ray_direction;

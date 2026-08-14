@@ -55,17 +55,17 @@ PointInUnionCheckUO::PointInUnionCheckUO(const InputParameters & parameters)
   }
 }
 
-SurfaceSide
+SurfaceGeometry::SurfaceSide
 PointInUnionCheckUO::sideness(const Point & p) const
 {
   // Fold the provider queries incrementally and stop at the first provider that
   // reports INSIDE (the maximal union result). This avoids the remaining, possibly
   // expensive (e.g. mesh ray-casting) provider queries once membership is decided.
-  SurfaceSide result = SurfaceSide::OUTSIDE;
+  SurfaceGeometry::SurfaceSide result = SurfaceGeometry::SurfaceSide::OUTSIDE;
   for (const auto * provider : _providers)
   {
-    result = unionSideness(result, provider->sideness(p));
-    if (result == SurfaceSide::INSIDE)
+    result = SurfaceGeometry::unionSideness(result, provider->sideness(p));
+    if (result == SurfaceGeometry::SurfaceSide::INSIDE)
       return result;
   }
 

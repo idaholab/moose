@@ -41,7 +41,7 @@ PointInPolyhedronCheckUO::initialSetup()
   // The fixed_x_ray backend (TriangleManifold) handles only 3D TRI3 surface
   // meshes (mesh_dimension 2). Reject 2D EDGE2 surfaces here with a clear
   // message; use pca_ray or user_selected_ray for 2D instead.
-  if (_method == PointContainmentMethod::FIXED_X_RAY)
+  if (_method == PointContainmentClassifier::Method::FIXED_X_RAY)
   {
     if (_builder.mesh().mesh_dimension() != 2)
       paramError("point_containment_method",
@@ -64,8 +64,9 @@ PointInPolyhedronCheckUO::initialSetup()
   // The fixed_x_ray (TriangleManifold) backend classifies from the mesh directly
   // and ignores the SurfaceElementSet. Skip surfaceElementSet() in that case so
   // the builder never builds the whole-mesh set that would go unused.
-  const SurfaceElementSet * const set =
-      (_method == PointContainmentMethod::FIXED_X_RAY) ? nullptr : &_builder.surfaceElementSet();
+  const SurfaceElementSet * const set = (_method == PointContainmentClassifier::Method::FIXED_X_RAY)
+                                            ? nullptr
+                                            : &_builder.surfaceElementSet();
   _classifier = std::make_unique<PointContainmentClassifier>(
       _builder.mesh(), set, _method, _tolerance, pcaRayOptions());
 }

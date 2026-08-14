@@ -38,7 +38,7 @@ class AdaptiveRayContainmentCheck final
 public:
   AdaptiveRayContainmentCheck(const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
                               const std::vector<Point> & centroids,
-                              const RayDirectionOptions & ray_options,
+                              const SurfaceGeometry::RayDirectionOptions & ray_options,
                               const Real eps_on_surface = libMesh::TOLERANCE,
                               const int leaf_max_size = 10,
                               const FileName & obb_file_name = "",
@@ -46,7 +46,7 @@ public:
                               const libMesh::Parallel::Communicator * comm = nullptr);
 
   /// Main function: Determine if a point is inside the geometry
-  SurfaceSide sideness(const Point & p) const;
+  SurfaceGeometry::SurfaceSide sideness(const Point & p) const;
 
   /// The resolved ray direction actually used for shooting: the (normalized) user
   /// direction for a user-selected ray, or the PCA-selected direction for an auto ray.
@@ -107,8 +107,8 @@ private:
   BoundingBox _bounds;
 
   /// Whether the ray direction is auto-selected via PCA (true) or user-selected (false).
-  /// Set once in the constructor from the RayDirectionOptions mode. Only an auto ray runs
-  /// PCA and may have its direction chosen automatically.
+  /// Set once in the constructor from the SurfaceGeometry::RayDirectionOptions mode. Only an auto
+  /// ray runs PCA and may have its direction chosen automatically.
   bool _auto_ray_direction = false;
 
   /// When the ray direction is auto-selected (PCA) we build an Oriented Bounding Box (OBB);
@@ -160,8 +160,8 @@ private:
 
   /// Determine sideness from a pair of opposite rays. A conflicting parity returns std::nullopt
   /// so the caller can apply the selected ambiguity policy.
-  std::optional<SurfaceSide> sidenessFromRayPair(const Point & p,
-                                                 const std::array<Point, 2> & ray_starts) const;
+  std::optional<SurfaceGeometry::SurfaceSide>
+  sidenessFromRayPair(const Point & p, const std::array<Point, 2> & ray_starts) const;
 
   /// True if `p` lies on the surface (within `_eps_on_surface`), i.e. some candidate element
   /// contains it. This is a property of `p` alone, independent of any ray direction.

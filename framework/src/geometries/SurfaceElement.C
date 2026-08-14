@@ -15,8 +15,9 @@ SurfaceElement::SurfaceElement(const Elem * elem, const Point & normal)
   : _elem(elem), _normal(normal)
 {
   mooseAssert(elem, "Element must not be null");
-  mooseAssert(MooseUtils::absoluteFuzzyEqual(_normal.norm(), 1),
-              "normal vector must be unit length, length = " << _normal.norm());
+
+  if (!MooseUtils::absoluteFuzzyEqual(_normal.norm(), 1))
+    mooseError("SurfaceElement: normal vector must be unit length, length = ", _normal.norm());
 }
 
 Real

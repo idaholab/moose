@@ -19,7 +19,7 @@
 AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
     const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
     const std::vector<Point> & centroids,
-    const RayDirectionOptions & ray_options,
+    const SurfaceGeometry::RayDirectionOptions & ray_options,
     const Real eps_on_surface,
     const int leaf_max_size,
     const FileName & obb_file_name,
@@ -44,7 +44,7 @@ AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
   _num_elements = _bd_elements.size();
   _dim = _bd_elements[0]->expectedEmbeddingMeshDim();
 
-  _auto_ray_direction = (ray_options.mode == RayDirectionMode::AUTO_PCA);
+  _auto_ray_direction = (ray_options.mode == SurfaceGeometry::RayDirectionMode::AUTO_PCA);
 
   if (!_auto_ray_direction)
   {
@@ -74,16 +74,16 @@ AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
       1e-2 /*safe protect: expanded box length in each direction and both sides*/);
 }
 
-SurfaceSide
+SurfaceGeometry::SurfaceSide
 AdaptiveRayContainmentCheck::sideness(const Point & p) const
 {
   if (isOutsideBoundingBox(p))
-    return SurfaceSide::OUTSIDE;
+    return SurfaceGeometry::SurfaceSide::OUTSIDE;
 
   // Whether p sits on the surface is a property of p alone, so decide it once here rather than
   // re-testing it on every ray cast below.
   if (isOnSurface(p))
-    return SurfaceSide::ON;
+    return SurfaceGeometry::SurfaceSide::ON;
 
   const std::array<Point, 2> ray_starts =
       _auto_ray_direction
@@ -120,7 +120,7 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
 
     for (const auto & probe_start : probe_starts)
       if (countCrossings(probe_start, p, false) == 0)
-        return SurfaceSide::OUTSIDE;
+        return SurfaceGeometry::SurfaceSide::OUTSIDE;
   }
 
   std::ostringstream oss;
@@ -128,7 +128,7 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
   mooseError("AdaptiveRayContainmentCheck: No decision could be made for point " + oss.str());
 }
 
-std::optional<SurfaceSide>
+std::optional<SurfaceGeometry::SurfaceSide>
 AdaptiveRayContainmentCheck::sidenessFromRayPair(const Point & p,
                                                  const std::array<Point, 2> & ray_starts) const
 {
@@ -142,13 +142,14 @@ AdaptiveRayContainmentCheck::sidenessFromRayPair(const Point & p,
 
     // A ray that never crosses the closed surface proves the point is outside.
     if (counts[i] == 0)
-      return SurfaceSide::OUTSIDE;
+      return SurfaceGeometry::SurfaceSide::OUTSIDE;
   }
 
   // Consistent parity gives a definite decision; conflicting parity is undecided (nullopt) and
   // left to the caller's policy.
   if ((counts[0] % 2) == (counts[1] % 2))
-    return (counts[0] % 2 == 1) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
+    return (counts[0] % 2 == 1) ? SurfaceGeometry::SurfaceSide::INSIDE
+                                : SurfaceGeometry::SurfaceSide::OUTSIDE;
   return std::nullopt;
 }
 

@@ -109,18 +109,19 @@ TEST(AdaptiveRayContainmentCheck, RectangleAdaptiveRayContainmentCheck)
 
   // USER_SPECIFIED: shoot the ray along +x exactly (no PCA), matching the old
   // explicit-direction constructor this test was written against.
-  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_opts{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
   AdaptiveRayContainmentCheck inout_test(bd_elements, std::vector<Point>(), ray_opts);
 
   // Inside
-  EXPECT_EQ(inout_test.sideness(Point(0.5, 0.5, 0.0)), SurfaceSide::INSIDE);
+  EXPECT_EQ(inout_test.sideness(Point(0.5, 0.5, 0.0)), SurfaceGeometry::SurfaceSide::INSIDE);
 
   // Outside
-  EXPECT_EQ(inout_test.sideness(Point(-0.1, 0.5, 0.0)), SurfaceSide::OUTSIDE);
-  EXPECT_EQ(inout_test.sideness(Point(1.5, 1.5, 0.0)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(inout_test.sideness(Point(-0.1, 0.5, 0.0)), SurfaceGeometry::SurfaceSide::OUTSIDE);
+  EXPECT_EQ(inout_test.sideness(Point(1.5, 1.5, 0.0)), SurfaceGeometry::SurfaceSide::OUTSIDE);
 
   // On edge - result depends on epsilon, should return ON
-  EXPECT_EQ(inout_test.sideness(Point(1.0, 0.5, 0.0)), SurfaceSide::ON);
+  EXPECT_EQ(inout_test.sideness(Point(1.0, 0.5, 0.0)), SurfaceGeometry::SurfaceSide::ON);
 }
 
 TEST(AdaptiveRayContainmentCheck, PcaFallbackUsesFallbackDirection)
@@ -159,10 +160,11 @@ TEST(AdaptiveRayContainmentCheck, PcaFallbackUsesFallbackDirection)
     edges.push_back(std::move(edge));
   }
 
-  const RayDirectionOptions ray_options{RayDirectionMode::AUTO_PCA, Point()};
+  const SurfaceGeometry::RayDirectionOptions ray_options{
+      SurfaceGeometry::RayDirectionMode::AUTO_PCA, Point()};
   AdaptiveRayContainmentCheck containment(bd_elements, std::vector<Point>(), ray_options);
 
-  EXPECT_EQ(containment.sideness(Point(1.5, 4.0, 0.0)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(containment.sideness(Point(1.5, 4.0, 0.0)), SurfaceGeometry::SurfaceSide::OUTSIDE);
 }
 
 TEST(AdaptiveRayContainmentCheck, UnitCube3DUserRay)
@@ -175,15 +177,17 @@ TEST(AdaptiveRayContainmentCheck, UnitCube3DUserRay)
   std::vector<std::unique_ptr<Tri3>> tris;
   buildTriBox(Point(0, 0, 0), Point(1, 1, 1), bd_elements, centroids, nodes, tris);
 
-  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_opts{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
   AdaptiveRayContainmentCheck check(bd_elements, centroids, ray_opts);
 
   // z != y keeps the +x ray off the y == z face diagonal (a mesh-triangulation artifact a single
   // fixed user ray would otherwise graze), so these are clean interior/exterior crossings.
-  EXPECT_EQ(check.sideness(Point(0.5, 0.5, 0.3)), SurfaceSide::INSIDE);
-  EXPECT_EQ(check.sideness(Point(1.5, 0.5, 0.3)), SurfaceSide::OUTSIDE);
-  EXPECT_EQ(check.sideness(Point(-0.5, 0.5, 0.3)), SurfaceSide::OUTSIDE);
-  EXPECT_EQ(check.sideness(Point(1.0, 0.5, 0.3)), SurfaceSide::ON); // on the +x face
+  EXPECT_EQ(check.sideness(Point(0.5, 0.5, 0.3)), SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(check.sideness(Point(1.5, 0.5, 0.3)), SurfaceGeometry::SurfaceSide::OUTSIDE);
+  EXPECT_EQ(check.sideness(Point(-0.5, 0.5, 0.3)), SurfaceGeometry::SurfaceSide::OUTSIDE);
+  EXPECT_EQ(check.sideness(Point(1.0, 0.5, 0.3)),
+            SurfaceGeometry::SurfaceSide::ON); // on the +x face
 
   // The resolved ray direction is the normalized user direction.
   EXPECT_NEAR(check.rayDirection()(0), 1.0, 1e-12);
@@ -201,12 +205,13 @@ TEST(AdaptiveRayContainmentCheck, Box3DPcaRay)
   std::vector<std::unique_ptr<Tri3>> tris;
   buildTriBox(Point(0, 0, 0), Point(4, 1, 1), bd_elements, centroids, nodes, tris);
 
-  const RayDirectionOptions ray_opts{RayDirectionMode::AUTO_PCA, Point()};
+  const SurfaceGeometry::RayDirectionOptions ray_opts{SurfaceGeometry::RayDirectionMode::AUTO_PCA,
+                                                      Point()};
   AdaptiveRayContainmentCheck check(bd_elements, centroids, ray_opts);
 
-  EXPECT_EQ(check.sideness(Point(2.0, 0.5, 0.5)), SurfaceSide::INSIDE);
-  EXPECT_EQ(check.sideness(Point(5.0, 0.5, 0.5)), SurfaceSide::OUTSIDE);
-  EXPECT_EQ(check.sideness(Point(-1.0, 0.5, 0.5)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(check.sideness(Point(2.0, 0.5, 0.5)), SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(check.sideness(Point(5.0, 0.5, 0.5)), SurfaceGeometry::SurfaceSide::OUTSIDE);
+  EXPECT_EQ(check.sideness(Point(-1.0, 0.5, 0.5)), SurfaceGeometry::SurfaceSide::OUTSIDE);
 
   // The auto path resolves to a unit shooting direction.
   EXPECT_NEAR(check.rayDirection().norm(), 1.0, 1e-12);
@@ -231,15 +236,16 @@ TEST(AdaptiveRayContainmentCheck, SymmetricLDiagonalVertexHits)
                      nodes,
                      edges);
 
-  const RayDirectionOptions ray_options{RayDirectionMode::AUTO_PCA, Point()};
+  const SurfaceGeometry::RayDirectionOptions ray_options{
+      SurfaceGeometry::RayDirectionMode::AUTO_PCA, Point()};
   AdaptiveRayContainmentCheck containment(bd_elements, std::vector<Point>(), ray_options);
 
   // On the diagonal, inside the bottom arm; its ray grazes the concave vertex (2, 2).
-  EXPECT_EQ(containment.sideness(Point(1.875, 1.875, 0.0)), SurfaceSide::INSIDE);
+  EXPECT_EQ(containment.sideness(Point(1.875, 1.875, 0.0)), SurfaceGeometry::SurfaceSide::INSIDE);
   // On the diagonal, inside the bottom arm; its ray grazes the convex corner (1, 1).
-  EXPECT_EQ(containment.sideness(Point(1.25, 1.25, 0.0)), SurfaceSide::INSIDE);
+  EXPECT_EQ(containment.sideness(Point(1.25, 1.25, 0.0)), SurfaceGeometry::SurfaceSide::INSIDE);
   // On the diagonal, in the removed upper-right square; its ray grazes vertices (2, 2) and (1, 1).
-  EXPECT_EQ(containment.sideness(Point(2.5, 2.5, 0.0)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(containment.sideness(Point(2.5, 2.5, 0.0)), SurfaceGeometry::SurfaceSide::OUTSIDE);
 }
 
 TEST(AdaptiveRayContainmentCheck, TrueCrossingAtVertex)
@@ -256,13 +262,14 @@ TEST(AdaptiveRayContainmentCheck, TrueCrossingAtVertex)
       nodes,
       edges);
 
-  const RayDirectionOptions ray_options{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_options{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
   AdaptiveRayContainmentCheck containment(bd_elements, std::vector<Point>(), ray_options);
 
   // Center: the ray to it crosses the left vertex (0, 2) exactly once -> inside.
-  EXPECT_EQ(containment.sideness(Point(2.0, 2.0, 0.0)), SurfaceSide::INSIDE);
+  EXPECT_EQ(containment.sideness(Point(2.0, 2.0, 0.0)), SurfaceGeometry::SurfaceSide::INSIDE);
   // On the same ray line but outside the diamond, past the right vertex (4, 2).
-  EXPECT_EQ(containment.sideness(Point(5.0, 2.0, 0.0)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(containment.sideness(Point(5.0, 2.0, 0.0)), SurfaceGeometry::SurfaceSide::OUTSIDE);
 }
 
 TEST(AdaptiveRayContainmentCheck, TangentTouchAtSpikeTip)
@@ -284,12 +291,13 @@ TEST(AdaptiveRayContainmentCheck, TangentTouchAtSpikeTip)
                      nodes,
                      edges);
 
-  const RayDirectionOptions ray_options{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_options{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
   AdaptiveRayContainmentCheck containment(bd_elements, std::vector<Point>(), ray_options);
 
   // At y = 2 the ray to this interior point grazes the spike tip (2, 2); the touch must not be
   // counted as a crossing, so the point stays inside.
-  EXPECT_EQ(containment.sideness(Point(3.5, 2.0, 0.0)), SurfaceSide::INSIDE);
+  EXPECT_EQ(containment.sideness(Point(3.5, 2.0, 0.0)), SurfaceGeometry::SurfaceSide::INSIDE);
 }
 
 TEST(AdaptiveRayContainmentCheck, NearMissVertex)
@@ -308,14 +316,18 @@ TEST(AdaptiveRayContainmentCheck, NearMissVertex)
       nodes,
       edges);
 
-  const RayDirectionOptions ray_options{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_options{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
   AdaptiveRayContainmentCheck containment(bd_elements, std::vector<Point>(), ray_options);
 
   // Interior points whose ray passes just above / just below the side vertices (near miss).
-  EXPECT_EQ(containment.sideness(Point(2.0, 2.0 + 1.0e-6, 0.0)), SurfaceSide::INSIDE);
-  EXPECT_EQ(containment.sideness(Point(2.0, 2.0 - 1.0e-6, 0.0)), SurfaceSide::INSIDE);
+  EXPECT_EQ(containment.sideness(Point(2.0, 2.0 + 1.0e-6, 0.0)),
+            SurfaceGeometry::SurfaceSide::INSIDE);
+  EXPECT_EQ(containment.sideness(Point(2.0, 2.0 - 1.0e-6, 0.0)),
+            SurfaceGeometry::SurfaceSide::INSIDE);
   // On a near-miss line but outside the diamond, past the right vertex.
-  EXPECT_EQ(containment.sideness(Point(5.0, 2.0 + 1.0e-6, 0.0)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(containment.sideness(Point(5.0, 2.0 + 1.0e-6, 0.0)),
+            SurfaceGeometry::SurfaceSide::OUTSIDE);
 }
 
 TEST(AdaptiveRayContainmentCheck, CollinearRayAlongEdge)
@@ -337,10 +349,11 @@ TEST(AdaptiveRayContainmentCheck, CollinearRayAlongEdge)
                      nodes,
                      edges);
 
-  const RayDirectionOptions ray_options{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_options{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
   AdaptiveRayContainmentCheck containment(bd_elements, std::vector<Point>(), ray_options);
 
-  EXPECT_EQ(containment.sideness(Point(2.0, 2.0, 0.0)), SurfaceSide::INSIDE);
+  EXPECT_EQ(containment.sideness(Point(2.0, 2.0, 0.0)), SurfaceGeometry::SurfaceSide::INSIDE);
 }
 
 TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
@@ -356,7 +369,8 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
 
   // USER_SPECIFIED: shoot the ray along +x exactly (no PCA), matching the old
   // explicit-direction constructor this test was written against.
-  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_opts{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
 
   // Classify a point on the x = 1 edge; the default constructor uses the libMesh tolerance, the
   // second form uses an explicit on-surface epsilon.
@@ -371,15 +385,15 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
   // 1e-9 off the edge: inside the libMesh default band (read as ON). A 1e-15 eps is too tight to
   // catch it; a 1e-3 eps is loose enough.
   const Point near_edge(1 + 1e-9, 0.5, 0.0);
-  EXPECT_EQ(side_default(near_edge), SurfaceSide::ON);
-  EXPECT_NE(side_with_eps(near_edge, 1e-15), SurfaceSide::ON);
-  EXPECT_EQ(side_with_eps(near_edge, 1e-3), SurfaceSide::ON);
+  EXPECT_EQ(side_default(near_edge), SurfaceGeometry::SurfaceSide::ON);
+  EXPECT_NE(side_with_eps(near_edge, 1e-15), SurfaceGeometry::SurfaceSide::ON);
+  EXPECT_EQ(side_with_eps(near_edge, 1e-3), SurfaceGeometry::SurfaceSide::ON);
 
   // 1e-5 off the edge: outside the default band (not ON), so only a comparably large eps reads ON.
   const Point off_edge(1 + 1e-5, 0.5, 0.0);
-  EXPECT_NE(side_default(off_edge), SurfaceSide::ON);
-  EXPECT_NE(side_with_eps(off_edge, 1e-15), SurfaceSide::ON);
-  EXPECT_EQ(side_with_eps(off_edge, 1e-2), SurfaceSide::ON);
+  EXPECT_NE(side_default(off_edge), SurfaceGeometry::SurfaceSide::ON);
+  EXPECT_NE(side_with_eps(off_edge, 1e-15), SurfaceGeometry::SurfaceSide::ON);
+  EXPECT_EQ(side_with_eps(off_edge, 1e-2), SurfaceGeometry::SurfaceSide::ON);
 }
 
 TEST(AdaptiveRayContainmentCheck, EmptyBoundaryElementsThrow)
@@ -388,7 +402,8 @@ TEST(AdaptiveRayContainmentCheck, EmptyBoundaryElementsThrow)
   // dereferencing _bd_elements[0], which is undefined behavior in opt builds
   // where the constructor's internal check would otherwise be compiled out.
   std::vector<std::unique_ptr<SurfaceElement>> empty_bd_elements;
-  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions ray_opts{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
   EXPECT_MOOSEERROR_MSG_CONTAINS(
       AdaptiveRayContainmentCheck(empty_bd_elements, std::vector<Point>(), ray_opts),
       "must not be empty");
@@ -410,15 +425,17 @@ TEST(AdaptiveRayContainmentCheck, NonFiniteRayDirectionThrows)
       edges);
 
   // A NaN component in the user-specified ray direction must be rejected.
-  const RayDirectionOptions nan_ray_opts{RayDirectionMode::USER_SPECIFIED,
-                                         Point(std::numeric_limits<Real>::quiet_NaN(), 0.0, 0.0)};
+  const SurfaceGeometry::RayDirectionOptions nan_ray_opts{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED,
+      Point(std::numeric_limits<Real>::quiet_NaN(), 0.0, 0.0)};
   EXPECT_MOOSEERROR_MSG_CONTAINS(
       AdaptiveRayContainmentCheck(bd_elements, std::vector<Point>(), nan_ray_opts),
       "must be finite");
 
   // An infinity component in the user-specified ray direction must be rejected.
-  const RayDirectionOptions inf_ray_opts{RayDirectionMode::USER_SPECIFIED,
-                                         Point(0.0, std::numeric_limits<Real>::infinity(), 0.0)};
+  const SurfaceGeometry::RayDirectionOptions inf_ray_opts{
+      SurfaceGeometry::RayDirectionMode::USER_SPECIFIED,
+      Point(0.0, std::numeric_limits<Real>::infinity(), 0.0)};
   EXPECT_MOOSEERROR_MSG_CONTAINS(
       AdaptiveRayContainmentCheck(bd_elements, std::vector<Point>(), inf_ray_opts),
       "must be finite");

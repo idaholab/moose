@@ -14,13 +14,6 @@
 class Function;
 class PointInSurfaceCheckInterface;
 
-enum class DistanceType
-{
-  NONE = -1,
-  SIGNED_DISTANCE = 0,
-  GEOMETRY = 1
-};
-
 class InterceptedElementModifier : public SBMElementSubdomainModifierBase
 {
 public:
@@ -35,6 +28,13 @@ protected:
   const Function * _parsed_function;
 
 private:
+  enum class DistanceType
+  {
+    NONE = -1,
+    SIGNED_DISTANCE = 0,
+    GEOMETRY = 1
+  };
+
   /// Fetches the "in_out_test" user object and validates it implements the
   /// point-in-surface check interface; only called when that parameter is user-set.
   const PointInSurfaceCheckInterface * getCheckedInOutTest();

@@ -34,7 +34,10 @@ public:
   virtual void initialSetup() override;
 
   /// Classify a point against the surface.
-  SurfaceSide sideness(const Point & p) const override { return _classifier->sideness(p); }
+  SurfaceGeometry::SurfaceSide sideness(const Point & p) const override
+  {
+    return _classifier->sideness(p);
+  }
 
   /// The resolved ray direction used by the ray-casting backend.
   Point rayDirection() const { return _classifier->rayDirection(); }

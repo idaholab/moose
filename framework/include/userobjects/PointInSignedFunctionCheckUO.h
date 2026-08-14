@@ -38,7 +38,7 @@ public:
   // combine across threads.
   virtual void threadJoin(const UserObject &) override {}
 
-  virtual SurfaceSide sideness(const Point & p) const override;
+  virtual SurfaceGeometry::SurfaceSide sideness(const Point & p) const override;
 
   /// 1 for INSIDE/ON, 0 for OUTSIDE -- usable directly by SpatialUserObjectAux.
   virtual Real spatialValue(const Point & p) const override { return contains(p) ? 1.0 : 0.0; }

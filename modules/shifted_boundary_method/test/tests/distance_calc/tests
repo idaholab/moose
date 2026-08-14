@@ -146,5 +146,16 @@
                'nor a SignedDistanceToSurfaceMesh.'
     []
 
+    [signed_distance_in_out_test_wrong_type]
+      type = 'RunException'
+      input = '2D_signed_distance.i'
+      cli_args = 'Functions/sign_dist_square/in_out_test=TreeBuilder'
+      expect_err = 'does not implement the point-in-surface check interface'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'if SignedDistanceToSurfaceMesh receives an in-out test user object that does not '
+                'implement the point-in-surface check interface.'
+    []
+
   []
 []

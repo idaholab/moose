@@ -9,6 +9,7 @@
 
 #include "Triangle.h"
 #include "LineSegment.h"
+#include "MooseError.h"
 
 #include <cmath>
 
@@ -25,10 +26,12 @@ Triangle::normal() const
   const auto v1 = _p1 - _p0;
   const auto v2 = _p2 - _p0;
 
-  auto n = v1.cross(v2);
-  n /= n.norm();
+  const auto n = v1.cross(v2);
+  const Real norm = n.norm();
+  if (norm == 0.0)
+    mooseError("Triangle: cannot compute the normal of a degenerate triangle.");
 
-  return n;
+  return n / norm;
 }
 
 bool

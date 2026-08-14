@@ -46,11 +46,11 @@ SurfaceSidenessTestAux::computeValue()
       isNodal() ? static_cast<const Point &>(*_current_node) : _current_elem->vertex_average();
   switch (_check.sideness(p))
   {
-    case SurfaceSide::INSIDE:
+    case SurfaceGeometry::SurfaceSide::INSIDE:
       return 2.0;
-    case SurfaceSide::ON:
+    case SurfaceGeometry::SurfaceSide::ON:
       return 1.0;
-    case SurfaceSide::OUTSIDE:
+    case SurfaceGeometry::SurfaceSide::OUTSIDE:
       return 0.0;
   }
   return 0.0;

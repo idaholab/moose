@@ -37,7 +37,7 @@ PointInSubdomainCheckUO::PointInSubdomainCheckUO(const InputParameters & paramet
   // Per-subdomain checks use the ray-casting engine over element subsets; the
   // fixed_x_ray (TriangleManifold) backend operates on a whole Tri3 MeshBase and
   // cannot be applied per subdomain.
-  if (_method == PointContainmentMethod::FIXED_X_RAY)
+  if (_method == PointContainmentClassifier::Method::FIXED_X_RAY)
     paramError("point_containment_method",
                "fixed_x_ray is not supported by PointInSubdomainCheckUO; use pca_ray or "
                "user_selected_ray.");
@@ -49,7 +49,7 @@ PointInSubdomainCheckUO::initialSetup()
   // The shared ray-backend tuning/debug options (method -> ray-direction intent,
   // leaf size, comm) come from the base class; only the debug file names are
   // specialized per subdomain below.
-  const PcaRayOptions base_options = pcaRayOptions();
+  const PointContainmentClassifier::RayOptions base_options = pcaRayOptions();
 
   // Each subdomain gets its own checker, so the OBB/ray debug meshes must go to
   // distinct files; otherwise later subdomains overwrite earlier ones. Insert the
@@ -66,7 +66,7 @@ PointInSubdomainCheckUO::initialSetup()
 
   for (const auto & [subdomain_id, set] : _builder.getSurfaceElementSetsBySubdomain())
   {
-    PcaRayOptions options = base_options;
+    PointContainmentClassifier::RayOptions options = base_options;
     options.obb_file_name = per_subdomain_name(_obb_file_name, subdomain_id);
     options.ray_file_name = per_subdomain_name(_ray_file_name, subdomain_id);
 
@@ -82,8 +82,8 @@ PointInSubdomainCheckUO::ifInside(const Point & p) const
 {
   for (const auto & [_, checker] : _subdomain_id_checkers)
   {
-    const SurfaceSide side = checker->sideness(p);
-    if (side == SurfaceSide::INSIDE || side == SurfaceSide::ON)
+    const SurfaceGeometry::SurfaceSide side = checker->sideness(p);
+    if (side == SurfaceGeometry::SurfaceSide::INSIDE || side == SurfaceGeometry::SurfaceSide::ON)
       return true;
   }
   return false;
@@ -99,8 +99,8 @@ PointInSubdomainCheckUO::whichSubdomain(const Point & p) const
   std::vector<subdomain_id_type> matches;
   for (const auto & [subdomain_id, checker] : _subdomain_id_checkers)
   {
-    const SurfaceSide side = checker->sideness(p);
-    if (side == SurfaceSide::INSIDE || side == SurfaceSide::ON)
+    const SurfaceGeometry::SurfaceSide side = checker->sideness(p);
+    if (side == SurfaceGeometry::SurfaceSide::INSIDE || side == SurfaceGeometry::SurfaceSide::ON)
       matches.push_back(subdomain_id);
   }
 

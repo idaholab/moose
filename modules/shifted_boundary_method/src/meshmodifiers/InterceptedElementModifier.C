@@ -23,7 +23,10 @@ InterceptedElementModifier::validParams()
   params.addClassDescription("Marks elements as inside, outside, or intercepted based on a given "
                              "distance function or geometry.");
 
-  params.addParam<FunctionName>("signed_dist_function", "Signed Distance Function to evaluate");
+  params.addParam<FunctionName>(
+      "signed_dist_function",
+      "Signed distance function to evaluate. Exactly one of 'signed_dist_function' and "
+      "'in_out_test' must be provided; providing neither or both is invalid.");
 
   params.addRequiredParam<SubdomainID>("subdomain_id_inside", "ID for inside elements.");
   params.addRequiredParam<SubdomainID>("subdomain_id_outside", "ID for outside elements.");
@@ -35,7 +38,10 @@ InterceptedElementModifier::validParams()
       "distance below 'threshold', or points reported inside by the in-out test); when false, the "
       "retained domain is the region outside the surface.");
 
-  params.addParam<UserObjectName>("in_out_test", "The name of the in-out test user object");
+  params.addParam<UserObjectName>(
+      "in_out_test",
+      "The name of the in-out test user object. Exactly one of 'in_out_test' and "
+      "'signed_dist_function' must be provided; providing neither or both is invalid.");
 
   return params;
 }
@@ -49,8 +55,11 @@ InterceptedElementModifier::InterceptedElementModifier(const InputParameters & p
     _subdomain_id_outside(getParam<SubdomainID>("subdomain_id_outside")),
     _threshold(getParam<Real>("threshold")),
     _is_domain_inside_surface(getParam<bool>("is_domain_inside_surface")),
-    _in_out_test_base(isParamSetByUser("in_out_test") ? getCheckedInOutTest() : nullptr)
+    _in_out_test_base(nullptr)
 {
+  // Register by name before sorting and defer the lookup, as done by MeshCut2DUserObjectBase.
+  if (isParamSetByUser("in_out_test"))
+    _depend_uo.insert(getParam<UserObjectName>("in_out_test"));
 }
 
 const PointInSurfaceCheckInterface *
@@ -68,14 +77,17 @@ InterceptedElementModifier::getCheckedInOutTest()
   return check;
 }
 
-/// @brief Initial setup for the InterceptedElementModifier class to read in the Gmsh file
-/// NOTE: this function should be overrided
+/// Validate that exactly one geometry source (signed_dist_function or in_out_test) is set,
+/// after running the base-class setup
 void
 InterceptedElementModifier::initialSetup()
 {
   // Run the base class setup (reinitialize subdomains/variables, moving boundary maps,
   // reinitialization strategy, and parameter consistency checks) before our own.
   SBMElementSubdomainModifierBase::initialSetup();
+
+  if (isParamSetByUser("in_out_test"))
+    _in_out_test_base = getCheckedInOutTest();
 
   // Exactly one geometry source must be provided.
   if (_in_out_test_base && _parsed_function)
