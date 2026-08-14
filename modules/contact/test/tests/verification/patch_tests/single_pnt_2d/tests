@@ -84,6 +84,22 @@
     search solver "
                   "options."
   []
+  [frictionless_pen_contact_line_search_block]
+    type = 'CSVDiff'
+    input = 'single_point_2d_contact_line_search_block.i'
+    csvdiff = 'single_point_2d_contact_line_search_block_out.csv'
+    allow_warnings = true
+    abs_zero = 1e-8
+    rel_err = 5e-4
+    mesh_mode = REPLICATED
+    requirement = "The Contact system shall enforce frictionless, penalty contact
+    for 2D plane "
+                  "strain single point contact model using a PetscContactLineSearch
+    selected "
+                  "through a [LineSearch] block instead of the deprecated
+    line_search = "
+                  "'contact' Executioner syntax, producing identical results."
+  []
   [mu_0_0_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
