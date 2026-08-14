@@ -11,7 +11,7 @@ porosity_name = porosity
   []
 
   [lps]
-    type = ADViscoplasticityStressUpdate
+    type = ${AD}PorousViscoplasticityStressUpdate
     coefficient = 'coef'
     power = 3
     outputs = all
@@ -19,7 +19,7 @@ porosity_name = porosity
     relative_tolerance = 1e-15
   []
   [coef]
-    type = ADParsedMaterial
+    type = ${AD}ParsedMaterial
     property_name = coef
     expression = '1e-18 * exp(-4e4 / 1.987 / 1200)'
   []

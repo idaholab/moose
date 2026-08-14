@@ -1,6 +1,8 @@
 end_time = 1
 dt = ${fparse end_time / 10}
 strain = 1e-5
+AD = AD
+use_ad = true
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -17,7 +19,7 @@ strain = 1e-5
   strain = FINITE
   add_variables = true
   generate_output = 'strain_xx strain_yy strain_xy hydrostatic_stress vonmises_stress'
-  use_automatic_differentiation = true
+  use_automatic_differentiation = ${use_ad}
 []
 
 [Functions]
@@ -30,23 +32,23 @@ strain = 1e-5
 
 [Materials]
   [elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
+    type = ${AD}ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
   []
   [stress]
-    type = ADComputeMultipleInelasticStress
+    type = ${AD}ComputeMultipleInelasticStress
     inelastic_models = creep
     outputs = all
   []
   [porosity]
-    type = ADPorosityFromStrain
+    type = ${AD}PorosityFromStrain
     initial_porosity = 0.1
     inelastic_strain = 'combined_inelastic_strain'
     outputs = all
   []
   [creep]
-    type = ADPowerLawCreepStressUpdate
+    type = ${AD}PowerLawCreepStressUpdate
     activation_energy = 4e4
     temperature = 1200
     coefficient = 1e-18
@@ -59,19 +61,19 @@ strain = 1e-5
 
 [BCs]
   [no_disp_x]
-    type = ADDirichletBC
+    type = ${AD}DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   []
   [no_disp_y]
-    type = ADDirichletBC
+    type = ${AD}DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   []
   [pull_disp_y]
-    type = ADFunctionDirichletBC
+    type = ${AD}FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pull

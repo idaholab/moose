@@ -40,12 +40,20 @@
     requirement = 'The Jacobian for the AD exact cylindrical problem shall be perfect'
   []
 
+  [creep_nonad]
+    type = CSVDiff
+    input = creep.i
+    csvdiff = creep_nonad_out.csv
+    cli_args = 'AD="" use_ad=false Outputs/file_base=creep_nonad_out'
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute a creep strain based on an extrenal loading not using automatic differentiation.'
+  []
   [creep]
     type = CSVDiff
     input = creep.i
     csvdiff = creep_out.csv
     design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
-    requirement = 'The system shall compute a creep strain based on an extrenal loading.'
+    requirement = 'The system shall compute a creep strain based on an extrenal loading using automatic differentiation.'
   []
   [creep-jac]
     type = 'PetscJacobianTester'
@@ -66,11 +74,18 @@
     csvdiff = 'lps_single_no_porosity_out.csv'
     requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that matches a simple radial return calculation if porosity is not coupled.'
   []
+  [lps_single_nonad]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_nonad_out.csv'
+    cli_args = 'AD="" use_ad=false Outputs/file_base=lps_single_nonad_out'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that increases the porosity due to an external strain not using automatic differentiation.'
+  []
   [lps_single]
     type = CSVDiff
     input = 'lps_single.i'
     csvdiff = 'lps_single_out.csv'
-    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that increases the porosity due to an external strain.'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that increases the porosity due to an external strain using automatic differentiation.'
   []
   [lps_single-jac]
     type = 'PetscJacobianTester'
@@ -81,6 +96,20 @@
     difference_tol = 1e8
     prereq = lps_single
     requirement = 'The Jacobian for the AD lps single problem shall be perfect'
+  []
+  [lps_single_negative_pressure]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_negative_pressure_out.csv'
+    cli_args = 'Materials/lps/additional_porosity_pressure=-1e7 Outputs/file_base=lps_single_negative_pressure_out'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that decreases the porosity due to an external strain and a negative porosity pressure.'
+  []
+  [lps_single_positive_pressure]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_positive_pressure_out.csv'
+    cli_args = 'Materials/lps/additional_porosity_pressure=1e7 Outputs/file_base=lps_single_positive_pressure_out'
+    requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that decreases the porosity due to an external strain and a positive porosity pressure.'
   []
 
   [lps_single_split_no_porosity]
