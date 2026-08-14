@@ -24,7 +24,7 @@
  */
 struct SurfaceComplexationInfo
 {
-  SurfaceComplexationInfo() {};
+  SurfaceComplexationInfo() {}
 
   bool operator==(const SurfaceComplexationInfo & rhs) const
   {
@@ -68,7 +68,9 @@ struct KineticRateDefinition
       promoting_monod_indices(promoting_monod_indices),
       promoting_half_saturation(promoting_half_saturation),
       progeny_index(progeny_index),
-      description(description) {};
+      description(description)
+  {
+  }
 
   bool operator==(const KineticRateDefinition & rhs) const
   {
@@ -103,7 +105,9 @@ struct ModelGeochemicalDatabase
    * attempt to reduce memory consumption
    */
   ModelGeochemicalDatabase(const GeochemicalDatabaseReader & db)
-    : original_database(&db), swap_to_original_basis(DenseMatrix<Real>()) {};
+    : original_database(&db), swap_to_original_basis(DenseMatrix<Real>())
+  {
+  }
 
   bool operator==(const ModelGeochemicalDatabase & rhs) const
   {

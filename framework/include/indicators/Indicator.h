@@ -39,7 +39,7 @@ public:
 
   Indicator(const InputParameters & parameters);
 
-  virtual ~Indicator() {};
+  virtual ~Indicator() {}
 
   /**
    * Pure virtual that must be overridden.

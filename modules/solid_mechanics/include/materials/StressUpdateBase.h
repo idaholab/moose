@@ -169,7 +169,7 @@ public:
   /**
    * Reset material properties. Useful for substepping with inelastic models.
    */
-  virtual void resetIncrementalMaterialProperties() {};
+  virtual void resetIncrementalMaterialProperties() {}
 
   /**
    * Compute the strain energy rate density for this inelastic model for the current step.

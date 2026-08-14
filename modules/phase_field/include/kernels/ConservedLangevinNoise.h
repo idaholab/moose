@@ -20,7 +20,7 @@ public:
   ConservedLangevinNoise(const InputParameters & parameters);
 
 protected:
-  virtual void residualSetup() {};
+  virtual void residualSetup() {}
   virtual Real computeQpResidual();
 
 private:

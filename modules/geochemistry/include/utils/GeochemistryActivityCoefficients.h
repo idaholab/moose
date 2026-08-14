@@ -18,7 +18,7 @@
 class GeochemistryActivityCoefficients
 {
 public:
-  GeochemistryActivityCoefficients() {};
+  GeochemistryActivityCoefficients() {}
 
   bool operator==(const GeochemistryActivityCoefficients & /*rhs*/) const { return true; };
 

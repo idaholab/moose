@@ -25,7 +25,7 @@ public:
 
   TestDiscontinuousValuePP(const InputParameters & parameters);
 
-  virtual ~TestDiscontinuousValuePP() {};
+  virtual ~TestDiscontinuousValuePP() {}
 
   virtual void initialize() override {};
 

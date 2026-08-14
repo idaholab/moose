@@ -23,7 +23,7 @@ public:
   // Splitting Constructor
   ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split split);
 
-  virtual ~ThreadedNodeLoop() {};
+  virtual ~ThreadedNodeLoop() {}
 
   void operator()(const RangeType & range);
 

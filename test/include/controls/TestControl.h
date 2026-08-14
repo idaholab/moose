@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
 
   TestControl(const InputParameters & parameters);
-  virtual ~TestControl() {};
+  virtual ~TestControl() {}
   virtual void execute();
 
 private:

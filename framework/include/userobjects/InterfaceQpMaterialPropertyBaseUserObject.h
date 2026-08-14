@@ -25,7 +25,7 @@ public:
    * @param parameters The input parameters for this object
    */
   InterfaceQpMaterialPropertyBaseUserObject(const InputParameters & parameters);
-  virtual ~InterfaceQpMaterialPropertyBaseUserObject() {};
+  virtual ~InterfaceQpMaterialPropertyBaseUserObject() {}
 
 protected:
   /**
