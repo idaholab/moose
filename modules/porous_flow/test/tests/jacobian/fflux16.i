@@ -1,5 +1,6 @@
 # 1phase, 1component, constant viscosity, Kozeny-Carman permeability
 # density with constant bulk, Corey relative perm, nonzero gravity, unsaturated with vanGenuchten
+# a mixed-order element formulation is used in this test: second-order displacemnets and first-order pore pressure
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -9,7 +10,6 @@
     nz = 1
     elem_type = HEX27
   []
-  second_order = true
 []
 
 [GlobalParams]
@@ -167,13 +167,6 @@
 []
 
 [Preconditioning]
-  active = check
-  [andy]
-    type = SMP
-    full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  []
   [check]
     type = SMP
     full = true
