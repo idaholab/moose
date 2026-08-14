@@ -11,7 +11,7 @@ porosity_name = porosity
   []
 
   [lps_one]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 'coef_one'
     power = 3
     outputs = all
@@ -21,7 +21,7 @@ porosity_name = porosity
     negative_behavior = zero
   []
   [lps_two]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 'coef_two'
     power = 3
     outputs = all
