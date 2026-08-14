@@ -9,18 +9,25 @@
 
 #include "LineSearch.h"
 #include "MooseApp.h"
+#include "FEProblem.h"
 
 InputParameters
 LineSearch::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params.registerBase("LineSearch");
+  params.addParam<NonlinearSystemName>(
+      "nl_sys", "The nonlinear system this line search should be applied to.");
   return params;
 }
 
 LineSearch::LineSearch(const InputParameters & parameters)
   : MooseObject(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblem *>("_fe_problem", "Must be using FEProblem.")),
-    _nl_its(0)
+    _nl_its(0),
+    _nl_sys_num(isParamValid("nl_sys")
+                    ? _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nl_sys"))
+                    : 0),
+    _nl(_fe_problem.getNonlinearSystemBase(_nl_sys_num))
 {
 }

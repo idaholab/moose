@@ -27,6 +27,7 @@
 // Forward declarations
 class FEProblemBase;
 class MoosePreconditioner;
+class LineSearch;
 class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
@@ -502,6 +503,13 @@ public:
    */
   void setPreconditioner(std::shared_ptr<MoosePreconditioner> pc);
   MoosePreconditioner const * getPreconditioner() const;
+
+  /**
+   * Sets a line search
+   * @param line_search The line search to be set
+   */
+  void setLineSearch(std::shared_ptr<LineSearch> line_search);
+  LineSearch * getLineSearch() const;
 
   /**
    * If called with true this system will use a finite differenced form of
@@ -1028,6 +1036,9 @@ protected:
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
   std::shared_ptr<MoosePreconditioner> _preconditioner;
+
+  /// Line search
+  std::shared_ptr<LineSearch> _line_search;
 
   /// Whether or not to use a finite differenced preconditioner
   bool _use_finite_differenced_preconditioner;
