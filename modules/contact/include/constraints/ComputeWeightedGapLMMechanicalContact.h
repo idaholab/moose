@@ -10,9 +10,11 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
-#include "LMWeightedGapUserObject.h"
+#include "WeightedGapUserObject.h"
 
 #include <unordered_map>
+
+class LMWeightedGapUserObject;
 
 /**
  * Computes the weighted gap that will later be used to enforce the
@@ -123,5 +125,8 @@ protected:
   const Real * _normalization_ptr = nullptr;
 
   /// The weighted gap user object
-  LMWeightedGapUserObject & _weighted_gap_uo;
+  WeightedGapUserObject & _weighted_gap_uo;
+
+  /// Non-null only when 'use_derived_c_normal' is true; provides per-node dofToDerivedC() access
+  LMWeightedGapUserObject * const _lm_weighted_gap_uo;
 };
