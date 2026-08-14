@@ -1,0 +1,79 @@
+[Tests]
+  design = 'TorchScriptProfileFunctorMaterial.md TorchScriptUserObject.md'
+
+  [interpolation]
+    type = CSVDiff
+    input = profile.i
+    csvdiff = profile_out.csv
+    requirement = 'The system shall evaluate multiple TorchScript-generated profiles as spatial functors.'
+    capabilities = 'libtorch'
+  []
+
+  [clamp]
+    type = CSVDiff
+    input = profile.i
+    csvdiff = clamp.csv
+    cli_args = "FunctorMaterials/profiles/coordinate_scale=1 FunctorMaterials/profiles/out_of_range_behavior=clamp Outputs/file_base=clamp"
+    requirement = 'The system shall clamp profile coordinates outside the TorchScript profile range.'
+    capabilities = 'libtorch'
+  []
+
+  [extrapolate]
+    type = CSVDiff
+    input = profile.i
+    csvdiff = extrapolate.csv
+    cli_args = "FunctorMaterials/profiles/coordinate_scale=1 FunctorMaterials/profiles/out_of_range_behavior=extrapolate Outputs/file_base=extrapolate"
+    requirement = 'The system shall linearly extrapolate TorchScript profiles when requested.'
+    capabilities = 'libtorch'
+  []
+
+  [channel_count_error]
+    type = RunException
+    input = profile.i
+    cli_args = "FunctorMaterials/profiles/profile_names='profile_a' Postprocessors/b_max/functor=profile_a Postprocessors/b_min/functor=profile_a"
+    expect_err = 'profile_names contains 1 entries'
+    requirement = 'The system shall report a mismatch between TorchScript output channels and profile names.'
+    capabilities = 'libtorch'
+    max_parallel = 1
+  []
+
+  [station_count_error]
+    type = RunException
+    input = profile.i
+    cli_args = "FunctorMaterials/profiles/profile_coordinates='0 1'"
+    expect_err = 'profile_coordinates contains 2 entries'
+    requirement = 'The system shall report a mismatch between TorchScript output stations and profile coordinates.'
+    capabilities = 'libtorch'
+    max_parallel = 1
+  []
+
+  [coordinate_order_error]
+    type = RunException
+    input = profile.i
+    cli_args = "FunctorMaterials/profiles/profile_coordinates='0 1 1'"
+    expect_err = 'Profile coordinates must be strictly increasing'
+    requirement = 'The system shall reject non-increasing profile coordinates.'
+    capabilities = 'libtorch'
+    max_parallel = 1
+  []
+
+  [direction_error]
+    type = RunException
+    input = profile.i
+    cli_args = "FunctorMaterials/profiles/profile_direction='0 0 0'"
+    expect_err = 'profile_direction must be finite and nonzero'
+    requirement = 'The system shall reject a zero profile direction.'
+    capabilities = 'libtorch'
+    max_parallel = 1
+  []
+
+  [range_error]
+    type = RunException
+    input = profile.i
+    cli_args = 'FunctorMaterials/profiles/coordinate_scale=1'
+    expect_err = 'Profile coordinate .* is outside'
+    requirement = 'The system shall report an out-of-range profile coordinate when configured to error.'
+    capabilities = 'libtorch'
+    max_parallel = 1
+  []
+[]
