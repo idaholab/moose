@@ -269,7 +269,7 @@ ComputeWeightedGapLMMechanicalContact::normalContactScale(const DofObject * cons
 {
   const Real scale = _use_derived_c_normal
                          ? libmesh_map_find(_lm_weighted_gap_uo->dofToDerivedC(), dof)[0]
-                         : _c * (_normalize_c ? 1.0 : contactNormalization());
+                         : _c;
   if (!std::isfinite(scale) || scale <= 0.0)
     mooseError("Mortar contact requires positive, finite nodal normal pressure scales.");
   return scale;
@@ -285,7 +285,9 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   // active, in which case it substitutes a coverage-independent (full-element) integral so the two
   // mechanisms don't double-count coverage (PR review discussion; not from Popp 2013).
   const Real c =
-      normal_scale / _weighted_gap_uo.normalizeCDivisor(dof, contactNormalization());
+      (_use_derived_c_normal || _normalize_c)
+          ? normal_scale / _weighted_gap_uo.normalizeCDivisor(dof, contactNormalization())
+          : normal_scale;
 
   // Scaling factor kappa_j (Popp 2013 eq. 34; 1 when disabled/fully covered): dividing the gap by
   // kappa_j gives g_bar/kappa_j, preserving the complementarity root with zhat_j = kappa_j
