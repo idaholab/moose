@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 #include "LinearSystem.h"
+#include "LineSearch.h"
 #include "Convergence.h"
 #include "Executioner.h"
 #include "ConvergenceIterationTypes.h"
@@ -204,9 +205,43 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   : MultiSystemSolveObject(ex),
     _num_grid_steps(cast_int<unsigned int>(getParam<unsigned int>("num_grids") - 1))
 {
-  if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
-      _moose_line_searches.end())
-    _problem.addLineSearch(_pars);
+  const auto line_search_name = getParam<MooseEnum>("line_search").operator std::string();
+  if (_moose_line_searches.find(line_search_name) != _moose_line_searches.end())
+  {
+    mooseDeprecated("line_search = '",
+                    line_search_name,
+                    "' is deprecated. Use a [LineSearch] block with type = "
+                    "PetscContactLineSearch or PetscProjectSolutionOntoBounds instead.");
+
+    std::shared_ptr<LineSearch> line_search;
+    if (line_search_name == "contact")
+    {
+      InputParameters ls_params = _app.getFactory().getValidParams("PetscContactLineSearch");
+
+      bool affect_ltol = _pars.isParamValid("contact_line_search_ltol");
+      ls_params.set<bool>("affect_ltol") = affect_ltol;
+      ls_params.set<unsigned>("allowed_lambda_cuts") =
+          _pars.get<unsigned>("contact_line_search_allowed_lambda_cuts");
+      ls_params.set<Real>("contact_ltol") =
+          affect_ltol ? _pars.get<Real>("contact_line_search_ltol") : _pars.get<Real>("l_tol");
+      ls_params.set<MooseEnum>("backing_line_search") =
+          _pars.get<MooseEnum>("contact_line_search_backing");
+      ls_params.set<FEProblem *>("_fe_problem") = dynamic_cast<FEProblem *>(&_problem);
+
+      line_search = _app.getFactory().create<LineSearch>(
+          "PetscContactLineSearch", "contact_line_search", ls_params);
+    }
+    else // "project"
+    {
+      InputParameters ls_params =
+          _app.getFactory().getValidParams("PetscProjectSolutionOntoBounds");
+      ls_params.set<FEProblem *>("_fe_problem") = dynamic_cast<FEProblem *>(&_problem);
+
+      line_search = _app.getFactory().create<LineSearch>(
+          "PetscProjectSolutionOntoBounds", "project_solution_onto_bounds_line_search", ls_params);
+    }
+    _problem.getNonlinearSystemBase(0).setLineSearch(line_search);
+  }
 
   auto set_solver_params = [this, &ex](const SolverSystem & sys)
   {

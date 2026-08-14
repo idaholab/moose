@@ -179,6 +179,15 @@ void setSolveTypeFromParams(FEProblemBase & fe_problem, const InputParameters & 
 void setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
+ * Marks the given nonlinear system as using an object-based LineSearch (one already installed
+ * via NonlinearSystemBase::setLineSearch) and wires up the PETSc nonlinear solver to call into it
+ * instead of a built-in PETSc line search type.
+ * @param fe_problem The problem owning the nonlinear system
+ * @param nl_sys_num The nonlinear system whose LineSearch object should be attached to PETSc
+ */
+void attachLineSearchObject(FEProblemBase & fe_problem, unsigned int nl_sys_num);
+
+/**
  *  Sets the FE problem's matrix-free finite difference type from the input params.
  */
 void setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params);

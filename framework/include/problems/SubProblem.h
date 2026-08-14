@@ -47,7 +47,6 @@ typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
-class LineSearch;
 class FaceInfo;
 class MooseObjectName;
 namespace Moose
@@ -777,8 +776,6 @@ public:
    * Method for reading wehther we have any ad objects
    */
   bool haveADObjects() const { return _have_ad_objects; }
-
-  virtual LineSearch * getLineSearch() = 0;
 
   /**
    * The coupling matrix defining what blocks exist in the preconditioning matrix

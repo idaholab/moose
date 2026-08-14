@@ -24,7 +24,6 @@ class AssemblyData;
 class MooseMesh;
 class Assembly;
 class FEProblemBase;
-class LineSearch;
 
 // libMesh forward declarations
 namespace libMesh
@@ -347,8 +346,6 @@ public:
    * refining the DisplacedMesh.
    */
   void undisplaceMesh();
-
-  virtual LineSearch * getLineSearch() override;
 
   virtual const CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const override;
 
