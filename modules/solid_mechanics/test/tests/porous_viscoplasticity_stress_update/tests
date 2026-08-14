@@ -165,6 +165,7 @@
     type = CSVDiff
     input = 'lps_single_substepping.i'
     csvdiff = 'lps_single_substepping_out.csv'
+    heavy = true
     rel_err = 5e-3
     requirement = 'The system shall compute the viscoplastic response using a two models with LPS formulation that increase the porosity due to an external strain'
   []
