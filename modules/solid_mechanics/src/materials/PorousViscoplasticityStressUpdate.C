@@ -14,7 +14,7 @@
 registerMooseObjectRenamed("SolidMechanicsApp",
                            ADViscoplasticityStressUpdate,
                            "09/30/2027 24:00",
-                           PorousViscoplasticityStressUpdate);
+                           ADPorousViscoplasticityStressUpdate);
 
 registerMooseObject("SolidMechanicsApp", PorousViscoplasticityStressUpdate);
 registerMooseObject("SolidMechanicsApp", ADPorousViscoplasticityStressUpdate);
@@ -55,12 +55,21 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
   params.addParam<Real>("minimum_equivalent_stress",
                         1.0e-3,
                         "Minimum stress scale below which viscoplasticity is not calculated.");
+  params.renameParam("minimum_equivalent_stress",
+                     "minimum_stress_magnitude",
+                     "Minimum value of equivalent or absolute value of the hydrostatic stress "
+                     "below which viscoplasticity is not calculated.");
 
   params.addParam<Real>(
       "maximum_equivalent_stress",
       1.0e12,
-      "Maximum value of equivalent stress above which an exception is thrown instead of "
-      "calculating the properties in this material.");
+      "Maximum value of equivalent or absolute value of the hydrostatic stress above which an "
+      "exception is thrown instead of calculating the properties in this material.");
+  params.renameParam(
+      "maximum_equivalent_stress",
+      "maximum_stress_magnitude",
+      "Maximum value of equivalent or absolute value of the hydrostatic stress above which an "
+      "exception is thrown instead of calculating the properties in this material.");
 
   MooseEnum substepping_type("NONE INCREMENT_BASED", "NONE");
   substepping_type.addDocumentation("NONE", "Do not use local constitutive substepping");
@@ -85,7 +94,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
       "Maximum number of local constitutive substeps before cutting the global timestep.");
 
   params.addParamNamesToGroup(
-      "verbose maximum_gauge_ratio maximum_equivalent_stress use_substepping "
+      "verbose maximum_gauge_ratio maximum_stress_magnitude use_substepping "
       "substep_strain_tolerance adaptive_substepping maximum_number_substeps",
       "Advanced");
 
@@ -112,8 +121,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
     _gauge_stress(
         this->template declareGenericProperty<Real, is_ad>(this->_base_name + "gauge_stress")),
     _maximum_gauge_ratio(this->template getParam<Real>("maximum_gauge_ratio")),
-    _minimum_equivalent_stress(this->template getParam<Real>("minimum_equivalent_stress")),
-    _maximum_equivalent_stress(this->template getParam<Real>("maximum_equivalent_stress")),
+    _minimum_stress_magnitude(this->template getParam<Real>("minimum_stress_magnitude")),
+    _maximum_stress_magnitude(this->template getParam<Real>("maximum_stress_magnitude")),
     _use_substepping(
         this->template getParam<MooseEnum>("use_substepping").template getEnum<SubsteppingType>()),
     _substep_tolerance(this->template getParam<Real>("substep_strain_tolerance")),
@@ -185,10 +194,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::hasViscoplasticDrive(
 {
   using std::abs;
 
-  if (equiv_stress > _minimum_equivalent_stress)
+  if (equiv_stress > _minimum_stress_magnitude)
     return true;
 
-  return _intermediate_porosity > 0.0 && abs(effectiveHydroStress()) > _minimum_equivalent_stress;
+  return _intermediate_porosity > 0.0 && abs(effectiveHydroStress()) > _minimum_stress_magnitude;
 }
 
 template <bool is_ad>
@@ -204,8 +213,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::gaugeStressScale(
   if (hydro_scale > scale)
     scale = hydro_scale;
 
-  if (scale < _minimum_equivalent_stress)
-    scale = _minimum_equivalent_stress;
+  if (scale < _minimum_stress_magnitude)
+    scale = _minimum_stress_magnitude;
 
   return scale;
 }
@@ -274,13 +283,13 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
   effective_inelastic_strain_increment = 0.0;
 
   // Protect against extremely high values of stresses calculated by other viscoplastic materials
-  if (equiv_stress > _maximum_equivalent_stress)
+  if (gaugeStressScale(equiv_stress) > _maximum_stress_magnitude)
     mooseException("In ",
                    _name,
                    ": equivalent stress (",
-                   MetaPhysicL::raw_value(equiv_stress),
-                   ") is higher than maximum_equivalent_stress (",
-                   _maximum_equivalent_stress,
+                   MetaPhysicL::raw_value(gaugeStressScale(equiv_stress)),
+                   ") is higher than maximum_stress_magnitude (",
+                   _maximum_stress_magnitude,
                    ").\nCutting time step.");
 
   if (hasViscoplasticDrive(equiv_stress))
@@ -307,6 +316,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
   const auto new_equiv_stress =
       new_dev_stress_squared == 0.0 ? 0.0 : sqrt(1.5 * new_dev_stress_squared);
 
+  // Cut timestep if new stress is higher by a non-numerical noise amount. An additive 1 Pa is
+  // utilized ot protect for small differences and if equiv_stresses are zero
   if (new_equiv_stress > equiv_stress + 1.0)
     mooseException("In ",
                    _name,
@@ -338,14 +349,16 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubsteps(
   if (!hasViscoplasticDrive(equiv_stress))
     return 1;
 
-  if (equiv_stress > _maximum_equivalent_stress)
+  if (gaugeStressScale(equiv_stress) > _maximum_stress_magnitude)
     mooseException("In ",
                    _name,
-                   ": equivalent stress is higher than maximum_equivalent_stress while "
-                   "estimating local substeps.");
+                   ": equivalent stress (",
+                   MetaPhysicL::raw_value(gaugeStressScale(equiv_stress)),
+                   ") is higher than maximum_stress_magnitude (",
+                   _maximum_stress_magnitude,
+                   ").\nCutting time step.");
 
-  // Create gauge_stress with initial guess TODO I don't think the IC does anything actually...
-  auto gauge_stress = gaugeStressScale(equiv_stress);
+  GenericReal<is_ad> gauge_stress;
   computeGaugeStress(gauge_stress, equiv_stress);
 
   const auto dpsi_dgauge = _coefficient[_qp] * pow(gauge_stress, _power);
@@ -626,11 +639,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeResidual(
 
   if (_verbose)
     Moose::out << "in computeResidual:\n"
-               << "  position: " << _q_point[_qp] << " matrix_hydro_stress: " << _hydro_stress
-               << " effective_hydro_stress: " << effective_hydro_stress
-               << " equiv_stress: " << equiv_stress << " trial_gauge: " << trial_gauge
-               << " M: " << M << "\n  residual: " << residual << " derivative: " << _derivative
-               << std::endl;
+               << "  position: " << _q_point[_qp]
+               << " matrix_hydro_stress: " << MetaPhysicL::raw_value(_hydro_stress)
+               << " effective_hydro_stress: " << MetaPhysicL::raw_value(effective_hydro_stress)
+               << " equiv_stress: " << MetaPhysicL::raw_value(equiv_stress)
+               << " trial_gauge: " << MetaPhysicL::raw_value(trial_gauge)
+               << " M: " << MetaPhysicL::raw_value(M)
+               << "\n  residual: " << MetaPhysicL::raw_value(residual)
+               << " derivative: " << MetaPhysicL::raw_value(_derivative) << std::endl;
 
   return residual;
 }

@@ -111,6 +111,19 @@
     cli_args = 'Materials/lps/additional_porosity_pressure=1e7 Outputs/file_base=lps_single_positive_pressure_out'
     requirement = 'The system shall compute the viscoplastic response using a single model with LPS formulation that decreases the porosity due to an external strain and a positive porosity pressure.'
   []
+  [lps_single_hydrostatic]
+    type = CSVDiff
+    input = 'lps_single_hydrostatic.i'
+    csvdiff = 'lps_single_hydrostatic_out.csv'
+    requirement = 'The system shall compute the viscoplastic response using the LPS formulation that increases the porosity due to an internal porosity pressure.'
+  []
+  [lps_single_negative_hydrostatic]
+    type = CSVDiff
+    input = 'lps_single_hydrostatic.i'
+    csvdiff = 'lps_single_negative_hydrostatic_out.csv'
+    cli_args = 'Materials/lps/additional_porosity_pressure=-1e7 Outputs/file_base=lps_single_negative_hydrostatic_out'
+    requirement = 'The system shall compute the viscoplastic response using the LPS formulation that increases the porosity due to an internal porosity pressure.'
+  []
 
   [lps_single_split_no_porosity]
     type = CSVDiff
