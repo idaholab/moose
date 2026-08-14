@@ -1,4 +1,4 @@
-# Porosus Viscoplasticity Stress Update
+# PorosusViscoplasticityStressUpdate
 
 !syntax description /Materials/PorousViscoplasticityStressUpdate
 
@@ -76,7 +76,7 @@ component analysis. Several fitting parameters were introduced into Gurson's mod
 cell), leading to the famous GTN model that is the most widely-used damage and porosity evolution
 model for ductile materials.
 
-[!cite](Leblond:1994kl) (LPS) extended the GTN model to account for rate-sensitive plastics. While
+[!cite](Leblond:1994kl) (LPS) extended the GTN    model to account for rate-sensitive plastics. While
 far less common than the rate-insensitive GTN model, the work by Leblond et al. generated a similar
 analytical solution to GTN, but accounted for dissipation in the material, making it also very accessible to
 finite element implementation. It is expected that differences between rate-sensitive (i.e. LPS) and
@@ -94,7 +94,7 @@ a single dissipative potential, described by a Norton-type power law:
 \end{equation}
 Here, the gauge stress, $\Lambda_n$,  is used to translate applied stress and porosity to strain rate response in a power law creeping material with rate-sensitivity factor $n$, is given via the minimization of the residual $\mathcal{R}$:
 \begin{equation}
-  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
+  \mathcal{R} = \left(1+\frac{2f}{3}\right)\left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
 \end{equation}
 where $h_n$ is a rate sensitivity factor. The law proposed by [!cite](Leblond:1994kl)reduces exactly to the [!cite](Gurson:1977gg) model when
 using a rate-insensitive exponent.
@@ -121,16 +121,16 @@ is captured due to the act of homogenization.
 
 Using the LPS model, the gauge stress is calculated by minimizing the residual,
 \begin{equation}
-  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
+  \mathcal{R} = \left(1+\frac{2f}{3}\right)\left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
   \label{eq:residual}
 \end{equation}
 
 The rate sensitivity factor $h_n$ is a function of the strain rate stress exponent, gauge stress, and equivalent stress,
 \begin{equation}
-  h_n = \left(1+\frac{1}{n}\left(s_f\frac{|\Sigma_m|}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^{\frac{n+1}{n}}\right)^n
+  h_n = \left(1+\frac{1}{n}\left(s_f\frac{|\Sigma_m^{eff}|}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^{\frac{n+1}{n}}\right)^n
 \label{eq:h}
 \end{equation}
-where $s_f$ is a shape factor that depends on the pore shape:
+where  $s_f$ is a shape factor that depends on the pore shape:
 \begin{equation}
 s_f =\begin{cases}
   \frac{3}{2} &\text{for spherical pores} \\
@@ -139,7 +139,12 @@ s_f =\begin{cases}
 \end{cases}
 \end{equation}
 
-In addition, the mean stress utilized in [eq:h] is different depending on the shape of the pore,
+$\Sigma_m^{eff}$ is an effective hydrostatus stress that includes internal pressure due to gases:
+\begin{equation}
+  \Sigma_m^{eff} = \Sigma_m + p_{pore}.
+  \label{eq:effective_hydro}
+\end{equation}
+ In addition, porosity pressurization is only enabled for spherical pores, and the mean stress utilized in [eq:effective_hydro] is different depending on the shape of the pore,
 \begin{equation}
 \Sigma_m =\begin{cases}
   \frac{1}{3}(\Sigma_{1,1} + \Sigma_{2,2} + \Sigma_{3,3})  &\text{for spherical pores} \\
@@ -148,10 +153,11 @@ In addition, the mean stress utilized in [eq:h] is different depending on the sh
 \end{cases}
 \end{equation}
 
-The GTN can be solved in exactly the same manner as the LPS model by taking $n\rightarrow \infty$ in [eq:residual] and [eq:shape_factor], reducing $\mathcal{R}$ to,
+The GTN can be solved in exactly the same manner as the LPS model by taking $n\rightarrow \infty$ in [eq:residual] and [eq:h], reducing $\mathcal{R}$ to,
 \begin{equation}
-  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_{\infty}(\boldsymbol{\Sigma},f)}\right)^2 + 2f \cosh\left(s_f\frac{\Sigma_m}{\Lambda_{\infty}}\right) - 1 - f^2 = 0
+  \mathcal{R} = \left(1+\frac{2f}{3}\right)\left(\frac{\Sigma_{eq}}{\Lambda_{\infty}(\boldsymbol{\Sigma},f)}\right)^2 + 2f \cosh\left(s_f\frac{\Sigma_m}{\Lambda_{\infty}}\right) - 1 - f^2 = 0.
 \end{equation}
+Note that for now, porosity pressurization is not enabled for the GTN model.
 
 Once a solution for $\Lambda_n$ is found, the strain rate can be determined using [eq:strain_rate] with the relationship,
 \begin{equation}
