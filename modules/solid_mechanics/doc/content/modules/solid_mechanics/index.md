@@ -60,7 +60,7 @@ Select from the available stress models or add your own:
   - [Smeared Cracking](/ComputeSmearedCrackingStress.md)
   - [Multi-Surface Creep/Plasticity](/ComputeMultipleInelasticStress.md)
   - [Crystal Plasticity](/ComputeMultipleCrystalPlasticityStress.md)
-  - [Viscoplasticity](/ADViscoplasticityStressUpdate.md)
+  - [Viscoplasticity](/PorousViscoplasticityStressUpdate.md)
   - [LAROMANCE](/LAROMANCE.md)
 
 ## Advanced Features
