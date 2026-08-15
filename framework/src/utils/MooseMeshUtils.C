@@ -195,6 +195,23 @@ getBoundaryIDSet(const MeshBase & mesh,
   return std::set<BoundaryID>(boundaries.begin(), boundaries.end());
 }
 
+std::set<std::pair<BoundaryName, BoundaryID>>
+getAllBoundaryNamesAndIDs(const MeshBase & mesh)
+{
+  std::set<std::pair<BoundaryName, BoundaryID>> boundaries;
+  const auto & binfo = mesh.get_boundary_info();
+  const auto & boundary_ids = binfo.get_boundary_ids();
+  for (const auto id : boundary_ids)
+  {
+    // if neither a sideset or nodeset, then empty
+    if (binfo.get_sideset_name(id).size())
+      boundaries.insert(std::make_pair(binfo.get_sideset_name(id), id));
+    else
+      boundaries.insert(std::make_pair(binfo.get_nodeset_name(id), id));
+  }
+  return boundaries;
+}
+
 std::vector<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_names)
 {
@@ -230,6 +247,17 @@ getSubdomainIDs(const MeshBase & mesh, const std::set<SubdomainName> & subdomain
   const auto blk_ids = getSubdomainIDs(
       mesh, std::vector<SubdomainName>(subdomain_names.begin(), subdomain_names.end()));
   return {blk_ids.begin(), blk_ids.end()};
+}
+
+std::set<std::pair<SubdomainName, SubdomainID>>
+getAllSubdomainNamesAndIDs(const MeshBase & mesh)
+{
+  std::set<std::pair<SubdomainName, SubdomainID>> subdomains;
+  std::set<subdomain_id_type> subdomain_ids;
+  mesh.subdomain_ids(subdomain_ids, /*global*/ true);
+  for (const auto id : subdomain_ids)
+    subdomains.insert(std::make_pair(mesh.subdomain_name(id), id));
+  return subdomains;
 }
 
 BoundaryID
@@ -323,6 +351,11 @@ boundaryCentroidCalculator(const BoundaryName & boundary, MeshBase & mesh)
   mesh.comm().sum(volume_weighted_centroid_sum);
   mesh.comm().sum(volume_sum);
 
+  if (volume_sum == 0)
+  {
+    mooseWarning("Boundary centroid was requested but boundary '" + boundary + "' is empty.");
+    return Point(0.);
+  }
   return volume_weighted_centroid_sum / volume_sum;
 }
 

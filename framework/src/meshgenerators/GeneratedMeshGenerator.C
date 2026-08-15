@@ -79,6 +79,10 @@ GeneratedMeshGenerator::validParams()
                                "If provided, prefix the built in boundary names with this string");
   params.addParam<boundary_id_type>(
       "boundary_id_offset", 0, "This offset is added to the generated boundary IDs");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundary_names",
+      "Names of the boundaries enclosing the domain. Defaults to:\n'left right' in 1D\n'bottom "
+      "right top left' in 2D\n'back bottom right top left front' in 3D");
 
   params.addParam<std::vector<ExtraElementIDName>>("extra_element_integers",
                                                    "Names of extra element integers");
@@ -119,6 +123,15 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
     paramError("ymax", "ymax must be larger than ymin.");
   if (_zmax < _zmin)
     paramError("zmax", "zmax must be larger than zmin.");
+  if (isParamValid("boundary_names"))
+  {
+    const auto & bdy_names = getParam<std::vector<BoundaryName>>("boundary_names");
+    if ((_dim == 1 && bdy_names.size() != 2) || (_dim == 2 && bdy_names.size() != 4) ||
+        (_dim == 3 && bdy_names.size() != 6))
+      paramError("boundary_names",
+                 "Should be of size '" + std::to_string(2 * _dim) +
+                     "', currently of size: " + std::to_string(bdy_names.size()));
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -243,10 +256,20 @@ GeneratedMeshGenerator::generate()
 
     MeshTools::Modification::change_boundary_id(*mesh, *rit, *rit + _boundary_id_offset);
 
-    boundary_info.sideset_name(*rit + _boundary_id_offset) =
-        _boundary_name_prefix + old_sideset_name;
-    boundary_info.nodeset_name(*rit + _boundary_id_offset) =
-        _boundary_name_prefix + old_nodeset_name;
+    if (!isParamValid("boundary_names"))
+    {
+      boundary_info.sideset_name(*rit + _boundary_id_offset) =
+          _boundary_name_prefix + old_sideset_name;
+      boundary_info.nodeset_name(*rit + _boundary_id_offset) =
+          _boundary_name_prefix + old_nodeset_name;
+    }
+    else
+    {
+      const auto & bdy_name = getParam<std::vector<BoundaryName>>(
+          "boundary_names")[std::distance(mesh_boundary_ids.rbegin(), rit)];
+      boundary_info.sideset_name(*rit + _boundary_id_offset) = _boundary_name_prefix + bdy_name;
+      boundary_info.nodeset_name(*rit + _boundary_id_offset) = _boundary_name_prefix + bdy_name;
+    }
   }
 
   // FIXME: change_boundary_id() was *supposed* to leave the mesh in
