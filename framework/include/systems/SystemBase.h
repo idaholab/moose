@@ -1102,8 +1102,15 @@ private:
         static_cast<const SystemBase *>(this)->getSolutionStates(iteration_type));
   }
 
-  /// 2D array of solution state vector pointers; first index corresponds to
-  /// SolutionIterationType, second index corresponds to state index (0=current, 1=old, 2=older)
+  /**
+   * 2D array of solution state vector pointers.
+   *
+   * Outer (array) index: SolutionIterationType (Time, Nonlinear, ...)
+   * Inner (vector) index: State (0=current, 1=old, ...)
+   *
+   * Should only be accessed through getSolutionStates() when possible
+   * for bounds checking.
+   */
   std::array<std::vector<NumericVector<Number> *>,
              static_cast<size_t>(Moose::SolutionIterationType::Count)>
       _solution_states;
