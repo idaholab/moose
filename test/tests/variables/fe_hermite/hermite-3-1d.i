@@ -19,22 +19,22 @@
   [bc_fnl]
     type = ParsedFunction
     expression = -3*x*x
-  [../]
+  []
   [bc_fnr]
     type = ParsedFunction
     expression = 3*x*x
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = -6*x+(x*x*x)
-  [../]
+  []
 
   [solution]
     type = ParsedGradFunction
     value = x*x*x
     grad_x = 3*x*x
-  [../]
+  []
 []
 
 # Hermite Variable type
@@ -42,7 +42,7 @@
   [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
@@ -50,18 +50,18 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -70,39 +70,39 @@
     variable = u
     boundary = 'left'
     function = bc_fnl
-  [../]
+  []
   [bc_right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = bc_fnr
-  [../]
+  []
 []
 
 [Postprocessors]
   [dofs]
     type = NumDOFs
-  [../]
+  []
 
   [h]
     type = AverageElementSize
-  [../]
+  []
 
   [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
+  []
   [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
+  []
   [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]

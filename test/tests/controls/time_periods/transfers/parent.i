@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,11 +15,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.01
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,20 +28,20 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [average]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,7 +65,7 @@
     execute_on = timestep_end
     type = TransientMultiApp
     input_files = sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -74,7 +74,7 @@
     to_multi_app = pp_sub
     from_postprocessor = average
     to_aux_scalar = from_master_app
-  [../]
+  []
 []
 
 [Controls]
@@ -83,5 +83,5 @@
     enable_objects = Transfer::pp_transfer
     start_time = 2
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []

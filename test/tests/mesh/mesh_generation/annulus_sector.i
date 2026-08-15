@@ -19,14 +19,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -35,19 +35,19 @@
     variable = u
     value = 0.0
     boundary = rmin
-  [../]
+  []
   [outer]
     type = FunctionDirichletBC
     variable = u
     function = log(5)
     boundary = rmax
-  [../]
+  []
   [min_angle]
     type = FunctionDirichletBC
     variable = u
     function = 'log(sqrt(x*x + y*y))'
     boundary = 'dmin dmax'
-  [../]
+  []
 []
 
 [Executioner]

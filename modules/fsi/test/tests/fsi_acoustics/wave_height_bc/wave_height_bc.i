@@ -31,23 +31,23 @@
 
 [Variables]
   [p]
-  [../]
+  []
 []
 
 [AuxVariables]
   [Wave1]
-  [../]
+  []
 []
 
 [Kernels]
   [diffusion]
     type = Diffusion
     variable = 'p'
-  [../]
+  []
   [inertia]
     type = AcousticInertia
     variable = p
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,7 +58,7 @@
     density = 1e-6
     gravity = 9.81
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -67,7 +67,7 @@
     variable = p
     boundary = 'left right top bottom'
     value = 0
-  [../]
+  []
   [free]
     type = FluidFreeSurfaceBC
     variable = p
@@ -82,14 +82,14 @@
     variable = 'p'
     function = initial_cond
     boundary = 'front'
-  [../]
+  []
 []
 
 [Functions]
   [initial_cond]
     type = ParsedFunction
     expression = '0.00001*exp(-((x-0.5)/0.1)^2-((y-0.5)/0.1)^2)'
-  [../]
+  []
 []
 
 [Materials]
@@ -97,7 +97,7 @@
     type = GenericConstantMaterial
     prop_names = inv_co_sq
     prop_values = 4.44e-7
-  [../]
+  []
 []
 
 [Executioner]
@@ -125,7 +125,7 @@
     type = PointValue
     point = '0.5 0.5 0.01'
     variable = Wave1
-  [../]
+  []
 []
 
 [Outputs]

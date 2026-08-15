@@ -11,12 +11,12 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [v]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -24,7 +24,7 @@
     type = ConstantAux
     variable = v
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -34,15 +34,15 @@
     value1 = nodes
     value2 = elems
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [nodes]
     type = NumNodes
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [elems]
     type = NumElements
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Problem]

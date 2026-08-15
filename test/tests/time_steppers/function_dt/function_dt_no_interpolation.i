@@ -14,26 +14,26 @@
   [exact_fn]
     type = ParsedFunction
     expression = t*t*(x*x+y*y)
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = 2*t*(x*x+y*y)-4*t*t
-  [../]
+  []
 
   [dts]
     type = PiecewiseConstant
     x = '0  4  8 12  20'
     y = '0  1  2  4  8'
     direction = right
-  [../]
+  []
 []
 
 [Variables]
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [ICs]
@@ -41,25 +41,25 @@
     type = FunctionIC
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Kernels]
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -68,7 +68,7 @@
     variable = u
     boundary = 'left right top bottom'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,7 +79,7 @@
   [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Outputs]

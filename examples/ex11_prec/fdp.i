@@ -6,12 +6,12 @@
   [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [forced]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 # The Preconditioning block
@@ -31,7 +31,7 @@
 
     petsc_options_iname = '-pc_type -mat_fd_coloring_err -mat_fd_type'
     petsc_options_value = 'lu       1e-6                 ds'
-  [../]
+  []
 
   [FDP_n]
     type = FDP
@@ -44,7 +44,7 @@
 
     petsc_options_iname = '-pc_type -mat_fd_coloring_err -mat_fd_type'
     petsc_options_value = 'lu       1e-6                 ds'
-  [../]
+  []
 
   [FDP_n_full]
     type = FDP
@@ -56,25 +56,25 @@
 
     petsc_options_iname = '-pc_type -mat_fd_coloring_err -mat_fd_type'
     petsc_options_value = 'lu       1e-6                 ds'
-  [../]
+  []
 []
 
 [Kernels]
   [diff_diffused]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 
   [conv_forced]
     type = CoupledForce
     variable = forced
     v = diffused
-  [../]
+  []
 
   [diff_forced]
     type = Diffusion
     variable = forced
-  [../]
+  []
 []
 
 [BCs]
@@ -86,28 +86,28 @@
     variable = diffused
     boundary = 'left'
     value = 0
-  [../]
+  []
 
   [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'right'
     value = 100
-  [../]
+  []
 
   [left_forced]
     type = DirichletBC
     variable = forced
     boundary = 'left'
     value = 0
-  [../]
+  []
 
   [right_forced]
     type = DirichletBC
     variable = forced
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

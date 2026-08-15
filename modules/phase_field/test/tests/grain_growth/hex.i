@@ -20,7 +20,7 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [UserObjects]
@@ -29,27 +29,27 @@
     coloring_algorithm = bt
     x_offset = .5
     grain_num = 4
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [PolycrystalColoringIC]
       polycrystal_ic_uo = hex_ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -57,15 +57,15 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -76,7 +76,7 @@
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -84,7 +84,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

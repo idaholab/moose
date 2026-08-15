@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 # Note: the BadKernels syntax is set up to incorrectly call addIndicator()
@@ -17,7 +17,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -26,13 +26,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

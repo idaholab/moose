@@ -23,12 +23,12 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 3.0
-    [../]
-  [../]
+    []
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [eta]
     order = FIRST
     family = LAGRANGE
@@ -40,26 +40,26 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 2.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
   [ACBulk]
     type = AllenCahn
     variable = eta
     coupled_variables = c
     f_name = F
-  [../]
+  []
   [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = kappa_eta
-  [../]
+  []
 
   [c_res]
     type = SplitCHParsed
@@ -68,25 +68,25 @@
     kappa_name = kappa_c
     w = w
     coupled_variables = 'eta'
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -94,23 +94,23 @@
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1 1        '
-  [../]
+  []
   [consts2]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 1'
-  [../]
+  []
 
   [switching]
     type = SwitchingFunctionMaterial
     eta = eta
     h_order = SIMPLE
-  [../]
+  []
   [barrier]
     type = BarrierFunctionMaterial
     eta = eta
     g_order = SIMPLE
-  [../]
+  []
 
   [free_energy_A]
     type = DerivativeParsedMaterial
@@ -119,7 +119,7 @@
     expression = '(c-0.1)^2*(c-1)^2 + c*0.01'
     derivative_order = 2
     enable_jit = true
-  [../]
+  []
   [free_energy_B]
     type = DerivativeParsedMaterial
     property_name = Fb
@@ -127,7 +127,7 @@
     expression = 'c^2*(c-0.9)^2 + (1-c)*0.01'
     derivative_order = 2
     enable_jit = true
-  [../]
+  []
 
   [free_energy]
     type = DerivativeTwoPhaseMaterial
@@ -139,14 +139,14 @@
     derivative_order = 2
     outputs = exodus
     output_properties = 'F dF/dc dF/deta d^2F/dc^2 d^2F/dcdeta d^2F/deta^2'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

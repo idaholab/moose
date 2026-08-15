@@ -14,12 +14,12 @@
   [exact_fn]
     type = ParsedFunction
     expression = x*x+y*y
-  [../]
+  []
 
   [ffn]
     type = ParsedFunction
     expression = -4
-  [../]
+  []
 []
 
 [Variables]
@@ -34,21 +34,21 @@
       y2 =  2
       inside = 1
       outside = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [udiff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing_fn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
@@ -57,7 +57,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
-  [../]
+  []
 []
 
 [Outputs]

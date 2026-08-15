@@ -17,31 +17,31 @@
   [forcing_fn]
     type = ParsedFunction
     expression = -2*(x*x+y*y-2)
-  [../]
+  []
 
   [solution]
     type = ParsedGradFunction
     value = (1-x*x)*(1-y*y)
     grad_x = 2*(x*y*y-x)
     grad_y = 2*(x*x*y-y)
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -51,7 +51,7 @@
     value = 0
     boundary = 'top left right bottom'
     penalty = 1e10
-  [../]
+  []
 []
 
 # [BCs]
@@ -61,7 +61,7 @@
 #     variable = u
 #     value = 0
 #     boundary = 'top left right bottom'
-#   [../]
+#   []
 # []
 
 [Postprocessors]
@@ -69,17 +69,17 @@
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
+  []
   [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
+  []
   [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]

@@ -7,7 +7,7 @@
     order = FIRST
     family = LAGRANGE
     block = '1 2 3'
-  [../]
+  []
 []
 
 [Materials]
@@ -16,21 +16,21 @@
     block = 1
     thermal_conductivity = 1000
     specific_heat = 1
-  [../]
+  []
 
   [right]
     type = HeatConductionMaterial
     block = 2
     thermal_conductivity = 500
     specific_heat = 1
-  [../]
+  []
 
   [middle]
     type = HeatConductionMaterial
     block = 3
     thermal_conductivity = 100
     specific_heat = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -38,7 +38,7 @@
     type = HeatConduction
     variable = temp
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [BCs]
@@ -47,14 +47,14 @@
     variable = temp
     boundary = 'left'
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = temp
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

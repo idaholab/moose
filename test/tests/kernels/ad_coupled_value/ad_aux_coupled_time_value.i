@@ -14,19 +14,19 @@
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [AuxVariables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
   [u]
     type = ParsedFunction
     expression = 't'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -34,7 +34,7 @@
     type = FunctionAux
     variable = u
     function = u
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,11 +42,11 @@
     type = ADCoupledTimeDerivative
     variable = v
     v = u
-  [../]
+  []
   [diff_v]
     type = ADDiffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -55,13 +55,13 @@
     variable = v
     boundary = 'left'
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -76,7 +76,7 @@
     type = ElementL2Error
     variable = v
     function = '1/2 * (x^2 + x)'
-  [../]
+  []
 []
 
 [Executioner]

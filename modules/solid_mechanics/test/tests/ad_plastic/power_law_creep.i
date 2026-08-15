@@ -15,7 +15,7 @@
   [hydrostatic_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -24,18 +24,18 @@
     variable = hydrostatic_stress
     rank_two_tensor = stress
     scalar_type = Hydrostatic
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
     order = SECOND
     scaling = 1e-10
-  [../]
+  []
   [disp_y]
     order = SECOND
     scaling = 1e-10
-  [../]
+  []
 []
 
 [Functions]
@@ -43,7 +43,7 @@
     type = PiecewiseLinear
     x = '0 10'
     y = '0 1e-3'
-  [../]
+  []
 []
 
 [Kernels]
@@ -51,12 +51,12 @@
     type = ADStressDivergenceTensors
     component = 0
     variable = disp_x
-  [../]
+  []
   [stress_y]
     type = ADStressDivergenceTensors
     component = 1
     variable = disp_y
-  [../]
+  []
 []
 
 [Materials]
@@ -64,13 +64,13 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-  [../]
+  []
   [strain]
     type = ADComputeIncrementalStrain
-  [../]
+  []
   [elastic_strain]
     type = ADComputeMultipleInelasticStress
-  [../]
+  []
 
   [creep_ten]
     type = ADPowerLawCreepStressUpdate
@@ -78,35 +78,35 @@
     n_exponent = 4
     activation_energy = 0
     base_name = creep_ten
-  [../]
+  []
   [creep_ten2]
     type = ADPowerLawCreepStressUpdate
     coefficient = 10e-24
     n_exponent = 4
     activation_energy = 0
     base_name = creep_ten2
-  [../]
+  []
   [creep_one]
     type = ADPowerLawCreepStressUpdate
     coefficient = 1e-24
     n_exponent = 4
     activation_energy = 0
     base_name = creep_one
-  [../]
+  []
   [creep_nine]
     type = ADPowerLawCreepStressUpdate
     coefficient = 9e-24
     n_exponent = 4
     activation_energy = 0
     base_name = creep_nine
-  [../]
+  []
   [creep_zero]
     type = ADPowerLawCreepStressUpdate
     coefficient = 0e-24
     n_exponent = 4
     activation_energy = 0
     base_name = creep_zero
-  [../]
+  []
 []
 
 [BCs]
@@ -115,28 +115,28 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 
   [no_disp_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
   [pull_disp_y]
     type = ADFunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pull
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -156,26 +156,26 @@
   [max_disp_x]
     type = ElementExtremeValue
     variable = disp_x
-  [../]
+  []
   [max_disp_y]
     type = ElementExtremeValue
     variable = disp_y
-  [../]
+  []
   [max_hydro]
     type = ElementAverageValue
     variable = hydrostatic_stress
-  [../]
+  []
   [dt]
     type = TimestepSize
-  [../]
+  []
   [num_lin]
     type = NumLinearIterations
     outputs = console
-  [../]
+  []
   [num_nonlin]
     type = NumNonlinearIterations
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]

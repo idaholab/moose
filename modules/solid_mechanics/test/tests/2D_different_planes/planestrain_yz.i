@@ -8,16 +8,16 @@
 
 [Variables]
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxVariables]
   [temp]
-  [../]
+  []
   [disp_x]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -28,7 +28,7 @@
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = 'eigenstrain'
     generate_output = 'stress_xx stress_yz stress_yy stress_zz strain_xx strain_yz strain_yy strain_zz'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -36,14 +36,14 @@
     type = FunctionAux
     variable = temp
     function = tempfunc
-  [../]
+  []
 []
 
 [Functions]
   [tempfunc]
     type = ParsedFunction
     expression = '(1-y)*t'
-  [../]
+  []
 []
 
 [BCs]
@@ -52,33 +52,33 @@
     boundary = 4
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     boundary = 4
     variable = disp_z
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
   [elastic_stress]
     type = ComputeLinearElasticStress
     block = 1
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 1
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -88,7 +88,7 @@
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
-  [../]
+  []
 []
 
 [Executioner]

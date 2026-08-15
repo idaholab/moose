@@ -6,7 +6,7 @@
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -14,19 +14,19 @@
     type = ConstantAux
     variable = disp_x
     value = 1
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -35,14 +35,14 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 3
-  [../]
+  []
 []
 
 [Constraints]
@@ -53,7 +53,7 @@
     secondary = 4
     penalty = 100000
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Executioner]

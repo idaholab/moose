@@ -18,7 +18,7 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [UserObjects]
@@ -27,27 +27,27 @@
     rand_seed = 102
     grain_num = 4
     coloring_algorithm = bt
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -55,15 +55,15 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -75,7 +75,7 @@
     wGB = 60 # nm
     Q = 1.0307
     GBenergy = 2.4
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -83,19 +83,19 @@
     type = ElementIntegralVariablePostprocessor
     variable = gr1
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [avg_grain_vol]
     type = AverageGrainVolume
     grain_num = 4
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

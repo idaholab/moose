@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
     [InitialCondition]
       type = SmoothCircleIC
@@ -17,25 +17,25 @@
       invalue = 1
       outvalue = 0
       int_width = 0.2
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = v
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = v
-  [../]
+  []
   [gradientcomponent]
     type = GradientComponent
     variable = u
     v = v
     component = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,7 +49,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

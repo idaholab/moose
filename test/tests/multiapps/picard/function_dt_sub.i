@@ -10,38 +10,38 @@
   [u_fn]
     type = ParsedFunction
     expression = t*x
-  [../]
+  []
   [ffn]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 
   [dts]
     type = PiecewiseLinear
     x = '0.1  10'
     y = '0.1  10'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [fn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
@@ -50,13 +50,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = u_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
   [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Outputs]

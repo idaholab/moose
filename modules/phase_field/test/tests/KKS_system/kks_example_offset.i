@@ -22,7 +22,7 @@
   [Fglobal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
@@ -30,32 +30,32 @@
   [eta]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # hydrogen concentration
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # chemical potential
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # hydrogen phase concentration (matrix)
   [cm]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
   # hydrogen phase concentration (delta phase)
   [cd]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [ICs]
@@ -68,7 +68,7 @@
     invalue = 0.2
     outvalue = 0.1
     int_width = 0.75
-  [../]
+  []
   [c]
     variable = c
     type = SmoothCircleIC
@@ -78,7 +78,7 @@
     invalue = 0.6
     outvalue = 0.4
     int_width = 0.75
-  [../]
+  []
 []
 
 
@@ -87,8 +87,8 @@
     [all]
       variable = 'eta w c cm cd'
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -98,7 +98,7 @@
     property_name = fm
     coupled_variables = 'cm'
     expression = '(0.1-cm)^2'
-  [../]
+  []
 
   # Free energy of the delta phase
   [fd]
@@ -106,28 +106,28 @@
     property_name = fd
     coupled_variables = 'cd'
     expression = '(0.9-cd)^2+0.5'
-  [../]
+  []
 
   # h(eta)
   [h_eta]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta
-  [../]
+  []
 
   # g(eta)
   [g_eta]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta
-  [../]
+  []
 
   # constant properties
   [constants]
     type = GenericConstantMaterial
     prop_names  = 'M   L   kappa'
     prop_values = '0.7 0.7 0.4  '
-  [../]
+  []
 []
 
 [Kernels]
@@ -141,7 +141,7 @@
     variable = cd
     c        = c
     eta      = eta
-  [../]
+  []
 
   # enforce pointwise equality of chemical potentials
   [ChemPotVacancies]
@@ -150,7 +150,7 @@
     cb       = cd
     fa_name  = fm
     fb_name  = fd
-  [../]
+  []
 
   #
   # Cahn-Hilliard Equation
@@ -161,18 +161,18 @@
     ca       = cm
     fa_name  = fm
     w        = w
-  [../]
+  []
 
   [dcdt]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
   [ckernel]
     type = SplitCHWRes
     mob_name = M
     variable = w
-  [../]
+  []
 
   #
   # Allen-Cahn Equation
@@ -184,23 +184,23 @@
     fb_name  = fd
     coupled_variables     = 'cm cd'
     w        = 0.4
-  [../]
+  []
   [ACBulkC]
     type = KKSACBulkC
     variable = eta
     ca       = cm
     cb       = cd
     fa_name  = fm
-  [../]
+  []
   [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = kappa
-  [../]
+  []
   [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -210,7 +210,7 @@
     fa_name = fm
     fb_name = fd
     w = 0.4
-  [../]
+  []
 []
 
 [Executioner]
@@ -233,7 +233,7 @@
   [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 

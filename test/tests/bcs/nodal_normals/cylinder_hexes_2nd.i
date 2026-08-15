@@ -6,12 +6,12 @@
   [all_bc_fn]
     type = ParsedFunction
     expression = x*x+y*y
-  [../]
+  []
 
   [f_fn]
     type = ParsedFunction
     expression = -4
-  [../]
+  []
 []
 
 [NodalNormals]
@@ -22,19 +22,19 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [ffn]
     type = BodyForce
     variable = u
     function = f_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -43,7 +43,7 @@
     variable = u
     boundary = '1'
     function = 'all_bc_fn'
-  [../]
+  []
 []
 
 [Executioner]

@@ -20,28 +20,28 @@
 
 [AuxVariables]
   [saved_x]
-  [../]
+  []
   [saved_y]
-  [../]
+  []
   [contact_traction]
-  [../]
+  []
   [penetration]
-  [../]
+  []
   [inc_slip_x]
-  [../]
+  []
   [inc_slip_y]
-  [../]
+  []
   [accum_slip_x]
-  [../]
+  []
   [accum_slip_y]
-  [../]
+  []
 []
 
 [Functions]
   [vertical_movement]
     type = ParsedFunction
     expression = -t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -50,7 +50,7 @@
     strain = FINITE
     save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 
@@ -61,49 +61,49 @@
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
+  []
   [zeroslip_y]
     type = ConstantAux
     variable = inc_slip_y
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
+  []
   [accum_slip_x]
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
-  [../]
+  []
   [accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
-  [../]
+  []
   [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [Postprocessors]
   [nonlinear_its]
     type = NumNonlinearIterations
     execute_on = timestep_end
-  [../]
+  []
   [penetration]
     type = NodalVariableValue
     variable = penetration
     nodeid = 222
-  [../]
+  []
   [contact_pressure]
     type = NodalVariableValue
     variable = contact_pressure
     nodeid = 222
-  [../]
+  []
 []
 
 [BCs]
@@ -112,25 +112,25 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = -0.02
-  [../]
+  []
   [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
@@ -139,11 +139,11 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -169,7 +169,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]
@@ -177,11 +177,11 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
   [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Problem]
@@ -195,7 +195,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Contact]
@@ -209,5 +209,5 @@
     tangential_tolerance = 1e-3
     normal_smoothing_distance = 0.1
     al_penetration_tolerance = 1e-9
-  [../]
+  []
 []

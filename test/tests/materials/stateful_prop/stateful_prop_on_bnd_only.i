@@ -13,7 +13,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -21,12 +21,12 @@
     type = MatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
-  [../]
+  []
 
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -35,7 +35,7 @@
     variable = u
     boundary = left
     value = 0.0
-  [../]
+  []
 
   [right]
     type = MTBC
@@ -43,7 +43,7 @@
     boundary = right
     grad = 1.0
     prop_name = thermal_conductivity
-  [../]
+  []
 []
 
 [Materials]
@@ -52,12 +52,12 @@
     prop_names = 'thermal_conductivity'
     prop_values = 10
     block = 0
-  [../]
+  []
 
   [stateful_on_boundary]
     type = StatefulSpatialTest
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

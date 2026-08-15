@@ -15,20 +15,20 @@
     family = SCALAR
     order = FIRST
     initial_condition = 0
-  [../]
+  []
 []
 
 [ScalarKernels]
   [dt]
     type = ODETimeDerivative
     variable = x
-  [../]
+  []
   [ode1]
     type = ParsedODEKernel
     expression = '-mytime'
     postprocessors = mytime
     variable = x
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -36,26 +36,26 @@
     type = ScalarVariable
     variable = x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [mytime]
     type = FunctionValuePostprocessor
     function = t
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 
   [exact_x]
     type = FunctionValuePostprocessor
     function = '0.5*t^2'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [l2err_x]
     type = ScalarL2Error
     variable = x
     function = '0.5*t^2'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

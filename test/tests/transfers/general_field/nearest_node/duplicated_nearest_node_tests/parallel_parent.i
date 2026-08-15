@@ -13,19 +13,19 @@
   [u]
      order = FIRST
      family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [from_sub]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,13 +34,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,7 +65,7 @@
     positions = '0 1.0 0.0'
     input_files = parallel_sub.i
     execute_on = 'timestep_end'
-   [../]
+   []
 []
 
 [Transfers]
@@ -78,5 +78,5 @@
     variable = from_sub
     execute_on = 'timestep_end'
     fixed_bounding_box_size = '1 1 0'
-  [../]
+  []
 []

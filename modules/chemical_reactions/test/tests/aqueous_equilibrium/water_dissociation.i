@@ -20,7 +20,7 @@
 
 [AuxVariables]
   [ph]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -28,13 +28,13 @@
     type = PHAux
     h_conc = h+
     variable = ph
-  [../]
+  []
 []
 
 [Variables]
   [h+]
     initial_condition = 1.0e-7
-  [../]
+  []
 []
 
 [ReactionNetwork]
@@ -42,14 +42,14 @@
     primary_species = h+
     secondary_species = oh-
     reactions = '- h+ = oh- -13.9951'
-  [../]
+  []
 []
 
 [Kernels]
   [h+_ie]
     type = PrimaryTimeDerivative
     variable = h+
-  [../]
+  []
 []
 
 [Materials]
@@ -57,7 +57,7 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity porosity conductivity'
     prop_values = '1e-7 0.25 1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,7 +71,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -79,17 +79,17 @@
     type = ElementIntegralVariablePostprocessor
     variable = h+
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [oh-]
     type = ElementIntegralVariablePostprocessor
     variable = oh-
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [ph]
     type = ElementIntegralVariablePostprocessor
     variable = ph
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

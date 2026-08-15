@@ -10,7 +10,7 @@
     xmax = 0
     ymin = -5
     ymax = 5
-  [../]
+  []
   [right_gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -20,26 +20,26 @@
     xmax = 6
     ymin = -5
     ymax = 5
-  [../]
+  []
 
   [left_and_right]
     type = MeshCollectionGenerator
     inputs = 'left_gen right_gen'
-  [../]
+  []
   [leftleft]
     type = SideSetsAroundSubdomainGenerator
     block = 0
     new_boundary = leftleft
     normal = '-1 0 0'
     input = left_and_right
-  [../]
+  []
   [leftright]
     type = SideSetsAroundSubdomainGenerator
     block = 0
     new_boundary = leftright
     normal = '1 0 0'
     input = leftleft
-  [../]
+  []
 
   [right]
     type = SubdomainBoundingBoxGenerator
@@ -47,7 +47,7 @@
     bottom_left = '3 -5 0'
     block_id = 1
     input = leftright
-  [../]
+  []
 
   [rightleft]
     type = SideSetsAroundSubdomainGenerator
@@ -55,48 +55,48 @@
     new_boundary = rightleft
     normal = '-1 0 0'
     input = right
-  [../]
+  []
   [rightright]
     type = SideSetsAroundSubdomainGenerator
     block = 1
     new_boundary = rightright
     normal = '1 0 0'
     input = rightleft
-  [../]
+  []
 []
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [gap_conductance]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [disp_x]
     type = ParsedFunction
     expression = -3+t
-  [../]
+  []
   [left_temp]
     type = ParsedFunction
     expression = 1000+t
-  [../]
+  []
 []
 
 [Kernels]
   [hc]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -106,14 +106,14 @@
     variable = disp_x
     function = disp_x
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
   [gap_conductivity]
     type = MaterialRealAux
     boundary = leftright
     property = gap_conductance
     variable = gap_conductance
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [BCs]
@@ -122,13 +122,13 @@
     variable = temp
     boundary = leftleft
     function = left_temp
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = temp
     boundary = rightright
     value = 400
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -142,7 +142,7 @@
     emissivity_primary = 0
     emissivity_secondary = 0
     type = GapHeatTransfer
-  [../]
+  []
 []
 
 [Materials]
@@ -152,7 +152,7 @@
     specific_heat = 1
     thermal_conductivity = 1
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -160,7 +160,7 @@
     type = PointValue
     point = '0 0 0'
     variable = gap_conductance
-  [../]
+  []
 []
 
 [Executioner]

@@ -13,8 +13,8 @@
     [InitialCondition]
       type = ConstantIC
       value = 0.0
-    [../]
-  [../]
+    []
+  []
 []
 
 # A MONOMIAL displacement has no degrees of freedom on the mesh nodes
@@ -22,21 +22,21 @@
   [disp_x]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
   [disp_y]
     [InitialCondition]
       type = FunctionIC
       function = displ
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   [displ]
     type = ParsedFunction
     expression = -1/2*x*(y-0.5)
-  [../]
+  []
 []
 
 [Kernels]
@@ -44,7 +44,7 @@
     type = Diffusion
     variable = temperature
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
@@ -54,14 +54,14 @@
     boundary = left
     value = 1
     use_displaced_mesh = true
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
     value = 0
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -69,7 +69,7 @@
     type = SMP
     full = true
     solve_type = PJFNK
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,7 +88,7 @@
   [TimeStepper]
     type = ConstantDT
     dt = 0.001
-  [../]
+  []
   dtmin = .001
 []
 

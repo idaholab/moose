@@ -10,8 +10,8 @@
     [error]
       type = VectorValueJumpIndicator
       variable = something
-    [../]
-  [../]
+    []
+  []
 []
 
 
@@ -24,7 +24,7 @@
     y1 = 0
     x2 = 0.5
     x1 = 0
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -32,12 +32,12 @@
     type = VectorMooseVariable
     order = CONSTANT
     family = MONOMIAL_VEC
-  [../]
+  []
   [something_1]
     order = CONSTANT
     family = MONOMIAL
     outputs = 'none'
-  [../]
+  []
 []
 
 [AuxKernels]

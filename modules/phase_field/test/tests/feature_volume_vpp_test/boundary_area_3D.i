@@ -19,21 +19,21 @@
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '24.9 50 50'
-  [../]
+  []
   [right_side]
     input = left_side
     type = SubdomainBoundingBoxGenerator
     block_id = 2
     bottom_left = '25.1 0 0'
     top_right = '50 50 50'
-  [../]
+  []
   [iface_u]
     input = right_side
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = 1
     paired_block = 2
     new_boundary = 10
-  [../]
+  []
 []
 
 [Variables]
@@ -66,7 +66,7 @@
     compute_var_to_feature_map = true
     threshold = 0.001
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -79,7 +79,7 @@
     execute_on = INITIAL
     boundary = 10
     single_feature_per_element = false
-  [../]
+  []
 []
 
 [Kernels]

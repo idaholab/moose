@@ -12,27 +12,27 @@
 
 [Variables]
   [phi]
-  [../]
+  []
 []
 
 [AuxVariables]
   [phi_0]
-  [../]
+  []
   [marker]
-  [../]
+  []
 []
 
 [Kernels]
   [time]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
   [reinit]
     type = LevelSetOlssonReinitialization
     variable = phi
     phi_0 = phi_0
     epsilon = 0.03
-  [../]
+  []
 []
 
 [Problem]
@@ -44,7 +44,7 @@
     type = LevelSetOlssonTerminator
     tol = 1
     min_steps = 3
-  [../]
+  []
 []
 
 [Executioner]

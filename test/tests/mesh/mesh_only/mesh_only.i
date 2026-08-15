@@ -11,7 +11,7 @@
     extrusion_vector = '0 1e-2 0'
     bottom_sideset = '2'
     top_sideset = '4'
-  [../]
+  []
 []
 
 [Outputs]

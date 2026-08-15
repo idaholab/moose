@@ -32,16 +32,16 @@
                 -0.2  0.0  0.0
                  0.2  0.0  0.0
                  0.2  0.0 -0.5'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -49,7 +49,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz'
-  [../]
+  []
 []
 
 [Functions]
@@ -57,7 +57,7 @@
     type = PiecewiseLinear
     x = '0 2.0 4.0 6.0 8.0'
     y = '0 1000 0 1000 0'
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -66,19 +66,19 @@
     variable = disp_x
     component = 0
     function = pressure
-  [../]
+  []
   [p_y]
     type = XFEMPressure
     variable = disp_y
     component = 1
     function = pressure
-  [../]
+  []
   [p_z]
     type = XFEMPressure
     variable = disp_z
     component = 2
     function = pressure
-  [../]
+  []
 []
 
 [BCs]
@@ -87,19 +87,19 @@
     boundary = 'bottom top'
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [bottom_z]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_z
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -107,10 +107,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -125,7 +125,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -148,5 +148,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

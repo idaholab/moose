@@ -11,12 +11,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -25,18 +25,18 @@
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -47,28 +47,28 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 100
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -101,21 +101,21 @@
       # control how schur works using PETSc options
       # petsc_options_iname = '-pc_fieldsplit_schur_fact_type -pc_fieldsplit_schur_precondition'
       # petsc_options_value = 'full selfp'
-    [../]
+    []
     [u]
       vars = 'u'
       # PETSc options for this subsolver
       # A prefix will be applied, so just put the options for this subsolver only
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre preonly'
-    [../]
+    []
     [v]
       vars = 'v'
       # PETSc options for this subsolver
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre  preonly'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

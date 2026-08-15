@@ -15,14 +15,14 @@
   [diffusion]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = diffusion
-  [../]
+  []
 []
 
 [BCs]
@@ -31,14 +31,14 @@
     variable = diffusion
     boundary = 3
     value = 3
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = diffusion
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Dampers]
@@ -46,7 +46,7 @@
   [diffusion_damp]
     type = ConstantDamper
     damping = 0.9
-  [../]
+  []
 []
 
 [Executioner]

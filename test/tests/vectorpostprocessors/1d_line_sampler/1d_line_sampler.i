@@ -18,14 +18,14 @@ my_xmax = 1.2
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,13 +34,13 @@ my_xmax = 1.2
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,7 +55,7 @@ my_xmax = 1.2
     type = GenericConstantMaterial
     prop_names = 'my_prop'
     prop_values = 5
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -65,7 +65,7 @@ my_xmax = 1.2
     start = '0 0 0'
     end = '${my_xmax} 0 0'
     sort_by = x
-  [../]
+  []
 []
 
 [Outputs]
@@ -74,5 +74,5 @@ my_xmax = 1.2
     execute_vector_postprocessors_on = 'timestep_end'
     show = 'my_vpp'
     precision = 5
-  [../]
+  []
 []

@@ -7,9 +7,9 @@
 
 [AuxVariables]
   [aux0]
-  [../]
+  []
   [aux1]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -18,18 +18,18 @@
     variable = aux0
     coupled = aux1
     execute_on = linear
-  [../]
+  []
   [aux1]
     type = CoupledAux
     variable = aux1
     coupled = aux0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -37,11 +37,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -50,13 +50,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

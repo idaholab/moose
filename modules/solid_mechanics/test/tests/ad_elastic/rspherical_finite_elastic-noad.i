@@ -13,7 +13,7 @@
   # scale with one over Young's modulus
   [disp_r]
     scaling = 1e-10
-  [../]
+  []
 []
 
 [Kernels]
@@ -22,7 +22,7 @@
     component = 0
     variable = disp_r
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
@@ -31,13 +31,13 @@
     variable = disp_r
     boundary = left
     value = 0
-  [../]
+  []
   [rdisp]
     type = DirichletBC
     variable = disp_r
     boundary = right
     value = 0.1
-  [../]
+  []
 []
 
 [Materials]
@@ -45,20 +45,20 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e10
-  [../]
+  []
   [strain]
     type = ComputeRSphericalFiniteStrain
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

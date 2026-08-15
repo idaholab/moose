@@ -14,15 +14,15 @@
     [InitialCondition]
       type = ConstantIC
       value = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [tot_resid]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -30,14 +30,14 @@
     type = Diffusion
     variable = u
     save_in = 'tot_resid'
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = u
     function = 1
     save_in = 'tot_resid'
-  [../]
+  []
 []
 
 [DGKernels]
@@ -47,7 +47,7 @@
     epsilon = -1
     sigma = 6
     save_in = 'tot_resid'
-  [../]
+  []
 []
 
 [BCs]
@@ -57,7 +57,7 @@
     variable = u
     coefficient = 2
     save_in = 'tot_resid'
-  [../]
+  []
 []
 
 [Executioner]

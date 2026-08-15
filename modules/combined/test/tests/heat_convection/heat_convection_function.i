@@ -7,11 +7,11 @@
   [t_infinity]
     type = ParsedFunction
     expression = '300'
-  [../]
+  []
   [htc]
     type = ParsedFunction
     expression = 10.0*5.7                 # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
-  [../]
+  []
 []
 
 [Variables]  # Variables Start
@@ -19,7 +19,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 294.26
-  [../]
+  []
 []    # Variables END
 
 
@@ -27,7 +27,7 @@
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []    # Kernels END
 
 
@@ -39,14 +39,14 @@
     variable = temp
     coefficient = htc
     T_infinity = t_infinity
-  [../]                                  # Convective End
+  []                                  # Convective End
 
   [fixed]
     type = DirichletBC
     variable = temp
     boundary = 10
     value = 100
-  [../]
+  []
 []    # BCs END
 
 [Materials]    # Materials Start
@@ -55,13 +55,13 @@
     block = '1 2 3 4 5 6 7'
     specific_heat = 826.4
     thermal_conductivity = 57
-  [../]
+  []
 
   [density]
     type = Density
     block = '1 2 3 4 5 6 7'
     density = 2405.28
-  [../]
+  []
 []      # Materials END
 
 [Executioner]    # Executioner Start

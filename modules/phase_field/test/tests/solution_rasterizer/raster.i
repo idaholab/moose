@@ -26,5 +26,5 @@
     # raster_mode = MAP
     raster_mode = FILTER
     threshold = 0.5
-  [../]
+  []
 []

@@ -22,7 +22,7 @@
     direction = '1 0 0'
     stress_tensor = stress
     boundary = right
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]

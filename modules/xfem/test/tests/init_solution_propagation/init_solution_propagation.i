@@ -36,29 +36,29 @@
     type = LineSegmentCutSetUserObject
     cut_data ='0.0000e+000  0.0000e+000  5.5000e+000  0.0000e+000  0.0   0.0
                5.5000e+000  0.0000e+000  2.5500e+001  0.0000e+000  0.05  1.05'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [AuxVariables]
   [const_monomial]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [first_monomial]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
   [first_linear]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -66,7 +66,7 @@
     strain = FINITE
     add_variables = true
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -75,31 +75,31 @@
     function = 'dummy'
     variable = const_monomial
     execute_on = 'initial'
-  [../]
+  []
   [first_monomial]
     type = FunctionAux
     function = 'dummy'
     variable = first_monomial
     execute_on = 'initial'
-  [../]
+  []
   [first_linear]
     type = FunctionAux
     function = 'dummy'
     variable = first_linear
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Functions]
   [dummy]
     type = ParsedFunction
     expression = 'x*x+y*y'
-  [../]
+  []
   [disp_top_y]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 0.1'
-  [../]
+  []
 []
 
 [BCs]
@@ -108,21 +108,21 @@
     boundary = 2
     variable = disp_y
     function = disp_top_y
-  [../]
+  []
 
   [bottom_y]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
 
   [right_x]
     type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -130,10 +130,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -162,5 +162,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

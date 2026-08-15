@@ -11,33 +11,33 @@
     input = gen
     type = SubdomainIDGenerator
     subdomain_id = 1
-  [../]
+  []
 []
 
 [Variables]
   [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
   [v]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [w]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
   [u_kernel]
     type = Diffusion
     variable = u
-  [../]
+  []
   [v_kernel]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -46,13 +46,13 @@
     variable = u
     value = 100
     boundary = left
-  [../]
+  []
   [v_bc]
     type = NeumannBC
     variable = v
     value = 100
     boundary = left
-  [../]
+  []
 []
 
 [ScalarKernels]
@@ -60,7 +60,7 @@
     type = AlphaCED
     variable = w
     value = 100
-  [../]
+  []
 []
 
 [Executioner]

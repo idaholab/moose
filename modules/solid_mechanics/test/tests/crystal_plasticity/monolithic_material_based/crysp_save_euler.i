@@ -16,49 +16,49 @@
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [e_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [fp_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [rotout]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [gss1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [euler1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [euler2]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [euler3]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [Functions]
   [tdisp]
     type = ParsedFunction
     expression = 0.01*t
-  [../]
+  []
 []
 
 [UserObjects]
@@ -68,7 +68,7 @@
     # Enter file data as prop#1, prop#2, .., prop#nprop
     nprop = 3
     read_type = element
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -80,7 +80,7 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [e_yy]
     type = RankTwoAux
     variable = e_yy
@@ -89,7 +89,7 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [fp_yy]
     type = RankTwoAux
     variable = fp_yy
@@ -98,7 +98,7 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [gss1]
     type = MaterialStdVectorAux
     variable = gss1
@@ -106,7 +106,7 @@
     index = 0
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [euler1]
     type = MaterialRealVectorValueAux
     variable = euler1
@@ -114,7 +114,7 @@
     component = 0
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [euler2]
     type = MaterialRealVectorValueAux
     variable = euler2
@@ -122,7 +122,7 @@
     component = 1
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [euler3]
     type = MaterialRealVectorValueAux
     variable = euler3
@@ -130,7 +130,7 @@
     component = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -139,19 +139,19 @@
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
   [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
@@ -166,14 +166,14 @@
     hprops = '1.0 541.5 60.8 109.8 2.5'
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     tan_mod_type = exact
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
     read_prop_user_object = prop_read
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -181,29 +181,29 @@
     type = ElementAverageValue
     variable = stress_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [e_yy]
     type = ElementAverageValue
     variable = e_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [fp_yy]
     type = ElementAverageValue
     variable = fp_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [gss1]
     type = ElementAverageValue
     variable = gss1
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -235,6 +235,6 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 

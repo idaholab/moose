@@ -8,29 +8,29 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [transferred_u]
-  [../]
+  []
   [elemental_transferred_u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [x_disp]
     initial_condition = -0.1
-  [../]
+  []
   [y_disp]
     initial_condition = -0.1
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -39,13 +39,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,7 +69,7 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = fromsub_sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -81,7 +81,7 @@
     displaced_target_mesh = true
     # Test features non-overlapping meshes
     error_on_miss = false
-  [../]
+  []
   [elemental_from_sub]
     source_variable = sub_u
     variable = elemental_transferred_u
@@ -90,5 +90,5 @@
     displaced_target_mesh = true
     # Test features non-overlapping meshes
     error_on_miss = false
-  [../]
+  []
 []

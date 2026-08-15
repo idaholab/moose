@@ -25,7 +25,7 @@
   [PolycrystalVariables]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -34,20 +34,20 @@
       radius = 333.33
       x = 500
       y = 500
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -55,15 +55,15 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [top_bottom]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -77,19 +77,19 @@
     inclination_anisotropy = true
     delta_sigma = 0.1
     delta_mob = 0.0
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
+  []
 
   [gr1_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
 []
 
 [Executioner]

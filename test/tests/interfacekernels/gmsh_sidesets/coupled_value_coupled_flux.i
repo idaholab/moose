@@ -5,11 +5,11 @@
 [Variables]
   [u]
     block = 6
-  [../]
+  []
 
   [v]
     block = 5
-  [../]
+  []
 []
 
 [Kernels]
@@ -18,18 +18,18 @@
     variable = u
     D = 4
     block = 6
-  [../]
+  []
   [diff_v]
     type = CoeffParamDiffusion
     variable = v
     D = 2
     block = 5
-  [../]
+  []
   [source_u]
     type = BodyForce
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [InterfaceKernels]
@@ -39,7 +39,7 @@
    neighbor_var = v
    boundary = '1 2'
    penalty = 1e6
- [../]
+ []
 []
 
 [BCs]
@@ -47,12 +47,12 @@
     type = VacuumBC
     variable = u
     boundary = 4
-  [../]
+  []
   [v]
     type = VacuumBC
     variable = v
     boundary = 3
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -60,19 +60,19 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = 6
-  [../]
+  []
   [v_int]
     type = ElementIntegralVariablePostprocessor
     variable = v
     block = 5
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

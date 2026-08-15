@@ -8,18 +8,18 @@
 [Variables]
   [u]
     initial_condition = 0.01
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -42,26 +42,26 @@
     type = AverageNodalVariableValue
     variable = u
     execute_on = 'TIMESTEP_END'
-  [../]
+  []
   [elemental]
     type = ElementAverageValue
     variable = u
     execute_on = 'TIMESTEP_END'
-  [../]
+  []
   [general]
     type = PointValue
     point = '0.5 0.5 0'
     variable = u
     execute_on = 'TIMESTEP_END'
-  [../]
+  []
   [internal_side]
     type = NumInternalSides
-  [../]
+  []
   [side]
     type = SideAverageValue
     boundary = right
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -84,5 +84,5 @@
     start_time = 0.5
     end_time = 1
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []

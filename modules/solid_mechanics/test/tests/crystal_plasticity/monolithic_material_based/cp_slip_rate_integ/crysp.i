@@ -12,26 +12,26 @@
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [fp_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [gss1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [tdisp]
     type = ParsedFunction
     expression = 0.01*t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -39,7 +39,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
@@ -51,7 +51,7 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
+  []
   [fp_zz]
     type = RankTwoAux
     variable = fp_zz
@@ -59,7 +59,7 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
+  []
   [e_zz]
     type = RankTwoAux
     variable = e_zz
@@ -67,14 +67,14 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
+  []
   [gss1]
     type = MaterialStdVectorAux
     variable = gss1
     property = gss
     index = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -83,25 +83,25 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
@@ -118,38 +118,38 @@
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     tan_mod_type = exact
     slip_incr_tol = 1
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
+  []
 []
 
 [Postprocessors]
   [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
+  []
   [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
-  [../]
+  []
   [e_zz]
     type = ElementAverageValue
     variable = e_zz
-  [../]
+  []
   [gss1]
     type = ElementAverageValue
     variable = gss1
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

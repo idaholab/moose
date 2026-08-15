@@ -15,7 +15,7 @@
 
 [Variables]
   [c]
-  [../]
+  []
 []
 
 [ICs]
@@ -27,7 +27,7 @@
     inside = '0.2 0.5 0.8'
     outside = 1
     int_width = 5
-  [../]
+  []
 []
 
 [Executioner]

@@ -25,7 +25,7 @@
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
-  [../]
+  []
 []
 
 [BCs]
@@ -34,43 +34,43 @@
     variable = disp_y
     boundary = top
     max_value = 0.49
-  [../]
+  []
   [bottom]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = bottom
     function = t
-  [../]
+  []
   [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [front]
     type = DirichletBC
     variable = disp_z
     boundary = front
     value = 0
-  [../]
+  []
 []
 
 [Materials]
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

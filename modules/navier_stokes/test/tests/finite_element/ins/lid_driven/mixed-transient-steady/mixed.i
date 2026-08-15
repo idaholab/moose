@@ -14,15 +14,15 @@
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
   [p]
-  [../]
+  []
   [temperature]
     [InitialCondition]
       type = ConstantIC
@@ -44,50 +44,50 @@
   [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [mass_pspg]
     type = INSADMassPSPG
     variable = p
-  [../]
+  []
 
   [momentum_time]
     type = INSADMomentumTimeDerivative
     variable = velocity
-  [../]
+  []
 
   [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
-  [../]
+  []
 
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
   [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
     integrate_p_by_parts = true
-  [../]
+  []
 
   [momentum_supg]
     type = INSADMomentumSUPG
     variable = velocity
     velocity = velocity
-  [../]
+  []
 
  [temperature_advection]
    type = INSADEnergyAdvection
    variable = temperature
- [../]
+ []
 
  [temperature_conduction]
    type = ADHeatConduction
    variable = temperature
    thermal_conductivity = 'k'
- [../]
+ []
 
   [temperature_supg]
     type = INSADEnergySUPG
@@ -101,35 +101,35 @@
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'bottom right left'
-  [../]
+  []
 
   [lid]
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'top'
     function_x = 'lid_function'
-  [../]
+  []
 
   [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 
   [temperature_hot]
     type = DirichletBC
     variable = temperature
     boundary = 'bottom'
     value = 1
-  [../]
+  []
 
   [temperature_cold]
     type = DirichletBC
     variable = temperature
     boundary = 'top'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -137,7 +137,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  .01'
-  [../]
+  []
   [ins_mat]
     type = INSADStabilized3Eqn
     velocity = velocity
@@ -153,7 +153,7 @@
     # of the mesh spacing.
     type = ParsedFunction
     expression = '4*x*(1-x)'
-  [../]
+  []
 []
 
 [Executioner]

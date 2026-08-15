@@ -19,7 +19,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -28,17 +28,17 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing]
     type = GaussContForcing
     variable = u
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -48,15 +48,15 @@
       primary = 'left'
       secondary = 'right'
       translation = '40 0 0'
-    [../]
+    []
 
     [y]
       variable = u
       primary = 'bottom'
       secondary = 'top'
       translation = '0 40 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

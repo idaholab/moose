@@ -19,7 +19,7 @@
     type = SMP
     full = true
     solve_type = Newton
-  [../]
+  []
 []
 
 [Executioner]
@@ -36,7 +36,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
   console = true
   [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Variables]
@@ -44,16 +44,16 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     # Velocity in radial (r) direction
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
   [vel_y]
     # Velocity in axial (z) direction
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
   [p]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [BCs]
@@ -62,25 +62,25 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     boundary = bottom
     variable = vel_x
     value = 0
-  [../]
+  []
   [v_in]
     type = FunctionDirichletBC
     boundary = bottom
     variable = vel_y
     function = 'inlet_func'
-  [../]
+  []
   [u_axis_and_walls]
     type = DirichletBC
     boundary = 'left right'
     variable = vel_x
     value = 0
-  [../]
+  []
   [v_no_slip]
     type = DirichletBC
     boundary = 'right'
     variable = vel_y
     value = 0
-  [../]
+  []
   [u_out]
     type = INSMomentumNoBCBCLaplaceForm
     boundary = top
@@ -89,7 +89,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
   [v_out]
     type = INSMomentumNoBCBCLaplaceForm
     boundary = top
@@ -98,7 +98,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
   # When the NoBCBC is applied on the outlet boundary then there is nothing
   # constraining the pressure. Thus we must pin the pressure somewhere to ensure
   # that the problem is not singular. If the below BC is not applied then
@@ -119,7 +119,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceFormRZ
     variable = vel_x
@@ -127,7 +127,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceFormRZ
     variable = vel_y
@@ -135,7 +135,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -144,14 +144,14 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     block = 'volume'
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Functions]
   [inlet_func]
     type = ParsedFunction
     expression = '-4 * x^2 + 1'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -161,12 +161,12 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     vel_y = vel_y
     boundary = 'bottom'
     execute_on = 'timestep_end'
-  [../]
+  []
   [flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'top'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

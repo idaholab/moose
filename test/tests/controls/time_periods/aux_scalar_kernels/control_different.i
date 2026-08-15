@@ -7,23 +7,23 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux0]
     family = SCALAR
-  [../]
+  []
   [aux1]
     family = SCALAR
-  [../]
+  []
 []
 
 [Functions]
   [func]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,11 +31,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -43,12 +43,12 @@
     type = FunctionScalarAux
     variable = aux0
     function = func
-  [../]
+  []
   [scalar_aux1]
     type = FunctionScalarAux
     variable = aux1
     function = func
-  [../]
+  []
 []
 
 [BCs]
@@ -57,13 +57,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -86,5 +86,5 @@
     start_time      = '0.25 0.45'
     end_time        = '0.55 0.75'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []

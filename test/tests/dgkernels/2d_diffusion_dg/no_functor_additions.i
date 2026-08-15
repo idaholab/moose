@@ -17,8 +17,8 @@
     [InitialCondition]
       type = ConstantIC
       value = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
@@ -32,30 +32,30 @@
   [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
-  [../]
+  []
   [exact_fn]
     type = ParsedGradFunction
     expression = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
 
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [abs]          # u * v
     type = Reaction
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [DGKernels]
@@ -81,7 +81,7 @@
     function = exact_fn
     epsilon = -1
     sigma = 6
-  [../]
+  []
 []
 
 [Executioner]

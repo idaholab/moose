@@ -5,7 +5,7 @@
 
 [Variables]
   [dummy1]
-  [../]
+  []
 []
 
 [Problem]
@@ -18,7 +18,7 @@
     expression = dummy2
     symbol_values = invalid
     symbol_names = dummy2
-  [../]
+  []
 []
 
 [Executioner]

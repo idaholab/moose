@@ -9,7 +9,7 @@
     nx = 4
     ny = 4
     nz = 4
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -18,14 +18,14 @@
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [Kernels]
   [temp_diff]
     type = ADDiffusion
     variable = temp
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -35,7 +35,7 @@
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [BCs]
@@ -44,28 +44,28 @@
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
+  []
 
   [bottom]
     type = ADDirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
 
   [back]
     type = ADDirichletBC
     variable = disp_z
     boundary = 'back'
     value = 0.0
-  [../]
+  []
 
   [temp]
     type = ADFunctionDirichletBC
     variable = temp
     boundary = 'front back top bottom left right'
     function = '1 + t'
-  [../]
+  []
 []
 
 [Materials]
@@ -73,24 +73,24 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
   [thermal_expansion_strain]
     type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
     thermal_expansion_function = cte_func_mean
     stress_free_temperature = 1
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Functions]
   [cte_func_mean]
     type = ParsedFunction
     expression = '1e-6 + 1e-8 * t + 1e-8 * t^2 + exp(t) * 1e-2'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -98,11 +98,11 @@
     type = SideAverageValue
     variable = disp_x
     boundary = right
-  [../]
+  []
   [temp_avg]
     type = ElementAverageValue
     variable = temp
-  [../]
+  []
 []
 
 [Executioner]

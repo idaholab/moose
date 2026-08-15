@@ -17,7 +17,7 @@
     cut_data = '-0.26 0.0 0.0 0.1'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Mesh]
@@ -26,15 +26,15 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
-  [../]
+  []
 []
 
 [BCs]
@@ -43,25 +43,25 @@
     boundary = 102
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [top_y]
     type = DirichletBC
     boundary = 102
     variable = disp_y
     value = 0.1
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     boundary = 101
     variable = disp_y
     value = -0.1
-  [../]
+  []
   [bottom_x]
     type = DirichletBC
     boundary = 101
     variable = disp_x
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -69,10 +69,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,7 +87,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -109,5 +109,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

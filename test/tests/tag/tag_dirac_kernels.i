@@ -15,12 +15,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -29,28 +29,28 @@
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 
   [diff_u]
     type = Diffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 
   [ddt_v]
     type = TimeDerivative
     variable = v
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -62,7 +62,7 @@
     point = '0.2 0.3 0'
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+  []
 []
 
 [BCs]
@@ -73,7 +73,7 @@
     value = 0
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
@@ -82,7 +82,7 @@
     value = 1
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
@@ -91,7 +91,7 @@
     value = 1
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
@@ -100,14 +100,14 @@
     value = 0
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 []
 
 [Preconditioning]
   [precond]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]
@@ -123,12 +123,12 @@
   [tag_variable1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [tag_variable2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -137,14 +137,14 @@
     variable = tag_variable1
     v = u
     vector_tag = vec_tag2
-  [../]
+  []
 
   [TagVectorAux2]
     type = TagMatrixAux
     variable = tag_variable2
     v = u
     matrix_tag = mat_tag2
-  [../]
+  []
 []
 
 [Executioner]
@@ -163,7 +163,7 @@
     type = PointValue
     variable = u
     point = '0.2 0.3 0'
-  [../]
+  []
 []
 
 [Outputs]

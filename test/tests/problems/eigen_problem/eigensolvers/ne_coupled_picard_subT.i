@@ -14,7 +14,7 @@
   [T]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -22,19 +22,19 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [Kernels]
   [diff_T]
     type = Diffusion
     variable = T
-  [../]
+  []
   [src_T]
     type = CoupledForce
     variable = T
     v = power
-  [../]
+  []
 []
 
 [BCs]
@@ -43,7 +43,7 @@
     variable = T
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -64,7 +64,7 @@
     # The choice does not matter here, but conceptually there is no need to override
     # the old solution when the subapp is an Eigenvalue solve
     update_old_solution_when_keeping_solution_during_restore = false
-  [../]
+  []
 []
 
 [Transfers]
@@ -74,14 +74,14 @@
     source_variable = T
     variable = T
     execute_on = timestep_end
-  [../]
+  []
   [power_from_sub]
     type = MultiAppShapeEvaluationTransfer
     from_multi_app = sub
     source_variable = power
     variable = power
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Outputs]

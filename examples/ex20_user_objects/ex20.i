@@ -6,18 +6,18 @@
 [Variables]
   [u]
     initial_condition = 0.01
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = ExampleDiffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -26,13 +26,13 @@
     variable = u
     boundary = leftleft
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = rightright
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -40,7 +40,7 @@
     type = BlockAverageDiffusionMaterial
     block = 'left right'
     block_average_userobject = bav
-  [../]
+  []
 []
 
 [UserObjects]
@@ -49,7 +49,7 @@
     variable = u
     execute_on = timestep_begin
     outputs = none
-  [../]
+  []
 []
 
 [Executioner]

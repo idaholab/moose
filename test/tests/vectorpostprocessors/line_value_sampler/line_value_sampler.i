@@ -16,20 +16,20 @@
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -38,25 +38,25 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
   [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -64,7 +64,7 @@
     type = ElementAverageValue
     variable = u
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 # Vector Postprocessor System
@@ -76,7 +76,7 @@
     end_point = '1 0.5 0'
     num_points = 11
     sort_by = id
-  [../]
+  []
 []
 
 [Executioner]

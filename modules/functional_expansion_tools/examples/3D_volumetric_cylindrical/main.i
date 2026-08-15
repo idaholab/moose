@@ -16,30 +16,30 @@
   [m]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [s_in]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff_m]
     type = HeatConduction
     variable = m
-  [../]
+  []
   [time_diff_m]
     type = HeatConductionTimeDerivative
     variable = m
-  [../]
+  []
   [s_in] # Add in the contribution from the SubApp
     type = CoupledForce
     variable = m
     v = s_in
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -47,7 +47,7 @@
     type = FunctionSeriesToAux
     variable = s_in
     function = FX_Basis_Value_Main
-  [../]
+  []
 []
 
 [Materials]
@@ -55,7 +55,7 @@
     type = GenericConstantMaterial
     prop_names =  'thermal_conductivity specific_heat density'
     prop_values = '1.0                  1.0           1.0' # W/(cm K), J/(g K), g/cm^3
-  [../]
+  []
 []
 
 [ICs]
@@ -63,7 +63,7 @@
     type = ConstantIC
     variable = m
     value = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -72,7 +72,7 @@
     variable = m
     value = 1
     boundary = 'top bottom outside'
-  [../]
+  []
 []
 
 [Functions]
@@ -83,7 +83,7 @@
     physical_bounds = '-2.5 2.5   0 0 1' # z_min z_max   x_center y_center radius
     z = Legendre # Axial in z
     disc = Zernike # (r, t) default to unit disc in x-y plane
-  [../]
+  []
 []
 
 [UserObjects]
@@ -91,22 +91,22 @@
     type = FXVolumeUserObject
     function = FX_Basis_Value_Main
     variable = m
-  [../]
+  []
 []
 
 [Postprocessors]
   [average_value]
     type = ElementAverageValue
     variable = m
-  [../]
+  []
   [peak_value]
     type = ElementExtremeValue
     value_type = max
     variable = m
-  [../]
+  []
   [picard_iterations]
     type = NumFixedPointIterations
-  [../]
+  []
 []
 
 [Executioner]
@@ -131,7 +131,7 @@
   [FXTransferApp]
     type = TransientMultiApp
     input_files = sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -140,11 +140,11 @@
     to_multi_app = FXTransferApp
     this_app_object_name = FX_Value_UserObject_Main
     multi_app_object_name = FX_Basis_Value_Sub
-  [../]
+  []
   [ValueToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Value_Main
     multi_app_object_name = FX_Value_UserObject_Sub
-  [../]
+  []
 []

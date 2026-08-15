@@ -39,15 +39,15 @@
       inside = 1.0e-2
       outside = 1.0e-10
       variable = a
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -55,7 +55,7 @@
     type = FunctionIC
     variable = pressure
     function = 2-x
-  [../]
+  []
 []
 
 [ReactionNetwork]
@@ -64,23 +64,23 @@
     reactions = '2a = pa2 1'
     secondary_species = pa2
     pressure = pressure
-  [../]
+  []
 []
 
 [Kernels]
   [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
+  []
   [a_diff]
     type = PrimaryDiffusion
     variable = a
-  [../]
+  []
   [a_conv]
     type = PrimaryConvection
     variable = a
     p = pressure
-  [../]
+  []
 []
 
 [BCs]
@@ -88,7 +88,7 @@
     type = ChemicalOutFlowBC
     variable = a
     boundary = right
-  [../]
+  []
 []
 
 [Materials]
@@ -96,7 +96,7 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -121,5 +121,5 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

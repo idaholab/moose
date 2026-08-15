@@ -26,12 +26,12 @@
   [top_pull]
     type = ParsedFunction
     expression = t*(0.0625)
-  [../]
+  []
   [hf]
     type = PiecewiseLinear
     x = '0  0.001 0.003 0.023'
     y = '50 52    54    56'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -39,7 +39,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -48,25 +48,25 @@
     variable = disp_y
     boundary = 5
     function = top_pull
-  [../]
+  []
   [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
   [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = 2
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -74,17 +74,17 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
+  []
   [isotropic_plasticity]
     type = IsotropicPlasticityStressUpdate
     yield_stress = 50.0
     hardening_function = hf
-  [../]
+  []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress
     tangent_operator = elastic
     inelastic_models = 'isotropic_plasticity'
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,5 +114,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

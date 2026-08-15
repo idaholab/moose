@@ -8,7 +8,7 @@
     xmax = 0
     ymin = -5
     ymax = 5
-  [../]
+  []
   [right]
     type = GeneratedMeshGenerator
     dim = 2
@@ -18,12 +18,12 @@
     xmax = 6
     ymin = -5
     ymax = 5
-  [../]
+  []
 
   [left_and_right]
     type = MeshCollectionGenerator
     inputs = 'left right'
-  [../]
+  []
 []
 
 [Outputs]

@@ -8,7 +8,7 @@
     bias_x = 2
     bias_z = 0.5
     boundary_id_offset = 10
-  [../]
+  []
 []
 
 [Outputs]

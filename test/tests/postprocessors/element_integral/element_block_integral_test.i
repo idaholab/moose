@@ -8,7 +8,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -17,7 +17,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,14 +28,14 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,18 +49,18 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = 1
-  [../]
+  []
 
   [integral_right]
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = 2
-  [../]
+  []
 
   [integral_all]
     type = ElementIntegralVariablePostprocessor
     variable = u
-  [../]
+  []
 []
 
 [Outputs]

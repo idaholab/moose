@@ -50,7 +50,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 500.0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,7 +58,7 @@
     type = FunctionAux
     variable = temp
     function = temp_hist
-  [../]
+  []
 []
 
 [Functions]
@@ -66,22 +66,22 @@
     type = PiecewiseLinear
     x = '0 1     2    4    5    6'
     y = '0 0.025 0.05 0.05 0.06 0.085'
-  [../]
+  []
   [hf1]
     type = PiecewiseLinear
     x = '0.0  0.01 0.02 0.03 0.1'
     y = '5000 5030 5060 5090 5300'
-  [../]
+  []
   [hf2]
     type = PiecewiseLinear
     x = '0.0  0.01 0.02 0.03 0.1'
     y = '4000 4020 4040 4060 4200'
-  [../]
+  []
   [temp_hist]
     type = PiecewiseLinear
     x = '0   1   2   3   4'
     y = '500 500 500 600 400'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -90,7 +90,7 @@
     incremental = true
     add_variables = true
     generate_output = 'stress_yy strain_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
-  [../]
+  []
 []
 
 
@@ -100,25 +100,25 @@
     variable = disp_y
     boundary = 3
     function = top_pull
-  [../]
+  []
   [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = 0
     value = 0.0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -126,7 +126,7 @@
     type = ElementalVariableValue
     variable = stress_yy
     elementid = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -134,7 +134,7 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.3
-  [../]
+  []
   [temp_dep_hardening]
     type = TemperatureDependentHardeningStressUpdate
     hardening_functions = 'hf1 hf2'
@@ -142,12 +142,12 @@
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
     temperature = temp
-  [../]
+  []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress
     tangent_operator = elastic
     inelastic_models = 'temp_dep_hardening'
-  [../]
+  []
 []
 
 [Executioner]
@@ -174,5 +174,5 @@
 [Outputs]
   [out]
     type = Exodus
-  [../]
+  []
 []

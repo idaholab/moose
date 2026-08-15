@@ -16,7 +16,7 @@
   [c]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -24,7 +24,7 @@
     type = DiscreteNucleationAux
     variable = c
     map = map
-  [../]
+  []
 []
 
 [UserObjects]
@@ -32,12 +32,12 @@
     type = DiscreteNucleationFromFile
     hold_time = 2
     file = nuclei2.csv
-  [../]
+  []
   [map]
     type = DiscreteNucleationMap
     int_width = 3
     inserter = inserter
-  [../]
+  []
 []
 
 [Executioner]

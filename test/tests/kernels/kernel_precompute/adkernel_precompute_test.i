@@ -13,20 +13,20 @@
   [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = ADDiffusion
     variable = convected
-  [../]
+  []
 
   [conv]
     type = ADConvectionPrecompute
     variable = convected
     velocity = '1.0 0.0 0.0'
-  [../]
+  []
 []
 
 [BCs]
@@ -36,7 +36,7 @@
     preset = false
     boundary = 'left'
     value = 0
-  [../]
+  []
 
   [top]
     type = DirichletBC
@@ -44,7 +44,7 @@
     preset = false
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

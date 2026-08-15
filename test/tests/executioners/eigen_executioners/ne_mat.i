@@ -22,7 +22,7 @@
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,13 +31,13 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [rhs]
     type = MaterialEigenKernel
     variable = u
     mat = varmat
-  [../]
+  []
 []
 
 [Materials]
@@ -46,7 +46,7 @@
     block = 0
     var = u
     material_prop_name = varmat
-  [../]
+  []
 []
 
 [BCs]
@@ -58,7 +58,7 @@
     preset = false
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,12 +85,12 @@
     variable = u
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
-  [../]
+  []
 
   [udiff]
     type = ElementL2Diff
     variable = u
-  [../]
+  []
 []
 
 [Outputs]

@@ -30,34 +30,34 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxVariables]
   [vel_x]
-  [../]
+  []
   [accel_x]
-  [../]
+  []
   [vel_y]
-  [../]
+  []
   [accel_y]
-  [../]
+  []
   [vel_z]
-  [../]
+  []
   [accel_z]
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 []
 
@@ -69,7 +69,7 @@
     newmark_beta = 0.25
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-  [../]
+  []
 []
 
 
@@ -79,48 +79,48 @@
     displacement = disp_x
     variable = accel_x
     first = false
-  [../]
+  []
   [accel_y]
     type = TestNewmarkTI
     displacement = disp_y
     variable = accel_y
     first = false
-  [../]
+  []
   [accel_z]
     type = TestNewmarkTI
     displacement = disp_z
     variable = accel_z
     first = false
-  [../]
+  []
   [vel_x]
     type = TestNewmarkTI
     displacement = disp_x
     variable = vel_x
-  [../]
+  []
   [vel_y]
     type = TestNewmarkTI
     displacement = disp_y
     variable = vel_y
-  [../]
+  []
   [vel_z]
     type = TestNewmarkTI
     displacement = disp_z
     variable = vel_z
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 0
     index_j = 1
-  [../]
+  []
 
 []
 
@@ -129,7 +129,7 @@
     type = PiecewiseLinear
     data_file = acceleration.csv
     format = columns
-  [../]
+  []
 []
 
 [BCs]
@@ -138,25 +138,25 @@
     variable = disp_y
     boundary = top
     value=0.0
-  [../]
+  []
   [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
     value=0.0
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value=0.0
-  [../]
+  []
   [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value=0.0
-  [../]
+  []
   [preset_accelertion]
     type = PresetAcceleration
     boundary = bottom
@@ -165,7 +165,7 @@
     beta = 0.25
     acceleration = accel_x
     velocity = vel_x
-   [../]
+   []
 []
 
 [Materials]
@@ -173,17 +173,17 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
-  [../]
+  []
 
 
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '7750'
-  [../]
+  []
 
 []
 
@@ -208,22 +208,22 @@
 [Postprocessors]
   [_dt]
     type = TimestepSize
-  [../]
+  []
   [disp]
     type = NodalVariableValue
     variable = disp_x
     nodeid = 1
-  [../]
+  []
   [vel]
     type = NodalVariableValue
     variable = vel_x
     nodeid = 1
-  [../]
+  []
   [accel]
     type = NodalVariableValue
     variable = accel_x
     nodeid = 1
-  [../]
+  []
 []
 
 [Outputs]

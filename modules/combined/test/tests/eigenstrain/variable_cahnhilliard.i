@@ -22,54 +22,54 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 50.0
-    [../]
-  [../]
+    []
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
     displacements = 'disp_x disp_y'
-  [../]
+  []
   [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [AuxVariables]
   [sigma11_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [sigma22_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 [AuxKernels]
   [matl_sigma11]
@@ -78,14 +78,14 @@
     index_i = 0
     index_j = 0
     variable = sigma11_aux
-  [../]
+  []
   [matl_sigma22]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
     variable = sigma22_aux
-  [../]
+  []
 []
 
 [Materials]
@@ -94,7 +94,7 @@
     prop_names  = 'M kappa_c'
     prop_values = '1 5'
     block = 0
-  [../]
+  []
   [chemical_free_energy]
     type = DerivativeParsedMaterial
     block = 0
@@ -105,17 +105,17 @@
     expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '7 7'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
+  []
   [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
@@ -124,7 +124,7 @@
     property_name = var_dep
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
   [eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
@@ -132,20 +132,20 @@
     prefactor = var_dep
     args = 'c'
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
-  [../]
+  []
   [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
     block = 0
     coupled_variables = 'c'
     derivative_order = 2
-  [../]
+  []
   [free_energy]
     type = DerivativeSumMaterial
     block = 0
@@ -153,7 +153,7 @@
     sum_materials = 'Fc Fe'
     coupled_variables = 'c'
     derivative_order = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -162,26 +162,26 @@
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
+  []
   [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'top'
     value = -5
-  [../]
+  []
   [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

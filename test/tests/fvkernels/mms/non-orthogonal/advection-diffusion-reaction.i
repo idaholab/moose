@@ -12,7 +12,7 @@ diff=1.1
     nx = 2
     ny = 2
     elem_type = TRI3
-  [../]
+  []
 []
 
 [Variables]

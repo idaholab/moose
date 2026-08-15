@@ -10,25 +10,25 @@
   [disp_x_fn]
     type = ParsedFunction
     expression = '-x'
-  [../]
+  []
   [disp_z_fn]
     type = ParsedFunction
     expression = 'x'
-  [../]
+  []
 []
 
 [AuxVariables]
   [sub_app_var]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -36,17 +36,17 @@
     type = FunctionAux
     variable = disp_x
     function = 'disp_x_fn'
-  [../]
+  []
   [disp_y_ak]
     type = ConstantAux
     variable = disp_y
     value = 0
-  [../]
+  []
   [disp_z_ak]
     type = FunctionAux
     variable = disp_z
     function = 'disp_z_fn'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -57,24 +57,24 @@
     num_layers = 10
     execute_on = TIMESTEP_END
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -83,14 +83,14 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 2
-  [../]
+  []
 []
 
 [Executioner]

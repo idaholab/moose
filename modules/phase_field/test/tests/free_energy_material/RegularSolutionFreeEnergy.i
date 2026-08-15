@@ -15,27 +15,27 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
   [myT]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
   [diff2]
     type = Diffusion
     variable = myT
-  [../]
+  []
 []
 
 [BCs]
@@ -44,25 +44,25 @@
     variable = c
     boundary = left
     function = x
-  [../]
+  []
   [bottom]
     type = FunctionDirichletBC
     variable = myT
     boundary = bottom
     function = y
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = c
     boundary = right
     function = x
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = myT
     boundary = top
     function = y
-  [../]
+  []
 []
 
 [Materials]
@@ -72,7 +72,7 @@
     c = c
     T = myT
     outputs = out
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,5 +88,5 @@
   [out]
     type = Exodus
     execute_on = timestep_end
-  [../]
+  []
 []

@@ -24,8 +24,8 @@
     [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
@@ -34,13 +34,13 @@
     # dudt = 3*t^2*(x^2 + y^2)
 #    expression = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
     expression = -4
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
 #    expression = t*t*t*((x*x)+(y*y))
     expression = ((x*x)+(y*y))
-  [../]
+  []
 []
 
 [Kernels]
@@ -49,18 +49,18 @@
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -69,7 +69,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -77,7 +77,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]

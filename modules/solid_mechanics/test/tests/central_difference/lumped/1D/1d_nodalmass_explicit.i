@@ -7,26 +7,26 @@
     xmax = 10
     nx = 5
     dim = 1
-  [../]
+  []
   [all_nodes]
     type = BoundingBoxNodeSetGenerator
     new_boundary = 'all'
     input = 'generated_mesh'
     top_right = '10 0 0'
     bottom_left = '0 0 0'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
 []
 
 [AuxVariables]
   [accel_x]
-  [../]
+  []
   [vel_x]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -35,18 +35,18 @@
     variable = accel_x
     displacement = disp_x
     first = false
-  [../]
+  []
   [vel_x]
     type = TestNewmarkTI
     variable = vel_x
     displacement = disp_x
-  [../]
+  []
 []
 
 [Kernels]
   [DynamicSolidMechanics]
     displacements = 'disp_x'
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -55,13 +55,13 @@
     variable = disp_x
     boundary = right
     functor = force_x
-  [../]
+  []
   [nodal_masses]
     type = NodalTranslationalInertia
     nodal_mass_file = 'nodal_mass_file.csv'
     variable = 'disp_x'
     boundary = 'all'
-  [../]
+  []
 []
 
 [Functions]
@@ -70,7 +70,7 @@
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0' # force
     scale_factor = 1e3
-  [../]
+  []
 []
 
 [BCs]
@@ -79,7 +79,7 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -88,17 +88,17 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
+  []
   [strain_block]
     type = ComputeIncrementalStrain
     block = 0
     displacements = 'disp_x'
     implicit = false
-  [../]
+  []
   [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,7 +109,7 @@
   timestep_tolerance = 2e-10
   [TimeIntegrator]
     type = CentralDifference
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -117,7 +117,7 @@
     type = PointValue
     point = '10.0 0.0 0.0'
     variable = accel_x
-  [../]
+  []
 []
 
 [Outputs]

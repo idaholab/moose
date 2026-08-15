@@ -30,14 +30,14 @@
     cut_data = '0  0 0
                 0 -0.5 0
                 -0.5 0 0'
-  [../]
+  []
 []
 
 [AuxVariables]
   [SED]
    order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [DomainIntegral]
@@ -59,7 +59,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -69,14 +69,14 @@
     property = strain_energy_density
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [Functions]
   [top_trac_z]
     type = ConstantFunction
     value = 10
-  [../]
+  []
 []
 
 
@@ -86,25 +86,25 @@
     boundary = front
     variable = disp_z
     function = top_trac_z
-  [../]
+  []
   [bottom_x]
     type = DirichletBC
     boundary = back
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     boundary = back
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [bottom_z]
     type = DirichletBC
     boundary = back
     variable = disp_z
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -112,10 +112,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -130,7 +130,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -153,5 +153,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

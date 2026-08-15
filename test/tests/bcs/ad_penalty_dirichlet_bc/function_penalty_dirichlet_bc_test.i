@@ -14,21 +14,21 @@
   [forcing_fn]
     type = ParsedFunction
     expression = -4+x*x+y*y
-  [../]
+  []
 
   [solution]
     type = ParsedGradFunction
     value = x*x+y*y
     grad_x = 2*x
     grad_y = 2*y
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = SECOND
     family = HIERARCHIC
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,18 +36,18 @@
   [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 
   [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
   [forcing]
     type = ADBodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -58,33 +58,33 @@
     function = solution
     boundary = 'top left right bottom'
     penalty = 1e6
-  [../]
+  []
 []
 
 [Postprocessors]
   [dofs]
     type = NumDOFs
-  [../]
+  []
 
   [h]
     type = AverageElementSize
-  [../]
+  []
 
   [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
+  []
   [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
+  []
   [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]

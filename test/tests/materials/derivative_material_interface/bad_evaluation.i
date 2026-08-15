@@ -5,7 +5,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -13,7 +13,7 @@
     type = MatDiffusion
     variable = u
     diffusivity = F
-  [../]
+  []
 []
 
 [Materials]
@@ -22,7 +22,7 @@
     prop_names = 'time'
     prop_values = 't'
     outputs = all
-  [../]
+  []
 
   [F]
     type = DerivativeParsedMaterial
@@ -32,7 +32,7 @@
     disable_fpoptimizer = true
     enable_jit = false
     evalerror_behavior = nan
-  [../]
+  []
 []
 
 [Executioner]

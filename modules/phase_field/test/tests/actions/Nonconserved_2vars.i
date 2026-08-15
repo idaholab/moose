@@ -21,16 +21,16 @@
         mobility = 1.0
         variable_mobility = false
         coupled_variables = 'eta2'
-      [../]
+      []
       [eta2]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
         coupled_variables = 'eta1'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -43,7 +43,7 @@
     invalue = 1.0
     outvalue = 0.0
     int_width = 3.0
-  [../]
+  []
   [eta2_IC]
     type = SmoothCircleIC
     variable = eta2
@@ -53,7 +53,7 @@
     invalue = 0.0
     outvalue = 1.0
     int_width = 3.0
-  [../]
+  []
 []
 
 [Materials]
@@ -63,14 +63,14 @@
     coupled_variables = 'eta1 eta2'
     expression = '2.5 * (eta1^4/4 - eta1^2/2 + eta2^4/4 - eta2^2/2 + 3/2 * eta1^2 * eta2^2) + 1/4'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

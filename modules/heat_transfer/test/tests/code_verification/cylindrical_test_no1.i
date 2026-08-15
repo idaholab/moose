@@ -16,14 +16,14 @@
     elem_type = EDGE2
     xmin = 0.2
     nx = 4
-  [../]
+  []
   coord_type = RZ
 []
 
 [Variables]
   [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
@@ -32,14 +32,14 @@
     symbol_names = 'ri ro ui uo'
     symbol_values = '0.2 1.0 300 0'
     expression = '( uo * log(ri) - ui * log(ro) + (ui-uo) * log(x) ) / log(ri/ro)'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -48,13 +48,13 @@
     boundary = left
     variable = u
     value = 300
-  [../]
+  []
   [uo]
     type = DirichletBC
     boundary = right
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -62,7 +62,7 @@
     type = GenericConstantMaterial
     prop_names = 'density specific_heat thermal_conductivity'
     prop_values = '1.0 1.0 5.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -74,7 +74,7 @@
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
+  []
   [h]
     type = AverageElementSize
   []

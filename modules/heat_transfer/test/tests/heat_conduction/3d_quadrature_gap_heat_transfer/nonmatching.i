@@ -4,14 +4,14 @@
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [Kernels]
   [hc]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -20,13 +20,13 @@
     variable = temp
     boundary = leftleft
     value = 1000
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = temp
     boundary = rightright
     value = 400
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -38,7 +38,7 @@
     emissivity_primary = 0
     emissivity_secondary = 0
     type = GapHeatTransfer
-  [../]
+  []
 []
 
 [Materials]
@@ -47,7 +47,7 @@
     block = 'left right'
     specific_heat = 1
     thermal_conductivity = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -56,13 +56,13 @@
     variable = temp
     boundary = leftright
     diffusivity = thermal_conductivity
-  [../]
+  []
   [right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = rightleft
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [Executioner]

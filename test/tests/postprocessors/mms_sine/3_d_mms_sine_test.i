@@ -21,7 +21,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables] #We added nodal AuxVariables
@@ -30,7 +30,7 @@
   [nodal_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -40,12 +40,12 @@
   [diff]
     type = MMSDiffusion
     variable = u
-  [../]
+  []
 
   [implicit] #We got from MOOSE kernels
     type = MMSImplicitEuler
     variable = u
-  [../]
+  []
 
   [conv] #We created our own convection kernel
     type = MMSConvection
@@ -53,17 +53,17 @@
     x = -1
     y = 2
     z = -3
-  [../]
+  []
 
   [forcing] #We created our own forcing kernel
     type = MMSForcing
     variable = u
-  [../]
+  []
 
   [reaction] #We got from MOOSE kernels
     type = MMSReaction
     variable = u
-  [../]
+  []
 []
 [AuxKernels] #We created our own AuxKernel
   active = 'ConstantAux'
@@ -71,7 +71,7 @@
   [ConstantAux]
     type = MMSConstantAux
     variable = nodal_aux
-  [../]
+  []
 []
 
 [BCs]
@@ -82,7 +82,7 @@
     variable = u
     boundary = '0 1 2 3 4 5'
  #   value = sin(a*x*y*z*t)
-  [../]
+  []
 []
 
 [Executioner]

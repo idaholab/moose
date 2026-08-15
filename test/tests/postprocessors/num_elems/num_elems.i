@@ -13,37 +13,37 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [v_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [force]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [force]
     type = BodyForce
     variable = u
     function = force
-  [../]
+  []
 []
 
 [BCs]
@@ -52,13 +52,13 @@
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
   [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,8 +79,8 @@
       top_right = '0.6 0.6 0'
       outside = do_nothing
       type = BoxMarker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
@@ -88,12 +88,12 @@
     type = NumElements
     elem_filter = 'ACTIVE'
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [num_elems_total]
     type = NumElements
     elem_filter = 'TOTAL'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

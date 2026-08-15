@@ -7,27 +7,27 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [from_sub]
-  [../]
+  []
   [elemental_from_sub]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -36,13 +36,13 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,7 +63,7 @@
     app_type = MooseTestApp
     positions = '0.0 0.0 0'
     input_files = fixed_meshes_sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -73,27 +73,27 @@
     source_variable = u
     variable = from_sub
     fixed_meshes = true
-  [../]
+  []
   [elemental_from_sub]
     type = MultiAppProjectionTransfer
     from_multi_app = sub
     source_variable = u
     variable = elemental_from_sub
     fixed_meshes = true
-  [../]
+  []
   [to_sub]
     type = MultiAppProjectionTransfer
     to_multi_app = sub
     source_variable = u
     variable = from_parent
     fixed_meshes = true
-  [../]
+  []
   [elemental_to_sub]
     type = MultiAppProjectionTransfer
     to_multi_app = sub
     source_variable = u
     variable = elemental_from_parent
     fixed_meshes = true
-  [../]
+  []
 []
 

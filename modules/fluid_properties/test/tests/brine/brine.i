@@ -45,49 +45,49 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [AuxVariables]
   [pressure]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [temperature]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [xnacl]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [enthalpy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [internal_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Functions]
   [pic]
     type = ParsedFunction
     expression = 'if(x<2,20e6, 40e6)'
-  [../]
+  []
   [tic]
     type = ParsedFunction
     expression = 'if(x<1, 323.15, 473.15)'
-  [../]
+  []
   [xic]
     type = ParsedFunction
     expression = 'if(x<2,0.1047, 0.2261)'
-  [../]
+  []
 []
 
 [ICs]
@@ -95,17 +95,17 @@
     type = FunctionIC
     function = pic
     variable = pressure
-  [../]
+  []
   [t_ic]
     type = FunctionIC
     function = tic
     variable = temperature
-  [../]
+  []
   [x_ic]
     type = FunctionIC
     function = xic
     variable = xnacl
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -113,23 +113,23 @@
     type = MaterialRealAux
      variable = density
      property = density
-  [../]
+  []
   [enthalpy]
     type = MaterialRealAux
      variable = enthalpy
      property = enthalpy
-  [../]
+  []
   [internal_energy]
     type = MaterialRealAux
      variable = internal_energy
      property = e
-  [../]
+  []
 []
 
 [FluidProperties]
   [brine]
     type = BrineFluidProperties
-  [../]
+  []
 []
 
 [Materials]
@@ -139,14 +139,14 @@
     temperature = temperature
     xmass = xnacl
     fp = brine
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [Executioner]
@@ -159,47 +159,47 @@
     type = ElementalVariableValue
     variable = density
     elementid = 0
-  [../]
+  []
   [density1]
     type = ElementalVariableValue
     variable = density
     elementid = 1
-  [../]
+  []
   [density2]
     type = ElementalVariableValue
     variable = density
     elementid = 2
-  [../]
+  []
   [enthalpy0]
     type = ElementalVariableValue
     variable = enthalpy
     elementid = 0
-  [../]
+  []
   [enthalpy1]
     type = ElementalVariableValue
     variable = enthalpy
     elementid = 1
-  [../]
+  []
   [enthalpy2]
     type = ElementalVariableValue
     variable = enthalpy
     elementid = 2
-  [../]
+  []
   [e0]
     type = ElementalVariableValue
     variable = internal_energy
     elementid = 0
-  [../]
+  []
   [e1]
     type = ElementalVariableValue
     variable = internal_energy
     elementid = 1
-  [../]
+  []
   [e2]
     type = ElementalVariableValue
     variable = internal_energy
     elementid = 2
-  [../]
+  []
 []
 
 [Outputs]

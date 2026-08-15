@@ -16,7 +16,7 @@
   [Partitioner]
     type = LibmeshPartitioner
     partitioner = linear
-  [../]
+  []
   parallel_type = replicated
 []
 
@@ -24,7 +24,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,12 +34,12 @@
     type = BodyForce
     variable = u
     value = 10.0
-  [../]
+  []
 
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -48,14 +48,14 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

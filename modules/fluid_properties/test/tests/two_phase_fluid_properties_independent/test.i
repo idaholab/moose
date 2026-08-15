@@ -21,12 +21,12 @@
 [AuxVariables]
   [p]
     initial_condition = 1e5
-  [../]
+  []
   [T]
     initial_condition = 300
-  [../]
+  []
   [rho_avg]
-  [../]
+  []
 []
 
 [FluidProperties]
@@ -35,18 +35,18 @@
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 0.02867055103448276
-  [../]
+  []
   # rho2 = 0.6666666667 kg/m^3
   [fp2]
     type = IdealGasFluidProperties
     gamma = 1.2
     molar_mass = 0.0166289196
-  [../]
+  []
   [fp_2phase]
     type = TwoPhaseFluidPropertiesIndependent
     fp_liquid = fp1
     fp_vapor = fp2
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,7 +58,7 @@
     T = T
     fp_2phase = fp_2phase
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -66,7 +66,7 @@
     type = NodalVariableValue
     variable = rho_avg
     nodeid = 0
-  [../]
+  []
 []
 
 [Executioner]

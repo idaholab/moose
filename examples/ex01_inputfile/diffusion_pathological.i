@@ -20,21 +20,21 @@
   [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
 # This variable is not active in the list above
 # therefore it is not used in the simulation
   [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 # This example applies DirichletBCs to all four sides of our square domain
@@ -44,12 +44,12 @@
     variable = diffused
     boundary = '1'
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = diffused
     boundary = '2'
     value = 1
-  [../]
+  []
 []

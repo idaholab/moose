@@ -21,26 +21,26 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [solution]
     type = ParsedFunction
     expression = (exp(x)-1)/(exp(1)-1)
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [conv]
     type = Convection
     variable = u
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -49,13 +49,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 # Mesh Indicator System

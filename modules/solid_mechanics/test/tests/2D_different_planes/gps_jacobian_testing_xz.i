@@ -10,18 +10,18 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
   [scalar_strain_yy]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_y]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -31,7 +31,7 @@
     scalar_out_of_plane_strain = scalar_strain_yy
     out_of_plane_direction = y
     planar_formulation = GENERALIZED_PLANE_STRAIN
-  [../]
+  []
 []
 
 [Materials]
@@ -39,17 +39,17 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -15,14 +15,14 @@
     elem_type = EDGE2
     xmin = 0.2
     nx = 4
-  [../]
+  []
   coord_type = RZ
 []
 
 [Variables]
   [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
@@ -31,19 +31,19 @@
     symbol_names = 'q k0 ri ro beta u0'
     symbol_values = '1200 1 0.2 1.0 1e-3 0'
     expression = 'u0+(1/beta)*( ( 1 + 0.5*beta*((ro^2-x^2)-(ro^2-ri^2) * log(ro/x)/log(ro/ri))*q/k0 )^0.5  - 1)'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = u
-  [../]
+  []
   [heatsource]
     type = HeatSource
     function = 1200
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -52,7 +52,7 @@
     boundary = 'left right'
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -60,13 +60,13 @@
     type = GenericConstantMaterial
     prop_names = 'density specific_heat'
     prop_values = '1.0 1.0'
-  [../]
+  []
   [thermal_conductivity]
     type = ParsedMaterial
     property_name = 'thermal_conductivity'
     coupled_variables = u
     expression = '1 * (1 + 1e-3*u)'
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,7 +78,7 @@
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
+  []
   [h]
     type = AverageElementSize
   []

@@ -8,18 +8,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -53,7 +53,7 @@
   [console]
     type = Console
     output_file = true
-  [../]
+  []
 []
 
 [MultiApps]
@@ -62,5 +62,5 @@
     app_type = MooseTestApp
     positions = '0 0 0 0.5 0.5 0'
     input_files = time_dt_from_parent_subsub.i
-  [../]
+  []
 []

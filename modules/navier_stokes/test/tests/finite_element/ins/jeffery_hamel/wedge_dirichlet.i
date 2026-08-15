@@ -31,7 +31,7 @@
     new_boundary = pinned_node
     coord = '1 0'
     input = file
-  [../]
+  []
 []
 
 
@@ -39,15 +39,15 @@
   [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -57,11 +57,11 @@
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
   [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
@@ -69,11 +69,11 @@
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
   [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
@@ -81,7 +81,7 @@
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -90,31 +90,31 @@
     variable = vel_x
     boundary = 'top_wall bottom_wall'
     value = 0.0
-  [../]
+  []
   [vel_y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'top_wall bottom_wall'
     value = 0.0
-  [../]
+  []
   [vel_x_inlet]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'inlet outlet'
     function = 'vel_x_exact'
-  [../]
+  []
   [vel_y_inlet]
     type = FunctionDirichletBC
     variable = vel_y
     boundary = 'inlet outlet'
     function = 'vel_y_exact'
-  [../]
+  []
   [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -123,7 +123,7 @@
     block = 1
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -131,7 +131,7 @@
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]
@@ -163,25 +163,25 @@
     type = PiecewiseLinear
     data_file = 'f.csv'
     format = 'columns'
-  [../]
+  []
   [vel_x_exact]
     type = WedgeFunction
     var_num = 0
     mu = 1
     rho = 1
-  [../]
+  []
   [vel_y_exact]
     type = WedgeFunction
     var_num = 1
     mu = 1
     rho = 1
-  [../]
+  []
   [p_exact]
     type = WedgeFunction
     var_num = 2
     mu = 1
     rho = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -190,17 +190,17 @@
     variable = vel_x
     function = vel_x_exact
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [vel_y_L2_error]
     type = ElementL2Error
     variable = vel_y
     function = vel_y_exact
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [p_L2_error]
     type = ElementL2Error
     variable = p
     function = p_exact
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

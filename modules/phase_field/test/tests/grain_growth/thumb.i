@@ -32,8 +32,8 @@
       width = 400.0
       invalue = 0.0
       outvalue = 1.0
-    [../]
-  [../]
+    []
+  []
 
   [gr1]
     order = FIRST
@@ -45,27 +45,27 @@
       width = 400.0
       invalue = 1.0
       outvalue = 0.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
   [BndsCalc]
     type = BndsCalcAux
     variable = bnds
-  [../]
+  []
 []
 
 [BCs]
@@ -76,14 +76,14 @@
       primary = 0
       secondary = 2
       translation = '0 1000 0'
-    [../]
+    []
 
     [top_bottom]
       primary = 1
       secondary = 3
       translation = '-1000 0 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -94,21 +94,21 @@
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
   [gr_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -135,7 +135,7 @@
     refine_fraction = 0.8
     coarsen_fraction = 0.05
     max_h_level = 2
-  [../]
+  []
 []
 
 [Outputs]

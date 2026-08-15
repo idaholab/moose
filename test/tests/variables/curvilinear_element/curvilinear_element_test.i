@@ -8,14 +8,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -24,7 +24,7 @@
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -37,7 +37,7 @@
   [integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
-  [../]
+  []
 []
 
 [Outputs]

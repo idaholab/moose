@@ -12,7 +12,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Adaptivity]
@@ -23,8 +23,8 @@
       top_right = '0.9 0.9 0'
       inside = refine
       outside = do_nothing
-    [../]
-  [../]
+    []
+  []
   marker = box
 []
 
@@ -39,7 +39,7 @@
     execute_on = 'INITIAL TIMESTEP_END NONLINEAR LINEAR'
     report_peak_value = true
     mem_units = kilobytes # or bytes, megabytes, gigabytes
-  [../]
+  []
 []
 
 [Executioner]

@@ -12,27 +12,27 @@
     type = SplineFunction
     x = '-1  0 3'
     y = '0.5 0 3'
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ufn]
     type = SplineFFn
     variable = u
     function = spline_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -41,7 +41,7 @@
     variable = u
     boundary = '0 1'
     function = spline_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -50,7 +50,7 @@
     variable = u
     function = spline_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

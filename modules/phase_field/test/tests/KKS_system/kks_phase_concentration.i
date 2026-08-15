@@ -26,25 +26,25 @@
     variable = c
     boundary = 'left'
     value = 0.1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = c
     boundary = 'right'
     value = 0.9
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = eta
     boundary = 'top'
     value = 0.1
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = eta
     boundary = 'bottom'
     value = 0.9
-  [../]
+  []
 []
 
 [Variables]
@@ -53,28 +53,28 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.5
-  [../]
+  []
 
   # order parameter
   [eta]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 
   # phase concentration a
   [ca]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.2
-  [../]
+  []
 
   # phase concentration b
   [cb]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.3
-  [../]
+  []
 []
 
 [Materials]
@@ -84,13 +84,13 @@
     property_name = Fa
     coupled_variables = 'ca'
     expression = 'ca^2'
-  [../]
+  []
   [fb]
     type = DerivativeParsedMaterial
     property_name = Fb
     coupled_variables = 'cb'
     expression = '(1-cb)^2'
-  [../]
+  []
 
   # h(eta)
   [h_eta]
@@ -98,7 +98,7 @@
     h_order = HIGH
     eta = eta
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
@@ -110,22 +110,22 @@
   [cadiff]
     type = Diffusion
     variable = ca
-  [../]
+  []
 
   [cbdiff]
     type = Diffusion
     variable = cb
-  [../]
+  []
 
   [cdiff]
     type = Diffusion
     variable = c
-  [../]
+  []
 
   [etadiff]
     type = Diffusion
     variable = eta
-  [../]
+  []
 
   # ...and solve for ca and cb
   [phaseconcentration]
@@ -134,7 +134,7 @@
     variable = cb
     c        = c
     eta      = eta
-  [../]
+  []
 
   [chempot]
     type = KKSPhaseChemicalPotential
@@ -142,7 +142,7 @@
     cb       = cb
     fa_name  = Fa
     fb_namee  = Fb
-  [../]
+  []
 []
 
 [Executioner]
@@ -160,11 +160,11 @@
   [full]
     type = SMP
     full = true
-  [../]
+  []
   [mydebug]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

@@ -24,21 +24,21 @@
 [Variables]
   [ca++]
     initial_condition = 1.0e-5
-  [../]
+  []
   [h+]
     initial_condition = 1.0e-6
-  [../]
+  []
   [hco3-]
     initial_condition = 1.0e-5
-  [../]
+  []
 []
 
 [AuxVariables]
   [caco3_s]
     initial_condition = 0.05
-  [../]
+  []
   [ph]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -46,7 +46,7 @@
     type = PHAux
     h_conc = h+
     variable = ph
-  [../]
+  []
 []
 
 [ReactionNetwork]
@@ -59,7 +59,7 @@
                  ca++ + hco3- = cahco3+ -1.0467,
                  ca++ - h+ = caoh+ -12.85,
                  - h+ = oh- -13.9951'
-  [../]
+  []
   [SolidKineticReactions]
     primary_species = 'ca++ hco3- h+'
     kin_reactions = 'ca++ + hco3- - h+ = caco3_s'
@@ -71,22 +71,22 @@
     specific_reactive_surface_area = 0.1
     kinetic_rate_constant = 6.456542e-7
     activation_energy = 1.5e4
-  [../]
+  []
 []
 
 [Kernels]
   [ca++_ie]
     type = PrimaryTimeDerivative
     variable = ca++
-  [../]
+  []
   [h+_ie]
     type = PrimaryTimeDerivative
     variable = h+
-  [../]
+  []
   [hco3-_ie]
     type = PrimaryTimeDerivative
     variable = hco3-
-  [../]
+  []
 []
 
 [Materials]
@@ -94,7 +94,7 @@
     type = GenericConstantMaterial
     prop_names = 'porosity diffusivity conductivity'
     prop_values = '0.25 1e-9 1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -110,7 +110,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -118,52 +118,52 @@
     type = ElementIntegralVariablePostprocessor
     variable = h+
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [ca++]
     type = ElementIntegralVariablePostprocessor
     variable = ca++
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [hco3-]
     type = ElementIntegralVariablePostprocessor
     variable = hco3-
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [co2_aq]
     type = ElementIntegralVariablePostprocessor
     variable = co2_aq
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [oh-]
     type = ElementIntegralVariablePostprocessor
     variable = oh-
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [co3--]
     type = ElementIntegralVariablePostprocessor
     variable = co3--
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [caco3_aq]
     type = ElementIntegralVariablePostprocessor
     variable = caco3_aq
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [caco3_s]
     type = ElementIntegralVariablePostprocessor
     variable = caco3_s
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [ph]
     type = ElementIntegralVariablePostprocessor
     variable = ph
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [calcite_vf]
     type = TotalMineralVolumeFraction
     variable = caco3_s
     molar_volume = 36.934e-6
-  [../]
+  []
 []
 
 [Outputs]

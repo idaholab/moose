@@ -15,28 +15,28 @@
     top_right = '0.5 0.5 0'
     bottom_left = '0 0 0'
     block_id = 1
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [mat]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,7 +44,7 @@
     type = MaterialRealAux
     variable = mat
     property = prop
-  [../]
+  []
 []
 
 [BCs]
@@ -53,13 +53,13 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 3
-  [../]
+  []
 []
 
 [Materials]
@@ -68,7 +68,7 @@
     block = 1
     prop_names = prop
     prop_values = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,5 +81,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

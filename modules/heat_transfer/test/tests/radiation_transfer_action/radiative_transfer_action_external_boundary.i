@@ -11,7 +11,7 @@
     dy = '6'
     iy = '9'
     subdomain_id = '0 1 2'
-  [../]
+  []
 
     [inner_left]
       type = SideSetsBetweenSubdomainsGenerator
@@ -19,7 +19,7 @@
       primary_block = 0
       paired_block = 1
       new_boundary = 'inner_left'
-    [../]
+    []
 
     [inner_right]
       type = SideSetsBetweenSubdomainsGenerator
@@ -27,7 +27,7 @@
       primary_block = 2
       paired_block = 1
       new_boundary = 'inner_right'
-    [../]
+    []
 
     [inner_top]
       type = ParsedGenerateSideset
@@ -36,7 +36,7 @@
       included_subdomains = 1
       new_sideset_name = 'inner_top'
       input = 'inner_right'
-    [../]
+    []
 
     [inner_bottom]
       type = ParsedGenerateSideset
@@ -45,20 +45,20 @@
       included_subdomains = 1
       new_sideset_name = 'inner_bottom'
       input = 'inner_top'
-    [../]
+    []
 
     [rename]
       type = RenameBlockGenerator
       old_block = '2'
       new_block = '0'
       input = inner_bottom
-    [../]
+    []
 []
 
 [Variables]
   [temperature]
     block = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -67,7 +67,7 @@
     variable = temperature
     block = 0
     thermal_conductivity = 5
-  [../]
+  []
 []
 
 [GrayDiffuseRadiation]
@@ -82,7 +82,7 @@
     fixed_temperature_boundary = '6'
     fixed_boundary_temperatures = '800'
     view_factor_calculator = analytical
-  [../]
+  []
 []
 
 [Functions]
@@ -98,14 +98,14 @@
     variable = temperature
     boundary = left
     value = 1000
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
     value = 300
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -113,7 +113,7 @@
     type = SideAverageValue
     variable = temperature
     boundary = inner_right
-  [../]
+  []
 []
 
 [Executioner]

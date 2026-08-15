@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -15,41 +15,41 @@
     # Aux field variable representing the L2 error on each element
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [element_h1_error]
     # Aux field variable representing the H1 error on each element
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [element_l2_norm]
     # Aux field variable representing the L^2 norm of the solution variable
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [exact_fn]
     type = ParsedFunction
     expression = sin(2*pi*x)*sin(2*pi*y)
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = 8*pi^2*sin(2*pi*x)*sin(2*pi*y)
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -57,7 +57,7 @@
     type = ElementLpNormAux
     variable = element_l2_norm
     coupled_variable = u
-  [../]
+  []
   [l2_error_aux]
     type = ElementL2ErrorFunctionAux
     variable = element_l2_error
@@ -65,7 +65,7 @@
     function = exact_fn
     # The nonlinear variable representing the FEM solution
     coupled_variable = u
-  [../]
+  []
   [h1_error_aux]
     type = ElementH1ErrorFunctionAux
     variable = element_h1_error
@@ -73,7 +73,7 @@
     function = exact_fn
     # The nonlinear variable representing the FEM solution
     coupled_variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -82,7 +82,7 @@
     variable = u
     boundary = 'bottom left right top'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -93,7 +93,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]

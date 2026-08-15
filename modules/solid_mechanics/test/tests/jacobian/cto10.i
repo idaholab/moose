@@ -45,7 +45,7 @@
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
@@ -58,7 +58,7 @@
     strength = 1
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
+  []
   [simple1]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
@@ -66,7 +66,7 @@
     strength = 1
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
+  []
   [simple2]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
@@ -74,7 +74,7 @@
     strength = 3
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
+  []
   [simple3]
     type = SolidMechanicsPlasticSimpleTester
     a = 0
@@ -82,7 +82,7 @@
     strength = 1.1
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
+  []
   [simple4]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
@@ -90,7 +90,7 @@
     strength = 1.1
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
+  []
   [simple5]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
@@ -98,7 +98,7 @@
     strength = 3.1
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
+  []
 []
 
 [Materials]
@@ -106,19 +106,19 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5E6'
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 0  0 2.1 0  0 0 3.0'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [multi]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = 'simple0 simple1 simple2 simple3 simple4 simple5'
     tangent_operator = linear
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -127,7 +127,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

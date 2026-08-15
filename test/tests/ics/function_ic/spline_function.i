@@ -17,7 +17,7 @@
   [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Functions]
@@ -25,7 +25,7 @@
     type = SplineFunction
     x = '0 1 2 3'
     y = '0 1 0 1'
-  [../]
+  []
 []
 
 [ICs]
@@ -33,7 +33,7 @@
     type = FunctionIC
     variable = 'u'
     function = spline_function
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,5 +49,5 @@
   [OverSampling]
     type = Exodus
     refinements = 3
-  [../]
+  []
 []

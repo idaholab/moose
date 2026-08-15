@@ -6,12 +6,12 @@
   [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [forced]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 # The Preconditioning block
@@ -31,7 +31,7 @@
 
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-  [../]
+  []
 
   [SMP_jfnk_full]
     type = SMP
@@ -45,7 +45,7 @@
 
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-  [../]
+  []
 
   [SMP_n]
     type = SMP
@@ -58,25 +58,25 @@
 
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-  [../]
+  []
 []
 
 [Kernels]
   [diff_diffused]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 
   [conv_forced]
     type = CoupledForce
     variable = forced
     v = diffused
-  [../]
+  []
 
   [diff_forced]
     type = Diffusion
     variable = forced
-  [../]
+  []
 []
 
 [BCs]
@@ -87,28 +87,28 @@
     variable = diffused
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 2
     value = 100
-  [../]
+  []
 
   [left_forced]
     type = DirichletBC
     variable = forced
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right_forced]
     type = DirichletBC
     variable = forced
     boundary = 2
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

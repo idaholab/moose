@@ -25,7 +25,7 @@
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
@@ -36,13 +36,13 @@
     value_0 = 10
     value_residual = 1
     internal_limit = 10
-  [../]
+  []
   [compressive_strength]
     type = SolidMechanicsHardeningCubic
     value_0 = -10
     value_residual = -1
     internal_limit = 9
-  [../]
+  []
   [cap]
     type = SolidMechanicsPlasticMeanCapTC
     tensile_strength = tensile_strength
@@ -51,7 +51,7 @@
     internal_constraint_tolerance = 1E-9
     use_custom_cto = true
     use_custom_returnMap = true
-  [../]
+  []
 []
 
 [Materials]
@@ -60,19 +60,19 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.7 1'
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '6 5 4  5 7 2  4 2 2'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-11
     plastic_models = cap
     tangent_operator = nonlinear
     min_stepsize = 1
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -81,7 +81,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

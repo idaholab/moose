@@ -16,14 +16,14 @@
 
 [Variables]
   [T]
-  [../]
+  []
 []
 
 [Kernels]
   [HeatDiff]
     type = ADHeatConduction
     variable = T
-  [../]
+  []
 []
 
 [BCs]
@@ -32,13 +32,13 @@
     variable = T
     boundary = 'right bottom left'
     value = 0
-  [../]
+  []
   [top]
     type = ADFunctionDirichletBC
     variable = T
     boundary = top
     function = '10*sin(pi*x*0.5)'
-  [../]
+  []
 []
 
 [Materials]
@@ -46,7 +46,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '1 1 1'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -54,12 +54,12 @@
     type = NodalL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
-  [../]
+  []
   [elemental_error]
     type = ElementL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
-  [../]
+  []
 []
 
 [Executioner]

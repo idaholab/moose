@@ -18,12 +18,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -36,28 +36,28 @@
     expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '2'
-  [../]
+  []
 
   [bc_v]
     type = ParsedFunction
     expression = sin(alpha*pi*y)
     symbol_names = 'alpha'
     symbol_values = '2'
-  [../]
+  []
 
   [f_u]
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '2'
-  [../]
+  []
 
   [f_v]
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*y)
     symbol_names = 'alpha'
     symbol_values = '2'
-  [../]
+  []
 []
 
 [Kernels]
@@ -66,25 +66,25 @@
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 
   # This Kernel can take a function name to use
   [forcing_u]
     type = BodyForce
     variable = u
     function = f_u
-  [../]
+  []
 
   [forcing_v]
     type = BodyForce
     variable = v
     function = f_v
-  [../]
+  []
 []
 
 [BCs]
@@ -96,14 +96,14 @@
     variable = u
     boundary = 'bottom right top left'
     function = bc_u
-  [../]
+  []
 
   [all_v]
     type = FunctionDirichletBC
     variable = v
     boundary = 'bottom right top left'
     function = bc_v
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,14 +114,14 @@
     coarsen_fraction = 0.0
     max_h_level = 10
     steps = 3
-  [../]
+  []
 []
 
 [Postprocessors]
   [dofs]
     type = NumDOFs
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [integral]
     type = ElementVectorL2Error
@@ -130,7 +130,7 @@
     function_x = bc_u
     function_y = bc_v
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

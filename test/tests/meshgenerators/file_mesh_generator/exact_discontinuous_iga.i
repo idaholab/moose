@@ -31,7 +31,7 @@
     type = TimeDerivative
     variable = u
     block = 0
-  [../]
+  []
   [null]
     type = NullKernel
     variable = u

@@ -66,7 +66,7 @@
     type = ViewFactorPP
     from_boundary = left
     to_boundary = bottom
-  [../]
+  []
 
   [bottom_left]
     type = ViewFactorPP

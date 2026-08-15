@@ -9,12 +9,12 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [phi]
-  [../]
+  []
 []
 
 [ICs]
@@ -22,14 +22,14 @@
     type = FunctionIC
     variable = phi
     function = ic_func_phi
-  [../]
+  []
 []
 
 [Functions]
   [ic_func_phi]
     type = ParsedFunction
     expression = '0.5 * (1 - tanh((x - 5) / 0.8))'
-  [../]
+  []
 []
 
 [BCs]
@@ -39,18 +39,18 @@
     boundary = top
     value = 2
     boundary_material = hm
-  [../]
+  []
 []
 
 [Kernels]
   [dudt]
     type = ADTimeDerivative
     variable = u
-  [../]
+  []
   [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 []
 
 [Materials]
@@ -60,7 +60,7 @@
     coupled_variables = 'phi'
     expression = '3*phi^2 - 2*phi^3'
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

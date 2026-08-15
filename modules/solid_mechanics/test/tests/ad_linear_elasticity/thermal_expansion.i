@@ -29,15 +29,15 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0
-  [../]
+  []
   [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
   [eigenstrain]
     type = ADComputeEigenstrain
     eigen_base = '1e-4'
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [BCs]
@@ -46,20 +46,20 @@
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
+  []
   [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

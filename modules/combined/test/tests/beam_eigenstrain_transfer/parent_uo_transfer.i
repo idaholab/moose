@@ -26,23 +26,23 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
   [rot_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [rot_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [rot_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
@@ -51,37 +51,37 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
+  []
   [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [Kernels]
@@ -92,7 +92,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 0
     variable = disp_x
-  [../]
+  []
   [solid_disp_y]
     type = StressDivergenceBeam
     block = '1'
@@ -100,7 +100,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 1
     variable = disp_y
-  [../]
+  []
   [solid_disp_z]
     type = StressDivergenceBeam
     block = '1'
@@ -108,7 +108,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 2
     variable = disp_z
-  [../]
+  []
   [solid_rot_x]
     type = StressDivergenceBeam
     block = '1'
@@ -116,7 +116,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 3
     variable = rot_x
-  [../]
+  []
   [solid_rot_y]
     type = StressDivergenceBeam
     block = '1'
@@ -124,7 +124,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 4
     variable = rot_y
-  [../]
+  []
   [solid_rot_z]
     type = StressDivergenceBeam
     block = '1'
@@ -132,7 +132,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 5
     variable = rot_z
-  [../]
+  []
 []
 
 [Materials]
@@ -142,7 +142,7 @@
     poissons_ratio = 0.3
     shear_coefficient = 1.0
     block = 1
-  [../]
+  []
   [strain]
     type = ComputeIncrementalBeamStrain
     block = '1'
@@ -155,16 +155,16 @@
     Iz = 0.01
     y_orientation = '0.0 0.0 1.0'
     eigenstrain_names = 'thermal'
-  [../]
+  []
   [stress]
     type = ComputeBeamResultants
     block = 1
-  [../]
+  []
   [thermal]
     type = ComputeEigenstrainBeamFromVariable
     displacement_eigenstrain_variables = 'zero1 to_var zero2'
     eigenstrain_name = thermal
-  [../]
+  []
 []
 
 [Executioner]
@@ -189,11 +189,11 @@
 
 [AuxVariables]
   [to_var]
-  [../]
+  []
   [zero1]
-  [../]
+  []
   [zero2]
-  [../]
+  []
 []
 
 [MultiApps]
@@ -202,7 +202,7 @@
     app_type = CombinedApp
     positions = '1.5 2.0 2.0 2.5 0.0 3.0'
     input_files = 'subapp1_uo_transfer.i subapp2_uo_transfer.i'
-  [../]
+  []
 []
 
 [Transfers]
@@ -212,7 +212,7 @@
     from_multi_app = sub
     variable = to_var
     all_master_nodes_contained_in_sub_app = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -220,12 +220,12 @@
     type = PointValue
     variable = disp_y
     point = '1.5 2.150080 2.0'
-  [../]
+  []
   [pos2]
     type = PointValue
     variable = disp_y
     point = '2.5 0.150080 3.0'
-  [../]
+  []
 []
 
 [Outputs]

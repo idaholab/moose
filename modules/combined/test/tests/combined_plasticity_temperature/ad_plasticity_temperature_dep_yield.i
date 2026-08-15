@@ -48,14 +48,14 @@
     add_variables = true
     generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Variables]
   [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -63,24 +63,24 @@
     type = PiecewiseLinear
     x = '0 1     2    4    5    6'
     y = '0 0.025 0.05 0.05 0.06 0.085'
-  [../]
+  []
   [yield]
     type = PiecewiseLinear
     x = '400 500 600'
     y = '6e3 5e3 4e3'
-  [../]
+  []
   [temp]
     type = PiecewiseLinear
     x = '0   1   2   3   4'
     y = '500 500 500 600 400'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = ADHeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -89,31 +89,31 @@
     variable = disp_y
     boundary = top
     function = top_pull
-  [../]
+  []
   [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
   [temp]
     type = FunctionDirichletBC
     variable = temp
     function = temp
     boundary = left
-  [../]
+  []
 []
 
 [Materials]
@@ -122,27 +122,27 @@
     block = 0
     youngs_modulus = 2.0e5
     poissons_ratio = 0.3
-  [../]
+  []
   [creep_plas]
     type = ADComputeMultipleInelasticStress
     block = 0
     inelastic_models = 'plasticity'
     max_iterations = 50
     absolute_tolerance = 1e-05
-  [../]
+  []
   [plasticity]
     type = ADIsotropicPlasticityStressUpdate
     block = 0
     hardening_constant = 0
     yield_stress_function = yield
     temperature = temp
-  [../]
+  []
   [heat_conduction]
     type = ADHeatConductionMaterial
     block = 0
     specific_heat = 1
     thermal_conductivity = 1
-  [../]
+  []
 []
 
 [Executioner]

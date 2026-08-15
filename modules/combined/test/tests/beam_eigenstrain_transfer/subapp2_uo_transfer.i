@@ -25,18 +25,18 @@
 
 [AuxVariables]
   [temp]
-  [../]
+  []
   [axial_strain]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [temperature_load]
     type = ParsedFunction
     expression = t*(1000.0)+300.0
-  [../]
+  []
 []
 
 [Physics]
@@ -47,9 +47,9 @@
         incremental = true
         add_variables = true
         eigenstrain_names = eigenstrain
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [AuxKernels]
@@ -57,7 +57,7 @@
     type = FunctionAux
     variable = temp
     function = temperature_load
-  [../]
+  []
   [axial_strain]
     type = RankTwoAux
     variable = axial_strain
@@ -65,7 +65,7 @@
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -74,13 +74,13 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -88,17 +88,17 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
+  []
   [small_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]
@@ -138,7 +138,7 @@
     variable = axial_strain
     num_points = 11
     sort_by = 'id'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -146,5 +146,5 @@
     type = PointValue
     variable = disp_y
     point = '0.5 0.150080 0.0'
-  [../]
+  []
 []

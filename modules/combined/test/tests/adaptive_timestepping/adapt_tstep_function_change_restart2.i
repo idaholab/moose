@@ -20,21 +20,21 @@
     type = PiecewiseLinear
     x = '0 1e6  2e6  2.001e6 2.002e6'
     y = '0 3e8  3e8  12e8    0'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
 
   [disp_y]
-  [../]
+  []
 
   [disp_z]
-  [../]
+  []
 
   [temp]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -47,26 +47,26 @@
     add_variables  = true
     generate_output = 'vonmises_stress'
     temperature = temp
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 
   [heat_ie]
     type = HeatConductionTimeDerivative
     variable = temp
-  [../]
+  []
 
   [heat_source]
      type = HeatSource
      variable = temp
      value = 1.0
      function = Fiss_Function
-  [../]
+  []
 []
 
 [BCs]
@@ -75,25 +75,25 @@
    variable = temp
    boundary = 1
    value = 300
- [../]
+ []
  [top_bottom_disp_x]
    type = DirichletBC
    variable = disp_x
    boundary = '1'
    value = 0
- [../]
+ []
  [top_bottom_disp_y]
    type = DirichletBC
    variable = disp_y
    boundary = '1'
    value = 0
- [../]
+ []
  [top_bottom_disp_z]
    type = DirichletBC
    variable = disp_z
    boundary = '1'
    value = 0
- [../]
+ []
 []
 
 [Materials]
@@ -102,17 +102,17 @@
     temp = temp
     specific_heat = 1.0
     thermal_conductivity = 1.0
-  [../]
+  []
 
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 300e6
     poissons_ratio = .3
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
   [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
@@ -120,12 +120,12 @@
     stress_free_temperature = 300.0
     temperature = temp
     eigenstrain_name = thermal_expansion
-  [../]
+  []
 
   [density]
     type = Density
     density = 10963.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -141,7 +141,7 @@
     timestep_limiting_function = Fiss_Function
     max_function_change = 3e7
     dt = 1e6
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -149,24 +149,24 @@
     type = ElementAverageValue
     variable = temp
     execute_on = 'timestep_end'
-  [../]
+  []
 
   [vonMises]
     type = ElementAverageValue
     variable = vonmises_stress
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
   [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []
 
 [Problem]

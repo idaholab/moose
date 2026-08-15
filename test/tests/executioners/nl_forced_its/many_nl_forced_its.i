@@ -5,18 +5,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -26,14 +26,14 @@
     preset = false
     boundary = left
     value = -1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

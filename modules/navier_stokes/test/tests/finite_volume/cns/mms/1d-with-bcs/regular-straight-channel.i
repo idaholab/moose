@@ -8,7 +8,7 @@
     dim = 1
     xmax = 1.5
     nx = 15
-  [../]
+  []
 []
 
 [FluidProperties]

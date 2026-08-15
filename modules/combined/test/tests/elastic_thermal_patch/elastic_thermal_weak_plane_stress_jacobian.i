@@ -12,20 +12,20 @@
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 
   [strain_zz]
-  [../]
+  []
 
   [temp]
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,25 +34,25 @@
     variable = disp_x
     eigenstrain_names = thermal_eigenstrain
     component = 0
-  [../]
+  []
   [disp_y]
     type = StressDivergenceTensors
     variable = disp_y
     eigenstrain_names = thermal_eigenstrain
     component = 1
-  [../]
+  []
 
   [solid_z]
     type = WeakPlaneStress
     variable = strain_zz
     eigenstrain_names = thermal_eigenstrain
-  [../]
+  []
 
   [heat]
     type = HeatConduction
     variable = temp
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Materials]
@@ -60,33 +60,33 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
+  []
   [strain]
     type = ComputePlaneSmallStrain
     eigenstrain_names = thermal_eigenstrain
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 0
     eigenstrain_name = thermal_eigenstrain
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 
   [conductivity]
     type = HeatConductionMaterial
     thermal_conductivity = 1
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

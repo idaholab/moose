@@ -17,11 +17,11 @@
   [cracking_stress_fn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [crack_flags2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
@@ -29,11 +29,11 @@
     type = PiecewiseLinear
     x = '0 0.1 0.2 0.3 0.4'
     y = '0 0.001 0 -0.001 0'
-  [../]
+  []
   [fstress]
     type = ParsedFunction
     expression = 'if(x > 0.667, 1.1e6, 1.2e6)'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -42,7 +42,7 @@
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx strain_xx strain_yy strain_xy strain_yz'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -51,13 +51,13 @@
     variable = cracking_stress_fn
     function = fstress
     execute_on = initial
-  [../]
+  []
   [crack_flags2]
     type = ADMaterialRealVectorValueAux
     property = crack_flags
     variable = crack_flags2
    component = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -66,20 +66,20 @@
     variable = disp_x
     boundary = '3 4'
     function = displ
-  [../]
+  []
 
   [pin_x]
     type = ADDirichletBC
     variable = disp_x
     boundary =  '1 2'
     value = 0
-  [../]
+  []
   [pin_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = '1 4'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -87,17 +87,17 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200.0e7
     poissons_ratio = 0.0
-  [../]
+  []
   [elastic_stress]
     type = ADComputeSmearedCrackingStress
     cracking_stress = cracking_stress_fn
     cracked_elasticity_type = FULL
     softening_models = abrupt_softening
-  [../]
+  []
   [abrupt_softening]
     type = ADAbruptSoftening
     residual_stress = 0.0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -105,17 +105,17 @@
     type = ElementalVariableValue
     variable = stress_xx
     elementid = 2
-  [../]
+  []
   [elem_strain_xx]
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 2
-  [../]
+  []
   [elem_crack_flags_x]
     type = ElementalVariableValue
     variable = crack_flags2
     elementid = 2
-  [../]
+  []
 []
 
 [Executioner]

@@ -40,9 +40,9 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic/All]
@@ -57,7 +57,7 @@
     type = Gravity
     variable = disp_y
     value = 20
-  [../]
+  []
 []
 
 [BCs]
@@ -66,7 +66,7 @@
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -74,15 +74,15 @@
     type = ComputeIsotropicElasticityTensor
     shear_modulus = 0.5e6
     lambda = 0.0
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
   [density]
     type = Density
     density = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -98,5 +98,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

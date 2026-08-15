@@ -13,7 +13,7 @@
     bottom_left = '0.5 0 0'
     top_right = '1 0 0'
     input = gen
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -28,23 +28,23 @@
         strain = SMALL
         additional_generate_output = 'stress_yy'
         save_in = 'resid_x resid_y'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Variables]
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [resid_x]
-  [../]
+  []
   [resid_y]
-  [../]
+  []
 []
 
 [Kernels]
@@ -53,24 +53,24 @@
     variable = disp_x
     component = 0
     c = c
-  [../]
+  []
   [solid_y]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
     c = c
-  [../]
+  []
   [ACBulk]
     type = AllenCahn
     variable = c
     f_name = F
-  [../]
+  []
 
   [ACInterface]
     type = ACInterface
     variable = c
     kappa_name = kappa_op
-  [../]
+  []
 []
 
 [BCs]
@@ -79,19 +79,19 @@
     variable = disp_y
     boundary = top
     function = 't'
-  [../]
+  []
   [yfix]
     type = DirichletBC
     variable = disp_y
     boundary = noncrack
     value = 0
-  [../]
+  []
   [xfix]
     type = DirichletBC
     variable = disp_x
     boundary = top
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -99,24 +99,24 @@
     type = GenericConstantMaterial
     prop_names = 'gc_prop l visco'
     prop_values = '1e-3 0.04 1e-4'
-  [../]
+  []
   [define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
     property_name = L
     expression = '1.0/(gc_prop * visco)'
-  [../]
+  []
   [define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
     property_name = kappa_op
     expression = 'gc_prop * l'
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [elastic]
     type = ComputeLinearElasticPFFractureStress
     c = c
@@ -124,7 +124,7 @@
     D_name = 'degradation'
     F_name = 'local_fracture_energy'
     decomposition_type = strain_spectral
-  [../]
+  []
   [degradation]
     type = DerivativeParsedMaterial
     property_name = degradation
@@ -133,7 +133,7 @@
     constant_names       = 'eta'
     constant_expressions = '0.0'
     derivative_order = 2
-  [../]
+  []
   [local_fracture_energy]
     type = DerivativeParsedMaterial
     property_name = local_fracture_energy
@@ -141,14 +141,14 @@
     material_property_names = 'gc_prop l'
     expression = 'c^2 * gc_prop / 2 / l'
     derivative_order = 2
-  [../]
+  []
   [fracture_driving_energy]
     type = DerivativeSumMaterial
     coupled_variables = c
     sum_materials = 'elastic_energy local_fracture_energy'
     derivative_order = 2
     property_name = F
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -156,19 +156,19 @@
     type = NodalSum
     variable = resid_x
     boundary = 2
-  [../]
+  []
   [resid_y]
     type = NodalSum
     variable = resid_y
     boundary = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

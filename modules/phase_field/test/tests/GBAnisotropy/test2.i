@@ -26,8 +26,8 @@
       invalue = 0.0
       outvalue = 1.0
       int_width = 50.0
-    [../]
-  [../]
+    []
+  []
   [gr1]
     order = FIRST
     family = LAGRANGE
@@ -39,8 +39,8 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 50.0
-    [../]
-  [../]
+    []
+  []
   [gr2]
     order = FIRST
     family = LAGRANGE
@@ -52,30 +52,30 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 50.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [unique_grains]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [var_indices]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
   var_name_base = gr
   op_num = 3
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -85,15 +85,15 @@
     execute_on = timestep_end
     var_name_base = gr
     op_num = 3
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [top_bottom]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -110,23 +110,23 @@
     # molar_volume_value = 7.11e-6 #Units:m^3/mol
     Anisotropic_GB_file_name = anisotropy_mobility.txt
     inclination_anisotropy = false
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
+  []
 
   [gr1_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
   [gr2_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr2
-  [../]
+  []
 []
 
 [Executioner]

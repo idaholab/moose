@@ -4,7 +4,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
   # This test uses SolutionUserObject which doesn't work with DistributedMesh.
   parallel_type = replicated
 []
@@ -13,21 +13,21 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -36,7 +36,7 @@
     solution = xda_soln
     execute_on = initial
     variable = u_aux
-  [../]
+  []
 []
 
 [UserObjects]
@@ -45,7 +45,7 @@
     mesh = build_out_0001_mesh.xda
     es = build_out_0001.xda
     system_variables = u
-  [../]
+  []
 []
 
 [BCs]
@@ -54,13 +54,13 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,5 +75,5 @@
   exodus = true
   [xda]
     type = XDA
-  [../]
+  []
 []

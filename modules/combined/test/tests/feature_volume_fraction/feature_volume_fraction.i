@@ -25,20 +25,20 @@
       int_width = 1
       invalue = 1
       outvalue = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -47,7 +47,7 @@
     flood_counter = feature_counter
     execute_on = 'initial timestep_end'
     outputs = none
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -56,17 +56,17 @@
     variable = u
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [Volume]
     type = VolumePostprocessor
     execute_on = 'initial'
-  [../]
+  []
   [volume_fraction]
     type = FeatureVolumeFraction
     mesh_volume = Volume
     feature_volumes = feature_volumes
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

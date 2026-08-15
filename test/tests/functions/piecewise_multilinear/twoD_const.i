@@ -15,14 +15,14 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [Kernels]
   [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
@@ -30,17 +30,17 @@
   [constant]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
   [constant_ref]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
   [diff]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -48,20 +48,20 @@
     type = FunctionAux
     variable = constant
     function = const_fcn
-  [../]
+  []
 
   [const_ref_AuxK]
     type = FunctionAux
     variable = constant_ref
     function = const_ref
-  [../]
+  []
 
   [diff]
     type = ParsedAux
     variable = diff
     expression = 'constant - constant_ref'
     coupled_variables = 'constant constant_ref'
-  [../]
+  []
 []
 
 
@@ -70,7 +70,7 @@
     type = PiecewiseMulticonstant
     direction = 'left right'
     data_file = twoD_const.txt
-  [../]
+  []
 
   [const_ref]
     type = ParsedFunction
@@ -79,7 +79,7 @@
             iy := if(y > 0, 2, if(y > -0.5, 1, 0));
             iy * 3 + ix
             '
-  [../]
+  []
 []
 
 
@@ -87,7 +87,7 @@
   [diff_pp]
     type = ElementIntegralVariablePostprocessor
     variable = diff
-  [../]
+  []
 []
 
 [Executioner]

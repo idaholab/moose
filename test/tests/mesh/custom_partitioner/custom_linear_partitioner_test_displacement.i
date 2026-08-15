@@ -15,7 +15,7 @@
   [Partitioner]
     type = LibmeshPartitioner
     partitioner = linear
-  [../]
+  []
   parallel_type = replicated
 []
 
@@ -23,42 +23,42 @@
   [aux_v_fn]
     type = ParsedFunction
     expression = x*(y-0.5)/5
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [udiff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [uie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [vdiff]
     type = Diffusion
     variable = v
-  [../]
+  []
 
 
   [vie]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -67,35 +67,35 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [uright]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 0.1
-  [../]
+  []
 
   [vleft]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 1
-  [../]
+  []
 
   [vright]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 0
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux_v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -103,7 +103,7 @@
     type = FunctionAux
     variable = aux_v
     function = aux_v_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -117,7 +117,7 @@
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
-  [../]
+  []
 []
 
 [Outputs]
@@ -125,5 +125,5 @@
   [out]
     type = Exodus
     use_displaced = true
-  [../]
+  []
 []

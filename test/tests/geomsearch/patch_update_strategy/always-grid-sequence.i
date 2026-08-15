@@ -14,23 +14,23 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [linear_field]
-  [../]
+  []
   [receiver]
     # The field to transfer into
-  [../]
+  []
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [elemental_reciever]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -39,7 +39,7 @@
     variable = u
     coef = 1
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -49,7 +49,7 @@
     variable = linear_field
     function = y
     execute_on = initial
-  [../]
+  []
   [right_to_left]
     type = GapValueAux
     variable = receiver
@@ -57,21 +57,21 @@
     paired_boundary = rightleft
     execute_on = 'nonlinear timestep_end'
     boundary = leftright
-  [../]
+  []
   [y_displacement]
     type = FunctionAux
     variable = disp_y
     function = t
     execute_on = 'linear timestep_begin'
     block = left
-  [../]
+  []
   [elemental_right_to_left]
     type = GapValueAux
     variable = elemental_reciever
     paired_variable = linear_field
     paired_boundary = rightleft
     boundary = leftright
-  [../]
+  []
 []
 
 [BCs]
@@ -80,13 +80,13 @@
     variable = u
     boundary = 'lefttop righttop'
     function = 't'
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = u
     boundary = 'leftbottom rightbottom'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

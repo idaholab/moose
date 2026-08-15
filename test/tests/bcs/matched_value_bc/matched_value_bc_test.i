@@ -4,7 +4,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 # Solves a pair of coupled diffusion equations where u=v on the boundary
@@ -16,13 +16,13 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 3
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,12 +31,12 @@
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -47,21 +47,21 @@
     variable = v
     boundary = 1
     value = 3
-  [../]
+  []
 
   [left_u]
     type = MatchedValueBC
     variable = u
     boundary = 3
     v = v
-  [../]
+  []
 []
 
 [Preconditioning]
   [precond]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

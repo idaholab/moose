@@ -11,7 +11,7 @@
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -20,14 +20,14 @@
     planar_formulation = PLANE_STRAIN
     add_variables = true
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
-  [../]
+  []
 []
 
 [Functions]
   [pull]
     type = ParsedFunction
     expression ='0.01 * t'
-  [../]
+  []
 []
 
 [BCs]
@@ -36,32 +36,32 @@
     boundary = 1
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [pull]
     type = FunctionDirichletBC
     boundary = 2
     variable = disp_y
     function = pull
-  [../]
+  []
 []
 
 [Materials]
   [linear_stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     poissons_ratio = 0.3
     youngs_modulus = 1e10
-  [../]
+  []
 []
 
 [Executioner]

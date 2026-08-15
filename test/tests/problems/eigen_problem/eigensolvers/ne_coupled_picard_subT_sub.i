@@ -14,18 +14,18 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [T]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [power]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,14 +34,14 @@
     variable = u
     mat_prop = diffusion
     offset = 0.0
-  [../]
+  []
 
   [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -52,7 +52,7 @@
     normalization = unorm
     normal_factor = 10
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -61,13 +61,13 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 
   [eigenU]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Materials]
@@ -77,7 +77,7 @@
     block = 0
     base = 1.0
     coef = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,19 +92,19 @@
     type = ElementIntegralVariablePostprocessor
     variable = power
     execute_on = timestep_end
-  [../]
+  []
   [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [VectorPostprocessors]
   [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

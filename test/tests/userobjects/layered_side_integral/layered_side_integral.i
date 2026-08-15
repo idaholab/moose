@@ -8,21 +8,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [layered_integral]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -31,13 +31,13 @@
     variable = u
     boundary = bottom
     value = 0
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -46,7 +46,7 @@
     variable = layered_integral
     boundary = right
     user_object = layered_integral
-  [../]
+  []
 []
 
 [UserObjects]
@@ -57,7 +57,7 @@
     variable = u
     execute_on = linear
     boundary = right
-  [../]
+  []
 []
 
 [VectorPostprocessors]

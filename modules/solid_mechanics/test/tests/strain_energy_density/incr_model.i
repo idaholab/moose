@@ -20,7 +20,7 @@
   [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
@@ -29,7 +29,7 @@
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = -100
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -39,7 +39,7 @@
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy strain_zz'
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -48,7 +48,7 @@
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -57,19 +57,19 @@
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
   [Pressure]
     [top]
       boundary = 'top'
       function = rampConstantUp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -77,14 +77,14 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 30e+6
     poissons_ratio = 0.3
-  [../]
+  []
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [strain_energy_density]
     type = StrainEnergyDensity
     incremental = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -113,33 +113,33 @@
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 0
-  [../]
+  []
   [epyy]
     type = ElementalVariableValue
     variable = strain_yy
     elementid = 0
-  [../]
+  []
   [epzz]
     type = ElementalVariableValue
     variable = strain_zz
     elementid = 0
-  [../]
+  []
   [sigxx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
+  []
   [sigyy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
+  []
   [sigzz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
+  []
   [SED]
     type = ElementAverageValue
     variable = SED
-  [../]
+  []
 []
 
 [Outputs]

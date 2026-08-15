@@ -19,19 +19,19 @@
   [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
   [biharmonic]
     type = Biharmonic
     variable = u
-  [../]
+  []
   [body_force]
     type = BodyForce
     variable = u
     function = forcing_func
-  [../]
+  []
 []
 
 [BCs]
@@ -41,14 +41,14 @@
     boundary = 'left right top bottom'
     function = u_func
     penalty = 1e10
-  [../]
+  []
   [all_flux]
     type = FunctionPenaltyFluxBC
     variable = u
     boundary = 'left right top bottom'
     function = u_func
     penalty = 1e10
-  [../]
+  []
 []
 
 [Adaptivity]
@@ -57,8 +57,8 @@
       type = LaplacianJumpIndicator
       variable = u
       scale_by_flux_faces = true
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -80,7 +80,7 @@
   [Quadrature]
     type = GAUSS
     order = ELEVENTH
-  [../]
+  []
 []
 
 [Functions]
@@ -89,11 +89,11 @@
     value  = 'exp(-c*(x^2+y^2))*exp(-t)'
     grad_x = '-2*c*exp(-c*(x^2+y^2))*x*exp(-t)'
     grad_y = '-2*c*exp(-c*(x^2+y^2))*y*exp(-t)'
-  [../]
+  []
   [forcing_func]
     type   = ParsedFunction
     expression  = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))*exp(-t)'
-  [../]
+  []
 []
 
 [ICs]
@@ -101,7 +101,7 @@
     type = FunctionIC
     function = u_func
     variable = u
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -109,12 +109,12 @@
     type = ElementL2Error
     variable = u
     function = u_func
-  [../]
+  []
   [h1_error]
     type = ElementH1Error
     variable = u
     function = u_func
-  [../]
+  []
 []
 
 [Outputs]

@@ -12,7 +12,7 @@
     x = Legendre
     disc = Zernike
     y = Legendre
-  [../]
+  []
 []
 
 [Executioner]

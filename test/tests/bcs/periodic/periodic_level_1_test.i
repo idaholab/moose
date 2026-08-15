@@ -16,7 +16,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,13 +24,13 @@
     type = CoefDiffusion
     variable = u
     coef = 1e-5
-  [../]
+  []
 
   [conv]
     type = Convection
     variable = u
     velocity = '-0.4 0 0'
-  [../]
+  []
 
   [forcing]
     type = GaussContForcing
@@ -39,12 +39,12 @@
     y_center = 8.0
     x_spread = 1.0
     y_spread = 2.0
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -54,15 +54,15 @@
       primary = 3
       secondary = 1
       translation = '20 0 0'
-    [../]
+    []
 
     [y]
       variable = u
       primary = 0
       secondary = 2
       translation = '0 16 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -75,7 +75,7 @@
     coarsen_fraction = .2
     max_h_level = 4
     error_estimator = KellyErrorEstimator
-  [../]
+  []
 []
 
 [Outputs]

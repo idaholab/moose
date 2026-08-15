@@ -14,7 +14,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -34,7 +34,7 @@
     prevent_overlap = true
     semiaxis_c_variation = '0 0'
     semiaxis_c = '1 1'
-  [../]
+  []
 []
 
 [Executioner]
@@ -53,7 +53,7 @@
   dt = 100.0
   [Adaptivity]
     refine_fraction = .5
-  [../]
+  []
 []
 
 [Outputs]

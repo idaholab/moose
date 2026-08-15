@@ -15,7 +15,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,7 +23,7 @@
     type = Diffusion
     variable = u
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [BCs]
@@ -32,13 +32,13 @@
     variable = u
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = u
     boundary = top
     function = 't'
-  [../]
+  []
 []
 
 [Executioner]
@@ -51,5 +51,5 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0e-10
-  [../]
+  []
 []

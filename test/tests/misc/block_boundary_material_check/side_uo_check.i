@@ -5,7 +5,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [UserObjects]
@@ -13,7 +13,7 @@
     type = MatSideUserObject
     mat_prop = 'foo'
     boundary = 1
-  [../]
+  []
 []
 
 [Problem]

@@ -13,18 +13,18 @@
     bottom_left = '0 0 0'
     top_right = '1 1 0'
     block_id = 1
-  [../]
+  []
   [primary0_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
-  [../]
+  []
   [break_boundary]
     input = primary0_interface
     type = BreakBoundaryOnSubdomainGenerator
-  [../]
+  []
 []
 
 [Variables]
@@ -32,13 +32,13 @@
     order = FIRST
     family = LAGRANGE
     block = 0
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -47,18 +47,18 @@
     variable = u
     D = 2
     block = 0
-  [../]
+  []
   [diff_v]
     type = CoeffParamDiffusion
     variable = v
     D = 4
     block = 1
-  [../]
+  []
   [source_u]
     type = BodyForce
     variable = u
     function = 0.1*t
-  [../]
+  []
 []
 
 [InterfaceKernels]
@@ -68,7 +68,7 @@
     neighbor_var = v
     boundary = primary0_interface
     penalty = 1e6
-  [../]
+  []
 []
 
 [BCs]
@@ -76,19 +76,19 @@
     type = VacuumBC
     variable = u
     boundary = 'left_to_0 bottom_to_0 right top'
-  [../]
+  []
   [v]
     type = VacuumBC
     variable = v
     boundary = 'left_to_1 bottom_to_1'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = TRUE
-  [../]
+  []
 []
 
 [Executioner]
@@ -117,7 +117,7 @@
     boundary = 'primary0_interface'
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
-  [../]
+  []
   [interface_value_rate_uo]
     type = InterfaceQpMaterialPropertyRealUO
     property = diffusivity
@@ -126,7 +126,7 @@
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
     value_type = rate
-  [../]
+  []
   [interface_value_increment_uo]
     type = InterfaceQpMaterialPropertyRealUO
     property = diffusivity
@@ -135,7 +135,7 @@
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
     value_type = increment
-  [../]
+  []
 []
 
 [Materials]
@@ -143,12 +143,12 @@
     type = StatefulMaterial
     block = 0
     initial_diffusivity = 5
-  [../]
+  []
   [stateful2]
     type = StatefulMaterial
     block = 1
     initial_diffusivity = 2
-  [../]
+  []
 []
 
 [AuxKernels]

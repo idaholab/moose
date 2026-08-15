@@ -6,14 +6,14 @@
 
   [Variables]
     [u]
-    [../]
+    []
   []
 
   [Kernels]
     [diff]
       type = Diffusion
       variable = u
-    [../]
+    []
   []
 
   [BCs]
@@ -22,13 +22,13 @@
       variable = u
       boundary = left
       value = 0
-    [../]
+    []
     [right]
       type = DirichletBC
       variable = u
       boundary = right
       value = 1
-    [../]
+    []
   []
 
   [Postprocessors]
@@ -36,7 +36,7 @@
     [c]
       type = ConstantPostprocessor
       value = 1.0
-    [../]
+    []
 
     # ParsedPostprocessor whose expression is now controllable.
     # It uses the constant postprocessor 'c' and time 't'.
@@ -45,7 +45,7 @@
       expression = 'c + t'
       pp_names = 'c'
       use_t = true
-    [../]
+    []
   []
 
   [Controls/web_server]

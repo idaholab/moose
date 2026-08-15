@@ -66,7 +66,7 @@
   [temp_function]
     type = ParsedFunction
     expression ='200*x+100*y+200*z'
-  [../]
+  []
 [] # Functions
 
 [Variables]
@@ -74,7 +74,7 @@
   [temp]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
 [] # Variables
 
@@ -83,7 +83,7 @@
   [heat_r]
     type = AnisoHeatConduction
     variable = temp
-  [../]
+  []
 
 [] # Kernels
 
@@ -94,7 +94,7 @@
     variable = temp
     boundary = 10
     function = temp_function
-  [../]
+  []
 
 [] # BCs
 
@@ -106,7 +106,7 @@
     specific_heat = 0.116
     thermal_conductivity = '4.85e-4 0 0 0 4.85e-4 0 0 0 4.85e-4'
     temperature = temp
-  [../]
+  []
 
 [] # Materials
 
@@ -129,7 +129,7 @@
 
   [Quadrature]
     order = THIRD
-  [../]
+  []
 
 [] # Executioner
 

@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,16 +15,16 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [diff2]
     type = CoefDiffusion
     variable = u
     coef = 0.2
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,7 +55,7 @@
   [func_coef]
     type = ParsedFunction
     expression = '2*t + 0.1'
-  [../]
+  []
 []
 
 [Controls]
@@ -63,5 +63,5 @@
     type = TestControl
     test_type = 'real'
     parameter = '*/*/coef'
-  [../]
+  []
 []

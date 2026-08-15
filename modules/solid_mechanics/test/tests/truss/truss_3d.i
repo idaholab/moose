@@ -8,43 +8,43 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
  [axial_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e_over_l]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [area]
     order = CONSTANT
     family = MONOMIAL
 #    initial_condition = 1.0
-  [../]
+  []
   [react_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [react_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [react_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -52,12 +52,12 @@
     type = PiecewiseLinear
     x = '0  1 2 3'
     y = '0 .5 1 1'
-  [../]
+  []
   [y2]
     type = PiecewiseLinear
     x = '0 1  2 3'
     y = '0 0 .5 1'
-  [../]
+  []
 []
 
 [BCs]
@@ -67,63 +67,63 @@
     preset = false
     boundary = 1
     value = 0.0
-  [../]
+  []
   [fixx2]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = 2
     function = x2
-  [../]
+  []
   [fixx3]
     type = DirichletBC
     variable = disp_x
     preset = false
     boundary = 3
     value = 0.0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = 1
     value = 0
-  [../]
+  []
   [fixy2]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = 2
     function = y2
-  [../]
+  []
   [fixy3]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = 3
     value = 0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     preset = false
     boundary = 1
     value = 0
-  [../]
+  []
   [fixz2]
     type = DirichletBC
     variable = disp_z
     preset = false
     boundary = 2
     value = 0
-  [../]
+  []
   [fixz3]
     type = DirichletBC
     variable = disp_z
     preset = false
     boundary = 3
     value = 0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -132,20 +132,20 @@
     block = '1 2'
     property = axial_stress
     variable = axial_stress
-  [../]
+  []
   [e_over_l]
     type = MaterialRealAux
     block = '1 2'
     property = e_over_l
     variable = e_over_l
-  [../]
+  []
   [area]
     type = ConstantAux
     block = '1 2'
     variable = area
     value = 1.0
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Executioner]
@@ -173,7 +173,7 @@
     variable = disp_x
     area = area
     save_in = react_x
-  [../]
+  []
   [solid_y]
     type = StressDivergenceTensorsTruss
     block = '1 2'
@@ -182,7 +182,7 @@
     variable = disp_y
     area = area
     save_in = react_y
-  [../]
+  []
   [solid_z]
     type = StressDivergenceTensorsTruss
     block = '1 2'
@@ -191,7 +191,7 @@
     variable = disp_z
     area = area
     save_in = react_z
-  [../]
+  []
 []
 
 [Materials]
@@ -200,7 +200,7 @@
     block = '1 2'
     youngs_modulus = 1e6
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [Outputs]

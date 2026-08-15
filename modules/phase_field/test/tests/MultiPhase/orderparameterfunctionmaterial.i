@@ -24,26 +24,26 @@
     variable = eta1
     boundary = 'left'
     value = 0
-  [../]
+  []
   [right1]
     type = DirichletBC
     variable = eta1
     boundary = 'right'
     value = 1
-  [../]
+  []
 
   [left2]
     type = DirichletBC
     variable = eta2
     boundary = 'left'
     value = 0
-  [../]
+  []
   [right2]
     type = DirichletBC
     variable = eta2
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Variables]
@@ -51,13 +51,13 @@
   [eta1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 2
   [eta2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Materials]
@@ -67,7 +67,7 @@
     eta = eta1
     function_name = h1
     outputs = exodus
-  [../]
+  []
 
   [h_eta2]
     type = SwitchingFunctionMaterial
@@ -75,7 +75,7 @@
     eta = eta2
     function_name = h2
     outputs = exodus
-  [../]
+  []
 
   [g_eta1]
     type = BarrierFunctionMaterial
@@ -83,7 +83,7 @@
     eta = eta1
     function_name = g1
     outputs = exodus
-  [../]
+  []
 
   [g_eta2]
     type = BarrierFunctionMaterial
@@ -91,19 +91,19 @@
     eta = eta2
     function_name = g2
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
   [eta1diff]
     type = Diffusion
     variable = eta1
-  [../]
+  []
 
   [eta2diff]
     type = Diffusion
     variable = eta2
-  [../]
+  []
 []
 
 [Executioner]

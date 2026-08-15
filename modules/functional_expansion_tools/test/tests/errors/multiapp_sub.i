@@ -9,25 +9,25 @@
 
 [Variables]
   [empty]
-  [../]
+  []
 []
 
 [AuxVariables]
   [s]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [m_in]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [null_kernel]
     type = NullKernel
     variable = empty
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -35,13 +35,13 @@
     type = FunctionSeriesToAux
     function = FX_Basis_Value_Sub
     variable = m_in
-  [../]
+  []
   [calculate_s]
     type = ParsedAux
     variable = s
     coupled_variables = m_in
     expression = '2*exp(-m_in/0.8)'
-  [../]
+  []
 []
 
 [Functions]
@@ -51,7 +51,7 @@
     orders = '3'
     physical_bounds = '0.0  10.0'
     x = Legendre
-  [../]
+  []
 []
 
 [UserObjects]
@@ -59,7 +59,7 @@
     type = FXVolumeUserObject
     function = FX_Basis_Value_Sub
     variable = s
-  [../]
+  []
 []
 
 [Executioner]

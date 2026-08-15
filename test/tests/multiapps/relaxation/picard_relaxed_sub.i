@@ -7,28 +7,28 @@
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [AuxVariables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
   [force_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
   [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -37,13 +37,13 @@
     variable = v
     boundary = left
     value = 2
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

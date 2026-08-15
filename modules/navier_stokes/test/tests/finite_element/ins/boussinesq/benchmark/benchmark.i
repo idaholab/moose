@@ -14,7 +14,7 @@ temp_ref=${fparse hot_temp / 2.}
     new_boundary = corner
     coord = '0 0'
     input = gen
-  [../]
+  []
 []
 
 
@@ -23,7 +23,7 @@ temp_ref=${fparse hot_temp / 2.}
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,7 +71,7 @@ temp_ref=${fparse hot_temp / 2.}
     variable = velocity
     # The third entry is to satisfy RealVectorValue
     values = '0 0 0'
-  [../]
+  []
   # Even though we are integrating by parts, because there are no integrated
   # boundary conditions on the velocity p doesn't appear in the system of
   # equations. Thus we must pin the pressure somewhere in order to ensure a
@@ -81,19 +81,19 @@ temp_ref=${fparse hot_temp / 2.}
     boundary = corner
     variable = p
     value = 0
-  [../]
+  []
   [hot]
     type = DirichletBC
     variable = temp
     boundary = left
     value = ${hot_temp}
-  [../]
+  []
   [cold]
     type = DirichletBC
     variable = temp
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 
@@ -101,7 +101,7 @@ temp_ref=${fparse hot_temp / 2.}
   [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [mass_pspg]
     type = INSADMassPSPG
     variable = p
@@ -110,7 +110,7 @@ temp_ref=${fparse hot_temp / 2.}
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
   [momentum_advection]
     type = INSADMomentumAdvection
     variable = velocity
@@ -126,12 +126,12 @@ temp_ref=${fparse hot_temp / 2.}
     variable = velocity
     temperature = temp
     gravity = '0 -1 0'
-  [../]
+  []
   [gravity]
     type = INSADGravityForce
     variable = velocity
     gravity = '0 -1 0'
-  [../]
+  []
   [supg]
     type = INSADMomentumSUPG
     variable = velocity
@@ -146,7 +146,7 @@ temp_ref=${fparse hot_temp / 2.}
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = 'k'
-  [../]
+  []
   [temp_supg]
     type = INSADEnergySUPG
     variable = temp
@@ -160,12 +160,12 @@ temp_ref=${fparse hot_temp / 2.}
     # alpha = coefficient of thermal expansion where rho  = rho0 -alpha * rho0 * delta T
     prop_names =  'mu        rho   alpha   k        cp'
     prop_values = '1         1     1       1        1'
-  [../]
+  []
   [const]
     type = GenericConstantMaterial
     prop_names =  'temp_ref'
     prop_values = '${temp_ref}'
-  [../]
+  []
   [ins_mat]
     type = INSADStabilized3Eqn
     velocity = velocity

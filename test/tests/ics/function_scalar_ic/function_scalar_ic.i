@@ -15,14 +15,14 @@
   [n]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
   [f]
     type = ParsedFunction
     expression = cos(t)
-  [../]
+  []
 []
 
 [ICs]
@@ -30,19 +30,19 @@
     type = FunctionScalarIC
     variable = n
     function = f
-  [../]
+  []
 []
 
 [ScalarKernels]
   [dn]
     type = ODETimeDerivative
     variable = n
-  [../]
+  []
   [ode1]
     type = ParsedODEKernel
     expression = '-n'
     variable = n
-  [../]
+  []
 []
 
 [Executioner]

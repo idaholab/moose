@@ -7,7 +7,7 @@
     op_num = 4
     var_name_base = gr
     initial_from_file = true
-  [../]
+  []
 []
 
 [Executioner]

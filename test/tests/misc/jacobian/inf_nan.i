@@ -5,14 +5,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [td]
     type = NanKernel
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

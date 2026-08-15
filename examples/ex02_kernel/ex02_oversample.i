@@ -11,14 +11,14 @@
 [Variables]
   [diffused]
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -27,7 +27,7 @@
     type = ConstantPointSource
     value = 1
     point = '0.3 0.3 0.0'
-  [../]
+  []
 []
 
 [BCs]
@@ -36,7 +36,7 @@
     variable = diffused
     boundary = 'bottom left right top'
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -51,10 +51,10 @@
     type = Exodus
     file_base = oversample_2
     refinements = 2
-  [../]
+  []
   [refine_4]
     type = Exodus
     file_base = oversample_4
     refinements = 4
-  [../]
+  []
 []

@@ -15,19 +15,19 @@
   [disc_u]
     family = monomial
     order = first
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = disc_u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = disc_u
     value = 7
-  [../]
+  []
 []
 
 [DGKernels]
@@ -36,14 +36,14 @@
   variable = disc_u
   sigma = 1
   epsilon = 1
-  [../]
+  []
 []
 
 [Functions]
   [zero_fn]
     type = ParsedFunction
     expression = 0.0
-  [../]
+  []
 []
 
 [BCs]
@@ -54,7 +54,7 @@
     function = zero_fn
     sigma = 1
     epsilon = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,5 +70,5 @@
     type = Exodus
     discontinuous = true
     file_base = 'exodus_discontinuous_out'
-  [../]
+  []
 []

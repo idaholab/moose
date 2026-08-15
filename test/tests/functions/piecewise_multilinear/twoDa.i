@@ -15,20 +15,20 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [Kernels]
   [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
   [bilinear1_var]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -36,7 +36,7 @@
     type = FunctionAux
     variable = bilinear1_var
     function = bilinear1_fcn
-  [../]
+  []
 []
 
 
@@ -45,11 +45,11 @@
   [bilinear1_fcn]
     type = PiecewiseMultilinear
     data_file = twoD1.txt
-  [../]
+  []
   [bilinear1_answer]
     type = ParsedFunction
     expression = 1+2*x+3*y
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -57,7 +57,7 @@
     type = NodalL2Error
     function = bilinear1_answer
     variable = bilinear1_var
-  [../]
+  []
 []
 
 [Executioner]

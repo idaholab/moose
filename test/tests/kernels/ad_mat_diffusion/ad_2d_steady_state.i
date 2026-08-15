@@ -16,7 +16,7 @@
 
 [Variables]
   [T]
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,7 +24,7 @@
     type = ADMatDiffusion
     variable = T
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = T
     boundary = 'left right bottom'
     value = 0
-  [../]
+  []
   [top]
     type = ADFunctionDirichletBC
     variable = T
     boundary = top
     function = '10*sin(pi*x*0.5)'
-  [../]
+  []
 []
 
 [Materials]
@@ -47,7 +47,7 @@
     type = ADGenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1
-  [../]
+  []
 []
 
 
@@ -57,13 +57,13 @@
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
+  []
   [elemental_error]
     type = ElementL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
+  []
 []
 
 [Executioner]

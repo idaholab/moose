@@ -9,7 +9,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
@@ -17,17 +17,17 @@
     type = ParsedVectorFunction
     expression_y = '0.1+x'
     expression_x = '0.5*(1+x*y)'
-  [../]
+  []
   [conductivity_2]
     type = ParsedVectorFunction
     expression_y = '0.1+2*x'
     expression_x = '0.2+x*y'
-  [../]
+  []
   [conductivity]
     type = LinearCombinationFunction # yields expression_y=0.1, expression_x=0.8
     functions = 'conductivity_1 conductivity_2'
     w = '2 -1'
-  [../]
+  []
 []
 
 [Kernels]
@@ -35,7 +35,7 @@
     type = DiffTensorKernel
     variable = u
     conductivity = conductivity
-  [../]
+  []
 []
 
 [BCs]
@@ -44,13 +44,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

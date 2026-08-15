@@ -25,7 +25,7 @@ x_sep = 35
                     1 1
                     0 1
                     0 0'
-  [../]
+  []
 
   [wall]
     type = SideSetsBetweenSubdomainsGenerator
@@ -33,20 +33,20 @@ x_sep = 35
     primary_block = 1
     paired_block = 0
     new_boundary = 'wall'
-  [../]
+  []
 
   [delete]
     type = BlockDeletionGenerator
     input = wall
     block = 0
-  [../]
+  []
 []
 
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     allow_imperfect_jacobians = true
-  [../]
+  []
 []
 
 [Variables]
@@ -54,44 +54,44 @@ x_sep = 35
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
   [rho_u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
   [rho_v]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
   [rho_E]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [AuxVariables]
   [Ma]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [p]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [v_norm]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [temperature]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -100,69 +100,69 @@ x_sep = 35
     variable = Ma
     fluid_properties = fp
     use_material_properties = true
-  [../]
+  []
 
   [p_aux]
     type = ADMaterialRealAux
     variable = p
     property = pressure
-  [../]
+  []
 
   [v_norm_aux]
     type = ADMaterialRealAux
     variable = v_norm
     property = speed
-  [../]
+  []
 
   [temperature_aux]
     type = ADMaterialRealAux
     variable = temperature
     property = T_fluid
-  [../]
+  []
 []
 
 [FVKernels]
   [mass_time]
     type = FVTimeKernel
     variable = rho
-  [../]
+  []
 
   [mass_advection]
     type = CNSFVMassHLLC
     variable = rho
-  [../]
+  []
 
   [momentum_x_time]
     type = FVTimeKernel
     variable = rho_u
-  [../]
+  []
 
   [momentum_x_advection]
     type = CNSFVMomentumHLLC
     variable = rho_u
     momentum_component = x
-  [../]
+  []
 
   [momentum_y_time]
     type = FVTimeKernel
     variable = rho_v
-  [../]
+  []
 
   [momentum_y_advection]
     type = CNSFVMomentumHLLC
     variable = rho_v
     momentum_component = y
-  [../]
+  []
 
   [fluid_energy_time]
     type = FVTimeKernel
     variable = rho_E
-  [../]
+  []
 
   [fluid_energy_advection]
     type = CNSFVFluidEnergyHLLC
     variable = rho_E
-  [../]
+  []
 []
 
 [FVBCs]
@@ -171,14 +171,14 @@ x_sep = 35
     variable = rho_u
     momentum_component = x
     boundary = 'left right wall'
-  [../]
+  []
 
   [mom_y_pressure]
     type = CNSFVMomImplicitPressureBC
     variable = rho_v
     momentum_component = y
     boundary = 'wall'
-  [../]
+  []
 []
 
 [ICs]
@@ -186,19 +186,19 @@ x_sep = 35
     type = FunctionIC
     variable = rho
     function = 'if (x < ${x_sep}, ${rho_left}, ${rho_right})'
-  [../]
+  []
 
   [rho_u_ic]
     type = FunctionIC
     variable = rho_u
     function = 'if (x < ${x_sep}, ${fparse rho_left * u_left}, ${fparse rho_right * u_right})'
-  [../]
+  []
 
   [rho_E_ic]
     type = FunctionIC
     variable = rho_E
     function = 'if (x < ${x_sep}, ${fparse E_left * rho_left}, ${fparse E_right * rho_right})'
-  [../]
+  []
 []
 
 [Materials]
@@ -209,11 +209,11 @@ x_sep = 35
     rhov = rho_v
     rho_et = rho_E
     fp = fp
-  [../]
+  []
   [sound_speed]
     type = SoundspeedMat
     fp = fp
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -222,7 +222,7 @@ x_sep = 35
     full = true
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -230,7 +230,7 @@ x_sep = 35
     type = ADCFLTimeStepSize
     c_names = 'sound_speed'
     vel_names = 'speed'
-  [../]
+  []
 []
 
 [Executioner]
@@ -245,5 +245,5 @@ x_sep = 35
   [TimeStepper]
     type = PostprocessorDT
     postprocessor = cfl_dt
-  [../]
+  []
 []

@@ -12,14 +12,14 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [w]
     scaling = 1.0e2
-  [../]
+  []
   [T]
     initial_condition = 1000.0
     scaling = 1.0e5
-  [../]
+  []
 []
 
 [ICs]
@@ -32,7 +32,7 @@
     outvalue = 0.1
     int_width = 100.0
     variable = c
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,12 +42,12 @@
     kappa_name = kappa
     w = w
     f_name = F
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [w_res_soret]
     type = SoretDiffusion
     variable = w
@@ -55,17 +55,17 @@
     T = T
     diff_name = D
     Q_name = Qstar
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
   [HtCond]
     type = MatDiffusion
     variable = T
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [BCs]
@@ -74,14 +74,14 @@
     variable = T
     boundary = left
     value = 1000.0
-  [../]
+  []
 
   [Right_T]
     type = DirichletBC
     variable = T
     boundary = right
     value = 1015.0
-  [../]
+  []
 []
 
 [Materials]
@@ -97,7 +97,7 @@
     Em = 0.71 # in eV, from Balluffi1978 Table 2
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.708 # Total guess
-  [../]
+  []
   [thcond]
     type = ParsedMaterial
     block = 0
@@ -105,20 +105,20 @@
     expression = 'if(c>0.7,1e-8,4e-8)'
     property_name = thermal_conductivity
     outputs = exodus
-  [../]
+  []
   [free_energy]
     type = PolynomialFreeEnergy
     block = 0
     c = c
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

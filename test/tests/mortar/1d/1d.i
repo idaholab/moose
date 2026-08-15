@@ -8,19 +8,19 @@
     order = FIRST
     family = LAGRANGE
     block = '1 2'
-  [../]
+  []
 
   [lm]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Problem]
@@ -34,7 +34,7 @@
     var = u
     boundary = '100 101'
     absolute_value_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [BCs]
@@ -43,14 +43,14 @@
     variable = u
     boundary = '1'
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = '2'
     value = 3
-  [../]
+  []
 
   [evc1]
     type = OneDEqualValueConstraintBC
@@ -59,7 +59,7 @@
     lambda = lm
     component = 0
     vg = 1
-  [../]
+  []
 
   [evc2]
     type = OneDEqualValueConstraintBC
@@ -68,7 +68,7 @@
     lambda = lm
     component = 0
     vg = -1
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -76,7 +76,7 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

@@ -28,11 +28,11 @@
   [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [cross_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -42,7 +42,7 @@
     interfacial_vars = 'c'
     kappa_names = 'kappa_c'
     additional_free_energy = cross_energy
-  [../]
+  []
 
   #
   # Helper kernel to cpompute the gradient contribution from interfaces of order
@@ -58,7 +58,7 @@
     kappa_names = 'kappa11 kappa12 kappa13
                    kappa21 kappa22 kappa23
                    kappa31 kappa32 kappa33'
-  [../]
+  []
 []
 
 [Variables]
@@ -78,8 +78,8 @@
       invalue = 1.0
       outvalue = 0.01
       int_width = 10.0
-    [../]
-  [../]
+    []
+  []
 
   [eta1]
     order = FIRST
@@ -92,24 +92,24 @@
       # with the kappa parameter supplied for the given interface.
       #
       function = 'r:=sqrt(x^2+y^2);if(r<=4,1,0)'
-    [../]
-  [../]
+    []
+  []
   [eta2]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = 'r:=sqrt(x^2+y^2);if(r>4&r<=7,1,0)'
-    [../]
-  [../]
+    []
+  []
   [eta3]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = 'r:=sqrt(x^2+y^2);if(r>7,1,0)'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -125,11 +125,11 @@
     variable = c
     f_name = F
     coupled_variables = 'eta1 eta2 eta3'
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 
   #
   # Order parameter eta1
@@ -144,27 +144,27 @@
   [deta1dt]
     type = TimeDerivative
     variable = eta1
-  [../]
+  []
   [ACBulk1]
     type = AllenCahn
     variable = eta1
     coupled_variables = 'eta2 eta3 c'
     mob_name = L1
     f_name = F
-  [../]
+  []
   [ACInterface1]
     type = ACMultiInterface
     variable = eta1
     etas = 'eta1 eta2 eta3'
     mob_name = L1
     kappa_names = 'kappa11 kappa12 kappa13'
-  [../]
+  []
   [penalty1]
     type = SwitchingFunctionPenalty
     variable = eta1
     etas    = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
-  [../]
+  []
 
   #
   # Order parameter eta2
@@ -172,27 +172,27 @@
   [deta2dt]
     type = TimeDerivative
     variable = eta2
-  [../]
+  []
   [ACBulk2]
     type = AllenCahn
     variable = eta2
     coupled_variables = 'eta1 eta3 c'
     mob_name = L2
     f_name = F
-  [../]
+  []
   [ACInterface2]
     type = ACMultiInterface
     variable = eta2
     etas = 'eta1 eta2 eta3'
     mob_name = L2
     kappa_names = 'kappa21 kappa22 kappa23'
-  [../]
+  []
   [penalty2]
     type = SwitchingFunctionPenalty
     variable = eta2
     etas    = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
-  [../]
+  []
 
   #
   # Order parameter eta3
@@ -200,35 +200,35 @@
   [deta3dt]
     type = TimeDerivative
     variable = eta3
-  [../]
+  []
   [ACBulk3]
     type = AllenCahn
     variable = eta3
     coupled_variables = 'eta1 eta2 c'
     mob_name = L3
     f_name = F
-  [../]
+  []
   [ACInterface3]
     type = ACMultiInterface
     variable = eta3
     etas = 'eta1 eta2 eta3'
     mob_name = L3
     kappa_names = 'kappa31 kappa32 kappa33'
-  [../]
+  []
   [penalty3]
     type = SwitchingFunctionPenalty
     variable = eta3
     etas    = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -240,7 +240,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M   kappa_c L1 L2 L3  kappa11 kappa12 kappa13 kappa21 kappa22 kappa23 kappa31 kappa32 kappa33'
     prop_values = '0.2 0.75    1  1  1   0.75    0.75    0.75    0.75    0.75    0.75    0.75    0.75    0.75   '
-  [../]
+  []
 
   # This material sums up the individual phase contributions. It is written to the output file
   # (see GlobalParams section above) and can be used to check the constraint enforcement.
@@ -249,7 +249,7 @@
     property_name = etasum
     material_property_names = 'h1 h2 h3'
     expression = 'h1+h2+h3'
-  [../]
+  []
 
   # The phase contribution factors for each material point are computed using the
   # SwitchingFunctionMaterials. Each phase with an order parameter eta contributes h(eta)
@@ -259,19 +259,19 @@
     function_name = h1
     eta = eta1
     h_order = SIMPLE
-  [../]
+  []
   [switching2]
     type = SwitchingFunctionMaterial
     function_name = h2
     eta = eta2
     h_order = SIMPLE
-  [../]
+  []
   [switching3]
     type = SwitchingFunctionMaterial
     function_name = h3
     eta = eta3
     h_order = SIMPLE
-  [../]
+  []
 
   # The barrier function adds a phase transformation energy barrier. It also
   # Drives order parameters toward the [0:1] interval to avoid negative or larger than 1
@@ -280,7 +280,7 @@
   [barrier]
     type = MultiBarrierFunctionMaterial
     etas = 'eta1 eta2 eta3'
-  [../]
+  []
 
   # We use DerivativeParsedMaterials to specify three (very) simple free energy
   # expressions for the three phases. All necessary derivatives are built automatically.
@@ -291,19 +291,19 @@
     property_name = F1
     expression = '(c-1)^2'
     coupled_variables = 'c'
-  [../]
+  []
   [phase_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = F2
     expression = '(c-0.5)^2'
     coupled_variables = 'c'
-  [../]
+  []
   [phase_free_energy_3]
     type = DerivativeParsedMaterial
     property_name = F3
     expression = 'c^2'
     coupled_variables = 'c'
-  [../]
+  []
 
   # The DerivativeMultiPhaseMaterial ties the phase free energies together into a global free energy.
   # https://mooseframework.inl.gov/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
@@ -316,7 +316,7 @@
     etas     = 'eta1 eta2 eta3'
     coupled_variables = 'c'
     W = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -324,13 +324,13 @@
   [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
+  []
 
   # for testing we also monitor the total solute amount, which should be conserved.
   [total_solute]
     type = ElementIntegralVariablePostprocessor
     variable = c
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -340,7 +340,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -364,7 +364,7 @@
   [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.1
-  [../]
+  []
 []
 
 [Debug]
@@ -377,5 +377,5 @@
   [table]
     type = CSV
     delimiter = ' '
-  [../]
+  []
 []

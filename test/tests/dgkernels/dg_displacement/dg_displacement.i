@@ -10,47 +10,47 @@
   [u]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
-  [../]
+  []
   [exact_fn]
     type = ParsedGradFunction
     expression = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
-  [../]
+  []
   [disp_func]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [abs]
     type = Reaction
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [DGKernels]
@@ -60,7 +60,7 @@
     epsilon = -1
     sigma = 6
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
@@ -71,7 +71,7 @@
     function = exact_fn
     epsilon = -1
     sigma = 6
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,6 +91,6 @@
     function = disp_func
     variable = disp_x
     type = FunctionIC
-  [../]
+  []
 []
 

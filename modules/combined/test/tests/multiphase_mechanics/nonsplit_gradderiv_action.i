@@ -15,8 +15,8 @@
 [Modules]
   [PhaseField]
     [DisplacementGradients]
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
@@ -24,14 +24,14 @@
     [InitialCondition]
       type = FunctionIC
       function = '0.1*sin(2*x/10*3.14159265359)'
-    [../]
-  [../]
+    []
+  []
   [disp_y]
     [InitialCondition]
       type = FunctionIC
       function = '0.1*sin(1*y/10*3.14159265359)'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
@@ -39,34 +39,34 @@
     order = THIRD
     family = HERMITE
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
   [dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [bulk]
     type = CahnHilliard
     variable = c
     mob_name = M
     f_name = F
-  [../]
+  []
   [int]
     type = CHInterface
     variable = c
     mob_name = M
     kappa_name = kappa_c
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -74,7 +74,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M  kappa_c'
     prop_values = '1  0.1'
-  [../]
+  []
 
   [elasticity_tensor]
     type = ComputeConcentrationDependentElasticityTensor
@@ -83,19 +83,19 @@
     C1_ijkl = '3.0 3.0'
     fill_method0 = symmetric_isotropic
     fill_method1 = symmetric_isotropic
-  [../]
+  []
   [smallstrain]
     type = ComputeSmallStrain
-  [../]
+  []
   [linearelastic_a]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = F
     coupled_variables = 'c'
     derivative_order = 3
-  [../]
+  []
 []
 
 [Executioner]

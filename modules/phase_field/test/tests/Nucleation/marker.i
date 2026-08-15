@@ -14,7 +14,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
@@ -23,29 +23,29 @@
     boundary = left
     variable = c
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     boundary = right
     variable = c
     value = 1
-  [../]
+  []
   [Periodic]
     [all]
       auto_direction = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [c]
     type = Diffusion
     variable = c
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -55,7 +55,7 @@
     op_values = 1
     map = map
     outputs = exodus
-  [../]
+  []
 []
 
 [UserObjects]
@@ -64,12 +64,12 @@
     hold_time = 1
     probability = 0.01
     radius = 3.27
-  [../]
+  []
   [map]
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Adaptivity]
@@ -77,8 +77,8 @@
     [nuc]
       type = DiscreteNucleationMarker
       map = map
-    [../]
-  [../]
+    []
+  []
   marker = nuc
   cycles_per_step = 3
   recompute_markers_during_cycles = true

@@ -40,7 +40,7 @@
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
@@ -52,7 +52,7 @@
     strength = 1
     yield_function_tolerance = 1.0E-9
     internal_constraint_tolerance = 1.0E-9
-  [../]
+  []
   [simple1]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
@@ -60,7 +60,7 @@
     strength = 1
     yield_function_tolerance = 1.0E-9
     internal_constraint_tolerance = 1.0E-9
-  [../]
+  []
   [simple2]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
@@ -68,7 +68,7 @@
     strength = 1.5
     yield_function_tolerance = 1.0E-9
     internal_constraint_tolerance = 1.0E-9
-  [../]
+  []
 []
 
 [Materials]
@@ -76,19 +76,19 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5E6'
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 0  0 0.8 0  0 0 1.5'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [multi]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = 'simple0 simple1 simple2'
     tangent_operator = linear
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -97,7 +97,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

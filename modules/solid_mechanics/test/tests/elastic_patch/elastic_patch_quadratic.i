@@ -47,66 +47,66 @@
   [xDispFunc]
     type = ParsedFunction
     expression = 5e-5*(2*x+y+z)
-  [../]
+  []
   [yDispFunc]
     type = ParsedFunction
     expression = 5e-5*(x+2*y+z)
-  [../]
+  []
   [zDispFunc]
     type = ParsedFunction
     expression = 5e-5*(x+y+2*z)
-  [../]
+  []
 [] # Functions
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [elastic_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [hydrostatic]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [firstinv]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [secondinv]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [thirdinv]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 [] # AuxVariables
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -114,7 +114,7 @@
     add_variables = true
     strain = SMALL
     incremental = false
-  [../]
+  []
 []
 
 
@@ -125,76 +125,76 @@
     index_i = 0
     index_j = 0
     variable = stress_xx
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
     variable = stress_yy
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     variable = stress_zz
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 1
     variable = stress_xy
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 2
     variable = stress_yz
-  [../]
+  []
   [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 0
     variable = stress_zx
-  [../]
+  []
   [elastic_energy]
     type = ElasticEnergyAux
     variable = elastic_energy
-  [../]
+  []
   [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     scalar_type = VonMisesStress
     variable = vonmises
-  [../]
+  []
   [hydrostatic]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     scalar_type = Hydrostatic
     variable = hydrostatic
-  [../]
+  []
   [fi]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     scalar_type = FirstInvariant
     variable = firstinv
-  [../]
+  []
   [si]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     scalar_type = SecondInvariant
     variable = secondinv
-  [../]
+  []
   [ti]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     scalar_type = ThirdInvariant
     variable = thirdinv
-  [../]
+  []
 [] # AuxKernels
 
 [BCs]
@@ -203,19 +203,19 @@
     variable = disp_x
     boundary = '1 2 3 4 6 7 8 9 10 12 15 17 18 19 20 21 23 24 25 26'
     function = xDispFunc
-  [../]
+  []
   [all_nodes_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = '1 2 3 4 6 7 8 9 10 12 15 17 18 19 20 21 23 24 25 26'
     function = yDispFunc
-  [../]
+  []
   [all_nodes_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = '1 2 3 4 6 7 8 9 10 12 15 17 18 19 20 21 23 24 25 26'
     function = zDispFunc
-  [../]
+  []
 [] # BCs
 
 [Materials]
@@ -223,10 +223,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 [] # Materials
 
 [Executioner]
@@ -249,5 +249,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 [] # Outputs

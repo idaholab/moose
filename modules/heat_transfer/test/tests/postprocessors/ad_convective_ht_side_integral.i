@@ -9,7 +9,7 @@
     subdomain_id = '1 1 1
                     1 2 1
                     1 1 1'
-  [../]
+  []
 
   [add_iss_1]
     type = SideSetsBetweenSubdomainsGenerator
@@ -17,19 +17,19 @@
     paired_block = 2
     new_boundary = 'interface'
     input = cartesian
-  [../]
+  []
 
   [block_deleter]
     type = BlockDeletionGenerator
     block = 2
     input = add_iss_1
-  [../]
+  []
 []
 
 [Variables]
   [temperature]
     initial_condition = 300
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -37,13 +37,13 @@
     family = MONOMIAL
     order = CONSTANT
     initial_condition = 400
-  [../]
+  []
 
   [channel_Hw]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = 1000
-  [../]
+  []
 []
 
 [Kernels]
@@ -51,7 +51,7 @@
     type = ADHeatConduction
     variable = temperature
     thermal_conductivity = 'thermal_conductivity'
-  [../]
+  []
 []
 
 [BCs]
@@ -62,7 +62,7 @@
     htc = channel_Hw
     T_infinity = channel_T
     boundary = 'interface'
-  [../]
+  []
 
   # hot boundary on the left
   [left]
@@ -70,7 +70,7 @@
     variable = temperature
     value = 1000
     boundary = 'left'
-  [../]
+  []
 
   # cool boundary on the right
   [right]
@@ -78,7 +78,7 @@
     variable = temperature
     value = 300
     boundary = 'right'
-  [../]
+  []
 []
 
 [Materials]
@@ -87,13 +87,13 @@
     temp = temperature
     thermal_conductivity = 25
     specific_heat = 1000
-  [../]
+  []
 
   [htc_material]
     type = ADGenericConstantMaterial
     prop_names = 'alpha_wall'
     prop_values = '1000'
-  [../]
+  []
 
   [tfluid_mat]
     type = ADPiecewiseLinearInterpolationMaterial
@@ -101,7 +101,7 @@
     variable = channel_T
     x = '400 500'
     y = '400 500'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -111,7 +111,7 @@
     htc_var = channel_Hw
     T_solid = temperature
     boundary = interface
-  [../]
+  []
 
   [Qw2]
     type = ADConvectiveHeatTransferSideIntegral
@@ -119,7 +119,7 @@
     htc = alpha_wall
     T_solid = temperature
     boundary = interface
-  [../]
+  []
 
   [Qw3]
     type = ADConvectiveHeatTransferSideIntegral
@@ -127,7 +127,7 @@
     htc = alpha_wall
     T_solid = temperature
     boundary = interface
-  [../]
+  []
 []
 
 [Executioner]

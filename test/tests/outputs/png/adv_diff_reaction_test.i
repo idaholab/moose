@@ -9,7 +9,7 @@
   [phi]
     order  = SECOND
     family = LAGRANGE
-  [../]
+  []
 
 []
 
@@ -26,7 +26,7 @@
     Av       = 10.
     Bv       =  8.
     Cv       = -1.
-  [../]
+  []
 
   [diffusion]
     type     = Diffusion0
@@ -34,7 +34,7 @@
     Ak       = 10.
     Bk       = 0.1
     Ck       = 0.1
-  [../]
+  []
 
   [source]
     type     = ForcingFunctionXYZ0
@@ -52,7 +52,7 @@
     Ak       = 10.
     Bk       = 0.1
     Ck       = 0.1
-  [../]
+  []
 
 []
 
@@ -68,7 +68,7 @@
     A0       = 1.
     B0       = 1.2
     C0       = 0.8
-  [../]
+  []
 
   [rgt_sca]
     type     = DirichletBCfuncXYZ0
@@ -78,7 +78,7 @@
     A0       = 1.
     B0       = 1.2
     C0       = 0.8
-  [../]
+  []
 
   [top_sca]
     type     = DirichletBCfuncXYZ0
@@ -88,7 +88,7 @@
     A0       = 1.
     B0       = 1.2
     C0       = 0.8
-  [../]
+  []
 
   [lft_sca]
     type     = DirichletBCfuncXYZ0
@@ -98,7 +98,7 @@
     A0       = 1.
     B0       = 1.2
     C0       = 0.8
-  [../]
+  []
 
 []
 

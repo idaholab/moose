@@ -78,7 +78,7 @@ middle = 50
   [fluid_energy_time]
     type = FVTimeKernel
     variable = rho_E
-  [../]
+  []
 
   [fluid_energy_advection]
     type = CNSFVFluidEnergyHLLC
@@ -147,7 +147,7 @@ middle = 50
     full = true
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-  [../]
+  []
 []
 
 [Executioner]

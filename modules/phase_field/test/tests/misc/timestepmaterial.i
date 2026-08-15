@@ -9,7 +9,7 @@
   [time]
     type = TimeStepMaterial
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]
@@ -24,7 +24,7 @@
   [TimeStepper]
     type = TimeSequenceStepper
     time_sequence = '4 8 15 16 23 42'
-  [../]
+  []
 []
 
 [Outputs]

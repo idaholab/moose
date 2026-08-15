@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,7 +15,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = 'prop'
-  [../]
+  []
 []
 
 [BCs]
@@ -24,13 +24,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -39,7 +39,7 @@
     prop_names = 'prop'
     prop_values = 1
     compute = false # testing that this produces warning because resetQpProperties is not re-defined
-  [../]
+  []
 []
 
 [Executioner]

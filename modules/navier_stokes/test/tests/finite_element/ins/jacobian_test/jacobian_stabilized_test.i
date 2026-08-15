@@ -30,41 +30,41 @@
   [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [vel_z]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [p]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [mass]
     type = INSMass
     variable = p
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     component = 0
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     component = 1
-  [../]
+  []
   [z_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_z
     component = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -73,14 +73,14 @@
     block = 0
     prop_names = 'rho mu'
     prop_values = '0.5 1.5'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -96,23 +96,23 @@
     variable = p
     min = 0.5
     max = 1.5
-  [../]
+  []
   [vel_x]
     type = RandomIC
     variable = vel_x
     min = 0.5
     max = 1.5
-  [../]
+  []
   [vel_y]
     type = RandomIC
     variable = vel_y
     min = 0.5
     max = 1.5
-  [../]
+  []
   [vel_z]
     type = RandomIC
     variable = vel_z
     min = 0.5
     max = 1.5
-  [../]
+  []
 []

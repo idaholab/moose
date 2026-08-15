@@ -20,73 +20,73 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
-  [../]
+  []
 []
 
 [AuxVariables]
   [s11_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [s12_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [s22_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [s11_an]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [s12_an]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [s22_an]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e11_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e12_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e22_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e11_an]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e12_an]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e22_an]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [fel_an]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [c]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -96,89 +96,89 @@
     index_i = 0
     index_j = 0
     variable = s11_aux
-  [../]
+  []
   [matl_s12]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 1
     variable = s12_aux
-  [../]
+  []
   [matl_s22]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
     variable = s22_aux
-  [../]
+  []
   [matl_s11_an]
     type = RankTwoAux
     rank_two_tensor = stress_an
     index_i = 0
     index_j = 0
     variable = s11_an
-  [../]
+  []
   [matl_s12_an]
     type = RankTwoAux
     rank_two_tensor = stress_an
     index_i = 0
     index_j = 1
     variable = s12_an
-  [../]
+  []
   [matl_s22_an]
     type = RankTwoAux
     rank_two_tensor = stress_an
     index_i = 1
     index_j = 1
     variable = s22_an
-  [../]
+  []
   [matl_e11]
     type = RankTwoAux
     rank_two_tensor = total_strain
     index_i = 0
     index_j = 0
     variable = e11_aux
-  [../]
+  []
   [matl_e12]
     type = RankTwoAux
     rank_two_tensor = total_strain
     index_i = 0
     index_j = 1
     variable = e12_aux
-  [../]
+  []
   [matl_e22]
     type = RankTwoAux
     rank_two_tensor = total_strain
     index_i = 1
     index_j = 1
     variable = e22_aux
-  [../]
+  []
   [matl_e11_an]
     type = RankTwoAux
     rank_two_tensor = strain_an
     index_i = 0
     index_j = 0
     variable = e11_an
-  [../]
+  []
   [matl_e12_an]
     type = RankTwoAux
     rank_two_tensor = strain_an
     index_i = 0
     index_j = 1
     variable = e12_an
-  [../]
+  []
   [matl_e22_an]
     type = RankTwoAux
     rank_two_tensor = strain_an
     index_i = 1
     index_j = 1
     variable = e22_an
-  [../]
+  []
   [matl_fel_an]
     type = MaterialRealAux
     variable = fel_an
     property = fel_an_mat
-  [../]
+  []
 []
 
 [Materials]
@@ -187,11 +187,11 @@
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
+  []
   [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
@@ -202,7 +202,7 @@
     f_name = var_dep
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
   [eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
@@ -210,13 +210,13 @@
     prefactor = var_dep
     args = c
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
-  [../]
+  []
   [analytical]
     type = InclusionProperties
     a = 0.1
@@ -227,7 +227,7 @@
     strain_name = strain_an
     stress_name = stress_an
     energy_name = fel_an_mat
-  [../]
+  []
 []
 
 [BCs]
@@ -237,20 +237,20 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -277,5 +277,5 @@
     variable = c
     invalue = 1
     type = SmoothCircleIC
-  [../]
+  []
 []

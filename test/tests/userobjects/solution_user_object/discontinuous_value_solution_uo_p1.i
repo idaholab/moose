@@ -11,37 +11,37 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [discontinuous_variable]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [continuous_variable]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [discontinuous_function]
     type = ParsedFunction
     expression = 'if(x<0.5,3,5)'
-  [../]
+  []
   [continuous_function]
     type = ParsedFunction
     expression = 'if(x<0.5,x,2*x-0.5)'
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [ICs]
@@ -49,12 +49,12 @@
     type = FunctionIC
     variable = discontinuous_variable
     function = discontinuous_function
-  [../]
+  []
   [continuous_variable]
     type = FunctionIC
     variable = continuous_variable
     function = continuous_function
-  [../]
+  []
 []
 
 [BCs]
@@ -63,13 +63,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [one]
     type = DirichletBC
     variable = u
     boundary = 'right top bottom'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

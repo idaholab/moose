@@ -22,7 +22,7 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [ICs]
@@ -31,20 +31,20 @@
       radius = 300
       x = 400
       y = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -52,7 +52,7 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
@@ -63,7 +63,7 @@
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -71,14 +71,14 @@
     type = ElementIntegralVariablePostprocessor
     variable = gr1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

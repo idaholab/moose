@@ -5,7 +5,7 @@
     xmin = 0
     xmax = 10
     nx = 50
-  [../]
+  []
 []
 
 [Problem]
@@ -17,7 +17,7 @@
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [ICs]
@@ -25,18 +25,18 @@
     type = FunctionIC
     variable = v
     function = 'if (x > 2 & x < 3, 0.5, 0)'
-  [../]
+  []
 []
 
 [FVKernels]
   [burgers]
     type = FVBurgers1D
     variable = v
-  [../]
+  []
   [time]
     type = FVTimeKernel
     variable = v
-  [../]
+  []
 []
 
 [FVBCs]
@@ -44,7 +44,7 @@
     type = FVBurgersOutflowBC
     variable = v
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Executioner]

@@ -31,7 +31,7 @@
     cut_data = '1.0  0.5  0.1  0.5'
     time_start_cut = 0.0
     time_end_cut = 8.0
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -39,7 +39,7 @@
     strain = FINITE
     planar_formulation = plane_strain
     add_variables = true
-  [../]
+  []
 []
 
 [Functions]
@@ -47,7 +47,7 @@
     type = PiecewiseLinear
     x='0  50'
     y='0  0.02'
-  [../]
+  []
 []
 
 [BCs]
@@ -56,25 +56,25 @@
     boundary = bottom
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [topx]
     type = DirichletBC
     boundary = top
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [topy]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
     function = pull
-  [../]
+  []
 []
 
 [Materials]
@@ -82,11 +82,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
   [_elastic_strain]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -101,7 +101,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -126,5 +126,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

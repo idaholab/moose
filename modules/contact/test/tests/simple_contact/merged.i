@@ -12,7 +12,7 @@
     add_variables = true
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -22,7 +22,7 @@
     component = 0
     boundary = 3
     secondary = 2
-  [../]
+  []
 
   [primary_y]
     type = ContactPrimary
@@ -30,7 +30,7 @@
     component = 1
     boundary = 3
     secondary = 2
-  [../]
+  []
 
   [primary_z]
     type = ContactPrimary
@@ -38,7 +38,7 @@
     component = 2
     boundary = 3
     secondary = 2
-  [../]
+  []
 
   [secondary_x]
     type = SecondaryConstraint
@@ -46,7 +46,7 @@
     component = 0
     boundary = 2
     primary = 3
-  [../]
+  []
 
   [secondary_y]
     type = SecondaryConstraint
@@ -54,7 +54,7 @@
     component = 1
     boundary = 2
     primary = 3
-  [../]
+  []
 
   [secondary_z]
     type = SecondaryConstraint
@@ -62,7 +62,7 @@
     component = 2
     boundary = 2
     primary = 3
-  [../]
+  []
 []
 
 [BCs]
@@ -71,42 +71,42 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [left_z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = -0.0001
-  [../]
+  []
 
   [right_y]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
 
   [right_z]
     type = DirichletBC
     variable = disp_z
     boundary = 4
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -115,11 +115,11 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stiffStuff_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -143,5 +143,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

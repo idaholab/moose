@@ -21,7 +21,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -30,11 +30,11 @@
     variable = u
     conductivity = 'k'
     block = '0 1'
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -43,13 +43,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -58,13 +58,13 @@
     block = 0
     prop_names = 'k'
     prop_values = 1
-  [../]
+  []
   [inside]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'k'
     prop_values = 0.1
-  [../]
+  []
 []
 
 [Executioner]

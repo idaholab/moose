@@ -12,12 +12,12 @@
 
 [Variables]
   [phi]
-  [../]
+  []
 []
 
 [AuxVariables]
   [phi_0]
-  [../]
+  []
 []
 
 [BCs]
@@ -25,22 +25,22 @@
     [all]
       variable = phi
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [time]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
 
   [reinit]
     type = LevelSetOlssonReinitialization
     variable = phi
     phi_0 = phi_0
     epsilon = 0.05
-  [../]
+  []
 []
 
 [Problem]
@@ -51,7 +51,7 @@
   [arnold]
     type = LevelSetOlssonTerminator
     tol = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,5 +69,5 @@
     dt = 0.001
     optimal_iterations = 5
     growth_factor = 5
-  [../]
+  []
 []

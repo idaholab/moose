@@ -15,14 +15,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [bubble_map]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,7 +31,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing_1]
     type = GaussContForcing
@@ -40,7 +40,7 @@
     y_center = 1.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_2]
     type = GaussContForcing
@@ -49,7 +49,7 @@
     y_center = 39.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_3]
     type = GaussContForcing
@@ -58,7 +58,7 @@
     y_center = 20.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_4]
     type = GaussContForcing
@@ -67,12 +67,12 @@
     y_center = 15.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -81,7 +81,7 @@
     variable = bubble_map
     execute_on = timestep_end
     flood_counter = bubbles
-  [../]
+  []
 []
 
 [BCs]
@@ -89,8 +89,8 @@
     [x]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [UserObjects]
@@ -101,7 +101,7 @@
     execute_on = timestep_end
     outputs = none
     flood_entity_type = NODAL
-  [../]
+  []
 []
 
 [Executioner]
@@ -116,7 +116,7 @@
     coarsen_fraction = .02
     max_h_level = 3
     error_estimator = KellyErrorEstimator
-  [../]
+  []
 []
 
 [Outputs]

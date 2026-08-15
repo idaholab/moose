@@ -5,7 +5,7 @@
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [BCs]
@@ -15,14 +15,14 @@
     penalty = 1.0
     function = const
     variable = v
-  [../]
+  []
 []
 
 [Functions]
   [const]
     type = ConstantFunction
     value = -1
-  [../]
+  []
 []
 
 [Executioner]

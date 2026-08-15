@@ -131,13 +131,13 @@
     variable = fv_rho
     function = exact_rho
     execute_on = timestep_end
-  [../]
+  []
   [l2_vel]
     type = ElementL2Error
     variable = fv_vel
     function = exact_vel
     execute_on = timestep_end
-  [../]
+  []
   [h]
     type = AverageElementSize
     execute_on = timestep_end

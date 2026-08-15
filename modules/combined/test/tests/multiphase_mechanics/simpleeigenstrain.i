@@ -16,11 +16,11 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -35,12 +35,12 @@
       invalue = 1.0
       outvalue = 0.1
       int_width = 50.0
-    [../]
-  [../]
+    []
+  []
   [e11_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -50,7 +50,7 @@
     index_i = 0
     index_j = 0
     variable = e11_aux
-  [../]
+  []
 []
 
 [BCs]
@@ -59,18 +59,18 @@
     boundary = bottom
     variable = disp_y
     value = 0.
-  [../]
+  []
   [left]
     type = DirichletBC
     boundary = left
     variable = disp_x
     value = 0.
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
-  [../]
+  []
 []
 
 [Materials]
@@ -85,20 +85,20 @@
   #  disp_x = disp_x
   #  C_ijkl = '3 1 1 3 1 3 1 1 1 '
   #  fill_method = symmetric9
-  #[../]
+  #[]
 
   [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '3 1 1 3 1 3 1 1 1 '
-  [../]
+  []
   [strain]
     type = ComputeSmallStrain
     eigenstrain_names = eigenstrain
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [prefactor]
     type = DerivativeParsedMaterial
     coupled_variables = c
@@ -106,14 +106,14 @@
     constant_names       = 'epsilon0 c0'
     constant_expressions = '0.05     0'
     expression = '(c - c0) * epsilon0'
-  [../]
+  []
   [eigenstrain]
     type = ComputeVariableEigenstrain
     eigen_base = '1'
     args = c
     prefactor = prefactor
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]

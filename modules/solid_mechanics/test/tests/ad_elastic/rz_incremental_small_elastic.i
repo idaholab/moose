@@ -14,10 +14,10 @@
   # scale with one over Young's modulus
   [disp_r]
     scaling = 1e-10
-  [../]
+  []
   [disp_z]
     scaling = 1e-10
-  [../]
+  []
 []
 
 [Kernels]
@@ -25,12 +25,12 @@
     type = ADStressDivergenceRZTensors
     component = 0
     variable = disp_r
-  [../]
+  []
   [stress_z]
     type = ADStressDivergenceRZTensors
     component = 1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
@@ -39,19 +39,19 @@
     variable = disp_z
     boundary = bottom
     value = 0
-  [../]
+  []
   [axial]
     type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0
-  [../]
+  []
   [rdisp]
     type = DirichletBC
     variable = disp_r
     boundary = right
     value = 0.1
-  [../]
+  []
 []
 
 [Materials]
@@ -59,23 +59,23 @@
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e10
-  [../]
+  []
 []
 
 [Materials]
   [strain]
     type = ADComputeAxisymmetricRZIncrementalStrain
-  [../]
+  []
   [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

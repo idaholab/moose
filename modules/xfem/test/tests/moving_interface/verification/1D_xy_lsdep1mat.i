@@ -53,19 +53,19 @@
     type = LevelSetCutUserObject
     level_set_var = ls
     heal_always = true
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [ls]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -73,17 +73,17 @@
     type = MatDiffusion
     variable = u
     diffusivity = diffusion_coefficient
-  [../]
+  []
   [vol_heat_src]
     type = BodyForce
     variable = u
     function = src_func
-  [../]
+  []
   [mat_time_deriv]
     type = TestMatTimeDerivative
     variable = u
     mat_prop_value = rhoCp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -91,7 +91,7 @@
     type = FunctionAux
     variable = ls
     function = ls_func
-  [../]
+  []
 []
 
 [Constraints]
@@ -101,7 +101,7 @@
     geometric_cut_userobject = 'level_set_cut_uo'
     use_penalty = true
     alpha = 1e5
-  [../]
+  []
 []
 
 [Functions]
@@ -110,19 +110,19 @@
     expression = 'rhoCp*(-200*x+200)-(0.05*200*t/1.04)'
     symbol_names = 'rhoCp'
     symbol_values = 10
-  [../]
+  []
   [neumann_func]
     type = ParsedFunction
     expression = '((0.05/1.04)*(1-(x-0.04)-0.2*t) + 1.5)*200*t'
-  [../]
+  []
   [k_func]
     type = ParsedFunction
     expression = '(0.05/1.04)*(1-(x-0.04)-0.2*t) + 1.5'
-  [../]
+  []
   [ls_func]
     type = ParsedFunction
     expression = '1.04 - x - 0.2*t'
-  [../]
+  []
 []
 
 [Materials]
@@ -130,12 +130,12 @@
     type = GenericConstantMaterial
     prop_names = 'rhoCp'
     prop_values = 10
-  [../]
+  []
   [therm_cond_prop]
     type = GenericFunctionMaterial
     prop_names = 'diffusion_coefficient'
     prop_values = 'k_func'
-  [../]
+  []
 []
 
 [BCs]
@@ -144,13 +144,13 @@
     variable = u
     boundary = 'left'
     function = neumann_func
-  [../]
+  []
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 400
-  [../]
+  []
 []
 
 [ICs]
@@ -158,7 +158,7 @@
     type = ConstantIC
     value = 400
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -184,5 +184,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

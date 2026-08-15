@@ -13,18 +13,18 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxVariables]
   [volumetric_strain]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -35,7 +35,7 @@
   [master]
     strain = FINITE
     decomposition_method = EigenSolution #Necessary for exact solution
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,7 +44,7 @@
     scalar_type = VolumetricStrain
     rank_two_tensor = total_strain
     variable = volumetric_strain
-  [../]
+  []
 []
 
 [Functions]
@@ -66,37 +66,37 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = pres_disp
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pres_disp
-  [../]
+  []
   [front]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = pres_disp
-  [../]
+  []
 []
 
 [Materials]
@@ -104,15 +104,15 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [finite_strain_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [volumetric_change]
     type = GenericFunctionMaterial
     prop_names = volumetric_change
     prop_values = t
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -120,17 +120,17 @@
     type = VolumePostprocessor
     use_displaced_mesh = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [volumetric_strain]
     type = ElementalVariableValue
     variable = volumetric_strain
     elementid = 0
-  [../]
+  []
   [disp_right]
     type = NodalExtremeValue
     variable = disp_x
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

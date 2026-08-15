@@ -18,14 +18,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,14 +34,14 @@
     variable = u
     boundary = 'new_bottom'
     value = 0
-  [../]
+  []
 
   [top]
     type = DirichletBC
     variable = u
     boundary = 'new_top'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

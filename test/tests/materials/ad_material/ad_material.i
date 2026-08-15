@@ -8,7 +8,7 @@
 [Variables]
   [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -18,7 +18,7 @@
     prop_to_use = 'AdAd'
     ad_mat_prop = ad_diffusivity
     regular_mat_prop = regular_diffusivity
-  [../]
+  []
 []
 
 [BCs]
@@ -28,14 +28,14 @@
     preset = false
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -44,7 +44,7 @@
     coupled_var = u
     ad_mat_prop = ad_diffusivity
     regular_mat_prop = regular_diffusivity
-  [../]
+  []
 []
 
 [Executioner]

@@ -19,11 +19,11 @@
   [exact_v]
     type = ParsedFunction
     expression = sin(pi*x)*sin(pi*y)
-  [../]
+  []
   [force_fn_v]
     type = ParsedFunction
     expression = 2*pi*pi*sin(pi*x)*sin(pi*y)
-  [../]
+  []
 []
 
 [Variables]
@@ -32,12 +32,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -45,29 +45,29 @@
     type = SMP
     off_diag_row    = 'u'
     off_diag_column = 'v'
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [conv_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
   [ffn_v]
     type = BodyForce
     variable = v
     function = force_fn_v
-  [../]
+  []
 []
 
 [BCs]
@@ -76,21 +76,21 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
   [all_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '0 1 2 3'
     function = exact_v
-  [../]
+  []
 []
 
 [Executioner]
@@ -104,7 +104,7 @@
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
-  [../]
+  []
 []
 
 [Outputs]

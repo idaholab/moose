@@ -20,7 +20,7 @@
     block_id = 1
     bottom_left = '1 1 0'
     top_right = '4 4 5'
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -29,7 +29,7 @@
     family = MONOMIAL
     block = 1
     initial_condition = 0
-  [../]
+  []
 []
 
 [Variables]

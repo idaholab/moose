@@ -9,18 +9,18 @@
 
 [Variables]
   [T]
-  [../]
+  []
 []
 
 [AuxVariables]
   [flux_x]
       order = FIRST
       family = MONOMIAL
-  [../]
+  []
   [flux_y]
       order = FIRST
       family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -29,12 +29,12 @@
     type = MatDiffusionTest # A Laplacian operator
     variable = T
     prop_name = 'thermal_conductivity'
-  [../]
+  []
   [diff_ad]
     type = ADMatDiffusion # A Laplacian operator
     variable = T
     diffusivity = 'thermal_conductivity'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,14 +44,14 @@
     variable = flux_x
     diffusion_variable = T
     component = x
-  [../]
+  []
   [flux_y]
     type = DiffusionFluxAux
     diffusivity = 'thermal_conductivity'
     variable = flux_y
     diffusion_variable = T
     component = y
-  [../]
+  []
 []
 
 [BCs]
@@ -60,13 +60,13 @@
     variable = T
     boundary = left
     value = 4000 # K
-  [../]
+  []
   [outlet]
     type = DirichletBC
     variable = T
     boundary = right
     value = 400 # K
-  [../]
+  []
 []
 
 [Materials]
@@ -74,7 +74,7 @@
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '10' # in W/mK
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -86,7 +86,7 @@
     end_point = '0.98 0.01 0'
     num_points = 11
     sort_by = id
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,7 +6,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -14,7 +14,7 @@
     type = MatCoefDiffusion
     variable = u
     conductivity = conductivity
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -38,13 +38,13 @@
     block = 1
     prop_names = conductivity
     prop_values = 100
-  [../]
+  []
   [mat2]
     type = GenericConstantMaterial
     block = 2
     prop_names = conductivity
     prop_values = 1e-4
-  [../]
+  []
 []
 
 [Executioner]

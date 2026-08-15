@@ -9,7 +9,7 @@
 
 [AuxVariables]
   [logk]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -19,19 +19,19 @@
     temperature_points = '200 300 400'
     logk_points = '1.8 1.5 1.2'
     variable = logk
-  [../]
+  []
 []
 
 [Variables]
   [temperature]
-  [../]
+  []
 []
 
 [Kernels]
   [temperature]
     type = Diffusion
     variable = temperature
-  [../]
+  []
 []
 
 [BCs]
@@ -40,13 +40,13 @@
     variable = temperature
     value = 150
     boundary = left
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = temperature
     value = 400
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

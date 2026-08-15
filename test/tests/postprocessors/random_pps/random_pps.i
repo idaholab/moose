@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Problem]
@@ -19,7 +19,7 @@
     type = RandomPostprocessor
     seed = 1
     generator = 2
-  [../]
+  []
 []
 
 [Executioner]

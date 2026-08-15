@@ -16,34 +16,34 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
     eigen = true
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 
   [rhs]
     type = CoupledEigenKernel
     variable = u
     v = v
-  [../]
+  []
   [src_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 []
 
 [BCs]
@@ -52,13 +52,13 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
   [homogeneous_v]
     type = DirichletBC
     variable = v
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -82,13 +82,13 @@
     variable = v
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
-  [../]
+  []
 
   [udiff]
     type = ElementL2Diff
     variable = u
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]

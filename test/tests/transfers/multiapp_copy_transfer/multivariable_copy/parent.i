@@ -8,9 +8,9 @@
 [Variables]
   # Create two variables
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [Problem]
@@ -31,7 +31,7 @@
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
-  [../]
+  []
 []
 
 [Transfers]
@@ -41,7 +41,7 @@
     source_variable = 'u v'
     variable = 'u v'
     from_multi_app = sub
-  [../]
+  []
 []
 
 [Outputs]

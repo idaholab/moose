@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,24 +23,24 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [L2_norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
   [L2:norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
   [L1_norm]
     type = ElementL1Error
     function = 0

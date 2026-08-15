@@ -43,7 +43,7 @@
     type = ElementAverageValue
     variable = u
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Executioner]

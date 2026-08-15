@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,11 +15,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,20 +28,20 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [pp]
     type = Receiver
     default = 2
-  [../]
+  []
 []
 
 [Executioner]

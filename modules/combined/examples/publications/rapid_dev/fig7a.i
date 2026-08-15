@@ -27,7 +27,7 @@
     expression = '${RADIUS}-pos_c'
     symbol_names = pos_c
     symbol_values = pos_c
-  [../]
+  []
 []
 
 # AuxVars to compute the free energy density for outputting
@@ -35,11 +35,11 @@
   [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [cross_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -49,7 +49,7 @@
     interfacial_vars = 'c'
     kappa_names = 'kappa_c'
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Variables]
@@ -63,10 +63,10 @@
       y1 = 0
       radius = ${RADIUS}
       int_width = 3
-    [../]
-  [../]
+    []
+  []
   [w]
-  [../]
+  []
 
   # Phase order parameter
   [eta]
@@ -78,23 +78,23 @@
       y1 = 0
       radius = ${RADIUS}
       int_width = 3
-    [../]
-  [../]
+    []
+  []
 
   # Mesh displacement
   [disp_r]
     order = SECOND
-  [../]
+  []
 
   [Fe_fit]
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
   # Set up stress divergence kernels
   [TensorMechanics]
-  [../]
+  []
 
   # Split Cahn-Hilliard kernels
   [c_res]
@@ -104,49 +104,49 @@
     coupled_variables = 'eta'
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 
   # Allen-Cahn and Lagrange-multiplier constraint kernels for order parameter 1
   [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
   [ACBulk1]
     type = AllenCahn
     variable = eta
     coupled_variables = 'c'
     mob_name = L
     f_name = F
-  [../]
+  []
   [ACInterface]
     type = ACInterface
     variable = eta
     mob_name = L
     kappa_name = kappa_eta
-  [../]
+  []
 
   [Fe]
     type = MaterialPropertyValue
     prop_name = Fe
     variable = Fe_fit
-  [../]
+  []
 
   [autoadjust]
     type = MaskedBodyForce
     variable = w
     function = diff
     mask = mask
-  [../]
+  []
 []
 
 [Materials]
@@ -155,7 +155,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M   L   kappa_c kappa_eta'
     prop_values = '1.0 1.0 0.5     1'
-  [../]
+  []
 
   # forcing function mask
   [mask]
@@ -163,15 +163,15 @@
     property_name = mask
     expression = grad/dt
     material_property_names = 'grad dt'
-  [../]
+  []
   [grad]
     type = VariableGradientMaterial
     variable = c
     prop = grad
-  [../]
+  []
   [time]
     type = TimeStepMaterial
-  [../]
+  []
 
   # global mechanical properties
   [elasticity_tensor_1]
@@ -179,30 +179,30 @@
     C_ijkl = '1 1'
     base_name = phase1
     fill_method = symmetric_isotropic
-  [../]
+  []
   [elasticity_tensor_2]
     type = ComputeElasticityTensor
     C_ijkl = '1 1'
     base_name = phase2
     fill_method = symmetric_isotropic
-  [../]
+  []
   [strain_1]
     type = ComputeRSphericalSmallStrain
     base_name = phase1
-  [../]
+  []
   [strain_2]
     type = ComputeRSphericalSmallStrain
     base_name = phase2
     eigenstrain_names = eigenstrain
-  [../]
+  []
   [stress_1]
     type = ComputeLinearElasticStress
     base_name = phase1
-  [../]
+  []
   [stress_2]
     type = ComputeLinearElasticStress
     base_name = phase2
-  [../]
+  []
 
   # eigenstrain per phase
   [eigenstrain2]
@@ -210,7 +210,7 @@
     eigen_base = '0.05 0.05 0.05 0 0 0'
     base_name = phase2
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
   # switching functions
   [switching]
@@ -218,11 +218,11 @@
     function_name = h
     eta = eta
     h_order = SIMPLE
-  [../]
+  []
   [barrier]
     type = BarrierFunctionMaterial
     eta = eta
-  [../]
+  []
 
   # chemical free energies
   [chemical_free_energy_1]
@@ -231,14 +231,14 @@
     expression = 'c^2'
     coupled_variables = 'c'
     derivative_order = 2
-  [../]
+  []
   [chemical_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = Fc2
     expression = '(1-c)^2'
     coupled_variables = 'c'
     derivative_order = 2
-  [../]
+  []
 
   # elastic free energies
   [elastic_free_energy_1]
@@ -247,14 +247,14 @@
     coupled_variables = ''
     base_name = phase1
     derivative_order = 2
-  [../]
+  []
   [elastic_free_energy_2]
     type = ElasticEnergyMaterial
     f_name = Fe2
     coupled_variables = ''
     base_name = phase2
     derivative_order = 2
-  [../]
+  []
 
   # per phase free energies
   [free_energy_1]
@@ -263,14 +263,14 @@
     sum_materials = 'Fc1 Fe1'
     coupled_variables = 'c'
     derivative_order = 2
-  [../]
+  []
   [free_energy_2]
     type = DerivativeSumMaterial
     property_name = F2
     sum_materials = 'Fc2 Fe2'
     coupled_variables = 'c'
     derivative_order = 2
-  [../]
+  []
 
   # global chemical free energy
   [global_free_energy]
@@ -281,14 +281,14 @@
     eta = eta
     coupled_variables = 'c'
     W = 4
-  [../]
+  []
 
   # global stress
   [global_stress]
     type = TwoPhaseStressMaterial
     base_A = phase1
     base_B = phase2
-  [../]
+  []
 
   [elastic_free_energy]
     type = DerivativeTwoPhaseMaterial
@@ -298,7 +298,7 @@
     eta = eta
     coupled_variables = 'c'
     W = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -307,14 +307,14 @@
     variable = disp_r
     boundary = 'left'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 # We monitor the total free energy and the total solute concentration (should be constant)
@@ -324,13 +324,13 @@
     variable = local_energy
     execute_on = 'INITIAL TIMESTEP_END'
     outputs = 'table console'
-  [../]
+  []
   [total_solute]
     type = ElementIntegralVariablePostprocessor
     variable = c
     execute_on = 'INITIAL TIMESTEP_END'
     outputs = 'table console'
-  [../]
+  []
   [pos_c]
     type = FindValueOnLine
     start_point = '0 0 0'
@@ -340,7 +340,7 @@
     tol = 1e-8
     execute_on = 'INITIAL TIMESTEP_END'
     outputs = 'table console'
-  [../]
+  []
   [pos_eta]
     type = FindValueOnLine
     start_point = '0 0 0'
@@ -350,14 +350,14 @@
     tol = 1e-8
     execute_on = 'INITIAL TIMESTEP_END'
     outputs = 'table console'
-  [../]
+  []
   [c_min]
     type = ElementExtremeValue
     value_type = min
     variable = c
     execute_on = 'INITIAL TIMESTEP_END'
     outputs = 'table console'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -370,7 +370,7 @@
     sort_by = x
     outputs = vpp
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Executioner]
@@ -394,7 +394,7 @@
     optimal_iterations = 7
     iteration_window = 1
     dt = 1
-  [../]
+  []
 
   [Adaptivity]
     initial_adaptivity = 5
@@ -402,7 +402,7 @@
     max_h_level = 5
     refine_fraction = 0.9
     coarsen_fraction = 0.1
-  [../]
+  []
 []
 
 [Outputs]
@@ -413,7 +413,7 @@
     type = CSV
     delimiter = ' '
     file_base = radius_${RADIUS}/energy_pp
-  [../]
+  []
   [vpp]
     type = CSV
     delimiter = ' '
@@ -421,5 +421,5 @@
     sync_only = true
     time_data = true
     file_base = radius_${RADIUS}/energy_vpp
-  [../]
+  []
 []

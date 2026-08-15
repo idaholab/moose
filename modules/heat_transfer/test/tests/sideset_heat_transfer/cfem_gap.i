@@ -279,14 +279,14 @@
     boundary = 'top_2'
     coefficient = 1e3 # W/K/m^2
     T_infinity = 600.0
-  [../]
+  []
   [bc_top_3]
     type = ConvectiveFluxFunction # (Robin BC)
     variable = T3
     boundary = 'top_3'
     coefficient = 1e3 # W/K/m^2
     T_infinity = 600.0
-  [../]
+  []
 
   [bc_right_3]
     type = ConvectiveFluxFunction # (Robin BC)
@@ -294,14 +294,14 @@
     boundary = 'right_3'
     coefficient = 1e3 # W/K/m^2
     T_infinity = 600.0
-  [../]
+  []
   [bc_right_1]
     type = ConvectiveFluxFunction # (Robin BC)
     variable = T1
     boundary = 'right_1'
     coefficient = 1e3 # W/K/m^2
     T_infinity = 600.0
-  [../]
+  []
 []
 
 [Materials]

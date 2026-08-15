@@ -5,20 +5,20 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [nearest_node_value]
     block = left
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,13 +27,13 @@
     variable = u
     boundary = 'leftbottom rightbottom'
     value = 0
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = u
     boundary = 'lefttop righttop'
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,7 +43,7 @@
     boundary = leftright
     paired_variable = u
     paired_boundary = rightleft
-  [../]
+  []
 []
 
 [Executioner]

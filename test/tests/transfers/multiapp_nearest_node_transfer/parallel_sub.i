@@ -12,22 +12,22 @@
     [InitialCondition]
       type = ConstantIC
       value = 1.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [pid]
     order = constant
     family = monomial
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -36,13 +36,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -64,5 +64,5 @@
   [pid]
     type = ProcessorIDAux
     variable = pid
-  [../]
+  []
 []

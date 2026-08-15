@@ -13,7 +13,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -21,7 +21,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = a
-  [../]
+  []
 
   [conv]
     type = MatConvection
@@ -29,7 +29,7 @@
     x = 1
     y = 0
     mat_prop = b
-  [../]
+  []
 []
 
 [BCs]
@@ -38,14 +38,14 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -54,28 +54,28 @@
     block = 0
     mat_prop = 'a'
     coupled_mat_prop = 'b'
-  [../]
+  []
 
   [matB]
     type = CoupledMaterial
     block = 0
     mat_prop = 'b'
     coupled_mat_prop = 'c'
-  [../]
+  []
 
   [matC]
     type = CoupledMaterial
     block = 0
     mat_prop = 'c'
     coupled_mat_prop = 'd'
-  [../]
+  []
 
   [matD]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'd'
     prop_values = '2'
-  [../]
+  []
 []
 
 [Executioner]

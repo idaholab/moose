@@ -13,44 +13,44 @@
     ymax = 1
     zmin = 0.0
     zmax = 2
-  [../]
+  []
   [all_nodes]
     type = BoundingBoxNodeSetGenerator
     new_boundary = 'all'
     input = 'generated_mesh'
     top_right = '1 1 2'
     bottom_left = '0 0 0'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxVariables]
   [vel_x]
-  [../]
+  []
   [accel_x]
-  [../]
+  []
   [vel_y]
-  [../]
+  []
   [accel_y]
-  [../]
+  []
   [vel_z]
-  [../]
+  []
   [accel_z]
-  [../]
+  []
 []
 
 [Kernels]
   [DynamicSolidMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -59,34 +59,34 @@
     variable = accel_x
     displacement = disp_x
     first = false
-  [../]
+  []
   [vel_x]
     type = TestNewmarkTI
     variable = vel_x
     displacement = disp_x
-  [../]
+  []
   [accel_y]
     type = TestNewmarkTI
     variable = accel_y
     displacement = disp_y
     first = false
-  [../]
+  []
   [vel_y]
     type = TestNewmarkTI
     variable = vel_y
     displacement = disp_y
-  [../]
+  []
   [accel_z]
     type = TestNewmarkTI
     variable = accel_z
     displacement = disp_z
     first = false
-  [../]
+  []
   [vel_z]
     type = TestNewmarkTI
     variable = vel_z
     displacement = disp_z
-  [../]
+  []
 []
 
 [BCs]
@@ -96,21 +96,21 @@
     variable = disp_x
     function = dispx
     preset = false
-  [../]
+  []
   [y_bot]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = back
     function = dispy
     preset = false
-  [../]
+  []
   [z_bot]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = back
     function = dispz
     preset = false
-  [../]
+  []
 []
 
 [Functions]
@@ -118,15 +118,15 @@
     type = PiecewiseLinear
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # displacement
-  [../]
+  []
   [dispy]
     type = ParsedFunction
     expression = 0.1*t*t*sin(10*t)
-  [../]
+  []
   [dispz]
     type = ParsedFunction
     expression = 0.1*t*t*sin(20*t)
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -135,19 +135,19 @@
     boundary = 'all'
     nodal_mass_file = 'nodal_mass_file.csv'
     variable = 'disp_x'
-  [../]
+  []
   [nodal_mass_y]
     type = NodalTranslationalInertia
     boundary = 'all'
     nodal_mass_file = 'nodal_mass_file.csv'
     variable = 'disp_y'
-  [../]
+  []
   [nodal_mass_z]
     type = NodalTranslationalInertia
     boundary = 'all'
     nodal_mass_file = 'nodal_mass_file.csv'
     variable = 'disp_z'
-  [../]
+  []
 []
 
 [Materials]
@@ -156,17 +156,17 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
+  []
   [strain_block]
     type = ComputeIncrementalStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
     implicit = false
-  [../]
+  []
   [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -177,7 +177,7 @@
   timestep_tolerance = 1e-6
   [TimeIntegrator]
     type = CentralDifference
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -185,7 +185,7 @@
     type = NodalVariableValue
     nodeid = 10
     variable = accel_x
-  [../]
+  []
 []
 
 [Outputs]

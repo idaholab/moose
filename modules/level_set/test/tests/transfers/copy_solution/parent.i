@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [ICs]
@@ -15,7 +15,7 @@
     type = FunctionIC
     function = 'x*x*y'
     variable = u
-  [../]
+  []
 []
 
 [Problem]
@@ -32,7 +32,7 @@
     type = FullSolveMultiApp
     input_files = 'sub.i'
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Transfers]
@@ -43,7 +43,7 @@
     to_multi_app = sub
     execute_on = timestep_end
     check_multiapp_execute_on = false
-  [../]
+  []
 []
 
 [Outputs]

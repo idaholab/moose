@@ -11,21 +11,21 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [u_xda_func]
     type = SolutionFunction
     solution = xda_u
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,13 +34,13 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [UserObjects]
@@ -51,7 +51,7 @@
     es = aux_nonlinear_solution_out_0001.xda
     system_variables = u
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]
@@ -64,12 +64,12 @@
   [unorm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
   [uerror]
     type = ElementL2Error
     variable = u
     function = u_xda_func
-  [../]
+  []
 []
 
 [Outputs]

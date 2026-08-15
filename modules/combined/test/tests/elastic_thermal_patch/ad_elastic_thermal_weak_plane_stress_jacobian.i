@@ -10,18 +10,18 @@
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [strain_zz]
-  [../]
+  []
   [temp]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -30,7 +30,7 @@
     strain = SMALL
     eigenstrain_names = thermal_eigenstrain
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Kernels]
@@ -38,7 +38,7 @@
     type = HeatConduction
     variable = temp
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Materials]
@@ -46,22 +46,22 @@
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
+  []
   [thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 0
     eigenstrain_name = thermal_eigenstrain
-  [../]
+  []
   [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
 
   [conductivity]
     type = HeatConductionMaterial
     thermal_conductivity = 1
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Executioner]

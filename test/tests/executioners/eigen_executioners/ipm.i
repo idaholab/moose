@@ -24,14 +24,14 @@
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [x_disp]
-  [../]
+  []
   [y_disp]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -39,23 +39,23 @@
     type = FunctionAux
     variable = x_disp
     function = x_disp_func
-  [../]
+  []
   [y_disp]
     type = FunctionAux
     variable = y_disp
     function = y_disp_func
-  [../]
+  []
 []
 
 [Functions]
   [x_disp_func]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
   [y_disp_func]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -65,20 +65,20 @@
     type = Diffusion
     variable = u
     use_displaced_mesh = true
-  [../]
+  []
 
   [rea]
     type = CoefReaction
     variable = u
     coefficient = 2.0
     use_displaced_mesh = true
-  [../]
+  []
 
   [rhs]
     type = MassEigenKernel
     variable = u
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
@@ -90,7 +90,7 @@
     boundary = '0 1 2 3'
     value = 0
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -118,14 +118,14 @@
     variable = u
     execute_on = linear
     use_displaced_mesh = true
-  [../]
+  []
 
   [udiff]
     type = ElementL2Diff
     variable = u
     execute_on = 'linear timestep_end'
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Outputs]

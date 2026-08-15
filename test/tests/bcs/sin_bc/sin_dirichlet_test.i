@@ -13,7 +13,7 @@
   [initial_value]
     type = ParsedFunction
     expression = 'x'
-  [../]
+  []
 []
 
 [Variables]
@@ -26,8 +26,8 @@
     [InitialCondition]
       type = FunctionIC
       function = initial_value
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -36,12 +36,12 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -54,7 +54,7 @@
     initial = 0.0
     final = 1.0
     duration = 10.0
-  [../]
+  []
 
   [right]
     type = SinDirichletBC
@@ -63,7 +63,7 @@
     initial = 1.0
     final = 0.0
     duration = 10.0
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,7 +10,7 @@
   [client]
     type = ADDerivativeMaterialInterfaceTestClient
     block = 0
-  [../]
+  []
 
   # ...then declare them!
   [provider]
@@ -18,7 +18,7 @@
     block = 0
     outputs = exodus
     output_properties = 'dprop/db dprop/da d^2prop/dadb d^2prop/dadc d^3prop/dadbdc'
-  [../]
+  []
 []
 
 [Executioner]

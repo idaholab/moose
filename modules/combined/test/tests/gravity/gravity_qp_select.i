@@ -55,48 +55,48 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx_qp_0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_4]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_5]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_6]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_7]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx_qp_8]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic/All]
@@ -111,7 +111,7 @@
     type = Gravity
     variable = disp_x
     value = 20
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -122,7 +122,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 0
-  [../]
+  []
   [stress_xx_qp_1]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -130,7 +130,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 1
-  [../]
+  []
   [stress_xx_qp_2]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -138,7 +138,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 2
-  [../]
+  []
   [stress_xx_qp_3]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -146,7 +146,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 3
-  [../]
+  []
   [stress_xx_qp_4]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -154,7 +154,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 4
-  [../]
+  []
   [stress_xx_qp_5]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -162,7 +162,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 5
-  [../]
+  []
   [stress_xx_qp_6]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -170,7 +170,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 6
-  [../]
+  []
   [stress_xx_qp_7]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -178,7 +178,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 7
-  [../]
+  []
   [stress_xx_qp_8]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -186,7 +186,7 @@
     index_i = 0
     index_j = 0
     selected_qp = 8
-  [../]
+  []
 []
 
 [BCs]
@@ -195,13 +195,13 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [no_z]
     type = DirichletBC
     variable = disp_y
     boundary = 5
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -209,15 +209,15 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     bulk_modulus = 0.333333333333333e6
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
   [density]
     type = Density
     density = 2
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -240,5 +240,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

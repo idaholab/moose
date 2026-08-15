@@ -8,14 +8,14 @@
 [Variables]
   [u]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = ADVectorDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     type = ADVectorFunctionDirichletBC
     variable = u
     boundary = 'top bottom'
-  [../]
+  []
   [left]
     type = ADVectorFunctionNeumannBC
     variable = u
     boundary = left
     function_x = '1'
-  [../]
+  []
 []
 
 [Executioner]

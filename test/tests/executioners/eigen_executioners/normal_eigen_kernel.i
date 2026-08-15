@@ -19,7 +19,7 @@
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -27,25 +27,25 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [rea]
     type = CoefReaction
     variable = u
     coefficient = 2.0
-  [../]
+  []
 
   [rhs]
     type = MassEigenKernel
     variable = u
     eigen = false
-  [../]
+  []
 
   [rea1]
     type = CoefReaction
     variable = u
     coefficient = 1.0
-  [../]
+  []
 []
 
 [BCs]
@@ -54,7 +54,7 @@
     variable = u
     boundary = '2 3'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Outputs]

@@ -22,14 +22,14 @@
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [AuxVariables]
   [layered_integral]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [FVKernels]
@@ -37,7 +37,7 @@
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -46,7 +46,7 @@
     variable = layered_integral
     execute_on = timestep_end
     user_object = layered_integral
-  [../]
+  []
 []
 
 [FVBCs]
@@ -55,13 +55,13 @@
     variable = u
     boundary = bottom
     value = 0
-  [../]
+  []
   [top]
     type = FVDirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
@@ -71,7 +71,7 @@
     num_layers = 3
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [Executioner]

@@ -11,25 +11,25 @@
     dim = 2
     nx = 4
     ny = 4
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
   [all]
     formulation = BOND
-  [../]
+  []
 []
 
 [Materials]
@@ -37,11 +37,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.33
-  [../]
+  []
 
   [force_density]
     type = ComputeSmallStrainConstantHorizonMaterialBPD
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -50,7 +50,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'
     petsc_options_value = 'bcgs bjacobi test'
-  [../]
+  []
 []
 
 [Executioner]

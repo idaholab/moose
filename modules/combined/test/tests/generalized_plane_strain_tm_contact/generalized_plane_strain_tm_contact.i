@@ -12,51 +12,51 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [temp]
-  [../]
+  []
   [scalar_strain_zz]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -65,17 +65,17 @@
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
     use_displaced_mesh = true
-  [../]
+  []
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [Physics]
@@ -83,9 +83,9 @@
     [GeneralizedPlaneStrain]
       [gps]
         use_displaced_mesh = true
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [AuxKernels]
@@ -95,28 +95,28 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 
   [strain_xx]
     type = RankTwoAux
@@ -124,35 +124,35 @@
     variable = strain_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [strain_xy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Functions]
   [tempramp]
     type = ParsedFunction
     expression = 't'
-  [../]
+  []
 []
 
 [BCs]
@@ -161,25 +161,25 @@
     boundary = '4 6'
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [y]
     type = DirichletBC
     boundary = '4 6'
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [t]
     type = DirichletBC
     boundary = '4'
     variable = temp
     value = 0.0
-  [../]
+  []
   [tramp]
     type = FunctionDirichletBC
     variable = temp
     boundary = '6'
     function = tempramp
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -187,7 +187,7 @@
     type = SMP
     off_diag_row =    'disp_x disp_y'
     off_diag_column = 'disp_y disp_x'
-  [../]
+  []
 []
 
 [Contact]
@@ -200,7 +200,7 @@
     normal_smoothing_distance = .1
     model = frictionless
     formulation = kinematic
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -216,7 +216,7 @@
     gap_conductivity = 0.01
     min_gap = 0.001
     quadrature = true
-  [../]
+  []
 []
 
 [Materials]
@@ -225,12 +225,12 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e6
     block = '1 2'
-  [../]
+  []
   [strain]
     type = ComputePlaneSmallStrain
     eigenstrain_names = eigenstrain
     block = '1 2'
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
@@ -238,24 +238,24 @@
     stress_free_temperature = 0.0
     eigenstrain_name = eigenstrain
     block = '1 2'
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = '1 2'
-  [../]
+  []
 
   [heatcond]
     type = HeatConductionMaterial
     thermal_conductivity = 3.0
     specific_heat = 300.0
     block = '1 2'
-  [../]
+  []
 
   [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '1'
-  [../]
+  []
 []
 
 [Executioner]

@@ -19,12 +19,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -32,7 +32,7 @@
     type = SMP
     off_diag_row    = 'u'
     off_diag_column = 'v'
-  [../]
+  []
 []
 
 [Kernels]
@@ -41,18 +41,18 @@
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [conv_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -63,28 +63,28 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 9
-  [../]
+  []
 
   [bottom_v]
     type = DirichletBC
     variable = v
     boundary = 0
     value = 5
-  [../]
+  []
 
   [top_v]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [Executioner]

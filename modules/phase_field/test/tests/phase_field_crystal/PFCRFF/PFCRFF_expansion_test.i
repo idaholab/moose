@@ -14,15 +14,15 @@
 
 [Variables]
   [PFCRFFVariables]
-  [../]
+  []
   [n]
     [InitialCondition]
       type = RandomIC
       max = 1.00187734619
       min = -1.00187734619
       seed = 12345
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -30,27 +30,27 @@
     n_name = n
     log_approach = expansion
     n_exp_terms = 5
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   [PFC]
     type = PFCRFFMaterial
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -58,11 +58,11 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
   [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

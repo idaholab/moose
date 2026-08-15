@@ -18,7 +18,7 @@
   [solution]
     type = ParsedFunction
     expression = 0.5*(1+tanh(x/2^0.5))
-  [../]
+  []
 []
 
 [Variables]
@@ -28,21 +28,21 @@
       function = solution
       #type = FunctionIC
       #function = if(x>0,1,0)
-    [../]
-  [../]
+    []
+  []
   [w]
-  [../]
+  []
 []
 
 [AuxVariables]
   [diff]
-  [../]
+  []
   [ca]
     [InitialCondition]
       type = FunctionIC
       function = '0.5*(1+tanh(x/2^0.5))'
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxKernels]
@@ -51,7 +51,7 @@
     variable = diff
     expression = c-ca
     coupled_variables = 'c ca'
-  [../]
+  []
 []
 
 [Materials]
@@ -60,7 +60,7 @@
     property_name = F
     expression = 'c^2*(1-c)^2'
     coupled_variables = c
-  [../]
+  []
 []
 
 [Kernels]
@@ -71,17 +71,17 @@
     f_name = F
     kappa_name = 1
     w = w
-  [../]
+  []
   [wres]
     type = SplitCHWRes
     variable = w
     mob_name = 1
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -89,7 +89,7 @@
     type = ElementL2Error
     function = solution
     variable = c
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -100,14 +100,14 @@
     end_point = '10 0 0'
     num_points = 200
     sort_by = x
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -123,7 +123,7 @@
     dt = 1
     optimal_iterations = 5
     iteration_window = 1
-  [../]
+  []
 []
 
 [Outputs]

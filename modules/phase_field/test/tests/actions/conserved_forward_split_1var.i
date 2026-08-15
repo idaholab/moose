@@ -20,9 +20,9 @@
         mobility = 1.0
         kappa = kappa_c
         free_energy = F
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -33,14 +33,14 @@
     x2 = 25.0
     y1 = 0.0
     y2 = 25.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [local_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -50,7 +50,7 @@
     f_name = F
     kappa_names = kappa_c
     interfacial_vars = c
-  [../]
+  []
 []
 
 [Materials]
@@ -58,32 +58,32 @@
     type = GenericConstantMaterial
     prop_names = kappa_c
     prop_values = 2.0
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     coupled_variables = c
     expression = '(1 - c)^2 * (1 + c)^2'
     property_name = F
-  [../]
+  []
 []
 
 [Postprocessors]
   [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
+  []
   [total_c]
     type = ElementIntegralVariablePostprocessor
     variable = c
     execute_on = 'initial TIMESTEP_END'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

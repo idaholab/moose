@@ -24,8 +24,8 @@
 
     [InitialCondition]
       type = TEIC
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -34,17 +34,17 @@
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = TEJumpFFN
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -54,7 +54,7 @@
     type = TEJumpBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -62,7 +62,7 @@
 
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,7 +78,7 @@
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
-  [../]
+  []
 
   start_time = 0.0
   end_time = 5
@@ -91,7 +91,7 @@
     dt = 0.1
     e_max = 3e-1
     e_tol = 1e-1
-  [../]
+  []
 []
 
 [Outputs]

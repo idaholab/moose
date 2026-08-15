@@ -20,14 +20,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -36,7 +36,7 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 
   [right]
     type = MTBC
@@ -44,7 +44,7 @@
     boundary = right
     grad = 8
     prop_name = matp
-  [../]
+  []
 []
 
 # auxiliary system
@@ -53,7 +53,7 @@
   [matp]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -62,19 +62,19 @@
     property = matp
     variable = matp
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Materials]
   [mat_left]
     type = MTMaterial
     boundary = left
-  [../]
+  []
   [mat_right]
     type = MTMaterial
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,5 +87,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

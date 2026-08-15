@@ -13,24 +13,24 @@
     dim = 2
     nx = 4
     ny = 4
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 
   [scalar_strain_zz]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics]
@@ -38,13 +38,13 @@
     [all]
       formulation = NONORDINARY_STATE
       stabilization = BOND_HORIZON_I
-    [../]
-  [../]
+    []
+  []
   [GeneralizedPlaneStrain]
     [all]
       formulation = NONORDINARY_STATE
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -52,14 +52,14 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
+  []
   [strain]
     type = ComputePlaneSmallStrainNOSPD
     stabilization = BOND_HORIZON_I
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -68,7 +68,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'
     petsc_options_value = 'bcgs bjacobi test'
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,5 +81,5 @@
   [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
-  [../]
+  []
 []

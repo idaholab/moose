@@ -17,14 +17,14 @@
   [penetration]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [negramp]
     type = ParsedFunction
     expression = -t/10
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -40,14 +40,14 @@
     variable = penetration
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [Postprocessors]
   [nonlinear_its]
     type = NumNonlinearIterations
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -56,25 +56,25 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = negramp
-  [../]
+  []
   [right_y]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -83,11 +83,11 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Contact]
@@ -97,7 +97,7 @@
     model = frictionless
     penalty = 1e+6
     normal_smoothing_distance = 0.1
-  [../]
+  []
 []
 
 [Adaptivity]
@@ -112,8 +112,8 @@
       top_right = '0.75 2.0 0.0'
       inside = refine
       outside = do_nothing
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

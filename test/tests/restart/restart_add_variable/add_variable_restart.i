@@ -12,31 +12,31 @@
   [exact_fn]
     type = ParsedFunction
     expression = t*((x*x)+(y*y))
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = -4+(x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [diffusivity]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,38 +44,38 @@
     type = MaterialRealAux
     variable = diffusivity
     property = diffusivity
-  [../]
+  []
 []
 
 [Kernels]
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = diffusivity
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [Materials]
   [mat]
     type = StatefulMaterial
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -84,21 +84,21 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = '3'
     value = 0
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = '1'
     value = 1
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -106,7 +106,7 @@
     type = PBP
     solve_order = 'u v'
     preconditioner = 'AMG AMG'
-  [../]
+  []
 []
 
 [Executioner]
@@ -128,7 +128,7 @@
     type = Exodus
     elemental_as_nodal = true
     execute_elemental_on = none
-  [../]
+  []
   [json]
     type = JSON
     execute_system_information_on = none

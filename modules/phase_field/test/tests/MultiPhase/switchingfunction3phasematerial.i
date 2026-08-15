@@ -25,20 +25,20 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
   [eta2]
     [InitialCondition]
       type = FunctionIC
       function = 1.0-x
-    [../]
-  [../]
+    []
+  []
   [eta3]
     [InitialCondition]
       type = ConstantIC
       value = 0.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -49,7 +49,7 @@
     eta_j = eta2
     eta_k = eta3
     outputs = exodus
-  [../]
+  []
 # Next we reverse eta2 and eta3 to make sure the switching function is symmetric
 # with respect to interchanging these two, as it is designed to be
   [h_material_2]
@@ -59,7 +59,7 @@
     eta_j = eta3
     eta_k = eta2
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]

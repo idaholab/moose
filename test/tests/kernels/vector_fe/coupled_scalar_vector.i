@@ -12,9 +12,9 @@
   [u]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,22 +23,22 @@
     variable = u
     x_forcing_func = 'x_ffn'
     y_forcing_func = 'y_ffn'
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = v
-  [../]
+  []
   [source]
     type = BodyForce
     variable = v
-  [../]
+  []
   [advection]
     type = EFieldAdvection
     variable = v
     efield = u
     charge = 'positive'
     mobility = 100
-  [../]
+  []
 []
 
 [BCs]
@@ -49,39 +49,39 @@
     function_x = 'x_sln'
     function_y = 'y_sln'
     variable = u
-  [../]
+  []
   [bnd_v]
     type = DirichletBC
     boundary = 'left right top bottom'
     value = 0
     variable = v
-  [../]
+  []
 []
 
 [Functions]
   [x_ffn]
     type = ParsedFunction
     expression = '(2*pi*pi + 1)*cos(pi*x)*sin(pi*y)'
-  [../]
+  []
   [y_ffn]
     type = ParsedFunction
     expression = '-(2*pi*pi + 1)*sin(pi*x)*cos(pi*y)'
-  [../]
+  []
   [x_sln]
     type = ParsedFunction
     expression = 'cos(pi*x)*sin(pi*y)'
-  [../]
+  []
   [y_sln]
     type = ParsedFunction
     expression = '-sin(pi*x)*cos(pi*y)'
-  [../]
+  []
 []
 
 [Preconditioning]
   [pre]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

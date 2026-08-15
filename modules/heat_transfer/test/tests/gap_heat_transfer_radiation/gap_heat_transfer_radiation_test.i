@@ -51,7 +51,7 @@
     type = PiecewiseLinear
     x = '0   1'
     y = '200 200'
-  [../]
+  []
 []
 
 [Variables]
@@ -59,14 +59,14 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 
@@ -76,14 +76,14 @@
     boundary = 1
     variable = temp
     function = temp
-  [../]
+  []
 
   [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -95,7 +95,7 @@
     gap_conductivity = 0.09187557
     emissivity_primary = 0.5
     emissivity_secondary = 0.5
-  [../]
+  []
 []
 
 [Materials]
@@ -104,13 +104,13 @@
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 10000000.0
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     block = '1 2'
     prop_names = 'density'
     prop_values = '1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -139,28 +139,28 @@
     boundary = 2
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [flux_left]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
-  [../]
+  []
 
   [flux_right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [Outputs]

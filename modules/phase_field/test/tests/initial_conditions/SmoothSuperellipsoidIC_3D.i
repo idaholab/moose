@@ -12,7 +12,7 @@
 
 [Variables]
   [c]
-  [../]
+  []
 []
 
 [ICs]
@@ -29,26 +29,26 @@
     invalue = 1.0
     outvalue = 0
     int_width = 4.0
-  [../]
+  []
 []
 
 [Kernels]
   [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [Diffusion]
     type = MatDiffusion
     variable = c
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [All]
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -56,7 +56,7 @@
     type = GenericConstantMaterial
     prop_names = D
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Executioner]

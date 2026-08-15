@@ -14,18 +14,18 @@
     nx = 2
     ny = 2
     elem_type = QUAD4
-  [../]
+  []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
     input = left_block
     old_boundary = '0 1 2 3'
     new_boundary = 'lb_bottom lb_right lb_top lb_left'
-  [../]
+  []
   [left_block_id]
     type = SubdomainIDGenerator
     input = left_block_sidesets
     subdomain_id = 1
-  [../]
+  []
   [right_block]
     type = GeneratedMeshGenerator
     dim = 2
@@ -36,12 +36,12 @@
     nx = 2
     ny = 2
     elem_type = QUAD4
-  [../]
+  []
   [right_block_id]
     type = SubdomainIDGenerator
     input = right_block
     subdomain_id = 2
-  [../]
+  []
   [right_block_change_boundary_id]
     type = RenameBoundaryGenerator
     input = right_block_id
@@ -51,13 +51,13 @@
   [combined]
     type = MeshCollectionGenerator
     inputs = 'left_block_id right_block_change_boundary_id'
-  [../]
+  []
   [block_rename]
     type = RenameBlockGenerator
     input = combined
     old_block = '1 2'
     new_block = 'left_block right_block'
-  [../]
+  []
   [right_right_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = block_rename
@@ -106,12 +106,12 @@
   [T]
     block = 'left_block right_block'
     order = SECOND
-  [../]
+  []
   [lambda]
     block = 'secondary_lower'
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [BCs]
@@ -120,7 +120,7 @@
     exact_solution = exact_soln_primal
     variable = T
     boundary = 'lb_bottom lb_top lb_left rb_bottom rb_right rb_top'
-  [../]
+  []
 []
 
 [Kernels]
@@ -128,29 +128,29 @@
     type = Diffusion
     variable = T
     block = 'left_block right_block'
-  [../]
+  []
   [sink]
     type = Reaction
     variable = T
     block = 'left_block right_block'
-  [../]
+  []
   [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
     block = 'left_block right_block'
-  [../]
+  []
 []
 
 [Functions]
   [forcing_function]
     type = ParsedFunction
     expression = ''
-  [../]
+  []
   [exact_soln_primal]
     type = ParsedFunction
     expression = ''
-  [../]
+  []
   [exact_soln_lambda]
     type = ParsedFunction
     expression = ''
@@ -182,14 +182,14 @@
     primary_gap_conductance = 1
     secondary_mms_function = mms_secondary
     primary_mms_function = mms_primary
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

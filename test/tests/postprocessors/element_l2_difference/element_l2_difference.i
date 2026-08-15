@@ -8,32 +8,32 @@
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [force_u]
     type = BodyForce
     variable = u
     function = 'x*x*x+y*y*y'
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
   [force_v]
     type = BodyForce
     variable = v
     function = 'x*x*x+y*y*y'
-  [../]
+  []
 []
 
 [BCs]
@@ -42,13 +42,13 @@
     variable = u
     boundary = 'left bottom right top'
     value = 0
-  [../]
+  []
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 'left bottom right top'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,7 +66,7 @@
     type = ElementL2Difference
     variable = u
     other_variable = v
-  [../]
+  []
 []
 
 [Outputs]

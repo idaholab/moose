@@ -12,7 +12,7 @@
   [c]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [ICs]
@@ -25,34 +25,34 @@
     invalue = 1.0
     outvalue = -0.8
     int_width = 4.0
-  [../]
+  []
 []
 
 [Kernels]
   [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [CHSolid]
     type = CahnHilliard
     variable = c
     mob_name = M
     f_name = F
-  [../]
+  []
   [CHInterface]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -60,12 +60,12 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 1.0'
-  [../]
+  []
   [free_energy]
     type = MathEBFreeEnergy
     property_name = F
     c = c
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,5 +91,5 @@
   [oversample]
     type = Exodus
     refinements = 2
-  [../]
+  []
 []

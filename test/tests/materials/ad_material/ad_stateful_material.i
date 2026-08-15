@@ -8,7 +8,7 @@
 [Variables]
   [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -18,7 +18,7 @@
     prop_to_use = 'AdAd'
     ad_mat_prop = 'diffusivity'
     regular_mat_prop = 'unused_diffusivity'
-  [../]
+  []
 []
 
 [Kernels]
@@ -26,7 +26,7 @@
     type = BodyForce
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -35,13 +35,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -49,11 +49,11 @@
     type = GenericConstantMaterial
     prop_names = 'unused_diffusivity'
     prop_values = '0'
-  [../]
+  []
   [ad_stateful]
     type = ADStatefulMaterial
     u = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -74,5 +74,5 @@
   [exodus]
     type = Exodus
     show_material_properties = 'diffusivity'
-  [../]
+  []
 []

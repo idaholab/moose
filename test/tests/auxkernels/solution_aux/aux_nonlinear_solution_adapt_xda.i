@@ -12,41 +12,41 @@
     [jump_indicator]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
+    []
+  []
   [Markers]
     [error_frac]
       type = ErrorFractionMarker
       indicator = jump_indicator
       refine = 0.7
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_aux]
-  [../]
+  []
 []
 
 [Functions]
   [u_xda_func]
     type = SolutionFunction
     solution = xda_u
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -55,7 +55,7 @@
     variable = u_aux
     solution = xda_u_aux
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -64,13 +64,13 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [UserObjects]
@@ -81,7 +81,7 @@
     es = aux_nonlinear_solution_adapt_out_0004.xda
     system_variables = u_aux
     execute_on = initial
-  [../]
+  []
   [xda_u]
     type = SolutionUserObject
     system = nl0
@@ -89,7 +89,7 @@
     es = aux_nonlinear_solution_adapt_out_0004.xda
     system_variables = u
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]
@@ -107,5 +107,5 @@
     function = u_xda_func
     variable = u
     type = FunctionIC
-  [../]
+  []
 []

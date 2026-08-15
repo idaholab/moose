@@ -19,8 +19,8 @@
         kappa = 20.0
         coupled_variables = 'eta'
         solve_type = direct
-      [../]
-    [../]
+      []
+    []
     [Nonconserved]
       [eta]
         free_energy = F
@@ -29,9 +29,9 @@
         coupled_variables = 'c'
         family = HERMITE
         order = THIRD
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -44,12 +44,12 @@
     y2 = 35
     inside = 0.1
     outside = 0.9
-  [../]
+  []
   [eta_IC]
     type = ConstantIC
     variable = eta
     value = 0.5
-  [../]
+  []
 []
 
 [Materials]
@@ -58,14 +58,14 @@
     property_name = F
     coupled_variables = 'eta c'
     expression = '(1 - eta)*10.0*(c - 0.1)^2 + eta*(8.0*(c - 0.9)^2) + 10.0*eta^2*(1-eta)^2'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,5 +92,5 @@
   [out]
     type = Exodus
     refinements = 2
-  [../]
+  []
 []

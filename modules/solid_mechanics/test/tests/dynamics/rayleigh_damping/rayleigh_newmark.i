@@ -34,7 +34,7 @@
     strain = SMALL
     incremental = false
     stiffness_damping_coefficient = 0.1
-  [../]
+  []
 []
 
 

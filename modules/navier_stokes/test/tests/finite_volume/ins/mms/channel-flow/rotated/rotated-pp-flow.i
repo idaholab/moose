@@ -250,19 +250,19 @@ two_term_boundary_expansion=true
     function = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [L2v]
     type = ElementL2Error
     variable = v
     function = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [L2p]
     variable = pressure
     function = exact_p
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

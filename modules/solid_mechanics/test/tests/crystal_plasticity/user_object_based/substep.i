@@ -12,26 +12,26 @@
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [fp_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [gss]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [tdisp]
     type = ParsedFunction
     expression = 0.01*t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -39,7 +39,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
@@ -51,7 +51,7 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
+  []
   [fp_zz]
     type = RankTwoAux
     variable = fp_zz
@@ -59,7 +59,7 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
+  []
   [e_zz]
     type = RankTwoAux
     variable = e_zz
@@ -67,14 +67,14 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-  [../]
+  []
   [gss]
     type = MaterialStdVectorAux
     variable = gss
     property = state_var_gss
     index = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -83,25 +83,25 @@
     variable = uy
     boundary = bottom
     value = 0
-  [../]
+  []
   [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
-  [../]
+  []
   [symmz]
     type = DirichletBC
     variable = uz
     boundary = back
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = uz
     boundary = front
     function = tdisp
-  [../]
+  []
 []
 
 [UserObjects]
@@ -112,12 +112,12 @@
     num_slip_sys_flowrate_props = 2
     flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
     uo_state_var_name = state_var_gss
-  [../]
+  []
   [slip_resistance_gss]
     type = CrystalPlasticitySlipResistanceGSS
     variable_size = 12
     uo_state_var_name = state_var_gss
-  [../]
+  []
   [state_var_gss]
     type = CrystalPlasticityStateVariable
     variable_size = 12
@@ -125,14 +125,14 @@
     group_values = '60.8 60.8 60.8'
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
-  [../]
+  []
   [state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 109.8 2.5'
     uo_slip_rate_name = slip_rate_gss
     uo_state_var_name = state_var_gss
-  [../]
+  []
 []
 
 [Materials]
@@ -146,13 +146,13 @@
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
+  []
 
 []
 
@@ -161,29 +161,29 @@
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [e_zz]
     type = ElementAverageValue
     variable = e_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [gss]
     type = ElementAverageValue
     variable = gss
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

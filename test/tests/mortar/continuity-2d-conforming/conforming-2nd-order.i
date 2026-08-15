@@ -27,11 +27,11 @@
   [exact_sln]
     type = ParsedFunction
     expression= x*x+y*y
-  [../]
+  []
   [ffn]
     type = ParsedFunction
     expression= -4
-  [../]
+  []
 []
 
 [Variables]
@@ -39,25 +39,25 @@
     order = SECOND
     family = LAGRANGE
     block = '1 2'
-  [../]
+  []
 
   [lm]
     order = SECOND
     family = LAGRANGE
     block = secondary_lower
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [ffn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [Constraints]
@@ -69,7 +69,7 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
-  [../]
+  []
 []
 
 [BCs]
@@ -78,7 +78,7 @@
     variable = u
     boundary = '1 2 3 4'
     function = exact_sln
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -88,7 +88,7 @@
     function = exact_sln
     block = '1 2'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -96,7 +96,7 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

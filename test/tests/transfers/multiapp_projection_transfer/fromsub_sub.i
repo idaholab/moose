@@ -11,28 +11,28 @@
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [AuxVariables]
   [x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [x_func]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -41,7 +41,7 @@
     variable = x
     function = x_func
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -50,13 +50,13 @@
     variable = v
     boundary = left
     value = 2
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

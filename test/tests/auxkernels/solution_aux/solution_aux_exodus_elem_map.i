@@ -13,21 +13,21 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [matid]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -37,7 +37,7 @@
     variable = matid
     scale_factor = 1.0
     weighting_type = average
-  [../]
+  []
 []
 
 [UserObjects]
@@ -46,7 +46,7 @@
     mesh = elem_map.e
     system_variables = MatID
     timestep = LATEST
-  [../]
+  []
 []
 
 [BCs]
@@ -55,7 +55,7 @@
     variable = u
     boundary = '1'
     value = 1.0
-  [../]
+  []
 []
 
 [Executioner]

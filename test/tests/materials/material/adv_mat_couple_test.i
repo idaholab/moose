@@ -8,7 +8,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -17,14 +17,14 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [body_force]
     type = BodyForce
     variable = u
     block = 1
     value = 10
-  [../]
+  []
 []
 
 [BCs]
@@ -35,14 +35,14 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -52,7 +52,7 @@
     mat_prop = 'some_prop'
     coupled_mat_prop = 'mp1'
     block = '1 2'
-  [../]
+  []
 
   # This material supplies a value for block 1 ONLY
   [mat_0]
@@ -60,7 +60,7 @@
     block = 1
     prop_names = 'mp1'
     prop_values = 2
-  [../]
+  []
 
   # This material supplies a value for block 2 ONLY
   [mat_1]
@@ -68,7 +68,7 @@
     block = 2
     prop_names = 'mp1'
     prop_values = 200
-  [../]
+  []
 []
 
 [Executioner]

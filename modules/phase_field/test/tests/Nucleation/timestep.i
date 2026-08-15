@@ -14,7 +14,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
@@ -23,29 +23,29 @@
     boundary = left
     variable = c
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     boundary = right
     variable = c
     value = 1
-  [../]
+  []
   [Periodic]
     [all]
       auto_direction = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [c]
     type = Diffusion
     variable = c
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [UserObjects]
@@ -54,24 +54,24 @@
     hold_time = 1
     probability = 0.0005
     radius = 3.27
-  [../]
+  []
   [map]
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
   [dtnuc]
     type = DiscreteNucleationTimeStep
     inserter = inserter
     p2nucleus = 0.1
     dt_max = 0.5
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,7 +85,7 @@
     iteration_window = 2
     timestep_limiting_postprocessor = dtnuc
     dt = 1
-  [../]
+  []
 []
 
 [Outputs]

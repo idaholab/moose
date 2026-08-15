@@ -13,14 +13,14 @@
   [all]
     strain = SMALL
     add_variables = true
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -31,7 +31,7 @@
     index_j = 2
     variable = stress_theta
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
@@ -40,10 +40,10 @@
     type = ComputeElasticityTensor
     C_ijkl = '1022726 113636 113636 1022726 454545'
     fill_method = axisymmetric_rz
-  [../]
+  []
   [elastic_stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [BCs]
@@ -53,14 +53,14 @@
     variable = disp_r
     boundary = left
     value = 0.0
-  [../]
+  []
 
   [no_disp_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
 # exterior and internal pressures
   [exterior_pressure_r]
@@ -68,7 +68,7 @@
     variable = disp_r
     boundary = right
     factor = 200000
-  [../]
+  []
 []
 
 [Debug]
@@ -106,19 +106,19 @@
     optimal_iterations = 6
     iteration_window = 0
     linear_iteration_ratio = 100
-  [../]
+  []
 
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

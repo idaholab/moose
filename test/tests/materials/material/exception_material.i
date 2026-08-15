@@ -13,31 +13,31 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [mat]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [time_derivative]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = matp
-  [../]
+  []
   [f]
     type = BodyForce
     variable = u
     function = '20'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -56,7 +56,7 @@
     type = MaterialRealAux
     variable = mat
     property = matp
-  [../]
+  []
 []
 
 [BCs]
@@ -65,7 +65,7 @@
     variable = u
     boundary = 'left top bottom right'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -74,7 +74,7 @@
     block = 0
     rank = 0
     coupled_var = u
-  [../]
+  []
 []
 
 [Executioner]

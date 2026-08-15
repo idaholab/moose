@@ -10,49 +10,49 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxVariables]
   [distance]
-  [../]
+  []
   [tangential_distance]
-  [../]
+  []
   [normal_x]
-  [../]
+  []
   [normal_y]
-  [../]
+  []
   [normal_z]
-  [../]
+  []
   [closest_point_x]
-  [../]
+  []
   [closest_point_y]
-  [../]
+  []
   [closest_point_z]
-  [../]
+  []
 #  [element_id]
-#  [../]
+#  []
   [side]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_x]
     type = Diffusion
     variable = disp_x
-  [../]
+  []
   [diff_y]
     type = Diffusion
     variable = disp_y
-  [../]
+  []
   [diff_z]
     type = Diffusion
     variable = disp_z
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -63,7 +63,7 @@
     paired_boundary = 12     #primary
     tangential_tolerance = 0.09
     normal_smoothing_distance = 0.2
-  [../]
+  []
 
   [penetrate2]
     type = PenetrationAux
@@ -72,7 +72,7 @@
     paired_boundary = 11     #primary
     tangential_tolerance = 0.09
     normal_smoothing_distance = 0.2
-  [../]
+  []
 
   [penetrate3]
     type = PenetrationAux
@@ -80,7 +80,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = tangential_distance
-  [../]
+  []
 
   [penetrate4]
     type = PenetrationAux
@@ -88,7 +88,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = tangential_distance
-  [../]
+  []
 
   [penetrate5]
     type = PenetrationAux
@@ -96,7 +96,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = normal_x
-  [../]
+  []
 
   [penetrate6]
     type = PenetrationAux
@@ -104,7 +104,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = normal_x
-  [../]
+  []
 
   [penetrate7]
     type = PenetrationAux
@@ -112,7 +112,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = normal_y
-  [../]
+  []
 
   [penetrate8]
     type = PenetrationAux
@@ -120,7 +120,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = normal_y
-  [../]
+  []
 
   [penetrate9]
     type = PenetrationAux
@@ -128,7 +128,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = normal_z
-  [../]
+  []
 
   [penetrate10]
     type = PenetrationAux
@@ -136,7 +136,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = normal_z
-  [../]
+  []
 
   [penetrate11]
     type = PenetrationAux
@@ -144,7 +144,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = closest_point_x
-  [../]
+  []
 
   [penetrate12]
     type = PenetrationAux
@@ -152,7 +152,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = closest_point_x
-  [../]
+  []
 
   [penetrate13]
     type = PenetrationAux
@@ -160,7 +160,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = closest_point_y
-  [../]
+  []
 
   [penetrate14]
     type = PenetrationAux
@@ -168,7 +168,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = closest_point_y
-  [../]
+  []
 
   [penetrate15]
     type = PenetrationAux
@@ -176,7 +176,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = closest_point_z
-  [../]
+  []
 
   [penetrate16]
     type = PenetrationAux
@@ -184,7 +184,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = closest_point_z
-  [../]
+  []
 
 #  [penetrate17]
 #    type = PenetrationAux
@@ -192,7 +192,7 @@
 #    boundary = 11
 #    paired_boundary = 12
 #    quantity = element_id
-#  [../]
+#  []
 #
 #  [penetrate18]
 #    type = PenetrationAux
@@ -200,7 +200,7 @@
 #    boundary = 12
 #    paired_boundary = 11
 #    quantity = element_id
-#  [../]
+#  []
 
   [penetrate19]
     type = PenetrationAux
@@ -208,7 +208,7 @@
     boundary = 11
     paired_boundary = 12
     quantity = side
-  [../]
+  []
 
   [penetrate20]
     type = PenetrationAux
@@ -216,7 +216,7 @@
     boundary = 12
     paired_boundary = 11
     quantity = side
-  [../]
+  []
 []
 
 [BCs]
@@ -225,42 +225,42 @@
     variable = disp_x
     boundary = 1
     value = 0
-  [../]
+  []
 
   [b1y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0
-  [../]
+  []
 
   [b1z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0
-  [../]
+  []
 
   [b2x]
     type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0
-  [../]
+  []
 
   [b2y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = disp_y
-  [../]
+  []
 
   [b2z]
     type = DirichletBC
     variable = disp_z
     boundary = 2
     value = 0
-  [../]
+  []
 []
 
 [Functions]
@@ -268,7 +268,7 @@
     type = PiecewiseLinear
     x = '0.0 0.25 0.75 1.0'
     y = '0.0 2.0 -2.0  0.0'
-  [../]
+  []
 []
 
 [Executioner]

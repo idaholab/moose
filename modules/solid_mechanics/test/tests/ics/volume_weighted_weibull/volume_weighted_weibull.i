@@ -41,7 +41,7 @@
     bin_number = 100
     execute_on = initial
     outputs = initial
-  [../]
+  []
 []
 
 [Executioner]
@@ -52,5 +52,5 @@
   [initial]
     type = CSV
     execute_on = initial
-  [../]
+  []
 []

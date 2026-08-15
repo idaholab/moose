@@ -23,15 +23,15 @@
   [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -41,11 +41,11 @@
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
   [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
@@ -53,11 +53,11 @@
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
   [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
@@ -65,7 +65,7 @@
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -74,25 +74,25 @@
     variable = vel_x
     boundary = 'top_wall bottom_wall'
     value = 0.0
-  [../]
+  []
   [vel_y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'top_wall bottom_wall'
     value = 0.0
-  [../]
+  []
   [vel_x_inlet]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'inlet'
     function = 'vel_x_exact'
-  [../]
+  []
   [vel_y_inlet]
     type = FunctionDirichletBC
     variable = vel_y
     boundary = 'inlet'
     function = 'vel_y_exact'
-  [../]
+  []
 []
 
 [Materials]
@@ -101,7 +101,7 @@
     block = 1
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -109,7 +109,7 @@
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]
@@ -141,17 +141,17 @@
     type = PiecewiseLinear
     data_file = 'f.csv'
     format = 'columns'
-  [../]
+  []
   [vel_x_exact]
     type = WedgeFunction
     var_num = 0
     mu = 1
     rho = 1
-  [../]
+  []
   [vel_y_exact]
     type = WedgeFunction
     var_num = 1
     mu = 1
     rho = 1
-  [../]
+  []
 []

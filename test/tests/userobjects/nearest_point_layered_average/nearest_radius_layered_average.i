@@ -25,26 +25,26 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [ring_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [reac]
     type = Reaction
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
     function = func
-  [../]
+  []
 []
 
 [Functions]
@@ -60,7 +60,7 @@
     variable = ring_average
     execute_on = timestep_end
     user_object = nrla
-  [../]
+  []
 []
 
 [UserObjects]
@@ -74,7 +74,7 @@
               0.35 0 0
               0.45 0 0'
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

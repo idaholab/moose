@@ -8,14 +8,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [np_layered_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,11 +23,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -36,7 +36,7 @@
     variable = np_layered_average
     execute_on = 'timestep_begin'
     user_object = npla
-  [../]
+  []
 []
 
 [BCs]
@@ -45,13 +45,13 @@
     variable = u
     boundary = left
     value = 10
-  [../]
+  []
   [one]
     type = DirichletBC
     variable = u
     boundary = 'right back top'
     value = 12
-  [../]
+  []
 []
 
 [UserObjects]
@@ -62,7 +62,7 @@
     num_layers = 10
     variable = u
     execute_on = 'timestep_begin'
-  [../]
+  []
 []
 
 [Executioner]

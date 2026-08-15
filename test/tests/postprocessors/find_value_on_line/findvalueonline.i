@@ -11,19 +11,19 @@
     [InitialCondition]
       type = FunctionIC
       function = if(x<1,1-x,0)
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = phi
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
 []
 
 [BCs]
@@ -32,13 +32,13 @@
     boundary = left
     variable = phi
     value = 1
-  [../]
+  []
   [fix]
     type = DirichletBC
     boundary = right
     variable = phi
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -49,7 +49,7 @@
     start_point = '0 0 0'
     end_point = '10 0 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

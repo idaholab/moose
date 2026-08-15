@@ -28,7 +28,7 @@
   [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -37,7 +37,7 @@
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -46,21 +46,21 @@
     variable = disp_x
     boundary = 3
     value = 0.0
-  [../]
+  []
 
   [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 
   [back]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -69,7 +69,7 @@
     variable = temp
     block = '1 2'
     function = temp_func
-  [../]
+  []
 []
 
 [Materials]
@@ -77,10 +77,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [small_stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [thermal_expansion_strain1]
     type = ComputeMeanThermalExpansionFunctionEigenstrain
     block = 1
@@ -89,7 +89,7 @@
     stress_free_temperature = 0.0
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [thermal_expansion_strain2]
     type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
     block = 2
@@ -97,7 +97,7 @@
     stress_free_temperature = 0.0
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Functions]
@@ -106,19 +106,19 @@
     symbol_names = 'tsf tref scale' #stress free temp, reference temp, scale factor
     symbol_values = '0.0 0.5  1e-4'
     expression = 'scale * (0.5 * t^2 - 0.5 * tsf^2) / (t - tref)'
-  [../]
+  []
   [cte_func_inst]
     type = PiecewiseLinear
     xy_data = '0 0.0
                2 2.0'
     scale_factor = 1e-4
-  [../]
+  []
 
   [temp_func]
     type = PiecewiseLinear
     xy_data = '0 1
                1 2'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -126,13 +126,13 @@
     type = NodalExtremeValue
     variable = disp_x
     boundary = 101
-  [../]
+  []
 
   [disp_2]
     type = NodalExtremeValue
     variable = disp_x
     boundary = 102
-  [../]
+  []
 []
 
 [Executioner]

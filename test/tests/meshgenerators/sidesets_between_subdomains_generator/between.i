@@ -10,7 +10,7 @@
     primary_block = 'left'
     paired_block = 'right'
     new_boundary = 'in_between'
-  [../]
+  []
 []
 
 [Outputs]

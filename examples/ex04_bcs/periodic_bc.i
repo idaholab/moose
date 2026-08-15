@@ -15,26 +15,26 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing]
     type = ExampleGaussContForcing
     variable = u
     x_center = 2
     y_center = 4
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -46,7 +46,7 @@
     [auto]
       variable = u
       auto_direction = 'x y'
-    [../]
+    []
 
      # Use Translation vectors for everything else
      [manual_x]
@@ -54,15 +54,15 @@
        primary = 'left'
        secondary = 'right'
        translation = '40 0 0'
-     [../]
+     []
 
      [manual_y]
        variable = u
        primary = 'bottom'
        secondary = 'top'
        translation = '0 40 0'
-     [../]
-  [../]
+     []
+  []
 []
 
 [Executioner]

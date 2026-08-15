@@ -17,37 +17,37 @@
     [InitialCondition]
       type = ConstantIC
       value = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
-  [../]
+  []
   [exact_fn]
     type = ParsedGradFunction
     expression = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [abs]
     type = Reaction
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [DGKernels]
@@ -56,7 +56,7 @@
     variable = u
     epsilon = -1
     sigma = 6
-  [../]
+  []
 []
 
 [BCs]
@@ -67,7 +67,7 @@
     function = exact_fn
     epsilon = -1
     sigma = 6
-  [../]
+  []
 []
 
 [Materials]
@@ -75,13 +75,13 @@
     type = StatefulMaterial
     initial_diffusivity = 1
     boundary = 'left'
-  [../]
+  []
   [general]
     type = GenericConstantMaterial
     block = '0'
     prop_names = 'dummy'
     prop_values = '1'
-  [../]
+  []
 []
 
 [Executioner]

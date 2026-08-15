@@ -15,4 +15,4 @@
     copy_files = gold
     combine_streams = True
     cli_args = <CLI_ARGS>
-  [../]
+  []

@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -45,20 +45,20 @@
       type = GradientJumpIndicator
       variable = u
       outputs = none
-    [../]
+    []
     [indicator_1]
       type = GradientJumpIndicator
       variable = u
       outputs = none
-    [../]
-  [../]
+    []
+  []
   [Markers]
     [marker_0]
       type = ValueThresholdMarker
       outputs = markers
       refine = 0.5
       variable = u
-    [../]
+    []
     [marker_1]
       type = BoxMarker
       bottom_left = '0.25 0.25 0'
@@ -66,15 +66,15 @@
       inside = REFINE
       outside = DONT_MARK
       outputs = markers
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
   [markers]
     type = Exodus
-  [../]
+  []
   [no_markers]
     type = Exodus
-  [../]
+  []
 []

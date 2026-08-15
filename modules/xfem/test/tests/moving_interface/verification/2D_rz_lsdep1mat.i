@@ -54,19 +54,19 @@
     type = LevelSetCutUserObject
     level_set_var = ls
     heal_always = true
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [ls]
     order = FIRST
     family = LAGRANGE
-    [../]
+    []
 []
 
 [Kernels]
@@ -74,17 +74,17 @@
     type = MatDiffusion
     variable = u
     diffusivity = diffusion_coefficient
-  [../]
+  []
   [vol_heat_src]
     type = BodyForce
     variable = u
     function = src_func
-  [../]
+  []
   [mat_time_deriv]
     type = TestMatTimeDerivative
     variable = u
     mat_prop_value = rhoCp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -92,7 +92,7 @@
     type = FunctionAux
     variable = ls
     function = ls_func
-  [../]
+  []
 []
 
 [Constraints]
@@ -102,7 +102,7 @@
     geometric_cut_userobject = 'level_set_cut_uo'
     use_penalty = true
     alpha = 1e5
-  [../]
+  []
 []
 
 [Functions]
@@ -110,27 +110,27 @@
     type = ParsedFunction
     expression = '10*(-100*x-100*y+400) + t*(-2.5*y/(2.04*x) + 155/x - t/(2.04*x)
             - 7.5/2.04)'
-  [../]
+  []
   [neumann_func]
     type = ParsedFunction
     expression = '((0.01/2.04)*(-2.5*x-2.5*y-t)+1.55)*100*t'
-  [../]
+  []
   [dirichlet_right_func]
     type = ParsedFunction
     expression = '(-100*y+200)*t+400'
-  [../]
+  []
   [dirichlet_top_func]
     type = ParsedFunction
     expression = '(-100*x+200)*t+400'
-  [../]
+  []
   [k_func]
     type = ParsedFunction
     expression = '(0.01/2.04)*(-2.5*x-2.5*y-t) + 1.55'
-  [../]
+  []
   [ls_func]
     type = ParsedFunction
     expression = '-0.5*(x+y) + 2.04 -0.2*t'
-  [../]
+  []
 []
 
 [Materials]
@@ -138,12 +138,12 @@
     type = GenericConstantMaterial
     prop_names = 'rhoCp'
     prop_values = 10
-  [../]
+  []
   [therm_cond_prop]
     type = GenericFunctionMaterial
     prop_names = 'diffusion_coefficient'
     prop_values = 'k_func'
-  [../]
+  []
 []
 
 [BCs]
@@ -152,25 +152,25 @@
     variable = u
     boundary = 'left'
     function = neumann_func
-  [../]
+  []
   [right_u]
     type = FunctionDirichletBC
     variable = u
     boundary = 'right'
     function = dirichlet_right_func
-  [../]
+  []
   [bottom_du]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = neumann_func
-  [../]
+  []
   [top_u]
     type = FunctionDirichletBC
     variable = u
     boundary = 'top'
     function = dirichlet_top_func
-  [../]
+  []
 []
 
 [ICs]
@@ -178,7 +178,7 @@
     type = ConstantIC
     value = 400
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -204,5 +204,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

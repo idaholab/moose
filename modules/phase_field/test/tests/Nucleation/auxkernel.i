@@ -15,7 +15,7 @@
   [c]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -26,7 +26,7 @@
     no_nucleus_value = -1
     nucleus_value = 2
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [UserObjects]
@@ -36,13 +36,13 @@
     probability = 0.01
     seed = 12346
     radius = 3.27
-  [../]
+  []
   [map]
     type = DiscreteNucleationMap
     int_width = 2
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Executioner]

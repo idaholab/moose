@@ -35,25 +35,25 @@
   [block1]
     # the `block` parameter is only valid insde a subblock.
     block = 1
-  [../]
+  []
   [block2]
     block = 2
     # the `additional_generate_output` parameter is also only valid inside a
     # subblock. Values specified here are appended to the `generate_output`
     # parameter values.
     additional_generate_output = 'strain_yy'
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -64,7 +64,7 @@
     index_j = 2
     variable = stress_theta
     execute_on = timestep_end
-  [../]
+  []
   [strain_theta]
     type = RankTwoAux
     rank_two_tensor = total_strain
@@ -72,7 +72,7 @@
     index_j = 2
     variable = strain_theta
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
@@ -80,15 +80,15 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-  [../]
+  []
   [_elastic_stress1]
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
   [_elastic_stress2]
     type = ComputeFiniteStrainElasticStress
     block = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -97,25 +97,25 @@
     boundary = 'left'
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [top]
     type = DirichletBC
     boundary = 'top'
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [right]
     type = DirichletBC
     boundary = 'right'
     variable = disp_x
     value = 0.01
-  [../]
+  []
   [bottom]
     type = DirichletBC
     boundary = 'bottom'
     variable = disp_y
     value = 0.01
-  [../]
+  []
 []
 
 [Debug]

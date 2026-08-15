@@ -25,34 +25,34 @@
       inside = 1.0
       outside = -0.8
       variable = c
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [CHSolid]
     type = CHMath
     variable = c
     mob_name = M
-  [../]
+  []
   [CHInterface]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -61,7 +61,7 @@
     prop_names  = 'M kappa_c'
     prop_values = '1.0 1.0'
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

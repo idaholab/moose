@@ -12,22 +12,22 @@
     type = PiecewiseLinear
     x = '1 3 5'
     y = '1 4 4'
-  [../]
+  []
   [temp_spike2]
     type = PiecewiseLinear
     x = '0 2 4'
     y = '1 1 2'
-  [../]
+  []
   [temp_spike3]
     type = PiecewiseConstant
     x = '1 6 8'
     y = '1 4 4'
-  [../]
+  []
   [temp_spike4]
     type = PiecewiseConstant
     x = '0 7 9'
     y = '1 1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -39,13 +39,13 @@
     dt = 10
     timestep_limiting_function = 'temp_spike1 temp_spike2 temp_spike3 temp_spike4'
     force_step_every_function_point = true
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

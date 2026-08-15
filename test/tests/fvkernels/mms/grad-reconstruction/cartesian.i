@@ -11,7 +11,7 @@ diff=1.1
     ymax = 1
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
@@ -20,7 +20,7 @@ diff=1.1
     order = CONSTANT
     fv = true
     initial_condition = 1
-  [../]
+  []
 []
 
 [FVKernels]
@@ -28,7 +28,7 @@ diff=1.1
     type = FVElementalAdvection
     variable = v
     velocity = '${a} ${fparse 2 * a} 0'
-  [../]
+  []
   [reaction]
     type = FVReaction
     variable = v
@@ -86,7 +86,7 @@ diff=1.1
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

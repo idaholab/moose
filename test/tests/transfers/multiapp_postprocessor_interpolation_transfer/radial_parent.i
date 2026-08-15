@@ -7,19 +7,19 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [from_sub]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -58,7 +58,7 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = 'sub0.i sub1.i'
-  [../]
+  []
 []
 
 [Transfers]
@@ -69,5 +69,5 @@
     from_multi_app = sub
     interp_type = radial_basis
     radius = 1.5
-  [../]
+  []
 []

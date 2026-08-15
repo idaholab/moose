@@ -29,7 +29,7 @@
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
@@ -37,7 +37,7 @@
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -45,23 +45,23 @@
     type = ComputeIsotropicElasticityTensor
     lambda = 1.0E3
     shear_modulus = 1.3E3
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '2 -1 0.5  1 1.9 0  0.5 0 3'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [tensile]
     type = TensileStressUpdate
     tensile_strength = ts
     smoothing_tol = 0.1
     yield_function_tol = 1.0E-12
-  [../]
+  []
   [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = tensile
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -70,7 +70,7 @@
     full = true
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -38,7 +38,7 @@
     type = PiecewiseLinear
     x = '0   1   2'
     y = '100 200 200'
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -49,7 +49,7 @@
     secondary = 2
     emissivity_primary = 0
     emissivity_secondary = 0
-  [../]
+  []
 []
 
 [Variables]
@@ -57,14 +57,14 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 
@@ -74,14 +74,14 @@
     boundary = 1
     variable = temp
     function = temp
-  [../]
+  []
 
   [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
-  [../]
+  []
 []
 
 [Materials]
@@ -91,14 +91,14 @@
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 100000000.0
-  [../]
+  []
 
   [density]
     type = GenericConstantMaterial
     block = '1 2'
     prop_names = 'density'
     prop_values = '1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -134,27 +134,27 @@
     type = SideAverageValue
     boundary = 2
     variable = temp
-  [../]
+  []
 
   [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
-  [../]
+  []
 
   [flux_left]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
-  [../]
+  []
 
   [flux_right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 
@@ -164,5 +164,5 @@
     type = Exodus
     execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
-  [../]
+  []
 []

@@ -20,16 +20,16 @@
         mobility = M
         kappa = kappa_c
         solve_type = REVERSE_SPLIT
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [AuxVariables]
   [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -38,7 +38,7 @@
     variable = c
     min = -0.1
     max =  0.1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -49,15 +49,15 @@
     interfacial_vars = c
     kappa_names = kappa_c
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -65,7 +65,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 0.5'
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     property_name = fbulk
@@ -75,7 +75,7 @@
     expression = W*(1-c)^2*(1+c)^2
     enable_jit = true
     outputs = exodus
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -83,18 +83,18 @@
     type = SideIntegralVariablePostprocessor
     variable = c
     boundary = top
-  [../]
+  []
   [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
+  []
 []
 
 [Preconditioning]
   [cw_coupling]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

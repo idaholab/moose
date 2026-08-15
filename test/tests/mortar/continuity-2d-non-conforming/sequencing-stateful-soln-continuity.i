@@ -9,23 +9,23 @@
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
-  [../]
+  []
   [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
-  [../]
+  []
 []
 
 [Variables]
   [T]
     block = '1 2'
     order = SECOND
-  [../]
+  []
   [lambda]
     block = '10'
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -42,7 +42,7 @@
     exact_solution = exact_soln
     variable = T
     boundary = '3 4 5 6 7 8'
-  [../]
+  []
 []
 
 [Kernels]
@@ -50,18 +50,18 @@
     type = Diffusion
     variable = T
     block = '1 2'
-  [../]
+  []
   [sink]
     type = Reaction
     variable = T
     block = '1 2'
-  [../]
+  []
   [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
     block = '1 2'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -77,18 +77,18 @@
   [ssm]
     type = SpatialStatefulMaterial
     block = '1 2'
-  [../]
+  []
 []
 
 [Functions]
   [forcing_function]
     type = ParsedFunction
     expression= '-4 + x^2 + y^2'
-  [../]
+  []
   [exact_soln]
     type = ParsedFunction
     expression= 'x^2 + y^2'
-  [../]
+  []
 []
 
 [Debug]
@@ -105,14 +105,14 @@
     secondary_subdomain = 10
     variable = lambda
     secondary_variable = T
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

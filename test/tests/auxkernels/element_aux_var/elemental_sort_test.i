@@ -4,14 +4,14 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -19,19 +19,19 @@
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 0
-  [../]
+  []
 
   [two]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,20 +43,20 @@
     value = 2
     operator = '/'
     coupled = one
-  [../]
+  []
 
   [one]
     variable = one
     type = ConstantAux
     value = 1
-  [../]
+  []
 
   [five]
     type = ConstantAux
     variable = five
     boundary = '3 1'
     value = 5
-  [../]
+  []
 []
 
 [BCs]
@@ -67,14 +67,14 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,5 +87,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

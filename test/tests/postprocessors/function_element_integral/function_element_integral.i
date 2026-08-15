@@ -17,7 +17,7 @@ integral = ${fparse dx * ((y1 + y2) * 0.5 + (y2 + y3) * 0.5)}
     axis = x
     x = '0 2 4'
     y = '${y1} ${y2} ${y3}'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -25,13 +25,13 @@ integral = ${fparse dx * ((y1 + y2) * 0.5 + (y2 + y3) * 0.5)}
     type = FunctionElementIntegral
     function = function
     execute_on = 'initial'
-  [../]
+  []
   [integral_rel_err]
     type = RelativeDifferencePostprocessor
     value1 = integral_pp
     value2 = ${integral}
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]

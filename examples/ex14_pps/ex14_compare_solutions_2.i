@@ -13,20 +13,20 @@
   [forced]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = forced
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = forced
     function = 'x*x+y*y' # Any object expecting a function name can also receive a ParsedFunction string
-  [../]
+  []
 []
 
 [BCs]
@@ -35,7 +35,7 @@
     variable = forced
     boundary = 'bottom right top left'
     value = 0
-  [../]
+  []
 []
 
 [UserObjects]
@@ -45,7 +45,7 @@
     system_variables = forced
     mesh = ex14_compare_solutions_1_out_0000_mesh.xda
     es = ex14_compare_solutions_1_out_0000.xda
-  [../]
+  []
 []
 
 [Functions]
@@ -54,7 +54,7 @@
     # Note: This references the SolutionUserObject above
     type = SolutionFunction
     solution = fine_solution
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,7 +69,7 @@
     # raise the integration order.
     # Note: This will slow down the calculation a bit
     order = SIXTH
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -78,7 +78,7 @@
     type = ElementL2Error
     variable = forced
     function = fine_function
-  [../]
+  []
 []
 
 [Outputs]

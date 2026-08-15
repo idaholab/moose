@@ -7,7 +7,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Problem]
@@ -20,7 +20,7 @@
   num_steps = 10
   [TimeStepper]
     type = ExternalPetscTimeStepper
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -47,7 +47,7 @@
     type = TransientMultiApp
     input_files = 'moose_as_sub.i'
     app_type = ExternalPetscSolverTestApp
-  [../]
+  []
 []
 
 [Transfers]
@@ -56,5 +56,5 @@
     to_multi_app = sub_app
     source_variable = u
     variable = v
-  [../]
+  []
 []

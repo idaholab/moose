@@ -27,7 +27,7 @@
     variable = u
     function_x = 'ffx'
     function_y = 'ffy'
-  [../]
+  []
 []
 
 [BCs]

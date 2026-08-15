@@ -8,7 +8,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Executioner]
@@ -23,7 +23,7 @@
   [num_dofs_nl]
     type = NumDOFs
     system = NL
-  [../]
+  []
 []
 
 [Outputs]

@@ -16,7 +16,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Problem]
@@ -44,8 +44,8 @@
       length_direction = '-1 2 2'
       inside = refine
       outside = do_nothing
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

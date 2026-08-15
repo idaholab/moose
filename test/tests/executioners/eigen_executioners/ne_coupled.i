@@ -16,19 +16,19 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [T]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [power]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -37,22 +37,22 @@
     variable = u
     mat_prop = diffusion
     offset = 0.0
-  [../]
+  []
 
   [rhs]
     type = MassEigenKernel
     variable = u
-  [../]
+  []
 
   [diff_T]
     type = Diffusion
     variable = T
-  [../]
+  []
   [src_T]
     type = CoupledForce
     variable = T
     v = power
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -67,7 +67,7 @@
 
 
     execute_on = linear
-  [../]
+  []
 []
 
 [BCs]
@@ -76,14 +76,14 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 
   [homogeneousT]
     type = DirichletBC
     variable = T
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -93,7 +93,7 @@
     block = 0
     base = 1.0
     coef = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -119,13 +119,13 @@
     variable = u
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
-  [../]
+  []
 
   [udiff]
     type = ElementL2Diff
     variable = u
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]

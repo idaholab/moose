@@ -8,18 +8,18 @@
 [Variables]
   [temp]
     initial_condition = 200.0
-  [../]
+  []
 []
 
 [Kernels]
   [heat_dt]
     type = ADTimeDerivative
     variable = temp
-  [../]
+  []
   [heat_conduction]
     type = ADDiffusion
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -29,7 +29,7 @@
     boundary = 'right'
     T_infinity = 100.0
     heat_transfer_coefficient = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -38,18 +38,18 @@
     variable = temp
     boundary = left
     execute_on = 'TIMESTEP_END initial'
-  [../]
+  []
   [right_temp]
     type = SideAverageValue
     variable = temp
     boundary = right
-  [../]
+  []
   [right_flux]
     type = SideDiffusiveFluxAverage
     variable = temp
     boundary = right
     diffusivity = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,5 +65,5 @@
   [out]
     type = CSV
     time_step_interval = 10
-  [../]
+  []
 []

@@ -5,7 +5,7 @@
     xmin = 0
     xmax = 1
     nx = 10
-  [../]
+  []
 []
 
 [Problem]
@@ -15,14 +15,14 @@
 [Variables]
   [u]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [AuxVariables]
   [v]
-  [../]
+  []
   [x]
-  [../]
+  []
 []
 
 [ICs]
@@ -30,7 +30,7 @@
     type = FunctionIC
     variable = x
     function = 'x'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -38,7 +38,7 @@
     type = FunctionAux
     variable = v
     function = func
-  [../]
+  []
 []
 
 [Controls]
@@ -47,7 +47,7 @@
     parameter = '*/*/scale_factor'
     function = '2'
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Materials]
@@ -58,7 +58,7 @@
     x = '0 1'
     y = '0 10'
     outputs = all
-  [../]
+  []
 []
 
 [Functions]
@@ -67,7 +67,7 @@
     x = '0 1'
     y = '0 10'
     axis = x
-  [../]
+  []
 []
 
 [Executioner]

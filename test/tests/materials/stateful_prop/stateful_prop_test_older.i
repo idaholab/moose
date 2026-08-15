@@ -7,14 +7,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [prop1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,12 +23,12 @@
     variable = u
     prop_name = thermal_conductivity
     prop_state = 'older'                  # Use the "Older" value to compute conductivity
-  [../]
+  []
 
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -37,13 +37,13 @@
     variable = prop1
     property = thermal_conductivity
     execute_on = initial
-  [../]
+  []
 
   [prop1_output]
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
-  [../]
+  []
 []
 
 [BCs]
@@ -52,14 +52,14 @@
     variable = u
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [top]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1.0
-  [../]
+  []
 []
 
 [Materials]
@@ -67,7 +67,7 @@
     type = StatefulTest
     prop_names = thermal_conductivity
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -75,7 +75,7 @@
     type = ElementAverageValue
     variable = prop1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

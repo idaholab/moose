@@ -27,7 +27,7 @@
     cut_data = '1.0  0.5  0.0  0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -35,7 +35,7 @@
     strain = FINITE
     planar_formulation = plane_strain
     add_variables = true
-  [../]
+  []
 []
 
 [Functions]
@@ -43,7 +43,7 @@
     type = PiecewiseLinear
     x='0  50   100'
     y='0  0.02 0.1'
-  [../]
+  []
 []
 
 [BCs]
@@ -52,25 +52,25 @@
     boundary = bottom
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [topx]
     type = DirichletBC
     boundary = top
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [topy]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
     function = pull
-  [../]
+  []
 []
 
 [Constraints]
@@ -81,7 +81,7 @@
     alpha = 1.0e8
     use_displaced_mesh = true
     geometric_cut_userobject = 'line_seg_cut_uo'
-  [../]
+  []
   [disp_y]
     type = XFEMSingleVariableConstraint
     variable = disp_y
@@ -89,7 +89,7 @@
     alpha = 1.0e8
     use_displaced_mesh = true
     geometric_cut_userobject = 'line_seg_cut_uo'
-  [../]
+  []
 []
 
 [Materials]
@@ -98,12 +98,12 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 0
-  [../]
+  []
 
   [_elastic_strain]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -118,7 +118,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -144,5 +144,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

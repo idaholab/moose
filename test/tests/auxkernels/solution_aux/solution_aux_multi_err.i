@@ -9,25 +9,25 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [nn]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [en]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -38,14 +38,14 @@
     scale_factor = 2.0
     #from_variable = source_nodal
     #add_factor = -10teg
-  [../]
+  []
   [en]
     type = SolutionAux
     solution = soln
     variable = en
     scale_factor = 2.0
     #from_variable = source_nodal
-  [../]
+  []
 []
 
 [UserObjects]
@@ -54,7 +54,7 @@
     mesh = cubesource_added.e
     system_variables = 'source_nodal nodal_10'
     timestep = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -63,7 +63,7 @@
     variable = u
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 
 []
 

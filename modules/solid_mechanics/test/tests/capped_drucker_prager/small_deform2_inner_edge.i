@@ -24,7 +24,7 @@
     add_variables = true
     incremental = true
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -33,26 +33,26 @@
     variable = disp_x
     boundary = 'front back'
     function = '-1.5E-6*x+2E-6*x*sin(t)'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '2E-6*y*sin(2*t)'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '-2E-6*z*(sin(t)+sin(2*t))'
-  [../]
+  []
 []
 
 [AuxVariables]
   [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -61,7 +61,7 @@
     index = 0
     property = plastic_yield_function
     variable = yield_fcn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -69,71 +69,71 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
+  []
   [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
+  []
   [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
+  []
   [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
+  []
   [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
+  []
   [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
+  []
   [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
   [f0]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
   [f1]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
 []
 
 [UserObjects]
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1000
-  [../]
+  []
   [cs]
     type = SolidMechanicsHardeningConstant
     value = 1000
-  [../]
+  []
   [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
+  []
   [mc_phi]
     type = SolidMechanicsHardeningConstant
     value = 20
     convert_to_radians = true
-  [../]
+  []
   [mc_psi]
     type = SolidMechanicsHardeningConstant
     value = 0
-  [../]
+  []
   [dp]
     type = SolidMechanicsPlasticDruckerPrager
     mc_cohesion = mc_coh
@@ -142,7 +142,7 @@
     mc_interpolation_scheme = inner_edge
     internal_constraint_tolerance = 1 # irrelevant here
     yield_function_tolerance = 1      # irrelevant here
-  [../]
+  []
 []
 
 [Materials]
@@ -151,12 +151,12 @@
     block = 0
     lambda = 0.0
     shear_modulus = 1.0e7
-  [../]
+  []
   [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = cdp
     perform_finite_strain_rotations = false
-  [../]
+  []
   [cdp]
     type = CappedDruckerPragerStressUpdate
     DP_model = dp
@@ -165,7 +165,7 @@
     yield_function_tol = 1E-8
     tip_smoother = 4
     smoothing_tol = 1E-5
-  [../]
+  []
 []
 
 
@@ -181,5 +181,5 @@
   exodus = false
   [csv]
     type = CSV
-  [../]
+  []
 []

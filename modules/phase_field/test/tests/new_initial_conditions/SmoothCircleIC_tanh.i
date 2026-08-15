@@ -12,7 +12,7 @@
   [c]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [ICs]
@@ -26,15 +26,15 @@
     outvalue = -0.8
     int_width = 8.0
     profile = TANH
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -51,5 +51,5 @@
   [out]
     type = Exodus
     refinements = 1
-  [../]
+  []
 []

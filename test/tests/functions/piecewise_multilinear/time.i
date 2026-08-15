@@ -17,20 +17,20 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [Kernels]
   [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
   [time1_var]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -38,7 +38,7 @@
     type = FunctionAux
     variable = time1_var
     function = time1_fcn
-  [../]
+  []
 []
 
 [Functions]
@@ -46,11 +46,11 @@
   [time1_fcn]
     type = PiecewiseMultilinear
     data_file = time1.txt
-  [../]
+  []
   [time1_answer]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -58,7 +58,7 @@
     type = NodalL2Error
     function = time1_answer
     variable = time1_var
-  [../]
+  []
 []
 
 

@@ -23,14 +23,14 @@
     rotation0_vector = '0 0 1'
     rotation0_angle = 45
     transformation_order = rotation0
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -38,7 +38,7 @@
     type = FunctionIC
     variable = u
     function = solution_fcn
-  [../]
+  []
 []
 
 [Functions]
@@ -46,14 +46,14 @@
     type = SolutionFunction
     from_variable = u
     solution = solution_uo
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

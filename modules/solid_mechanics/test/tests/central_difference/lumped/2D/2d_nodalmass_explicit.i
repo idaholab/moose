@@ -10,32 +10,32 @@
     ymax = 2
     nx = 1
     ny = 2
-  [../]
+  []
   [all_nodes]
     type = BoundingBoxNodeSetGenerator
     new_boundary = 'all'
     input = 'generated_mesh'
     top_right = '1 2 0'
     bottom_left = '0 0 0'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [AuxVariables]
   [accel_x]
-  [../]
+  []
   [vel_x]
-  [../]
+  []
   [accel_y]
-  [../]
+  []
   [vel_y]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,29 +44,29 @@
     variable = accel_x
     displacement = disp_x
     first = false
-  [../]
+  []
   [vel_x]
     type = TestNewmarkTI
     variable = vel_x
     displacement = disp_x
-  [../]
+  []
   [accel_y]
     type = TestNewmarkTI
     variable = accel_y
     displacement = disp_y
     first = false
-  [../]
+  []
   [vel_y]
     type = TestNewmarkTI
     variable = vel_y
     displacement = disp_y
-  [../]
+  []
 []
 
 [Kernels]
   [DynamicSolidMechanics]
     displacements = 'disp_x disp_y'
-  [../]
+  []
 []
 
 [BCs]
@@ -75,14 +75,14 @@
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [x_bot]
     type = FunctionDirichletBC
     boundary = bottom
     variable = disp_x
     function = disp
     preset = false
-  [../]
+  []
 []
 
 [Functions]
@@ -90,7 +90,7 @@
     type = PiecewiseLinear
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # displacement
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -99,13 +99,13 @@
     variable = 'disp_x'
     nodal_mass_file = 'nodal_mass_file.csv'
     boundary = 'all'
-  [../]
+  []
   [nodal_mass_y]
     type = NodalTranslationalInertia
     variable = 'disp_y'
     nodal_mass_file = 'nodal_mass_file.csv'
     boundary = 'all'
-  [../]
+  []
 []
 
 [Materials]
@@ -114,17 +114,17 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
+  []
   [strain_block]
     type = ComputeIncrementalStrain
     block = 0
     displacements = 'disp_x disp_y'
     implicit = false
-  [../]
+  []
   [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -135,7 +135,7 @@
   timestep_tolerance = 1e-6
   [TimeIntegrator]
     type = CentralDifference
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -143,7 +143,7 @@
     type = PointValue
     point = '1.0 2.0 0.0'
     variable = accel_x
-  [../]
+  []
 []
 
 [Outputs]

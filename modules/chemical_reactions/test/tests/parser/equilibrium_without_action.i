@@ -7,18 +7,18 @@
 
 [Variables]
   [a]
-  [../]
+  []
   [b]
-  [../]
+  []
 []
 
 [AuxVariables]
   [pressure]
-  [../]
+  []
   [pa2]
-  [../]
+  []
   [pab]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -28,14 +28,14 @@
     v = a
     log_k = 2
     sto_v = 2
-  [../]
+  []
   [pab]
     type = AqueousEquilibriumRxnAux
     variable = pab
     v = 'a b'
     log_k = -2
     sto_v = '1 1'
-  [../]
+  []
 []
 
 [ICs]
@@ -48,7 +48,7 @@
     y2 = 1
     inside = 1.0e-2
     outside = 1.0e-10
-  [../]
+  []
   [b]
     type = BoundingBoxIC
     variable = b
@@ -58,55 +58,55 @@
     y2 = 1
     inside = 1.0e-2
     outside = 1.0e-10
-  [../]
+  []
   [pressure]
     type = FunctionIC
     variable = pressure
     function = 2-x
-  [../]
+  []
 []
 
 [Kernels]
   [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
+  []
   [a_diff]
     type = PrimaryDiffusion
     variable = a
-  [../]
+  []
   [a_conv]
     type = PrimaryConvection
     variable = a
     p = pressure
-  [../]
+  []
   [b_ie]
     type = PrimaryTimeDerivative
     variable = b
-  [../]
+  []
   [b_diff]
     type = PrimaryDiffusion
     variable = b
-  [../]
+  []
   [b_conv]
     type = PrimaryConvection
     variable = b
     p = pressure
-  [../]
+  []
   [a1_eq]
     type = CoupledBEEquilibriumSub
     variable = a
     log_k = 2
     weight = 2
     sto_u = 2
-  [../]
+  []
   [a1_diff]
     type = CoupledDiffusionReactionSub
     variable = a
     log_k = 2
     weight = 2
     sto_u = 2
-  [../]
+  []
   [a1_conv]
     type = CoupledConvectionReactionSub
     variable = a
@@ -114,7 +114,7 @@
     weight = 2
     sto_u = 2
     p = pressure
-  [../]
+  []
   [a2_eq]
     type = CoupledBEEquilibriumSub
     variable = a
@@ -123,7 +123,7 @@
     weight = 1
     sto_v = 1
     sto_u = 1
-  [../]
+  []
   [a2_diff]
     type = CoupledDiffusionReactionSub
     variable = a
@@ -132,7 +132,7 @@
     weight = 1
     sto_v = 1
     sto_u = 1
-  [../]
+  []
   [a2_conv]
     type = CoupledConvectionReactionSub
     variable = a
@@ -142,7 +142,7 @@
     sto_v = 1
     sto_u = 1
     p = pressure
-  [../]
+  []
   [b2_eq]
     type = CoupledBEEquilibriumSub
     variable = b
@@ -151,7 +151,7 @@
     weight = 1
     sto_v = 1
     sto_u = 1
-  [../]
+  []
   [b2_diff]
     type = CoupledDiffusionReactionSub
     variable = b
@@ -160,7 +160,7 @@
     weight = 1
     sto_v = 1
     sto_u = 1
-  [../]
+  []
   [b2_conv]
     type = CoupledConvectionReactionSub
     variable = b
@@ -170,7 +170,7 @@
     sto_v = 1
     sto_u = 1
     p = pressure
-  [../]
+  []
 []
 
 [BCs]
@@ -179,23 +179,23 @@
     variable = a
     boundary = left
     value = 1.0e-2
-  [../]
+  []
   [a_right]
     type = ChemicalOutFlowBC
     variable = a
     boundary = right
-  [../]
+  []
   [b_left]
     type = DirichletBC
     variable = b
     boundary = left
     value = 1.0e-2
-  [../]
+  []
   [b_right]
     type = ChemicalOutFlowBC
     variable = b
     boundary = right
-  [../]
+  []
 []
 
 [Materials]
@@ -203,7 +203,7 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -225,5 +225,5 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

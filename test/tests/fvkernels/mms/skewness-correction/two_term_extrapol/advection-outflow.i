@@ -9,14 +9,14 @@ a=1
   [gen_mesh]
     type = FileMeshGenerator
     file = skewed.msh
-  [../]
+  []
 []
 
 [Variables]
   [v]
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
-  [../]
+  []
 []
 
 [FVKernels]
@@ -24,17 +24,17 @@ a=1
     type = FVAdvection
     variable = v
     velocity = '${a} 0 0'
-  [../]
+  []
   [diffusion]
     type = FVDiffusion
     variable = v
     coeff = coeff
-  [../]
+  []
   [body]
     type = FVBodyForce
     variable = v
     function = 'forcing'
-  [../]
+  []
 []
 
 [FVBCs]
@@ -101,7 +101,7 @@ a=1
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

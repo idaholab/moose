@@ -10,27 +10,27 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [multi_layered_average]
-  [../]
+  []
   [element_multi_layered_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -39,13 +39,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -72,7 +72,7 @@
     type = TransientMultiApp
     input_files = sub.i
     app_type = MooseTestApp
-  [../]
+  []
 []
 
 [Transfers]
@@ -82,12 +82,12 @@
     type = MultiAppUserObjectTransfer
     from_multi_app = sub_app
     skip_coordinate_collapsing = true
-  [../]
+  []
   [element_layered_transfer]
     user_object = layered_average
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer
     from_multi_app = sub_app
     skip_coordinate_collapsing = true
-  [../]
+  []
 []

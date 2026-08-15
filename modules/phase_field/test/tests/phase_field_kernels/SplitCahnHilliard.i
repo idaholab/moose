@@ -29,12 +29,12 @@
       invalue = 1.0
       outvalue = -0.5
       int_width = 30.0
-    [../]
-  [../]
+    []
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -44,17 +44,17 @@
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [Materials]
@@ -62,7 +62,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '100 40'
-  [../]
+  []
 
   [free_energy]
     # equivalent to `MathFreeEnergy`
@@ -71,7 +71,7 @@
     coupled_variables = 'c'
     expression = '0.25*(1+c)^2*(1-c)^2'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -79,7 +79,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -25,45 +25,45 @@
     variable = disp_x
     boundary = back
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
-  [../]
+  []
   [bottomz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
   [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = '(sin(0.05*t)+x)/1E0'
-  [../]
+  []
   [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = '(cos(0.04*t)+x*y)/1E0'
-  [../]
+  []
   [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = 't/1E2'
-  [../]
+  []
 []
 
 [AuxVariables]
   [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -72,7 +72,7 @@
     index = 0
     property = plastic_yield_function
     variable = yield_fcn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -81,11 +81,11 @@
     point = '0 0 0'
     variable = yield_fcn
     outputs = 'console'
-  [../]
+  []
   [should_be_zero]
     type = FunctionValuePostprocessor
     function = should_be_zero_fcn
-  [../]
+  []
 []
 
 [Functions]
@@ -94,24 +94,24 @@
     expression = 'if(a<1E-3,0,a)'
     symbol_names = 'a'
     symbol_values = 'yield_fcn_at_zero'
-  [../]
+  []
 []
 
 [UserObjects]
   [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 1E3
-  [../]
+  []
   [mc_phi]
     type = SolidMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
+  []
   [mc_psi]
     type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
-  [../]
+  []
   [mc]
     type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
@@ -124,7 +124,7 @@
     mc_edge_smoother = 10
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-6
-  [../]
+  []
 []
 
 [Materials]
@@ -133,7 +133,7 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
-  [../]
+  []
   [mc]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -142,7 +142,7 @@
     plastic_models = mc
     debug_fspb = crash
     deactivation_scheme = safe
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -150,7 +150,7 @@
     add_variables = true
     incremental = true
     strain = finite
-  [../]
+  []
 []
 
 
@@ -166,5 +166,5 @@
   exodus = false
   [csv]
     type = CSV
-    [../]
+    []
 []

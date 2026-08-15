@@ -17,8 +17,8 @@
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -27,17 +27,17 @@
     variable = c
     mob_name = M
     f_name = F
-  [../]
+  []
   [int]
     type = CHInterfaceAniso
     variable = c
     kappa_name = kappa_c
     mob_name = M
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -45,26 +45,26 @@
     type = GenericConstantMaterial
     prop_names = 'kappa_c'
     prop_values = '2.0'
-  [../]
+  []
   [mob]
     type = ConstantAnisotropicMobility
     tensor = '0.1 0 0
               0   1 0
               0   0 0'
     M_name = M
-  [../]
+  []
   [free_energy]
     type = MathEBFreeEnergy
     property_name = F
     c = c
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -27,13 +27,13 @@
     cut_data = '0.5  1.0  0.5  0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Variables]
   [temp]
     initial_condition = 300.0     # set initial temp to ambient
-  [../]
+  []
 []
 
 [Functions]
@@ -41,14 +41,14 @@
     type = PiecewiseLinear
     x = '0   2'
     y = '0  0.1'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]         # gradient term in heat conduction equation
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -58,14 +58,14 @@
     variable = temp
     boundary = 3
     function = temp_left
-  [../]
+  []
 
   [right_temp]
     type = DirichletBC
     variable = temp
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -75,7 +75,7 @@
     temp = temp
     thermal_conductivity = 5.0
     specific_heat = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -112,5 +112,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

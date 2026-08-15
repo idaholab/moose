@@ -15,14 +15,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [bubble_map]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,7 +31,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing_1]
     type = GaussContForcing
@@ -41,7 +41,7 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [forcing_2]
     type = GaussContForcing
@@ -51,7 +51,7 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [forcing_3]
     type = GaussContForcing
@@ -61,7 +61,7 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [forcing_4]
     type = GaussContForcing
@@ -71,12 +71,12 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -85,7 +85,7 @@
     variable = bubble_map
     execute_on = timestep_end
     flood_counter = bubbles
-  [../]
+  []
 []
 
 [BCs]
@@ -93,8 +93,8 @@
     [x]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
@@ -103,7 +103,7 @@
     variable = u
     threshold = 0.3
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Executioner]
@@ -118,7 +118,7 @@
 #    coarsen_fraction = .02
 #    max_h_level = 3
 #    error_estimator = KellyErrorEstimator
-#  [../]
+#  []
 []
 
 [Outputs]

@@ -47,25 +47,25 @@
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 0.5380168369562588'
-  [../]
+  []
   [disp_x2]
     type = PiecewiseLinear
     scale_factor = 0.5
     x = '0. 1.'
     y = '0. 0.5380168369562588'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
   [disp_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -74,7 +74,7 @@
     decomposition_method = EigenSolution
     incremental = true
     strain = FINITE
-  [../]
+  []
 []
 
 [BCs]
@@ -83,27 +83,27 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 
   [x]
     type = FunctionDirichletBC
     boundary = 3
     variable = disp_x
     function = disp_x
-  [../]
+  []
   [x2]
     type = FunctionDirichletBC
     boundary = 4
     variable = disp_x
     function = disp_x2
-  [../]
+  []
 []
 
 [Materials]
@@ -111,11 +111,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -128,7 +128,7 @@
 
   [Quadrature]
     order = THIRD
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -136,7 +136,7 @@
     type = InternalVolume
     boundary = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

@@ -15,14 +15,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [periodic_dist]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [pid]
     order = CONSTANT
     family = monomial
@@ -33,24 +33,24 @@
   [pidaux]
     type = ProcessorIDAux
     variable = pid
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing]
     type = GaussContForcing
     variable = u
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,7 +58,7 @@
     type = PeriodicDistanceAux
     variable = periodic_dist
     point = '4 6 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -66,8 +66,8 @@
     [all]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

@@ -12,25 +12,25 @@ u_left = 0.5
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [pot]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [adv_u]
     type = PotentialAdvection
     variable = u
     potential = pot
-  [../]
+  []
   [diff_pot]
     type = Diffusion
     variable = pot
-  [../]
+  []
 []
 
 [BCs]
@@ -39,13 +39,13 @@ u_left = 0.5
     type = DirichletBC
     value = ${u_left}
     variable = u
-  [../]
+  []
   [right]
     boundary = right
     type = DirichletBC
     variable = u
     value = 0
-  [../]
+  []
 
   [left_pot]
     boundary = left
@@ -55,13 +55,13 @@ u_left = 0.5
     denom_user_object = denom_user_object
     v = u
     Vb = 1
-  [../]
+  []
   [right_pot]
     boundary = right
     type = DirichletBC
     variable = pot
     value = 0
-  [../]
+  []
 []
 
 [UserObjects]
@@ -70,20 +70,20 @@ u_left = 0.5
     u = u
     boundary = left
     execute_on = 'linear nonlinear'
-  [../]
+  []
   [denom_user_object]
     type = DenomShapeSideUserObject
     u = u
     boundary = left
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_flux]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -93,7 +93,7 @@ u_left = 0.5
     u = u
     potential = pot
     component = 0
-  [../]
+  []
 []
 
 [Problem]
@@ -105,7 +105,7 @@ u_left = 0.5
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -127,21 +127,21 @@ u_left = 0.5
     type = FunctionIC
     variable = u
     function = ic_u
-  [../]
+  []
   [pot]
     type = FunctionIC
     variable = pot
     function = ic_pot
-  [../]
+  []
 []
 
 [Functions]
   [ic_u]
     type = ParsedFunction
     expression = '${u_left} * (1 - x)'
-  [../]
+  []
   [ic_pot]
     type = ParsedFunction
     expression = '1 - x'
-  [../]
+  []
 []

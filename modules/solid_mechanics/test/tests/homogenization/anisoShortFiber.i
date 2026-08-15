@@ -25,29 +25,29 @@
   [dx_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [dy_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [dx_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [dy_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [dx_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [dy_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 
@@ -60,7 +60,7 @@
     displacements = 'dx_xx dy_xx'
     use_displaced_mesh = false
     base_name = xx
-  [../]
+  []
   [div_y_xx]
     type = StressDivergenceTensors
     component = 1
@@ -68,7 +68,7 @@
     displacements = 'dx_xx dy_xx'
     use_displaced_mesh = false
     base_name = xx
-  [../]
+  []
   [div_x_yy]
     type = StressDivergenceTensors
     component = 0
@@ -76,7 +76,7 @@
     displacements = 'dx_yy dy_yy'
     use_displaced_mesh = false
     base_name = yy
-  [../]
+  []
   [div_y_yy]
     type = StressDivergenceTensors
     component = 1
@@ -84,7 +84,7 @@
     displacements = 'dx_yy dy_yy'
     use_displaced_mesh = false
     base_name = yy
-  [../]
+  []
   [div_x_xy]
     type = StressDivergenceTensors
     component = 0
@@ -92,7 +92,7 @@
     displacements = 'dx_xy dy_xy'
     use_displaced_mesh = false
     base_name = xy
-  [../]
+  []
   [div_y_xy]
     type = StressDivergenceTensors
     component = 1
@@ -100,7 +100,7 @@
     displacements = 'dx_xy dy_xy'
     use_displaced_mesh = false
     base_name = xy
-  [../]
+  []
 
   [aeh_dx_xx]
     type = AsymptoticExpansionHomogenizationKernel
@@ -108,14 +108,14 @@
     component = 0
     column = xx
     base_name = xx
-  [../]
+  []
   [aeh_dy_xx]
     type = AsymptoticExpansionHomogenizationKernel
     variable = dy_xx
     component = 1
     column = xx
     base_name = xx
-  [../]
+  []
 
   [aeh_dx_yy]
     type = AsymptoticExpansionHomogenizationKernel
@@ -123,14 +123,14 @@
     component = 0
     column = yy
     base_name = yy
-  [../]
+  []
   [aeh_dy_yy]
     type = AsymptoticExpansionHomogenizationKernel
     variable = dy_yy
     component = 1
     column = yy
     base_name = yy
-  [../]
+  []
 
   [aeh_dx_xy]
     type = AsymptoticExpansionHomogenizationKernel
@@ -138,14 +138,14 @@
     component = 0
     column = xy
     base_name = xy
-  [../]
+  []
   [aeh_dy_xy]
     type = AsymptoticExpansionHomogenizationKernel
     variable = dy_xy
     component = 1
     column = xy
     base_name = xy
-  [../]
+  []
 []
 
 [BCs]
@@ -155,56 +155,56 @@
       primary = 30
       secondary = 40
       translation = '0 1 0'
-    [../]
+    []
 
     [left_right]
       primary = 10
       secondary = 20
       translation = '1 0 0'
-    [../]
-  [../]
+    []
+  []
 
   [dx_xx_anchor]
     type = DirichletBC
     variable = dx_xx
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [dy_xx_anchor]
     type = DirichletBC
     variable = dy_xx
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [dx_yy_anchor]
     type = DirichletBC
     variable = dx_yy
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [dy_yy_anchor]
     type = DirichletBC
     variable = dy_yy
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [dx_xy_anchor]
     type = DirichletBC
     variable = dx_xy
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [dy_xy_anchor]
     type = DirichletBC
     variable = dy_xy
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -212,30 +212,30 @@
   [elastic_stress_xx]
     type = ComputeLinearElasticStress
     base_name = xx
-  [../]
+  []
   [elastic_stress_yy]
     type = ComputeLinearElasticStress
     base_name = yy
-  [../]
+  []
   [elastic_stress_xy]
     type = ComputeLinearElasticStress
     base_name = xy
-  [../]
+  []
   [strain_xx]
     type = ComputeSmallStrain
     displacements = 'dx_xx dy_xx'
     base_name = xx
-  [../]
+  []
   [strain_yy]
     type = ComputeSmallStrain
     displacements = 'dx_yy dy_yy'
     base_name = yy
-  [../]
+  []
   [strain_xy]
     type = ComputeSmallStrain
     displacements = 'dx_xy dy_xy'
     base_name = xy
-  [../]
+  []
 
 
   [block1]
@@ -244,7 +244,7 @@
     fill_method = symmetric9
     C_ijkl = '81.360117 26.848839 26.848839 81.360117 26.848839 81.360117 27.255639 27.255639 27.255639'
     base_name = xx
-  [../]
+  []
 
   [block2]
     type =  ComputeElasticityTensor
@@ -252,7 +252,7 @@
     fill_method = symmetric9
     C_ijkl = '81.360117 26.848839 26.848839 81.360117 26.848839 81.360117 27.255639 27.255639 27.255639'
     base_name = yy
-  [../]
+  []
 
   [block3]
     type =  ComputeElasticityTensor
@@ -260,7 +260,7 @@
     fill_method = symmetric9
     C_ijkl = '81.360117 26.848839 26.848839 81.360117 26.848839 81.360117 27.255639 27.255639 27.255639'
     base_name = xy
-  [../]
+  []
 
   [block4]
     type =  ComputeElasticityTensor
@@ -268,7 +268,7 @@
     fill_method = symmetric9
     C_ijkl = '416.66667 83.33333 83.33333 416.6667 83.33333 416.66667 166.66667 166.66667 166.66667'
     base_name = xx
-  [../]
+  []
 
   [block5]
     type =  ComputeElasticityTensor
@@ -276,7 +276,7 @@
     fill_method = symmetric9
     C_ijkl = '416.66667 83.33333 83.33333 416.6667 83.33333 416.66667 166.66667 166.66667 166.66667'
     base_name = yy
-  [../]
+  []
 
   [block6]
     type =  ComputeElasticityTensor
@@ -284,7 +284,7 @@
     fill_method = symmetric9
     C_ijkl = '416.66667 83.33333 83.33333 416.6667 83.33333 416.66667 166.66667 166.66667 166.66667'
     base_name = xy
- [../]
+ []
 
 []
 
@@ -302,7 +302,7 @@
     dx_xy = dx_xy
     dy_xy = dy_xy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [E2222]
     type = AsymptoticExpansionHomogenizationElasticConstants
@@ -316,7 +316,7 @@
     dx_xy = dx_xy
     dy_xy = dy_xy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [E1122]
     type = AsymptoticExpansionHomogenizationElasticConstants
@@ -330,7 +330,7 @@
     dx_xy = dx_xy
     dy_xy = dy_xy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
 
   [E2211]
@@ -345,7 +345,7 @@
     dx_xy = dx_xy
     dy_xy = dy_xy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
 
   [E1212]
@@ -360,14 +360,14 @@
     dx_xy = dx_xy
     dy_xy = dy_xy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
  [SMP]
   type = SMP
   full = true
- [../]
+ []
 []
 
 

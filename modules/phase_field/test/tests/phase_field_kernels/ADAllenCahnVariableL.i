@@ -18,8 +18,8 @@
     [InitialCondition]
       type = FunctionIC
       function = 'x/24+0.5'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
@@ -34,21 +34,21 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 3.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [detadt]
     type = ADTimeDerivative
     variable = eta
-  [../]
+  []
 
   [ACBulk]
     type = ADAllenCahn
     variable = eta
     f_name = F
-  [../]
+  []
 
   [ACInterface]
     type = ADACInterface
@@ -56,7 +56,7 @@
     kappa_name = 1
     variable_L = true
     coupled_variables = chi
-  [../]
+  []
 []
 
 [Materials]
@@ -65,14 +65,14 @@
     function = F2
     f_name = L
     op = 'eta chi'
-  [../]
+  []
 
   [free_energy]
     type = ADTestDerivativeFunction
     function = F1
     f_name = F
     op = 'eta'
-  [../]
+  []
 []
 
 [Executioner]

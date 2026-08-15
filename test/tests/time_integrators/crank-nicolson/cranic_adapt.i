@@ -14,7 +14,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -22,12 +22,12 @@
     type = ParsedFunction
     # dudt = 3*t^2*(x^2 + y^2)
     expression = sin(pi*x)*sin(pi*y)+2*t*pi*pi*sin(pi*x)*sin(pi*y)
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*sin(pi*x)*sin(pi*y)
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,18 +36,18 @@
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -56,7 +56,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -64,7 +64,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -73,7 +73,7 @@
   # Use the block format instead of the scheme parameter
   [TimeIntegrator]
     type = CrankNicolson
-  [../]
+  []
 
   solve_type = 'PJFNK'
 
@@ -85,7 +85,7 @@
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
-  [../]
+  []
 []
 
 [Outputs]

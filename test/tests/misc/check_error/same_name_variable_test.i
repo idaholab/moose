@@ -16,14 +16,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Executioner]

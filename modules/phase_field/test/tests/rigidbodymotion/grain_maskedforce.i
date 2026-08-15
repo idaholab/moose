@@ -32,12 +32,12 @@
       3D_spheres = false
       variable = c
       block = 0
-    [../]
-  [../]
+    []
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -47,17 +47,17 @@
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
   [motion]
     type = MultiGrainRigidBodyMotion
     c = c
@@ -66,7 +66,7 @@
     grain_tracker_object = grain_center
     grain_force = grain_force
     grain_volumes = grain_volumes
-  [../]
+  []
 []
 
 [Materials]
@@ -75,7 +75,7 @@
     block = 0
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '5.0  2.0      0.1'
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     block = 0
@@ -85,16 +85,16 @@
     constant_expressions = '0.1          1.0e-2'
     expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     derivative_order = 2
-  [../]
+  []
 []
 
 [AuxVariables]
   [eta0]
-  [../]
+  []
   [eta1]
-  [../]
+  []
   [bnds]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -105,7 +105,7 @@
     op_num = 2
     v = 'eta0 eta1'
     block = 0
-  [../]
+  []
 []
 
 [ICs]
@@ -118,7 +118,7 @@
     variable = eta0
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
+  []
   [IC_eta1]
     int_width = 4.0
     x1 = 30.0
@@ -128,23 +128,23 @@
     variable = eta1
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
+  []
 []
 
 [VectorPostprocessors]
   [forces_cosnt]
     type = GrainForcesPostprocessor
     grain_force = grain_force_const
-  [../]
+  []
   [forces_total]
     type = GrainForcesPostprocessor
     grain_force = grain_force
-  [../]
+  []
   [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -153,26 +153,26 @@
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
-  [../]
+  []
   [grain_force_const]
     type = ConstantGrainForceAndTorque
     execute_on = 'linear nonlinear'
     force =  '5.0 10.0 0.0 1.0 0.0 0.0'
     torque = '0.0 0.0 50.0 0.0 0.0 5.0'
-  [../]
+  []
   [grain_force]
     type = MaskedGrainForceAndTorque
     grain_force = grain_force_const
     pinned_grains = 0
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

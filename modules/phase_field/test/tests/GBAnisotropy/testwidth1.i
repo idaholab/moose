@@ -22,7 +22,7 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [Functions]
@@ -31,19 +31,19 @@
     expression = '0.5*(1.0-tanh((x)*sqrt(m/kappa/2.0)))'
     symbol_names = 'm kappa'
     symbol_values = '0.26514 331.414'
-  [../]
+  []
   [ic_func_eta2]
     type = ParsedFunction
     expression = '0.5*(1.0+tanh((x)*sqrt(m/kappa/2.0)))*0.5*(1.0-tanh((x-500)*sqrt(m/kappa/2.0)))'
     symbol_names = 'm kappa'
     symbol_values = '0.26514 331.414'
-  [../]
+  []
   [ic_func_eta3]
     type = ParsedFunction
     expression = '0.5*(1.0+tanh((x-500)*sqrt(m/kappa/2.0)))'
     symbol_names = 'm kappa'
     symbol_values = '0.26514 331.414'
-  [../]
+  []
 []
 
 [ICs]
@@ -51,37 +51,37 @@
     variable = gr0
     type = FunctionIC
     function = ic_func_eta1
-  [../]
+  []
   [eta2_ic]
     variable = gr1
     type = FunctionIC
     function = ic_func_eta2
-  [../]
+  []
   [eta3_ic]
     variable = gr2
     type = FunctionIC
     function = ic_func_eta3
-  [../]
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [unique_grains]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [var_indices]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -89,7 +89,7 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
@@ -102,7 +102,7 @@
     # molar_volume_value = 7.11e-6 #Units:m^3/mol
     Anisotropic_GB_file_name = anisotropy_energy.txt
     inclination_anisotropy = false # true
-  [../]
+  []
 []
 
 [Executioner]

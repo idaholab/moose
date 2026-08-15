@@ -11,7 +11,7 @@
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
@@ -19,7 +19,7 @@
     type = FVDiffusion
     variable = u
     coeff = 0.1
-  [../]
+  []
 []
 
 [FVBCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
   [right]
     type = FVDirichletBC
     variable = u
     boundary = right
     value = 10
-  [../]
+  []
 []
 
 [Executioner]

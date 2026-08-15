@@ -13,16 +13,16 @@
 
 [Variables]
   [w]
-  [../]
+  []
   [phi]
-  [../]
+  []
   [eta0]
-  [../]
+  []
 []
 
 [AuxVariables]
   [bnds]
-  [../]
+  []
 []
 
 [ICs]
@@ -35,7 +35,7 @@
     y2 = 0
     inside = 0.1
     outside = 0
-  [../]
+  []
   [IC_phi]
     type = BoundingBoxIC
     variable = phi
@@ -45,7 +45,7 @@
     y2 = 0
     inside = 1
     outside = 0
-  [../]
+  []
   [IC_eta0]
     type = BoundingBoxIC
     variable = eta0
@@ -55,14 +55,14 @@
     y2 = 0
     inside = 1
     outside = 0
-  [../]
+  []
 []
 
 [AuxKernels]
   [bnds_aux]
     type = BndsCalcAux
     variable = bnds
-  [../]
+  []
 []
 
 [Modules]
@@ -86,8 +86,8 @@
       mobility_name_op = L_phi
       kappa_op = kappa
       free_energies_op = 'omegab omegam'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -96,20 +96,20 @@
     type = GenericConstantMaterial
     prop_names =  'Va      cb_eq cm_eq kb   km  mu  gamma L      L_phi  kappa  kB'
     prop_values = '0.04092 1.0   1e-5  1400 140 1.5 1.5   5.3e+3 2.3e+4 295.85 8.6173324e-5'
-  [../]
+  []
   #SWITCHING FUNCTIONS
   [switchb]
     type = SwitchingFunctionMultiPhaseMaterial
     h_name = hb
     all_etas = 'phi eta0'
     phase_etas = 'phi'
-  [../]
+  []
   [switchm]
     type = SwitchingFunctionMultiPhaseMaterial
     h_name = hm
     all_etas = 'phi eta0'
     phase_etas = 'eta0'
-  [../]
+  []
   [omegab]
     type = DerivativeParsedMaterial
     property_name = omegab
@@ -117,7 +117,7 @@
     material_property_names = 'Va kb cb_eq'
     expression = '-0.5*w^2/Va^2/kb - w/Va*cb_eq'
     derivative_order = 2
-  [../]
+  []
   [omegam]
     type = DerivativeParsedMaterial
     property_name = omegam
@@ -125,7 +125,7 @@
     material_property_names = 'Va km cm_eq'
     expression = '-0.5*w^2/Va^2/km - w/Va*cm_eq'
     derivative_order = 2
-  [../]
+  []
   [chi]
     type = DerivativeParsedMaterial
     property_name = chi
@@ -133,7 +133,7 @@
     material_property_names = 'Va hb hm kb km'
     expression = '(hm/km + hb/kb)/Va^2'
     derivative_order = 2
-  [../]
+  []
   #DENSITIES/CONCENTRATION
   [rhob]
     type = DerivativeParsedMaterial
@@ -142,7 +142,7 @@
     material_property_names = 'Va kb cb_eq'
     expression = 'w/Va^2/kb + cb_eq/Va'
     derivative_order = 1
-  [../]
+  []
   [rhom]
     type = DerivativeParsedMaterial
     property_name = rhom
@@ -150,14 +150,14 @@
     material_property_names = 'Va km cm_eq(eta0)'
     expression = 'w/Va^2/km + cm_eq/Va'
     derivative_order = 1
-  [../]
+  []
   [concentration]
     type = ParsedMaterial
     property_name = c
     material_property_names = 'rhom hm rhob hb Va'
     expression = 'Va*(hm*rhom + hb*rhob)'
     outputs = exodus
-  [../]
+  []
   [mobility]
     type = DerivativeParsedMaterial
     material_property_names = 'chi kB'
@@ -165,14 +165,14 @@
     constant_expressions = '1400 2.4 1.25e2'
     property_name = chiD
     expression = 'chi*D0*exp(-Em/kB/T)'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

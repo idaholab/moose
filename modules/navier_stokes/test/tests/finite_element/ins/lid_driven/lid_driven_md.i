@@ -40,7 +40,7 @@
     thermal_expansion = 0       # K^{-1}
     cp =  1272.0
     viscosity = 0.1             # Pa-s, Re=rho*u*L/mu = 100*1*0.1/0.1 = 100
-  [../]
+  []
 []
 
 [Variables]
@@ -48,16 +48,16 @@
   [vel_x]
     scaling = 1.e-1
     initial_condition = 0.0
-  [../]
+  []
   [vel_y]
     scaling = 1.e-1
     initial_condition = 0.0
-  [../]
+  []
   # Pressure
   [p]
     scaling = 1
     initial_condition = 1.0e5
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -182,9 +182,9 @@
   [console]
     type = Console
     output_linear = false
-  [../]
+  []
   [out]
     type = Exodus
     hide = 'porosity'
-  [../]
+  []
 []

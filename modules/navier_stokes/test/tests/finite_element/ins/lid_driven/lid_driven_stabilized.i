@@ -40,18 +40,18 @@
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
   [vel_x]
-  [../]
+  []
 
   [vel_y]
-  [../]
+  []
 
   [p]
-  [../]
+  []
 []
 
 [Kernels]
@@ -62,7 +62,7 @@
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
 
   # x-momentum, space
   [x_momentum_space]
@@ -72,7 +72,7 @@
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
 
   # y-momentum, space
   [y_momentum_space]
@@ -82,7 +82,7 @@
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -91,28 +91,28 @@
     variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
-  [../]
+  []
 
   [lid]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
     function = 'lid_function'
-  [../]
+  []
 
   [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
-  [../]
+  []
 
   [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -121,7 +121,7 @@
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Functions]
@@ -131,7 +131,7 @@
     # of the mesh spacing.
     type = ParsedFunction
     expression = '4*x*(1-x)'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -139,7 +139,7 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

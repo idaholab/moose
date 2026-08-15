@@ -75,7 +75,7 @@
     Iy = 7892.0
     Iz = 7892.0
     y_orientation = '0 1.0 0.0'
-  [../]
+  []
 []
 
 [Materials]
@@ -87,11 +87,11 @@
     # poissons_ratio = 0.3
     shear_coefficient = 0.85
     block = 0
-  [../]
+  []
   [stress]
     type = ComputeBeamResultants
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -100,32 +100,32 @@
     variable = disp_x
     boundary = 'BC1'
     value = 0.0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 'BC1'
     value = 0.0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 'BC1'
     value = 0.0
-  [../]
+  []
 
   [fixy2]
     type = DirichletBC
     variable = disp_y
     boundary = 'BC2'
     value = 0.0
-  [../]
+  []
   [fixz2]
     type = DirichletBC
     variable = disp_z
     boundary = 'BC2'
     value = 0.0
-  [../]
+  []
 []
 
 [Functions]
@@ -133,12 +133,12 @@
     type = PiecewiseLinear
     x = '0.0 10.0'
     y = '0.0 50000.0'
-  [../]
+  []
   [force_25e3]
     type = PiecewiseLinear
     x = '0.0 10.0'
     y = '0.0 25000.0'
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -147,33 +147,33 @@
     variable = disp_z
     boundary = 'two'
     functor = force_50e3
-  [../]
+  []
   [force_z8]
     type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'eight'
     functor = force_50e3
-  [../]
+  []
 
   [force_z1]
     type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'one'
     functor = force_25e3
-  [../]
+  []
   [force_z9]
     type =  UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'nine'
     functor = force_25e3
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 [Executioner]
   type = Transient
@@ -193,47 +193,47 @@
     type = PointValue
     point = '0.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
   [disp_x1]
     type = PointValue
     point = '0.0 0.0 0.0'
     variable = disp_x
-  [../]
+  []
   [disp_z2]
     type = PointValue
     point = '60.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
   [disp_zBC1]
     type = PointValue
     point = '120.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
   [disp_z5]
     type = PointValue
     point = '240.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
   [disp_zBC2]
     type = PointValue
     point = '360.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
   [disp_xBC2]
     type = PointValue
     point = '360.0 0.0 0.0'
     variable = disp_x
-  [../]
+  []
   [disp_z8]
     type = PointValue
     point = '420.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
   [disp_z9]
     type = PointValue
     point = '480.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
 []
 [Debug]
  show_var_residual_norms = true

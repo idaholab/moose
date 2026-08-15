@@ -12,22 +12,22 @@
     dim = 2
     nx = 8
     ny = 8
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 
   [strain_zz]
-  [../]
+  []
 []
 
 [BCs]
@@ -36,33 +36,33 @@
     variable = disp_x
     boundary = 1003
     value = 0.0
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1003
     value = 0.0
-  [../]
+  []
   [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1001
     value = 0.001
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
   [all]
     formulation = NONORDINARY_STATE
     stabilization = BOND_HORIZON_I
-  [../]
+  []
 []
 
 [Kernels]
   [strain_zz]
     type = WeakPlaneStressNOSPD
     variable = strain_zz
-  [../]
+  []
 []
 
 [Materials]
@@ -70,21 +70,21 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e8
     poissons_ratio = 0.3
-  [../]
+  []
   [strain]
     type = ComputePlaneSmallStrainNOSPD
     stabilization = BOND_HORIZON_I
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -98,7 +98,7 @@
   [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
-  [../]
+  []
 []
 
 [Outputs]

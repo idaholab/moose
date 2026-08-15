@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
@@ -15,14 +15,14 @@
     # Flux BC for computing the analytical solution in the postprocessor
     type = ParsedFunction
     expression = exp(y)+1
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -31,13 +31,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = FunctionNeumannBC
     variable = u
     boundary = right
     function = right_bc
-  [../]
+  []
 []
 
 [Materials]
@@ -46,14 +46,14 @@
     block = 0
     prop_names = diffusivity
     prop_values = 2
-  [../]
+  []
 
   [mat_props_bnd]
     type = GenericConstantMaterial
     boundary = right
     prop_names = diffusivity
     prop_values = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -63,7 +63,7 @@
     variable = u
     boundary = right
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [Executioner]

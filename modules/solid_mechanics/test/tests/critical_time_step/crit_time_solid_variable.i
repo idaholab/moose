@@ -16,7 +16,7 @@
     add_variables = true
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 
@@ -26,14 +26,14 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [Functions]
   [prefac]
     type = ParsedFunction
     expression = '1+2*x'
-  [../]
+  []
 []
 
 [Materials]
@@ -42,15 +42,15 @@
     poissons_ratio = 0.1
     youngs_modulus = 1e6
     elasticity_tensor_prefactor = prefac
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8050.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,7 +71,7 @@
   [time_step]
     type = CriticalTimeStep
     density = density
-  [../]
+  []
 []
 
 [Outputs]

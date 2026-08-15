@@ -14,26 +14,26 @@
     dim = 2
     nx = 8
     ny = 8
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [AuxVariables]
   [critical_stress]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,13 +43,13 @@
     rank_two_tensor = stress
     critical_variable = critical_stress
     failure_criterion = VonMisesStress
-  [../]
+  []
 []
 
 [UserObjects]
   [shape_singularity]
     type = SingularShapeTensorEliminatorUserObjectPD
-  [../]
+  []
 []
 
 [ICs]
@@ -57,7 +57,7 @@
     type = ConstantIC
     variable = critical_stress
     value = 150
-  [../]
+  []
 []
 
 [BCs]
@@ -66,37 +66,37 @@
     variable = disp_x
     boundary = 1003
     value = 0.0
-  [../]
+  []
   [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1002
     value = 0.0
-  [../]
+  []
   [bottom_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1000
     function = '-0.002*t'
-  [../]
+  []
 
   [rbm_x]
     type = RBMPresetOldValuePD
     variable = disp_x
     boundary = 999
-  [../]
+  []
   [rbm_y]
     type = RBMPresetOldValuePD
     variable = disp_y
     boundary = 999
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
   [all]
     formulation = NONORDINARY_STATE
     stabilization = BOND_HORIZON_I
-  [../]
+  []
 []
 
 [Materials]
@@ -104,27 +104,27 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.33
-  [../]
+  []
   [strain]
     type = ComputeSmallStrainNOSPD
     stabilization = BOND_HORIZON_I
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Postprocessors]
   [bond_status_updated_times]
     type = BondStatusConvergedPostprocessorPD
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -144,7 +144,7 @@
   [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
-  [../]
+  []
 []
 
 [Outputs]

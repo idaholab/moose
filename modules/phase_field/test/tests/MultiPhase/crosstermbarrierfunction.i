@@ -14,7 +14,7 @@
                                if(x<7, 0,
                                if(x<8, 0.5-0.5*cos(il*pi),
                                1))))'
-  [../]
+  []
   [func2]
     type = ParsedFunction
     expression = 'il:=x-1; ir:=5-x; if(x<1, 0,
@@ -22,7 +22,7 @@
                                if(x<4, 1,
                                if(x<5, 0.5-0.5*cos(ir*pi),
                                0))))'
-  [../]
+  []
   [func3]
     type = ParsedFunction
     expression = 'il:=x-4; ir:=8-x; if(x<4, 0,
@@ -30,7 +30,7 @@
                                if(x<7, 1,
                                if(x<8, 0.5-0.5*cos(ir*pi),
                                0))))'
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -40,24 +40,24 @@
     [InitialCondition]
       type = FunctionIC
       function = func1
-    [../]
-  [../]
+    []
+  []
   [eta2]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = func2
-    [../]
-  [../]
+    []
+  []
   [eta3]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = func3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -70,7 +70,7 @@
     function_name = gsimple
     g_order = SIMPLE
     outputs = 'out'
-  [../]
+  []
   [crosstermbarrier_low]
     type = CrossTermBarrierFunctionMaterial
     etas = 'eta1 eta2 eta3'
@@ -80,7 +80,7 @@
     function_name = glow
     g_order = LOW
     outputs = 'out'
-  [../]
+  []
 []
 
 [Executioner]

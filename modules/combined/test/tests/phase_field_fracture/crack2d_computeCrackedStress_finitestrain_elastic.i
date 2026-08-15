@@ -13,7 +13,7 @@
     bottom_left = '0.5 0 0'
     top_right = '1 0 0'
     input = gen
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -24,7 +24,7 @@
   [strain_yy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Physics]
@@ -36,9 +36,9 @@
         planar_formulation = PLANE_STRAIN
         additional_generate_output = 'stress_yy'
         strain_base_name = uncracked
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 [Modules]
   [PhaseField]
@@ -47,9 +47,9 @@
         free_energy = E_el
         kappa = kappa_op
         mobility = L
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Kernels]
@@ -58,19 +58,19 @@
     variable = disp_x
     component = 0
     c = c
-  [../]
+  []
   [solid_y]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
     c = c
-  [../]
+  []
   [off_disp]
     type = AllenCahnElasticEnergyOffDiag
     variable = c
     displacements = 'disp_x disp_y'
     mob_name = L
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -81,7 +81,7 @@
     index_i = 1
     index_j = 1
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [BCs]
@@ -90,19 +90,19 @@
     variable = disp_y
     boundary = top
     function = 't'
-  [../]
+  []
   [yfix]
     type = DirichletBC
     variable = disp_y
     boundary = noncrack
     value = 0
-  [../]
+  []
   [xfix]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -110,17 +110,17 @@
     type = GenericConstantMaterial
     prop_names = 'gc_prop l visco'
     prop_values = '1e-3 0.05 1e-4'
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
     base_name = uncracked
-  [../]
+  []
   [elastic]
     type = ComputeFiniteStrainElasticStress
     base_name = uncracked
-  [../]
+  []
   [cracked_stress]
     type = ComputeCrackedStress
     c = c
@@ -129,26 +129,26 @@
     use_current_history_variable = true
     uncracked_base_name = uncracked
     finite_strain_model = true
-  [../]
+  []
 []
 
 [Postprocessors]
   [av_stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
+  []
   [av_strain_yy]
     type = SideAverageValue
     variable = disp_y
     boundary = top
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

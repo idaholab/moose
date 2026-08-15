@@ -22,7 +22,7 @@
   [PolycrystalVariables]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [UserObjects]
@@ -31,47 +31,47 @@
     grain_num = 6000 # Number of grains
     rand_seed = 8675 # 301
     coloring_algorithm = jp
-  [../]
+  []
   [term]
     type = Terminator
     expression = 'grain_tracker < 218'
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [ghost_elements]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [halos]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -79,43 +79,43 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     field_display = UNIQUE_REGION
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
-  [../]
+  []
   [ghost_elements]
     type = FeatureFloodCountAux
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
-  [../]
+  []
   [halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
-  [../]
+  []
   [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
-  [../]
+  []
 []
 
 #[BCs]
 #  [Periodic]
 #    [All]
 #      auto_direction = 'x y'
-#    [../]
-#  [../]
+#    []
+#  []
 #[]
 
 [Materials]
@@ -129,36 +129,36 @@
     molar_volume = 7.11e-6 #Molar volume in m^3/mol
     length_scale = 1.0e-6
     time_scale = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
   [n_elements]
     type = NumElements
     execute_on = timestep_end
-  [../]
+  []
   [n_nodes]
     type = NumNodes
     execute_on = timestep_end
-  [../]
+  []
   [DOFs]
     type = NumDOFs
-  [../]
+  []
   [grain_tracker]
     type = GrainTracker
     threshold = 0.1
     compute_halo_maps = true
-  [../]
+  []
 []
 
 #[Preconditioning]
 #  [SMP]
 #    type = SMP
 #    full = true
-#  [../]
+#  []
 #[]
 
 [Executioner]
@@ -181,7 +181,7 @@
     dt = 0.0002
     growth_factor = 1.1
     optimal_iterations = 8
-  [../]
+  []
 
   #[Adaptivity]
   #  initial_adaptivity = 4
@@ -189,7 +189,7 @@
   #  coarsen_fraction = 0.1
   #  max_h_level = 4
   #  print_changed_info = true
-  #[../]
+  #[]
 []
 
 [Outputs]
@@ -198,5 +198,5 @@
   csv = true
   [console]
     type = Console
-  [../]
+  []
 []

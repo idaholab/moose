@@ -14,14 +14,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [rxn]
     type = PReaction
     power = 2
@@ -35,13 +35,13 @@
     variable = u
     boundary = left
     value = 1000
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

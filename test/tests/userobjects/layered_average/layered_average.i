@@ -7,21 +7,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [layered_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -30,7 +30,7 @@
     variable = layered_average
     execute_on = timestep_end
     user_object = average
-  [../]
+  []
 []
 
 [BCs]
@@ -39,13 +39,13 @@
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
-  [../]
+  []
 []
 
 [UserObjects]
@@ -54,7 +54,7 @@
     variable = u
     direction = y
     num_layers = 2
-  [../]
+  []
 []
 
 [VectorPostprocessors]

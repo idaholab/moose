@@ -8,16 +8,16 @@
 [Variables]
   [a]
     initial_condition = 0.1
-  [../]
+  []
   [b]
     initial_condition = 0.1
-  [../]
+  []
   [c]
     initial_condition = 0.1
-  [../]
+  []
   [d]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [ReactionNetwork]
@@ -34,26 +34,26 @@
     gas_constant = 8.314
     reference_temperature = '298.15 298.15 298.15'
     system_temperature = '298.15 298.15 298.15'
-  [../]
+  []
 []
 
 [Kernels]
   [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
+  []
   [b_ie]
     type = PrimaryTimeDerivative
     variable = b
-  [../]
+  []
   [c_ie]
     type = PrimaryTimeDerivative
     variable = c
-  [../]
+  []
   [d_ie]
     type = PrimaryTimeDerivative
     variable = d
-  [../]
+  []
 []
 
 [Materials]
@@ -61,7 +61,7 @@
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.1
-  [../]
+  []
 []
 
 [Executioner]
@@ -76,7 +76,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

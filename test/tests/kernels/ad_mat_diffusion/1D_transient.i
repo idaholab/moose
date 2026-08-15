@@ -14,7 +14,7 @@
 
 [Variables]
   [T]
-  [../]
+  []
 []
 
 [ICs]
@@ -22,7 +22,7 @@
     type = FunctionIC
     variable = T
     function = '100*sin(pi*x/80)'
-  [../]
+  []
 []
 
 [Kernels]
@@ -30,12 +30,12 @@
     type = MatDiffusion
     variable = T
     diffusivity = 0.95
-  [../]
+  []
   [dt]
     type = CoefTimeDerivative
     variable = T
     Coefficient = 0.82064
-  [../]
+  []
 []
 
 [BCs]
@@ -44,7 +44,7 @@
     variable = T
     boundary = 'left right'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,7 +59,7 @@
     function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
     variable = T
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]

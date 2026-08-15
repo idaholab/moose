@@ -9,23 +9,23 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [AuxVariables]
   [T]
-  [../]
+  []
   [flux_n]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [T]
     type = ParsedFunction
     expression = 'x*x*y*y+1'
-  [../]
+  []
 []
 
 [ICs]
@@ -33,14 +33,14 @@
     type = FunctionIC
     variable = T
     function = T
-  [../]
+  []
 []
 
 [Kernels]
   [dummy]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -52,7 +52,7 @@
     component = normal
     boundary = 'left right'
     check_boundary_restricted = false
-  [../]
+  []
 []
 
 [Materials]
@@ -60,7 +60,7 @@
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '10'
-  [../]
+  []
 []
 
 [Postprocessors]

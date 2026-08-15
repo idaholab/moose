@@ -33,9 +33,9 @@
 [Variables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
   [p]
-  [../]
+  []
 []
 
 # Need to set a non-zero initial condition because we have a velocity norm in
@@ -53,7 +53,7 @@
   [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [mass_pspg]
     type = INSADMassPSPG
     variable = p
@@ -66,13 +66,13 @@
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
   [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
-  [../]
+  []
   [momentum_supg]
     type = INSADMomentumSUPG
     variable = velocity
@@ -87,7 +87,7 @@
     boundary = 'bottom'
     function_x = 0
     function_y = 'inlet_func'
-  [../]
+  []
   [wall]
     type = VectorFunctionDirichletBC
     variable = velocity
@@ -108,7 +108,7 @@
   [inlet_func]
     type = ParsedFunction
     expression = '-4 * x^2 + 1'
-  [../]
+  []
 []
 
 [Materials]
@@ -116,7 +116,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
   [ins_mat]
     type = INSADTauMaterial
     velocity = velocity
@@ -129,7 +129,7 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]
@@ -146,7 +146,7 @@
   console = true
   [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -156,12 +156,12 @@
     vel_y = vel_y
     boundary = 'bottom'
     execute_on = 'timestep_end'
-  [../]
+  []
   [flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'top'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [ICs]
@@ -15,7 +15,7 @@
     type = FunctionIC
     variable = u
     function = gaussian_2d
-  [../]
+  []
 []
 
 [Functions]
@@ -24,7 +24,7 @@
     expression = exp(-((x-x0)*(x-x0)+(y-y0)*(y-y0))/2.0/sigma/sigma)
     symbol_names = 'sigma x0 y0'
     symbol_values = '0.05 0.35 0.25'
-  [../]
+  []
 []
 
 [Kernels]
@@ -32,11 +32,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.02
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -44,8 +44,8 @@
     [all]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -70,15 +70,15 @@
       radius = 0.2
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [UserObjects]
   [mesh_adaptivity_off]
     type = ToggleMeshAdaptivity
     mesh_adaptivity = 'off'
-  [../]
+  []
 []
 
 [Outputs]
@@ -86,6 +86,6 @@
   [console]
     type = Console
     print_mesh_changed_info = true
-  [../]
+  []
 []
 

@@ -17,10 +17,10 @@
 [Variables]
   [u]
     block = 0
-  [../]
+  []
   [v]
     block = 10
-  [../]
+  []
 []
 
 [Kernels]
@@ -28,18 +28,18 @@
     type = Diffusion
     variable = u
     block = 0
-  [../]
+  []
   [srcv]
     type = BodyForce
     block = 10
     variable = v
     function = 1
-  [../]
+  []
   [time_v]
     type = TimeDerivative
     block = 10
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -48,13 +48,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

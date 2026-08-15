@@ -8,21 +8,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [layered_average_value]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -31,7 +31,7 @@
     variable = layered_average_value
     execute_on = timestep_end
     user_object = layered_average
-  [../]
+  []
 []
 
 [BCs]
@@ -40,13 +40,13 @@
     variable = u
     boundary = bottom
     value = 0
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
@@ -55,7 +55,7 @@
     variable = u
     direction = y
     num_layers = 4
-  [../]
+  []
 []
 
 [Executioner]
@@ -80,7 +80,7 @@
     type = TransientMultiApp
     input_files = tosub_displaced_sub.i
     app_type = MooseTestApp
-  [../]
+  []
 []
 
 [Transfers]
@@ -91,7 +91,7 @@
     to_multi_app = sub_app
     displaced_target_mesh = true
     skip_coordinate_collapsing = true
-  [../]
+  []
   [element_layered_transfer]
     source_user_object = layered_average
     variable = element_multi_layered_average
@@ -99,5 +99,5 @@
     to_multi_app = sub_app
     displaced_target_mesh = true
     skip_coordinate_collapsing = true
-  [../]
+  []
 []

@@ -23,12 +23,12 @@
       type = FunctionIC
       variable = w
       function = f_w
-    [../]
-  [../]
+    []
+  []
   [phi]
-  [../]
+  []
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -39,8 +39,8 @@
       type = FunctionIC
       variable = T
       function = f_T
-    [../]
-  [../]
+    []
+  []
 []
 
 [ICs]
@@ -53,7 +53,7 @@
     radii = '150 150'
     invalue = 0
     outvalue = 1
-  [../]
+  []
   [gr0_IC]
     type = SmoothCircleIC
     variable = gr0
@@ -63,7 +63,7 @@
     radius = 150
     invalue = 1
     outvalue = 0
-  [../]
+  []
   [gr1_IC]
     type = SmoothCircleIC
     variable = gr1
@@ -73,18 +73,18 @@
     radius = 150
     invalue = 1
     outvalue = 0
-  [../]
+  []
 []
 
 [Functions]
   [f_T]
     type = ConstantFunction
     value = 1600
-  [../]
+  []
   [f_w]
     type = ParsedFunction
     expression = '1.515e-7 * x'
-  [../]
+  []
 []
 
 [Materials]
@@ -96,7 +96,7 @@
     constant_names = 'a b'
     constant_expressions = '-0.025 1571.6'
     expression = 'a*T + b'
-  [../]
+  []
   # Diffusivity and mobilities
   [chiD]
     type = GrandPotentialTensorMaterial
@@ -114,7 +114,7 @@
     bulkindex = 1
     gbindex = 20
     surfindex = 100
-  [../]
+  []
   # Equilibrium vacancy concentration
   [cs_eq]
     type = DerivativeParsedMaterial
@@ -124,7 +124,7 @@
     constant_expressions = '2.69 2.1 8.617343e-5'
     expression = 'bnds:=gr0^2 + gr1^2; cb:=exp(-Ef/kB/T); cgb:=exp(-(Ef-Egb)/kB/T);
                 cb + 4.0*(cgb-cb)*(1.0 - bnds)^2'
-  [../]
+  []
   # Everything else
   [sintering]
     type = GrandPotentialSinteringMaterial
@@ -137,7 +137,7 @@
     equilibrium_vacancy_concentration = cs_eq
     solid_energy_model = DILUTE
     outputs = exodus
-  [../]
+  []
 
   # Concentration is only meant for output
   [c]
@@ -148,26 +148,26 @@
     constant_expressions = '0.04092'
     expression = 'Va*(hs*rhos + hv*rhov)'
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
   [dt_gr0]
     type = TimeDerivative
     variable = gr0
-  [../]
+  []
   [dt_gr1]
     type = TimeDerivative
     variable = gr1
-  [../]
+  []
   [dt_phi]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
   [dt_w]
     type = TimeDerivative
     variable = w
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -175,7 +175,7 @@
     type = FunctionAux
     variable = T
     function = f_T
-  [../]
+  []
 []
 
 [Executioner]

@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,7 +15,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = 'diff'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -23,14 +23,14 @@
     type = ElementLpNormAux
     variable = error
     coupled_variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
   [error]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [BCs]
@@ -40,14 +40,14 @@
     preset = false
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -58,7 +58,7 @@
     block = 0
     outputs = exodus
     output_properties = 'mat_prop'
-  [../]
+  []
 []
 
 [Executioner]

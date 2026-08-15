@@ -19,19 +19,19 @@
   [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [temp]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -41,7 +41,7 @@
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
@@ -50,7 +50,7 @@
     pressure = p
     component = 0
     integrate_p_by_parts = false
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
@@ -59,25 +59,25 @@
     pressure = p
     component = 1
     integrate_p_by_parts = false
-  [../]
+  []
   [x_mom_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
+  []
   [y_mom_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
+  []
   [temp]
     type = INSTemperature
     variable = temp
     u = vel_x
     v = vel_y
-  [../]
+  []
   [temp_time_deriv]
     type = INSTemperatureTimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [Materials]
@@ -86,14 +86,14 @@
     block = 0
     prop_names = 'rho mu k cp'
     prop_values = '0.5 1.5 0.7 1.3'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -108,23 +108,23 @@
     variable = p
     min = 0.5
     max = 1.5
-  [../]
+  []
   [vel_x]
     type = RandomIC
     variable = vel_x
     min = 0.5
     max = 1.5
-  [../]
+  []
   [vel_y]
     type = RandomIC
     variable = vel_y
     min = 0.5
     max = 1.5
-  [../]
+  []
   [temp]
     type = RandomIC
     variable = temp
     min = 0.5
     max = 1.5
-  [../]
+  []
 []

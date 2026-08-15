@@ -151,7 +151,7 @@
     coupled_variables = 'phase1 phase2'
     tensors = 'C1   C2'
     weights = 'h1   h2'
-  [../]
+  []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'power_law_creep'
@@ -177,7 +177,7 @@
     end_point = '1.0 1.0 1.0'
     num_points = 5
     outputs = tests
-  [../]
+  []
 []
 
 [Executioner]
@@ -206,6 +206,6 @@
   [tests]
     type = CSV
     execute_on = final
-  [../]
+  []
 []
 

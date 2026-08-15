@@ -9,22 +9,22 @@
   [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxVariables]
   [feature]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [proc_id]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [feature_ghost]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -33,26 +33,26 @@
     variable = feature
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [proc_id]
     type = ProcessorIDAux
     variable = proc_id
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [ghost]
     type = FeatureFloodCountAux
     variable = feature_ghost
     field_display = GHOSTED_ENTITIES
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Functions]
   [tif]
     type = ImageFunction
     component = 0
-  [../]
+  []
 []
 
 [ICs]
@@ -60,7 +60,7 @@
     type = FunctionIC
     function = tif
     variable = u
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -69,7 +69,7 @@
     variable = u
     threshold = 1.0
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Problem]

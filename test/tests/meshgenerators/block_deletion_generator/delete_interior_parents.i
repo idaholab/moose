@@ -49,18 +49,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -69,7 +69,7 @@
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

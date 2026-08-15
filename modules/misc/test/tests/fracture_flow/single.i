@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [ICs]
@@ -15,7 +15,7 @@
     type = ConstantIC
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -24,7 +24,7 @@
     boundary = 1
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -33,32 +33,32 @@
     variable = u
     Coefficient = 0.2  # matrix porosity
     block = 1
-  [../]
+  []
   [matrix_diff]
     type = AnisotropicDiffusion
     variable = u
     block = 1
     tensor_coeff = '0.002 0 0   0 0 0   0 0 0'  # matrix porosity * matrix diffusivity
-  [../]
+  []
   [fracture_dt]
     type = CoefTimeDerivative
     variable = u
     Coefficient = 0.1  # fracture half-aperture * fracture porosity
     block = 2
-  [../]
+  []
   [fracture_advect]
     type = Convection
     variable = u
     block = 2
     velocity = '0 0.08 0' # fracture half-aperture * velocity in fracture
-  [../]
+  []
 []
 
 [Preconditioning]
   [standard]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

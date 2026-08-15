@@ -9,14 +9,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -25,21 +25,21 @@
     variable = u
     boundary = 0
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 2
-  [../]
+  []
 []
 
 [AuxVariables]
   [bc_sum]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -48,14 +48,14 @@
     variable = bc_sum
     nodes = '0 10'
     sum_var = u
-  [../]
+  []
 []
 
 [Postprocessors]
   [sum]
     type = ScalarVariable
     variable = bc_sum
-  [../]
+  []
 []
 
 [Executioner]

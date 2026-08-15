@@ -6,7 +6,7 @@
 
 [AuxVariables]
   [a]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -15,7 +15,7 @@
     variable = a
     value = 1.
     execute_on = initial
-  [../]
+  []
 []
 
 [Problem]
@@ -30,5 +30,5 @@
   [exodus]
     type = Exodus
     use_displaced = true
-  [../]
+  []
 []

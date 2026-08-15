@@ -15,7 +15,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,7 +24,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -35,21 +35,21 @@
     variable = u
     boundary = 3
     value = 0.0
-  [../]
+  []
 
   [right]
     type = NeumannBC
     variable = u
     boundary = 1
     value = 2.0
-  [../]
+  []
 
   [top]
     type = VacuumBC
     variable = u
     boundary = 2
     alpha = 5.0
-  [../]
+  []
 []
 
 [Executioner]

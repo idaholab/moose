@@ -12,19 +12,19 @@
     bottom_left = '0 0.5 0'
     block_id = 100
     block_name = 'top'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -48,7 +48,7 @@
     prop_names = block_prop
     block = ANY_BLOCK_ID
     prop_values = 12345
-  [../]
+  []
 []
 
 [UserObjects]
@@ -57,7 +57,7 @@
     expected_names = 'top 0'
     property_name = 'block_prop'
     test_type = 'block'
-  [../]
+  []
 []
 
 [Executioner]

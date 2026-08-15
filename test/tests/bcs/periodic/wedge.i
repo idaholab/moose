@@ -9,12 +9,12 @@
   [tr_x]
     type = ParsedFunction
     expression = -x
-  [../]
+  []
 
   [tr_y]
     type = ParsedFunction
     expression = y
-  [../]
+  []
 []
 
 [Variables]
@@ -23,7 +23,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -32,7 +32,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing]
     type = GaussContForcing
@@ -41,12 +41,12 @@
     y_center = 3.0
     x_spread = 0.2
     y_spread = 0.2
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -59,8 +59,8 @@
       secondary = 2
       transform_func = 'tr_x tr_y'
       inv_transform_func = 'tr_x tr_y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

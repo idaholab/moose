@@ -18,7 +18,7 @@
     order = CONSTANT
     family = MONOMIAL
     block = p1
-  [../]
+  []
 []
 
 [ICs]
@@ -27,14 +27,14 @@
     variable = var
     function = setvar
     block = p1
-  [../]
+  []
 []
 
 [Functions]
   [setvar]
     type = ParsedFunction
     expression = '1 + z * z'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -45,7 +45,7 @@
     num_layers = 10
     execute_on = TIMESTEP_END
     block = p1
-  [../]
+  []
 []
 
 [Executioner]

@@ -11,26 +11,26 @@
 [Variables]
   [u]
     initial_condition = 1
-  [../]
+  []
   [scalar_variable]
     family = SCALAR
     order = FIRST
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [ScalarKernels]
   [td1]
     type = ODETimeDerivative
     variable = scalar_variable
-  [../]
+  []
 []
 
 [BCs]
@@ -39,13 +39,13 @@
       variable = u
       boundary = 'left'
       value = 1
-  [../]
+  []
   [rightDirichlet]
       type = DirichletBC
       variable = u
       boundary = 'right'
       value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -54,7 +54,7 @@
     variable = u
     coupled_scalar = scalar_variable
     boundary = left
-  [../]
+  []
 []
 
 [Executioner]

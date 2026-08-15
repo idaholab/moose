@@ -15,39 +15,39 @@
 
 [Variables]
   [HHPFCRFFSplitVariables]
-  [../]
+  []
 []
 
 [AuxVariables]
   [n]
-  [../]
+  []
 []
 
 [Kernels]
   [HHPFCRFFSplitKernel]
     log_approach = expansion
     n_name = n
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   [PFC]
     type = PFCRFFMaterial
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -55,11 +55,11 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
   [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -93,5 +93,5 @@
     variable = n
     x1 = 1.5
     type = PFCFreezingIC
-  [../]
+  []
 []

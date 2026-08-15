@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,20 +23,20 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = 't'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

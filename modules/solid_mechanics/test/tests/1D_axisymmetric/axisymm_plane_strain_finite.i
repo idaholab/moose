@@ -18,13 +18,13 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
 []
 
 [AuxVariables]
   [temp]
     initial_condition = 580.0
-  [../]
+  []
 []
 
 [Functions]
@@ -32,12 +32,12 @@
     type = PiecewiseLinear
     x = '0   1   2'
     y = '580 580 680'
-  [../]
+  []
   [disp_x]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 2e-3'
-  [../]
+  []
 []
 
 [Physics]
@@ -48,9 +48,9 @@
         strain = FINITE
         generate_output = 'strain_xx strain_zz stress_xx stress_yy stress_zz'
         eigenstrain_names = eigenstrain
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [AuxKernels]
@@ -59,7 +59,7 @@
     variable = temp
     function = temp
     execute_on = 'timestep_begin'
-  [../]
+  []
 []
 
 [BCs]
@@ -68,13 +68,13 @@
     boundary = 1
     value = 0
     variable = disp_x
-  [../]
+  []
   [disp_x]
     type = FunctionDirichletBC
     boundary = 2
     function = disp_x
     variable = disp_x
-  [../]
+  []
 []
 
 [Materials]
@@ -82,7 +82,7 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3600
     poissons_ratio = 0.2
-  [../]
+  []
 
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
@@ -90,11 +90,11 @@
     temperature = temp
     stress_free_temperature = 580
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]

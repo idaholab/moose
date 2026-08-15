@@ -32,7 +32,7 @@
     incremental = true
     strain = finite
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -41,42 +41,42 @@
     variable = disp_x
     boundary = 'front back'
     function = '0.5E-6*x'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0.4E-6*y'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0.3E-6*z'
-  [../]
+  []
 []
 
 [AuxVariables]
   [f0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [intnl]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -85,30 +85,30 @@
     property = plastic_yield_function
     index = 0
     variable = f0
-  [../]
+  []
   [f1_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f1
-  [../]
+  []
   [f2_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f2
-  [../]
+  []
   [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
   [intnl_auxk]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 0
     variable = intnl
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -116,57 +116,57 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
+  []
   [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
+  []
   [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
+  []
   [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
+  []
   [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
+  []
   [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
+  []
   [f0]
     type = PointValue
     point = '0 0 0'
     variable = f0
-  [../]
+  []
   [f1]
     type = PointValue
     point = '0 0 0'
     variable = f1
-  [../]
+  []
   [f2]
     type = PointValue
     point = '0 0 0'
     variable = f2
-  [../]
+  []
   [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
-  [../]
+  []
   [intnl]
     type = PointValue
     point = '0 0 0'
     variable = intnl
-  [../]
+  []
 []
 
 [UserObjects]
@@ -175,14 +175,14 @@
     value_0 = 0.5
     value_residual = 1
     internal_limit = 1E-6
-  [../]
+  []
   [tens]
     type = SolidMechanicsPlasticTensileMulti
     tensile_strength = hard
     shift = 1E-6
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5
-  [../]
+  []
 []
 
 [Materials]
@@ -191,7 +191,7 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.6E6 1E6'
-  [../]
+  []
   [mc]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -204,7 +204,7 @@
     debug_stress_change = 1E-6
     debug_pm_change = '1E-6 1E-6 1E-6'
     debug_intnl_change = 1E-6
-  [../]
+  []
 []
 
 
@@ -220,5 +220,5 @@
   exodus = false
   [csv]
     type = CSV
-    [../]
+    []
 []

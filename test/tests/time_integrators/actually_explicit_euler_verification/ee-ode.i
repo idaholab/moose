@@ -15,19 +15,19 @@
     family = SCALAR
     order = FIRST
     initial_condition = 0
-  [../]
+  []
 []
 
 [ScalarKernels]
   [time]
     type = ODETimeDerivative
     variable = u
-  [../]
+  []
   [source]
     type = ParsedODEKernel
     variable = u
     expression = -2
-  [../]
+  []
 []
 
 [Executioner]
@@ -35,7 +35,7 @@
 
   [TimeIntegrator]
     type = ActuallyExplicitEuler
-  [../]
+  []
   dt = 1
   num_steps = 5
 []

@@ -10,21 +10,21 @@
   [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_elemental]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -32,7 +32,7 @@
     type = FunctionAux
     function = 'x + y'
     variable = u_elemental
-  [../]
+  []
 []
 
 [BCs]
@@ -41,13 +41,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

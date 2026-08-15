@@ -30,7 +30,7 @@
     add_variables = true
     incremental = true
     generate_output = 'max_principal_stress mid_principal_stress min_principal_stress stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
-  [../]
+  []
 []
 
 
@@ -40,34 +40,34 @@
     variable = disp_x
     boundary = 'front back'
     function = '0.4E-6*x*t'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0.1E-6*y*t'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
   [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [intnl]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -76,18 +76,18 @@
     index = 6
     property = plastic_yield_function
     variable = yield_fcn
-  [../]
+  []
   [iter_auxk]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
   [intnl_auxk]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 0
     variable = intnl
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -95,55 +95,55 @@
     type = PointValue
     point = '0 0 0'
     variable = max_principal_stress
-  [../]
+  []
   [s_mid]
     type = PointValue
     point = '0 0 0'
     variable = mid_principal_stress
-  [../]
+  []
   [s_min]
     type = PointValue
     point = '0 0 0'
     variable = min_principal_stress
-  [../]
+  []
   [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
   [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
-  [../]
+  []
   [intnl]
     type = PointValue
     point = '0 0 0'
     variable = intnl
-  [../]
+  []
 []
 
 [UserObjects]
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1E6
-  [../]
+  []
   [mc_coh]
     type = SolidMechanicsHardeningCubic
     value_0 = 10
     value_residual = 20
     internal_limit = 5E-6
-  [../]
+  []
   [mc_phi]
     type = SolidMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
+  []
   [mc_psi]
     type = SolidMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
@@ -151,7 +151,7 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1E7
     poissons_ratio = 0.3
-  [../]
+  []
   [mc]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
@@ -161,12 +161,12 @@
     dilation_angle = mc_psi
     smoothing_tol = 0
     yield_function_tol = 1.0E-9
-  [../]
+  []
   [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 

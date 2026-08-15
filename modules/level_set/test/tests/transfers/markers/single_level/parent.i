@@ -15,24 +15,24 @@
       top_right = '0.75 0.75 0'
       outside =  DO_NOTHING
       inside = REFINE
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -41,13 +41,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -67,7 +67,7 @@
     type = LevelSetReinitializationMultiApp
     input_files = 'sub.i'
     execute_on = TIMESTEP_BEGIN
-  [../]
+  []
 []
 
 [Transfers]
@@ -76,7 +76,7 @@
     to_multi_app = sub
     source_variable = marker
     variable = marker
-  [../]
+  []
 []
 
 [Outputs]

@@ -15,20 +15,20 @@
   [forced]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = forced
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = forced
     function = 'x*x+y*y' # Any object expecting a function name can also receive a ParsedFunction string
-  [../]
+  []
 []
 
 [BCs]
@@ -37,7 +37,7 @@
     variable = forced
     boundary = 'bottom right top left'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

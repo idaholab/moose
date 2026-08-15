@@ -17,40 +17,40 @@
   [bc_fn]
     type=ParsedFunction
     expression=0
-  [../]
+  []
   [bc_fnt]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
   [bc_fnb]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
   [bc_fnl]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
   [bc_fnr]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 
   [forcing_fn]
 #    type = ParsedFunction
 #    expression = 0
     type = MTPiecewiseConst3D
-  [../]
+  []
 
   [solution]
     type = MTPiecewiseConst3D
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -58,18 +58,18 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -83,57 +83,57 @@
     variable = u
     boundary = 'top bottom left right'
     function = bc_fn
-  [../]
+  []
   [bc_top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = bc_fnt
-  [../]
+  []
   [bc_bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bc_fnb
-  [../]
+  []
   [bc_left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = bc_fnl
-  [../]
+  []
   [bc_right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = bc_fnr
-  [../]
+  []
 []
 
 [Postprocessors]
   [dofs]
     type = NumDOFs
-  [../]
+  []
 
   [h]
     type = AverageElementSize
-  [../]
+  []
 
   [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
+  []
   [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
+  []
   [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]
@@ -143,7 +143,7 @@
   nl_rel_tol = 1.e-9
   [Adaptivity]
 
-  [../]
+  []
 []
 
 [Outputs]
@@ -151,5 +151,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

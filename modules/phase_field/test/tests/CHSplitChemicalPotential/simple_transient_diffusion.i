@@ -9,9 +9,9 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [mu]
-  [../]
+  []
 []
 
 [Kernels]
@@ -20,17 +20,17 @@
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
-  [../]
+  []
   [chempot]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -40,26 +40,26 @@
     coupled_variables = c
     expression = 'c'
     derivative_order = 1
-  [../]
+  []
   [var_dependence]
     type = DerivativeParsedMaterial
     expression = '0.1'
     coupled_variables = c
     property_name = var_dep
     derivative_order = 1
-  [../]
+  []
   [mobility_tensor]
     type = ConstantAnisotropicMobility
     M_name = mobility_tensor
     tensor = '1 0 0 0 1 0 0 0 1'
-  [../]
+  []
   [mobility]
     type = CompositeMobilityTensor
     M_name = mobility_prop
     tensors = mobility_tensor
     weights = var_dep
     coupled_variables = c
-  [../]
+  []
 []
 
 [BCs]
@@ -68,13 +68,13 @@
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
   [rightc]
     type = DirichletBC
     variable = c
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -95,7 +95,7 @@
   [smp]
      type = SMP
      full = true
-  [../]
+  []
 []
 
 [Outputs]

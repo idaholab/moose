@@ -27,7 +27,7 @@
     x = '0 1'
     y = '0 1'
     scale_factor = 100
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -36,7 +36,7 @@
     incremental = true
     strain = FINITE
     generate_output = 'stress_xx stress_xy stress_zx stress_yy stress_zz stress_yz'
-  [../]
+  []
 []
 
 [Contact]
@@ -44,7 +44,7 @@
     primary = 3
     secondary = 2
     penalty = 1e5
-  [../]
+  []
 []
 
 [BCs]
@@ -53,21 +53,21 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 10
     value = 0.0
-  [../]
+  []
 
   [Pressure]
     [right_pressure]
       boundary = 4
       function = pressure
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -76,11 +76,11 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stiffStuff_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -105,5 +105,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

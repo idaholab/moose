@@ -5,14 +5,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

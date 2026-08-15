@@ -19,9 +19,9 @@
         strain = FINITE
         add_variables = true
         generate_output = 'stress_zz'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [BCs]
@@ -30,36 +30,36 @@
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
   [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [move_front]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = 't/10.'
-  [../]
+  []
 []
 
 [Materials]
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.5e6 0.75e6 0.75e6 1.5e6 0.75e6 1.5e6 0.375e6 0.375e6 0.375e6'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -94,7 +94,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

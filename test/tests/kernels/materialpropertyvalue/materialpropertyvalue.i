@@ -15,7 +15,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Materials]
@@ -26,7 +26,7 @@
     prop_names  = 'C'
     prop_values = 'x^2-y^2'
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,7 +34,7 @@
     type = MaterialPropertyValue
     prop_name = C
     variable = c
-  [../]
+  []
 []
 
 [Executioner]

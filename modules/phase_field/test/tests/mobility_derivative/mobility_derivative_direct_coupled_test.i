@@ -12,9 +12,9 @@
   [c]
     family = HERMITE
     order = THIRD
-  [../]
+  []
   [d]
-  [../]
+  []
 []
 
 [ICs]
@@ -27,7 +27,7 @@
     int_width = 3
     invalue = 1
     outvalue = 0
-  [../]
+  []
   [d_IC]
     type = BoundingBoxIC
     x1 = 0
@@ -37,7 +37,7 @@
     inside = 1.0
     outside = 0.0
     variable = d
-  [../]
+  []
 []
 
 [Kernels]
@@ -47,27 +47,27 @@
     mob_name = M
     f_name = F
     coupled_variables = d
-  [../]
+  []
   [c_int]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
     coupled_variables = d
-  [../]
+  []
   [c_dot]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [d_dot]
     type = TimeDerivative
     variable = d
-  [../]
+  []
   [d_diff]
     type = MatDiffusion
     variable = d
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [Materials]
@@ -75,31 +75,31 @@
     type = GenericConstantMaterial
     prop_names = kappa_c
     prop_values = 2.0
-  [../]
+  []
   [mob]
     type = DerivativeParsedMaterial
     property_name = M
     coupled_variables = 'c d'
     expression = if(d>0.001,d,0.001)*if(c<0,0.5,if(c>1,0.5,1-0.5*c^2))
     derivative_order = 2
-  [../]
+  []
   [free_energy]
     type = MathEBFreeEnergy
     property_name = F
     c = c
-  [../]
+  []
   [d_diff]
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -124,5 +124,5 @@
   [oversample]
     refinements = 2
     type = Exodus
-  [../]
+  []
 []

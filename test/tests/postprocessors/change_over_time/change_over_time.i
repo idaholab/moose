@@ -12,18 +12,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [time_derivative]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -32,13 +32,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -53,7 +53,7 @@
   [my_function]
     type = ParsedFunction
     expression = '1 + t * t'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -61,13 +61,13 @@
     type = FunctionValuePostprocessor
     function = my_function
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [change_over_time]
     type = ChangeOverTimePostprocessor
     postprocessor = my_postprocessor
     change_with_respect_to_initial = false
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

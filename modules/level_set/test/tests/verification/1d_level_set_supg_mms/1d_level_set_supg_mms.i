@@ -8,13 +8,13 @@
 
 [Variables]
   [phi]
-  [../]
+  []
 []
 
 [AuxVariables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [ICs]
@@ -22,7 +22,7 @@
     function = phi_exact
     variable = phi
     type = FunctionIC
-  [../]
+  []
   [vel_ic]
     type = VectorFunctionIC
     variable = velocity
@@ -36,51 +36,51 @@
     expression = 'a*exp(1/(10*t))*sin(2*pi*x/b) + 1'
     symbol_names = 'a b'
     symbol_values = '1 8'
-  [../]
+  []
   [phi_mms]
     type = ParsedFunction
     expression = '-a*exp(1/(10*t))*sin(2*pi*x/b)/(10*t^2) + 2*pi*a*exp(1/(10*t))*cos(2*pi*x/b)/b'
     symbol_names = 'a b'
     symbol_values = '1 8'
-  [../]
+  []
   [velocity_func]
     type = ParsedVectorFunction
     expression_x = '1'
     expression_y = '1'
-  [../]
+  []
 []
 
 [Kernels]
   [time]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
   [time_supg]
     type = LevelSetTimeDerivativeSUPG
     variable = phi
     velocity = velocity
-  [../]
+  []
   [phi_advection]
     type = LevelSetAdvection
     variable = phi
     velocity = velocity
-  [../]
+  []
   [phi_forcing]
     type = BodyForce
     variable = phi
     function = phi_mms
-  [../]
+  []
   [phi_advection_supg]
     type = LevelSetAdvectionSUPG
     variable = phi
     velocity = velocity
-  [../]
+  []
   [phi_forcing_supg]
     type = LevelSetForcingFunctionSUPG
     velocity = velocity
     variable = phi
     function = phi_mms
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -88,15 +88,15 @@
     type = ElementL2Error
     function = phi_exact
     variable = phi
-  [../]
+  []
   [h]
     type = AverageElementSize
-  [../]
+  []
   [point]
     type = PointValue
     point = '0.1 0 0'
     variable = phi
-  [../]
+  []
 []
 
 [Executioner]

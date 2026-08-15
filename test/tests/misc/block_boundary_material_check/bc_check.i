@@ -5,7 +5,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [BCs]
@@ -14,7 +14,7 @@
     variable = u
     boundary = left
     mat_prop = 'prop'
-  [../]
+  []
 []
 
 [Problem]

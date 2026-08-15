@@ -21,7 +21,7 @@
   [Fglobal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
@@ -29,13 +29,13 @@
   [cg]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # vac concentration
   [cv]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -48,7 +48,7 @@
     invalue = 0.9
     outvalue = 0.1
     int_width = 0.75
-  [../]
+  []
   [cg]
     variable = cg
     type = SmoothCircleIC
@@ -58,7 +58,7 @@
     invalue = 0.7
     outvalue = 0.0
     int_width = 0.75
-  [../]
+  []
 []
 
 
@@ -67,8 +67,8 @@
     [all]
       variable = 'cg cv'
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -81,27 +81,27 @@
     T = 300
     outputs = exodus
     derivative_order = 2
-  [../]
+  []
 []
 
 [Kernels]
   [diff_g]
     type = Diffusion
     variable = cg
-  [../]
+  []
   [time_g]
     type = TimeDerivative
     variable = cg
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = cv
-  [../]
+  []
   [time_v]
     type = TimeDerivative
     variable = cv
-  [../]
+  []
 []
 
 [Executioner]

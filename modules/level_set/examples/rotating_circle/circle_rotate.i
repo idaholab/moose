@@ -13,12 +13,12 @@
 [AuxVariables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [Variables]
   [phi]
-  [../]
+  []
 []
 
 [Functions]
@@ -27,12 +27,12 @@
     epsilon = 0.03
     center = '0 0.5 0'
     radius = 0.15
-  [../]
+  []
   [velocity_func]
     type = ParsedVectorFunction
     expression_x = '4*y'
     expression_y = '-4*x'
-  [../]
+  []
 []
 
 [ICs]
@@ -40,7 +40,7 @@
     type = FunctionIC
     function = phi_exact
     variable = phi
-  [../]
+  []
   [vel_ic]
     type = VectorFunctionIC
     variable = velocity
@@ -52,13 +52,13 @@
   [time]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
 
   [advection]
     type = LevelSetAdvection
     velocity = velocity
     variable = phi
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -68,12 +68,12 @@
     variable = phi
     location = outside
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [cfl]
     type = LevelSetCFLCondition
     velocity = velocity
     execute_on = 'initial' #timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,7 +88,7 @@
     type = PostprocessorDT
     postprocessor = cfl
     scale = 0.8
-  [../]
+  []
 []
 
 [Outputs]

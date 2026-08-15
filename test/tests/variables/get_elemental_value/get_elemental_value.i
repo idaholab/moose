@@ -18,14 +18,14 @@
 
 [Variables]
   [copied_var]
-  [../]
+  []
 []
 
 [AuxVariables]
   [test_var]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -34,7 +34,7 @@
     variable = test_var
     copied_variable = copied_var
     # The parameter "time_level" is provided by tests file
-  [../]
+  []
 []
 
 [ICs]
@@ -42,19 +42,19 @@
     type = ConstantIC
     variable = copied_var
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
   [time_der]
     type = TimeDerivative
     variable = copied_var
-  [../]
+  []
   [src]
     type = BodyForce
     variable = copied_var
     function = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
   [test_pp]
     type = ElementAverageValue
     variable = test_var
-  [../]
+  []
 []
 
 [Outputs]

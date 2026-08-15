@@ -12,14 +12,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -50,7 +50,7 @@
       coarsen = 0.3
       variable = u
       refine = 0.7
-    [../]
+    []
     [inverted_marker]
       type = ValueThresholdMarker
       invert = true
@@ -58,8 +58,8 @@
       refine = 0.3
       variable = u
       third_state = DO_NOTHING
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

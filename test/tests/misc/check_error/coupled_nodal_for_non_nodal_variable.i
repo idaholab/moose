@@ -12,14 +12,14 @@
   [v]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Materials]
   [m]
     type = CoupledNodalMaterial
     coupled = v
-  [../]
+  []
 []
 
 [Executioner]

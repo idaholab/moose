@@ -12,14 +12,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     value = -5.0
     boundary = rmin
-  [../]
+  []
   [outer]
     type = DirichletBC
     variable = u
     value = 0.0
     boundary = rmax
-  [../]
+  []
 []
 
 [Executioner]

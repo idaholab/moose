@@ -7,20 +7,20 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [lag]
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -29,13 +29,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -43,12 +43,12 @@
     type = TestSerializedSolution
     system = aux
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [nl]
     type = TestSerializedSolution
     system = nl
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

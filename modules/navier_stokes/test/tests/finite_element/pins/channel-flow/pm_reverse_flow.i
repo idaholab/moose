@@ -126,7 +126,7 @@
   [temperature_time]
     type = PINSFEFluidTemperatureTimeDerivative
     variable = T
-  [../]
+  []
   [temperature_space]
     type = INSFEFluidEnergyKernel
     variable = T
@@ -159,7 +159,7 @@
     variable = p
     boundary = 'right'
     value = 1e5
-  [../]
+  []
 
   # BCs for x-momentum equation
   # Inlet

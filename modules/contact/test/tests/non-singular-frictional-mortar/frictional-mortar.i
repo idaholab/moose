@@ -14,7 +14,7 @@ refine = 1
   [original_file_mesh]
     type = FileMeshGenerator
     file = long_short_blocks.e
-  [../]
+  []
   uniform_refine =  ${refine}
 []
 
@@ -25,18 +25,18 @@ refine = 1
     add_variables = true
     block = '1 2'
     scaling = 1e-6
-  [../]
+  []
 []
 
 [Functions]
   [horizontal_movement]
     type = ParsedFunction
     expression = 'if(t<1.0,${vx}*t-${offset},${vx}-${offset})'
-  [../]
+  []
   [vertical_movement]
     type = ParsedFunction
     expression = 'if(t<1.0,${offset},${vy}*(t-1.0)+${offset})'
-  [../]
+  []
 []
 
 [BCs]
@@ -45,25 +45,25 @@ refine = 1
     variable = disp_x
     boundary = 30
     function = horizontal_movement
-  [../]
+  []
   [fix_right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
+  []
   [fix_right_y]
     type = DirichletBC
     variable = disp_y
     boundary = '40'
     value = 0.0
-  [../]
+  []
   [push_left_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = '30'
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
@@ -72,22 +72,22 @@ refine = 1
     block = 1
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress_left]
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
 
   [elasticity_tensor_right]
     type = ComputeIsotropicElasticityTensor
     block = 2
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress_right]
     type = ComputeFiniteStrainElasticStress
     block = 2
-  [../]
+  []
 []
 
 [Contact]
@@ -102,7 +102,7 @@ refine = 1
     c_tangential = 1e3
     normal_lm_scaling = 1e-3
     tangential_lm_scaling = 1e-3
-  [../]
+  []
 []
 
 [ICs]
@@ -111,20 +111,20 @@ refine = 1
     variable = disp_y
     value = ${offset}
     type = ConstantIC
-  [../]
+  []
   [disp_x]
     block = 1
     variable = disp_x
     value = -${offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -150,5 +150,5 @@ petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -s
 [Outputs]
   [exodus]
     type = Exodus
-  [../]
+  []
 []

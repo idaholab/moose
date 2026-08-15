@@ -19,8 +19,8 @@
       type = FunctionIC
       variable = eta1
       function = x
-    [../]
-  [../]
+    []
+  []
   [eta2]
     order = FIRST
     family = LAGRANGE
@@ -28,8 +28,8 @@
       type = FunctionIC
       variable = eta2
       function = 1-x
-    [../]
-  [../]
+    []
+  []
   [eta3]
     order = FIRST
     family = LAGRANGE
@@ -37,8 +37,8 @@
       type = FunctionIC
       variable = eta3
       function = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -47,7 +47,7 @@
     etas = 'eta1 eta2 eta3'
     function_name = g
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

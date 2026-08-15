@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,11 +15,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.02
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,8 +27,8 @@
     [all]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -56,8 +56,8 @@
       shut_off_time = 0.15
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
@@ -65,6 +65,6 @@
   [console]
     type = Console
     print_mesh_changed_info = true
-  [../]
+  []
 []
 

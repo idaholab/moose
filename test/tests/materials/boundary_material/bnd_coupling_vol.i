@@ -30,19 +30,19 @@
   [exact_fn]
     type = ParsedFunction
     expression = x*x+y*y
-  [../]
+  []
 
   [f_fn]
     type = ParsedFunction
     expression = -4*3+x*x+y*y
-  [../]
+  []
 []
 
 [Variables]
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
@@ -52,18 +52,18 @@
 
     offset = 0
     mat_prop = k3vol
-  [../]
+  []
 
   [r]
     type = Reaction
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = f_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -72,7 +72,7 @@
     variable = u
     prop_name = k3bnd
     boundary = 'left right top bottom'
-  [../]
+  []
 []
 
 [Materials]
@@ -81,20 +81,20 @@
     prop_names = 'k1vol'
     prop_values = 1
     block = 0
-  [../]
+  []
 
   [k2vol]
     type = GenericConstantMaterial
     prop_names = 'k2vol'
     prop_values = 2
     block = 0
-  [../]
+  []
   [k2bnd]
     type = GenericConstantMaterial
     prop_names = 'k2bnd'
     prop_values = 2
     boundary = 'left right top bottom'
-  [../]
+  []
 
   [k3vol]
     type = SumMaterial
@@ -105,7 +105,7 @@
 
     val1 = 1
     val2 = 2
-  [../]
+  []
 
   [k3bnd]
     type = SumMaterial
@@ -116,7 +116,7 @@
 
     val1 = 1
     val2 = 2
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -124,7 +124,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]

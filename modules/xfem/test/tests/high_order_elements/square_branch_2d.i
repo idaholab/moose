@@ -27,20 +27,20 @@
     type = LineSegmentCutSetUserObject
     cut_data = '-1.0000e-10   6.6340e-01   6.6340e-01  -1.0000e-10  0.0  1.0
                  3.3120e-01   3.3200e-01   1.0001e+00   3.3200e-01  1.0  2.0'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
-  [../]
+  []
 []
 
 [Functions]
@@ -48,12 +48,12 @@
     type = PiecewiseLinear
     x = '0  1.0    2.0   3.0'
     y = '0  0.005  0.01  0.01'
-  [../]
+  []
   [top_disp_y]
     type = PiecewiseLinear
     x = '0  1.0    2.0   3.0'
     y = '0  0.005  0.01  0.01'
-  [../]
+  []
 []
 
 [BCs]
@@ -62,25 +62,25 @@
     boundary = 1
     variable = disp_x
     function = right_disp_x
-  [../]
+  []
   [top_y]
     type = FunctionDirichletBC
     boundary = 2
     variable = disp_y
     function = top_disp_y
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [left_x]
     type = DirichletBC
     boundary = 3
     variable = disp_x
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -88,10 +88,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -106,7 +106,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -129,5 +129,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

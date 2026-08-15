@@ -23,19 +23,19 @@
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = 1e4
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -43,7 +43,7 @@
     volumetric_locking_correction = true
     incremental = true
     strain = FINITE
-  [../]
+  []
 []
 
 [BCs]
@@ -52,21 +52,21 @@
     variable = disp_x
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 
   [Pressure]
     [fred]
       boundary = 3
       function = pressure
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -75,12 +75,12 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -97,7 +97,7 @@
     type = InternalVolume
     boundary = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

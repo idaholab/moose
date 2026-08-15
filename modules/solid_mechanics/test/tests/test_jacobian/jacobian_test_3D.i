@@ -24,16 +24,16 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
-  [../]
+  []
 []
 
 [BCs]
@@ -42,14 +42,14 @@
     variable = disp_y
     boundary = top
     value = -1.0
-  [../]
+  []
 
   [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
 []
 
@@ -59,10 +59,10 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 0
-  [../]
+  []
   [stress]
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

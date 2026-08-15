@@ -24,39 +24,39 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [axial_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e_over_l]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [area]
     order = CONSTANT
     family = MONOMIAL
 #    initial_condition = 1.0
-  [../]
+  []
   [react_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [react_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [react_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -64,12 +64,12 @@
     type = PiecewiseLinear
     x = '0  1 2 3'
     y = '0 .5 1 1'
-  [../]
+  []
   [y2]
     type = PiecewiseLinear
     x = '0 1  2 3'
     y = '0 0 .5 1'
-  [../]
+  []
 []
 
 [BCs]
@@ -78,20 +78,20 @@
     variable = disp_x
     boundary = 1
     value = 0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0
-  [../]
+  []
 
   [fixy4]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -100,7 +100,7 @@
     value = -25
     point = '1 0 0'
     variable = disp_y
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -109,27 +109,27 @@
     block = 1
     property = axial_stress
     variable = axial_stress
-  [../]
+  []
   [e_over_l]
     type = MaterialRealAux
     block = 1
     property = e_over_l
     variable = e_over_l
-  [../]
+  []
   [area]
     type = ConstantAux
     block = 1
     variable = area
     value = 0.8
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -158,7 +158,7 @@
     variable = disp_x
     area = area
     save_in = react_x
-  [../]
+  []
   [solid_y]
     type = StressDivergenceTensorsTruss
     block = 1
@@ -167,7 +167,7 @@
     variable = disp_y
     area = area
     save_in = react_y
-  [../]
+  []
 []
 
 [Materials]
@@ -176,7 +176,7 @@
     block = 1
     youngs_modulus = 1e6
     displacements = 'disp_x disp_y'
-  [../]
+  []
 []
 
 [Outputs]

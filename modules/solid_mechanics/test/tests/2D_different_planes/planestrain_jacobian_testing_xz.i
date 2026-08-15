@@ -10,14 +10,14 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_y]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -26,7 +26,7 @@
     strain = SMALL
     out_of_plane_direction = y
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [Materials]
@@ -34,17 +34,17 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

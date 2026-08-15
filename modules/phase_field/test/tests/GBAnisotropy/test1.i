@@ -23,34 +23,34 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [Tricrystal2CircleGrainsIC]
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [unique_grains]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [var_indices]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,15 +58,15 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [top_bottom]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -77,23 +77,23 @@
     # molar_volume_value = 7.11e-6 #Units:m^3/mol
     Anisotropic_GB_file_name = anisotropy_mobility.txt   # anisotropy_energy.txt
     inclination_anisotropy = false # true
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
+  []
 
   [gr1_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
   [gr2_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr2
-  [../]
+  []
 []
 
 [Executioner]

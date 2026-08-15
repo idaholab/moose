@@ -13,7 +13,7 @@
 [AuxVariables]
   [temperature]
     initial_condition = 900.0
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -21,7 +21,7 @@
     strain = FINITE
     add_variables = true
     generate_output = vonmises_stress
-  [../]
+  []
 []
 
 [BCs]
@@ -30,27 +30,27 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [pressure_x]
     type = Pressure
     variable = disp_x
     boundary = right
     function = t
     factor = 3.1675e5
-  [../]
+  []
   [pressure_y]
     type = Pressure
     variable = disp_y
     boundary = top
     function = t
     factor = 6.336e5
-  [../]
+  []
 []
 
 [Materials]
@@ -58,18 +58,18 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3.30e11
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
-  [../]
+  []
   [rom_stress_prediction]
     type = SS316HLAROMANCEStressUpdateTest
     temperature = temperature
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
@@ -89,23 +89,23 @@
   [effective_strain_avg]
     type = ElementAverageValue
     variable = effective_creep_strain
-  [../]
+  []
   [temperature]
     type = ElementAverageValue
     variable = temperature
-  [../]
+  []
   [cell_dislocations]
     type = ElementAverageValue
     variable = cell_dislocations
-  [../]
+  []
   [wall_disloactions]
     type = ElementAverageValue
     variable = wall_dislocations
-  [../]
+  []
   [vonmises_stress]
     type = ElementAverageValue
     variable = vonmises_stress
-  [../]
+  []
 []
 
 [Outputs]

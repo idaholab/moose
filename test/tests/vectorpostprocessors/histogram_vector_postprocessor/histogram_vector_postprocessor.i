@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -43,13 +43,13 @@
   [constant]
     type = ConstantVectorPostprocessor
     value = '9 1 1 2 3 2 4 6 3 6 9'
-  [../]
+  []
 
   [histo]
     type = HistogramVectorPostprocessor
     vpp = constant
     num_bins = 4
-  [../]
+  []
 []
 
 [Outputs]

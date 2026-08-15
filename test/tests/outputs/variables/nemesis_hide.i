@@ -21,48 +21,48 @@
   [Partitioner]
     type = LibmeshPartitioner
     partitioner = linear
-  [../]
+  []
 []
 
 [Functions]
   [fn_x]
     type = ParsedFunction
     expression = x
-  [../]
+  []
   [fn_y]
     type = ParsedFunction
     expression = y
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux_u]
-  [../]
+  []
   [aux_v]
-  [../]
+  []
   [proc_id]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -70,16 +70,16 @@
     type = FunctionAux
     variable = aux_u
     function = 'x*x+y*y'
-  [../]
+  []
   [auxk_v]
     type = FunctionAux
     variable = aux_v
     function = '-(x*x+y*y)'
-  [../]
+  []
   [auxk_proc_id]
     variable = proc_id
     type = ProcessorIDAux
-  [../]
+  []
 []
 
 [BCs]
@@ -88,14 +88,14 @@
     variable = u
     boundary = '1 3'
     function = fn_x
-  [../]
+  []
 
   [v_bc]
     type = FunctionDirichletBC
     variable = v
     boundary = '0 2'
     function = fn_y
-  [../]
+  []
 []
 
 [Executioner]
@@ -108,5 +108,5 @@
   [out]
     type = Nemesis
     hide = 'u aux_v'
-  [../]
+  []
 []

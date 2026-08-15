@@ -22,15 +22,15 @@
   [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -40,7 +40,7 @@
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
@@ -48,7 +48,7 @@
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
@@ -56,7 +56,7 @@
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -65,19 +65,19 @@
     variable = vel_x
     boundary = 'top bottom'
     value = 0.0
-  [../]
+  []
   [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'left top bottom'
     value = 0.0
-  [../]
+  []
   [x_inlet]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'left'
     function = 'inlet_func'
-  [../]
+  []
 []
 
 [Materials]
@@ -86,7 +86,7 @@
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -94,7 +94,7 @@
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]
@@ -111,12 +111,12 @@
 [Outputs]
   [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Functions]
   [inlet_func]
     type = ParsedFunction
     expression = '-4 * (y - 0.5)^2 + 1'
-  [../]
+  []
 []

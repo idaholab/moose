@@ -21,7 +21,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
@@ -29,19 +29,19 @@
     type = PiecewiseLinear
     x = '0.0 0.1 0.2    0.3  0.4    0.5  0.6'
     y = '0.0 0.0 0.0025 0.01 0.0175 0.02 0.02'
-  [../]
+  []
 []
 
 [Kernels]
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -51,14 +51,14 @@
     preset = false
     boundary = 'left'
     function = forcing_fn
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = u
     preset = false
     boundary = 'right'
     function = forcing_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -76,15 +76,15 @@
   [udot]
     type = ElementAverageTimeDerivative
     variable = u
-  [../]
+  []
   [udotdot]
     type = ElementAverageSecondTimeDerivative
     variable = u
-  [../]
+  []
   [u]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
 []
 
 [Outputs]

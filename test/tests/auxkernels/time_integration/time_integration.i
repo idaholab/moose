@@ -27,7 +27,7 @@
     type = PiecewiseLinear
     x = '0.01 0.1'
     y = '0.005 0.05'
-  [../]
+  []
 []
 
 [Variables]
@@ -35,32 +35,32 @@
     initial_condition = 0.0
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
      type = Diffusion
      variable = u
-  [../]
+  []
   [timederivative]
      type = TimeDerivative
      variable = u
-  [../]
+  []
   [sourceterm]
      type = BodyForce
      variable = u
      function = Source
-  [../]
+  []
 []
 
 [AuxVariables]
   [v_midpoint]
-  [../]
+  []
   [v_trapazoid]
-  [../]
+  []
   [v_simpson]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -69,19 +69,19 @@
     variable_to_integrate = u
     variable = v_midpoint
     order = 1
-  [../]
+  []
   [TrapazoidalTimeIntegrator]
     type = VariableTimeIntegrationAux
     variable_to_integrate = u
     variable = v_trapazoid
     order = 2
-  [../]
+  []
   [SimpsonsTimeIntegrator]
     type = VariableTimeIntegrationAux
     variable_to_integrate = u
     variable = v_simpson
     order = 3
-  [../]
+  []
 []
 
 [BCs]
@@ -90,59 +90,59 @@
     variable = u
     function = RightBC
     boundary = 'right'
- [../]
+ []
  [LeftBC]
     type = FunctionDirichletBC
     variable = u
     function = LeftBC
     boundary = 'left'
- [../]
+ []
  [TopBC]
     type = FunctionDirichletBC
     variable = u
     function = TopBC
     boundary = 'top'
- [../]
+ []
  [BottomBC]
     type = FunctionDirichletBC
     variable = u
     function = BottomBC
     boundary = 'bottom'
- [../]
+ []
 []
 
 [Functions]
  [Soln]
     type = ParsedFunction
     expression = 't*(x*x+y*y)'
- [../]
+ []
  [Source]
     type = ParsedFunction
     expression = '(x*x + y*y) - 4*t'
- [../]
+ []
  [TopBC]
     type = ParsedFunction
     expression = 't*(x*x+1)'
- [../]
+ []
  [BottomBC]
     type = ParsedFunction
     expression = 't*x*x'
- [../]
+ []
  [RightBC]
    type = ParsedFunction
    expression = 't*(y*y+1)'
- [../]
+ []
  [LeftBC]
     type = ParsedFunction
     expression = 't*y*y'
-  [../]
+  []
 []
 [Postprocessors]
   [l2_error]
     type = NodalL2Error
     variable = u
     function = Soln
-  [../]
+  []
 []
 
 [Executioner]
@@ -154,7 +154,7 @@
   [TimeStepper]
      type = FunctionDT
      function = dts
-  [../]
+  []
 
   nl_abs_tol = 1.e-15
 []

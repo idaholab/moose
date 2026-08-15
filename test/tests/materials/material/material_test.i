@@ -25,14 +25,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [mat]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -40,7 +40,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = matp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -49,7 +49,7 @@
     variable = mat
     property = matp
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -58,7 +58,7 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
   [right]
     type = MTBC
@@ -66,7 +66,7 @@
     boundary = 1
     grad = 8
     prop_name = matp
-  [../]
+  []
 []
 
 # Materials System
@@ -74,7 +74,7 @@
   [mat]
     type = MTMaterial
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,5 +88,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

@@ -28,7 +28,7 @@
   [PolycrystalVariables]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [UserObjects]
@@ -38,7 +38,7 @@
     coloring_algorithm = jp
     rand_seed = 10
     output_adjacency_matrix = true
-  [../]
+  []
   [grain_tracker]
     type = GrainTracker
     threshold = 0.2
@@ -49,15 +49,15 @@
     polycrystal_ic_uo = voronoi
     error_on_grain_creation = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
@@ -66,58 +66,58 @@
     # Variable used to visualize the grain boundaries in the simulation
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [unique_grains]
-  [../]
+  []
 
   [var_indices]
-  [../]
+  []
 
   [ghost_regions]
-  [../]
+  []
 
   [halos]
-  [../]
+  []
 
   [halo0]
-  [../]
+  []
 
   [halo1]
-  [../]
+  []
 
   [halo2]
-  [../]
+  []
 
   [halo3]
-  [../]
+  []
 
   [halo4]
-  [../]
+  []
 
   [halo5]
-  [../]
+  []
 
   [halo6]
-  [../]
+  []
 
   [halo7]
-  [../]
+  []
 
   [centroids]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [proc_id]
-  [../]
+  []
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
   [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -127,103 +127,103 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [ghosted_entities]
     type = FeatureFloodCountAux
     variable = ghost_regions
     flood_counter = grain_tracker
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [halos]
     type = FeatureFloodCountAux
     variable = halos
     flood_counter = grain_tracker
     field_display = HALOS
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [halo0]
     type = FeatureFloodCountAux
     variable = halo0
     map_index = 0
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [halo1]
     type = FeatureFloodCountAux
     variable = halo1
     map_index = 1
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [halo2]
     type = FeatureFloodCountAux
     variable = halo2
     map_index = 2
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [halo3]
     type = FeatureFloodCountAux
     variable = halo3
     map_index = 3
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [halo4]
     type = FeatureFloodCountAux
     variable = halo4
     map_index = 4
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [halo5]
     type = FeatureFloodCountAux
     variable = halo5
     map_index = 5
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [halo6]
     type = FeatureFloodCountAux
     variable = halo6
     map_index = 6
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [halo7]
     type = FeatureFloodCountAux
     variable = halo7
     map_index = 7
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
   [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = timestep_end
     field_display = CENTROID
     flood_counter = grain_tracker
-  [../]
+  []
   [proc_id]
     type = ProcessorIDAux
     variable = proc_id
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -239,7 +239,7 @@
     GBmob0 = 2.5e-6 # m^4(Js) for copper from schonfelder1997molecular bibtex entry
     Q = 0.23 # eV for copper from schonfelder1997molecular bibtex entry
     GBenergy = 0.708 # J/m^2 from schonfelder1997molecular bibtex entry
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -247,7 +247,7 @@
   [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
+  []
 []
 
 [Executioner]
@@ -276,5 +276,5 @@
   [pg]
     type = PerfGraphOutput
     level = 2                     # Default is 1
-  [../]
+  []
 []

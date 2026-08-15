@@ -16,7 +16,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
@@ -25,7 +25,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -34,17 +34,17 @@
   [one]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [five]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [coupled]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -53,14 +53,14 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   #Coupling of nonlinear to Aux
   [force]
     type = CoupledForce
     variable = u
     v = one
-  [../]
+  []
 []
 
 # AuxKernel System
@@ -70,7 +70,7 @@
     variable = one
     type = ConstantAux
     value = 1
-  [../]
+  []
 
   #Shows coupling of Aux to nonlinear
   [coupled]
@@ -78,14 +78,14 @@
     type = CoupledAux
     value = 2
     coupled = u
-  [../]
+  []
 
   [five]
     type = ConstantAux
     variable = five
     boundary = '3 1'
     value = 5
-  [../]
+  []
 
 []
 
@@ -97,14 +97,14 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

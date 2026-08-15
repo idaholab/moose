@@ -7,21 +7,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux0]
-  [../]
+  []
   [aux1]
-  [../]
+  []
 []
 
 [Functions]
   [func]
     type = ParsedFunction
     expression = t*x*y
-  [../]
+  []
 []
 
 [Kernels]
@@ -29,11 +29,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -41,12 +41,12 @@
     type = FunctionAux
     variable = aux0
     function = func
-  [../]
+  []
   [aux1]
     type = FunctionAux
     variable = aux1
     function = func
-  [../]
+  []
 []
 
 [BCs]
@@ -55,13 +55,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -84,5 +84,5 @@
     start_time         = '0.25             0.55'
     end_time           = '0.65             0.75'
     execute_on         = 'initial timestep_begin'
-  [../]
+  []
 []

@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,16 +15,16 @@
     type = CoefDiffusion
     variable = u
     coef = 0.05
-  [../]
+  []
   [diff1]
     type = CoefDiffusion
     variable = u
     coef = 0.5
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,5 +63,5 @@
     start_time = '0'
     end_time = '0.51'
     execute_on = 'timestep_begin'
-  [../]
+  []
 []

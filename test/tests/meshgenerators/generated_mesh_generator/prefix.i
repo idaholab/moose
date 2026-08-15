@@ -8,7 +8,7 @@
     bias_x = 2
     bias_z = 0.5
     boundary_name_prefix = new
-  [../]
+  []
 []
 
 [Outputs]

@@ -11,12 +11,12 @@
     axis = x
     x = '0 2'
     y = '1.01 2.99'
-  [../]
+  []
 []
 
 [AuxVariables]
   [a]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -24,23 +24,23 @@
     type = FunctionAux
     variable = a
     function = fn
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -49,13 +49,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -63,19 +63,19 @@
     type = PointValue
     variable = a
     point = '0 0 0'
-  [../]
+  []
 
   [value2]
     type = PointValue
     variable = a
     point = '1 0 0'
-  [../]
+  []
 
   [value3]
     type = PointValue
     variable = a
     point = '2 0 0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -90,5 +90,5 @@
     type = CSV
     file_base = csv_validation_tester_01
     execute_on = 'final'
-  [../]
+  []
 []

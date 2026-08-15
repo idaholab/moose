@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -54,7 +54,7 @@
     execute_on = timestep_end
     type = TransientMultiApp
     input_files = pp_sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -63,5 +63,5 @@
     postprocessor = from_parent
     type = MultiAppVariableValueSamplePostprocessorTransfer
     to_multi_app = pp_sub
-  [../]
+  []
 []

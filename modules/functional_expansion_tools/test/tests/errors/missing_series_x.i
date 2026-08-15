@@ -9,7 +9,7 @@
     series_type = Cartesian
     orders = '0'
     physical_bounds = '-1 1'
-  [../]
+  []
 []
 
 [Executioner]

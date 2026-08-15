@@ -16,7 +16,7 @@
   [tracer]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -24,7 +24,7 @@
     type = FunctionIC
     variable = tracer
     function = 'if(x<0.1,0,if(x>0.3,0,1))'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -33,26 +33,26 @@
     execute_on = 'linear'
     scheme = 'none' #none | minmod | mc | superbee
     u = tracer
-  [../]
+  []
 
   [internal_side_flux]
     type = AEFVUpwindInternalSideFlux
     execute_on = 'linear'
     velocity = 0.1
-  [../]
+  []
 
   [free_outflow_bc]
     type = AEFVFreeOutflowBoundaryFlux
     execute_on = 'linear'
     velocity = 0.1
-  [../]
+  []
 []
 
 [Kernels]
   [dot]
     type = TimeDerivative
     variable = tracer
-  [../]
+  []
 []
 [DGKernels]
   [concentration]
@@ -61,7 +61,7 @@
     component = 'concentration'
     flux = internal_side_flux
     u = tracer
-  [../]
+  []
 []
 
 [BCs]
@@ -72,7 +72,7 @@
     component = 'concentration'
     flux = free_outflow_bc
     u = tracer
-  [../]
+  []
 []
 
 [Materials]
@@ -80,7 +80,7 @@
     type = AEFVMaterial
     slope_limiting = lslope
     u = tracer
-  [../]
+  []
 []
 
 
@@ -92,7 +92,7 @@
     num_points = 100
     sort_by = x
     variable = tracer
-  [../]
+  []
 []
 
 [Executioner]

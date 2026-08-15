@@ -11,21 +11,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [np_layered_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -34,7 +34,7 @@
     variable = np_layered_average
     execute_on = timestep_end
     user_object = npla
-  [../]
+  []
 []
 
 [BCs]
@@ -43,13 +43,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [one]
     type = DirichletBC
     variable = u
     boundary = 'right back top'
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
@@ -59,7 +59,7 @@
     num_layers = 10
     variable = u
     points_file = points.txt
-  [../]
+  []
 []
 
 [Executioner]

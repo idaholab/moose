@@ -28,7 +28,7 @@
   [unique_regions]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [ICs]
@@ -57,7 +57,7 @@
     primary_percolation_boundaries = 'left'
     secondary_percolation_boundaries = 'right'
     specified_boundaries = 'left right'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -68,7 +68,7 @@
     # Turn on centroid output
     output_centroids = true
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -84,7 +84,7 @@
     variable = unique_regions
     flood_counter = flood_count
     field_display = UNIQUE_REGION
-  [../]
+  []
 []
 
 [Problem]

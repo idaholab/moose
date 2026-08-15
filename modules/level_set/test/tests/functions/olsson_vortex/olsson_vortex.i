@@ -8,7 +8,7 @@
 [AuxVariables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -17,14 +17,14 @@
     variable = velocity
     function = velocity_func
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Functions]
   [velocity_func]
     type = LevelSetOlssonVortex
     reverse_time = 2
-  [../]
+  []
 []
 
 [Problem]

@@ -11,22 +11,22 @@
   [bc_fn]
     type=ParsedFunction
     expression=0
-  [../]
+  []
 
   [forcing_fn]
     type = MTPiecewiseConst1D
-  [../]
+  []
 
   [solution]
     type = MTPiecewiseConst1D
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,18 +34,18 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -59,33 +59,33 @@
     variable = u
     boundary = 'left right'
     function = bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
   [dofs]
     type = NumDOFs
-  [../]
+  []
 
   [h]
     type = AverageElementSize
-  [../]
+  []
 
   [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
+  []
   [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
+  []
   [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]
@@ -95,7 +95,7 @@
   nl_rel_tol = 1.e-9
   [Adaptivity]
 
-  [../]
+  []
 []
 
 [Outputs]
@@ -103,5 +103,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

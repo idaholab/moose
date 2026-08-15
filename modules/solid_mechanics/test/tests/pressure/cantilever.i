@@ -47,7 +47,7 @@
     add_variables = false
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 

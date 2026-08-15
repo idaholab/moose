@@ -16,7 +16,7 @@
     type = CSVReaderVectorPostprocessor
     csv_file = 'example.csv'
     force_preic = true
-  [../]
+  []
 []
 
 [Outputs]

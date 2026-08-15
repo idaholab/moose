@@ -16,33 +16,33 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
-  [../]
+  []
 []
 
 [AuxVariables]
   [e11_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e22_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [c]
-  [../]
+  []
   [eigen_strain00]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -52,21 +52,21 @@
     index_i = 0
     index_j = 0
     variable = e11_aux
-  [../]
+  []
   [matl_e22]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
     variable = e22_aux
-  [../]
+  []
   [eigen_strain00]
     type = RankTwoAux
     variable = eigen_strain00
     rank_two_tensor = eigenstrain
     index_j = 0
     index_i = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -75,11 +75,11 @@
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
+  []
   [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
@@ -90,7 +90,7 @@
     f_name = var_dep
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
   [eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
@@ -98,13 +98,13 @@
     prefactor = var_dep
     args = c
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
-  [../]
+  []
 []
 
 [BCs]
@@ -114,32 +114,32 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0
-  [../]
+  []
   [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.01
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -168,5 +168,5 @@
     variable = c
     invalue = 1
     type = SmoothCircleIC
-  [../]
+  []
 []

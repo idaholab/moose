@@ -7,18 +7,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,13 +27,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,7 +59,7 @@
     app_type = MooseTestApp
     enable = false # Start with a multiapp that's disabled up front
     sub_cycling = true
-  [../]
+  []
 []
 
 [Controls]
@@ -70,5 +70,5 @@
     end_time = 1.3
     execute_on = 'timestep_begin'
     reverse_on_false = true
-  [../]
+  []
 []

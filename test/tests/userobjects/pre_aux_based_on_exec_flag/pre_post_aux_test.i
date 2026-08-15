@@ -14,7 +14,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -41,12 +41,12 @@
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -96,13 +96,13 @@
     type = ElementIntegralVariablePostprocessor
     variable = w1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
   [scalePostAux]
     type = ScalePostprocessor
     value = total_u1
     scaling_factor = 1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
   #
   # shoule only run pre_aux on initial
   #
@@ -110,13 +110,13 @@
     type = ElementIntegralVariablePostprocessor
     variable = w1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
   [scale_initial]
     type = ScalePostprocessor
     value = total_u2
     scaling_factor = 1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
   #
   # shoule be forced into preaux on timestep_end
   #
@@ -124,13 +124,13 @@
     type = ElementIntegralVariablePostprocessor
     variable = w1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
   [scale_td_end]
     type = ScalePostprocessor
     value = total_u3
     scaling_factor = 1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
   #
   # shoule be forced into preaux on final
   #
@@ -138,13 +138,13 @@
     type = ElementIntegralVariablePostprocessor
     variable = w1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
   [scale_final]
     type = ScalePostprocessor
     value = total_u4
     scaling_factor = 1
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
-  [../]
+  []
 []
 
 [BCs]
@@ -153,7 +153,7 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

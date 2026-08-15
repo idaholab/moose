@@ -22,7 +22,7 @@
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,12 +31,12 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [rhs]
     type = MassEigenKernel
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -48,7 +48,7 @@
     preset = false
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,7 +71,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -82,12 +82,12 @@
     variable = u
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
-  [../]
+  []
 
   [udiff]
     type = ElementL2Diff
     variable = u
-  [../]
+  []
 []
 
 [Outputs]

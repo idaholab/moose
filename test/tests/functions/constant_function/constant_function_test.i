@@ -14,17 +14,17 @@
   [bc_fn]
     type = ParsedFunction
     expression = 'x*x+y*y'
-  [../]
+  []
 
   [icfn]
     type = ConstantFunction
     value = 1
-  [../]
+  []
 
   [ffn]
     type = ConstantFunction
     value = -4
-  [../]
+  []
 []
 
 [Variables]
@@ -34,8 +34,8 @@
     [InitialCondition]
       type = FunctionIC
       function = icfn
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -43,12 +43,12 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [force]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
@@ -57,7 +57,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = bc_fn
-  [../]
+  []
 []
 
 [Executioner]

@@ -25,26 +25,26 @@
     variable = u
     mat_prop = diffusion
     offset = 0.0
-  [../]
+  []
 
   [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
-  [../]
+  []
 
   [diff_T]
     type = CoefDiffusion
     variable = T
     coef = 1e30
-  [../]
+  []
   [src_T]
     type = CoupledForce
     variable = T
     v = power
     coef = 1e30
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -56,7 +56,7 @@
     # this coefficient will affect the eigenvalue.
     normal_factor = 10
     execute_on = linear
-  [../]
+  []
 []
 
 [BCs]
@@ -65,20 +65,20 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 
   [eigenU]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 
   [homogeneousT]
     type = DirichletBC
     variable = T
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -88,7 +88,7 @@
     block = 0
     base = 1.0
     coef = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -106,14 +106,14 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [VectorPostprocessors]
   [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

@@ -17,40 +17,40 @@
   [ic]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*x
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [body]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [ICs]
@@ -58,7 +58,7 @@
     type = FunctionIC
     variable = u
     function = ic
-  [../]
+  []
 []
 
 [BCs]
@@ -67,7 +67,7 @@
     variable = u
     boundary = '0 1'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,7 +75,7 @@
 
   [TimeIntegrator]
     type = LStableDirk2
-  [../]
+  []
   num_steps = 1
   abort_on_solve_fail = true
 

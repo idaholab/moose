@@ -16,13 +16,13 @@
       top_right = '0.5 0.5 0'
       inside = REFINE
       outside = DO_NOTHING
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bubble]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -31,7 +31,7 @@
     variable = bubble
     function = bubble_func
     execute_on = initial
-  [../]
+  []
 []
 
 
@@ -40,7 +40,7 @@
     type = LevelSetOlssonBubble
     center = '0.25 0.25 0'
     radius = 0.15
-  [../]
+  []
 []
 
 [Problem]

@@ -32,25 +32,25 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [bounding_block1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [bounding_block2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -60,14 +60,14 @@
     variable = bounding_block1
     execute_on = timestep_end
     user_object = bounding_block1
-  [../]
+  []
   [bounding_block2]
     type = SpatialUserObjectAux
     block = 2
     variable = bounding_block2
     execute_on = timestep_end
     user_object = bounding_block2
-  [../]
+  []
 []
 
 [BCs]
@@ -76,25 +76,25 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [lu]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
   [ul]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
   [uu]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 8
-  [../]
+  []
 []
 
 [UserObjects]
@@ -106,7 +106,7 @@
     execute_on = linear
     block = 1
     layer_bounding_block = 2
-  [../]
+  []
   [bounding_block2]
     type = LayeredAverage
     direction = y
@@ -115,7 +115,7 @@
     layer_bounding_block = 1
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [Executioner]

@@ -4,7 +4,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -16,13 +16,13 @@
     preconditioner  = 'LU LU'
     off_diag_row    = 'v'
     off_diag_column = 'u'
-  [../]
+  []
 
   [FDP]
     type = FDP
     off_diag_row    = 'v'
     off_diag_column = 'u'
-  [../]
+  []
 []
 
 [Variables]
@@ -31,12 +31,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -45,18 +45,18 @@
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -67,28 +67,28 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 100
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -71,12 +71,12 @@
     order = FIRST
     family = LAGRANGE
     block = secondary_left
-  [../]
+  []
   [lm2]
     order = FIRST
     family = LAGRANGE
     block = secondary_bottom
-  [../]
+  []
 []
 
 [AuxVariables]

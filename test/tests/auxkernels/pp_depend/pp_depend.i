@@ -7,19 +7,19 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [pp_aux]
-  [../]
+  []
 []
 
 [Functions]
   [t_func]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -27,7 +27,7 @@
     type = CoefDiffusion
     variable = u
     coef = 0.01
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -36,7 +36,7 @@
     variable = pp_aux
     execute_on = timestep_end
     pp = t_pp
-  [../]
+  []
 []
 
 [BCs]
@@ -45,20 +45,20 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [t_pp]
     type = FunctionValuePostprocessor
     function = t_func
-  [../]
+  []
 []
 
 [Problem]

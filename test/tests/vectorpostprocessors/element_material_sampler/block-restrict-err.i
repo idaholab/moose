@@ -9,14 +9,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -25,13 +25,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -39,7 +39,7 @@
     type = GenericConstantMaterial
     prop_names = 'prop1 prop2 prop3'
     prop_values = '1 2 42'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -47,7 +47,7 @@
     type = ElementMaterialSampler
     material = 'mat'
     elem_ids = '2112'
-  [../]
+  []
 []
 
 [Executioner]

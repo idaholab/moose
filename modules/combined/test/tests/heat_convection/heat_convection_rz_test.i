@@ -60,7 +60,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 294.26 # Initial cylinder temperature
-  [../]
+  []
 
 []    # Variables END
 
@@ -69,12 +69,12 @@
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 
   [heat_ie]
     type = HeatConductionTimeDerivative
     variable = temp
-  [../]
+  []
 
 []    # Kernels END
 
@@ -91,7 +91,7 @@
          final = 477.6      # final ambient (lab or oven) temperature (K)
    duration = 600.    # length of time in seconds that it takes the ambient
           #   temperature to ramp from initial to final
-  [../]          # Convective End
+  []          # Convective End
 
 []    # BCs END
 
@@ -110,12 +110,12 @@
           #    make the cylinder thermally soak faster (only for the purposes
           #    of this test problem
 
-  [../]
+  []
   [density]
     type = Density
     block = 1
     density = 2405.28
-  [../]
+  []
 
 []      # Materials END
 

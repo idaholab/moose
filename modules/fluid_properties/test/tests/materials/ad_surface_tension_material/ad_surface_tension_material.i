@@ -9,7 +9,7 @@
 [FluidProperties]
   [fp_2phase]
     type = StiffenedGasTwoPhaseFluidProperties
-  [../]
+  []
 []
 
 [Materials]
@@ -17,13 +17,13 @@
     type = ADGenericConstantMaterial
     prop_names = 'T_test'
     prop_values = '300'
-  [../]
+  []
   [sigma_mat]
     type = ADSurfaceTensionMaterial
     T = T_test
     surface_tension = surface_tension_test
     fp_2phase = fp_2phase
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -31,7 +31,7 @@
     type = ADElementIntegralMaterialProperty
     mat_prop = surface_tension_test
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Problem]

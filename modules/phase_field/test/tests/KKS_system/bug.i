@@ -24,13 +24,13 @@
     variable = u
     boundary = 'left'
     value = 0.1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 0.9
-  [../]
+  []
 []
 
 [Variables]
@@ -38,26 +38,26 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # secondary variable
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [udiff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [valgebra]
     type = AlgebraDebug
     variable = v
     v = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
 #  [mydebug]
 #    type = FDP
 #    full = true
-#  [../]
+#  []
 #[]
 
 [Outputs]

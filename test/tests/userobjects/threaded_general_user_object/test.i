@@ -6,14 +6,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -22,7 +22,7 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -33,14 +33,14 @@
   [prime_product]
     type = PrimeProductUserObject
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Postprocessors]
   [product]
     type = PrimeProductPostprocessor
     prime_product = prime_product
-  [../]
+  []
 []
 
 [Outputs]

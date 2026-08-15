@@ -30,19 +30,19 @@
                   2.0  1.1 -1.0
                   2.0  1.1  1.0
                  -1.0 -0.1  1.0'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -52,14 +52,14 @@
     variable = u
     boundary = front
     value = 3
-  [../]
+  []
 
   [back]
     type = DirichletBC
     variable = u
     boundary = back
     value = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -84,12 +84,12 @@
     type = SideIntegralVariablePostprocessor
     variable = u
     boundary = front
-  [../]
+  []
   [back]
     type = SideIntegralVariablePostprocessor
     variable = u
     boundary = back
-  [../]
+  []
 []
 
 [Outputs]
@@ -99,5 +99,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

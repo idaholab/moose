@@ -9,7 +9,7 @@
 [FluidProperties]
   [fp_2phase]
     type = StiffenedGasTwoPhaseFluidProperties
-  [../]
+  []
 []
 
 [Materials]
@@ -17,13 +17,13 @@
     type = ADGenericConstantMaterial
     prop_names = 'p_test'
     prop_values = '1e5'
-  [../]
+  []
   [T_sat_mat]
     type = ADSaturationTemperatureMaterial
     p = p_test
     T_sat = T_sat_test
     fp_2phase = fp_2phase
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -31,7 +31,7 @@
     type = ADElementIntegralMaterialProperty
     mat_prop = T_sat_test
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Problem]

@@ -14,7 +14,7 @@
                                if(x<7, 0,
                                if(x<8, 0.5-0.5*cos(il*pi),
                                1))))'
-  [../]
+  []
   [func2]
     type = ParsedFunction
     expression = 'il:=x-1; ir:=5-x; if(x<1, 0,
@@ -22,7 +22,7 @@
                                if(x<4, 1,
                                if(x<5, 0.5-0.5*cos(ir*pi),
                                0))))'
-  [../]
+  []
   [func3]
     type = ParsedFunction
     expression = 'il:=x-4; ir:=8-x; if(x<4, 0,
@@ -30,7 +30,7 @@
                                if(x<7, 1,
                                if(x<8, 0.5-0.5*cos(ir*pi),
                                0))))'
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -40,24 +40,24 @@
     [InitialCondition]
       type = FunctionIC
       function = func1
-    [../]
-  [../]
+    []
+  []
   [eta2]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = func2
-    [../]
-  [../]
+    []
+  []
   [eta3]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = func3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -71,7 +71,7 @@
     function_name = gsl
     g_order = LOW
     outputs = 'out'
-  [../]
+  []
   [asymmetriccrosstermbarrier_low]
     type = AsymmetricCrossTermBarrierFunctionMaterial
     etas     = 'eta1 eta2 eta3'
@@ -82,7 +82,7 @@
     function_name = gal
     g_order = LOW
     outputs = 'out'
-  [../]
+  []
 
   [asymmetriccrosstermbarrie_simple]
     type = AsymmetricCrossTermBarrierFunctionMaterial
@@ -94,23 +94,23 @@
     function_name = gas
     g_order = SIMPLE
     outputs = 'out'
-  [../]
+  []
 
   [switch1]
     type = SwitchingFunctionMaterial
     function_name = h1
     eta = eta1
-  [../]
+  []
   [switch2]
     type = SwitchingFunctionMaterial
     function_name = h2
     eta = eta2
-  [../]
+  []
   [switch3]
     type = SwitchingFunctionMaterial
     function_name = h3
     eta = eta3
-  [../]
+  []
 []
 
 [Executioner]

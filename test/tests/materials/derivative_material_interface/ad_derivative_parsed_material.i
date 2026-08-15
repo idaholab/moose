@@ -14,8 +14,8 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]

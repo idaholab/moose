@@ -2,7 +2,7 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
-  [../]
+  []
 []
 
 [Problem]
@@ -13,20 +13,20 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [body_force]
     type = BodyForce
     variable = u
     value = 10
-  [../]
+  []
 []
 
 [BCs]
@@ -35,14 +35,14 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -50,7 +50,7 @@
     type = GenericConstantMaterial
     prop_names =  'diff1'
     prop_values = '1'
-  [../]
+  []
 []
 
 [Executioner]

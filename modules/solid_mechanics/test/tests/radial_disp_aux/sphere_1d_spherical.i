@@ -21,16 +21,16 @@
 
 [AuxVariables]
   [temp]
-  [../]
+  []
   [rad_disp]
-  [../]
+  []
 []
 
 [Functions]
   [temperature_load]
     type = ParsedFunction
     expression = t+300.0
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -38,7 +38,7 @@
     strain = FINITE
     add_variables = true
     eigenstrain_names = eigenstrain
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -47,11 +47,11 @@
     variable = temp
     function = temperature_load
     use_displaced_mesh = false
-  [../]
+  []
   [raddispaux]
     type = RadialDisplacementSphereAux
     variable = rad_disp
-  [../]
+  []
 []
 
 [BCs]
@@ -60,7 +60,7 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -68,17 +68,17 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
+  []
   [small_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]

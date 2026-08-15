@@ -5,14 +5,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -21,13 +21,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = NeumannBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

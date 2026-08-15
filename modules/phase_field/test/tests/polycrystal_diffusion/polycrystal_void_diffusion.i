@@ -45,8 +45,8 @@
       outvalue = 0.0
       polycrystal_ic_uo = voronoi
       rand_seed = 10
-    [../]
-  [../]
+    []
+  []
   [bubble_IC]
     variable = bubble
     type = PolycrystalVoronoiVoidIC
@@ -55,7 +55,7 @@
     outvalue = 0.0
     polycrystal_ic_uo = voronoi
     rand_seed = 10
-  [../]
+  []
 []
 
 [Materials]
@@ -72,13 +72,13 @@
     h_name = hb
     all_etas = 'bubble gr0 gr1 gr2 gr3'
     phase_etas = 'bubble'
-  [../]
+  []
   [hm]
     type = SwitchingFunctionMultiPhaseMaterial
     h_name = hm
     all_etas = 'bubble gr0 gr1 gr2 gr3'
     phase_etas = 'gr0 gr1 gr2 gr3'
-  [../]
+  []
 []
 
 [UserObjects]

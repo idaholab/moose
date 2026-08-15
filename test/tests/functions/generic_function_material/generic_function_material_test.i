@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
   [diff_func]
     type = ParsedFunction
     expression = 1/t
-  [../]
+  []
 []
 
 [Kernels]
@@ -22,16 +22,16 @@
     type = GenericDiffusion
     variable = u
     property = diffusion
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [conv]
     type = Convection
     variable = u
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -40,13 +40,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -55,7 +55,7 @@
     block = 0
     prop_names = diffusion
     prop_values = diff_func
-  [../]
+  []
 []
 
 [Executioner]

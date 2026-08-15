@@ -38,7 +38,7 @@
     Iy = 23.3505405
     Iz = 23.3505405
     y_orientation = '0 1.0 0.0'
-  [../]
+  []
 []
 
 [Materials]
@@ -48,11 +48,11 @@
     poissons_ratio = 0.3
     shear_coefficient = 1.0
     block = 0
-  [../]
+  []
   [stress]
     type = ComputeBeamResultants
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -61,38 +61,38 @@
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 'left'
     value = 0.0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 'left'
     value = 0.0
-  [../]
+  []
 
   [fixrx]
     type = DirichletBC
     variable = rot_x
     boundary = 'left'
     value = 0.0
-  [../]
+  []
   [fixry]
     type = DirichletBC
     variable = rot_y
     boundary = 'left'
     value = 0.0
-  [../]
+  []
   [fixrz]
     type = DirichletBC
     variable = rot_z
     boundary = 'left'
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -101,14 +101,14 @@
     variable = disp_z
     boundary = 'right'
     rate = 250
-  [../]
+  []
 
   [force_rx]
     type = ConstantRate
     variable = rot_x
     boundary = 'right'
     rate = 9000
-  [../]
+  []
 
 []
 
@@ -116,7 +116,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 [Executioner]
   type = Transient
@@ -136,27 +136,27 @@
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = disp_y
-  [../]
+  []
   [disp_z]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
   [disp_rx]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = rot_x
-  [../]
+  []
   [disp_ry]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = rot_y
-  [../]
+  []
   [disp_rz]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = rot_z
-  [../]
+  []
 []
 [Debug]
  show_var_residual_norms = true

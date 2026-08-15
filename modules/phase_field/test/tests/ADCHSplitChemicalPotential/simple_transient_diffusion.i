@@ -6,9 +6,9 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [mu]
-  [../]
+  []
 []
 
 [Kernels]
@@ -17,16 +17,16 @@
     variable = c
     chemical_potential_var = mu
     mobility = mobility_prop
-  [../]
+  []
   [chempot]
     type = ADCHSplitChemicalPotential
     variable = mu
     chemical_potential = mu_prop
-  [../]
+  []
   [time]
     type = ADTimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -36,12 +36,12 @@
     variable = c
     x = '0 1'
     y = '0 1'
-  [../]
+  []
   [mobility_prop]
     type = ADGenericConstantMaterial
     prop_names = mobility_prop
     prop_values = 0.1
-  [../]
+  []
 []
 
 [BCs]
@@ -50,13 +50,13 @@
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
   [rightc]
     type = DirichletBC
     variable = c
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -72,7 +72,7 @@
   [smp]
      type = SMP
      full = true
-  [../]
+  []
 []
 
 [Outputs]

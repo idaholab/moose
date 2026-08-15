@@ -13,7 +13,7 @@
   [c]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [ICs]
@@ -26,7 +26,7 @@
     outvalue = 0.1
     int_width = 60.0
     variable = c
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,17 +34,17 @@
     type = CahnHilliard
     variable = c
     f_name = F
-  [../]
+  []
   [gradient_energy]
     type = CHInterface
     variable = c
     mob_name = M
     kappa_name = kappa
-  [../]
+  []
   [cdot]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -59,12 +59,12 @@
     Em = 0.71 # in eV, from Balluffi1978 Table 2
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.7 # Total guess
-  [../]
+  []
   [free_energy]
     type = PolynomialFreeEnergy
     c = c
     derivative_order = 2
-  [../]
+  []
 []
 
 [Executioner]

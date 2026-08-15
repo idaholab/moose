@@ -23,7 +23,7 @@
     xy_data = '0.1 0.5
                0.6 1.0
                1.0 0.5'
-  [../]
+  []
 []
 ############################################################
 [UserObjects]
@@ -31,22 +31,22 @@
     type = AEFVSlopeLimitingOneD
     execute_on = 'linear'
     scheme = 'none' #none | minmod | mc | superbee
-  [../]
+  []
 
   [internal_side_flux]
     type = AEFVUpwindInternalSideFlux
     execute_on = 'linear'
-  [../]
+  []
 
   [free_outflow_bc]
     type = AEFVFreeOutflowBoundaryFlux
     execute_on = 'linear'
-  [../]
+  []
 []
 ############################################################
 [Variables]
   [u]
-  [../]
+  []
 []
 ############################################################
 [ICs]
@@ -54,7 +54,7 @@
     type = FunctionIC
     variable = 'u'
     function = ic_u
-  [../]
+  []
 []
 ############################################################
 [Kernels]
@@ -62,7 +62,7 @@
     implicit = true
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 ############################################################
 [DGKernels]
@@ -71,7 +71,7 @@
     variable = u
     component = 'concentration'
     flux = internal_side_flux
-  [../]
+  []
 []
 ############################################################
 [BCs]
@@ -81,21 +81,21 @@
     variable = u
     component = 'concentration'
     flux = free_outflow_bc
-  [../]
+  []
 []
 ############################################################
 [Materials]
   [aefv]
     type = AEFVMaterial
     block = 0
-  [../]
+  []
 []
 ############################################################
 [Executioner]
   type = Transient
   [TimeIntegrator]
     type = ExplicitMidpoint
-  [../]
+  []
   solve_type = 'LINEAR'
 
   l_tol = 1e-4
@@ -114,6 +114,6 @@
     type = Exodus
     file_base = 1d_aefv_square_wave_none_out
     time_step_interval = 2
-  [../]
+  []
   perf_graph = true
 []

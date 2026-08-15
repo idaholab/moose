@@ -17,7 +17,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -28,14 +28,14 @@
 [Outputs]
   [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DGKernels]
@@ -44,14 +44,14 @@
     variable = u
     epsilon = -1
     sigma = 6
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [BCs]
@@ -62,19 +62,19 @@
     function = exact_fn
     epsilon = -1
     sigma = 6
-  [../]
+  []
   [vacuum]
     boundary = 'top'
     type = VacuumBC
     variable = u
-  [../]
+  []
 []
 
 [Functions]
   [exact_fn]
     type = ConstantFunction
     value = 1
-  [../]
+  []
 []
 
 [ICs]
@@ -82,5 +82,5 @@
     type = ConstantIC
     value = 1
     variable = u
-  [../]
+  []
 []

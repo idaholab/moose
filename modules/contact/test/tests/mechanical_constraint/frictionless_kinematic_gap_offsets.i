@@ -11,33 +11,33 @@
 
 [AuxVariables]
   [inc_slip_x]
-  [../]
+  []
   [inc_slip_y]
-  [../]
+  []
   [accum_slip_x]
-  [../]
+  []
   [accum_slip_y]
-  [../]
+  []
   [primary_gap_offset]
-  [../]
+  []
   [secondary_gap_offset]
-  [../]
+  []
   [mapped_primary_gap_offset]
-  [../]
+  []
 []
 
 [Functions]
   [vertical_movement]
     type = ParsedFunction
     expression = -t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     strain = FINITE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -47,45 +47,45 @@
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
+  []
   [zeroslip_y]
     type = ConstantAux
     variable = inc_slip_y
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
+  []
   [accum_slip_x]
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
-  [../]
+  []
   [accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
-  [../]
+  []
   [primary_gap_offset]
     type = ConstantAux
     variable = primary_gap_offset
     value = -0.01
     boundary = 2
-  [../]
+  []
   [mapped_primary_gap_offset]
     type = GapValueAux
     variable = mapped_primary_gap_offset
     paired_variable = primary_gap_offset
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
   [secondary_gap_offset]
     type = ConstantAux
     variable = secondary_gap_offset
     value = -0.01
     boundary = 3
-  [../]
+  []
 []
 
 [BCs]
@@ -94,25 +94,25 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = -0.02
-  [../]
+  []
   [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
@@ -121,17 +121,17 @@
     block = 1
     poissons_ratio = 0.3
     youngs_modulus = 1e7
-  [../]
+  []
   [right]
     type = ComputeIsotropicElasticityTensor
     block = 2
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -157,7 +157,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]
@@ -165,11 +165,11 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
   [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Contact]
@@ -180,5 +180,5 @@
     penalty = 1e+6
     secondary_gap_offset = secondary_gap_offset
     mapped_primary_gap_offset = mapped_primary_gap_offset
-  [../]
+  []
 []

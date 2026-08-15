@@ -10,13 +10,13 @@
 [Functions]
   [clamp]
     type = ClampTestFunction
-  [../]
+  []
   [exact]
     type = PiecewiseLinear
     x = '0   0.2 0.8 1.0'
     y = '0.2 0.2 0.8 0.8'
     axis = x
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -27,7 +27,7 @@
     end_point = '1 0 0'
     num_points = 10
     sort_by = x
-  [../]
+  []
 []
 
 [Executioner]

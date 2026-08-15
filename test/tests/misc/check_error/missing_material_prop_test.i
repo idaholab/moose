@@ -8,7 +8,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -18,14 +18,14 @@
     type = DiffMKernel
     variable = u
     mat_prop = diff1
-  [../]
+  []
 
   [body_force]
     type = BodyForce
     variable = u
     block = 1
     value = 10
-  [../]
+  []
 []
 
 [BCs]
@@ -36,14 +36,14 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -52,7 +52,7 @@
     block = 1
     prop_names =  'diff1'
     prop_values = '1'
-  [../]
+  []
 []
 
 [Executioner]

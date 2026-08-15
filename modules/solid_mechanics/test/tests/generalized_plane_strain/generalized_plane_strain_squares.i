@@ -8,37 +8,37 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 
   [scalar_strain_zz1]
     order = FIRST
     family = SCALAR
-  [../]
+  []
   [scalar_strain_zz2]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
   [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [saved_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [saved_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [aux_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -48,14 +48,14 @@
     index_i = 2
     index_j = 2
     block = 1
-  [../]
+  []
   [react_z2]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     block = 2
-  [../]
+  []
 []
 
 [Physics]
@@ -69,7 +69,7 @@
         strain = SMALL
         save_in = 'saved_x saved_y'
         block = '1'
-      [../]
+      []
       [gps2]
         planar_formulation = GENERALIZED_PLANE_STRAIN
         scalar_out_of_plane_strain = scalar_strain_zz2
@@ -77,9 +77,9 @@
         strain = SMALL
         save_in = 'saved_x saved_y'
         block = '2'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 
@@ -89,21 +89,21 @@
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
+  []
   [aux_strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = aux_strain_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Functions]
   [tempfunc]
     type = ParsedFunction
     expression = '(1-x)*t'
-  [../]
+  []
 []
 
 [BCs]
@@ -112,25 +112,25 @@
     boundary = 1
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottom1y]
     type = DirichletBC
     boundary = 1
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [bottom2x]
     type = DirichletBC
     boundary = 2
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottom2y]
     type = DirichletBC
     boundary = 2
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -139,7 +139,7 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e6
     block = '1 2'
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
@@ -147,11 +147,11 @@
     stress_free_temperature = 0.5
     block = '1 2'
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]

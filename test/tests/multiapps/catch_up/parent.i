@@ -14,18 +14,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,13 +34,13 @@
     variable = u
     boundary = 'left'
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,5 +66,5 @@
     max_catch_up_steps = 100
     max_failures = 100
     catch_up = true
-  [../]
+  []
 []

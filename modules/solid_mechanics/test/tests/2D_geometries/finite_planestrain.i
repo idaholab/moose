@@ -18,14 +18,14 @@
     planar_formulation = PLANE_STRAIN
     add_variables = true
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
-  [../]
+  []
 []
 
 [Functions]
   [pull]
     type = ParsedFunction
     expression ='0.005 * t'
-  [../]
+  []
 []
 
 [BCs]
@@ -34,30 +34,30 @@
     boundary = left
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [pull]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
     function = pull
-  [../]
+  []
 []
 
 [Materials]
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
+  []
 []
 
 [Executioner]

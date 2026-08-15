@@ -17,89 +17,89 @@
     dim = 2
     nx = 8
     ny = 8
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [AuxVariables]
   [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [tstrain_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [tstrain_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [tstrain_zz]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [tstrain_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [mstrain_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [mstrain_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [mstrain_zz]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [mstrain_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
 
   [stress_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [stress_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [stress_zz]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [stress_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [von_mises]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
   [all]
     formulation = ORDINARY_STATE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -108,7 +108,7 @@
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
+  []
 
   [tstrain_xx]
     type = NodalRankTwoPD
@@ -117,7 +117,7 @@
     output_type = component
     index_i = 0
     index_j = 0
-  [../]
+  []
   [tstrain_yy]
     type = NodalRankTwoPD
     variable = tstrain_yy
@@ -125,7 +125,7 @@
     output_type = component
     index_i = 1
     index_j = 1
-  [../]
+  []
   [tstrain_zz]
     type = NodalRankTwoPD
     variable = tstrain_zz
@@ -133,7 +133,7 @@
     output_type = component
     index_i = 2
     index_j = 2
-  [../]
+  []
   [tstrain_xy]
     type = NodalRankTwoPD
     variable = tstrain_xy
@@ -141,7 +141,7 @@
     output_type = component
     index_i = 0
     index_j = 1
-  [../]
+  []
 
   [mstrain_xx]
     type = NodalRankTwoPD
@@ -150,7 +150,7 @@
     output_type = component
     index_i = 0
     index_j = 0
-  [../]
+  []
   [mstrain_yy]
     type = NodalRankTwoPD
     variable = mstrain_yy
@@ -158,7 +158,7 @@
     output_type = component
     index_i = 1
     index_j = 1
-  [../]
+  []
   [mstrain_zz]
     type = NodalRankTwoPD
     variable = mstrain_zz
@@ -166,7 +166,7 @@
     output_type = component
     index_i = 2
     index_j = 2
-  [../]
+  []
   [mstrain_xy]
     type = NodalRankTwoPD
     variable = mstrain_xy
@@ -174,7 +174,7 @@
     output_type = component
     index_i = 0
     index_j = 1
-  [../]
+  []
 
   [stress_xx]
     type = NodalRankTwoPD
@@ -183,7 +183,7 @@
     output_type = component
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_yy]
     type = NodalRankTwoPD
     variable = stress_yy
@@ -191,7 +191,7 @@
     output_type = component
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_zz]
     type = NodalRankTwoPD
     variable = stress_zz
@@ -199,7 +199,7 @@
     output_type = component
     index_i = 2
     index_j = 2
-  [../]
+  []
   [stress_xy]
     type = NodalRankTwoPD
     variable = stress_xy
@@ -207,7 +207,7 @@
     output_type = component
     index_i = 0
     index_j = 1
-  [../]
+  []
 
   [vonmises]
     type = NodalRankTwoPD
@@ -215,14 +215,14 @@
     rank_two_tensor = stress
     output_type = scalar
     scalar_type = VonMisesStress
-  [../]
+  []
 []
 
 [Functions]
   [tempfunc]
     type = ParsedFunction
     expression = 'x*x+y*y'
-  [../]
+  []
 []
 
 [BCs]
@@ -231,30 +231,30 @@
     boundary = 1003
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     boundary = 1000
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-  [../]
+  []
 
   [force_density]
     type = ComputeSmallStrainConstantHorizonMaterialOSPD
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

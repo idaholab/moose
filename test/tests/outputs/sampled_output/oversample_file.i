@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -45,5 +45,5 @@
     type = Exodus
     refinements = 1
     file_base = exodus_oversample_custom_name
-  [../]
+  []
 []

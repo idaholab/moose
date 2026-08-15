@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,7 +15,7 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
 []
 
 [BCs]
@@ -24,13 +24,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -47,5 +47,5 @@
     parameter = 'BCs/left/value'
     execute_on = 'initial timestep_begin'
     depends_on = 'no-control'
-  [../]
+  []
 []

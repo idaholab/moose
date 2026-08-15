@@ -10,9 +10,9 @@
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [Kernels]
@@ -20,20 +20,20 @@
     type = ConservativeAdvection
     variable = u
     velocity = '0 1 0'
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [src]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
   [diffv]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -42,7 +42,7 @@
     variable = u
     boundary = bottom
     value = 2
-  [../]
+  []
   [right]
     type = ChannelGradientBC
     variable = u
@@ -50,25 +50,25 @@
     channel_gradient_pps = channel_gradient
     axis = y
     h_name = h
-  [../]
+  []
   [top]
     type = OutflowBC
     variable = u
     boundary = top
     velocity = '0 1 0'
-  [../]
+  []
   [leftv]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
+  []
   [rightv]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -81,7 +81,7 @@
     #half_channel_length = 0.5
     #h=Nu*k/half_channel_length
     prop_values = '8'
-  [../]
+  []
 []
 
 [Executioner]
@@ -102,7 +102,7 @@
     variable = u
     type = LineValueSampler
     execute_on = 'timestep_begin nonlinear timestep_end linear'
-  [../]
+  []
   [lv2]
     num_points = 30
     start_point = '1 0 0'
@@ -111,7 +111,7 @@
     variable = v
     type = LineValueSampler
     execute_on = 'timestep_begin nonlinear timestep_end linear'
-  [../]
+  []
   [channel_gradient]
     lv1 = lv1
     lv2 = lv2
@@ -120,12 +120,12 @@
     axis = y
     type = ChannelGradientVectorPostprocessor
     execute_on = 'timestep_begin nonlinear timestep_end linear'
-  [../]
+  []
 []
 
 [Functions]
   [ffn]
     type = ParsedFunction
     expression = '1'
-  [../]
+  []
 []

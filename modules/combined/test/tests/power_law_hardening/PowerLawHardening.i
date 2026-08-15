@@ -23,14 +23,14 @@
   [total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [top_pull]
     type = ParsedFunction
     expression = t*(0.1)
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -49,7 +49,7 @@
     variable = total_strain_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
  []
 
 [BCs]
@@ -58,25 +58,25 @@
     variable = disp_y
     boundary = top
     function = top_pull
-  [../]
+  []
   [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -84,17 +84,17 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.3
-  [../]
+  []
   [power_law_hardening]
     type = IsotropicPowerLawHardeningStressUpdate
     strength_coefficient = 0.5 #K
     strain_hardening_exponent = 0.5 #n
-  [../]
+  []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'power_law_hardening'
     tangent_operator = elastic
-  [../]
+  []
 []
 
 [Executioner]
@@ -122,16 +122,16 @@
   [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
+  []
   [strain_yy]
     type = ElementAverageValue
     variable = total_strain_yy
-  [../]
+  []
 []
 
 [Outputs]
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

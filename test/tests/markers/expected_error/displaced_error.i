@@ -12,21 +12,21 @@
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -35,7 +35,7 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,6 +49,6 @@
       # this triggers the expected error
       use_displaced_mesh = true
       mark = DONT_MARK
-    [../]
-  [../]
+    []
+  []
 []

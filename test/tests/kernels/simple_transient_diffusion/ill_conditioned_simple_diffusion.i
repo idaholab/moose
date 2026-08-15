@@ -6,14 +6,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = MatDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,14 +23,14 @@
     preset = false
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = u
     preset = false
     boundary = right
     function = constant
-  [../]
+  []
 []
 
 [Functions]

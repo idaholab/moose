@@ -14,27 +14,27 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [force]
     type = BodyForce
     variable = u
     function = time_function
-  [../]
+  []
 []
 
 [Functions]
   [time_function]
     type = ParsedFunction
     expression = 't+1'
-  [../]
+  []
 []
 
 [BCs]
@@ -43,14 +43,14 @@
     variable = u
     boundary = 'left right bottom top'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
   [norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

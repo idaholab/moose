@@ -34,7 +34,7 @@
     strain = SMALL
     add_variables = true
     generate_output = 'stress_zz'
-  [../]
+  []
 []
 
 [Materials]
@@ -42,9 +42,9 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-  [../]
+  []
   [stress]
-  [../]
+  []
 []
 
 [BCs]
@@ -54,14 +54,14 @@
     variable = disp_r
     boundary = xzero
     value = 0.0
-  [../]
+  []
 
   [no_disp_z]
     type = DirichletBC
     variable = disp_z
     boundary = yzero
     value = 0.0
-  [../]
+  []
 
 # exterior and internal pressures
   [exterior_pressure_r]
@@ -69,28 +69,28 @@
     variable = disp_r
     boundary = outer
     factor = 200000
-  [../]
+  []
 
  [exterior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = outer
     factor = 200000
-  [../]
+  []
 
   [interior_pressure_r]
     type = Pressure
     variable = disp_r
     boundary = inner
     factor = 100000
-  [../]
+  []
 
   [interior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = inner
     factor = 100000
-  [../]
+  []
 []
 
 [Debug]
@@ -128,19 +128,19 @@
     optimal_iterations = 6
     iteration_window = 0
     linear_iteration_ratio = 100
-  [../]
+  []
 
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

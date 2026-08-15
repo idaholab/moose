@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
   [force]
     type = ADBodyForce
     variable = u
@@ -30,21 +30,21 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     preset = false
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Preconditioning]
   [pre]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,6 +71,6 @@
       top_right = '1 1 0'
       inside = 'refine'
       outside = 'do_nothing'
-    [../]
-  [../]
+    []
+  []
 []

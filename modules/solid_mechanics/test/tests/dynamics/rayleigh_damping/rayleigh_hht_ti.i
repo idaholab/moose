@@ -36,7 +36,7 @@
     incremental = false
     stiffness_damping_coefficient = 0.1
     hht_alpha = 0.11
-  [../]
+  []
 []
 
 

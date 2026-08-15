@@ -10,9 +10,9 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [w]
-  [../]
+  []
 []
 
 [ICs]
@@ -23,7 +23,7 @@
     y1 = 0.0
     y2 = 30.0
     variable = c
-  [../]
+  []
 []
 
 [Kernels]
@@ -33,26 +33,26 @@
     kappa_name = kappa_c
     w = w
     f_name = F
-  [../]
+  []
   [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
     coupled_variables = c
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -60,7 +60,7 @@
     type = GenericConstantMaterial
     prop_names = 'kappa_c'
     prop_values = '2.0'
-  [../]
+  []
   [mob]
     type = DerivativeParsedMaterial
     property_name = M
@@ -68,12 +68,12 @@
     expression = '1-0.9*c^2'
     outputs = exodus
     derivative_order = 1
-  [../]
+  []
   [free_energy]
     type = MathEBFreeEnergy
     property_name = F
     c = c
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -81,7 +81,7 @@
    type = SMP
    off_diag_row = 'w c'
    off_diag_column = 'c w'
-  [../]
+  []
 []
 
 [Executioner]

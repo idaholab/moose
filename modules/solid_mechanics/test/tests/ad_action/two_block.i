@@ -31,24 +31,24 @@
     add_variables = true
     #block = 1
     use_automatic_differentiation = true
-  [../]
+  []
   [block2]
     strain = SMALL
     add_variables = true
     block = 2
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -59,7 +59,7 @@
     index_j = 2
     variable = stress_theta
     execute_on = timestep_end
-  [../]
+  []
   [strain_theta]
     type = ADRankTwoAux
     rank_two_tensor = total_strain
@@ -67,7 +67,7 @@
     index_j = 2
     variable = strain_theta
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
@@ -75,15 +75,15 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-  [../]
+  []
   [_elastic_stress1]
     type = ADComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
   [_elastic_stress2]
     type = ADComputeLinearElasticStress
     block = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -92,25 +92,25 @@
     boundary = 'left'
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [top]
     type = DirichletBC
     boundary = 'top'
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [right]
     type = DirichletBC
     boundary = 'right'
     variable = disp_x
     value = 0.01
-  [../]
+  []
   [bottom]
     type = DirichletBC
     boundary = 'bottom'
     variable = disp_y
     value = 0.01
-  [../]
+  []
 []
 
 [Debug]
@@ -121,7 +121,7 @@
   [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

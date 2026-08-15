@@ -11,7 +11,7 @@
 [Variables]
   [diffused]
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
@@ -19,7 +19,7 @@
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -28,7 +28,7 @@
     type = ConstantPointSource
     value = 1
     point = '0.3 0.3 0.0'
-  [../]
+  []
 []
 
 [BCs]
@@ -38,7 +38,7 @@
     variable = diffused
     boundary = 'bottom left right top'
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,9 +55,9 @@
   [os2]
     type = Exodus
     refinements = 2
-  [../]
+  []
   [os4]
     type = Exodus
     refinements = 4
-  [../]
+  []
 []

@@ -13,7 +13,7 @@
   [aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -22,7 +22,7 @@
     function = 'sin(x + 1e12*t)'
     variable = aux
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [Executioner]
@@ -41,7 +41,7 @@
   [integral]
     type = ElementIntegralVariablePostprocessor
     variable = aux
-  [../]
+  []
 []
 
 [Problem]
@@ -54,9 +54,9 @@
   [out]
     type = CSV
     new_row_tolerance = 1e-14
-  [../]
+  []
   [console]
     type = Console
     new_row_tolerance = 1e-14
-  [../]
+  []
 []

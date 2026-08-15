@@ -11,14 +11,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff1]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,14 +27,14 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -46,7 +46,7 @@
                1 1'
     block = 0
     outputs = all
-  [../]
+  []
 
   [m2]
     type = ADPiecewiseLinearInterpolationMaterial
@@ -56,7 +56,7 @@
     y = '0 1'
     block = 0
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

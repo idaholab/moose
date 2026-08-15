@@ -56,56 +56,56 @@
     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
     new_boundary = xmin
     normal = '-1 0 0'
-  [../]
+  []
   [xmax]
     input = xmin
     type = SideSetsAroundSubdomainGenerator
     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
     new_boundary = xmax
     normal = '1 0 0'
-  [../]
+  []
   [ymin]
     input = xmax
     type = SideSetsAroundSubdomainGenerator
     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
     new_boundary = ymin
     normal = '0 -1 0'
-  [../]
+  []
   [ymax]
     input = ymin
     type = SideSetsAroundSubdomainGenerator
     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
     new_boundary = ymax
     normal = '0 1 0'
-  [../]
+  []
   [zmax]
     input = ymax
     type = SideSetsAroundSubdomainGenerator
     block = 16
     new_boundary = zmax
     normal = '0 0 1'
-  [../]
+  []
   [zmin]
     input = zmax
     type = SideSetsAroundSubdomainGenerator
     block = 2
     new_boundary = zmin
     normal = '0 0 -1'
-  [../]
+  []
   [excav]
     type = SubdomainBoundingBoxGenerator
     input = zmin
     block_id = 1
     bottom_left = '0 0 -400'
     top_right = '150 1000 -397'
-  [../]
+  []
   [roof]
     type = SideSetsAroundSubdomainGenerator
     block = 1
     input = excav
     new_boundary = roof
     normal = '0 0 1'
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -116,15 +116,15 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
   [wc_x]
-  [../]
+  []
   [wc_y]
-  [../]
+  []
 []
 
 [Kernels]
@@ -133,19 +133,19 @@
     use_displaced_mesh = false
     variable = disp_x
     component = 0
-  [../]
+  []
   [cy_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_y
     component = 1
-  [../]
+  []
   [cz_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_z
     component = 2
-  [../]
+  []
   [x_couple]
     type = StressDivergenceTensors
     use_displaced_mesh = false
@@ -153,7 +153,7 @@
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
+  []
   [y_couple]
     type = StressDivergenceTensors
     use_displaced_mesh = false
@@ -161,99 +161,99 @@
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
+  []
   [x_moment]
     type = MomentBalancing
     use_displaced_mesh = false
     variable = wc_x
     component = 0
-  [../]
+  []
   [y_moment]
     type = MomentBalancing
     use_displaced_mesh = false
     variable = wc_y
     component = 1
-  [../]
+  []
   [gravity]
     type = Gravity
     use_displaced_mesh = false
     variable = disp_z
     value = -10E-6 # remember this is in MPa
-  [../]
+  []
 []
 
 
 [AuxVariables]
   [wc_z]
-  [../]
+  []
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [mc_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [mc_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [mc_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [mc_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -263,111 +263,111 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
+  []
   [stress_yx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yx
     index_i = 1
     index_j = 0
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
+  []
   [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zx
     index_i = 2
     index_j = 0
-  [../]
+  []
   [stress_zy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zy
     index_i = 2
     index_j = 1
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
   [mc_shear]
     type = MaterialStdVectorAux
     index = 0
     property = mc_plastic_internal_parameter
     variable = mc_shear
-  [../]
+  []
   [mc_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = mc_plastic_internal_parameter
     variable = mc_tensile
-  [../]
+  []
   [wp_shear]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_internal_parameter
     variable = wp_shear
-  [../]
+  []
   [wp_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_internal_parameter
     variable = wp_tensile
-  [../]
+  []
   [mc_shear_f]
     type = MaterialStdVectorAux
     index = 6
     property = mc_plastic_yield_function
     variable = mc_shear_f
-  [../]
+  []
   [mc_tensile_f]
     type = MaterialStdVectorAux
     index = 0
     property = mc_plastic_yield_function
     variable = mc_tensile_f
-  [../]
+  []
   [wp_shear_f]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_yield_function
     variable = wp_shear_f
-  [../]
+  []
   [wp_tensile_f]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_yield_function
     variable = wp_tensile_f
-  [../]
+  []
 []
 
 
@@ -378,48 +378,48 @@
     variable = disp_x
     boundary = 'xmin xmax'
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'ymin ymax'
     value = 0.0
-  [../]
+  []
   [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = zmin
     value = 0.0
-  [../]
+  []
   [no_wc_x]
     type = DirichletBC
     variable = wc_x
     boundary = 'ymin ymax'
     value = 0.0
-  [../]
+  []
   [no_wc_y]
     type = DirichletBC
     variable = wc_y
     boundary = 'xmin xmax'
     value = 0.0
-  [../]
+  []
   [roof]
     type = StickyBC
     variable = disp_z
     min_value = -3.0
     boundary = roof
-  [../]
+  []
 []
 
 [Functions]
   [ini_xx]
     type = ParsedFunction
     expression = '0.8*2500*10E-6*z'
-  [../]
+  []
   [ini_zz]
     type = ParsedFunction
     expression = '2500*10E-6*z'
-  [../]
+  []
   [excav_sideways]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  minval maxval slope'
@@ -427,13 +427,13 @@
     # excavation face at ymin+(ymax-ymin)*min(t/end_t,1)
     # slope is the distance over which the modulus reduces from maxval to minval
     expression = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,if(y<ymin+(ymax-ymin)*min(t/end_t,1)+slope,minval+(maxval-minval)*(y-(ymin+(ymax-ymin)*min(t/end_t,1)))/slope,maxval))'
-  [../]
+  []
   [density_sideways]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  minval maxval'
     symbol_values = '17.0   0    1000.0 0 2500'
     expression = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,maxval)'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -442,56 +442,56 @@
     value_0 = 2.99 # MPa
     value_residual = 3.01 # MPa
     rate = 1.0
-  [../]
+  []
   [mc_fric]
     type = SolidMechanicsHardeningConstant
     value = 0.65 # 37deg
-  [../]
+  []
   [mc_dil]
     type = SolidMechanicsHardeningConstant
     value = 0.15 # 8deg
-  [../]
+  []
 
   [mc_tensile_str_strong_harden]
     type = SolidMechanicsHardeningExponential
     value_0 = 1.0 # MPa
     value_residual = 1.0 # MPa
     rate = 1.0
-  [../]
+  []
   [mc_compressive_str]
     type = SolidMechanicsHardeningCubic
     value_0 = 100 # Large!
     value_residual = 100
     internal_limit = 0.1
-  [../]
+  []
 
   [wp_coh_harden]
     type = SolidMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
-  [../]
+  []
   [wp_tan_fric]
     type = SolidMechanicsHardeningConstant
     value = 0.36 # 20deg
-  [../]
+  []
   [wp_tan_dil]
     type = SolidMechanicsHardeningConstant
     value = 0.18 # 10deg
-  [../]
+  []
 
   [wp_tensile_str_harden]
     type = SolidMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
-  [../]
+  []
   [wp_compressive_str_soften]
     type = SolidMechanicsHardeningCubic
     value_0 = 100
     value_residual = 1
     internal_limit = 1.0
-  [../]
+  []
 []
 
 [Materials]
@@ -503,7 +503,7 @@
     layer_thickness = 1.0
     joint_normal_stiffness = 1E9 # huge
     joint_shear_stiffness = 1E3 # MPa
-  [../]
+  []
   [elasticity_tensor_1]
     type = ComputeLayeredCosseratElasticityTensor
     block = 1
@@ -513,16 +513,16 @@
     joint_normal_stiffness = 1E9 # huge
     joint_shear_stiffness = 1E3 # MPa
     elasticity_tensor_prefactor = excav_sideways
-  [../]
+  []
   [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     eigenstrain_name = ini_stress
     initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
-  [../]
+  []
 
   [stress_0]
     type = ComputeMultipleInelasticCosseratStress
@@ -534,7 +534,7 @@
     max_iterations = 1
     tangent_operator = nonlinear
     perform_finite_strain_rotations = false
-  [../]
+  []
   [stress_1]
     type = ComputeMultipleInelasticCosseratStress
     block = 1
@@ -544,7 +544,7 @@
     max_iterations = 1
     tangent_operator = nonlinear
     perform_finite_strain_rotations = false
-  [../]
+  []
   [mc]
     type = CappedMohrCoulombCosseratStressUpdate
     warn_about_precision_loss = false
@@ -561,7 +561,7 @@
     yield_function_tol = 1E-9 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0
-  [../]
+  []
   [wp]
     type = CappedWeakPlaneCosseratStressUpdate
     warn_about_precision_loss = false
@@ -577,7 +577,7 @@
     yield_function_tol = 1E-11 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0E-3
-  [../]
+  []
 
 
   [density_0]
@@ -585,13 +585,13 @@
     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
     prop_names = density
     prop_values = 2500
-  [../]
+  []
   [density_1]
     type = GenericFunctionMaterial
     block = 1
     prop_names = density
     prop_values = density_sideways
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -607,13 +607,13 @@
     boundary = roof
     value_type = min
     variable = disp_z
-  [../]
+  []
   [min_surface_disp]
     type = NodalExtremeValue
     boundary = zmax
     value_type = min
     variable = disp_z
-  [../]
+  []
 []
 
 [Executioner]

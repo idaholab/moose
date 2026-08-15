@@ -69,20 +69,20 @@
     type = PiecewiseLinear
     x = '0   1'
     y = '100 200'
-  [../]
+  []
 []
 
 [Variables]
   [temp]
    initial_condition = 100
-  [../]
+  []
 []
 
 [AuxVariables]
   [gap_conductance]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 
@@ -90,7 +90,7 @@
   [heat_conduction]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -99,7 +99,7 @@
     property = gap_conductance
     variable = gap_conductance
     boundary = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -108,7 +108,7 @@
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 1000000.0
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -124,7 +124,7 @@
     gap_geometry_type = CYLINDER
     cylinder_axis_point_1 = '0 0 0'
     cylinder_axis_point_2 = '0 1 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -133,13 +133,13 @@
     boundary = 5
     variable = temp
     function = temp
-  [../]
+  []
   [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
-  [../]
+  []
 []
 
 [Executioner]
@@ -161,7 +161,7 @@
   [Quadrature]
      order = fifth
      side_order = seventh
-  [../]
+  []
 
 []
 
@@ -169,7 +169,7 @@
   exodus = true
    [Console]
     type = Console
-   [../]
+   []
 []
 
 [Postprocessors]
@@ -177,25 +177,25 @@
     type = SideAverageValue
     boundary = 2
     variable = temp
-  [../]
+  []
 
   [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
-  [../]
+  []
 
   [flux_left]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
-  [../]
+  []
 
   [flux_right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
-  [../]
+  []
 []

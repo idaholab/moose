@@ -36,31 +36,31 @@
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 1e-6
-  [../]
+  []
   [rampConstant2]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 2e-6
-  [../]
+  []
   [rampConstant3]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 3e-6
-  [../]
+  []
   [rampConstant4]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 4e-6
-  [../]
+  []
   [rampConstant6]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 6e-6
-  [../]
+  []
 [] # Functions
 
 [AuxVariables]
@@ -68,75 +68,75 @@
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [elastic_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [hydrostatic]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [firstinv]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [secondinv]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [thirdinv]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [maxprincipal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [midprincipal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [minprincipal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [direction]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [max_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [sint]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 [] # AuxVariables
 
@@ -146,7 +146,7 @@
     block = '1 2 3 4 5 6 7'
     strain = FINITE
     incremental = true
-  [../]
+  []
 []
 
 
@@ -158,113 +158,113 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
+  []
   [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zx
     index_i = 2
     index_j = 0
-  [../]
+  []
   [elastic_energy]
     type = ElasticEnergyAux
     variable = elastic_energy
-  [../]
+  []
   [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = vonmisesStress
-  [../]
+  []
   [hydrostatic]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = hydrostatic
     scalar_type = hydrostatic
-  [../]
+  []
   [fi]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = firstinv
     scalar_type = firstinvariant
-  [../]
+  []
   [si]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = secondinv
     scalar_type = secondinvariant
-  [../]
+  []
   [ti]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = thirdinv
     scalar_type = thirdinvariant
-  [../]
+  []
   [maxprincipal]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = maxprincipal
     scalar_type = MaxPRiNCIpAl
-  [../]
+  []
   [midprincipal]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = midprincipal
     scalar_type = MidPRiNCIpAl
-  [../]
+  []
   [minprincipal]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = minprincipal
     scalar_type = MiNPRiNCIpAl
-  [../]
+  []
   [direction]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = direction
     scalar_type = direction
     direction = '1 1 1'
-  [../]
+  []
   [max_shear]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = max_shear
     scalar_type = MaxShear
-  [../]
+  []
   [sint]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = sint
     scalar_type = StressIntensity
-  [../]
+  []
 
 
 [] # AuxKernels
@@ -276,152 +276,152 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [node1_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = rampConstant2
-  [../]
+  []
   [node1_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 1
     function = rampConstant3
-  [../]
+  []
 
   [node2_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 2
     function = rampConstant1
-  [../]
+  []
   [node2_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = rampConstant2
-  [../]
+  []
   [node2_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 2
     function = rampConstant6
-  [../]
+  []
 
   [node3_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 3
     function = rampConstant1
-  [../]
+  []
   [node3_y]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
   [node3_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 3
     function = rampConstant3
-  [../]
+  []
 
   [node4_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
   [node4_y]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
   [node4_z]
     type = DirichletBC
     variable = disp_z
     boundary = 4
     value = 0.0
-  [../]
+  []
 
   [node5_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 5
     function = rampConstant1
-  [../]
+  []
   [node5_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 5
     function = rampConstant4
-  [../]
+  []
   [node5_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 5
     function = rampConstant3
-  [../]
+  []
 
   [node6_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 6
     function = rampConstant2
-  [../]
+  []
   [node6_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 6
     function = rampConstant4
-  [../]
+  []
   [node6_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 6
     function = rampConstant6
-  [../]
+  []
 
   [node7_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 7
     function = rampConstant2
-  [../]
+  []
   [node7_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 7
     function = rampConstant2
-  [../]
+  []
   [node7_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 7
     function = rampConstant3
-  [../]
+  []
 
   [node8_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 8
     function = rampConstant1
-  [../]
+  []
   [node8_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 8
     function = rampConstant2
-  [../]
+  []
   [node8_z]
     type = DirichletBC
     variable = disp_z
     boundary = 8
     value = 0.0
-  [../]
+  []
 
 
 [] # BCs
@@ -432,11 +432,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
 [] # Materials
 

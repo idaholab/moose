@@ -7,7 +7,7 @@
 
 [AuxVariables]
   [t]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -16,7 +16,7 @@
     variable = t
     function = t
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Problem]

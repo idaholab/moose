@@ -8,7 +8,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
@@ -16,7 +16,7 @@
     type = ParsedVectorFunction
     expression_y = 0.1
     expression_x = 0.8
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,7 +24,7 @@
     type = DiffTensorKernel
     variable = u
     conductivity = conductivity
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

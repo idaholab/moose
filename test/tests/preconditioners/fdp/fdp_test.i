@@ -7,31 +7,31 @@
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [Preconditioning]
   [FDP]
     type = FDP
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,11 +49,11 @@
     type = RandomIC
     min = 0.1
     max = 0.9
-  [../]
+  []
   [v]
     variable = v
     type = RandomIC
     min = 0.1
     max = 0.9
-  [../]
+  []
 []

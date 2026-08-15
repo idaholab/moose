@@ -38,19 +38,19 @@
     boundary_new = 13
     bottom_left = '0.4 0.4 0.9'
     top_right = '0.6 0.6 1.1'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -59,25 +59,25 @@
     variable = u
     boundary = 10
     value = 1
-  [../]
+  []
   [secondBC]
     type = DirichletBC
     variable = u
     boundary = 11
     value = 0
-  [../]
+  []
   [thirdBC]
     type = DirichletBC
     variable = u
     boundary = 12
     value = 0
-  [../]
+  []
   [fourthBC]
     type = DirichletBC
     variable = u
     boundary = 13
     value = 0.5
-  [../]
+  []
 []
 
 [Executioner]

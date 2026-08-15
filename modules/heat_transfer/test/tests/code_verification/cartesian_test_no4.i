@@ -14,13 +14,13 @@
     dim = 1
     elem_type = EDGE2
     nx = 1
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
@@ -29,19 +29,19 @@
     symbol_names = 'q q0 k L uf h'
     symbol_values = '1200 200 1 1 100 10.0'
     expression = 'uf + (q0 + L * q)/h + 0.5 * ( 2 * q0 + q * (L + x)) * (L-x) / k'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = u
-  [../]
+  []
   [heatsource]
     type = HeatSource
     function = 1200
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -50,14 +50,14 @@
     boundary = left
     variable = u
     value = 200
-  [../]
+  []
   [uo]
     type = CoupledConvectiveHeatFluxBC
     boundary = right
     variable = u
     htc = 10.0
     T_infinity = 100
-  [../]
+  []
 []
 
 [Materials]
@@ -65,7 +65,7 @@
     type = GenericConstantMaterial
     prop_names = 'density specific_heat thermal_conductivity'
     prop_values = '1.0 1.0 1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -77,7 +77,7 @@
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
+  []
   [h]
     type = AverageElementSize
   []

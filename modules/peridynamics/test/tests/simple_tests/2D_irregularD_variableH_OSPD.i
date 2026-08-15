@@ -17,19 +17,19 @@
   [fmg]
     type = FileMeshGenerator
     file = square.e
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = fmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [BCs]
@@ -38,25 +38,25 @@
     variable = disp_x
     boundary = 1001
     value = 0.0
-  [../]
+  []
   [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1004
     value = 0.0
-  [../]
+  []
   [bottom_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1002
     function = '-0.001 * t'
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
   [all]
     formulation = ORDINARY_STATE
-  [../]
+  []
 []
 
 [Materials]
@@ -64,18 +64,18 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.0
-  [../]
+  []
 
   [force_density]
     type = ComputeSmallStrainVariableHorizonMaterialOSPD
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

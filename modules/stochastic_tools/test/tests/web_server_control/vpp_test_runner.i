@@ -5,7 +5,7 @@
 []
 [Variables]
   [u]
-  [../]
+  []
 []
 [Kernels]
   [diff]

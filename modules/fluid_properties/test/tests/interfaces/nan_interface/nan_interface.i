@@ -6,7 +6,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -14,13 +14,13 @@
     type = NaNInterfaceTestKernel
     variable = u
     nan_interface_test_fp = fp
-  [../]
+  []
 []
 
 [FluidProperties]
   [fp]
     type = NaNInterfaceTestFluidProperties
-  [../]
+  []
 []
 
 [Executioner]

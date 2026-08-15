@@ -8,12 +8,12 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [v]
-  [../]
+  []
 []
 
 [Kernels]
@@ -21,16 +21,16 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [force_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
+  []
 []
 
 [BCs]
@@ -39,13 +39,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -74,7 +74,7 @@
     input_files = picard_sub.i
     sub_cycling = true
     interpolate_transfers = true
-  [../]
+  []
 []
 
 [Transfers]
@@ -83,11 +83,11 @@
     from_multi_app = sub
     source_variable = v
     variable = v
-  [../]
+  []
   [u_to_sub]
     type = MultiAppNearestNodeTransfer
     to_multi_app = sub
     source_variable = u
     variable = u
-  [../]
+  []
 []

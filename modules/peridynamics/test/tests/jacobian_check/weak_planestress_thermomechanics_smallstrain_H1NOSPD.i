@@ -15,25 +15,25 @@
     dim = 2
     nx = 4
     ny = 4
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 
   [strain_zz]
-  [../]
+  []
 
   [temp]
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
@@ -41,7 +41,7 @@
     formulation = NONORDINARY_STATE
     stabilization = BOND_HORIZON_I
     eigenstrain_names = thermal_strain
-  [../]
+  []
 []
 
 [Kernels]
@@ -49,12 +49,12 @@
     type = WeakPlaneStressNOSPD
     variable = strain_zz
     eigenstrain_names = thermal_strain
-  [../]
+  []
 
   [heat_conduction]
     type = HeatConductionBPD
     variable = temp
-  [../]
+  []
 []
 
 [Materials]
@@ -62,27 +62,27 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.3
-  [../]
+  []
   [strain]
     type = ComputePlaneSmallStrainNOSPD
     stabilization = BOND_HORIZON_I
     eigenstrain_names = thermal_strain
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 0.5
     eigenstrain_name = thermal_strain
-  [../]
+  []
 
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 
   [thermal]
     type = ThermalConstantHorizonMaterialBPD
     thermal_conductivity = 1.0
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -91,7 +91,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'
     petsc_options_value = 'bcgs bjacobi test'
-  [../]
+  []
 []
 
 [Executioner]
@@ -104,5 +104,5 @@
   [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
-  [../]
+  []
 []

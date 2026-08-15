@@ -23,14 +23,14 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [UserObjects]
@@ -38,7 +38,7 @@
     type = PolycrystalVoronoi
     rand_seed = 81
     coloring_algorithm = bt
-  [../]
+  []
   [grain_tracker]
     type = GrainTracker
     threshold = 0.2
@@ -47,30 +47,30 @@
     flood_entity_type = elemental
     execute_on = ' initial timestep_begin'
     outputs = none
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
   [PolycrystalStoredEnergy]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -78,7 +78,7 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
@@ -86,14 +86,14 @@
     type = DeformedGrainMaterial
     int_width = 4.0
     outputs = exodus
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

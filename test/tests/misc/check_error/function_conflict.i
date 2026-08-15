@@ -8,12 +8,12 @@
 [Functions]
   [x]
     type = ConstantFunction
-  [../]
+  []
 []
 
 [Variables]
   [var]
-  [../]
+  []
 []
 
 [ICs]
@@ -21,7 +21,7 @@
     type = FunctionIC
     variable = var
     function = x
-  [../]
+  []
 []
 
 
@@ -29,7 +29,7 @@
   [diff]
     type = Diffusion
     variable = var
-  [../]
+  []
 []
 
 [Executioner]

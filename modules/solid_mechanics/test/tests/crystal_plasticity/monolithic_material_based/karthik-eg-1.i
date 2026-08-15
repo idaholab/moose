@@ -11,13 +11,13 @@
 [Variables]
   [x_disp]
     block = 0
-  [../]
+  []
   [y_disp]
     block = 0
-  [../]
+  []
   [z_disp]
     block = 0
-  [../]
+  []
 []
 
 [SolidMechanics]
@@ -26,7 +26,7 @@
 #    disp_y = y_disp
 #    disp_z = z_disp
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [Materials]
@@ -39,7 +39,7 @@
     disp_y = y_disp
     disp_z = z_disp
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
-  [../]
+  []
   [fcrysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
@@ -53,18 +53,18 @@
     gprops = '1 12 60.8'
     fill_method = symmetric9
     slip_sys_file_name = input_slip_sys.txt
-  [../]
+  []
 []
 
 [Functions]
   [topdisp]
     type = ParsedFunction
     expression = 0.7*t
-  [../]
+  []
   [tpress]
     type = ParsedFunction
     expression = -200*t
-  [../]
+  []
 []
 
 [BCs]
@@ -73,25 +73,25 @@
     variable = z_disp
     boundary = back
     value = 0
-  [../]
+  []
   [ybc]
     type = DirichletBC
     variable = y_disp
     boundary = bottom
     value = 0
-  [../]
+  []
   [xbc]
     type = DirichletBC
     variable = x_disp
     boundary = left
     value = 0
-  [../]
+  []
   [zmove]
     type = FunctionDirichletBC
     variable = z_disp
     boundary = front
     function = topdisp
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -99,12 +99,12 @@
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [e_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -116,7 +116,7 @@
     index_j = 3
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [e_zz]
     type = RankTwoAux
     rank_two_tensor = lage
@@ -125,7 +125,7 @@
     index_j = 3
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -133,19 +133,19 @@
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [ezz]
     type = ElementAverageValue
     variable = e_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

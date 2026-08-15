@@ -79,7 +79,7 @@ diff=1.1
     variable = v
     function = exact
     outputs = 'console csv'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

@@ -32,7 +32,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
@@ -43,19 +43,19 @@
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
+  []
   [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
+  []
   [z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
@@ -64,82 +64,82 @@
     variable = disp_x
     boundary = 'front back'
     function = '0'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [int0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [int1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [int2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [int3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -149,99 +149,99 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
   [f0]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = f0
-  [../]
+  []
   [f1]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f1
-  [../]
+  []
   [f2]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f2
-  [../]
+  []
   [f3]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 3
     variable = f3
-  [../]
+  []
   [int0]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 0
     variable = int0
-  [../]
+  []
   [int1]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 1
     variable = int1
-  [../]
+  []
   [int2]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 2
     variable = int2
-  [../]
+  []
   [int3]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 3
     variable = int3
-  [../]
+  []
   [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -249,43 +249,43 @@
     type = ElementExtremeValue
     variable = f0
     outputs = console
-  [../]
+  []
   [raw_f1]
     type = ElementExtremeValue
     variable = f1
     outputs = console
-  [../]
+  []
   [raw_f2]
     type = ElementExtremeValue
     variable = f2
     outputs = console
-  [../]
+  []
   [raw_f3]
     type = ElementExtremeValue
     variable = f3
     outputs = console
-  [../]
+  []
   [iter]
     type = ElementExtremeValue
     variable = iter
     outputs = console
-  [../]
+  []
   [f0]
     type = FunctionValuePostprocessor
     function = should_be_zero0_fcn
-  [../]
+  []
   [f1]
     type = FunctionValuePostprocessor
     function = should_be_zero1_fcn
-  [../]
+  []
   [f2]
     type = FunctionValuePostprocessor
     function = should_be_zero2_fcn
-  [../]
+  []
   [f3]
     type = FunctionValuePostprocessor
     function = should_be_zero3_fcn
-  [../]
+  []
 []
 
 [Functions]
@@ -294,42 +294,42 @@
     expression = 'if(a<1E-1,0,a)'
     symbol_names = 'a'
     symbol_values = 'raw_f0'
-  [../]
+  []
   [should_be_zero1_fcn]
     type = ParsedFunction
     expression = 'if(a<1E-1,0,a)'
     symbol_names = 'a'
     symbol_values = 'raw_f1'
-  [../]
+  []
   [should_be_zero2_fcn]
     type = ParsedFunction
     expression = 'if(a<1E-1,0,a)'
     symbol_names = 'a'
     symbol_values = 'raw_f2'
-  [../]
+  []
   [should_be_zero3_fcn]
     type = ParsedFunction
     expression = 'if(a<1E-1,0,a)'
     symbol_names = 'a'
     symbol_values = 'raw_f3'
-  [../]
+  []
 []
 
 [UserObjects]
   [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 4E7
-  [../]
+  []
   [mc_phi]
     type = SolidMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
-  [../]
+  []
   [mc_psi]
     type = SolidMechanicsHardeningConstant
     value = 10
     convert_to_radians = true
-  [../]
+  []
   [mc]
     type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
@@ -338,31 +338,31 @@
     mc_tip_smoother = 4E6
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
 
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1E6
-  [../]
+  []
   [tensile]
     type = SolidMechanicsPlasticTensile
     tensile_strength = ts
     tensile_tip_smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
   [coh]
     type = SolidMechanicsHardeningConstant
     value = 1E6
-  [../]
+  []
   [tanphi]
     type = SolidMechanicsHardeningConstant
     value = 0.46630766
-  [../]
+  []
   [tanpsi]
     type = SolidMechanicsHardeningConstant
     value = 0.46630766
-  [../]
+  []
   [wps]
     type = SolidMechanicsPlasticWeakPlaneShear
     cohesion = coh
@@ -371,17 +371,17 @@
     smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
   [str]
     type = SolidMechanicsHardeningConstant
     value = 0.01E6
-  [../]
+  []
   [wpt]
     type = SolidMechanicsPlasticWeakPlaneTensile
     tensile_strength = str
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
 []
 
 [Materials]
@@ -390,7 +390,7 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '1E9 1.3E9'
-  [../]
+  []
   [multi]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -407,7 +407,7 @@
     debug_stress_change = 1E1
     debug_pm_change = '1E-6 1E-6 1E-6 1E-6'
     debug_intnl_change = '1E-6 1E-6 1E-6 1E-6'
-  [../]
+  []
 []
 
 
@@ -423,5 +423,5 @@
   exodus = false
   [csv]
     type = CSV
-    [../]
+    []
 []

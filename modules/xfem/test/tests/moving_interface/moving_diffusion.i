@@ -13,7 +13,7 @@
     type = LevelSetCutUserObject
     level_set_var = ls
     heal_always = true
-  [../]
+  []
 []
 
 [Mesh]
@@ -32,7 +32,7 @@
   [ls]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -40,19 +40,19 @@
     type = FunctionAux
     variable = ls
     function = ls_func
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
   [ls_func]
     type = ParsedFunction
     expression = 'x-0.76+0.21*t'
-  [../]
+  []
 []
 
 [Kernels]
@@ -60,11 +60,11 @@
     type = MatDiffusion
     variable = u
     diffusivity = diffusion_coefficient
-  [../]
+  []
   [time_deriv]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Constraints]
@@ -76,7 +76,7 @@
     use_penalty = true
     alpha = 1e5
     geometric_cut_userobject = 'level_set_cut_uo'
-  [../]
+  []
 []
 
 [BCs]
@@ -85,13 +85,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [left_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -99,13 +99,13 @@
     type = GenericConstantMaterial
     prop_names = A_diffusion_coefficient
     prop_values = 5
-  [../]
+  []
 
   [diffusivity_B]
     type = GenericConstantMaterial
     prop_names = B_diffusion_coefficient
     prop_values = 0.5
-  [../]
+  []
 
   [diff_combined]
     type = LevelSetBiMaterialReal
@@ -113,7 +113,7 @@
     levelset_negative_base = 'B'
     level_set_var = ls
     prop_name = diffusion_coefficient
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -150,5 +150,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

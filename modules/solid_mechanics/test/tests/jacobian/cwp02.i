@@ -16,7 +16,7 @@
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
@@ -26,29 +26,29 @@
     value_0 = 100
     value_residual = 2
     rate = 1
-  [../]
+  []
   [tanphi]
     type = SolidMechanicsHardeningExponential
     value_0 = 1.0
     value_residual = 0.5
     rate = 2
-  [../]
+  []
   [tanpsi]
     type = SolidMechanicsHardeningExponential
     value_0 = 0.1
     value_residual = 0.05
     rate = 1
-  [../]
+  []
   [t_strength]
     type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 1
     rate = 1
-  [../]
+  []
   [c_strength]
     type = SolidMechanicsHardeningConstant
     value = 100
-  [../]
+  []
 []
 
 [Materials]
@@ -56,17 +56,17 @@
     type = ComputeIsotropicElasticityTensor
     lambda = 1.0
     shear_modulus = 2.0
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 0  0 0 0  0 0 2'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
     tangent_operator = nonlinear
-  [../]
+  []
   [mc]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
@@ -78,7 +78,7 @@
     tip_smoother = 1
     smoothing_tol = 2
     yield_function_tol = 1E-10
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -88,7 +88,7 @@
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

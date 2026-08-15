@@ -11,7 +11,7 @@ a=1.1
     xmin = 0
     xmax = 1.1
     nx = 2
-  [../]
+  []
 []
 
 [Variables]
@@ -21,14 +21,14 @@ a=1.1
     fv = true
     two_term_boundary_expansion = false
     type = MooseVariableFVReal
-  [../]
+  []
   [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
     two_term_boundary_expansion = true
     type = MooseVariableFVReal
-  [../]
+  []
 []
 
 [FVKernels]
@@ -36,7 +36,7 @@ a=1.1
     type = FVAdvection
     variable = u
     velocity = '${a} 0 0'
-  [../]
+  []
   [body_u]
     type = FVBodyForce
     variable = u
@@ -46,7 +46,7 @@ a=1.1
     type = FVAdvection
     variable = v
     velocity = '${a} 0 0'
-  [../]
+  []
   [body_v]
     type = FVBodyForce
     variable = v
@@ -118,14 +118,14 @@ a=1.1
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [L2v]
     type = ElementL2Error
     variable = v
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

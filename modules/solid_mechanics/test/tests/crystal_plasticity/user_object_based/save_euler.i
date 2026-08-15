@@ -15,38 +15,38 @@
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [e_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [fp_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [gss]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [euler1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [euler2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [euler3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [tdisp]
     type = ParsedFunction
     expression = 0.01*t
-  [../]
+  []
 []
 
 [UserObjects]
@@ -56,7 +56,7 @@
     # Enter file data as prop#1, prop#2, .., prop#nprop
     nprop = 3
     read_type = element
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -67,7 +67,7 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-  [../]
+  []
   [e_yy]
     type = RankTwoAux
     variable = e_yy
@@ -75,7 +75,7 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-  [../]
+  []
   [fp_yy]
     type = RankTwoAux
     variable = fp_yy
@@ -83,35 +83,35 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-  [../]
+  []
   [gss]
     type = MaterialStdVectorAux
     variable = gss
     property = state_var_gss
     index = 0
     execute_on = timestep_end
-  [../]
+  []
   [euler1]
     type = MaterialRealVectorValueAux
     variable = euler1
     property = Euler_angles
     component = 0
     execute_on = timestep_end
-  [../]
+  []
   [euler2]
     type = MaterialRealVectorValueAux
     variable = euler2
     property = Euler_angles
     component = 1
     execute_on = timestep_end
-  [../]
+  []
   [euler3]
     type = MaterialRealVectorValueAux
     variable = euler3
     property = Euler_angles
     component = 2
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -120,19 +120,19 @@
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
   [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = tdisp
-  [../]
+  []
 []
 
 [UserObjects]
@@ -143,12 +143,12 @@
     num_slip_sys_flowrate_props = 2
     flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
     uo_state_var_name = state_var_gss
-  [../]
+  []
   [slip_resistance_gss]
     type = CrystalPlasticitySlipResistanceGSS
     variable_size = 12
     uo_state_var_name = state_var_gss
-  [../]
+  []
   [state_var_gss]
     type = CrystalPlasticityStateVariable
     variable_size = 12
@@ -156,14 +156,14 @@
     group_values = '60.8 60.8 60.8'
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
-  [../]
+  []
   [state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 109.8 2.5'
     uo_slip_rate_name = slip_rate_gss
     uo_state_var_name = state_var_gss
-  [../]
+  []
 []
 
 [Materials]
@@ -175,39 +175,39 @@
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
     read_prop_user_object = prop_read
-  [../]
+  []
 []
 
 [Postprocessors]
   [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
+  []
   [e_yy]
     type = ElementAverageValue
     variable = e_yy
-  [../]
+  []
   [fp_yy]
     type = ElementAverageValue
     variable = fp_yy
-  [../]
+  []
   [gss]
     type = ElementAverageValue
     variable = gss
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -236,6 +236,6 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 

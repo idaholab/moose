@@ -10,12 +10,12 @@
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
   [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
@@ -23,12 +23,12 @@
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
   [diff_v]
     type = FVDiffusion
     variable = v
     coeff = 1
-  [../]
+  []
 []
 
 [FVBCs]
@@ -37,25 +37,25 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = FVDirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
   [left_v]
     type = FVDirichletBC
     variable = v
     boundary = left
     value = 1
-  [../]
+  []
   [right_v]
     type = FVDirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -65,7 +65,7 @@
     variable = 'u v'
     points = '0.09 0.09 0  0.23 0.4 0  0.78 0.2 0'
     sort_by = x
-  [../]
+  []
 []
 
 [Executioner]

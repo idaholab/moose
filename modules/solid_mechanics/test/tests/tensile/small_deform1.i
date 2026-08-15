@@ -29,7 +29,7 @@
     incremental = true
     strain = finite
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -38,26 +38,26 @@
     variable = disp_x
     boundary = 'front back'
     function = '0.1E-6*x'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0.2E-6*y'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '1E-6*z'
-  [../]
+  []
 []
 
 [AuxVariables]
   [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -66,7 +66,7 @@
     property = plastic_yield_function
     index = 0
     variable = yield_fcn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -74,51 +74,51 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
+  []
   [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
+  []
   [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
+  []
   [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
+  []
   [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
+  []
   [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
+  []
   [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
 []
 
 [UserObjects]
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1
-  [../]
+  []
   [mc]
     type = SolidMechanicsPlasticTensile
     tensile_strength = ts
     yield_function_tolerance = 1E-6
     tensile_tip_smoother = 0.0
     internal_constraint_tolerance = 1E-5
-  [../]
+  []
 []
 
 [Materials]
@@ -127,7 +127,7 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 2.0E6'
-  [../]
+  []
   [mc]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -140,7 +140,7 @@
     debug_stress_change = 1E-8
     debug_pm_change = 1E-5
     debug_intnl_change = 1E-5
-  [../]
+  []
 []
 
 
@@ -156,5 +156,5 @@
   exodus = false
   [csv]
     type = CSV
-    [../]
+    []
 []

@@ -20,7 +20,7 @@
     type = SodiumPropertiesMaterial
     temperature = 100
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
@@ -32,11 +32,11 @@
   [k_avg]
     type = ElementAverageValue
     variable = k
-  [../]
+  []
   [cp_avg]
     type = ElementAverageValue
     variable = cp
-  [../]
+  []
 []
 
 [Outputs]

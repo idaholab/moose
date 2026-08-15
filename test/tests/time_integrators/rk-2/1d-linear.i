@@ -11,17 +11,17 @@
   [ic]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*x
-  [../]
+  []
 []
 
 [Variables]
@@ -32,8 +32,8 @@
     [InitialCondition]
       type = FunctionIC
       function = ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -41,20 +41,20 @@
     type = TimeDerivative
     variable = u
     implicit = true
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
     implicit = false
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
     implicit = false
-  [../]
+  []
 []
 
 [BCs]
@@ -63,7 +63,7 @@
     variable = u
     boundary = '0 1'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -71,7 +71,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,7 +79,7 @@
 
   [TimeIntegrator]
     type = ExplicitMidpoint
-  [../]
+  []
   solve_type = 'LINEAR'
 
   start_time = 0.0

@@ -14,8 +14,8 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -23,11 +23,11 @@
     type = ADMatDiffusion
     variable = eta
     diffusivity = F
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [Materials]
@@ -36,7 +36,7 @@
     coupled_variables  = 'eta'
     expression ='(eta-0.5)^2'
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

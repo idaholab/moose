@@ -20,27 +20,27 @@
   [forcing_fn]
     type = ParsedFunction
     expression = x*(y+1)
-  [../]
+  []
 []
 
 [Variables]
   [u]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
   [uv]
     type = Reaction
     variable = u
-  [../]
+  []
 
   [fv]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -48,7 +48,7 @@
     type = SideIntegralVariablePostprocessor
     variable = u
     boundary = '0 1'
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,5 +60,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

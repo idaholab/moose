@@ -27,14 +27,14 @@
 
 [AuxVariables]
   [temp]
-  [../]
+  []
 []
 
 [Functions]
   [temperature_load]
     type = ParsedFunction
     expression = t*(500.0)+300.0
-  [../]
+  []
 []
 
 [Physics]
@@ -46,9 +46,9 @@
                 add_variables = true
                 eigenstrain_names = eigenstrain
                 generate_output = 'strain_xx strain_yy strain_zz'
-            [../]
-        [../]
-    [../]
+            []
+        []
+    []
 []
 
 [AuxKernels]
@@ -57,7 +57,7 @@
     variable = temp
     function = temperature_load
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [BCs]
@@ -66,19 +66,19 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -86,17 +86,17 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
+  []
   [small_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]
@@ -129,17 +129,17 @@
   [strain_xx]
     type = ElementAverageValue
     variable = strain_xx
-  [../]
+  []
   [strain_yy]
     type = ElementAverageValue
     variable = strain_yy
-  [../]
+  []
   [strain_zz]
     type = ElementAverageValue
     variable = strain_zz
-  [../]
+  []
   [temperature]
     type = AverageNodalVariableValue
     variable = temp
-  [../]
+  []
 []

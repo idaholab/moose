@@ -16,7 +16,7 @@
     family = LAGRANGE
     # set this so that the Picard initial norm is not zero
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -25,11 +25,11 @@
     family = LAGRANGE
     # set this so that the Picard initial norm is not zero
     initial_condition = 1
-  [../]
+  []
   [power]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -38,14 +38,14 @@
     variable = u
     mat_prop = diffusion
     offset = 0.0
-  [../]
+  []
 
   [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -57,7 +57,7 @@
     # this coefficient will affect the eigenvalue.
     normal_factor = 10
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -66,13 +66,13 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 
   [eigenU]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Materials]
@@ -82,7 +82,7 @@
     block = 0
     base = 1.0
     coef = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -99,14 +99,14 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [VectorPostprocessors]
   [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
@@ -120,7 +120,7 @@
     type = FullSolveMultiApp
     input_files = ne_coupled_picard_sub.i
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Transfers]
@@ -129,11 +129,11 @@
     from_multi_app = sub
     source_variable = T
     variable = T
-  [../]
+  []
   [power_to_sub]
     type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub
     source_variable = power
     variable = power
-  [../]
+  []
 []
