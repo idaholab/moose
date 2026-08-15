@@ -30,6 +30,12 @@ protected:
   void evaluateRHSResidual() override;
   void rebuildBoundaryElementList();
 
+  /**
+   * NEML2 has its own way of handling elem and node ranges, independent of the blocks upon
+   * variables are defined
+   */
+  void constructRanges() override;
+
   /// The assembly object with cached assembly information
   NEML2Assembly * _neml2_assembly = nullptr;
 

@@ -100,4 +100,51 @@
     design = 'ExplicitDynamicsContactAction.md'
     requirement = 'The contact system when used with explicit time stepping shall be able to be block restricted to subdomains that are involved in the contact.'
   []
+  [moving_block_failure]
+    type = 'RunException'
+    input = 'moving_block.i'
+    expect_err = 'negative Jacobian'
+    allow_warnings = true
+    cli_args = 'Executioner/TimeIntegrator/restrict_to_active_blocks=false'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    requirement = 'The contact system shall produce an error if it detects an inverted element.'
+    issues = '#32066'
+  []
+  [moving_block_success]
+    type = 'Exodiff'
+    input = 'moving_block.i'
+    exodiff = 'moving_block_out.e'
+    allow_warnings = true
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    requirement = 'Explicit dynamics along with contact shall be able to handle inverted elements '
+                  'if no variables are defined on those elements.'
+    issues = '#32066'
+  []
+  [moving_block_refine1]
+    type = 'Exodiff'
+    input = 'moving_block_refine1.i'
+    exodiff = 'moving_block_refine1_out.e moving_block_refine1_out.e-s002'
+    allow_warnings = true
+    max_parallel = 2
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    requirement = 'In explicit dynamical problems, it shall be possible to perform no calculations '
+                  'on mesh blocks upon which no variables are defined, including the cases where '
+                  'mesh adaptivity is used.'
+    design = 'ExplicitDynamicsContactConstraint.md ExplicitMixedOrder.md'
+    issues = '#32066'
+  []
+  [moving_block_refine2]
+    type = 'Exodiff'
+    input = 'moving_block_refine2.i'
+    exodiff = 'moving_block_refine2_out.e moving_block_refine2_out.e-s002 moving_block_refine2_out.e-s003'
+    allow_warnings = true
+    heavy = true
+    max_parallel = 2
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    requirement = 'In explicit dynamical problems, it shall be possible to perform no calculations '
+                  'on mesh blocks upon which no variables are defined, including the cases where '
+                  'initial mesh adaptivity and/or marker-defined adaptivity are used.'
+    design = 'ExplicitDynamicsContactConstraint.md ExplicitMixedOrder.md'
+    issues = '#32066'
+  []
 []
