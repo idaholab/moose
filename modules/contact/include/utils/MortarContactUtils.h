@@ -147,6 +147,39 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
 }
 
 /**
+ * Same as the three-argument \p hueberStadlerWohlmuthFrictionResidual, but additionally
+ * short-circuits to the trivial identity residual whenever the raw, unaugmented normal
+ * contact pressure \p normal_pressure falls below \p epsilon.
+ *
+ * The pure weight == 0 condition in the three-argument overload is an exact mathematical
+ * criterion, but it is a poor numerical proxy for "this dof is separated" during Newton
+ * iteration: \p augmented_tangential_pressure includes a tangential penalty term that is
+ * essentially never exactly zero in floating point, so the full weight/radius expression
+ * stays active even for dofs whose normal contact state is still swinging between contact
+ * and separation as the active set settles. Because that expression is only piecewise smooth
+ * across the active-set boundary, evaluating it on a dof that has not yet settled can inject a
+ * large, poorly conditioned residual and Jacobian row into that Newton step. Gating on the raw
+ * normal Lagrange multiplier instead is a coarser but cheaper and more conservative criterion:
+ * it forces such transitioning dofs onto the trivial identity residual (a well-conditioned,
+ * constant-derivative Jacobian row) until the normal contact state has clearly resolved,
+ * trading a small amount of formulation fidelity for solver robustness during that transient.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressure,
+                                      const std::array<T, N> & augmented_tangential_pressure,
+                                      const T & radius,
+                                      const T & normal_pressure,
+                                      const T & epsilon)
+{
+  if (normal_pressure < epsilon)
+    return tangential_pressure;
+
+  return hueberStadlerWohlmuthFrictionResidual(
+      tangential_pressure, augmented_tangential_pressure, radius);
+}
+
+/**
  * This function is used to communicate velocities across processes
  * @param dof_to_weighted_gap Map from degree of freedom to weighted (weak) gap
  * @param mesh Mesh used to locate nodes or elements
@@ -491,11 +524,11 @@ ConstraintState combineConstraintStates(ConstraintState a, ConstraintState b);
  * @param send_data_back Whether to send the canonical state back to every non-owning rank
  * that had a local entry for that id
  */
-void communicateConstraintStates(
-    std::unordered_map<dof_id_type, ConstraintState> & dof_to_state,
-    const std::unordered_map<dof_id_type, processor_id_type> & owner_of,
-    const Parallel::Communicator & communicator,
-    bool send_data_back);
+void
+communicateConstraintStates(std::unordered_map<dof_id_type, ConstraintState> & dof_to_state,
+                            const std::unordered_map<dof_id_type, processor_id_type> & owner_of,
+                            const Parallel::Communicator & communicator,
+                            bool send_data_back);
 
 /// Global dof ids whose canonical constraint state changed between two reconciled snapshots.
 /// See symmetricDifference() for exact bucket semantics.
@@ -513,9 +546,9 @@ struct ConstraintStateDiff
  * both newly_contact and newly_stick). Every id in curr is looked up in prev via
  * libmesh_map_find, which throws if the two snapshots are not of the same dof space.
  */
-ConstraintStateDiff symmetricDifference(
-    const std::unordered_map<dof_id_type, ConstraintState> & prev,
-    const std::unordered_map<dof_id_type, ConstraintState> & curr);
+ConstraintStateDiff
+symmetricDifference(const std::unordered_map<dof_id_type, ConstraintState> & prev,
+                    const std::unordered_map<dof_id_type, ConstraintState> & curr);
 
 /// The four named constraint-state sets, derived from a reconciled canonical map.
 /// A_contact is the disjoint union of A_stick, A_slip, and the CONTACT_UNCLASSIFIED ids.
@@ -525,8 +558,8 @@ struct ConstraintStateSets
 };
 
 /// Derive the four named sets from a reconciled canonical map.
-ConstraintStateSets constraintStateSets(
-    const std::unordered_map<dof_id_type, ConstraintState> & canonical);
+ConstraintStateSets
+constraintStateSets(const std::unordered_map<dof_id_type, ConstraintState> & canonical);
 
 /**
  * Directional derivative of an AD switching-function value along the Newton direction d_k
@@ -536,7 +569,7 @@ ConstraintStateSets constraintStateSets(
  * direction vector does not cover.
  */
 Real directionalDerivative(const ADReal & q,
-                            const std::unordered_map<dof_id_type, Real> & direction);
+                           const std::unordered_map<dof_id_type, Real> & direction);
 
 /**
  * Predicted step length at which a switching function is expected to cross zero along the
@@ -560,8 +593,8 @@ struct FirstEventGroup
  * Determine the first tied event group from a set of per-dof predicted step lengths (as
  * produced by eventStepLength()). Returns std::nullopt if \p predicted_alphas is empty.
  */
-std::optional<FirstEventGroup> firstEventGroup(
-    const std::unordered_map<dof_id_type, Real> & predicted_alphas, Real tau_event);
+std::optional<FirstEventGroup>
+firstEventGroup(const std::unordered_map<dof_id_type, Real> & predicted_alphas, Real tau_event);
 }
 }
 }

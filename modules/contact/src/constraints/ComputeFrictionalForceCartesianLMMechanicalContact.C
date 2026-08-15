@@ -49,6 +49,10 @@ ComputeFrictionalForceCartesianLMMechanicalContact::validParams()
   InputParameters params = ComputeWeightedGapCartesianLMMechanicalContact::validParams();
   params.addClassDescription("Computes mortar frictional forces.");
   params.addParam<Real>("c_t", 1e0, "Numerical parameter for tangential constraints");
+  params.addParam<Real>(
+      "epsilon",
+      1.0e-7,
+      "Minimum value of contact pressure that will trigger frictional enforcement");
   params.addRangeCheckedParam<Real>(
       "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   return params;
@@ -64,7 +68,8 @@ ComputeFrictionalForceCartesianLMMechanicalContact::
     _primary_y_dot(adCoupledNeighborValueDot("disp_y")),
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
-    _mu(getParam<Real>("mu"))
+    _mu(getParam<Real>("mu")),
+    _epsilon(getParam<Real>("epsilon"))
 {
 }
 
@@ -254,8 +259,10 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   const auto radius =
       Moose::Mortar::Contact::coulombFrictionRadius(ADReal(_mu), augmented_normal_pressure);
 
-  // Active/inactive switching, including the degenerate zero-weight case at pure separation, is
-  // handled internally by hueberStadlerWohlmuthFrictionResidual; see MortarContactUtils.h.
+  // Degree-two Hueber-Stadler-Wohlmuth friction residual (see MortarContactUtils.h), gated by the
+  // raw, unaugmented normal_pressure_value via epsilon so dofs transitioning between contact and
+  // separation fall back to the trivial identity residual rather than the full weight/radius
+  // expression.
   if (!_has_disp_z)
   {
     const std::array<ADReal, 1> tangential_pressure{{tangential_pressure_value}};
@@ -263,7 +270,11 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
         {tangential_pressure_value + c_t * tangential_vel * _dt}};
 
     tangential_dof_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-        tangential_pressure, augmented_tangential_pressure, radius)[0];
+        tangential_pressure,
+        augmented_tangential_pressure,
+        radius,
+        normal_pressure_value,
+        ADReal(_epsilon))[0];
   }
   else
   {
@@ -274,7 +285,11 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
          tangential_pressure_value_dir + c_t * (*_tangential_vel_ptr[1]) * _dt}};
 
     const auto residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-        tangential_pressure, augmented_tangential_pressure, radius);
+        tangential_pressure,
+        augmented_tangential_pressure,
+        radius,
+        normal_pressure_value,
+        ADReal(_epsilon));
     tangential_dof_residual = residual[0];
     tangential_dof_residual_dir = residual[1];
   }
