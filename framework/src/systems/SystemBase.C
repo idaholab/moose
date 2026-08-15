@@ -1379,20 +1379,33 @@ SystemBase::oldSolutionStateVectorName(const unsigned int state,
                                        const Moose::SolutionIterationType iteration_type) const
 {
   mooseAssert(state != 0, "Not an old state");
+  mooseAssert(static_cast<unsigned short>(iteration_type) <
+                  static_cast<unsigned short>(Moose::SolutionIterationType::Count),
+              "Invalid iteration_type");
 
-  if (iteration_type == Moose::SolutionIterationType::Time)
+  switch (iteration_type)
   {
-    if (state == 1)
-      return Moose::OLD_SOLUTION_TAG;
-    else if (state == 2)
-      return Moose::OLDER_SOLUTION_TAG;
+    case Moose::SolutionIterationType::Time:
+      if (state == 1)
+        return Moose::OLD_SOLUTION_TAG;
+      else if (state == 2)
+        return Moose::OLDER_SOLUTION_TAG;
+      break;
+    case Moose::SolutionIterationType::Nonlinear:
+      if (state == 1)
+        return Moose::PREVIOUS_NL_SOLUTION_TAG;
+      break;
+    case Moose::SolutionIterationType::MultiAppFixedPoint:
+      if (state == 1)
+        return Moose::PREVIOUS_MULTIAPP_FP_SOLUTION_TAG;
+      break;
+    case Moose::SolutionIterationType::MultiSystemFixedPoint:
+      if (state == 1)
+        return Moose::PREVIOUS_MULTISYSTEM_FP_SOLUTION_TAG;
+      break;
+    case Moose::SolutionIterationType::Count:
+      break;
   }
-  else if (iteration_type == Moose::SolutionIterationType::Nonlinear && state == 1)
-    return Moose::PREVIOUS_NL_SOLUTION_TAG;
-  else if (iteration_type == Moose::SolutionIterationType::MultiAppFixedPoint && state == 1)
-    return Moose::PREVIOUS_MULTIAPP_FP_SOLUTION_TAG;
-  else if (iteration_type == Moose::SolutionIterationType::MultiSystemFixedPoint && state == 1)
-    return Moose::PREVIOUS_MULTISYSTEM_FP_SOLUTION_TAG;
 
   return "solution_state_" + std::to_string(state) + "_" + Moose::stringify(iteration_type);
 }
