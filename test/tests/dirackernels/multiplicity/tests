@@ -6,5 +6,5 @@
     input = 'multiplicity.i'
     csvdiff = 'multiplicity_out.csv'
     requirement = "The DiracKernel system shall allow for duplicate source locations to be defined."
-  [../]
+  []
 []

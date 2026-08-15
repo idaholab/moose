@@ -9,5 +9,5 @@
     expect_out = '8 Linear'
 
     requirement = "The system shall support the the ability to set solver options within sub-applications."
-  [../]
+  []
 []

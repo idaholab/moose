@@ -8,7 +8,7 @@
     requirement = 'The system shall solve a 2D axisymmetric (RZ) thermomechanical problem and '
                    'produce a solution file for use as the source solution which is then '
                    'mapped between cylindrical and 3D cartesian coordinates.'
-  [../]
+  []
   [./axisymmetric_2d3d_solution_function_3dy]
     type = 'Exodiff'
     input = '3dy.i'
@@ -16,7 +16,7 @@
     prereq = 'axisymmetric_2d3d_solution_function_2d'
     requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
                    'onto a full 3D mesh whose axis of symmetry is the y-axis.'
-  [../]
+  []
   [./axisymmetric_2d3d_solution_function_3dy_scale]
     type = 'Exodiff'
     input = '3dy.i'
@@ -26,7 +26,7 @@
     requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
                    'onto a full 3D mesh whose axis of symmetry is the y-axis while stretching '
                    'the axial dimension and scaling the mapped axial displacement.'
-  [../]
+  []
   [./axisymmetric_2d3d_solution_function_3dz]
     type = 'Exodiff'
     input = '3dy.i'
@@ -35,7 +35,7 @@
     prereq = 'axisymmetric_2d3d_solution_function_3dy_scale'
     requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
                    'onto a full 3D mesh whose axis of symmetry is the z-axis.'
-  [../]
+  []
   [./axisymmetric_2d3d_solution_function_3dz_scale]
     type = 'Exodiff'
     input = '3dy.i'
@@ -45,5 +45,5 @@
     requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
                    'onto a full 3D mesh whose axis of symmetry is the z-axis while stretching '
                    'the axial dimension and scaling the mapped axial displacement.'
-  [../]
+  []
 []

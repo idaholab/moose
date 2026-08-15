@@ -6,5 +6,5 @@
     input = parent.i
     exodiff = 'parent_out.e parent_out.e-s002 parent_out.e-s003 parent_out.e-s004 parent_out_sub0.e parent_out_sub0.e-s002 parent_out_sub0.e-s003 parent_out_sub0.e-s004'
     requirement = "The level set module shall include the ability to transfer refinement patterns, with multiple levels of refinement, to a sub-application."
-  [../]
+  []
 []

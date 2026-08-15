@@ -8,5 +8,5 @@
      check_files = 'hide_vector_pp_out.csv hide_vector_pp_test_vpp_0021.csv'
 
      requirement = "The system shall support limiting vector postrocessor data to a specific CSV output object."
-  [../]
+  []
 []

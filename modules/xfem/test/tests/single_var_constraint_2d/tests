@@ -9,7 +9,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint across a propagating XFEM interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./propagating_2field_1constraint]
     type = Exodiff
     input = propagating_2field_1constraint.i
@@ -20,7 +20,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint across a propagating XFEM interface for one variable in a problem with another variable that does not have a constraint across that interface.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./propagating_2field_2constraint]
     type = Exodiff
     input = propagating_2field_2constraint.i
@@ -31,7 +31,7 @@
     requirement = 'The XFEM module shall provide an ability to apply zero-jump, zero-flux-jump constraints across a propagating XFEM interface for two variables.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./stationary_equal]
     type = Exodiff
     input = stationary_equal.i
@@ -42,7 +42,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./stationary_fluxjump]
     type = Exodiff
     input = stationary_fluxjump.i
@@ -53,7 +53,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump (defined by a Real value) constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./stationary_fluxjump_func]
     type = Exodiff
     input = stationary_fluxjump_func.i
@@ -64,7 +64,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump (defined by a function) constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#13756'
-  [../]
+  []
   [./stationary_jump]
     type = Exodiff
     input = stationary_jump.i
@@ -75,7 +75,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump (defined by a Real value), zero-flux-jump constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./stationary_jump_func]
     type = Exodiff
     input = stationary_jump_func.i
@@ -86,7 +86,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump (defined by a function), zero-flux-jump constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#13756'
-  [../]
+  []
   [./stationary_jump_fluxjump]
     type = Exodiff
     input = stationary_jump_fluxjump.i
@@ -98,7 +98,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, nonzero-flux-jump constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./equal_value]
     type = Exodiff
     input = equal_value.i
@@ -109,5 +109,5 @@
     requirement = 'The XFEM module shall provide an ability to apply a two-sided equal value constraint on a stationary interface for one variable.'
     design = 'XFEMEqualValueAtInterface.md'
     issues = '#11750'
-  [../]
+  []
 []

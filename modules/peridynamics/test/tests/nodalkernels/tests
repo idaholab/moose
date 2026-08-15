@@ -9,5 +9,5 @@
                    Dirichlet boundary condition of old value by penalty method for nodesets."
     design = 'nodalkernels/PenaltyDirichletOldValuePD.md'
     issues = '#11561'
-  [../]
+  []
 []

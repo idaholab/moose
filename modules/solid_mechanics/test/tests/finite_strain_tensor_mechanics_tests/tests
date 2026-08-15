@@ -8,7 +8,7 @@
     requirement = 'The system shall track a changing global stress state when a model undergoes rigid body rotation'
     issues = '#8422'
     rel_err = 3e-5
-  [../]
+  []
 
   [./patch_test]
     type = 'Exodiff'
@@ -18,5 +18,5 @@
     max_parallel = 1
     requirement = 'The system shall compute a uniform stress state given a uniform strain state with finite strains'
     issues = '#12584'
-  [../]
+  []
 []

@@ -6,7 +6,7 @@
     input = 'crysp.i'
     exodiff = 'out.e'
     requirement = 'The system shall compute the stress and strain response of a single crystal using the Kalidindi constitutive equation for hardening as a function of slip rate on each slip system.'
-  [../]
+  []
   [./test_substep]
     type = 'Exodiff'
     input = 'crysp_substep.i'
@@ -17,7 +17,7 @@
     issues = '#5082 #5683'
     requirement = 'The system shall compute the stress and strain response of a single crystal using the Kalidindi constitutive equation for hardening as a function of slip rate on each slip system with the substepping capability that reduces the intermediate time step size to aid with convergence within the crystal plasticity hardening model.'
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./test_with_linesearch]
     type = 'Exodiff'
     input = 'crysp_linesearch.i'
@@ -27,5 +27,5 @@
     valgrind = HEAVY
     requirement = 'The system shall compute the stress and strain response of a single crystal using the Kalidindi constitutive equation for hardening as a function of slip rate on each slip system with the bisection line search method within the crystal plasticity hardening model to aid with convergence.'
     capabilities = 'method!=dbg'
-  [../]
+  []
 []

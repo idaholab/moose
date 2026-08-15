@@ -6,5 +6,5 @@
     input = 'test_lap_bc.i'
     exodiff = 'out.e'
     requirement = "The system shall properly compute second derivatives within BoundaryCondition objects."
-  [../]
+  []
 []

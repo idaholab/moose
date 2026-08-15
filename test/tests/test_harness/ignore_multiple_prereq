@@ -3,11 +3,11 @@
     type = RunApp
     input = good.i
     skip = "always skipped"
-  [../]
+  []
   [./ignore_multi_prereq_dependency]
     type = RunApp
     input = good.i
     heavy = true
     prereq = always_skipped
-  [../]
+  []
 []

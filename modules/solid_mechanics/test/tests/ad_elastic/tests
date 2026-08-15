@@ -11,7 +11,7 @@
     exodiff = 'finite_elastic_out.e'
     requirement = 'We shall be able to reproduce finite strain elasticity results of the hand-coded simulation using automatic differentiation. (non-AD reference)'
     design = 'ComputeFiniteStrain.md'
-  [../]
+  []
   [./finite_elastic]
     type = 'Exodiff'
     input = 'finite_elastic.i'
@@ -20,7 +20,7 @@
     requirement = 'We shall be able to reproduce finite strain elasticity results of the hand-coded simulation using automatic differentiation.'
     design = 'ADComputeFiniteStrain.md'
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./finite_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'finite_elastic.i'
@@ -29,7 +29,7 @@
     difference_tol = 1e-4
     requirement = 'The Jacobian for the AD finite strain elasticity problem shall be perfect'
     design = 'ADComputeFiniteStrain.md'
-  [../]
+  []
 
   [./incremental_small_elastic-noad]
     type = 'Exodiff'
@@ -37,7 +37,7 @@
     exodiff = 'incremental_small_elastic_out.e'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation using automatic differentiation. (non-AD reference)'
     design = 'ComputeIncrementalStrain.md'
-  [../]
+  []
   [./incremental_small_elastic]
     type = 'Exodiff'
     input = 'incremental_small_elastic.i'
@@ -45,7 +45,7 @@
     prereq = 'incremental_small_elastic-noad'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation using automatic differentiation.'
     design = 'ADComputeIncrementalStrain.md'
-  [../]
+  []
   [./incremental_small_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'incremental_small_elastic.i'
@@ -54,7 +54,7 @@
     difference_tol = 1e0
     requirement = 'The Jacobian for the AD incremental small strain elasticity problem shall be perfect'
     design = 'ADComputeIncrementalStrain.md'
-  [../]
+  []
 
   [./green-lagrange]
     type = 'Exodiff'
@@ -63,7 +63,7 @@
     requirement = 'The system shall provide an AD enabled Green-Lagrange strain calculator'
     allow_test_objects = true
     design = 'ADComputeGreenLagrangeStrain.md'
-  [../]
+  []
   [./green-lagrange-jac]
     type = 'PetscJacobianTester'
     input = 'green-lagrange.i'
@@ -72,7 +72,7 @@
     difference_tol = 1e-6
     requirement = 'The Jacobian for the Green-Lagrange strain calculator shall be perfect'
     design = 'ADComputeGreenLagrangeStrain.md'
-  [../]
+  []
 
   #
   # Axisymmetric 2D
@@ -84,7 +84,7 @@
     exodiff = 'rz_finite_elastic_out.e'
     requirement = 'We shall be able to reproduce finite strain elasticity results of the hand-coded simulation in cylindrical coordinates using automatic differentiation. (non-AD reference)'
     design = 'ComputeAxisymmetricRZFiniteStrain.md'
-  [../]
+  []
   [./rz_finite_elastic]
     type = 'Exodiff'
     input = 'rz_finite_elastic.i'
@@ -92,7 +92,7 @@
     prereq = 'rz_finite_elastic-noad'
     requirement = 'We shall be able to reproduce finite strain elasticity results of the hand-coded simulation in cylindrical coordinates using automatic differentiation.'
     design = 'ADComputeAxisymmetricRZFiniteStrain.md'
-  [../]
+  []
   [./rz_finite_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'rz_finite_elastic.i'
@@ -101,7 +101,7 @@
     difference_tol = 1e0
     requirement = 'The Jacobian for the AD finite strain elasticity problem in cylindrical coordinates shall be perfect'
     design = 'ADComputeAxisymmetricRZFiniteStrain.md'
-  [../]
+  []
 
   [./rz_incremental_small_elastic-noad]
     type = 'Exodiff'
@@ -109,7 +109,7 @@
     exodiff = 'rz_incremental_small_elastic_out.e'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation in cylindrical coordinates using automatic differentiation. (non-AD reference)'
     design = 'ComputeAxisymmetricRZIncrementalStrain.md'
-  [../]
+  []
   [./rz_incremental_small_elastic]
     type = 'Exodiff'
     input = 'rz_incremental_small_elastic.i'
@@ -117,7 +117,7 @@
     prereq = 'rz_incremental_small_elastic-noad'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation in cylindrical coordinates using automatic differentiation.'
     design = 'ADComputeAxisymmetricRZIncrementalStrain.md'
-  [../]
+  []
   [./rz_incremental_small_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'rz_incremental_small_elastic.i'
@@ -127,7 +127,7 @@
     cli_args = '-mat_fd_type ds'
     requirement = 'The Jacobian for the AD incremental small strain elasticity problem in cylindrical coordinates shall be perfect'
     design = 'ADComputeAxisymmetricRZIncrementalStrain.md'
-  [../]
+  []
 
   [./rz_small_elastic-noad]
     type = 'Exodiff'
@@ -135,7 +135,7 @@
     exodiff = 'rz_small_elastic_out.e'
     requirement = 'We shall be able to reproduce small strain elasticity results of the hand-coded simulation in cylindrical coordinates using automatic differentiation. (non-AD reference)'
     design = 'ComputeAxisymmetricRZSmallStrain.md'
-  [../]
+  []
   [./rz_small_elastic]
     type = 'Exodiff'
     input = 'rz_small_elastic.i'
@@ -143,7 +143,7 @@
     prereq = 'rz_small_elastic-noad'
     requirement = 'We shall be able to reproduce small strain elasticity results of the hand-coded simulation in cylindrical coordinates using automatic differentiation.'
     design = 'ADComputeAxisymmetricRZSmallStrain.md'
-  [../]
+  []
   [./rz_small_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'rz_small_elastic.i'
@@ -153,7 +153,7 @@
     cli_args = '-mat_fd_type ds'
     requirement = 'The Jacobian for the AD small strain elasticity problem in cylindrical coordinates shall be perfect'
     design = 'ADComputeAxisymmetricRZSmallStrain.md'
-  [../]
+  []
 
   #
   # RSpherical 1D
@@ -165,7 +165,7 @@
     exodiff = 'rspherical_finite_elastic_out.e'
     requirement = 'We shall be able to reproduce finite strain elasticity results of the hand-coded simulation in spherical coordinates using automatic differentiation. (non-AD reference)'
     design = 'ComputeRSphericalFiniteStrain.md'
-  [../]
+  []
   [./rspherical_finite_elastic]
     type = 'Exodiff'
     input = 'rspherical_finite_elastic.i'
@@ -173,7 +173,7 @@
     prereq = 'rspherical_finite_elastic-noad'
     requirement = 'We shall be able to reproduce finite strain elasticity results of the hand-coded simulation in spherical coordinates using automatic differentiation.'
     design = 'ADComputeRSphericalFiniteStrain.md'
-  [../]
+  []
   [./rspherical_finite_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'rspherical_finite_elastic.i'
@@ -183,7 +183,7 @@
     cli_args = '-mat_fd_type ds'
     requirement = 'The Jacobian for the AD finite strain elasticity problem in spherical coordinates shall be perfect'
     design = 'ADComputeRSphericalFiniteStrain.md'
-  [../]
+  []
 
   [./rspherical_incremental_small_elastic-noad]
     type = 'Exodiff'
@@ -191,7 +191,7 @@
     exodiff = 'rspherical_incremental_small_elastic_out.e'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation in spherical coordinates using automatic differentiation. (non-AD reference)'
     design = 'ComputeRSphericalIncrementalStrain.md'
-  [../]
+  []
   [./rspherical_incremental_small_elastic]
     type = 'Exodiff'
     input = 'rspherical_incremental_small_elastic.i'
@@ -199,7 +199,7 @@
     prereq = 'rspherical_incremental_small_elastic-noad'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation in spherical coordinates using automatic differentiation.'
     design = 'ADComputeRSphericalIncrementalStrain.md'
-  [../]
+  []
   [./rspherical_incremental_small_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'rspherical_incremental_small_elastic.i'
@@ -209,7 +209,7 @@
     cli_args = '-mat_fd_type ds'
     requirement = 'The Jacobian for the AD incremental small strain elasticity in spherical coordinates problem shall be perfect'
     design = 'ADComputeRSphericalIncrementalStrain.md'
-  [../]
+  []
 
   [./rspherical_small_elastic-noad]
     type = 'Exodiff'
@@ -217,7 +217,7 @@
     exodiff = 'rspherical_small_elastic_out.e'
     requirement = 'We shall be able to reproduce small strain elasticity results of the hand-coded simulation in spherical coordinates using automatic differentiation. (non-AD reference)'
     design = 'ComputeRSphericalSmallStrain.md'
-  [../]
+  []
   [./rspherical_small_elastic]
     type = 'Exodiff'
     input = 'rspherical_small_elastic.i'
@@ -225,7 +225,7 @@
     prereq = 'rspherical_small_elastic-noad'
     requirement = 'We shall be able to reproduce small strain elasticity results of the hand-coded simulation in spherical coordinates using automatic differentiation.'
     design = 'ADComputeRSphericalSmallStrain.md'
-  [../]
+  []
   [./rspherical_small_elastic-jac]
     type = 'PetscJacobianTester'
     input = 'rspherical_small_elastic.i'
@@ -235,5 +235,5 @@
     cli_args = '-mat_fd_type ds'
     requirement = 'The Jacobian for the AD small strain elasticity problem in spherical coordinates shall be perfect'
     design = 'ADComputeRSphericalSmallStrain.md'
-  [../]
+  []
 []

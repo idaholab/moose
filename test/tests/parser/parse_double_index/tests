@@ -8,5 +8,5 @@
     exodiff = 'parse_double_index.e'
 
     requirement = 'The system shall support reading in jagged double-indexed arrays from the input file using two delimiters for columns and rows respectively.'
-  [../]
+  []
 []

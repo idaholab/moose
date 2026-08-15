@@ -11,7 +11,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'HEX8 elements'
-    [../]
+    []
     [./hex20]
       type = 'CSVDiff'
       input = 'nafems_t3_hex_template.i'
@@ -20,7 +20,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'HEX20 elements'
-    [../]
+    []
     [./hex27]
       type = 'CSVDiff'
       input = 'nafems_t3_hex_template.i'
@@ -29,7 +29,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'HEX27 elements'
-    [../]
+    []
     [./edge2]
       type = 'CSVDiff'
       input = 'nafems_t3_edge_template.i'
@@ -38,7 +38,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'EDGE2 elements'
-    [../]
+    []
     [./edge3]
       type = 'CSVDiff'
       input = 'nafems_t3_edge_template.i'
@@ -47,7 +47,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'EDGE3 elements'
-    [../]
+    []
     [./quad4]
       type = 'CSVDiff'
       input = 'nafems_t3_quad_template.i'
@@ -56,7 +56,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'QUAD4 elements'
-    [../]
+    []
     [./quad8]
       type = 'CSVDiff'
       input = 'nafems_t3_quad_template.i'
@@ -65,7 +65,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'QUAD8 elements'
-    [../]
+    []
     [./quad9]
       type = 'CSVDiff'
       input = 'nafems_t3_quad_template.i'
@@ -74,8 +74,8 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'QUAD9 elements'
-    [../]
-  [../]
+    []
+  []
   [./fine_mesh]
     requirement = 'The system shall compute the transient heat conduction solution for the NAFEMS T3 benchmark problem using a fine mesh and '
     [./hex8]
@@ -86,7 +86,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'HEX8 mesh'
-    [../]
+    []
     [./hex20]
       type = 'CSVDiff'
       input = 'nafems_t3_hex_template.i'
@@ -95,7 +95,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'HEX20 mesh'
-    [../]
+    []
     [./hex27]
       type = 'CSVDiff'
       input = 'nafems_t3_hex_template.i'
@@ -104,7 +104,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'HEX27 mesh'
-    [../]
+    []
     [./edge2]
       type = 'CSVDiff'
       input = 'nafems_t3_edge_template.i'
@@ -113,7 +113,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'EDGE2 mesh'
-    [../]
+    []
     [./edge3]
       type = 'CSVDiff'
       input = 'nafems_t3_edge_template.i'
@@ -122,7 +122,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'EDGE3 mesh'
-    [../]
+    []
     [./quad4]
       type = 'CSVDiff'
       input = 'nafems_t3_quad_template.i'
@@ -131,7 +131,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'QUAD4 mesh'
-    [../]
+    []
     [./quad8]
       type = 'CSVDiff'
       input = 'nafems_t3_quad_template.i'
@@ -140,7 +140,7 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'QUAD8 mesh'
-    [../]
+    []
     [./quad9]
       type = 'CSVDiff'
       input = 'nafems_t3_quad_template.i'
@@ -149,6 +149,6 @@
       verification = 'nafems_t3_verif.md'
       mesh_mode = REPLICATED
       detail = 'QUAD9 mesh'
-    [../]
-  [../]
+    []
+  []
 []

@@ -11,5 +11,5 @@
     # absolute comparisons.
     custom_cmp = 'bump_out.cmp'
     requirement = 'The system shall be able to solve the Euler equations for subsonic flow with a bump in the channel.'
-  [../]
+  []
 []

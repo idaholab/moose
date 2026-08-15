@@ -8,7 +8,7 @@
     issues = '#5669'
     design = 'InterfaceOrientationMaterial.md'
     requirement = 'The system shall syntax check a dendritic snowflake growth example using an orientation-dependent anisotropic interface energy.'
-  [../]
+  []
   [./echebarria_iso]
       type = RunApp
       input = 'echebarria_iso.i'
@@ -18,5 +18,5 @@
       issues = '#27171'
       design = 'AntitrappingCurrent.md'
       requirement = 'The system shall syntax check an isothermal Echebarria solidification example using an antitrapping current.'
-  [../]
+  []
 []

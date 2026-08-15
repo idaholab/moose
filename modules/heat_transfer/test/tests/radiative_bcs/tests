@@ -8,7 +8,7 @@
     issues = "#13053"
     # see #21185
     allow_warnings = true
-  [../]
+  []
   [ad_radiative_bc_cyl]
     type = CSVDiff
     input = 'ad_radiative_bc_cyl.i'
@@ -39,7 +39,7 @@
     design = 'source/bcs/FunctionRadiativeBC.md'
     issues = "#13053"
     mesh_mode = REPLICATED
-  [../]
+  []
   [ad_function_radiative_bc]
     type = Exodiff
     input = 'ad_function_radiative_bc.i'

@@ -10,5 +10,5 @@
     requirement = "The system shall include the ability to create a finite element mesh by tiling existing meshes."
     design = 'meshgenerators/TiledMeshGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

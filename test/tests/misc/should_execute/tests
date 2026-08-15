@@ -7,7 +7,7 @@
     input = 'should_execute.i'
 
     requirement = 'The test system shall have the ability to execute a specific input file.'
-  [../]
+  []
   [./dont]
     type = 'Exodiff'
     input = 'should_execute.i'
@@ -28,5 +28,5 @@
 
     requirement = 'The test system shall have the ability to run a test that neither clears expected outputs or runs '
                   'the expected executeable for multiple output testing.'
-  [../]
+  []
 []

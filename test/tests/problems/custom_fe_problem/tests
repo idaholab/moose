@@ -8,5 +8,5 @@
     requirement = 'The system shall support the ability to extend the basic "Problem" interface.'
     issues = '#12060'
     design = '/Problem/index.md'
-  [../]
+  []
 []

@@ -10,7 +10,7 @@
     issues = '#2094 #6872'
 
     max_parallel = 16 # 16 element test (initially)
-  [../]
+  []
   [./named_system]
     type = 'CSVDiff'
     input = 'named_system.i'
@@ -20,5 +20,5 @@
                    (DOFS) from a named equation system in the simulation.'
     design = '/NumDOFs.md'
     issues = '#31796'
-  [../]
+  []
 []

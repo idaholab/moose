@@ -8,5 +8,5 @@
     # This problem uses SuperLU.
     capabilities = 'superlu'
     requirement = "The LevelSetAdvection Kernel shall converage at the correct rate as tested by the method of manufactured solutions."
-  [../]
+  []
 []

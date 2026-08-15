@@ -7,5 +7,5 @@
     requirement = 'The system shall be able to indicate when libMesh Ghosting Functors are in use.'
     design = "RelationshipManager.md"
     issues = '#13206'
-  [../]
+  []
 []

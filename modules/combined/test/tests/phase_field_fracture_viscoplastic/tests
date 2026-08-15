@@ -11,5 +11,5 @@
                   'isotropic phase-field damage to propagate a crack.'
     design = 'HyperElasticPhaseFieldIsoDamage.md'
     issues = '#6049'
-  [../]
-[../]
+  []
+[]

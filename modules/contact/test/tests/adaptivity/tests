@@ -9,5 +9,5 @@
     requirement = "Contact shall be enforced on new nodes created due to mesh refinement"
     design = 'Constraints/index.md'
     max_threads = 1 # See https://github.com/idaholab/moose/issues/18685
-  [../]
+  []
 []

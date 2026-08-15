@@ -9,5 +9,5 @@
     issues = '#5336'
     design = 'PFCRFFMaterial.md'
     requirement = 'The system shall be able to solve the rational-function-fit phase field crystal model split across a parent and sub-application.'
-  [../]
+  []
 []

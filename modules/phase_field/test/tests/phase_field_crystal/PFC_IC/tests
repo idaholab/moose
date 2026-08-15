@@ -10,7 +10,7 @@
       # 0-step transient does not recover
       recover = false
       detail = 'body-centered cubic lattice, and'
-    [../]
+    []
 
     [./FCC_test]
       type = 'Exodiff'
@@ -19,6 +19,6 @@
       # 0-step transient does not recover
       recover = false
       detail = 'face-centered cubic lattice.'
-    [../]
-  [../]
+    []
+  []
 []

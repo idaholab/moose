@@ -8,5 +8,5 @@
                    'calculation and asymptotic expansion homogenization.'
     design = 'HomogenizedHeatConduction.md HomogenizedThermalConductivity.md ThermalConductivity.md'
     issues = '#5517'
-  [../]
+  []
 []

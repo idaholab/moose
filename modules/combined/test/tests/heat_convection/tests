@@ -12,7 +12,7 @@
                   'that the solid surface temperature of a 3D body tracks the ramping fluid '
                   'temperature.'
     design = 'HeatConduction.md'
-  [../]
+  []
 
   [./test_function]
     type = 'Exodiff'
@@ -21,7 +21,7 @@
     requirement = 'The system shall apply a convective flux boundary condition whose fluid '
                   'temperature and heat transfer coefficient are each given by a function.'
     design = 'ConvectiveFluxFunction.md'
-  [../]
+  []
 
   [./test_rz]
     type = 'Exodiff'
@@ -33,7 +33,7 @@
                   'fluid temperature and a natural-convection heat transfer coefficient to '
                   'model the thermal soak of an axisymmetric body.'
     design = 'HeatConduction.md'
-  [../]
+  []
 
   [./test_3d]
     type = 'Exodiff'
@@ -45,7 +45,7 @@
                   'fluid temperature and a natural-convection heat transfer coefficient to '
                   'model the thermal soak of a 3D body.'
     design = 'HeatConduction.md'
-  [../]
+  []
 
   [./test_rz_tf]
     type = 'Exodiff'
@@ -58,5 +58,5 @@
                   'that the solid surface temperature of an axisymmetric body tracks the '
                   'ramping fluid temperature.'
     design = 'HeatConduction.md'
-  [../]
+  []
 []

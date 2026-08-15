@@ -9,7 +9,7 @@
     scale_refine = 5
 
     requirement = 'The system shall support setting initial conditions of field variables to a constant value.'
-  [../]
+  []
 
   [./subdomain_test]
     type = 'Exodiff'
@@ -18,5 +18,5 @@
     scale_refine = 5
 
     requirement = 'The system shall support setting initial conditions of subdomain restricted field variables to a constant value.'
-  [../]
+  []
 []

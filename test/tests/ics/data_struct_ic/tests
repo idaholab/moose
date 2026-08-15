@@ -8,5 +8,5 @@
                   ' when possible when evaluating initial conditions at a point in the domain.'
     issues = '#4953'
     design = 'syntax/ICs/index.md'
-  [../]
+  []
 []

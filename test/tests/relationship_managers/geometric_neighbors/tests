@@ -11,7 +11,7 @@
     max_parallel = 3
 
     requirement = "The system shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality"
-  [../]
+  []
 
   [./geometric_edge_neighbor_3D]
     type = 'Exodiff'
@@ -23,5 +23,5 @@
     max_parallel = 3
 
     requirement = "The system shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality in 3D"
-  [../]
+  []
 []

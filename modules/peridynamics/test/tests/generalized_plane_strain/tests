@@ -10,7 +10,7 @@
                    of generalized plane strain problem.'
     design = 'GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./gps_squares_OSPD]
     type = 'Exodiff'
@@ -22,7 +22,7 @@
                    of generalized plane strain problem with a problem geometry with multiple disjoint regions.'
     design = 'GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./out_of_plane_pressure_OSPD]
     type = 'Exodiff'
@@ -33,7 +33,7 @@
                    pressure for the ordinary state-based formulation of generalized plane strain problem.'
     design = 'GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./planestrain_prescribed_OSPD]
     type = 'Exodiff'
@@ -45,7 +45,7 @@
                    of generalized plane strain problem.'
     design = 'ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./gps_H1NOSPD]
     type = 'Exodiff'
@@ -58,5 +58,5 @@
                    the horizon stabilized correspondence model.'
     design = 'GeneralizedPlaneStrainUserObjectNOSPD.md'
     issues = '#11561'
-  [../]
+  []
 []

@@ -9,7 +9,7 @@
     run_sim = True
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements"
     max_parallel = 2 # The finite differencing in `-snes_test_jacobian` is a little finicky. This test failed **only** the distributed mesh sweep with p = 3
-  [../]
+  []
   [./jxw_jacobian_2]
     type = 'PetscJacobianTester'
     input = 'not-handling-jxw.i'
@@ -20,7 +20,7 @@
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements"
     max_parallel = 2 # The finite differencing in `-snes_test_jacobian` is a little finicky. The above test failed **only** the distributed mesh sweep with p = 3 so we'll mark this one too
     prereq = 'jxw_jacobian'
-  [../]
+  []
   [./jxw_jacobian_cylindrical]
     type = 'PetscJacobianTester'
     input = 'jxw-cylindrical.i'
@@ -30,7 +30,7 @@
     cli_args = '-snes_test_err 1e-9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements for a cylindrical geometry"
     max_parallel = 2
-  [../]
+  []
   [./jxw_jacobian_2_cylindrical]
     type = 'PetscJacobianTester'
     input = 'jxw-cylindrical.i'
@@ -41,7 +41,7 @@
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements for a cylindrical geometry"
     max_parallel = 2
     prereq = 'jxw_jacobian_cylindrical'
-  [../]
+  []
   [./jxw_jacobian_spherical]
     type = 'PetscJacobianTester'
     input = 'jxw-spherical.i'
@@ -50,7 +50,7 @@
     run_sim = True
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements for a spherical geometry"
     max_parallel = 2
-  [../]
+  []
   [./jxw_jacobian_2_spherical]
     type = 'PetscJacobianTester'
     input = 'jxw-spherical.i'
@@ -61,5 +61,5 @@
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements for a spherical geometry"
     max_parallel = 2
     prereq = 'jxw_jacobian_spherical'
-  [../]
+  []
 []

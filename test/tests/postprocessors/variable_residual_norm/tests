@@ -11,5 +11,5 @@
     allow_deprecated = true
 
     requirement = 'The system shall compute the difference between the test and trial functions (Residual) for a specified variable.'
-  [../]
+  []
 []

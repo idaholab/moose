@@ -9,5 +9,5 @@
     max_parallel = 3
     mesh_mode = replicated # Just because of the gold file
     requirement = "The system shall be capable of populating an auxiliary variable from VectorPostprocessor data sized to the number of processors."
-  [../]
+  []
 []

@@ -12,7 +12,7 @@
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the ExodusII format."
     capabilities = '!cuda'
-  [../]
+  []
 
   [iterative]
     requirement = "The system shall support output during linear and non-linear iterations during steady simulations using the ExodusII format:"
@@ -28,7 +28,7 @@
 
       detail = 'in a single file or'
       capabilities = '!cuda' # boomeramg iteration counts different with gpu support
-    [../]
+    []
     [./exodus_steady_sequence]
       # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
       type = 'Exodiff'
@@ -54,7 +54,7 @@
 
       detail = 'in a sequence of files.'
       capabilities = '!cuda' # boomeramg iteration counts different with gpu support
-    [../]
+    []
   []
   [./vtk]
     type = 'XMLDiff'
@@ -68,7 +68,7 @@
     mesh_mode = REPLICATED
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the VTK format."
-  [../]
+  []
   [./csv]
     type = 'CSVDiff'
     input = 'iterative_csv.i'
@@ -85,7 +85,7 @@
     capabilities = '!hpc'
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the CSV format."
-  [../]
+  []
 
   [start_stop]
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations:"

@@ -9,5 +9,5 @@
     issues = '#20694'
     design = 'FileMeshGenerator.md'
     requirement = 'The system shall read TetGen file meshes.'
-  [../]
+  []
 []

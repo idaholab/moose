@@ -6,7 +6,7 @@
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals, for water at equilibrium at a constant 60C temperature."
     issues = '#15693'
     design = 'forge.md'
-  [../]
+  []
   [./water_60_to_220degC]
     type = CSVDiff
     input = water_60_to_220degC.i
@@ -16,7 +16,7 @@
     design = 'forge.md'
     # Geochemistry solver does not support recover (see #15816)
     recover = false
-  [../]
+  []
   [./kinetic]
     type = CSVDiff
     input = kinetic.i
@@ -26,7 +26,7 @@
     design = 'forge.md'
     # Geochemistry solver does not support recover (see #15816)
     recover = false
-  [../]
+  []
   [./water_3]
     type = CSVDiff
     input = water_3.i
@@ -34,7 +34,7 @@
     requirement = "The system shall be able to solve aqueous geochemical systems with varying temperatures and varying pH"
     issues = '#15693'
     design = 'forge.md'
-  [../]
+  []
   [./natural_reservoir]
     type = CSVDiff
     input = natural_reservoir.i
@@ -45,7 +45,7 @@
     design = 'forge.md'
     # Geochemistry solver does not support recover (see #15816)
     recover = false
-  [../]
+  []
   [./reservoir_and_water_3]
     type = CSVDiff
     input = reservoir_and_water_3.i
@@ -56,7 +56,7 @@
     design = 'forge.md'
     # Geochemistry solver does not support recover (see #15816)
     recover = false
-  [../]
+  []
   [./porous_flow]
     type = CSVDiff
     input = porous_flow.i
@@ -65,7 +65,7 @@
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals to examine water injection in a natural reservoir without geochemistry"
     issues = '#15693'
     design = 'forge.md'
-  [../]
+  []
   [./aquifer_geochemistry_alone]
     type = CSVDiff
     input = aquifer_geochemistry.i
@@ -76,5 +76,5 @@
     design = 'forge.md'
     # Geochemistry solver does not support recover (see #15816)
     recover = false
-  [../]
+  []
 []

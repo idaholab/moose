@@ -13,5 +13,5 @@
     # The 3D grid is good for the final partitioning of the extruded mesh, but it is not good
     # for the partitioning triggered during mesh generation when the mesh is still 2D
     allow_warnings = true
-  [../]
+  []
 []

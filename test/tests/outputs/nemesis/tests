@@ -9,7 +9,7 @@
     requirement = "The Nemesis Output object shall output separate files per process for visualization purposes."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
-  [../]
+  []
   [./nemesis_elemental_replicated]
     type = 'Exodiff'
     input = nemesis_elemental.i
@@ -27,7 +27,7 @@
     requirement = "The Nemesis Output object shall support writing elemental variables."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
-  [../]
+  []
   [./nemesis_elemental_distributed]
     type = 'Exodiff'
     input = nemesis_elemental.i
@@ -41,7 +41,7 @@
     requirement = "The Nemesis Output object shall support writing elemental variables with the same numbering on DistributedMesh."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
-  [../]
+  []
   [./nemesis_scalar_replicated]
     type = 'Exodiff'
     input = nemesis_scalar.i
@@ -60,7 +60,7 @@
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false
-  [../]
+  []
   [./nemesis_scalar_distributed]
     type = 'Exodiff'
     input = nemesis_scalar.i
@@ -75,5 +75,5 @@
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false
-  [../]
+  []
 []

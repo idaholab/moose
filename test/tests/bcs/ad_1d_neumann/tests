@@ -8,7 +8,7 @@
       input = '1d_neumann.i'
       exodiff = '1d_neumann_out.e'
       detail = 'using a generated mesh.'
-    [../]
+    []
     [./jac]
       type = 'PetscJacobianTester'
       input = '1d_neumann.i'
@@ -16,12 +16,12 @@
       ratio_tol = 1e-7
       difference_tol = 1e-6
       detail = 'and shall be able to produce the exact Jacobian'
-    [../]
+    []
     [./from_cubit]
       type = 'Exodiff'
       input = 'from_cubit.i'
       exodiff = 'from_cubit_out.e'
       detail = 'using an imported mesh.'
-    [../]
-  [../]
+    []
+  []
 []

@@ -8,7 +8,7 @@
     exodiff = 'test_out.e'
 
     requirement = 'The system shall be capable of outputting material properties through auxiliary field variables.'
-  [../]
+  []
   [./except1]
     type = 'RunException'
     input = test.i
@@ -17,5 +17,5 @@
     expect_err = 'Trying to evaluate qp 10 but there are only 4 quadrature points in the element'
 
     requirement = 'The system shall report and error when invalid indices are requested when attempting to output material properties through auxiliary field variables.'
-  [../]
+  []
 []

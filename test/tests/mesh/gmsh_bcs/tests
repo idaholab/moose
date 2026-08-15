@@ -7,5 +7,5 @@
     requirement = 'The system shall read GMesh (.msh) format file meshes containing multiple boundaries.'
     issues = '#1402'
     design = 'FileMesh.md'
-  [../]
+  []
 []

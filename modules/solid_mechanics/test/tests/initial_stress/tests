@@ -6,7 +6,7 @@
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "SolidMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of functions to define the initial stress tensor"
-  [../]
+  []
   [./except02]
     type = 'RunException'
     input = 'except02.i'
@@ -14,7 +14,7 @@
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#13087"
     requirement = "SolidMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of AuxVariables to define the initial stress tensor"
-  [../]
+  []
   [./gravity]
     type = 'Exodiff'
     input = 'gravity.i'
@@ -22,7 +22,7 @@
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "SolidMechanics shall allow users to specify initial stresses using Functions"
-  [../]
+  []
   [./gravity_with_aux]
     type = 'Exodiff'
     input = 'gravity_with_aux.i'
@@ -30,7 +30,7 @@
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#13087"
     requirement = "SolidMechanics shall allow users to specify initial stresses using AuxVariables"
-  [../]
+  []
   [./gravity_cosserat]
     type = 'Exodiff'
     input = 'gravity_cosserat.i'
@@ -38,7 +38,7 @@
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "SolidMechanics shall allow users to specify initial stresses for problems with Cosserat mechanics"
-  [../]
+  []
   [./mc_tensile]
     type = 'CSVDiff'
     input = 'mc_tensile.i'
@@ -49,5 +49,5 @@
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "SolidMechanics shall allow users to specify initial stresses for problems with plasticity, and if the initial stresses are inadmissible, the return-map algorithm will be applied, perhaps incrementally, to bring the initial stresses back to the admissible region"
-  [../]
+  []
 []

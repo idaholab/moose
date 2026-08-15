@@ -10,7 +10,7 @@
                    pre-existing center crack.'
     design = 'PeridynamicsMesh.md'
     issues = '#11561'
-  [../]
+  []
 
   [./double_edged_cracks]
     type = 'Exodiff'
@@ -23,7 +23,7 @@
                    pre-existing double edged cracks.'
     design = 'PeridynamicsMesh.md'
     issues = '#11561'
-  [../]
+  []
 
   [./2D_convert_one]
     type = 'Exodiff'
@@ -36,7 +36,7 @@
                    mesh block and delete the converted FE mesh.'
     design = 'MeshGeneratorPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./2D_convert_one_retain]
     type = 'Exodiff'
@@ -49,7 +49,7 @@
                    mesh block and retain the converted FE mesh.'
     design = 'MeshGeneratorPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./2D_convert_all_retain]
     type = 'Exodiff'
@@ -62,7 +62,7 @@
                    mesh blocks and retain the converted FE meshes.'
     design = 'MeshGeneratorPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./3D_generate_sideset]
     type = 'Exodiff'
@@ -75,7 +75,7 @@
                    based on sidesets of FE meshes for 3D peridynamic meshes.'
     design = 'MeshGeneratorPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./2D_generate_sidesets_partial_boundary]
     type = 'Exodiff'
@@ -88,7 +88,7 @@
                    based on sidesets of 2D FE mesh with partial boundary for sidesets.'
     design = 'MeshGeneratorPD.md'
     issues = '#17723'
-  [../]
+  []
 
   [./3D_generate_sidesets_partial_boundary]
     type = 'Exodiff'
@@ -101,7 +101,7 @@
                    based on sidesets of 3D FE mesh with partial boundary for sidesets.'
     design = 'MeshGeneratorPD.md'
     issues = '#17723'
-  [../]
+  []
 
   [./2D_single_interface_block]
     type = 'Exodiff'
@@ -116,7 +116,7 @@
                    both converted blocks and interface blocks'
     design = 'MeshGeneratorPD.md'
     issues = '#11561'
-  [../]
+  []
 
   [./Error_nonexisting_blockID]
     type = 'RunException'
@@ -127,7 +127,7 @@
                    a block specified to be converted does not exist in the mesh'
     design = 'MeshGeneratorPD.md'
     issues = '#17723'
-  [../]
+  []
 
   [./Error_wrong_bonding_blockID]
     type = 'RunException'
@@ -138,7 +138,7 @@
                    a block specified for bonding pairs does not exist in the mesh'
     design = 'MeshGeneratorPD.md'
     issues = '#17723'
-  [../]
+  []
 
   [./Error_nonexisting_sideset]
     type = 'RunException'
@@ -149,5 +149,5 @@
                    a specified sideset does not exist in the mesh'
     design = 'MeshGeneratorPD.md'
     issues = '#17723'
-  [../]
+  []
 []

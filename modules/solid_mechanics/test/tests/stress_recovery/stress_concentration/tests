@@ -8,5 +8,5 @@
     requirement = "In areas of high concentration gradients, the Zienkiewicz-Zhu implementation shall recover the specified material property."
     design = 'nodal_patch_recovery.md'
     issues = '#11880'
-  [../]
+  []
 []

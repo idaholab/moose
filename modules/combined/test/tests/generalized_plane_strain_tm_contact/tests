@@ -12,7 +12,7 @@
                  'in a coupled thermomechanical problem.'
    design = 'GeneralizedPlaneStrainAction.md MechanicalContactConstraint.md'
    issues = '#5210'
- [../]
+ []
  [./out_of_plane_pressure]
    type = 'Exodiff'
    input = 'out_of_plane_pressure.i'
@@ -22,5 +22,5 @@
                  'plane strain model.'
    design = 'GeneralizedPlaneStrainAction.md OutOfPlanePressure.md'
    issues = '#6024'
- [../]
+ []
 []

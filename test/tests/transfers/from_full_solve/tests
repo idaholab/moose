@@ -9,5 +9,5 @@
     recover = false
 
     requirement = "The system shall support the transfer of data from a completed solve within sub-application to the parent application."
-  [../]
+  []
 []

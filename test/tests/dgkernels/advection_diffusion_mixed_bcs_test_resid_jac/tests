@@ -8,12 +8,12 @@
     cli_args = 'Mesh/uniform_refine=4'
     abs_zero = 1e-9
     requirement = "The system shall be able to solve the advection diffusion equation using the discontinuous Galerkin method."
-  [../]
+  []
   [./jac]
     type = 'PetscJacobianTester'
     input = 'dg_advection_diffusion_test.i'
     cli_args = 'Outputs/exodus=false'
     recover = false
     requirement = "The system shall compute the correct Jacobian for the advection diffusion equation using the discontinuous Galerkin method."
-  [../]
+  []
 []

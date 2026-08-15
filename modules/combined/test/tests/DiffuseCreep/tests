@@ -7,7 +7,7 @@
                    'divergence of a diffusional, grain-boundary-dependent Cahn-Hilliard flux.'
     design = 'FluxBasedStrainIncrement.md SumTensorIncrements.md'
     issues = '#6612'
-  [../]
+  []
   [./strain_gb_relax]
     type = 'Exodiff'
     input = 'strain_gb_relax.i'
@@ -16,7 +16,7 @@
                    'relaxation, oriented along the local grain boundary normal.'
     design = 'GBRelaxationStrainIncrement.md SumTensorIncrements.md'
     issues = '#6612'
-  [../]
+  []
   [./stress]
     type = 'Exodiff'
     input = 'stress.i'
@@ -27,7 +27,7 @@
                    'field.'
     design = 'FluxBasedStrainIncrement.md ComputeStrainIncrementBasedStress.md'
     issues = '#6612'
-  [../]
+  []
   [./stress_flux_n_gb_relax]
     type = 'Exodiff'
     input = 'stress_flux_n_gb_relax.i'
@@ -38,7 +38,7 @@
                    'boundary relaxation strain increment.'
     design = 'FluxBasedStrainIncrement.md GBRelaxationStrainIncrement.md SumTensorIncrements.md'
     issues = '#6612'
-  [../]
+  []
   [./stress_based_chem_pot]
     type = 'Exodiff'
     input = 'stress_based_chem_pot.i'
@@ -49,7 +49,7 @@
                    'calculation.'
     design = 'StressBasedChemicalPotential.md'
     issues = '#6612'
-  [../]
+  []
   [./variable_base_eigen_strain]
     type = 'Exodiff'
     input = 'variable_base_eigen_strain.i'
@@ -60,5 +60,5 @@
                    'concentration-dependent prefactor.'
     design = 'ComputeVariableBaseEigenStrain.md'
     issues = '#6612'
-  [../]
+  []
 []

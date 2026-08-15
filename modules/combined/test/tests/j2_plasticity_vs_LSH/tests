@@ -8,5 +8,5 @@
                   'return-mapping plasticity user object formulation.'
     design = 'SolidMechanicsPlasticJ2.md'
     issues = '#5628'
-  [../]
+  []
 []

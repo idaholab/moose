@@ -9,5 +9,5 @@
     rel_err = 1e-05
 
     requirement = "The system shall support the use of Crank-Nicolson time integration scheme."
-  [../]
+  []
 []

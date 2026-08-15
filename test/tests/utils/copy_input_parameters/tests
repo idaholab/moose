@@ -7,5 +7,5 @@
     requirement = 'The system shall prevent the user from copying InputParameters objects inside of MooseObject-derived objects.'
     design = 'InputParameters.md'
     issues = '#5439'
-  [../]
+  []
 []

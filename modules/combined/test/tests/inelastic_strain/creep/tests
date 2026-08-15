@@ -7,5 +7,5 @@
     abs_zero = 9e-5
     design = 'PowerLawCreepStressUpdate.md'
     requirement = 'The system shall compute and output the effective creep strain'
-  [../]
+  []
 []

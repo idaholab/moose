@@ -7,5 +7,5 @@
                    'that are anisotropically enhanced at grain boundaries relative to the bulk.'
     design = 'GBDependentDiffusivity.md GBDependentAnisotropicTensor.md'
     issues = '#6612'
-  [../]
+  []
 []

@@ -9,7 +9,7 @@
     capture_perf_graph = false
 
     requirement = "The system shall support the ability to specify the output object for postprocessor data from within the input file block defining the postprocessor."
-  [../]
+  []
   [./invalid_outputs]
     type = 'RunException'
     input = 'postprocessor_invalid.i'
@@ -17,26 +17,26 @@
     cli_args = 'Postprocessors/num_dofs/outputs=garbage'
 
     requirement = "The system shall report an error if an invalid output name is provided within the postprocessor input file block."
-  [../]
+  []
   [./console]
     type = 'CSVDiff'
     input = 'postprocessor_console.i'
     csvdiff = 'postprocessor_console_out.csv'
 
     requirement = "The system shall support limiting postprocessor output to the screen."
-  [../]
+  []
   [./show_hide]
     type = 'CSVDiff'
     input = 'show_hide.i'
     csvdiff = 'show_hide_out.csv'
 
     requirement = "The system shall support limiting postprocessor output to from within the input file syntax of an output object."
-  [../]
+  []
   [./test_hidden_shown]
     type = 'RunException'
     input = 'output_pps_hidden_shown_check.i'
     expect_err = 'Output\(s\) specified to be both shown and hidden: elem_56'
 
     requirement = "The system shall report an error if a postprocessor variable is listed for suppression and inclusion within an output object block in the input file."
-  [../]
+  []
 []

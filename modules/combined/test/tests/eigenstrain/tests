@@ -7,7 +7,7 @@
     issues = '#5194'
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The system shall correctly compute an eigenstrain that is a function of a variable using the ComputeVariableEigenstrain material."
-  [../]
+  []
   [./variable_finite]
     type = 'Exodiff'
     input = 'variable_finite.i'
@@ -16,7 +16,7 @@
     issues = '#5194'
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The system shall correctly compute an eigenstrain that is a function of a variable in a finite strain calculation using the ComputeVariableEigenstrain material."
-  [../]
+  []
   [./variable_cahnhilliard]
     type = 'Exodiff'
     input = 'variable_cahnhilliard.i'
@@ -25,7 +25,7 @@
     issues = '#6066'
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The system shall correctly compute, using the ComputeVariableEigenstrain material, the derivative of an eigenstrain that is a function of a variable with respect to that variable."
-  [../]
+  []
   [./composite]
     type = 'Exodiff'
     input = 'composite.i'
@@ -33,7 +33,7 @@
     issues = '#6205'
     design = 'CompositeEigenstrain.md'
     requirement = "The system shall correctly apply, using the CompositeEigenstrain material, an eigenstrain computed as the weighted sum of two base Eigenstrain tensors"
-  [../]
+  []
   [./inclusion]
     type = 'Exodiff'
     input = 'inclusion.i'
@@ -43,5 +43,5 @@
     issues = '#7452'
     design = 'ComputeVariableEigenstrain.md InclusionProperties.md'
     requirement = "The system shall correctly compute, using the InclusionProperties material in conjunction with the ComputeVariableEigenstrain material, the in-plane dilatational eigenstrains resulting from an ellipsoidal inclusion."
-  [../]
+  []
 []

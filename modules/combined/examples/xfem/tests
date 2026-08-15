@@ -8,7 +8,7 @@
                    'a crack is propagated along a prescribed line over time using XFEM.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#10210'
-  [../]
+  []
   [./xfem_thermomechanics_stress_growth]
     type = RunApp
     input = 'xfem_thermomechanics_stress_growth.i'
@@ -20,5 +20,5 @@
                    'with XFEM.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
     issues = '#10210'
-  [../]
+  []
 []

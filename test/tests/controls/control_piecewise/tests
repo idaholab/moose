@@ -6,5 +6,5 @@
     input = 'controlled_piecewise.i'
     exodiff = 'controlled_piecewise_out.e'
     requirement = "The system shall allow controlling piecewise functions and material properties."
-  [../]
+  []
 []

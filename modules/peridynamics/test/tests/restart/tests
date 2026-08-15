@@ -8,7 +8,7 @@
     map = false
     requirement = 'The system shall be able to save extra unconventional
                    mesh data for peridynamics models.'
-  [../]
+  []
 
   [./restart_run]
     type = 'Exodiff'
@@ -19,5 +19,5 @@
     skip = 'PD does not support restart yet'
     requirement = 'The system shall be able to restore extra unconventional
                    mesh data for peridynamics models.'
-  [../]
+  []
 []

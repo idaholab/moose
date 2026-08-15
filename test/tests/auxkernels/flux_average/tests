@@ -6,5 +6,5 @@
     input = 'flux_average.i'
     exodiff = 'flux_average_out.e'
     requirement = "The system shall include the ability to access the normal of a coupled variable within an AuxKernel object."
-  [../]
+  []
 []

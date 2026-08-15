@@ -6,5 +6,5 @@
     issues = '#6487'
     design = 'CHSplitChemicalPotential.md CHSplitConcentration.md'
     requirement = 'The system shall be able to solve a simple Cahn-Hilliard problem in the split form.'
-  [../]
+  []
 []

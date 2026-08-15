@@ -6,5 +6,5 @@
     requirement = "The system shall be able to compute and visualize element quality metrics"
     design = 'ElementQualityAux.md'
     issues = '#12131'
-  [../]
+  []
 []

@@ -8,5 +8,5 @@
     requirement = "The system shall correctly compute Jacobians when boundary conditions are disabled."
     design = 'syntax/Executioner/index.md'
     issues = '#12627'
-  [../]
+  []
 []

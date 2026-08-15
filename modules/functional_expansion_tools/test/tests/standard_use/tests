@@ -9,7 +9,7 @@
     min_threads = 2
     group = functional_expansion_tools
     requirement = 'The functional_expansion_tools module shall be capable of coupling interface data between a parent and sub app in 2D.'
-  [../]
+  []
 
 
   [./volume_coupling]
@@ -20,7 +20,7 @@
     custom_cmp = ignore_picard_its.cmp
     group = functional_expansion_tools
     requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a parent and sub app in 1D.'
-  [../]
+  []
 
   [./volume_coupling_custom_norm]
     type = Exodiff
@@ -30,7 +30,7 @@
     group = functional_expansion_tools
     prereq = 'volume_coupling'
     requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a parent and sub app in 1D using a custom norm.'
-  [../]
+  []
 
 
   [./print_coefficients]
@@ -38,7 +38,7 @@
     input = multiapp_print_coefficients.i
     group = functional_expansion
     requirement = "The functional_expansion_tools module shall be capable of printing coefficients when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
-  [../]
+  []
 
 
   [./neglect_invalid_enum]
@@ -46,7 +46,7 @@
     input = neglect_invalid_enum.i
     group = functional_expansion
     requirement = "The functional_expansion_tools module shall not generate an error when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
-  [../]
+  []
 
 
   [./incompatible_dimensions]
@@ -54,5 +54,5 @@
     input = multiapp_different_physical_boundaries.i
     group = functional_expansion_tools
     requirement = 'The functional_expansion_tools module shall not validate the physical dimensions between objects.'
-  [../]
+  []
 []

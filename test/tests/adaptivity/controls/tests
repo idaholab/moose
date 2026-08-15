@@ -7,5 +7,5 @@
     csvdiff = 'control_out.csv'
     requirement = "The system shall be able to turn on or off adaptivity using control logic."
     recover = false
-  [../]
+  []
 []

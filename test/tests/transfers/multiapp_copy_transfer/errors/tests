@@ -9,7 +9,7 @@
     expect_err = 'The meshes must be identical to utilize MultiAppDofCopyTransfer::transfer'
 
     requirement = 'The system shall report an error when the MultiAppCopyTransfer object is used on non-identical meshes.'
-  [../]
+  []
   [./different_variable_type]
     type = RunException
     input = parent.i
@@ -17,7 +17,7 @@
     expect_err = 'must be the same type \(order and family\)'
 
     requirement = 'The system shall report an error when the MultiAppCopyTransfer object is used on meshes with different variable types.'
-  [../]
+  []
   [./different_num_procs]
     type = RunException
     input = parent.i
@@ -28,5 +28,5 @@
     expect_err = 'The number of processors used by the origin and target problems must be the same'
 
     requirement = 'The system shall report an error, instead of segfaulting, when a MultiAppCopyTransfer object is used with a sub-app restricted to a different number of processors than its parent app.'
-  [../]
+  []
 []

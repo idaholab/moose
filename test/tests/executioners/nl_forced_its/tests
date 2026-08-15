@@ -9,7 +9,7 @@
     design = 'FEProblemSolve.md'
     # Solver manages to converge at 10 parallel processes
     max_parallel = 9
-  [../]
+  []
   [./2d_diffusion_test]
     type = 'RunApp'
     input = '2d_diffusion_test.i'
@@ -18,7 +18,7 @@
     issues = '#16474'
     design = 'FEProblemSolve.md'
     cli_args = "-snes_converged_reason"
-  [../]
+  []
   [./many_nl_forced_its]
     type = RunApp
     input = 'many_nl_forced_its.i'
@@ -26,7 +26,7 @@
     requirement = 'The system shall perform many non linear iterations before checking for non linear divergence'
     issues = '#19591'
     design = 'FEProblemSolve.md'
-  [../]
+  []
   [./many_nl_forced_its_ref_res]
     type = RunApp
     input = 'many_nl_forced_its_ref_res.i'
@@ -34,5 +34,5 @@
     requirement = 'The system shall perform many non linear iterations before checking for non linear divergence using reference residual'
     issues = '#19591'
     design = 'FEProblemSolve.md'
-  [../]
+  []
 []

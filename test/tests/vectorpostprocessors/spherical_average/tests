@@ -7,5 +7,5 @@
     issues = '#7810'
     design = 'SphericalAverage.md'
     requirement = 'The system shall support computing the spherical average of a variable as a function of radius throughout the mesh domain.'
-  [../]
+  []
 []

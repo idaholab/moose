@@ -8,5 +8,5 @@
                    'orientation.'
     design = 'PolycrystalElasticDrivingForceAction.md ComputePolycrystalElasticityTensor.md'
     issues = '#5335'
-  [../]
+  []
 []

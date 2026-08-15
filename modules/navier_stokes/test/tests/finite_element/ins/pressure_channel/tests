@@ -9,7 +9,7 @@
       exodiff = 'open_bc_out_pressure_BC.e'
       custom_cmp = open_bc_out_pressure_BC.cmp
       detail = 'using the kernel formulation,'
-    [../]
+    []
     [action]
       type = 'Exodiff'
       input = 'open_bc_pressure_BC_action.i'
@@ -17,13 +17,13 @@
       custom_cmp = open_bc_out_pressure_BC.cmp
       prereq = open_bc_pressure_BC/kernels
       detail = 'using the action formulation'
-    [../]
+    []
     [fieldSplit]
       type = 'Exodiff'
       input = 'open_bc_pressure_BC_fieldSplit.i'
       exodiff = 'open_bc_out_pressure_BC_fieldSplit.e'
       custom_cmp = open_bc_out_pressure_BC_fieldSplit.cmp
       detail = 'and using a field split preconditioning.'
-    [../]
+    []
   []
 []

@@ -7,7 +7,7 @@
     exodiff = 'global_strain_out.e'
     requirement = "The globalstrain system shall correctly compute the volume change
                    due to applied stress while still maintaining periodicity in 2D."
-  [../]
+  []
   [./uniaxial]
     type = 'Exodiff'
     input = 'global_strain_uniaxial.i'
@@ -16,7 +16,7 @@
     requirement = "The globalstrain system shall correctly compute the volume change
                    under uniaxial stress while still maintaining periodicity
                    in all the directions in 3D."
-  [../]
+  []
   [./hydrostat]
     type = 'Exodiff'
     input = 'global_strain_hydrostat.i'
@@ -24,7 +24,7 @@
     requirement = "The globalstrain system shall correctly compute the volume change
                    under hydrostratic stress while still maintaining periodicity
                    in all the directions in 3D."
-  [../]
+  []
   [./shear]
     type = 'Exodiff'
     input = 'global_strain_shear.i'
@@ -32,7 +32,7 @@
     requirement = "The globalstrain system shall correctly compute the shear
                    deformation due to applied stress while still maintaining
                    periodicity in all the directions in 3D."
-  [../]
+  []
   [./direction]
     type = 'Exodiff'
     input = 'global_strain_direction.i'
@@ -40,7 +40,7 @@
     requirement = "The globalstrain system shall correctly compute the deformation
                    behavior in 2D with applied displacement boundary condition in
                    one direction while still maintaining periodicity in the other."
-  [../]
+  []
   [./disp]
     type = 'Exodiff'
     input = 'global_strain_disp.i'
@@ -49,7 +49,7 @@
     requirement = "The globalstrain system shall correctly compute the deformation
                    behavior in 3D with applied displacement boundary condition in
                    one direction while still maintaining periodicity in the others."
-  [../]
+  []
   [./pressure_3D]
     type = 'Exodiff'
     input = 'global_strain_pressure_3D.i'
@@ -57,7 +57,7 @@
     requirement = "The globalstrain system shall correctly compute the deformation behavior
                    in 3D with pressure boundary condition in one direction while
                    still maintaining periodicity in the others."
-  [../]
+  []
   [./action_check]
     type = 'Exodiff'
     input = 'global_strain_action.i'
@@ -66,5 +66,5 @@
     requirement = "The 'GlobalStrainAction' should set all the objects reqiured
                    for the globalstrain system to correctly compute the deformation
                    behavior maintaining strain periodicity."
-  [../]
+  []
 []

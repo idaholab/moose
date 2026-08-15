@@ -8,7 +8,7 @@
                    plane stress problems by providing related material constants.'
     design = 'ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
-  [../]
+  []
   [./conventional_planestress_H1NOSPD]
     type = 'Exodiff'
     input = 'conventional_planestress_H1NOSPD.i'
@@ -20,7 +20,7 @@
     design = 'ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
     allow_test_objects = true
-  [../]
+  []
   [./weak_planestress_H1NOSPD]
     type = 'Exodiff'
     input = 'weak_planestress_H1NOSPD.i'
@@ -30,5 +30,5 @@
                    weak formulation based on Form I of the horizon stabilized correspondence model.'
     design = 'WeakPlaneStressNOSPD.md'
     issues = '#11561'
-  [../]
+  []
 []

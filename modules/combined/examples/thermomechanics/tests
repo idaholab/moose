@@ -8,5 +8,5 @@
                    'thermal expansion in a heated circular domain.'
     design = 'ComputeThermalExpansionEigenstrain.md CylindricalRankTwoAux.md'
     issues = '#6038'
-  [../]
+  []
 []

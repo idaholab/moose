@@ -7,5 +7,5 @@
     issues = '#7091'
     design = 'AccumulateAux.md'
     requirement = 'The system shall provide an aux kernel that accumulates the values of a given variable.'
-  [../]
+  []
 []

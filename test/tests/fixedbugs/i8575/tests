@@ -5,5 +5,5 @@
     type = 'RunApp'
     input = 'test.i'
     requirement = "The Material objects provided on all subdomains shall satisfy requests for objects on all subdomains."
-  [../]
+  []
 []

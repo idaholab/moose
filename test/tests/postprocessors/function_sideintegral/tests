@@ -8,5 +8,5 @@
     csvdiff = 'function_sideintegral.csv'
 
     requirement = 'The system shall compute the integral of a function over a boundary.'
-  [../]
+  []
 []

@@ -7,7 +7,7 @@
     'functions and shape function gradients consistent with the maximum number of'
     'shape functions and quadrature points in the simulation.'
     design = 'PhiZero.md'
-  [../]
+  []
   [./phi_zero_quadratic]
     type = 'RunApp'
     input = 'simple_transient_diffusion.i'
@@ -19,5 +19,5 @@
     'size of zero objects when using second-order elements and second order-variables.'
     design = 'PhiZero.md'
     prereq = 'phi_zero_linear'
-  [../]
+  []
 []

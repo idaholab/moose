@@ -8,7 +8,7 @@
     check_files = 'tecplot_out_0000.dat tecplot_out_0001.dat'
 
     requirement = "The system shall support writing ASCII Tecplot output."
-  [../]
+  []
 
   [./test_append]
     type = 'CheckFiles'
@@ -16,7 +16,7 @@
     check_files = 'tecplot_append_out.dat'
 
     requirement = "The system shall support appending Tecplot output files."
-  [../]
+  []
 
   [./test_binary]
     # Tests the for existence of binary tecplot files.  This requires libmesh
@@ -27,5 +27,5 @@
     capabilities = 'tecplot'
 
     requirement = "The system shall optionally support writing binary Tecplot files."
-  [../]
+  []
 []

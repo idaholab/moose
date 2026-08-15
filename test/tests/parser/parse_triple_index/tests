@@ -6,5 +6,5 @@
     type = 'RunApp'
     input = 'parse_triple_index.i'
     requirement = 'The system shall support reading in jagged triple-indexed arrays from the input file using two delimiters for columns and rows respectively.'
-  [../]
+  []
 []

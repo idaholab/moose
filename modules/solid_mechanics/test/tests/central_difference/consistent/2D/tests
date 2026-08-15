@@ -9,7 +9,7 @@
     csvdiff = '2d_consistent_implicit_out.csv'
     requirement = "The NewmarkBeta timeintegrator shall correctly calculate "
                   "the response of a 2D mesh. "
-  [../]
+  []
 
   # 2D explicit analysis with Central Difference time integration
   [./explicit]
@@ -19,5 +19,5 @@
     requirement = "The CentralDifference timeintegrator shall correctly calculate "
                   "the response of a 2D mesh when the the consistent mass matrix "
                   "option is used."
-  [../]
+  []
 []

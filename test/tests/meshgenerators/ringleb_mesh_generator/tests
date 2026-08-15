@@ -10,5 +10,5 @@
     requirement = 'The system shall support the ability to create a mesh for a "Ringleb" geometry.'
     design = 'meshgenerators/RinglebMeshGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

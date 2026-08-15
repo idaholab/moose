@@ -10,5 +10,5 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce eliminating initial
                    overclosure between the primary and secondary surfaces."
-  [../]
+  []
 []

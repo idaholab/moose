@@ -10,13 +10,13 @@
       input = 'ansys_vm2.i'
       csvdiff = 'ansys_vm2_out.csv'
       detail = "subjected to simply supported BCs and distributed loading."
-    [../]
+    []
 
     [./ansys_vm12]
       type = 'CSVDiff'
       input = 'ansys_vm12.i'
       csvdiff = 'ansys_vm12_out.csv'
       detail = "subjected to combined bending and torsion loading."
-    [../]
+    []
   []
 []

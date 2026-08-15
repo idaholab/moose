@@ -6,5 +6,5 @@
     input = parent.i
     exodiff = 'parent_out.e parent_out_sub0.e'
     requirement = "The Control system shall be capable of activating or deactivating MultiApp objects with time."
-  [../]
+  []
 []

@@ -8,30 +8,30 @@
       input = 's1_testmodel.i'
       check_input = True
       detail = 'a simplified free energy and a test set of initial conditions,'
-    [../]
+    []
     [./s2_fasttest]
       type = RunApp
       input = 's2_fasttest.i'
       check_input = True
       detail = 'a simplified free energy and a fast-running test set of initial conditions,'
-    [../]
+    []
     [./s3_decomp]
       type = RunApp
       input = 's3_decomp.i'
       check_input = True
       detail = 'simplified conditions and a random initial condition,'
-    [../]
+    []
     [./s4_mobility]
       type = RunApp
       input = 's4_mobility.i'
       check_input = True
       detail = 'a realistic free energy and mobility, and'
-    [../]
+    []
     [./s5_energycurve]
       type = RunApp
       input = 's5_energycurve.i'
       check_input = True
       detail = 'a realistic free energy and mobility while also measuring the total free energy and tracking decomposed features.'
-    [../]
-  [../]
+    []
+  []
 []

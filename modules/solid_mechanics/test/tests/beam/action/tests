@@ -8,7 +8,7 @@
 
     requirement = "The LineElementAction class shall correctly create the objects"
                   " required for a mechanics simulation using beam or truss elements."
-  [../]
+  []
   [./2_block_common_action]
     type = 'Exodiff'
     input = '2_block_common.i'
@@ -17,7 +17,7 @@
 
     requirement = "The LineElementAction class shall correctly set the common parameters"
                   " in the action subblocks."
-  [../]
+  []
   [./beam_action_test1]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -25,7 +25,7 @@
 
     requirement = "The LineElementAction class shall produce an error when the displacement"
                   " variables are not provided by the user."
-  [../]
+  []
   [./beam_action_test2]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -36,7 +36,7 @@
     requirement = "The LineElementAction class shall produce an error if the user provided"
                   " inputs for `strain_type`, `rotation_type` and `use_displaced_mesh`"
                   " parameters are not compatible."
-  [../]
+  []
   [./beam_action_test3]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -46,7 +46,7 @@
     requirement = "The LineElementAction class shall produce an error if the number"
                   " of variables listed in the `save_in` parameter differs from"
                   " the number of displacement variables."
-  [../]
+  []
   [./beam_action_test4]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -56,7 +56,7 @@
     requirement = "The LineElementAction class shall produce an error if the number of"
                   " variables listed in the `diag_save_in` parameter differs from the"
                   " number of displacement variables."
-  [../]
+  []
   [./beam_action_test5]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -65,7 +65,7 @@
 
     requirement = "The LineElementAction class shall produce an error if the names for the"
                   " rotational degrees of freedom are not provided by the user."
-  [../]
+  []
   [./beam_action_test6]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -75,7 +75,7 @@
     requirement = "The LineElementAction class shall produce an error if the number of"
                   " rotational variables provided as input differs from the"
                   " number of displacement variables."
-  [../]
+  []
   [./beam_action_test7]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -85,7 +85,7 @@
     requirement = "The LineElementAction class shall produce an error if the moment of"
                   " inertia, area and orientation of the beam are not provided"
                   " as input."
-  [../]
+  []
   [./beam_action_test8]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -95,7 +95,7 @@
     requirement = "The LineElementAction class shall produce an error if translational and"
                   " rotational velocities and accelerations are not provided as"
                   " input for dynamic simulations using beam elements."
-  [../]
+  []
   [./beam_action_test9]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -105,7 +105,7 @@
     requirement = "The LineElementAction class shall produce an error if the number of"
                   " translational and rotational velocities and accelerations"
                   " differs from the number of displacement variables."
-  [../]
+  []
   [./beam_action_test10]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -115,7 +115,7 @@
     requirement = "The LineElementAction class shall produce an error if Newmark time"
                   " integration parameters (`beta` and `gamma`) are not provided"
                   " as input for dynamic simulations using beam elements."
-  [../]
+  []
   [./beam_action_test11]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -125,7 +125,7 @@
     requirement = "The LineElementAction class shall produce an error if density is not"
                   " provided as input for dynamic beam simulations using beams elements with consistent"
                   " mass/inertia matrix."
-  [../]
+  []
   [./beam_action_test12]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -135,7 +135,7 @@
     requirement = "The LineElementAction class shall produce an error if nodal mass is not"
                   " provided as input for dynamic beam simulations using beam elements with nodal"
                   " mass matrix."
-  [../]
+  []
   [./beam_action_test13]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -145,7 +145,7 @@
     requirement = "The LineElementAction class shall produce an error if nodal inertia"
                   " is not provided as input for dynamic beam simulations using beam elements with nodal"
                   " inertia matrix."
-  [../]
+  []
   [./beam_action_test14]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -154,7 +154,7 @@
 
     requirement = "The LineElementAction class shall produce an error if multiple subblocks"
                   " specify properties for the same mesh block."
-  [../]
+  []
   [./beam_action_test15]
     type = 'RunException'
     input = 'beam_action_chk.i'
@@ -163,7 +163,7 @@
 
     requirement = "The LineElementAction class shall produce an error if an action subblock"
                   " is mesh block restricted while another is not."
-  [../]
+  []
   [./beam_action_test16]
     type = 'RunException'
     input = '2_block_common.i'
@@ -173,5 +173,5 @@
     requirement = "The LineElementAction class shall produce an error if `dynamic_nodal_translational_inertia`"
                   " is set to true in the common action block but the subblocks do"
                   " not have the parameters required for a dynamic beam simulation using beam elements."
-  [../]
+  []
 []

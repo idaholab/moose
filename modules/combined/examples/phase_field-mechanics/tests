@@ -9,7 +9,7 @@
                    'in which an oversized precipitate deforms under uniaxial compressive stress.'
     design = 'SplitCHParsed.md ElasticEnergyMaterial.md ComputeVariableEigenstrain.md'
     issues = '#4502'
-  [../]
+  []
   [./EBSD_reconstruction_grain_growth_mech]
     type = RunApp
     input = 'EBSD_reconstruction_grain_growth_mech.i'
@@ -21,7 +21,7 @@
                    'grain orientations.'
     design = 'EBSDReader.md ComputePolycrystalElasticityTensor.md'
     issues = '#5519'
-  [../]
+  []
   [./Nonconserved]
     type = RunApp
     input = 'Nonconserved.i'
@@ -31,7 +31,7 @@
                    'in which an oversized phase inclusion grows under uniaxial tensile stress.'
     design = 'AllenCahn.md TwoPhaseStressMaterial.md ElasticEnergyMaterial.md'
     issues = '#4502'
-  [../]
+  []
   [./Pattern1]
     type = RunApp
     input = 'Pattern1.i'
@@ -47,7 +47,7 @@
                    'expansion and contraction.'
     design = 'DerivativeMultiPhaseMaterial.md MultiPhaseStressMaterial.md'
     issues = '#4886'
-  [../]
+  []
   [./grain_texture]
     type = RunApp
     input = 'grain_texture.i'
@@ -58,7 +58,7 @@
                    'texture (Euler angles) of each tracked grain during polycrystalline grain '
                    'growth.'
     design = 'GrainTextureVectorPostprocessor.md'
-  [../]
+  []
   [./hex_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'hex_grain_growth_2D_eldrforce.i'
@@ -70,7 +70,7 @@
                    'microstructure under applied compression.'
     design = 'PolycrystalElasticDrivingForceAction.md PolycrystalHex.md'
     issues = '#5335'
-  [../]
+  []
   [./poly_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'poly_grain_growth_2D_eldrforce.i'
@@ -82,5 +82,5 @@
                    'polycrystal microstructure under applied compression.'
     design = 'PolycrystalElasticDrivingForceAction.md PolycrystalVoronoi.md'
     issues = '#5335'
-  [../]
+  []
 []

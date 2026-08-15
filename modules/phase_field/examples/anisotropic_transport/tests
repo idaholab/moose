@@ -6,5 +6,5 @@
     issues = '#5841'
     design = 'MatAnisoDiffusion.md'
     requirement = 'The system shall syntax check an example of anisotropic mass transport using a material-dependent anisotropic mobility tensor.'
-  [../]
+  []
 []

@@ -8,5 +8,5 @@
     recover = false #see #2295
 
     requirement = "The system shall support offseting the spatial position of a domain during output."
-  [../]
+  []
 []

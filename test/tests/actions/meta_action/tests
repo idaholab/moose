@@ -6,5 +6,5 @@
     input = 'meta_action_test.i'
     exodiff = 'out.e'
     requirement = "The Action system shall allow `Action` objects to create other `Action` objects."
-  [../]
+  []
 []

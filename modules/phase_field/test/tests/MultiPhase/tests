@@ -7,7 +7,7 @@
     requirement = 'The system shall provide a material to combine two free energies materials into a Wheeler-Boettinger-McFadden two phase free energy'
     design = 'DerivativeTwoPhaseMaterial.md'
     issues = '#4035'
-  [../]
+  []
   [./derivativetwophasematerial_jacobian]
     type = 'PetscJacobianTester'
     input = 'derivativetwophasematerial_jacobian.i'
@@ -17,7 +17,7 @@
     requirement = 'The system shall provide exact third derivatives of a Wheeler-Boettinger-McFadden two phase free energy with respect to the order parameter and the phase free energy arguments'
     design = 'DerivativeTwoPhaseMaterial.md'
     issues = '#34438'
-  [../]
+  []
   [./orderparameterfunctionmaterial]
     type = 'Exodiff'
     input = 'orderparameterfunctionmaterial.i'
@@ -25,7 +25,7 @@
     design = 'SwitchingFunctionMaterial.md'
     requirement = 'The system shall provide a materials to generate barrier and switching function in a Wheeler-Boettinger-McFadden multiphase model'
     issues = '#4355'
-  [../]
+  []
   [./thirdphasesuppressionmaterial]
     type = 'Exodiff'
     input = 'thirdphasesuppressionmaterial.i'
@@ -33,7 +33,7 @@
     design = 'ThirdPhaseSuppressionMaterial.md'
     requirement = 'The system shall provide a free energy penalty class that suppresses the formation of a third phase in grain boundaries'
     issues = '#6279'
-  [../]
+  []
   [./multibarrierfunction]
     type = 'Exodiff'
     input = 'multibarrierfunction.i'
@@ -41,7 +41,7 @@
     design = 'MultiBarrierFunctionMaterial.md'
     requirement = 'The system shall provide a material for computing barrier values in multiphase systems'
     issues = '#4545'
-  [../]
+  []
   [./crosstermbarrierfunction]
     type = 'Exodiff'
     input = 'crosstermbarrierfunction.i'
@@ -49,7 +49,7 @@
     design = 'CrossTermBarrierFunctionMaterial.md'
     requirement = 'The system shall provide a material for computing independent barrier values for each phase pair in a multiphase system'
     issues = '#5192'
-  [../]
+  []
   [./asymmetriccrosstermbarrierfunction]
     type = 'Exodiff'
     input = 'asymmetriccrosstermbarrierfunction.i'
@@ -57,7 +57,7 @@
     design = 'AsymmetricCrossTermBarrierFunctionMaterial.md'
     requirement = 'The system shall provide a material for computing independent barrier values for each phase pair in a multiphase system with asymmetric interface profiles'
     issues = '#6584'
-  [../]
+  []
 
   [./lagrangemult]
     type = 'Exodiff'
@@ -67,7 +67,7 @@
     requirement = 'The system shall provide a lagrange multiplier based constraint for keeping the sum of all phase order parameters equal to one'
     design = 'SwitchingFunctionConstraintLagrange.md'
     issues = '#4545'
-  [../]
+  []
   [./penalty]
     type = 'Exodiff'
     input = 'penalty.i'
@@ -75,7 +75,7 @@
     requirement = 'The system shall provide a penalty based constraint for keeping the sum of all phase order parameters equal to one'
     design = 'SwitchingFunctionConstraintLagrange.md'
     issues = '#4723'
-  [../]
+  []
   [./crosstermfreeenergy]
     type = 'Exodiff'
     input = 'crosstermfreeenergy.i'
@@ -83,7 +83,7 @@
     requirement = 'The system shall provide an AuxKernel to compute the free energy contribution form pairwise phase barrier functions'
     design = 'CrossTermGradientFreeEnergy.md'
     issues = '#4710'
-  [../]
+  []
   [./acmultiinterface]
     type = 'Exodiff'
     input = 'acmultiinterface.i'
@@ -91,7 +91,7 @@
     requirement = 'The system shall provide an Allen-Cahn gradient energy kernel with cross term contributions'
     design = 'ACMultiInterface.md'
     issues = '#4545'
-  [../]
+  []
   [./acmultiinterface_aux]
     type = 'Exodiff'
     input = 'acmultiinterface_aux.i'
@@ -99,7 +99,7 @@
     requirement = 'The system shall provide an Allen-Cahn gradient energy kernel with cross term contributions, and some order parameters may be aux variables'
     design = 'ACMultiInterface.md'
     issues = '#4545'
-  [../]
+  []
   [./switchingfunction3phasematerial]
     type = 'Exodiff'
     input = 'switchingfunction3phasematerial.i'
@@ -107,7 +107,7 @@
     requirement = 'The system shall provide switching functions for three-phase KKS phase-field model'
     design = 'SwitchingFunction3PhaseMaterial.md'
     issues = '#6857'
-  [../]
+  []
   [./switchingfunctionmultiphasematerial]
     type = 'Exodiff'
     input = 'switchingfunctionmultiphasematerial.i'
@@ -115,7 +115,7 @@
     requirement = 'The system shall provide switching functions for multi-phase KKS phase-field model'
     design = 'SwitchingFunctionMultiPhaseMaterial.md'
     issues = '#8113'
-  [../]
+  []
   [./mixedswitchingfunctionmaterial]
     type = 'Exodiff'
     input = 'mixedswitchingfunctionmaterial.i'
@@ -123,7 +123,7 @@
     requirement = 'The system shall provide mixed switching functions with order 234 and 246 and an adjustable weight'
     design = 'MixedSwitchingFunctionMaterial.md'
     issues = '#9042'
-[../]
+[]
   [./barrierfunctionmaterial]
     type = 'Exodiff'
     input = 'barrierfunctionmaterial.i'
@@ -131,5 +131,5 @@
     requirement = 'The system shall provide order 246 polynomials in the two phase barrier function'
     design = 'BarrierFunctionMaterial.md'
     issues = '#9301'
-  [../]
+  []
 []

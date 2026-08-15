@@ -8,7 +8,7 @@
     check_input = True
     design = 'GrainGrowthAction.md GrainTracker.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example that uses the GrainGrowth action and tracks grains.'
-  [../]
+  []
   [./grain_growth_2D_random]
     type = RunApp
     input = 'grain_growth_2D_random.i'
@@ -17,7 +17,7 @@
     check_input = True
     design = 'GrainGrowthAction.md PolycrystalRandomIC.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example that uses the GrainGrowth action with a randomly seeded polycrystal initial condition.'
-  [../]
+  []
   [./grain_growth_2D_voronoi]
     type = RunApp
     input = 'grain_growth_2D_voronoi.i'
@@ -26,7 +26,7 @@
     check_input = True
     design = 'GBEvolution.md PolycrystalVoronoi.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example built explicitly from a Voronoi tessellation polycrystal initial condition.'
-  [../]
+  []
   [./grain_growth_2D_voronoi_newadapt]
     type = RunApp
     input = 'grain_growth_2D_voronoi_newadapt.i'
@@ -36,7 +36,7 @@
     check_input = True
     design = 'GBEvolution.md PolycrystalVoronoi.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example built from a Voronoi tessellation polycrystal initial condition with mesh adaptivity.'
-  [../]
+  []
   [./grain_growth_3D]
     type = RunApp
     input = 'grain_growth_3D.i'
@@ -48,7 +48,7 @@
     cli_args = 'Mesh/uniform_refine=0'
     design = 'GrainGrowthAction.md GrainTracker.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 3D grain growth example that uses the GrainGrowth action and tracks grains.'
-  [../]
+  []
   [./grain_growth_3D_large]
     type = RunApp
     input = '3D_6000_gr.i'
@@ -60,5 +60,5 @@
     issues = '#11804'
     design = 'GBEvolution.md PolycrystalVoronoi.md GrainTracker.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a large-scale 3D grain growth example with many grains, built explicitly from a Voronoi tessellation polycrystal initial condition.'
-  [../]
+  []
 []

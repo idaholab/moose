@@ -10,5 +10,5 @@
     issues = '#9860'
     design = 'CSVReaderVectorPostprocessor.md'
     requirement = 'The system shall issue an error if the CSVReaderVectorPostprocessor is used in a UserObjectTransfer because the former does not have any notion of "spatial" information.'
-  [../]
+  []
 []

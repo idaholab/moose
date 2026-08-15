@@ -8,5 +8,5 @@
     exodiff = 'random_partitioner_out.e'
     min_parallel = 4
     max_parallel = 4
-  [../]
+  []
 []

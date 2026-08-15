@@ -7,7 +7,7 @@
     issues = '#9817'
     design = 'PrimaryConvection.md'
     requirement = 'The system shall compute a correct Jacobian for the PrimaryConvection kernel.'
-  [../]
+  []
   [./coupled_convreact]
     type = PetscJacobianTester
     input = coupled_convreact.i
@@ -16,7 +16,7 @@
     issues = '#9817'
     design = 'CoupledConvectionReactionSub.md'
     requirement = 'The system shall compute a correct Jacobian for the CoupledConvectionReactionSub kernel.'
-  [../]
+  []
   [./coupled_convreact2]
     type = PetscJacobianTester
     input = coupled_convreact2.i
@@ -25,7 +25,7 @@
     issues = '#9817 #10567'
     design = 'CoupledConvectionReactionSub.md'
     requirement = 'The system shall compute a correct Jacobian for the CoupledConvectionReactionSub kernel when activity coefficients not equal to unity are used.'
-  [../]
+  []
   [./coupled_diffreact]
     type = PetscJacobianTester
     input = coupled_diffreact.i
@@ -34,7 +34,7 @@
     issues = '#9817'
     design = 'CoupledDiffusionReactionSub.md'
     requirement = 'The system shall compute a correct Jacobian for the CoupledDiffusionReactionSub kernel.'
-  [../]
+  []
   [./coupled_diffreact2]
     type = PetscJacobianTester
     input = coupled_diffreact2.i
@@ -43,7 +43,7 @@
     issues = '#9817 #10567'
     design = 'CoupledDiffusionReactionSub.md'
     requirement = 'The system shall compute a correct Jacobian for the CoupledDiffusionReactionSub kernel when activity coefficients not equal to unity are used.'
-  [../]
+  []
   [./coupled_equilsub]
     type = PetscJacobianTester
     input = coupled_equilsub.i
@@ -52,7 +52,7 @@
     issues = '#9817'
     design = 'CoupledBEEquilibriumSub.md'
     requirement = 'The system shall compute a correct Jacobian for the CoupledBEEquilibriumSub kernel.'
-  [../]
+  []
   [./coupled_equilsub2]
     type = PetscJacobianTester
     input = coupled_equilsub2.i
@@ -61,7 +61,7 @@
     issues = '#9817 #10567'
     design = 'CoupledBEEquilibriumSub.md'
     requirement = 'The system shall compute a correct Jacobian for the CoupledBEEquilibriumSub kernel when activity coefficients not equal to unity are used.'
-  [../]
+  []
   [./2species]
     type = PetscJacobianTester
     input = 2species.i
@@ -70,7 +70,7 @@
     issues = '#9817'
     design = 'PrimaryConvection.md PrimaryDiffusion.md DarcyFluxPressure.md'
     requirement = 'The system shall compute a correct Jacobian for a two primary species aqueous transport simulation with no secondary species present.'
-  [../]
+  []
   [./2species_equilibrium]
     type = PetscJacobianTester
     input = 2species_equilibrium.i
@@ -79,7 +79,7 @@
     issues = '#9817'
     design = 'ReactionNetwork/AqueousEquilibriumReactions/index.md'
     requirement = 'The system shall compute a correct Jacobian for a two primary species aqueous transport simulation with equilibrium secondary species present.'
-  [../]
+  []
   [./2species_equilibrium_with_density]
     type = PetscJacobianTester
     input = 2species_equilibrium_with_density.i
@@ -88,5 +88,5 @@
     issues = '#9817 #9816'
     design = 'ReactionNetwork/AqueousEquilibriumReactions/index.md DarcyFluxPressure.md'
     requirement = 'The system shall compute a correct Jacobian for a two primary species aqueous transport simulation with equilibrium secondary species present and density included in the Darcy flux calculation.'
-  [../]
+  []
 []

@@ -6,5 +6,5 @@
     type = 'RunApp'
     input = 'parameter_map.i'
     requirement = 'The system shall build a bijective map between variable numbers and their couple variable indices.'
-  [../]
+  []
 []

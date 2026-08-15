@@ -8,5 +8,5 @@
     csvdiff = 'out.csv'
 
     requirement = 'The system shall support evaluating Postprocessors (UserObjects) in the following order: Elemental, Side, Internal Side, Nodal, and General.'
-  [../]
+  []
 []

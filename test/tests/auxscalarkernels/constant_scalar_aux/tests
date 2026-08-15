@@ -8,5 +8,5 @@
     use_old_floor = true
     abs_zero = 1e-9
     requirement = "The `ConstantScalarAux` object shall set the value of an scalar auxiliary variable to a constant value."
-  [../]
+  []
 []

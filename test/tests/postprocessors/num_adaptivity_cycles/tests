@@ -7,7 +7,7 @@
 
     issues = '#7646'
     requirement = 'The system shall be capable of running multiple adaptivity cycles in a single solve step.'
-  [../]
+  []
   [./num_adaptivity_cycles_toggle_adaptivity]
     type = 'CSVDiff'
     input = 'num_adaptivity_cycles_toggle_adaptivity.i'
@@ -15,7 +15,7 @@
 
     issues = '#9746'
     requirement = 'They system shall be capable of toggling adaptivity at the start of the simulation.'
-  [../]
+  []
   [./num_adaptivity_cycles_toggle_adaptivity_wait]
     type = 'CSVDiff'
     input = 'num_adaptivity_cycles_toggle_adaptivity_wait.i'
@@ -23,5 +23,5 @@
 
     issues = '#9746'
     requirement = 'They system shall be capable of toggling adaptivity during the simulation.'
-  [../]
+  []
 []

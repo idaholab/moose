@@ -7,7 +7,7 @@
     expect_out = '9\s*Nonlinear'
     absent_out = '13\s*Nonlinear'
     requirement = "The Damper system shall be capable of reducing the change in non linear residual based on an allowable increment on elements using an absolute increment."
-  [../]
+  []
   [./testverifydamping_percentage]
     type = 'RunApp'
     input = 'max_increment_damper_test.i'
@@ -15,7 +15,7 @@
     expect_out = '9\s*Nonlinear'
     absent_out = '13\s*Nonlinear'
     requirement = "The Damper system shall be capable of reducing the change in non linear residual based on an allowable increment on elements using an fractional increment."
-  [../]
+  []
   [bad_key]
     type = RunException
     input = max_increment_damper_test.i

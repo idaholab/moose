@@ -9,5 +9,5 @@
                   " to move as a linear combination of the primary nodes."
     design = "LinearNodalConstraint.md"
     issues = "#5783"
-  [../]
+  []
 []

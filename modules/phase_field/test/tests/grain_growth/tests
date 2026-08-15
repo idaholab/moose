@@ -7,7 +7,7 @@
     requirement = 'The system shall provide a polycrystalline material model with grain growth'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
   [./temperature_gradient]
     type = 'Exodiff'
@@ -19,7 +19,7 @@
     # needed in parallel
     abs_zero = 1e-9
     rel_err = 3e-5
-  [../]
+  []
 
   [./thumb]
     type = 'Exodiff'
@@ -29,7 +29,7 @@
     requirement = 'A thumb shaped grain IC shall be provided for direct comparison to grain boundary mobility experiments'
     design = 'ThumbIC.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
   [./hex]
     type = 'Exodiff'
@@ -38,7 +38,7 @@
     requirement = 'A hexagonal grain structure IC shall be provided'
     design = 'PolycrystalHex.md'
     issues = '#8810'
-  [../]
+  []
 
   [./hex_kdtree]
     type = 'Exodiff'
@@ -48,7 +48,7 @@
     requirement = 'A hexagonal grain structure IC shall be provided using KDTree'
     design = 'PolycrystalHex.md'
     issues = '#8810'
-  [../]
+  []
 
   [./boundingbox]
     type = 'Exodiff'
@@ -57,7 +57,7 @@
     requirement = 'A bicrystal grain IC shall be provided to set up a rectangular grain in a matrix'
     design = 'BicrystalBoundingBoxICAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
   [./evolution]
     type = 'Exodiff'
@@ -66,7 +66,7 @@
     requirement = 'The grain boundary evolution model shall be able to compute the grain boundary mobility based on an activation energy'
     design = 'GBEvolution.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
   [./constant_mobility]
     type = 'Exodiff'
@@ -75,7 +75,7 @@
     requirement = 'The grain boundary evolution model shall permit specifying a constant mobility'
     design = 'GBEvolution.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
   [./off-diagonal]
     type = 'Exodiff'
@@ -85,7 +85,7 @@
     requirement = 'The grain boundary evolution model shall provide off-diagonal Jacobians'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
   [./explicit]
     type = 'Exodiff'
@@ -94,7 +94,7 @@
     requirement = 'The grain growth model shall work with explicit time integration'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
   [./voronoi]
     type = 'Exodiff'
@@ -103,7 +103,7 @@
     requirement = 'A voronoi tesselation grain structure IC shall be provided'
     design = 'PolycrystalVoronoi.md'
     issues = '#8810'
-  [../]
+  []
 
   [./faux_voronoi]
     type = 'Exodiff'
@@ -115,7 +115,7 @@
     design = 'FauxPolycrystalVoronoi.md'
     cli_args ='UserObjects/voronoi/type=FauxPolycrystalVoronoi'
     issues = '#14697'
-  [../]
+  []
 
   [./mesh_adaptivity]
     type = 'Exodiff'
@@ -129,7 +129,7 @@
     # We will receive a mooseWarning when using linear partitioner.
     # Linear partitioner produces machine independent results
     allow_warnings = true
-  [../]
+  []
 
   [./mesh_adaptivity_voronoi]
     type = 'Exodiff'
@@ -145,7 +145,7 @@
     # We will receive a mooseWarning when using linear partitioner.
     # Linear partitioner produces machine independent results
     allow_warnings = true
-  [../]
+  []
 
   [./mesh_adaptivity_ghost]
     type = 'Exodiff'
@@ -162,7 +162,7 @@
     requirement = 'The system shall be able to apply mesh adaptivity and output evaluable and ghosting elements using distributed generator'
     design = 'DistributedRectilinearMeshGenerator.md'
     issues = '#15348  #16143'
-  [../]
+  []
 
   [./voronoi_columnar_3D]
     type = 'Exodiff'
@@ -171,7 +171,7 @@
     requirement = 'A columnar grain IC shall be provided based on a 2D voronoi tesselation'
     design = 'PolycrystalVoronoi.md'
     issues = '#8810'
-  [../]
+  []
 
   [./particle]
     type = 'Exodiff'
@@ -181,5 +181,5 @@
     requirement = 'The grain boundary evolution model shall provide coupling to conserved order parameters'
     design = 'ACGBPoly.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 []

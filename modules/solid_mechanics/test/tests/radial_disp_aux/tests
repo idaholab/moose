@@ -6,14 +6,14 @@
     exodiff = 'cylinder_2d_axisymmetric_out.e'
     design = 'RadialDisplacementCylinderAux.md'
     requirement = 'The system shall compute the radial component of displacement for axisymmetric cylindrical models'
-  [../]
+  []
   [./cylinder_2d_cartesian]
     type = 'Exodiff'
     input = 'cylinder_2d_cartesian.i'
     exodiff = 'cylinder_2d_cartesian_out.e'
     design = 'RadialDisplacementCylinderAux.md'
     requirement = 'The system shall compute the radial component of displacement for 2D Cartesian cylindrical models'
-  [../]
+  []
   [./cylinder_3d_cartesian]
     type = 'Exodiff'
     input = 'cylinder_3d_cartesian.i'
@@ -21,21 +21,21 @@
     design = 'RadialDisplacementCylinderAux.md'
     requirement = 'The system shall compute the radial component of displacement for 3D Cartesian cylindrical models'
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./sphere_1d_spherical]
     type = 'Exodiff'
     input = 'sphere_1d_spherical.i'
     exodiff = 'sphere_1d_spherical_out.e'
     design = 'RadialDisplacementSphereAux.md'
     requirement = 'The system shall compute the radial component of displacement for 1D spherical models'
-  [../]
+  []
   [./sphere_2d_axisymmetric]
     type = 'Exodiff'
     input = 'sphere_2d_axisymmetric.i'
     exodiff = 'sphere_2d_axisymmetric_out.e'
     design = 'RadialDisplacementSphereAux.md'
     requirement = 'The system shall compute the radial component of displacement for axisymmetric spherical models'
-  [../]
+  []
   [./sphere_3d_cartesian]
     type = 'Exodiff'
     input = 'sphere_3d_cartesian.i'
@@ -43,7 +43,7 @@
     design = 'RadialDisplacementSphereAux.md'
     requirement = 'The system shall compute the radial component of displacement for 3D Cartesian spherical models'
     capabilities = 'method!=dbg'
-  [../]
+  []
 
   [./sphere_1d_spherical_except_1]
     type = 'RunException'
@@ -53,7 +53,7 @@
     prereq = sphere_1d_spherical
     design = 'RadialDisplacementSphereAux.md'
     requirement = 'The system shall report an error if "origin" is supplied to RadialDisplacementSphereAux when the coordinate system is not Cartesian or axisymmetric'
-  [../]
+  []
 
   [./cylinder_2d_axisymmetric_except_1]
     type = 'RunException'
@@ -63,7 +63,7 @@
     prereq = cylinder_2d_axisymmetric
     design = 'RadialDisplacementCylinderAux.md'
     requirement = 'The system shall report an error if "axis_vector" is supplied to RadialDisplacementCylinderAux and the model is not 3D Cartesian'
-  [../]
+  []
 
   [./cylinder_3d_cartesian_except_1]
     type = 'RunException'
@@ -73,5 +73,5 @@
     prereq = cylinder_3d_cartesian
     design = 'RadialDisplacementCylinderAux.md'
     requirement = 'The system shall report an error if "axis_vector" has length of zero'
-  [../]
+  []
 []

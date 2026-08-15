@@ -7,5 +7,5 @@
     csvdiff = '3D_struc_acoustic_out.csv'
     abs_zero = 1e-08
     requirement = 'The system shall reproduce fluid pressures and structural stress that match accurately with values provided.'
-  [../]
+  []
 []

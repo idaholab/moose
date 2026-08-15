@@ -10,14 +10,14 @@
       detail = 'using MultiAppUserObjectTransfer.'
       # Beam moves and line value sampler ends up getting values outside of sampled points
       allow_warnings = true
-    [../]
+    []
     [./error_1]
       type = RunException
       input = 'subapp1_uo_transfer.i'
       cli_args = "VectorPostprocessors/axial_str/end_point='0.5 0 0' Outputs/csv=false Outputs/exodus=false"
       expect_err = 'LineValueSampler: `start_point` and `end_point` must be different.'
       detail = 'and LineValueSampler shall report an error if the line segment provided as input has zero length.'
-    [../]
+    []
     [./error_2]
       type = RunException
       input = 'parent_uo_transfer.i'
@@ -27,7 +27,7 @@
       detail = 'and LineValueSampler shall report an error if multiple variables'
                     ' are provided as input to the sampler when it is used with'
                     ' MultiAppUserObjectTransfer.'
-    [../]
+    []
     [./error_3]
       type = RunException
       input = 'parent_uo_transfer.i'
@@ -35,7 +35,7 @@
       expect_err = 'LineValueSampler: When calling getValue\(\) on LineValueSampler, `sort_by` should be set to `id`.'
       detail = 'and LineValueSampler shall report an error if sorting method'
                     ' is not set to `id` when it is used with MultiAppUserObjectTransfer.'
-    [../]
+    []
     [./error_4]
       type = RunException
       input = 'parent_uo_transfer.i'
@@ -46,6 +46,6 @@
                     ' segment lies outside the limits of the line segment.'
       # Beam moves and line value sampler ends up getting values outside of sampled points
       allow_warnings = true
-    [../]
-  [../]
+    []
+  []
 []

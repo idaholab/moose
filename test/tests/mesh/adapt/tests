@@ -10,7 +10,7 @@
 
     requirement = 'The system shall perform identical adaptivity patterns on both the reference mesh and the displaced mesh when it exists.'
     issues = '#443'
-  [../]
+  []
 
   [./test_time]
     type = 'Exodiff'
@@ -20,7 +20,7 @@
 
     requirement = 'The system shall support toggling adaptivity on/off during a simulation.'
     issues = '#1755 #447'
-  [../]
+  []
 
   [./initial_adaptivity_test]
     type = 'Exodiff'
@@ -33,7 +33,7 @@
 
     requirement = 'The system shall perform one or more adaptivity steps on the mesh before the simulation begins.'
     issues = '#920'
-  [../]
+  []
 
   [./patch_test]
     type = 'Exodiff'
@@ -46,7 +46,7 @@
 
     requirement = 'The system shall support patch-based error estimation among a stencil of elements.'
     issues = '#833'
-  [../]
+  []
 
   [./adapt_cycles_test]
     type = 'Exodiff'
@@ -58,7 +58,7 @@
     requirement = 'The system shall support multiple adaptive steps per solve.'
     issues = '#830'
     abs_zero = 1e-8
-  [../]
+  []
 
   [./test]
     type = 'Exodiff'
@@ -68,7 +68,7 @@
 
     requirement = 'The system shall perform adaptivity on systems containing multiple independent field variables.'
     issues = '#920'
-  [../]
+  []
 
   [./interval]
     type = 'Exodiff'
@@ -78,5 +78,5 @@
 
     requirement = 'The system shall support running adaptivity on an interval basis (every several time steps).'
     issues = '#6888'
-  [../]
+  []
 []

@@ -9,5 +9,5 @@
     scale_refine = 2
 
     requirement = "The system shall support access to finite element quadrature point locations during the calculation of refinement marker flags."
-  [../]
+  []
 []

@@ -6,7 +6,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the friction angle is negative"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./except2]
     type = 'RunException'
     input = 'except2.i'
@@ -14,7 +14,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the dilation angle is negative"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./except3]
     type = 'RunException'
     input = 'except3.i'
@@ -22,7 +22,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the friction angle is less than the dilation angle"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./except4]
     type = 'RunException'
     input = 'except4.i'
@@ -30,7 +30,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the cohesion is negative"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./except5]
     type = 'RunException'
     input = 'except5.i'
@@ -38,7 +38,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the sum of the tensile and compressive strength is less than smoothing_tol"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./except6]
     type = 'RunException'
     input = 'except6.i'
@@ -46,7 +46,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the normal vector has zero length"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small1]
     type = 'CSVDiff'
     input = 'small_deform1.i'
@@ -54,7 +54,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly compute stresses in the elastic regime"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small2]
     type = 'CSVDiff'
     input = 'small_deform2.i'
@@ -62,7 +62,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent tensile failure with the Lame coefficient lambda=0"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small3]
     type = 'CSVDiff'
     input = 'small_deform3.i'
@@ -70,7 +70,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent tensile failure with the Lame coefficient lambda=4"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small4]
     type = 'CSVDiff'
     input = 'small_deform4.i'
@@ -78,7 +78,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent compression failure"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small5]
     type = 'CSVDiff'
     input = 'small_deform5.i'
@@ -86,7 +86,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent shear failure"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small6]
     type = 'CSVDiff'
     input = 'small_deform6.i'
@@ -94,7 +94,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent both tensile and shear failure"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small7]
     type = 'CSVDiff'
     input = 'small_deform7.i'
@@ -102,7 +102,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent tensile behavior with hardening"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small8]
     type = 'CSVDiff'
     input = 'small_deform8.i'
@@ -110,7 +110,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent compression behavior with hardening"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small9]
     type = 'CSVDiff'
     input = 'small_deform9.i'
@@ -118,7 +118,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent shear behavior with hardening"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small10]
     type = 'CSVDiff'
     input = 'small_deform10.i'
@@ -126,7 +126,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent hardening under combined tension and shear"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./small11]
     type = 'CSVDiff'
     input = 'small_deform11.i'
@@ -134,7 +134,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent hardening under combined tension and shear with an initial stress"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
 
   [./pull_push]
     type = Exodiff
@@ -144,7 +144,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent the behavior of a column of elements that is pulled, then pushed"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
   [./pull_push_h]
     type = Exodiff
     input = 'pull_push_h.i'
@@ -153,7 +153,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent the behavior of a column of elements that is pulled, then pushed, with tensile hardening"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
-  [../]
+  []
 
   [./cwp_beam]
     type = Exodiff
@@ -165,7 +165,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
     capabilities = 'method!=dbg'
-  [../]
+  []
 
   [./pull_and_shear_1step]
     type = Exodiff
@@ -175,7 +175,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
     custom_cmp = 'pull_and_shear_1step.cmp'
-  [../]
+  []
   [./pull_and_shear]
     type = Exodiff
     input = 'pull_and_shear.i'
@@ -186,7 +186,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./push_and_shear]
     type = Exodiff
     input = 'push_and_shear.i'
@@ -196,7 +196,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./throw_test]
     type = 'RunException'
     input = 'throw_test.i'
@@ -205,7 +205,7 @@
     requirement = "The system shall permit exceptions to be thrown from material models with stateful properties without reading/writing to/from uninitialized memory"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
-  [../]
+  []
 
   [./small_inclined2]
     type = 'CSVDiff'
@@ -214,7 +214,7 @@
     requirement = "The CappedWeakInclinedPlaneStressUpdate model shall correctly represent tensile failure with a specified normal=(1,0,0)"
     design = "CappedWeakInclinedPlaneStressUpdate.md"
     issues = "#8303"
-  [../]
+  []
   [./small_inclined3]
     type = 'CSVDiff'
     input = 'small_deform_inclined3.i'
@@ -222,7 +222,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent tensile failure with a specified normal=(0,1,0)"
     design = "CappedWeakInclinedPlaneStressUpdate.md"
     issues = "#8303"
-  [../]
+  []
   [./small_inclined5]
     type = 'CSVDiff'
     input = 'small_deform_inclined5.i'
@@ -230,7 +230,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent shear failure with a specified normal=(1,0,0)"
     design = "CappedWeakInclinedPlaneStressUpdate.md"
     issues = "#8303"
-  [../]
+  []
 
   [./small_cosserat1]
     type = 'CSVDiff'
@@ -239,7 +239,7 @@
     requirement = "The CappedWeakPlaneCosseratStressUpdate model shall correctly represent plastic behavior under a first set of loading conditions"
     design = "CappedWeakPlaneCosseratStressUpdate.md"
     issues = "#8431"
-  [../]
+  []
   [./small_cosserat2]
     type = 'CSVDiff'
     input = 'small_deform_cosserat2.i'
@@ -247,7 +247,7 @@
     requirement = "The CappedWeakPlaneCosseratStressUpdate model shall correctly represent plastic behavior under a second set of loading conditions"
     design = "CappedWeakPlaneCosseratStressUpdate.md"
     issues = "#8431"
-  [../]
+  []
   [./small_cosserat3]
     type = 'CSVDiff'
     input = 'small_deform_cosserat3.i'
@@ -255,7 +255,7 @@
     requirement = "The CappedWeakPlaneCosseratStressUpdate model shall correctly represent plastic behavior under a third set of loading conditions"
     design = "CappedWeakPlaneCosseratStressUpdate.md"
     issues = "#8431"
-  [../]
+  []
   [./small_cosserat4]
     type = 'CSVDiff'
     input = 'small_deform_cosserat4.i'
@@ -263,5 +263,5 @@
     requirement = "The CappedWeakPlaneCosseratStressUpdate model shall correctly represent plastic behavior under a fourth set of loading conditions"
     design = "CappedWeakPlaneCosseratStressUpdate.md"
     issues = "#8431"
-  [../]
+  []
 []

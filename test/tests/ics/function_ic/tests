@@ -9,7 +9,7 @@
     recover = false #see #2295
 
     requirement = 'The system shall support setting gradient values for shape functions that support them.'
-  [../]
+  []
 
   [./spline_function]
     type = 'Exodiff'
@@ -18,5 +18,5 @@
     recover = false #see #2295
 
     requirement = 'The system shall support using a spline function to set both value and gradient values in an initial condition.'
-  [../]
+  []
 []

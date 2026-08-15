@@ -9,7 +9,7 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
   [./patch_sideset_generator_linear]
     type = 'Exodiff'
@@ -21,7 +21,7 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
   [./patch_sideset_generator_centroid]
     type = 'Exodiff'
@@ -33,7 +33,7 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
   [./patch_sideset_generator_centroid_error]
     type = RunException
@@ -45,7 +45,7 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
   [./patch_sideset_generator_grid]
     type = 'Exodiff'
@@ -57,7 +57,7 @@
     mesh_mode = REPLICATED
     issues = "#15829"
     recover = false
-  [../]
+  []
 
   [./patch_sideset_generator_grid_2D]
     type = 'Exodiff'
@@ -69,7 +69,7 @@
     mesh_mode = REPLICATED
     issues = "#15829"
     recover = false
-  [../]
+  []
 
   [./patch_sideset_generator_grid_2D_overpart]
     type = 'Exodiff'
@@ -81,5 +81,5 @@
     mesh_mode = REPLICATED
     issues = "#15829"
     recover = false
-  [../]
+  []
 []

@@ -9,7 +9,7 @@
     capabilities = 'vtk'
     min_parallel = 4
     requirement = 'The system shall correctly identify and count a single spiral-shaped feature read from an image.'
-  [../]
+  []
 
   [./boxes]
     type = CSVDiff
@@ -20,7 +20,7 @@
     capabilities = 'vtk'
     min_parallel = 4
     requirement = 'The system shall correctly identify and count multiple box-shaped features read from an image.'
-  [../]
+  []
 
   [./l_shapes]
     type = CSVDiff
@@ -31,5 +31,5 @@
     capabilities = 'vtk'
     min_parallel = 4
     requirement = 'The system shall correctly identify and count multiple L-shaped features read from an image.'
-  [../]
+  []
 []

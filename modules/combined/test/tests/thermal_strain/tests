@@ -9,5 +9,5 @@
     scale_refine = 1
     max_parallel = 1
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature'
-  [../]
+  []
 []

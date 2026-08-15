@@ -6,7 +6,7 @@
     requirement = 'Generates a rectangular IC'
     issues = '#11034'
     design = 'ics/BoundingBoxIC.md'
-  [../]
+  []
   [./diffuse]
     type = 'Exodiff'
     input = 'bounding_box_ic_diffuse_test.i'
@@ -14,5 +14,5 @@
     requirement = 'BoundingBoxIC shall have a diffuse interface option.'
     issues = '#13331'
     design = 'ics/BoundingBoxIC.md'
-  [../]
+  []
 []

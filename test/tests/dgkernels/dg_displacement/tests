@@ -6,5 +6,5 @@
     input = 'dg_displacement.i'
     exodiff = 'out.e'
     requirement = "The DGKernel system shall operate with displaced meshes."
-  [../]
+  []
 []

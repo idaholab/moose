@@ -8,5 +8,5 @@
     issues = '#13310'
     requirement = 'The system shall support Picard iteration with a FullSolveMultiApp at the root with multiple multiapp levels.'
     recover = False #Steady
-  [../]
+  []
 []

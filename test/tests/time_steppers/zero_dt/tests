@@ -7,5 +7,5 @@
     issues = '#10553'
     design = 'Executioner/TimeStepper/index.md'
     requirement = 'The system shall report an error if the initial time step size is calculated to be zero.'
-  [../]
+  []
 []

@@ -5,5 +5,5 @@
     type = RunApp
     input = 'strain_check.i'
     requirement = "The Lagrangian kernels can use a small strain elastic update with a large kinematics formulation"
-  [../]
+  []
 []

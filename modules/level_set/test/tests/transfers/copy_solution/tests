@@ -6,5 +6,5 @@
     input = parent.i
     exodiff = parent_out_sub0.e
     requirement = "The level set module shall include the ability to transfer a non-linear variable between the parent and a sub-application."
-  [../]
+  []
 []

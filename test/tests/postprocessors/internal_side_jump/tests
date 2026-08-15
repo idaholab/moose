@@ -9,5 +9,5 @@
     issues = '#9390'
     design = 'MooseVariableFE.md'
     requirement = 'The system shall support retrieving solution values from neighboring elements for use in internal side calculations.'
-  [../]
+  []
 []

@@ -6,5 +6,5 @@
     requirement = "The Control system shall allow a boolean parameter to be controlled with a function."
     issues = '#15402'
     design = 'syntax/Controls/index.md source/controls/BoolFunctionControl.md'
-  [../]
+  []
 []

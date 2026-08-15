@@ -11,7 +11,7 @@
     input = good.i
     cli_args = 'Outputs/exodus=true'
     check_files = 'good_out.e'
-  [../]
+  []
 
   [./b]
     type = CheckFiles
@@ -19,7 +19,7 @@
     cli_args = 'Outputs/exodus=true'
     check_files = 'good_out.e'
     prereq = 'a'
-  [../]
+  []
 
   [./c]
     type = CheckFiles
@@ -27,7 +27,7 @@
     cli_args = 'Outputs/exodus=true'
     check_files = 'good_out.e'
     prereq = 'b'
-  [../]
+  []
 
   # Missing prereq with same check_files
   [./d]
@@ -35,5 +35,5 @@
     input = good.i
     cli_args = 'Outputs/exodus=true'
     check_files = 'good_out.e'
-  [../]
+  []
 []

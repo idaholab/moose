@@ -9,5 +9,5 @@
     requirement = 'The system shall provide an AD material that computes saturation temperature.'
     design = '/ADSaturationTemperatureMaterial.md'
     issues = '#15308'
-  [../]
+  []
 []

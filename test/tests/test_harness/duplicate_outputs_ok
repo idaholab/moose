@@ -6,7 +6,7 @@
     input = good.i
     cli_args = 'Outputs/exodus=true Outputs/file_base=skipped_out'
     check_files = 'skipped_out.e'
-  [../]
+  []
 
   [./b]
     type = CheckFiles
@@ -14,7 +14,7 @@
     cli_args = 'Outputs/exodus=true Outputs/file_base=skipped_out'
     check_files = 'skipped_out.e'
     skip = "Testing false dependency output to same file"
-  [../]
+  []
 
   # In this set we have a false dependency because
   # one of the tests is heavy
@@ -23,7 +23,7 @@
     input = good.i
     cli_args = 'Outputs/exodus=true Outputs/file_base=heavy_out'
     check_files = 'heavy_out.e'
-  [../]
+  []
 
   [./d]
     type = CheckFiles
@@ -31,7 +31,7 @@
     cli_args = 'Outputs/exodus=true Outputs/file_base=heavy_out'
     check_files = 'heavy_out.e'
     heavy = true
-  [../]
+  []
 
   # In this set we have two tests competing for the same output file
   # but one of them has a dependency on a skipped test
@@ -41,7 +41,7 @@
     cli_args = 'Outputs/exodus=true Outputs/file_base=not_used'
     check_files = 'not_used.e'
     skip = "Skipped Prereq"
-  [../]
+  []
 
   [./f]
     type = CheckFiles
@@ -50,23 +50,23 @@
     check_files = 'depend_out.e'
     # Depend on a skipped test
     prereq = e
-  [../]
+  []
 
   [./g]
     type = CheckFiles
     input = good.i
     cli_args = 'Outputs/exodus=true Outputs/file_base=depend_out'
     check_files = 'depend_out.e'
-  [../]
+  []
 
   [./h]
     type = 'AnalyzeJacobian'
     input = 'good.i'
-  [../]
+  []
 
   [./i]
     type = 'AnalyzeJacobian'
     input = 'good.i'
     prereq = h
-  [../]
+  []
 []

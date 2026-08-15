@@ -9,5 +9,5 @@
     scale_refine = 2
 
     requirement = "The system shall include the ability to mark elements within a finite element mesh for adaptivity based on if the value of a variable is within a specific range."
-  [../]
+  []
 []

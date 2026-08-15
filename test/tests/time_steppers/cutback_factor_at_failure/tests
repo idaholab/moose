@@ -8,7 +8,7 @@
     exodiff = 'constant_dt_cutback_out.e'
     requirement = "The system shall support how time step size is cut, using user-specified cutback_factor_at_failure, due to a solve failure.
                    Here, the original time step size is specified as a constant value."
-  [../]
+  []
 
   [./function_dt_cutback]
     type = 'Exodiff'
@@ -16,5 +16,5 @@
     exodiff = 'function_dt_cutback_out.e'
     requirement = "The system shall support how time step size is cut, using user-specified cutback_factor_at_failure, due to a solve failure.
                    Here, the original time step size is specified as a function of time."
-  [../]
+  []
 []

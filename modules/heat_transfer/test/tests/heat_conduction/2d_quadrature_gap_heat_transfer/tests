@@ -7,7 +7,7 @@
                    FEM orders and quadratures (QUAD4)."
     design = "/materials/GapConductance.md"
     issues = "#6750"
-  [../]
+  []
 
   [./perfectQ8]
     type = 'Exodiff'
@@ -17,7 +17,7 @@
                    FEM orders and quadratures (QUAD8)"
     design = "/materials/GapConductance.md"
     issues = "#6750"
-  [../]
+  []
 
   [./perfectQ9]
     type = 'Exodiff'
@@ -27,7 +27,7 @@
                    FEM orders and quadratures (QUAD9)"
     design = "/materials/GapConductance.md"
     issues = "#6750"
-  [../]
+  []
 
   [./nonmatching]
     type = 'Exodiff'
@@ -36,7 +36,7 @@
     requirement = "The system shall compute the heat transfer across small gaps for non-matching meshes."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
-  [../]
+  []
 
   [./second_order]
     type = 'Exodiff'
@@ -45,7 +45,7 @@
     requirement = "The system shall compute the heat transfer across small gaps for second order FEM bases."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
-  [../]
+  []
 
   [./moving]
     type = 'Exodiff'
@@ -55,7 +55,7 @@
     requirement = "The system shall compute the heat transfer across small gaps for moving interfaces."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
-  [../]
+  []
 
   [./gap_conductivity_property]
     type = 'Exodiff'
@@ -64,7 +64,7 @@
     requirement = "The system shall compute the heat transfer across small gaps with a specified gap conductivity."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
-  [../]
+  []
 
   [./gap_conductivity_property_r1_error]
     type = RunException
@@ -75,7 +75,7 @@
                    with uniform mesh refinement"
     design = "/actions/ThermalContactAction.md"
     issues = "#13043"
-  [../]
+  []
 
   [perfect_prereq]
     type = 'CheckFiles'

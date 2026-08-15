@@ -9,5 +9,5 @@
     requirement = "Multi-stage time integrators shall check convergence for all stages"
     design = "TimeIntegrator/index.md"
     issues = '#11719'
-  [../]
+  []
 []

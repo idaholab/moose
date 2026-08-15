@@ -9,7 +9,7 @@
     requirement = 'The system shall compute the volume fraction of flooded features relative to '
                   'the total mesh volume.'
     design = 'FeatureVolumeFraction.md'
-  [../]
+  []
 
   [./Avrami_test]
     type = CSVDiff
@@ -19,5 +19,5 @@
     requirement = 'The system shall compute the Avrami fraction of flooded features relative to '
                   'an equilibrium volume fraction.'
     design = 'FeatureVolumeFraction.md'
-  [../]
+  []
 []

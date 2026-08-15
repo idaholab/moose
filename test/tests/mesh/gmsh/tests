@@ -9,5 +9,5 @@
     requirement = 'The system shall read GMesh (.msh) format file meshes.'
     issues = '#2105'
     design = 'FileMesh.md'
-  [../]
+  []
 []

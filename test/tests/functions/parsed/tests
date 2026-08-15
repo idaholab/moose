@@ -6,21 +6,21 @@
     exodiff = 'steady_out.e'
     requirement = "The Function system shall support the creation of objects that execute a function defined within the input file."
     issues = '#1902'
-  [../]
+  []
   [./transient]
     type = 'Exodiff'
     input = 'mms_transient_coupled.i'
     exodiff = 'mms_transient_coupled_out.e'
     requirement = "The ParsedFunction object shall be capable of defining function within the input file for use with the method of manufactured solutions."
     issues = '#1902'
-  [../]
+  []
   [./vector]
     type = 'Exodiff'
     input = 'vector_function.i'
     exodiff = 'vector_function_out.e'
     requirement = "The Function system shall support the creation of objects that execute a vector function defined within the input file."
     issues = '#2273'
-  [../]
+  []
 
   [./scalar]
     # Test the use of scalar variables within a ParsedFunction
@@ -29,7 +29,7 @@
     exodiff = 'scalar_out.e'
     requirement = "The Function system shall support the creation of objects that execute a function defined within the input file that includes a scalar variable."
     issues = '#5041'
-  [../]
+  []
 
   [./function]
     type = Exodiff
@@ -37,7 +37,7 @@
     exodiff = 'function_out.e'
     requirement = "The ParsedFunction object shall support the use of other functions specified by their names in its expression."
     issues = '#12179'
-  [../]
+  []
 
   [./combined]
     type = Exodiff
@@ -45,7 +45,7 @@
     exodiff = 'combined_out.e'
     requirement = "The ParsedFunction object shall support the use of functions, scalar expressions and postprocessor expressions specified by their names in its expression at the same time."
     issues = '#12179'
-  [../]
+  []
 
   [./function_curl]
     type = Exodiff
@@ -54,7 +54,7 @@
     abs_zero = 3e-09
     requirement = "The Function system shall support the creation of objects that execute a curl of a vector function defined within the input file."
     issues = '#13041'
-  [../]
+  []
 
   [./vals_error]
     type = 'RunException'
@@ -62,7 +62,7 @@
     expect_err = 'No postprocessor, scalar variable, or function with the name \'invalid\' found. Unable to convert \'invalid\' to type double'
     requirement = "The ParsedFunction object shall fail with a human readable error if a vals entry is supplied that is neither a valid postprocessor, scalar variable, function, or real number."
     issues = '#14169'
-  [../]
+  []
 
   [./nl_vars]
     type = RunException
@@ -71,5 +71,5 @@
     expect_err = "The only variables supported by ParsedFunction are scalar variables, and var 'f' is not scalar."
     requirement = "The system should error if a field variable is passed into a parsed function object, as this capability is currently not supported."
     issues = '#15523'
-  [../]
+  []
 []

@@ -8,5 +8,5 @@
                    one or more equation systems in the simulation.'
     design = '/NumVars.md'
     issues = '#2094'
-  [../]
+  []
 []

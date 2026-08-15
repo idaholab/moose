@@ -7,7 +7,7 @@
                   'coupled concentration variable in a single-phase mechanics model.'
     design = 'ComputeVariableEigenstrain.md'
     issues = '#4373'
-  [../]
+  []
   [./elasticenergymaterial]
     type = 'Exodiff'
     input = 'elasticenergymaterial.i'
@@ -17,7 +17,7 @@
                   'variable.'
     design = 'ElasticEnergyMaterial.md'
     issues = '#4269'
-  [../]
+  []
   [./twophasestress]
     type = 'Exodiff'
     input = 'twophasestress.i'
@@ -27,7 +27,7 @@
                   'tensor and eigenstrain.'
     design = 'TwoPhaseStressMaterial.md'
     issues = '#4269'
-  [../]
+  []
   [./multiphasestress]
     type = 'Exodiff'
     input = 'multiphasestress.i'
@@ -37,7 +37,7 @@
                   'own elasticity tensor and eigenstrain.'
     design = 'MultiPhaseStressMaterial.md'
     issues = '#4886'
-  [../]
+  []
   [./nonsplit_gradderiv]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv.i'
@@ -49,7 +49,7 @@
                   'variables.'
     design = 'GradientComponent.md StrainGradDispDerivatives.md ComputeConcentrationDependentElasticityTensor.md'
     issues = '#5631'
-  [../]
+  []
   [./nonsplit_gradderiv_action]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv_action.i'
@@ -62,7 +62,7 @@
                   'up automatically by an action.'
     design = 'DisplacementGradientsAction.md'
     issues = '#5631'
-  [../]
+  []
   [./gradientcomponent]
     type = 'Exodiff'
     input = 'gradientcomponent.i'
@@ -71,5 +71,5 @@
                   'as an auxiliary variable.'
     design = 'GradientComponent.md'
     issues = '#5631'
-  [../]
+  []
 []

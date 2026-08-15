@@ -8,7 +8,7 @@
     exodiff = 'stateful_coupling_out.e'
 
     requirement = 'The system shall be able to produce stateful material properties that can be consumed by other objects in the system.'
-  [../]
+  []
 
   [./aux_init_qp_props]
     type = 'Exodiff'
@@ -16,5 +16,5 @@
     exodiff = 'stateful_aux_out.e'
 
     requirement = 'The system shall support coupling in an auxiliary field variable for use in initializing stateful material properties.'
-  [../]
+  []
 []

@@ -6,7 +6,7 @@
     input = 'layered_side_integral.i'
     exodiff = 'layered_side_integral_out.e'
     requirement = "The system shall correctly compute layered integrals along a specified boundary."
-  [../]
+  []
 
   [unique_points]
     type = 'CSVDiff'
@@ -20,14 +20,14 @@
     input = 'layered_side_integral_fv.i'
     exodiff = 'layered_side_integral_fv_out.e'
     requirement = "The system shall correctly compute layered integrals of finite volume variables along a specified boundary."
-  [../]
+  []
 
   [./average]
     type = 'Exodiff'
     input = 'layered_side_average.i'
     exodiff = 'layered_side_average_out.e'
     requirement = "The system shall allow taking averages of variables along a coordinate axis in layers on a boundary."
-  [../]
+  []
 
   [average_unique_points]
     type = 'CSVDiff'
@@ -41,7 +41,7 @@
     input = 'layered_side_diffusive_flux_average.i'
     exodiff = 'layered_side_diffusive_flux_average_out.e'
     requirement = "The system shall allow taking averages of the diffusive flux of variables along a coordinate axis in layers on a boundary."
-  [../]
+  []
 
   [diffusive_flux_average_fv]
     type = 'Exodiff'
@@ -56,5 +56,5 @@
     cli_args = 'UserObjects/layered_side_average/block=0'
     expect_err = "Both block and boundary cannot be specified for a layered integral user object. If you want to define the geometric bounds of the layers from a specified block set layer_bounding_block instead."
     requirement = "The system shall not allow both the block and boundary parameter to be specified for layered side integrals."
-  [../]
+  []
 []

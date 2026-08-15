@@ -9,5 +9,5 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 []
