@@ -24,6 +24,9 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/cell_pyramid5.h"
 #include "libmesh/cell_c0polyhedron.h"
+#include "libmesh/face_c0polygon.h"
+
+#include "MooseMeshXYCuttingUtils.h"
 
 using namespace libMesh;
 
@@ -275,6 +278,63 @@ polyhedronElemSplitter(MeshBase & mesh,
   for (const auto i : make_range(poly->n_subelements()))
     for (unsigned int j = 0; j < n_elem_extra_ids; j++)
       elems_Tet4[i]->set_extra_integer(j, exist_extra_ids[j]);
+}
+
+void
+polygonElemSplitter(MeshBase & mesh,
+                    const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+                    const dof_id_type elem_id,
+                    std::vector<dof_id_type> & converted_elems_ids)
+{
+  Elem * elem = mesh.elem_ptr(elem_id);
+  auto * polygon = dynamic_cast<libMesh::C0Polygon *>(elem);
+  if (!polygon)
+    mooseError("polygonElemSplitter called on a non-C0POLYGON element.");
+
+  const unsigned int n_poly_sides = polygon->n_sides();
+
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  std::vector<std::vector<boundary_id_type>> elem_side_list(n_poly_sides);
+  elementBoundaryInfoCollector(bdry_side_list, elem_id, n_poly_sides, elem_side_list);
+
+  const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
+  std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
+  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    exist_extra_ids[j] = polygon->get_extra_integer(j);
+
+  const auto subdomain_id = polygon->subdomain_id();
+  const auto n_tris = polygon->n_subtriangles();
+  for (unsigned int i = 0; i < n_tris; ++i)
+  {
+    const auto tri_nodes = polygon->subtriangle(i);
+    auto new_elem = std::make_unique<Tri3>();
+    for (unsigned int k = 0; k < 3; ++k)
+      new_elem->set_node(k, const_cast<Node *>(polygon->node_ptr(tri_nodes[k])));
+    new_elem->subdomain_id() = subdomain_id;
+    Elem * new_tri = mesh.add_elem(std::move(new_elem));
+    converted_elems_ids.push_back(new_tri->id());
+
+    // For each TRI3 side (between local nodes tri_nodes[k] and tri_nodes[(k+1)%3]), check
+    // whether the pair of local polygon-node indices is consecutive in the polygon's vertex
+    // loop. If so, the side lies on that polygon side and inherits its boundary ids; otherwise
+    // it is an interior edge of the polygon and gets nothing.
+    for (unsigned int k = 0; k < 3; ++k)
+    {
+      const int a = tri_nodes[k];
+      const int b = tri_nodes[(k + 1) % 3];
+      int poly_side = -1;
+      if ((a + 1) % static_cast<int>(n_poly_sides) == b)
+        poly_side = a;
+      else if ((b + 1) % static_cast<int>(n_poly_sides) == a)
+        poly_side = b;
+      if (poly_side >= 0)
+        for (const auto & side_info : elem_side_list[poly_side])
+          boundary_info.add_side(new_tri, k, side_info);
+    }
+
+    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+      new_tri->set_extra_integer(j, exist_extra_ids[j]);
+  }
 }
 
 std::vector<unsigned int>
@@ -740,6 +800,67 @@ convert3DMeshToAllTet4(MeshBase & mesh)
 
   convert3DMeshToAllTet4(
       mesh, original_elems, converted_elems_ids_to_track, block_id_to_remove, true);
+}
+
+void
+convert2DMeshToAllTri3(MeshBase & mesh)
+{
+  mooseAssert(mesh.is_serial(),
+              "This method only supports serial meshes. If you are calling this method with a "
+              "distributed mesh, please serialize it first.");
+
+  auto * replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(&mesh);
+  if (!replicated_mesh_ptr)
+    mooseError(
+        "convert2DMeshToAllTri3 requires a replicated mesh; serialize the distributed mesh first.");
+
+  std::set<subdomain_id_type> subdomain_ids_set;
+  mesh.subdomain_ids(subdomain_ids_set);
+  const subdomain_id_type max_subdomain_id = *subdomain_ids_set.rbegin();
+  const subdomain_id_type block_id_to_remove = max_subdomain_id + 1;
+
+  // Collect the elements that need splitting; TRI3 stays as-is.
+  std::vector<dof_id_type> elems_to_split;
+  for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
+       elem_it++)
+  {
+    if ((*elem_it)->default_order() != Order::FIRST)
+      mooseError("Only first order elements are supported.");
+    const auto t = (*elem_it)->type();
+    if (t == ElemType::QUAD4 || t == ElemType::C0POLYGON)
+      elems_to_split.push_back((*elem_it)->id());
+    else if (t != ElemType::TRI3)
+      mooseError("Unsupported 2D element type for triangulation.");
+  }
+
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  const auto bdry_side_list = boundary_info.build_side_list();
+  std::vector<dof_id_type> converted_elems_ids;
+  for (const auto elem_id : elems_to_split)
+  {
+    Elem * elem = mesh.elem_ptr(elem_id);
+    switch (elem->type())
+    {
+      case ElemType::QUAD4:
+        MooseMeshXYCuttingUtils::quadElemSplitter(*replicated_mesh_ptr, elem_id, 0);
+        elem->subdomain_id() = block_id_to_remove;
+        break;
+      case ElemType::C0POLYGON:
+        polygonElemSplitter(mesh, bdry_side_list, elem_id, converted_elems_ids);
+        elem->subdomain_id() = block_id_to_remove;
+        break;
+      default:
+        mooseError("Unexpected element type.");
+    }
+  }
+
+  for (auto elem_it = mesh.active_subdomain_elements_begin(block_id_to_remove);
+       elem_it != mesh.active_subdomain_elements_end(block_id_to_remove);
+       elem_it++)
+    mesh.delete_elem(*elem_it);
+
+  mesh.contract();
+  mesh.prepare_for_use();
 }
 
 void
