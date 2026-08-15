@@ -1,7 +1,7 @@
 [Tests]
   issues = '#869'
   design = 'source/kernels/ConservativeAdvection.md source/dgkernels/DGConvection.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '1d_advection_dg.i'
     exodiff = '1d_advection_dg_out.e'

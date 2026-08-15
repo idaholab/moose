@@ -1,5 +1,5 @@
 [Tests]
-  [./single]
+  [single]
     type = 'CSVDiff'
     input = 'bool_function_control.i'
     csvdiff = 'bool_function_control_out.csv'

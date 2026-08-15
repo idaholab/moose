@@ -1,7 +1,7 @@
 [Tests]
   issues = '#9205'
   design = 'outputs/Exodus.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'output_dimension.i'
     exodiff = 'output_dimension_out.e'

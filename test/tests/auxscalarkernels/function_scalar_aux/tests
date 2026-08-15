@@ -1,7 +1,7 @@
 [Tests]
   issues = '#3499'
   design = 'auxscalarkernels/FunctionScalarAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'function_scalar_aux.i'
     exodiff = 'function_scalar_aux_out.e'

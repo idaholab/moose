@@ -1,5 +1,5 @@
 [Tests]
-  [./derivativetwophasematerial]
+  [derivativetwophasematerial]
     type = 'Exodiff'
     input = 'derivativetwophasematerial.i'
     exodiff = 'derivativetwophasematerial_out.e'
@@ -8,7 +8,7 @@
     design = 'DerivativeTwoPhaseMaterial.md'
     issues = '#4035'
   []
-  [./orderparameterfunctionmaterial]
+  [orderparameterfunctionmaterial]
     type = 'Exodiff'
     input = 'orderparameterfunctionmaterial.i'
     exodiff = 'orderparameterfunctionmaterial_out.e'
@@ -16,7 +16,7 @@
     requirement = 'The system shall provide a materials to generate barrier and switching function in a WBM multiphase model'
     issues = '#4355'
   []
-  [./thirdphasesuppressionmaterial]
+  [thirdphasesuppressionmaterial]
     type = 'Exodiff'
     input = 'thirdphasesuppressionmaterial.i'
     exodiff = 'thirdphasesuppressionmaterial_out.e'
@@ -24,7 +24,7 @@
     requirement = 'The system shall provide a free energy penalty class that suppresses the formation of a third phase in grain boundaries'
     issues = '#6279'
   []
-  [./multibarrierfunction]
+  [multibarrierfunction]
     type = 'Exodiff'
     input = 'multibarrierfunction.i'
     exodiff = 'multibarrierfunction_out.e'
@@ -32,7 +32,7 @@
     requirement = 'The system shall provide a material for computing barrier values in multiphase systems'
     issues = '#4545'
   []
-  [./crosstermbarrierfunction]
+  [crosstermbarrierfunction]
     type = 'Exodiff'
     input = 'crosstermbarrierfunction.i'
     exodiff = 'crosstermbarrierfunction_out.e'
@@ -40,7 +40,7 @@
     requirement = 'The system shall provide a material for computing independent barrier values for each phase pair in a multiphase system'
     issues = '#5192'
   []
-  [./asymmetriccrosstermbarrierfunction]
+  [asymmetriccrosstermbarrierfunction]
     type = 'Exodiff'
     input = 'asymmetriccrosstermbarrierfunction.i'
     exodiff = 'asymmetriccrosstermbarrierfunction_out.e'
@@ -49,7 +49,7 @@
     issues = '#6584'
   []
 
-  [./lagrangemult]
+  [lagrangemult]
     type = 'Exodiff'
     input = 'lagrangemult.i'
     exodiff = 'lagrangemult_out.e'
@@ -58,7 +58,7 @@
     design = 'SwitchingFunctionConstraintLagrange.md'
     issues = '#4545'
   []
-  [./penalty]
+  [penalty]
     type = 'Exodiff'
     input = 'penalty.i'
     exodiff = 'penalty_out.e'
@@ -66,7 +66,7 @@
     design = 'SwitchingFunctionConstraintLagrange.md'
     issues = '#4723'
   []
-  [./crosstermfreeenergy]
+  [crosstermfreeenergy]
     type = 'Exodiff'
     input = 'crosstermfreeenergy.i'
     exodiff = 'crosstermfreeenergy_out.e'
@@ -74,7 +74,7 @@
     design = 'CrossTermGradientFreeEnergy.md'
     issues = '#4710'
   []
-  [./acmultiinterface]
+  [acmultiinterface]
     type = 'Exodiff'
     input = 'acmultiinterface.i'
     exodiff = 'acmultiinterface_out.e'
@@ -82,7 +82,7 @@
     design = 'ACMultiInterface.md'
     issues = '#4545'
   []
-  [./acmultiinterface_aux]
+  [acmultiinterface_aux]
     type = 'Exodiff'
     input = 'acmultiinterface_aux.i'
     exodiff = 'acmultiinterface_aux_out.e'
@@ -90,7 +90,7 @@
     design = 'ACMultiInterface.md'
     issues = '#4545'
   []
-  [./switchingfunction3phasematerial]
+  [switchingfunction3phasematerial]
     type = 'Exodiff'
     input = 'switchingfunction3phasematerial.i'
     exodiff = 'switchingfunction3phasematerial_out.e'
@@ -98,7 +98,7 @@
     design = 'SwitchingFunction3PhaseMaterial.md'
     issues = '#6857'
   []
-  [./switchingfunctionmultiphasematerial]
+  [switchingfunctionmultiphasematerial]
     type = 'Exodiff'
     input = 'switchingfunctionmultiphasematerial.i'
     exodiff = 'switchingfunctionmultiphasematerial_out.e'
@@ -106,7 +106,7 @@
     design = 'SwitchingFunctionMultiPhaseMaterial.md'
     issues = '#8113'
   []
-  [./mixedswitchingfunctionmaterial]
+  [mixedswitchingfunctionmaterial]
     type = 'Exodiff'
     input = 'mixedswitchingfunctionmaterial.i'
     exodiff = 'mixedswitchingfunctionmaterial_out.e'
@@ -114,7 +114,7 @@
     design = 'MixedSwitchingFunctionMaterial.md'
     issues = '#9042'
 []
-  [./barrierfunctionmaterial]
+  [barrierfunctionmaterial]
     type = 'Exodiff'
     input = 'barrierfunctionmaterial.i'
     exodiff = 'barrierfunctionmaterial_out.e'

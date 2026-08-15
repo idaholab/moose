@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'constant_dt_regrowth.i'
     exodiff = 'constant_dt_regrowth_out.e'

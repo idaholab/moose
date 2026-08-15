@@ -1,6 +1,6 @@
 [Tests]
     design = 'InterfaceQpValueUserObject.md InterfaceValueUserObjectAux.md'
-    [./interface_UO_QP_test]
+    [interface_UO_QP_test]
       type = 'Exodiff'
       input = 'interface_value_user_object_QP.i'
       exodiff = 'interface_value_user_object_QP_out.e'
@@ -20,7 +20,7 @@
       issues = '#11647'
       max_threads = 1
     []
-    [./interface_UO_get_material_test]
+    [interface_UO_get_material_test]
       type = 'RunApp'
       input = 'interface_userobject_material_value.i'
       expect_out = ' Solve Converged!'
@@ -33,7 +33,7 @@
       issues = '#14680'
       max_threads = 1
     []
-    [./interface_Qp_rate_incremement_test]
+    [interface_Qp_rate_incremement_test]
       type = 'Exodiff'
       input = 'interface_value_rate_increment_user_object_QP.i'
       exodiff = 'interface_value_rate_increment_user_object_QP_out.e'
@@ -42,7 +42,7 @@
       issues = '#14680'
       max_threads = 1
     []
-    [./interface_Qp_real_material]
+    [interface_Qp_real_material]
       type = 'Exodiff'
       input = 'interface_mp_real_user_object_QP.i'
       exodiff = 'interface_mp_real_user_object_QP_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./print_memory_usage]
+  [print_memory_usage]
     type = CheckFiles
     input = print_memory_usage.i
     check_files = print_memory_usage_out.csv
@@ -8,7 +8,7 @@
     requirement = "The system shall provide a postprocessor to measure physical and virtual memory usage and the major page fault count, depending on the operating system's ability to make those values available"
     design = '/MemoryUsage.md'
   []
-  [./vector_memory_usage]
+  [vector_memory_usage]
     type = CheckFiles
     input = vector_memory_usage.i
     cli_args = 'Problem/check_uo_aux_state=true'

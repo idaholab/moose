@@ -1,7 +1,7 @@
 [Tests]
   design = 'SolidMechanicsPlasticOrthotropic.md'
   issues = '#3832'
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'orthotropic.i'
     csvdiff = 'orthotropic_out.csv'
@@ -12,7 +12,7 @@
                   'strain applied in the x and y directions.'
   []
 
-  [./power_rule]
+  [power_rule]
     type = 'CSVDiff'
     input = 'powerRuleHardening.i'
     csvdiff = 'powerRuleHardening_out.csv'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'ad_saturation_temperature_material.i'
     csvdiff = 'ad_saturation_temperature_material_out.csv'

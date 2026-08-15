@@ -1,7 +1,7 @@
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080'
-  [./real_mortar_gap_conductance]
+  [real_mortar_gap_conductance]
     type = Exodiff
     input = 'gap-conductance.i'
     exodiff = 'gap-conductance_out.e'

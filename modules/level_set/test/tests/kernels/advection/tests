@@ -1,7 +1,7 @@
 [Tests]
   issues = '#8465'
   design = 'LevelSetAdvection.md'
-  [./mms]
+  [mms]
     type = CSVDiff
     input = advection_mms.i
     csvdiff = advection_mms_out.csv

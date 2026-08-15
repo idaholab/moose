@@ -1,5 +1,5 @@
 [Tests]
-  [./2D_stretch_failure_BPD]
+  [2D_stretch_failure_BPD]
     type = 'Exodiff'
     input = '2D_stretch_failure_BPD.i'
     exodiff = '2D_stretch_failure_BPD.e'
@@ -8,7 +8,7 @@
     design = 'StretchBasedFailureCriterionPD.md'
     issues = '#11561'
   []
-  [./2D_stress_failure_H1NOSPD]
+  [2D_stress_failure_H1NOSPD]
     type = 'Exodiff'
     input = '2D_stress_failure_H1NOSPD.i'
     exodiff = '2D_stress_failure_H1NOSPD.e'
@@ -17,7 +17,7 @@
     design = 'RankTwoBasedFailureCriteriaNOSPD.md'
     issues = '#11561'
   []
-  [./2D_singular_shape_tensor_H1NOSPD]
+  [2D_singular_shape_tensor_H1NOSPD]
     type = 'Exodiff'
     input = '2D_singular_shape_tensor_H1NOSPD.i'
     exodiff = '2D_singular_shape_tensor_H1NOSPD.e'
@@ -26,7 +26,7 @@
     design = 'SingularShapeTensorEliminatorUserObjectPD.md'
     issues = '#15393'
   []
-  [./2D_bond_status_convergence_BPD]
+  [2D_bond_status_convergence_BPD]
     type = 'Exodiff'
     input = '2D_bond_status_convergence_BPD.i'
     exodiff = '2D_bond_status_convergence_BPD.e'
@@ -36,7 +36,7 @@
     design = 'BondStatusConvergedPostprocessorPD.md'
     issues = '#15532'
   []
-  [./2D_bond_status_convergence_H1NOSPD]
+  [2D_bond_status_convergence_H1NOSPD]
     type = 'Exodiff'
     input = '2D_bond_status_convergence_H1NOSPD.i'
     exodiff = '2D_bond_status_convergence_H1NOSPD.e'

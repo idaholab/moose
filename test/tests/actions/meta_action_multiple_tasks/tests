@@ -1,7 +1,7 @@
 [Tests]
   issues = '#10619'
   design = 'actions/Action.md'
-  [./circle_quads]
+  [circle_quads]
     type = 'Exodiff'
     input = 'circle_quads.i'
     exodiff = 'circle_quads_out.e'

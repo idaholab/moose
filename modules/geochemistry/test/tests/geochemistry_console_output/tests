@@ -1,5 +1,5 @@
 [Tests]
-  [./console]
+  [console]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

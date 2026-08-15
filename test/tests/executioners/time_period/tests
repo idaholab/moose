@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5560'
   design = 'source/controls/TimePeriod.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'time_period_test.i'
     exodiff = 'time_period_test_out.e'

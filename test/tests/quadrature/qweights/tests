@@ -2,7 +2,7 @@
   issues = '#19066'
   design = 'SetupQuadratureAction.md'
 
-  [./weights]
+  [weights]
     type = Exodiff
     input = 'positive_qweights.i'
     exodiff = 'positive_qweights_out.e'

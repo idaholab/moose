@@ -1,5 +1,5 @@
 [Tests]
-  [./coupled_pressure]
+  [coupled_pressure]
     type = Exodiff
     input = 'coupled_pressure_test.i'
     exodiff = 'coupled_pressure_test_out.e'

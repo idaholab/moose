@@ -1,7 +1,7 @@
 [Tests]
   issues = '#2357'
   design = 'syntax/DiracKernels/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'front_tracking.i'
     exodiff = 'front_tracking_out.e'

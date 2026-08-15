@@ -2,7 +2,7 @@
   issues = '#7213'
   design = 'syntax/MultiApps/index.md'
 
-  [./initial_multiapp_failure]
+  [initial_multiapp_failure]
     type = 'RunException'
     input = 'parent.i'
     expect_err = 'failed to converge initial MultiApp'

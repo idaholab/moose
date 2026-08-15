@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'multiblock_restricted_var_test.i'
     exodiff = 'multiblock_restricted_var_test_out.e'

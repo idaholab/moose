@@ -1,5 +1,5 @@
 [Tests]
-  [./exception_transient]
+  [exception_transient]
     type = RunApp
     input = exception_transient.i
     errors = 'asdfghjkl'

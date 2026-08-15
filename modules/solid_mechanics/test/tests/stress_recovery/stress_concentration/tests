@@ -1,5 +1,5 @@
 [Tests]
-  [./stress_concentration]
+  [stress_concentration]
     type = 'Exodiff'
     input = 'stress_concentration.i'
     exodiff = 'stress_concentration_out.e'

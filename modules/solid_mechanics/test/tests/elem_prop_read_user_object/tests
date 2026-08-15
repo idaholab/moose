@@ -1,7 +1,7 @@
 [Tests]
   issues = '#4066'
 
-  [./test_elem]
+  [test_elem]
     type = 'Exodiff'
     input = 'prop_elem_read.i'
     exodiff = 'prop_elem_read_out.e'
@@ -9,7 +9,7 @@
     requirement = 'The system shall provide an object to read values from a file and map them onto a mesh based on mesh element IDs'
     allow_warnings = true # CSV file has more rows than number of elements
   []
-  [./test_grain]
+  [test_grain]
     type = 'Exodiff'
     input = 'prop_grain_read.i'
     exodiff = 'prop_grain_read_out.e'

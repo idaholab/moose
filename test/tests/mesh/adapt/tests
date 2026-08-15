@@ -1,7 +1,7 @@
 [Tests]
    design = 'syntax/Adaptivity/index.md'
 
-  [./displaced_test]
+  [displaced_test]
     type = 'Exodiff'
     input = 'displaced_adapt_test.i'
     exodiff = 'displaced_adapt_test_out.e-s002'
@@ -12,7 +12,7 @@
     issues = '#443'
   []
 
-  [./test_time]
+  [test_time]
     type = 'Exodiff'
     input = 'adapt_time_test.i'
     exodiff = 'out_time.e-s002'
@@ -22,7 +22,7 @@
     issues = '#1755 #447'
   []
 
-  [./initial_adaptivity_test]
+  [initial_adaptivity_test]
     type = 'Exodiff'
     input = 'initial_adaptivity_test.i'
     exodiff = 'initial_adaptivity_test_out.e'
@@ -35,7 +35,7 @@
     issues = '#920'
   []
 
-  [./patch_test]
+  [patch_test]
     type = 'Exodiff'
     input = 'patch_recovery_test.i'
     exodiff = 'patch_out.e-s002'
@@ -48,7 +48,7 @@
     issues = '#833'
   []
 
-  [./adapt_cycles_test]
+  [adapt_cycles_test]
     type = 'Exodiff'
     input = 'adapt_test_cycles.i'
     exodiff = 'out_cycles.e out_cycles.e-s002'
@@ -60,7 +60,7 @@
     abs_zero = 1e-8
   []
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'adapt_test.i'
     exodiff = 'out.e-s002'
@@ -70,7 +70,7 @@
     issues = '#920'
   []
 
-  [./interval]
+  [interval]
     type = 'Exodiff'
     input = 'interval.i'
     exodiff = 'interval_out.e-s002'

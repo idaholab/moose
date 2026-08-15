@@ -2,7 +2,7 @@
   issues = '#1609'
   design = 'VolumePostprocessor.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'sphere1D.i'
     exodiff = 'sphere1D_out.e'

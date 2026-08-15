@@ -1,5 +1,5 @@
 [Tests]
-  [./mesh_collection_generator_test]
+  [mesh_collection_generator_test]
     type = 'Exodiff'
     input = 'mesh_collection_generator.i'
     cli_args = '--mesh-only'

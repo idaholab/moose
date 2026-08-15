@@ -1,5 +1,5 @@
 [Tests]
-  [./bw01]
+  [bw01]
     type = 'Exodiff'
     input = 'bw01.i'
     exodiff = 'bw01.e'
@@ -11,7 +11,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./bw02]
+  [bw02]
     type = 'Exodiff'
     input = 'bw02.i'
     exodiff = 'bw02.e'
@@ -21,7 +21,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./wli01]
+  [wli01]
     type = 'Exodiff'
     input = 'wli01.i'
     exodiff = 'wli01.e'
@@ -33,7 +33,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./wli02]
+  [wli02]
     type = 'Exodiff'
     input = 'wli02.i'
     exodiff = 'wli02.e'
@@ -43,7 +43,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./rd01]
+  [rd01]
     type = 'Exodiff'
     input = 'rd01.i'
     exodiff = 'rd01.e'
@@ -55,7 +55,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./rd02]
+  [rd02]
     type = 'Exodiff'
     input = 'rd02.i'
     exodiff = 'rd02.e'
@@ -66,7 +66,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./rd03]
+  [rd03]
     type = 'Exodiff'
     input = 'rd03.i'
     exodiff = 'rd03.e'
@@ -76,7 +76,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./rsc01]
+  [rsc01]
     type = 'Exodiff'
     input = 'rsc01.i'
     exodiff = 'rsc01.e'
@@ -88,7 +88,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   []
-  [./rsc02]
+  [rsc02]
     type = 'Exodiff'
     input = 'rsc02.i'
     exodiff = 'rsc02.e'

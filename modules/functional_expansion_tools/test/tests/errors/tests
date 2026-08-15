@@ -3,7 +3,7 @@
     issues = '#10577'
     design = 'modules/functional_expansion_tools/index.md'
     requirement = 'The system shall report an error if '
-    [./Cartesian_missing_series]
+    [Cartesian_missing_series]
       # Every functional series must have a series set for each dimension
       type = RunException
       input = missing_series_x.i
@@ -13,7 +13,7 @@
     []
 
 
-    [./CylindricalDuo_missing_axis_series]
+    [CylindricalDuo_missing_axis_series]
       # Every functional series must have a series set for each dimension
       type = RunException
       input = missing_series_duo_axis.i
@@ -23,7 +23,7 @@
     []
 
 
-    [./CylindricalDuo_missing_disc_series]
+    [CylindricalDuo_missing_disc_series]
       # Every functional series must have a series set for each dimension
       type = RunException
       input = missing_series_duo_disc.i
@@ -33,7 +33,7 @@
     []
 
 
-    [./CylindricalDuo_multiple_series]
+    [CylindricalDuo_multiple_series]
       # No multiple axes allowed for CylindricalDuo
       type = RunException
       input = multiple_series_duo.i
@@ -43,7 +43,7 @@
     []
 
 
-    [./FXFluxBC_bad_function]
+    [FXFluxBC_bad_function]
       # The function must be a FunctionSeries type
       type = RunException
       input = bc_flux_bad_function.i
@@ -53,7 +53,7 @@
     []
 
 
-    [./FXValueBC_bad_function]
+    [FXValueBC_bad_function]
       # The function must be a FunctionSeries type
       type = RunException
       input = bc_value_bad_function.i
@@ -63,7 +63,7 @@
     []
 
 
-    [./FXValuePenaltyBC_bad_function]
+    [FXValuePenaltyBC_bad_function]
       # The function must be a FunctionSeries type
       type = RunException
       input = bc_value_penalty_bad_function.i
@@ -73,7 +73,7 @@
     []
 
 
-    [./FunctionSeriesToAux_bad_function]
+    [FunctionSeriesToAux_bad_function]
       # The function must be a FunctionSeries type
       type = RunException
       input = aux_bad_function.i
@@ -83,7 +83,7 @@
     []
 
 
-    [./MultiAppFXTransfer_missing_local]
+    [MultiAppFXTransfer_missing_local]
       # The named object must exist in the local app
       type = RunException
       input = multiapp_missing_local_object.i
@@ -93,7 +93,7 @@
     []
 
 
-    [./MultiAppFXTransfer_missing_sub]
+    [MultiAppFXTransfer_missing_sub]
       # The named object must exist in the sub app
       type = RunException
       input = multiapp_missing_sub_object.i
@@ -103,7 +103,7 @@
     []
 
 
-    [./MultiAppFXTransfer_bad_function_series]
+    [MultiAppFXTransfer_bad_function_series]
       # A coupled function must be a FunctionSeries type
       type = RunException
       input = multiapp_bad_function_series.i
@@ -113,7 +113,7 @@
     []
 
 
-    [./MultiAppFXTransfer_bad_user_object]
+    [MultiAppFXTransfer_bad_user_object]
       # A coupled UserObject must be one of the FX...UserObject types
       type = RunException
       input = multiapp_bad_user_object.i
@@ -123,7 +123,7 @@
     []
 
 
-    [./MultiAppFXTransfer_incompatible_orders]
+    [MultiAppFXTransfer_incompatible_orders]
       # Coupled FXs must have the same orders in all dimensions
       type = RunException
       input = multiapp_incompatible_orders.i
@@ -133,7 +133,7 @@
     []
 
 
-    [./invalid_order]
+    [invalid_order]
       # For any type of expansion, there are extraneous fields that should not be included. If these
       # are included, they are neglected, but their matching entries in 'physical_bounds' and 'orders'
       # are NOT neglected. An error should be provided if the length of 'orders' does not match the
@@ -146,7 +146,7 @@
     []
 
 
-    [./invalid_bounds_length]
+    [invalid_bounds_length]
       # An error is provided if the length of 'physical_bounds' does not match the number of valid
       # series.
       type = RunException

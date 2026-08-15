@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'internal_side_jump.i'
     csvdiff = 'internal_side_jump_out.csv'

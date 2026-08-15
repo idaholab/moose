@@ -1,7 +1,7 @@
 [Tests]
   issues = '#9483 #5676'
   design = 'syntax/Controls/index.md'
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'

@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5857'
   design = 'outputs/Exodus.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'overwrite.i'
     exodiff = 'overwrite_out.e'

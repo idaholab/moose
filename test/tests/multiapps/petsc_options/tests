@@ -2,7 +2,7 @@
   issues = '#1872'
   design = 'syntax/MultiApps/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'parent.i'
     exodiff = 'parent_out.e parent_out_sub0.e'

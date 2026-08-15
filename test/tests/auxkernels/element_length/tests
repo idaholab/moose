@@ -1,7 +1,7 @@
 [Tests]
   design = 'auxkernels/ElementLengthAux.md'
   issues = '#7597'
-  [./test]
+  [test]
     type = Exodiff
     input = element_length.i
     exodiff = element_length_out.e

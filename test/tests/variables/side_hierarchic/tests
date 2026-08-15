@@ -1,5 +1,5 @@
 [Tests]
-  [./side_hierarchic]
+  [side_hierarchic]
     type = Exodiff
     input = 'side_hierarchic.i'
     exodiff = 'side_hierarchic_out.e'

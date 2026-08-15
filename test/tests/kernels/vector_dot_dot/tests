@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'vector_test.i'
     exodiff = 'vector_test_out.e'

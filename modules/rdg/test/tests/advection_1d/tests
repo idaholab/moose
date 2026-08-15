@@ -1,5 +1,5 @@
 [Tests]
-  [./1d_aefv_square_wave_none]
+  [1d_aefv_square_wave_none]
     type = 'Exodiff'
     input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_none_out.e'
@@ -12,7 +12,7 @@
     design = 'rdg/index.md'
     issues = '#7967'
   []
-  [./1d_aefv_square_wave_minmod]
+  [1d_aefv_square_wave_minmod]
     type = 'Exodiff'
     input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_minmod_out.e'
@@ -26,7 +26,7 @@
     design = 'rdg/index.md'
     issues = '#7967'
   []
-  [./1d_aefv_square_wave_mc]
+  [1d_aefv_square_wave_mc]
     type = 'Exodiff'
     input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_mc_out.e'
@@ -40,7 +40,7 @@
     design = 'rdg/index.md'
     issues = '#7967'
   []
-  [./1d_aefv_square_wave_superbee]
+  [1d_aefv_square_wave_superbee]
     type = 'Exodiff'
     input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_superbee_out.e'
@@ -54,7 +54,7 @@
     design = 'rdg/index.md'
     issues = '#7967'
   []
-  [./1d_block_restrictable]
+  [1d_block_restrictable]
     type = 'Exodiff'
     input = 'block_restrictable.i'
     exodiff = 'block_restrictable_out.e'
@@ -67,7 +67,7 @@
     issues = '#8357'
   []
 
-  [./rdgP0]
+  [rdgP0]
     type = 'CSVDiff'
     input = 'rdgP0.i'
     csvdiff = 'rdgP0_out_tracer_0011.csv'

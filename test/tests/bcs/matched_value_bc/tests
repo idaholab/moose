@@ -1,7 +1,7 @@
 [Tests]
   issues = '#656'
   design = 'syntax/BCs/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'matched_value_bc_test.i'
     exodiff = 'out.e'

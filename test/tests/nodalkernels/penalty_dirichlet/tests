@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'nodal_penalty_dirichlet.i'
     exodiff = 'nodal_preset_bc_out.e'

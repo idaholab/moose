@@ -1,7 +1,7 @@
 [Tests]
   design = 'GlobalStrain/index.md'
   issues = '#11314'
-  [./strain]
+  [strain]
     type = RunApp
     input = 'global_strain_pfm.i'
     # The actual input file solves on a 50x50 mesh.  For checking the
@@ -12,7 +12,7 @@
     requirement = "This shall correctly compute the deformation behavior using
                    the globalstrain system for a multiphysics problem in 2D."
   []
-  [./strain_3D]
+  [strain_3D]
     type = RunApp
     input = 'global_strain_pfm_3D.i'
     # Checking input on smaller mesh

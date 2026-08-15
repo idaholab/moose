@@ -1,5 +1,5 @@
 [Tests]
-  [./annular_mesh_generator]
+  [annular_mesh_generator]
     type = 'Exodiff'
     input = 'annular_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -10,7 +10,7 @@
     design = 'meshgenerators/AnnularMeshGenerator.md'
     issues = '#11640'
   []
-  [./annular_mesh_generator_negative_growth]
+  [annular_mesh_generator_negative_growth]
     type = 'Exodiff'
     input = 'annular_mesh_generator_negative_growth.i'
     cli_args = '--mesh-only'
@@ -22,7 +22,7 @@
     design = 'meshgenerators/AnnularMeshGenerator.md'
     issues = '#16699'
   []
-  [./annular_mesh_generator_deprecated]
+  [annular_mesh_generator_deprecated]
     type = 'Exodiff'
     input = 'annular_mesh_generator_deprecated.i'
     cli_args = '--mesh-only'
@@ -32,7 +32,7 @@
     deprecated = true
     no_error_deprecated = true
   []
-  [./annular_mesh_generator_radial_positions]
+  [annular_mesh_generator_radial_positions]
     type = 'Exodiff'
     input = 'annular_mesh_generator_radial_positions.i'
     cli_args = '--mesh-only'

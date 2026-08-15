@@ -1,5 +1,5 @@
 [Tests]
-  [./ates]
+  [ates]
     type = CSVDiff
     input = 'ates.i'
     csvdiff = 'ates_csv.csv'

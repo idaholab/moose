@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'PFCTrad_test.i'
     exodiff = 'PFCTrad_test_out.e'

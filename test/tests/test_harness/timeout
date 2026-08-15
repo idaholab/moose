@@ -1,10 +1,10 @@
 [Tests]
-  [./timeout]
+  [timeout]
     type = RunCommand
     command = 'python -c "import time; time.sleep(15)"'
     max_time = 8
   []
-  [./timeout_env]
+  [timeout_env]
     type = RunCommand
     command = 'python -c "import time; time.sleep(15)"'
   []

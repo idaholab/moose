@@ -1,7 +1,7 @@
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080'
-  [./dynamic_mortar_gap_conductance]
+  [dynamic_mortar_gap_conductance]
     requirement = 'We shall be able to do gap conductance on a dynamic mesh using auxiliary displacements, computing the residual and Jacobian'
     [separate]
       type = Exodiff

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
@@ -7,7 +7,7 @@
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3087'
   []
-  [./parallel]
+  [parallel]
     # This ensures that PointSamplerBase is properly handling unique point finding
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
@@ -18,7 +18,7 @@
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3087'
   []
-  [./scaling]
+  [scaling]
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_scaling_line_sample_0001.csv'
@@ -28,7 +28,7 @@
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#12314'
   []
-  [./delimiter]
+  [delimiter]
     type = 'CheckFiles'
     input = 'csv_delimiter.i'
     check_files = 'csv_delimiter_csv_line_sample_0001.csv'

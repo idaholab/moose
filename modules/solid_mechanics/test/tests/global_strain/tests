@@ -1,14 +1,14 @@
 [Tests]
   design = 'SolidMechanics/GlobalStrain/index.md'
   issues = '#11314'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'global_strain.i'
     exodiff = 'global_strain_out.e'
     requirement = "The globalstrain system shall correctly compute the volume change
                    due to applied stress while still maintaining periodicity in 2D."
   []
-  [./uniaxial]
+  [uniaxial]
     type = 'Exodiff'
     input = 'global_strain_uniaxial.i'
     exodiff = 'global_strain_uniaxial_out.e'
@@ -17,7 +17,7 @@
                    under uniaxial stress while still maintaining periodicity
                    in all the directions in 3D."
   []
-  [./hydrostat]
+  [hydrostat]
     type = 'Exodiff'
     input = 'global_strain_hydrostat.i'
     exodiff = 'global_strain_hydrostat_out.e'
@@ -25,7 +25,7 @@
                    under hydrostratic stress while still maintaining periodicity
                    in all the directions in 3D."
   []
-  [./shear]
+  [shear]
     type = 'Exodiff'
     input = 'global_strain_shear.i'
     exodiff = 'global_strain_shear_out.e'
@@ -33,7 +33,7 @@
                    deformation due to applied stress while still maintaining
                    periodicity in all the directions in 3D."
   []
-  [./direction]
+  [direction]
     type = 'Exodiff'
     input = 'global_strain_direction.i'
     exodiff = 'global_strain_direction_out.e'
@@ -41,7 +41,7 @@
                    behavior in 2D with applied displacement boundary condition in
                    one direction while still maintaining periodicity in the other."
   []
-  [./disp]
+  [disp]
     type = 'Exodiff'
     input = 'global_strain_disp.i'
     exodiff = 'global_strain_disp_out.e'
@@ -50,7 +50,7 @@
                    behavior in 3D with applied displacement boundary condition in
                    one direction while still maintaining periodicity in the others."
   []
-  [./pressure_3D]
+  [pressure_3D]
     type = 'Exodiff'
     input = 'global_strain_pressure_3D.i'
     exodiff = 'global_strain_pressure_3D_out.e'
@@ -58,7 +58,7 @@
                    in 3D with pressure boundary condition in one direction while
                    still maintaining periodicity in the others."
   []
-  [./action_check]
+  [action_check]
     type = 'Exodiff'
     input = 'global_strain_action.i'
     exodiff = 'global_strain_action_out.e'

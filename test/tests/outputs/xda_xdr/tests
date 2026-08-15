@@ -2,7 +2,7 @@
   issues = '#1927'
   design = 'outputs/XDA.md'
 
-  [./both_xda_and_xdr]
+  [both_xda_and_xdr]
     # Test that setting xda = true and xdr = true works.
     type = CheckFiles
     input = xda_xdr.i

@@ -1,9 +1,9 @@
 [Tests]
-  [./always_ok]
+  [always_ok]
     type = RunApp
     input = good.i
   []
-  [./always_bad]
+  [always_bad]
     type = RunCommand
     command = "false"
   []

@@ -2,7 +2,7 @@
   issues = '#8496'
   design = 'syntax/Materials/index.md'
 
-  [./test]
+  [test]
     type = RunApp
     input = 'test.i'
 

@@ -1,7 +1,7 @@
 [Tests]
   design = 'CSVDiff.md'
   issues = '#12683 #12687'
-  [./test_csvdiff_comparison_file_missing]
+  [test_csvdiff_comparison_file_missing]
     type = CSVDiff
     input = csvdiff_comparison.i
     csvdiff = csvdiff_comparison_out.csv

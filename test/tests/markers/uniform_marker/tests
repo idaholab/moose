@@ -2,7 +2,7 @@
   issues = '#1566'
   design = 'UniformMarker.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'uniform_marker.i'
     exodiff = 'uniform_marker_out.e'

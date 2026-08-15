@@ -1,5 +1,5 @@
 [Tests]
-  [./kernel]
+  [kernel]
     type = 'Exodiff'
     input = 'scalar_constraint_kernel.i'
     exodiff = 'scalar_constraint_kernel_out.e'
@@ -12,7 +12,7 @@
     issues = 'cbf6d2235379f6ad75908b0f9d4be792dbce6c3d'
   []
 
-  [./kernel_disp]
+  [kernel_disp]
     type = 'Exodiff'
     input = 'scalar_constraint_kernel_disp.i'
     exodiff = 'scalar_constraint_kernel_disp_out.e'
@@ -22,7 +22,7 @@
     issues = '#7699'
   []
 
-  [./bc]
+  [bc]
     type = 'Exodiff'
     input = 'scalar_constraint_bc.i'
     exodiff = 'scalar_constraint_bc_out.e'

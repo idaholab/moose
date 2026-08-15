@@ -1,7 +1,7 @@
 [Tests]
   issues = '#1405'
   design = 'FunctionNeumannBC.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'neumannbc_out.e'

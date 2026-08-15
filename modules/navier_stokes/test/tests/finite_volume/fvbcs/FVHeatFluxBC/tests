@@ -1,7 +1,7 @@
 [Tests]
   design = 'NSFVHeatFluxBC.md'
   issues = '#18434'
-  [./local_porosity]
+  [local_porosity]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = local_porosity_out.e
@@ -10,7 +10,7 @@
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to local values "
                   "of porosity."
   []
-  [./global_porosity]
+  [global_porosity]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = global_porosity_out.e
@@ -19,7 +19,7 @@
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
                   "of porosity."
   []
-  [./local_k]
+  [local_k]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = local_k_out.e
@@ -28,7 +28,7 @@
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to local values "
                   "of thermal conductivity."
   []
-  [./global_k]
+  [global_k]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = global_k_out.e
@@ -37,7 +37,7 @@
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
                   "of thermal conductivity."
   []
-  [./local_kappa]
+  [local_kappa]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = local_kappa_out.e
@@ -46,7 +46,7 @@
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to local values "
                   "of effective thermal conductivity."
   []
-  [./global_kappa]
+  [global_kappa]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = global_kappa_out.e

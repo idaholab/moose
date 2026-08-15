@@ -2,7 +2,7 @@
   design = 'LinearCombinationPostprocessor.md'
   issues = '#10145'
 
-  [./linear_combination]
+  [linear_combination]
     type = 'CSVDiff'
     input = 'linear_combination.i'
     csvdiff = 'linear_combination_out.csv'
@@ -10,7 +10,7 @@
     requirement = 'The system shall support the ability to compute a linear combination of scalar values (Postprocessors).'
   []
 
-  [./linear_combination_defaulted_pps]
+  [linear_combination_defaulted_pps]
     type = 'CSVDiff'
     input = 'linear_combination.i'
     csvdiff = 'linear_combination_defaulted_pps.csv'

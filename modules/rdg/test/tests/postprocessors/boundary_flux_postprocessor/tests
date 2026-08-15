@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'boundary_flux_postprocessor.i'
     csvdiff = 'boundary_flux_postprocessor_out.csv'

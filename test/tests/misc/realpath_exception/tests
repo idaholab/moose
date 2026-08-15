@@ -2,7 +2,7 @@
   design = 'Parser.md'
   issues = '#15718'
 
-  [./except01]
+  [except01]
     type = RunException
     input = not_exist.i
     expect_err = 'Unable to open file '

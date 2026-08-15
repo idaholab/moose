@@ -1,20 +1,20 @@
 [Tests]
   design = 'source/functions/MooseParsedFunction.md'
-  [./steady]
+  [steady]
     type = 'Exodiff'
     input = 'steady.i'
     exodiff = 'steady_out.e'
     requirement = "The Function system shall support the creation of objects that execute a function defined within the input file."
     issues = '#1902'
   []
-  [./transient]
+  [transient]
     type = 'Exodiff'
     input = 'mms_transient_coupled.i'
     exodiff = 'mms_transient_coupled_out.e'
     requirement = "The ParsedFunction object shall be capable of defining function within the input file for use with the method of manufactured solutions."
     issues = '#1902'
   []
-  [./vector]
+  [vector]
     type = 'Exodiff'
     input = 'vector_function.i'
     exodiff = 'vector_function_out.e'
@@ -22,7 +22,7 @@
     issues = '#2273'
   []
 
-  [./scalar]
+  [scalar]
     # Test the use of scalar variables within a ParsedFunction
     type = Exodiff
     input = scalar.i
@@ -31,7 +31,7 @@
     issues = '#5041'
   []
 
-  [./function]
+  [function]
     type = Exodiff
     input = function.i
     exodiff = 'function_out.e'
@@ -39,7 +39,7 @@
     issues = '#12179'
   []
 
-  [./combined]
+  [combined]
     type = Exodiff
     input = combined.i
     exodiff = 'combined_out.e'
@@ -47,7 +47,7 @@
     issues = '#12179'
   []
 
-  [./function_curl]
+  [function_curl]
     type = Exodiff
     input = function_curl.i
     exodiff = 'function_curl_out.e'
@@ -56,7 +56,7 @@
     issues = '#13041'
   []
 
-  [./vals_error]
+  [vals_error]
     type = 'RunException'
     input = 'vals_error.i'
     expect_err = 'No postprocessor, scalar variable, or function with the name \'invalid\' found. Unable to convert \'invalid\' to type double'
@@ -64,7 +64,7 @@
     issues = '#14169'
   []
 
-  [./nl_vars]
+  [nl_vars]
     type = RunException
     input = 'combined.i'
     cli_args = "Functions/fn/symbol_names='f sv' Functions/fn/symbol_values='f sv'"

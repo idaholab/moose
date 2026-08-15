@@ -2,7 +2,7 @@
     design = '/VectorPostprocessors/index.md'
     issues = '#11408'
 
-  [./test]
+  [test]
     requirement = 'The system shall provide VectorPostprocessor results to all processors as scattered data.'
 
     type = 'Exodiff'
@@ -11,7 +11,7 @@
     min_parallel = 2
     max_parallel = 2
   []
-  [./broadcast]
+  [broadcast]
     requirement = 'The system shall provide VectorPostprocessor results to all processors as replicated data.'
 
     type = 'Exodiff'

@@ -1,5 +1,5 @@
 [tests]
-  [./acceleration_bc]
+  [acceleration_bc]
     type = 'Exodiff'
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'
@@ -11,7 +11,7 @@
     issues = "#7642"
     capabilities = 'method!=dbg'
   []
-  [./acceleration_bc_ti]
+  [acceleration_bc_ti]
     type = 'Exodiff'
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'

@@ -2,7 +2,7 @@
   issues = '#3249'
   design = 'syntax/Outputs/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'subdir_output.i'
     exodiff = 'sub1/sub2/subdir_output_out.e'

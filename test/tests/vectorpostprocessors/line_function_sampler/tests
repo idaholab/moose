@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'line_function_sampler.i'
     csvdiff = 'line_function_sampler_out_func_vals_0001.csv'

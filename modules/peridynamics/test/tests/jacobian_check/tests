@@ -1,5 +1,5 @@
 [Tests]
-  [./2D_heat_conduction_BPD]
+  [2D_heat_conduction_BPD]
     type = 'PetscJacobianTester'
     input = '2D_heat_conduction_BPD.i'
     ratio_tol = 1E-7
@@ -9,7 +9,7 @@
     design = 'HeatConductionBPD.md'
     issues = '#11561'
   []
-  [./2D_heat_conduction_free_node_BPD]
+  [2D_heat_conduction_free_node_BPD]
     type = 'PetscJacobianTester'
     input = '2D_heat_conduction_BPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -21,7 +21,7 @@
     design = 'HeatConductionBPD.md'
     issues = '#15393'
   []
-  [./2D_mechanics_BPD]
+  [2D_mechanics_BPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_BPD.i'
     ratio_tol = 1E-7
@@ -31,7 +31,7 @@
     design = 'MechanicsBPD.md'
     issues = '#11561'
   []
-  [./2D_mechanics_free_node_BPD]
+  [2D_mechanics_free_node_BPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_BPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -43,7 +43,7 @@
     design = 'MechanicsBPD.md'
     issues = '#15393'
   []
-  [./2D_thermomechanics_BPD]
+  [2D_thermomechanics_BPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_BPD.i'
     ratio_tol = 1E-7
@@ -53,7 +53,7 @@
     design = 'MechanicsBPD.md'
     issues = '#11561'
   []
-  [./2D_thermomechanics_free_node_BPD]
+  [2D_thermomechanics_free_node_BPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_BPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -65,7 +65,7 @@
     design = 'MechanicsBPD.md'
     issues = '#15393'
   []
-  [./2D_mechanics_OSPD]
+  [2D_mechanics_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_OSPD.i'
     ratio_tol = 1E-7
@@ -75,7 +75,7 @@
     design = 'MechanicsOSPD.md'
     issues = '#11561'
   []
-  [./2D_mechanics_free_node_OSPD]
+  [2D_mechanics_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -87,7 +87,7 @@
     design = 'MechanicsOSPD.md'
     issues = '#15393'
   []
-  [./2D_thermomechanics_OSPD]
+  [2D_thermomechanics_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_OSPD.i'
     ratio_tol = 1E-7
@@ -97,7 +97,7 @@
     design = 'MechanicsOSPD.md'
     issues = '#11561'
   []
-  [./2D_thermomechanics_free_node_OSPD]
+  [2D_thermomechanics_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -109,7 +109,7 @@
     design = 'MechanicsOSPD.md'
     issues = '#15393'
   []
-  [./2D_mechanics_FNOSPD]
+  [2D_mechanics_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_FNOSPD.i'
     ratio_tol = 1E-7
@@ -120,7 +120,7 @@
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./2D_mechanics_free_node_FNOSPD]
+  [2D_mechanics_free_node_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_FNOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -133,7 +133,7 @@
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#15393'
   []
-  [./2D_thermomechanics_FNOSPD]
+  [2D_thermomechanics_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_FNOSPD.i'
     ratio_tol = 1E-7
@@ -144,7 +144,7 @@
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./2D_thermomechanics_free_node_FNOSPD]
+  [2D_thermomechanics_free_node_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_FNOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -156,7 +156,7 @@
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#15393'
   []
-  [./2D_mechanics_smallstrain_H1NOSPD]
+  [2D_mechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -167,7 +167,7 @@
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./2D_mechanics_smallstrain_free_node_H1NOSPD]
+  [2D_mechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -180,7 +180,7 @@
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#15393'
   []
-  [./2D_mechanics_smallstrain_H2NOSPD]
+  [2D_mechanics_smallstrain_H2NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
@@ -191,7 +191,7 @@
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./2D_thermomechanics_smallstrain_free_node_H1NOSPD]
+  [2D_thermomechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -204,7 +204,7 @@
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#15393'
   []
-  [./2D_thermomechanics_smallstrain_H1NOSPD]
+  [2D_thermomechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -216,7 +216,7 @@
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./2D_thermomechanics_smallstrain_H2NOSPD]
+  [2D_thermomechanics_smallstrain_H2NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
@@ -228,7 +228,7 @@
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./3D_mechanics_smallstrain_H1NOSPD]
+  [3D_mechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '3D_mechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -239,7 +239,7 @@
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./3D_mechanics_smallstrain_H2NOSPD]
+  [3D_mechanics_smallstrain_H2NOSPD]
     type = 'PetscJacobianTester'
     input = '3D_mechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
@@ -250,7 +250,7 @@
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
   []
-  [./3D_mechanics_smallstrain_free_node_H1NOSPD]
+  [3D_mechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '3D_mechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -264,7 +264,7 @@
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#15393'
   []
-  [./gps_OSPD]
+  [gps_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_OSPD.i'
     ratio_tol = 1E-7
@@ -275,7 +275,7 @@
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#11561'
   []
-  [./gps_free_node_OSPD]
+  [gps_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -288,7 +288,7 @@
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#15393'
   []
-  [./gps_thermomechanics_OSPD]
+  [gps_thermomechanics_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_OSPD.i'
     ratio_tol = 1E-7
@@ -299,7 +299,7 @@
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#11561'
   []
-  [./gps_thermomechanics_free_node_OSPD]
+  [gps_thermomechanics_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -312,7 +312,7 @@
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#15393'
   []
-  [./gps_H1NOSPD]
+  [gps_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -324,7 +324,7 @@
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#11561'
   []
-  [./gps_free_node_H1NOSPD]
+  [gps_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -337,7 +337,7 @@
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#15393'
   []
-  [./gps_thermomechanics_smallstrain_H1NOSPD]
+  [gps_thermomechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -349,7 +349,7 @@
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#11561'
   []
-  [./gps_thermomechanics_smallstrain_free_node_H1NOSPD]
+  [gps_thermomechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -362,7 +362,7 @@
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#15393'
   []
-  [./weak_planestress_thermomechanics_smallstrain_H1NOSPD]
+  [weak_planestress_thermomechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'weak_planestress_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -372,7 +372,7 @@
     design = 'WeakPlaneStressNOSPD.md'
     issues = '#11561'
   []
-  [./weak_planestress_thermomechanics_smallstrain_free_node_H1NOSPD]
+  [weak_planestress_thermomechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'weak_planestress_thermomechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'

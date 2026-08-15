@@ -1,7 +1,7 @@
 [Tests]
   issues = '#1896'
   design = '/AuxScalarKernels/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'aux_scalar_deps.i'
     exodiff = 'aux_scalar_deps_out.e'

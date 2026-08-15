@@ -1,5 +1,5 @@
 [Tests]
-  [./ranktwotensor_OSPD]
+  [ranktwotensor_OSPD]
     type = 'Exodiff'
     input = 'planestrain_thermomechanics_ranktwotensor_OSPD.i'
     exodiff = 'planestrain_thermomechanics_ranktwotensor_OSPD.e'
@@ -9,7 +9,7 @@
     design = 'NodalRankTwoPD.md'
     issues = '#11561'
   []
-  [./stretch_H1NOSPD]
+  [stretch_H1NOSPD]
     type = 'Exodiff'
     input = 'planestrain_thermomechanics_stretch_H1NOSPD.i'
     exodiff = 'planestrain_thermomechanics_stretch_H1NOSPD.e'
@@ -18,7 +18,7 @@
     design = 'ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   []
-  [./offset_and_area_2D]
+  [offset_and_area_2D]
     type = 'Exodiff'
     input = 'boundary_offset_node_area_2D.i'
     exodiff = 'boundary_offset_node_area_2D_out.e'
@@ -28,7 +28,7 @@
     design = 'BoundaryOffsetPD.md NodalVolumePD.md'
     issues = '#11561'
   []
-  [./offset_and_volume_3D]
+  [offset_and_volume_3D]
     type = 'Exodiff'
     input = 'boundary_offset_node_volume_3D.i'
     exodiff = 'boundary_offset_node_volume_3D_out.e'

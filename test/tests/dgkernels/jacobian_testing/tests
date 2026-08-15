@@ -1,7 +1,7 @@
 [Tests]
   issues = '#629'
   design = 'syntax/DGKernels/index.md'
-  [./jacobian_test]
+  [jacobian_test]
     type = AnalyzeJacobian
     input = coupled_dg_jac_test.i
     expect_out = '\nNo errors detected. :-\)\n'

@@ -1,7 +1,7 @@
 [Tests]
   issues = '#2880'
   design = 'syntax/Functions/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'default_function.i'
     exodiff = 'default_function_out.e'

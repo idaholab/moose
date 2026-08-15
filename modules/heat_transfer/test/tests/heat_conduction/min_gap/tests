@@ -1,5 +1,5 @@
 [Tests]
-  [./min_gap_order_zero]
+  [min_gap_order_zero]
     type = CSVDiff
     csvdiff = min_gap_order_zero.csv
     input = min_gap.i
@@ -9,7 +9,7 @@
     mesh_mode = REPLICATED
     requirement = 'Optionally a constant attenuation shall be applied to compute the gap conductance below a gap length threshold.'
   []
-  [./min_gap_order_one]
+  [min_gap_order_one]
     type = CSVDiff
     csvdiff = min_gap_order_one.csv
     input = min_gap.i

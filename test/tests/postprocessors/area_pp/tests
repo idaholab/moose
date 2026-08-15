@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'area_pp.i'
     csvdiff = 'area_pp_out.csv'

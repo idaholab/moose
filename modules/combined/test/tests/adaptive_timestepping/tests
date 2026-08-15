@@ -1,7 +1,7 @@
 [Tests]
   design = "/IterationAdaptiveDT.md"
   issues = "#2423"
-  [./test_function_change]
+  [test_function_change]
     type = 'Exodiff'
     input = 'adapt_tstep_function_change.i'
     exodiff = 'adapt_tstep_function_change_out.e'
@@ -9,7 +9,7 @@
     requirement = "The system shall allow for an adaptively computed time step to be limited based on a permissible change in the value of a function over a step."
   []
 
-  [./test_function_force_step]
+  [test_function_force_step]
     type = 'Exodiff'
     input = 'adapt_tstep_function_force_step.i'
     exodiff = 'adapt_tstep_function_force_step_out.e'
@@ -17,7 +17,7 @@
     requirement = "The system shall allow for forcing time steps to be taken at the knots of a time-dependent function."
   []
 
-  [./test_function_change_restart1]
+  [test_function_change_restart1]
     type = 'RunApp'
     input = 'adapt_tstep_function_change_restart1.i'
     recover = false
@@ -25,7 +25,7 @@
     requirement = "The system shall run the first part of a model used to test restarting with adaptive time steps."
   []
 
-  [./test_function_change_restart2]
+  [test_function_change_restart2]
    type = 'Exodiff'
     input = 'adapt_tstep_function_change_restart2.i'
     exodiff = 'adapt_tstep_function_change_restart2_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'function_array_aux.i'
     exodiff = 'function_array_aux_out.e'

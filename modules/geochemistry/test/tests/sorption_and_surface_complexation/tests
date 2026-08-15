@@ -1,5 +1,5 @@
 [Tests]
-  [./selenate]
+  [selenate]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -9,7 +9,7 @@
     issues = '#15290 #15261'
     design = 'AddTimeDependentReactionSolverAction.md selenate.md'
   []
-  [./ferric_hydroxide]
+  [ferric_hydroxide]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

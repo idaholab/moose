@@ -2,7 +2,7 @@
   issues = '#1275'
   design = 'syntax/Adaptivity/index.md BoxMarker.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'dont_mark_test.i'
     exodiff = 'dont_mark_test_out.e'

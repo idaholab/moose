@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'num_dofs.i'
     csvdiff = 'num_dofs_out.csv'
@@ -11,7 +11,7 @@
 
     max_parallel = 16 # 16 element test (initially)
   []
-  [./named_system]
+  [named_system]
     type = 'CSVDiff'
     input = 'named_system.i'
     csvdiff = 'named_system_out.csv'

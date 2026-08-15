@@ -1,5 +1,5 @@
 [Tests]
-  [./2D]
+  [2D]
     type = Exodiff
     input = '2D.i'
     exodiff = '2D_out.e'
@@ -11,7 +11,7 @@
     design = 'thm_example.md'
     requirement = 'An example of a 2-phase THM benchmark problem shall be demonstrated in PorousFlow'
   []
-  [./2D_c]
+  [2D_c]
     type = Exodiff
     input = '2D_c.i'
     exodiff = '2D_c_out.e'

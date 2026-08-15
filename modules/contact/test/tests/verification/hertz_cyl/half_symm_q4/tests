@@ -1,7 +1,7 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./glued_kin]
+  [glued_kin]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
     csvdiff = 'hertz_cyl_half_1deg_glued_kin_check2.csv hertz_cyl_half_1deg_glued_kin_check_cont_press_0010.csv hertz_cyl_half_1deg_glued_kin_check_x_disp_0010.csv hertz_cyl_half_1deg_glued_kin_check_y_disp_0010.csv'
@@ -16,7 +16,7 @@
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem."
   []
-  [./glued_pen]
+  [glued_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
     csvdiff = 'hertz_cyl_half_1deg_glued_pen_check2.csv hertz_cyl_half_1deg_glued_pen_check_cont_press_0010.csv hertz_cyl_half_1deg_glued_pen_check_x_disp_0010.csv hertz_cyl_half_1deg_glued_pen_check_y_disp_0010.csv'
@@ -31,7 +31,7 @@
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem."
   []
-  [./frictionless_kin]
+  [frictionless_kin]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
     csvdiff = 'hertz_cyl_half_1deg_frictionless_kin_check2.csv
@@ -50,7 +50,7 @@
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem."
   []
-  [./frictionless_pen]
+  [frictionless_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
     csvdiff = 'hertz_cyl_half_1deg_frictionless_pen_check2.csv
@@ -69,7 +69,7 @@
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem."
   []
-  [./frictionless_aug]
+  [frictionless_aug]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
     csvdiff = 'hertz_cyl_half_1deg_frictionless_aug_check2.csv
@@ -91,7 +91,7 @@
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem."
   []
-  [./mu_0_pen]
+  [mu_0_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template3.i'
     csvdiff = 'hertz_cyl_half_1deg_mu_0_pen_check2.csv hertz_cyl_half_1deg_mu_0_pen_check_cont_press_0020.csv hertz_cyl_half_1deg_mu_0_pen_check_x_disp_0020.csv hertz_cyl_half_1deg_mu_0_pen_check_y_disp_0020.csv'
@@ -108,7 +108,7 @@
     contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
     of 0."
   []
-  [./mu_0_2_pen]
+  [mu_0_2_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template3.i'
     csvdiff = 'hertz_cyl_half_1deg_mu_0_2_pen_check2.csv hertz_cyl_half_1deg_mu_0_2_pen_check_cont_press_0060.csv hertz_cyl_half_1deg_mu_0_2_pen_check_x_disp_0060.csv hertz_cyl_half_1deg_mu_0_2_pen_check_y_disp_0060.csv'
@@ -126,7 +126,7 @@
     contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
     of 0.2."
   []
-  [./mu_1_0_pen]
+  [mu_1_0_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template3.i'
     csvdiff = 'hertz_cyl_half_1deg_mu_1_0_pen_check2.csv hertz_cyl_half_1deg_mu_1_0_pen_check_cont_press_0010.csv hertz_cyl_half_1deg_mu_1_0_pen_check_x_disp_0010.csv hertz_cyl_half_1deg_mu_1_0_pen_check_y_disp_0010.csv'
@@ -143,7 +143,7 @@
     contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
     of 1.0."
   []
-  [./mu_0_2_aug]
+  [mu_0_2_aug]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
     csvdiff = 'hertz_cyl_half_1deg_mu_0_2_aug_check2.csv hertz_cyl_half_1deg_mu_0_2_aug_check_cont_press_0030.csv hertz_cyl_half_1deg_mu_0_2_aug_check_x_disp_0030.csv hertz_cyl_half_1deg_mu_0_2_aug_check_y_disp_0030.csv'

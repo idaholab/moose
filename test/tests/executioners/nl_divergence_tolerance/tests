@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Executioner/index.md'
-  [./test]
+  [test]
     type = RunException
     input = 'nl_divergence_tolerance.i'
     capabilities = 'petsc>=3.8.0'
@@ -11,7 +11,7 @@
     issues = '#13991'
     expect_err = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
   []
-  [./test_abs_divtol]
+  [test_abs_divtol]
     type = RunException
     input = 'nl_abs_divergence_tolerance.i'
     expect_err = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"

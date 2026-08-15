@@ -2,7 +2,7 @@
   design = 'DataIO.md Restartable.md'
   issues = '#2306'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'duplicate_node.i'
     exodiff = 'duplicate_node_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'custom_partition_generated_mesh.i'
     exodiff = 'custom_partition_generated_mesh_out.e'

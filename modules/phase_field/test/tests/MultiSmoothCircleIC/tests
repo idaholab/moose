@@ -1,6 +1,6 @@
 [Tests]
   issues = ''
-  [./multi_test]
+  [multi_test]
     type = 'Exodiff'
     input = 'multismoothcircleIC_test.i'
     exodiff = 'multismoothcircleIC_test_out.e'
@@ -11,7 +11,7 @@
     requirement = 'We shall be able to generate multiple smooth circle initial conditions with uniform radius variation type'
   []
 
-  [./multi_normal_test]
+  [multi_normal_test]
     type = 'Exodiff'
     input = 'multismoothcircleIC_normal_test.i'
     exodiff = 'multismoothcircleIC_normal_test_out.e'
@@ -24,7 +24,7 @@
     requirement = 'We shall be able to generate multiple smooth circle initial conditions with normal radius variation type'
   []
 
-  [./lattice_bounds]
+  [lattice_bounds]
     type = 'Exodiff'
     input = 'latticesmoothcircleIC_bounds.i'
     exodiff = 'latticesmoothcircleIC_bounds_out.e'
@@ -33,7 +33,7 @@
     requirement = 'We shall be able to produce a lattice of smooth circle initial conditions, allowing the circles to exist on the simulation cell boundaries and using a uniform radius variation type'
   []
 
-  [./lattice_test]
+  [lattice_test]
     type = 'Exodiff'
     input = 'latticesmoothcircleIC_test.i'
     exodiff = 'latticesmoothcircleIC_test_out.e'
@@ -44,7 +44,7 @@
     requirement = 'We shall be able to produce a lattice of smooth circle initial conditions, using a uniform radius variation type'
   []
 
-  [./lattice_normal_test]
+  [lattice_normal_test]
     type = 'Exodiff'
     input = 'latticesmoothcircleIC_normal_test.i'
     exodiff = 'latticesmoothcircleIC_normal_test_out.e'
@@ -55,7 +55,7 @@
     requirement = 'We shall be able to produce a lattice of smooth circle initial conditions using a normal radius variation type'
   []
 
-  [./lattice_small_invalue_test]
+  [lattice_small_invalue_test]
     type = 'Exodiff'
     input = 'latticesmoothcircleIC_small_invalue_test.i'
     exodiff = 'latticesmoothcircleIC_small_invalue_test_out.e'
@@ -65,7 +65,7 @@
     requirement = 'We shall be able to create multiple SpecifiedSmoothCircleICs with a small invalue'
   []
 
-  [./specified_test]
+  [specified_test]
     type = 'Exodiff'
     input = 'specifiedsmoothcircleIC_test.i'
     exodiff = 'specifiedsmoothcircleIC_test_out.e'

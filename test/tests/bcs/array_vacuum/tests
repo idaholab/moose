@@ -1,7 +1,7 @@
 [Tests]
   issues = '#6881'
   design = '/bcs/ArrayVacuumBC.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'array_vacuum.i'
     exodiff = 'array_vacuum_out.e'

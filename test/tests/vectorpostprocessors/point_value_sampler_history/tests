@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'point_value_sampler_history.i'
     csvdiff = 'point_value_sampler_history_out_point_sample.csv'

@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Materials/index.md'
-  [./test_adad]
+  [test_adad]
     type = 'Exodiff'
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
@@ -9,7 +9,7 @@
     requirement = "The Jacobian from a material property declared as AD and gotten as AD shall be accurate"
     issues = "#5658"
   []
-  [./test_regreg]
+  [test_regreg]
     type = 'Exodiff'
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
@@ -20,7 +20,7 @@
     requirement = "The Jacobian from a material property declared as regular and gotten as regular shall be inaccurate"
     issues = "#5658"
   []
-  [./stateful_jacobian]
+  [stateful_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_stateful_material.i'
     ratio_tol = 1e-7
@@ -30,7 +30,7 @@
     requirement = 'AD shall work with stateful material properties and the Jacobian shall be beautiful'
     issues = "#5658"
   []
-  [./stateful_residual]
+  [stateful_residual]
     type = 'Exodiff'
     exodiff = 'ad_stateful_material_exodus.e'
     input = 'ad_stateful_material.i'

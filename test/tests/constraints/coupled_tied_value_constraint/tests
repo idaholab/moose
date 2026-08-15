@@ -1,7 +1,7 @@
 [Tests]
   issues = '#1476'
   design = 'source/constraints/CoupledTiedValueConstraint.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'coupled_tied_value_constraint.i'
     exodiff = 'out.e'

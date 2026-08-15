@@ -1,7 +1,7 @@
 [Tests]
   issues = '#6001'
   design = 'outputs/FileOutput.md'
-  [./test]
+  [test]
     type = RunApp
     input = append_date.i
     recover = false # Steady

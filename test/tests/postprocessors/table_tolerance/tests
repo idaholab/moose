@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'table_tolerance_test.i'
     csvdiff = 'table_tolerance_test_out.csv'

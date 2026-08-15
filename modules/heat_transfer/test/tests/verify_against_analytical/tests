@@ -1,7 +1,7 @@
 [Tests]
   design = "HeatConduction.md"
 
-  [./1D_transient]
+  [1D_transient]
     type = 'Exodiff'
     input = '1D_transient.i'
     exodiff = '1D_transient_out.e'
@@ -9,7 +9,7 @@
     requirement = "Heat conduction shall match the answer from an analytical solution in 1D"
     issues = "#5975"
   []
-  [./ad_1D_transient]
+  [ad_1D_transient]
     type = 'Exodiff'
     input = 'ad_1D_transient.i'
     exodiff = 'ad_1D_transient_out.e'
@@ -17,7 +17,7 @@
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel in 1D"
     issues = "#5658 #12633"
   []
-  [./ad_1D_transient_jacobian]
+  [ad_1D_transient_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_1D_transient.i'
     ratio_tol = 1e-7
@@ -28,7 +28,7 @@
     issues = "#5658 #12633"
   []
 
-  [./2D_steady_state]
+  [2D_steady_state]
     type = 'Exodiff'
     input = '2d_steady_state.i'
     exodiff = '2d_steady_state_out.e'
@@ -36,7 +36,7 @@
     requirement = "Heat conduction shall match the answer from an analytical solution in 2D"
     issues = "#8194"
   []
-  [./ad_2D_steady_state]
+  [ad_2D_steady_state]
     type = 'Exodiff'
     input = 'ad_2d_steady_state.i'
     exodiff = 'ad_2d_steady_state_out.e'
@@ -44,7 +44,7 @@
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel in 2D"
     issues = "#5658 #12633"
   []
-  [./ad_2D_steady_state_jacobian]
+  [ad_2D_steady_state_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_2d_steady_state.i'
     ratio_tol = 1e-7

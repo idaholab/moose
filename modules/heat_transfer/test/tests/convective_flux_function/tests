@@ -1,13 +1,13 @@
 [Tests]
   design = 'ConvectiveFluxFunction.md'
   issues = '#14418'
-  [./constant]
+  [constant]
     type = 'CSVDiff'
     input = 'convective_flux_function.i'
     csvdiff = 'convective_flux_function_out.csv'
     requirement = 'The system shall allow prescribing a convective flux boundary condition using a constant heat transfer coefficient.'
   []
-  [./time_dependent]
+  [time_dependent]
     prereq = constant
     type = 'CSVDiff'
     input = 'convective_flux_function.i'
@@ -15,7 +15,7 @@
     csvdiff = 'convective_flux_function_out.csv'
     requirement = 'The system shall allow prescribing a convective flux boundary condition using a heat transfer coefficient that is a function of position and time.'
   []
-  [./temperature_dependent]
+  [temperature_dependent]
     prereq = time_dependent
     type = 'CSVDiff'
     input = 'convective_flux_function.i'

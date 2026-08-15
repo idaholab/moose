@@ -2,7 +2,7 @@
   design = 'FileMeshGenerator.md'
   issues = '#11640'
 
-  [./gmsh_test]
+  [gmsh_test]
     type = 'Exodiff'
     input = 'gmsh_test.i'
     exodiff = 'gmsh_test_in.e'

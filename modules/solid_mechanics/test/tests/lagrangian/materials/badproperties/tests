@@ -1,5 +1,5 @@
 [Tests]
-  [./stvenantkirchhoff]
+  [stvenantkirchhoff]
     type = RunException
     input = stvenantkirchhoff.i
     expect_err = 'ComputeStVenantKirchhoffStress requires an isotropic elasticity'

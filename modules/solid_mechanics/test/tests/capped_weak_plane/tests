@@ -1,5 +1,5 @@
 [Tests]
-  [./except1]
+  [except1]
     type = 'RunException'
     input = 'except1.i'
     expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
@@ -7,7 +7,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./except2]
+  [except2]
     type = 'RunException'
     input = 'except2.i'
     expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
@@ -15,7 +15,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./except3]
+  [except3]
     type = 'RunException'
     input = 'except3.i'
     expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane friction angle must not be less than dilation angle'
@@ -23,7 +23,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./except4]
+  [except4]
     type = 'RunException'
     input = 'except4.i'
     expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane cohesion must not be negative'
@@ -31,7 +31,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./except5]
+  [except5]
     type = 'RunException'
     input = 'except5.i'
     expect_err = 'CappedWeakPlaneStressUpdate: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol'
@@ -39,7 +39,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./except6]
+  [except6]
     type = 'RunException'
     input = 'except6.i'
     expect_err = 'CappedWeakInclinedPlaneStressUpdate: normal_vector must not have zero length'
@@ -47,7 +47,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small1]
+  [small1]
     type = 'CSVDiff'
     input = 'small_deform1.i'
     csvdiff = 'small_deform1.csv'
@@ -55,7 +55,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small2]
+  [small2]
     type = 'CSVDiff'
     input = 'small_deform2.i'
     csvdiff = 'small_deform2.csv'
@@ -63,7 +63,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small3]
+  [small3]
     type = 'CSVDiff'
     input = 'small_deform3.i'
     csvdiff = 'small_deform3.csv'
@@ -71,7 +71,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small4]
+  [small4]
     type = 'CSVDiff'
     input = 'small_deform4.i'
     csvdiff = 'small_deform4.csv'
@@ -79,7 +79,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small5]
+  [small5]
     type = 'CSVDiff'
     input = 'small_deform5.i'
     csvdiff = 'small_deform5.csv'
@@ -87,7 +87,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small6]
+  [small6]
     type = 'CSVDiff'
     input = 'small_deform6.i'
     csvdiff = 'small_deform6.csv'
@@ -95,7 +95,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small7]
+  [small7]
     type = 'CSVDiff'
     input = 'small_deform7.i'
     csvdiff = 'small_deform7.csv'
@@ -103,7 +103,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small8]
+  [small8]
     type = 'CSVDiff'
     input = 'small_deform8.i'
     csvdiff = 'small_deform8.csv'
@@ -111,7 +111,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small9]
+  [small9]
     type = 'CSVDiff'
     input = 'small_deform9.i'
     csvdiff = 'small_deform9.csv'
@@ -119,7 +119,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small10]
+  [small10]
     type = 'CSVDiff'
     input = 'small_deform10.i'
     csvdiff = 'small_deform10.csv'
@@ -127,7 +127,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./small11]
+  [small11]
     type = 'CSVDiff'
     input = 'small_deform11.i'
     csvdiff = 'small_deform11.csv'
@@ -136,7 +136,7 @@
     issues = "#7784"
   []
 
-  [./pull_push]
+  [pull_push]
     type = Exodiff
     input = 'pull_push.i'
     exodiff = 'pull_push.e'
@@ -145,7 +145,7 @@
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   []
-  [./pull_push_h]
+  [pull_push_h]
     type = Exodiff
     input = 'pull_push_h.i'
     exodiff = 'pull_push_h.e'
@@ -155,7 +155,7 @@
     issues = "#7784"
   []
 
-  [./cwp_beam]
+  [cwp_beam]
     type = Exodiff
     input = 'beam.i'
     exodiff = 'beam.e'
@@ -167,7 +167,7 @@
     capabilities = 'method!=dbg'
   []
 
-  [./pull_and_shear_1step]
+  [pull_and_shear_1step]
     type = Exodiff
     input = 'pull_and_shear_1step.i'
     exodiff = 'pull_and_shear_1step.e'
@@ -176,7 +176,7 @@
     issues = "#7960"
     custom_cmp = 'pull_and_shear_1step.cmp'
   []
-  [./pull_and_shear]
+  [pull_and_shear]
     type = Exodiff
     input = 'pull_and_shear.i'
     exodiff = 'pull_and_shear.e'
@@ -187,7 +187,7 @@
     issues = "#7960"
     capabilities = 'method!=dbg'
   []
-  [./push_and_shear]
+  [push_and_shear]
     type = Exodiff
     input = 'push_and_shear.i'
     exodiff = 'push_and_shear.e'
@@ -197,7 +197,7 @@
     issues = "#7960"
     capabilities = 'method!=dbg'
   []
-  [./throw_test]
+  [throw_test]
     type = 'RunException'
     input = 'throw_test.i'
     expect_err = "Solve failed and timestep already at or below dtmin"
@@ -207,7 +207,7 @@
     issues = "#7960"
   []
 
-  [./small_inclined2]
+  [small_inclined2]
     type = 'CSVDiff'
     input = 'small_deform_inclined2.i'
     csvdiff = 'small_deform_inclined2.csv'
@@ -215,7 +215,7 @@
     design = "CappedWeakInclinedPlaneStressUpdate.md"
     issues = "#8303"
   []
-  [./small_inclined3]
+  [small_inclined3]
     type = 'CSVDiff'
     input = 'small_deform_inclined3.i'
     csvdiff = 'small_deform_inclined3.csv'
@@ -223,7 +223,7 @@
     design = "CappedWeakInclinedPlaneStressUpdate.md"
     issues = "#8303"
   []
-  [./small_inclined5]
+  [small_inclined5]
     type = 'CSVDiff'
     input = 'small_deform_inclined5.i'
     csvdiff = 'small_deform_inclined5.csv'
@@ -232,7 +232,7 @@
     issues = "#8303"
   []
 
-  [./small_cosserat1]
+  [small_cosserat1]
     type = 'CSVDiff'
     input = 'small_deform_cosserat1.i'
     csvdiff = 'small_deform_cosserat1.csv'
@@ -240,7 +240,7 @@
     design = "CappedWeakPlaneCosseratStressUpdate.md"
     issues = "#8431"
   []
-  [./small_cosserat2]
+  [small_cosserat2]
     type = 'CSVDiff'
     input = 'small_deform_cosserat2.i'
     csvdiff = 'small_deform_cosserat2.csv'
@@ -248,7 +248,7 @@
     design = "CappedWeakPlaneCosseratStressUpdate.md"
     issues = "#8431"
   []
-  [./small_cosserat3]
+  [small_cosserat3]
     type = 'CSVDiff'
     input = 'small_deform_cosserat3.i'
     csvdiff = 'small_deform_cosserat3.csv'
@@ -256,7 +256,7 @@
     design = "CappedWeakPlaneCosseratStressUpdate.md"
     issues = "#8431"
   []
-  [./small_cosserat4]
+  [small_cosserat4]
     type = 'CSVDiff'
     input = 'small_deform_cosserat4.i'
     csvdiff = 'small_deform_cosserat4.csv'

@@ -1,7 +1,7 @@
 [Tests]
 design = 'syntax/DomainIntegral/index.md'
 issues = '#3705'
- [./ii_2d]
+ [ii_2d]
    type = 'CSVDiff'
    input = 'interaction_integral_2d.i'
    csvdiff = 'interaction_integral_2d_out.csv'
@@ -9,7 +9,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D.'
    capabilities = 'method!=dbg'
  []
- [./ii_2d_rot]
+ [ii_2d_rot]
    type = 'CSVDiff'
    input = 'interaction_integral_2d_rot.i'
    csvdiff = 'interaction_integral_2d_rot_out.csv'
@@ -17,7 +17,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems for all planes in 2D.'
    capabilities = 'method!=dbg'
  []
- [./ii_3d_as_2d]
+ [ii_3d_as_2d]
    type = 'CSVDiff'
    input = 'interaction_integral_3d_as_2d.i'
    csvdiff = 'interaction_integral_3d_as_2d_out.csv'
@@ -25,7 +25,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3d evaluated as 2D.'
    capabilities = 'method!=dbg'
  []
- [./ii_3d]
+ [ii_3d]
    type = 'CSVDiff'
    input = 'interaction_integral_3d.i'
    csvdiff = 'interaction_integral_3d_out.csv interaction_integral_3d_out_II_KI_1_0001.csv interaction_integral_3d_out_II_KI_2_0001.csv interaction_integral_3d_out_II_KII_1_0001.csv interaction_integral_3d_out_II_KII_2_0001.csv interaction_integral_3d_out_II_KIII_1_0001.csv interaction_integral_3d_out_II_KIII_2_0001.csv'
@@ -34,7 +34,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D.'
    capabilities = 'method!=dbg'
  []
- [./ii_3d_noq]
+ [ii_3d_noq]
    type = 'CSVDiff'
    input = 'interaction_integral_3d.i'
    cli_args = 'Outputs/file_base=interaction_integral_3d_noq_out'
@@ -45,7 +45,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D while supressing the output of q function values.'
    capabilities = 'method!=dbg'
  []
- [./ii_3d_points]
+ [ii_3d_points]
    type = 'CSVDiff'
    input = 'interaction_integral_3d_points.i'
    csvdiff = 'interaction_integral_3d_points_out.csv interaction_integral_3d_points_out_II_KI_1_0001.csv interaction_integral_3d_points_out_II_KI_2_0001.csv interaction_integral_3d_points_out_II_KII_1_0001.csv interaction_integral_3d_points_out_II_KII_2_0001.csv interaction_integral_3d_points_out_II_KIII_1_0001.csv interaction_integral_3d_points_out_II_KIII_2_0001.csv'
@@ -54,7 +54,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D at specified points.'
    capabilities = 'method!=dbg'
  []
- [./ii_3d_rot]
+ [ii_3d_rot]
    type = 'CSVDiff'
    input = 'interaction_integral_3d_rot.i'
    csvdiff = 'interaction_integral_3d_rot_out.csv interaction_integral_3d_rot_out_II_KI_1_0001.csv interaction_integral_3d_rot_out_II_KI_2_0001.csv interaction_integral_3d_rot_out_II_KII_1_0001.csv interaction_integral_3d_rot_out_II_KII_2_0001.csv interaction_integral_3d_rot_out_II_KIII_1_0001.csv interaction_integral_3d_rot_out_II_KIII_2_0001.csv'
@@ -63,7 +63,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in any plane in 3D.'
    capabilities = 'method!=dbg'
  []
- [./ii_2d_chk_q]
+ [ii_2d_chk_q]
    type = 'Exodiff'
    input = 'interaction_integral_2d.i'
    cli_args = 'DomainIntegral/output_q=true'
@@ -73,7 +73,7 @@ issues = '#3705'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D while outputting q values.'
    capabilities = 'method!=dbg'
  []
- [./ii_2d_rot_chk_q]
+ [ii_2d_rot_chk_q]
    type = 'Exodiff'
    input = 'interaction_integral_2d_rot.i'
    cli_args = 'DomainIntegral/output_q=true'
@@ -82,7 +82,7 @@ issues = '#3705'
    prereq = 'ii_2d_rot'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in any plane 2D while outputting q values.'
  []
- [./ii_3d_as_2d_chk_q]
+ [ii_3d_as_2d_chk_q]
    type = 'Exodiff'
    input = 'interaction_integral_3d_as_2d.i'
    cli_args = 'DomainIntegral/output_q=true'
@@ -91,7 +91,7 @@ issues = '#3705'
    prereq = 'ii_3d_as_2d'
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D evaluated as 2D.'
  []
- [./ii_3d_chk_q]
+ [ii_3d_chk_q]
    type = 'Exodiff'
    input = 'interaction_integral_3d.i'
    cli_args = 'DomainIntegral/output_q=true'
@@ -101,7 +101,7 @@ issues = '#3705'
    abs_zero = 1e-8
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D while outputting q values.'
  []
- [./ii_3d_points_chk_q]
+ [ii_3d_points_chk_q]
    type = 'Exodiff'
    input = 'interaction_integral_3d_points.i'
    cli_args = 'DomainIntegral/output_q=true'
@@ -111,7 +111,7 @@ issues = '#3705'
    abs_zero = 1e-8
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D for specified points, while outputting q values.'
  []
- [./ii_3d_rot_chk_q]
+ [ii_3d_rot_chk_q]
    type = 'Exodiff'
    input = 'interaction_integral_3d_rot.i'
    cli_args = 'DomainIntegral/output_q=true'

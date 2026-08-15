@@ -1,5 +1,5 @@
 [Tests]
-  [./2D_regularD_constH_BPD]
+  [2D_regularD_constH_BPD]
     type = 'Exodiff'
     input = '2D_regularD_constH_BPD.i'
     exodiff = '2D_regularD_constH_BPD.e'
@@ -9,7 +9,7 @@
     design = 'ComputeSmallStrainConstantHorizonMaterialBPD.md'
     issues = '#11561'
   []
-  [./2D_regularD_variableH_BPD]
+  [2D_regularD_variableH_BPD]
     type = 'Exodiff'
     input = '2D_regularD_variableH_BPD.i'
     exodiff = '2D_regularD_variableH_BPD.e'
@@ -19,7 +19,7 @@
     design = 'ComputeSmallStrainVariableHorizonMaterialBPD.md'
     issues = '#11561'
   []
-  [./2D_regularD_constH_OSPD]
+  [2D_regularD_constH_OSPD]
     type = 'Exodiff'
     input = '2D_regularD_constH_OSPD.i'
     exodiff = '2D_regularD_constH_OSPD.e'
@@ -29,7 +29,7 @@
     design = 'ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   []
-  [./2D_regularD_variableH_OSPD]
+  [2D_regularD_variableH_OSPD]
     type = 'Exodiff'
     input = '2D_regularD_variableH_OSPD.i'
     exodiff = '2D_regularD_variableH_OSPD.e'
@@ -39,7 +39,7 @@
     design = 'ComputeSmallStrainVariableHorizonMaterialOSPD.md'
     issues = '#11561'
   []
-  [./2D_irregularD_variableH_BPD]
+  [2D_irregularD_variableH_BPD]
     type = 'Exodiff'
     input = '2D_irregularD_variableH_BPD.i'
     exodiff = '2D_irregularD_variableH_BPD.e'
@@ -49,7 +49,7 @@
     design = 'ComputeSmallStrainVariableHorizonMaterialBPD.md'
     issues = '#11561'
   []
-  [./2D_irregularD_variableH_OSPD]
+  [2D_irregularD_variableH_OSPD]
     type = 'Exodiff'
     input = '2D_irregularD_variableH_OSPD.i'
     exodiff = '2D_irregularD_variableH_OSPD.e'
@@ -59,7 +59,7 @@
     design = 'ComputeSmallStrainVariableHorizonMaterialOSPD.md'
     issues = '#11561'
   []
-  [./2D_small_strain_H1NOSPD]
+  [2D_small_strain_H1NOSPD]
     type = 'Exodiff'
     input = '2D_small_strain_H1NOSPD.i'
     exodiff = '2D_small_strain_H1NOSPD.e'
@@ -69,7 +69,7 @@
     design = 'ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   []
-  [./2D_finite_strain_H1NOSPD]
+  [2D_finite_strain_H1NOSPD]
     type = 'Exodiff'
     input = '2D_finite_strain_H1NOSPD.i'
     exodiff = '2D_finite_strain_H1NOSPD.e'

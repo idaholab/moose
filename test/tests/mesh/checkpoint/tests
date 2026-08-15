@@ -1,7 +1,7 @@
 [Tests]
   design = 'splitting.md'
   issues = '#8472 #7752 #11004'
-  [./test_2_generate_split]
+  [test_2_generate_split]
     type = 'RunApp'
     input = 'checkpoint_split.i'
     cli_args = '--split-mesh 2 --split-file checkpoint_split_in'
@@ -10,7 +10,7 @@
     recover = false
     mesh_mode = 'REPLICATED'
   []
-  [./test_2]
+  [test_2]
     prereq = 'test_2_generate_split'
     type = 'Exodiff'
     input = 'checkpoint_split.i'
@@ -21,7 +21,7 @@
 
     requirement = 'The system shall use pre-split mesh files using a standard input file combined with command line arguments.'
   []
-  [./test_2a_generate_split]
+  [test_2a_generate_split]
     type = 'RunApp'
     input = 'checkpoint_split.i'
     cli_args = '--split-mesh 2 --split-file checkpoint_split_in.cpr'
@@ -30,7 +30,7 @@
     recover = false
     mesh_mode = 'REPLICATED'
   []
-  [./test_2a]
+  [test_2a]
     prereq = 'test_2a_generate_split'
     type = 'Exodiff'
     input = 'checkpoint_split.i'

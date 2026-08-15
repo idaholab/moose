@@ -1,15 +1,15 @@
 [Tests]
   issues = '#12903'
   design = 'ADFunctionNeumannBC.md'
-  [./ad]
+  [ad]
     requirement = 'The system shall support Neumann type boundary conditions defined by a function'
-    [./test]
+    [test]
       type = 'Exodiff'
       input = 'test.i'
       exodiff = 'neumannbc_out.e'
       detail = 'using automatic differentiation.'
     []
-    [./test-jac]
+    [test-jac]
       type = 'PetscJacobianTester'
       input = 'test.i'
       run_sim = False

@@ -2,7 +2,7 @@
   design = 'NodalEqualValueConstraint.md OneDEqualValueConstraintBC.md'
   issues = '#4211'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '1d.i'
     exodiff = '1d_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./variable]
+  [variable]
     type = 'Exodiff'
     input = 'variable.i'
     exodiff = 'variable_out.e'
@@ -8,7 +8,7 @@
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The ComputeVariableEigenstrain material shall correctly compute an eigenstrain that is a function of a variable."
   []
-  [./variable_finite]
+  [variable_finite]
     type = 'Exodiff'
     input = 'variable_finite.i'
     exodiff = 'variable_finite_out.e'
@@ -17,7 +17,7 @@
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The ComputeVariableEigenstrain material shall correctly compute an eigenstrain that is a function of a variable in a finite strain calculation."
   []
-  [./variable_cahnhilliard]
+  [variable_cahnhilliard]
     type = 'Exodiff'
     input = 'variable_cahnhilliard.i'
     exodiff = 'variable_cahnhilliard_out.e'
@@ -26,7 +26,7 @@
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The ComputeVariableEigenstrain material shall correctly compute the derivative of an eigenstrain that is a function of a variable with respect to that variable."
   []
-  [./composite]
+  [composite]
     type = 'Exodiff'
     input = 'composite.i'
     exodiff = 'composite_out.e'
@@ -34,7 +34,7 @@
     design = 'CompositeEigenstrain.md'
     requirement = "The CompositeEigenstrain material shall correctly apply an eigenstrain computed as the weighted sum of two base Eigenstrain tensors"
   []
-  [./inclusion]
+  [inclusion]
     type = 'Exodiff'
     input = 'inclusion.i'
     exodiff = 'inclusion_out.e'

@@ -2,7 +2,7 @@
   design = 'Executioner/index.md'
   issues = '#584'
 
-  [./mffd_test]
+  [mffd_test]
     type = 'RunApp'
     input = 'mffd_test.i'
     expect_out = 'Using ds compute h routine'

@@ -1,12 +1,12 @@
 [Tests]
-  [./small1]
+  [small1]
     type = 'CSVDiff'
     input = 'small_deform1.i'
     csvdiff = 'small_deform1.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small1_Bbar]
+  [small1_Bbar]
     type = 'CSVDiff'
     input = 'small_deform1.i'
     csvdiff = 'small_deform1.csv'
@@ -14,14 +14,14 @@
     abs_zero = 1.0E-5
     prereq = 'small1'
   []
-  [./small2]
+  [small2]
     type = 'CSVDiff'
     input = 'small_deform2.i'
     csvdiff = 'small_deform2.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small2_Bbar]
+  [small2_Bbar]
     type = 'CSVDiff'
     input = 'small_deform2.i'
     csvdiff = 'small_deform2.csv'
@@ -29,14 +29,14 @@
     abs_zero = 1.0E-5
     prereq = 'small2'
   []
-  [./small3]
+  [small3]
     type = 'CSVDiff'
     input = 'small_deform3.i'
     csvdiff = 'small_deform3.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small3_Bbar]
+  [small3_Bbar]
     type = 'CSVDiff'
     input = 'small_deform3.i'
     csvdiff = 'small_deform3.csv'
@@ -44,14 +44,14 @@
     abs_zero = 1.0E-5
     prereq = 'small3'
   []
-  [./small4]
+  [small4]
     type = 'CSVDiff'
     input = 'small_deform4.i'
     csvdiff = 'small_deform4.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small4_Bbar]
+  [small4_Bbar]
     type = 'CSVDiff'
     input = 'small_deform4.i'
     csvdiff = 'small_deform4.csv'
@@ -59,14 +59,14 @@
     abs_zero = 1.0E-5
     prereq = 'small4'
   []
-  [./small5]
+  [small5]
     type = 'CSVDiff'
     input = 'small_deform5.i'
     csvdiff = 'small_deform5.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small5_Bbar]
+  [small5_Bbar]
     type = 'CSVDiff'
     input = 'small_deform5.i'
     csvdiff = 'small_deform5.csv'
@@ -74,14 +74,14 @@
     abs_zero = 1.0E-5
     prereq = 'small5'
   []
-  [./small6]
+  [small6]
     type = 'CSVDiff'
     input = 'small_deform6.i'
     csvdiff = 'small_deform6.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small6_Bbar]
+  [small6_Bbar]
     type = 'CSVDiff'
     input = 'small_deform6.i'
     csvdiff = 'small_deform6.csv'
@@ -90,14 +90,14 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'small6'
   []
-  [./small7]
+  [small7]
     type = 'CSVDiff'
     input = 'small_deform7.i'
     csvdiff = 'small_deform7.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small7_Bbar]
+  [small7_Bbar]
     type = 'CSVDiff'
     input = 'small_deform7.i'
     csvdiff = 'small_deform7.csv'
@@ -107,14 +107,14 @@
     prereq = 'small7'
   []
 
-  [./small_hard3]
+  [small_hard3]
     type = 'CSVDiff'
     input = 'small_deform_hard3.i'
     csvdiff = 'small_deform_hard3.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   []
-  [./small_hard3_Bbar]
+  [small_hard3_Bbar]
     type = 'CSVDiff'
     input = 'small_deform_hard3.i'
     csvdiff = 'small_deform_hard3.csv'
@@ -124,7 +124,7 @@
     prereq = 'small_hard3'
   []
 
-  [./planar1]
+  [planar1]
     type = 'CSVDiff'
     input = 'planar1.i'
     csvdiff = 'planar1.csv'
@@ -132,7 +132,7 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   []
-  [./planar1_Bbar]
+  [planar1_Bbar]
     type = 'CSVDiff'
     input = 'planar1.i'
     csvdiff = 'planar1.csv'
@@ -141,7 +141,7 @@
     cli_args = '--no-trap-fpe'
     prereq = 'planar1'
   []
-  [./planar2]
+  [planar2]
     type = 'CSVDiff'
     input = 'planar2.i'
     csvdiff = 'planar2.csv'
@@ -149,7 +149,7 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   []
-  [./planar2_Bbar]
+  [planar2_Bbar]
     type = 'CSVDiff'
     input = 'planar2.i'
     csvdiff = 'planar2.csv'
@@ -158,7 +158,7 @@
     cli_args = '--no-trap-fpe'
     prereq = 'planar2'
   []
-  [./planar3]
+  [planar3]
     type = 'CSVDiff'
     input = 'planar3.i'
     csvdiff = 'planar3.csv'
@@ -166,7 +166,7 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   []
-  [./planar4]
+  [planar4]
     type = 'CSVDiff'
     input = 'planar4.i'
     csvdiff = 'planar4.csv'
@@ -176,7 +176,7 @@
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
   []
-  [./planar5]
+  [planar5]
     type = 'CSVDiff'
     input = 'planar5.i'
     csvdiff = 'planar5.csv'
@@ -186,7 +186,7 @@
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
   []
-  [./planar6]
+  [planar6]
     type = 'CSVDiff'
     input = 'planar6.i'
     csvdiff = 'planar6.csv'
@@ -194,7 +194,7 @@
     rel_err = 1.0E-5
     cli_args = '--no-trap-fpe'
   []
-  [./planar7]
+  [planar7]
     type = 'CSVDiff'
     input = 'planar7.i'
     csvdiff = 'planar7.csv'
@@ -202,7 +202,7 @@
     rel_err = 1.0E-5
     cli_args = '--no-trap-fpe'
   []
-  [./planar8]
+  [planar8]
     type = 'CSVDiff'
     input = 'planar8.i'
     csvdiff = 'planar8.csv'
@@ -211,7 +211,7 @@
     cli_args = '--no-trap-fpe'
   []
 
-  [./random_smoothed]
+  [random_smoothed]
     type = CSVDiff
     input = 'random_smoothed.i'
     csvdiff = 'random_smoothed.csv'
@@ -219,7 +219,7 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe Mesh/nx=2 Mesh/ny=2 Mesh/xmax=2 Mesh/ymax=2'
   []
-  [./random_smoothed_heavy]
+  [random_smoothed_heavy]
     type = CSVDiff
     input = 'random_smoothed.i'
     csvdiff = 'random_smoothed.csv'
@@ -228,7 +228,7 @@
     cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
     heavy = true
   []
-  [./random_planar]
+  [random_planar]
     type = CSVDiff
     input = 'random_planar.i'
     csvdiff = 'random_planar.csv'
@@ -236,7 +236,7 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe Mesh/nx=2 Mesh/ny=2 Mesh/xmax=2 Mesh/ymax=2'
   []
-  [./random_planar_heavy]
+  [random_planar_heavy]
     type = CSVDiff
     input = 'random_planar.i'
     csvdiff = 'random_planar.csv'
@@ -246,12 +246,12 @@
     heavy = true
   []
 
-  [./small_deform1_update]
+  [small_deform1_update]
     type = 'CSVDiff'
     input = 'small_deform1_update_version.i'
     csvdiff = 'small_deform1_update_version.csv'
   []
-  [./small_deform2_update]
+  [small_deform2_update]
     type = 'CSVDiff'
     input = 'small_deform2_update_version.i'
     csvdiff = 'small_deform2_update_version.csv'
@@ -261,37 +261,37 @@
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
   []
-  [./small_deform3_update]
+  [small_deform3_update]
     type = 'CSVDiff'
     input = 'small_deform3_update_version.i'
     csvdiff = 'small_deform3_update_version.csv'
   []
-  [./small_deform5_update]
+  [small_deform5_update]
     type = 'CSVDiff'
     input = 'small_deform5_update_version.i'
     csvdiff = 'small_deform5_update_version.csv'
   []
-  [./small_deform6_update]
+  [small_deform6_update]
     type = 'CSVDiff'
     input = 'small_deform6_update_version.i'
     csvdiff = 'small_deform6_update_version.csv'
   []
-  [./small_deform_hard3_update]
+  [small_deform_hard3_update]
     type = 'CSVDiff'
     input = 'small_deform_hard3_update_version.i'
     csvdiff = 'small_deform_hard3_update_version.csv'
   []
-  [./small_deform8_update]
+  [small_deform8_update]
     type = 'CSVDiff'
     input = 'small_deform8_update_version.i'
     csvdiff = 'small_deform8_update_version.csv'
   []
-  [./small_deform9_update]
+  [small_deform9_update]
     type = 'CSVDiff'
     input = 'small_deform9_update_version.i'
     csvdiff = 'small_deform9_update_version.csv'
   []
-  [./random_update_heavy]
+  [random_update_heavy]
     type = CSVDiff
     input = 'random_update.i'
     csvdiff = 'random_update.csv'

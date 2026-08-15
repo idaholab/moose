@@ -1,5 +1,5 @@
 [Tests]
-  [./vol_expansion]
+  [vol_expansion]
     type = Exodiff
     input = vol_expansion.i
     exodiff = vol_expansion.e
@@ -7,7 +7,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./undrained_oedometer]
+  [undrained_oedometer]
     type = CSVDiff
     input = undrained_oedometer.i
     csvdiff = undrained_oedometer.csv
@@ -15,7 +15,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation]
+  [pp_generation]
     type = CSVDiff
     input = pp_generation.i
     csvdiff = pp_generation.csv
@@ -23,7 +23,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_action]
+  [pp_generation_action]
     type = CSVDiff
     input = pp_generation_action.i
     csvdiff = pp_generation_action.csv
@@ -31,7 +31,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_fullysat_action]
+  [pp_generation_fullysat_action]
     type = CSVDiff
     input = pp_generation_fullysat_action.i
     csvdiff = pp_generation_fullysat_action.csv
@@ -39,7 +39,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_unconfined]
+  [pp_generation_unconfined]
     type = CSVDiff
     input = pp_generation_unconfined.i
     csvdiff = pp_generation_unconfined.csv
@@ -47,7 +47,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_unconfined_constM]
+  [pp_generation_unconfined_constM]
     type = CSVDiff
     input = pp_generation_unconfined_constM.i
     csvdiff = pp_generation_unconfined_constM.csv
@@ -55,7 +55,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_unconfined_constM_action]
+  [pp_generation_unconfined_constM_action]
     type = CSVDiff
     input = pp_generation_unconfined_constM_action.i
     prereq = pp_generation_unconfined_constM
@@ -65,7 +65,7 @@
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_unconfined_fully_saturated]
+  [pp_generation_unconfined_fully_saturated]
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated.i
     csvdiff = pp_generation_unconfined_fully_saturated.csv
@@ -73,7 +73,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_unconfined_fully_saturated_volume]
+  [pp_generation_unconfined_fully_saturated_volume]
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated_volume.i
     csvdiff = pp_generation_unconfined_fully_saturated_volume.csv
@@ -81,7 +81,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./pp_generation_unconfined_basicthm]
+  [pp_generation_unconfined_basicthm]
     type = CSVDiff
     input = pp_generation_unconfined_basicthm.i
     csvdiff = pp_generation_unconfined_basicthm.csv
@@ -89,7 +89,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./mandel]
+  [mandel]
     type = CSVDiff
     input = mandel.i
     csvdiff = mandel.csv
@@ -97,7 +97,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./mandel_constM]
+  [mandel_constM]
     type = CSVDiff
     input = mandel_constM.i
     csvdiff = mandel_constM.csv
@@ -105,7 +105,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./mandel_fully_saturated]
+  [mandel_fully_saturated]
     type = CSVDiff
     input = mandel_fully_saturated.i
     csvdiff = mandel_fully_saturated.csv
@@ -113,7 +113,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./mandel_fully_saturated_volume]
+  [mandel_fully_saturated_volume]
     type = CSVDiff
     input = mandel_fully_saturated_volume.i
     csvdiff = mandel_fully_saturated_volume.csv
@@ -121,7 +121,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./mandel_basicthm]
+  [mandel_basicthm]
     type = CSVDiff
     input = mandel_basicthm.i
     csvdiff = mandel_basicthm.csv
@@ -129,7 +129,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./terzaghi]
+  [terzaghi]
     type = CSVDiff
     input = terzaghi.i
     csvdiff = terzaghi.csv
@@ -137,7 +137,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./terzaghi_constM]
+  [terzaghi_constM]
     type = CSVDiff
     input = terzaghi_constM.i
     csvdiff = terzaghi_constM.csv
@@ -145,7 +145,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./terzaghi_fully_saturated_volume]
+  [terzaghi_fully_saturated_volume]
     type = CSVDiff
     input = terzaghi_fully_saturated_volume.i
     csvdiff = terzaghi_fully_saturated_volume.csv
@@ -153,7 +153,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./terzaghi_basicthm]
+  [terzaghi_basicthm]
     type = CSVDiff
     input = terzaghi_basicthm.i
     csvdiff = terzaghi_basicthm.csv
@@ -161,7 +161,7 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   []
-  [./vol_expansion_poroperm]
+  [vol_expansion_poroperm]
     type = CSVDiff
     input = vol_expansion_poroperm.i
     csvdiff = vol_expansion_poroperm.csv

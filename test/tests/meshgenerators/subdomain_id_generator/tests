@@ -1,5 +1,5 @@
 [Tests]
-  [./generate_subdomain_id_test]
+  [generate_subdomain_id_test]
     type = 'Exodiff'
     input = 'generate_subdomain_id.i'
     cli_args = '--mesh-only'

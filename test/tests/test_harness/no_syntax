@@ -1,5 +1,5 @@
 [Tests]
-  [./no_syntax]
+  [no_syntax]
     type = RunApp
     input = good.i
   []

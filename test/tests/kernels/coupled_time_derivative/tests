@@ -1,5 +1,5 @@
 [Tests]
-  [./testdirichlet]
+  [testdirichlet]
     type = 'Exodiff'
     input = 'coupled_time_derivative_test.i'
     exodiff = 'coupled_time_derivative_test_out.e'
@@ -7,7 +7,7 @@
     design = '/CoupledTimeDerivative.md'
     requirement = 'A coupled time derivative kernel shall be provided'
   []
-  [./adtestdirichlet]
+  [adtestdirichlet]
     type = 'Exodiff'
     input = 'ad_coupled_time_derivative_test.i'
     exodiff = 'coupled_time_derivative_test_out.e'
@@ -16,7 +16,7 @@
     design = '/ADCoupledTimeDerivative.md'
     requirement = 'A coupled time derivative kernel with forward mode automatic differentiation shall be provided'
   []
-  [./vectortestdirichlet]
+  [vectortestdirichlet]
     type = 'Exodiff'
     input = 'vector_coupled_time_derivative_test.i'
     exodiff = 'vector_coupled_time_derivative_test_out.e'
@@ -24,7 +24,7 @@
     design = 'VectorCoupledTimeDerivative.md'
     requirement = 'A coupled time derivative kernel compatible with vector variables with hand-coded jacobians shall be provided'
   []
-  [./jac_vectortestdirichlet]
+  [jac_vectortestdirichlet]
     type = 'PetscJacobianTester'
     input = 'vector_coupled_time_derivative_test.i'
     cli_args = 'Outputs/exodus=false'

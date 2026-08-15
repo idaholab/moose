@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e-s005'
@@ -9,7 +9,7 @@
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   []
 
-  [./temperature_gradient]
+  [temperature_gradient]
     type = 'Exodiff'
     input = 'temperature_gradient.i'
     exodiff = 'temperature_gradient_out.e'
@@ -18,7 +18,7 @@
     issues = '#9507'
   []
 
-  [./thumb]
+  [thumb]
     type = 'Exodiff'
     input = 'thumb.i'
     exodiff = 'thumb_out.e-s006'
@@ -28,7 +28,7 @@
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   []
 
-  [./hex]
+  [hex]
     type = 'Exodiff'
     input = 'hex.i'
     exodiff = 'hex_out.e'
@@ -37,7 +37,7 @@
     issues = '#8810'
   []
 
-  [./hex_kdtree]
+  [hex_kdtree]
     type = 'Exodiff'
     input = 'hex.i'
     exodiff = 'hex_out.e'
@@ -47,7 +47,7 @@
     issues = '#8810'
   []
 
-  [./boundingbox]
+  [boundingbox]
     type = 'Exodiff'
     input = 'boundingbox.i'
     exodiff = 'boundingbox_out.e-s003'
@@ -56,7 +56,7 @@
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   []
 
-  [./evolution]
+  [evolution]
     type = 'Exodiff'
     input = 'evolution.i'
     exodiff = 'evolution_out.e'
@@ -65,7 +65,7 @@
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   []
 
-  [./constant_mobility]
+  [constant_mobility]
     type = 'Exodiff'
     input = 'constant_mobility.i'
     exodiff = 'constant_mobility_out.e'
@@ -74,7 +74,7 @@
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   []
 
-  [./off-diagonal]
+  [off-diagonal]
     type = 'Exodiff'
     input = 'off-diagonal.i'
     exodiff = 'off-diagonal_out.e-s002'
@@ -84,7 +84,7 @@
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   []
 
-  [./explicit]
+  [explicit]
     type = 'Exodiff'
     input = 'explicit.i'
     exodiff = 'explicit_out.e'
@@ -93,7 +93,7 @@
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   []
 
-  [./voronoi]
+  [voronoi]
     type = 'Exodiff'
     input = 'voronoi.i'
     exodiff = 'voronoi_out.e'
@@ -102,7 +102,7 @@
     issues = '#8810'
   []
 
-  [./faux_voronoi]
+  [faux_voronoi]
     type = 'Exodiff'
     input = 'voronoi.i'
     exodiff = 'voronoi_out.e'
@@ -114,7 +114,7 @@
     issues = '#14697'
   []
 
-  [./mesh_adaptivity]
+  [mesh_adaptivity]
     type = 'Exodiff'
     input = 'voronoi_adaptivity.i'
     exodiff = 'voronoi_adaptivity_out.e voronoi_adaptivity_out.e-s002'
@@ -124,7 +124,7 @@
     issues = '#15348'
   []
 
-  [./mesh_adaptivity_voronoi]
+  [mesh_adaptivity_voronoi]
     type = 'Exodiff'
     input = 'voronoi_adaptivity.i'
     exodiff = 'voronoi_adaptivity_out.e voronoi_adaptivity_out.e-s002'
@@ -136,7 +136,7 @@
     issues = '#15348  #16143'
   []
 
-  [./mesh_adaptivity_ghost]
+  [mesh_adaptivity_ghost]
     type = 'Exodiff'
     input = 'voronoi_adaptivity_ghost.i'
     exodiff = 'voronoi_adaptivity_ghost_out.e voronoi_adaptivity_ghost_out.e-s002'
@@ -153,7 +153,7 @@
     issues = '#15348  #16143'
   []
 
-  [./voronoi_columnar_3D]
+  [voronoi_columnar_3D]
     type = 'Exodiff'
     input = 'voronoi_columnar_3D.i'
     exodiff = 'voronoi_columnar_3D_out.e'
@@ -162,7 +162,7 @@
     issues = '#8810'
   []
 
-  [./particle]
+  [particle]
     type = 'Exodiff'
     input = 'particle.i'
     exodiff = 'particle_out.e-s005'

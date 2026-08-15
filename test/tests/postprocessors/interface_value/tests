@@ -1,5 +1,5 @@
 [Tests]
-  [./interface_average_variable_value_postprocessor_test]
+  [interface_average_variable_value_postprocessor_test]
     type = 'Exodiff'
     input = 'interface_fe_variable_value_postprocessor.i'
     exodiff = 'InterfaceAverageVariableValuePostprocessor_fe.e'
@@ -16,7 +16,7 @@
     issues = '#11647'
     max_threads = 2
   []
-  [./interface_integral_variable_value_postprocessor_test]
+  [interface_integral_variable_value_postprocessor_test]
     type = 'Exodiff'
     input = 'interface_fe_variable_value_postprocessor.i'
     exodiff = 'InterfaceIntegralVariableValuePostprocessor_fe.e'
@@ -33,7 +33,7 @@
     issues = '#11647'
     max_threads = 2
   []
-  [./interface_average_variable_value_postprocessor_fv_test]
+  [interface_average_variable_value_postprocessor_fv_test]
     type = 'Exodiff'
     input = 'interface_fv_variable_value_postprocessor.i'
     exodiff = 'InterfaceAverageVariableValuePostprocessor_fv.e'
@@ -51,7 +51,7 @@
     issues = '#11647 #16099'
     max_threads = 2
   []
-  [./interface_integral_variable_value_postprocessor_fv_test]
+  [interface_integral_variable_value_postprocessor_fv_test]
     type = 'Exodiff'
     input = 'interface_fv_variable_value_postprocessor.i'
     exodiff = 'InterfaceIntegralVariableValuePostprocessor_fv.e'

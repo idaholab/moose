@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'scalarkernel_vectorpostprocessor.i'
     exodiff = 'scalarkernel_vectorpostprocessor_out.e'

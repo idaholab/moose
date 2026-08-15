@@ -1,7 +1,7 @@
 [Tests]
   issues = '#1927'
   design = syntax/Outputs/index.md
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'position.i'
     exodiff = 'position_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test1]
+  [test1]
     type = 'Exodiff'
     input = 'test1.i'
     exodiff = 'test1_out.e'
@@ -7,7 +7,7 @@
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities.'
   []
-  [./test2]
+  [test2]
     type = 'Exodiff'
     input = 'test2.i'
     exodiff = 'test2_out.e'
@@ -15,7 +15,7 @@
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities.'
   []
-  [./test3]
+  [test3]
     type = 'Exodiff'
     input = 'test3.i'
     exodiff = 'test3_out.e'
@@ -23,7 +23,7 @@
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities with an inclination dependence.'
   []
-  [./testwidth1]
+  [testwidth1]
     type = 'Exodiff'
     input = 'testwidth1.i'
     exodiff = 'testwidth1_out.e'

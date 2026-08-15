@@ -1,9 +1,9 @@
 [Tests]
   issues = '#8437 #26920'
   design = 'syntax/Materials/index.md'
-  [./real]
+  [real]
     requirement = 'The system shall be able to produce a valid Real material object on the fly for use in calculations requiring material properties'
-    [./all_qps]
+    [all_qps]
       type = 'Exodiff'
       input = 'generic_constant_material.i'
       exodiff = 'generic_constant_material_out.e'
@@ -12,7 +12,7 @@
     # Run this test after the main test, setting the constant_on_elem
     # flag to true for one of the Materials.  There should be no
     # difference between this version and the original gold file.
-    [./constant_on_elem]
+    [constant_on_elem]
       type = 'Exodiff'
       input = 'generic_constant_material.i'
       exodiff = 'generic_constant_material_out.e'
@@ -21,42 +21,42 @@
       detail = 'with a single value per element for efficiency that is made available to all quadrature points in a coupled calculation.'
     []
   []
-  [./ranktwotensor]
+  [ranktwotensor]
     requirement = 'The system shall shall be able to compute a RankTwoTensor material object'
-    [./constant]
+    [constant]
       type = 'CSVDiff'
       input = 'generic_constant_rank_two_tensor.i'
       csvdiff = 'generic_constant_rank_two_tensor_out.csv'
       detail = 'with constant values.'
     []
-    [./ad_constant]
+    [ad_constant]
       type = 'CSVDiff'
       input = 'ad_generic_constant_rank_two_tensor.i'
       csvdiff = 'ad_generic_constant_rank_two_tensor_out.csv'
       detail = 'with constant values using automatic differentiation.'
     []
-    [./function]
+    [function]
       type = 'CSVDiff'
       input = 'generic_function_rank_two_tensor.i'
       csvdiff = 'generic_function_rank_two_tensor_out.csv'
       detail = 'with values determined by functions.'
     []
-    [./ad_function]
+    [ad_function]
       type = 'CSVDiff'
       input = 'ad_generic_function_rank_two_tensor.i'
       csvdiff = 'ad_generic_function_rank_two_tensor_out.csv'
       detail = 'with values determined by functions using automatic differentiation.'
     []
   []
-  [./symmetric_ranktwotensor]
+  [symmetric_ranktwotensor]
     requirement = 'The system shall be able to compute a SymmetricRankTwoTensor material object'
-    [./constant]
+    [constant]
       type = 'CSVDiff'
       input = 'generic_constant_symmetric_rank_two_tensor.i'
       csvdiff = 'generic_constant_symmetric_rank_two_tensor_out.csv'
       detail = 'with constant values.'
     []
-    [./ad_constant]
+    [ad_constant]
       type = 'CSVDiff'
       input = 'ad_generic_constant_symmetric_rank_two_tensor.i'
       csvdiff = 'ad_generic_constant_symmetric_rank_two_tensor_out.csv'
@@ -65,13 +65,13 @@
   []
   [realvectorvalue]
     requirement = 'The system shall be able to compute a RealVectorValue material property'
-    [./constant]
+    [constant]
       type = 'Exodiff'
       input = 'generic_constant_real_vector_value.i'
       exodiff = 'generic_constant_real_vector_value_out.e'
       detail = 'with constant values.'
     []
-    [./ad_constant]
+    [ad_constant]
       type = 'Exodiff'
       input = 'ad_generic_constant_real_vector_value.i'
       exodiff = 'ad_generic_constant_real_vector_value_out.e'

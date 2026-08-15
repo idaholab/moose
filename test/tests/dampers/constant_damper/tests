@@ -1,7 +1,7 @@
 [Tests]
   issues = 'a36e89da9e8028ea068c330f516c7cc805d4cdeb'
   design = 'source/dampers/ConstantDamper.md'
-  [./testdamper]
+  [testdamper]
     type = 'Exodiff'
     input = 'constant_damper_test.i'
     exodiff = 'out.e'

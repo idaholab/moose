@@ -1,5 +1,5 @@
 [Tests]
-  [./stationary_equal_3d]
+  [stationary_equal_3d]
     type = Exodiff
     input = stationary_equal_3d.i
     exodiff = 'stationary_equal_3d_out.e'
@@ -10,7 +10,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./stationary_fluxjump_3d]
+  [stationary_fluxjump_3d]
     type = Exodiff
     input = stationary_fluxjump_3d.i
     exodiff = 'stationary_fluxjump_3d_out.e'
@@ -21,7 +21,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./stationary_jump_3d]
+  [stationary_jump_3d]
     type = Exodiff
     input = stationary_jump_3d.i
     exodiff = 'stationary_jump_3d_out.e'
@@ -32,7 +32,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./stationary_jump_fluxjump_3d]
+  [stationary_jump_fluxjump_3d]
     type = Exodiff
     input = stationary_jump_fluxjump_3d.i
     exodiff = 'stationary_jump_fluxjump_3d_out.e'

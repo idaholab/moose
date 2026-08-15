@@ -1,5 +1,5 @@
 [Tests]
-  [./convection]
+  [convection]
     type = Exodiff
     input = conjugate_heat_transfer.i
     exodiff = conjugate_heat_transfer_out.e

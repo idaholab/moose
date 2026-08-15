@@ -1,7 +1,7 @@
 [Tests]
   issues = '#3532'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./normalized_penalty]
+  [normalized_penalty]
     type = Exodiff
     input = 'normalized_penalty.i'
     exodiff = 'normalized_penalty_out.e'
@@ -9,7 +9,7 @@
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Penalty contact.'
   []
-  [./normalized_penalty_Q8]
+  [normalized_penalty_Q8]
     type = Exodiff
     input = 'normalized_penalty_Q8.i'
     exodiff = 'normalized_penalty_Q8_out.e'
@@ -19,7 +19,7 @@
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
   []
-  [./normalized_penalty_kin]
+  [normalized_penalty_kin]
     type = Exodiff
     input = 'normalized_penalty_kin.i'
     exodiff = 'normalized_penalty_kin_out.e'
@@ -27,7 +27,7 @@
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Kinematic contact.'
   []
-  [./normalized_penalty_kin_Q8]
+  [normalized_penalty_kin_Q8]
     type = Exodiff
     input = 'normalized_penalty_kin_Q8.i'
     exodiff = 'normalized_penalty_kin_Q8_out.e'

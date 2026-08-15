@@ -1,5 +1,5 @@
 [Tests]
-  [./except01]
+  [except01]
     type = 'RunException'
     input = 'except01.i'
     expect_err = 'ComputeEigenstrainFromInitialStress: 9 initial stress functions must be provided.  You supplied 3'
@@ -7,7 +7,7 @@
     issues = "#9749"
     requirement = "SolidMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of functions to define the initial stress tensor"
   []
-  [./except02]
+  [except02]
     type = 'RunException'
     input = 'except02.i'
     expect_err = 'ComputeEigenstrainFromInitialStress: If you supply initial_stress_aux, 9 values must be given.  You supplied 3'
@@ -15,7 +15,7 @@
     issues = "#13087"
     requirement = "SolidMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of AuxVariables to define the initial stress tensor"
   []
-  [./gravity]
+  [gravity]
     type = 'Exodiff'
     input = 'gravity.i'
     exodiff = 'gravity.e'
@@ -23,7 +23,7 @@
     issues = "#9749"
     requirement = "SolidMechanics shall allow users to specify initial stresses using Functions"
   []
-  [./gravity_with_aux]
+  [gravity_with_aux]
     type = 'Exodiff'
     input = 'gravity_with_aux.i'
     exodiff = 'gravity_with_aux.e'
@@ -31,7 +31,7 @@
     issues = "#13087"
     requirement = "SolidMechanics shall allow users to specify initial stresses using AuxVariables"
   []
-  [./gravity_cosserat]
+  [gravity_cosserat]
     type = 'Exodiff'
     input = 'gravity_cosserat.i'
     exodiff = 'gravity_cosserat.e'
@@ -39,7 +39,7 @@
     issues = "#9749"
     requirement = "SolidMechanics shall allow users to specify initial stresses for problems with Cosserat mechanics"
   []
-  [./mc_tensile]
+  [mc_tensile]
     type = 'CSVDiff'
     input = 'mc_tensile.i'
     csvdiff = 'mc_tensile.csv'

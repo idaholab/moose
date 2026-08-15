@@ -1,5 +1,5 @@
 [Tests]
-  [./glued_penalty]
+  [glued_penalty]
     type = Exodiff
     input = glued_penalty.i
     exodiff = 'glued_penalty_out.e'

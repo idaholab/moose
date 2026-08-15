@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     issues = '#7043'
     design = 'TemperatureDependentHardeningStressUpdate.md'
     type = 'Exodiff'
@@ -8,7 +8,7 @@
     requirement = 'The system shall compute the stress as a function of temperature and plastic strain from user-supplied hardening functions not using automatic differentiation.'
     capabilities = 'method!=dbg'
   []
-  [./ADtest]
+  [ADtest]
     issues = '#18454'
     design = 'TemperatureDependentHardeningStressUpdate.md'
     type = 'Exodiff'

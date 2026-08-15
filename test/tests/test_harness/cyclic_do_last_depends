@@ -1,10 +1,10 @@
 [Tests]
-  [./do_last]
+  [do_last]
     type = RunApp
     input = good.i
     prereq = ALL
   []
-  [./a]
+  [a]
     type = RunApp
     input = good.i
     prereq = do_last

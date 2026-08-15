@@ -1,5 +1,5 @@
 [Tests]
-  [./center_crack]
+  [center_crack]
     type = 'Exodiff'
     input = '2D_center_crack.i'
     cli_args = '--mesh-only'
@@ -12,7 +12,7 @@
     issues = '#11561'
   []
 
-  [./double_edged_cracks]
+  [double_edged_cracks]
     type = 'Exodiff'
     input = '2D_double_edged_cracks.i'
     cli_args = '--mesh-only'
@@ -25,7 +25,7 @@
     issues = '#11561'
   []
 
-  [./2D_convert_one]
+  [2D_convert_one]
     type = 'Exodiff'
     input = '2D_convert_one.i'
     cli_args = '--mesh-only'
@@ -38,7 +38,7 @@
     issues = '#11561'
   []
 
-  [./2D_convert_one_retain]
+  [2D_convert_one_retain]
     type = 'Exodiff'
     input = '2D_convert_one_retain.i'
     cli_args = '--mesh-only'
@@ -51,7 +51,7 @@
     issues = '#11561'
   []
 
-  [./2D_convert_all_retain]
+  [2D_convert_all_retain]
     type = 'Exodiff'
     input = '2D_convert_all_retain.i'
     cli_args = '--mesh-only'
@@ -64,7 +64,7 @@
     issues = '#11561'
   []
 
-  [./3D_generate_sideset]
+  [3D_generate_sideset]
     type = 'Exodiff'
     input = '3D_sideset.i'
     cli_args = '--mesh-only'
@@ -77,7 +77,7 @@
     issues = '#11561'
   []
 
-  [./2D_generate_sidesets_partial_boundary]
+  [2D_generate_sidesets_partial_boundary]
     type = 'Exodiff'
     input = '2D_sidesets_partial_boundary.i'
     cli_args = '--mesh-only'
@@ -90,7 +90,7 @@
     issues = '#17723'
   []
 
-  [./3D_generate_sidesets_partial_boundary]
+  [3D_generate_sidesets_partial_boundary]
     type = 'Exodiff'
     input = '3D_sidesets_partial_boundary.i'
     cli_args = '--mesh-only'
@@ -103,7 +103,7 @@
     issues = '#17723'
   []
 
-  [./2D_single_interface_block]
+  [2D_single_interface_block]
     type = 'Exodiff'
     input = '2D_single_interface_block.i'
     cli_args = '--mesh-only'
@@ -118,7 +118,7 @@
     issues = '#11561'
   []
 
-  [./Error_nonexisting_blockID]
+  [Error_nonexisting_blockID]
     type = 'RunException'
     input = 'Error_nonexisting_blockID.i'
     cli_args = '--mesh-only'
@@ -129,7 +129,7 @@
     issues = '#17723'
   []
 
-  [./Error_wrong_bonding_blockID]
+  [Error_wrong_bonding_blockID]
     type = 'RunException'
     input = 'Error_wrong_bonding_blockID.i'
     cli_args = '--mesh-only'
@@ -140,7 +140,7 @@
     issues = '#17723'
   []
 
-  [./Error_nonexisting_sideset]
+  [Error_nonexisting_sideset]
     type = 'RunException'
     input = 'Error_nonexisting_sideset.i'
     cli_args = '--mesh-only'

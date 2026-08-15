@@ -2,7 +2,7 @@
   issues = '#5771'
   design = 'ElementL2Difference.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'element_l2_difference.i'
     exodiff = 'element_l2_difference_out.e'

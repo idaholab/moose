@@ -1,5 +1,5 @@
 [Tests]
-  [./mineral]
+  [mineral]
     type = CSVDiff
     input = mineral.i
     csvdiff = mineral_out.csv

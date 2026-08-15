@@ -1,5 +1,5 @@
 [Tests]
-  [./except1]
+  [except1]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -10,7 +10,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./except2]
+  [except2]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -21,7 +21,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./except3]
+  [except3]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -32,7 +32,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./except4]
+  [except4]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -43,7 +43,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./except5]
+  [except5]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -54,7 +54,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./except6]
+  [except6]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -65,7 +65,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_1]
+  [spatial_1]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -75,7 +75,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_1_console]
+  [spatial_1_console]
     type = RunApp
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -87,7 +87,7 @@
     issues = '#15693'
     design = 'GeochemistryConsoleOutput.md'
   []
-  [./spatial_1_console_MPI]
+  [spatial_1_console_MPI]
     type = RunApp
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -101,7 +101,7 @@
     issues = '#15693'
     design = 'GeochemistryConsoleOutput.md'
   []
-  [./spatial_2]
+  [spatial_2]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -111,7 +111,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_3]
+  [spatial_3]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -121,7 +121,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_4]
+  [spatial_4]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -131,7 +131,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_4_threads]
+  [spatial_4_threads]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -143,7 +143,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_4_mpi]
+  [spatial_4_mpi]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -155,7 +155,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_4_threads_mpi]
+  [spatial_4_threads_mpi]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -168,7 +168,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_5]
+  [spatial_5]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -178,7 +178,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_6]
+  [spatial_6]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -188,7 +188,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_7_no_adaptive]
+  [spatial_7_no_adaptive]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -199,7 +199,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_7_dt_min]
+  [spatial_7_dt_min]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -210,7 +210,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_7]
+  [spatial_7]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -220,7 +220,7 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   []
-  [./spatial_8]
+  [spatial_8]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

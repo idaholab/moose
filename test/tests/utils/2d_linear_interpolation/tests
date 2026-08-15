@@ -1,7 +1,7 @@
 [Tests]
   design = 'BilinearInterpolation.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '2d_linear_interpolation_test.i'
     exodiff = 'out.e'
@@ -10,7 +10,7 @@
     issues = '#1405'
   []
 
-  [./test_internal]
+  [test_internal]
     type = 'Exodiff'
     input = '2d_linear_interpolation_test_internal.i'
     exodiff = 'out.e'
@@ -20,7 +20,7 @@
     issues = '#5991'
   []
 
-  [./data_file_and_xyz_error]
+  [data_file_and_xyz_error]
     type = 'RunException'
     input = '2d_linear_interpolation_test_internal.i'
     cli_args = 'Outputs/csv=false Functions/u/data_file=fred.csv'
@@ -30,7 +30,7 @@
     issues = '#5991'
   []
 
-  [./size_xyz_error]
+  [size_xyz_error]
     type = 'RunException'
     input = '2d_linear_interpolation_test_internal.i'
     cli_args = "Outputs/exodus=false Functions/u/x='0 2 3 4'"
@@ -40,7 +40,7 @@
     issues = '#5991'
   []
 
-  [./xyz_error]
+  [xyz_error]
     type = 'RunException'
     input = 'xyz_error.i'
     expect_err = "In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified"

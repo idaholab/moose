@@ -1,7 +1,7 @@
 [Tests]
   design = 'AdvectionBC.md'
   issues = '#13283'
-  [./advection_bc]
+  [advection_bc]
     type = 'Exodiff'
     input = 'advection_bc.i'
     exodiff = 'advection_bc_out.e'

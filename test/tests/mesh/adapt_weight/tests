@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'adapt_weight_test.i'
     exodiff = 'out.e-s002'

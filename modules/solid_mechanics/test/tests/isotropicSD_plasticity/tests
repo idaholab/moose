@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'isotropicSD.i'
     csvdiff = 'isotropicSD_out.csv'
@@ -7,7 +7,7 @@
     abs_zero = 1.0E-3
   []
 
-  [./power_rule]
+  [power_rule]
     type = 'CSVDiff'
     input = 'powerRuleHardening.i'
     csvdiff = 'powerRuleHardening_out.csv'

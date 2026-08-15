@@ -1,7 +1,7 @@
 [Tests]
   issues = '#2713'
   design = 'source/auxkernels/PenetrationAux.md source/auxkernels/GapValueAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '2d_interior_boundary_penetration_locator.i'
     exodiff = '2d_interior_boundary_penetration_locator_out.e'

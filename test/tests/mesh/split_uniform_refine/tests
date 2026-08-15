@@ -1,7 +1,7 @@
 [Tests]
   design = 'Mesh/index.md Mesh/splitting.md'
 
- [./square]
+ [square]
    type = 'Exodiff'
    input = '3d_diffusion.i'
    cli_args = '-r 1 Mesh/skip_refine_when_use_split=false --use-split  --split-file square'

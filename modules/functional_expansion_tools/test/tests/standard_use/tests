@@ -1,7 +1,7 @@
 [Tests]
   design = 'functional_expansion_tools/index.md'
   issues = '#10577'
-  [./interface_coupling]
+  [interface_coupling]
     type = Exodiff
     input = interface_coupled.i
     exodiff = interface_coupled_out.e
@@ -12,7 +12,7 @@
   []
 
 
-  [./volume_coupling]
+  [volume_coupling]
     # This test couples a parent and sub app in 1D for a light but fully-functional volumetric test
     type = Exodiff
     input = volume_coupled.i
@@ -22,7 +22,7 @@
     requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a parent and sub app in 1D.'
   []
 
-  [./volume_coupling_custom_norm]
+  [volume_coupling_custom_norm]
     type = Exodiff
     input = volume_coupling_custom_norm.i
     exodiff = volume_coupled_out.e
@@ -33,7 +33,7 @@
   []
 
 
-  [./print_coefficients]
+  [print_coefficients]
     type = RunApp
     input = multiapp_print_coefficients.i
     group = functional_expansion
@@ -41,7 +41,7 @@
   []
 
 
-  [./neglect_invalid_enum]
+  [neglect_invalid_enum]
     type = RunApp
     input = neglect_invalid_enum.i
     group = functional_expansion
@@ -49,7 +49,7 @@
   []
 
 
-  [./incompatible_dimensions]
+  [incompatible_dimensions]
     type = RunApp
     input = multiapp_different_physical_boundaries.i
     group = functional_expansion_tools

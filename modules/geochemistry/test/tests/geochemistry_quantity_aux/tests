@@ -1,5 +1,5 @@
 [Tests]
-  [./except1]
+  [except1]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -9,7 +9,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except2a]
+  [except2a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -20,7 +20,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except2b]
+  [except2b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -31,7 +31,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except2c]
+  [except2c]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -42,7 +42,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except2d]
+  [except2d]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -53,7 +53,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except2g]
+  [except2g]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -64,7 +64,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except2e]
+  [except2e]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -75,7 +75,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except2f]
+  [except2f]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -86,7 +86,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except3a]
+  [except3a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -97,7 +97,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except3b]
+  [except3b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -108,7 +108,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except4a]
+  [except4a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -119,7 +119,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except4b]
+  [except4b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -130,7 +130,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except5a]
+  [except5a]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -141,7 +141,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except5b]
+  [except5b]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -152,7 +152,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except5c]
+  [except5c]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -163,7 +163,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except5d]
+  [except5d]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -174,7 +174,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./except5e]
+  [except5e]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -185,7 +185,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./surface_charge]
+  [surface_charge]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -196,7 +196,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./surface_potential]
+  [surface_potential]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -207,7 +207,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./free_cm3]
+  [free_cm3]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -217,7 +217,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./free_mg]
+  [free_mg]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -227,7 +227,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./molal]
+  [molal]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -237,7 +237,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./mg_per_kg]
+  [mg_per_kg]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -247,7 +247,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./neglog10a]
+  [neglog10a]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -257,7 +257,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./activity]
+  [activity]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -267,7 +267,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./bulk_moles]
+  [bulk_moles]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -277,7 +277,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./temperature]
+  [temperature]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -287,7 +287,7 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./kinetic_moles]
+  [kinetic_moles]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -297,7 +297,7 @@
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./kinetic_free_mg]
+  [kinetic_free_mg]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -308,7 +308,7 @@
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./kinetic_free_cm3]
+  [kinetic_free_cm3]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -319,7 +319,7 @@
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   []
-  [./kinetic_rate]
+  [kinetic_rate]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

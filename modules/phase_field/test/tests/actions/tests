@@ -1,5 +1,5 @@
 [Tests]
-  [./Nonconserved_1var]
+  [Nonconserved_1var]
     type = Exodiff
     input = 'Nonconserved_1var.i'
     exodiff = 'Nonconserved_1var_out.e'
@@ -7,7 +7,7 @@
     design = 'actions/NonconservedAction.md'
     requirement = 'The phase field module shall provide an action to set up an Allen-Cahn problem'
   []
-  [./Nonconserved_highorder]
+  [Nonconserved_highorder]
     type = Exodiff
     input = 'Nonconserved_highorder.i'
     exodiff = 'Nonconserved_highorder_out.e'
@@ -15,7 +15,7 @@
     design = 'actions/NonconservedAction.md'
     requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with higher order elements'
   []
-  [./Nonconserved_variableL]
+  [Nonconserved_variableL]
     type = Exodiff
     input = 'Nonconserved_variableL.i'
     exodiff = 'Nonconserved_variableL_out.e'
@@ -23,7 +23,7 @@
     design = 'actions/NonconservedAction.md'
     requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with variable dependent mobilities'
   []
-  [./Nonconserved_2vars]
+  [Nonconserved_2vars]
     type = Exodiff
     input = 'Nonconserved_2vars.i'
     exodiff = 'Nonconserved_2vars_out.e'
@@ -31,7 +31,7 @@
     design = 'actions/NonconservedAction.md'
     requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with multiple order parameters'
   []
-  [./conserved_direct_1var]
+  [conserved_direct_1var]
     type = Exodiff
     input = 'conserved_direct_1var.i'
     exodiff = 'conserved_direct_1var_out.e'
@@ -41,7 +41,7 @@
     # uses exodus oversampling see #2295
     recover = false
   []
-  [./conserved_split_1var]
+  [conserved_split_1var]
     type = Exodiff
     input = 'conserved_split_1var.i'
     exodiff = 'conserved_split_1var_out.e'
@@ -49,7 +49,7 @@
     design = 'actions/ConservedAction.md'
     requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem'
   []
-  [./conserved_split_1var_high_order]
+  [conserved_split_1var_high_order]
     type = Exodiff
     input = 'conserved_split_1var_high_order.i'
     exodiff = 'conserved_split_1var_high_order_out.e'
@@ -57,7 +57,7 @@
     design = 'actions/ConservedAction.md'
     requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem with higher order elements'
   []
-  [./conserved_direct_1var_variable_mob]
+  [conserved_direct_1var_variable_mob]
     type = Exodiff
     input = 'conserved_direct_1var_variable_mob.i'
     exodiff = 'conserved_direct_1var_variable_mob_out.e'
@@ -67,7 +67,7 @@
     # uses exodus oversampling see #2295
     recover = false
   []
-  [./conserved_split_1var_variable_mob]
+  [conserved_split_1var_variable_mob]
     type = Exodiff
     input = 'conserved_split_1var_variable_mob.i'
     exodiff = 'conserved_split_1var_variable_mob_out.e'
@@ -76,7 +76,7 @@
     design = 'actions/ConservedAction.md'
     requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem with variable dependent mobilities'
   []
-  [./both_split_2vars]
+  [both_split_2vars]
     type = Exodiff
     input = 'both_split_2vars.i'
     exodiff = 'both_split_2vars_out.e'
@@ -84,7 +84,7 @@
     design = 'actions/ConservedAction.md actions/NonconservedAction.md'
     requirement = 'The phase field module NonconservedAction and ConservedAction can be combined to construct a coupled Allen-Chan and split Cahn-Hilliard problem'
   []
-  [./both_direct_2vars]
+  [both_direct_2vars]
     type = Exodiff
     input = 'both_direct_2vars.i'
     exodiff = 'both_direct_2vars_out.e'
@@ -94,7 +94,7 @@
     # uses exodus oversampling see #2295
     recover = false
     []
-  [./conserved_forward_split_1var]
+  [conserved_forward_split_1var]
     type = Exodiff
     input = 'conserved_forward_split_1var.i'
     exodiff = 'conserved_forward_split_1var_out.e'
@@ -102,7 +102,7 @@
     design = 'actions/ConservedAction.md'
     requirement = 'The phase field module shall provide an action to set up a forward split Cahn-Hilliard problem'
   []
-  [./grain_growth]
+  [grain_growth]
     type = Exodiff
     input = 'grain_growth.i'
     exodiff = 'grain_growth_out.e'
@@ -110,7 +110,7 @@
     design = 'actions/GrainGrowthAction.md'
     requirement = 'The phase field module shall provide an action to set up grain growth problems'
   []
-  [./ad_grain_growth]
+  [ad_grain_growth]
     type = Exodiff
     input = 'grain_growth.i'
     exodiff = 'grain_growth_out.e'
@@ -120,7 +120,7 @@
     cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Materials/Copper/type=ADGBEvolution'
     prereq = 'grain_growth'
   []
-  [./ad_grain_growth-jac]
+  [ad_grain_growth-jac]
     type = 'PetscJacobianTester'
     input = 'grain_growth.i'
     issues = '#13539'
@@ -133,7 +133,7 @@
     cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Materials/Copper/type=ADGBEvolution Executioner/num_steps=1 Mesh/nx=10 Mesh/ny=10'
     prereq = 'ad_grain_growth'
   []
-  [./grain_growth_with_c]
+  [grain_growth_with_c]
     type = Exodiff
     input = 'grain_growth_with_c.i'
     exodiff = 'grain_growth_with_c_out.e'
@@ -141,7 +141,7 @@
     design = 'actions/GrainGrowthAction.md'
     requirement = 'The grain growth action shall have the ability to set up problems with a pinning particle'
   []
-  [./grain_growth_with_T_grad]
+  [grain_growth_with_T_grad]
     type = Exodiff
     input = 'grain_growth_with_T_grad.i'
     exodiff = 'grain_growth_with_T_grad_out.e'
@@ -149,7 +149,7 @@
     design = 'actions/GrainGrowthAction.md'
     requirement = 'The grain growth action shall have the ability to set up problems with a temperature gradient'
   []
-  [./grand_potential_kernels]
+  [grand_potential_kernels]
     # Test
     type = Exodiff
     input = 'gpm_kernel.i'

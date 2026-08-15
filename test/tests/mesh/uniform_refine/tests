@@ -1,7 +1,7 @@
 [Tests]
   design = 'Mesh/index.md'
 
-  [./square]
+  [square]
     type = 'Exodiff'
     input = '3d_diffusion.i'
     exodiff = '3d_diffusion_out.n.3.0	3d_diffusion_out.n.3.1	3d_diffusion_out.n.3.2'

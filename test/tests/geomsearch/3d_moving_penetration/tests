@@ -32,7 +32,7 @@
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, disjoint surfaces of a moving interface in 3D using a tangential tolerance of for the distance."
   []
 
-  [./pl_test1qtt]
+  [pl_test1qtt]
     type = 'Exodiff'
     input = 'pl_test1qtt.i'
     exodiff = 'pl_test1qtt_out.e'

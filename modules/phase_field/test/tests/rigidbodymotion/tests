@@ -1,6 +1,6 @@
 [Tests]
 
-  [./grain_motion]
+  [grain_motion]
     type = 'Exodiff'
     input = 'grain_motion.i'
     exodiff = 'grain_motion_out.e'
@@ -9,14 +9,14 @@
     mesh_mode = REPLICATED
   []
 
-  [./grain_forcedensity]
+  [grain_forcedensity]
     type = 'Exodiff'
     input = 'grain_forcedensity.i'
     exodiff = 'grain_forcedensity_out.e'
     allow_warnings = true
   []
 
-  [./grain_motion2]
+  [grain_motion2]
     type = 'Exodiff'
     input = 'grain_motion2.i'
     exodiff = 'grain_motion2_out.e'
@@ -25,7 +25,7 @@
     mesh_mode = REPLICATED
   []
 
-  [./grain_motion_faux]
+  [grain_motion_faux]
     type = 'Exodiff'
     input = 'grain_motion_fauxGT.i'
     exodiff = 'grain_motion_fauxGT_out.e'
@@ -34,7 +34,7 @@
     mesh_mode = REPLICATED
   []
 
-  [./grain_appliedforcedensity]
+  [grain_appliedforcedensity]
     type = 'Exodiff'
     input = 'grain_appliedforcedensity.i'
     exodiff = 'grain_appliedforcedensity_out.e'
@@ -43,14 +43,14 @@
     mesh_mode = REPLICATED
   []
 
-  [./grain_forcesum]
+  [grain_forcesum]
     type = 'Exodiff'
     input = 'grain_forcesum.i'
     exodiff = 'grain_forcesum_out.e'
     allow_warnings = true
   []
 
-  [./grain_forcemasked]
+  [grain_forcemasked]
     type = 'Exodiff'
     input = 'grain_maskedforce.i'
     exodiff = 'grain_maskedforce_out.e'
@@ -59,7 +59,7 @@
     mesh_mode = REPLICATED
   []
 
-  [./polycrystal_action]
+  [polycrystal_action]
     type = 'Exodiff'
     input = 'polycrystal_action.i'
     exodiff = 'polycrystal_action_out.e'
@@ -68,7 +68,7 @@
     mesh_mode = REPLICATED
   []
 
-  [./euler_angles_updater]
+  [euler_angles_updater]
     type = 'Exodiff'
     input = 'update_orientation.i'
     exodiff = 'update_orientation_out.e'
@@ -77,7 +77,7 @@
     mesh_mode = REPLICATED
   []
 
-  [./euler_angles_updater_check]
+  [euler_angles_updater_check]
     type = 'CSVDiff'
     input = 'update_orientation_verify.i'
     csvdiff = 'update_orientation_verify_out_angle_check_0001.csv'

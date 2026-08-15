@@ -1,10 +1,10 @@
 [Tests]
-  [./always_skipped]
+  [always_skipped]
     type = RunApp
     input = good.i
     skip = "always skipped"
   []
-  [./ignore_multi_prereq_dependency]
+  [ignore_multi_prereq_dependency]
     type = RunApp
     input = good.i
     heavy = true

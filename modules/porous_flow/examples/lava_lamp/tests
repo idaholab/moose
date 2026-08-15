@@ -1,5 +1,5 @@
 [Tests]
-  [./1phase_convection]
+  [1phase_convection]
     type = RunApp
     input = 1phase_convection.i
     check_input = true
@@ -8,7 +8,7 @@
     issues = '#13239'
     design = 'porous_flow/lava_lamp.md'
   []
-  [./2phase_convection]
+  [2phase_convection]
     type = RunApp
     input = 2phase_convection.i
     check_input = true

@@ -1,7 +1,7 @@
 [Tests]
   issues = '5478df0f0897ed7ac3dd3a3de1785a7948c75cfe'
   design = 'source/auxkernels/PenetrationAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'penetration_locator_test.i'
     exodiff = 'out.e'
@@ -9,7 +9,7 @@
     requirement = "The PenetrationAux object shall compute the distance between two boundaries in 3D that overlap."
   []
 
-  [./disconnected_test]
+  [disconnected_test]
     type = 'Exodiff'
     input = 'disconnected_penetration.i'
     exodiff = 'disconnected_penetration_out.e'
@@ -17,7 +17,7 @@
     requirement = "The system shall be able to compute the signed distance between potentially-overlapping boundaries in disconnected meshes."
   []
 
-  [./parallel_test]
+  [parallel_test]
     type = 'Exodiff'
     input = 'penetration_locator_test.i'
     exodiff = 'out.e'

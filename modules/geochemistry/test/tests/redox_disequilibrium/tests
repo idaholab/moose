@@ -1,5 +1,5 @@
 [Tests]
-  [./morro]
+  [morro]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -43,7 +43,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.861V
     issues = '#15290 #15261'
     design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md morro.md'
   []
-  [./morro_disequilibrium]
+  [morro_disequilibrium]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -89,7 +89,7 @@ e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3074V
     issues = '#15290 #15261'
     design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md morro.md'
   []
-  [./microbial]
+  [microbial]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

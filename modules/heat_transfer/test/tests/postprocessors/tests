@@ -1,5 +1,5 @@
 [Tests]
-  [./convective_ht_side_integral]
+  [convective_ht_side_integral]
     type = 'CSVDiff'
     input = 'convective_ht_side_integral.i'
     csvdiff = 'convective_ht_side_integral_out.csv'
@@ -8,7 +8,7 @@
     issues = '#14390'
   []
 
-  [./ad_convective_ht_side_integral]
+  [ad_convective_ht_side_integral]
     type = 'CSVDiff'
     input = 'ad_convective_ht_side_integral.i'
     csvdiff = 'ad_convective_ht_side_integral_out.csv'

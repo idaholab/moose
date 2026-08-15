@@ -2,14 +2,14 @@
   issues = "#7437"
    design = "InterfaceKernels/index.md"
 
-  [./matchedvalue]
+  [matchedvalue]
     type = 'Exodiff'
     input = 'interface.i'
     exodiff = 'interface_out.e'
     requirement = "The system shall support Dirichlet and Neumann interface conditions."
   []
 
-  [./penalty]
+  [penalty]
     type = 'Exodiff'
     input = 'interface.i'
     exodiff = 'interface_penalty.e'
@@ -18,7 +18,7 @@
     requirement = "The system shall support penalty interface conditions."
   []
 
-  [./variable_coeffs_AD]
+  [variable_coeffs_AD]
     type = 'Exodiff'
     input = 'interface.i'
     exodiff = 'variable_coeffs.e'
@@ -26,7 +26,7 @@
     requirement = "The system shall support matched-value interface with different variable coefficients with automatic differentiation."
   []
 
-  [./variable_coeffs]
+  [variable_coeffs]
     type = 'Exodiff'
     input = 'interface.i'
     exodiff = 'variable_coeffs.e'

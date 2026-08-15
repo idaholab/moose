@@ -1,5 +1,5 @@
 [Tests]
-  [./test_rz_tm]
+  [test_rz_tm]
     type = 'Exodiff'
     input = 'rz_tensors.i'
     exodiff = 'rz_out.e'
@@ -9,7 +9,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant in a body being displaced with RZ formulation"
   []
-  [./ad_test_rz_tm]
+  [ad_test_rz_tm]
     type = 'Exodiff'
     input = 'rz_tensors.i'
     exodiff = 'rz_out.e'
@@ -22,7 +22,7 @@
   []
 
 
-  [./test_shear_z_tm]
+  [test_shear_z_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_z_test_out.e'
@@ -32,7 +32,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant in shear test simulations."
   []
-  [./ad_test_shear_z_tm]
+  [ad_test_shear_z_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_z_test_out.e'
@@ -44,7 +44,7 @@
     requirement = "Mass shall remain constant in shear test simulations when using automatic differentiation."
   []
 
-  [./test_shear_y_tm]
+  [test_shear_y_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_y_test_out.e'
@@ -55,7 +55,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant in Y-axis shear test simulations"
   []
-  [./ad_test_shear_y_tm]
+  [ad_test_shear_y_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_y_test_out.e'
@@ -67,7 +67,7 @@
     requirement = "Mass shall remain constant in Y-axis shear test simulations when using automatic differentiation"
   []
 
-  [./test_shear_x_tm]
+  [test_shear_x_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_x_test_out.e'
@@ -78,7 +78,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant in X-axis shear test simulations"
   []
-  [./ad_test_shear_x_tm]
+  [ad_test_shear_x_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_x_test_out.e'
@@ -91,7 +91,7 @@
   []
 
 
-  [./test_uniform_tm]
+  [test_uniform_tm]
     type = 'Exodiff'
     input = 'uniform_expand_compress_test_tensors.i'
     exodiff = 'uniform_expand_compress_test_out.e'
@@ -100,7 +100,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant during a uniform compression simulation."
   []
-  [./ad_test_uniform_tm]
+  [ad_test_uniform_tm]
     type = 'Exodiff'
     input = 'uniform_expand_compress_test_tensors.i'
     exodiff = 'uniform_expand_compress_test_out.e'
@@ -112,7 +112,7 @@
   []
 
 
-  [./test_z_tm]
+  [test_z_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_z_test_out.e'
@@ -122,7 +122,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant during a Z-axis compression simulation."
   []
-  [./ad_test_z_tm]
+  [ad_test_z_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_z_test_out.e'
@@ -134,7 +134,7 @@
     requirement = "Mass shall remain constant during a Z-axis compression simulation when using automatic differentation."
   []
 
-  [./test_y_tm]
+  [test_y_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_y_test_out.e'
@@ -145,7 +145,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant during a Y-axis compression simulation."
   []
-  [./ad_test_y_tm]
+  [ad_test_y_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_y_test_out.e'
@@ -157,7 +157,7 @@
     requirement = "Mass shall remain constant during a Y-axis compression simulation when using automatic differentation."
   []
 
-  [./test_x_tm]
+  [test_x_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_x_test_out.e'
@@ -168,7 +168,7 @@
     issues = "#6484"
     requirement = "Mass shall remain constant during a X-axis compression simulation."
   []
-  [./ad_test_x_tm]
+  [ad_test_x_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_x_test_out.e'

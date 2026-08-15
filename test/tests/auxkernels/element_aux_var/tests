@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/AuxKernels/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'element_aux_var_test.i'
     exodiff = 'out.e'
@@ -8,7 +8,7 @@
     requirement = "Kernel objects shall be capable of coupling to an auxiliary variable."
   []
 
-  [./sort_test]
+  [sort_test]
     type = 'Exodiff'
     input = 'elemental_sort_test.i'
     exodiff = 'elemental_sort_test_out.e'
@@ -16,7 +16,7 @@
     requirement = "AuxKernel object dependencies shall be resolved automatically."
   []
 
-  [./high_order_test]
+  [high_order_test]
     type = 'Exodiff'
     input = 'element_high_order_aux_test.i'
     exodiff = 'ho.e'
@@ -24,7 +24,7 @@
     requirement = "AuxKernel objects shall operate on higher-order monomial basis functions."
   []
 
-  [./high_order_l2_test]
+  [high_order_l2_test]
     type = 'Exodiff'
     input = 'l2_element_aux_var_test.i'
     exodiff = 'l2elemaux.e'
@@ -32,7 +32,7 @@
     requirement = "AuxKernel objects shall operate on first-order L@2@ basis functions."
   []
 
-  [./block_global_depend_resolve]
+  [block_global_depend_resolve]
     type = 'Exodiff'
     input = 'block_global_depend_elem_aux.i'
     exodiff = 'block_global_depend_elem_aux_out.e'

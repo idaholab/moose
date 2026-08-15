@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'element_quality_aux.i'
     exodiff = 'element_quality_aux_out.e'

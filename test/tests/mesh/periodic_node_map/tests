@@ -1,7 +1,7 @@
 [Tests]
   design = "Mesh/index.md"
   issues = "#11891"
-  [./1D]
+  [1D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x' Mesh/dim=1"
@@ -10,7 +10,7 @@
     recover = false  # Steady Test (Needs to be here since we don't want the checkpoints clobbering each other)
     mesh_mode = 'replicated' # We no longer ghost all periodic boundaries for all procs
   []
-  [./2D]
+  [2D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x y' Mesh/dim=2"
@@ -19,7 +19,7 @@
     recover = false  # Steady Test (Needs to be here since we don't want the checkpoints clobbering each other)
     mesh_mode = 'replicated' # We no longer ghost all periodic boundaries for all procs
   []
-  [./3D]
+  [3D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x y z' Mesh/dim=3"

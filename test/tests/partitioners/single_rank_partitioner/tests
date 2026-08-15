@@ -2,7 +2,7 @@
   issues = '#18729'
   design = 'partitioner/SingleRankPartitioner.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'single_rank_partitioner.i'
     exodiff = 'single_rank_partitioner_out.e'
@@ -10,7 +10,7 @@
     requirement = 'The system shall allow restricting apps to just one MPI rank'
   []
 
-  [./test_error]
+  [test_error]
     type = 'RunException'
     input = 'single_rank_partitioner.i'
     expect_err = 'Cannot be larger than'

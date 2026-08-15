@@ -1,7 +1,7 @@
 [Tests]
   issues = "#1927 #7511"
   design = "interfaces/OutputInterface.md"
-  [./test]
+  [test]
      type = CheckFiles
      input = hide_vector_pp.i
      check_not_exists = 'hide_vector_pp_out_vpp_0001.csv hide_vector_test_out_vpp_0001.csv'  # Only 0021 should exist from the "test" output

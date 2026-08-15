@@ -1,14 +1,14 @@
 [Tests]
   design = 'Diffusion.md'
   issues = 'libmesh#1985'
-  [./test_smp]
+  [test_smp]
     type = 'Exodiff'
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
     expect_out = "0 of 11"
     requirement = 'The SMP Jacobian for a problem with a hanging-node shall be non-singular'
   []
-  [./test_fd_coloring]
+  [test_fd_coloring]
     type = 'Exodiff'
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
@@ -18,7 +18,7 @@
     allow_warnings = True
     requirement = 'The colored finite difference Jacobian for a problem with a hanging-node shall be non-singular'
   []
-  [./test_fd_standard]
+  [test_fd_standard]
     type = 'Exodiff'
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
@@ -28,7 +28,7 @@
     allow_warnings = True
     requirement = 'The standard finite difference Jacobian for a problem with a hanging-node shall be non-singular'
   []
-  [./test_mf]
+  [test_mf]
     type = 'Exodiff'
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
@@ -36,7 +36,7 @@
     cli_args = "-snes_mf_operator -pc_type asm"
     requirement = 'A matrix-free operator shall be able to solve the hanging-node problem, indicating it is non-singular'
   []
-  [./test_smp_jacobian]
+  [test_smp_jacobian]
     type = PetscJacobianTester
     input = 'simple_diffusion.i'
     run_sim = True

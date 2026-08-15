@@ -1,6 +1,6 @@
 [Tests]
   design = "Restartable.md DataIO.md"
-  [./transient_solve]
+  [transient_solve]
     type = 'Exodiff'
     input = 'transient.i'
     exodiff = 'transient_out.e'
@@ -9,7 +9,7 @@
     issues = '#13438'
   []
 
-  [./steady_from_transient_restart]
+  [steady_from_transient_restart]
     type = 'Exodiff'
     input = 'steady_from_transient_restart.i'
     exodiff = 'steady_from_transient_restart_out.e'

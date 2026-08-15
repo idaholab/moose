@@ -1,5 +1,5 @@
 [Tests]
-  [./invalid_swap]
+  [invalid_swap]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -9,7 +9,7 @@
     issues = '#14981'
     design = 'GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   []
-  [./gypsum]
+  [gypsum]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -22,7 +22,7 @@ Gypsum.  T = 43.6625degC'
     issues = '#14981'
     design = 'eqm_temp_a.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   []
-  [./hematite]
+  [hematite]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -33,7 +33,7 @@ Gypsum.  T = 43.6625degC'
     issues = '#14981'
     design = 'pH_pe.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   []
-  [./muscovite]
+  [muscovite]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -45,7 +45,7 @@ Gypsum.  T = 43.6625degC'
     issues = '#14981'
     design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   []
-  [./muscovite2]
+  [muscovite2]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -62,7 +62,7 @@ Gypsum.  T = 43.6625degC'
     issues = '#14981'
     design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   []
-  [./pyrite]
+  [pyrite]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -77,7 +77,7 @@ Pyrite = -1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12
     issues = '#14981'
     design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   []
-  [./clinoptilolite]
+  [clinoptilolite]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -91,7 +91,7 @@ Clinoptil-Ca = 6.667*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz + 1.333*OH- - 0.
     issues = '#14981'
     design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   []
-  [./clinoptilolite2]
+  [clinoptilolite2]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

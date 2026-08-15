@@ -2,7 +2,7 @@
   design = 'Mesh/index.md'
   issues = '#2142'
 
-  [./replicated_mesh]
+  [replicated_mesh]
     type = 'RunApp'
     input = 'unique_ids.i'
     min_parallel = 2
@@ -10,7 +10,7 @@
     capabilities = 'unique_id'
   []
 
-  [./distributed_mesh]
+  [distributed_mesh]
     type = 'RunApp'
     input = 'unique_ids.i'
     cli_args = '--distributed-mesh'

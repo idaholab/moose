@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'picard_parent.i'
     exodiff = 'picard_parent_out_sub0.e picard_parent_out.e'
@@ -14,7 +14,7 @@
     issues = '#5126'
   []
 
-  [./test_csv]
+  [test_csv]
     type = 'CSVDiff'
     input = 'picard_parent.i'
     csvdiff = 'picard_parent_out_sub0.csv picard_parent_out.csv'
@@ -32,7 +32,7 @@
     issues = '#11178'
   []
 
-  [./test_2subapps]
+  [test_2subapps]
     type = 'Exodiff'
     input = 'picard_parent.i'
     exodiff = 'picard_parent_2subapps_out_sub.e picard_parent_2subapps_out_sub_no_fail.e picard_parent_2subapps_out.e'

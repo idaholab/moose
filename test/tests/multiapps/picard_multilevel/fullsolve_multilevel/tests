@@ -1,6 +1,6 @@
 [Tests]
    design = 'multiapps/FullSolveMultiApp.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'parent.i'
     exodiff = 'parent_out.e parent_out_level1-0.e parent_out_level1-0_level2-0.e'

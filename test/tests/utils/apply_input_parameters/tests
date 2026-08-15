@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     # Runs simple_transient_diffusion but with the kernel added via an action an the parameters for the
     # Kernel are set using applyParameters
     type = 'Exodiff'

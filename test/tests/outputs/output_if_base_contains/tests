@@ -2,7 +2,7 @@
   issues = '#1927'
   design = 'syntax/Outputs/index.md'
 
-  [./dt_from_parent]
+  [dt_from_parent]
     type = 'CheckFiles'
     input = 'dt_from_parent_parent.i'
     check_files =      'dt_from_parent_parent_out.e '

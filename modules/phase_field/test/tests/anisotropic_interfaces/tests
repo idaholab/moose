@@ -1,10 +1,10 @@
 [Tests]
-  [./kobayashi]
+  [kobayashi]
     type = 'Exodiff'
     input = 'kobayashi.i'
     exodiff = 'kobayashi_out.e'
   []
-  [./adkobayashi]
+  [adkobayashi]
     type = 'Exodiff'
     input = 'adkobayashi.i'
     exodiff = 'adkobayashi_out.e'

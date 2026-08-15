@@ -1,5 +1,5 @@
 [Tests]
-  [./patch_small_strain]
+  [patch_small_strain]
     type = 'Exodiff'
     input = 'patch.i'
     exodiff = 'patch_out.e'
@@ -8,7 +8,7 @@
     design = 'nodal_patch_recovery.md'
     issues = '#11880'
   []
-  [./patch_finite_strain]
+  [patch_finite_strain]
     type = 'Exodiff'
     input = 'patch_finite_stress.i'
     exodiff = 'patch_finite_stress_out.e'

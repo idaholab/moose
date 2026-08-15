@@ -3,7 +3,7 @@
   design = 'CavityPressure/index.md'
   [values]
     requirement = 'The system shall compute a cavity pressure based on the ideal gas law'
-    [./3d]
+    [3d]
       type = 'Exodiff'
       input = '3d.i'
       exodiff = '3d_out.e'
@@ -11,7 +11,7 @@
       rel_err = 1e-5
       detail = 'in 3D.'
     []
-    [./initial_temperature]
+    [initial_temperature]
       type = 'Exodiff'
       input = 'initial_temperature.i'
       exodiff = 'initial_temperature_out.e'
@@ -19,7 +19,7 @@
       rel_err = 1e-5
       detail = 'where the initial temperature of the cavity is independently specified.'
     []
-    [./rz]
+    [rz]
       type = 'Exodiff'
       input = 'rz.i'
       exodiff = 'rz_out.e'
@@ -27,7 +27,7 @@
       recover = false
       detail = 'in axisymmetric geometry.'
     []
-    [./rz_restart_prereq]
+    [rz_restart_prereq]
       type = RunApp
       prereq = values/rz
       input = 'rz.i'
@@ -35,7 +35,7 @@
       recover = false
       detail = 'in axisymmetric geometry and write a restart file with cavity pressure information.'
     []
-    [./rz_restart]
+    [rz_restart]
       type = 'Exodiff'
       prereq = 'values/rz_restart_prereq'
       input = 'rz.i'
@@ -43,7 +43,7 @@
       delete_output_before_running = false
       detail = 'in axisymmetric geometry and restart properly.'
     []
-    [./multiple_postprocessors]
+    [multiple_postprocessors]
       type = 'Exodiff'
       input = 'multiple_postprocessors.i'
       exodiff = 'multiple_postprocessors_out.e'
@@ -51,7 +51,7 @@
       rel_err = 1e-5
       detail = 'when given a set of internal volumes to sum.'
     []
-    [./additional_volume]
+    [additional_volume]
       type = 'Exodiff'
       input = 'additional_volume.i'
       exodiff = 'additional_volume_out.e'
@@ -61,27 +61,27 @@
 
   [group]
     requirement = 'The system shall report an error if'
-    [./negative_volume]
+    [negative_volume]
       type = RunException
       input = 'negative_volume.i'
       expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
       detail = 'a negative volume is supplied to the cavity pressure calculation.'
     []
-    [./range_check_R]
+    [range_check_R]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/R=0'
       expect_err = "BCs/CavityPressure/1/R: Range check failed; expression = 'R > 0.0', value = 0"
       detail = 'the range checking of the gas constant parameter R fails'
     []
-    [./range_check_initial_temperature]
+    [range_check_initial_temperature]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/initial_temperature=0'
       expect_err = "BCs/CavityPressure/1/initial_temperature: Range check failed; expression = 'initial_temperature > 0.0', value = 0"
       detail = 'the range checking of the initial temperature fails'
     []
-    [./range_check_initial_pressure]
+    [range_check_initial_pressure]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/initial_pressure=-1'

@@ -1,5 +1,5 @@
 [Tests]
-  [./equal_solutions]
+  [equal_solutions]
     type = 'RunException'
     input = 'solutions_equal.i'
     expect_err = "Solutions are equal"

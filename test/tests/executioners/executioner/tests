@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Executioner/index.md'
-  [./test_steady_adapt]
+  [test_steady_adapt]
     type = 'Exodiff'
     input = 'steady-adapt.i'
     exodiff = 'out_steady_adapt.e-s004'
@@ -9,7 +9,7 @@
     issues = '#1405'
   []
 
-  [./test_steady_state_check]
+  [test_steady_state_check]
     type = 'Exodiff'
     input = 'steady_state_check_test.i'
     exodiff = 'out_ss_check.e'
@@ -17,7 +17,7 @@
     issues = '#1927'
   []
 
-  [./test_steady]
+  [test_steady]
     type = 'Exodiff'
     input = 'steady.i'
     exodiff = 'out_steady.e'
@@ -26,7 +26,7 @@
     issues = '#1405'
   []
 
-  [./test_transient]
+  [test_transient]
     type = 'Exodiff'
     input = 'transient.i'
     exodiff = 'out_transient.e'
@@ -34,7 +34,7 @@
     issues = '#1405'
   []
 
-  [./test_print_automatic_scaling_factors_true]
+  [test_print_automatic_scaling_factors_true]
     type = 'RunApp'
     input = 'steady.i'
     cli_args = "Executioner/automatic_scaling=true Executioner/verbose=true Outputs/exodus=false"
@@ -44,7 +44,7 @@
     issues = '#13795'
   []
 
-  [./test_print_automatic_scaling_factors_false]
+  [test_print_automatic_scaling_factors_false]
     type = 'RunApp'
     input = 'steady.i'
     cli_args = "Executioner/automatic_scaling=true Outputs/exodus=false"

@@ -1,5 +1,5 @@
 [Tests]
-  [./check_mesh_meta_data]
+  [check_mesh_meta_data]
     type = 'RunApp'
     input = 'check_mesh_meta_data_test.i'
     # Note: SideSetsFromAllNormalsGenerator used by this test only works with replicated mesh
