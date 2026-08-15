@@ -1264,8 +1264,7 @@ SystemBase::copySolutionsBackwards()
 void
 SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_type)
 {
-  auto & solution_states = getSolutionStates(iteration_type);
-  const auto num_states = solution_states.size();
+  const auto num_states = getNumSolutionStates(iteration_type);
   if (num_states > 1)
   {
     // Normally copy through old (index 1). For Time, optionally stop at older
@@ -1275,7 +1274,7 @@ SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_t
 
     const std::size_t stop = skip_old ? 1 : 0;
     for (std::size_t i = num_states - 1; i > stop; --i)
-      solution_states[i] = solution_states[i - 1];
+      solutionState(i, iteration_type) = solutionState(i - 1, iteration_type);
   }
 
   // Custom logic for changing state based on iteration type
