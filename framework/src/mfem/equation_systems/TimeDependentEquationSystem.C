@@ -95,22 +95,23 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     const auto & test_var_name = _test_var_names.at(i);
-    auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    auto test_mblfs =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<Moose::MFEM::ParMixedBilinearForm>>();
     for (const auto j : index_range(_coupled_var_names))
     {
       const auto & coupled_var_name = _coupled_var_names.at(j);
-      auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
-                                                               _test_pfespaces.at(i));
+      auto mblf = std::make_shared<Moose::MFEM::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
+                                                                      _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble kernels
       if (test_var_name != coupled_var_name)
       {
         // Apply all mixed kernels with this test/trial pair
-        ApplyBoundaryBLFIntegrators<mfem::ParMixedBilinearForm>(
+        ApplyBoundaryBLFIntegrators<Moose::MFEM::ParMixedBilinearForm>(
             coupled_var_name, test_var_name, mblf, _integrated_bc_map, _dt);
-        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+        ApplyDomainBLFIntegrators<Moose::MFEM::ParMixedBilinearForm>(
             coupled_var_name, test_var_name, mblf, _kernels_map, _dt);
         // Apply dt*du/dt contributions from the operator on the trial variable
-        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+        ApplyDomainBLFIntegrators<Moose::MFEM::ParMixedBilinearForm>(
             coupled_var_name, test_var_name, mblf, _td_kernels_map);
         if (mblf->GetDBFI()->Size() || mblf->GetBBFI()->Size())
         {
@@ -135,17 +136,17 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
   {
     const auto & test_var_name = _test_var_names.at(i);
     auto test_td_mblfs =
-        std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+        std::make_shared<Moose::MFEM::NamedFieldsMap<Moose::MFEM::ParMixedBilinearForm>>();
     for (const auto j : index_range(_trial_var_names))
     {
       const auto & trial_var_name = _trial_var_names.at(j);
-      auto td_mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
-                                                                  _test_pfespaces.at(i));
+      auto td_mblf = std::make_shared<Moose::MFEM::ParMixedBilinearForm>(_test_pfespaces.at(j),
+                                                                         _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble kernels
       if (test_var_name != trial_var_name)
       {
         // Apply all mixed kernels with this test/trial pair
-        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+        ApplyDomainBLFIntegrators<Moose::MFEM::ParMixedBilinearForm>(
             trial_var_name, test_var_name, td_mblf, _td_kernels_map);
         // Assemble mixed bilinear form
         if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
