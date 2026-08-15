@@ -59,6 +59,8 @@ class SchedulerOptions:
     """Whether or not to monitor Job CPU usage."""
     monitor_job_memory: bool
     """Whether or not to monitor Job memory usage."""
+    monitor_job_gpu_memory: bool
+    """Whether or not to monitor Job GPU memory usage."""
 
     time_utility_path: Optional[str]
     """The path to the time utility found, if any."""
@@ -102,8 +104,10 @@ class Scheduler(MooseObject):
 
     CAN_SET_HWLOC_TOPOLOGY = False
     """Whether or not to set hwloc topology if available."""
-    CAN_SET_MAX_MEMORY = False
-    """Whether or not Job max memory can be set (Jobs can be killed if over memory)."""
+    CAN_SET_MAX_CPU_MEMORY = False
+    """Whether or not Job max CPU memory can be set."""
+    CAN_SET_MAX_GPU_MEMORY = True
+    """Whether or not Job max GPU memory can be set."""
     CAN_OPENMPI_OVERSUBSCRIBE = False
     """Whether or not OpenMPI can be set to oversubscribe."""
     MONITOR_JOB_CPU = False
@@ -201,6 +205,9 @@ class Scheduler(MooseObject):
         monitor_job_memory: bool = (
             self.MONITOR_JOB_MEMORY is True and not options.no_memory_tracking
         )
+        monitor_job_gpu_memory: bool = (
+            monitor_job_memory is True and not options.no_gpu_memory_tracking
+        )
 
         # Find the time utility if needed, disabling CPU tracking
         # if enabled but no time utility available
@@ -220,27 +227,41 @@ class Scheduler(MooseObject):
             self.CAN_SET_HWLOC_TOPOLOGY
             and mpi_config.hwloc
             and not options.no_hwloc_topology
+            and (hwloc_topology_path := build_hwloc_topology())
         ):
-            if hwloc_topology_path := build_hwloc_topology():
-                self.harness.printInfo(
-                    f"Using cached hwloc topology in '{hwloc_topology_path}'"
-                )
+            self.harness.printInfo(
+                f"Using cached hwloc topology in '{hwloc_topology_path}'"
+            )
 
         # Can't restrict resources without tracking
         if self.options.max_cpu_per_slot and not monitor_job_cpu:
             self.harness.errorExit(
                 "Cannot specify --max-cpu-per-slot; CPU tracking is not available"
             )
-        if self.options.max_memory_per_slot and (
-            not monitor_job_memory or not self.CAN_SET_MAX_MEMORY
+        if self.options.max_cpu_memory_per_slot is not None and (
+            not monitor_job_memory or not self.CAN_SET_MAX_CPU_MEMORY
         ):
             self.harness.errorExit(
-                "Cannot specify --max-memory-per-slot; memory tracking is not available"
+                "Cannot specify --max-cpu-memory-per-slot; "
+                "CPU memory tracking is not available"
             )
+        if self.options.max_gpu_memory_per_slot is not None:
+            if not monitor_job_gpu_memory or not self.CAN_SET_MAX_GPU_MEMORY:
+                self.harness.errorExit(
+                    "Cannot specify --max-gpu-memory-per-slot; "
+                    "GPU memory tracking is not available"
+                )
+            if not self.harness.isGPUComputeDevice():
+                self.harness.errorExit(
+                    "Cannot specify --max-gpu-memory-per slot; "
+                    f"--compute-device={self.options.compute_device} is not a GPU"
+                )
+        if monitor_job_gpu_memory and not self.harness.isGPUComputeDevice():
+            monitor_job_gpu_memory = False
         # Can't disable hwloc topology
         if options.no_hwloc_topology and not self.CAN_SET_HWLOC_TOPOLOGY:
             self.harness.errorExit(
-                "Cannot --no-hwloc-topology; scheduler does not " "support setting it"
+                "Cannot --no-hwloc-topology; scheduler does not support setting it"
             )
         # Can't disable openmpi oversubscribe
         if options.no_openmpi_oversubscribe and not self.CAN_OPENMPI_OVERSUBSCRIBE:
@@ -254,6 +275,7 @@ class Scheduler(MooseObject):
             mpi_config=mpi_config,
             monitor_job_cpu=monitor_job_cpu,
             monitor_job_memory=monitor_job_memory,
+            monitor_job_gpu_memory=monitor_job_gpu_memory,
             time_utility_path=time_utility_path,
             time_utility_type=time_utility_type,
         )

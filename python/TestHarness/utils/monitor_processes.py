@@ -21,11 +21,13 @@ from typing import TYPE_CHECKING, Any, Optional
 
 import psutil
 
-HAS_PYNVML = find_spec("pynvml") is not None
-"""Whether or not pynvml is available."""
+NO_CUDA_TRACKING_REASON: Optional[str] = (
+    "Python package 'pynvml' is not available" if find_spec("pynvml") is None else None
+)
+"""The reason why cuda tracking cannot be done, if any."""
 
 # Load pynvml if available
-if TYPE_CHECKING or HAS_PYNVML:
+if TYPE_CHECKING or NO_CUDA_TRACKING_REASON is None:
     import pynvml
 
 MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
@@ -34,7 +36,7 @@ MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
 """Whether or not to use PSS for memory tracking from smaps_rollup."""
 
 
-def get_process_memory(process: psutil.Process) -> Optional[int]:
+def get_process_cpu_memory(process: psutil.Process) -> Optional[int]:
     """
     Get the memory of a process, if running.
 
@@ -70,6 +72,20 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     return None
 
 
+def get_cuda_running_processes(handles: list) -> dict[int, Any]:
+    """Get the running CUDA processes from the pynvml GPU handles (pid -> process)."""
+    processes = {}
+    for handle in handles:
+        with suppress(pynvml.NVMLError):
+            processes.update(
+                {
+                    p.pid: p.usedGpuMemory
+                    for p in pynvml.nvmlDeviceGetComputeRunningProcesses(handle)
+                }
+            )
+    return processes
+
+
 class MemoryMonitor:
     """Monitor that runs in a separate thread to track children memory usage."""
 
@@ -102,15 +118,8 @@ class MemoryMonitor:
         # If tracking nvidia GPUs, make sure we can actually
         # poll at least one GPU for memory usage
         if track_nvidia:
-            if not HAS_PYNVML:
-                print(
-                    "WARNING: Not tracking GPU memory usage; "
-                    "'pynvml' package unavailable"
-                )
-                self._track_nvidia = False
-            else:
-                self.init_pynvml_handles()
-                pynvml.nvmlShutdown()
+            self.init_pynvml_handles()
+            pynvml.nvmlShutdown()
 
     @staticmethod
     def init_pynvml_handles() -> list:
@@ -170,19 +179,11 @@ class MemoryMonitor:
 
         while not stop_event.is_set():
             # Accumulate nvidia GPU processes if we have handlers
-            pynvml_processes: Optional[dict[int, Any]] = None
-            if pynvml_handles is not None:
-                pynvml_processes = {}
-                for handle in pynvml_handles:
-                    with suppress(pynvml.NVMLError):
-                        pynvml_processes.update(
-                            {
-                                p.pid: p.usedGpuMemory
-                                for p in pynvml.nvmlDeviceGetComputeRunningProcesses(
-                                    handle
-                                )
-                            }
-                        )
+            pynvml_processes: Optional[dict[int, Any]] = (
+                get_cuda_running_processes(pynvml_handles)
+                if pynvml_handles is not None
+                else None
+            )
 
             # Get the entire flattened process tree, removing process 0 as
             # it's the exit condition when searching recursively
@@ -214,7 +215,7 @@ class MemoryMonitor:
                 if (
                     ppid := pid if pid in children_pids else in_children_pids(p)
                 ) is not None:
-                    if (cpu_memory := get_process_memory(p)) is not None:
+                    if (cpu_memory := get_process_cpu_memory(p)) is not None:
                         cpu_result[ppid] += cpu_memory
                     if (
                         pynvml_processes is not None

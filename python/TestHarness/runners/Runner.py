@@ -98,13 +98,16 @@ class Runner(OutputInterface):
             if self._max_memory is None:
                 self._max_memory = self.MaxMemory(cpu_memory, gpu_memory)
             else:
+                updated = False
                 if cpu_memory > self._max_memory.cpu:
                     self._max_memory.cpu = cpu_memory
+                    updated = True
                 if gpu_memory is not None and (
                     self._max_memory.gpu is None or gpu_memory > self._max_memory.gpu
                 ):
                     self._max_memory.gpu = gpu_memory
-                return True
+                    updated = True
+                return updated
         return False
 
     @property
