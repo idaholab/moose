@@ -183,10 +183,15 @@ public:
    */
   virtual void solve();
 
-  virtual void copyOldSolutions();
-  virtual void copyPreviousNonlinearSolutions();
-  virtual void copyPreviousMultiAppFixedPointSolutions();
-  virtual void copyPreviousMultiSystemFixedPointSolutions();
+  /**
+   * Copy the solution back in time (older -> old, etc).
+   */
+  void copyOldSolutions();
+  /**
+   * Copy a specific type of solution back in time (older -> old, etc).
+   */
+  void copyPreviousSolutions(const Moose::SolutionIterationType iteration_type);
+
   virtual void restoreSolutions();
 
   /**
@@ -209,6 +214,18 @@ public:
    * Initializes the solution state.
    */
   virtual void initSolutionState();
+
+  /**
+   * Get all of the solution states (current, old, ...) for the given iteration type.
+   */
+  const std::vector<NumericVector<Number> *> &
+  getSolutionStates(const Moose::SolutionIterationType iteration_type) const;
+
+  /**
+   * Get the number of solution states (0 = current, 1 = current + old, ...)
+   * for the given iteration type.
+   */
+  std::size_t getNumSolutionStates(const Moose::SolutionIterationType iteration_type) const;
 
   /**
    * Get a state of the solution (0 = current, 1 = old, 2 = older, etc).
@@ -1075,20 +1092,55 @@ private:
   TagName oldSolutionStateVectorName(const unsigned int,
                                      Moose::SolutionIterationType iteration_type) const;
 
-  /// 2D array of solution state vector pointers; first index corresponds to
-  /// SolutionIterationType, second index corresponds to state index (0=current, 1=old, 2=older)
-  std::array<std::vector<NumericVector<Number> *>, 3> _solution_states;
+  /**
+   * Get all of the solution states (current, old, ...) for the given iteration type.
+   */
+  std::vector<NumericVector<Number> *> &
+  getSolutionStates(const Moose::SolutionIterationType iteration_type)
+  {
+    return const_cast<std::vector<NumericVector<Number> *> &>(
+        static_cast<const SystemBase *>(this)->getSolutionStates(iteration_type));
+  }
+
+  /**
+   * 2D array of solution state vector pointers.
+   *
+   * Outer (array) index: SolutionIterationType (Time, Nonlinear, ...)
+   * Inner (vector) index: State (0=current, 1=old, ...)
+   *
+   * Should only be accessed through getSolutionStates() when possible
+   * for bounds checking.
+   */
+  std::array<std::vector<NumericVector<Number> *>,
+             static_cast<size_t>(Moose::SolutionIterationType::Count)>
+      _solution_states;
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _saved_solution_states;
   /// Whether to skip the next copy from the solution to the old vector
   bool _skip_next_solution_to_old_copy;
 };
 
+inline const std::vector<NumericVector<Number> *> &
+SystemBase::getSolutionStates(const Moose::SolutionIterationType iteration_type) const
+{
+  const auto iteration_type_index = static_cast<std::size_t>(iteration_type);
+  mooseAssert(iteration_type_index < static_cast<std::size_t>(Moose::SolutionIterationType::Count),
+              "Invalid solution iteration type");
+  mooseAssert(iteration_type_index < _solution_states.size(), "_solution_states sized incorrectly");
+  return _solution_states[iteration_type_index];
+}
+
+inline std::size_t
+SystemBase::getNumSolutionStates(const Moose::SolutionIterationType iteration_type) const
+{
+  return getSolutionStates(iteration_type).size();
+}
+
 inline bool
 SystemBase::hasSolutionState(const unsigned int state,
                              const Moose::SolutionIterationType iteration_type) const
 {
-  return _solution_states[static_cast<unsigned short>(iteration_type)].size() > state;
+  return getNumSolutionStates(iteration_type) > state;
 }
 
 #define PARALLEL_TRY
