@@ -1123,9 +1123,11 @@ private:
 inline const std::vector<NumericVector<Number> *> &
 SystemBase::getSolutionStates(const Moose::SolutionIterationType iteration_type) const
 {
-  const auto index = static_cast<unsigned short>(iteration_type);
-  mooseAssert(index < _solution_states.size(), "Invalid solution iteration type");
-  return _solution_states[index];
+  const auto iteration_type_index = static_cast<std::size_t>(iteration_type);
+  mooseAssert(iteration_type_index < static_cast<std::size_t>(Moose::SolutionIterationType::Count),
+              "Invalid solution iteration type");
+  mooseAssert(iteration_type_index < _solution_states.size(), "_solution_states sized incorrectly");
+  return _solution_states[iteration_type_index];
 }
 
 inline std::size_t
