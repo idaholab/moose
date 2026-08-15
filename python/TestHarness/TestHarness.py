@@ -2139,22 +2139,6 @@ class TestHarness:
             )
             opts.minimal_capabilities = True
 
-        # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT
-        # if --max-memory-per-slot is not not set
-        if (
-            opts.max_memory_per_slot is None
-            and (
-                MOOSE_MAX_MEMORY_PER_SLOT := os.environ.get("MOOSE_MAX_MEMORY_PER_SLOT")
-            )
-            is not None
-        ):
-            value = float(MOOSE_MAX_MEMORY_PER_SLOT)
-            print_info(
-                f"Setting --max-memory-per-slot={value} MB from "
-                "MOOSE_MAX_MEMORY_PER_SLOT",
-            )
-            opts.max_memory_per_slot = value
-
         # Convert extend action params to lists if they have a single value
         for name in ["ignore_capability"]:
             if (value := getattr(opts, name)) is not None and isinstance(value, str):
