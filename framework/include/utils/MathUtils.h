@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
+#include "MooseUtils.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
@@ -466,6 +467,36 @@ timeDerivName(const T & base_prop_name)
  * @param mat_B Reference to the other matrix
  */
 void kron(RealEigenMatrix & product, const RealEigenMatrix & mat_A, const RealEigenMatrix & mat_B);
+
+/**
+ * Computes the norm of \p value, with \p epsilon added under the square root so that the result
+ * and its derivative remain smooth (and finite) as \p value approaches the zero vector. This is
+ * needed because AD types fail to compute a derivative through sqrt() at zero:
+ * d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx diverges as f(x) -> 0. \p epsilon only needs to be
+ * negligible relative to the physical scale of \p value's components; its exact value is
+ * otherwise arbitrary.
+ *
+ * \p value may be any rank-1 tensor type providing operator()(unsigned int) over Moose::dim
+ * components (e.g. VectorValue), or any fixed-size container of scalars (e.g. std::array).
+ */
+template <typename T>
+auto
+regularizedNorm(const T & value, const Real epsilon = 1e-42)
+{
+  using std::sqrt;
+
+  typename T::value_type sum_of_squares = 0;
+  if constexpr (MooseUtils::Has_size<T>::value)
+  {
+    for (const auto & component : value)
+      sum_of_squares += component * component;
+  }
+  else
+    for (const auto i : make_range(Moose::dim))
+      sum_of_squares += value(i) * value(i);
+
+  return sqrt(sum_of_squares + epsilon);
+}
 
 } // namespace MathUtils
 

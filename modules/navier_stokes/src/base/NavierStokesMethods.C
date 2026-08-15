@@ -9,6 +9,7 @@
 
 #include "NavierStokesMethods.h"
 #include "MooseError.h"
+#include "MathUtils.h"
 #include "libmesh/vector_value.h"
 #include "NS.h"
 
@@ -159,11 +160,7 @@ template <typename T>
 T
 computeSpeed(const libMesh::VectorValue<T> & velocity)
 {
-  // if the velocity is zero, then the norm function call fails because AD tries to calculate the
-  // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
-  // So add a bit of noise (based on hitchhiker's guide to the galaxy's meaning of life number) to
-  // avoid this failure mode.
-  return isZero(velocity) ? 1e-42 : velocity.norm();
+  return MathUtils::regularizedNorm(velocity);
 }
 template Real computeSpeed<Real>(const libMesh::VectorValue<Real> & velocity);
 template ADReal computeSpeed<ADReal>(const libMesh::VectorValue<ADReal> & velocity);
