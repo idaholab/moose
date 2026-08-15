@@ -7,6 +7,6 @@
     exodiff = 'kokkos_pp_depend_out.e'
     requirement = 'The Kokkos system shall be able to execute user objects before the execution of an auxiliary kernel if the latter depends on the former.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

@@ -12,7 +12,7 @@
       detail = 'with a single variable integral and a single extra ID'
       recover = false
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [multi_ids]
       type = 'CSVDiff'
@@ -22,7 +22,7 @@
       detail = 'with a single variable integral and multiple extra IDs'
       recover = false
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [multi_ids_multi_vars]
       type = 'CSVDiff'
@@ -32,7 +32,7 @@
       detail = 'with multiple variable integrals and multiple extra IDs'
       recover = false
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [vars_and_mats]
       type = 'CSVDiff'
@@ -42,7 +42,7 @@
       detail = 'with multiple variable and material property integrals and multiple extra IDs'
       recover = false
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [vars_and_mats_average]
       type = 'CSVDiff'
@@ -52,7 +52,7 @@
       detail = 'with multiple variable and material property averages and multiple extra IDs'
       recover = false
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 
@@ -67,7 +67,7 @@
       recover = false
       prereq = atomic/default
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [multi_ids]
       type = 'CSVDiff'
@@ -78,7 +78,7 @@
       recover = false
       prereq = atomic/multi_ids
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [multi_ids_multi_vars]
       type = 'CSVDiff'
@@ -89,7 +89,7 @@
       recover = false
       prereq = atomic/multi_ids_multi_vars
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [vars_and_mats]
       type = 'CSVDiff'
