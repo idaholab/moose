@@ -49,10 +49,6 @@ ComputeFrictionalForceCartesianLMMechanicalContact::validParams()
   InputParameters params = ComputeWeightedGapCartesianLMMechanicalContact::validParams();
   params.addClassDescription("Computes mortar frictional forces.");
   params.addParam<Real>("c_t", 1e0, "Numerical parameter for tangential constraints");
-  params.addParam<Real>(
-      "epsilon",
-      1.0e-7,
-      "Minimum value of contact pressure that will trigger frictional enforcement");
   params.addRangeCheckedParam<Real>(
       "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   return params;
@@ -68,8 +64,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::
     _primary_y_dot(adCoupledNeighborValueDot("disp_y")),
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
-    _mu(getParam<Real>("mu")),
-    _epsilon(getParam<Real>("epsilon"))
+    _mu(getParam<Real>("mu"))
 {
 }
 
@@ -205,7 +200,7 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     const DofObject * const dof)
 {
-  using std::abs, std::sqrt, std::max, std::min;
+  using std::abs, std::sqrt, std::min;
 
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
@@ -255,56 +250,33 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
 
   const ADReal & tangential_vel = *_tangential_vel_ptr[0];
 
-  // Primal-dual active set strategy (PDASS)
+  const auto augmented_normal_pressure = normal_pressure_value + c * weighted_gap;
+  const auto radius =
+      Moose::Mortar::Contact::coulombFrictionRadius(ADReal(_mu), augmented_normal_pressure);
+
+  // Active/inactive switching, including the degenerate zero-weight case at pure separation, is
+  // handled internally by hueberStadlerWohlmuthFrictionResidual; see MortarContactUtils.h.
   if (!_has_disp_z)
   {
-    if (normal_pressure_value.value() < _epsilon)
-      tangential_dof_residual = tangential_pressure_value;
-    else
-    {
-      const auto term_1 = max(_mu * (normal_pressure_value + c * weighted_gap),
-                              abs(tangential_pressure_value + c_t * tangential_vel * _dt)) *
-                          tangential_pressure_value;
-      const auto term_2 = _mu * max(0.0, normal_pressure_value + c * weighted_gap) *
-                          (tangential_pressure_value + c_t * tangential_vel * _dt);
+    const std::array<ADReal, 1> tangential_pressure{{tangential_pressure_value}};
+    const std::array<ADReal, 1> augmented_tangential_pressure{
+        {tangential_pressure_value + c_t * tangential_vel * _dt}};
 
-      tangential_dof_residual = term_1 - term_2;
-    }
+    tangential_dof_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+        tangential_pressure, augmented_tangential_pressure, radius)[0];
   }
   else
   {
-    if (normal_pressure_value.value() < _epsilon)
-    {
-      tangential_dof_residual = tangential_pressure_value;
-      tangential_dof_residual_dir = tangential_pressure_value_dir;
-    }
-    else
-    {
-      const Real epsilon_sqrt = 1.0e-48;
+    const std::array<ADReal, 2> tangential_pressure{
+        {tangential_pressure_value, tangential_pressure_value_dir}};
+    const std::array<ADReal, 2> augmented_tangential_pressure{
+        {tangential_pressure_value + c_t * (*_tangential_vel_ptr[0]) * _dt,
+         tangential_pressure_value_dir + c_t * (*_tangential_vel_ptr[1]) * _dt}};
 
-      const auto lamdba_plus_cg = normal_pressure_value + c * weighted_gap;
-
-      std::array<ADReal, 2> lambda_t_plus_ctu;
-      lambda_t_plus_ctu[0] = tangential_pressure_value + c_t * (*_tangential_vel_ptr[0]) * _dt;
-      lambda_t_plus_ctu[1] = tangential_pressure_value_dir + c_t * (*_tangential_vel_ptr[1]) * _dt;
-
-      const auto term_1_x = max(_mu * lamdba_plus_cg,
-                                sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                     lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                            tangential_pressure_value;
-
-      const auto term_1_y = max(_mu * lamdba_plus_cg,
-                                sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                     lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                            tangential_pressure_value_dir;
-
-      const auto term_2_x = _mu * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
-
-      const auto term_2_y = _mu * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
-
-      tangential_dof_residual = term_1_x - term_2_x;
-      tangential_dof_residual_dir = term_1_y - term_2_y;
-    }
+    const auto residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+        tangential_pressure, augmented_tangential_pressure, radius);
+    tangential_dof_residual = residual[0];
+    tangential_dof_residual_dir = residual[1];
   }
 
   // Compute the friction coefficient (constant or function)
