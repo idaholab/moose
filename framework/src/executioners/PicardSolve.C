@@ -66,7 +66,7 @@ PicardSolve::allocateStorage(const bool primary)
 void
 PicardSolve::saveVariableValues(const bool primary)
 {
-  // Primary is copied back by _transformed_sys->copyPreviousMultiAppFixedPointSolutions()
+  // Primary is copied back by _transformed_sys->copyPreviousSolutions(MultiAppFixedPoint)
   if (!performingRelaxation(primary) || primary)
     return;
 

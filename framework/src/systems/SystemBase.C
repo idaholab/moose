@@ -510,17 +510,16 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 void
 SystemBase::saveOldSolutions()
 {
-  const auto states =
-      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
-  if (states > 1)
+  const auto num_states = getNumSolutionStates(Moose::SolutionIterationType::Time);
+  if (num_states > 1)
   {
-    _saved_solution_states.resize(states);
-    for (unsigned int i = 1; i <= states - 1; ++i)
+    _saved_solution_states.resize(num_states);
+    for (unsigned int i = 1; i <= num_states - 1; ++i)
       if (!_saved_solution_states[i])
         _saved_solution_states[i] =
             &addVector("save_solution_state_" + std::to_string(i), false, PARALLEL);
 
-    for (unsigned int i = 1; i <= states - 1; ++i)
+    for (unsigned int i = 1; i <= num_states - 1; ++i)
       *(_saved_solution_states[i]) = solutionState(i);
   }
 
@@ -542,10 +541,9 @@ SystemBase::saveOldSolutions()
 void
 SystemBase::restoreOldSolutions()
 {
-  const auto states =
-      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
-  if (states > 1)
-    for (unsigned int i = 1; i <= states - 1; ++i)
+  const auto num_states = getNumSolutionStates(Moose::SolutionIterationType::Time);
+  if (num_states > 1)
+    for (unsigned int i = 1; i <= num_states - 1; ++i)
       if (_saved_solution_states[i])
       {
         solutionState(i) = *(_saved_solution_states[i]);
@@ -1259,25 +1257,46 @@ void
 SystemBase::copySolutionsBackwards()
 {
   system().update();
-  copyOldSolutions();
-  copyPreviousNonlinearSolutions();
+  copyPreviousSolutions(Moose::SolutionIterationType::Time);
+  copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
 }
 
-/**
- * Shifts the solutions backwards in nonlinear iteration history
- */
 void
-SystemBase::copyPreviousNonlinearSolutions()
+SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_type)
 {
-  const auto states =
-      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Nonlinear)].size();
-  if (states > 1)
-    for (unsigned int i = states - 1; i > 0; --i)
-      solutionState(i, Moose::SolutionIterationType::Nonlinear) =
-          solutionState(i - 1, Moose::SolutionIterationType::Nonlinear);
+  auto & solution_states = getSolutionStates(iteration_type);
+  const auto num_states = solution_states.size();
+  if (num_states > 1)
+  {
+    // Normally copy through old (index 1). For Time, optionally stop at older
+    // and leave old unchanged.
+    const bool skip_old =
+        iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
 
-  if (solutionPreviousNewton())
-    *solutionPreviousNewton() = *currentSolution();
+    const std::size_t stop = skip_old ? 1 : 0;
+    for (std::size_t i = num_states - 1; i > stop; --i)
+      solution_states[i] = solution_states[i - 1];
+  }
+
+  // Custom logic for changing state based on iteration type
+  switch (iteration_type)
+  {
+    case Moose::SolutionIterationType::Time:
+      _skip_next_solution_to_old_copy = false;
+      if (solutionUDotOld())
+        *solutionUDotOld() = *solutionUDot();
+      if (solutionUDotDotOld())
+        *solutionUDotDotOld() = *solutionUDotDot();
+      break;
+    case Moose::SolutionIterationType::Nonlinear:
+      if (solutionPreviousNewton())
+        *solutionPreviousNewton() = *currentSolution();
+      break;
+    case Moose::SolutionIterationType::MultiAppFixedPoint:
+    case Moose::SolutionIterationType::MultiSystemFixedPoint:
+    case Moose::SolutionIterationType::Count:
+      break;
+  }
 }
 
 /**
@@ -1286,42 +1305,7 @@ SystemBase::copyPreviousNonlinearSolutions()
 void
 SystemBase::copyOldSolutions()
 {
-  // copy the solutions backward: current->old, old->older
-  const auto states =
-      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
-  if (states > 1)
-    for (unsigned int i = states - 1; i > uint(_skip_next_solution_to_old_copy); --i)
-      solutionState(i) = solutionState(i - 1);
-  _skip_next_solution_to_old_copy = false;
-
-  if (solutionUDotOld())
-    *solutionUDotOld() = *solutionUDot();
-  if (solutionUDotDotOld())
-    *solutionUDotDotOld() = *solutionUDotDot();
-}
-
-void
-SystemBase::copyPreviousMultiAppFixedPointSolutions()
-{
-  const auto n_states = _solution_states[static_cast<unsigned short>(
-                                             Moose::SolutionIterationType::MultiAppFixedPoint)]
-                            .size();
-  if (n_states > 1)
-    for (unsigned int i = n_states - 1; i > 0; --i)
-      solutionState(i, Moose::SolutionIterationType::MultiAppFixedPoint) =
-          solutionState(i - 1, Moose::SolutionIterationType::MultiAppFixedPoint);
-}
-
-void
-SystemBase::copyPreviousMultiSystemFixedPointSolutions()
-{
-  const auto n_states = _solution_states[static_cast<unsigned short>(
-                                             Moose::SolutionIterationType::MultiSystemFixedPoint)]
-                            .size();
-  if (n_states > 1)
-    for (unsigned int i = n_states - 1; i > 0; --i)
-      solutionState(i, Moose::SolutionIterationType::MultiSystemFixedPoint) =
-          solutionState(i - 1, Moose::SolutionIterationType::MultiSystemFixedPoint);
+  copyPreviousSolutions(Moose::SolutionIterationType::Time);
 }
 
 /**
@@ -1419,6 +1403,8 @@ SystemBase::solutionState(const unsigned int state,
                           const Moose::SolutionIterationType iteration_type) const
 {
   if (!hasSolutionState(state, iteration_type))
+  {
+    const auto num_states = getNumSolutionStates(iteration_type);
     mooseError("For iteration type '",
                Moose::stringify(iteration_type),
                "': solution state ",
@@ -1426,12 +1412,11 @@ SystemBase::solutionState(const unsigned int state,
                " was requested in ",
                name(),
                " but only up to state ",
-               (_solution_states[static_cast<unsigned short>(iteration_type)].size() == 0)
-                   ? 0
-                   : _solution_states[static_cast<unsigned short>(iteration_type)].size() - 1,
+               (num_states == 0) ? 0 : num_states - 1,
                " is available.");
+  }
 
-  const auto & solution_states = _solution_states[static_cast<unsigned short>(iteration_type)];
+  const auto & solution_states = getSolutionStates(iteration_type);
 
   if (state == 0)
     mooseAssert(solution_states[0] == &solutionInternal(), "Inconsistent current solution");
@@ -1449,7 +1434,7 @@ SystemBase::solutionState(const unsigned int state,
 {
   if (!hasSolutionState(state, iteration_type))
     needSolutionState(state, iteration_type);
-  return *_solution_states[static_cast<unsigned short>(iteration_type)][state];
+  return *getSolutionStates(iteration_type)[state];
 }
 
 libMesh::ParallelType
@@ -1458,8 +1443,7 @@ SystemBase::solutionStateParallelType(const unsigned int state,
 {
   if (!hasSolutionState(state, iteration_type))
     mooseError("solutionStateParallelType() may only be called if the solution state exists.");
-
-  return _solution_states[static_cast<unsigned short>(iteration_type)][state]->type();
+  return getSolutionStates(iteration_type)[state]->type();
 }
 
 void

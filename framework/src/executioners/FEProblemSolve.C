@@ -469,7 +469,7 @@ FEProblemSolve::solve()
 
       // Copy back systems as needed/requested
       for (auto * sys : _systems_to_copy_back_multi_sys_fp)
-        sys->copyPreviousMultiSystemFixedPointSolutions();
+        sys->copyPreviousSolutions(Moose::SolutionIterationType::MultiSystemFixedPoint);
 
       // Loop over each system
       for (const auto sys_i : index_range(_systems))

@@ -114,7 +114,7 @@ SecantSolve::saveVariableValues(const bool primary)
   xn_m2 = xn_m1;
 
   // Before a solve, solution is a sequence term, after a solve, solution is the evaluated term
-  // Primary is copied back by _transformed_sys->copyPreviousMultiAppFixedPointSolutions()
+  // Primary is copied back by _transformed_sys->copyPreviousSolutions(MultiAppFixedPoint)
   if (!primary)
     xn_m1 = solution;
 
