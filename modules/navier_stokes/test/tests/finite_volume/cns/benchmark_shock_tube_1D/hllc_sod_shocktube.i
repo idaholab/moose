@@ -142,7 +142,7 @@ middle = 50
 
 [Preconditioning]
   active = ''
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type'

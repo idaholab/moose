@@ -18,7 +18,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
@@ -28,12 +28,12 @@
 [Kernels]
   active = 'diff rhs'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./rhs]
+  [rhs]
     type = MassEigenKernel
     variable = u
   [../]
@@ -42,7 +42,7 @@
 [BCs]
   active = 'homogeneous'
 
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     preset = false
@@ -68,7 +68,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -77,14 +77,14 @@
 [Postprocessors]
   active = 'unorm udiff'
 
-  [./unorm]
+  [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
   [../]
 
-  [./udiff]
+  [udiff]
     type = ElementL2Diff
     variable = u
   [../]

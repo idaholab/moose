@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./v]
+  [v]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Materials]
-  [./m]
+  [m]
     type = CoupledNodalMaterial
     coupled = v
   [../]

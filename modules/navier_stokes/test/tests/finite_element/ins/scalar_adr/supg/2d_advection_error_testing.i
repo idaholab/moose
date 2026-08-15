@@ -20,14 +20,14 @@ ay=1
 []
 
 [Variables]
-  [./c]
+  [c]
     family = LAGRANGE
     order = SECOND
   [../]
 []
 
 [Kernels]
-  [./adv]
+  [adv]
     type = AdvectionSUPG
     variable = c
     forcing_func = 'ffn'
@@ -35,7 +35,7 @@ ay=1
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = c
     boundary = 'left right top bottom'
@@ -44,7 +44,7 @@ ay=1
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names = 'mu rho'
     prop_values = '0 1'
@@ -52,15 +52,15 @@ ay=1
 []
 
 [Functions]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression = '${ax}*(0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)) + ${ay}*(0.14*pi*x*cos(0.2*pi*x*y) + 0.4*pi*cos(pi*y))'
   [../]
-  [./c_func]
+  [c_func]
     type = ParsedFunction
     expression = '0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5'
   [../]
-  [./cx_func]
+  [cx_func]
     type = ParsedFunction
     expression = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
   [../]
@@ -84,7 +84,7 @@ ay=1
   nl_max_its = 10
   l_tol = 1e-6
   l_max_its = 10
-  [./TimeStepper]
+  [TimeStepper]
     dt = .05
     type = IterationAdaptiveDT
     cutback_factor = 0.4
@@ -94,22 +94,22 @@ ay=1
 []
 
 [Outputs]
-  [./exodus]
+  [exodus]
     type = Exodus
   [../]
-  [./csv]
+  [csv]
     type = CSV
   [../]
 []
 
 [Postprocessors]
-  [./L2c]
+  [L2c]
     type = ElementL2Error
     variable = c
     function = c_func
     outputs = 'console'    execute_on = 'timestep_end'
   [../]
-  [./L2cx]
+  [L2cx]
     type = ElementL2Error
     variable = cx
     function = cx_func
@@ -118,14 +118,14 @@ ay=1
 []
 
 [AuxVariables]
-  [./cx]
+  [cx]
     family = MONOMIAL
     order = FIRST
   [../]
 []
 
 [AuxKernels]
-  [./cx_aux]
+  [cx_aux]
     type = VariableGradientComponent
     component = x
     variable = cx

@@ -19,7 +19,7 @@
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
@@ -28,21 +28,21 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     incremental = true
     strain = FINITE
   [../]
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = '1 2 3 4'
@@ -51,14 +51,14 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 3'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 3'
   [../]
@@ -74,31 +74,31 @@
 []
 
 [Postprocessors]
-  [./internalVolume]
+  [internalVolume]
     type = InternalVolume
     boundary = 10
     component = 0
     execute_on = 'initial timestep_end'
   [../]
-  [./intVol1]
+  [intVol1]
     type = InternalVolume
     boundary = 2
     component = 0
     execute_on = 'initial timestep_end'
   [../]
-  [./intVol1Again]
+  [intVol1Again]
     type = InternalVolume
     boundary = 9
     component = 0
     execute_on = 'initial timestep_end'
   [../]
-  [./intVol2]
+  [intVol2]
     type = InternalVolume
     boundary = 11
     component = 0
     execute_on = 'initial timestep_end'
   [../]
-  [./intVolTotal]
+  [intVolTotal]
     type = InternalVolume
     boundary = 4
     component = 0

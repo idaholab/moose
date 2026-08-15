@@ -17,10 +17,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SpecifiedSmoothCircleIC
       invalue = 1.0
       outvalue = 0.1
@@ -34,31 +34,31 @@
       block = 0
     [../]
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
-  [./motion]
+  [motion]
     type = MultiGrainRigidBodyMotion
     c = c
     variable = w
@@ -70,13 +70,13 @@
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '5.0  2.0      0.1'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     block = 0
     property_name = F
@@ -89,16 +89,16 @@
 []
 
 [AuxVariables]
-  [./eta0]
+  [eta0]
   [../]
-  [./eta1]
+  [eta1]
   [../]
-  [./bnds]
+  [bnds]
   [../]
 []
 
 [AuxKernels]
-  [./bnds]
+  [bnds]
     type = BndsCalcAux
     variable = bnds
     var_name_base = eta
@@ -109,7 +109,7 @@
 []
 
 [ICs]
-  [./ic_eta0]
+  [ic_eta0]
     int_width = 4.0
     x1 = 20.0
     y1 = 0.0
@@ -119,7 +119,7 @@
     invalue = 1.0
     type = SmoothCircleIC
   [../]
-  [./IC_eta1]
+  [IC_eta1]
     int_width = 4.0
     x1 = 30.0
     y1 = 25.0
@@ -132,15 +132,15 @@
 []
 
 [VectorPostprocessors]
-  [./forces_cosnt]
+  [forces_cosnt]
     type = GrainForcesPostprocessor
     grain_force = grain_force_const
   [../]
-  [./forces_total]
+  [forces_total]
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
@@ -148,19 +148,19 @@
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
   [../]
-  [./grain_force_const]
+  [grain_force_const]
     type = ConstantGrainForceAndTorque
     execute_on = 'linear nonlinear'
     force =  '5.0 10.0 0.0 1.0 0.0 0.0'
     torque = '0.0 0.0 50.0 0.0 0.0 5.0'
   [../]
-  [./grain_force]
+  [grain_force]
     type = MaskedGrainForceAndTorque
     grain_force = grain_force_const
     pinned_grains = 0
@@ -169,7 +169,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

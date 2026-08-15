@@ -11,30 +11,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = NEDELEC_ONE
     order = FIRST
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [Kernels]
-  [./wave]
+  [wave]
     type = VectorFEWave
     variable = u
     x_forcing_func = 'x_ffn'
     y_forcing_func = 'y_ffn'
   [../]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = v
   [../]
-  [./source]
+  [source]
     type = BodyForce
     variable = v
   [../]
-  [./advection]
+  [advection]
     type = EFieldAdvection
     variable = v
     efield = u
@@ -44,18 +44,18 @@
 []
 
 [Functions]
-  [./x_ffn]
+  [x_ffn]
     type = ParsedFunction
     expression = '(2*pi*pi + 1)*cos(pi*x)*sin(pi*y)'
   [../]
-  [./y_ffn]
+  [y_ffn]
     type = ParsedFunction
     expression = '-(2*pi*pi + 1)*sin(pi*x)*cos(pi*y)'
   [../]
 []
 
 [Preconditioning]
-  [./pre]
+  [pre]
     type = SMP
     full = true
   [../]

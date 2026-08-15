@@ -28,16 +28,16 @@
 # defined. The solution is to define an empty variable tha does nothing, but causes MOOSE to solve
 # the AuxKernels that we need.
 [Variables]
-  [./empty]
+  [empty]
   [../]
 []
 
 [AuxVariables]
-  [./s]
+  [s]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./m_in]
+  [m_in]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -45,19 +45,19 @@
 
 # We must have a kernel for every variable, hence this null kernel to match the variable 'empty'
 [Kernels]
-  [./null_kernel]
+  [null_kernel]
     type = NullKernel
     variable = empty
   [../]
 []
 
 [AuxKernels]
-  [./reconstruct_m_in]
+  [reconstruct_m_in]
     type = FunctionSeriesToAux
     function = FX_Basis_Value_Sub
     variable = m_in
   [../]
-  [./calculate_s] # Something to make 's' change each time, but allow a converging solution
+  [calculate_s] # Something to make 's' change each time, but allow a converging solution
     type = ParsedAux
     variable = s
     coupled_variables = m_in
@@ -66,7 +66,7 @@
 []
 
 [Functions]
-  [./FX_Basis_Value_Sub]
+  [FX_Basis_Value_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '3   4   5'
@@ -78,7 +78,7 @@
 []
 
 [UserObjects]
-  [./FX_Value_UserObject_Sub]
+  [FX_Value_UserObject_Sub]
     type = FXVolumeUserObject
     function = FX_Basis_Value_Sub
     variable = s

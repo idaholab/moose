@@ -9,25 +9,25 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
-  [./hoop_stress]
+  [hoop_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionUserObject
     mesh = 2d_out.e
     system_variables = 'disp_x disp_y temp'
@@ -35,24 +35,24 @@
 []
 
 [Functions]
-  [./soln_func_temp]
+  [soln_func_temp]
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'temp'
   [../]
-  [./soln_func_disp_x]
+  [soln_func_disp_x]
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'disp_x disp_y'
     component = 0
   [../]
-  [./soln_func_disp_y]
+  [soln_func_disp_y]
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'disp_x disp_y'
     component = 1
   [../]
-  [./soln_func_disp_z]
+  [soln_func_disp_z]
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'disp_x disp_y'
@@ -61,7 +61,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     volumetric_locking_correction = true
     add_variables  = true
     incremental = true
@@ -72,13 +72,13 @@
 []
 
 [AuxKernels]
-  [./t_soln_aux]
+  [t_soln_aux]
     type = FunctionAux
     variable = temp
     block = '1 2'
     function = soln_func_temp
   [../]
-  [./hoop_stress]
+  [hoop_stress]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = hoop_stress
@@ -88,21 +88,21 @@
 []
 
 [BCs]
-  [./x_soln_bc]
+  [x_soln_bc]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = '1 2'
     function = soln_func_disp_x
   [../]
-  [./y_soln_bc]
+  [y_soln_bc]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = '1 2'
     function = soln_func_disp_y
   [../]
-  [./z_soln_bc]
+  [z_soln_bc]
     type = FunctionDirichletBC
     variable = disp_z
     preset = false
@@ -112,19 +112,19 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 193.05e9
     poissons_ratio = 0.3
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
 
-  [./thermal_expansion]
+  [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     block = '1 2'
     thermal_expansion_coeff = 13e-6
@@ -133,7 +133,7 @@
     eigenstrain_name = thermal_expansion
   [../]
 
-  [./density]
+  [density]
     type = Density
     block = '1'
     density = 8000.0
@@ -162,7 +162,7 @@
 [Outputs]
   file_base = 3dy_out
   exodus = true
-  [./console]
+  [console]
     type = Console
     max_rows = 25
   [../]

@@ -12,54 +12,54 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [Functions]
-  [./top_displacement]
+  [top_displacement]
     type = ParsedFunction
     expression = t
   [../]
 []
 
 [BCs]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = 'disp_x'
     boundary = bottom
     value = 0
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = 'disp_y'
     boundary = bottom
     value = 0
   [../]
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     variable = 'disp_z'
     boundary = bottom
     value = 0
   [../]
 
-  [./top_x]
+  [top_x]
     type = DirichletBC
     variable = 'disp_x'
     boundary = top
     value = 0
   [../]
-  [./top_y]
+  [top_y]
     type = FunctionDirichletBC
     variable = 'disp_y'
     boundary = top
     function = top_displacement
   [../]
-  [./top_z]
+  [top_z]
     type = DirichletBC
     variable = 'disp_z'
     boundary = top
@@ -68,17 +68,17 @@
 []
 
 [Kernels]
-  [./x]
+  [x]
     type = ADStressDivergenceTensors
     variable = disp_x
     component = 0
   [../]
-  [./y]
+  [y]
     type = ADStressDivergenceTensors
     variable = disp_y
     component = 1
   [../]
-  [./z]
+  [z]
     type = ADStressDivergenceTensors
     variable = disp_z
     component = 2
@@ -86,7 +86,7 @@
 []
 
 [Materials]
-  [./rubber_elasticity]
+  [rubber_elasticity]
     type = ComputeIsotropicElasticityTensor
     # lambda = 1.2e7
     # shear_modulus = 1.2e7
@@ -96,16 +96,16 @@
 []
 
 [Materials]
-  [./strain]
+  [strain]
     type = ADComputeGreenLagrangeStrain
   [../]
-  [./stress]
+  [stress]
     type = ADComputeLinearElasticStress
   [../]
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

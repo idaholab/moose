@@ -14,8 +14,8 @@
 []
 
 [Testing]
-  [./LotsOfDiffusion]
-    [./vars]
+  [LotsOfDiffusion]
+    [vars]
       number = 1
       diffusion_coefficients = 1
     [../]

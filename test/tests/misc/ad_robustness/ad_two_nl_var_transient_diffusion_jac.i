@@ -7,7 +7,7 @@ penalty=1
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = FIRST
   [../]
@@ -18,12 +18,12 @@ penalty=1
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = ADTimeDerivative
     variable = u
   [../]
@@ -47,28 +47,28 @@ penalty=1
 []
 
 [BCs]
-  [./left]
+  [left]
     type = PenaltyDirichletBC
     variable = u
     boundary = left
     value = 0
     penalty = ${penalty}
   [../]
-  [./right]
+  [right]
     type = PenaltyDirichletBC
     variable = u
     boundary = right
     value = 1
     penalty = ${penalty}
   [../]
-  [./left_v]
+  [left_v]
     type = PenaltyDirichletBC
     variable = v
     boundary = left
     value = 0
     penalty = ${penalty}
   [../]
-  [./right_v]
+  [right_v]
     type = PenaltyDirichletBC
     variable = v
     boundary = right

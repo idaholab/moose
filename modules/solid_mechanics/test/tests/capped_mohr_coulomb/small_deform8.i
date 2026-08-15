@@ -28,7 +28,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     generate_output = 'max_principal_stress mid_principal_stress min_principal_stress stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
@@ -36,19 +36,19 @@
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0E-6*x'
   [../]
-  [./y]
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0E-6*y'
   [../]
-  [./z]
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
@@ -57,53 +57,53 @@
 []
 
 [AuxVariables]
-  [./f0]
+  [f0]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f1]
+  [f1]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f2]
+  [f2]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [iter]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./intnl]
+  [intnl]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./f0_auxk]
+  [f0_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = f0
   [../]
-  [./f1_auxk]
+  [f1_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f1
   [../]
-  [./f2_auxk]
+  [f2_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f2
   [../]
-  [./iter]
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
   [../]
-  [./intnl_auxk]
+  [intnl_auxk]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 0
@@ -112,72 +112,72 @@
 []
 
 [Postprocessors]
-  [./s_I]
+  [s_I]
     type = PointValue
     point = '0 0 0'
     variable = max_principal_stress
   [../]
-  [./s_II]
+  [s_II]
     type = PointValue
     point = '0 0 0'
     variable = mid_principal_stress
   [../]
-  [./s_III]
+  [s_III]
     type = PointValue
     point = '0 0 0'
     variable = min_principal_stress
   [../]
-  [./s_xx]
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
   [../]
-  [./s_xy]
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
   [../]
-  [./s_xz]
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
   [../]
-  [./s_yy]
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
   [../]
-  [./s_yz]
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
   [../]
-  [./s_zz]
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
   [../]
-  [./f0]
+  [f0]
     type = PointValue
     point = '0 0 0'
     variable = f0
   [../]
-  [./f1]
+  [f1]
     type = PointValue
     point = '0 0 0'
     variable = f1
   [../]
-  [./f2]
+  [f2]
     type = PointValue
     point = '0 0 0'
     variable = f2
   [../]
-  [./iter]
+  [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
   [../]
-  [./intnl]
+  [intnl]
     type = PointValue
     point = '0 0 0'
     variable = intnl
@@ -185,31 +185,31 @@
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = SolidMechanicsHardeningConstant
     value = 0.5
   [../]
-  [./cs]
+  [cs]
     type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
-  [./coh]
+  [coh]
     type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
-  [./ang]
+  [ang]
     type = SolidMechanicsHardeningConstant
     value = 0.5
   [../]
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0.6E6 1E6'
   [../]
-  [./tensile]
+  [tensile]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
     compressive_strength = cs
@@ -219,7 +219,7 @@
     smoothing_tol = 0.0
     yield_function_tol = 1.0E-12
   [../]
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = tensile
     perform_finite_strain_rotations = false

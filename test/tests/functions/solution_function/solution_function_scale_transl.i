@@ -14,7 +14,7 @@
 []
 
 [UserObjects]
-  [./solution_uo]
+  [solution_uo]
     type = SolutionUserObject
     mesh = cube_with_u_equals_x.e
     timestep = 1
@@ -26,14 +26,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./u_init]
+  [u_init]
     type = FunctionIC
     variable = u
     function = solution_fcn
@@ -41,7 +41,7 @@
 []
 
 [Functions]
-  [./solution_fcn]
+  [solution_fcn]
     type = SolutionFunction
     from_variable = u
     solution = solution_uo
@@ -49,7 +49,7 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = TimeDerivative
     variable = u
   [../]

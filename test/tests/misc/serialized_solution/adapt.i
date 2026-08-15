@@ -6,30 +6,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -38,11 +38,11 @@
 []
 
 [Postprocessors]
-  [./aux_serialized]
+  [aux_serialized]
     type = TestSerializedSolution
     system = aux
   [../]
-  [./nl_serialized]
+  [nl_serialized]
     type = TestSerializedSolution
     system = nl
   [../]
@@ -59,8 +59,8 @@
 
 [Adaptivity]
   marker = box_refine
-  [./Markers]
-    [./box_refine]
+  [Markers]
+    [box_refine]
       type = BoxMarker
       bottom_left = '0.2 0.2 0'
       top_right = '0.8 0.8 0'

@@ -67,7 +67,7 @@
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact

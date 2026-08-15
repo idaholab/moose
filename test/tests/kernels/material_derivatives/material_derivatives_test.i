@@ -8,34 +8,34 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Functions]
-  [./u_IC_fn]
+  [u_IC_fn]
     type = ParsedFunction
     expression = 'x'
   [../]
-  [./v_IC_fn]
+  [v_IC_fn]
     type = ParsedFunction
     expression = 'sin(x)'
   [../]
 []
 
 [ICs]
-  [./u_IC]
+  [u_IC]
     type = FunctionIC
     variable = u
     function = u_IC_fn
   [../]
-  [./v_IC]
+  [v_IC]
     type = FunctionIC
     variable = v
     function = v_IC_fn
@@ -43,21 +43,21 @@
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = u
     coupled_variables = 'u v'
     material_property = material_derivative_test_property
   [../]
   # add a dummy kernel for v to prevent singular Jacobian
-  [./dummy_kernel]
+  [dummy_kernel]
     type = Diffusion
     variable = v
   [../]
 []
 
 [Materials]
-  [./material_derivative_test_material]
+  [material_derivative_test_material]
     type = MaterialDerivativeTestMaterial
     var1 = u
     var2 = v
@@ -65,7 +65,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     solve_type = newton

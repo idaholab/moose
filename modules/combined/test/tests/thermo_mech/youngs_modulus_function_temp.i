@@ -41,30 +41,30 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
-  [./temp]
+  [temp]
     initial_condition = 400
   [../]
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./elastic_strain_xx]
+  [elastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./temperature_function]
+  [temperature_function]
     type = PiecewiseLinear
     x = '1       4'
     y = '400   700'
@@ -72,19 +72,19 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = Diffusion
     variable = temp
   [../]
 
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
   [../]
 []
 
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
@@ -92,7 +92,7 @@
     index_j = 0
   [../]
 
- [./elastic_strain_xx]
+ [elastic_strain_xx]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_xx
@@ -103,32 +103,32 @@
 []
 
 [BCs]
-  [./u_left_fix]
+  [u_left_fix]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./u_bottom_fix]
+  [u_bottom_fix]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./u_back_fix]
+  [u_back_fix]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
   [../]
-  [./u_pull_right]
+  [u_pull_right]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0.001
   [../]
 
-  [./temp_bc_1]
+  [temp_bc_1]
     type = FunctionDirichletBC
     variable = temp
     preset = false
@@ -138,7 +138,7 @@
 []
 
 [Materials]
-  [./youngs_modulus]
+  [youngs_modulus]
     type = PiecewiseLinearInterpolationMaterial
     xy_data = '0          10e+6
                599.9999   10e+6
@@ -147,16 +147,16 @@
     property = youngs_modulus
     variable = temp
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor
     args = temp
     youngs_modulus = youngs_modulus
     poissons_ratio = 0.0
   [../]
-  [./strain]
+  [strain]
     type = ComputeIncrementalStrain
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -168,16 +168,16 @@
 []
 
 [Postprocessors]
-  [./elastic_strain_xx]
+  [elastic_strain_xx]
     type = ElementAverageValue
     variable = elastic_strain_xx
   [../]
-  [./elastic_stress_xx]
+  [elastic_stress_xx]
     type = ElementAverageValue
     variable = stress_xx
   [../]
 
-  [./temp]
+  [temp]
     type = AverageNodalVariableValue
     variable = temp
   [../]

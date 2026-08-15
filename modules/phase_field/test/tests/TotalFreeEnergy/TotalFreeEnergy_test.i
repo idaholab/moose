@@ -18,21 +18,21 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./w]
+  [w]
   [../]
 []
 
 [AuxVariables]
-  [./local_free_energy]
+  [local_free_energy]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [ICs]
-  [./cIC]
+  [cIC]
     type = SmoothCircleIC
     variable = c
     x1 = 125.0
@@ -45,19 +45,19 @@
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
@@ -65,7 +65,7 @@
 []
 
 [AuxKernels]
-  [./local_free_energy]
+  [local_free_energy]
     type = TotalFreeEnergy
     variable = local_free_energy
     kappa_names = kappa_c
@@ -74,12 +74,12 @@
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1e-3 0.1'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     coupled_variables = c
     constant_names = 'barr_height  cv_eq'
@@ -90,14 +90,14 @@
 []
 
 [Postprocessors]
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_free_energy
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

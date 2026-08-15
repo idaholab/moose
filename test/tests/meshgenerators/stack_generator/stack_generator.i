@@ -1,5 +1,5 @@
 [Mesh]
-  [./layer1]
+  [layer1]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 10
@@ -10,7 +10,7 @@
     zmax = 3
   []
 
-  [./layer2]
+  [layer2]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 10
@@ -21,7 +21,7 @@
     zmax = 5
   []
 
-  [./layer3]
+  [layer3]
     type = SubdomainBoundingBoxGenerator
     input = layer2
     bottom_left = '3 3 3'
@@ -29,7 +29,7 @@
     block_id = 2
   []
 
-  [./layer4]
+  [layer4]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 10
@@ -40,7 +40,7 @@
     zmax = 2
   []
 
-  [./stack]
+  [stack]
     type = StackGenerator
     dim = 3
     inputs = 'layer1 layer2 layer3 layer4'

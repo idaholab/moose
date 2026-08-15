@@ -42,13 +42,13 @@
 [] # Mesh
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 795.77471545947674 # 10000/pi/2^2
   [../]
-  [./disp_y]
+  [disp_y]
     type = PiecewiseLinear
     x = '0.  1.    2.'
     y = '0. -0.01 -0.01'
@@ -57,12 +57,12 @@
 
 [Variables]
 
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -71,35 +71,35 @@
 
 [AuxVariables]
 
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_xy]
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yz]
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zx]
+  [stress_zx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vonmises]
+  [vonmises]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./hydrostatic]
+  [hydrostatic]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -107,48 +107,48 @@
 [] # AuxVariables
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
   [../]
 []
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     variable = stress_xx
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
     variable = stress_yy
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     variable = stress_zz
   [../]
-  [./stress_xy]
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 1
     variable = stress_xy
   [../]
-  [./stress_yz]
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 2
     variable = stress_yz
   [../]
-  [./stress_zx]
+  [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
@@ -160,20 +160,20 @@
 
 [BCs]
 
-  [./base_y]
+  [base_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1000
     value = 0.0
   [../]
 
-  [./symm_x]
+  [symm_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./disp_y]
+  [disp_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
@@ -184,7 +184,7 @@
 
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 1000
     secondary = 100
     model = coulomb
@@ -198,24 +198,24 @@
 
 [Materials]
 
-  [./tensor]
+  [tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1.40625e7
     poissons_ratio = 0.25
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = '1'
   [../]
 
-  [./tensor_1000]
+  [tensor_1000]
     type = ComputeIsotropicElasticityTensor
     block = '1000'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
   [../]
-  [./stress_1000]
+  [stress_1000]
     type = ComputeLinearElasticStress
     block = '1000'
   [../]
@@ -223,7 +223,7 @@
 [] # Materials
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
@@ -253,7 +253,7 @@
 [] # Executioner
 
 [Postprocessors]
-  [./maxdisp]
+  [maxdisp]
     type = NodalVariableValue
     nodeid = 39 # 40-1 where 40 is the exodus node number of the top-left node
     variable = disp_y
@@ -261,7 +261,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
   [../]

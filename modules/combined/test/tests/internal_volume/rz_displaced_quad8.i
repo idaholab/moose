@@ -43,12 +43,12 @@
 []
 
 [Functions]
-  [./disp_x]
+  [disp_x]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 0.5380168369562588'
   [../]
-  [./disp_x2]
+  [disp_x2]
     type = PiecewiseLinear
     scale_factor = 0.5
     x = '0. 1.'
@@ -57,19 +57,19 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = SECOND
     family = LAGRANGE
   [../]
 
-  [./disp_y]
+  [disp_y]
     order = SECOND
     family = LAGRANGE
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     volumetric_locking_correction = false
     decomposition_method = EigenSolution
     incremental = true
@@ -78,27 +78,27 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
 
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
   [../]
 
-  [./x]
+  [x]
     type = FunctionDirichletBC
     boundary = 3
     variable = disp_x
     function = disp_x
   [../]
-  [./x2]
+  [x2]
     type = FunctionDirichletBC
     boundary = 4
     variable = disp_x
@@ -107,13 +107,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -126,13 +126,13 @@
   dt = 1.0
   end_time = 1.0
 
-  [./Quadrature]
+  [Quadrature]
     order = THIRD
   [../]
 []
 
 [Postprocessors]
-  [./internalVolume]
+  [internalVolume]
     type = InternalVolume
     boundary = 2
     execute_on = 'initial timestep_end'

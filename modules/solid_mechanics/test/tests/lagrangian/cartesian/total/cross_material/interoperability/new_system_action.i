@@ -96,13 +96,13 @@
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = SolidMechanicsHardeningPowerRule
     value_0 = 100.0
     epsilon0 = 0.1
     exponent = 2.0
   [../]
-  [./j2]
+  [j2]
     type = SolidMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3
@@ -131,11 +131,11 @@
 []
 
 [Postprocessors]
-  [./strain]
+  [strain]
     type = ElementAverageValue
     variable = mechanical_strain_xx
   []
-  [./stress]
+  [stress]
     type = ElementAverageValue
     variable = stress_xx
   []

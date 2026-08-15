@@ -8,13 +8,13 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 4
     ny = 4
   [../]
-  [./gpd]
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
@@ -22,32 +22,32 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 
-  [./scalar_strain_zz]
+  [scalar_strain_zz]
     order = FIRST
     family = SCALAR
   [../]
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Modules/Peridynamics/Mechanics]
-  [./Master]
-    [./all]
+  [Master]
+    [all]
       formulation = ORDINARY_STATE
     [../]
   [../]
-  [./GeneralizedPlaneStrain]
-    [./all]
+  [GeneralizedPlaneStrain]
+    [all]
       formulation = ORDINARY_STATE
       out_of_plane_stress_variable = stress_zz
     [../]
@@ -55,7 +55,7 @@
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = NodalRankTwoPD
     variable = stress_zz
 
@@ -70,19 +70,19 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
   [../]
 
-  [./force_density]
+  [force_density]
     type = ComputeSmallStrainConstantHorizonMaterialOSPD
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'

@@ -74,7 +74,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -92,7 +92,7 @@
 
 [InterfaceKernels]
   active = 'diffusion'
-  [./diffusion]
+  [diffusion]
     type = InterfaceDiffusion
     variable = v
     neighbor_var = u
@@ -101,7 +101,7 @@
     D_neighbor = 'D'
   [../]
 
-  [./penalty]
+  [penalty]
     type = PenaltyInterfaceDiffusion
     variable = v
     neighbor_var = u

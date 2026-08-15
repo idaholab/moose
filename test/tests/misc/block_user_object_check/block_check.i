@@ -1,18 +1,18 @@
 [Mesh]
-  [./generator]
+  [generator]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
     ny = 5
   [../]
-  [./left_block]
+  [left_block]
     type = SubdomainBoundingBoxGenerator
     input = generator
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '0.5 1 0'
   [../]
-  [./right_block]
+  [right_block]
     type = SubdomainBoundingBoxGenerator
     input = left_block
     block_id = 2
@@ -22,11 +22,11 @@
 []
 
 [Variables]
-  [./var_1]
+  [var_1]
     block = 1
     initial_condition = 100
   [../]
-  [./var_2]
+  [var_2]
     block = 2
     initial_condition = 200
   [../]
@@ -43,7 +43,7 @@
 []
 
 [Postprocessors]
-  [./obj]
+  [obj]
     type = NodalExtremeValue
     variable = var_1
     #block = 1 # this is what being tested, see the test spec

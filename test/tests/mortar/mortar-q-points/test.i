@@ -3,13 +3,13 @@
     type = FileMeshGenerator
     file = nodal_normals_test_offset_nonmatching_gap.e
   []
-  [./primary]
+  [primary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   [../]
-  [./secondary]
+  [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
@@ -23,18 +23,18 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     block = '1 2'
   [../]
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = '1 2'
   [../]
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = T
     block = '1 2'
@@ -42,7 +42,7 @@
 []
 
 [Constraints]
-  [./mortar]
+  [mortar]
     type = SpatiallyVaryingSource
     primary_boundary = 2
     secondary_boundary = 1
@@ -53,7 +53,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

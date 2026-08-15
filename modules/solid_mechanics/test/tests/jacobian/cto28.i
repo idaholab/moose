@@ -18,26 +18,26 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [Kernels]
-  [./cx_elastic]
+  [cx_elastic]
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
   [../]
-  [./cy_elastic]
+  [cy_elastic]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
   [../]
-  [./cz_elastic]
+  [cz_elastic]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
@@ -45,27 +45,27 @@
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./cs]
+  [cs]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./mc_coh]
+  [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./phi]
+  [phi]
     type = SolidMechanicsHardeningConstant
     value = 0.8
   [../]
-  [./psi]
+  [psi]
     type = SolidMechanicsHardeningConstant
     value = 0.4
   [../]
-  [./dp]
+  [dp]
     type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = phi
@@ -76,28 +76,28 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 10.0
     poissons_ratio = 0.25
   [../]
-  [./strain]
+  [strain]
     type = ComputeIncrementalStrain
     eigenstrain_names = ini_stress
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '10 0 0  0 10 0  0 0 10'
     eigenstrain_name = ini_stress
   [../]
-  [./admissible]
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'dp'
     relative_tolerance = 2.0
     absolute_tolerance = 1E6
     max_iterations = 1
   [../]
-  [./dp]
+  [dp]
     type = CappedDruckerPragerStressUpdate
     base_name = dp
     DP_model = dp
@@ -110,7 +110,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'

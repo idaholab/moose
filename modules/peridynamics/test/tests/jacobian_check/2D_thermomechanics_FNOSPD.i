@@ -8,13 +8,13 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 4
     ny = 4
   [../]
-  [./gpd]
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
@@ -22,16 +22,16 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Modules/Peridynamics/Mechanics/Master]
-  [./all]
+  [all]
     formulation = NONORDINARY_STATE
     stabilization = FORCE
     eigenstrain_names = thermal
@@ -39,41 +39,41 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConductionBPD
     variable = temp
   [../]
 []
 
 [Materials]
-  [./linelast]
+  [linelast]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.0
   [../]
-  [./strain]
+  [strain]
     type = ComputePlaneSmallStrainNOSPD
     eigenstrain_names = thermal
     stabilization = FORCE
   [../]
-  [./thermal_strain]
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     eigenstrain_name = thermal
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 
-  [./thermal]
+  [thermal]
     type = ThermalConstantHorizonMaterialBPD
     thermal_conductivity = 1.0
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'
@@ -88,7 +88,7 @@
   dt = 1
   num_steps = 1
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
   [../]

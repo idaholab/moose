@@ -4,41 +4,41 @@
 []
 
 [Functions]
-  [./tr_x]
+  [tr_x]
     type = ParsedFunction
     expression = -x*cos(pi/3)
   [../]
 
-  [./tr_y]
+  [tr_y]
     type = ParsedFunction
     expression = x*sin(pi/3)
   [../]
 
-  [./itr_x]
+  [itr_x]
     type = ParsedFunction
     expression = -x/cos(pi/3)
   [../]
 
-  [./itr_y]
+  [itr_y]
     type = ParsedFunction
     expression = 0
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = GaussContForcing
     variable = u
     x_center = 2
@@ -47,15 +47,15 @@
     y_spread = 0.5
   [../]
 
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = u
       primary = 1
       secondary = 4

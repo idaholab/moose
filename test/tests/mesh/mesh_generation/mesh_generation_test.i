@@ -21,7 +21,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -30,7 +30,7 @@
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -40,14 +40,14 @@
   active = 'left right'
 
   # Mesh Generation produces boundaries in counter-clockwise fashion
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1

@@ -23,21 +23,21 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.0 0.5 1.0 0.5'
   [../]
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     planar_formulation = PLANE_STRAIN
@@ -46,44 +46,44 @@
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0 1.0'
     y = '500 500'
   [../]
-  [./bc_func_tx]
+  [bc_func_tx]
     type = ParsedFunction
     expression = '0.5-(0.5-x)*cos(pi*t/2.0)-x'
   [../]
-  [./bc_func_ty]
+  [bc_func_ty]
     type = ParsedFunction
     expression = '(0.5-x)*sin(pi*t/2.0)+0.5'
   [../]
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     boundary = 0
     preset = false
     variable = disp_y
     value = 0.0
   [../]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     boundary = 0
     preset = false
     variable = disp_x
     value = 0.0
   [../]
-  [./top_right_y]
+  [top_right_y]
     type = FunctionDirichletBC
     boundary = 2
     preset = false
     variable = disp_y
     function = bc_func_ty
   [../]
-  [./top_right_x]
+  [top_right_x]
     type = FunctionDirichletBC
     boundary = 2
     preset = false
@@ -93,14 +93,14 @@
 []
 
 [DiracKernels]
-  [./pressure_x]
+  [pressure_x]
     type = XFEMPressure
     variable = disp_x
     component = 0
     function = pressure
     use_displaced_mesh = true
   [../]
-  [./pressure_y]
+  [pressure_y]
     type = XFEMPressure
     variable = disp_y
     component = 1
@@ -110,12 +110,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -129,7 +129,7 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -152,7 +152,7 @@
 [Outputs]
   file_base = 2d_pressure_displaced_mesh_out
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

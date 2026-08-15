@@ -2,7 +2,7 @@ a=1.1
 diff=1.1
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = FileMeshGenerator
     file = skewed.msh
   [../]
@@ -10,7 +10,7 @@ diff=1.1
 
 
 [Variables]
-  [./v]
+  [v]
     initial_condition = 1
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
@@ -64,7 +64,7 @@ diff=1.1
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact

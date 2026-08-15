@@ -11,29 +11,29 @@
 []
 
 [Functions]
-  [./bc_fnt]
+  [bc_fnt]
     type = ParsedFunction
     expression = 2*y
   [../]
-  [./bc_fnb]
+  [bc_fnb]
     type = ParsedFunction
     expression = -2*y
   [../]
-  [./bc_fnl]
+  [bc_fnl]
     type = ParsedFunction
     expression = -2*x
   [../]
-  [./bc_fnr]
+  [bc_fnr]
     type = ParsedFunction
     expression = 2*x
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = -4+x*x+y*y
   [../]
 
-  [./solution]
+  [solution]
     type = ParsedGradFunction
     expression = x*x+y*y
     grad_x = 2*x
@@ -42,7 +42,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = HIERARCHIC
   [../]
@@ -50,17 +50,17 @@
 
 [Kernels]
   active = 'diff forcing reaction'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -68,25 +68,25 @@
 []
 
 [BCs]
-  [./bc_top]
+  [bc_top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = bc_fnt
   [../]
-  [./bc_bottom]
+  [bc_bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bc_fnb
   [../]
-  [./bc_left]
+  [bc_left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = bc_fnl
   [../]
-  [./bc_right]
+  [bc_right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
@@ -95,25 +95,25 @@
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
   [../]
 
-  [./h]
+  [h]
     type = AverageElementSize
   [../]
 
-  [./L2error]
+  [L2error]
     type = ElementL2Error
     variable = u
     function = solution
   [../]
-  [./H1error]
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
   [../]
-  [./H1Semierror]
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution

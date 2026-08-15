@@ -5,7 +5,7 @@
     nx = 2
     ny = 2
   []
-  [./right_side]
+  [right_side]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
@@ -15,30 +15,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -56,37 +56,37 @@
 []
 
 [Postprocessors]
-  [./initial] # 1 per simulation
+  [initial] # 1 per simulation
     type = InternalSideSetupInterfaceCount
     count_type = 'initial'
     execute_on = 'initial timestep_begin timestep_end'
   [../]
-  [./timestep] # once per timestep
+  [timestep] # once per timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'timestep'
     execute_on = 'initial timestep_begin timestep_end'
   [../]
-  [./subdomain] # 1 on initial and 2 for each timestep
+  [subdomain] # 1 on initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'subdomain'
     execute_on = 'initial timestep_begin timestep_end'
   [../]
-  [./initialize] # 1 for initial and 2 for each timestep
+  [initialize] # 1 for initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'initialize'
     execute_on = 'initial timestep_begin timestep_end'
   [../]
-  [./finalize] # 1 for initial and 2 for each timestep
+  [finalize] # 1 for initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'finalize'
     execute_on = 'initial timestep_begin timestep_end'
   [../]
-  [./execute] # 4 for initial and 8 for each timestep
+  [execute] # 4 for initial and 8 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'execute'
     execute_on = 'initial timestep_begin timestep_end'
   [../]
-  [./threadjoin] # 1 for initial and 2 for each timestep
+  [threadjoin] # 1 for initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'threadjoin'
     execute_on = 'initial timestep_begin timestep_end'

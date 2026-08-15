@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     xmin = -6
@@ -13,7 +13,7 @@
     nz = 12
   []
 
-  [./subdomains]
+  [subdomains]
     type = OrientedSubdomainBoundingBoxGenerator
     input = gmg
     center = '-1 4 1'
@@ -33,7 +33,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 

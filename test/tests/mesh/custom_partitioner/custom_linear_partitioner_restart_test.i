@@ -13,7 +13,7 @@
     ymax = 10.0
   []
 
-  [./Partitioner]
+  [Partitioner]
     type = LibmeshPartitioner
     partitioner = linear
   [../]
@@ -21,7 +21,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -30,27 +30,27 @@
 [Kernels]
   active = 'bodyforce ie'
 
-  [./bodyforce]
+  [bodyforce]
     type = BodyForce
     variable = u
     value = 10.0
   [../]
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2

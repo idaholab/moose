@@ -5,9 +5,9 @@
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
   [../]
-  [./conc]
+  [conc]
     family = MONOMIAL
     order = CONSTANT
     block = centre_block
@@ -15,13 +15,13 @@
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = RandomIC
     variable = pressure
     min = -1
     max = 1
   [../]
-  [./conc_ic]
+  [conc_ic]
     type = RandomIC
     variable = conc
     min = -1
@@ -32,17 +32,17 @@
 
 
 [Kernels]
-  [./p_dot] # this is just so a kernel is defined everywhere
+  [p_dot] # this is just so a kernel is defined everywhere
     type = TimeDerivative
     variable = pressure
   [../]
-  [./flow_from_matrix]
+  [flow_from_matrix]
     type = DesorptionFromMatrix
     block = centre_block
     variable = conc
     pressure_var = pressure
   [../]
-  [./flux_to_porespace]
+  [flux_to_porespace]
     type = DesorptionToPorespace
     block = centre_block
     variable = pressure
@@ -51,13 +51,13 @@
 []
 
 [Materials]
-  [./nothing] # when any block contains a material, all blocks need to
+  [nothing] # when any block contains a material, all blocks need to
     type = GenericConstantMaterial
     block = 'left_block centre_block right_block'
     prop_names = ''
     prop_values = ''
   [../]
-  [./langmuir_params]
+  [langmuir_params]
     type = MollifiedLangmuirMaterial
     block = centre_block
     one_over_desorption_time_const = 0.813E-10
@@ -71,7 +71,7 @@
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'

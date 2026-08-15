@@ -18,20 +18,20 @@
 []
 
 [Functions]
-  [./TGradient]
+  [TGradient]
     type = ParsedFunction
     expression = '450 + 0.1*x'
   [../]
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalBoundingBoxIC]
+  [PolycrystalICs]
+    [BicrystalBoundingBoxIC]
       x1 = 0.0
       x2 = 500.0
       y1 = 0.0
@@ -41,26 +41,26 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
   [../]
-  [./T]
+  [T]
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     variable_mobility = true
     coupled_variables = 'T'
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
   [../]
-  [./Tgrad]
+  [Tgrad]
     type = FunctionAux
     variable = T
     function = TGradient
@@ -68,7 +68,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = T # K
     wGB = 60 # nm
@@ -79,7 +79,7 @@
 []
 
 [Postprocessors]
-  [./gr0_area]
+  [gr0_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr0
     execute_on = 'initial TIMESTEP_END'
@@ -87,7 +87,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

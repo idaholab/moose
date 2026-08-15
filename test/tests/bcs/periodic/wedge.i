@@ -6,12 +6,12 @@
 [Functions]
   active = 'tr_x tr_y'
 
-  [./tr_x]
+  [tr_x]
     type = ParsedFunction
     expression = -x
   [../]
 
-  [./tr_y]
+  [tr_y]
     type = ParsedFunction
     expression = y
   [../]
@@ -20,7 +20,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -29,12 +29,12 @@
 [Kernels]
   active = 'diff forcing dot'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = GaussContForcing
     variable = u
     x_center = -0.5
@@ -43,7 +43,7 @@
     y_spread = 0.2
   [../]
 
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
   [../]
@@ -52,8 +52,8 @@
 [BCs]
   #active = ' '
 
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = u
       primary = 1
       secondary = 2

@@ -13,21 +13,21 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 125.0
       y1 = 125.0
@@ -37,14 +37,14 @@
       int_width = 50.0
     [../]
   [../]
-  [./e11_aux]
+  [e11_aux]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./stress_e11]
+  [stress_e11]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
@@ -54,13 +54,13 @@
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.
   [../]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     variable = disp_x
@@ -69,14 +69,14 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
   [../]
 []
 
 [Materials]
   # This deprecated material is replaced by the materials below
   #
-  #[./eigenstrain]
+  #[eigenstrain]
   #  type = SimpleEigenStrainMaterial
   #  block = 0
   #  epsilon0 = 0.05
@@ -87,19 +87,19 @@
   #  fill_method = symmetric9
   #[../]
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '3 1 1 3 1 3 1 1 1 '
   [../]
-  [./strain]
+  [strain]
     type = ComputeSmallStrain
     eigenstrain_names = eigenstrain
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
-  [./prefactor]
+  [prefactor]
     type = DerivativeParsedMaterial
     coupled_variables = c
     property_name = prefactor
@@ -107,7 +107,7 @@
     constant_expressions = '0.05     0'
     expression = '(c - c0) * epsilon0'
   [../]
-  [./eigenstrain]
+  [eigenstrain]
     type = ComputeVariableEigenstrain
     eigen_base = '1'
     args = c

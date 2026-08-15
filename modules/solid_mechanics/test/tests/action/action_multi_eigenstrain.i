@@ -26,7 +26,7 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -37,14 +37,14 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./block1]
+  [block1]
     block = 1
     strain = FINITE
     add_variables = true
     automatic_eigenstrain_names = true
     generate_output = 'strain_xx strain_yy strain_zz'
   [../]
-  [./block2]
+  [block2]
     block = 2
     strain = FINITE
     add_variables = true
@@ -54,21 +54,21 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = 3
     value = 0.0
   [../]
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
   [../]
 
-  [./back]
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = 1
@@ -77,7 +77,7 @@
 []
 
 [AuxKernels]
-  [./temp]
+  [temp]
     type = FunctionAux
     variable = temp
     block = '1 2'
@@ -86,15 +86,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./small_stress]
+  [small_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion_strain1]
+  [thermal_expansion_strain1]
     type = ComputeMeanThermalExpansionFunctionEigenstrain
     block = 1
     thermal_expansion_function = cte_func_mean
@@ -103,7 +103,7 @@
     temperature = temp
     eigenstrain_name = eigenstrain1
   [../]
-  [./thermal_expansion_strain2]
+  [thermal_expansion_strain2]
     type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
     block = 2
     thermal_expansion_function = cte_func_inst
@@ -114,20 +114,20 @@
 []
 
 [Functions]
-  [./cte_func_mean]
+  [cte_func_mean]
     type = ParsedFunction
     symbol_names = 'tsf tref scale' #stress free temp, reference temp, scale factor
     symbol_values = '0.0 0.5  1e-4'
     expression = 'scale * (t - tsf) / (t - tref)'
   [../]
-  [./cte_func_inst]
+  [cte_func_inst]
     type = PiecewiseLinear
     xy_data = '0 1.0
                2 1.0'
     scale_factor = 1e-4
   [../]
 
-  [./temp_func]
+  [temp_func]
     type = PiecewiseLinear
     xy_data = '0 1
                1 2'
@@ -135,13 +135,13 @@
 []
 
 [Postprocessors]
-  [./disp_1]
+  [disp_1]
     type = NodalExtremeValue
     variable = disp_x
     boundary = 101
   [../]
 
-  [./disp_2]
+  [disp_2]
     type = NodalExtremeValue
     variable = disp_x
     boundary = 102

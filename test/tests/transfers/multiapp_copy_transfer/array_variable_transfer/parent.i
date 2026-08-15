@@ -32,7 +32,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
@@ -41,7 +41,7 @@
 
 [Transfers]
   # Transfers all components together on the same mesh.
-  [./from_sub]
+  [from_sub]
     type = MultiAppCopyTransfer
     source_variable = u
     variable = v

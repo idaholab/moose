@@ -17,13 +17,13 @@
 []
 
 [Variables]
-  [./temperature]
+  [temperature]
     initial_condition = 300
   [../]
 []
 
 [UserObjects]
-  [./gray_lambert]
+  [gray_lambert]
     type = ViewFactorObjectSurfaceRadiation
     boundary = 'bottom top left right front back'
     fixed_temperature_boundary = 'bottom top'
@@ -34,7 +34,7 @@
     view_factor_object_name = view_factor
   [../]
 
-  [./view_factor]
+  [view_factor]
     type = UnobstructedPlanarViewFactor
     boundary = 'bottom top left right front back'
     normalize_view_factor = true
@@ -43,42 +43,42 @@
 []
 
 [Postprocessors]
-  [./heat_flux_density_bottom]
+  [heat_flux_density_bottom]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = HEAT_FLUX_DENSITY
     boundary = bottom
   [../]
 
-  [./temperature_left]
+  [temperature_left]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = TEMPERATURE
     boundary = left
   [../]
 
-  [./temperature_right]
+  [temperature_right]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = TEMPERATURE
     boundary = right
   [../]
 
-  [./brightness_top]
+  [brightness_top]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = RADIOSITY
     boundary = top
   [../]
 
-  [./brightness_front]
+  [brightness_front]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = RADIOSITY
     boundary = front
   [../]
 
-  [./brightness_back]
+  [brightness_back]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = RADIOSITY

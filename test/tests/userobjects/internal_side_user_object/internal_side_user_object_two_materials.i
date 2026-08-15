@@ -10,7 +10,7 @@
     ny = 2
     elem_type = QUAD4
   []
-  [./subdomain_id]
+  [subdomain_id]
     input = gen
     type = SubdomainPerElementGenerator
     subdomain_ids = '0 1
@@ -19,19 +19,19 @@
 []
 
 [Functions]
-  [./fn_exact]
+  [fn_exact]
     type = ParsedFunction
     expression = 'x*x+y*y'
   [../]
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression = -4
   [../]
 []
 
 [UserObjects]
-  [./isuo]
+  [isuo]
     type = InsideUserObject
     variable = u
     diffusivity = diffusivity
@@ -40,19 +40,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = ffn
@@ -60,7 +60,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -69,12 +69,12 @@
 []
 
 [Materials]
-  [./stateful1]
+  [stateful1]
     type = StatefulMaterial
     block = 0
     initial_diffusivity = 1
   [../]
-  [./stateful2]
+  [stateful2]
     type = StatefulMaterial
     block = 1
     initial_diffusivity = 2
@@ -82,7 +82,7 @@
 []
 
 [Postprocessors]
-  [./value]
+  [value]
     type = InsideValuePPS
     user_object = isuo
   [../]

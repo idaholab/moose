@@ -13,7 +13,7 @@
 []
 
 [Functions]
-  [./rampConstant]
+  [rampConstant]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
@@ -31,28 +31,28 @@
 
 [BCs]
 
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0.0
   [../]
 
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
 
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
   [../]
 
-  [./top_x]
+  [top_x]
     type = DisplacementAboutAxis
     boundary = top
     function = rampConstant
@@ -63,7 +63,7 @@
     variable = disp_x
   [../]
 
-  [./top_y]
+  [top_y]
     type = DisplacementAboutAxis
     boundary = top
     function = rampConstant
@@ -75,13 +75,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
   [../]

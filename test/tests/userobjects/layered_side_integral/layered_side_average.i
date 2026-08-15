@@ -7,32 +7,32 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./layered_side_average]
+  [layered_side_average]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
   [../]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
@@ -41,7 +41,7 @@
 []
 
 [AuxKernels]
-  [./lsia]
+  [lsia]
     type = SpatialUserObjectAux
     variable = layered_side_average
     boundary = right
@@ -50,7 +50,7 @@
 []
 
 [UserObjects]
-  [./layered_side_average]
+  [layered_side_average]
     type = LayeredSideAverage
     direction = y
     num_layers = 3

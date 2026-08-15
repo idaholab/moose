@@ -5,12 +5,12 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     block = 1
@@ -20,12 +20,12 @@
 [Kernels]
   active = 'diff body_force'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = v
     block = 2
@@ -36,14 +36,14 @@
 [BCs]
   active = 'right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2

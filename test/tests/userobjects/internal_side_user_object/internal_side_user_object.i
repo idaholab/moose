@@ -11,38 +11,38 @@
 []
 
 [Functions]
-  [./fn_exact]
+  [fn_exact]
     type = ParsedFunction
     expression = 'x*x+y*y'
   [../]
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression = -4
   [../]
 []
 
 [UserObjects]
-  [./isuo]
+  [isuo]
     type = InsideUserObject
     variable = u
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = ffn
@@ -50,7 +50,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -59,7 +59,7 @@
 []
 
 [Postprocessors]
-  [./value]
+  [value]
     type = InsideValuePPS
     user_object = isuo
   [../]

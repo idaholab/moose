@@ -10,56 +10,56 @@
 []
 
 [Functions]
-  [./v1_func]
+  [v1_func]
     type = ParsedFunction
     expression = (1-x)/2
   [../]
-  [./v2_func]
+  [v2_func]
     type = ParsedFunction
     expression = (1+x)/2
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./lc]
+  [lc]
   [../]
 
-  [./v1]
+  [v1]
   [../]
-  [./v2]
+  [v2]
   [../]
 
-  [./w1]
+  [w1]
   [../]
-  [./w2]
+  [w2]
   [../]
 []
 
 [ICs]
-  [./v1_ic]
+  [v1_ic]
     type = FunctionIC
     variable = v1
     function = v1_func
   [../]
-  [./v2_ic]
+  [v2_ic]
     type = FunctionIC
     variable = v2
     function = v2_func
   [../]
 
-  [./w1_ic]
+  [w1_ic]
     type = ConstantIC
     variable = w1
     value = 0.3
   [../]
-  [./w2_ic]
+  [w2_ic]
     type = ConstantIC
     variable = w2
     value = 0.5
@@ -67,7 +67,7 @@
 []
 
 [AuxKernels]
-  [./lc-aux]
+  [lc-aux]
     type = ParsedAux
     variable = lc
     expression = 'v1*w1+v2*w2'
@@ -78,21 +78,21 @@
 
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -106,7 +106,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
   [../]
 []

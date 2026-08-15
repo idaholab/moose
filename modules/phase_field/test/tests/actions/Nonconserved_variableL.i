@@ -13,9 +13,9 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Nonconserved]
-      [./eta]
+  [PhaseField]
+    [Nonconserved]
+      [eta]
         free_energy = F
         kappa = 2.0
         mobility = variable_L
@@ -25,7 +25,7 @@
 []
 
 [ICs]
-  [./InitialCondition]
+  [InitialCondition]
     type = SmoothCircleIC
     variable = eta
     x1 = 20.0
@@ -38,7 +38,7 @@
 []
 
 [Materials]
-  [./mobility]
+  [mobility]
     type = DerivativeParsedMaterial
     property_name = variable_L
     coupled_variables = 'eta'
@@ -46,7 +46,7 @@
     derivative_order = 1
     outputs = exodus
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'eta'

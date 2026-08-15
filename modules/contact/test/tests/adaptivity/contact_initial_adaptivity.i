@@ -14,28 +14,28 @@
 []
 
 [AuxVariables]
-  [./penetration]
+  [penetration]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Functions]
-  [./negramp]
+  [negramp]
     type = ParsedFunction
     expression = -t/10
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
   []
 []
 
 [AuxKernels]
-  [./penetration]
+  [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 3
@@ -44,32 +44,32 @@
 []
 
 [Postprocessors]
-  [./nonlinear_its]
+  [nonlinear_its]
     type = NumNonlinearIterations
     execute_on = timestep_end
   [../]
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./left_y]
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-  [./right_x]
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = negramp
   [../]
-  [./right_y]
+  [right_y]
     type = DirichletBC
     variable = disp_y
     boundary = 4
@@ -78,20 +78,20 @@
 []
 
 [Materials]
-  [./stiffStuff1]
+  [stiffStuff1]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff1_stress]
+  [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
 []
 
 [Contact]
-  [./leftright]
+  [leftright]
     secondary = 3
     primary = 2
     model = frictionless
@@ -105,8 +105,8 @@
   marker = box
   max_h_level = 2
   initial_steps = 2
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       type = BoxMarker
       bottom_left = '0.5 -2.0 0.0'
       top_right = '0.75 2.0 0.0'

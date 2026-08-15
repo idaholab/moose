@@ -5,7 +5,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -14,12 +14,12 @@
 [Kernels]
   active = 'diff body_force'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     block = 1
@@ -30,14 +30,14 @@
 [BCs]
   active = 'right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -47,7 +47,7 @@
 
 [Materials]
   # This material is global and uses a coupled property
-  [./mat_global]
+  [mat_global]
     type = CoupledMaterial
     mat_prop = 'some_prop'
     coupled_mat_prop = 'mp1'
@@ -55,7 +55,7 @@
   [../]
 
   # This material supplies a value for block 1 ONLY
-  [./mat_0]
+  [mat_0]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'mp1'
@@ -63,7 +63,7 @@
   [../]
 
   # This material supplies a value for block 2 ONLY
-  [./mat_1]
+  [mat_1]
     type = GenericConstantMaterial
     block = 2
     prop_names = 'mp1'

@@ -10,31 +10,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./aux1]
+  [aux1]
     initial_condition = 1
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -43,7 +43,7 @@
 []
 
 [Materials]
-  [./coupling_u]
+  [coupling_u]
     type = VarCouplingMaterial
     block = 0
     var = u
@@ -51,7 +51,7 @@
 []
 
 [Postprocessors]
-  [./aux1_integral]
+  [aux1_integral]
     type = ElementIntegralVariablePostprocessor
     variable = aux1
     execute_on = 'initial timestep_end'

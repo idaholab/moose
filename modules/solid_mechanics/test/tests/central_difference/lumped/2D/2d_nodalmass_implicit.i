@@ -5,7 +5,7 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
     incremental = true
@@ -14,7 +14,7 @@
 
 
 [Mesh]
-  [./generated_mesh]
+  [generated_mesh]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -24,7 +24,7 @@
     nx = 1
     ny = 2
   [../]
-  [./all_nodes]
+  [all_nodes]
     type = BoundingBoxNodeSetGenerator
     new_boundary = 'all'
     input = 'generated_mesh'
@@ -35,13 +35,13 @@
 
 
 [BCs]
-  [./y_bot]
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./x_bot]
+  [x_bot]
     type = PresetDisplacement
     boundary = bottom
     variable = disp_x
@@ -53,7 +53,7 @@
 []
 
 [Functions]
-  [./disp]
+  [disp]
     type = PiecewiseLinear
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # displacement
@@ -61,13 +61,13 @@
 []
 
 [NodalKernels]
-  [./nodal_mass_x]
+  [nodal_mass_x]
     type = NodalTranslationalInertia
     variable = 'disp_x'
     nodal_mass_file = 'nodal_mass_file.csv'
     boundary = 'all'
   [../]
-  [./nodal_mass_y]
+  [nodal_mass_y]
     type = NodalTranslationalInertia
     variable = 'disp_y'
     nodal_mass_file = 'nodal_mass_file.csv'
@@ -76,17 +76,17 @@
 []
 
 [Materials]
-  [./elasticity_tensor_block]
+  [elasticity_tensor_block]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
   [../]
-  [./stress_block]
+  [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
   [../]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
@@ -95,7 +95,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
   [../]
@@ -110,7 +110,7 @@
   end_time = 0.1
   dt = 0.005
   timestep_tolerance = 1e-6
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = NewmarkBeta
     beta = 0.25
     gamma = 0.5
@@ -118,7 +118,7 @@
 []
 
 [Postprocessors]
-  [./accel_2x]
+  [accel_2x]
     type = PointValue
     point = '1.0 2.0 0.0'
     variable = accel_x

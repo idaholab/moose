@@ -3,13 +3,13 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
 
     # Use the initial Condition block underneath the variable
     # for which we want to apply this initial condition
-    [./InitialCondition]
+    [InitialCondition]
       type = ExampleIC
       coefficient = 2.0
     [../]
@@ -17,26 +17,26 @@
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = diffused
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = diffused
     boundary = 'top'
     value = 2
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = diffused
     boundary = 'bottom'

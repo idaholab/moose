@@ -3,11 +3,11 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = 2D_2blocks.e
   [../]
-  [./gpd]
+  [gpd]
     type = MeshGeneratorPD
     input = fmg
     retain_fe_mesh = true

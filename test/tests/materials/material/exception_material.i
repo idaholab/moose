@@ -10,30 +10,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./mat]
+  [mat]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./time_derivative]
+  [time_derivative]
     type = TimeDerivative
     variable = u
   [../]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = matp
   [../]
-  [./f]
+  [f]
     type = BodyForce
     variable = u
     function = '20'
@@ -41,7 +41,7 @@
 []
 
 [AuxKernels]
-  [./mat]
+  [mat]
     # Sequence of events:
     # 1.) MaterialRealAux is re-evaluated every linear iteration
     # 2.) MaterialRealAux calls ExceptionMaterial::computeQpProperties()
@@ -60,7 +60,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = u
     boundary = 'left top bottom right'
@@ -69,7 +69,7 @@
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = ExceptionMaterial
     block = 0
     rank = 0

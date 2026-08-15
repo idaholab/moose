@@ -8,14 +8,14 @@
 []
 
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./local_free_energy]
+  [local_free_energy]
     type = TotalFreeEnergy
     variable = local_energy
     kappa_names = kappa_c
@@ -24,37 +24,37 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     scaling = 1e1
-    [./InitialCondition]
+    [InitialCondition]
       type = RampIC
       variable = c
       value_left = 0
       value_right = 1
     [../]
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
@@ -63,13 +63,13 @@
 []
 
 [Functions]
-  [./Int_energy]
+  [Int_energy]
     type = ParsedFunction
     symbol_values = 'total_solute Cleft Cright Fleft Fright volume'
     expression = '((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft'
     symbol_names = 'total_solute Cleft Cright Fleft Fright volume'
   [../]
-  [./Diff]
+  [Diff]
     type = ParsedFunction
     symbol_values = 'total_free_energy total_no_int'
     symbol_names = 'total_free_energy total_no_int'
@@ -78,12 +78,12 @@
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'kappa_c M'
     prop_values = '25      150'
   [../]
-  [./Free_energy]
+  [Free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     expression = 'c^2*(c-1)^2'
@@ -94,40 +94,40 @@
 
 [Postprocessors]
   # The total free energy of the simulation cell to observe the energy reduction.
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
   [../]
 
   # for testing we also monitor the total solute amount, which should be conserved,
   # gives Cavg in % for this problem.
-  [./total_solute]
+  [total_solute]
     type = ElementIntegralVariablePostprocessor
     variable = c
   [../]
   # Get simulation cell size (1D volume) from postprocessor
-  [./volume]
+  [volume]
     type = ElementIntegralMaterialProperty
     mat_prop = 1
   [../]
   # Find concentration in each phase using SideAverageValue
-  [./Cleft]
+  [Cleft]
     type = SideAverageValue
     boundary = left
     variable = c
   [../]
-  [./Cright]
+  [Cright]
     type = SideAverageValue
     boundary = right
     variable = c
   [../]
   # Find local energy in each phase by checking boundaries
-  [./Fleft]
+  [Fleft]
     type = SideAverageValue
     boundary = left
     variable = local_energy
   [../]
-  [./Fright]
+  [Fright]
     type = SideAverageValue
     boundary = right
     variable = local_energy
@@ -136,11 +136,11 @@
   # only applies once equilibrium is reached!!
   # Difference between energy with and without interface
   # gives interface energy per unit area.
-  [./total_no_int]
+  [total_no_int]
     type = FunctionValuePostprocessor
     function = Int_energy
   [../]
-  [./Energy_of_Interface]
+  [Energy_of_Interface]
     type = FunctionValuePostprocessor
     function = Diff
   [../]
@@ -150,7 +150,7 @@
   # This preconditioner makes sure the Jacobian Matrix is fully populated. Our
   # kernels compute all Jacobian matrix entries.
   # This allows us to use the Newton solver below.
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -175,7 +175,7 @@
   # make sure that the result obtained for the interfacial free energy is fully converged
   end_time   = 40
 
-  [./TimeStepper]
+  [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.5
   [../]
@@ -184,12 +184,12 @@
 [Outputs]
   gnuplot = true
   csv = true
-  [./exodus]
+  [exodus]
     type = Exodus
     show = 'c local_energy'
     execute_on = 'failed initial nonlinear timestep_end final'
   [../]
-  [./console]
+  [console]
     type = Console
     execute_on = 'FAILED INITIAL NONLINEAR TIMESTEP_END final'
   [../]

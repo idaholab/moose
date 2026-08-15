@@ -12,7 +12,7 @@
 []
 
 [Variables]
-  [./A]
+  [A]
     family = LAGRANGE_VEC
     order = FIRST
     initial_condition = '2 3 4'

@@ -10,29 +10,29 @@
 []
 
 [Variables]
-  [./m]
+  [m]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./s_in]
+  [s_in]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff_m]
+  [diff_m]
     type = HeatConduction
     variable = m
   [../]
-  [./time_diff_m]
+  [time_diff_m]
     type = HeatConductionTimeDerivative
     variable = m
   [../]
-  [./s_in] # Add in the contribution from the SubApp
+  [s_in] # Add in the contribution from the SubApp
     type = CoupledForce
     variable = m
     v = s_in
@@ -40,7 +40,7 @@
 []
 
 [AuxKernels]
-  [./reconstruct_s_in]
+  [reconstruct_s_in]
     type = FunctionSeriesToAux
     variable = s_in
     function = FX_Basis_Value_Main
@@ -48,7 +48,7 @@
 []
 
 [Materials]
-  [./Unobtanium]
+  [Unobtanium]
     type = GenericConstantMaterial
     prop_names =  'thermal_conductivity specific_heat density'
     prop_values = '1.0                  1.0           1.0' # W/(cm K), J/(g K), g/cm^3
@@ -56,7 +56,7 @@
 []
 
 [ICs]
-  [./start_m]
+  [start_m]
     type = ConstantIC
     variable = m
     value = 1
@@ -64,7 +64,7 @@
 []
 
 [BCs]
-  [./surround]
+  [surround]
     type = DirichletBC
     variable = m
     value = 1
@@ -73,7 +73,7 @@
 []
 
 [Functions]
-  [./FX_Basis_Value_Main]
+  [FX_Basis_Value_Main]
     type = FunctionSeries
     series_type = CylindricalDuo
     orders = '5   3' # Axial first, then (r, t) FX
@@ -84,7 +84,7 @@
 []
 
 [UserObjects]
-  [./FX_Value_UserObject_Main]
+  [FX_Value_UserObject_Main]
     type = FXVolumeUserObject
     function = FX_Basis_Value_Main
     variable = m
@@ -92,16 +92,16 @@
 []
 
 [Postprocessors]
-  [./average_value]
+  [average_value]
     type = ElementAverageValue
     variable = m
   [../]
-  [./peak_value]
+  [peak_value]
     type = ElementExtremeValue
     value_type = max
     variable = m
   [../]
-  [./picard_iterations]
+  [picard_iterations]
     type = NumFixedPointIterations
   [../]
 []
@@ -125,7 +125,7 @@
 []
 
 [MultiApps]
-  [./FXTransferApp]
+  [FXTransferApp]
     type = TransientMultiApp
     input_files = sub.i
     output_sub_cycles = true
@@ -133,13 +133,13 @@
 []
 
 [Transfers]
-  [./ValueToSub]
+  [ValueToSub]
     type = MultiAppFXTransfer
     to_multi_app = FXTransferApp
     this_app_object_name = FX_Value_UserObject_Main
     multi_app_object_name = FX_Basis_Value_Sub
   [../]
-  [./ValueToMe]
+  [ValueToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Value_Main

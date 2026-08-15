@@ -19,12 +19,12 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [UserObjects]
-  [./hex_ic]
+  [hex_ic]
     type = PolycrystalHex
     coloring_algorithm = bt
     x_offset = .5
@@ -33,27 +33,27 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = hex_ic
     [../]
   [../]
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
@@ -61,15 +61,15 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
@@ -81,7 +81,7 @@
 
 [Preconditioning]
   active = ''
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

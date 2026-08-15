@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./dummy]
+  [dummy]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusion
     variable = dummy
     diffusivity = dummy_prop
@@ -17,7 +17,7 @@
 []
 
 [Materials]
-  [./matprop]
+  [matprop]
     type = Stateful
     property_name = dummy_prop
   [../]

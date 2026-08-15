@@ -17,19 +17,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./lr_u]
+  [lr_u]
     type = DirichletBC
     variable = u
     boundary = '1 3'
@@ -38,13 +38,13 @@
 []
 
 [Postprocessors]
-  [./elem_56]
+  [elem_56]
     type = ElementalVariableValue
     variable = u
     elementid = 56
   [../]
 
-  [./elem_12]
+  [elem_12]
     type = ElementalVariableValue
     variable = u
     elementid = 12
@@ -57,7 +57,7 @@
 []
 
 [Outputs]
-  [./console]
+  [console]
     type = Console
     show = 'elem_56'
     hide = 'elem_56'

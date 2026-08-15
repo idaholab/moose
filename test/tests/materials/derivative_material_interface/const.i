@@ -6,29 +6,29 @@
 []
 
 [AuxVariables]
-  [./dummy]
+  [dummy]
   [../]
 []
 
 [Materials]
-  [./provider]
+  [provider]
     type = DerivativeMaterialInterfaceTestProvider
     block = 0
   [../]
-  [./client]
+  [client]
     type = DerivativeMaterialInterfaceTestClient
     prop_name = prop
     block = 0
     outputs = exodus
   [../]
-  [./client2]
+  [client2]
     type = DerivativeMaterialInterfaceTestClient
     prop_name = 1.0
     block = 0
     outputs = exodus
   [../]
 
-  [./dummy]
+  [dummy]
     type = GenericConstantMaterial
     prop_names = prop
     block = 0

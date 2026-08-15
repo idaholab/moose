@@ -17,12 +17,12 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     rand_seed = 6
     grain_num = 4
@@ -31,27 +31,27 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = 'timestep_end'
@@ -59,15 +59,15 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./Moly_GB]
+  [Moly_GB]
     type = GBEvolution
     time_scale = 1.0e-2
     GBMobility = 1.88e-14    # m^4/J*s
@@ -78,7 +78,7 @@
 []
 
 [Postprocessors]
-  [./gr1area]
+  [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
     execute_on = 'initial timestep_end'
@@ -86,7 +86,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

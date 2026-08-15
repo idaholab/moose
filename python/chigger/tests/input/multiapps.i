@@ -17,7 +17,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     app_type = MooseTestApp
     type = TransientMultiApp
     input_files = sub.i

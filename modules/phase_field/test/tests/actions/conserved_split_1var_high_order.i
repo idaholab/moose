@@ -13,9 +13,9 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./cv]
+  [PhaseField]
+    [Conserved]
+      [cv]
         solve_type = REVERSE_SPLIT
         family = LAGRANGE
         order = SECOND
@@ -28,7 +28,7 @@
 []
 
 [ICs]
-  [./InitialCondition]
+  [InitialCondition]
     type = CrossIC
     x1 = 5.0
     y1 = 5.0
@@ -39,7 +39,7 @@
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'cv'
@@ -48,7 +48,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

@@ -84,17 +84,17 @@
     order = THIRD
     family = SCALAR
   []
-  [./lm1]
+  [lm1]
     order = FIRST
     family = LAGRANGE
     block = secondary_left
   [../]
-  [./lm2]
+  [lm2]
     order = FIRST
     family = LAGRANGE
     block = secondary_bottom
   [../]
-  [./lm3]
+  [lm3]
     order = FIRST
     family = LAGRANGE
     block = secondary_back

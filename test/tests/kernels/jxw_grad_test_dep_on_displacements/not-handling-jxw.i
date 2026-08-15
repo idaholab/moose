@@ -12,32 +12,32 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./u]
+  [u]
     order = FIRST
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = Diffusion
     variable = disp_x
   [../]
-  [./disp_y]
+  [disp_y]
     type = Diffusion
     variable = disp_y
   [../]
-  [./u]
+  [u]
     type = ADDiffusion
     variable = u
     use_displaced_mesh = true
   [../]
-  [./v]
+  [v]
     type = ADDiffusion
     variable = v
     use_displaced_mesh = true
@@ -46,56 +46,56 @@
 
 [BCs]
   # BCs cannot be preset due to Jacobian test
-  [./u_left]
+  [u_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = u
   [../]
-  [./u_right]
+  [u_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'right'
     variable = u
   [../]
-  [./v_left]
+  [v_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = v
   [../]
-  [./v_right]
+  [v_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'right'
     variable = v
   [../]
-  [./disp_x_left]
+  [disp_x_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = disp_x
   [../]
-  [./disp_x_right]
+  [disp_x_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'right'
     variable = disp_x
   [../]
-  [./disp_y_left]
+  [disp_y_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'bottom'
     variable = disp_y
   [../]
-  [./disp_y_right]
+  [disp_y_right]
     type = DirichletBC
     preset = false
     value = 1
@@ -105,7 +105,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -117,32 +117,32 @@
 []
 
 [Outputs]
-  [./dofmap]
+  [dofmap]
     type = DOFMap
     execute_on = 'initial'
   [../]
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = RandomIC
     variable = disp_x
     min = 0.01
     max = 0.09
   [../]
-  [./disp_y]
+  [disp_y]
     type = RandomIC
     variable = disp_y
     min = 0.01
     max = 0.09
   [../]
-  [./u]
+  [u]
     type = RandomIC
     variable = u
     min = 0.1
     max = 0.9
   [../]
-  [./v]
+  [v]
     type = RandomIC
     variable = v
     min = 0.1

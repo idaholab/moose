@@ -6,28 +6,28 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./x]
+  [x]
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./y]
+  [y]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [ICs]
-  [./x]
+  [x]
     type = FunctionIC
     function = x
     variable = x
   [../]
-  [./y]
+  [y]
     type = FunctionIC
     function = y
     variable = y
@@ -35,20 +35,20 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -77,13 +77,13 @@
 []
 
 [Transfers]
-  [./incoming_x]
+  [incoming_x]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     source_variable = x
     to_multi_app = sub
     postprocessor = incoming_x
   [../]
-  [./incoming_y]
+  [incoming_y]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     source_variable = y
     to_multi_app = sub

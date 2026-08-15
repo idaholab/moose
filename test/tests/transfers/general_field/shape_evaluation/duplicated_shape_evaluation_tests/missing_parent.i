@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -48,7 +48,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     positions = '0.9 0.5 0'
     type = TransientMultiApp
     app_type = MooseTestApp
@@ -58,14 +58,14 @@
 []
 
 [Transfers]
-  [./to_sub]
+  [to_sub]
     source_variable = u
     variable = transferred_u
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     to_multi_app = sub
     error_on_miss = true
   [../]
-  [./elemental_to_sub]
+  [elemental_to_sub]
     source_variable = u
     variable = elemental_transferred_u
     type = MultiAppGeneralFieldShapeEvaluationTransfer

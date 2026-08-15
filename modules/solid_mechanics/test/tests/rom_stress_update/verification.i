@@ -8,12 +8,12 @@
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
   [../]
 []
 
 [AuxKernels]
-  [./temp_aux]
+  [temp_aux]
     type = FunctionAux
     variable = temperature
     function = temp_fcn
@@ -22,7 +22,7 @@
 []
 
 [Functions]
-  [./rhom_fcn]
+  [rhom_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -31,7 +31,7 @@
     xy_in_file_only = false
     direction = right
   [../]
-  [./rhoi_fcn]
+  [rhoi_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -40,7 +40,7 @@
     xy_in_file_only = false
     direction = right
   [../]
-  [./vmJ2_fcn]
+  [vmJ2_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -49,7 +49,7 @@
     xy_in_file_only = false
     direction = right
   [../]
-  [./evm_fcn]
+  [evm_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -58,7 +58,7 @@
     xy_in_file_only = false
     direction = right
   [../]
-  [./temp_fcn]
+  [temp_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -68,7 +68,7 @@
     direction = right
   [../]
 
-  [./rhom_soln_fcn]
+  [rhom_soln_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -77,7 +77,7 @@
     xy_in_file_only = false
     direction = right
   [../]
-  [./rhoi_soln_fcn]
+  [rhoi_soln_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -86,7 +86,7 @@
     xy_in_file_only = false
     direction = right
   [../]
-  [./creep_rate_soln_fcn]
+  [creep_rate_soln_fcn]
     type = PiecewiseConstant
     data_file = ss316_verification_data.csv
     x_index_in_file = 0
@@ -96,19 +96,19 @@
     direction = right
   [../]
 
-  [./rhom_diff_fcn]
+  [rhom_diff_fcn]
     type = ParsedFunction
     symbol_names = 'rhom_soln rhom'
     symbol_values = 'rhom_soln rhom'
     expression = 'abs(rhom_soln - rhom) / rhom_soln'
   [../]
-  [./rhoi_diff_fcn]
+  [rhoi_diff_fcn]
     type = ParsedFunction
     symbol_names = 'rhoi_soln rhoi'
     symbol_values = 'rhoi_soln rhoi'
     expression = 'abs(rhoi_soln - rhoi) / rhoi_soln'
   [../]
-  [./creep_rate_diff_fcn]
+  [creep_rate_diff_fcn]
     type = ParsedFunction
     symbol_names = 'creep_rate_soln creep_rate'
     symbol_values = 'creep_rate_soln creep_rate'
@@ -118,7 +118,7 @@
 
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'vonmises_stress'
@@ -126,39 +126,39 @@
 []
 
 [BCs]
-  [./symmx]
+  [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
-  [./symmz]
+  [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
-  [./pressure_x]
+  [pressure_x]
     type = Pressure
     variable = disp_x
     boundary = right
     function = vmJ2_fcn
     factor = 0.5e6
   [../]
-  [./pressure_y]
+  [pressure_y]
     type = Pressure
     variable = disp_y
     boundary = top
     function = vmJ2_fcn
     factor = -0.5e6
   [../]
-  [./pressure_z]
+  [pressure_z]
     type = Pressure
     variable = disp_z
     boundary = front
@@ -168,16 +168,16 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e11
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
   [../]
-  [./rom_stress_prediction]
+  [rom_stress_prediction]
     type = SS316HLAROMANCEStressUpdateTest
     temperature = temperature
     effective_inelastic_strain_name = effective_creep_strain
@@ -208,94 +208,94 @@
 []
 
 [Postprocessors]
-  [./effective_strain_avg]
+  [effective_strain_avg]
     type = ElementAverageValue
     variable = effective_creep_strain
     outputs = console
   [../]
-  [./temperature]
+  [temperature]
     type = ElementAverageValue
     variable = temperature
     outputs = console
   [../]
-  [./rhom]
+  [rhom]
     type = ElementAverageValue
     variable = cell_dislocations
   [../]
-  [./rhoi]
+  [rhoi]
     type = ElementAverageValue
     variable = wall_dislocations
   [../]
-  [./vonmises_stress]
+  [vonmises_stress]
     type = ElementAverageValue
     variable = vonmises_stress
     outputs = console
   [../]
-  [./creep_rate]
+  [creep_rate]
     type = ElementAverageValue
     variable = creep_rate
   [../]
-  [./rhom_in]
+  [rhom_in]
     type = FunctionValuePostprocessor
     function = rhom_fcn
     execute_on = 'TIMESTEP_END initial'
     outputs = console
   [../]
-  [./rhoi_in]
+  [rhoi_in]
     type = FunctionValuePostprocessor
     function = rhoi_fcn
     execute_on = 'TIMESTEP_END initial'
     outputs = console
   [../]
-  [./vmJ2_in]
+  [vmJ2_in]
     type = FunctionValuePostprocessor
     function = vmJ2_fcn
     execute_on = 'TIMESTEP_END initial'
     outputs = console
   [../]
-  [./rhom_soln]
+  [rhom_soln]
     type = FunctionValuePostprocessor
     function = rhom_soln_fcn
     outputs = console
   [../]
-  [./rhoi_soln]
+  [rhoi_soln]
     type = FunctionValuePostprocessor
     function = rhoi_soln_fcn
     outputs = console
   [../]
-  [./creep_rate_soln]
+  [creep_rate_soln]
     type = FunctionValuePostprocessor
     function = creep_rate_soln_fcn
     outputs = console
   [../]
 
-  [./rhom_diff]
+  [rhom_diff]
     type = FunctionValuePostprocessor
     function = rhom_diff_fcn
     outputs = console
   [../]
-  [./rhoi_diff]
+  [rhoi_diff]
     type = FunctionValuePostprocessor
     function = rhoi_diff_fcn
     outputs = console
   [../]
-  [./creep_rate_diff]
+  [creep_rate_diff]
     type = FunctionValuePostprocessor
     function = creep_rate_diff_fcn
     outputs = console
   [../]
 
-  [./rhom_max_diff]
+  [rhom_max_diff]
     type = TimeExtremeValue
     postprocessor = rhom_diff
     outputs = console
   [../]
-  [./rhoi_max_diff]
+  [rhoi_max_diff]
     type = TimeExtremeValue
     postprocessor = rhoi_diff
     outputs = console
   [../]
-  [./creep_rate_max_diff]
+  [creep_rate_max_diff]
     type = TimeExtremeValue
     postprocessor = creep_rate_diff
     outputs = console

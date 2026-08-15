@@ -24,7 +24,7 @@
 [] # Mesh
 
 [Functions]
-  [./temps]
+  [temps]
     type = ParsedFunction
     expression ='-2e5+200*x+100*y'
   [../]
@@ -32,7 +32,7 @@
 
 [Variables]
 
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -41,7 +41,7 @@
 
 [Kernels]
 
-  [./heat_r]
+  [heat_r]
     type = HeatConduction
     variable = temp
   [../]
@@ -50,7 +50,7 @@
 
 [BCs]
 
-  [./temps]
+  [temps]
     type = FunctionDirichletBC
     variable = temp
     boundary = 10
@@ -61,7 +61,7 @@
 
 [Materials]
 
-  [./heat]
+  [heat]
     type = HeatConductionMaterial
     block = 1
 

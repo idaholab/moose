@@ -6,7 +6,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
@@ -15,7 +15,7 @@
 []
 
 [Postprocessors]
-  [./random_pps]
+  [random_pps]
     type = RandomPostprocessor
     seed = 1
     generator = 2

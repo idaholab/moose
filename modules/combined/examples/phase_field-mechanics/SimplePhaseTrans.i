@@ -24,10 +24,10 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 50
       y1 = 50
@@ -40,7 +40,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     generate_output = 'stress_xx stress_yy'
     eigenstrain_names = 'eigenstrain'
@@ -48,30 +48,30 @@
 []
 
 [Kernels]
-  [./eta_bulk]
+  [eta_bulk]
     type = AllenCahn
     variable = eta
     f_name = F
   [../]
-  [./eta_interface]
+  [eta_interface]
     type = ACInterface
     variable = eta
     kappa_name = kappa_eta
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = eta
   [../]
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1 1'
   [../]
 
-  [./chemical_free_energy]
+  [chemical_free_energy]
     type = DerivativeParsedMaterial
     property_name = Fc
     coupled_variables = 'eta'
@@ -82,17 +82,17 @@
     derivative_order = 2
   [../]
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '70 30 30 70 30 70 30 30 30'
     fill_method = symmetric9
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 
-  [./var_dependence]
+  [var_dependence]
     type = DerivativeParsedMaterial
     expression = eta
     coupled_variables = 'eta'
@@ -101,7 +101,7 @@
     derivative_order = 2
   [../]
 
-  [./eigenstrain]
+  [eigenstrain]
     type = ComputeVariableEigenstrain
     eigen_base = '0.1 0.1 0 0 0 0'
     prefactor = var_dep
@@ -110,14 +110,14 @@
     eigenstrain_name = eigenstrain
   [../]
 
-  [./elastic_free_energy]
+  [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
     coupled_variables = 'eta'
     derivative_order = 2
   [../]
 
-  [./free_energy]
+  [free_energy]
     type = DerivativeSumMaterial
     property_name = F
     sum_materials = 'Fc Fe'
@@ -127,13 +127,13 @@
 []
 
 [BCs]
-  [./all_y]
+  [all_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'top bottom left right'
     value = 0
   [../]
-  [./all_x]
+  [all_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'top bottom left right'
@@ -143,7 +143,7 @@
 
 [Preconditioning]
   # active = ' '
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -166,7 +166,7 @@
   start_time = 0.0
   num_steps = 10
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 9
     iteration_window = 2

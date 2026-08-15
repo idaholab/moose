@@ -33,7 +33,7 @@
 []
 
 [VectorPostprocessors]
-  [./histo]
+  [histo]
     type = VariableValueVolumeHistogram
     variable = u_vww
     min_value = 0
@@ -49,7 +49,7 @@
 []
 
 [Outputs]
-  [./initial]
+  [initial]
     type = CSV
     execute_on = initial
   [../]

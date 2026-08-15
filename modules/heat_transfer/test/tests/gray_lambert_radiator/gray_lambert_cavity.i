@@ -14,7 +14,7 @@
 []
 
 [Variables]
-  [./temperature]
+  [temperature]
     initial_condition = 300
   [../]
 []
@@ -37,7 +37,7 @@
     # Alternatively we can keep 'TIMESTEP_END' and do 'execution_order_group = -1'.
     execute_on = 'INITIAL'
   []
-  [./gray_lambert]
+  [gray_lambert]
     type = ViewFactorObjectSurfaceRadiation
     boundary = 'bottom top left right'
     fixed_temperature_boundary = 'bottom top'
@@ -50,41 +50,41 @@
 []
 
 [VectorPostprocessors]
-  [./lambert_vpp]
+  [lambert_vpp]
     type = SurfaceRadiationVectorPostprocessor
     surface_radiation_object_name = gray_lambert
     information = 'temperature emissivity radiosity heat_flux_density'
   [../]
 
-  [./view_factors]
+  [view_factors]
     type = ViewFactorVectorPostprocessor
     view_factor_object_name = view_factors_uo
   [../]
 []
 
 [Postprocessors]
-  [./heat_flux_density_bottom]
+  [heat_flux_density_bottom]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = HEAT_FLUX_DENSITY
     boundary = bottom
   [../]
 
-  [./temperature_left]
+  [temperature_left]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = TEMPERATURE
     boundary = left
   [../]
 
-  [./temperature_right]
+  [temperature_right]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = TEMPERATURE
     boundary = right
   [../]
 
-  [./brightness_top]
+  [brightness_top]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = RADIOSITY

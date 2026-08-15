@@ -14,25 +14,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -51,7 +51,7 @@
   execute_on = 'timestep_end'
 
   # Demonstration of using an Exodus Outputter
-  [./out]
+  [out]
     type = Exodus
   [../]
 []

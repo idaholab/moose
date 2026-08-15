@@ -21,10 +21,10 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
       y1 = 0.0
@@ -34,10 +34,10 @@
       outside = 1.0e-10
     [../]
   [../]
-  [./b]
+  [b]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
       y1 = 0.0
@@ -50,25 +50,25 @@
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./pa2]
+  [pa2]
   [../]
-  [./pab]
+  [pab]
   [../]
 []
 
 [AuxKernels]
-  [./pa2eq]
+  [pa2eq]
     type = AqueousEquilibriumRxnAux
     variable = pa2
     v = a
     sto_v = 2
     log_k = 2
   [../]
-  [./pabeq]
+  [pabeq]
     type = AqueousEquilibriumRxnAux
     variable = pab
     v = 'a b'
@@ -78,7 +78,7 @@
 []
 
 [ICs]
-  [./pressure]
+  [pressure]
     type = FunctionIC
     variable = pressure
     function = 2-x
@@ -86,47 +86,47 @@
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
   [../]
-  [./a_diff]
+  [a_diff]
     type = PrimaryDiffusion
     variable = a
   [../]
-  [./a_conv]
+  [a_conv]
     type = PrimaryConvection
     variable = a
     p = pressure
   [../]
-  [./b_ie]
+  [b_ie]
     type = PrimaryTimeDerivative
     variable = b
   [../]
-  [./b_diff]
+  [b_diff]
     type = PrimaryDiffusion
     variable = b
   [../]
-  [./b_conv]
+  [b_conv]
     type = PrimaryConvection
     variable = b
     p = pressure
   [../]
-  [./a1eq]
+  [a1eq]
     type = CoupledBEEquilibriumSub
     variable = a
     log_k = 2
     weight = 2
     sto_u = 2
   [../]
-  [./a1diff]
+  [a1diff]
     type = CoupledDiffusionReactionSub
     variable = a
     log_k = 2
     weight = 2
     sto_u = 2
   [../]
-  [./a1conv]
+  [a1conv]
     type = CoupledConvectionReactionSub
     variable = a
     log_k = 2
@@ -134,7 +134,7 @@
     sto_u = 2
     p = pressure
   [../]
-  [./a2eq]
+  [a2eq]
     type = CoupledBEEquilibriumSub
     variable = a
     v = b
@@ -143,7 +143,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./a2diff]
+  [a2diff]
     type = CoupledDiffusionReactionSub
     variable = a
     v = b
@@ -152,7 +152,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./a2conv]
+  [a2conv]
     type = CoupledConvectionReactionSub
     variable = a
     v = b
@@ -162,7 +162,7 @@
     sto_u = 1
     p = pressure
   [../]
-  [./b2eq]
+  [b2eq]
     type = CoupledBEEquilibriumSub
     variable = b
     v = a
@@ -171,7 +171,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./b2diff]
+  [b2diff]
     type = CoupledDiffusionReactionSub
     variable = b
     v = a
@@ -180,7 +180,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./b2conv]
+  [b2conv]
     type = CoupledConvectionReactionSub
     variable = b
     v = a
@@ -193,24 +193,24 @@
 []
 
 [BCs]
-  [./a_left]
+  [a_left]
     type = DirichletBC
     variable = a
     boundary = left
     value = 1.0e-2
   [../]
-  [./a_right]
+  [a_right]
     type = ChemicalOutFlowBC
     variable = a
     boundary = right
   [../]
-  [./b_left]
+  [b_left]
     type = DirichletBC
     variable = b
     boundary = left
     value = 1.0e-2
   [../]
-  [./b_right]
+  [b_right]
     type = ChemicalOutFlowBC
     variable = b
     boundary = right
@@ -218,7 +218,7 @@
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
@@ -244,7 +244,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

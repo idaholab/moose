@@ -12,7 +12,7 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -20,7 +20,7 @@
 
 [Materials]
   #
-  [./funcmat]
+  [funcmat]
     type = GenericFunctionMaterial
     block = 0
     prop_names  = 'C'
@@ -30,7 +30,7 @@
 []
 
 [Kernels]
-  [./value]
+  [value]
     type = MaterialPropertyValue
     prop_name = C
     variable = c

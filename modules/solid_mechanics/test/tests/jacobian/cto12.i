@@ -22,7 +22,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
@@ -33,21 +33,21 @@
 
 
 [UserObjects]
-  [./mc_coh]
+  [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./mc_phi]
+  [mc_phi]
     type = SolidMechanicsHardeningConstant
     value = 60
     convert_to_radians = true
   [../]
-  [./mc_psi]
+  [mc_psi]
     type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
   [../]
-  [./mc]
+  [mc]
     type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
@@ -60,18 +60,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 1'
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '3 0 0  0 3 0  0 0 1.5'
     eigenstrain_name = ini_stress
   [../]
-  [./mc]
+  [mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-11
     plastic_models = mc
@@ -81,7 +81,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'

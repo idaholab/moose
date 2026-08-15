@@ -26,7 +26,7 @@
 []
 
 [UserObjects]
-  [./square_cut_uo]
+  [square_cut_uo]
     type = RectangleCutUserObject
     cut_data = ' -0.001 0.5 -0.001
                   0.401 0.5 -0.001
@@ -36,7 +36,7 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
    order = CONSTANT
     family = MONOMIAL
   [../]
@@ -58,7 +58,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
@@ -66,7 +66,7 @@
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
@@ -76,7 +76,7 @@
 []
 
 [Functions]
-  [./top_trac_y]
+  [top_trac_y]
     type = ConstantFunction
     value = 10
   [../]
@@ -84,25 +84,25 @@
 
 
 [BCs]
-  [./top_y]
+  [top_y]
     type = FunctionNeumannBC
     boundary = top
     variable = disp_y
     function = top_trac_y
   [../]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
   [../]
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     boundary = bottom
     variable = disp_z
@@ -111,13 +111,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
     block = 0
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
   [../]
@@ -132,7 +132,7 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -156,7 +156,7 @@
   file_base = edge_crack_3d_out
   execute_on = 'timestep_end'
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

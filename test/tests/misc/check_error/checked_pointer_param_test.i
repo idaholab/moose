@@ -1,7 +1,7 @@
 # The extra 'x' before the Mesh section below is intentional.
 # We want to catch this type of error.
 x[Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -12,7 +12,7 @@ x[Mesh]
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -21,7 +21,7 @@ x[Mesh]
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -30,14 +30,14 @@ x[Mesh]
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1

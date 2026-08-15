@@ -5,13 +5,13 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
     ny = 10
   [../]
-  [./gpd]
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
@@ -19,12 +19,12 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [AuxVariables]
-  [./bond_status]
+  [bond_status]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 1
@@ -32,18 +32,18 @@
 []
 
 [Functions]
-  [./analytical_sol]
+  [analytical_sol]
     type = ParsedFunction
     expression = 'x*x+y*y'
   [../]
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConductionBPD
     variable = temp
   [../]
-  [./heat_source]
+  [heat_source]
     type = HeatSourceBPD
     variable = temp
     power_density = -4
@@ -51,25 +51,25 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = temp
     boundary = 1003
     function = analytical_sol
   [../]
-  [./bottom]
+  [bottom]
     type = FunctionDirichletBC
     variable = temp
     boundary = 1000
     function = analytical_sol
   [../]
-  [./right]
+  [right]
     type = FunctionDirichletBC
     variable = temp
     boundary = 1001
     function = analytical_sol
   [../]
-  [./top]
+  [top]
     type = FunctionDirichletBC
     variable = temp
     boundary = 1002
@@ -78,7 +78,7 @@
 []
 
 [Materials]
-  [./thermal_mat]
+  [thermal_mat]
     type = ThermalConstantHorizonMaterialBPD
     temperature = temp
     thermal_conductivity = 1
@@ -86,7 +86,7 @@
 []
 
 [Postprocessors]
-  [./nodal_error]
+  [nodal_error]
     type = NodalL2Error
     function = 'analytical_sol'
     variable = temp
@@ -94,7 +94,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

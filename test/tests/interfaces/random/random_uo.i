@@ -7,31 +7,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./random_elemental]
+  [random_elemental]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./random_elemental]
+  [random_elemental]
     type = RandomAux
     variable = random_elemental
     random_user_object = random_uo
@@ -39,13 +39,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -54,7 +54,7 @@
 []
 
 [UserObjects]
-  [./random_uo]
+  [random_uo]
     type = RandomElementalUserObject
   [../]
 []

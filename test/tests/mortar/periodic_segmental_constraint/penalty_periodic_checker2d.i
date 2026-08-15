@@ -21,21 +21,21 @@
     input = left_block_sidesets
     subdomain_id = 1
   []
-  [./lowrig]
+  [lowrig]
     type = SubdomainBoundingBoxGenerator
     input = 'left_block_id'
     block_id = 2
     bottom_left = '0 -1 0'
     top_right = '1 0 0'
   [../]
-  [./upplef]
+  [upplef]
     type = SubdomainBoundingBoxGenerator
     input = 'lowrig'
     block_id = 3
     bottom_left = '-1 0 0'
     top_right = '0 1 0'
   [../]
-  [./upprig]
+  [upprig]
     type = SubdomainBoundingBoxGenerator
     input = 'upplef'
     block_id = 4
@@ -95,11 +95,11 @@
     order = SECOND
     family = SCALAR
   []
-  [./flux_x]
+  [flux_x]
       order = FIRST
       family = MONOMIAL
   [../]
-  [./flux_y]
+  [flux_y]
       order = FIRST
       family = MONOMIAL
   [../]
@@ -115,7 +115,7 @@
 []
 
 [AuxKernels]
-  [./flux_x]
+  [flux_x]
     type = DiffusionFluxAux
     diffusivity = 'conductivity'
     variable = flux_x
@@ -123,7 +123,7 @@
     component = x
     block = '1 2 3 4'
   [../]
-  [./flux_y]
+  [flux_y]
     type = DiffusionFluxAux
     diffusivity = 'conductivity'
     variable = flux_y

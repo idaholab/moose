@@ -12,14 +12,14 @@
 []
 
 [Variables]
-  [./A]
+  [A]
     family = LAGRANGE_VEC
     order = FIRST
   [../]
 []
 
 [ICs]
-  [./A]
+  [A]
     type = VectorConstantIC
     variable = A
     x_value = 2

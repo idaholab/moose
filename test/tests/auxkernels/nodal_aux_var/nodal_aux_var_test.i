@@ -11,7 +11,7 @@
 
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -22,7 +22,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -31,17 +31,17 @@
 [AuxVariables]
   active = 'one five coupled'
 
-  [./one]
+  [one]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./five]
+  [five]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./coupled]
+  [coupled]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -50,13 +50,13 @@
 [Kernels]
   active = 'diff force'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
   #Coupling of nonlinear to Aux
-  [./force]
+  [force]
     type = CoupledForce
     variable = u
     v = one
@@ -66,21 +66,21 @@
 # AuxKernel System
 [AuxKernels]
   #Simple Aux Kernel
-  [./constant]
+  [constant]
     variable = one
     type = ConstantAux
     value = 1
   [../]
 
   #Shows coupling of Aux to nonlinear
-  [./coupled]
+  [coupled]
     variable = coupled
     type = CoupledAux
     value = 2
     coupled = u
   [../]
 
-  [./five]
+  [five]
     type = ConstantAux
     variable = five
     boundary = '3 1'
@@ -92,14 +92,14 @@
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1

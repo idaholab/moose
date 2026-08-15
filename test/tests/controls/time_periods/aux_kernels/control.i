@@ -6,43 +6,43 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./aux0]
+  [aux0]
   [../]
-  [./aux1]
+  [aux1]
   [../]
 []
 
 [Functions]
-  [./func]
+  [func]
     type = ParsedFunction
     expression = t*x*y
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./aux0]
+  [aux0]
     type = FunctionAux
     variable = aux0
     function = func
   [../]
-  [./aux1]
+  [aux1]
     type = FunctionAux
     variable = aux1
     function = func
@@ -50,13 +50,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -78,7 +78,7 @@
 []
 
 [Controls]
-  [./damping_control]
+  [damping_control]
     type = TimePeriod
     disable_objects    = 'AuxKernels::aux0 AuxKernels::aux1'
     start_time         = '0.25             0.55'

@@ -5,7 +5,7 @@
     nx = 10
     ny = 10
   []
-  [./add_subdomain]
+  [add_subdomain]
     input = gen
     type = SubdomainBoundingBoxGenerator
     top_right = '1 1 0'
@@ -16,25 +16,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -43,13 +43,13 @@
 []
 
 [Materials]
-  [./material]
+  [material]
     type = GenericConstantMaterial
     prop_names = combo
     block = 100
     prop_values = 12345
   [../]
-  [./top]
+  [top]
     type = GenericConstantMaterial
     prop_names = combo
     block = 0
@@ -58,7 +58,7 @@
 []
 
 [UserObjects]
-  [./get_material_block_names_test]
+  [get_material_block_names_test]
     type = GetMaterialPropertyBoundaryBlockNamesTest
     expected_names = 'top 0'
     property_name = combo

@@ -7,49 +7,49 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 
-  [./scalar_strain_zz1]
+  [scalar_strain_zz1]
     order = FIRST
     family = SCALAR
   [../]
-  [./scalar_strain_zz2]
+  [scalar_strain_zz2]
     order = FIRST
     family = SCALAR
   [../]
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./saved_x]
+  [saved_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./saved_y]
+  [saved_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./aux_strain_zz]
+  [aux_strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Postprocessors]
-  [./react_z1]
+  [react_z1]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     block = 1
   [../]
-  [./react_z2]
+  [react_z2]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
@@ -62,7 +62,7 @@
   [SolidMechanics]
     [QuasiStatic]
       generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy'
-      [./gps1]
+      [gps1]
         planar_formulation = GENERALIZED_PLANE_STRAIN
         scalar_out_of_plane_strain = scalar_strain_zz1
         eigenstrain_names = eigenstrain
@@ -70,7 +70,7 @@
         save_in = 'saved_x saved_y'
         block = '1'
       [../]
-      [./gps2]
+      [gps2]
         planar_formulation = GENERALIZED_PLANE_STRAIN
         scalar_out_of_plane_strain = scalar_strain_zz2
         eigenstrain_names = eigenstrain
@@ -84,13 +84,13 @@
 
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
   [../]
-  [./aux_strain_zz]
+  [aux_strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = aux_strain_zz
@@ -100,32 +100,32 @@
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     expression = '(1-x)*t'
   [../]
 []
 
 [BCs]
-  [./bottom1x]
+  [bottom1x]
     type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
   [../]
-  [./bottom1y]
+  [bottom1y]
     type = DirichletBC
     boundary = 1
     variable = disp_y
     value = 0.0
   [../]
-  [./bottom2x]
+  [bottom2x]
     type = DirichletBC
     boundary = 2
     variable = disp_x
     value = 0.0
   [../]
-  [./bottom2y]
+  [bottom2y]
     type = DirichletBC
     boundary = 2
     variable = disp_y
@@ -134,13 +134,13 @@
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
     block = '1 2'
   [../]
-  [./thermal_strain]
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
@@ -148,7 +148,7 @@
     block = '1 2'
     eigenstrain_name = eigenstrain
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = '1 2'
   [../]

@@ -19,18 +19,18 @@
 []
 
 [Variables]
-  [./c]   # Mole fraction of Cr (unitless)
+  [c]   # Mole fraction of Cr (unitless)
     order = FIRST
     family = LAGRANGE
   [../]
-  [./w]   # Chemical potential (eV/mol)
+  [w]   # Chemical potential (eV/mol)
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./concentrationIC]   # 46.774 mol% Cr with variations
+  [concentrationIC]   # 46.774 mol% Cr with variations
     type = RandomIC
     min = 0.44774
     max = 0.48774
@@ -40,25 +40,25 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./c_bcs]
+  [Periodic]
+    [c_bcs]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Kernels]
-  [./w_dot]
+  [w_dot]
     variable = w
     v = c
     type = CoupledTimeDerivative
   [../]
-  [./coupled_res]
+  [coupled_res]
     variable = w
     type = SplitCHWRes
     mob_name = M
   [../]
-  [./coupled_parsed]
+  [coupled_parsed]
     variable = c
     type = SplitCHParsed
     f_name = f_loc
@@ -71,7 +71,7 @@
   # d is a scaling factor that makes it easier for the solution to converge
   # without changing the results. It is defined in each of the materials and
   # must have the same value in each one.
-  [./constants]
+  [constants]
     # Define constant values kappa_c and M. Eventually M will be replaced with
     # an equation rather than a constant.
     type = GenericFunctionMaterial
@@ -81,7 +81,7 @@
                    # kappa_c*eV_J*nm_m^2*d
                    # M*nm_m^2/eV_J/d
   [../]
-  [./local_energy]
+  [local_energy]
     # Defines the function for the local free energy density as given in the
     # problem, then converts units and adds scaling factor.
     type = DerivativeParsedMaterial
@@ -98,19 +98,19 @@
 []
 
 [Postprocessors]
-  [./step_size]             # Size of the time step
+  [step_size]             # Size of the time step
     type = TimestepSize
   [../]
-  [./iterations]            # Number of iterations needed to converge timestep
+  [iterations]            # Number of iterations needed to converge timestep
     type = NumNonlinearIterations
   [../]
-  [./nodes]                 # Number of nodes in mesh
+  [nodes]                 # Number of nodes in mesh
     type = NumNodes
   [../]
-  [./evaluations]           # Cumulative residual calculations for simulation
+  [evaluations]           # Cumulative residual calculations for simulation
     type = NumResidualEvaluations
   [../]
-  [./active_time]           # Time computer spent on simulation
+  [active_time]           # Time computer spent on simulation
     type = PerfGraphData
     section_name = "Root"
     data_type = total
@@ -118,7 +118,7 @@
 []
 
 [Preconditioning]
-  [./coupled]
+  [coupled]
     type = SMP
     full = true
   [../]
@@ -136,14 +136,14 @@
                          -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly
                          ilu          1'
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 10
     cutback_factor = 0.8
     growth_factor = 1.5
     optimal_iterations = 7
   [../]
-  [./Adaptivity]
+  [Adaptivity]
     coarsen_fraction = 0.1
     refine_fraction = 0.7
     max_h_level = 2
@@ -158,7 +158,7 @@
   exodus = true
   console = true
   csv = true
-  [./console]
+  [console]
     type = Console
     max_rows = 10
   [../]

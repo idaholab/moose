@@ -26,7 +26,7 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '1.0  0.5  0.1  0.5'
     time_start_cut = 0.0
@@ -35,7 +35,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     planar_formulation = plane_strain
     add_variables = true
@@ -43,7 +43,7 @@
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = PiecewiseLinear
     x='0  50'
     y='0  0.02'
@@ -51,25 +51,25 @@
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
   [../]
-  [./topx]
+  [topx]
     type = DirichletBC
     boundary = top
     variable = disp_x
     value = 0.0
   [../]
-  [./topy]
+  [topy]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
@@ -78,13 +78,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
 
-  [./_elastic_strain]
+  [_elastic_strain]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -98,7 +98,7 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -123,7 +123,7 @@
 [Outputs]
   exodus = true
   execute_on = timestep_end
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

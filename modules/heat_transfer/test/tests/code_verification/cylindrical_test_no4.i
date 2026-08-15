@@ -10,7 +10,7 @@
 # A. Toptan, et al. (Mar.2020). Tech. rep. CASL-U-2020-1939-000, SAND2020-3887 R. DOI:10.2172/1614683.
 
 [Mesh]
-  [./geom]
+  [geom]
     type = GeneratedMeshGenerator
     dim = 1
     elem_type = EDGE2
@@ -21,13 +21,13 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
   [../]
 []
 
 [Functions]
-  [./exact]
+  [exact]
     type = ParsedFunction
     symbol_names = 'qin q k ri ro uf h'
     symbol_values = '100 1200 1.0 0.2 1 100 10'
@@ -36,11 +36,11 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = u
   [../]
-  [./heatsource]
+  [heatsource]
     type = HeatSource
     function = 1200
     variable = u
@@ -48,13 +48,13 @@
 []
 
 [BCs]
-  [./ui]
+  [ui]
     type = NeumannBC
     boundary = left
     variable = u
     value = 100
   [../]
-  [./uo]
+  [uo]
     type = CoupledConvectiveHeatFluxBC
     boundary = right
     variable = u
@@ -64,7 +64,7 @@
 []
 
 [Materials]
-  [./property]
+  [property]
     type = GenericConstantMaterial
     prop_names = 'density specific_heat thermal_conductivity'
     prop_values = '1.0 1.0 1.0'
@@ -76,12 +76,12 @@
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     function = exact
     variable = u
   [../]
-  [./h]
+  [h]
     type = AverageElementSize
   []
 []

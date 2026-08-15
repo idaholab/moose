@@ -6,20 +6,20 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./nodal_ode]
+  [nodal_ode]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
@@ -28,13 +28,13 @@
 []
 
 [NodalKernels]
-  [./td]
+  [td]
     type = TimeDerivativeNodalKernel
     variable = nodal_ode
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
-  [./constant_rate]
+  [constant_rate]
     type = ConstantRate
     variable = nodal_ode
     rate = 1.0
@@ -44,7 +44,7 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
@@ -52,7 +52,7 @@
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -72,26 +72,26 @@
 []
 
 [AuxVariables]
-  [./tag_variable1]
+  [tag_variable1]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./tag_variable2]
+  [tag_variable2]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./TagVectorAux1]
+  [TagVectorAux1]
     type = TagVectorAux
     variable = tag_variable1
     v = nodal_ode
     vector_tag = vec_tag2
   [../]
 
-  [./TagVectorAux2]
+  [TagVectorAux2]
     type = TagMatrixAux
     variable = tag_variable2
     v = u

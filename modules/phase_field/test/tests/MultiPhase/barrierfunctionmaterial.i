@@ -13,12 +13,12 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
   [../]
 []
 
 [ICs]
-  [./IC_eta]
+  [IC_eta]
     type = SmoothCircleIC
     variable = eta
     x1 = 10
@@ -31,27 +31,27 @@
 []
 
 [Kernels]
-  [./eta_bulk]
+  [eta_bulk]
     type = AllenCahn
     variable = eta
     f_name = 0
     mob_name = 1
   [../]
-  [./eta_interface]
+  [eta_interface]
     type = ACInterface
     variable = eta
     kappa_name = 1
     mob_name = 1
   [../]
 
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
   [../]
 []
 
 [Materials]
-  [./barrier]
+  [barrier]
     type = BarrierFunctionMaterial
     eta = eta
     g_order = HIGH

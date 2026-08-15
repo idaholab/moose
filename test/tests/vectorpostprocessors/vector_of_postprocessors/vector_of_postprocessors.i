@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -33,11 +33,11 @@
 []
 
 [Postprocessors]
-  [./max]
+  [max]
     type = ElementExtremeValue
     variable = u
   [../]
-  [./min]
+  [min]
     type = ElementExtremeValue
     variable = u
     value_type = min
@@ -45,7 +45,7 @@
 []
 
 [VectorPostprocessors]
-  [./min_max]
+  [min_max]
     type = VectorOfPostprocessors
     postprocessors = 'min max'
   [../]

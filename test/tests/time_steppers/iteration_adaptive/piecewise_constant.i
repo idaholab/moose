@@ -8,7 +8,7 @@
 []
 
 [Functions]
-  [./temp_spike]
+  [temp_spike]
     type = PiecewiseConstant
     x = '0 1 1.1 1.2 2'
     y = '1 1 2   1   1'
@@ -19,7 +19,7 @@
   type = Transient
   end_time = 2.0
   verbose = true
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.9
     timestep_limiting_function = temp_spike
@@ -28,7 +28,7 @@
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
   [../]
 []

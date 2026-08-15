@@ -48,7 +48,7 @@
 []
 
 [UserObjects]
-  [./level_set_cut_uo]
+  [level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = ls
     heal_always = true
@@ -56,29 +56,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./ls]
+  [ls]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./heat_cond]
+  [heat_cond]
     type = MatDiffusion
     variable = u
     diffusivity = diffusion_coefficient
   [../]
-  [./vol_heat_src]
+  [vol_heat_src]
     type = BodyForce
     variable = u
     function = src_func
   [../]
-  [./mat_time_deriv]
+  [mat_time_deriv]
     type = TestMatTimeDerivative
     variable = u
     mat_prop_value = rhoCp
@@ -86,7 +86,7 @@
 []
 
 [AuxKernels]
-  [./ls_function]
+  [ls_function]
     type = FunctionAux
     variable = ls
     function = ls_func
@@ -94,7 +94,7 @@
 []
 
 [Constraints]
-  [./xfem_constraint]
+  [xfem_constraint]
     type = XFEMSingleVariableConstraint
     variable = u
     geometric_cut_userobject = 'level_set_cut_uo'
@@ -104,27 +104,27 @@
 []
 
 [Functions]
-  [./src_func]
+  [src_func]
     type = ParsedFunction
     expression = '10*(-200*x+200)'
   [../]
-  [./ls_func]
+  [ls_func]
     type = ParsedFunction
     expression = '1-(x-0.04)-0.2*t'
   [../]
-  [./neumann_func]
+  [neumann_func]
     type = ParsedFunction
     expression = '1.5*200*t'
   [../]
 []
 
 [Materials]
-  [./mat_time_deriv_prop]
+  [mat_time_deriv_prop]
     type = GenericConstantMaterial
     prop_names = 'rhoCp'
     prop_values = 10
   [../]
-  [./therm_cond_prop]
+  [therm_cond_prop]
     type = GenericConstantMaterial
     prop_names = 'diffusion_coefficient'
     prop_values = 1.5
@@ -132,13 +132,13 @@
 []
 
 [BCs]
-  [./left_du]
+  [left_du]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = neumann_func
   [../]
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -147,7 +147,7 @@
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     value = 400
     variable = u
@@ -174,7 +174,7 @@
   time_step_interval = 1
   execute_on = 'initial timestep_end'
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

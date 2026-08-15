@@ -8,26 +8,26 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
-  [./temp]
+  [temp]
     initial_condition = 100.0
   [../]
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0 1 2'
     y = '0 1 1'
     scale_factor = 10.0
   [../]
 
-  [./tempFunc]
+  [tempFunc]
     type = PiecewiseLinear
     x = '0. 3.'
     y = '100.0 440.0'
@@ -35,7 +35,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./block1]
+  [block1]
     block = 1
     volumetric_locking_correction = true
     incremental = true
@@ -44,7 +44,7 @@
     decomposition_method = EigenSolution
     temperature = temp
   [../]
-  [./block2]
+  [block2]
     block = 2
     volumetric_locking_correction = true
     incremental = true
@@ -56,35 +56,35 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
   [../]
 []
 
 [BCs]
-  [./left_right_x]
+  [left_right_x]
     type = DirichletBC
     variable = disp_x
     boundary = '1 4'
     value = 0.0
   [../]
 
-  [./left_right_y]
+  [left_right_y]
     type = DirichletBC
     variable = disp_y
     boundary = '1 4'
     value = 0.0
   [../]
 
-  [./left_right_z]
+  [left_right_z]
     type = DirichletBC
     variable = disp_z
     boundary = '1 4'
     value = 0.0
   [../]
 
-  [./temp]
+  [temp]
     type = FunctionDirichletBC
     variable = temp
     boundary = '2 3'
@@ -93,7 +93,7 @@
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 2
     secondary = 3
     penalty = 1e8
@@ -102,19 +102,19 @@
 
 [Materials]
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
   [../]
 
-  [./stress1]
+  [stress1]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
 
-  [./thermal_expansion1]
+  [thermal_expansion1]
     type = ComputeThermalExpansionEigenstrain
     block = 1
     thermal_expansion_coeff = 1e-4
@@ -123,7 +123,7 @@
     eigenstrain_name = thermal_expansion1
   [../]
 
-  [./thermal_expansion2]
+  [thermal_expansion2]
     type = ComputeThermalExpansionEigenstrain
     block = 2
     thermal_expansion_coeff = 1e-5
@@ -132,14 +132,14 @@
     eigenstrain_name = thermal_expansion2
   [../]
 
-  [./heat]
+  [heat]
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 1.0
   [../]
 
-  [./density]
+  [density]
     type = Density
     block = '1 2'
     density = 1.0
@@ -147,7 +147,7 @@
 []
 
 [Preconditioning]
-  [./FDP]
+  [FDP]
     type = FDP
     full = true
     implicit_geometric_coupling = true

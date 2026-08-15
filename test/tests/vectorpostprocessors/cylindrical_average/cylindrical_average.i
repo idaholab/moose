@@ -17,17 +17,17 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
 []
 
 [AuxVariables]
-  [./d]
+  [d]
   [../]
 []
 
 [AuxKernels]
-  [./d]
+  [d]
     type = FunctionAux
     variable = d
     function = set_d
@@ -36,14 +36,14 @@
 []
 
 [Functions]
-  [./set_d]
+  [set_d]
     type = ParsedFunction
     expression = 'r := sqrt(x * x + y * y); r'
   [../]
 []
 
 [VectorPostprocessors]
-  [./average]
+  [average]
     type = CylindricalAverage
     variable = d
     radius = 5

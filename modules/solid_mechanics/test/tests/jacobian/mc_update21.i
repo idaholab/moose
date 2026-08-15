@@ -20,7 +20,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
@@ -30,24 +30,24 @@
 
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
-  [./cs]
+  [cs]
     type = SolidMechanicsHardeningConstant
     value = 1E6
   [../]
-  [./coh]
+  [coh]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./phi]
+  [phi]
     type = SolidMechanicsHardeningConstant
     value = 60
     convert_to_radians = true
   [../]
-  [./psi]
+  [psi]
     type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
@@ -55,17 +55,17 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     lambda = 0.5
     shear_modulus = 1.0
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '3 0 0  0 3 0  0 0 1.5'
     eigenstrain_name = ini_stress
   [../]
-  [./cmc]
+  [cmc]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
     compressive_strength = cs
@@ -75,7 +75,7 @@
     smoothing_tol = 1
     yield_function_tol = 1.0E-12
   [../]
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = cmc
     perform_finite_strain_rotations = false
@@ -83,7 +83,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type'

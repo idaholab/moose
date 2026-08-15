@@ -184,7 +184,7 @@
   start_time = 0
   automatic_scaling = true
 
-  [./TimeStepper]
+  [TimeStepper]
   type = IterationAdaptiveDT
   dt = 2.5e-2
   time_t = '0.0  10.0'

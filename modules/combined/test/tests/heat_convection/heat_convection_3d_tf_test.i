@@ -64,7 +64,7 @@
 []    # Mesh END
 
 [Variables]  # Variables Start
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 294.26 # Initial parallelpiped temperature
@@ -74,13 +74,13 @@
 
 
 [Kernels]  # Kernels Start
-  [./heat]
+  [heat]
 #    type = HeatConductionRZ
      type = HeatConduction
      variable = temp
   [../]
 
-  [./heat_ie]
+  [heat_ie]
 #  type = HeatConductionTimeDerivativeRZ
   type = HeatConductionTimeDerivative
   variable = temp
@@ -91,7 +91,7 @@
 
 [BCs]    # Boundary Conditions Start
 # Heat transfer coefficient on outer parallelpiped radius and ends
-  [./convective_clad_surface]    # Convective Start
+  [convective_clad_surface]    # Convective Start
 #         type = ConvectiveFluxRZ  # Convective flux, e.g. q'' = h*(Tw - Tf)
          type = ConvectiveFluxBC  # Convective flux, e.g. q'' = h*(Tw - Tf)
          boundary = '1 2 3 4 5 6'  # BC applied on top, along length, and bottom
@@ -107,13 +107,13 @@
 []    # BCs END
 
 [Materials]    # Materials Start
-  [./thermal]
+  [thermal]
     type = HeatConductionMaterial
     block = 1
     specific_heat = 826.4
     thermal_conductivity = 1.937  # this makes alpha 9.74e-7 m^2/s
   [../]
-  [./density]
+  [density]
     type = Density
     block = 1
     density = 2405.28

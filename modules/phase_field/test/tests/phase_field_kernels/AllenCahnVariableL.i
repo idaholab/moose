@@ -13,8 +13,8 @@
 []
 
 [AuxVariables]
-  [./chi]
-    [./InitialCondition]
+  [chi]
+    [InitialCondition]
       type = FunctionIC
       function = 'x/24+0.5'
     [../]
@@ -22,10 +22,10 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0.0
       y1 = 0.0
@@ -38,18 +38,18 @@
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
   [../]
 
-  [./ACBulk]
+  [ACBulk]
     type = AllenCahn
     variable = eta
     f_name = F
   [../]
 
-  [./ACInterface]
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = 1
@@ -59,7 +59,7 @@
 []
 
 [Materials]
-  [./L]
+  [L]
     type = DerivativeParsedMaterial
     property_name = L
     coupled_variables = 'eta chi'
@@ -67,7 +67,7 @@
     derivative_order = 2
   [../]
 
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'eta'

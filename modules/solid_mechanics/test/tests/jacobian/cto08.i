@@ -36,7 +36,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
@@ -46,7 +46,7 @@
 
 
 [UserObjects]
-  [./simple0]
+  [simple0]
     type = SolidMechanicsPlasticSimpleTester
     a = 0
     b = 1
@@ -54,7 +54,7 @@
     yield_function_tolerance = 1.0E-9
     internal_constraint_tolerance = 1.0E-9
   [../]
-  [./simple1]
+  [simple1]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
     b = 0
@@ -62,7 +62,7 @@
     yield_function_tolerance = 1.0E-9
     internal_constraint_tolerance = 1.0E-9
   [../]
-  [./simple2]
+  [simple2]
     type = SolidMechanicsPlasticSimpleTester
     a = 1
     b = 1
@@ -73,17 +73,17 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5E6'
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 0  0 0.15 0  0 0 1.5'
     eigenstrain_name = ini_stress
   [../]
-  [./multi]
+  [multi]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-9
@@ -93,7 +93,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'

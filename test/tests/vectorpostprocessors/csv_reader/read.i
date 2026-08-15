@@ -12,7 +12,7 @@
 []
 
 [UserObjects]
-  [./tester]
+  [tester]
     type = TestCSVReader
     vectorpostprocessor = reader
     vector = year
@@ -22,7 +22,7 @@
 []
 
 [VectorPostprocessors]
-  [./reader]
+  [reader]
     type = CSVReaderVectorPostprocessor
     csv_file = example.csv
   [../]

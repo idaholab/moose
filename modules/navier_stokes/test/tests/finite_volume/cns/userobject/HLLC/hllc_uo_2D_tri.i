@@ -7,7 +7,7 @@ E_right = 1.7919094397e+05
 v_right = 50
 
 [Mesh]
-  [./cartesian]
+  [cartesian]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -21,7 +21,7 @@ v_right = 50
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     allow_imperfect_jacobians = true
   [../]
@@ -32,34 +32,34 @@ v_right = 50
 []
 
 [Variables]
-  [./rho]
+  [rho]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./rho_v]
+  [rho_v]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./rho_E]
+  [rho_E]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [ICs]
-  [./rho_ic]
+  [rho_ic]
     type = FunctionIC
     variable = rho
     function = 'if (y / (2 * x) < 0.5, ${rho_left}, ${rho_right})'
   [../]
 
-  [./rho_v_ic]
+  [rho_v_ic]
     type = FunctionIC
     variable = rho_v
     function = 'if (y / (2 * x) < 0.5, ${fparse rho_left * v_left}, ${fparse rho_right * v_right})'
   [../]
 
-  [./rho_E_ic]
+  [rho_E_ic]
     type = FunctionIC
     variable = rho_E
     function = 'if (y / (2 * x) < 0.5, ${fparse E_left * rho_left}, ${fparse E_right * rho_right})'
@@ -67,7 +67,7 @@ v_right = 50
 []
 
 [Materials]
-  [./var_mat]
+  [var_mat]
     type = ConservedVarValuesMaterial
     rho = rho
     rhou = 0
@@ -78,14 +78,14 @@ v_right = 50
 []
 
 [UserObjects]
-  [./hllc]
+  [hllc]
     type = HLLCUserObject
     fp = fp
   [../]
 []
 
 [VectorPostprocessors]
-  [./wave_speeds]
+  [wave_speeds]
     type = WaveSpeedVPP
     hllc_uo = hllc
     elem_id = 0

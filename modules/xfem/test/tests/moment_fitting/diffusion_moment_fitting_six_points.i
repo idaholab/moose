@@ -26,7 +26,7 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.5 1.0 0.5 0.5'
     time_start_cut = 0.0
@@ -35,12 +35,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Functions]
-  [./u_left]
+  [u_left]
     type = PiecewiseLinear
     x = '0   2'
     y = '0  0.1'
@@ -48,7 +48,7 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -56,14 +56,14 @@
 
 [BCs]
 # Define boundary conditions
-  [./left_u]
+  [left_u]
     type = FunctionDirichletBC
     variable = u
     boundary = 3
     function = u_left
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
@@ -78,7 +78,7 @@
   petsc_options_value = 'hypre boomeramg'
   line_search = 'none'
 
-  [./Quadrature]
+  [Quadrature]
     order = FOURTH
     type = MONOMIAL
   [../]
@@ -97,7 +97,7 @@
   time_step_interval = 1
   execute_on = timestep_end
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

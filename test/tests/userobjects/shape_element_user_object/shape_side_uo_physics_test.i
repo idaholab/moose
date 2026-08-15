@@ -9,45 +9,45 @@ u_left = 0.5
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./pot]
+  [pot]
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
-  [./adv_u]
+  [adv_u]
     type = PotentialAdvection
     variable = u
     potential = pot
   [../]
-  [./diff_pot]
+  [diff_pot]
     type = Diffusion
     variable = pot
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     boundary = left
     type = DirichletBC
     value = ${u_left}
     variable = u
   [../]
-  [./right]
+  [right]
     boundary = right
     type = DirichletBC
     variable = u
     value = 0
   [../]
 
-  [./left_pot]
+  [left_pot]
     boundary = left
     type = ExampleShapeSideIntegratedBC
     variable = pot
@@ -56,7 +56,7 @@ u_left = 0.5
     v = u
     Vb = 1
   [../]
-  [./right_pot]
+  [right_pot]
     boundary = right
     type = DirichletBC
     variable = pot
@@ -65,13 +65,13 @@ u_left = 0.5
 []
 
 [UserObjects]
-  [./num_user_object]
+  [num_user_object]
     type = NumShapeSideUserObject
     u = u
     boundary = left
     execute_on = 'linear nonlinear'
   [../]
-  [./denom_user_object]
+  [denom_user_object]
     type = DenomShapeSideUserObject
     u = u
     boundary = left
@@ -80,14 +80,14 @@ u_left = 0.5
 []
 
 [AuxVariables]
-  [./u_flux]
+  [u_flux]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [AuxKernels]
-  [./u_flux]
+  [u_flux]
     type = DriftDiffusionFluxAux
     variable = u_flux
     u = u
@@ -102,7 +102,7 @@ u_left = 0.5
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -123,12 +123,12 @@ u_left = 0.5
 []
 
 [ICs]
-  [./u]
+  [u]
     type = FunctionIC
     variable = u
     function = ic_u
   [../]
-  [./pot]
+  [pot]
     type = FunctionIC
     variable = pot
     function = ic_pot
@@ -136,11 +136,11 @@ u_left = 0.5
 []
 
 [Functions]
-  [./ic_u]
+  [ic_u]
     type = ParsedFunction
     expression = '${u_left} * (1 - x)'
   [../]
-  [./ic_pot]
+  [ic_pot]
     type = ParsedFunction
     expression = '1 - x'
   [../]

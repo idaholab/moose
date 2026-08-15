@@ -11,26 +11,26 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = t*t*(x*x+y*y)
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = 2*t*(x*x+y*y)-4*t*t
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
   [../]
 []
 
 [ICs]
-  [./u_var]
+  [u_var]
     type = FunctionIC
     variable = u
     function = exact_fn
@@ -38,17 +38,17 @@
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -56,7 +56,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left right top bottom'
@@ -65,7 +65,7 @@
 []
 
 [Postprocessors]
-  [./l2_error]
+  [l2_error]
     type = ElementL2Error
     variable = u
     function = exact_fn
@@ -73,7 +73,7 @@
   [../]
 
   # Just use some postprocessor that gives values good enough for time stepping ;-)
-  [./dt]
+  [dt]
     type = ElementAverageValue
     variable = u
     execute_on = 'initial timestep_end'
@@ -86,7 +86,7 @@
 
   start_time = 1.0
   num_steps = 2
-  [./TimeStepper]
+  [TimeStepper]
     type = PostprocessorDT
     postprocessor = dt
   [../]

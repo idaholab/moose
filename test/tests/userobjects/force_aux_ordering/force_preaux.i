@@ -10,7 +10,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
@@ -18,12 +18,12 @@
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -31,7 +31,7 @@
 
 
 [Postprocessors]
-  [./total_u]
+  [total_u]
     type = ElementIntegralVariablePostprocessor
     variable = u
   [../]
@@ -41,13 +41,13 @@
   # at its default location, timestep_end/POST_AUX/after total_u and hence gets
   # the most up to date information. scale2 is pushed into PRE_AUX and hence picks
   # up the value of total_u from the last timestep.
-  [./scale1]
+  [scale1]
     type = ScalePostprocessor
     value = total_u
     scaling_factor = 1
   [../]
 
-  [./scale2]
+  [scale2]
     type = ScalePostprocessor
     value = total_u
     scaling_factor = 1
@@ -56,7 +56,7 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1

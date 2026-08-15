@@ -9,45 +9,45 @@
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./pk2]
+  [pk2]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./fp_zz]
+  [fp_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./rotout]
+  [rotout]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./e_zz]
+  [e_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./gss]
+  [gss]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./slip_increment]
+  [slip_increment]
    order = CONSTANT
    family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     expression = 0.1*t
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true
@@ -56,7 +56,7 @@
 
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     variable = stress_zz
     rank_two_tensor = stress
@@ -64,7 +64,7 @@
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./pk2]
+  [pk2]
    type = RankTwoAux
    variable = pk2
    rank_two_tensor = pk2
@@ -72,7 +72,7 @@
    index_i = 2
    execute_on = timestep_end
   [../]
-  [./fp_zz]
+  [fp_zz]
     type = RankTwoAux
     variable = fp_zz
     rank_two_tensor = fp
@@ -80,7 +80,7 @@
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./e_zz]
+  [e_zz]
     type = RankTwoAux
     variable = e_zz
     rank_two_tensor = lage
@@ -88,14 +88,14 @@
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./gss]
+  [gss]
     type = MaterialStdVectorAux
     variable = gss
     property = state_var_gss
     index = 0
     execute_on = timestep_end
   [../]
-  [./slip_inc]
+  [slip_inc]
    type = MaterialStdVectorAux
    variable = slip_increment
    property = slip_rate_gss
@@ -105,25 +105,25 @@
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
   [../]
-  [./symmx]
+  [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
   [../]
-  [./symmz]
+  [symmz]
     type = DirichletBC
     variable = uz
     boundary = back
     value = 0
   [../]
-  [./tdisp]
+  [tdisp]
     type = FunctionDirichletBC
     variable = uz
     boundary = front
@@ -132,7 +132,7 @@
 []
 
 [UserObjects]
-  [./slip_rate_gss]
+  [slip_rate_gss]
     type = CrystalPlasticitySlipRateGSS
     variable_size = 12
     slip_sys_file_name = input_slip_sys.txt
@@ -140,12 +140,12 @@
     flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
     uo_state_var_name = state_var_gss
   [../]
-  [./slip_resistance_gss]
+  [slip_resistance_gss]
     type = CrystalPlasticitySlipResistanceGSS
     variable_size = 12
     uo_state_var_name = state_var_gss
   [../]
-  [./state_var_gss]
+  [state_var_gss]
     type = CrystalPlasticityStateVariable
     variable_size = 12
     groups = '0 4 8 12'
@@ -153,7 +153,7 @@
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
   [../]
-  [./state_var_evol_rate_comp_gss]
+  [state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 109.8 2.5'
@@ -163,7 +163,7 @@
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainUObasedCP
     block = 0
     stol = 1e-2
@@ -173,7 +173,7 @@
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
@@ -182,34 +182,34 @@
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
   [../]
-  [./pk2]
+  [pk2]
    type = ElementAverageValue
    variable = pk2
   [../]
-  [./fp_zz]
+  [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
   [../]
-  [./e_zz]
+  [e_zz]
     type = ElementAverageValue
     variable = e_zz
   [../]
-  [./gss]
+  [gss]
     type = ElementAverageValue
     variable = gss
   [../]
-  [./slip_increment]
+  [slip_increment]
    type = ElementAverageValue
    variable = slip_increment
   [../]
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

@@ -7,23 +7,23 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./scalar_strain_zz]
+  [scalar_strain_zz]
     order = FIRST
     family = SCALAR
   [../]
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./generalized_plane_strain]
+  [generalized_plane_strain]
     block = 1
     strain = SMALL
     scalar_out_of_plane_strain = scalar_strain_zz
@@ -35,7 +35,7 @@
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
@@ -43,20 +43,20 @@
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     expression = '(1-x)*t'
   [../]
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     boundary = 3
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [bottomy]
     type = DirichletBC
     boundary = 3
     variable = disp_y
@@ -65,18 +65,18 @@
 []
 
 [Materials]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeLinearElasticStress
     block = 1
   [../]
-  [./thermal_strain]
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     eigenstrain_name = eigenstrain
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 1
     poissons_ratio = 0.3
@@ -85,7 +85,7 @@
 []
 
 [Postprocessors]
-  [./react_z]
+  [react_z]
     type = MaterialTensorIntegral
     use_displaced_mesh = false
     rank_two_tensor = stress
@@ -117,7 +117,7 @@
 
 [Outputs]
   file_base = gps_xy_small_out
-  [./exodus]
+  [exodus]
     type = Exodus
   [../]
 []

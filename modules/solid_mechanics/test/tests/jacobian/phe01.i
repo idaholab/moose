@@ -9,56 +9,56 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [Kernels]
-  [./silly_phe]
+  [silly_phe]
     type = PlasticHeatEnergy
     coeff = 0.5
     variable = disp_x
   [../]
-  [./dummy_disp_y]
+  [dummy_disp_y]
     type = TimeDerivative
     variable = disp_y
   [../]
-  [./dummy_disp_z]
+  [dummy_disp_z]
     type = TimeDerivative
     variable = disp_z
   [../]
 []
 
 [UserObjects]
-  [./coh]
+  [coh]
     type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 2
     rate = 1
   [../]
-  [./tanphi]
+  [tanphi]
     type = SolidMechanicsHardeningExponential
     value_0 = 1.0
     value_residual = 0.5
     rate = 2
   [../]
-  [./tanpsi]
+  [tanpsi]
     type = SolidMechanicsHardeningExponential
     value_0 = 0.1
     value_residual = 0.05
     rate = 3
   [../]
-  [./t_strength]
+  [t_strength]
     type = SolidMechanicsHardeningExponential
     value_0 = 100
     value_residual = 100
     rate = 1
   [../]
-  [./c_strength]
+  [c_strength]
     type = SolidMechanicsHardeningCubic
     value_0 = 1
     value_residual = 0
@@ -68,30 +68,30 @@
 []
 
 [Materials]
-  [./phe]
+  [phe]
     type = ComputePlasticHeatEnergy
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     lambda = 1.0
     shear_modulus = 2.0
   [../]
-  [./strain]
+  [strain]
     type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = ini_stress
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 0  0 0 1  0 1 -1.5'
     eigenstrain_name = ini_stress
   [../]
-  [./admissible]
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
     tangent_operator = nonlinear
   [../]
-  [./mc]
+  [mc]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
@@ -107,7 +107,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'

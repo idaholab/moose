@@ -12,14 +12,14 @@
 []
 
 [AuxVariables]
-  [./c]
+  [c]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./c]
+  [c]
     type = DiscreteNucleationAux
     map = map
     variable = c
@@ -30,14 +30,14 @@
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     type = DiscreteNucleationInserter
     hold_time = 0.4
     probability = 0.01
     seed = 12346
     radius = 3.27
   [../]
-  [./map]
+  [map]
     type = DiscreteNucleationMap
     int_width = 2
     periodic = c

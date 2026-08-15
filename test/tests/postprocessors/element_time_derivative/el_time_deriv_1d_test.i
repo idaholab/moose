@@ -9,10 +9,10 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0
     [../]
@@ -20,30 +20,30 @@
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = t*x+1
   [../]
 []
 
 [Kernels]
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
   [../]
-  [./diffusion]
+  [diffusion]
     type = Diffusion
     variable = u
   [../]
-  [./timeDer]
+  [timeDer]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = u
     boundary = '0 1'
@@ -52,11 +52,11 @@
 []
 
 [Postprocessors]
-  [./elementAvgTimeDerivative]
+  [elementAvgTimeDerivative]
     type = ElementAverageTimeDerivative
     variable = u
   [../]
-  [./elementAvgValue]
+  [elementAvgValue]
     type = ElementAverageValue
     variable = u
   [../]

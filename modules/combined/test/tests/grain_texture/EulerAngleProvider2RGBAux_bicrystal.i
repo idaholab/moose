@@ -14,13 +14,13 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalBoundingBoxIC]
+  [PolycrystalICs]
+    [BicrystalBoundingBoxIC]
       x1 = 0
       y1 = 0
       x2 = 500
@@ -30,61 +30,61 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./unique_grains]
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./var_indices]
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./active_bounds_elemental]
+  [active_bounds_elemental]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./rgb]
+  [rgb]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./bnds_aux]
+  [bnds_aux]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
   [../]
-  [./unique_grains]
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_tracker
     execute_on = 'initial timestep_begin'
     field_display = UNIQUE_REGION
   [../]
-  [./var_indices]
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
     execute_on = 'initial timestep_begin'
     field_display = VARIABLE_COLORING
   [../]
-  [./active_bounds_elemental]
+  [active_bounds_elemental]
     type = FeatureFloodCountAux
     variable = active_bounds_elemental
     field_display = ACTIVE_BOUNDS
     execute_on = 'initial timestep_begin'
     flood_counter = grain_tracker
   [../]
-  [./rgb]
+  [rgb]
     type = EulerAngleProvider2RGBAux
     variable = rgb
     euler_angle_provider = euler_angle_file
@@ -95,7 +95,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     block = 0
     T = 500 # K
@@ -108,7 +108,7 @@
 []
 
 [UserObjects]
-  [./grain_tracker]
+  [grain_tracker]
     type = FauxGrainTracker
     connecting_threshold = 0.05
     compute_var_to_feature_map = true
@@ -116,21 +116,21 @@
     execute_on = 'initial timestep_begin'
     outputs = none
   [../]
-  [./euler_angle_file]
+  [euler_angle_file]
     type = EulerAngleFileReader
     file_name = test.tex
   [../]
 []
 
 [Postprocessors]
-  [./gr0_area]
+  [gr0_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr0
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
   [../]

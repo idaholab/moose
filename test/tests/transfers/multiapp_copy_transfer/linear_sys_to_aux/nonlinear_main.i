@@ -50,7 +50,7 @@
     value = 0
   []
 
-  [./right]
+  [right]
     type = FVDirichletBC
     variable = u_main
     boundary = right

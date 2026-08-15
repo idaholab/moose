@@ -18,11 +18,11 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = TEIC
     [../]
   [../]
@@ -31,17 +31,17 @@
 [Kernels]
   active = 'td diff ffn'
 
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = TEJumpFFN
     variable = u
   [../]
@@ -50,7 +50,7 @@
 [BCs]
   active = 'all'
 
-  [./all]
+  [all]
     type = TEJumpBC
     variable = u
     boundary = '0 1 2 3'
@@ -60,7 +60,7 @@
 [Postprocessors]
   active = 'dt'
 
-  [./dt]
+  [dt]
     type = TimestepSize
   [../]
 []
@@ -74,7 +74,7 @@
   nl_rel_tol = 1e-7
 #  l_tol = 1e-5
 
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
@@ -86,7 +86,7 @@
 
   dtmax = 0.25
 
-  [./TimeStepper]
+  [TimeStepper]
     type = DT2
     dt = 0.1
     e_max = 3e-1

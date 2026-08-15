@@ -29,7 +29,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     strain = finite
@@ -38,19 +38,19 @@
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0E-6*x'
   [../]
-  [./y]
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0E-6*y'
   [../]
-  [./z]
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
@@ -59,53 +59,53 @@
 []
 
 [AuxVariables]
-  [./f0]
+  [f0]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f1]
+  [f1]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f2]
+  [f2]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [iter]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./intnl]
+  [intnl]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./f0_auxk]
+  [f0_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = f0
   [../]
-  [./f1_auxk]
+  [f1_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f1
   [../]
-  [./f2_auxk]
+  [f2_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f2
   [../]
-  [./iter]
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
   [../]
-  [./intnl_auxk]
+  [intnl_auxk]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 0
@@ -114,57 +114,57 @@
 []
 
 [Postprocessors]
-  [./s_xx]
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
   [../]
-  [./s_xy]
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
   [../]
-  [./s_xz]
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
   [../]
-  [./s_yy]
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
   [../]
-  [./s_yz]
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
   [../]
-  [./s_zz]
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
   [../]
-  [./f0]
+  [f0]
     type = PointValue
     point = '0 0 0'
     variable = f0
   [../]
-  [./f1]
+  [f1]
     type = PointValue
     point = '0 0 0'
     variable = f1
   [../]
-  [./f2]
+  [f2]
     type = PointValue
     point = '0 0 0'
     variable = f2
   [../]
-  [./iter]
+  [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
   [../]
-  [./intnl]
+  [intnl]
     type = PointValue
     point = '0 0 0'
     variable = intnl
@@ -172,13 +172,13 @@
 []
 
 [UserObjects]
-  [./hard]
+  [hard]
     type = SolidMechanicsHardeningCubic
     value_0 = 0.5
     value_residual = 1
     internal_limit = 1E-6
   [../]
-  [./tens]
+  [tens]
     type = SolidMechanicsPlasticTensileMulti
     tensile_strength = hard
     shift = 1E-6
@@ -188,13 +188,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.6E6 1E6'
   [../]
-  [./mc]
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-12
@@ -220,7 +220,7 @@
 [Outputs]
   file_base = planar5
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
     [../]
 []

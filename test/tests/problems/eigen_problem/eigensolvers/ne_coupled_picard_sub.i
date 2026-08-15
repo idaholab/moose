@@ -11,25 +11,25 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./power]
+  [power]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff_T]
+  [diff_T]
     type = Diffusion
     variable = T
   [../]
-  [./src_T]
+  [src_T]
     type = CoupledForce
     variable = T
     v = power
@@ -37,7 +37,7 @@
 []
 
 [BCs]
-  [./homogeneousT]
+  [homogeneousT]
     type = DirichletBC
     variable = T
     boundary = '0 1 2 3'

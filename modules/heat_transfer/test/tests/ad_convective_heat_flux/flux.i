@@ -21,13 +21,13 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 100.0
   [../]
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = 10
@@ -35,13 +35,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = ADDirichletBC
     variable = temp
     boundary = left
     value = 100.0
   [../]
-  [./right]
+  [right]
     type = ADConvectiveHeatFluxBC
     variable = temp
     boundary = right
@@ -51,7 +51,7 @@
 []
 
 [Postprocessors]
-  [./right_flux]
+  [right_flux]
     type = SideDiffusiveFluxAverage
     variable = temp
     boundary = right

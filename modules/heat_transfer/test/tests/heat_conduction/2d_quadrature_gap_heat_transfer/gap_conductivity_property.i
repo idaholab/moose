@@ -3,26 +3,26 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [AuxVariables]
-  [./gap_conductivity]
+  [gap_conductivity]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./hc]
+  [hc]
     type = HeatConduction
     variable = temp
   [../]
 []
 
 [AuxKernels]
-  [./gap_conductivity]
+  [gap_conductivity]
     type = MaterialRealAux
     boundary = leftright
     property = gap_conductivity
@@ -31,13 +31,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temp
     boundary = leftleft
     value = 300
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = temp
     boundary = rightright
@@ -46,7 +46,7 @@
 []
 
 [ThermalContact]
-  [./left_to_right]
+  [left_to_right]
     secondary = leftright
     quadrature = true
     primary = rightleft
@@ -59,7 +59,7 @@
 []
 
 [Materials]
-  [./hcm]
+  [hcm]
     type = HeatConductionMaterial
     block = 'left right'
     specific_heat = 1

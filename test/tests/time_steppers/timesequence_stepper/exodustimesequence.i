@@ -11,26 +11,26 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = t*t*(x*x+y*y)
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = 2*t*(x*x+y*y)-4*t*t
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
   [../]
 []
 
 [ICs]
-  [./u_var]
+  [u_var]
     type = FunctionIC
     variable = u
     function = exact_fn
@@ -38,17 +38,17 @@
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -56,7 +56,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left right top bottom'
@@ -67,7 +67,7 @@
 [Executioner]
   type = Transient
   end_time = 4.0
-  [./TimeStepper]
+  [TimeStepper]
     type = ExodusTimeSequenceStepper
     mesh = timesequence_no_start_time.e
   [../]

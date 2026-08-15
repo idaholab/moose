@@ -9,7 +9,7 @@
 []
 
 [Materials]
-  [./tensor]
+  [tensor]
     type = GenericConstantRankTwoTensor
     tensor_name = constant
     # tensor values are column major-ordered

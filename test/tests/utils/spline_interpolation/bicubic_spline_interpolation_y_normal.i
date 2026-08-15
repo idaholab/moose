@@ -9,15 +9,15 @@
 []
 
 [Functions]
-  [./yx1]
+  [yx1]
     type = ParsedFunction
     expression = '3*z^2'
   [../]
-  [./yx2]
+  [yx2]
     type = ParsedFunction
     expression = '6*x^2'
   [../]
-  [./spline_fn]
+  [spline_fn]
     type = BicubicSplineFunction
     normal_component = y
     x1 = '0 2 4'
@@ -30,49 +30,49 @@
     yx1 = 'yx1'
     yx2 = 'yx2'
   [../]
-  [./u_func]
+  [u_func]
     type = ParsedFunction
     expression = 'z^3 + 2*x^3'
   [../]
-  [./u2_forcing_func]
+  [u2_forcing_func]
     type = ParsedFunction
     expression = '-6*z - 12*x'
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./bi_func_value]
+  [bi_func_value]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./x_deriv]
+  [x_deriv]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./z_deriv]
+  [z_deriv]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./bi_func_value]
+  [bi_func_value]
     type = FunctionAux
     variable = bi_func_value
     function = spline_fn
   [../]
-  [./deriv_1]
+  [deriv_1]
     type = FunctionDerivativeAux
     function = spline_fn
     variable = z_deriv
     component = z
   [../]
-  [./deriv_2]
+  [deriv_2]
     type = FunctionDerivativeAux
     function = spline_fn
     variable = x_deriv
@@ -81,11 +81,11 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     function = u2_forcing_func
@@ -93,7 +93,7 @@
 []
 
 [BCs]
-  [./sides]
+  [sides]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left right front back'
@@ -102,25 +102,25 @@
 []
 
 [Postprocessors]
-  [./nodal_l2_err_spline]
+  [nodal_l2_err_spline]
     type = NodalL2Error
     variable = u
     function = spline_fn
     execute_on = 'initial timestep_end'
   [../]
-  [./nodal_l2_err_analytic]
+  [nodal_l2_err_analytic]
     type = NodalL2Error
     variable = u
     function = u_func
     execute_on = 'initial timestep_end'
   [../]
-  [./x_deriv_err_analytic]
+  [x_deriv_err_analytic]
     type = NodalL2Error
     variable = x_deriv
     function = yx2
     execute_on = 'initial timestep_end'
   [../]
-  [./z_deriv_err_analytic]
+  [z_deriv_err_analytic]
     type = NodalL2Error
     variable = z_deriv
     function = yx1

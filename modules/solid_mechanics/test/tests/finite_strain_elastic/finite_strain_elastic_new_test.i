@@ -9,7 +9,7 @@
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     expression = '0.01 * t'
   [../]
@@ -18,7 +18,7 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      [./all]
+      [all]
         strain = FINITE
         add_variables = true
       [../]
@@ -27,25 +27,25 @@
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
-  [./symmx]
+  [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
-  [./symmz]
+  [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
-  [./tdisp]
+  [tdisp]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
@@ -54,18 +54,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

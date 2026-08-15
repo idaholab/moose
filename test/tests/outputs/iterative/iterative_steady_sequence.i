@@ -6,26 +6,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
@@ -44,7 +44,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     execute_on = 'initial timestep_end failed nonlinear linear'
     sequence = true

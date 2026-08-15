@@ -6,7 +6,7 @@
 []
 
 [Functions]
-  [./fn]
+  [fn]
     type = PiecewiseLinear
     axis = x
     x = '0 2'
@@ -15,12 +15,12 @@
 []
 
 [AuxVariables]
-  [./a]
+  [a]
   [../]
 []
 
 [AuxKernels]
-  [./a_ak]
+  [a_ak]
     type = FunctionAux
     variable = a
     function = fn
@@ -28,29 +28,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -59,19 +59,19 @@
 []
 
 [Postprocessors]
-  [./value1]
+  [value1]
     type = PointValue
     variable = a
     point = '0 0 0'
   [../]
 
-  [./value2]
+  [value2]
     type = PointValue
     variable = a
     point = '1 0 0'
   [../]
 
-  [./value3]
+  [value3]
     type = PointValue
     variable = a
     point = '2 0 0'
@@ -86,7 +86,7 @@
 []
 
 [Outputs]
-  [./csv]
+  [csv]
     type = CSV
     file_base = csv_validation_tester_01
     execute_on = 'final'

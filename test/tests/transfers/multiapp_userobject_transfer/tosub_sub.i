@@ -9,37 +9,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
   [../]
 []
 
 [AuxVariables]
-  [./multi_layered_average]
+  [multi_layered_average]
   [../]
-  [./element_multi_layered_average]
+  [element_multi_layered_average]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./axial_force]
+  [axial_force]
     type = ParsedFunction
     expression = 1000*y
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
-  [./force]
+  [force]
     type = BodyForce
     variable = u
     function = axial_force
@@ -47,7 +47,7 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

@@ -8,7 +8,7 @@
 
 [Variables]
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -17,7 +17,7 @@
 [Functions]
 
 
-  [./u]
+  [u]
     type = PiecewiseBilinear
     #x = '0 1 3' # Testing this error
     y = '0 1 3'
@@ -28,7 +28,7 @@
 
 [Kernels]
 
-  [./diffu]
+  [diffu]
     type = Diffusion
     variable = u
   [../]
@@ -36,7 +36,7 @@
 
 [BCs]
 
-  [./u]
+  [u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1'

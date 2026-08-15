@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = FileMeshGenerator
     file = cube.e
   [../]
@@ -48,7 +48,7 @@
 
 [Executioner]
   type = Steady
-  [./Quadrature]
+  [Quadrature]
     allow_negative_qweights = false
   [../]
   solve_type = 'NEWTON'

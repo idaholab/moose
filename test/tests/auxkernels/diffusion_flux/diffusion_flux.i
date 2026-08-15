@@ -8,16 +8,16 @@
 []
 
 [Variables]
-  [./T]
+  [T]
   [../]
 []
 
 [AuxVariables]
-  [./flux_x]
+  [flux_x]
       order = FIRST
       family = MONOMIAL
   [../]
-  [./flux_y]
+  [flux_y]
       order = FIRST
       family = MONOMIAL
   [../]
@@ -25,12 +25,12 @@
 
 [Kernels]
   active = 'diff'
-  [./diff]
+  [diff]
     type = MatDiffusionTest # A Laplacian operator
     variable = T
     prop_name = 'thermal_conductivity'
   [../]
-  [./diff_ad]
+  [diff_ad]
     type = ADMatDiffusion # A Laplacian operator
     variable = T
     diffusivity = 'thermal_conductivity'
@@ -38,14 +38,14 @@
 []
 
 [AuxKernels]
-  [./flux_x]
+  [flux_x]
     type = DiffusionFluxAux
     diffusivity = 'thermal_conductivity'
     variable = flux_x
     diffusion_variable = T
     component = x
   [../]
-  [./flux_y]
+  [flux_y]
     type = DiffusionFluxAux
     diffusivity = 'thermal_conductivity'
     variable = flux_y
@@ -55,13 +55,13 @@
 []
 
 [BCs]
-  [./inlet]
+  [inlet]
     type = DirichletBC # Simple u=value BC
     variable = T
     boundary = left
     value = 4000 # K
   [../]
-  [./outlet]
+  [outlet]
     type = DirichletBC
     variable = T
     boundary = right
@@ -70,7 +70,7 @@
 []
 
 [Materials]
-  [./k]
+  [k]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '10' # in W/mK
@@ -79,7 +79,7 @@
 
 [VectorPostprocessors]
   # avoid sampling an element variable on faces
-  [./line_sample]
+  [line_sample]
     type = LineValueSampler
     variable = 'T flux_x flux_y'
     start_point = '0.01 0.01 0'

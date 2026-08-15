@@ -14,58 +14,58 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./pid]
+  [pid]
     order = CONSTANT
     family = monomial
   []
 []
 
 [AuxKernels]
-  [./pidaux]
+  [pidaux]
     type = ProcessorIDAux
     variable = pid
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = GaussContForcing
     variable = u
   [../]
 
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff_x]
+  [diff_x]
     type = Diffusion
     variable = disp_x
   [../]
 
-  [./diff_y]
+  [diff_y]
     type = Diffusion
     variable = disp_y
   [../]
@@ -73,15 +73,15 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = u
       primary = 'left'
       secondary = 'right'
       translation = '40 0 0'
     [../]
 
-    [./y]
+    [y]
       variable = u
       primary = 'bottom'
       secondary = 'top'
@@ -89,28 +89,28 @@
     [../]
   [../]
 
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = -0.01
   [../]
 
-  [./right_x]
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0.01
   [../]
 
-  [./left_y]
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = left
     value = -0.01
   [../]
 
-  [./right_y]
+  [right_y]
     type = DirichletBC
     variable = disp_y
     boundary = right
@@ -135,14 +135,14 @@
   marker = marker
   initial_marker = marker
   max_h_level = 2
-  [./Indicators]
-    [./indicator]
+  [Indicators]
+    [indicator]
       type = GradientJumpIndicator
       variable = u
     [../]
   [../]
-  [./Markers]
-    [./marker]
+  [Markers]
+    [marker]
       type = ErrorFractionMarker
       indicator = indicator
       coarsen = 0.1

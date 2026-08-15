@@ -17,20 +17,20 @@
 []
 
 [AuxVariables]
-  [./SERD]
+  [SERD]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./rampConstantUp]
+  [rampConstantUp]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = -100
   [../]
-  [./ramp_disp_y]
+  [ramp_disp_y]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 6.8e-6 1.36e-5'
@@ -38,7 +38,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = SMALL
     add_variables = true
     incremental = true
@@ -48,7 +48,7 @@
 []
 
 [AuxKernels]
-  [./SERD]
+  [SERD]
     type = MaterialRealAux
     variable = SERD
     property = strain_energy_rate_density
@@ -57,21 +57,21 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     preset = false
     boundary = 'left'
     value = 0.0
   [../]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = 'bottom'
     value = 0.0
   [../]
-  [./top_disp]
+  [top_disp]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
@@ -81,16 +81,16 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
     poissons_ratio = 0.0
   [../]
-  [./radial_return_stress]
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'powerlawcrp'
   [../]
-  [./powerlawcrp]
+  [powerlawcrp]
     type = PowerLawCreepStressUpdate
     coefficient = 3.125e-21 # 7.04e-17 #
     n_exponent = 4.0
@@ -98,7 +98,7 @@
     activation_energy = 0.0
     # max_inelastic_increment = 0.01
   [../]
-  [./strain_energy_rate_density]
+  [strain_energy_rate_density]
     type = StrainEnergyRateDensity
     inelastic_models = 'powerlawcrp'
   [../]
@@ -126,34 +126,34 @@
 []
 
 [Postprocessors]
-  [./etxx]
+  [etxx]
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 0
   [../]
-  [./etyy]
+  [etyy]
     type = ElementalVariableValue
     variable = strain_yy
     elementid = 0
   [../]
-  [./etzz]
+  [etzz]
     type = ElementalVariableValue
     variable = strain_zz
     elementid = 0
   [../]
-  [./sigxx]
+  [sigxx]
     type = ElementAverageValue
     variable = stress_xx
   [../]
-  [./sigyy]
+  [sigyy]
     type = ElementAverageValue
     variable = stress_yy
   [../]
-  [./sigzz]
+  [sigzz]
     type = ElementAverageValue
     variable = stress_zz
   [../]
-  [./SERD]
+  [SERD]
     type = ElementAverageValue
     variable = SERD
   [../]

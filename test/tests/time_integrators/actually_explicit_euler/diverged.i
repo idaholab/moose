@@ -6,35 +6,35 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./nan]
+  [nan]
     type = NanKernel
     variable = u
     timestep_to_nan = 4
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -49,7 +49,7 @@
   l_tol = 1e-12
   dtmin = 1e-8
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ActuallyExplicitEuler
     solve_type = lump_preconditioned
   [../]

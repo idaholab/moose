@@ -5,7 +5,7 @@
     nx = 10
     ny = 10
   []
-  [./subdomains]
+  [subdomains]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0.1 0.1 0'
@@ -15,25 +15,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -42,19 +42,19 @@
 []
 
 [Materials]
-  [./block]
+  [block]
     type = GenericConstantMaterial
     block = '0 1'
     prop_names = 'property0 property1 property2 property3 property4 property5 property6 property7 property8 property9 property10'
     prop_values = '0 1 2 3 4 5 6 7 8 9 10'
   [../]
-  [./boundary]
+  [boundary]
     type = GenericConstantMaterial
     prop_names = bnd_prop
     boundary = top
     prop_values = 12345
   [../]
-  [./restricted]
+  [restricted]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'restricted0 restricted1'
@@ -74,7 +74,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./debug] # This is only a test, you should turn this on via [Debug] block
+  [debug] # This is only a test, you should turn this on via [Debug] block
     type = MaterialPropertyDebugOutput
   [../]
 []

@@ -8,27 +8,27 @@
 []
 
 [Variables]
-  [./T]
+  [T]
       initial_condition = 400.0   # unit in Kelvin only!!
   [../]
 []
 
 [AuxVariables]
-  [./elec_conduct]
+  [elec_conduct]
       order = FIRST
       family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = HeatConduction
     variable = T
   [../]
 []
 
 [AuxKernels]
-  [./elec_conduct]
+  [elec_conduct]
     type = MaterialRealAux
     variable = elec_conduct
     property = electrical_conductivity
@@ -37,13 +37,13 @@
 []
 
 [BCs]
-  [./inlet]
+  [inlet]
     type = DirichletBC
     variable = T
     boundary = left
     value = 1000 # K
   [../]
-  [./outlet]
+  [outlet]
     type = DirichletBC
     variable = T
     boundary = right
@@ -52,12 +52,12 @@
 []
 
 [Materials]
-  [./k]
+  [k]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '10' # in W/mK
   [../]
-  [./sigma]
+  [sigma]
     type = SemiconductorLinearConductivity
     temp = T
     sh_coeff_A = 0.002
@@ -66,7 +66,7 @@
 []
 
 [VectorPostprocessors]
-  [./line_sample]
+  [line_sample]
     type = LineValueSampler
     warn_discontinuous_face_values = false
     variable = 'T elec_conduct'

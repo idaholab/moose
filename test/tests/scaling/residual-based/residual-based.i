@@ -13,12 +13,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -30,13 +30,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1000
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

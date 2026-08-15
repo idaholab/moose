@@ -18,21 +18,21 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   []
 []
 
 [AuxVariables]
-  [./unique_regions]
+  [unique_regions]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = MultiSmoothCircleIC
     variable = c
     invalue = 1.0
@@ -45,7 +45,7 @@
 []
 
 [Postprocessors]
-  [./flood_count]
+  [flood_count]
     type = FeatureFloodCount
     variable = c
 
@@ -61,7 +61,7 @@
 []
 
 [VectorPostprocessors]
-  [./features]
+  [features]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count
 
@@ -79,7 +79,7 @@
 []
 
 [AuxKernels]
-  [./unique_regions]
+  [unique_regions]
     type = FeatureFloodCountAux
     variable = unique_regions
     flood_counter = flood_count

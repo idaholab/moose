@@ -7,24 +7,24 @@
 []
 
 [Functions]
-  [./a_fn]
+  [a_fn]
     type = ParsedFunction
     expression = t
   [../]
 []
 
 [AuxVariables]
-  [./v]
+  [v]
   [../]
 
-  [./a]
+  [a]
     family = SCALAR
     order = FIRST
   [../]
 []
 
 [AuxScalarKernels]
-  [./a_sak]
+  [a_sak]
     type = FunctionScalarAux
     variable = a
     function = a_fn
@@ -32,7 +32,7 @@
 []
 
 [AuxKernels]
-  [./ak_v]
+  [ak_v]
     type = CoupledScalarAux
     variable = v
     coupled = a
@@ -41,12 +41,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]

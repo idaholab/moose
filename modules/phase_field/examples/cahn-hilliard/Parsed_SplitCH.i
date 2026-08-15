@@ -13,9 +13,9 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./c]
+  [PhaseField]
+    [Conserved]
+      [c]
         free_energy = fbulk
         mobility = M
         kappa = kappa_c
@@ -26,14 +26,14 @@
 []
 
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [ICs]
-  [./cIC]
+  [cIC]
     type = RandomIC
     variable = c
     min = -0.1
@@ -42,7 +42,7 @@
 []
 
 [AuxKernels]
-  [./local_energy]
+  [local_energy]
     type = TotalFreeEnergy
     variable = local_energy
     f_name = fbulk
@@ -53,20 +53,20 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 0.5'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = fbulk
     coupled_variables = c
@@ -79,19 +79,19 @@
 []
 
 [Postprocessors]
-  [./top]
+  [top]
     type = SideIntegralVariablePostprocessor
     variable = c
     boundary = top
   [../]
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
   [../]
 []
 
 [Preconditioning]
-  [./cw_coupling]
+  [cw_coupling]
     type = SMP
     full = true
   [../]

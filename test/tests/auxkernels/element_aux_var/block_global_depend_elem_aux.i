@@ -3,26 +3,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./coupled_left]
+  [coupled_left]
     order = CONSTANT
     family = MONOMIAL
     block = 1
   [../]
 
-  [./coupled_right]
+  [coupled_right]
     order = CONSTANT
     family = MONOMIAL
     block = 2
   [../]
 
-  [./two]
+  [two]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 0
@@ -30,12 +30,12 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     block = 1
@@ -44,7 +44,7 @@
 []
 
 [AuxKernels]
-  [./coupled_left]
+  [coupled_left]
     variable = coupled_left
     type = CoupledAux
     value = 8
@@ -52,7 +52,7 @@
     coupled = two
   [../]
 
-  [./coupled_right]
+  [coupled_right]
     variable = coupled_right
     type = CoupledAux
     value = 8
@@ -60,7 +60,7 @@
     coupled = two
   [../]
 
-  [./two]
+  [two]
     type = ConstantAux
     variable = two
     value = 2
@@ -70,14 +70,14 @@
 [BCs]
   active = 'right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2

@@ -7,21 +7,21 @@
 []
 
 [Variables]
-  [./phi]
+  [phi]
   [../]
 []
 
 [AuxVariables]
-  [./phi_0]
+  [phi_0]
     family = MONOMIAL
     order = FIRST
   [../]
-  [./phi_exact]
+  [phi_exact]
   [../]
 []
 
 [AuxKernels]
-  [./phi_exact]
+  [phi_exact]
     type = FunctionAux
     function = phi_exact
     variable = phi_exact
@@ -29,11 +29,11 @@
 []
 
 [Functions]
-  [./phi_initial]
+  [phi_initial]
     type = ParsedFunction
     expression = '1-x'
   [../]
-  [./phi_exact]
+  [phi_exact]
     type = ParsedFunction
     symbol_names = epsilon
     symbol_values = 0.05
@@ -42,12 +42,12 @@
 []
 
 [ICs]
-  [./phi_ic]
+  [phi_ic]
     type = FunctionIC
     function = phi_initial
     variable = phi
   [../]
-  [./phi_0_ic]
+  [phi_0_ic]
     type = FunctionIC
     function = phi_initial
     variable = phi_0
@@ -55,12 +55,12 @@
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = phi
   [../]
 
-  [./reinit]
+  [reinit]
     type = LevelSetOlssonReinitialization
     variable = phi
     phi_0 = phi_0
@@ -69,26 +69,26 @@
 []
 
 [UserObjects]
-  [./arnold]
+  [arnold]
     type = LevelSetOlssonTerminator
     tol = 0.1
   [../]
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = phi
     function = phi_exact
     execute_on = 'initial timestep_end'
   [../]
-  [./ndofs]
+  [ndofs]
     type = NumDOFs
   [../]
 []
 
 [VectorPostprocessors]
-  [./line]
+  [line]
     type = LineValueSampler
     start_point = '0 0.5 0'
     end_point =  '1 0.5 0'
@@ -115,7 +115,7 @@
 
 [Outputs]
   exodus = true
-  [./out]
+  [out]
     type = CSV
     time_data = true
     file_base = output/olsson_1d_out

@@ -11,45 +11,45 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     variable = c
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     boundary = right
     variable = c
     value = 1
   [../]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = y
     [../]
   [../]
 []
 
 [Kernels]
-  [./c]
+  [c]
     type = Diffusion
     variable = c
   [../]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [Materials]
-  [./nucleation]
+  [nucleation]
     type = DiscreteNucleation
     op_names  = c
     op_values = 1
@@ -59,13 +59,13 @@
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     type = DiscreteNucleationInserter
     hold_time = 1
     probability = 0.01
     radius = 3.27
   [../]
-  [./map]
+  [map]
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
@@ -73,8 +73,8 @@
 []
 
 [Adaptivity]
-  [./Markers]
-    [./nuc]
+  [Markers]
+    [nuc]
       type = DiscreteNucleationMarker
       map = map
     [../]

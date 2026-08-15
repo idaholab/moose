@@ -6,7 +6,7 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
@@ -15,23 +15,23 @@
 []
 
 [Variables]
-  [./scalar_strain_zz]
+  [scalar_strain_zz]
     order = FIRST
     family = SCALAR
   [../]
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
-  [./saved_x]
+  [saved_x]
   [../]
-  [./saved_y]
+  [saved_y]
   [../]
 []
 
 [Postprocessors]
-  [./react_z]
+  [react_z]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
@@ -40,7 +40,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
@@ -53,7 +53,7 @@
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
@@ -62,20 +62,20 @@
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     expression = '(1-x)*t'
   [../]
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     boundary = 0
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [bottomy]
     type = DirichletBC
     boundary = 0
     variable = disp_y
@@ -84,25 +84,25 @@
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
   [../]
-  [./thermal_strain]
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     eigenstrain_name = eigenstrain
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

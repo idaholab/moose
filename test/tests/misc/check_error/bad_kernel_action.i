@@ -6,7 +6,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
@@ -14,20 +14,20 @@
 # when it should actually call addKernel() to test that we can detect when
 # people call the wrong FEProblem methods in their Actions.
 [BadKernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

@@ -8,21 +8,21 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = '1 2'
   [../]
-  [./v]
+  [v]
     block = 2
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = BlkResTestDiffusion
     variable = u
     block = '1 2'
   [../]
-  [./v_diff]
+  [v_diff]
     type = Diffusion
     variable = v
     block = 2
@@ -30,13 +30,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -45,13 +45,13 @@
 []
 
 [Materials]
-  [./mat0]
+  [mat0]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'a b'
     prop_values = '1 2'
   [../]
-  [./mat1]
+  [mat1]
     type = GenericConstantMaterial
     block = 2
     prop_names = a
@@ -60,7 +60,7 @@
 []
 
 [Postprocessors]
-  [./off_block]
+  [off_block]
     type = NodalVariableValue
     variable = v
     nodeid = 0

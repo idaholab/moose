@@ -14,7 +14,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -26,20 +26,20 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
 []
 
 [DGKernels]
-  [./dg_diff]
+  [dg_diff]
     type = DGDiffusion
     variable = u
     epsilon = -1
@@ -48,14 +48,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = MONOMIAL
   [../]
 []
 
 [BCs]
-  [./source]
+  [source]
     type = DGFunctionDiffusionDirichletBC
     variable = u
     boundary = 'right'
@@ -63,7 +63,7 @@
     epsilon = -1
     sigma = 6
   [../]
-  [./vacuum]
+  [vacuum]
     boundary = 'top'
     type = VacuumBC
     variable = u
@@ -71,14 +71,14 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ConstantFunction
     value = 1
   [../]
 []
 
 [ICs]
-  [./u]
+  [u]
     type = ConstantIC
     value = 1
     variable = u

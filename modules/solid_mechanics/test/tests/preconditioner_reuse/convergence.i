@@ -157,7 +157,7 @@
 
 [Outputs]
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
     file_base = base_case
   [../]

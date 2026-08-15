@@ -6,37 +6,37 @@
 []
 
 [Variables]
-  [./a]
+  [a]
   [../]
-  [./b]
+  [b]
   [../]
-  [./c]
+  [c]
   [../]
 []
 
 [AuxVariables]
-  [./gamma_a]
+  [gamma_a]
   [../]
-  [./gamma_b]
+  [gamma_b]
   [../]
-  [./gamma_c]
+  [gamma_c]
   [../]
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
   [../]
-  [./b_ie]
+  [b_ie]
     type = PrimaryTimeDerivative
     variable = b
   [../]
-  [./c_ie]
+  [c_ie]
     type = PrimaryTimeDerivative
     variable = c
   [../]
-  [./aeq]
+  [aeq]
     type = CoupledBEEquilibriumSub
     variable = a
     log_k = 1
@@ -49,7 +49,7 @@
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.2

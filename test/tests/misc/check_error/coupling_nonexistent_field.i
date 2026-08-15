@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./coupled]
+  [coupled]
     type = CoupledForce
     variable = u
     # 'a' does not exist -> error

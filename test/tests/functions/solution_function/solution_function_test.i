@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -8,10 +8,10 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = initial_cond_func
     [../]
@@ -19,10 +19,10 @@
 []
 
 [AuxVariables]
-  [./u_aux]
+  [u_aux]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = initial_cond_func
     [../]
@@ -30,27 +30,27 @@
 []
 
 [Functions]
-  [./initial_cond_func]
+  [initial_cond_func]
     type = SolutionFunction
     solution = ex_soln
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
@@ -59,7 +59,7 @@
 []
 
 [UserObjects]
-  [./ex_soln]
+  [ex_soln]
     type = SolutionUserObject
     system_variables = u
     mesh = build_out_0001_mesh.xda

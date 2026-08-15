@@ -5,12 +5,12 @@
 [Functions]
   active = 'tr_x tr_y'
 
-  [./tr_x]
+  [tr_x]
     type = ParsedFunction
     expression = -x
   [../]
 
-  [./tr_y]
+  [tr_y]
     type = ParsedFunction
     expression = y
   [../]
@@ -20,12 +20,12 @@
   active = 'u temp'
 #  active = 'temp'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -35,12 +35,12 @@
   active = 'diff forcing dot dot_T diff_T'
 #  active = 'dot_T diff_T'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = GaussContForcing
     variable = u
     x_center = -0.5
@@ -49,17 +49,17 @@
     y_spread = 0.2
   [../]
 
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./dot_T]
+  [dot_T]
     type = TimeDerivative
     variable = temp
   [../]
 
-  [./diff_T]
+  [diff_T]
     type = Diffusion
     variable = temp
   [../]
@@ -68,8 +68,8 @@
 [BCs]
   #active = ' '
 
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       primary = 1
       secondary = 2
       transform_func = 'tr_x tr_y'
@@ -78,14 +78,14 @@
     [../]
   [../]
 
-  [./left_temp]
+  [left_temp]
     type = DirichletBC
     value = 0
     boundary = 1
     variable = temp
   [../]
 
-  [./right_temp]
+  [right_temp]
     type = DirichletBC
     value = 1
     boundary = 2

@@ -5,21 +5,21 @@
     nx = 10
     xmax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
   [../]
-  [./interface]
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
   [../]
-  [./interface_again]
+  [interface_again]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface
     primary_block = '1'
@@ -29,20 +29,20 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff0]
+  [diff0]
     type = CoeffParamDiffusion
     variable = u
     D = 4
     block = 0
   [../]
-  [./diff1]
+  [diff1]
     type = CoeffParamDiffusion
     variable = u
     D = 2
@@ -51,7 +51,7 @@
 []
 
 [InterfaceKernels]
-  [./interface]
+  [interface]
     type = InterfaceDiffusion
     variable = u
     neighbor_var = u
@@ -62,13 +62,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -77,7 +77,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

@@ -19,14 +19,14 @@ num_steps=10
 []
 
 [Bounds]
-  [./u_upper_bounds]
+  [u_upper_bounds]
     type = ConstantBounds
     variable = bounds
     bounded_variable = u
     bound_type = upper
     bound_value = ${l}
   [../]
-  [./u_lower_bounds]
+  [u_lower_bounds]
     type = ConstantBounds
     variable = bounds
     bounded_variable = u

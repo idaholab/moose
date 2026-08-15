@@ -146,7 +146,7 @@
     coupled_variables = phase2
     expression = '0.5*tanh(20*(phase2-0.5))+0.5'
   []
-  [./C]
+  [C]
     type = CompositeElasticityTensor
     coupled_variables = 'phase1 phase2'
     tensors = 'C1   C2'
@@ -165,7 +165,7 @@
     switching_functions = 'h1  h1'
     temperature = temp
   []
-  [./plas]
+  [plas]
     type = IsotropicPlasticityStressUpdate
     hardening_constant = 1
     yield_stress = 1e30
@@ -173,7 +173,7 @@
 []
 
 [VectorPostprocessors]
-  [./soln]
+  [soln]
     type = LineValueSampler
     warn_discontinuous_face_values = false
     sort_by = x
@@ -208,7 +208,7 @@
 
 [Outputs]
   exodus = false
-  [./tests]
+  [tests]
     type = CSV
     execute_on = final
   [../]

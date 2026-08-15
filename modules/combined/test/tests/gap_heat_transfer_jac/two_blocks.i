@@ -13,26 +13,26 @@
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = FileMeshGenerator
     file = two_blocks.e
   []
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = ADHeatConduction
     variable = temp
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     eigenstrain_names = thermal_expansion
@@ -42,7 +42,7 @@
 []
 
 [Contact]
-  [./mechanical]
+  [mechanical]
     primary = 4
     secondary = 5
     formulation = kinematic
@@ -52,7 +52,7 @@
 []
 
 [ThermalContact]
-  [./thermal]
+  [thermal]
     type = GapHeatTransfer
     variable = temp
     primary = 4
@@ -65,31 +65,31 @@
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./left_y]
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 7
     value = 0
   [../]
-  [./top_temp]
+  [top_temp]
     type = DirichletBC
     variable = temp
     boundary = 7
     value = 1000.0
   [../]
-  [./bot_temp]
+  [bot_temp]
     type = DirichletBC
     variable = temp
     boundary = 6
@@ -98,34 +98,34 @@
 []
 
 [Materials]
-  [./density]
+  [density]
     type = Density
     density = 100
   [../]
-  [./temp]
+  [temp]
     type = ADHeatConductionMaterial
     thermal_conductivity = 1e5
     specific_heat = 620.0
   [../]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
   [../]
-  [./thermal_eigenstrain]
+  [thermal_eigenstrain]
     type = ADComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 500
     temperature = temp
     eigenstrain_name = thermal_expansion
   [../]
-  [./stress]
+  [stress]
     type = ADComputeFiniteStrainElasticStress
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

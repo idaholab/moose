@@ -14,12 +14,12 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
   [../]
-  [./b]
+  [b]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
@@ -27,12 +27,12 @@
 []
 
 [AuxVariables]
-  [./mineral]
+  [mineral]
   [../]
 []
 
 [AuxKernels]
-  [./mineral_conc]
+  [mineral_conc]
     type = KineticDisPreConcAux
     variable = mineral
     e_act = 1.5e4
@@ -48,29 +48,29 @@
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
   [../]
-  [./a_pd]
+  [a_pd]
     type = PrimaryDiffusion
     variable = a
   [../]
-  [./b_ie]
+  [b_ie]
     type = PrimaryTimeDerivative
     variable = b
   [../]
-  [./b_pd]
+  [b_pd]
     type = PrimaryDiffusion
     variable = b
   [../]
-  [./a_r]
+  [a_r]
     type = CoupledBEKinetic
     variable = a
     v = mineral
     weight = 1
   [../]
-  [./b_r]
+  [b_r]
     type = CoupledBEKinetic
     variable = b
     v = mineral
@@ -79,28 +79,28 @@
 []
 
 [BCs]
-  [./a_left]
+  [a_left]
     type = DirichletBC
     variable = a
     preset = false
     boundary = left
     value = 1.0e-2
   [../]
-  [./a_right]
+  [a_right]
     type = DirichletBC
     variable = a
     preset = false
     boundary = right
     value = 0
   [../]
-  [./b_left]
+  [b_left]
     type = DirichletBC
     variable = b
     preset = false
     boundary = left
     value = 0
   [../]
-  [./b_right]
+  [b_right]
     type = DirichletBC
     variable = b
     preset = false
@@ -110,7 +110,7 @@
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '5e-4 4e-3 0.4'
@@ -125,7 +125,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

@@ -6,36 +6,36 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [AuxVariables]
-  [./w]
+  [w]
   [../]
 []
 
 [Kernels]
-  [./diffu]
+  [diffu]
     type = Diffusion
     variable = u
   [../]
-  [./diffv]
+  [diffv]
     type = Diffusion
     variable = v
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

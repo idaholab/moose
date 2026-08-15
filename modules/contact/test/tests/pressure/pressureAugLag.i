@@ -13,7 +13,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     generate_output = 'stress_yy'
@@ -21,7 +21,7 @@
 []
 
 [Contact]
-  [./m20_s10]
+  [m20_s10]
     primary = 20
     secondary = 10
     penalty = 1e7
@@ -32,35 +32,35 @@
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 3
     value = 0.0
   [../]
 
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
 
-  [./z]
+  [z]
     type = DirichletBC
     variable = disp_z
     boundary = 5
     value = 0.0
   [../]
 
-  [./Pressure]
-    [./press]
+  [Pressure]
+    [press]
       boundary = 7
       factor = 1e3
     [../]
   [../]
 
-  [./down]
+  [down]
     type = DirichletBC
     variable = disp_y
     boundary = 8
@@ -69,20 +69,20 @@
 []
 
 [Materials]
-  [./stiffStuff1]
+  [stiffStuff1]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1.0e6
     poissons_ratio = 0.0
   [../]
-  [./stiffStuff1_stress]
+  [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
 []
 
 [Dampers]
-  [./limitX]
+  [limitX]
     type = MaxIncrement
     max_increment = 1e-5
     variable = disp_x
@@ -90,7 +90,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

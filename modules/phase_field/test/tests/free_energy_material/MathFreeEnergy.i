@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = SmoothCircleIC
     variable = c
     x1 = 25.0
@@ -29,17 +29,17 @@
 []
 
 [Kernels]
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = c
   [../]
-  [./CHSolid]
+  [CHSolid]
     type = CahnHilliard
     variable = c
     mob_name = M
     f_name = F
   [../]
-  [./CHInterface]
+  [CHInterface]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
@@ -48,20 +48,20 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 1.0'
   [../]
-  [./free_energy]
+  [free_energy]
     type = MathFreeEnergy
     property_name = F
     c = c
@@ -88,7 +88,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./oversample]
+  [oversample]
     type = Exodus
     refinements = 2
   [../]

@@ -1,5 +1,5 @@
 [Mesh]
-  [./generated]
+  [generated]
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1'
@@ -13,19 +13,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
     block = 1
   [../]
 
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     block = 2
   [../]
 
-  [./w]
+  [w]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -38,17 +38,17 @@
 []
 
 [VectorPostprocessors]
-  [./face_info_1]
+  [face_info_1]
     type = TestFaceInfo
     vars = 'u'
   [../]
 
-  [./face_info_2]
+  [face_info_2]
     type = TestFaceInfo
     vars = 'v'
   [../]
 
-  [./face_info_3]
+  [face_info_3]
     type = TestFaceInfo
     vars = 'w'
   [../]

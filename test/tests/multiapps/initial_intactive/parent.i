@@ -6,29 +6,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -52,7 +52,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     positions = '0 0 0'
     type = TransientMultiApp
     input_files = 'sub.i'
@@ -63,7 +63,7 @@
 []
 
 [Controls]
-  [./multiapp_enable]
+  [multiapp_enable]
     type = TimePeriod
     disable_objects = 'MultiApps::sub'
     start_time = 0

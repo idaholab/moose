@@ -18,10 +18,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0
       y1 = 0
@@ -31,26 +31,26 @@
       int_width = 30.0
     [../]
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = ADSplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
   [../]
-  [./w_res]
+  [w_res]
     type = ADSplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = ADCoupledTimeDerivative
     variable = w
     v = c
@@ -58,13 +58,13 @@
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = ADGenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '100 40'
   [../]
 
-  [./free_energy]
+  [free_energy]
     type = ADMathFreeEnergy
     f_name = F
     c = 'c'
@@ -73,7 +73,7 @@
 
 [Preconditioning]
   # active = ' '
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

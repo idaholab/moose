@@ -9,20 +9,20 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = SECOND
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
   [../]
 []
 
 [DiracKernels]
-  [./foo]
+  [foo]
     variable = diffused
     type = ConstantPointSource
     value = 1
@@ -31,7 +31,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = diffused
     boundary = 'bottom left right top'
@@ -47,12 +47,12 @@
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true
-  [./refine_2]
+  [refine_2]
     type = Exodus
     file_base = oversample_2
     refinements = 2
   [../]
-  [./refine_4]
+  [refine_4]
     type = Exodus
     file_base = oversample_4
     refinements = 4

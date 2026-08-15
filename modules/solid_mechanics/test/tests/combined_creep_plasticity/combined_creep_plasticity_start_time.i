@@ -69,7 +69,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     incremental = true
     add_variables = true
@@ -78,13 +78,13 @@
 []
 
 [Functions]
-  [./top_pull]
+  [top_pull]
     type = PiecewiseLinear
     x = '  10   11   11.5'
     y = '-20 -40   -20'
   [../]
 
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     x = '10        10.5    11.0    11.5'
     y = '0.015  0.015  0.005  0.005'
@@ -92,26 +92,26 @@
 []
 
 [BCs]
-  [./u_top_pull]
+  [u_top_pull]
     type = Pressure
     variable = disp_y
     boundary = top
     factor = 1
     function = top_pull
   [../]
-  [./u_bottom_fix]
+  [u_bottom_fix]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./u_yz_fix]
+  [u_yz_fix]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./u_xy_fix]
+  [u_xy_fix]
     type = DirichletBC
     variable = disp_z
     boundary = back
@@ -120,13 +120,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     youngs_modulus = 1e3
     poissons_ratio = 0.3
   [../]
-  [./creep_plas]
+  [creep_plas]
     type = ComputeMultipleInelasticStress
     block = 0
     tangent_operator = elastic
@@ -135,7 +135,7 @@
     absolute_tolerance = 1e-05
     combined_inelastic_strain_weights = '0.0 1.0'
   [../]
-  [./creep]
+  [creep]
     type = PowerLawCreepStressUpdate
     block = 0
     coefficient = 0.5e-7
@@ -144,7 +144,7 @@
     activation_energy = 0
     start_time = 10
   [../]
-  [./plas]
+  [plas]
     type = IsotropicPlasticityStressUpdate
     block = 0
     hardening_constant = 100
@@ -172,7 +172,7 @@
   start_time = 10.0
   end_time = 11.5
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
   [../]

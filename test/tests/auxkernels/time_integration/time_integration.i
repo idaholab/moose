@@ -23,7 +23,7 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     x = '0.01 0.1'
     y = '0.005 0.05'
@@ -31,7 +31,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 0.0
     family = LAGRANGE
     order = SECOND
@@ -39,15 +39,15 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
      type = Diffusion
      variable = u
   [../]
-  [./timederivative]
+  [timederivative]
      type = TimeDerivative
      variable = u
   [../]
-  [./sourceterm]
+  [sourceterm]
      type = BodyForce
      variable = u
      function = Source
@@ -55,28 +55,28 @@
 []
 
 [AuxVariables]
-  [./v_midpoint]
+  [v_midpoint]
   [../]
-  [./v_trapazoid]
+  [v_trapazoid]
   [../]
-  [./v_simpson]
+  [v_simpson]
   [../]
 []
 
 [AuxKernels]
-  [./MidpointTimeIntegrator]
+  [MidpointTimeIntegrator]
     type = VariableTimeIntegrationAux
     variable_to_integrate = u
     variable = v_midpoint
     order = 1
   [../]
-  [./TrapazoidalTimeIntegrator]
+  [TrapazoidalTimeIntegrator]
     type = VariableTimeIntegrationAux
     variable_to_integrate = u
     variable = v_trapazoid
     order = 2
   [../]
-  [./SimpsonsTimeIntegrator]
+  [SimpsonsTimeIntegrator]
     type = VariableTimeIntegrationAux
     variable_to_integrate = u
     variable = v_simpson
@@ -85,25 +85,25 @@
 []
 
 [BCs]
- [./RightBC]
+ [RightBC]
     type = FunctionDirichletBC
     variable = u
     function = RightBC
     boundary = 'right'
  [../]
- [./LeftBC]
+ [LeftBC]
     type = FunctionDirichletBC
     variable = u
     function = LeftBC
     boundary = 'left'
  [../]
- [./TopBC]
+ [TopBC]
     type = FunctionDirichletBC
     variable = u
     function = TopBC
     boundary = 'top'
  [../]
- [./BottomBC]
+ [BottomBC]
     type = FunctionDirichletBC
     variable = u
     function = BottomBC
@@ -112,33 +112,33 @@
 []
 
 [Functions]
- [./Soln]
+ [Soln]
     type = ParsedFunction
     expression = 't*(x*x+y*y)'
  [../]
- [./Source]
+ [Source]
     type = ParsedFunction
     expression = '(x*x + y*y) - 4*t'
  [../]
- [./TopBC]
+ [TopBC]
     type = ParsedFunction
     expression = 't*(x*x+1)'
  [../]
- [./BottomBC]
+ [BottomBC]
     type = ParsedFunction
     expression = 't*x*x'
  [../]
- [./RightBC]
+ [RightBC]
    type = ParsedFunction
    expression = 't*(y*y+1)'
  [../]
- [./LeftBC]
+ [LeftBC]
     type = ParsedFunction
     expression = 't*y*y'
   [../]
 []
 [Postprocessors]
-  [./l2_error]
+  [l2_error]
     type = NodalL2Error
     variable = u
     function = Soln
@@ -151,7 +151,7 @@
   end_time = 0.1
 #  dt = 0.1
 #  num_steps = 10
-  [./TimeStepper]
+  [TimeStepper]
      type = FunctionDT
      function = dts
   [../]

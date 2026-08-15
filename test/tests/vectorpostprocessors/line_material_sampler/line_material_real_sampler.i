@@ -28,21 +28,21 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./mat]
+  [mat]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = matp
@@ -50,7 +50,7 @@
 []
 
 [AuxKernels]
-  [./mat]
+  [mat]
     type = MaterialRealAux
     variable = mat
     property = matp
@@ -59,7 +59,7 @@
 []
 
 [VectorPostprocessors]
-  [./mat]
+  [mat]
     type = LineMaterialRealSampler
     start = '0.125 0.375 0.0'
     end   = '0.875 0.375 0.0'
@@ -69,14 +69,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = MTBC
     variable = u
     boundary = 1
@@ -86,7 +86,7 @@
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = MTMaterial
     block = '0 1'
   [../]
@@ -102,7 +102,7 @@
   execute_on = 'timestep_end'
   file_base = out
   csv = true
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]

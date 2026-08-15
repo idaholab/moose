@@ -6,14 +6,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./aux]
+  [aux]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
@@ -21,13 +21,13 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
@@ -35,14 +35,14 @@
 
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -53,7 +53,7 @@
 [Materials]
   # This material couples to an aux variable and
   # uses it in stateful property initialization
-  [./stateful_mat]
+  [stateful_mat]
     type = StatefulTest
     coupled = aux
     prop_names = thermal_conductivity

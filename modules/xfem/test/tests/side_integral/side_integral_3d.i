@@ -24,7 +24,7 @@
 []
 
 [UserObjects]
-  [./square_cut_uo]
+  [square_cut_uo]
     type = RectangleCutUserObject
     cut_data = ' -1.0 -0.1 -1.0
                   2.0  1.1 -1.0
@@ -34,12 +34,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -47,14 +47,14 @@
 
 [BCs]
 # Define boundary conditions
-  [./front]
+  [front]
     type = DirichletBC
     variable = u
     boundary = front
     value = 3
   [../]
 
-  [./back]
+  [back]
     type = DirichletBC
     variable = u
     boundary = back
@@ -80,12 +80,12 @@
 []
 
 [Postprocessors]
-  [./front]
+  [front]
     type = SideIntegralVariablePostprocessor
     variable = u
     boundary = front
   [../]
-  [./back]
+  [back]
     type = SideIntegralVariablePostprocessor
     variable = u
     boundary = back
@@ -96,7 +96,7 @@
   time_step_interval = 1
   execute_on = timestep_end
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

@@ -27,7 +27,7 @@
 
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true
@@ -37,19 +37,19 @@
 
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '-2.5E-6*x'
   [../]
-  [./y]
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0E-6*y'
   [../]
-  [./z]
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
@@ -58,90 +58,90 @@
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_xy]
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_xz]
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yz]
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f]
+  [f]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [iter]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
   [../]
-  [./stress_xy]
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
   [../]
-  [./stress_xz]
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
   [../]
-  [./stress_yz]
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
   [../]
-  [./f]
+  [f]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_yield_function
     variable = f
   [../]
-  [./iter]
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
@@ -149,42 +149,42 @@
 []
 
 [Postprocessors]
-  [./s_xx]
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
   [../]
-  [./s_xy]
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
   [../]
-  [./s_xz]
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
   [../]
-  [./s_yy]
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
   [../]
-  [./s_yz]
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
   [../]
-  [./s_zz]
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
   [../]
-  [./f]
+  [f]
     type = PointValue
     point = '0 0 0'
     variable = f
   [../]
-  [./iter]
+  [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
@@ -192,11 +192,11 @@
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = SolidMechanicsHardeningConstant
     value = 2
   [../]
-  [./j2]
+  [j2]
     type = SolidMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3
@@ -205,13 +205,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
   [../]
-  [./mc]
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-9
@@ -231,7 +231,7 @@
 [Outputs]
   file_base = hard1
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
     [../]
 []

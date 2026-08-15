@@ -12,7 +12,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -21,7 +21,7 @@
 # Nodal Auxvariable that tries to access a material property
 [AuxVariables]
 active = 'mat'
-  [./mat]
+  [mat]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -30,7 +30,7 @@ active = 'mat'
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = matp
@@ -39,7 +39,7 @@ active = 'mat'
 
 [AuxKernels]
 active = 'mat'
-  [./mat]
+  [mat]
     type = MaterialRealAux
     variable = mat
     property = matp
@@ -49,14 +49,14 @@ active = 'mat'
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = MTBC
     variable = u
     boundary = 1
@@ -68,7 +68,7 @@ active = 'mat'
 [Materials]
   active = mat
 
-  [./mat]
+  [mat]
     type = MTMaterial
     block = 0
   [../]

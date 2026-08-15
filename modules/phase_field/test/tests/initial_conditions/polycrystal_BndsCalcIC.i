@@ -20,12 +20,12 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     rand_seed = 105
     grain_num = 3
@@ -33,31 +33,31 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
     [../]
   [../]
-  [./bnds]
+  [bnds]
     type = BndsCalcIC # IC is created for activating the initial adaptivity
     variable = bnds
   [../]
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
@@ -65,15 +65,15 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 6 # nm
@@ -84,7 +84,7 @@
 []
 
 [Postprocessors]
-  [./ngrains]
+  [ngrains]
     type = FeatureFloodCount
     variable = "gr0 gr1 gr2"
     threshold = 0.7
@@ -92,7 +92,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -119,16 +119,16 @@
   initial_steps = 1
   max_h_level = 1
   marker = err_bnds
- [./Markers]
-    [./err_bnds]
+ [Markers]
+    [err_bnds]
       type = ErrorFractionMarker
       coarsen = 0.3
       refine = 0.9
       indicator = ind_bnds
     [../]
   [../]
-  [./Indicators]
-     [./ind_bnds]
+  [Indicators]
+     [ind_bnds]
        type = GradientJumpIndicator
        variable = bnds
     [../]

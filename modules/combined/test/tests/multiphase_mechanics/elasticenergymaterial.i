@@ -15,12 +15,12 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 125.0
       y1 = 125.0
@@ -33,13 +33,13 @@
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
   [../]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     variable = disp_x
@@ -48,9 +48,9 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
   [../]
-  [./dummy]
+  [dummy]
     type = MatDiffusion
     variable = c
     diffusivity = 0
@@ -58,19 +58,19 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '3 1 1 3 1 3 1 1 1 '
   [../]
-  [./strain]
+  [strain]
     type = ComputeSmallStrain
     eigenstrain_names = eigenstrain
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
-  [./prefactor]
+  [prefactor]
     type = DerivativeParsedMaterial
     coupled_variables = c
     property_name = prefactor
@@ -78,7 +78,7 @@
     constant_expressions = '0.05     0'
     expression = '(c - c0) * epsilon0'
   [../]
-  [./eigenstrain]
+  [eigenstrain]
     type = ComputeVariableEigenstrain
     eigen_base = '1'
     args = c
@@ -86,7 +86,7 @@
     eigenstrain_name = eigenstrain
   [../]
 
-  [./elasticenergy]
+  [elasticenergy]
     type = ElasticEnergyMaterial
     coupled_variables = 'c'
     outputs = exodus

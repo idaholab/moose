@@ -9,13 +9,13 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
   [../]
 []
 
 [BCs]
-  [./obstruction]
+  [obstruction]
     type = StickyBC
     variable = disp_y
     boundary = bottom
@@ -25,10 +25,10 @@
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.2

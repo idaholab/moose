@@ -10,14 +10,14 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     ymax = 3
     elem_type = QUAD4
   []
-  [./subdomain_id]
+  [subdomain_id]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '2 1 0'
     block_id = 1
     [../]
-  [./interface]
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain_id
     primary_block = '0'
@@ -27,19 +27,19 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
 []
 
 [Functions]
-  [./fn_exact]
+  [fn_exact]
     type = ParsedFunction
     expression = 'x*x+y*y'
   [../]
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression = -4
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
     fv = true
@@ -47,13 +47,13 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 1
   [../]
 
-  [./ffn]
+  [ffn]
     type = FVBodyForce
     variable = u
     function = ffn
@@ -61,7 +61,7 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
 []
 
 [FVBCs]
-  [./all]
+  [all]
     type = FVFunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -70,13 +70,13 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
 []
 
 [Materials]
-  [./stateful1]
+  [stateful1]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'diffusivity'
     prop_values = 10
   [../]
-  [./stateful2]
+  [stateful2]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'diffusivity'
@@ -85,12 +85,12 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
 []
 
 [AuxKernels]
-  [./diffusivity_1]
+  [diffusivity_1]
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_1
   []
-  [./diffusivity_2]
+  [diffusivity_2]
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_2
@@ -98,18 +98,18 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
 []
 
 [AuxVariables]
-  [./diffusivity_1]
+  [diffusivity_1]
     family = MONOMIAL
     order = CONSTANT
   []
-  [./diffusivity_2]
+  [diffusivity_2]
     family = MONOMIAL
     order = CONSTANT
   []
 []
 
 [Postprocessors]
-  [./diffusivity_average]
+  [diffusivity_average]
     type = ${postprocessor_type}
     interface_value_type = average
     variable = diffusivity_1
@@ -117,7 +117,7 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_jump_primary_secondary]
+  [diffusivity_jump_primary_secondary]
     type = ${postprocessor_type}
     interface_value_type = jump_primary_minus_secondary
     variable = diffusivity_1
@@ -125,7 +125,7 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_jump_secondary_primary]
+  [diffusivity_jump_secondary_primary]
     type = ${postprocessor_type}
     interface_value_type = jump_secondary_minus_primary
     variable = diffusivity_1
@@ -133,7 +133,7 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_jump_abs]
+  [diffusivity_jump_abs]
     type = ${postprocessor_type}
     interface_value_type = jump_abs
     variable = diffusivity_1
@@ -141,7 +141,7 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_primary]
+  [diffusivity_primary]
     type = ${postprocessor_type}
     interface_value_type = primary
     variable = diffusivity_1
@@ -149,7 +149,7 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_secondary]
+  [diffusivity_secondary]
     type = ${postprocessor_type}
     interface_value_type = secondary
     variable = diffusivity_1
@@ -157,7 +157,7 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_single_variable]
+  [diffusivity_single_variable]
     type = ${postprocessor_type}
     interface_value_type = primary
     variable = diffusivity_1

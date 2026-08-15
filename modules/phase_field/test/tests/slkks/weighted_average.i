@@ -15,13 +15,13 @@
 
 [Variables]
   [c]
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = x*0.5
     []
    []
    [eta]
-     [./InitialCondition]
+     [InitialCondition]
        type = FunctionIC
        function = x
      []

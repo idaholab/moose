@@ -13,13 +13,13 @@
     ymin = -0.5
     ymax = 0.5
   []
-  [./cnode]
+  [cnode]
     input = gen
     type = ExtraNodesetGenerator
     coord = '0.0 0.0'
     new_boundary = 100
   [../]
-  [./anode]
+  [anode]
     input = cnode
     type = ExtraNodesetGenerator
     coord = '0.0 0.5'
@@ -63,14 +63,14 @@
 
 # AuxVars to compute the free energy density for outputting
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./local_free_energy]
+  [local_free_energy]
     type = TotalFreeEnergy
     block = 0
     execute_on = 'initial LINEAR'
@@ -82,64 +82,64 @@
 
 [Variables]
   # Solute concentration variable
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = RandomIC
       min = 0.49
       max = 0.51
     [../]
     block = 0
   [../]
-  [./w]
+  [w]
     block = 0
   [../]
 
   # Mesh displacement
-  [./disp_x]
+  [disp_x]
     block = 0
   [../]
-  [./disp_y]
+  [disp_y]
     block = 0
   [../]
 
   # Lagrange multipliers for gradient component periodicity
-  [./lm_left_right_xx]
+  [lm_left_right_xx]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
   [../]
-  [./lm_left_right_xy]
+  [lm_left_right_xy]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
   [../]
-  [./lm_left_right_yx]
+  [lm_left_right_yx]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
   [../]
-  [./lm_left_right_yy]
+  [lm_left_right_yy]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
   [../]
 
-  [./lm_up_down_xx]
+  [lm_up_down_xx]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
   [../]
-  [./lm_up_down_xy]
+  [lm_up_down_xy]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
   [../]
-  [./lm_up_down_yx]
+  [lm_up_down_yx]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
   [../]
-  [./lm_up_down_yy]
+  [lm_up_down_yy]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
@@ -147,7 +147,7 @@
 []
 
 [Constraints]
-  [./ud_disp_x_grad_x]
+  [ud_disp_x_grad_x]
     type = EqualGradientConstraint
     variable = lm_up_down_xx
     component = 0
@@ -158,7 +158,7 @@
     primary_subdomain = primary_y
     periodic = true
   [../]
-  [./ud_disp_x_grad_y]
+  [ud_disp_x_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_xy
     component = 1
@@ -169,7 +169,7 @@
     primary_subdomain = primary_y
     periodic = true
   [../]
-  [./ud_disp_y_grad_x]
+  [ud_disp_y_grad_x]
     type = EqualGradientConstraint
     variable = lm_up_down_yx
     component = 0
@@ -180,7 +180,7 @@
     primary_subdomain = primary_y
     periodic = true
   [../]
-  [./ud_disp_y_grad_y]
+  [ud_disp_y_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_yy
     component = 1
@@ -192,7 +192,7 @@
     periodic = true
   [../]
 
-  [./lr_disp_x_grad_x]
+  [lr_disp_x_grad_x]
     type = EqualGradientConstraint
     variable = lm_left_right_xx
     component = 0
@@ -203,7 +203,7 @@
     primary_subdomain = primary_x
     periodic = true
   [../]
-  [./lr_disp_x_grad_y]
+  [lr_disp_x_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_xy
     component = 1
@@ -214,7 +214,7 @@
     primary_subdomain = primary_x
     periodic = true
   [../]
-  [./lr_disp_y_grad_x]
+  [lr_disp_y_grad_x]
     type = EqualGradientConstraint
     variable = lm_left_right_yx
     component = 0
@@ -225,7 +225,7 @@
     primary_subdomain = primary_x
     periodic = true
   [../]
-  [./lr_disp_y_grad_y]
+  [lr_disp_y_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_yy
     component = 1
@@ -240,18 +240,18 @@
 
 [Kernels]
   # Set up stress divergence kernels
-  [./TensorMechanics]
+  [TensorMechanics]
     block = 0
   [../]
 
   # Cahn-Hilliard kernels
-  [./c_dot]
+  [c_dot]
     type = CoupledTimeDerivative
     variable = w
     v = c
     block = 0
   [../]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
@@ -259,7 +259,7 @@
     w = w
     block = 0
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
@@ -269,47 +269,47 @@
 
 [Materials]
   # declare a few constants, such as mobilities (L,M) and interface gradient prefactors (kappa*)
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     block = '0 10 11'
     prop_names  = 'M   kappa_c'
     prop_values = '0.2 0.01   '
   [../]
 
-  [./shear1]
+  [shear1]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '0 0 0 0 0 0.5'
     tensor_name = shear1
   [../]
-  [./shear2]
+  [shear2]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '0 0 0 0 0 -0.5'
     tensor_name = shear2
   [../]
-  [./expand3]
+  [expand3]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '1 1 0 0 0 0'
     tensor_name = expand3
   [../]
 
-  [./weight1]
+  [weight1]
     type = DerivativeParsedMaterial
     block = 0
     expression = '0.3*c^2'
     property_name = weight1
     coupled_variables = c
   [../]
-  [./weight2]
+  [weight2]
     type = DerivativeParsedMaterial
     block = 0
     expression = '0.3*(1-c)^2'
     property_name = weight2
     coupled_variables = c
   [../]
-  [./weight3]
+  [weight3]
     type = DerivativeParsedMaterial
     block = 0
     expression = '4*(0.5-c)^2'
@@ -318,20 +318,20 @@
   [../]
 
   # matrix phase
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
   [../]
-  [./strain]
+  [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]
 
-  [./eigenstrain]
+  [eigenstrain]
     type = CompositeEigenstrain
     block = 0
     tensors = 'shear1  shear2  expand3'
@@ -340,13 +340,13 @@
     eigenstrain_name = eigenstrain
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
   [../]
 
   # chemical free energies
-  [./chemical_free_energy]
+  [chemical_free_energy]
     type = DerivativeParsedMaterial
     block = 0
     property_name = Fc
@@ -357,7 +357,7 @@
   [../]
 
   # elastic free energies
-  [./elastic_free_energy]
+  [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
     block = 0
@@ -367,7 +367,7 @@
   [../]
 
   # free energy (chemical + elastic)
-  [./free_energy]
+  [free_energy]
     type = DerivativeSumMaterial
     block = 0
     property_name = F
@@ -377,14 +377,14 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./up_down]
+  [Periodic]
+    [up_down]
       primary = top
       secondary = bottom
       translation = '0 -1 0'
       variable = 'c w'
     [../]
-    [./left_right]
+    [left_right]
       primary = left
       secondary = right
       translation = '1 0 0'
@@ -393,13 +393,13 @@
   [../]
 
   # fix center point location
-  [./centerfix_x]
+  [centerfix_x]
     type = DirichletBC
     boundary = 100
     variable = disp_x
     value = 0
   [../]
-  [./centerfix_y]
+  [centerfix_y]
     type = DirichletBC
     boundary = 100
     variable = disp_y
@@ -407,7 +407,7 @@
   [../]
 
   # fix side point x coordinate to inhibit rotation
-  [./angularfix]
+  [angularfix]
     type = DirichletBC
     boundary = 101
     variable = disp_x
@@ -416,7 +416,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -424,26 +424,26 @@
 
 # We monitor the total free energy and the total solute concentration (should be constant)
 [Postprocessors]
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     block = 0
     execute_on = 'initial TIMESTEP_END'
     variable = local_energy
   [../]
-  [./total_solute]
+  [total_solute]
     type = ElementIntegralVariablePostprocessor
     block = 0
     execute_on = 'initial TIMESTEP_END'
     variable = c
   [../]
-  [./min]
+  [min]
     type = ElementExtremeValue
     block = 0
     execute_on = 'initial TIMESTEP_END'
     value_type = min
     variable = c
   [../]
-  [./max]
+  [max]
     type = ElementExtremeValue
     block = 0
     execute_on = 'initial TIMESTEP_END'
@@ -474,7 +474,7 @@
   start_time = 0.0
   num_steps = 200
 
-  [./TimeStepper]
+  [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.01
   [../]
@@ -484,7 +484,7 @@
   execute_on = 'timestep_end'
   print_linear_residuals = false
   exodus = true
-  [./table]
+  [table]
     type = CSV
     delimiter = ' '
   [../]

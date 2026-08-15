@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -25,28 +25,28 @@
 []
 
 [BCs]
-  [./left_convected]
+  [left_convected]
     type = DirichletBC
     variable = convected
     boundary = 'left'
     value = 0
   [../]
 
-  [./right_convected]
+  [right_convected]
     type = DirichletBC
     variable = convected
     boundary = 'right'
     value = 1
   [../]
 
-  [./left_diffused]
+  [left_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'left'
     value = 0
   [../]
 
-  [./right_diffused]
+  [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'right'

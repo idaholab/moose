@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -8,21 +8,21 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = PenaltyDirichletBC
     penalty = 1e9
     variable = u
@@ -30,7 +30,7 @@
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = PenaltyDirichletBC
     penalty = 1e9
     variable = u

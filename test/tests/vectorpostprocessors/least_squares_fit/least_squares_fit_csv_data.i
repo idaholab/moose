@@ -15,13 +15,13 @@
 []
 
 [VectorPostprocessors]
-  [./csv_data]
+  [csv_data]
     type = CSVReaderVectorPostprocessor
     csv_file = fit_data_0.csv
     header = true
     outputs = none
   [../]
-  [./least_squares_fit_coeffs]
+  [least_squares_fit_coeffs]
     type = LeastSquaresFit
     vectorpostprocessor = csv_data
     x_name = 'id'

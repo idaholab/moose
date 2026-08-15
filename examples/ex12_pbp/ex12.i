@@ -3,12 +3,12 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./forced]
+  [forced]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -16,7 +16,7 @@
 
 # The Preconditioning block
 [Preconditioning]
-  [./PBP]
+  [PBP]
     type = PBP
     solve_order = 'diffused forced'
     preconditioner  = 'LU LU'
@@ -26,18 +26,18 @@
 []
 
 [Kernels]
-  [./diff_diffused]
+  [diff_diffused]
     type = Diffusion
     variable = diffused
   [../]
 
-  [./conv_forced]
+  [conv_forced]
     type = CoupledForce
     variable = forced
     v = diffused
   [../]
 
-  [./diff_forced]
+  [diff_forced]
     type = Diffusion
     variable = forced
   [../]
@@ -47,28 +47,28 @@
   #Note we have active on and neglect the right_forced BC
   active = 'left_diffused right_diffused left_forced'
 
-  [./left_diffused]
+  [left_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'left'
     value = 0
   [../]
 
-  [./right_diffused]
+  [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'right'
     value = 100
   [../]
 
-  [./left_forced]
+  [left_forced]
     type = DirichletBC
     variable = forced
     boundary = 'left'
     value = 0
   [../]
 
-  [./right_forced]
+  [right_forced]
     type = DirichletBC
     variable = forced
     boundary = 'right'

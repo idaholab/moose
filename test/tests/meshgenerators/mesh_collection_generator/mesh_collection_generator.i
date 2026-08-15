@@ -1,5 +1,5 @@
 [Mesh]
-  [./left]
+  [left]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 3
@@ -9,7 +9,7 @@
     ymin = -5
     ymax = 5
   [../]
-  [./right]
+  [right]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 3
@@ -20,7 +20,7 @@
     ymax = 5
   [../]
 
-  [./left_and_right]
+  [left_and_right]
     type = MeshCollectionGenerator
     inputs = 'left right'
   [../]

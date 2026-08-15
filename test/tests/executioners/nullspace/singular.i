@@ -11,26 +11,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./eig]
+  [eig]
     type = MassEigenKernel
     variable = u
     eigen_postprocessor = 1.0002920196258376e+01
     eigen = false
   [../]
 
-  [./force]
+  [force]
     type = CoupledForce
     variable = u
     v = aux_v
@@ -38,10 +38,10 @@
 []
 
 [AuxVariables]
-  [./aux_v]
+  [aux_v]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = eigen_mode
     [../]
@@ -49,7 +49,7 @@
 []
 
 [AuxKernels]
-  [./set_source]
+  [set_source]
     type = FunctionAux
     variable = aux_v
     function = second_harmonic
@@ -58,14 +58,14 @@
 []
 
 [Functions]
-  [./eigen_mode]
+  [eigen_mode]
     type = ParsedFunction
     expression = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
     symbol_names = 'L  mode'
     symbol_values = '10 1'
   [../]
 
-  [./second_harmonic]
+  [second_harmonic]
     type = ParsedFunction
     expression = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
     symbol_names = 'L  mode'
@@ -74,7 +74,7 @@
 []
 
 [BCs]
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 1'
@@ -83,7 +83,7 @@
 []
 
 [VectorPostprocessors]
-  [./sample_solution]
+  [sample_solution]
     type = LineValueSampler
     variable = u
     start_point = '0 0 0'
@@ -95,7 +95,7 @@
 []
 
 [Preconditioning]
-  [./prec]
+  [prec]
     type = SMP
     full = true
   [../]

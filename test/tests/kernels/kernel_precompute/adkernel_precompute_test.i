@@ -10,19 +10,19 @@
 []
 
 [Variables]
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = convected
   [../]
 
-  [./conv]
+  [conv]
     type = ADConvectionPrecompute
     variable = convected
     velocity = '1.0 0.0 0.0'
@@ -30,7 +30,7 @@
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = convected
     preset = false
@@ -38,7 +38,7 @@
     value = 0
   [../]
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = convected
     preset = false

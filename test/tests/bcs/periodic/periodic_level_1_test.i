@@ -13,26 +13,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 1e-5
   [../]
 
-  [./conv]
+  [conv]
     type = Convection
     variable = u
     velocity = '-0.4 0 0'
   [../]
 
-  [./forcing]
+  [forcing]
     type = GaussContForcing
     variable = u
     x_center = 6.0
@@ -41,22 +41,22 @@
     y_spread = 2.0
   [../]
 
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = u
       primary = 3
       secondary = 1
       translation = '20 0 0'
     [../]
 
-    [./y]
+    [y]
       variable = u
       primary = 0
       secondary = 2
@@ -70,7 +70,7 @@
   dt = 2
   num_steps = 7
 
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = .80
     coarsen_fraction = .2
     max_h_level = 4

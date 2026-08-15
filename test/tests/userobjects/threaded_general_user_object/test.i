@@ -5,19 +5,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./l]
+  [l]
     type = DirichletBC
     variable = u
     boundary = left
@@ -30,14 +30,14 @@
 []
 
 [UserObjects]
-  [./prime_product]
+  [prime_product]
     type = PrimeProductUserObject
     execute_on = timestep_end
   [../]
 []
 
 [Postprocessors]
-  [./product]
+  [product]
     type = PrimeProductPostprocessor
     prime_product = prime_product
   [../]

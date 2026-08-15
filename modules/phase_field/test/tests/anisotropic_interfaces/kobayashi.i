@@ -8,14 +8,14 @@
 []
 
 [Variables]
-  [./w]
+  [w]
   [../]
-  [./T]
+  [T]
   [../]
 []
 
 [ICs]
-  [./wIC]
+  [wIC]
     type = SmoothCircleIC
     variable = w
     int_width = 0.1
@@ -28,36 +28,36 @@
 []
 
 [Kernels]
-  [./w_dot]
+  [w_dot]
     type = TimeDerivative
     variable = w
   [../]
-  [./anisoACinterface1]
+  [anisoACinterface1]
     type = ACInterfaceKobayashi1
     variable = w
     mob_name = M
   [../]
-  [./anisoACinterface2]
+  [anisoACinterface2]
     type = ACInterfaceKobayashi2
     variable = w
     mob_name = M
   [../]
-  [./AllenCahn]
+  [AllenCahn]
     type = AllenCahn
     variable = w
     mob_name = M
     f_name = fbulk
     coupled_variables = 'T'
   [../]
-  [./T_dot]
+  [T_dot]
     type = TimeDerivative
     variable = T
   [../]
-  [./CoefDiffusion]
+  [CoefDiffusion]
     type = Diffusion
     variable = T
   [../]
-  [./w_dot_T]
+  [w_dot_T]
     type = CoefCoupledTimeDerivative
     variable = T
     v = w
@@ -66,7 +66,7 @@
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = fbulk
     coupled_variables = 'w T'
@@ -76,11 +76,11 @@
     derivative_order = 2
     outputs = 'out'
   [../]
-  [./material]
+  [material]
     type = InterfaceOrientationMaterial
     op = w
   [../]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'M'
     prop_values = '3333.333'
@@ -88,7 +88,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

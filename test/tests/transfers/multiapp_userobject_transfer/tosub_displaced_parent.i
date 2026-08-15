@@ -9,26 +9,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./layered_average_value]
+  [layered_average_value]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./layered_aux]
+  [layered_aux]
     type = SpatialUserObjectAux
     variable = layered_average_value
     execute_on = timestep_end
@@ -37,13 +37,13 @@
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
   [../]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
@@ -52,7 +52,7 @@
 []
 
 [UserObjects]
-  [./layered_average]
+  [layered_average]
     type = LayeredAverage
     variable = u
     direction = y
@@ -76,7 +76,7 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     execute_on = timestep_end
     positions = '0 0 0'
     type = TransientMultiApp
@@ -86,7 +86,7 @@
 []
 
 [Transfers]
-  [./layered_transfer]
+  [layered_transfer]
     user_object = layered_average
     variable = multi_layered_average
     type = MultiAppUserObjectTransfer
@@ -94,7 +94,7 @@
     displaced_target_mesh = true
     skip_coordinate_collapsing = true
   [../]
-  [./element_layered_transfer]
+  [element_layered_transfer]
     user_object = layered_average
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer

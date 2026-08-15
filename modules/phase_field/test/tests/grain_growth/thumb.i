@@ -22,10 +22,10 @@
 []
 
 [Variables]
-  [./gr0]
+  [gr0]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = ThumbIC
       xcoord = 500.0
       height = 600.0
@@ -35,10 +35,10 @@
     [../]
   [../]
 
-  [./gr1]
+  [gr1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = ThumbIC
       xcoord = 500.0
       height = 600.0
@@ -50,19 +50,19 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
   [../]
@@ -71,14 +71,14 @@
 [BCs]
   active = ' '
 
-  [./Periodic]
-    [./left_right]
+  [Periodic]
+    [left_right]
       primary = 0
       secondary = 2
       translation = '0 1000 0'
     [../]
 
-    [./top_bottom]
+    [top_bottom]
       primary = 1
       secondary = 3
       translation = '-1000 0 0'
@@ -87,7 +87,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
@@ -98,14 +98,14 @@
 []
 
 [Postprocessors]
-  [./gr_area]
+  [gr_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
   [../]
@@ -130,7 +130,7 @@
   num_steps = 10
   dt = 80.0
 
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 2
     refine_fraction = 0.8
     coarsen_fraction = 0.05

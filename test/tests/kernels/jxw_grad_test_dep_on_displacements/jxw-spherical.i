@@ -12,19 +12,19 @@
 []
 
 [Variables]
-  [./disp_r]
+  [disp_r]
   [../]
-  [./u]
+  [u]
     order = FIRST
   [../]
 []
 
 [Kernels]
-  [./disp_r]
+  [disp_r]
     type = Diffusion
     variable = disp_r
   [../]
-  [./u]
+  [u]
     type = ADDiffusion
     variable = u
     use_displaced_mesh = true
@@ -33,28 +33,28 @@
 
 [BCs]
   # BCs cannot be preset due to Jacobian tests
-  [./u_left]
+  [u_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = u
   [../]
-  [./u_right]
+  [u_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'right'
     variable = u
   [../]
-  [./disp_r_left]
+  [disp_r_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = disp_r
   [../]
-  [./disp_r_right]
+  [disp_r_right]
     type = DirichletBC
     preset = false
     value = 1
@@ -64,7 +64,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -76,20 +76,20 @@
 []
 
 [Outputs]
-  [./dofmap]
+  [dofmap]
     type = DOFMap
     execute_on = 'initial'
   [../]
 []
 
 [ICs]
-  [./disp_r]
+  [disp_r]
     type = RandomIC
     variable = disp_r
     min = 0.01
     max = 0.09
   [../]
-  [./u]
+  [u]
     type = RandomIC
     variable = u
     min = 0.1

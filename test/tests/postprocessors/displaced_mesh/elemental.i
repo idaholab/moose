@@ -7,41 +7,41 @@
 []
 
 [AuxVariables]
-  [./ux]
-    [./InitialCondition]
+  [ux]
+    [InitialCondition]
       type = FunctionIC
       function = x
     [../]
   [../]
-  [./uy]
-    [./InitialCondition]
+  [uy]
+    [InitialCondition]
       type = FunctionIC
       function = y
     [../]
   [../]
-  [./c]
+  [c]
     initial_condition = 1
   [../]
 []
 
 [Variables]
-  [./a]
+  [a]
   [../]
 []
 [Kernels]
-  [./a]
+  [a]
     type = Diffusion
     variable = a
   [../]
 []
 
 [Postprocessors]
-  [./without]
+  [without]
     type = ElementIntegralVariablePostprocessor
     variable = c
     execute_on = initial
   [../]
-  [./with]
+  [with]
     type = ElementIntegralVariablePostprocessor
     variable = c
     use_displaced_mesh = true
@@ -59,7 +59,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
   [../]
 []

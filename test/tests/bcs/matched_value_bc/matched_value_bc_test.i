@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -12,13 +12,13 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 3
   [../]
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
@@ -28,12 +28,12 @@
 [Kernels]
   active = 'diff_u diff_v'
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
@@ -42,14 +42,14 @@
 [BCs]
   active = 'right_v left_u'
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 3
   [../]
 
-  [./left_u]
+  [left_u]
     type = MatchedValueBC
     variable = u
     boundary = 3
@@ -58,7 +58,7 @@
 []
 
 [Preconditioning]
-  [./precond]
+  [precond]
     type = SMP
     full = true
   [../]

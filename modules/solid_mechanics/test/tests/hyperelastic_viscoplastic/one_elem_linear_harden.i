@@ -9,7 +9,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true
@@ -18,17 +18,17 @@
 
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./peeq]
+  [peeq]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./fp_zz]
+  [fp_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -36,7 +36,7 @@
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     variable = stress_zz
     rank_two_tensor = stress
@@ -45,7 +45,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./fp_zz]
+  [fp_zz]
     type = RankTwoAux
     variable = fp_zz
     rank_two_tensor = fp
@@ -54,7 +54,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./peeq]
+  [peeq]
     type = MaterialRealAux
     variable = peeq
     property = ep_eqv
@@ -64,25 +64,25 @@
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
   [../]
-  [./symmx]
+  [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
   [../]
-  [./symmz]
+  [symmz]
     type = DirichletBC
     variable = uz
     boundary = back
     value = 0
   [../]
-  [./tdisp]
+  [tdisp]
     type = FunctionDirichletBC
     variable = uz
     boundary = front
@@ -91,31 +91,31 @@
 []
 
 [UserObjects]
-  [./flowstress]
+  [flowstress]
     type = HEVPLinearHardening
     yield_stress = 100
     slope = 10
     intvar_prop_name = ep_eqv
   [../]
-  [./flowrate]
+  [flowrate]
     type = HEVPFlowRatePowerLawJ2
     reference_flow_rate = 0.0001
     flow_rate_exponent = 50.0
     flow_rate_tol = 1
     strength_prop_name = flowstress
   [../]
-  [./ep_eqv]
+  [ep_eqv]
      type = HEVPEqvPlasticStrain
      intvar_rate_prop_name = ep_eqv_rate
   [../]
-  [./ep_eqv_rate]
+  [ep_eqv_rate]
      type = HEVPEqvPlasticStrainRate
      flow_rate_prop_name = flowrate
   [../]
 []
 
 [Materials]
-  [./viscop]
+  [viscop]
     type = FiniteStrainHyperElasticViscoPlastic
     block = 0
     resid_abs_tol = 1e-18
@@ -127,7 +127,7 @@
     internal_var_user_objects = 'ep_eqv'
     internal_var_rate_user_objects = 'ep_eqv_rate'
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '2.8e5 1.2e5 1.2e5 2.8e5 1.2e5 2.8e5 0.8e5 0.8e5 0.8e5'
@@ -136,17 +136,17 @@
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./fp_zz]
+  [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./peeq]
+  [peeq]
     type = ElementAverageValue
     variable = peeq
     block = 'ANY_BLOCK_ID 0'
@@ -154,7 +154,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

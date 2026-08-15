@@ -20,24 +20,24 @@
 []
 
 [Functions]
-  [./exact_sln]
+  [exact_sln]
     type = ParsedFunction
     expression= y
   [../]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression= 0
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
   [../]
 
-  [./lm]
+  [lm]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
@@ -45,11 +45,11 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = ffn
@@ -57,7 +57,7 @@
 []
 
 [Constraints]
-  [./ced]
+  [ced]
     type = EqualValueConstraint
     variable = lm
     secondary_variable = u
@@ -69,7 +69,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '1 3'
@@ -78,7 +78,7 @@
 []
 
 [Postprocessors]
-  [./l2_error]
+  [l2_error]
     type = ElementL2Error
     variable = u
     function = exact_sln
@@ -88,7 +88,7 @@
 []
 
 [Preconditioning]
-  [./fmp]
+  [fmp]
     type = SMP
     full = true
     solve_type = 'NEWTON'

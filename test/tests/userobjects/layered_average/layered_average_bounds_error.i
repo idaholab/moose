@@ -6,26 +6,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./layered_average]
+  [layered_average]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./layered_average]
+  [layered_average]
     type = SpatialUserObjectAux
     variable = layered_average
     execute_on = timestep_end
@@ -34,13 +34,13 @@
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
   [../]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
@@ -49,7 +49,7 @@
 []
 
 [UserObjects]
-  [./average]
+  [average]
     type = LayeredAverage
     variable = u
     direction = y

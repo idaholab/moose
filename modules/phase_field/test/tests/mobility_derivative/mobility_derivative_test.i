@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./w]
+  [w]
   [../]
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = CrossIC
     x1 = 0.0
     x2 = 30.0
@@ -27,20 +27,20 @@
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = SplitCHParsed
     variable = c
     kappa_name = kappa_c
     w = w
     f_name = F
   [../]
-  [./wres]
+  [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
     coupled_variables = c
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
@@ -48,20 +48,20 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./kappa]
+  [kappa]
     type = GenericConstantMaterial
     prop_names = 'kappa_c'
     prop_values = '2.0'
   [../]
-  [./mob]
+  [mob]
     type = DerivativeParsedMaterial
     property_name = M
     coupled_variables = c
@@ -69,7 +69,7 @@
     outputs = exodus
     derivative_order = 1
   [../]
-  [./free_energy]
+  [free_energy]
     type = MathEBFreeEnergy
     property_name = F
     c = c
@@ -77,7 +77,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    off_diag_row = 'w c'
    off_diag_column = 'c w'

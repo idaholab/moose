@@ -11,19 +11,19 @@
 []
 
 [AuxVariables]
-  [./c]
+  [c]
   [../]
 []
 
 [Variables]
-  [./gr0]
+  [gr0]
   [../]
-  [./gr1]
+  [gr1]
   [../]
 []
 
 [ICs]
-  [./gr0]
+  [gr0]
     type = MultiSmoothCircleIC
     variable = gr0
     invalue = 1.0
@@ -35,7 +35,7 @@
     radius_variation = 0.2
     radius_variation_type = uniform
   [../]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     int_width = 12.0
     x1 = 50
@@ -48,23 +48,23 @@
 []
 
 [Kernels]
-  [./ie_gr0]
+  [ie_gr0]
     type = TimeDerivative
     variable = gr0
   [../]
-  [./diff_gr0]
+  [diff_gr0]
     type = Diffusion
     variable = gr0
   [../]
-  [./ie_gr1]
+  [ie_gr1]
     type = TimeDerivative
     variable = gr1
   [../]
-  [./diff_gr1]
+  [diff_gr1]
     type = Diffusion
     variable = gr1
   [../]
-  [./source]
+  [source]
     type = MaskedBodyForce
     variable = gr1
     function = t
@@ -73,7 +73,7 @@
 []
 
 [Materials]
-  [./mask]
+  [mask]
     type = ParsedMaterial
     expression = 'c'
     property_name = mask
@@ -82,7 +82,7 @@
 []
 
 [Postprocessors]
-  [./grain_tracker]
+  [grain_tracker]
     type = GrainTracker
 
     # Reserve the first "op" variable

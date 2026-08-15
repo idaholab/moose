@@ -23,7 +23,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     strain = finite
@@ -32,19 +32,19 @@
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0'
   [../]
-  [./y]
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
   [../]
-  [./z]
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
@@ -53,33 +53,33 @@
 []
 
 [AuxVariables]
-  [./yield_fcn]
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [iter]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./intnl]
+  [intnl]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./yield_fcn_auxk]
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = yield_fcn
   [../]
-  [./iter_auxk]
+  [iter_auxk]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
   [../]
-  [./intnl_auxk]
+  [intnl_auxk]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 0
@@ -88,32 +88,32 @@
 []
 
 [Postprocessors]
-  [./s_I]
+  [s_I]
     type = PointValue
     point = '0 0 0'
     variable = max_principal_stress
   [../]
-  [./s_II]
+  [s_II]
     type = PointValue
     point = '0 0 0'
     variable = mid_principal_stress
   [../]
-  [./s_III]
+  [s_III]
     type = PointValue
     point = '0 0 0'
     variable = min_principal_stress
   [../]
-  [./f]
+  [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
   [../]
-  [./iter]
+  [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
   [../]
-  [./intnl]
+  [intnl]
     type = PointValue
     point = '0 0 0'
     variable = intnl
@@ -121,7 +121,7 @@
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = SolidMechanicsHardeningCubic
     value_0 = 1.0
     value_residual = 0.5
@@ -131,18 +131,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 2.0E6'
   [../]
-  [./tensile]
+  [tensile]
     type = TensileStressUpdate
     tensile_strength = ts
     smoothing_tol = 0.0
     yield_function_tol = 1.0E-12
   [../]
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = tensile
     perform_finite_strain_rotations = false
@@ -160,7 +160,7 @@
 [Outputs]
   file_base = small_deform_hard3_update_version
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
   [../]
 []

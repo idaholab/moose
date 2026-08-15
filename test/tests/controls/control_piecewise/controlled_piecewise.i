@@ -1,5 +1,5 @@
 [Mesh]
-  [./generated]
+  [generated]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0
@@ -13,20 +13,20 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 0.1
   [../]
 []
 
 [AuxVariables]
-  [./v]
+  [v]
   [../]
-  [./x]
+  [x]
   [../]
 []
 
 [ICs]
-  [./x_ic]
+  [x_ic]
     type = FunctionIC
     variable = x
     function = 'x'
@@ -34,7 +34,7 @@
 []
 
 [AuxKernels]
-  [./v_aux]
+  [v_aux]
     type = FunctionAux
     variable = v
     function = func
@@ -42,7 +42,7 @@
 []
 
 [Controls]
-  [./func_control]
+  [func_control]
     type = RealFunctionControl
     parameter = '*/*/scale_factor'
     function = '2'
@@ -51,7 +51,7 @@
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = PiecewiseLinearInterpolationMaterial
     property = matprop
     variable = x
@@ -62,7 +62,7 @@
 []
 
 [Functions]
-  [./func]
+  [func]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 10'

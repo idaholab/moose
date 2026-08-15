@@ -17,26 +17,26 @@
 []
 
 [Functions]
-  [./bc_fn]
+  [bc_fn]
     type = ParsedFunction
     expression = x
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./all_u]
+  [all_u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1 3'
@@ -45,13 +45,13 @@
 []
 
 [Postprocessors]
-  [./elem_56]
+  [elem_56]
     type = ElementalVariableValue
     variable = u
     elementid = 56
   [../]
 
-  [./elem_12]
+  [elem_12]
     type = ElementalVariableValue
     variable = u
     elementid = 12
@@ -64,12 +64,12 @@
 []
 
 [Outputs]
-  [./console]
+  [console]
     type = Console
     show = 'elem_56'
     hide = 'elem_12'
   [../]
-  [./out]
+  [out]
     type = CSV
     show = 'elem_56'
     hide = 'elem_12'

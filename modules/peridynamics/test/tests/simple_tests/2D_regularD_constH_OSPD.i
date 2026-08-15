@@ -14,13 +14,13 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 4
     ny = 4
   [../]
-  [./gpd]
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
@@ -28,26 +28,26 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1003
     value = 0.0
   [../]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1002
     value = 0.0
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1000
@@ -56,25 +56,25 @@
 []
 
 [Modules/Peridynamics/Mechanics/Master]
-  [./all]
+  [all]
     formulation = ORDINARY_STATE
   [../]
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.0
   [../]
 
-  [./force_density]
+  [force_density]
     type = ComputeSmallStrainConstantHorizonMaterialOSPD
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

@@ -9,7 +9,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -40,14 +40,14 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
@@ -55,7 +55,7 @@
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false

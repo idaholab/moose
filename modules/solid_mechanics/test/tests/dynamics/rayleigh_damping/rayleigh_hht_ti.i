@@ -30,7 +30,7 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
     incremental = false

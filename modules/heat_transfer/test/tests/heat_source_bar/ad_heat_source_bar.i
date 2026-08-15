@@ -23,18 +23,18 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 300.0
   [../]
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = thermal_conductivity
   [../]
-  [./heatsource]
+  [heatsource]
     type = ADMatHeatSource
     material_property = volumetric_heat
     variable = temp
@@ -43,7 +43,7 @@
 []
 
 [BCs]
-  [./lefttemp]
+  [lefttemp]
     type = DirichletBC
     boundary = left
     variable = temp
@@ -52,7 +52,7 @@
 []
 
 [Materials]
-  [./density]
+  [density]
     type = ADGenericConstantMaterial
     prop_names = 'density  thermal_conductivity volumetric_heat  '
     prop_values = '10431.0 3.0                  3.8e7'
@@ -60,7 +60,7 @@
 []
 
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
   [../]
@@ -71,12 +71,12 @@
 []
 
 [Postprocessors]
-  [./right]
+  [right]
     type = SideAverageValue
     variable = temp
     boundary = right
   [../]
-  [./error]
+  [error]
     type = NodalL2Error
     function = '-3.8e+8/(2*3) * (x^2 - 2*x*0.01) + 600'
     variable = temp

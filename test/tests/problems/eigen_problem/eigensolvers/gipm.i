@@ -16,26 +16,26 @@
 #Its inverse will be 0.49950700634518.
 
 [Variables]
-  [./u]
+  [u]
     order = first
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./x_disp]
+  [x_disp]
   [../]
-  [./y_disp]
+  [y_disp]
   [../]
 []
 
 [AuxKernels]
-  [./x_disp]
+  [x_disp]
     type = FunctionAux
     variable = x_disp
     function = x_disp_func
   [../]
-  [./y_disp]
+  [y_disp]
     type = FunctionAux
     variable = y_disp
     function = y_disp_func
@@ -43,31 +43,31 @@
 []
 
 [Functions]
-  [./x_disp_func]
+  [x_disp_func]
     type = ParsedFunction
     expression = 0
   [../]
-  [./y_disp_func]
+  [y_disp_func]
     type = ParsedFunction
     expression = 0
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     use_displaced_mesh = true
   [../]
 
-  [./rea]
+  [rea]
     type = CoefReaction
     variable = u
     coefficient = 2.0
     use_displaced_mesh = true
   [../]
 
-  [./rhs]
+  [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
@@ -77,14 +77,14 @@
 []
 
 [BCs]
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
     use_displaced_mesh = true
   [../]
-  [./eigen_bc]
+  [eigen_bc]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -103,7 +103,7 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
   [../]
@@ -112,7 +112,7 @@
 [Outputs]
   csv = true
   execute_on = 'timestep_end'
-  [./console]
+  [console]
     type = Console
     outlier_variable_norms = false
   [../]

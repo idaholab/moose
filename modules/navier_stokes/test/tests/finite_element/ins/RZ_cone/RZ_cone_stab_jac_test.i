@@ -22,7 +22,7 @@
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     solve_type = NEWTON
@@ -39,35 +39,35 @@
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     # Velocity in radial (r) direction
   [../]
-  [./vel_y]
+  [vel_y]
     # Velocity in axial (z) direction
   [../]
-  [./p]
+  [p]
     order = FIRST
   [../]
 []
 
 
 [Kernels]
-  [./x_momentum_time]
+  [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
   [../]
-  [./y_momentum_time]
+  [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
   [../]
-  [./mass]
+  [mass]
     type = INSMassRZ
     variable = p
     u = vel_x
     v = vel_y
     pressure = p
   [../]
-  [./x_momentum_space]
+  [x_momentum_space]
     type = INSMomentumLaplaceFormRZ
     variable = vel_x
     u = vel_x
@@ -75,7 +75,7 @@
     pressure = p
     component = 0
   [../]
-  [./y_momentum_space]
+  [y_momentum_space]
     type = INSMomentumLaplaceFormRZ
     variable = vel_y
     u = vel_x
@@ -86,7 +86,7 @@
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1.1 1.1'
@@ -94,19 +94,19 @@
 []
 
 [ICs]
-  [./vel_x]
+  [vel_x]
     type = RandomIC
     variable = vel_x
     min = 0.1
     max = 0.9
   [../]
-  [./vel_y]
+  [vel_y]
     type = RandomIC
     variable = vel_y
     min = 0.1
     max = 0.9
   [../]
-  [./p]
+  [p]
     type = RandomIC
     variable = p
     min = 0.1

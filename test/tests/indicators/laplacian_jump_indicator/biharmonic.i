@@ -16,18 +16,18 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = THIRD
     family = HERMITE
   [../]
 []
 
 [Kernels]
-  [./biharmonic]
+  [biharmonic]
     type = Biharmonic
     variable = u
   [../]
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     function = forcing_func
@@ -36,21 +36,21 @@
 
 [BCs]
   active = 'all_value all_flux'
-  [./all_value]
+  [all_value]
     type = FunctionPenaltyDirichletBC
     variable = u
     boundary = 'left right top bottom'
     function = u_func
     penalty = 1e10
   [../]
-  [./all_flux]
+  [all_flux]
     type = FunctionPenaltyFluxBC
     variable = u
     boundary = 'left right top bottom'
     function = u_func
     penalty = 1e10
   [../]
-  [./all_laplacian]
+  [all_laplacian]
     type = BiharmonicLapBC
     variable = u
     boundary = 'left right top bottom'
@@ -82,36 +82,36 @@
 
   # Use 6x6 quadrature to ensure the forcing function is integrated
   # accurately.
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = ELEVENTH
   [../]
 []
 
 [Functions]
-  [./u_func]
+  [u_func]
     type   = ParsedGradFunction
     value  = 'exp(-c*(x^2+y^2))'
     grad_x = '-2*c*exp(-c*(x^2+y^2))*x'
     grad_y = '-2*c*exp(-c*(x^2+y^2))*y'
   [../]
-  [./lapu_func]
+  [lapu_func]
     type   = ParsedFunction
     expression  = '4*c*(c*(x^2+y^2) - 1)*exp(-c*(x^2+y^2))'
   [../]
-  [./forcing_func]
+  [forcing_func]
     type   = ParsedFunction
     expression  = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))'
   [../]
 []
 
 [Postprocessors]
-  [./l2_error]
+  [l2_error]
     type = ElementL2Error
     variable = u
     function = u_func
   [../]
-  [./h1_error]
+  [h1_error]
     type = ElementH1Error
     variable = u
     function = u_func

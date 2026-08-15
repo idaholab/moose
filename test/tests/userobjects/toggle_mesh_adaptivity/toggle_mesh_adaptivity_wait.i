@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -31,8 +31,8 @@
   cycles_per_step = 1
   marker = marker
   max_h_level = 4
-  [./Markers]
-    [./marker]
+  [Markers]
+    [marker]
       type = BoxMarker
       bottom_left = '0.35 0.25 0'
       top_right = '0.5 0.5 0'
@@ -43,7 +43,7 @@
 []
 
 [UserObjects]
-  [./mesh_adaptivity_off]
+  [mesh_adaptivity_off]
     type = ToggleMeshAdaptivity
     mesh_adaptivity = 'off'
     apply_after_timestep = 1
@@ -52,7 +52,7 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     print_mesh_changed_info = true
   [../]

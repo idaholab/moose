@@ -20,7 +20,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
@@ -31,19 +31,19 @@
 
 
 [UserObjects]
-  [./tensile_strength]
+  [tensile_strength]
     type = SolidMechanicsHardeningCubic
     value_0 = 10
     value_residual = 1
     internal_limit = 10
   [../]
-  [./compressive_strength]
+  [compressive_strength]
     type = SolidMechanicsHardeningCubic
     value_0 = -10
     value_residual = -1
     internal_limit = 9
   [../]
-  [./cap]
+  [cap]
     type = SolidMechanicsPlasticMeanCapTC
     tensile_strength = tensile_strength
     compressive_strength = compressive_strength
@@ -55,18 +55,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.7 1'
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '6 5 4  5 7 2  4 2 2'
     eigenstrain_name = ini_stress
   [../]
-  [./mc]
+  [mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-11
     plastic_models = cap
@@ -76,7 +76,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'

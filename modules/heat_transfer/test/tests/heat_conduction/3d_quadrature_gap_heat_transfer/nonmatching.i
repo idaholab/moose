@@ -3,25 +3,25 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Kernels]
-  [./hc]
+  [hc]
     type = HeatConduction
     variable = temp
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temp
     boundary = leftleft
     value = 1000
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = temp
     boundary = rightright
@@ -30,7 +30,7 @@
 []
 
 [ThermalContact]
-  [./left_to_right]
+  [left_to_right]
     secondary = leftright
     quadrature = true
     primary = rightleft
@@ -42,7 +42,7 @@
 []
 
 [Materials]
-  [./hcm]
+  [hcm]
     type = HeatConductionMaterial
     block = 'left right'
     specific_heat = 1
@@ -51,13 +51,13 @@
 []
 
 [Postprocessors]
-  [./left]
+  [left]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = leftright
     diffusivity = thermal_conductivity
   [../]
-  [./right]
+  [right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = rightleft

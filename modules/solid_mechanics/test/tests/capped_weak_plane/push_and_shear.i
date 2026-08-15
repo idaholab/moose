@@ -59,7 +59,7 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     newmark_beta = 0.25 # Newmark time integration
     newmark_gamma = 0.5 # Newmark time integration

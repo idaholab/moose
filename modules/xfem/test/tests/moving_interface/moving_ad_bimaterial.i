@@ -15,7 +15,7 @@
 []
 
 [UserObjects]
-  [./level_set_cut_uo]
+  [level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = ls
     heal_always = true
@@ -35,13 +35,13 @@
     ymax = 5.
     elem_type = QUAD4
   []
-  [./left_bottom]
+  [left_bottom]
     type = ExtraNodesetGenerator
     new_boundary = 'left_bottom'
     coord = '0.0 0.0'
     input = generated_mesh
   [../]
-  [./left_top]
+  [left_top]
     type = ExtraNodesetGenerator
     new_boundary = 'left_top'
     coord = '0.0 5.'
@@ -50,14 +50,14 @@
 []
 
 [AuxVariables]
-  [./ls]
+  [ls]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./ls_function]
+  [ls_function]
     type = FunctionAux
     variable = ls
     function = ls_func
@@ -65,41 +65,41 @@
 []
 
 [Functions]
-  [./ls_func]
+  [ls_func]
     type = ParsedFunction
     expression = 'y-3.153 + t'
   [../]
 []
 
 [AuxVariables]
-  [./a_strain_xx]
+  [a_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./a_strain_yy]
+  [a_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./a_strain_xy]
+  [a_strain_xy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./b_strain_xx]
+  [b_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./b_strain_yy]
+  [b_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./b_strain_xy]
+  [b_strain_xy]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
     use_automatic_differentiation = true
     add_variables = true
@@ -108,42 +108,42 @@
 []
 
 [AuxKernels]
-  [./a_strain_xx]
+  [a_strain_xx]
     type = ADRankTwoAux
     rank_two_tensor = A_total_strain
     index_i = 0
     index_j = 0
     variable = a_strain_xx
   [../]
-  [./a_strain_yy]
+  [a_strain_yy]
     type = ADRankTwoAux
     rank_two_tensor = A_total_strain
     index_i = 1
     index_j = 1
     variable = a_strain_yy
   [../]
-  [./a_strain_xy]
+  [a_strain_xy]
     type = ADRankTwoAux
     rank_two_tensor = A_total_strain
     index_i = 0
     index_j = 1
     variable = a_strain_xy
   [../]
-  [./b_strain_xx]
+  [b_strain_xx]
     type = ADRankTwoAux
     rank_two_tensor = B_total_strain
     index_i = 0
     index_j = 0
     variable = b_strain_xx
   [../]
-  [./b_strain_yy]
+  [b_strain_yy]
     type = ADRankTwoAux
     rank_two_tensor = B_total_strain
     index_i = 1
     index_j = 1
     variable = b_strain_yy
   [../]
-  [./b_strain_xy]
+  [b_strain_xy]
     type = ADRankTwoAux
     rank_two_tensor = B_total_strain
     index_i = 0
@@ -153,14 +153,14 @@
 []
 
 [Constraints]
-  [./dispx_constraint]
+  [dispx_constraint]
     type = XFEMSingleVariableConstraint
     use_displaced_mesh = false
     variable = disp_x
     alpha = 1e8
     geometric_cut_userobject = 'level_set_cut_uo'
   [../]
-  [./dispy_constraint]
+  [dispy_constraint]
     type = XFEMSingleVariableConstraint
     use_displaced_mesh = false
     variable = disp_y
@@ -170,25 +170,25 @@
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = ADDirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [bottomy]
     type = ADDirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
   [../]
-  [./topx]
+  [topx]
     type = ADFunctionDirichletBC
     boundary = top
     variable = disp_x
     function = 0.03*t
   [../]
-  [./topy]
+  [topy]
     type = ADFunctionDirichletBC
     boundary = top
     variable = disp_y
@@ -197,44 +197,44 @@
 []
 
 [Materials]
-  [./elasticity_tensor_A]
+  [elasticity_tensor_A]
     type = ADComputeIsotropicElasticityTensor
     base_name = A
     youngs_modulus = 1e9
     poissons_ratio = 0.3
   [../]
-  [./strain_A]
+  [strain_A]
     type = ADComputeSmallStrain
     base_name = A
     displacements = 'disp_x disp_y'
   [../]
-  [./stress_A]
+  [stress_A]
     type = ADComputeLinearElasticStress
     base_name = A
   [../]
-  [./elasticity_tensor_B]
+  [elasticity_tensor_B]
     type = ADComputeIsotropicElasticityTensor
     base_name = B
     youngs_modulus = 1e7
     poissons_ratio = 0.3
   [../]
-  [./strain_B]
+  [strain_B]
     type = ADComputeSmallStrain
     base_name = B
     displacements = 'disp_x disp_y'
   [../]
-  [./stress_B]
+  [stress_B]
     type = ADComputeLinearElasticStress
     base_name = B
   [../]
-  [./combined_stress]
+  [combined_stress]
     type = ADLevelSetBiMaterialRankTwo
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
     level_set_var = ls
     prop_name = stress
   [../]
-  [./combined_elasticity_tensor]
+  [combined_elasticity_tensor]
     type = ADLevelSetBiMaterialRankFour
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
@@ -274,7 +274,7 @@
   execute_on = timestep_end
   file_base = moving_bimaterial_out
   perf_graph = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

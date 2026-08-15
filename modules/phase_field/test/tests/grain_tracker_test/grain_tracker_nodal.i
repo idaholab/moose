@@ -16,18 +16,18 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     grain_num = 10 # Number of grains
     coloring_algorithm = bt # bt will assign one grain to each op if they are the same
     rand_seed = 1
   [../]
-  [./grain_tracker]
+  [grain_tracker]
     type = GrainTracker
     threshold = 0.5
     connecting_threshold = 0.2
@@ -38,45 +38,45 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./unique_grains]
+  [unique_grains]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./var_indices]
+  [var_indices]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
   [../]
-  [./unique_grains]
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
-  [./var_indices]
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
@@ -88,7 +88,7 @@
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     type = GBEvolution
     T = 500 # K
     wGB = 100 # nm
@@ -100,7 +100,7 @@
 []
 
 [Postprocessors]
-  [./DOFs]
+  [DOFs]
     type = NumDOFs
     execute_on = 'initial timestep_end'
   [../]

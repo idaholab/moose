@@ -8,21 +8,21 @@
 []
 
 [AuxVariables]
-  [./stress_11]
+  [stress_11]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
   [../]
 []
 
 [AuxKernels]
-  [./stress_11]
+  [stress_11]
     type = RankTwoAux
     variable = stress_11
     rank_two_tensor = stress
@@ -32,25 +32,25 @@
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
-  [./back]
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
-  [./top]
+  [top]
     type = DirichletBC
     variable = disp_y
     boundary = top
@@ -59,10 +59,10 @@
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 416666
     shear_modulus = 454545
@@ -70,7 +70,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

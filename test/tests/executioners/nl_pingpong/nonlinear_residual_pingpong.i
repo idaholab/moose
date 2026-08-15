@@ -10,7 +10,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
@@ -18,11 +18,11 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./power]
+  [power]
     type = PReaction
     variable = u
     coefficient = 0.2
@@ -34,13 +34,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = VacuumBC
     variable = u
     boundary = left
   [../]
 
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
@@ -49,7 +49,7 @@
 []
 
 [Postprocessors]
-  [./unorm]
+  [unorm]
     type = ElementL2Norm
     variable = u
   [../]

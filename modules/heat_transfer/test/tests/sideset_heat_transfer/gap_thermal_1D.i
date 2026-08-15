@@ -54,7 +54,7 @@
 
 [DGKernels]
   # DG kernel to represent diffusion accross element faces
-  [./dg_diff]
+  [dg_diff]
     type = DGDiffusion
     variable = T
     epsilon = -1

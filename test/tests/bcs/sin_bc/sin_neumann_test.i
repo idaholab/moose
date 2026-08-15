@@ -10,7 +10,7 @@
 []
 
 [Functions]
-  [./initial_value]
+  [initial_value]
     type = ParsedFunction
     expression = 'x'
   [../]
@@ -19,11 +19,11 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-#    [./InitialCondition]
+#    [InitialCondition]
 #      type = FunctionIC
  #     function = initial_value
 #    [../]
@@ -33,12 +33,12 @@
 [Kernels]
   active = 'diff ie'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
   [../]
@@ -47,14 +47,14 @@
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = SinNeumannBC
     variable = u
     boundary = 1

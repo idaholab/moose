@@ -6,13 +6,13 @@
     # block 1: left
     # block 2: right
   []
-  [./primary]
+  [primary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   [../]
-  [./secondary]
+  [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
@@ -58,10 +58,10 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     block = '1 2'
   [../]
-  [./lambda]
+  [lambda]
     block = '10'
     family = MONOMIAL
     order = CONSTANT
@@ -69,13 +69,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = T
     boundary = '5'
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = T
     boundary = '8'
@@ -84,7 +84,7 @@
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = '1 2'
@@ -96,7 +96,7 @@
 []
 
 [Constraints]
-  [./mortar]
+  [mortar]
     type = GapHeatConductanceAuxKernel
     primary_boundary = 2
     secondary_boundary = 1
@@ -121,7 +121,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

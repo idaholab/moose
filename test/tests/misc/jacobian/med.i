@@ -3,26 +3,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = 1
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [AuxVariables]
-  [./w]
+  [w]
   [../]
 []
 
 [Kernels]
-  [./diffu]
+  [diffu]
     type = WrongJacobianDiffusion
     block = 1
     jfactor = 0.9
     variable = u
   [../]
-  [./diffv]
+  [diffv]
     type = WrongJacobianDiffusion
     jfactor = 0.7
     variable = v

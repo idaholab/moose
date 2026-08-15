@@ -154,7 +154,7 @@
     v_fn = v_in
   []
   # Outlet
-  [./pressure_out]
+  [pressure_out]
     type = DirichletBC
     variable = p
     boundary = 'right'

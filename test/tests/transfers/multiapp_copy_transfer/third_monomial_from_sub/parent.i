@@ -6,7 +6,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = THIRD
   [../]
@@ -26,7 +26,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
@@ -34,7 +34,7 @@
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppCopyTransfer
     source_variable = aux
     variable = u

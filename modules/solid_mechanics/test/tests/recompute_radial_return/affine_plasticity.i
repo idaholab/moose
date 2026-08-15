@@ -72,22 +72,22 @@
 []
 
 [Functions]
-  [./disp_x]
+  [disp_x]
     type = PiecewiseLinear
     x = '0.  1.     2.'
     y = '0. -0.003 -0.0103923'
   [../]
-  [./disp_y]
+  [disp_y]
     type = PiecewiseLinear
     x = '0.  1.    2.'
     y = '0. -0.003 0.'
   [../]
-  [./disp_z]
+  [disp_z]
     type = PiecewiseLinear
     x = '0. 1.    2.'
     y = '0. 0.006 0.0103923'
   [../]
-  [./stress_xx]
+  [stress_xx]
     type = ParsedFunction
     # The paper gives 0.201 as the time at initial yield, but 0.20097635952803425 is the exact value.
     # The paper gives -95.26 MPa as the stress at yield, but -95.26279441628823 is the exact value.
@@ -100,7 +100,7 @@
                   if(t<=1, stressAtYield,
                   (a+b*sqrt(exp(expFac*t))+c*exp(expFac*t))/(1.0+d*exp(expFac*t))))' # tends to -a
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = ParsedFunction
     # The paper gives 0.201 as the time at initial yield, but 0.20097635952803425 is the exact value.
     # the paper gives -95.26 MPa as the stress at yield, but -95.26279441628823 is the exact value.
@@ -113,7 +113,7 @@
                   if(t<=1, stressAtYield,
                   (a+b*sqrt(exp(expFac*t))+c*exp(expFac*t))/(1.0+d*exp(expFac*t))))' # tends to -a
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = ParsedFunction
     # The paper gives 0.201 as the time at initial yield, but 0.20097635952803425 is the exact value.
     # the paper gives 190.5 MPa as the stress at yield, but 190.52558883257645 is the exact value.
@@ -129,32 +129,32 @@
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vonmises]
+  [vonmises]
     order = CONSTANT
     family = MONOMIAL
   [../]
 
-  [./plastic_strain_xx]
+  [plastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./plastic_strain_yy]
+  [plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./plastic_strain_zz]
+  [plastic_strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -162,7 +162,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
@@ -171,7 +171,7 @@
 
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
@@ -179,7 +179,7 @@
     index_j = 0
     execute_on = 'timestep_end'
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
@@ -187,7 +187,7 @@
     index_j = 1
     execute_on = 'timestep_end'
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
@@ -195,7 +195,7 @@
     index_j = 2
     execute_on = 'timestep_end'
   [../]
-  [./vonmises]
+  [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
@@ -203,7 +203,7 @@
     execute_on = 'timestep_end'
   [../]
 
-  [./plastic_strain_xx]
+  [plastic_strain_xx]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_strain_xx
@@ -211,7 +211,7 @@
     index_j = 0
     execute_on = 'timestep_end'
   [../]
-  [./plastic_strain_yy]
+  [plastic_strain_yy]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_strain_yy
@@ -219,7 +219,7 @@
     index_j = 1
     execute_on = 'timestep_end'
   [../]
-  [./plastic_strain_zz]
+  [plastic_strain_zz]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_strain_zz
@@ -230,38 +230,38 @@
 []
 
 [BCs]
-  [./fixed_x]
+  [fixed_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./fixed_y]
+  [fixed_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./fixed_z]
+  [fixed_z]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
   [../]
 
-  [./disp_x]
+  [disp_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = disp_x
   [../]
-  [./disp_y]
+  [disp_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = disp_y
   [../]
-  [./disp_z]
+  [disp_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
@@ -270,19 +270,19 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 210666666666.666667
     poissons_ratio = 0.3333333333333333
   [../]
 
 
-  [./isotropic_plasticity]
+  [isotropic_plasticity]
     type = IsotropicPlasticityStressUpdate
     yield_stress = 285788383.2488647 # = sqrt(3)*165e6 = sqrt(3) * yield in shear
     hardening_constant = 0.0
   [../]
-  [./radial_return_stress]
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     tangent_operator = elastic
     inelastic_models = 'isotropic_plasticity'
@@ -308,46 +308,46 @@
 []
 
 [Postprocessors]
-  [./analytic_xx]
+  [analytic_xx]
     type = FunctionValuePostprocessor
     function = stress_xx
   [../]
-  [./analytic_yy]
+  [analytic_yy]
     type = FunctionValuePostprocessor
     function = stress_yy
   [../]
-  [./analytic_zz]
+  [analytic_zz]
     type = FunctionValuePostprocessor
     function = stress_zz
   [../]
 
-  [./stress_xx]
+  [stress_xx]
     type = ElementalVariableValue
     variable = stress_xx
     elementid = 0
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = ElementalVariableValue
     variable = stress_yy
     elementid = 0
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = ElementalVariableValue
     variable = stress_zz
     elementid = 0
   [../]
 
-  [./stress_xx_l2_error]
+  [stress_xx_l2_error]
     type = ElementL2Error
     variable = stress_xx
     function = stress_xx
   [../]
-  [./stress_yy_l2_error]
+  [stress_yy_l2_error]
     type = ElementL2Error
     variable = stress_yy
     function = stress_yy
   [../]
-  [./stress_zz_l2_error]
+  [stress_zz_l2_error]
     type = ElementL2Error
     variable = stress_zz
     function = stress_zz

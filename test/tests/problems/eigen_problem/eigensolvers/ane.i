@@ -16,7 +16,7 @@
 # Its inverse is 35.349726539758187. Here a is equal to 10.
 
 [Variables]
-  [./u]
+  [u]
   []
 []
 
@@ -25,20 +25,20 @@
 # the problem is ill-conditioned at a constant vector.
 # We observed bad convergence when using a constant initial condition
 [ICs]
-  [./uic]
+  [uic]
     type = RandomIC
     variable = u
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = PHarmonic
     variable = u
     p = 3
   [../]
 
-  [./rhs]
+  [rhs]
     type = PMassKernel
     extra_vector_tags = 'eigen'
     variable = u
@@ -48,13 +48,13 @@
 []
 
 [BCs]
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 2'
     value = 0
   [../]
-  [./eigen]
+  [eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0 2'
@@ -68,7 +68,7 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
   [../]

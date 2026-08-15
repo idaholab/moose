@@ -11,19 +11,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     outputs = none
   [../]
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./elemental]
+  [elemental]
     order = CONSTANT
     family = MONOMIAL
     outputs = none
@@ -31,18 +31,18 @@
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
 []
 
 [AuxKernels]
-  [./elemental]
+  [elemental]
     type = ConstantAux
     variable = elemental
     value = 1
@@ -50,14 +50,14 @@
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 3

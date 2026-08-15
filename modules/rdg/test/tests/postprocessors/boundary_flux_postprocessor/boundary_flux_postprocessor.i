@@ -36,48 +36,48 @@ flux1_boundary0 = ${fparse A * B * nx_boundary0}
 []
 
 [Postprocessors]
-  [./flux0_boundary0]
+  [flux0_boundary0]
     type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux0_boundary0
     boundary = 0
     flux_index = 0
   [../]
-  [./flux0_boundary1]
+  [flux0_boundary1]
     type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux0_boundary1
     boundary = 1
     flux_index = 0
   [../]
-  [./flux0_provided]
+  [flux0_provided]
     type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux0_provided
     boundary = 0
     flux_index = 0
     normal = '${nx_provided} 0 0'
   [../]
-  [./flux1_boundary0]
+  [flux1_boundary0]
     type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux1_boundary0
     boundary = 0
     flux_index = 1
   [../]
 
-  [./flux0_boundary0_err]
+  [flux0_boundary0_err]
     type = RelativeDifferencePostprocessor
     value1 = flux0_boundary0
     value2 = ${flux0_boundary0}
   [../]
-  [./flux0_boundary1_err]
+  [flux0_boundary1_err]
     type = RelativeDifferencePostprocessor
     value1 = flux0_boundary1
     value2 = ${flux0_boundary1}
   [../]
-  [./flux0_provided_err]
+  [flux0_provided_err]
     type = RelativeDifferencePostprocessor
     value1 = flux0_provided
     value2 = ${flux0_provided}
   [../]
-  [./flux1_boundary0_err]
+  [flux1_boundary0_err]
     type = RelativeDifferencePostprocessor
     value1 = flux1_boundary0
     value2 = ${flux1_boundary0}
@@ -85,41 +85,41 @@ flux1_boundary0 = ${fparse A * B * nx_boundary0}
 []
 
 [UserObjects]
-  [./boundary_flux_flux0_boundary0]
+  [boundary_flux_flux0_boundary0]
     type = TestBoundaryFlux
   [../]
-  [./boundary_flux_flux0_boundary1]
+  [boundary_flux_flux0_boundary1]
     type = TestBoundaryFlux
   [../]
-  [./boundary_flux_flux0_provided]
+  [boundary_flux_flux0_provided]
     type = TestBoundaryFlux
   [../]
-  [./boundary_flux_flux1_boundary0]
+  [boundary_flux_flux1_boundary0]
     type = TestBoundaryFlux
   [../]
 []
 
 [Variables]
-  [./A]
+  [A]
   [../]
-  [./B]
+  [B]
   [../]
-  [./C]
+  [C]
   [../]
 []
 
 [ICs]
-  [./A_ic]
+  [A_ic]
     type = ConstantIC
     variable = A
     value = ${A}
   [../]
-  [./B_ic]
+  [B_ic]
     type = ConstantIC
     variable = B
     value = ${B}
   [../]
-  [./C_ic]
+  [C_ic]
     type = ConstantIC
     variable = C
     value = ${C}

@@ -8,11 +8,11 @@
 []
 
 [Postprocessors]
-  [./numsideqps]
+  [numsideqps]
     type = NumSideQPs
     boundary = 0
   [../]
-  [./numelemqps]
+  [numelemqps]
     type = NumElemQPs
     block = 0
   [../]
@@ -25,7 +25,7 @@
 
 [Executioner]
   type = Steady
-  [./Quadrature]
+  [Quadrature]
     order = third
     element_order = fifth
     side_order = seventh

@@ -4,7 +4,7 @@
 []
 
 [Functions]
-  [./series]
+  [series]
     type = FunctionSeries
     series_type = Cartesian
     orders = '0'

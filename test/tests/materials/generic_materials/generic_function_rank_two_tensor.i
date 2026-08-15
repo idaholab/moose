@@ -48,7 +48,7 @@
 []
 
 [Materials]
-  [./tensor]
+  [tensor]
     type = GenericFunctionRankTwoTensor
     tensor_name = function
     # tensor values are column major-ordered

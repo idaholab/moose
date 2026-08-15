@@ -24,46 +24,46 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./w]
+  [w]
   [../]
-  [./PolycrystalVariables] # Automatically creates order parameter variables
+  [PolycrystalVariables] # Automatically creates order parameter variables
   [../]
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
   [../]
-  [./force]
+  [force]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./free_energy]
+  [free_energy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./unique_grains]
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./var_indices]
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./centroids]
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./load_x]
+  [load_x]
     # Defines the force on the grains in the x-direction
     type = ParsedFunction
     expression = 0.005*cos(x*pi/600)
   [../]
-  [./load_y]
+  [load_y]
     # Defines the force on the grains in the y-direction
     type = ConstantFunction
     value = 0.002
@@ -71,7 +71,7 @@
 []
 
 [Kernels]
-  [./RigidBodyMultiKernel]
+  [RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
     c = c
     f_name = f_loc
@@ -82,17 +82,17 @@
     grain_tracker_object = grain_center
   [../]
   # Cahn Hilliard kernels
-  [./dt_w]
+  [dt_w]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
-  [./CH_wres]
+  [CH_wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./CH_Parsed]
+  [CH_Parsed]
     type = SplitCHParsed
     variable = c
     f_name = f_loc
@@ -100,7 +100,7 @@
     kappa_name = kappa_c
     coupled_variables = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/paste from line 4
   [../]
-  [./CH_RBM]
+  [CH_RBM]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -112,31 +112,31 @@
 []
 
 [AuxKernels]
-  [./force_x]
+  [force_x]
     type = FunctionAux
     variable = force
     function = load_x
   [../]
-  [./force_y]
+  [force_y]
     type = FunctionAux
     variable = force
     function = load_y
   [../]
-  [./energy_density]
+  [energy_density]
     type = TotalFreeEnergy
     variable = free_energy
     f_name = f_loc
     kappa_names = kappa_c
     interfacial_vars = c
   [../]
-  [./bnds]
+  [bnds]
     type = BndsCalcAux
     variable = bnds
   [../]
 []
 
 [BCs]
-  [./bcs]
+  [bcs]
     #zero flux BC
     type = NeumannBC
     value = 0
@@ -146,12 +146,12 @@
 []
 
 [Materials]
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
     prop_names = 'kappa_gr kappa_c M L'
     prop_values = '250 4000 4.5 60'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = f_loc
     constant_names = 'A B'
@@ -163,7 +163,7 @@
                                  #Copy/paste from lines 5-6
     derivative_order = 2
   [../]
-  [./force_density]
+  [force_density]
     type = ExternalForceDensityMaterial
     c = c
     k = 10.0
@@ -173,7 +173,7 @@
 []
 
 [Postprocessors]
-  [./total_energy]
+  [total_energy]
     type = ElementIntegralVariablePostprocessor
     variable = free_energy
     execute_on = 'initial timestep_end'
@@ -181,11 +181,11 @@
 []
 
 [VectorPostprocessors]
-  [./forces]
+  [forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
@@ -193,13 +193,13 @@
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
   [../]
-  [./grain_force]
+  [grain_force]
     type = ComputeExternalGrainForceAndTorque
     grain_data = grain_center
     c = c
@@ -210,7 +210,7 @@
 []
 
 [Preconditioning]
-  [./coupled]
+  [coupled]
     type = SMP
     full = true
   [../]
@@ -237,14 +237,14 @@
 [Outputs]
   exodus = true
   perf_graph = true
-  [./display]
+  [display]
     type = Console
     max_rows = 12
   [../]
 []
 
 [ICs]
-  [./concentration_IC]
+  [concentration_IC]
     type = SpecifiedSmoothCircleIC
     x_positions = '150 450 150 450'
     y_positions = '150 150 450 450'
@@ -255,7 +255,7 @@
     outvalue = 0.0
     int_width = 25
   [../]
-  [./gr0_IC]
+  [gr0_IC]
     type = SmoothCircleIC
     variable = gr0
     x1 = 150
@@ -265,7 +265,7 @@
     outvalue = 0.0
     int_width = 25
   [../]
-  [./gr1_IC]
+  [gr1_IC]
     type = SmoothCircleIC
     variable = gr1
     x1 = 450
@@ -275,7 +275,7 @@
     outvalue = 0.0
     int_width = 25
   [../]
-  [./gr2_IC]
+  [gr2_IC]
     type = SmoothCircleIC
     variable = gr2
     x1 = 150
@@ -285,7 +285,7 @@
     outvalue = 0.0
     int_width = 25
   [../]
-  [./gr3_IC]
+  [gr3_IC]
     type = SmoothCircleIC
     variable = gr3
     x1 = 450

@@ -9,23 +9,23 @@
 []
 
 [Functions]
-  [./displx]
+  [displx]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 0.00175'
   [../]
-  [./velocity_y]
+  [velocity_y]
     type = ParsedFunction
     expression = 'if(t < 2, 0.00175, 0)'
   [../]
-  [./velocity_z]
+  [velocity_z]
     type = ParsedFunction
     expression = 0.00175
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
@@ -33,26 +33,26 @@
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./move_x]
+  [move_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = displx
   [../]
 
-  [./fix_y]
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
   [../]
-  [./move_y]
+  [move_y]
     type = PresetVelocity
     variable = disp_y
     boundary = 5
@@ -60,13 +60,13 @@
 #    time_periods = 'p2 p3'
   [../]
 
-  [./fix_z]
+  [fix_z]
     type = DirichletBC
     variable = disp_z
     boundary = 3
     value = 0.0
   [../]
-  [./move_z]
+  [move_z]
     type = PresetVelocity
     variable = disp_z
     boundary = 6
@@ -76,18 +76,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 186.5e9
     poissons_ratio = .316
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 119.3e6
     cracked_elasticity_type = FULL
     softening_models = exponential_softening
   [../]
-  [./exponential_softening]
+  [exponential_softening]
     type = ExponentialSoftening
   [../]
 []
@@ -116,7 +116,7 @@
 []
 
 [Controls]
-  [./p1]
+  [p1]
     type = TimePeriod
     start_time = 0.0
     end_time = 1.0
@@ -125,7 +125,7 @@
     execute_on = 'initial timestep_begin'
   [../]
 
-  [./p2]
+  [p2]
     type = TimePeriod
     start_time = 1.0
     end_time = 2.0
@@ -135,7 +135,7 @@
     execute_on = 'initial timestep_begin'
   [../]
 
-  [./p3]
+  [p3]
     type = TimePeriod
     start_time = 2.0
     end_time = 3.0

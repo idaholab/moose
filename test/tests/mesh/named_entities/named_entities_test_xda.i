@@ -6,12 +6,12 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = '1 center_block 3'
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 20
       block = 'center_block 3'
@@ -20,7 +20,7 @@
 []
 
 [AuxVariables]
-  [./reporter]
+  [reporter]
     order = CONSTANT
     family = MONOMIAL
     block = 'left_block 3'
@@ -28,7 +28,7 @@
 []
 
 [ICs]
-  [./reporter_ic]
+  [reporter_ic]
     type = ConstantIC
     variable = reporter
     value = 10
@@ -38,14 +38,14 @@
 [Kernels]
   active = 'diff body_force'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     # Note we are using both names and numbers here
     block = 'left_block 2 right_block'
   [../]
 
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     block = 'center_block'
@@ -54,7 +54,7 @@
 []
 
 [AuxKernels]
-  [./hardness]
+  [hardness]
     type = MaterialRealAux
     variable = reporter
     property = 'hardness'
@@ -63,14 +63,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left_side'
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right_side'
@@ -79,14 +79,14 @@
 []
 
 [Postprocessors]
-  [./elem_average]
+  [elem_average]
     type = ElementAverageValue
     variable = u
     block = 'center_block'
     execute_on = 'initial timestep_end'
   [../]
 
-  [./side_average]
+  [side_average]
     type = SideAverageValue
     variable = u
     boundary = 'right_side'
@@ -95,14 +95,14 @@
 []
 
 [Materials]
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
     prop_names = 'hardness'
     prop_values = 10
     block = '1 right_block'
   [../]
 
-  [./empty]
+  [empty]
     type = MTMaterial
     block = 'center_block'
   [../]

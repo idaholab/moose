@@ -23,28 +23,28 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
   [../]
 []
 
 [BCs]
-  [./y_force]
+  [y_force]
     type = NeumannBC
     variable = disp_y
     boundary = top
     value = -1.0
   [../]
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
@@ -54,13 +54,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 0
   [../]
-  [./stress]
+  [stress]
     block = 0
   [../]
 []

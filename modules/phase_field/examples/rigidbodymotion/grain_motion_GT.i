@@ -19,16 +19,16 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./w]
+  [w]
   [../]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
@@ -36,17 +36,17 @@
     w = w
     coupled_variables = 'eta0 eta1 eta2 eta3'
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
-  [./motion]
+  [motion]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -56,7 +56,7 @@
     grain_volumes = grain_volumes
   [../]
 
-  [./RigidBodyMultiKernel]
+  [RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
     c = c
     f_name = F
@@ -69,12 +69,12 @@
 []
 
 [Functions]
-  [./load_x]
+  [load_x]
     # Defines the force on the grains in the x-direction
     type = ParsedFunction
     expression = 0.005*cos(x*pi/600)
   [../]
-  [./load_y]
+  [load_y]
     # Defines the force on the grains in the y-direction
     type = ConstantFunction
     value = 0.002
@@ -82,12 +82,12 @@
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    L kappa_c  kappa_eta'
     prop_values = '4.5 60  250      4000'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     #coupled_variables = 'c eta0 eta1 eta2 eta3'
@@ -104,12 +104,12 @@
                 +3*(eta0^2+eta1^2+eta2^2+eta3^2)^2)'
     derivative_order = 2
   [../]
-  #[./force_density]
+  #[force_density]
   #  type = ForceDensityMaterial
   #  c = c
   #  etas = 'eta0 eta1 eta2 eta3'
   #[../]
-  [./force_density]
+  [force_density]
     type = ExternalForceDensityMaterial
     c = c
     k = 10.0
@@ -120,45 +120,45 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
   [../]
-  [./unique_grains]
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./var_indices]
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./centroids]
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./bnds]
+  [bnds]
     type = BndsCalcAux
     variable = bnds
     #var_name_base = eta
     #op_num = 4.0
     v = 'eta0 eta1 eta2 eta3'
   [../]
-  [./unique_grains]
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_center
     field_display = UNIQUE_REGION
     execute_on = timestep_begin
   [../]
-  [./var_indices]
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_center
     field_display = VARIABLE_COLORING
     execute_on = timestep_begin
   [../]
-  [./centroids]
+  [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = timestep_begin
@@ -168,7 +168,7 @@
 []
 
 [ICs]
-  [./ic_eta1]
+  [ic_eta1]
     x_positions = '32.5 24.0'
     int_width = 1.0
     z_positions = '0 0'
@@ -181,7 +181,7 @@
     type = SpecifiedSmoothCircleIC
     block = 0
   [../]
-  [./multip]
+  [multip]
     x_positions = '5.5 15.5 24.0 32.5 7.0 15.5 24.0 32.5'
     int_width = 1.0
     z_positions = '0 0'
@@ -194,7 +194,7 @@
     type = SpecifiedSmoothCircleIC
     block = 0
   [../]
-  [./ic_eta0]
+  [ic_eta0]
     x_positions = '5.5 15.5'
     int_width = 1.0
     z_positions = '0 0'
@@ -207,7 +207,7 @@
     type = SpecifiedSmoothCircleIC
     block = 0
   [../]
-  [./ic_eta2]
+  [ic_eta2]
     x_positions = '24.0 7.0'
     int_width = 1.0
     z_positions = '0 0'
@@ -220,7 +220,7 @@
     type = SpecifiedSmoothCircleIC
     block = 0
   [../]
-  [./ic_eta3]
+  [ic_eta3]
     x_positions = '15.5 32.5'
     int_width = 1.0
     z_positions = '0 0'
@@ -236,11 +236,11 @@
 []
 
 [VectorPostprocessors]
-  [./forces]
+  [forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
@@ -248,13 +248,13 @@
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
   [../]
-  [./grain_force]
+  [grain_force]
     type = ComputeExternalGrainForceAndTorque
     c = c
     grain_data = grain_center
@@ -265,7 +265,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

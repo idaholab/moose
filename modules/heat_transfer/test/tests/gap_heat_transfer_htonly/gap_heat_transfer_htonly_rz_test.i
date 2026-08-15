@@ -55,7 +55,7 @@
 []
 [Functions]
 
-  [./ramp]
+  [ramp]
     type = PiecewiseLinear
     x = '0   1   2'
     y = '100 200 200'
@@ -63,7 +63,7 @@
 []
 
 [ThermalContact]
-  [./thermal_contact]
+  [thermal_contact]
     type = GapHeatTransfer
     variable = temp
     primary = 3
@@ -71,7 +71,7 @@
     emissivity_primary = 0
     emissivity_secondary = 0
   [../]
-  [./thermal_contact2]
+  [thermal_contact2]
     type = GapHeatTransfer
     variable = temp2
     primary = 3
@@ -84,12 +84,12 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
   [../]
-  [./temp2]
+  [temp2]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
@@ -97,22 +97,22 @@
 []
 
 [AuxVariables]
-  [./gap_cond]
+  [gap_cond]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./gap_cond2]
+  [gap_cond2]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
   [../]
-  [./heat2]
+  [heat2]
     type = HeatConduction
     variable = temp2
   [../]
@@ -120,28 +120,28 @@
 
 
 [BCs]
-  [./temp_far_left]
+  [temp_far_left]
     type = FunctionDirichletBC
     boundary = 1
     variable = temp
     function = ramp
   [../]
 
-  [./temp_far_right]
+  [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
   [../]
 
-  [./temp_far_left2]
+  [temp_far_left2]
     type = FunctionDirichletBC
     boundary = 1
     variable = temp2
     function = ramp
   [../]
 
-  [./temp_far_right2]
+  [temp_far_right2]
     type = DirichletBC
     boundary = 4
     variable = temp2
@@ -150,13 +150,13 @@
 []
 
 [AuxKernels]
-  [./conductance]
+  [conductance]
     type = MaterialRealAux
     property = gap_conductance
     variable = gap_cond
     boundary = 2
   [../]
-  [./conductance2]
+  [conductance2]
     type = MaterialRealAux
     property = gap_conductance
     variable = gap_cond2
@@ -166,13 +166,13 @@
 
 [Materials]
 
-  [./heat1]
+  [heat1]
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 1e6
   [../]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     block = '1 2'
     prop_names = 'density'
@@ -209,56 +209,56 @@
 
 [Postprocessors]
 
-  [./temp_left]
+  [temp_left]
     type = SideAverageValue
     boundary = 2
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./temp_right]
+  [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./flux_left]
+  [flux_left]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
   [../]
 
-  [./flux_right]
+  [flux_right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
   [../]
 
-  [./temp_left2]
+  [temp_left2]
     type = SideAverageValue
     boundary = 2
     variable = temp2
     execute_on = 'initial timestep_end'
   [../]
 
-  [./temp_right2]
+  [temp_right2]
     type = SideAverageValue
     boundary = 3
     variable = temp2
     execute_on = 'initial timestep_end'
   [../]
 
-  [./flux_left2]
+  [flux_left2]
     type = SideDiffusiveFluxIntegral
     variable = temp2
     boundary = 2
     diffusivity = thermal_conductivity
   [../]
 
-  [./flux_right2]
+  [flux_right2]
     type = SideDiffusiveFluxIntegral
     variable = temp2
     boundary = 3

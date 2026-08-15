@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [BCs]
-  [./bc_left]
+  [bc_left]
     type = MatTestNeumannBC
     variable = u
     boundary = left

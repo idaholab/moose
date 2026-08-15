@@ -12,10 +12,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 25.0
       y1 = 25.0
@@ -25,14 +25,14 @@
       int_width = 3.0
     [../]
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 30.0
       y1 = 25.0
@@ -45,23 +45,23 @@
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
   [../]
-  [./ACBulk]
+  [ACBulk]
     type = AllenCahn
     variable = eta
     coupled_variables = c
     f_name = F
   [../]
-  [./ACInterface]
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = kappa_eta
   [../]
 
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
@@ -69,12 +69,12 @@
     w = w
     coupled_variables = 'eta'
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
@@ -82,37 +82,37 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1 1        '
   [../]
-  [./consts2]
+  [consts2]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 1'
   [../]
 
-  [./switching]
+  [switching]
     type = SwitchingFunctionMaterial
     eta = eta
     h_order = SIMPLE
   [../]
-  [./barrier]
+  [barrier]
     type = BarrierFunctionMaterial
     eta = eta
     g_order = SIMPLE
   [../]
 
-  [./free_energy_A]
+  [free_energy_A]
     type = DerivativeParsedMaterial
     property_name = Fa
     coupled_variables = 'c'
@@ -120,7 +120,7 @@
     derivative_order = 2
     enable_jit = true
   [../]
-  [./free_energy_B]
+  [free_energy_B]
     type = DerivativeParsedMaterial
     property_name = Fb
     coupled_variables = 'c'
@@ -129,7 +129,7 @@
     enable_jit = true
   [../]
 
-  [./free_energy]
+  [free_energy]
     type = DerivativeTwoPhaseMaterial
     property_name = F
     fa_name = Fa
@@ -143,7 +143,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

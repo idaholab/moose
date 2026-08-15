@@ -126,13 +126,13 @@
 []
 
 [Postprocessors]
-  [./l2_rho]
+  [l2_rho]
     type = ElementL2Error
     variable = fv_rho
     function = exact_rho
     execute_on = timestep_end
   [../]
-  [./l2_vel]
+  [l2_vel]
     type = ElementL2Error
     variable = fv_vel
     function = exact_vel

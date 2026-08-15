@@ -12,27 +12,27 @@
 []
 
 [AuxVariables]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./e_yy]
+  [e_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./fp_yy]
+  [fp_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./rotout]
+  [rotout]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./gss1]
+  [gss1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -40,14 +40,14 @@
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     expression = 0.01*t
   [../]
 []
 
 [UserObjects]
-  [./prop_read]
+  [prop_read]
     type = PropertyReadFile
     prop_file_name = 'euler_ang_file.txt'
     # Enter file data as prop#1, prop#2, .., prop#nprop
@@ -57,7 +57,7 @@
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     variable = stress_yy
     rank_two_tensor = stress
@@ -66,7 +66,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./e_yy]
+  [e_yy]
     type = RankTwoAux
     variable = e_yy
     rank_two_tensor = lage
@@ -75,7 +75,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./fp_yy]
+  [fp_yy]
     type = RankTwoAux
     variable = fp_yy
     rank_two_tensor = fp
@@ -84,7 +84,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./gss1]
+  [gss1]
     type = MaterialStdVectorAux
     variable = gss1
     property = gss
@@ -95,19 +95,19 @@
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
   [../]
-  [./fix_y]
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
-  [./tdisp]
+  [tdisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
@@ -116,7 +116,7 @@
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
     gtol = 1e-2
@@ -128,7 +128,7 @@
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     tan_mod_type = exact
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
@@ -138,22 +138,22 @@
 []
 
 [Postprocessors]
-  [./stress_yy]
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./e_yy]
+  [e_yy]
     type = ElementAverageValue
     variable = e_yy
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./fp_yy]
+  [fp_yy]
     type = ElementAverageValue
     variable = fp_yy
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./gss1]
+  [gss1]
     type = ElementAverageValue
     variable = gss1
     block = 'ANY_BLOCK_ID 0'
@@ -161,7 +161,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -192,7 +192,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true

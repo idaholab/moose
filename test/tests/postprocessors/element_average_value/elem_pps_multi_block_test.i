@@ -17,26 +17,26 @@
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = x
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [Kernels]
-  [./uv]
+  [uv]
     type = Reaction
     variable = u
   [../]
 
-  [./fv]
+  [fv]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -44,7 +44,7 @@
 []
 
 [Postprocessors]
-  [./avg_1_2]
+  [avg_1_2]
     type = ElementAverageValue
     variable = u
     block = '0 1'
@@ -57,7 +57,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
   [../]

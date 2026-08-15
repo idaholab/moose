@@ -6,7 +6,7 @@
 [Variables]
   active = 'phi'
 
-  [./phi]
+  [phi]
     order  = SECOND
     family = LAGRANGE
   [../]
@@ -17,7 +17,7 @@
 
   active = 'advection diffusion source'
 
-  [./advection]
+  [advection]
     type     = Advection0
     variable = phi
     Au       = 10.
@@ -28,7 +28,7 @@
     Cv       = -1.
   [../]
 
-  [./diffusion]
+  [diffusion]
     type     = Diffusion0
     variable = phi
     Ak       = 10.
@@ -36,7 +36,7 @@
     Ck       = 0.1
   [../]
 
-  [./source]
+  [source]
     type     = ForcingFunctionXYZ0
     variable = phi
     omega0   = 2.
@@ -60,7 +60,7 @@
 
   active = 'btm_sca rgt_sca top_sca lft_sca'
 
-  [./btm_sca]
+  [btm_sca]
     type     = DirichletBCfuncXYZ0
     variable = phi
     boundary = 1
@@ -70,7 +70,7 @@
     C0       = 0.8
   [../]
 
-  [./rgt_sca]
+  [rgt_sca]
     type     = DirichletBCfuncXYZ0
     variable = phi
     boundary = 2
@@ -80,7 +80,7 @@
     C0       = 0.8
   [../]
 
-  [./top_sca]
+  [top_sca]
     type     = DirichletBCfuncXYZ0
     variable = phi
     boundary = 3
@@ -90,7 +90,7 @@
     C0       = 0.8
   [../]
 
-  [./lft_sca]
+  [lft_sca]
     type     = DirichletBCfuncXYZ0
     variable = phi
     boundary = 4

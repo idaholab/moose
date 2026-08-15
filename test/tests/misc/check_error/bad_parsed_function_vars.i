@@ -7,13 +7,13 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = 0
   [../]
 []
 
 [Functions]
-  [./sin_func]
+  [sin_func]
     type = ParsedFunction
     expression = sin(y)
     symbol_names = y        # <- This is a bad - you can't specify x, y, z, or t
@@ -22,7 +22,7 @@
 []
 
 [Kernels]
-  [./diffused]
+  [diffused]
     type = Diffusion
     variable = u
     block = 0
@@ -30,13 +30,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
   [../]
-  [./right]
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right

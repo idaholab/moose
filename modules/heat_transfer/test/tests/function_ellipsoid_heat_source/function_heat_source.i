@@ -15,22 +15,22 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 300
   [../]
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = ADHeatConductionTimeDerivative
     variable = temp
   [../]
-  [./heat_conduct]
+  [heat_conduct]
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = thermal_conductivity
   [../]
-  [./heat_source]
+  [heat_source]
     type = ADMatHeatSource
     material_property = volumetric_heat
     variable = temp
@@ -38,7 +38,7 @@
 []
 
 [BCs]
-  [./temp_bottom_fix]
+  [temp_bottom_fix]
     type = ADDirichletBC
     variable = temp
     boundary = 1
@@ -47,17 +47,17 @@
 []
 
 [Materials]
-  [./heat]
+  [heat]
     type = ADHeatConductionMaterial
     specific_heat = 603
     thermal_conductivity = 10e-2
   [../]
-  [./density]
+  [density]
     type = ADGenericConstantMaterial
     prop_names = 'density'
     prop_values = '4.43e-6'
   [../]
-  [./volumetric_heat]
+  [volumetric_heat]
     type = FunctionPathEllipsoidHeatSource
     rx = 1
     ry = 1
@@ -72,15 +72,15 @@
 []
 
 [Functions]
-  [./path_x]
+  [path_x]
     type = ParsedFunction
     expression = 2*cos(2.0*pi*t)
   [../]
-  [./path_y]
+  [path_y]
     type = ParsedFunction
     expression = 2*sin(2.0*pi*t)
   [../]
-  [./path_z]
+  [path_z]
     type = ParsedFunction
     expression = 1.0
   [../]
@@ -103,7 +103,7 @@
 []
 
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
   [../]

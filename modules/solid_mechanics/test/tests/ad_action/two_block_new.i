@@ -32,12 +32,12 @@
   strain = FINITE
   generate_output = 'stress_xx'
 
-  [./block1]
+  [block1]
     # the `block` parameter is only valid insde a subblock.
     block = 1
     use_automatic_differentiation = true
   [../]
-  [./block2]
+  [block2]
     block = 2
     # the `additional_generate_output` parameter is also only valid inside a
     # subblock. Values specified here are appended to the `generate_output`
@@ -48,18 +48,18 @@
 []
 
 [AuxVariables]
-  [./stress_theta]
+  [stress_theta]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_theta]
+  [strain_theta]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./stress_theta]
+  [stress_theta]
     type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 2
@@ -67,7 +67,7 @@
     variable = stress_theta
     execute_on = timestep_end
   [../]
-  [./strain_theta]
+  [strain_theta]
     type = ADRankTwoAux
     rank_two_tensor = total_strain
     index_i = 2
@@ -78,41 +78,41 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
   [../]
-  [./_elastic_stress1]
+  [_elastic_stress1]
     type = ADComputeFiniteStrainElasticStress
     block = 1
   [../]
-  [./_elastic_stress2]
+  [_elastic_stress2]
     type = ADComputeFiniteStrainElasticStress
     block = 2
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = 'left'
     variable = disp_x
     value = 0.0
   [../]
-  [./top]
+  [top]
     type = DirichletBC
     boundary = 'top'
     variable = disp_y
     value = 0.0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     boundary = 'right'
     variable = disp_x
     value = 0.01
   [../]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     boundary = 'bottom'
     variable = disp_y
@@ -125,7 +125,7 @@
 []
 
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
   [../]

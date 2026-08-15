@@ -26,7 +26,7 @@
 []
 
 [UserObjects]
-  [./square_planar_cut_uo]
+  [square_planar_cut_uo]
     type = RectangleCutUserObject
     cut_data = '-0.2  0.0 -0.5
                 -0.2  0.0  0.0
@@ -36,16 +36,16 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz'
@@ -53,7 +53,7 @@
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0 2.0 4.0 6.0 8.0'
     y = '0 1000 0 1000 0'
@@ -61,19 +61,19 @@
 []
 
 [DiracKernels]
-  [./p_x]
+  [p_x]
     type = XFEMPressure
     variable = disp_x
     component = 0
     function = pressure
   [../]
-  [./p_y]
+  [p_y]
     type = XFEMPressure
     variable = disp_y
     component = 1
     function = pressure
   [../]
-  [./p_z]
+  [p_z]
     type = XFEMPressure
     variable = disp_z
     component = 2
@@ -82,19 +82,19 @@
 []
 
 [BCs]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_x
     value = 0.0
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_y
     value = 0.0
   [../]
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_z
@@ -103,12 +103,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -122,7 +122,7 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -145,7 +145,7 @@
 [Outputs]
   file_base = edge_3d_pressure_out
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

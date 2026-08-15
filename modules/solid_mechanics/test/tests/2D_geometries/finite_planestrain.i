@@ -13,7 +13,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     planar_formulation = PLANE_STRAIN
     add_variables = true
@@ -22,26 +22,26 @@
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = ParsedFunction
     expression ='0.005 * t'
   [../]
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     boundary = left
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
   [../]
-  [./pull]
+  [pull]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
@@ -50,10 +50,10 @@
 []
 
 [Materials]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6

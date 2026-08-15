@@ -11,36 +11,36 @@
     nx = 2
     ny = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0.5 0 0'
     top_right = '1 1 0'
     block_id = 1
   [../]
-  [./interface]
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
   [../]
-  [./break_boundary]
+  [break_boundary]
     input = interface
     type = BreakBoundaryOnSubdomainGenerator
   [../]
 []
 
 [Variables]
-  [./u]
-    [./InitialCondition]
+  [u]
+    [InitialCondition]
       type = ConstantIC
       value = 1
     [../]
     block = 0
   [../]
-  [./u_neighbor]
-    [./InitialCondition]
+  [u_neighbor]
+    [InitialCondition]
       type = ConstantIC
       value = 1
     [../]
@@ -49,47 +49,47 @@
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = (x*x*x)-6.0*x
   [../]
 
-  [./bc_fn]
+  [bc_fn]
     type = ParsedFunction
     expression = (x*x*x)
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = diffusivity
     block = 0
   [../]
-  [./abs]
+  [abs]
     type = Reaction
     variable = u
     block = 0
   [../]
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
     block = 0
   [../]
-  [./diffn]
+  [diffn]
     type = MatDiffusionTest
     variable = u_neighbor
     prop_name = diffusivity
     block = 1
   [../]
-  [./absn]
+  [absn]
     type = Reaction
     variable = u_neighbor
     block = 1
   [../]
-  [./forcingn]
+  [forcingn]
     type = BodyForce
     variable = u_neighbor
     function = forcing_fn
@@ -98,7 +98,7 @@
 []
 
 [InterfaceKernels]
-  [./flux_match]
+  [flux_match]
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = u_neighbor
@@ -108,13 +108,13 @@
 []
 
 [BCs]
-  [./u]
+  [u]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left'
     function = bc_fn
   [../]
-  [./u_neighbor]
+  [u_neighbor]
     type = FunctionDirichletBC
     variable = u_neighbor
     boundary = 'right'
@@ -124,13 +124,13 @@
 
 [Materials]
   active = 'constant'
-  [./stateful]
+  [stateful]
     type = StatefulTest
     prop_names = 'diffusivity'
     prop_values = '1'
     block = '0 1'
   [../]
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
     prop_names = 'diffusivity'
     prop_values = '1'
@@ -139,7 +139,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -153,8 +153,8 @@
 [Adaptivity]
   marker = 'marker'
   steps = 1
-  [./Markers]
-    [./marker]
+  [Markers]
+    [marker]
       type = BoxMarker
       bottom_left = '0 0 0'
       top_right = '1 1 0'

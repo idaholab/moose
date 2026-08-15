@@ -7,7 +7,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
     fv = true
@@ -15,7 +15,7 @@
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 0.1
@@ -23,13 +23,13 @@
 []
 
 [FVBCs]
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = left
     value = 1
   [../]
-  [./right]
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = right
@@ -45,12 +45,12 @@
 []
 
 [Postprocessors]
-  [./elem_left]
+  [elem_left]
     type = ElementalVariableValue
     variable = u
     elementid = 0
   []
-  [./elem_right]
+  [elem_right]
     type = ElementalVariableValue
     variable = u
     elementid = 9

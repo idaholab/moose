@@ -23,21 +23,21 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
-  [./rad_disp]
+  [rad_disp]
   [../]
 []
 
 [Functions]
-  [./temperature_load]
+  [temperature_load]
     type = ParsedFunction
     expression = t+300.0
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     eigenstrain_names = eigenstrain
@@ -45,26 +45,26 @@
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = temperature_load
     use_displaced_mesh = false
   [../]
-  [./raddispaux]
+  [raddispaux]
     type = RadialDisplacementCylinderAux
     variable = rad_disp
   [../]
 []
 
 [BCs]
-  [./x]
+  [x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./y]
+  [y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
@@ -73,15 +73,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./small_stress]
+  [small_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion]
+  [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
     thermal_expansion_coeff = 1.3e-5
@@ -117,7 +117,7 @@
 []
 
 #[Postprocessors]
-#  [./strain_xx]
+#  [strain_xx]
 #    type = SideAverageValue
 #    variable =
 #    block = 0

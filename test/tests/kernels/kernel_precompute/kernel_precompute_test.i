@@ -12,7 +12,7 @@
 [Variables]
   active = 'convected'
 
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -21,12 +21,12 @@
 [Kernels]
   active = 'diff conv'
 
-  [./diff]
+  [diff]
     type = DiffusionPrecompute
     variable = convected
   [../]
 
-  [./conv]
+  [conv]
     type = ConvectionPrecompute
     variable = convected
     velocity = '1.0 0.0 0.0'
@@ -36,14 +36,14 @@
 [BCs]
   active = 'bottom top'
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = convected
     boundary = 'left'
     value = 0
   [../]
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = convected
     boundary = 'right'

@@ -13,7 +13,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./block1]
+  [block1]
     strain = SMALL #detects the change in coordinate system and automatically sets the correct strain class
     add_variables = true
     generate_output = 'stress_zz vonmises_stress' #use stress_zz to get stress_theta quantity
@@ -21,30 +21,30 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_r #change the variable to reflect the new displacement names
     boundary = left
     value = 0.0
   [../]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_z #change the variable to reflect the new displacement names
     boundary = bottom
     value = 0.0
   [../]
-  [./top]
+  [top]
     type = DirichletBC
     variable = disp_z #change the variable to reflect the new displacement names
     boundary = top
@@ -53,7 +53,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

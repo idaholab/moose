@@ -12,40 +12,40 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./ddt_u]
+  [ddt_u]
     type = TimeDerivative
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
 
-  [./ddt_v]
+  [ddt_v]
     type = TimeDerivative
     variable = v
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
     extra_matrix_tags = 'mat_tag1 mat_tag2'
@@ -54,7 +54,7 @@
 []
 
 [DiracKernels]
-  [./nonlinear_source]
+  [nonlinear_source]
     type = NonlinearSource
     variable = u
     coupled_var = v
@@ -66,7 +66,7 @@
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 3
@@ -75,7 +75,7 @@
     extra_vector_tags = 'vec_tag1'
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
@@ -84,7 +84,7 @@
     extra_vector_tags = 'vec_tag1'
   [../]
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
@@ -93,7 +93,7 @@
     extra_vector_tags = 'vec_tag1'
   [../]
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
@@ -104,7 +104,7 @@
 []
 
 [Preconditioning]
-  [./precond]
+  [precond]
     type = SMP
     full = true
   [../]
@@ -120,26 +120,26 @@
 []
 
 [AuxVariables]
-  [./tag_variable1]
+  [tag_variable1]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./tag_variable2]
+  [tag_variable2]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./TagVectorAux1]
+  [TagVectorAux1]
     type = TagVectorAux
     variable = tag_variable1
     v = u
     vector_tag = vec_tag2
   [../]
 
-  [./TagVectorAux2]
+  [TagVectorAux2]
     type = TagMatrixAux
     variable = tag_variable2
     v = u
@@ -159,7 +159,7 @@
 []
 
 [Postprocessors]
-  [./point_value]
+  [point_value]
     type = PointValue
     variable = u
     point = '0.2 0.3 0'

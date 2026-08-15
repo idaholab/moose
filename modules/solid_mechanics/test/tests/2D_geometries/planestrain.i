@@ -6,7 +6,7 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
@@ -15,7 +15,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
     planar_formulation = PLANE_STRAIN
     add_variables = true
@@ -24,26 +24,26 @@
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = ParsedFunction
     expression ='0.01 * t'
   [../]
 []
 
 [BCs]
-  [./rightx]
+  [rightx]
     type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [bottomy]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
   [../]
-  [./pull]
+  [pull]
     type = FunctionDirichletBC
     boundary = 2
     variable = disp_y
@@ -52,11 +52,11 @@
 []
 
 [Materials]
-  [./linear_stress]
+  [linear_stress]
     type = ComputeLinearElasticStress
     block = 0
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     poissons_ratio = 0.3

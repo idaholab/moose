@@ -14,12 +14,12 @@ velocity=1
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
 []
 
 [Kernels]
-  [./adv]
+  [adv]
     type = AdvectionSUPG
     variable = c
     forcing_func = 'ffn'
@@ -27,7 +27,7 @@ velocity=1
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = c
     boundary = left
@@ -36,7 +36,7 @@ velocity=1
 []
 
 [Materials]
-  [./mat]
+  [mat]
     # These Materials are required by the INSBase class; we don't use them for anything.
     type = GenericConstantMaterial
     prop_names = 'mu rho'
@@ -45,7 +45,7 @@ velocity=1
 []
 
 [Functions]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression = 'if(x < 6, 1 - .25 * x, if(x < 8, -2 + .25 * x, 0))'
   [../]

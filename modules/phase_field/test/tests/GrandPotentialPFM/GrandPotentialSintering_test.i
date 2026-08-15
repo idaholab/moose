@@ -19,29 +19,29 @@
 []
 
 [Variables]
-  [./w]
+  [w]
   [../]
-  [./phi]
+  [phi]
   [../]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
   [../]
-  [./T]
+  [T]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./F_loc]
+  [F_loc]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [ICs]
-  [./phi_IC]
+  [phi_IC]
     type = SpecifiedSmoothCircleIC
     variable = phi
     x_positions = '190 490 190 490'
@@ -51,7 +51,7 @@
     invalue = 0
     outvalue = 1
   [../]
-  [./gr0_IC]
+  [gr0_IC]
     type = SmoothCircleIC
     variable = gr0
     x1 = 190
@@ -61,7 +61,7 @@
     invalue = 1
     outvalue = 0
   [../]
-  [./gr1_IC]
+  [gr1_IC]
     type = SmoothCircleIC
     variable = gr1
     x1 = 490
@@ -71,7 +71,7 @@
     invalue = 1
     outvalue = 0
   [../]
-  [./gr2_IC]
+  [gr2_IC]
     type = SmoothCircleIC
     variable = gr2
     x1 = 190
@@ -81,7 +81,7 @@
     invalue = 1
     outvalue = 0
   [../]
-  [./gr3_IC]
+  [gr3_IC]
     type = SmoothCircleIC
     variable = gr3
     x1 = 490
@@ -94,7 +94,7 @@
 []
 
 [Functions]
-  [./f_T]
+  [f_T]
     type = ConstantFunction
     value = 1600
   [../]
@@ -102,7 +102,7 @@
 
 [Materials]
   # Free energy coefficients for parabolic curves
-  [./ks]
+  [ks]
     type = ParsedMaterial
     property_name = ks
     coupled_variables = 'T'
@@ -110,14 +110,14 @@
     constant_expressions = '-0.0025 157.16'
     expression = 'a*T + b'
   [../]
-  [./kv]
+  [kv]
     type = ParsedMaterial
     property_name = kv
     material_property_names = 'ks'
     expression = '10*ks'
   [../]
   # Diffusivity and mobilities
-  [./chiD]
+  [chiD]
     type = GrandPotentialTensorMaterial
     f_name = chiD
     solid_mobility = L
@@ -136,7 +136,7 @@
     outputs = exodus
   [../]
   # Equilibrium vacancy concentration
-  [./cs_eq]
+  [cs_eq]
     type = DerivativeParsedMaterial
     property_name = cs_eq
     coupled_variables = 'gr0 gr1 gr2 gr3 T'
@@ -145,7 +145,7 @@
     expression = 'bnds:=gr0^2 + gr1^2 + gr2^2 + gr3^2; exp(-Ef/kB/T) + 4.0 * c_GB * (1 - bnds)^2'
   [../]
   # Everything else
-  [./sintering]
+  [sintering]
     type = GrandPotentialSinteringMaterial
     chemical_potential = w
     void_op = phi
@@ -159,7 +159,7 @@
   [../]
 
   # Concentration is only meant for output
-  [./c]
+  [c]
     type = ParsedMaterial
     property_name = c
     material_property_names = 'hs rhos hv rhov'
@@ -168,7 +168,7 @@
     expression = 'Va*(hs*rhos + hv*rhov)'
     outputs = exodus
   [../]
-  [./f_bulk]
+  [f_bulk]
     type = ParsedMaterial
     property_name = f_bulk
     coupled_variables = 'phi gr0 gr1 gr2 gr3'
@@ -179,7 +179,7 @@
                   + gr1^2*(gr2^2 + gr3^2) + gr2^2*gr3^2) + 0.25)'
     outputs = exodus
   [../]
-  [./f_switch]
+  [f_switch]
     type = ParsedMaterial
     property_name = f_switch
     coupled_variables = 'w'
@@ -187,7 +187,7 @@
     expression = '0.5*w^2*chi'
     outputs = exodus
   [../]
-  [./f0]
+  [f0]
     type = ParsedMaterial
     property_name = f0
     material_property_names = 'f_bulk f_switch'
@@ -196,44 +196,44 @@
 []
 
 [Kernels]
-  [./dt_gr0]
+  [dt_gr0]
     type = TimeDerivative
     variable = gr0
   [../]
-  [./dt_gr1]
+  [dt_gr1]
     type = TimeDerivative
     variable = gr1
   [../]
-  [./dt_gr2]
+  [dt_gr2]
     type = TimeDerivative
     variable = gr2
   [../]
-  [./dt_gr3]
+  [dt_gr3]
     type = TimeDerivative
     variable = gr3
   [../]
-  [./dt_phi]
+  [dt_phi]
     type = TimeDerivative
     variable = phi
   [../]
-  [./dt_w]
+  [dt_w]
     type = TimeDerivative
     variable = w
   [../]
 []
 
 [AuxKernels]
-  [./bnds_aux]
+  [bnds_aux]
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
   [../]
-  [./T_aux]
+  [T_aux]
     type = FunctionAux
     variable = T
     function = f_T
   [../]
-  [./F_aux]
+  [F_aux]
     type = TotalFreeEnergy
     variable = F_loc
     f_name = f0

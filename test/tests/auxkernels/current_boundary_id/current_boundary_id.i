@@ -5,7 +5,7 @@
 #[Mesh]
 #  type = MeshGeneratorMesh
 #
-#  [./cartesian]
+#  [cartesian]
 #    type = CartesianMeshGenerator
 #    dim = 2
 #    dx = '1 1'
@@ -15,7 +15,7 @@
 #    subdomain_id = '1 2'
 #  [../]
 #
-#  [./interior_bc]
+#  [interior_bc]
 #    type = SideSetsBetweenSubdomainsGenerator
 #    primary_block = 1
 #    paired_block = 2
@@ -34,7 +34,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
@@ -43,25 +43,25 @@
 []
 
 [AuxVariables]
-  [./id1]
+  [id1]
     family = MONOMIAL
     order = CONSTANT
   []
 
-  [./id2]
+  [id2]
     family = MONOMIAL
     order = CONSTANT
   []
 []
 
 [AuxKernels]
-  [./id1]
+  [id1]
     type = BIDAux
     variable = id1
     boundary = 'top'
   [../]
 
-  [./id2]
+  [id2]
     type = BIDAux
     variable = id2
     boundary = '12'

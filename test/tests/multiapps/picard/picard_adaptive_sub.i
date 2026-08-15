@@ -6,21 +6,21 @@
 []
 
 [Variables]
-  [./v]
+  [v]
   [../]
 []
 
 [AuxVariables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
-  [./force_v]
+  [force_v]
     type = CoupledForce
     variable = v
     v = u
@@ -28,13 +28,13 @@
 []
 
 [BCs]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
   [../]
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
@@ -51,7 +51,7 @@
   petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-10
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     cutback_factor = 0.4
     growth_factor = 1.2

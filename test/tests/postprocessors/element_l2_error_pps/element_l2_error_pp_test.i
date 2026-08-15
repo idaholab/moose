@@ -26,7 +26,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -35,14 +35,14 @@
 [Functions]
   active = 'forcing_func u_func'
 
-  [./forcing_func]
+  [forcing_func]
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '4'
   [../]
 
-  [./u_func]
+  [u_func]
     type = ParsedFunction
     expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
@@ -53,12 +53,12 @@
 [Kernels]
   active = 'diff forcing'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_func
@@ -68,14 +68,14 @@
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = '1'
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = '3'
@@ -86,7 +86,7 @@
 [Executioner]
   type = Steady
 
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = 1.0
     coarsen_fraction = 0.0
     max_h_level = 10
@@ -96,7 +96,7 @@
 
 # Postprocessor System
 [Postprocessors]
-  [./integral]
+  [integral]
     type = ElementL2Error
     variable = u
     function = u_func

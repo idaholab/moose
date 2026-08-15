@@ -20,7 +20,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
@@ -31,27 +31,27 @@
 
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./cs]
+  [cs]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./mc_coh]
+  [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 10
   [../]
-  [./phi]
+  [phi]
     type = SolidMechanicsHardeningConstant
     value = 0.8
   [../]
-  [./psi]
+  [psi]
     type = SolidMechanicsHardeningConstant
     value = 0.4
   [../]
-  [./dp]
+  [dp]
     type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = phi
@@ -62,22 +62,22 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     lambda = 0.7
     shear_modulus = 1.0
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '10 0 0  0 10 0  0 0 10'
     eigenstrain_name = ini_stress
   [../]
-  [./admissible]
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = dp
   [../]
-  [./dp]
+  [dp]
     type = CappedDruckerPragerStressUpdate
     DP_model = dp
     tensile_strength = ts
@@ -89,7 +89,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'

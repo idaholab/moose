@@ -10,7 +10,7 @@
 [Variables][dummy][][]
 
 [Functions]
-  [./interpolate_vpp]
+  [interpolate_vpp]
     type = VectorPostprocessorFunction
     vectorpostprocessor_name = read_data
     argument_column = time
@@ -24,7 +24,7 @@
 []
 
 [Postprocessors]
-  [./check_value]
+  [check_value]
     type = FunctionValuePostprocessor
     function = interpolate_vpp
     execute_on = 'INITIAL TIMESTEP_END'
@@ -32,7 +32,7 @@
 []
 
 [VectorPostprocessors]
-  [./read_data]
+  [read_data]
     type = CSVReader
     csv_file = time_data.csv
     force_preaux = true # necessary so that vpp data exists to interpolate on step 0

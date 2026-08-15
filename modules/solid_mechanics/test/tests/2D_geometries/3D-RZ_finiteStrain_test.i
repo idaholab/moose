@@ -42,7 +42,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     block = 1
@@ -50,18 +50,18 @@
 []
 
 [AuxVariables]
-  [./stress_theta]
+  [stress_theta]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_theta]
+  [strain_theta]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./stress_theta]
+  [stress_theta]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
@@ -69,7 +69,7 @@
     variable = stress_theta
     execute_on = timestep_end
   [../]
-  [./strain_theta]
+  [strain_theta]
     type = RankTwoAux
     rank_two_tensor = total_strain
     index_i = 2
@@ -80,14 +80,14 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
     block = 1
   [../]
 
-  [./elastic_strain]
+  [elastic_strain]
     type = ComputeFiniteStrainElasticStress
     block = 1
   [../]
@@ -95,21 +95,21 @@
 
 [BCs]
 # pin particle along symmetry planes
-  [./no_disp_x]
+  [no_disp_x]
     type = DirichletBC
     variable = disp_x
     boundary = xzero
     value = 0.0
   [../]
 
-  [./no_disp_y]
+  [no_disp_y]
     type = DirichletBC
     variable = disp_y
     boundary = yzero
     value = 0.0
   [../]
 
-  [./no_disp_z]
+  [no_disp_z]
     type = DirichletBC
     variable = disp_z
     boundary = zzero
@@ -117,42 +117,42 @@
   [../]
 
 # exterior and internal pressures
-  [./exterior_pressure_x]
+  [exterior_pressure_x]
     type = Pressure
     variable = disp_x
     boundary = outer
     function = '200000*t'
   [../]
 
- [./exterior_pressure_y]
+ [exterior_pressure_y]
     type = Pressure
     variable = disp_y
     boundary = outer
     function = '200000*t'
   [../]
 
-[./exterior_pressure_z]
+[exterior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = outer
     function = '200000*t'
   [../]
 
-  [./interior_pressure_x]
+  [interior_pressure_x]
     type = Pressure
     variable = disp_x
     boundary = inner
     function = '100000*t'
   [../]
 
-  [./interior_pressure_y]
+  [interior_pressure_y]
     type = Pressure
     variable = disp_y
     boundary = inner
     function = '100000*t'
   [../]
 
-[./interior_pressure_z]
+[interior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = inner
@@ -190,15 +190,15 @@
 []
 
 [Postprocessors]
-  [./strainTheta]
+  [strainTheta]
     type = ElementAverageValue
     variable = strain_theta
   [../]
-  [./stressTheta]
+  [stressTheta]
     type = ElementAverageValue
     variable = stress_theta
   [../]
-  [./stressTheta_pt]
+  [stressTheta_pt]
     type = PointValue
     point = '5.0 0.0 0.0'
     #bottom inside edge for comparison to theory; use csv = true

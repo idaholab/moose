@@ -14,35 +14,35 @@
 # Its inverse is 0.5*(a/PI)^2 = 5.0660591821169. Here a is equal to 10.
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./rhs]
+  [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
   [../]
 
-  [./diffv]
+  [diffv]
     type = Diffusion
     variable = v
   [../]
 
-  [./rhsv]
+  [rhsv]
     type = CoefReaction
     variable = v
     coefficient = -1.0
@@ -51,25 +51,25 @@
 []
 
 [BCs]
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
   [../]
-  [./eigen]
+  [eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
   [../]
 
-  [./homogeneousv]
+  [homogeneousv]
     type = DirichletBC
     variable = v
     boundary = '0 1 2 3'
     value = 0
   [../]
-  [./eigenv]
+  [eigenv]
     type = EigenDirichletBC
     variable = v
     boundary = '0 1 2 3'
@@ -86,7 +86,7 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
   [../]

@@ -12,54 +12,54 @@
 []
 
 [Functions]
-  [./tr_x]
+  [tr_x]
     type = ParsedFunction
     expression = x
   [../]
-  [./tr_y]
+  [tr_y]
     type = ParsedFunction
     expression = y+10
   [../]
-  [./itr_x]
+  [itr_x]
     type = ParsedFunction
     expression = x
   [../]
-  [./itr_y]
+  [itr_y]
     type = ParsedFunction
     expression = y-10
   [../]
 
-  [./tr_x2]
+  [tr_x2]
     type = ParsedFunction
     expression = x+10
   [../]
-  [./tr_y2]
+  [tr_y2]
     type = ParsedFunction
     expression = y
   [../]
-  [./itr_x2]
+  [itr_x2]
     type = ParsedFunction
     expression = x-10
   [../]
-  [./itr_y2]
+  [itr_y2]
     type = ParsedFunction
     expression = y
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./forcing]
+  [forcing]
     type = GaussContForcing
     variable = u
     x_center = 2
@@ -67,7 +67,7 @@
     x_spread = 0.25
     y_spread = 0.5
   [../]
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
   [../]
@@ -75,8 +75,8 @@
 
 [BCs]
   # active = ' '
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = u
       primary = bottom
       secondary = top
@@ -84,7 +84,7 @@
       inv_transform_func = 'itr_x itr_y'
     [../]
 
-    [./y]
+    [y]
       variable = u
       primary = left
       secondary = right

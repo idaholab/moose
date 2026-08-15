@@ -13,8 +13,8 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = sin(x*7.4+z*4.1)+cos(y*3.8+x*8.7)+sin(z*9.1+y*2.6)
     [../]
@@ -22,18 +22,18 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [VectorPostprocessors]
-  [./average]
+  [average]
     type = SphericalAverage
     variable = c
     radius = 5

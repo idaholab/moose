@@ -14,14 +14,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = MultiSmoothCircleIC
     variable = c
     invalue = 1.0
@@ -36,11 +36,11 @@
 []
 
 [Kernels]
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = c
   [../]
-  [./diff]
+  [diff]
     type = MatDiffusion
     variable = c
     diffusivity = D_v
@@ -48,15 +48,15 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y z'
     [../]
   [../]
 []
 
 [Materials]
-  [./Dv]
+  [Dv]
     type = GenericConstantMaterial
     prop_names = D_v
     prop_values = 0.074802
@@ -64,7 +64,7 @@
 []
 
 [Postprocessors]
-  [./bubbles]
+  [bubbles]
     type = FeatureFloodCount
     variable = c
     execute_on = 'initial timestep_end'
@@ -85,7 +85,7 @@
   start_time = 0.0
   num_steps = 1
   dt = 100.0
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = .5
   [../]
 []

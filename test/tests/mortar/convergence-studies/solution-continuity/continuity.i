@@ -1,6 +1,6 @@
 [Mesh]
   second_order = true
-  [./left_block]
+  [left_block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -11,18 +11,18 @@
     ny = 2
     elem_type = QUAD4
   [../]
-  [./left_block_sidesets]
+  [left_block_sidesets]
     type = RenameBoundaryGenerator
     input = left_block
     old_boundary = '0 1 2 3'
     new_boundary = 'lb_bottom lb_right lb_top lb_left'
   [../]
-  [./left_block_id]
+  [left_block_id]
     type = SubdomainIDGenerator
     input = left_block_sidesets
     subdomain_id = 1
   [../]
-  [./right_block]
+  [right_block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 1
@@ -33,7 +33,7 @@
     ny = 2
     elem_type = QUAD4
   [../]
-  [./right_block_id]
+  [right_block_id]
     type = SubdomainIDGenerator
     input = right_block
     subdomain_id = 2
@@ -44,11 +44,11 @@
     old_boundary = '0 1 2 3'
     new_boundary = '100 101 102 103'
   []
-  [./combined]
+  [combined]
     type = MeshCollectionGenerator
     inputs = 'left_block_id right_block_change_boundary_id'
   [../]
-  [./block_rename]
+  [block_rename]
     type = RenameBlockGenerator
     input = combined
     old_block = '1 2'
@@ -99,17 +99,17 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     block = 'left_block right_block'
     order = SECOND
   [../]
-  [./lambda]
+  [lambda]
     block = 'secondary_lower'
   [../]
 []
 
 [BCs]
-  [./neumann]
+  [neumann]
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln_primal
     variable = T
@@ -118,17 +118,17 @@
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = 'left_block right_block'
   [../]
-  [./sink]
+  [sink]
     type = Reaction
     variable = T
     block = 'left_block right_block'
   [../]
-  [./forcing_function]
+  [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
@@ -137,11 +137,11 @@
 []
 
 [Functions]
-  [./forcing_function]
+  [forcing_function]
     type = ParsedFunction
     expression = ''
   [../]
-  [./exact_soln_primal]
+  [exact_soln_primal]
     type = ParsedFunction
     expression = ''
   [../]
@@ -156,7 +156,7 @@
 []
 
 [Constraints]
-  [./mortar]
+  [mortar]
     type = EqualValueConstraint
     primary_boundary = rb_left
     secondary_boundary = lb_right
@@ -169,7 +169,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

@@ -40,11 +40,11 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
@@ -56,7 +56,7 @@
 []
 
 [Kernels]
-  [./gravity]
+  [gravity]
     type = Gravity
     variable = disp_x
     value = 20
@@ -64,19 +64,19 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
   [../]
-  [./no_z]
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 5
@@ -85,16 +85,16 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     bulk_modulus = 0.333333333333333e6
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 
-  [./density]
+  [density]
     type = Density
     block = 1
     density = 2
@@ -111,7 +111,7 @@
 
 [Outputs]
   file_base = gravity_out
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]

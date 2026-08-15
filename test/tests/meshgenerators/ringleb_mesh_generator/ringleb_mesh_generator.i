@@ -1,5 +1,5 @@
 [Mesh]
-  [./rmg]
+  [rmg]
     type = RinglebMeshGenerator
     kmin = 0.7
     num_k_pts = 9

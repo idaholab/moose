@@ -6,35 +6,35 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff0]
+  [diff0]
     type = CoefDiffusion
     variable = u
     coef = 0.05
   [../]
-  [./diff1]
+  [diff1]
     type = CoefDiffusion
     variable = u
     coef = 0.5
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -56,7 +56,7 @@
 []
 
 [Controls]
-  [./diff]
+  [diff]
     type = TimePeriod
     enable_objects = 'Kernel::diff0'
     disable_objects = '*::diff1'

@@ -6,19 +6,19 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
 []
 
 [Functions]
-  [./fn]
+  [fn]
     type = FourierNoise
     lambda = 0.1
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = FunctionIC
     variable = c
     function = fn

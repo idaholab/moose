@@ -8,35 +8,35 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [AuxVariables]
-  [./penetration]
+  [penetration]
   [../]
-  [./saved_x]
+  [saved_x]
   [../]
-  [./saved_y]
+  [saved_y]
   [../]
-  [./diag_saved_x]
+  [diag_saved_x]
   [../]
-  [./diag_saved_y]
+  [diag_saved_y]
   [../]
-  [./inc_slip_x]
+  [inc_slip_x]
   [../]
-  [./inc_slip_y]
+  [inc_slip_y]
   [../]
-  [./accum_slip_x]
+  [accum_slip_x]
   [../]
-  [./accum_slip_y]
+  [accum_slip_y]
   [../]
 []
 
 [Functions]
-  [./appl_disp]
+  [appl_disp]
     type = PiecewiseLinear
     x = '0 0.001  0.101'
     y = '0 0.0   -0.10'
@@ -44,40 +44,40 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
     save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
-  [./incslip_x]
+  [incslip_x]
     type = PenetrationAux
     variable = inc_slip_x
     quantity = incremental_slip_x
     boundary = 3
     paired_boundary = 2
   [../]
-  [./incslip_y]
+  [incslip_y]
     type = PenetrationAux
     variable = inc_slip_y
     quantity = incremental_slip_y
     boundary = 3
     paired_boundary = 2
   [../]
-  [./accum_slip_x]
+  [accum_slip_x]
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
   [../]
-  [./accum_slip_y]
+  [accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
   [../]
-  [./penetration]
+  [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 3
@@ -86,25 +86,25 @@
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./boty]
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-  [./topx]
+  [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = appl_disp
   [../]
-  [./topy]
+  [topy]
     type = DirichletBC
     variable = disp_y
     boundary = 4
@@ -113,83 +113,83 @@
 []
 
 [Materials]
-  [./bot_elas_tens]
+  [bot_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1e9
     poissons_ratio = 0.3
   [../]
-  [./bot_strain]
+  [bot_strain]
     type = ComputePlaneFiniteStrain
     block = '1'
   [../]
-  [./bot_stress]
+  [bot_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
   [../]
-  [./top_elas_tens]
+  [top_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./top_strain]
+  [top_strain]
     type = ComputePlaneFiniteStrain
     block = '2'
   [../]
-  [./top_stress]
+  [top_stress]
     type = ComputeFiniteStrainElasticStress
     block = '2'
   [../]
 []
 
 [Postprocessors]
-  [./bot_react_x]
+  [bot_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 1
   [../]
-  [./bot_react_y]
+  [bot_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 1
   [../]
-  [./top_react_x]
+  [top_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 4
   [../]
-  [./top_react_y]
+  [top_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 4
   [../]
-  [./disp_x]
+  [disp_x]
     type = NodalVariableValue
     nodeid = 5
     variable = disp_x
   [../]
-  [./disp_y]
+  [disp_y]
     type = NodalVariableValue
     nodeid = 5
     variable = disp_y
   [../]
-  [./inc_slip_x]
+  [inc_slip_x]
     type = NodalVariableValue
     nodeid = 5
     variable = inc_slip_x
   [../]
-  [./inc_slip_y]
+  [inc_slip_y]
     type = NodalVariableValue
     nodeid = 5
     variable = inc_slip_y
   [../]
-  [./accum_slip_x]
+  [accum_slip_x]
     type = NodalVariableValue
     nodeid = 5
     variable = accum_slip_x
   [../]
-  [./accum_slip_y]
+  [accum_slip_y]
     type = NodalVariableValue
     nodeid = 5
     variable = accum_slip_y
@@ -221,14 +221,14 @@
   print_linear_residuals = true
   perf_graph = true
   csv = true
-  [./console]
+  [console]
     type = Console
     max_rows = 5
   [../]
 []
 
 [Contact]
-  [./leftright]
+  [leftright]
     primary = 2
     secondary = 3
     model = coulomb
@@ -241,7 +241,7 @@
 []
 
  [Dampers]
-   [./contact_slip]
+   [contact_slip]
      type = ContactSlipDamper
      primary = '2'
      secondary = '3'

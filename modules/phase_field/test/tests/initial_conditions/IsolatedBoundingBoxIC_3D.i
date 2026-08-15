@@ -17,12 +17,12 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = IsolatedBoundingBoxIC
     variable = c
     smaller_coordinate_corners = '5 5 5 14 14 14 30 23 30'

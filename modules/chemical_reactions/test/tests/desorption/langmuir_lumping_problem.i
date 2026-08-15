@@ -5,7 +5,7 @@
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     # try with and without the CONSTANT MONOMIAL to see that
     # CONSTANT MONOMIAL yields the correct result that pressure(x=0) is unchanged
     # but LINEAR LAGRANGE changes pressure(x=0) since pressure is not lumped at x=0
@@ -14,7 +14,7 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./conc]
+  [conc]
     family = MONOMIAL
     order = CONSTANT
     block = centre_block
@@ -22,12 +22,12 @@
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = ConstantIC
     variable = pressure
     value = 1.0
   [../]
-  [./conc_ic]
+  [conc_ic]
     type = ConstantIC
     variable = conc
     value = 1.0
@@ -37,22 +37,22 @@
 
 
 [Kernels]
-  [./c_dot]
+  [c_dot]
     type = TimeDerivative
     block = centre_block
     variable = conc
   [../]
-  [./flow_from_matrix]
+  [flow_from_matrix]
     type = DesorptionFromMatrix
     block = centre_block
     variable = conc
     pressure_var = pressure
   [../]
-  [./rho_dot]
+  [rho_dot]
     type = TimeDerivative
     variable = pressure
   [../]
-  [./flux_to_porespace]
+  [flux_to_porespace]
     type = DesorptionToPorespace
     block = centre_block
     variable = pressure
@@ -61,11 +61,11 @@
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = GenericConstantMaterial
     block = 'left_block centre_block right_block'
   [../]
-  [./lang_stuff]
+  [lang_stuff]
     type = LangmuirMaterial
     block = centre_block
     mat_desorption_time_const = 0.1
@@ -78,7 +78,7 @@
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'

@@ -31,14 +31,14 @@
     ymax = 0.1
     zmax = 0.1
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '5.0 0.0 0.0'
     block_id = 1
     top_right = '10.0 0.1 0.1'
   [../]
-  [./interface1]
+  [interface1]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     primary_block = 1
@@ -51,77 +51,77 @@
 []
 
 [Variables]
-  [./p]
+  [p]
     block = 1
   [../]
-  [./disp_x]
+  [disp_x]
     block = 0
   [../]
-  [./disp_y]
+  [disp_y]
     block = 0
   [../]
-  [./disp_z]
+  [disp_z]
     block = 0
   [../]
 []
 
 [AuxVariables]
-  [./vel_x]
+  [vel_x]
     order = FIRST
     family = LAGRANGE
     block = 0
   [../]
-  [./accel_x]
+  [accel_x]
     order = FIRST
     family = LAGRANGE
     block = 0
   [../]
-  [./vel_y]
+  [vel_y]
     order = FIRST
     family = LAGRANGE
     block = 0
   [../]
-  [./accel_y]
+  [accel_y]
     order = FIRST
     family = LAGRANGE
     block = 0
   [../]
-  [./vel_z]
+  [vel_z]
     order = FIRST
     family = LAGRANGE
     block = 0
   [../]
-  [./accel_z]
+  [accel_z]
     order = FIRST
     family = LAGRANGE
     block = 0
   [../]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./stress_xy]
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./stress_xz]
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./stress_yz]
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -129,31 +129,31 @@
 []
 
 [Kernels]
-  [./diffusion]
+  [diffusion]
     type = Diffusion
     variable = 'p'
     block = 1
   [../]
-  [./inertia]
+  [inertia]
     type = AcousticInertia
     variable = p
     block = 1
   [../]
-  [./DynamicTensorMechanics]
+  [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
     block = 0
   [../]
-  [./inertia_x]
+  [inertia_x]
     type = InertialForce
     variable = disp_x
     block = 0
   [../]
-  [./inertia_y]
+  [inertia_y]
     type = InertialForce
     variable = disp_y
     block = 0
   [../]
-  [./inertia_z]
+  [inertia_z]
     type = InertialForce
     variable = disp_z
     block = 0
@@ -161,46 +161,46 @@
 []
 
 [AuxKernels]
-  [./accel_x]
+  [accel_x]
     type = TestNewmarkTI
     displacement = disp_x
     variable = accel_x
     first = false
     block = 0
   [../]
-  [./vel_x]
+  [vel_x]
     type = TestNewmarkTI
     displacement = disp_x
     variable = vel_x
     block = 0
   [../]
-  [./accel_y]
+  [accel_y]
     type = TestNewmarkTI
     displacement = disp_y
     variable = accel_y
     first = false
     block = 0
   [../]
-  [./vel_y]
+  [vel_y]
     type = TestNewmarkTI
     displacement = disp_y
     variable = vel_y
     block = 0
   [../]
-  [./accel_z]
+  [accel_z]
     type = TestNewmarkTI
     displacement = disp_z
     variable = accel_z
     first = false
     block = 0
   [../]
-  [./vel_z]
+  [vel_z]
     type = TestNewmarkTI
     displacement = disp_z
     variable = vel_z
     block = 0
   [../]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
@@ -208,7 +208,7 @@
     index_j = 0
     block = 0
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
@@ -216,7 +216,7 @@
     index_j = 1
     block = 0
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
@@ -224,7 +224,7 @@
     index_j = 2
     block = 0
   [../]
-  [./stress_xy]
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
@@ -232,7 +232,7 @@
     index_j = 1
     block = 0
   [../]
-  [./stress_xz]
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
@@ -240,7 +240,7 @@
     index_j = 2
     block = 0
   [../]
-  [./stress_yz]
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
@@ -251,7 +251,7 @@
 []
 
 [InterfaceKernels]
-  [./interface1]
+  [interface1]
     type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_x
@@ -259,7 +259,7 @@
     D = 1e-6
     component = 0
   [../]
-  [./interface2]
+  [interface2]
     type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_y
@@ -267,7 +267,7 @@
     D = 1e-6
     component = 1
   [../]
-  [./interface3]
+  [interface3]
     type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_z
@@ -278,25 +278,25 @@
 []
 
 [BCs]
-  [./bottom_accel]
+  [bottom_accel]
     type = FunctionDirichletBC
     variable = p
     boundary = 'right'
     function = accel_bottom
   [../]
-  [./disp_x1]
+  [disp_x1]
     type = NeumannBC
     boundary = 'left'
     variable = disp_x
     value = 0.0
   [../]
-  [./disp_y1]
+  [disp_y1]
     type = NeumannBC
     boundary = 'left'
     variable = disp_y
     value = 0.0
   [../]
-  [./disp_z1]
+  [disp_z1]
     type = NeumannBC
     boundary = 'left'
     variable = disp_z
@@ -305,7 +305,7 @@
 []
 
 [Functions]
-  [./accel_bottom]
+  [accel_bottom]
     type = PiecewiseLinear
     data_file = ../1D_struc_acoustic/Input_1Peak_highF.csv
     scale_factor = 1e-2
@@ -314,37 +314,37 @@
 []
 
 [Materials]
-  [./co_sq]
+  [co_sq]
     type = GenericConstantMaterial
     prop_names = inv_co_sq
     prop_values = 4.44e-7
     block = '1'
   [../]
-  [./density0]
+  [density0]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
     prop_values = 1e-6
   [../]
-  [./elasticity_base]
+  [elasticity_base]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 2.25
     shear_modulus = 0.0
     block = 0
   [../]
-  [./strain]
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
-  [./stress]
+  [stress]
     type =  ComputeFiniteStrainElasticStress
     block = 0
   [../]
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
   [../]
@@ -371,12 +371,12 @@
 []
 
 [Postprocessors]
-  [./p1]
+  [p1]
     type = PointValue
     point = '5.0 0.05 0.05'
     variable = p
   [../]
-  [./stress_xx]
+  [stress_xx]
     type = PointValue
     point = '5.0 0.05 0.05'
     variable = stress_xx

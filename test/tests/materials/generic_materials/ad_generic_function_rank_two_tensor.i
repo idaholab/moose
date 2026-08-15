@@ -47,7 +47,7 @@
 []
 
 [Materials]
-  [./tensor]
+  [tensor]
     type = ADGenericFunctionRankTwoTensor
     tensor_name = function
     # tensor values are column major-ordered

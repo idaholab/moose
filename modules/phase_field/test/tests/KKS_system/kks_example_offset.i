@@ -19,7 +19,7 @@
 []
 
 [AuxVariables]
-  [./Fglobal]
+  [Fglobal]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -27,31 +27,31 @@
 
 [Variables]
   # order parameter
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
   [../]
 
   # hydrogen concentration
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
 
   # chemical potential
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
 
   # hydrogen phase concentration (matrix)
-  [./cm]
+  [cm]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
   [../]
   # hydrogen phase concentration (delta phase)
-  [./cd]
+  [cd]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
@@ -59,7 +59,7 @@
 []
 
 [ICs]
-  [./eta]
+  [eta]
     variable = eta
     type = SmoothCircleIC
     x1 = 0.0
@@ -69,7 +69,7 @@
     outvalue = 0.1
     int_width = 0.75
   [../]
-  [./c]
+  [c]
     variable = c
     type = SmoothCircleIC
     x1 = 0.0
@@ -83,8 +83,8 @@
 
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = 'eta w c cm cd'
       auto_direction = 'x y'
     [../]
@@ -93,7 +93,7 @@
 
 [Materials]
   # Free energy of the matrix
-  [./fm]
+  [fm]
     type = DerivativeParsedMaterial
     property_name = fm
     coupled_variables = 'cm'
@@ -101,7 +101,7 @@
   [../]
 
   # Free energy of the delta phase
-  [./fd]
+  [fd]
     type = DerivativeParsedMaterial
     property_name = fd
     coupled_variables = 'cd'
@@ -109,21 +109,21 @@
   [../]
 
   # h(eta)
-  [./h_eta]
+  [h_eta]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta
   [../]
 
   # g(eta)
-  [./g_eta]
+  [g_eta]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta
   [../]
 
   # constant properties
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
     prop_names  = 'M   L   kappa'
     prop_values = '0.7 0.7 0.4  '
@@ -135,7 +135,7 @@
   active = 'PhaseConc ChemPotVacancies CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
 
   # enforce c = (1-h(eta))*cm + h(eta)*cd
-  [./PhaseConc]
+  [PhaseConc]
     type = KKSPhaseConcentration
     ca       = cm
     variable = cd
@@ -144,7 +144,7 @@
   [../]
 
   # enforce pointwise equality of chemical potentials
-  [./ChemPotVacancies]
+  [ChemPotVacancies]
     type = KKSPhaseChemicalPotential
     variable = cm
     cb       = cd
@@ -155,7 +155,7 @@
   #
   # Cahn-Hilliard Equation
   #
-  [./CHBulk]
+  [CHBulk]
     type = KKSSplitCHCRes
     variable = c
     ca       = cm
@@ -163,12 +163,12 @@
     w        = w
   [../]
 
-  [./dcdt]
+  [dcdt]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
-  [./ckernel]
+  [ckernel]
     type = SplitCHWRes
     mob_name = M
     variable = w
@@ -177,7 +177,7 @@
   #
   # Allen-Cahn Equation
   #
-  [./ACBulkF]
+  [ACBulkF]
     type = KKSACBulkF
     variable = eta
     fa_name  = fm
@@ -185,26 +185,26 @@
     coupled_variables     = 'cm cd'
     w        = 0.4
   [../]
-  [./ACBulkC]
+  [ACBulkC]
     type = KKSACBulkC
     variable = eta
     ca       = cm
     cb       = cd
     fa_name  = fm
   [../]
-  [./ACInterface]
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = kappa
   [../]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
   [../]
 []
 
 [AuxKernels]
-  [./GlobalFreeEnergy]
+  [GlobalFreeEnergy]
     variable = Fglobal
     type = KKSGlobalFreeEnergy
     fa_name = fm
@@ -230,7 +230,7 @@
 # Precondition using handcoded off-diagonal terms
 #
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
   [../]

@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -33,7 +33,7 @@
 []
 
 [UserObjects]
-  [./restartable_types]
+  [restartable_types]
     type = PointerStoreError
   [../]
 []
@@ -51,7 +51,7 @@
 []
 
 [Outputs]
-  [./checkpoint]
+  [checkpoint]
     type = Checkpoint
     num_files = 1
   [../]

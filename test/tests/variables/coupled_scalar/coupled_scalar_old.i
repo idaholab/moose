@@ -6,34 +6,34 @@
 []
 
 [Functions]
-  [./lin1_fn]
+  [lin1_fn]
     type = ParsedFunction
     expression = t
   [../]
-  [./lin2_fn]
+  [lin2_fn]
     type = ParsedFunction
     expression = 't+1'
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./aux_scalar]
+  [aux_scalar]
     order = SECOND
     family = SCALAR
   [../]
-  [./coupled]
+  [coupled]
   [../]
-  [./coupled_1]
+  [coupled_1]
   [../]
 []
 
 [ICs]
-  [./aux_scalar_ic]
+  [aux_scalar_ic]
     variable = aux_scalar
     values = '1.2 4.3'
     type = ScalarComponentIC
@@ -41,23 +41,23 @@
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./coupled]
+  [coupled]
     type = CoupledScalarAux
     variable = coupled
     coupled = aux_scalar
   [../]
-  [./coupled_1]
+  [coupled_1]
     # Coupling to the "1" component of an aux scalar
     type = CoupledScalarAux
     variable = coupled_1
@@ -67,7 +67,7 @@
 []
 
 [AuxScalarKernels]
-  [./aux_scalar_k]
+  [aux_scalar_k]
     type = FunctionScalarAux
     variable = aux_scalar
     function = 'lin1_fn lin2_fn'
@@ -75,13 +75,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

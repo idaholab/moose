@@ -5,35 +5,35 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     family = SCALAR
     order = FIRST
   [../]
 []
 
 [Functions]
-  [./a_fn]
+  [a_fn]
     type = ParsedFunction
     expression = '4 - t'
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxScalarKernels]
-  [./a_sk]
+  [a_sk]
     type = FunctionScalarAux
     variable = a
     function = a_fn
@@ -42,13 +42,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 2
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

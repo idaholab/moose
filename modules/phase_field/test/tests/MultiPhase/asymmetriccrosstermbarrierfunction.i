@@ -7,7 +7,7 @@
 []
 
 [Functions]
-  [./func1]
+  [func1]
     type = ParsedFunction
     expression = 'il:=x-7; ir:=2-x; if(x<1, 1,
                                if(x<2, 0.5-0.5*cos(ir*pi),
@@ -15,7 +15,7 @@
                                if(x<8, 0.5-0.5*cos(il*pi),
                                1))))'
   [../]
-  [./func2]
+  [func2]
     type = ParsedFunction
     expression = 'il:=x-1; ir:=5-x; if(x<1, 0,
                                if(x<2, 0.5-0.5*cos(il*pi),
@@ -23,7 +23,7 @@
                                if(x<5, 0.5-0.5*cos(ir*pi),
                                0))))'
   [../]
-  [./func3]
+  [func3]
     type = ParsedFunction
     expression = 'il:=x-4; ir:=8-x; if(x<4, 0,
                                if(x<5, 0.5-0.5*cos(il*pi),
@@ -34,26 +34,26 @@
 []
 
 [AuxVariables]
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = func1
     [../]
   [../]
-  [./eta2]
+  [eta2]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = func2
     [../]
   [../]
-  [./eta3]
+  [eta3]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = func3
     [../]
@@ -61,7 +61,7 @@
 []
 
 [Materials]
-  [./symmetriccrosstermbarrier_low]
+  [symmetriccrosstermbarrier_low]
     type = AsymmetricCrossTermBarrierFunctionMaterial
     etas     = 'eta1 eta2 eta3'
     hi_names = 'h1   h2   h3'
@@ -72,7 +72,7 @@
     g_order = LOW
     outputs = 'out'
   [../]
-  [./asymmetriccrosstermbarrier_low]
+  [asymmetriccrosstermbarrier_low]
     type = AsymmetricCrossTermBarrierFunctionMaterial
     etas     = 'eta1 eta2 eta3'
     hi_names = 'h1   h2   h3'
@@ -84,7 +84,7 @@
     outputs = 'out'
   [../]
 
-  [./asymmetriccrosstermbarrie_simple]
+  [asymmetriccrosstermbarrie_simple]
     type = AsymmetricCrossTermBarrierFunctionMaterial
     etas     = 'eta1 eta2 eta3'
     hi_names = 'h1   h2   h3'
@@ -96,17 +96,17 @@
     outputs = 'out'
   [../]
 
-  [./switch1]
+  [switch1]
     type = SwitchingFunctionMaterial
     function_name = h1
     eta = eta1
   [../]
-  [./switch2]
+  [switch2]
     type = SwitchingFunctionMaterial
     function_name = h2
     eta = eta2
   [../]
-  [./switch3]
+  [switch3]
     type = SwitchingFunctionMaterial
     function_name = h3
     eta = eta3

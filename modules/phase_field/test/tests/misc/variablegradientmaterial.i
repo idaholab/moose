@@ -7,8 +7,8 @@
 []
 
 [AuxVariables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0
       y1 = 0
@@ -22,7 +22,7 @@
 []
 
 [Materials]
-  [./var_grad]
+  [var_grad]
     type = VariableGradientMaterial
     prop = grad_c
     variable = c

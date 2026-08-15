@@ -11,19 +11,19 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./w]
+  [w]
     scaling = 1.0e2
   [../]
-  [./T]
+  [T]
     initial_condition = 1000.0
     scaling = 1.0e5
   [../]
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     x1 = 125.0
     y1 = 0.0
@@ -36,19 +36,19 @@
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     kappa_name = kappa
     w = w
     f_name = F
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./w_res_soret]
+  [w_res_soret]
     type = SoretDiffusion
     variable = w
     c = c
@@ -56,12 +56,12 @@
     diff_name = D
     Q_name = Qstar
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
-  [./HtCond]
+  [HtCond]
     type = MatDiffusion
     variable = T
     diffusivity = thermal_conductivity
@@ -69,14 +69,14 @@
 []
 
 [BCs]
-  [./Left_T]
+  [Left_T]
     type = DirichletBC
     variable = T
     boundary = left
     value = 1000.0
   [../]
 
-  [./Right_T]
+  [Right_T]
     type = DirichletBC
     variable = T
     boundary = right
@@ -85,7 +85,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = PFParamsPolyFreeEnergy
     block = 0
     c = c
@@ -98,7 +98,7 @@
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.708 # Total guess
   [../]
-  [./thcond]
+  [thcond]
     type = ParsedMaterial
     block = 0
     coupled_variables = 'c'
@@ -106,7 +106,7 @@
     property_name = thermal_conductivity
     outputs = exodus
   [../]
-  [./free_energy]
+  [free_energy]
     type = PolynomialFreeEnergy
     block = 0
     c = c
@@ -115,7 +115,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
   [../]

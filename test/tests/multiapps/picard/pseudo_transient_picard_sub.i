@@ -6,26 +6,26 @@
 []
 
 [Variables]
-  [./v]
+  [v]
   [../]
 []
 
 [AuxVariables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = CoefTimeDerivative
     variable = v
     Coefficient = 0.1
   [../]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
-  [./force_v]
+  [force_v]
     type = CoupledForce
     variable = v
     v = u
@@ -33,13 +33,13 @@
 []
 
 [BCs]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
   [../]
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
@@ -48,7 +48,7 @@
 []
 
 [Postprocessors]
-  [./vnorm]
+  [vnorm]
     type = ElementL2Norm
     variable = v
   [../]

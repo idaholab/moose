@@ -6,31 +6,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./average_scalar]
+  [average_scalar]
     family = SCALAR
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -52,7 +52,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
@@ -62,7 +62,7 @@
 []
 
 [Transfers]
-  [./average_transfer]
+  [average_transfer]
     type = MultiAppPostprocessorToAuxScalarTransfer
     from_multi_app = sub
     from_postprocessor = average
