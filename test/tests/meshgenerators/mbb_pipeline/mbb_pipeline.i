@@ -65,7 +65,8 @@
     algorithm = laplace
   []
 
-  # The gold records element ids, which renumbering does not keep consistent in parallel
+  # Score ties in the greedy matching are broken by element id, so keep the ids stable
+  # across processor counts
   allow_renumbering = false
 []
 
@@ -107,21 +108,23 @@
     type = AverageElementSize
     outputs = csv
   []
-[]
-
-[Reporters]
-  [mesh_info]
-    type = MeshInfo
-    items = subdomain_elems
-    outputs = json
+  [quad_area]
+    type = VolumePostprocessor
+    block = 'mbb'
+    outputs = none
+  []
+  # The quadrilateral yield this pipeline is measured against: the fraction of the meshed
+  # area covered by the pairs the recombination merged, with the leftover triangles in
+  # their own subdomain making up the rest
+  [quad_area_fraction]
+    type = ParsedPostprocessor
+    expression = 'quad_area / area'
+    pp_names = 'quad_area area'
+    outputs = csv
   []
 []
 
 [Outputs]
   csv = true
   execute_on = 'FINAL'
-  [json]
-    type = JSON
-    execute_system_information_on = NONE
-  []
 []

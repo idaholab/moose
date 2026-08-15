@@ -30,3 +30,56 @@
     output_subdomain_name = 'triangles'
   []
 []
+
+[Problem]
+  solve = false
+[]
+
+[AuxVariables]
+  [quality]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [qa]
+    type = ElementQualityAux
+    variable = quality
+    metric = SHAPE
+  []
+[]
+
+[Executioner]
+  type = Transient
+  num_steps = 1
+[]
+
+[Postprocessors]
+  [area]
+    type = VolumePostprocessor
+    outputs = csv
+  []
+  [avg_quality]
+    type = ElementAverageValue
+    variable = quality
+    outputs = csv
+  []
+  [elem_size]
+    type = AverageElementSize
+    outputs = csv
+  []
+  # The hole boundary is a 12-sided polygon whose vertices the front never moves, so the
+  # perimeter of the 'inner' sideset is fixed by the input polygon no matter how the interior
+  # is triangulated; it also fails if the hole boundary name is not carried onto the sideset
+  [hole_perimeter]
+    type = AreaPostprocessor
+    boundary = 'inner'
+    outputs = csv
+  []
+[]
+
+[Outputs]
+  csv = true
+  execute_on = 'FINAL'
+[]

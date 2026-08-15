@@ -202,10 +202,13 @@ pcre%.$(obj-suffix) : pcre%.c | $$(prebuild)
 # the #pragma STDC FP_CONTRACT in predicates.c, so the flag has to come from here.
 # The path is spelled out because a bare predicates% stem would have to match an empty substring,
 # which GNU make does not promise to do.
+# Like the pcre rule above, -w keeps warnings-as-errors builds out of vendored code: GCC warns
+# about the FP_CONTRACT pragma it ignores and about Shewchuk's conditionally-assigned expansion
+# lengths, neither of which is ours to fix.
 %/predicates/src/predicates.$(obj-suffix) : %/predicates/src/predicates.c | $$(prebuild)
 	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -ffp-contract=off -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -ffp-contract=off -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c | $$(prebuild)
 	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."

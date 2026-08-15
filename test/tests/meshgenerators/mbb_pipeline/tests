@@ -11,26 +11,18 @@
       type = 'CSVDiff'
       input = 'mbb_pipeline.i'
       csvdiff = 'mbb_pipeline_out.csv'
-      # The meshed area is fixed by the boundary polygons, but the element size and shape quality
-      # depend on the order the front places points in, so they are compared loosely
-      override_columns = 'avg_quality elem_size'
-      override_rel_err = '1.0e-1 1.0e-1'
-      override_abs_zero = '1.0e-10 1.0e-10'
+      # The meshed area is fixed by the boundary polygons, but the element size, the shape quality
+      # and the fraction of the area the merged quadrilaterals cover depend on the order the front
+      # places points in, so they are compared loosely
+      override_columns = 'avg_quality elem_size quad_area_fraction'
+      override_rel_err = '1.0e-1 1.0e-1 1.5e-1'
+      override_abs_zero = '1.0e-10 1.0e-10 1.0e-10'
       recover = false
       mesh_mode = REPLICATED
       detail = 'the meshed area, the average element size and the average element shape quality of '
-               'the mesh it produces.'
-    []
-    [split]
-      type = 'JSONDiff'
-      input = 'mbb_pipeline.i'
-      jsondiff = 'mbb_pipeline_json.json'
-      prereq = 'mbb_quads_yield_baseline/quality'
-      should_execute = false
-      recover = false
-      mesh_mode = REPLICATED
-      detail = 'the elements it merged into quadrilaterals separately from the elements it left as '
-               'triangles, which is the quadrilateral yield this pipeline is measured against.'
+               'the mesh it produces, together with the fraction of the meshed area covered by the '
+               'elements it merged into quadrilaterals, which is the quadrilateral yield this '
+               'pipeline is measured against.'
     []
   []
   [mbb_all_quad]
