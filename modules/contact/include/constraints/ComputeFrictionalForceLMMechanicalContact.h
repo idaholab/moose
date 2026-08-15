@@ -121,6 +121,9 @@ protected:
   /// z-velocity on the primary face
   const ADVariableValue * const _primary_z_dot;
 
+  /// Minimum value of contact pressure that will trigger frictional enforcement
+  const Real _epsilon;
+
   /// Friction coefficient
   const Real _mu;
 
