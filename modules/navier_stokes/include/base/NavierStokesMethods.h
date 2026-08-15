@@ -11,7 +11,6 @@
 
 #include <vector>
 #include "Moose.h"
-#include "MooseUtils.h"
 #include "ADReal.h"
 #include "metaphysicl/raw_type.h"
 #include "FEProblemBase.h"
@@ -113,8 +112,6 @@ T findUStar(const T & mu, const T & rho, const T & u, Real dist);
  */
 template <typename T>
 T findyPlus(const T & mu, const T & rho, const T & u, Real dist);
-
-using MooseUtils::isZero;
 
 /**
  * Compute the speed (velocity norm) given the supplied velocity
