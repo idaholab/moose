@@ -8,5 +8,5 @@
     max_parallel = 3 # 3 element mesh
     max_threads = 3
     requirement = 'The system shall compute the volumetric L2 norm of a variable over the mesh.'
-  [../]
+  []
 []

@@ -9,5 +9,5 @@
     requirement = 'The system shall provide an AD material that computes surface tension.'
     design = '/ADSurfaceTensionMaterial.md'
     issues = '#15308'
-  [../]
+  []
 []

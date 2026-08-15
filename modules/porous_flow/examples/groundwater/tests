@@ -7,7 +7,7 @@
     issues = '#15921'
     design = 'groundwater_models.md'
     requirement = 'PorousFlow shall be able to simulate groundwater extraction via a borehole'
-  [../]
+  []
   [./ex02_steady_state]
     type = CSVDiff
     heavy = true
@@ -17,7 +17,7 @@
     issues = '#15921'
     design = 'groundwater_models.md'
     requirement = 'PorousFlow shall be able to simulate rainfall recharge, evapotranspiration and baseflow, and converge to a usable steadystate solution in such instances'
-  [../]
+  []
   [./ex02_abstraction]
     type = CSVDiff
     heavy = true
@@ -27,5 +27,5 @@
     issues = '#15921'
     design = 'groundwater_models.md'
     requirement = 'PorousFlow shall be able to simulate rainfall recharge, evapotranspiration and baseflow in transient simulations'
-  [../]
+  []
 []

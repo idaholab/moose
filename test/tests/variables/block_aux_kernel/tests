@@ -9,5 +9,5 @@
     group = 'requirements geometric'
 
     requirement = "The system shall support direct calculation of field variables on multiple mesh subdomains."
-  [../]
+  []
 []

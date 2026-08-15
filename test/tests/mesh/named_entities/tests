@@ -7,7 +7,7 @@
 
     requirement = "The system shall support interchangeable use of integer and string identifiers for mesh entities."
     issues = "#979"
-  [../]
+  []
 
   [./test_names_xda]
     type = 'Exodiff'
@@ -16,7 +16,7 @@
 
     requirement = "The system shall support interchangeable use of integer and string identifiers for mesh entities read from the XDA format."
     issues = "#1055"
-  [../]
+  []
 
   [./test_periodic_names]
     type = 'Exodiff'
@@ -28,7 +28,7 @@
 
     requirement = "The system shall support interchangeable use of integer and string identifiers within the BCs/Periodic block."
     issues = "#979"
-  [../]
+  []
 
   [./on_the_fly_test]
     type = 'Exodiff'
@@ -37,5 +37,5 @@
 
     requirement = "The system shall support the ability to assign and use string names to mesh entities during the simulation startup."
     issues = "#979"
-  [../]
+  []
 []

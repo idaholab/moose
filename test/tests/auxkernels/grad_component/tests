@@ -8,11 +8,11 @@
     use_old_floor = true
     abs_zero = 1e-09
     requirement = "The system shall include the ability to extract a component of a linear Lagrange variable gradient as an auxiliary variable."
-  [../]
+  []
   [./monomial]
     type = 'Exodiff'
     input = 'grad_component_monomial.i'
     exodiff = 'grad_component_monomial_out.e'
     requirement = "The system shall include the ability to extract a component of a first order monomial variable gradient as an auxiliary variable."
-  [../]
+  []
 []

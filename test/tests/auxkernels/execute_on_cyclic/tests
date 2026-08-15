@@ -5,5 +5,5 @@
     type = RunApp
     input = execute_on_cyclic.i
     requirement = "The system shall allow objects that depend on each other but have differing execution flags to run without error."
-  [../]
+  []
 []

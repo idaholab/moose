@@ -7,5 +7,5 @@
     exodiff = 'catch_release_out.e'
     custom_cmp = 'catch_release.exodiff'
     requirement = 'The contact system shall enforce three-dimensional block to block interaction using a penalty approach.'
-  [../]
+  []
 []

@@ -12,5 +12,5 @@
 
     requirement = "The system shall include an adaptive, error-estimate based multi-step time step calculation scheme."
     capabilities = 'method!=dbg'
-  [../]
+  []
 []

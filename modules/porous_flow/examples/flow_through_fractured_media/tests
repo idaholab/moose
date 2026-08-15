@@ -7,7 +7,7 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a coarse mesh in 2D'
-  [../]
+  []
   [./coarse_3D]
     type = CSVDiff
     heavy = true
@@ -18,7 +18,7 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a coarse mesh in 3D'
-  [../]
+  []
   [./fine_steady]
     type = Exodiff
     heavy = true
@@ -29,7 +29,7 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to find the steady-state solution for flow and solute transport along a fracture embedded in a porous matrix, using a fine mesh'
-  [../]
+  []
   [./fine_transient]
     type = CSVDiff
     heavy = true
@@ -41,7 +41,7 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a fine mesh'
-  [../]
+  []
   [./fine_thick_fracture_steady]
     type = Exodiff
     heavy = true
@@ -52,7 +52,7 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to find the steady-state solution for flow and solute transport along a finite-sized fracture embedded in a porous matrix, using a fine mesh'
-  [../]
+  []
   [./fine_thick_fracture_transient]
     type = CSVDiff
     heavy = true
@@ -64,7 +64,7 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a finite-sized fracture embedded in a porous matrix, using a fine mesh'
-  [../]
+  []
   [./diffusion]
     type = Exodiff
     input = 'diffusion.i'
@@ -73,5 +73,5 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'The system shall be able to simulate diffusion along fracture embedded in a porous matrix'
-  [../]
+  []
 []

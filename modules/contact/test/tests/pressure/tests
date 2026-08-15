@@ -8,7 +8,7 @@
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
     requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
-  [../]
+  []
 
   [./pressurePenalty]
     type = 'Exodiff'
@@ -17,7 +17,7 @@
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
     requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Penalty.'
-  [../]
+  []
 
   [./pressurePenalty_mechanical_constraint]
     type = 'Exodiff'
@@ -26,5 +26,5 @@
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Mechanical constraint.'
-  [../]
+  []
 []

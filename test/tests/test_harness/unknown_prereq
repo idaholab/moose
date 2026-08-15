@@ -3,5 +3,5 @@
     type = RunApp
     input = foo.i
     prereq = non_existent
-  [../]
+  []
 []

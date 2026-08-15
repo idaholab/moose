@@ -6,7 +6,7 @@
     requirement = "PorousFlow shall be able to correctly compute liquid and gas properties in the Pruess et al code comparison 3: water and no CO2 case"
     issues = '#12014'
     design = 'porous_flow/co2_intercomparison.md porous_flow/1Dradial.md'
-  [../]
+  []
   [./water_and_co2]
     type = CSVDiff
     input = 'properties.i Variables/zi/initial_condition=0.5 Outputs/file_base=properties_water_co2'
@@ -14,7 +14,7 @@
     requirement = "PorousFlow shall be able to correctly compute liquid and gas properties in the Pruess et al code comparison 3: water and gaseous CO2 case"
     issues = '#12014'
     design = 'porous_flow/co2_intercomparison.md porous_flow/1Dradial.md'
-  [../]
+  []
   [./brine]
     type = CSVDiff
     input = 'properties.i AuxVariables/xnacl/initial_condition=0.15 Outputs/file_base=properties_brine'
@@ -22,7 +22,7 @@
     requirement = "PorousFlow shall be able to correctly compute liquid and gas properties in the Pruess et al code comparison 3: brine and no CO2 case"
     issues = '#12014'
     design = 'porous_flow/co2_intercomparison.md porous_flow/1Dradial.md'
-  [../]
+  []
   [./brine_co2]
     type = CSVDiff
     input = 'properties.i Variables/zi/initial_condition=0.5 AuxVariables/xnacl/initial_condition=0.15 Outputs/file_base=properties_brine_co2'
@@ -31,7 +31,7 @@
     requirement = "PorousFlow shall be able to correctly compute liquid and gas properties in the Pruess et al code comparison 3: brine and gaseous CO2 case"
     issues = '#12014 #15911'
     design = 'porous_flow/co2_intercomparison.md porous_flow/1Dradial.md'
-  [../]
+  []
   [./1Dradial]
     type = RunApp
     input = '1Dradial.i'
@@ -39,5 +39,5 @@
     requirement = "PorousFlow shall be able to correctly compute radial flow from an injection well, as in the Pruess et all code comparison 3"
     issues = '#12014'
     design = 'porous_flow/co2_intercomparison.md porous_flow/1Dradial.md'
-  [../]
+  []
 []

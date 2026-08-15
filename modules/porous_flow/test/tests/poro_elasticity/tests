@@ -6,7 +6,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity in the situation where increasing porepressure leads to volumetric expansion'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./undrained_oedometer]
     type = CSVDiff
     input = undrained_oedometer.i
@@ -14,7 +14,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to simulate an undrained oedometer test'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation]
     type = CSVDiff
     input = pp_generation.i
@@ -22,7 +22,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-constrained solid'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_action]
     type = CSVDiff
     input = pp_generation_action.i
@@ -30,7 +30,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-constrained solid, using PorousFlow Actions'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_fullysat_action]
     type = CSVDiff
     input = pp_generation_fullysat_action.i
@@ -38,7 +38,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-constrained solid, using a fully-saturated formulation'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_unconfined]
     type = CSVDiff
     input = pp_generation_unconfined.i
@@ -46,7 +46,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-unconstrained solid'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_unconfined_constM]
     type = CSVDiff
     input = pp_generation_unconfined_constM.i
@@ -54,7 +54,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-unconstrained solid, using a constant Biot modulus'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_unconfined_constM_action]
     type = CSVDiff
     input = pp_generation_unconfined_constM_action.i
@@ -64,7 +64,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-unconstrained solid, using a constant Biot modulus, and be able to simulate this using an Action'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_unconfined_fully_saturated]
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated.i
@@ -72,7 +72,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-unconstrained solid, using a fully-saturated formulation'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_unconfined_fully_saturated_volume]
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated_volume.i
@@ -80,7 +80,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-unconstrained solid, using a fully-saturated formulation, based on fluid volumes instead of fluid masses'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./pp_generation_unconfined_basicthm]
     type = CSVDiff
     input = pp_generation_unconfined_basicthm.i
@@ -88,7 +88,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-unconstrained solid, using a Actions'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./mandel]
     type = CSVDiff
     input = mandel.i
@@ -96,7 +96,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Mandel consolidation of a drained medium'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./mandel_constM]
     type = CSVDiff
     input = mandel_constM.i
@@ -104,7 +104,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Mandel consolidation of a drained medium, using a constant Biot modulus'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./mandel_fully_saturated]
     type = CSVDiff
     input = mandel_fully_saturated.i
@@ -112,7 +112,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Mandel consolidation of a drained medium, using a fully-saturated formalism'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./mandel_fully_saturated_volume]
     type = CSVDiff
     input = mandel_fully_saturated_volume.i
@@ -120,7 +120,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Mandel consolidation of a drained medium, using a fully-saturated formalism based on fluid volume instaed of the usual fluid mass'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./mandel_basicthm]
     type = CSVDiff
     input = mandel_basicthm.i
@@ -128,7 +128,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Mandel consolidation of a drained medium, using Actions'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./terzaghi]
     type = CSVDiff
     input = terzaghi.i
@@ -136,7 +136,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Terzaghi consolidation of a drained medium'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./terzaghi_constM]
     type = CSVDiff
     input = terzaghi_constM.i
@@ -144,7 +144,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Terzaghi consolidation of a drained medium, using a constant Biot modulus'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./terzaghi_fully_saturated_volume]
     type = CSVDiff
     input = terzaghi_fully_saturated_volume.i
@@ -152,7 +152,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Terzaghi consolidation of a drained medium, using a fully-saturated formalism'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./terzaghi_basicthm]
     type = CSVDiff
     input = terzaghi_basicthm.i
@@ -160,7 +160,7 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Terzaghi consolidation of a drained medium, using Actions'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
   [./vol_expansion_poroperm]
     type = CSVDiff
     input = vol_expansion_poroperm.i
@@ -168,5 +168,5 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to calculate porosity and permeability increases in an unconfined sample where porepressure is increased'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
-  [../]
+  []
 []

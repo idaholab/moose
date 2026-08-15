@@ -13,7 +13,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 3D brick geometry (NAFEMS CGS1 contact patch test with mismatched nodes)."
-  [../]
+  []
   [./glued_pen]
     type = 'CSVDiff'
     input = 'brick2_template1.i'
@@ -26,7 +26,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 3D brick geometry (NAFEMS CGS1 contact patch test with mismatched nodes)."
-  [../]
+  []
   [./frictionless_kin]
     type = 'CSVDiff'
     input = 'brick2_template1.i'
@@ -39,7 +39,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 3D brick geometry (NAFEMS CGS1 contact patch test with mismatched nodes)."
-  [../]
+  []
   [./frictionless_pen]
     type = 'CSVDiff'
     input = 'brick2_template1.i'
@@ -52,7 +52,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 3D brick geometry (NAFEMS CGS1 contact patch test with mismatched nodes)."
-  [../]
+  []
   [./frictionless_aug]
     type = 'CSVDiff'
     input = 'brick2_template2.i'
@@ -66,7 +66,7 @@
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 3D brick geometry (NAFEMS CGS1 contact patch test
     with mismatched nodes)."
-  [../]
+  []
   [./mu_0_2_aug]
     type = 'CSVDiff'
     input = 'brick2_template2.i'
@@ -80,7 +80,7 @@
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 3D brick geometry (NAFEMS CGS1 contact patch test
     with mismatched nodes)."
-  [../]
+  []
   [./mu_0_2_pen]
     type = 'CSVDiff'
     input = 'brick2_mu_0_2_pen.i'
@@ -93,5 +93,5 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 3D brick geometry (NAFEMS CGS1 contact patch test
     with mismatched nodes)."
-  [../]
+  []
 []

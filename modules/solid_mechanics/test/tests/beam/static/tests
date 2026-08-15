@@ -9,7 +9,7 @@
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Timoshenko beam modeled using"
                   " beam elements under small deformations in the y direction."
-  [../]
+  []
   [./timoshenko_small_strain_z]
     type = 'Exodiff'
     input = 'timoshenko_small_strain_z.i'
@@ -18,7 +18,7 @@
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Timoshenko beam modeled using"
                   " beam elements under small deformations in the z direction."
-  [../]
+  []
   [./euler_small_strain_y]
     type = 'Exodiff'
     input = 'euler_small_strain_y.i'
@@ -27,7 +27,7 @@
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under small deformations in the y direction."
-  [../]
+  []
   [./euler_small_strain_z]
     type = 'Exodiff'
     input = 'euler_small_strain_z.i'
@@ -36,7 +36,7 @@
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under small deformations in the z direction."
-  [../]
+  []
   [./euler_finite_rot_y]
     type = 'Exodiff'
     input = 'euler_finite_rot_y.i'
@@ -46,7 +46,7 @@
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under finite deformations in the y direction."
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./euler_finite_rot_z]
     type = 'Exodiff'
     input = 'euler_finite_rot_z.i'
@@ -56,7 +56,7 @@
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under finite deformations in the z direction."
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./euler_small_y_with_action]
     type = 'Exodiff'
     input = 'euler_small_strain_y_action.i'
@@ -66,7 +66,7 @@
     requirement = "The LineElementAction class shall accurately create the objects"
                   " required to model the static bending response of an Euler-Bernoulli"
                   " beam modeled using beam elements under small deformations."
-  [../]
+  []
   [./euler_finite_y_with_action]
     type = 'Exodiff'
     input = 'euler_finite_rot_y_action.i'
@@ -76,7 +76,7 @@
     requirement = "The LineElementAction class shall accurately create the objects"
                   " required to model the static bending response of an Euler-Bernoulli"
                   " beam modeled using beam elements under finite deformations."
-  [../]
+  []
   [./euler_pipe_axial_disp]
     type = 'CSVDiff'
     input = 'euler_pipe_axial_disp.i'
@@ -84,7 +84,7 @@
 
     requirement = "The mechanics system shall accurately predict the axial displacement"
                   " of an Euler-Bernoulli pipe modeled using beam elements."
-  [../]
+  []
   [./euler_pipe_axial_force]
     type = 'CSVDiff'
     input = 'euler_pipe_axial_force.i'
@@ -92,7 +92,7 @@
     verification = 'beam_vandv.md'
     requirement = "The mechanics system shall accurately predict the axial forces"
                   " on an Euler-Bernoulli pipe modeled using beam elements."
-  [../]
+  []
   [./euler_pipe_bend]
     type = 'CSVDiff'
     input = 'euler_pipe_bend.i'
@@ -100,7 +100,7 @@
 
     requirement = "The mechanics system shall accurately predict the bending response"
                   " of an Euler-Bernoulli pipe modeled using beam elements."
-  [../]
+  []
   [./error_displacements1]
      type = 'RunException'
      input = 'euler_small_strain_y.i'
@@ -109,7 +109,7 @@
 
      requirement = "The ComputeIncrementalBeamStrain class shall produce an error if"
                    " the number of supplied displacements and rotations do not match."
-  [../]
+  []
   [./error_displacements2]
      type = 'RunException'
      input = 'euler_small_strain_y.i'
@@ -118,7 +118,7 @@
 
      requirement = "The StressDivergenceBeam class shall produce an error if the number"
                    " of supplied displacements and rotations do not match."
-  [../]
+  []
   [./error_large_strain]
      type = 'RunException'
      input = 'euler_small_strain_y.i'
@@ -128,7 +128,7 @@
      requirement = "The ComputeIncrementalBeamStrain class shall produce an error"
                    " if large strain calculation is requested for asymmetric beam"
                    " configurations with non-zero first or third moments of area."
-  [../]
+  []
   [./error_y_orientation]
     type = 'RunException'
     input = 'euler_small_strain_y.i'
@@ -137,7 +137,7 @@
 
     requirement = "The ComputeIncrementalBeamStrain class shall produce an error if"
                   " the y orientation provided is not perpendicular to the beam axis."
-  [../]
+  []
   [./torsion_1]
     type = 'Exodiff'
     input = 'torsion_1.i'
@@ -145,7 +145,7 @@
     verification = 'beam_vandv.md'
     requirement = "The mechanics system shall accurately predict the torsional response"
                   " of a beam modeled using beam elements with auto-calculated polar moment of inertia."
-  [../]
+  []
   [./torison_2]
     type = 'Exodiff'
     input = 'torsion_2.i'
@@ -153,5 +153,5 @@
 
     requirement = "The mechanics system shall accurately predict the torsional response"
                   " of a beam modeled using beam elements with user provided polar moment of inertia."
-  [../]
+  []
 []

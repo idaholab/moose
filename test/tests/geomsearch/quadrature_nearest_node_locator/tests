@@ -7,7 +7,7 @@
     group = 'geometric'
     requirement = "The NearestNodeDistanceAux object shall compute the shortest distance between nodes on two overlapping boundaries using a constant monomial auxiliary variable."
     issues = '#1462'
-  [../]
+  []
   [qnnl_ad]
     type = 'Exodiff'
     input = 'qnnl_ad.i'

@@ -10,7 +10,7 @@
     check_input = True
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
-  [../]
+  []
   [./AC_CH_advection_constforce_rect]
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
@@ -22,7 +22,7 @@
 
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
-  [../]
+  []
   [./grain_forcedensity_ext]
     type = RunApp
     input = 'grain_forcedensity_ext.i'
@@ -33,5 +33,5 @@
     check_input = True
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
-  [../]
+  []
 []

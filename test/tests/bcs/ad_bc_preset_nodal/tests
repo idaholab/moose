@@ -7,7 +7,7 @@
     design = 'bcs/ADFunctionDirichletBC.md'
     issues = '#13261'
     requirement = "The system shall support setting AD Dirichlet type boundary conditions, supplied as a function, directly to the solution vector prior to the solve."
-  [../]
+  []
   [./bc_preset_nodal_test]
     type = 'Exodiff'
     input = 'bc_preset_nodal.i'
@@ -15,7 +15,7 @@
     design = 'bcs/ADDirichletBC.md'
     issues = '#13261'
     requirement = "The system shall support setting AD Dirichlet type boundary conditions directly to the solution vector prior to the solve."
-  [../]
+  []
 
   [./bc_function_nodal_test-jac]
     type = 'PetscJacobianTester'
@@ -26,7 +26,7 @@
     design = 'bcs/ADFunctionDirichletBC.md'
     issues = '#13261'
     requirement = "The system shall support setting AD Dirichlet type boundary conditions, supplied as a function, directly to the solution vector prior to the solve and have perfect Jacobians."
-  [../]
+  []
   [./bc_preset_nodal_test-jac]
     type = 'PetscJacobianTester'
     input = 'bc_preset_nodal.i'
@@ -36,5 +36,5 @@
     design = 'bcs/ADDirichletBC.md'
     issues = '#13261'
     requirement = "The system shall support setting AD Dirichlet type boundary conditions directly to the solution vector prior to the solve and have perfect Jacobians."
-  [../]
+  []
 []

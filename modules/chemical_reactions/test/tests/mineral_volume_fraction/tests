@@ -3,5 +3,5 @@
     type = CSVDiff
     input = mineral.i
     csvdiff = mineral_out.csv
-  [../]
+  []
 []

@@ -10,7 +10,7 @@
       exodiff = 'bdf2_out.e'
 
       detail = "with and"
-    [../]
+    []
 
     [./adapt]
       type = 'Exodiff'
@@ -19,7 +19,7 @@
       group = 'adaptive'
 
       detail = "without mesh adaptivity."
-    [../]
+    []
   []
 
   [fv]

@@ -8,7 +8,7 @@
     group = 'adaptive'
     max_parallel = 1
     requirement = "The Output system shall be capable of applying displacements directly to the outputted mesh for steady problems."
-  [../]
+  []
 
   [./displaced_eq_test]
     type = 'Exodiff'
@@ -17,7 +17,7 @@
     group = 'adaptive'
     max_parallel = 1
     requirement = "The Output system shall be capable of applying displacements directly to the outputted mesh for transient problems with Kernels using the displaced configuration."
-  [../]
+  []
 
   [./displacement_transient_test]
     type = 'Exodiff'
@@ -26,5 +26,5 @@
     group = 'adaptive'
     max_parallel = 1
     requirement = "The Output system shall be capable of applying displacements directly to the outputted mesh for transient problems."
-  [../]
+  []
 []

@@ -11,5 +11,5 @@
     design = 'ElementL2Error.md'
     requirement = 'The system shall verify calculations using the method of manufactured solutions using a functional form of an equation outside of the shape function space.'
     capabilities = 'method!=dbg'
-  [../]
+  []
 []

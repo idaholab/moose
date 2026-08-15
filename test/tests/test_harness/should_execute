@@ -4,7 +4,7 @@
     input = good.i
     cli_args = 'Outputs/exodus=true Outputs/file_base=good_exodiff_out'
     exodiff = good_exodiff_out.e
-  [../]
+  []
   [./should_execute_false_ok]
     type = Exodiff
     input = exodiff.i
@@ -12,7 +12,7 @@
     exodiff = good_exodiff_out.e
     prereq = should_execute_true_ok
     should_execute = false # if true, there would be a failure.
-  [../]
+  []
   [./should_execute_true_fail]
     type = Exodiff
     input = exodiff.i
@@ -20,5 +20,5 @@
     exodiff = good_exodiff_out.e
     prereq = should_execute_false_ok
     # should_execute is true by default
-  [../]
+  []
 []

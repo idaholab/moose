@@ -7,7 +7,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the x-y plane for small strain"
     design = 'source/materials/ComputePlaneSmallStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_xy_incremental]
     type = Exodiff
     input = 'planestrain_xy.i'
@@ -19,7 +19,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the x-y plane for incremental strain"
     design = 'source/materials/ComputePlaneIncrementalStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_xy_finite]
     type = Exodiff
     input = 'planestrain_xy.i'
@@ -31,7 +31,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the x-y plane for finite strain"
     design = 'source/materials/ComputePlaneFiniteStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_xz_small]
     type = Exodiff
     input = 'planestrain_xz.i'
@@ -40,7 +40,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the x-z plane for small strain"
     design = 'source/materials/ComputePlaneSmallStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_xz_incremental]
     type = Exodiff
     input = 'planestrain_xz.i'
@@ -52,7 +52,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the x-z plane for incremental strain"
     design = 'source/materials/ComputePlaneIncrementalStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_xz_finite]
     type = Exodiff
     input = 'planestrain_xz.i'
@@ -64,7 +64,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the x-z plane for finite strain"
     design = 'source/materials/ComputePlaneFiniteStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_yz_small]
     type = Exodiff
     input = 'planestrain_yz.i'
@@ -73,7 +73,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the y-z plane for small strain"
     design = 'source/materials/ComputePlaneSmallStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_yz_incremental]
     type = Exodiff
     input = 'planestrain_yz.i'
@@ -85,7 +85,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the y-z plane for incremental strain"
     design = 'source/materials/ComputePlaneIncrementalStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./plane_strain_yz_finite]
     type = Exodiff
     input = 'planestrain_yz.i'
@@ -97,7 +97,7 @@
     requirement = "The tensor mechanics strain calculators shall solve plane strain in the y-z plane for finite strain"
     design = 'source/materials/ComputePlaneFiniteStrain.md'
     issues = '#11257'
-  [../]
+  []
   [./gps_xy_small]
     type = Exodiff
     input = 'gps_xy.i'
@@ -106,7 +106,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-y plane for small strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_xy_small_ad]
     type = Exodiff
     input = 'gps_xy.i'
@@ -134,7 +134,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-y plane for incremental strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_xy_incremental_ad]
     type = Exodiff
     input = 'gps_xy.i'
@@ -164,7 +164,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-y plane for finite strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_xy_finite_ad]
     type = Exodiff
     input = 'gps_xy.i'
@@ -191,7 +191,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-z plane for small strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_xz_small_ad]
     type = Exodiff
     input = 'gps_xz.i'
@@ -219,7 +219,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-z plane for incremental strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_xz_incremental_ad]
     type = Exodiff
     input = 'gps_xz.i'
@@ -249,7 +249,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the x-z plane for finite strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_xz_finite_ad]
     type = Exodiff
     input = 'gps_xz.i'
@@ -276,7 +276,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the y-z plane for small strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_yz_small_ad]
     type = Exodiff
     input = 'gps_yz.i'
@@ -304,7 +304,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the y-z plane for incremental strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_yz_incremental_ad]
     type = Exodiff
     input = 'gps_yz.i'
@@ -334,7 +334,7 @@
     requirement = "The tensor mechanics strain calculators shall solve generalized plane strain in the y-z plane for finite strain"
     design = 'modules/solid_mechanics/generalized_plane_strain.md'
     issues = '#11257'
-  [../]
+  []
   [gps_yz_finite_ad]
     type = Exodiff
     input = 'gps_yz.i'
@@ -361,7 +361,7 @@
     requirement = "The Jacobian for plane strain in the x-y plane shall be correct"
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
-  [../]
+  []
   [./planestrain_jacobian_xz]
     type = 'PetscJacobianTester'
     input = 'planestrain_jacobian_testing_xz.i'
@@ -370,7 +370,7 @@
     requirement = "The Jacobian for plane strain in the x-z plane shall be correct"
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
-  [../]
+  []
   [./planestrain_jacobian_yz]
     type = 'PetscJacobianTester'
     input = 'planestrain_jacobian_testing_yz.i'
@@ -379,7 +379,7 @@
     requirement = "The Jacobian for plane strain in the y-z plane shall be correct"
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
-  [../]
+  []
   [./gps_jacobian_xy]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_xy.i'
@@ -388,7 +388,7 @@
     requirement = "The Jacobian for generalized plane strain in the x-y plane shall be correct"
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
-  [../]
+  []
   [gps_jacobian_xy_ad]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_xy.i'
@@ -412,7 +412,7 @@
     requirement = "The Jacobian for generalized plane strain in the x-z plane shall be correct"
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
-  [../]
+  []
   [gps_jacobian_xz_ad]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_xz.i'
@@ -436,7 +436,7 @@
     requirement = "The Jacobian for generalized plane strain in the y-z plane shall be correct"
     design = 'source/kernels/StressDivergenceTensors.md'
     issues = '#11257'
-  [../]
+  []
   [gps_jacobian_yz_ad]
     type = 'PetscJacobianTester'
     input = 'gps_jacobian_testing_yz.i'

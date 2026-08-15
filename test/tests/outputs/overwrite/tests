@@ -7,5 +7,5 @@
     exodiff = 'overwrite_out.e'
 
     requirement = "The system shall include the ability to overwrite existing timesteps when writing ExodusII format."
-  [../]
+  []
 []

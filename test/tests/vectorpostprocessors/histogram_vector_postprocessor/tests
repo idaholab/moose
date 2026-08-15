@@ -7,7 +7,7 @@
     issues = '#11218'
     design = 'HistogramVectorPostprocessor.md'
     requirement = 'The system shall be able to compute a histogram of each vector of data produced by a vector data producer (VectorPostprocessor).'
-  [../]
+  []
 
   [./test_size0_err]
     type = 'RunException'
@@ -17,5 +17,5 @@
     issues = '#18459'
     design = 'HistogramVectorPostprocessor.md'
     requirement = 'The histogram vector postprocessor shall generate an error if the vector postprocessor that it operates on does not have any declared vectors'
-  [../]
+  []
 []

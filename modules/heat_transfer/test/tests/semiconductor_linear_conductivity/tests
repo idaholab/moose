@@ -6,5 +6,5 @@
     input = 'steinhart-hart_linear.i'
     exodiff = 'steinhart-hart_linear_out.e'
     requirement = 'The system shall compute conductivity of semiconductors according to the Steinhart-Hart equation'
-  [../]
+  []
 []

@@ -5,7 +5,7 @@
     exodiff = 'PFC_IC_BCC_test_out.e'
     # 0-step transient does not recover
     recover = false
-  [../]
+  []
 
   [./FCC_test]
     type = 'Exodiff'
@@ -13,5 +13,5 @@
     exodiff = 'PFC_IC_FCC_test_out.e'
     # 0-step transient does not recover
     recover = false
-  [../]
+  []
 []

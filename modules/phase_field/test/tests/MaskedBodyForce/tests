@@ -4,5 +4,5 @@
     type = Exodiff
     input = MaskedBodyForce_test.i
     exodiff = MaskedBodyForce_test_out.e
-  [../]
+  []
 []

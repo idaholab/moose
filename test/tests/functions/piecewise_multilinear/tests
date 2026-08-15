@@ -7,35 +7,35 @@
     expect_err = "Error opening file .* from GriddedData."
     max_parallel = 1
     requirement = "The PiecewiseMultilinear object will error if the supplied file fails to open."
-  [../]
+  []
   [./except2]
     type = 'RunException'
     input = 'except2.i'
     expect_err = "PiecewiseMultiInterpolation needs monotonically-increasing axis data.  Axis 0 contains non-monotonicity at value -1"
     max_parallel = 1
     requirement = "The PiecewiseMultiInterpolation object shall error if the supplied data is not monotonically increasing."
-  [../]
+  []
   [./except3]
     type = 'RunException'
     input = 'except3.i'
     expect_err = "According to AXIS statements in GriddedData, number of data points is 2 but 3 function values were read from file"
     max_parallel = 1
     requirement = "The PiecewiseMultiInterpolation object shall error if the number of requested functions differ than the number available from the file."
-  [../]
+  []
   [./except4]
     type = 'RunException'
     input = 'except4.i'
     expect_err = "PiecewiseMultiInterpolation needs the AXES to be independent.  Check the AXIS lines in your data file."
     max_parallel = 1
     requirement = "The PiecewiseMultiInterpolation errors if the axes supplied are not independent."
-  [../]
+  []
   [./except5]
     type = 'RunException'
     input = 'except5.i'
     expect_err = "No valid AXIS lines found by GriddedData"
     max_parallel = 1
     requirement = "The PiecewiseMultilinear shall error if the axis lines are not located in the supplied data."
-  [../]
+  []
 
   [./oneDa]
     type = 'CSVDiff'
@@ -43,14 +43,14 @@
     csvdiff = 'oneDa.csv'
     abs_zero = 1E-8
     requirement = "The PiecewiseMultilinear object shall perform interpolation on a 1D domain."
-  [../]
+  []
   [./oneDb]
     type = 'CSVDiff'
     input = 'oneDb.i'
     csvdiff = 'oneDb.csv'
     abs_zero = 1E-8
     requirement = "The PiecewiseMultilinear object shall perform interpolation on a 1D domain that compares to an equivalent known function."
-  [../]
+  []
 
   [./time]
     type = 'CSVDiff'
@@ -58,7 +58,7 @@
     csvdiff = 'time.csv'
     abs_zero = 1E-8
     requirement = "The PiecewiseMultilinear object shall perform interpolation of time-dependent data."
-  [../]
+  []
 
   [./twoDa]
     type = 'CSVDiff'
@@ -66,7 +66,7 @@
     csvdiff = 'twoDa.csv'
     abs_zero = 1E-8
     requirement = "The PiecewiseMultilinear object shall perform interpolation on a 2D domain."
-  [../]
+  []
   [./twoDb]
     type = 'Exodiff'
     input = 'twoDb.i'
@@ -74,14 +74,14 @@
     rel_err = 1E-5
     use_old_floor = True
     requirement = "The PiecewiseMultilinear object shall perform interpolation on a 2D domain that compares to an equivalent known function."
-  [../]
+  []
 
   [./twoD_const]
     type = 'Exodiff'
     input = 'twoD_const.i'
     exodiff = 'twoD_const.e'
     requirement = "The PiecewiseMultilinear object shall perform constant interpolation on a 2D domain."
-  [../]
+  []
 
   [./fourDa]
     type = 'Exodiff'
@@ -90,5 +90,5 @@
     rel_err = 1E-5
     use_old_floor = True
     requirement = "The PiecewiseMultilinear object shall perform interpolation on a 3D domain with time-dependent data."
-  [../]
+  []
 []

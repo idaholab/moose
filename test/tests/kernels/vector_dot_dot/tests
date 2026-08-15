@@ -6,5 +6,5 @@
     requirement = 'The system shall compute second-order time derivatives for vector variables'
     design = 'Coupleable.md'
     issues = '#13913'
-  [../]
+  []
 []

@@ -7,7 +7,7 @@
     # real bridge.e mesh, just to make the checks run faster.
     cli_args = 'Mesh/file=fake_bridge.e'
     check_input = True
-  [../]
+  []
   [./bridge_large_strain]
     type = RunApp
     input = 'bridge_large_strain.i'
@@ -16,5 +16,5 @@
     # real bridge.e mesh, just to make the checks run faster.
     cli_args = 'Mesh/file=fake_bridge.e'
     check_input = True
-  [../]
+  []
 []

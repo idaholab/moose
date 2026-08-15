@@ -8,5 +8,5 @@
     recover = false
     mesh_mode = REPLICATED
     requirement = "The DGCoupledDiffusion object shall compute the correct Jacobian."
-  [../]
+  []
 []

@@ -19,7 +19,7 @@
                  "a material property value on the primary side of  4 "
       issues = '#11647'
       max_threads = 1
-    [../]
+    []
     [./interface_UO_get_material_test]
       type = 'RunApp'
       input = 'interface_userobject_material_value.i'
@@ -32,7 +32,7 @@
                     "This test will produce an error if the computed an retrived material property are not the same."
       issues = '#14680'
       max_threads = 1
-    [../]
+    []
     [./interface_Qp_rate_incremement_test]
       type = 'Exodiff'
       input = 'interface_value_rate_increment_user_object_QP.i'
@@ -41,7 +41,7 @@
                     " when computing the variable rate or increment."
       issues = '#14680'
       max_threads = 1
-    [../]
+    []
     [./interface_Qp_real_material]
       type = 'Exodiff'
       input = 'interface_mp_real_user_object_QP.i'
@@ -49,5 +49,5 @@
       requirement = "Testing the implementation of the InterfaceQpMaterialPropertyRealUO."
       issues = '#14680'
       max_threads = 1
-    [../]
+    []
   []

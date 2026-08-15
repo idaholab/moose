@@ -10,7 +10,7 @@
     design = 'syntax/ScalarKernels/index.md'
     requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach.'
     issues = 'cbf6d2235379f6ad75908b0f9d4be792dbce6c3d'
-  [../]
+  []
 
   [./kernel_disp]
     type = 'Exodiff'
@@ -20,7 +20,7 @@
     design = 'syntax/ScalarKernels/index.md'
     requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach when displacements are active.'
     issues = '#7699'
-  [../]
+  []
 
   [./bc]
     type = 'Exodiff'
@@ -30,5 +30,5 @@
     design = 'syntax/ScalarKernels/index.md'
     requirement = 'The system shall support the ability to set Dirichlet boundary conditions using the Lagrange multiplier approach.'
     issues = '#1800'
-  [../]
+  []
 []

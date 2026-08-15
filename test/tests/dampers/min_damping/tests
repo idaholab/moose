@@ -8,7 +8,7 @@
     min_parallel = 2
     design = 'source/dampers/BoundingValueNodalDamper.md'
     requirement = "The BoundingValueNodalDamper object shall report if the minimum value is greater than the maximum value."
-  [../]
+  []
   [./min_elem_damping]
     type = 'RunApp'
     input = 'min_elem_damping.i'
@@ -17,12 +17,12 @@
     min_parallel = 2
     design = 'source/dampers/BoundingValueElementDamper.md'
     requirement = "The BoundingValueElementDamper object shall report if the minimum value is greater than the maximum value."
-  [../]
+  []
   [./min_general_damping]
     type = 'RunException'
     input = 'min_general_damping.i'
     expect_err = "Solve failed and timestep already at or below dtmin"
     design = 'syntax/Dampers/index.md'
     requirement = "The Damper system shall error if the damping value is below a minimum."
-  [../]
+  []
 []

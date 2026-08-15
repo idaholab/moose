@@ -6,5 +6,5 @@
     requirement = "Coupled variable gradient Jacobian entries generated with AD shall be accurate"
     design = "Coupleable.md"
     issues = "#5658"
-  [../]
+  []
 []

@@ -6,7 +6,7 @@
     requirement = "The variable data created by a MaterialRealAux object shall support being limited to boundaries."
     issues = '#3114'
     design = 'source/auxkernels/MaterialRealAux.md'
-  [../]
+  []
   [./ho_boundary_restricted_test]
     type = 'Exodiff'
     input = 'high_order_boundary_aux.i'
@@ -14,7 +14,7 @@
     requirement = "The system shall support boundary restricted auxiliary elemental variables with high order shape functions."
     issues = '#16895'
     design = 'syntax/AuxKernels/index.md'
-  [../]
+  []
   [./boundary_restricted_error_test]
     type = RunException
     input = 'high_order_boundary_aux.i'
@@ -23,7 +23,7 @@
     requirement = "The system shall report an error if a boundary restricted elemental auxiliary kernel is evaluated on an element with multiple boundary sides"
     issues = '#5061'
     design = 'syntax/AuxKernels/index.md'
-  [../]
+  []
   [./boundary_unrestricted_error_test]
     type = RunApp
     input = 'high_order_boundary_aux.i'
@@ -32,5 +32,5 @@
     issues = '#17424'
     design = 'syntax/AuxKernels/index.md'
     prereq = 'ho_boundary_restricted_test'
-  [../]
+  []
 []

@@ -8,5 +8,5 @@
     exodiff = 'obm_out.e'
 
     requirement = "The system shall support the ability to mark elements for mesh adaptivity based on a bounding box with arbitrary orientation."
-  [../]
+  []
 []

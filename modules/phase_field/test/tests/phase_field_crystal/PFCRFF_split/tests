@@ -6,5 +6,5 @@
 
     # This test loads the PhaseFieldApp Multiapp - it needs to be restricted in order to run reliably
     executable_pattern = 'phase_field-\w+$'
-  [../]
+  []
 []

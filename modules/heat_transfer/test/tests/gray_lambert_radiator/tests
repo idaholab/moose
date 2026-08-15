@@ -9,7 +9,7 @@
     expect_err = 'The number of entries must match the number of boundary entries.'
     requirement = 'The system shall check consistency of boundary and emissivity entries.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
-  [../]
+  []
 
   [./inconsistent_bnd_view_factors]
     type = 'RunException'
@@ -23,7 +23,7 @@
     expect_err = 'Leading dimension of view_factors must be equal to number of side sets.'
     requirement = 'The system shall check consistency of boundary and view factor entries.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
-  [../]
+  []
 
   [./inconsistent_iso_temperature]
     type = 'RunException'
@@ -36,7 +36,7 @@
     expect_err = 'fixed_boundary_temperatures and fixed_temperature_boundary must have the same length.'
     requirement = 'The system shall check consistency of fixed_boundary_temperatures and fixed_temperature_boundary entries.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
-  [../]
+  []
 
   [./inconsistent_bnd_iso_bnd]
     type = 'RunException'
@@ -49,7 +49,7 @@
     expect_err = 'fixed_temperature_boundary must be a subset of boundary.'
     requirement = 'The system shall check consistency of boundary and fixed_temperature_boundary entries.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
-  [../]
+  []
 
   [./inconsistent_bnd_adiabatic_bnd]
     type = 'RunException'
@@ -62,7 +62,7 @@
     expect_err = 'adiabatic_boundary must be a subset of boundary.'
     requirement = 'The system shall check consistency of boundary and adiabatic_boundary entries.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
-  [../]
+  []
 
   [./incorrect_view_factor_shape]
     type = 'RunException'
@@ -71,7 +71,7 @@
     expect_err = 'view_factors must be provided as square array. Row 1 has 2 entries.'
     requirement = 'The system shall check consistency of the view_factors entry shape.'
     design = 'SpecifiedViewFactor.md ViewFactorObjectSurfaceRadiation.md'
-  [../]
+  []
 
   [./bad_rowsum]
     type = 'RunException'
@@ -81,7 +81,7 @@
     capabilities = 'compiler!=gcc'
     requirement = 'The system shall check consistency of the view_factors entry norm.'
     design = 'SpecifiedViewFactor.md ViewFactorObjectSurfaceRadiation.md'
-  [../]
+  []
 
   [./gray_lambert_cavity]
     type = CSVDiff
@@ -90,7 +90,7 @@
     cli_args = 'Outputs/csv=true'
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces.'
     design = 'ViewFactorObjectSurfaceRadiation.md SurfaceRadiationVectorPostprocessor.md ViewFactorVectorPostprocessor.md'
-  [../]
+  []
 
   [./coupled_heat_conduction]
     type = Exodiff
@@ -99,7 +99,7 @@
     no_error_deprecated = true # TODO: Delete when ConstantViewFactorSurfaceRadiation is deleted
     requirement = 'The system shall allow coupling radiative transfer between gray Lambert surfaces to solving heat conduction.'
     design = 'ConstantViewFactorSurfaceRadiation.md'
-  [../]
+  []
 
   [./coupled_heat_conduction_emission_reconstruction]
     type = Exodiff
@@ -109,7 +109,7 @@
     no_error_deprecated = true # TODO: Delete when ConstantViewFactorSurfaceRadiation is deleted
     requirement = 'The system shall allow reconstructing the spatial distribution of the emission component on a radiation boundary via the T4 law.'
     design = 'GrayLambertNeumannBC.md'
-  [../]
+  []
 
   [./gray_lambert_cavity_automatic_vf]
     type = CSVDiff
@@ -118,7 +118,7 @@
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces when the view factors are provided by a userobject.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
     mesh_mode = REPLICATED
-  [../]
+  []
 
   [./gray_lambert_cavity_automatic_vf_3D]
     type = CSVDiff
@@ -127,5 +127,5 @@
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces in 3D when the view factors are provided by a userobject.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
     mesh_mode = REPLICATED
-  [../]
+  []
 []

@@ -6,11 +6,11 @@
     input = control_connection.i
     exodiff = control_connection_out.e
     requirement = "The MOOSE control system shall allow parameters from differing objects, with differing names to be associated and changed together."
-  [../]
+  []
   [./alias]
     type = Exodiff
     input = alias_connection.i
     exodiff = alias_connection_out.e
     requirement = "The MOOSE control system shall allow parameters from objects to be assigned aliases for the purpose of changing the value."
-  [../]
+  []
 []

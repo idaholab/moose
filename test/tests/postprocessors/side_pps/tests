@@ -6,5 +6,5 @@
     input = 'side_pps_multi_bnd_test.i'
     exodiff = 'side_pps_multi_bnd_test_out.e'
     requirement = 'The system shall compute an aggregate scalar quantity when applied along multiple boundaries.'
-  [../]
+  []
 []

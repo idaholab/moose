@@ -9,5 +9,5 @@
     design = '/AreaPostprocessor.md'
 
     max_parallel = 16 # 16 element test
-  [../]
+  []
 []

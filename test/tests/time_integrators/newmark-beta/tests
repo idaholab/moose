@@ -9,7 +9,7 @@
     requirement = "The NewmarkBeta time integrator shall correctly compute the first"
                   " and second time derivatives of a variable using the default beta"
                   " and gamma parameters."
-  [../]
+  []
   [./newmark_beta_prescribed]
     type = 'CSVDiff'
     input = 'newmark_beta_prescribed_parameters.i'
@@ -19,7 +19,7 @@
     requirement = "The NewmarkBeta time integrator shall correctly compute the first"
                   " and second time derivatives of a variable using user provided beta"
                   " and gamma parameters."
-  [../]
+  []
   [./newmark_beta_inactive_steps]
     type = 'CSVDiff'
     input = 'newmark_beta_inactive_steps.i'
@@ -28,7 +28,7 @@
     allow_warnings = True
     requirement = "The NewmarkBeta time integrator shall correctly use the inactive_tsteps"
                   " parameter."
-  [../]
+  []
   [./ad_newmark_beta_dotdot]
     type = 'CSVDiff'
     input = 'ad_newmark_beta_dotdot.i'
@@ -37,5 +37,5 @@
     requirement = "A Newmark-beta method time integrator shall correctly compute the second"
                   " time derivative of an automatic differentiation variable using the default beta"
                   " and gamma parameters."
-  [../]
+  []
 []

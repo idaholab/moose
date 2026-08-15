@@ -10,7 +10,7 @@
     design = 'LineSegmentCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
-  [../]
+  []
   [./crack_tip_enrichment_penny_crack_3d]
     type = Exodiff
     input = penny_crack_3d.i
@@ -24,5 +24,5 @@
     design = 'CircleCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
-  [../]
+  []
 []

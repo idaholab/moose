@@ -6,5 +6,5 @@
     exodiff = 'linear_with_full_smp_out.e'
     requirement = "The system shall correctly evaluate Jacobians with coupled problems and the LINEAR solve type"
     issues = '#14065'
-  [../]
+  []
 []

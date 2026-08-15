@@ -8,7 +8,7 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, overlapping surfaces in 2D."
-  [../]
+  []
 
   [./2d_triangle]
     type = 'Exodiff'
@@ -17,5 +17,5 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, disjoint surfaces in 2D with triangular elements."
-  [../]
+  []
 []

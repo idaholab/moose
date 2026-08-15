@@ -10,7 +10,7 @@
     requirement = 'The system shall not output linear residuals when requested.'
     cli_args = 'Outputs/print_linear_residuals=false'
 
-  [../]
+  []
   [./no_nonlinear_residuals]
     type = 'RunApp'
     input = 'no_output_residuals.i'
@@ -19,5 +19,5 @@
     expect_out = 'Linear |R|'
     requirement = 'The system shall not output non-linear residuals when requested.'
     cli_args = 'Outputs/print_nonlinear_residuals=false'
-  [../]
+  []
 []

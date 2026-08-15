@@ -7,7 +7,7 @@
     input = parent_conservative_transfer.i
     exodiff = 'parent_conservative_transfer_out.e parent_conservative_transfer_out_sub0.e'
     requirement = 'The system shall support conservative transfers'
-  [../]
+  []
 
   [./test_execute_on]
     type = RunException
@@ -23,7 +23,7 @@
     input = parent_power_density.i
     exodiff = 'parent_power_density_out.e parent_power_density_out_sub0.e parent_power_density_out_sub1.e'
     requirement = 'The system shall support conservative transfers using regular postprocessors'
-  [../]
+  []
 
   [./subs_execute_on]
     type = RunException
@@ -32,14 +32,14 @@
     cli_args ="Postprocessors/from_sub1/execute_on='timestep_end'"
     expect_err = "execute_on='transfer' is required in the conservative transfer for"
     requirement = 'The system shall check execute_on for PP in parent app'
-  [../]
+  []
 
   [./nearest_point]
     type = Exodiff
     input = parent_nearest_point.i
     exodiff = 'parent_nearest_point_out.e parent_nearest_point_out_sub0.e parent_nearest_point_out_sub1.e'
     requirement = 'The system shall support conservative transfers with nearestpoint VectorPostprocessors'
-  [../]
+  []
 
   [./nearest_point_execute_on]
     type = RunException
@@ -48,7 +48,7 @@
     cli_args ="VectorPostprocessors/to_nearest_point/execute_on='timestep_end'"
     expect_err = "execute_on='transfer' is required in the conservative transfer for"
     requirement = 'The system shall check execute_on for vector PP in parent app'
-  [../]
+  []
 
   [./nearest_point_vector_pps]
     type = CSVDiff
@@ -56,14 +56,14 @@
     csvdiff = 'parent_nearest_point_out_from_nearest_point_0001.csv parent_nearest_point_out_to_nearest_point_0001.csv'
     prereq = nearest_point
     requirement = 'The system shall be able to output the adjusting values in conservative transfers'
-  [../]
+  []
 
   [./userobject_transfer]
     type = Exodiff
     input = parent_userobject.i
     exodiff = 'parent_userobject_out.e parent_userobject_out_sub_app0.e parent_userobject_out_sub_app1.e'
     requirement = 'The system shall support conservative transfers in MultiAppUserObjectTransfer'
-  [../]
+  []
 
   [./userobject_transfer_csv]
     type = CSVDiff
@@ -71,7 +71,7 @@
     csvdiff = 'parent_userobject_out_to_nearest_point_0001.csv parent_userobject_out_to_nearest_point_element_0001.csv'
     prereq = userobject_transfer
     requirement = 'The system shall be able to output the adjusting values in conservative transfers for MultiAppUserObjectTransfer'
-  [../]
+  []
 
   [./negative_adjuster]
     type = Exodiff
@@ -79,7 +79,7 @@
     issues = '#15952'
     requirement = 'The systen shall allow adjustment if both from and to adjuster are negative.'
     exodiff = 'primary_negative_adjuster_out_sub0.e'
-  [../]
+  []
 
   [./skip_adjustment]
     type = Exodiff
@@ -87,5 +87,5 @@
     issues = '#15952'
     requirement = 'The systen shall allow to skip adjustments without throwing an error if from/to adjusters do not satisfy conditions.'
     exodiff = 'primary_skipped_adjuster_out_sub0.e'
-  [../]
+  []
 []

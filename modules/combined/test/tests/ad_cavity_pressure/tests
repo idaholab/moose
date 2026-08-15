@@ -10,7 +10,7 @@
       abs_zero = 1e-10
       rel_err = 1e-5
       detail = 'in 3D.'
-    [../]
+    []
     [./3d-jac]
       type = 'PetscJacobianTester'
       input = '3d.i'
@@ -20,7 +20,7 @@
       run_sim = True
       heavy = True
       detail = 'in 3D and calculate a perfect Jacobian.'
-    [../]
+    []
 
     [./initial_temperature]
       type = 'Exodiff'
@@ -29,7 +29,7 @@
       abs_zero = 1e-10
       rel_err = 1e-5
       detail = 'where the initial temperature of the cavity is independently specified.'
-    [../]
+    []
     [./initial_temperature-jac]
       type = 'PetscJacobianTester'
       input = 'initial_temperature.i'
@@ -39,7 +39,7 @@
       run_sim = True
       heavy = True
       detail = 'where the initial temperature of the cavity is independently specified and calculate a perfect Jacobian.'
-    [../]
+    []
 
     [./rz]
       type = 'Exodiff'
@@ -48,7 +48,7 @@
       abs_zero = 1e-10
       recover = false
       detail = 'in axisymmetric geometry.'
-    [../]
+    []
     [./rz-jac]
       type = 'PetscJacobianTester'
       input = 'rz.i'
@@ -58,7 +58,7 @@
       run_sim = True
       heavy = True
       detail = 'in axisymmetric geometry and calculate a perfect Jacobian.'
-    [../]
+    []
 
     [./rz_restart_prereq]
       type = RunApp
@@ -67,7 +67,7 @@
       cli_args = 'Executioner/num_steps=1'
       recover = false
       detail = 'in axisymmetric geometry and write a restart file with cavity pressure information.'
-    [../]
+    []
 
     [./rz_restart]
       type = 'Exodiff'
@@ -76,7 +76,7 @@
       exodiff = 'rz_out.e'
       delete_output_before_running = false
       detail = 'in axisymmetric geometry and restart properly.'
-    [../]
+    []
 
     [./multiple_postprocessors]
       type = 'Exodiff'
@@ -85,7 +85,7 @@
       abs_zero = 1e-10
       rel_err = 1e-5
       detail = 'when given a set of internal volumes to sum.'
-    [../]
+    []
     [./multiple_postprocessors-jac]
       type = 'PetscJacobianTester'
       input = 'multiple_postprocessors.i'
@@ -95,13 +95,13 @@
       run_sim = True
       heavy = True
       detail = 'when given a set of internal volumes to sum and calculate a perfect Jacobian'
-    [../]
+    []
     [./additional_volume]
       type = 'Exodiff'
       input = 'additional_volume.i'
       exodiff = 'additional_volume_out.e'
       detail = 'when including an additional volume that communicates with the cavity.'
-    [../]
+    []
   []
 
   [error]
@@ -111,27 +111,27 @@
       input = 'negative_volume.i'
       expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
       detail = 'a negative volume is supplied to the cavity pressure calculation.'
-    [../]
+    []
     [./range_check_R]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/R=0'
       expect_err = "BCs/CavityPressure/1/R: Range check failed; expression = 'R > 0.0', value = 0"
       detail = 'the range checking of the gas constant parameter R fails'
-    [../]
+    []
     [./range_check_initial_temperature]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/initial_temperature=0'
       expect_err = "BCs/CavityPressure/1/initial_temperature: Range check failed; expression = 'initial_temperature > 0.0', value = 0"
       detail = 'the range checking of the initial temperature fails'
-    [../]
+    []
     [./range_check_initial_pressure]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/initial_pressure=-1'
       expect_err = "BCs/CavityPressure/1/initial_pressure: Range check failed; expression = 'initial_pressure >= 0.0', value = -1"
       detail = 'the range checking of the initial pressure fails'
-    [../]
+    []
   []
 []

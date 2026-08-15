@@ -6,5 +6,5 @@
     requirement = "The system shall be able to compute the force on a sideset."
     design = "SidesetReaction.md"
     issues = "#15163"
-  [../]
+  []
 []

@@ -6,5 +6,5 @@
     input = 'adapt_interval.i'
     exodiff = 'adapt_interval_out.e adapt_interval_out.e-s003'
     requirement = "The Adaptivity system shall support execution at every n timestep."
-  [../]
+  []
 []

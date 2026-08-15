@@ -6,5 +6,5 @@
     requirement = "Jacobian entries generated with AD for a simple diffusion problem shall be accurate"
     design = "ADDiffusion.md"
     issues = "#5658"
-  [../]
+  []
 []

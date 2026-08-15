@@ -40,7 +40,7 @@
        mesh_mode = REPLICATED
 
        detail = 'in serial with a replicated mesh,'
-     [../]
+     []
      [./diff_serial_mesh_parallel]
        # Check that actual solution, in parallel with serial mesh
        type = XMLDiff
@@ -52,7 +52,7 @@
        mesh_mode = REPLICATED
 
        detail = 'in parallel with a replicated mesh, and'
-     [../]
+     []
      [./diff_parallel_mesh]
        # Check that actual solution, in parallel with parallel mesh
        type = XMLDiff
@@ -66,6 +66,6 @@
        skip = "#6149"
 
        detail = 'in parallel with a distributed mesh.'
-     [../]
+     []
   []
 []

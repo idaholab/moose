@@ -5,5 +5,5 @@
     exodiff = 'out.e out.e-s005'
     allow_test_objects = true
     max_parallel = 1 # See #9886
-  [../]
+  []
 []

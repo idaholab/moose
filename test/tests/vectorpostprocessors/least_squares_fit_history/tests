@@ -7,5 +7,5 @@
     requirement = 'The system shall support computing the least squares fit of a set of time values obtained from an aggregate operation defined by the developer.'
     issues = '#11709'
     design = 'LeastSquaresFitHistory.md'
-  [../]
+  []
 []

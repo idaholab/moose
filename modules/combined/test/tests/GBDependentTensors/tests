@@ -3,5 +3,5 @@
     type = 'Exodiff'
     input = 'gb_property.i'
     exodiff = 'gb_property_out.e'
-  [../]
+  []
 []

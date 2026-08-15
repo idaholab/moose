@@ -6,7 +6,7 @@
     requirement = 'The system process a signal and send out a general sensor-mediated signal for transient case.'
     design = 'GeneralSensorPostprocessor.md'
     issues = '#25590'
-  [../]
+  []
   [./steady_general_sensor]
     type = 'CSVDiff'
     input = 'steady_general_sensor.i'
@@ -14,7 +14,7 @@
     requirement = 'The system process a signal and send out a general sensor-mediated signal for steady-state case.'
     design = 'GeneralSensorPostprocessor.md'
     issues = '#25590'
-  [../]
+  []
   [./transient_thermocouple_sensor]
     type = 'CSVDiff'
     input = 'transient_thermocouple_sensor.i'
@@ -22,7 +22,7 @@
     requirement = 'The system process a signal and send out a thermocouple sensor-mediated signal for transient case.'
     design = 'ThermocoupleSensorPostprocessor.md'
     issues = '#25590'
-  [../]
+  []
   [./steady_thermocouple_sensor]
     type = 'CSVDiff'
     input = 'steady_thermocouple_sensor.i'
@@ -30,7 +30,7 @@
     requirement = 'The system process a signal and send out a thermocouple sensor-mediated signal for steady-state case.'
     design = 'ThermocoupleSensorPostprocessor.md'
     issues = '#25590'
-  [../]
+  []
   [./time_delay_test]
     type = 'CSVDiff'
     input = 'time_delay_test.i'
@@ -38,5 +38,5 @@
     requirement = 'The system process a signal and send out a sensor signal with time-delay'
     design = 'GeneralSensorPostprocessor.md'
     issues = '#31167'
-  [../]
+  []
 []

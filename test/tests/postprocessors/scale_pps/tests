@@ -8,5 +8,5 @@
     exodiff = 'scale_pps_out.e'
 
     requirement = 'The system shall support the scaling of a post processor quantity by another post processor quantity.'
-  [../]
+  []
 []

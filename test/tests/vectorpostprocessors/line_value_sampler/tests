@@ -6,7 +6,7 @@
     requirement = 'The system shall allow sampling of variables at equally spaced points for outputting.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3087'
-  [../]
+  []
   [./parallel]
     # This ensures that PointSamplerBase is properly handling unique point finding
     type = 'CSVDiff'
@@ -17,7 +17,7 @@
     requirement = 'The system shall allow sampling of variables at equally spaced points in parallel.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3087'
-  [../]
+  []
   [./scaling]
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
@@ -27,7 +27,7 @@
     requirement = 'The system shall allow scaling the line value sampler with a postprocessor.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#12314'
-  [../]
+  []
   [./delimiter]
     type = 'CheckFiles'
     input = 'csv_delimiter.i'
@@ -36,5 +36,5 @@
     requirement = 'The system shall allow sampling of auxvariables at equally spaced points with CSV delimiter and precision setting.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3593'
-  [../]
+  []
 []

@@ -22,7 +22,7 @@ Goethite = 1.5*H2O - 1.875*H+ + 0.125*SO4-- + 1*Fe++ - 0.125*HS-;  log10K = 9.30
     requirement = "The geochemistry model shall be able to report the saturation indices of minerals"
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
-  [../]
+  []
   [./eqm_model_25_to_92degC]
     type = 'RunApp'
     input = 'eqm_model_25_to_92degC.i'
@@ -50,7 +50,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     requirement = "It shall be possible to change temperature in a geochemistry model"
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
-  [../]
+  []
   [./scaling]
     type = 'CSVDiff'
     input = 'scaling.i'
@@ -59,7 +59,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     requirement = "It shall be possible to study scaling using a geochemistry model"
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
-  [../]
+  []
   [./aquifer_geochemistry_only]
     type = 'CSVDiff'
     input = 'aquifer_geochemistry.i'
@@ -69,7 +69,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     requirement = "The system shall be able to model spatially-dependent aquifer geochemical models."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
-  [../]
+  []
   [./porous_flow]
     type = 'Exodiff'
     input = 'porous_flow.i'
@@ -80,7 +80,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     requirement = "The system should be able to couple porous-flow simulations to spatially-dependent geochemical models to simulate reactive transport for spatially-dependent aquifer models."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
-  [../]
+  []
   [./whole_sim]
     type = 'CSVDiff'
     input = 'exchanger.i'
@@ -91,5 +91,5 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     requirement = "The system shall be able to two-way couple geochemical models with porous-flow simulations for spatially-dependent aquifer model."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
-  [../]
+  []
 []

@@ -7,5 +7,5 @@
     input = 'test.i'
     csvdiff = 'test_out.csv'
     requirement = 'The system shall compute the l-1, l-2, and l-infinity discrete residual norms (scaled or un-scaled) for a variable on a subdomain.'
-  [../]
+  []
 []

@@ -30,7 +30,7 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
   [./oriented_subdomain_bounding_box_generator_test_outside]
     type = 'Exodiff'

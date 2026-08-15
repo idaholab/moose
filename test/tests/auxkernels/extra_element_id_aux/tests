@@ -8,5 +8,5 @@
     issues = '#18665 #19297'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 []

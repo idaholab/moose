@@ -7,7 +7,7 @@
     issues = '#3087'
     design = 'syntax/VectorPostprocessors/index.md'
     requirement = 'The system shall be able to produce arbitrary vectors of values for use in other calculations.'
-  [../]
+  []
 
   [./constant_vector_postprocessor_multcol]
     type = 'CSVDiff'
@@ -19,5 +19,5 @@
     issues = '#14569'
     design = 'syntax/VectorPostprocessors/index.md'
     requirement = 'The system shall be able to produce multiple arbitrary vectors of values for use in other calculations.'
-  [../]
+  []
 []

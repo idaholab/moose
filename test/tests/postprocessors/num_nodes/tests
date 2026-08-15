@@ -8,7 +8,7 @@
                    (replicated or distributed) in the simulation.'
     design = '/NumNodes.md'
     issues = '#2094'
-  [../]
+  []
 
   [./test_split]
     type = 'CSVDiff'
@@ -24,5 +24,5 @@
                    in the simulation when using distributed (pre-split) mesh.'
     design = '/NumNodes.md'
     issues = '#2094 #8421'
-  [../]
+  []
 []

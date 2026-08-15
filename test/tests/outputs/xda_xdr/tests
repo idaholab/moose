@@ -9,5 +9,5 @@
     check_files = 'xda_xdr_out_0000.xda xda_xdr_out_0000.xdr xda_xdr_out_0000_mesh.xdr xda_xdr_out_0000_mesh.xda'
 
     requirement = "The system shall support simultaneous output of the ASCII and binary forms of the libMesh native format."
-  [../]
+  []
 []

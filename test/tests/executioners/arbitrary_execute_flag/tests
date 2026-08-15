@@ -7,5 +7,5 @@
     csvdiff = arbitrary_execute_out.csv
     expect_out = "Flag\sName:\sJUST_GO"
     requirement = "The Executioner system shall support the creation of custom objects with arbitrary execution flags."
-  [../]
+  []
 []

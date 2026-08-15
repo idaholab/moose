@@ -6,5 +6,5 @@
     requirement = 'The system shall compute layered side averages that computed from the closest values for a list of points'
     design = 'NearestPointLayeredSideAverage.md'
     issues = '#13252'
-  [../]
+  []
 []

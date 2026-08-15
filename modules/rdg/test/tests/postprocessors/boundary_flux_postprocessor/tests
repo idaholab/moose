@@ -11,5 +11,5 @@
     requirement = "RDGBoundaryFluxPostprocessor shall output correct boundary flux values."
     issues = '#13178'
     design = '/RDGBoundaryFluxPostprocessor.md'
-  [../]
+  []
 []

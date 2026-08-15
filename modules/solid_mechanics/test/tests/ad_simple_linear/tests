@@ -7,7 +7,7 @@
     absent_out = '3 Nonlinear'
     requirement = 'We shall be able to run a simple linear small-strain problem using a hand-coded Jacobian'
     design = 'ComputeSmallStrain.md'
-  [../]
+  []
   [./linear-ad]
     type = 'Exodiff'
     input = 'linear-ad.i'
@@ -16,7 +16,7 @@
     prereq = 'linear-hand-coded'
     requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation in the production stress divergence kernel'
     design = 'ADComputeSmallStrain.md'
-  [../]
+  []
   [./linear-ad-reverse]
     type = 'Exodiff'
     input = 'linear-ad-reverse-dependency.i'
@@ -25,7 +25,7 @@
     prereq = 'linear-ad'
     requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation with reversed stress and strain materials'
     design = 'ADComputeSmallStrain.md'
-  [../]
+  []
   [./linear-hand-coded-jac]
     type = 'PetscJacobianTester'
     input = 'linear-hand-coded.i'
@@ -34,7 +34,7 @@
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the hand-coded problem shall be perfect'
     design = 'ComputeSmallStrain.md'
-  [../]
+  []
   [./linear-ad-jac]
     type = 'PetscJacobianTester'
     input = 'linear-ad.i'
@@ -43,7 +43,7 @@
     difference_tol = 1e-4
     requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
     design = 'ADComputeSmallStrain.md'
-  [../]
+  []
   [./linear-ad-jac-reverse]
     type = 'PetscJacobianTester'
     input = 'linear-ad-reverse-dependency.i'
@@ -52,5 +52,5 @@
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the automatic differentiation problem with reversed stress and strain materials shall be perfect'
     design = 'ADComputeSmallStrain.md'
-  [../]
+  []
 []

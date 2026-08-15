@@ -8,5 +8,5 @@
     requirement = 'The system shall support the ability to sample a scalar material along an arbitrary line through the mesh domain.'
     design = 'LineMaterialRealSampler.md'
     issues = '#4462 #16959'
-  [../]
+  []
 []

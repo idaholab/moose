@@ -8,7 +8,7 @@
       input = 'penalty_dirichlet_bc_test.i'
       exodiff = 'penalty_dirichlet_bc_test_out.e'
       detail = 'with a constant value on the boundary.'
-    [../]
+    []
     [./penalty_dirichlet_bc_test-jac]
       type = 'PetscJacobianTester'
       input = 'penalty_dirichlet_bc_test.i'
@@ -16,7 +16,7 @@
       run_sim = False
       difference_tol = 1e-7
       detail = 'with a constant value on the boundary and shall be able to produce the exact Jacobian.'
-    [../]
+    []
 
     [./function_penalty_dirichlet_bc_test]
       type = 'Exodiff'
@@ -26,7 +26,7 @@
       max_parallel = 11
       scale_refine = 3
       detail = 'with a value on the boundary set by a function.'
-    [../]
+    []
     [./function_penalty_dirichlet_bc_test-jac]
       type = 'PetscJacobianTester'
       input = 'function_penalty_dirichlet_bc_test.i'
@@ -35,6 +35,6 @@
       ratio_tol = 1e-7
       difference_tol = 0.1
       detail = 'with a value on the boundary set by a function and shall be able to produce the exact Jacobian.'
-    [../]
-  [../]
+    []
+  []
 []

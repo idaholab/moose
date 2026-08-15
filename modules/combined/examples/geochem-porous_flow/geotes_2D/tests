@@ -6,7 +6,7 @@
     requirement = "The geochemistry model shall be able to find the molality of species at equilibrium with free minerals, with quartz-like minerals."
     issues = '#15693'
     design = 'geotes_2D.md'
-  [../]
+  []
   [./aquifer_un_quartz_equilibrium]
     type = CSVDiff
     input = aquifer_un_quartz_equilibrium.i
@@ -14,7 +14,7 @@
     requirement = "The geochemistry model shall be able to find the molality of species at equilibrium with free minerals"
     issues = '#15693'
     design = 'geotes_2D.md'
-  [../]
+  []
   [./aquifer_geochemistry_only]
     type = 'CSVDiff'
     input = 'aquifer_geochemistry.i'
@@ -23,7 +23,7 @@
     requirement = "The system shhall be able to model spatially-dependent aquifer geochemical models."
     issues = '#15693'
     design = 'geotes_2D.md'
-  [../]
+  []
   [./aquifer_un_quartz_geochemistry_only]
     type = 'CSVDiff'
     input = 'aquifer_un_quartz_geochemistry.i'
@@ -32,7 +32,7 @@
     requirement = "The system shhall be able to model spatially-dependent aquifer geochemical models with unquartz-like minerals."
     issues = '#15693'
     design = 'geotes_2D.md'
-  [../]
+  []
   [./porous_flow]
     type = 'Exodiff'
     input = 'porous_flow.i'
@@ -42,7 +42,7 @@
     requirement = "Porous-flow simulations should be able to couple to spatially-dependent geochemical models to simulate reactive transport"
     issues = '#15693'
     design = 'geotes_2D.md'
-  [../]
+  []
   [./exchanger]
     type = CSVDiff
     input = exchanger.i
@@ -53,7 +53,7 @@
     requirement = "Porous-flow simulations should be able to two-way couple to spatially-dependent geochemical models to simulate reactive transport"
     issues = '#15693'
     design = 'geotes_2D.md'
-  [../]
+  []
   [./exchanger_un_quartz]
     type = CSVDiff
     input = exchanger_un_quartz.i
@@ -64,5 +64,5 @@
     requirement = "The system shall be able to two-way couple porous-flow simulations to spatially-dependent geochemical models to simulate reactive transport, in the presence of unquartz-like minerals"
     issues = '#15693'
     design = 'geotes_2D.md'
-  [../]
+  []
 []

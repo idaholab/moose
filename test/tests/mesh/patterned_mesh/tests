@@ -10,7 +10,7 @@
     recover = false
 
     requirement = 'The system shall generate a mesh using one or more meshes stitched into a pattern controlled by a 2D array.'
-  [../]
+  []
 
   [./patterned_run]
     type = 'Exodiff'
@@ -20,5 +20,5 @@
     prereq = 'patterned_generation'
 
     requirement = 'The system shall read in a previously generated "patterned mesh" and run a simulation using that mesh.'
-  [../]
+  []
 []

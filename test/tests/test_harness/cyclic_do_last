@@ -3,10 +3,10 @@
     type = RunApp
     input = good.i
     prereq = ALL
-  [../]
+  []
   [./b]
     type = RunApp
     input = good.i
     prereq = ALL
-  [../]
+  []
 []

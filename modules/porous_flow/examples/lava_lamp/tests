@@ -7,7 +7,7 @@
     requirement = "PorousFlow shall be able to model diffusion of CO2 into brine and the resulting density-driven convection"
     issues = '#13239'
     design = 'porous_flow/lava_lamp.md'
-  [../]
+  []
   [./2phase_convection]
     type = RunApp
     input = 2phase_convection.i
@@ -17,5 +17,5 @@
     requirement = "PorousFlow shall be able to model diffusion of CO2 into brine, when the CO2 is initialised in a gas and liquid states, and when the gaseous phase disappears, and the resulting density-driven convection"
     issues = '#13239'
     design = 'porous_flow/lava_lamp.md'
-  [../]
+  []
 []

@@ -6,5 +6,5 @@
     type = 'RunApp'
     input = 'perf_graph.i'
     expect_out = 'FEProblem::computeResidualInternal'
-  [../]
+  []
 []

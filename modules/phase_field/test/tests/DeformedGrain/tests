@@ -4,5 +4,5 @@
     type = 'Exodiff'
     input = 'DeformedGrain.i'
     exodiff = 'DeformedGrain_out.e'
-  [../]
+  []
 []

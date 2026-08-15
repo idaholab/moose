@@ -11,5 +11,5 @@
     mesh_mode = 'REPLICATED'
 
     requirement = "The system shall support the ability to import meshes written using the General Mesh Viewer format."
-  [../]
+  []
 []

@@ -9,7 +9,7 @@
     recover = false
 
     requirement = 'The system shall only prepare or setup field variables on each element when they are used by a material object.'
-  [../]
+  []
 
   [./var_stateful_coupling]
     type = 'Exodiff'
@@ -17,5 +17,5 @@
     exodiff = 'var_stateful_coupling_out.e'
 
     requirement = 'The system shall support coupling in a nonlinear field variable for use in initializing stateful material properties.'
-  [../]
+  []
 []

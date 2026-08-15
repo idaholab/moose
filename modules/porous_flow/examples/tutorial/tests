@@ -8,7 +8,7 @@
     requirement = 'PorousFlow tutorial shall explain the 3D model used during the tutorial'
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
-  [../]
+  []
   [./00_2D]
     type = Exodiff
     input = '00_2D.i'
@@ -18,7 +18,7 @@
     requirement = 'PorousFlow tutorial shall explain the 2D model used during the tutorial'
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
-  [../]
+  []
   [./01]
     type = Exodiff
     input = '01.i'
@@ -28,7 +28,7 @@
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow'
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
-  [../]
+  []
   [./03]
     type = Exodiff
     input = '03.i'
@@ -38,7 +38,7 @@
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow coupled with heat flow'
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
-  [../]
+  []
   [./04]
     type = Exodiff
     input = '04.i'
@@ -48,7 +48,7 @@
     issues = '#10959'
     design = 'tutorial_04.md'
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow coupled with heat flow coupled with solid mechanics'
-  [../]
+  []
   [./05]
     type = Exodiff
     input = '05.i'
@@ -58,7 +58,7 @@
     issues = '#10959'
     design = 'tutorial_05.md'
     requirement = 'PorousFlow tutorial shall explain how to use realistic equations of state for the fluid'
-  [../]
+  []
   [./05_tabulated]
     type = Exodiff
     input = '05_tabulated.i'
@@ -68,7 +68,7 @@
     issues = '#10959'
     design = 'tutorial_05.md'
     requirement = 'PorousFlow tutorial shall explain how to use realistic equations of state for the fluid, using Tabulated fluid properties'
-  [../]
+  []
   [./06]
     type = Exodiff
     input = '06.i'
@@ -78,7 +78,7 @@
     requirement = 'PorousFlow tutorial shall explain how to add a tracer in a single-phase situation and how to use the PorousFlowFullySaturated Action'
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
-  [../]
+  []
   [./06_KT]
     type = Exodiff
     input = '06_KT.i'
@@ -90,7 +90,7 @@
     mesh_mode = 'replicated'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_06.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
-  [../]
+  []
   [./07]
     type = Exodiff
     input = '07.i'
@@ -99,7 +99,7 @@
     issues = '#10959'
     design = 'tutorial_07.md'
     requirement = 'PorousFlow tutorial shall explain how to add a chemically-reactive tracer in a single-phase situation as well as porosity and permeability functions'
-  [../]
+  []
   [./08]
     type = Exodiff
     input = '08.i'
@@ -108,7 +108,7 @@
     issues = '#10959'
     design = 'tutorial_08.md'
     requirement = 'PorousFlow tutorial shall explain how to use the PorousFlowSink as a general boundary condition that produces excellent convergence, and the PorousFlowUnsaturated Action to simulate unsaturated fluid flow'
-  [../]
+  []
   [./08_KT]
     type = Exodiff
     input = '08_KT.i'
@@ -118,7 +118,7 @@
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_08.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
-  [../]
+  []
   [./10]
     type = Exodiff
     input = '10.i'
@@ -128,7 +128,7 @@
     requirement = 'PorousFlow tutorial shall explain how to use the PorousFlow Kernels and Materials'
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
-  [../]
+  []
   [./11]
     type = Exodiff
     input = '11.i'
@@ -140,7 +140,7 @@
     issues = '#10959'
     design = 'tutorial_11.md'
     requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem in 3D'
-  [../]
+  []
   [./11_2D]
     type = Exodiff
     input = '11_2D.i'
@@ -153,7 +153,7 @@
     requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem in 3D and explain how to reduce it to 2D'
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
-  [../]
+  []
   [./13]
     type = Exodiff
     input = '13.i'
@@ -161,5 +161,5 @@
     issues = '#10959'
     design = 'tutorial_13.md'
     requirement = 'PorousFlow tutorial shall explain how to include precipitation-dissolution and equilibrium chemical systems in PorousFlow simulations'
-  [../]
+  []
 []

@@ -8,5 +8,5 @@
                   ' the existence of all dependent properties within a domain.'
     issues = '#5306'
     design = 'Problem/index.md'
-  [../]
+  []
 []

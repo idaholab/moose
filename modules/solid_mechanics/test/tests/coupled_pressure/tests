@@ -7,5 +7,5 @@
     requirement = "The system shall allow to apply a pressure boundary condition from a variable"
     design = 'CoupledPressureBC.md'
     issues = '#11558'
-  [../]
+  []
 []

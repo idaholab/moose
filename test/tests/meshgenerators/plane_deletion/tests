@@ -9,5 +9,5 @@
     requirement = "The system shall provide a method for deleting mesh elements lying on one side of a user-defined plane."
     design = 'PlaneDeletionGenerator.md'
     issues = '#13046'
-  [../]
+  []
 []

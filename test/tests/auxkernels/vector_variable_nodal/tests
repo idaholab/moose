@@ -9,5 +9,5 @@
     input = 'vector_variable_nodal.i'
     exodiff = 'vector_variable_nodal_out.e'
     requirement = "The system shall include the ability to compute auxiliary quantities at the nodes of elements based on the values of a LAGRANGE_VEC variable."
-  [../]
+  []
 []

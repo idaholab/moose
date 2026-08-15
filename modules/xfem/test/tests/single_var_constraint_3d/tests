@@ -9,7 +9,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./stationary_fluxjump_3d]
     type = Exodiff
     input = stationary_fluxjump_3d.i
@@ -20,7 +20,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./stationary_jump_3d]
     type = Exodiff
     input = stationary_jump_3d.i
@@ -31,7 +31,7 @@
     requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, zero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
   [./stationary_jump_fluxjump_3d]
     type = Exodiff
     input = stationary_jump_fluxjump_3d.i
@@ -43,5 +43,5 @@
     requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, nonzero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
-  [../]
+  []
 []

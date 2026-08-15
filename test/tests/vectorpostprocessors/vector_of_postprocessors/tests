@@ -7,5 +7,5 @@
     issues = '#4176'
     design = 'VectorOfPostprocessors.md'
     requirement = 'The system shall be able to aggregate an arbitrary set of scalar data producers (Postprocessors) into a single vector of Postprocessors.'
-  [../]
+  []
 []

@@ -7,5 +7,5 @@
     input = 'constraints.i'
     exodiff = 'constraints_out.e'
     requirement = "The Control system shall be capable of activating or deactivating Constraint objects with time."
-  [../]
+  []
 []

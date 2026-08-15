@@ -9,7 +9,7 @@
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system."
-  [../]
+  []
   [./frictionless_kinematic_gap_offset]
     type = 'Exodiff'
     input = 'frictionless_kinematic_gap_offsets.i'
@@ -19,7 +19,7 @@
                    between two blocks with gap offsets on both primary and secondary blocks using
                    a kinematic enforcement with the DiracKernel system."
     issues = '#14089'
-  [../]
+  []
   [./frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'
@@ -28,7 +28,7 @@
     requirement = "The contact system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system."
-  [../]
+  []
   [./glued_kinematic]
     type = 'Exodiff'
     input = 'glued_kinematic.i'
@@ -37,7 +37,7 @@
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system."
-  [../]
+  []
   [./glued_penalty]
     type = 'Exodiff'
     input = 'glued_penalty.i'
@@ -46,5 +46,5 @@
     requirement = "The contact system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system."
-  [../]
+  []
 []

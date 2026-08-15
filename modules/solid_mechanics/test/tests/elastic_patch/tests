@@ -9,7 +9,7 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeFiniteStrainElasticStress.md'
     issues = '#458'
-  [../]
+  []
   [./elastic_patch_incremental_small]
     type = 'Exodiff'
     input = 'elastic_patch.i'
@@ -22,7 +22,7 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeIncrementalStrain.md ComputeFiniteStrainElasticStress.md'
     issues = '#12584'
-  [../]
+  []
   [./elastic_patch_total_small]
     prereq = elastic_patch_incremental_small
     type = 'Exodiff'
@@ -36,7 +36,7 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeSmallStrain.md ComputeLinearElasticStress.md'
     issues = '#12584'
-  [../]
+  []
   [./elastic_patch_incremental_small_no_disp_mesh]
     prereq = elastic_patch_total_small
     type = 'Exodiff'
@@ -51,7 +51,7 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeIncrementalStrain.md ComputeFiniteStrainElasticStress.md'
     issues = '#12584 #12580'
-  [../]
+  []
   [./elastic_patch_Bbar]
     type = 'Exodiff'
     input = 'elastic_patch.i'
@@ -65,7 +65,7 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeFiniteStrainElasticStress.md VolumetricLocking.md'
     issues = '#458'
-  [../]
+  []
 
   [./elastic_patch_2Procs]
     type = Exodiff
@@ -80,7 +80,7 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeFiniteStrainElasticStress.md'
     issues = '#458'
-  [../]
+  []
   [./elastic_patch_2Procs_Bbar]
     type = Exodiff
     input = 'elastic_patch.i'
@@ -96,7 +96,7 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeFiniteStrainElasticStress.md VolumetricLocking.md'
     issues = '#458'
-  [../]
+  []
 
   [./elastic_patch_quadratic]
     type = Exodiff
@@ -109,5 +109,5 @@
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
              'ComputeFiniteStrainElasticStress.md'
     issues = '#620'
-  [../]
+  []
 []

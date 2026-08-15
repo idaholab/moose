@@ -6,7 +6,7 @@
     issues = '#21704'
     design = 'ComputeGBMisorientationType.md'
     requirement = 'The system shall output GB type for all GBs.'
-  [../]
+  []
   [./phase2]
     type = 'Exodiff'
     input = 'GB_Type_Phase2.i'
@@ -16,5 +16,5 @@
     requirement = 'The system shall assign local diffusivity.'
     # Steady solve
     recover = false
-  [../]
+  []
 []

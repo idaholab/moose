@@ -3,12 +3,12 @@
     type = 'Exodiff'
     input = 'kobayashi.i'
     exodiff = 'kobayashi_out.e'
-  [../]
+  []
   [./adkobayashi]
     type = 'Exodiff'
     input = 'adkobayashi.i'
     exodiff = 'adkobayashi_out.e'
     custom_cmp = 'adkobayashi.exodiff'
     valgrind = HEAVY
-  [../]
+  []
 []

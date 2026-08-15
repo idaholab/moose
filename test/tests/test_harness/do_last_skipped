@@ -3,10 +3,10 @@
     type = RunApp
     input = good.i
     prereq = ALL
-  [../]
+  []
   [./a]
     type = RunApp
     input = good.i
     skip = 'do_last should be skipped'
-  [../]
+  []
 []

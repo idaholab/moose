@@ -8,7 +8,7 @@
 
     issues = '#1776'
     requirement = 'The system shall support the ability to sample a field variable value anywhere within the domain.'
-  [../]
+  []
 
   [./error]
     type = 'RunException'
@@ -17,5 +17,5 @@
 
     issues = '#3475'
     requirement = 'The system shall report an error when a field variable sample location is outside of the domain.'
-  [../]
+  []
 []

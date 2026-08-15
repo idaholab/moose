@@ -8,7 +8,7 @@
     absent_out = 'WARNING! There are options you set that were not used!'
     issues = '#1978'
     design = 'Problem/index.md'
-  [../]
+  []
   [eigen_problem_solve_fail]
     type = 'RunException'
     requirement = 'The system shall inform the user when the nonlinear-eigen system solve failed.'

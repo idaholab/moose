@@ -9,5 +9,5 @@
                   ' variable.'
     design = 'FEProblemBase.md'
     issues = '#11202'
-  [../]
+  []
 []

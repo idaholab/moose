@@ -7,5 +7,5 @@
     requirement = 'The system shall support setting initial conditions on boundaries.'
     design = 'syntax/ICs/index.md'
     issues = '#534'
-  [../]
+  []
 []

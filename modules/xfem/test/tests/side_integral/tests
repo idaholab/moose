@@ -8,7 +8,7 @@
     map = false
     capabilities = 'unique_id'
     requirement = 'The XFEM module shall properly integrate quantities on sides of cut elements that are intersected by the cutting plane in 2D'
-  [../]
+  []
   [./side_integral_3d_xfem]
     type = Exodiff
     input = side_integral_3d.i
@@ -16,5 +16,5 @@
     map = false
     capabilities = 'unique_id'
     requirement = 'The XFEM module shall properly integrate quantities on sides of cut elements that are intersected by the cutting plane in 3D'
-  [../]
+  []
 []

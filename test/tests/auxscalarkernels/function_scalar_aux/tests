@@ -8,5 +8,5 @@
     use_old_floor = true
     abs_zero = 1e-9
     requirement = "The system shall include the ability to set the value of a scalar variable using a function."
-  [../]
+  []
 []

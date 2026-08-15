@@ -12,5 +12,5 @@
 
     # HPC runs could lead to a timeout
     capabilities = 'method!=dbg & !hpc'
-  [../]
+  []
 []

@@ -8,7 +8,7 @@
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Penalty contact.'
-  [../]
+  []
   [./normalized_penalty_Q8]
     type = Exodiff
     input = 'normalized_penalty_Q8.i'
@@ -18,7 +18,7 @@
     requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Penalty contact.'
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
   [./normalized_penalty_kin]
     type = Exodiff
     input = 'normalized_penalty_kin.i'
@@ -26,7 +26,7 @@
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Kinematic contact.'
-  [../]
+  []
   [./normalized_penalty_kin_Q8]
     type = Exodiff
     input = 'normalized_penalty_kin_Q8.i'
@@ -34,5 +34,5 @@
     abs_zero = 1e-6
     max_parallel = 1                                    # -pc_type lu
     requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Kinematic contact.'
-  [../]
+  []
 []

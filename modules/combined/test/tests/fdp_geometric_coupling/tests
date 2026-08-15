@@ -9,5 +9,5 @@
     max_parallel = 1
     valgrind = 'HEAVY'
     requirement = 'The finite difference preconditioner shall allow for implicit coupling with the geometric search'
-  [../]
+  []
 []

@@ -8,5 +8,5 @@
     requirement = "The system shall integrate functions over volume."
     design = 'FunctionElementIntegral.md'
     issues = '#13418'
-  [../]
+  []
 []

@@ -6,5 +6,5 @@
     input = old_mat_in_aux.i
     exodiff = old_mat_in_aux_out.e
     requirement = "AuxKernel objects shall support the use of material properties from the previous two timesteps."
-  [../]
+  []
 []

@@ -6,7 +6,7 @@
     override_columns = 'abc xyz'
     override_rel_err = '1e-2'
     override_abs_zero = '1e-9'
-  [../]
+  []
   [./test_badfile]
     type = CSVDiff
     input = csvdiff.i
@@ -14,5 +14,5 @@
     override_columns = 'abc'
     override_rel_err = '1e-2'
     override_abs_zero = '1e-9'
-  [../]
+  []
 []

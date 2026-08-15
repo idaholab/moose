@@ -7,7 +7,7 @@
 
     issues = '#1771'
     requirement = 'The system shall have the ability to output performance data to a file.'
-  [../]
+  []
 
   [./use_log_data_no_print]
     type = RunApp
@@ -36,7 +36,7 @@
 
     issues = '#7951'
     requirement = "The system shall calculate performance time when the data is only used by a Postprocessor."
-  [../]
+  []
 
   [./check_more_values]
     type = RunApp
@@ -47,5 +47,5 @@
 
     issues = '#10196'
     requirement = "The system shall calculate performance time even when the performance graph isn't printed to any output format."
-  [../]
+  []
 []

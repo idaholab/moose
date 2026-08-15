@@ -22,7 +22,7 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the Coulomb friction sliding block problem using the penalty method and a friction coefficient of .2'
-  [../]
+  []
   [./frictional_04_penalty]
     type = 'Exodiff'
     input = 'frictional_04_penalty.i'
@@ -34,7 +34,7 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the Coulomb friction sliding block problem using the penalty method and a friction coefficient of .4'
-  [../]
+  []
   [./frictionless_kinematic]
     type = 'Exodiff'
     input = 'frictionless_kinematic.i'
@@ -47,7 +47,7 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the frictionless sliding block problem using a kinematic constraint formulation.'
-  [../]
+  []
   [./frictionless_kinematic_scaling]
     type = 'Exodiff'
     input = 'frictionless_kinematic.i'
@@ -63,7 +63,7 @@
                    variable scaling is used or not"
     design = 'MechanicalContactConstraint.md'
     issues = '#11601'
-  [../]
+  []
   [./frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'
@@ -76,7 +76,7 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the frictionless sliding block problem using a penalty constraint formulation.'
-  [../]
+  []
   [./frictionless_penalty_contact_line_search]
     type = 'Exodiff'
     input = 'frictionless_penalty_contact_line_search.i'
@@ -89,5 +89,5 @@
     issues = '#10950'
     design = 'ContactLineSearch.md'
     requirement = 'We shall be able to solve the frictionless sliding block problem with a line serach customized for mechanical contact.'
-  [../]
+  []
 []

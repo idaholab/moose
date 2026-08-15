@@ -9,5 +9,5 @@
     max_parallel = 3
     issues = '#18571'
     requirement = 'The system shall support avoiding repartitioning the mesh and deleting remote elements after uniform refinements'
-  [../]
+  []
 []

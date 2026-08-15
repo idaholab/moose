@@ -8,7 +8,7 @@
     abs_zero = 1e-7
     requirement = "The mechanics system shall accurately model the axial response"
                   " of 3D truss elements."
-  [../]
+  []
   [./truss_hex]
     type = 'Exodiff'
     input = 'truss_hex.i'
@@ -16,7 +16,7 @@
     abs_zero = 1e-7
     requirement = "The truss element shall work correctly when hex elements are also"
                   " included in the same input or mesh file."
-  [../]
+  []
   [./truss_2d]
     type = 'Exodiff'
     input = 'truss_2d.i'
@@ -25,7 +25,7 @@
     max_parallel = 1
     requirement = "The mechanics system shall accurately model the static response of"
                   " a 2D frame modeled using truss elements."
-  [../]
+  []
   [./truss_3d_action]
     type = 'Exodiff'
     input = 'truss_3d_action.i'
@@ -34,7 +34,7 @@
     prereq = 'truss_3d'
     requirement = "The LineElementAction shall correctly create the objects required for"
                   " modeling the response of a mechanics system using 3D truss elements."
-  [../]
+  []
   [./truss_hex_action]
     type = 'Exodiff'
     input = 'truss_hex_action.i'
@@ -43,7 +43,7 @@
     prereq = 'truss_hex'
     requirement = "The LineElementAction shall correctly create the objects required for"
                   " modeling the response of a mechanics system using truss and hex elements."
-  [../]
+  []
   [./truss_2d_action]
     type = 'Exodiff'
     input = 'truss_2d_action.i'
@@ -54,7 +54,7 @@
     prereq = 'truss_2d'
     requirement = "The LineElementAction shall correctly create the objects required for"
                   " modeling the response of a mechanics system using 2D truss elements."
-  [../]
+  []
   [./action_error_1]
     type = 'RunException'
     input = 'truss_2d_action.i'
@@ -62,7 +62,7 @@
     expect_err='LineElementAction: `area` should be provided as input for'
     requirement = "The LineElementAction shall produce an error if `area` is not provided"
                   " as input for truss elements."
-  [../]
+  []
   [./action_error_2]
     type = 'RunException'
     input = 'truss_2d_action.i'
@@ -70,7 +70,7 @@
     expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
     requirement = "The LineElementAction shall produce an error if rotational variables are"
                   " provided as input for truss elements."
-  [../]
+  []
   [./tensile]
     type = 'Exodiff'
     input = 'truss_plastic.i'
@@ -81,7 +81,7 @@
                   "truss elements with a linear hardening model under tension."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
   [./tensile_nohardening]
     type = 'Exodiff'
     input = 'truss_plastic.i'
@@ -92,7 +92,7 @@
                   "truss elements with perfect plasticity under tension."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
   [./tensile_hardeningfn]
     type = 'Exodiff'
     input = 'truss_plastic.i'
@@ -103,7 +103,7 @@
                   "truss elements with a user-defined hardening function model under tension."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
   [./compressive]
     type = 'Exodiff'
     input = 'truss_plastic.i'
@@ -114,7 +114,7 @@
                   "truss elements with a linear hardening model under compression."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
   [./compressive_nohardening]
     type = 'Exodiff'
     input = 'truss_plastic.i'
@@ -125,7 +125,7 @@
                   "truss elements with perfect plasticity under compression."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
   [./compressive_hardeningfn]
     type = 'Exodiff'
     input = 'truss_plastic.i'
@@ -136,7 +136,7 @@
                   "truss elements with a user-defined hardening function model under compression."
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
   [./error_nohardening]
     type = 'RunException'
     input = 'truss_plastic.i'
@@ -146,7 +146,7 @@
     requirement = "PlasticTruss material should produce error if neither the hardening"
                   " constant nor a hardening function is provided."
 
-  [../]
+  []
   [./error_hardening]
     type = 'RunException'
     input = 'truss_plastic.i'
@@ -156,5 +156,5 @@
     requirement = "PlasticTruss material should produce error if both hardening"
                   " constant and hardening function are provided."
 
-  [../]
+  []
 []

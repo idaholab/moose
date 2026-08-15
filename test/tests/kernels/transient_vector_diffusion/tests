@@ -6,7 +6,7 @@
     requirement = 'The system shall be able to reproduce the simple_transient_diffusion test with VectorTimeDerivative (hand-coded Jacobian).'
     issues = '#13913'
     design = 'VectorTimeDerivative.md'
-  [../]
+  []
   [./jac_transient_vector_diffusion]
     type = 'PetscJacobianTester'
     input = 'transient_vector_diffusion.i'
@@ -17,5 +17,5 @@
     requirement = 'The Jacobian from VectorTimeDerivative shall be perfect'
     issues = '#13913'
     design = 'VectorTimeDerivative.md'
-  [../]
+  []
 []

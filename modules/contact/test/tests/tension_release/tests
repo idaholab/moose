@@ -9,7 +9,7 @@
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
     requirement = 'The contact system shall enforce and release contact conditions. 4 elements.'
-  [../]
+  []
 
   [./4ElemTensionRelease_mechanical_constraint]
     type = 'Exodiff'
@@ -18,7 +18,7 @@
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
     requirement = 'The contact system shall enforce and release contact conditions. 4 elements and mechanical constraints.'
-  [../]
+  []
 
   [./4ElemTensionRelease_no_new_nonzeros]
     type = 'Exodiff'
@@ -28,7 +28,7 @@
     cli_args = 'Problem/error_on_jacobian_nonzero_reallocation=true Outputs/file_base=4ElemTensionRelease_no_new_nonzeros_out'
     max_parallel = 1
     requirement = 'The contact system shall enforce and release contact conditions. 4 elements and ensure no new Jacobian allocations.'
-  [../]
+  []
 
   [./8ElemTensionRelease]
     type = 'Exodiff'
@@ -39,5 +39,5 @@
     max_parallel = 4
     mesh_mode = REPLICATED
     requirement = 'The contact system shall enforce and release contact conditions. 8 elements.'
-  [../]
+  []
 []

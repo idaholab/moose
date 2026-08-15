@@ -8,7 +8,7 @@
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as AD and gotten as AD shall be accurate"
     issues = "#5658"
-  [../]
+  []
   [./test_regreg]
     type = 'Exodiff'
     input = 'ad_material.i'
@@ -19,7 +19,7 @@
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as regular and gotten as regular shall be inaccurate"
     issues = "#5658"
-  [../]
+  []
   [./stateful_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_stateful_material.i'
@@ -29,7 +29,7 @@
     turn_off_exodus_output = False
     requirement = 'AD shall work with stateful material properties and the Jacobian shall be beautiful'
     issues = "#5658"
-  [../]
+  []
   [./stateful_residual]
     type = 'Exodiff'
     exodiff = 'ad_stateful_material_exodus.e'
@@ -39,7 +39,7 @@
     prereq = 'stateful_jacobian'
     requirement = 'The time evolution of the stateful diffusivity property shall show that AD works with stateful material properties'
     issues = "#5658"
-  [../]
+  []
   [default_material_value]
     type = 'Exodiff'
     exodiff = 'default_ad_material_out.e'
@@ -47,7 +47,7 @@
     cli_args = 'Kernels/diff/ad_mat_prop=1 Kernels/diff/regular_mat_prop=1 Outputs/file_base=default_ad_material_out'
     requirement = 'We shall be able to set default values for AD material properties'
     issues = "#5658"
-  [../]
+  []
   [default_material_value_jac]
     type = 'PetscJacobianTester'
     input = 'ad_material.i'
@@ -57,7 +57,7 @@
     issues = '#5658'
     ratio_tol = 1e-7
     difference_tol = 1e-5
-  [../]
+  []
   [global_index_derivative_map]
     type = 'Exodiff'
     input = 'ad_global_index_mapping.i'

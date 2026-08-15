@@ -8,7 +8,7 @@
                   " compute the stress based on the lagrangian strain."
     design = "source/materials/ComputeDeformGradBasedStress.md"
     issues = "#6604"
-  [../]
+  []
   [./elastic_Bbar]
     type = 'CSVDiff'
     input = 'elastic_stress.i'
@@ -20,7 +20,7 @@
                   " correction is used."
     design = "source/materials/ComputeDeformGradBasedStress.md VolumetricLocking.md"
     issues = "#6604"
-  [../]
+  []
   [./interface]
     type = 'CSVDiff'
     input = 'volumetric_strain_interface.i'
@@ -30,7 +30,7 @@
                   " the stress from previous configuration to the current configuration."
     design = "source/materials/ComputeVolumetricDeformGrad.md"
     issues = "#6604"
-  [../]
+  []
   [./interface_Bbar]
     type = 'CSVDiff'
     input = 'volumetric_strain_interface.i'
@@ -43,5 +43,5 @@
                   " correction is used."
     design = "source/materials/ComputeVolumetricDeformGrad.md source/materials/VolumeDeformGradCorrectedStress.md VolumetricLocking.md"
     issues = "#6604"
-  [../]
+  []
 []

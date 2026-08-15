@@ -6,5 +6,5 @@
     input = dgkernels.i
     exodiff = dgkernels_out.e
     requirement = "The Control system shall be capable of activating or deactivating DGKernel objects with time."
-  [../]
+  []
 []

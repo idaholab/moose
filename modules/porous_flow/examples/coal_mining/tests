@@ -11,5 +11,5 @@
     requirement = 'PorousFlow shall be able to simulate caving coupled with fluid flow associated with underground coal mining'
     design = 'porous_flow/coal_mining.md'
     issues = '#14148'
-  [../]
+  []
 []

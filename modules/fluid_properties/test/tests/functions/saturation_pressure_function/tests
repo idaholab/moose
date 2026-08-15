@@ -8,5 +8,5 @@
     requirement = 'The system shall provide a function that computes saturation pressure from a temperature function'
     design = '/SaturationPressureFunction.md'
     issues = '#14755'
-  [../]
+  []
 []

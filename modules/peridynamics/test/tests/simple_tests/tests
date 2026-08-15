@@ -8,7 +8,7 @@
                    the correct micro-modulus for the bond-based mechanics model using regular mesh.'
     design = 'ComputeSmallStrainConstantHorizonMaterialBPD.md'
     issues = '#11561'
-  [../]
+  []
   [./2D_regularD_variableH_BPD]
     type = 'Exodiff'
     input = '2D_regularD_variableH_BPD.i'
@@ -18,7 +18,7 @@
                    the correct micro-modulus for the bond-based mechanics model with varying bonds constants using regular mesh.'
     design = 'ComputeSmallStrainVariableHorizonMaterialBPD.md'
     issues = '#11561'
-  [../]
+  []
   [./2D_regularD_constH_OSPD]
     type = 'Exodiff'
     input = '2D_regularD_constH_OSPD.i'
@@ -28,7 +28,7 @@
                    for the ordinary state-based mechanics model using regular mesh.'
     design = 'ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
-  [../]
+  []
   [./2D_regularD_variableH_OSPD]
     type = 'Exodiff'
     input = '2D_regularD_variableH_OSPD.i'
@@ -38,7 +38,7 @@
                    correct micro-modulus for the ordinary state-based mechanics model using regular mesh.'
     design = 'ComputeSmallStrainVariableHorizonMaterialOSPD.md'
     issues = '#11561'
-  [../]
+  []
   [./2D_irregularD_variableH_BPD]
     type = 'Exodiff'
     input = '2D_irregularD_variableH_BPD.i'
@@ -48,7 +48,7 @@
                    correct micro-modulus for the bond-based mechanics model using irregular mesh.'
     design = 'ComputeSmallStrainVariableHorizonMaterialBPD.md'
     issues = '#11561'
-  [../]
+  []
   [./2D_irregularD_variableH_OSPD]
     type = 'Exodiff'
     input = '2D_irregularD_variableH_OSPD.i'
@@ -58,7 +58,7 @@
                    correct micro-modulus for the ordinary state-based mechanics model using irregular mesh.'
     design = 'ComputeSmallStrainVariableHorizonMaterialOSPD.md'
     issues = '#11561'
-  [../]
+  []
   [./2D_small_strain_H1NOSPD]
     type = 'Exodiff'
     input = '2D_small_strain_H1NOSPD.i'
@@ -68,7 +68,7 @@
                    for Form I of the horizon stabilized peridynamic correspondence model.'
     design = 'ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
-  [../]
+  []
   [./2D_finite_strain_H1NOSPD]
     type = 'Exodiff'
     input = '2D_finite_strain_H1NOSPD.i'
@@ -79,5 +79,5 @@
                    peridynamic correspondence model.'
     design = 'ComputePlaneFiniteStrainNOSPD.md'
     issues = '#11561'
-  [../]
+  []
 []

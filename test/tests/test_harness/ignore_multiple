@@ -4,5 +4,5 @@
     input = good.i
     skip = "always skipped"
     heavy = true
-  [../]
+  []
 []

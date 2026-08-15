@@ -8,5 +8,5 @@
     expect_out = '8 Nonlinear'
     scale_refine = 5
     requirement = "The system shall include the ability to reduce the change in nonlinear residual based on a constant value."
-  [../]
+  []
 []

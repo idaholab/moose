@@ -9,5 +9,5 @@
     issues = '#18759'
     design = 'Mesh/Partitioner/index.md'
     requirement = 'The system shall allow skipping partitioning after loading a mesh'
-  [../]
+  []
 []

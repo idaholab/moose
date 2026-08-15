@@ -11,7 +11,7 @@
                   'with no slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
-  [../]
+  []
   [./1d_aefv_square_wave_minmod]
     type = 'Exodiff'
     input = '1d_aefv_square_wave.i'
@@ -25,7 +25,7 @@
                   'with Minmod slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
-  [../]
+  []
   [./1d_aefv_square_wave_mc]
     type = 'Exodiff'
     input = '1d_aefv_square_wave.i'
@@ -39,7 +39,7 @@
                   'with MC slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
-  [../]
+  []
   [./1d_aefv_square_wave_superbee]
     type = 'Exodiff'
     input = '1d_aefv_square_wave.i'
@@ -53,7 +53,7 @@
                   'with Superbee slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
-  [../]
+  []
   [./1d_block_restrictable]
     type = 'Exodiff'
     input = 'block_restrictable.i'
@@ -65,7 +65,7 @@
     requirement = 'The system shall allow RDG user objects to be block-restrictable.'
     design = 'rdg/index.md'
     issues = '#8357'
-  [../]
+  []
 
   [./rdgP0]
     type = 'CSVDiff'
@@ -75,5 +75,5 @@
     requirement = "The system, with 1D RDG, shall allow arbitrary 1D velocities to be specified."
     issues = '#12346'
     design = 'porous_flow/numerical_diffusion.md'
-  [../]
+  []
 []

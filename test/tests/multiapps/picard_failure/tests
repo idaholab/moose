@@ -12,7 +12,7 @@
     design = '/MultiApps/index.md'
     requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
     issues = '#5126'
-  [../]
+  []
 
   [./test_csv]
     type = 'CSVDiff'
@@ -30,7 +30,7 @@
     design = '/MultiApps/index.md'
     requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
     issues = '#11178'
-  [../]
+  []
 
   [./test_2subapps]
     type = 'Exodiff'
@@ -47,5 +47,5 @@
     design = '/MultiApps/index.md'
     requirement = 'Multiapps shall be able to cut the parent app time step when any subapp encounters a solve failure.'
     issues = '#12477'
-  [../]
+  []
 []

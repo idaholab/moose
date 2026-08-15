@@ -13,7 +13,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D axisymmetric ring geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
+  []
   [./glued_pen]
     type = 'CSVDiff'
     input = 'ring1_template1.i'
@@ -26,7 +26,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D axisymmetric ring geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
+  []
   [./frictionless_kin]
     type = 'CSVDiff'
     input = 'ring1_template1.i'
@@ -39,7 +39,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frctionless, kinematic contact
     for 2D axisymmetric ring geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
+  []
   [./frictionless_pen]
     type = 'CSVDiff'
     input = 'ring1_template1.i'
@@ -52,7 +52,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frctionless, penalty contact
     for 2D axisymmetric ring geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
+  []
   [./frictionless_aug]
     type = 'CSVDiff'
     input = 'ring1_template2.i'
@@ -66,7 +66,7 @@
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D axisymmetric ring geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
-  [../]
+  []
   [./mu_0_2_aug]
     type = 'CSVDiff'
     input = 'ring1_template2.i'
@@ -80,7 +80,7 @@
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D axisymmetric ring geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
-  [../]
+  []
   [./mu_0_2_pen]
     type = 'CSVDiff'
     input = 'ring1_mu_0_2_pen.i'
@@ -93,5 +93,5 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D axisymmetric ring geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
-  [../]
+  []
 []

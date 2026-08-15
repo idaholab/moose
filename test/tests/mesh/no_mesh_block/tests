@@ -7,5 +7,5 @@
     issues = '#2408'
     design = "Mesh/index.md"
     requirement = "The system shall issue an error if no Mesh block is provided."
-  [../]
+  []
 []

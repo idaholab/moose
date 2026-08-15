@@ -8,5 +8,5 @@
                    peridynamics model.'
     design = 'HeatConductionBPD.md'
     issues = '#11561'
-  [../]
+  []
 []

@@ -8,5 +8,5 @@
     # comparison file does not exist
     comparison_file = does_not_exist.cmp
     requirement = 'TestHarness shall error in the event the comparison file is missing'
-  [../]
+  []
 []

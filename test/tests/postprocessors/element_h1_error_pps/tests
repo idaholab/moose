@@ -8,5 +8,5 @@
     csvdiff = 'out.csv'
 
     requirement = 'The system shall compute the H1-seminorm between a field variable and a analytical function.'
-  [../]
+  []
 []

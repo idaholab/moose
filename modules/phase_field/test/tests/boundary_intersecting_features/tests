@@ -10,7 +10,7 @@
     capabilities = 'vtk'
 
     requirement = "The FeatureVolumeVectorPostprocessor shall capture volume information of individual features."
-  [../]
+  []
 
   [./boundary_intersecting_features_flipped]
     type = CSVDiff
@@ -22,5 +22,5 @@
 
     requirement = "The FeatureVolumeVectorPostprocessor shall capture whether any feature intersects the boundary, "
                    " even when the non-root rank doesn't own a part of the feature that intersects the boundary."
-  [../]
+  []
 []

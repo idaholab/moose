@@ -10,5 +10,5 @@
     # Note, we never test on multiple nodes
     # so there is no reason to test this on more than one processor
     max_parallel = 1
-  [../]
+  []
 []

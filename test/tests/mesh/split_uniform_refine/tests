@@ -19,5 +19,5 @@
    capabilities = 'platform=linux'
    issues = '#18575 #27240'
    requirement = 'The system shall support optionally allowing uniform refinements when using a pre-split mesh'
- [../]
+ []
 []

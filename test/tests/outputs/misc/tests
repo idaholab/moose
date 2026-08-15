@@ -9,7 +9,7 @@
     max_parallel = 1
 
     requirement = "The system shall provide an API for retrieving an output object by type and name."
-  [../]
+  []
   [./getOutputs]
     type = RunException
     input = warehouse_access.i
@@ -18,7 +18,7 @@
     max_parallel = 1
 
     requirement = "The system shall provide an API for retrieving all output objects of a type."
-  [../]
+  []
   [./getOutputs_with_names]
     type = RunException
     input = warehouse_access.i
@@ -27,7 +27,7 @@
     max_parallel = 1
 
     requirement = "The system shall provide an API for retrieving output objects for the given names and type."
-  [../]
+  []
   [./getOutputNames]
     type = RunException
     input = warehouse_access.i
@@ -36,7 +36,7 @@
     max_parallel = 1
 
     requirement = "The system shall provide an API for retrieving all output object names of a type."
-  [../]
+  []
   [./default_names]
     type = CheckFiles
     input = default_names.i
@@ -44,5 +44,5 @@
     recover = false
 
     requirement = "The system shall support the naming of output files based on the input file block name."
-  [../]
+  []
 []

@@ -9,7 +9,7 @@
     scale_refine = 2
 
     requirement = "The system shall include a means for computing mesh refinement flags based on an absolute values of error."
-  [../]
+  []
 
   [./adapt_test]
     type = 'Exodiff'
@@ -18,5 +18,5 @@
     scale_refine = 2
 
     requirement = "The system shall include a means for performing mesh adaptivity based on an absolute values of error."
-  [../]
+  []
 []

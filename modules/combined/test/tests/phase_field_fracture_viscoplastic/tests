@@ -7,5 +7,5 @@
     use_old_floor = True
     valgrind = 'HEAVY'
     max_time = 500
-  [../]
-[../]
+  []
+[]

@@ -11,7 +11,7 @@
     cli_args = 'sub_app1:BCs/right/value=10 sub_app3:BCs/right/value=30'
 
     requirement = 'The system shall support the ability to change individual SubApp input file syntax from the command line.'
-  [../]
+  []
 
   [./cli_override_error_check]
     type = 'RunException'
@@ -23,5 +23,5 @@
     prereq = 'cli_override_single'
 
     requirement = 'The system shall produce an error when a SubApp command line override index is not valid.'
-  [../]
+  []
 []

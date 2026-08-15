@@ -7,5 +7,5 @@
     requirement = 'The TableOutput object shall allow the user to override tolerance checks when determining whether new rows should be added (independent variable delta)'
     design = 'TableOutput.md'
     issues = '#11171'
-  [../]
+  []
 []

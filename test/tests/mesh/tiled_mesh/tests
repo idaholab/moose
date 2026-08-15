@@ -9,5 +9,5 @@
     requirement = 'The system shall construct a mesh by "tiling" another mesh repeatedly.'
     issues = '#1729'
     design = 'TiledMesh.md'
-  [../]
+  []
 []

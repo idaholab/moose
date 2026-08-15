@@ -7,7 +7,7 @@
     requirement = 'The system shall reproduce an analytical solution of a heat source in a 1D ceramic bar.'
     design = "HeatSource.md"
     issues = "#2582"
-  [../]
+  []
   [./ad_heat_source_bar]
     type = 'Exodiff'
     input = 'ad_heat_source_bar.i'
@@ -17,7 +17,7 @@
     design = "ADMatHeatSource.md"
     issues = "#12633"
     custom_cmp = 'ad_heat_source_bar.cmp'
-  [../]
+  []
   [./ad_heat_source_bar_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_heat_source_bar.i'
@@ -28,5 +28,5 @@
     design = "ADMatHeatSource.md"
     issues = "#5658 #12633"
     prereq = 'ad_heat_source_bar' # same input file
-  [../]
+  []
 []

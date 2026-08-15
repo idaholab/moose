@@ -8,5 +8,5 @@
     requirement = 'The system shall support pausing execution for the purpose of attaching a debugger after launch.'
     issues = '#11166'
     design = 'MooseApp.md'
-  [../]
+  []
 []

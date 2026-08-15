@@ -7,7 +7,7 @@
     issues = '#8265'
     requirement = "The system shall compute constant stress in the xx, yy, zz, xy, yz, and xz direction
                    using irregular elements with functional Poisson's ratios and Young's moduli."
-  [../]
+  []
   [./ad-test]
     type = 'Exodiff'
     input = 'ad-thermal_elastic.i'
@@ -16,7 +16,7 @@
     issues = '#13232'
     requirement = "The system shall compute constant stress in the xx, yy, zz, xy, yz, and xz direction
                    using irregular elements with functional Poisson's ratios and Young's moduli, using automatic differentiation."
-  [../]
+  []
   [./ad-test-jac]
     type = 'PetscJacobianTester'
     input = 'ad-thermal_elastic.i'
@@ -27,12 +27,12 @@
     requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a good jacobian'
     design = "jacobian_definition.md"
     issues = "#12633"
-  [../]
+  []
   [./derivatives]
     type = 'AnalyzeJacobian'
     requirement = 'The system shall compute accurate Jacobians for elastic mechanics.'
     design = "jacobian_definition.md"
     issues = '#8265'
     input = 'derivatives.i'
-  [../]
+  []
 []

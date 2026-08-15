@@ -8,7 +8,7 @@
     csvdiff = 'ipm_out_eigenvalues_0001.csv'
     capabilities = 'slepc'
     requirement = "Eigenvalue system should support standard eigenvalue problems"
-  [../]
+  []
 
   [./gipm_test]
     type = 'CSVDiff'
@@ -16,7 +16,7 @@
     csvdiff = 'gipm_out_eigenvalues_0001.csv'
     capabilities = 'slepc'
     requirement = "Eigenvalue system should support generalized eigenvalue problems"
-  [../]
+  []
 
   [./gipm_ibc]
     type = 'CSVDiff'
@@ -24,7 +24,7 @@
     csvdiff = 'gipm_ibc_out_eigenvalues_0001.csv'
     capabilities = 'slepc'
     requirement = "Eigenvalue system should support IntegratedBC"
-  [../]
+  []
 
   [./wrong_dirichlet_value_eigen]
     type = 'RunException'
@@ -33,7 +33,7 @@
     expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
     capabilities = 'slepc'
     requirement = "Eigenvalue system should not allow users to use inhomogeneous nodal boundary conditions"
-  [../]
+  []
 
   [./wrong_NodalBC_type_eigen]
     type = 'RunException'
@@ -42,7 +42,7 @@
     expect_err = 'Invalid NodalBC for eigenvalue problems, please use homogeneous \(array\) Dirichlet.'
     capabilities = 'slepc'
     requirement = "Eigenvalue system should use homogeneous boundary conditions only"
-  [../]
+  []
 
   [./no_slepc]
     type = 'RunException'
@@ -51,7 +51,7 @@
     expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
     capabilities = '!slepc'
     requirement = "Eigenvalue system requires SLEPc installed"
-  [../]
+  []
 
   [./nonlinear_power]
     type = 'CSVDiff'
@@ -60,7 +60,7 @@
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem"
-  [../]
+  []
 
   [./monolith_newton]
     type = 'CSVDiff'
@@ -69,7 +69,7 @@
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem using Newton"
-  [../]
+  []
 
   [nonlinear_hanging_nodes]
     type = CSVDiff
@@ -86,7 +86,7 @@
     csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a deficient eigenvalue problem"
-  [../]
+  []
 
   [./nonlinear_laplace]
     type = 'CSVDiff'
@@ -94,7 +94,7 @@
     csvdiff = 'ane_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to compute a nonlinear eigenvalue problem"
-  [../]
+  []
 
   [./coupled_system]
     type = 'CSVDiff'
@@ -102,7 +102,7 @@
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to compute a coupled nonlinear eigenvalue problem"
-  [../]
+  []
 
   [./eigen_scalar_kernel]
     type = 'CSVDiff'
@@ -110,7 +110,7 @@
     csvdiff = 'scalar_out_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to handle scalar kernels"
-  [../]
+  []
 
   [./dg_krylovschur]
     type = 'CSVDiff'

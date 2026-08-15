@@ -8,7 +8,7 @@
     abs_zero = 6e-5
     design = 'IsotropicPlasticityStressUpdate.md'
     requirement = 'The system shall compute and output the effective plastic strain.'
-  [../]
+  []
   [./elastic_plastic_cycle]
     type = 'Exodiff'
     input = 'elas_plas_nl1_cycle.i'
@@ -17,5 +17,5 @@
     abs_zero = 8e-5
     design = 'IsotropicPlasticityStressUpdate.md'
     requirement = 'The system shall compute and output the effective plastic strain under cyclic loading.'
-  [../]
+  []
 []

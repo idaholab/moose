@@ -9,7 +9,7 @@
     requirement = 'The system shall generate pre-split mesh files using a standard input file combined with command line arguments.'
     recover = false
     mesh_mode = 'REPLICATED'
-  [../]
+  []
   [./test_2]
     prereq = 'test_2_generate_split'
     type = 'Exodiff'
@@ -20,7 +20,7 @@
     min_parallel = 2
 
     requirement = 'The system shall use pre-split mesh files using a standard input file combined with command line arguments.'
-  [../]
+  []
   [./test_2a_generate_split]
     type = 'RunApp'
     input = 'checkpoint_split.i'
@@ -29,7 +29,7 @@
     requirement = 'The system shall generate pre-split binary mesh files using a standard input file combined with command line arguments.'
     recover = false
     mesh_mode = 'REPLICATED'
-  [../]
+  []
   [./test_2a]
     prereq = 'test_2a_generate_split'
     type = 'Exodiff'
@@ -40,5 +40,5 @@
     min_parallel = 2
 
     requirement = 'The system shall use pre-split binary mesh files using a standard input file combined with command line arguments.'
-  [../]
+  []
 []

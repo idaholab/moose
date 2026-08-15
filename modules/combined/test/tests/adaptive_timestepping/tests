@@ -7,7 +7,7 @@
     exodiff = 'adapt_tstep_function_change_out.e'
     rel_err = 9e-06
     requirement = "The system shall allow for an adaptively computed time step to be limited based on a permissible change in the value of a function over a step."
-  [../]
+  []
 
   [./test_function_force_step]
     type = 'Exodiff'
@@ -15,7 +15,7 @@
     exodiff = 'adapt_tstep_function_force_step_out.e'
     rel_err = 9e-06
     requirement = "The system shall allow for forcing time steps to be taken at the knots of a time-dependent function."
-  [../]
+  []
 
   [./test_function_change_restart1]
     type = 'RunApp'
@@ -23,7 +23,7 @@
     recover = false
     restep = false
     requirement = "The system shall run the first part of a model used to test restarting with adaptive time steps."
-  [../]
+  []
 
   [./test_function_change_restart2]
    type = 'Exodiff'
@@ -33,5 +33,5 @@
     rel_err = 9e-06
     prereq = 'test_function_change test_function_change_restart1'
     requirement = "The system shall restart a model using adaptively computed time steps."
-  [../]
+  []
 []

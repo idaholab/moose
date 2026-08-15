@@ -16,5 +16,5 @@
     recover = false
 
     requirement = "The system shall support the ability to limit output to certain sub-applications based on name."
-  [../]
+  []
 []

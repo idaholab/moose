@@ -3,5 +3,5 @@
     type = RunApp
     input = good.i
     heavy = true
-  [../]
+  []
 []

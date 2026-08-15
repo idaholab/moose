@@ -8,7 +8,7 @@
     exodiff = 'stitched_mesh_out.e'
 
     requirement = "The system shall support the creating a single mesh from multiple meshes stitched together."
-  [../]
+  []
   [./files_error]
     type = 'RunException'
     input = 'stitched_mesh.i'
@@ -16,5 +16,5 @@
     expect_err = 'Must specify at least one mesh file for StitchedMesh'
 
     requirement = "The system shall report an error if at least one mesh file is not supplied when creating a mesh from multiple meshes stitched together."
-  [../]
+  []
 []

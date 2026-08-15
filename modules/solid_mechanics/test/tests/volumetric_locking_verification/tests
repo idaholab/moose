@@ -7,7 +7,7 @@
     design = 'VolumetricLocking.md'
     requirement = 'The mechanics system shall correctly model the deformation of a 2D membrane with nearly incompressible material when volumetric locking correction is set to true.'
     capabilities = 'method!=dbg'
-  [../]
+  []
   [./no_vol_lock_2D]
     type = Exodiff
     input = '42_node.i'
@@ -17,5 +17,5 @@
     design = 'VolumetricLocking.md'
     requirement = 'The mechanics system shall correctly model the locking behavior of a 2D membrane with nearly incompressible material when volumetric locking correction is set to false.'
     capabilities = 'method!=dbg'
-  [../]
+  []
 []

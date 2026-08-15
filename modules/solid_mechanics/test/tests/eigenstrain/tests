@@ -3,15 +3,15 @@
     type = 'CSVDiff'
     input = reducedOrderRZLinear.i
     csvdiff = reducedOrderRZLinear_out_hydro_0001.csv
-  [../]
+  []
   [./reducedOrderRZLinearConstant]
     type = 'Exodiff'
     input = reducedOrderRZLinearConstant.i
     exodiff = reducedOrderRZLinearConstant_out.e
-  [../]
+  []
   [./reducedOrderRZQuadratic]
     type = 'CSVDiff'
     input = reducedOrderRZQuadratic.i
     csvdiff = reducedOrderRZQuadratic_out_hydro_0001.csv
-  [../]
+  []
 []

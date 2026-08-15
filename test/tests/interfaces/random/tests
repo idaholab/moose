@@ -10,7 +10,7 @@
     max_threads = 1
 
     requirement = 'The system shall produce parallel-agnostic random number fields on a single processor.'
-  [../]
+  []
 
   [./parallel_verification]
     type = 'Exodiff'
@@ -21,7 +21,7 @@
     max_threads = 1
 
     requirement = 'The system shall produce parallel-agnostic random number fields on two or more processors.'
-  [../]
+  []
 
   [./threads_verification]
     type = 'Exodiff'
@@ -31,7 +31,7 @@
     min_threads = 2
 
     requirement = 'The system shall produce parallel-agnostic random number fields on two or more threads.'
-  [../]
+  []
 
   # Parallel Mesh Tests
   # AuxKernel Tests
@@ -45,7 +45,7 @@
     prereq = 'threads_verification'
 
     requirement = 'The system shall produce a parallel field without repeating patterns on distributed meshes.'
-  [../]
+  []
 
   # User Object Tests
   [./test_uo]
@@ -55,7 +55,7 @@
     max_threads = 1
 
     requirement = 'The system shall produce parallel-agnostic random number fields via the user defined (UserObject) system.'
-  [../]
+  []
 
   [./parallel_verification_uo]
     type = 'Exodiff'
@@ -66,7 +66,7 @@
     max_threads = 1
 
     requirement = 'The system shall produce parallel-agnostic random number fields via the user defined (UserObject) system on two or more processors.'
-  [../]
+  []
 
   [./threads_verification_uo]
     type = 'Exodiff'
@@ -77,7 +77,7 @@
 
     requirement = 'The system shall produce parallel-agnostic random number fields via the user defined (UserObject) system on two or more threads.'
 
-  [../]
+  []
 
   # User Object Tests
   [./test_uo_par_mesh]
@@ -90,7 +90,7 @@
     prereq = 'threads_verification_uo'
 
     requirement = 'The system shall produce a parallel field without repeating patterns via the user defined (UserObject) system.'
-  [../]
+  []
 
   # Material Tests
   [./material_serial]
@@ -100,7 +100,7 @@
     max_threads = 1
 
     requirement = 'The system shall produce a parallel-agnostic random number via the material system.'
-  [../]
+  []
 
   [./material_parallel]
     type = 'Exodiff'
@@ -111,5 +111,5 @@
     max_threads = 1
 
     requirement = 'The system shall produce a parallel-agnostic random number via the material system on two or more processors.'
-  [../]
+  []
 []

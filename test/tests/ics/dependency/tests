@@ -9,7 +9,7 @@
 
     requirement = 'The system shall allow nodal initial condition objects to couple '
                   ' to other nodal variables for computing values for the current variable.'
-  [../]
+  []
 
   [./monomial]
     type = 'Exodiff'
@@ -19,5 +19,5 @@
 
     requirement = 'The system shall allow elemental initial condition objects to couple '
                   ' to other elemental variables for computing values for the current variable.'
-  [../]
+  []
 []

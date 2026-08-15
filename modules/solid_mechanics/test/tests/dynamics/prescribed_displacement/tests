@@ -10,7 +10,7 @@
                   " displacement at the given boundary."
     design = "Dynamics.md PresetDisplacement.md"
     issues = "#7642"
-  [../]
+  []
   [./displacement_bc_ti]
     type = 'Exodiff'
     input = '3D_QStatic_1_Ramped_Displacement_ti.i'
@@ -24,7 +24,7 @@
     design = "Dynamics.md PresetDisplacement.md"
     issues = "#12185"
     prereq = "displacement_bc"
-  [../]
+  []
   [./displacement_bc_gravity]
     type = 'Exodiff'
     input = '3D_QStatic_1_Ramped_Displacement_with_gravity.i'
@@ -37,5 +37,5 @@
                   " before starting the dynamic analysis."
     design = "Dynamics.md"
     issues = "#7642"
-  [../]
+  []
 []

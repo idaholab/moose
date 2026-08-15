@@ -6,5 +6,5 @@
     requirement = 'The system shall compute time derivatives on a neighbor element for constant monomials'
     design = 'MooseVariableConstMonomial.md'
     issues = '#9836 #12185'
-  [../]
+  []
 []

@@ -11,7 +11,7 @@
     partial = True
     map = False
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable'
-  [../]
+  []
   [./equalgradient]
     type = 'Exodiff'
     input = 'equalgradient.i'
@@ -22,7 +22,7 @@
     map = False
     custom_cmp = 'one-variable-u.cmp'
     requirement = 'We shall be able to enforce solution gradient continuity on a conforming mesh for one variable'
-  [../]
+  []
 
   [./conforming_two_var]
     type = 'Exodiff'
@@ -34,7 +34,7 @@
     map = False
     custom_cmp = 'two-variable-uv.cmp'
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for two variables'
-  [../]
+  []
 
   [./conforming-2nd-order]
     type = 'Exodiff'
@@ -46,5 +46,5 @@
     map = False
     custom_cmp = 'one-variable-u.cmp'
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable using second order shape functions for both primal and lagrange variables. Note that this may be a relatively unstable discretization'
-  [../]
+  []
 []

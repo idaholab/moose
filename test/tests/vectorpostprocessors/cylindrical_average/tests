@@ -6,5 +6,5 @@
     requirement = 'The system shall support the computation of averages of variables over cylindrical shells.'
     issues = '#12979'
     design = 'vectorpostprocessors/CylindricalAverage.md'
-  [../]
+  []
 []

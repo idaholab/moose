@@ -7,7 +7,7 @@
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions on a 2D model using a penalty method.'
-  [../]
+  []
   [./3D]
     type = Exodiff
     input = 'inclined_bc_3d.i'
@@ -16,7 +16,7 @@
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions on a 3D model using a penalty method.'
-  [../]
+  []
   [ad]
     type = Exodiff
     input = 'ad_inclined_bc_3d.i'

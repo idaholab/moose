@@ -8,5 +8,5 @@
     csvdiff = 'internal_side_user_object_out.csv'
 
     requirement = "The system shall support the ability to restrict user defined calculations to sides of a subdomain."
-  [../]
+  []
 []

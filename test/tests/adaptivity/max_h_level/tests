@@ -7,5 +7,5 @@
     exodiff = 'max_h_level_out.e-s003'
     recover = false
     requirement = "The Adaptivity system shall be capable of restricting the element refinement level."
-  [../]
+  []
 []

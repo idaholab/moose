@@ -8,5 +8,5 @@
     csvdiff = 'gauss_lobatto_out.csv'
 
     requirement = "The system shall support the use of Gauss-Lobatto quadrature for numerical integration."
-  [../]
+  []
 []

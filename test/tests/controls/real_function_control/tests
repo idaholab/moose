@@ -6,12 +6,12 @@
     input = 'real_function_control.i'
     csvdiff = 'real_function_control_out.csv'
     requirement = "The Control system shall allow a scalar parameter to be controlled with a function."
-  [../]
+  []
 
   [./multiple]
     type = 'CSVDiff'
     input = 'multi_real_function_control.i'
     csvdiff = 'multi_real_function_control_out.csv'
     requirement = "The Control system shall allow multiple scalar parameters to be controlled with a function."
-  [../]
+  []
 []

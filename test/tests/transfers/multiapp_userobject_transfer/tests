@@ -85,7 +85,7 @@
     mesh_mode = replicated
     issues = "#13701"
     recover = false
-  [../]
+  []
 
   [invalid_block_to_app]
     type = RunException

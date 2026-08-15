@@ -9,5 +9,5 @@
     exodiff = 'execution_attribute_reporter_out.e'
 
     requirement = 'The system shall support an attribute (scalar value) reporter through the "Execution" system.'
-  [../]
+  []
 []

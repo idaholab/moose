@@ -10,5 +10,5 @@
     recover = false
 
     requirement = "The system shall support limiting the number of processors for sub-applications."
-  [../]
+  []
 []

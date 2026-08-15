@@ -10,7 +10,7 @@
     requirement = 'The system shall have the ability to generate a mesh by reading it from a file.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#11640 #32487'
-  [../]
+  []
   [./extra_integer_test]
     type = 'Exodiff'
     input = 'exodus_file_mesh_with_id.i'
@@ -20,7 +20,7 @@
     requirement = 'The system shall have the ability to assign element extra integers with elemental variables in an Exodus mesh file.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#14916'
-  [../]
+  []
 
   [./exodus_iga_test]
     type = XMLDiff

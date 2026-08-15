@@ -4,5 +4,5 @@
     input = good.i
     check_input = true
     check_input = true
-  [../]
+  []
 []

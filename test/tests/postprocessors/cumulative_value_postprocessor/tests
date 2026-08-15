@@ -9,5 +9,5 @@
     max_parallel = 1 # LU is used
 
     requirement = 'The system shall have the ability to accumulate a scalar value over time.'
-  [../]
+  []
 []

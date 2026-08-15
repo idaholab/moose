@@ -7,7 +7,7 @@
     exodiff = 'simple_transient_diffusion_out.e'
     requirement = 'ADCHSplitChemicalPotential and ADCHSplitConcentration shall solve a simple '
                   'Cahn-Hilliard problem using automatic differentiation.'
-  [../]
+  []
   [./simple_transient_diffusion-jac]
     type = 'PetscJacobianTester'
     input = 'simple_transient_diffusion.i'
@@ -17,5 +17,5 @@
     allow_test_objects = true
     requirement = 'The Jacobians for the automatic differentiation ADCHSplitChemicalPotential and '
                   'ADCHSplitConcentration kernels shall be accurate.'
-  [../]
+  []
 []

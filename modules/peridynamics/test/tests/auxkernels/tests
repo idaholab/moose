@@ -8,7 +8,7 @@
                    a material point for elastic material.'
     design = 'NodalRankTwoPD.md'
     issues = '#11561'
-  [../]
+  []
   [./stretch_H1NOSPD]
     type = 'Exodiff'
     input = 'planestrain_thermomechanics_stretch_H1NOSPD.i'
@@ -17,7 +17,7 @@
     requirement = 'The system shall be able to calculate the stretches of a bond.'
     design = 'ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
-  [../]
+  []
   [./offset_and_area_2D]
     type = 'Exodiff'
     input = 'boundary_offset_node_area_2D.i'
@@ -27,7 +27,7 @@
                    and nodal area from mesh for 2D geometries.'
     design = 'BoundaryOffsetPD.md NodalVolumePD.md'
     issues = '#11561'
-  [../]
+  []
   [./offset_and_volume_3D]
     type = 'Exodiff'
     input = 'boundary_offset_node_volume_3D.i'
@@ -37,5 +37,5 @@
                    and nodal volume from mesh for 3D geometries.'
     design = 'BoundaryOffsetPD.md NodalVolumePD.md'
     issues = '#11561'
-  [../]
+  []
 []

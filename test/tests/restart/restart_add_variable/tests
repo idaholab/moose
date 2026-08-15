@@ -7,7 +7,7 @@
 
     requirement = 'The systen shall support running and saving off a transient solution with stateful material properties for a restart test.'
     issues = '#13438'
-  [../]
+  []
 
   [./add_variable_restart]
     type = 'Exodiff'
@@ -17,7 +17,7 @@
 
     requirement = 'The systen shall support restart with a solution containing only a subset of the variables in the restart simulation.'
     issues = '#13438'
-  [../]
+  []
 
   [equation_systems_json]
     type = 'JSONDiff'

@@ -9,5 +9,5 @@
     allow_warnings = true
 
     requirement = 'The system shall support performing iterative solves of sub-applications that used smaller time steps than parent application.'
-  [../]
+  []
 []

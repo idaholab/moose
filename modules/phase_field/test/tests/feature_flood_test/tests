@@ -6,7 +6,7 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
     min_parallel = 4
-  [../]
+  []
 
   [./boxes]
     type = CSVDiff
@@ -16,7 +16,7 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
     min_parallel = 4
-  [../]
+  []
 
   [./l_shapes]
     type = CSVDiff
@@ -26,5 +26,5 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
     min_parallel = 4
-  [../]
+  []
 []

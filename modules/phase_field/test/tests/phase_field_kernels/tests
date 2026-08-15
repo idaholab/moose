@@ -8,7 +8,7 @@
     requirement = 'The system shall provide a non-split Cahn-Hilliard formalism'
     # uses exodus oversampling see #2295
     recover = false
-  [../]
+  []
 
   [./SplitCahnHilliard]
     type = 'Exodiff'
@@ -17,7 +17,7 @@
     issues = '#3356'
     design = '/SplitCHParsed.md'
     requirement = 'The system shall provide a split Cahn-Hilliard formalism'
-  [../]
+  []
   [./ADSplitCahnHilliard]
     type = 'Exodiff'
     input = 'ADSplitCahnHilliard.i'
@@ -26,7 +26,7 @@
     issues = '#13138'
     design = '/ADSplitCHParsed.md'
     requirement = 'The system shall provide an AD version of the split Cahn-Hilliard formalism'
-  [../]
+  []
   [./ADSplitCahnHilliard-jac]
     type = 'PetscJacobianTester'
     input = 'ADSplitCahnHilliard.i'
@@ -37,7 +37,7 @@
     issues = '#13138'
     design = '/ADSplitCHParsed.md'
     requirement = 'The system shall provide a perfect Jacobian for the AD split Cahn-Hilliard problem.'
-  [../]
+  []
 
   [./SplitCHWRes]
     type = 'Exodiff'
@@ -46,7 +46,7 @@
     issues = '#14140'
     design = '/SplitCHWRes.md'
     requirement = 'The system shall provide a kernel option to implement transport terms for the off-diagonal Onsager matrix components'
-  [../]
+  []
 
   [./AllenCahn]
     type = 'Exodiff'
@@ -55,7 +55,7 @@
     issues = '#3816'
     design = '/AllenCahn.md'
     requirement = 'The system shall provide a Allen-Cahn phase field formulation.'
-  [../]
+  []
   [./analyzejacobian_AllenCahn]
     type = 'AnalyzeJacobian'
     input = 'AllenCahn.i'
@@ -66,7 +66,7 @@
     issues = '#3816'
     design = '/AllenCahn.md'
     requirement = 'The system shall provide perfect Jacobian contributions for the Allen-Cahn phase field formulation.'
-  [../]
+  []
 
   [./AllenCahnVariableL]
     type = 'Exodiff'
@@ -75,7 +75,7 @@
     issues = '#3816'
     design = '/AllenCahn.md'
     requirement = 'The system shall provide a Allen-Cahn phase field formulation with a variable dependent mobility.'
-  [../]
+  []
 
   [./ADAllenCahn]
     type = 'Exodiff'
@@ -85,7 +85,7 @@
     issues = '#13197'
     design = '/ADAllenCahn.md'
     requirement = 'The system shall provide an AD version of the Allen-Cahn phase field formulation.'
-  [../]
+  []
   [./ADAllenCahn-jac]
     type = 'PetscJacobianTester'
     input = 'ADAllenCahn.i'
@@ -97,7 +97,7 @@
     issues = '#13197'
     design = '/ADAllenCahn.md'
     requirement = 'The system shall calculate a perfect Jacobian for the AD Allen-Cahn problem.'
-  [../]
+  []
 
   [./ADAllenCahnVariableL]
     type = 'Exodiff'
@@ -107,7 +107,7 @@
     issues = '#13197'
     design = '/ADAllenCahn.md'
     requirement = 'The system shall provide an AD version of the Allen-Cahn phase field formulation with a variable dependent mobility.'
-  [../]
+  []
   [./ADAllenCahnVariableL-jac]
     type = 'PetscJacobianTester'
     input = 'ADAllenCahnVariableL.i'
@@ -119,7 +119,7 @@
     issues = '#13197'
     design = '/ADAllenCahn.md'
     requirement = 'The system shall calculate a perfect Jacobian for the AD Allen-Cahn problem with a variable dependent mobility.'
-  [../]
+  []
 
 
   # This coupled formulation should give the same result as the direct Allen-Cahn
@@ -131,7 +131,7 @@
     issues = '#6194'
     design = '/CoupledAllenCahn.md'
     requirement = 'The system shall provide a coupled Allen-Cahn formulation.'
-  [../]
+  []
 
   # This is also a coupled formulation of Allen-Cahn equation, using variable mobility
   # Primarily here to test CoupledCoefReaction kernel
@@ -142,7 +142,7 @@
     issues = '#6265'
     design = '/CoupledAllenCahn.md'
     requirement = 'The system shall provide a coupled Allen-Cahn formulation with a user defined prefactor.'
-  [../]
+  []
 
   [./MatGradSquareCoupled]
     type = 'Exodiff'
@@ -151,7 +151,7 @@
     issues = '#10721'
     design = '/MatGradSquareCoupled.md'
     requirement = 'The system shall provide a coupled gradient square kernel.'
-  [../]
+  []
 
   [./SimpleSplitCHWRes]
     type = 'Exodiff'
@@ -160,7 +160,7 @@
     issues = '#6910'
     design = '/SimpleSplitCHWRes.md'
     requirement = 'The system shall provide a suite of simple to understand phase field kernels for novice users.'
-  [../]
+  []
 
   [./SimpleCHInterface]
     type = 'Exodiff'
@@ -171,7 +171,7 @@
     requirement = 'The system shall provide a suite of simple to understand phase field kernels for novice users.'
     # Use exodus oversampling. See #2295
     recover = false
-  [../]
+  []
 
   [./ACInterfaceStress]
     type = 'Exodiff'
@@ -181,7 +181,7 @@
     issues = '#9658'
     design = '/ACInterfaceStress.md'
     requirement = 'The system shall provide a free energy contribution from elastic stresses in interfaces.'
-  [../]
+  []
 
   [./analyzejacobian_ACInterfaceStress]
     type = 'AnalyzeJacobian'
@@ -192,7 +192,7 @@
     issues = '#9658'
     design = '/ACInterfaceStress.md'
     requirement = 'The system shall provide a perfect Jacobian for the free energy contribution from elastic stresses in interfaces.'
-  [../]
+  []
 
   [./nonuniform_barrier_coefficient]
     type = 'Exodiff'
@@ -201,7 +201,7 @@
     issues = '#11829'
     design = '/ACBarrierFunction.md'
     requirement = 'The system shall verify that the barrier height and gradient energy parameter must be permitted to depend on non-linear variables.'
-  [../]
+  []
 
   [./nonuniform_barrier_coefficient_AD]
     type = 'Exodiff'
@@ -210,7 +210,7 @@
     issues = '#15573'
     design = '/ACBarrierFunction.md /ACKappaFunction.md'
     requirement = 'MOOSE shall have AD examples where the barrier height and gradient energy parameter depend on non-linear variables'
-  [../]
+  []
 
   [./ADnonuniform_barrier_coefficient-jac]
     type = 'PetscJacobianTester'
@@ -222,5 +222,5 @@
     issues = '#15573'
     design = '/ACBarrierFunction.md /ACKappaFunction.md'
     requirement = 'The Jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
-  [../]
+  []
 []

@@ -10,7 +10,7 @@
                   'in 2D.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
+  []
   [./corner_edge_cut]
     type = Exodiff
     input = corner_edge_cut.i
@@ -23,7 +23,7 @@
                   'same mesh.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
+  []
   [./corner_node_cut]
     type = Exodiff
     input = corner_node_cut.i
@@ -35,7 +35,7 @@
                   'are generated to separate the previously connected elements.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
+  []
   [./notch]
     type = Exodiff
     input = notch.i
@@ -46,5 +46,5 @@
                   'crack front along a prescribed cut in 2D.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
+  []
 []

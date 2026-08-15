@@ -13,7 +13,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
-  [../]
+  []
   [./glued_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_qsym_1deg_template1.i'
@@ -26,7 +26,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
-  [../]
+  []
   [./frictionless_kin]
     type = 'CSVDiff'
     input = 'hertz_cyl_qsym_1deg_template1.i'
@@ -39,7 +39,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
-  [../]
+  []
   [./frictionless_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_qsym_1deg_template1.i'
@@ -52,7 +52,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
-  [../]
+  []
   [./frictionless_aug]
     type = 'CSVDiff'
     input = 'hertz_cyl_qsym_1deg_template1.i'
@@ -67,5 +67,5 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz quarter-symmetry cylindrical contact problem."
-  [../]
+  []
 []

@@ -7,7 +7,7 @@
                   'Variable to another when the transfer coefficient is a constant.'
     design = 'PorousFlowHeatMassTransfer.md'
     issues = '#11050'
-  [../]
+  []
   [./testvariable_transfer_variable_0D]
     type = 'CSVDiff'
     input = 'variable_transfer_variable_0D.i'
@@ -16,5 +16,5 @@
                   'Variable to another when the transfer coefficient is a variable.'
     design = 'PorousFlowHeatMassTransfer.md'
     issues = '#11050'
-  [../]
+  []
 []

@@ -7,5 +7,5 @@
     requirement = "The system shall support the application of Dirichlet type boundary conditions using the penalty method for nodesets."
     design = 'nodalkernels/PenaltyDirichletNodalKernel.md'
     issues = '#14092'
-  [../]
+  []
 []

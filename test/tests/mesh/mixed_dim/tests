@@ -7,7 +7,7 @@
     exodiff = 'out.e'
 
     requirement = 'The system shall support simulations on meshes containing both 1D and 2D element types.'
-  [../]
+  []
 
   [./oned_twod_w_matl_test]
     type = 'Exodiff'
@@ -15,7 +15,7 @@
     exodiff = '1d_2d_w_matl_out.e'
 
     requirement = 'The system shall support proper material evaluations on meshes containing both 1D and 2D element types.'
-  [../]
+  []
 
   [./oned_threed_test]
     type = 'Exodiff'
@@ -23,5 +23,5 @@
     exodiff = '1d_3d_out.e'
 
     requirement = 'The system shall support simulations on meshes containing both 1D and 3D element types.'
-  [../]
+  []
 []

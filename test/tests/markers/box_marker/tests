@@ -10,12 +10,12 @@
     scale_refine = 2
     requirement = "The adaptivity system shall create an auxiliary field variable that marks "
                   "elements for refinement within a rectangular region."
-  [../]
+  []
   [./mark_and_adapt]
     type = 'Exodiff'
     input = 'box_marker_adapt_test.i'
     exodiff = 'box_marker_adapt_test_out.e-s002'
     scale_refine = 2
     requirement = "The adaptivity system shall adapt the mesh within a rectangular region."
-  [../]
+  []
 []

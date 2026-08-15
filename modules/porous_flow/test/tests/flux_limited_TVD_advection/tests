@@ -6,7 +6,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall error-out if the flux-limiting computations are not evaluated on linear'
-  [../]
+  []
   [./jacobian_01]
     type = 'PetscJacobianTester'
     input = 'jacobian_01.i'
@@ -16,7 +16,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when there is no antidiffusion'
-  [../]
+  []
   [./jacobian_02_minmod]
     type = 'PetscJacobianTester'
     input = 'jacobian_02.i'
@@ -26,7 +26,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is minmod'
-  [../]
+  []
   [./jacobian_02_vanleer]
     type = 'PetscJacobianTester'
     input = 'jacobian_02.i'
@@ -36,7 +36,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is vanleer'
-  [../]
+  []
   [./jacobian_02_mc]
     type = 'PetscJacobianTester'
     input = 'jacobian_02.i'
@@ -46,7 +46,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is mc'
-  [../]
+  []
   [./jacobian_02_superbee]
     type = 'PetscJacobianTester'
     input = 'jacobian_02.i'
@@ -56,7 +56,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is superbee'
-  [../]
+  []
   [./jacobian_02_vanleer_threads]
     type = 'PetscJacobianTester'
     input = 'jacobian_02.i'
@@ -69,7 +69,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries, for more than 1 thread'
-  [../]
+  []
   [./jacobian_03_vanleer]
     type = 'PetscJacobianTester'
     input = 'jacobian_03.i'
@@ -79,7 +79,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is vanleer, when the variable is such that the flux limiter is 1'
-  [../]
+  []
   [./jacobian_03_mc]
     type = 'PetscJacobianTester'
     input = 'jacobian_03.i'
@@ -89,7 +89,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is mc, when the variable is such that the flux limiter is 1'
-  [../]
+  []
   [./fltvd_1D]
     type = 'CSVDiff'
     input = 'fltvd_1D.i'
@@ -98,7 +98,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D'
-  [../]
+  []
   [./fltvd_1D_threads]
     type = 'CSVDiff'
     input = 'fltvd_1D.i'
@@ -110,7 +110,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D with more than 1 thread'
-  [../]
+  []
   [./fltvd_2D]
     type = 'CSVDiff'
     input = 'fltvd_2D.i'
@@ -119,7 +119,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D'
-  [../]
+  []
   [./fltvd_2D_threads]
     type = 'CSVDiff'
     input = 'fltvd_2D.i'
@@ -131,7 +131,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D with more than 1 thread'
-  [../]
+  []
   [./fltvd_3D]
     type = 'CSVDiff'
     input = 'fltvd_3D.i'
@@ -141,7 +141,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 3D'
-  [../]
+  []
   [./fltvd_2D_angle]
     type = Exodiff
     input = 'fltvd_2D_angle.i'
@@ -150,7 +150,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when the velocity is not aligned with the mesh'
-  [../]
+  []
   [./fltvd_2D_trimesh]
     type = 'CSVDiff'
     input = 'fltvd_2D_trimesh.i'
@@ -161,7 +161,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when using triangular mesh elements'
-  [../]
+  []
   [./fltvd_2D_trimesh_threads]
     type = 'CSVDiff'
     input = 'fltvd_2D_trimesh.i'
@@ -175,7 +175,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when using triangular mesh elements and with more than 1 thread'
-  [../]
+  []
   [./fltvd_2D_blocks]
     type = 'CSVDiff'
     input = 'fltvd_2D_blocks.i'
@@ -184,7 +184,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when the advection is block limited'
-  [../]
+  []
   [./fltvd_2D_blocks_threads]
     type = 'CSVDiff'
     input = 'fltvd_2D_blocks.i'
@@ -196,7 +196,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when the advection is block limited, and when more than 1 thread is used'
-  [../]
+  []
   [./fltvd_1D_adaptivity]
     type = 'CSVDiff'
     input = 'fltvd_1D_adaptivity.i'
@@ -205,7 +205,7 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D when mesh adaptivity is used'
-  [../]
+  []
   [./fltvd_1D_adaptivity_threads]
     type = 'CSVDiff'
     input = 'fltvd_1D_adaptivity.i'
@@ -217,5 +217,5 @@
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D when mesh adaptivity is used, and when more than 1 thread is used'
-  [../]
+  []
 []

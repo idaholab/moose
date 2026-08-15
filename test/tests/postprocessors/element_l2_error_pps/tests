@@ -7,5 +7,5 @@
     input = 'element_l2_error_pp_test.i'
     csvdiff = 'out.csv'
     requirement = 'The system shall compute the L2-error (Euclidean) between a field variable and a analytical function.'
-  [../]
+  []
 []

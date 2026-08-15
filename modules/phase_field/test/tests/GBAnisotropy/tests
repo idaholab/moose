@@ -6,7 +6,7 @@
     issues = '#4580'
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities.'
-  [../]
+  []
   [./test2]
     type = 'Exodiff'
     input = 'test2.i'
@@ -14,7 +14,7 @@
     issues = '#4580'
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities.'
-  [../]
+  []
   [./test3]
     type = 'Exodiff'
     input = 'test3.i'
@@ -22,7 +22,7 @@
     issues = '#4580'
     design = 'GBAnisotropy.md'
     requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities with an inclination dependence.'
-  [../]
+  []
   [./testwidth1]
     type = 'Exodiff'
     input = 'testwidth1.i'
@@ -30,5 +30,5 @@
     issues = '#8079'
     design = 'GBWidthAnisotropy.md'
     requirement = 'The anisotropic grain boundary system shall allow the user to specify grain boundary widths independently for each interface between grains.'
-  [../]
+  []
 []

@@ -8,7 +8,7 @@
     expect_err = "The desired parameter 'Kernels/diff/non_controllable"
     match_literal = true
     requirement = "The Control system shall error if an attempt to alter a non-controllable parameter is performed."
-  [../]
+  []
 
   [./multiple_params_found_warning]
     # Test error message when single parameter is requested, but multiple exist
@@ -17,7 +17,7 @@
     expect_out = "The following controlled parameters are being retrieved"
     allow_warnings = true
     requirement = "The Control system shall error if multiple controllable parameters exists, but only a single parameter is expected to be controlled."
-  [../]
+  []
 
   [./no_param_found]
     # Test that an invalid parameter name errors properly
@@ -26,7 +26,7 @@
     expect_err = "The desired parameter 'unknown_param_name' was not located"
     match_literal = true
     requirement = "The Control system shall error if an unknown parameter is supplied for control."
-  [../]
+  []
 
   [./tid_warehouse_error]
     # Test tid assert on MooseObjectWarehouse
@@ -35,7 +35,7 @@
     expect_err = "Attempting to access a thread id \(12345\) greater than the number allowed by the storage item \(1\)"
     capabilities = 'method=dbg'
     requirement = "The Control system shall error if a thread id greater than the number of threads available is supplied when retrieving a Control object."
-  [../]
+  []
 
   [./disable_executioner]
     # Test that certain objects (e.g., Executioner) may not be disabled
@@ -43,7 +43,7 @@
     input = 'disable_executioner.i'
     expect_err = "The desired parameter 'Executioner::\*/enable"
     requirement = "The Control system shall error if an attempt is made to disable the Executioner."
-  [../]
+  []
 
   [./non_existing_dependency]
     # Test that non existing dependency errors out properly
@@ -51,5 +51,5 @@
     input = 'non_existing_dependency.i'
     expect_err = "The Control \"no-control\" was not created, did you make a spelling mistake or forget to include it in your input file\?"
     requirement = "The Control system shall error if an invalid control name is supplied to the Control dependency resolution procedure."
-  [../]
+  []
 []

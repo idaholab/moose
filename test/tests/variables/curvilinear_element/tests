@@ -8,5 +8,5 @@
     csvdiff = 'out.csv'
 
     requirement = 'The system shall support "curvilinear" elements (elements that contain curved edges.'
-  [../]
+  []
 []

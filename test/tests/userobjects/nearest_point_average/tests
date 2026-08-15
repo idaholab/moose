@@ -6,5 +6,5 @@
     requirement = 'The system shall compute averages computed from the closest values for a list of points'
     design = 'NearestPointAverage.md'
     issues = '#18536'
-  [../]
+  []
 []

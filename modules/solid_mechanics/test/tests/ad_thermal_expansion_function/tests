@@ -10,14 +10,14 @@
       input = 'finite_const.i'
       csvdiff = 'finite_const_out.csv'
       detail = 'and the finite strain formulation'
-    [../]
+    []
     [./small_const]
       type = CSVDiff
       input = 'small_const.i'
       csvdiff = 'small_const_out.csv'
       detail = 'and the small strain formulation'
-    [../]
-  [../]
+    []
+  []
   [./linear]
     issues = '#12650'
     design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
@@ -29,14 +29,14 @@
       input = 'finite_linear.i'
       csvdiff = 'finite_linear_out.csv'
       detail = 'and the finite strain formulation'
-    [../]
+    []
     [./small_const]
       type = CSVDiff
       input = 'small_linear.i'
       csvdiff = 'small_linear_out.csv'
       detail = 'and the small strain formulation'
-    [../]
-  [../]
+    []
+  []
   [./individual]
     issues = '#13634 #14595'
     design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md ComputeDilatationThermalExpansionFunctionEigenstrain.md'
@@ -48,13 +48,13 @@
       input = 'mean.i'
       csvdiff = 'mean_out.csv'
       detail = 'using a mean thermal expansion coefficient'
-    [../]
+    []
     [./mean_complex]
       type = CSVDiff
       input = 'mean_complex.i'
       csvdiff = 'mean_complex_out.csv'
       detail = 'using a complex mean thermal expansion coefficient'
-    [../]
+    []
     [./mean_complex_jac]
       type = 'PetscJacobianTester'
       input = 'mean_complex.i'
@@ -62,19 +62,19 @@
       ratio_tol = 1e-7
       difference_tol = 1e-7
       detail = 'using a complex mean thermal expansion coefficient and compute a perfect jacobian'
-    [../]
+    []
     [./instantaneous]
       type = CSVDiff
       input = 'instantaneous.i'
       csvdiff = 'instantaneous_out.csv'
       detail = 'using a instantaneous thermal expansion coefficient'
-    [../]
+    []
     [./instantaneous_complex]
       type = CSVDiff
       input = 'instantaneous_complex.i'
       csvdiff = 'instantaneous_complex_out.csv'
       detail = 'using a complex instantaneous thermal expansion coefficient'
-    [../]
+    []
     [./instantaneous_complex_jac]
       type = 'PetscJacobianTester'
       input = 'instantaneous_complex.i'
@@ -82,12 +82,12 @@
       ratio_tol = 1e-7
       difference_tol = 1e-7
       detail = 'using a complex instantaneous thermal expansion coefficient and compute a perfect jacobian'
-    [../]
+    []
     [./dilatation]
       type = CSVDiff
       input = 'dilatation.i'
       csvdiff = 'dilatation_out.csv'
       detail = 'using a dilatation thermal expansion coefficient'
-    [../]
-  [../]
+    []
+  []
 []

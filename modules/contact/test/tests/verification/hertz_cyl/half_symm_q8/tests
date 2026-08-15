@@ -15,7 +15,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
-  [../]
+  []
   [./glued_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
@@ -30,7 +30,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
-  [../]
+  []
   [./frictionless_kin]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
@@ -50,7 +50,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
-  [../]
+  []
   [./frictionless_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
@@ -70,7 +70,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
-  [../]
+  []
   [./frictionless_aug]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
@@ -92,7 +92,7 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
-  [../]
+  []
   [./mu_0_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template3.i'
@@ -110,7 +110,7 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8
     elements and with a friction coefficient of 0."
-  [../]
+  []
   [./mu_1_0_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template3.i'
@@ -128,7 +128,7 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8
     elements and with a friction coefficient of 1.0."
-  [../]
+  []
   [./mu_0_2_aug]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
@@ -147,5 +147,5 @@
     capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
-  [../]
+  []
 []

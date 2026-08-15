@@ -6,5 +6,5 @@
 # Run in serial so RandomIC gets fixed PRNG results
     max_parallel = 1
     max_threads  = 1
-  [../]
+  []
 []

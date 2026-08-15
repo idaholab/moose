@@ -7,19 +7,19 @@
     csvdiff = 'frictionless_constraint_out.csv'
     requirement = "The mechanics system shall accurately predict the displacement"
                   " of a beam element with a frictionless contact constraint."
-  [../]
+  []
   [./glued_constraint]
     type = 'CSVDiff'
     input = 'glued_constraint.i'
     csvdiff = 'glued_constraint_out.csv'
     requirement = "The mechanics system shall accurately predict the displacement"
                   " of a beam element with a glued contact constraint."
-  [../]
+  []
   [./frictional_constraint]
     type = 'CSVDiff'
     input = 'frictional_constraint.i'
     csvdiff = 'frictional_constraint_out.csv'
     requirement = "The mechanics system shall accurately predict the displacement"
                   " of a beam element with a frictional contact constraint."
-  [../]
+  []
 []

@@ -6,5 +6,5 @@
     requirement = "It shall not be possible to specify Markers to run on the displaced mesh."
     issues = '#11430'
     design = "Markers/index.md"
-  [../]
+  []
 []

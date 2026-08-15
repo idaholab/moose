@@ -9,5 +9,5 @@
     mesh_mode = 'REPLICATED'
 
     requirement = 'The system shall have the ability to read boundary information from Gmsh formatted mesh files.'
-  [../]
+  []
 []

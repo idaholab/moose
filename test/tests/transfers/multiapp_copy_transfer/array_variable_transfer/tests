@@ -8,5 +8,5 @@
     exodiff = 'parent_out.e parent_out_sub0.e'
 
     requirement = "The system shall support direct copy of array variables +from+ a sub-application +to+ the main application."
-  [../]
+  []
 []

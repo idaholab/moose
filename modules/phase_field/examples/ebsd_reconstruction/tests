@@ -5,5 +5,5 @@
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     capabilities = 'method!=dbg'
     check_input = True
-  [../]
+  []
 []
