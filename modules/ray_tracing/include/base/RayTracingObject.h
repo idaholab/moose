@@ -70,11 +70,11 @@ public:
   /**
    * Insertion point called immediately before executing the RayTracingStudy.
    */
-  virtual void preExecuteStudy() {};
+  virtual void preExecuteStudy() {}
   /**
    * Insertion point called immediately after executing the RayTracingStudy.
    */
-  virtual void postExecuteStudy() {};
+  virtual void postExecuteStudy() {}
 
 protected:
   /**

@@ -29,7 +29,7 @@ public:
   static MooseEnum valueOptions() { return MooseEnum("value rate increment", "value"); }
 
   InterfaceQpUserObjectBase(const InputParameters & parameters);
-  virtual ~InterfaceQpUserObjectBase() {};
+  virtual ~InterfaceQpUserObjectBase() {}
   virtual void initialSetup() override;
   virtual void initialize() override {};
   virtual void execute() override;

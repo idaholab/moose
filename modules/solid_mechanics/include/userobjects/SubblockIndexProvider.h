@@ -21,7 +21,7 @@ using libMesh::Elem;
 class SubblockIndexProvider
 {
 public:
-  virtual ~SubblockIndexProvider() {};
+  virtual ~SubblockIndexProvider() {}
   /**
    * The index of subblock this element is on.
    */

@@ -72,7 +72,7 @@ class CompileParamWalker : public hit::Walker
 {
 public:
   typedef std::map<std::string, hit::Node *> ParamMap;
-  CompileParamWalker(ParamMap & map) : _map(map) {};
+  CompileParamWalker(ParamMap & map) : _map(map) {}
 
   virtual void
   walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override;

@@ -37,12 +37,12 @@ protected:
   /**
    * Function to compute nonlocal contribution to the residual at the current nodes
    */
-  virtual void computeNonlocalResidual() {};
+  virtual void computeNonlocalResidual() {}
 
   /**
    * Function to compute local contribution to the diagonal Jacobian at the current nodes
    */
-  virtual void computeLocalJacobian() {};
+  virtual void computeLocalJacobian() {}
 
   /**
    * Function to precalculate data which will be used in the derived classes

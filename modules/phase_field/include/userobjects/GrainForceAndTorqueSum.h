@@ -26,8 +26,8 @@ public:
   GrainForceAndTorqueSum(const InputParameters & parameters);
 
   virtual void initialize();
-  virtual void execute() {};
-  virtual void finalize() {};
+  virtual void execute() {}
+  virtual void finalize() {}
 
   virtual const std::vector<RealGradient> & getForceValues() const;
   virtual const std::vector<RealGradient> & getTorqueValues() const;
