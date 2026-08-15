@@ -10,6 +10,8 @@
 #include "PorousFlowDictator.h"
 #include "NonlinearSystem.h"
 
+#include "libmesh/enum_to_string.h"
+
 registerMooseObject("PorousFlowApp", PorousFlowDictator);
 
 InputParameters
@@ -183,4 +185,46 @@ bool
 PorousFlowDictator::isFV() const
 {
   return _is_fv;
+}
+
+void
+PorousFlowDictator::registerNodalVariable(const VariableName & var_name) const
+{
+  // Resolved here rather than passed in by the caller, so the type cannot disagree with the
+  // name.  getVariable rather than getFieldVar("porous_flow_vars", ...) because a variable read
+  // at the nodes need not be a PorousFlow variable: an AuxVariable cannot be one at all, yet a
+  // nodal AuxVariable is routinely read at the nodes.
+  const FEType & fe_type = _fe_problem.getVariable(0, var_name).feType();
+
+  // The first variable to be registered defines the type the rest must match
+  if (!_nodal_fe_type)
+    _nodal_fe_type = fe_type;
+
+  if (*_nodal_fe_type != fe_type)
+  {
+    std::string registered;
+    for (const auto & name : _nodal_fe_type_vars)
+      registered += (registered.empty() ? "'" : ", '") + name + "'";
+
+    mooseError("Nodal PorousFlow Materials read variables of more than one FE type at the nodes: '",
+               var_name,
+               "' is ",
+               feTypeName(fe_type),
+               ", but ",
+               feTypeName(*_nodal_fe_type),
+               " was already registered by ",
+               registered,
+               ".  Every variable read at the nodes must share an FE type, because nodal Materials "
+               "index their properties with a single node counter that must be a valid "
+               "degree-of-freedom index for all of them.");
+  }
+
+  _nodal_fe_type_vars.insert(var_name);
+}
+
+std::string
+PorousFlowDictator::feTypeName(const FEType & fe_type)
+{
+  return Utility::enum_to_string<Order>(fe_type.order) + " " +
+         Utility::enum_to_string<FEFamily>(fe_type.family);
 }

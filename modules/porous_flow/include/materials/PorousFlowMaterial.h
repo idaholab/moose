@@ -23,10 +23,12 @@
  * ordinary Materials) or a node (for nodal Materials).
  *
  * For the nodal Material case, the Material Properties are sized
- * to max(number of nodes, number of quadpoints).  Only "number of nodes"
- * of these will ever be computed and used: the remaining ones
- * (if any) exist just to make sure that the vectors are correctly
- * sized in MOOSE's copying operations (etc).
+ * to max(number of nodes, number of quadpoints).  Only nodalDofCount() of
+ * these will ever be computed and used - that is, the number of nodes
+ * carrying a degree of freedom of the variables that are read at the nodes,
+ * which is fewer than the number of nodes for a first-order variable on a
+ * second-order mesh.  The remaining ones (if any) exist just to make sure
+ * that the vectors are correctly sized in MOOSE's copying operations (etc).
  *
  * If number of quadpoints < number of nodes (eg for boundary elements)
  * care should be taken to store the required nodal information in
@@ -66,6 +68,33 @@ protected:
    * @return the nearest quadpoint
    */
   unsigned nearestQP(unsigned nodenum) const;
+
+  /**
+   * The values of a coupled variable for this Material to read: its
+   * degree-of-freedom values if this is a nodal Material and the variable is
+   * nodal, and its quadpoint values otherwise.  An elemental variable (or an
+   * uncoupled default) has no nodal degrees of freedom, so reading it by degree
+   * of freedom would run off the end of a much shorter array.
+   * @param var_name the name of the coupled variable
+   * @param comp the component of the coupled variable
+   */
+  const VariableValue & nodalOrQpValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * The number of nodes of the current element that carry a degree of freedom of
+   * the variables that nodal Materials read at the nodes.  This, not
+   * _current_elem->n_nodes(), is the number of nodal values that may safely be
+   * computed and consumed.
+   *
+   * libMesh numbers element nodes vertices-first and numbers a LAGRANGE
+   * variable's degrees of freedom to match, so looping 0 .. nodalDofCount() - 1
+   * visits exactly the nodes that carry a degree of freedom, in order.
+   *
+   * This equals _current_elem->n_nodes() for a consistent LAGRANGE
+   * discretisation, and is smaller for a first-order variable on a second-order
+   * mesh: 4 versus 10 on TET10, 8 versus 27 on HEX27.
+   */
+  unsigned int nodalDofCount() const;
 
   /// Whether the derived class holds nodal values
   const bool _nodal_material;
