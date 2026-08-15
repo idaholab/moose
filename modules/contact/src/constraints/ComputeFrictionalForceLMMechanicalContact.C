@@ -41,6 +41,10 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
       "Coupled function to evaluate friction with values from contact pressure and relative "
       "tangential velocities");
   params.addParam<Real>("c_t", 1e0, "Numerical parameter for tangential constraints");
+  params.addParam<Real>(
+      "epsilon",
+      1.0e-7,
+      "Minimum value of contact pressure that will trigger frictional enforcement");
   params.addRangeCheckedParam<Real>(
       "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   params.addRequiredParam<UserObjectName>("weighted_velocities_uo",
@@ -60,6 +64,7 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _primary_y_dot(adCoupledNeighborValueDot("disp_y")),
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
+    _epsilon(getParam<Real>("epsilon")),
     _mu(isParamValid("function_friction") ? std::numeric_limits<double>::quiet_NaN()
                                           : getParam<Real>("mu")),
     _function_friction(isParamValid("function_friction") ? &getFunction("function_friction")
@@ -215,12 +220,16 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
       {friction_lm_values[0] + c_t * *tangential_vel[0] * _dt,
        friction_lm_values[1] + c_t * *tangential_vel[1] * _dt}};
 
-  // Degree-two Hueber-Stadler-Wohlmuth friction residual (see MortarContactUtils.h). Its
-  // identity fallback at zero weight replaces the previous ad hoc PDASS gate on the raw,
-  // unaugmented contact_pressure, which could disagree with the augmented normal pressure that
-  // actually governs degeneracy of this expression.
-  const auto residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-      friction_lm_values, augmented_tangential_pressure, radius);
+  // Degree-two Hueber-Stadler-Wohlmuth friction residual (see MortarContactUtils.h), gated by
+  // the raw, unaugmented contact_pressure via epsilon so dofs transitioning between contact and
+  // separation fall back to the trivial identity residual rather than the full weight/radius
+  // expression.
+  const auto residual =
+      Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(friction_lm_values,
+                                                                    augmented_tangential_pressure,
+                                                                    radius,
+                                                                    contact_pressure,
+                                                                    ADReal(_epsilon));
   const ADReal dof_residual = residual[0];
   const ADReal dof_residual_dir = residual[1];
 
@@ -268,8 +277,12 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
       {friction_lm_value + c_t * tangential_vel * _dt}};
 
   // Degree-two Hueber-Stadler-Wohlmuth friction residual; see 3D path above for rationale.
-  const ADReal dof_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-      tangential_pressure, augmented_tangential_pressure, radius)[0];
+  const ADReal dof_residual =
+      Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(tangential_pressure,
+                                                                    augmented_tangential_pressure,
+                                                                    radius,
+                                                                    contact_pressure,
+                                                                    ADReal(_epsilon))[0];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
