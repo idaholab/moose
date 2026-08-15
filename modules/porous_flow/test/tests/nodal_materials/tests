@@ -1,0 +1,38 @@
+[Tests]
+  issues = '#33502'
+  design = 'porous_flow/porosity.md PorousFlowDictator.md'
+  [second_order_mesh]
+    type = CSVDiff
+    input = second_order_mesh.i
+    csvdiff = second_order_mesh_out.csv
+    requirement = 'The system shall evaluate nodal Material properties only at those nodes of an element that carry a degree of freedom of the PorousFlow variables, so that a first-order variable may be used on a second-order mesh.'
+  []
+  [elemental_reference]
+    type = CSVDiff
+    input = elemental_reference.i
+    csvdiff = elemental_reference_out.csv
+    requirement = 'The system shall read an elemental coupled variable at the quadpoints rather than at the nodes when it is used as a reference value by a nodal porosity Material, because an elemental variable has no nodal degrees of freedom.'
+    issues = '#33370'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
+  [mixed_order_mechanics]
+    type = CSVDiff
+    input = mixed_order_mechanics.i
+    csvdiff = mixed_order_mechanics_out.csv
+    requirement = 'The system shall permit second-order displacements alongside a first-order porepressure, since no Material reads the displacements at the nodes.'
+  []
+  [elemental_reference_chemistry]
+    type = CSVDiff
+    input = elemental_reference_chemistry.i
+    csvdiff = elemental_reference_chemistry_out.csv
+    requirement = 'The system shall read an elemental coupled variable at the quadpoints rather than at the nodes when it is used as a reference mineral concentration by a nodal porosity Material, because an elemental variable has no nodal degrees of freedom.'
+    issues = '#33370'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
+  [mixed_order_flow_variables]
+    type = RunException
+    input = mixed_order_flow_variables.i
+    expect_err = "read variables of more than one FE type at the nodes"
+    requirement = 'The system shall produce an error if two variables that nodal Materials read at the nodes have different FE types, because those Materials index their properties with a single node counter.'
+  []
+[]

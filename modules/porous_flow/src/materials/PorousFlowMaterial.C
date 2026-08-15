@@ -12,6 +12,7 @@
 #include "MaterialPropertyStorage.h"
 
 #include "libmesh/quadrature.h"
+#include "libmesh/fe_interface.h"
 
 #include <limits>
 
@@ -51,6 +52,14 @@ PorousFlowMaterial::initialSetup()
   if (!_nodal_material)
     return;
 
+  // Tell the Dictator the FE type of every variable this Material reads at the
+  // nodes, so that a single node count can be shared by all nodal Materials.
+  // Elemental coupled variables are read by quadpoint instead (see the isNodal
+  // guard in the derived classes) and so do not take part.
+  for (const auto * const var : getCoupledMooseVars())
+    if (var->isNodal())
+      _dictator.registerNodalVariable(var->name());
+
   _material_data.onlyResizeIfSmaller(true);
   auto & storage = _material_data.getMaterialPropertyStorage();
   if (!storage.hasStatefulProperties())
@@ -73,8 +82,8 @@ PorousFlowMaterial::initStatefulProperties(unsigned int n_points)
     // size the properties to max(number_of_nodes, number_of_quadpoints)
     sizeNodalProperties();
 
-    // compute the values for number_of_nodes
-    Material::initStatefulProperties(_current_elem->n_nodes());
+    // compute the values for each node that carries a degree of freedom
+    Material::initStatefulProperties(nodalDofCount());
   }
   else
     Material::initStatefulProperties(n_points);
@@ -83,9 +92,9 @@ PorousFlowMaterial::initStatefulProperties(unsigned int n_points)
 void
 PorousFlowMaterial::computeNodalProperties()
 {
-  const unsigned int numnodes = _current_elem->n_nodes();
+  const unsigned int numnodes = nodalDofCount();
 
-  // compute the values for all nodes
+  // compute the values for all nodes that carry a degree of freedom
   for (_qp = 0; _qp < numnodes; ++_qp)
     computeQpProperties();
 
@@ -99,7 +108,7 @@ PorousFlowMaterial::computeNodalProperties()
   {
     MaterialProperties & props = _material_data.props();
 
-    // Copy from qp = _current_elem->n_nodes() - 1 to qp = _qrule->n_points() -1
+    // Copy from qp = nodalDofCount() - 1 to qp = _qrule->n_points() - 1
     for (const auto & prop_id : _supplied_prop_ids)
       for (unsigned int qp = numnodes; qp < _qrule->n_points(); ++qp)
         props[prop_id].qpCopy(qp, props[prop_id], numnodes - 1);
@@ -154,6 +163,46 @@ PorousFlowMaterial::sizeNodalProperties()
     for (const auto prop_id : _supplied_old_prop_ids)
       if (_material_data.props(state).hasValue(prop_id))
         _material_data.props(state)[prop_id].resize(new_size);
+}
+
+const VariableValue &
+PorousFlowMaterial::nodalOrQpValue(const std::string & var_name, unsigned int comp)
+{
+  const bool is_nodal = isCoupled(var_name) ? getFieldVar(var_name, comp)->isNodal() : false;
+  return (_nodal_material && is_nodal) ? coupledDofValues(var_name, comp)
+                                       : coupledValue(var_name, comp);
+}
+
+unsigned int
+PorousFlowMaterial::nodalDofCount() const
+{
+  // If no nodal Material reads any variable at the nodes then there is no short
+  // array to overrun, and every node is visited as it always has been
+  const auto & fe_type = _dictator.nodalFEType();
+  if (!fe_type)
+    return _current_elem->n_nodes();
+
+  const auto num_dofs = libMesh::FEInterface::n_dofs(*fe_type, _current_elem);
+
+  mooseAssert(num_dofs <= _current_elem->n_nodes(),
+              "A nodal Material would visit " << num_dofs << " nodes of an element that has only "
+                                              << _current_elem->n_nodes());
+
+  // Everything here rests on libMesh numbering element nodes vertices-first and
+  // numbering a LAGRANGE variable's degrees of freedom to match, so that degree
+  // of freedom i lives at node i and looping 0 .. num_dofs - 1 visits exactly
+  // the nodes that carry one.  That is a convention rather than something the
+  // code enforces, and an unchecked convention of precisely this kind produced
+  // the out-of-bounds read this count exists to prevent, so check it.
+  mooseAssert(fe_type->family != libMesh::LAGRANGE || fe_type->order != libMesh::FIRST ||
+                  num_dofs == _current_elem->n_vertices(),
+              "First-order LAGRANGE has "
+                  << num_dofs << " degrees of freedom on an element with "
+                  << _current_elem->n_vertices()
+                  << " vertices, so the assumption that they sit on the vertices, in order, does "
+                     "not hold for this element type");
+
+  return num_dofs;
 }
 
 unsigned

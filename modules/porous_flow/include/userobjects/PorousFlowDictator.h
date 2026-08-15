@@ -12,6 +12,9 @@
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
 
+#include <optional>
+#include <set>
+
 /**
  * This holds maps between the nonlinear variables
  * used in a PorousFlow simulation and the
@@ -160,6 +163,37 @@ public:
    */
   void usePermDerivs(bool flag) const { _perm_derivs = flag; };
 
+  /**
+   * Register a variable that a nodal Material reads by degree of freedom.  Every such variable
+   * must share an FE type, because nodal Materials index their properties with a single node
+   * counter that has to be a valid degree-of-freedom index for all of them at once.
+   *
+   * Registration is shared through the Dictator rather than resolved per-Material so that
+   * Materials which read no variable at the nodes, such as the porosity Materials, still index
+   * their properties the same way as the Materials that feed them.
+   *
+   * The FE type is looked up here rather than passed in, so that it cannot disagree with the
+   * name.  Note the lookup must be the general one: a variable read at the nodes need not be a
+   * PorousFlow variable, and an AuxVariable cannot be one at all (see the constructor), yet a
+   * nodal AuxVariable is routinely read at the nodes.
+   *
+   * @param var_name the name of the variable that is read at the nodes
+   */
+  void registerNodalVariable(const VariableName & var_name) const;
+
+  /// A human-readable name for an FE type, eg "FIRST LAGRANGE", for error messages
+  static std::string feTypeName(const libMesh::FEType & fe_type);
+
+  /**
+   * The FE type shared by every variable that nodal Materials read by degree of
+   * freedom, or unset if no nodal Material reads any variable that way.
+   *
+   * Every registration happens in a nodal Material's initialSetup(), which the
+   * framework completes before any Material property is computed, so this is
+   * fixed by the time anything reads it.
+   */
+  const std::optional<libMesh::FEType> & nodalFEType() const { return _nodal_fe_type; }
+
 protected:
   /// Number of PorousFlow variables
   const unsigned int _num_variables;
@@ -183,6 +217,13 @@ protected:
   mutable bool _perm_derivs;
 
 private:
+  /// FE type shared by the variables that nodal Materials read by DOF; see registerNodalVariable
+  mutable std::optional<libMesh::FEType> _nodal_fe_type;
+
+  /// Names of the variables that have registered _nodal_fe_type, used to report a disagreement.
+  /// A set because the same variable is typically read at the nodes by several Materials
+  mutable std::set<VariableName> _nodal_fe_type_vars;
+
   /// Whether the porous_flow_vars all have the same fe_type
   bool _consistent_fe_type;
 
