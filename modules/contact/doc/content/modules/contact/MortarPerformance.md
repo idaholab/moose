@@ -168,7 +168,7 @@ The recommended PETSc options for use with `NodeFaceConstraint` based contact ar
                         -ksp_gmres_restart'
   petsc_options_value = 'asm lu 20 101'
   ...
-[../]
+[]
 ```
 
 ## Scaling effects

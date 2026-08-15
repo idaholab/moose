@@ -20,7 +20,7 @@ $P$ is the penalty supplied in the parameter [!param](/InterfaceKernels/PenaltyI
 
 ## Example Input File Syntax
 
-!listing test/tests/interfacekernels/hybrid/interface.i start=[./penalty] end=[../] include-end=true
+!listing test/tests/interfacekernels/hybrid/interface.i start=[penalty] end=[] include-end=true
 
 !syntax parameters /InterfaceKernels/PenaltyInterfaceDiffusion
 

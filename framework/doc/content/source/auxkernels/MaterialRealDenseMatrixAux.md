@@ -20,7 +20,7 @@ do support automatic differentiation, to auxiliary variables, the derivatives wi
 In this example, the `MaterialRealDenseMatrixAux` is used to examine the first row, first column element of
 a matrix material property.
 
-!listing test/tests/materials/types/test.i block=AuxKernels start=[./densemat00] end=[./densemat01]
+!listing test/tests/materials/types/test.i block=AuxKernels start=[densemat00] end=[densemat01]
 
 !syntax parameters /AuxKernels/MaterialRealDenseMatrixAux
 

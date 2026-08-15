@@ -28,7 +28,7 @@ corresponding to the boundary subset $\partial \Omega_N$ via the
 
 ## Example Input Syntax
 
-!listing test/tests/controls/time_periods/bcs/bcs_integrated.i start=[./right2] end=[../] include-end=true
+!listing test/tests/controls/time_periods/bcs/bcs_integrated.i start=[right2] end=[] include-end=true
 
 !syntax parameters /BCs/FunctionNeumannBC
 
