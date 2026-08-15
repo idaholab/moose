@@ -44,13 +44,19 @@ TEST(GeometricPredicatesTest, collinearIsExactlyZero)
 {
   initPredicates();
 
+  // The volatile intermediates force each operation to round to double exactly once, no matter
+  // how this test file itself is compiled: a compiler defaulting to fast math (Intel's icx) or
+  // contracting into FMA (GCC and Clang on aarch64) could otherwise fold or fuse the textbook
+  // determinant into something more exact, and the point of this control is its rounding.
   auto naive_orient2d = [](const double * pa, const double * pb, const double * pc)
   {
-    const double dbx = pb[0] - pa[0];
-    const double dby = pb[1] - pa[1];
-    const double dcx = pc[0] - pa[0];
-    const double dcy = pc[1] - pa[1];
-    return dbx * dcy - dby * dcx;
+    volatile double dbx = pb[0] - pa[0];
+    volatile double dby = pb[1] - pa[1];
+    volatile double dcx = pc[0] - pa[0];
+    volatile double dcy = pc[1] - pa[1];
+    volatile double left = dbx * dcy;
+    volatile double right = dby * dcx;
+    return left - right;
   };
 
   const double two_53 = 9007199254740992.0;

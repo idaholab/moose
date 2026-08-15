@@ -198,8 +198,12 @@ pcre%.$(obj-suffix) : pcre%.c | $$(prebuild)
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-# The adaptive precision predicates are exact only without FMA contraction, and GCC does not honor
-# the #pragma STDC FP_CONTRACT in predicates.c, so the flag has to come from here.
+# The adaptive precision predicates are exact only when every operation rounds to double exactly
+# once: no FMA contraction, no reassociation, no other value-changing "fast math".  GCC does not
+# honor the #pragma STDC FP_CONTRACT in predicates.c, and Intel's icx defaults to a fast
+# floating point model, so both have to be overridden here: -fno-fast-math restores a value-safe
+# model (a no-op on GCC and Clang, which are value-safe by default), and -ffp-contract=off then
+# turns off the contraction that even a value-safe model permits.
 # The path is spelled out because a bare predicates% stem would have to match an empty substring,
 # which GNU make does not promise to do.
 # Like the pcre rule above, -w keeps warnings-as-errors builds out of vendored code: GCC warns
@@ -208,7 +212,7 @@ pcre%.$(obj-suffix) : pcre%.c | $$(prebuild)
 %/predicates/src/predicates.$(obj-suffix) : %/predicates/src/predicates.c | $$(prebuild)
 	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -ffp-contract=off -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -fno-fast-math -ffp-contract=off -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c | $$(prebuild)
 	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
