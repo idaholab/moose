@@ -5,15 +5,15 @@ directly in an input file, but indirectly via input file syntax like so:
 
 ```
 [Components]
-  [./compA]
-  [../]
+  [compA]
+  []
 
-  [./group]
-    [./comp1]
-    [../]
-    [./comp2]
-    [../]
-  [../]
+  [group]
+    [comp1]
+    []
+    [comp2]
+    []
+  []
 []
 ```
 

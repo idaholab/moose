@@ -20,10 +20,10 @@ The number of rows displayed in the table is controlled by the Console parameter
 
 ```
 [Outputs]
-  [./console]
+  [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []
 ```
 

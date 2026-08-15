@@ -27,7 +27,7 @@ outward unit normal to $\partial \Omega_N$.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/ad_1d_neumann/1d_neumann.i start=[./right] end=[../] include-end=true
+!listing test/tests/bcs/ad_1d_neumann/1d_neumann.i start=[right] end=[] include-end=true
 
 !syntax parameters /BCs/ADNeumannBC
 

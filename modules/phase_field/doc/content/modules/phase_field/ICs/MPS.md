@@ -74,11 +74,11 @@ The [`PolycrystalVoronoi`](/PolycrystalVoronoi.md) can read grain centroids from
 
 ```text
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     grain_num = 5
     file_name = 'grains.txt'
-  [../]
+  []
 []
 ```
 

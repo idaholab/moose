@@ -45,9 +45,9 @@ It can be applied to the whole domain using a single subblock
 
 ```
 [Physics/SolidMechanics/GlobalStrain]
-  [./all]
+  [all]
     ...
-  [../]
+  []
 []
 ```
 
@@ -55,12 +55,12 @@ or multiple subblocks can be used to apply block restrictions to the objects
 
 ```
 [Physics/SolidMechanics/GlobalStrain]
-  [./block_a]
+  [block_a]
     ...
-  [../]
-  [./block_b]
+  []
+  [block_b]
     ...
-  [../]
+  []
 []
 ```
 
