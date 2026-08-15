@@ -7,30 +7,30 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./c_dot]
+  [c_dot]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./c_dot_elem]
+  [c_dot_elem]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./coupled_dot]
+  [coupled_dot]
     type = DotCouplingAux
     variable = c_dot
     v = c
   [../]
-  [./coupled_dot_elem]
+  [coupled_dot_elem]
     type = DotCouplingAux
     variable = c_dot_elem
     v = c
@@ -38,7 +38,7 @@
 []
 
 [ICs]
-  [./centered_gauss_func]
+  [centered_gauss_func]
     type = FunctionIC
     variable = c
     function = gaussian_1d
@@ -46,26 +46,26 @@
 []
 
 [Functions]
-  [./gaussian_1d]
+  [gaussian_1d]
     type = ParsedFunction
     expression = exp(-x*x/2.0/1.0/1.0)
   [../]
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = c
   [../]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./auto]
+  [Periodic]
+    [auto]
       variable = c
       auto_direction = 'x'
     [../]

@@ -17,23 +17,23 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     initial_condition = 580.0
   [../]
 []
 
 [Functions]
-  [./temp]
+  [temp]
     type = PiecewiseLinear
     x = '0   1   2'
     y = '580 580 680'
   [../]
-  [./disp_x]
+  [disp_x]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 2e-6'
@@ -43,7 +43,7 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      [./ps]
+      [ps]
         planar_formulation = PLANE_STRAIN
         strain = SMALL
         incremental = true
@@ -55,7 +55,7 @@
 []
 
 [AuxKernels]
-  [./temp]
+  [temp]
     type = FunctionAux
     variable = temp
     function = temp
@@ -64,13 +64,13 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     boundary = 1
     value = 0
     variable = disp_x
   [../]
-  [./disp_x]
+  [disp_x]
     type = FunctionDirichletBC
     boundary = 2
     function = disp_x
@@ -79,13 +79,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3600
     poissons_ratio = 0.2
   [../]
 
-  [./thermal_strain]
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-8
     temperature = temp
@@ -93,7 +93,7 @@
     eigenstrain_name = eigenstrain
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeStrainIncrementBasedStress
   [../]
 []

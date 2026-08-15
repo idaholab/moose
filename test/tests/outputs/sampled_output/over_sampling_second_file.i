@@ -9,12 +9,12 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = t*((x*x)+(y*y))
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = -4+(x*x+y*y)
   [../]
@@ -23,24 +23,24 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
   active = 'ie diff ffn'
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -48,7 +48,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '1 2 4'
@@ -68,7 +68,7 @@
 
 [Outputs]
   file_base = out_wedge
-  [./oversample]
+  [oversample]
     type = Exodus
     file_base = out_wedge_oversample
     file = wedge6_mesh.e

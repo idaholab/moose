@@ -15,20 +15,20 @@
 []
 
 [Variables]
-  [./m]
+  [m]
   [../]
 []
 
 [Kernels]
-  [./diff_m]
+  [diff_m]
     type = HeatConduction
     variable = m
   [../]
-  [./time_diff_m]
+  [time_diff_m]
     type = HeatConductionTimeDerivative
     variable = m
   [../]
-  [./source_m]
+  [source_m]
     type = BodyForce
     variable = m
     value = 100
@@ -36,7 +36,7 @@
 []
 
 [Materials]
-  [./Impervium]
+  [Impervium]
     type = GenericConstantMaterial
     prop_names =  'thermal_conductivity specific_heat density'
     prop_values = '0.00001              50.0          100.0' # W/(cm K), J/(g K), g/cm^3
@@ -44,7 +44,7 @@
 []
 
 [ICs]
-  [./start_m]
+  [start_m]
     type = ConstantIC
     value = 2
     variable = m
@@ -52,13 +52,13 @@
 []
 
 [BCs]
-  [./interface_value]
+  [interface_value]
     type = FXValueBC
     variable = m
     boundary = right
     function = FX_Basis_Value_Main
   [../]
-  [./interface_flux]
+  [interface_flux]
     type = FXFluxBC
     boundary = right
     variable = m
@@ -67,14 +67,14 @@
 []
 
 [Functions]
-  [./FX_Basis_Value_Main]
+  [FX_Basis_Value_Main]
     type = FunctionSeries
     series_type = Cartesian
     orders = '4'
     physical_bounds = '0.0 10'
     y = Legendre
   [../]
-  [./FX_Basis_Flux_Main]
+  [FX_Basis_Flux_Main]
     type = FunctionSeries
     series_type = Cartesian
     orders = '7'
@@ -84,7 +84,7 @@
 []
 
 [UserObjects]
-  [./FX_Flux_UserObject_Main]
+  [FX_Flux_UserObject_Main]
     type = FXBoundaryFluxUserObject
     function = FX_Basis_Flux_Main
     variable = m
@@ -94,18 +94,18 @@
 []
 
 [Postprocessors]
-  [./average_interface_value]
+  [average_interface_value]
     type = SideAverageValue
     variable = m
     boundary = right
   [../]
-  [./total_flux]
+  [total_flux]
     type = SideDiffusiveFluxIntegral
     variable = m
     boundary = right
     diffusivity = thermal_conductivity
   [../]
-  [./picard_iterations]
+  [picard_iterations]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   [../]
@@ -130,7 +130,7 @@
 []
 
 [MultiApps]
-  [./FXTransferApp]
+  [FXTransferApp]
     type = TransientMultiApp
     input_files = sub.i
     sub_cycling = true
@@ -138,19 +138,19 @@
 []
 
 [Transfers]
-  [./FluxToSub]
+  [FluxToSub]
     type = MultiAppFXTransfer
     to_multi_app = FXTransferApp
     this_app_object_name = FX_Flux_UserObject_Main
     multi_app_object_name = FX_Basis_Flux_Sub
   [../]
-  [./ValueToMe]
+  [ValueToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Value_Main
     multi_app_object_name = FX_Value_UserObject_Sub
   [../]
-  [./FluxToMe]
+  [FluxToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Flux_Main

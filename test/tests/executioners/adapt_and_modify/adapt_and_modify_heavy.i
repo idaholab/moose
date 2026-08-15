@@ -10,30 +10,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./elem]
+  [elem]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./elem]
+  [elem]
     type = UniqueIDAux
     variable = elem
     execute_on = timestep_begin
@@ -41,13 +41,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -56,12 +56,12 @@
 []
 
 [UserObjects]
-  [./rh_uo]
+  [rh_uo]
     type = RandomHitUserObject
     execute_on = timestep_begin
     num_hits = 1
   [../]
-  [./rhsm]
+  [rhsm]
     type = RandomHitSolutionModifier
     execute_on = custom
     modify = u
@@ -81,24 +81,24 @@
 
 [Adaptivity]
   marker = rhm # Switch to combo to get the effect of both
-  [./Indicators]
-    [./gji]
+  [Indicators]
+    [gji]
       type = GradientJumpIndicator
       variable = u
     [../]
   [../]
-  [./Markers]
-    [./rhm]
+  [Markers]
+    [rhm]
       type = RandomHitMarker
       random_hits = rh_uo
     [../]
-    [./efm]
+    [efm]
       type = ErrorFractionMarker
       coarsen = 0.2
       indicator = gji
       refine = 0.8
     [../]
-    [./combo]
+    [combo]
       type = ComboMarker
       markers = 'efm rhm'
     [../]

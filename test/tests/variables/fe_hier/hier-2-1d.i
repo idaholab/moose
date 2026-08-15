@@ -8,21 +8,21 @@
 []
 
 [Functions]
-  [./bc_fnl]
+  [bc_fnl]
     type = ParsedFunction
     expression = -2*x
   [../]
-  [./bc_fnr]
+  [bc_fnr]
     type = ParsedFunction
     expression = 2*x
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = -2+x*x
   [../]
 
-  [./solution]
+  [solution]
     type = ParsedGradFunction
     expression = x*x
     grad_x = 2*x
@@ -30,7 +30,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = HIERARCHIC
   [../]
@@ -38,17 +38,17 @@
 
 [Kernels]
   active = 'diff forcing reaction'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -56,13 +56,13 @@
 []
 
 [BCs]
-  [./bc_left]
+  [bc_left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = bc_fnl
   [../]
-  [./bc_right]
+  [bc_right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
@@ -71,25 +71,25 @@
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
   [../]
 
-  [./h]
+  [h]
     type = AverageElementSize
   [../]
 
-  [./L2error]
+  [L2error]
     type = ElementL2Error
     variable = u
     function = solution
   [../]
-  [./H1error]
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
   [../]
-  [./H1Semierror]
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution

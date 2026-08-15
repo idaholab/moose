@@ -10,23 +10,23 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./w]
+  [w]
   [../]
-  [./eta1]
+  [eta1]
   [../]
-  [./eta2]
+  [eta2]
   [../]
-  [./eta3]
+  [eta3]
   [../]
-  [./eta0]
+  [eta0]
   [../]
 []
 
 [ICs]
 
-  [./IC_eta2]
+  [IC_eta2]
     x1 = 0
     y1 = 15
     x2 = 30
@@ -37,7 +37,7 @@
     variable = eta2
     int_width = 0
   [../]
-  [./IC_eta3]
+  [IC_eta3]
     x1 = 15
     y1 = 0
     x2 = 30
@@ -48,7 +48,7 @@
     variable = eta3
     int_width = 0
   [../]
-  [./IC_eta4]
+  [IC_eta4]
     x1 = 0
     y1 = 0
     x2 = 15
@@ -59,7 +59,7 @@
     variable = eta0
     int_width = 0
   [../]
-  [./IC_c]
+  [IC_c]
     x1 = 15
     y1 = 15
     radius = 8.0
@@ -69,7 +69,7 @@
     type = SmoothCircleIC
     int_width = 3.0
   [../]
-  [./IC_eta1]
+  [IC_eta1]
     x1 = 15
     y1 = 15
     radius = 8.0
@@ -86,12 +86,12 @@
 # this test to be easily turned in to a working example
 
 #[Kernels]
-#  [./c_dot]
+#  [c_dot]
 #    type = CoupledTimeDerivative
 #    variable = w
 #    v = c
 #  [../]
-#  [./c_res]
+#  [c_res]
 #    type = SplitCHParsed
 #    variable = c
 #    f_name = F
@@ -99,87 +99,87 @@
 #    w = w
 #    coupled_variables = 'eta1 eta2 eta3 eta0'
 #  [../]
-#  [./w_res]
+#  [w_res]
 #    # coupled_variables = 'c'
 #    type = SplitCHWRes
 #    variable = w
 #    mob_name = M
 #  [../]
-#  [./AC1_bulk]
+#  [AC1_bulk]
 #    type = AllenCahn
 #    variable = eta1
 #    f_name = F
 #    coupled_variables = 'c eta2 eta3 eta0'
 #  [../]
-#  [./AC1_int]
+#  [AC1_int]
 #    type = ACInterface
 #    variable = eta1
 #    kappa_name = kappa_s
 #  [../]
-#  [./e1_dot]
+#  [e1_dot]
 #    type = TimeDerivative
 #    variable = eta1
 #  [../]
-#  [./AC2_bulk]
+#  [AC2_bulk]
 #    type = AllenCahn
 #    variable = eta2
 #    f_name = F
 #    coupled_variables = 'c eta1 eta3 eta0'
 #  [../]
-#  [./AC2_int]
+#  [AC2_int]
 #    type = ACInterface
 #    variable = eta2
 #  [../]
-#  [./e2_dot]
+#  [e2_dot]
 #    type = TimeDerivative
 #    variable = eta2
 #  [../]
-#  [./AC3_bulk]
+#  [AC3_bulk]
 #    type = AllenCahn
 #    variable = eta3
 #    f_name = F
 #    coupled_variables = 'c eta2 eta1 eta0'
 #  [../]
-#  [./AC3_int]
+#  [AC3_int]
 #    type = ACInterface
 #    variable = eta3
 #  [../]
-#  [./e3_dot]
+#  [e3_dot]
 #    type = TimeDerivative
 #    variable = eta3
 #  [../]
-#  [./AC4_bulk]
+#  [AC4_bulk]
 #    type = AllenCahn
 #    variable = eta0
 #    f_name = F
 #    coupled_variables = 'c eta2 eta3 eta1'
 #  [../]
-#  [./AC4_int]
+#  [AC4_int]
 #    type = ACInterface
 #    variable = eta0
 #  [../]
-#  [./e4_dot]
+#  [e4_dot]
 #    type = TimeDerivative
 #    variable = eta0
 #  [../]
 #[]
 
 [Materials]
-  [./ha_test]
+  [ha_test]
     type = SwitchingFunctionMultiPhaseMaterial
     h_name = ha
     all_etas = 'eta0 eta1 eta2 eta3'
     phase_etas = 'eta1'
     outputs = exodus
   [../]
-  [./hb_test]
+  [hb_test]
     type = SwitchingFunctionMultiPhaseMaterial
     h_name = hb
     all_etas = 'eta0 eta1 eta2 eta3'
     phase_etas = 'eta0 eta2 eta3'
     outputs = exodus
   [../]
-  #[./ha]
+  #[ha]
   #  type = DerivativeParsedMaterial
   #  coupled_variables = 'eta1 eta2 eta3 eta0'
   #  property_name = ha_parsed
@@ -187,7 +187,7 @@
   #  derivative_order = 2
   #  outputs = exodus
   #[../]
-  #[./hb]
+  #[hb]
   #  type = DerivativeParsedMaterial
   #  coupled_variables = 'eta1 eta2 eta3 eta0'
   #  property_name = hb_parsed
@@ -196,7 +196,7 @@
   #  outputs = exodus
   #[../]
 
-  #[./FreeEng]
+  #[FreeEng]
   #  type = DerivativeParsedMaterial
   #  coupled_variables = 'c eta1 eta2 eta3 eta0'
   #  property_name = F
@@ -208,7 +208,7 @@
   #  ;f4:=z*s*(eta1^2*eta2^2+eta1^2*eta3^2+eta1^2*eta0^2)+g*(eta2^2*eta3^2+eta2^2*eta0^2+eta3^2*eta0^2);f:=1/4+e*f1+d*f2+h*(f3+f4);f'
   #  derivative_order = 2
   #[../]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     prop_names = 'kappa_c kappa_s kappa_op L M'
     prop_values = '0 3 3 1.0 1.0'

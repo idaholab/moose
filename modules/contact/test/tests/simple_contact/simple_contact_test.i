@@ -14,7 +14,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     generate_output = 'stress_xx'
@@ -22,7 +22,7 @@
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 3
     secondary = 2
     penalty = 1e5
@@ -31,42 +31,42 @@
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
 
-  [./left_y]
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
 
-  [./left_z]
+  [left_z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
   [../]
 
-  [./right_x]
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = -0.0001
   [../]
 
-  [./right_y]
+  [right_y]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
   [../]
 
-  [./right_z]
+  [right_z]
     type = DirichletBC
     variable = disp_z
     boundary = 4
@@ -75,13 +75,13 @@
 []
 
 [Materials]
-  [./stiffStuff]
+  [stiffStuff]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff_stress]
+  [stiffStuff_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
@@ -106,7 +106,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
   [../]

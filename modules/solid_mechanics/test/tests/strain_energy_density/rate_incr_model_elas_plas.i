@@ -17,20 +17,20 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./rampConstantUp]
+  [rampConstantUp]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = -100
   [../]
-  [./ramp_disp_y]
+  [ramp_disp_y]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 6.8e-6 1.36e-5'
@@ -38,7 +38,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = SMALL
     add_variables = true
     incremental = true
@@ -48,7 +48,7 @@
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
@@ -57,21 +57,21 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     preset = false
     boundary = 'left'
     value = 0.0
   [../]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = 'bottom'
     value = 0.0
   [../]
-  [./top_disp]
+  [top_disp]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
@@ -81,21 +81,21 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 30e+6
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'isoplas'
   [../]
-  [./isoplas]
+  [isoplas]
     type = IsotropicPlasticityStressUpdate
     yield_stress = 1e2
     hardening_constant = 0.0
   [../]
-  [./strain_energy_density]
+  [strain_energy_density]
     type = StrainEnergyDensity
     incremental = true
   [../]
@@ -123,64 +123,64 @@
 []
 
 [Postprocessors]
-  [./epxx]
+  [epxx]
     type = ElementalVariableValue
     variable = elastic_strain_xx
     elementid = 0
   [../]
-  [./epyy]
+  [epyy]
     type = ElementalVariableValue
     variable = elastic_strain_yy
     elementid = 0
   [../]
-  [./epzz]
+  [epzz]
     type = ElementalVariableValue
     variable = elastic_strain_zz
     elementid = 0
   [../]
-  [./eplxx]
+  [eplxx]
     type = ElementalVariableValue
     variable = plastic_strain_xx
     elementid = 0
   [../]
-  [./eplyy]
+  [eplyy]
     type = ElementalVariableValue
     variable = plastic_strain_yy
     elementid = 0
   [../]
-  [./eplzz]
+  [eplzz]
     type = ElementalVariableValue
     variable = plastic_strain_zz
     elementid = 0
   [../]
-  [./etxx]
+  [etxx]
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 0
   [../]
-  [./etyy]
+  [etyy]
     type = ElementalVariableValue
     variable = strain_yy
     elementid = 0
   [../]
-  [./etzz]
+  [etzz]
     type = ElementalVariableValue
     variable = strain_zz
     elementid = 0
   [../]
-  [./sigxx]
+  [sigxx]
     type = ElementAverageValue
     variable = stress_xx
   [../]
-  [./sigyy]
+  [sigyy]
     type = ElementAverageValue
     variable = stress_yy
   [../]
-  [./sigzz]
+  [sigzz]
     type = ElementAverageValue
     variable = stress_zz
   [../]
-  [./SED]
+  [SED]
     type = ElementAverageValue
     variable = SED
   [../]

@@ -5,14 +5,14 @@
     nx = 10
     xmax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
   [../]
-  [./interface]
+  [interface]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = '0'
@@ -22,14 +22,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = '0'
   [../]
 
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     block = '1'
@@ -37,13 +37,13 @@
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = CoeffParamDiffusion
     variable = u
     D = 4
     block = 0
   [../]
-  [./diff_v]
+  [diff_v]
     type = CoeffParamDiffusion
     variable = v
     D = 2
@@ -53,7 +53,7 @@
 
 [InterfaceKernels]
   active = 'interface'
-  [./interface]
+  [interface]
     type = InterfaceDiffusion
     variable = u
     neighbor_var = v
@@ -61,7 +61,7 @@
     D = 'D'
     D_neighbor = 'D'
   [../]
-  [./penalty_interface]
+  [penalty_interface]
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
@@ -72,19 +72,19 @@
 
 [BCs]
   active = 'left right middle'
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
     value = 0
   [../]
-  [./middle]
+  [middle]
     type = MatchedValueBC
     variable = v
     boundary = 'primary0_interface'
@@ -93,18 +93,18 @@
 []
 
 [Materials]
-  [./stateful]
+  [stateful]
     type = StatefulMaterial
     initial_diffusivity = 1
     boundary = primary0_interface
   [../]
-  [./block0]
+  [block0]
     type = GenericConstantMaterial
     block = '0'
     prop_names = 'D'
     prop_values = '4'
   [../]
-  [./block1]
+  [block1]
     type = GenericConstantMaterial
     block = '1'
     prop_names = 'D'
@@ -113,7 +113,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

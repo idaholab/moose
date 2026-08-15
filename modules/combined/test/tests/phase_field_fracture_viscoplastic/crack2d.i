@@ -9,9 +9,9 @@
 []
 
 [Physics]
-  [./SolidMechanics]
-    [./QuasiStatic]
-      [./All]
+  [SolidMechanics]
+    [QuasiStatic]
+      [All]
         add_variables = true
         strain = Finite
         additional_generate_output = stress_yy
@@ -21,9 +21,9 @@
   [../]
 []
 [Modules]
-  [./PhaseField]
-    [./Nonconserved]
-      [./c]
+  [PhaseField]
+    [Nonconserved]
+      [c]
         free_energy = E_el
         mobility = L
         kappa = kappa_op
@@ -33,29 +33,29 @@
 []
 
 [AuxVariables]
-  [./resid_x]
+  [resid_x]
   [../]
-  [./resid_y]
+  [resid_y]
   [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./peeq]
+  [peeq]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./solid_x]
+  [solid_x]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
     component = 0
     c = c
     use_displaced_mesh = true
   [../]
-  [./solid_y]
+  [solid_y]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
@@ -65,7 +65,7 @@
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     variable = stress_yy
     rank_two_tensor = stress
@@ -73,7 +73,7 @@
     index_i = 1
     execute_on = timestep_end
   [../]
-  [./peeq]
+  [peeq]
     type = MaterialRealAux
     variable = peeq
     property = ep_eqv
@@ -82,19 +82,19 @@
 []
 
 [BCs]
-  [./ydisp]
+  [ydisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = '0.0001*t'
   [../]
-  [./yfix]
+  [yfix]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0
   [../]
-  [./xfix]
+  [xfix]
     type = DirichletBC
     variable = disp_x
     boundary = '1 2'
@@ -103,53 +103,53 @@
 []
 
 [UserObjects]
-  [./flowstress]
+  [flowstress]
     type = HEVPLinearHardening
     yield_stress = 300
     slope = 1000
     intvar_prop_name = ep_eqv
   [../]
-  [./flowrate]
+  [flowrate]
     type = HEVPFlowRatePowerLawJ2
     reference_flow_rate = 0.0001
     flow_rate_exponent = 10.0
     flow_rate_tol = 1
     strength_prop_name = flowstress
   [../]
-  [./ep_eqv]
+  [ep_eqv]
      type = HEVPEqvPlasticStrain
      intvar_rate_prop_name = ep_eqv_rate
   [../]
-  [./ep_eqv_rate]
+  [ep_eqv_rate]
      type = HEVPEqvPlasticStrainRate
      flow_rate_prop_name = flowrate
   [../]
 []
 
 [Materials]
-  [./pfbulkmat]
+  [pfbulkmat]
     type = GenericConstantMaterial
     prop_names = 'l visco'
     prop_values = '0.08 1'
   [../]
-  [./pfgc]
+  [pfgc]
     type = GenericFunctionMaterial
     prop_names = 'gc_prop'
     prop_values = '1.0e-3'
   [../]
-  [./define_mobility]
+  [define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
     property_name = L
     expression = '1/(gc_prop * visco)'
   [../]
-  [./define_kappa]
+  [define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
     property_name = kappa_op
     expression = 'gc_prop * l'
   [../]
-  [./viscop_damage]
+  [viscop_damage]
     type = HyperElasticPhaseFieldIsoDamage
     resid_abs_tol = 1e-18
     resid_rel_tol = 1e-8
@@ -164,7 +164,7 @@
     c = c
     F_name = E_el
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
@@ -172,12 +172,12 @@
 []
 
 [Postprocessors]
-  [./resid_x]
+  [resid_x]
     type = NodalSum
     variable = resid_x
     boundary = 2
   [../]
-  [./resid_y]
+  [resid_y]
     type = NodalSum
     variable = resid_y
     boundary = 2
@@ -185,7 +185,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

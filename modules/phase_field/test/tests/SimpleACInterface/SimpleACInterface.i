@@ -20,10 +20,10 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 25.0
       y1 = 25.0
@@ -36,18 +36,18 @@
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
   [../]
 
-  [./ACBulk]
+  [ACBulk]
     type = AllenCahn
     variable = eta
     f_name = F
   [../]
 
-  [./ACInterface]
+  [ACInterface]
     type = SimpleACInterface
     variable = eta
     kappa_name = 1
@@ -55,14 +55,14 @@
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     block = 0
     prop_names  = 'L'
     prop_values = '1'
   [../]
 
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     block = 0
     property_name = F

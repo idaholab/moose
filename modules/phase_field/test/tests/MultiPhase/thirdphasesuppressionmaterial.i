@@ -12,28 +12,28 @@
 []
 
 [AuxVariables]
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       variable = eta1
       function = x
     [../]
   [../]
-  [./eta2]
+  [eta2]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       variable = eta2
       function = 1-x
     [../]
   [../]
-  [./eta3]
+  [eta3]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       variable = eta3
       function = y
@@ -42,7 +42,7 @@
 []
 
 [Materials]
-  [./suppressionbarrier]
+  [suppressionbarrier]
     type = ThirdPhaseSuppressionMaterial
     etas = 'eta1 eta2 eta3'
     function_name = g

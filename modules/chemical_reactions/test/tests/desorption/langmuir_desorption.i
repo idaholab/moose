@@ -8,21 +8,21 @@
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
   [../]
-  [./conc]
+  [conc]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = ConstantIC
     variable = pressure
     value = 1.0
   [../]
-  [./conc_ic]
+  [conc_ic]
     type = ConstantIC
     variable = conc
     value = 1.0
@@ -31,20 +31,20 @@
 
 
 [Kernels]
-  [./c_dot]
+  [c_dot]
     type = TimeDerivative
     variable = conc
   [../]
-  [./flow_from_matrix]
+  [flow_from_matrix]
     type = DesorptionFromMatrix
     variable = conc
     pressure_var = pressure
   [../]
-  [./rho_dot]
+  [rho_dot]
     type = TimeDerivative
     variable = pressure
   [../]
-  [./flux_to_porespace]
+  [flux_to_porespace]
     type = DesorptionToPorespace
     variable = pressure
     conc_var = conc
@@ -52,30 +52,30 @@
 []
 
 [Postprocessors]
-  [./mass_rho]
+  [mass_rho]
     type = ElementIntegralVariablePostprocessor
     block = 0
     variable = pressure
     execute_on = 'initial timestep_end'
   [../]
-  [./mass_conc]
+  [mass_conc]
     type = ElementIntegralVariablePostprocessor
     block = 0
     variable = conc
     execute_on = 'initial timestep_end'
   [../]
-  [./mass_tot]
+  [mass_tot]
     type = FunctionValuePostprocessor
     function = mass_fcn
     execute_on = 'initial timestep_end'
   [../]
-  [./p0]
+  [p0]
     type = PointValue
     variable = pressure
     point = '0 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./c0]
+  [c0]
     type = PointValue
     variable = conc
     point = '0 0 0'
@@ -84,7 +84,7 @@
 []
 
 [Functions]
-  [./mass_fcn]
+  [mass_fcn]
     type = ParsedFunction
     expression = a+b
     symbol_names = 'a b'
@@ -93,7 +93,7 @@
 []
 
 [Materials]
-  [./lang_stuff]
+  [lang_stuff]
     type = LangmuirMaterial
     block = 0
     one_over_desorption_time_const = 0.90909091
@@ -107,7 +107,7 @@
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'

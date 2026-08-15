@@ -7,46 +7,46 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = MONOMIAL
   [../]
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
   [../]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedGradFunction
     expression = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
   [../]
-  [./disp_func]
+  [disp_func]
     type = ParsedFunction
     expression = x
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./abs]
+  [abs]
     type = Reaction
     variable = u
   [../]
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -54,7 +54,7 @@
 []
 
 [DGKernels]
-  [./dg_diff]
+  [dg_diff]
     type = DGDiffusion
     variable = u
     epsilon = -1
@@ -64,7 +64,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DGFunctionDiffusionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -87,7 +87,7 @@
 []
 
 [ICs]
-  [./disp_x_ic]
+  [disp_x_ic]
     function = disp_func
     variable = disp_x
     type = FunctionIC

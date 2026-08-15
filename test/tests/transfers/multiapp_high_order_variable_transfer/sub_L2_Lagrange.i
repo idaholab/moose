@@ -6,23 +6,23 @@
 []
 
 [AuxVariables]
-  [./power_density]
+  [power_density]
     family = L2_LAGRANGE
     order = FIRST
   [../]
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
      type = Diffusion
      variable = temp
   [../]
-  [./heat_source_fuel]
+  [heat_source_fuel]
     type = CoupledForce
     variable = temp
     v = power_density
@@ -49,13 +49,13 @@
 []
 
 [Postprocessors]
-  [./temp_fuel_avg]
+  [temp_fuel_avg]
     type = ElementAverageValue
     variable = temp
     block = '0'
     execute_on = 'initial timestep_end'
   [../]
-  [./pwr_density]
+  [pwr_density]
     type = ElementIntegralVariablePostprocessor
     block = '0'
     variable = power_density

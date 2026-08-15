@@ -23,33 +23,33 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxVariables]
-  [./grain_auxvar]
+  [grain_auxvar]
     order = CONSTANT
     family = MONOMIAL
   [../]
 
-  [./centroids]
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./nodal_flood_aux]
+  [nodal_flood_aux]
     variable = grain_auxvar
     type = FeatureFloodCountAux
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./centroids]
+  [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     flood_counter = flood_count_pp
@@ -59,7 +59,7 @@
 []
 
 [Functions]
-  [./tif]
+  [tif]
     # ImageFunction gets its file range parameters from ImageMesh,
     # when it is present.  This prevents duplicating information in
     # input files.
@@ -72,7 +72,7 @@
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = tif
     variable = u
@@ -80,7 +80,7 @@
 []
 
 [Postprocessors]
-  [./flood_count_pp]
+  [flood_count_pp]
     type = FeatureFloodCount
     variable = u
     threshold = 1.0
@@ -90,7 +90,7 @@
 []
 
 [VectorPostprocessors]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'

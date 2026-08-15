@@ -9,38 +9,38 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./multi_layered_average]
+  [multi_layered_average]
   [../]
-  [./element_multi_layered_average]
+  [element_multi_layered_average]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -67,7 +67,7 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     positions = '0.3 0.1 0.3 0.7 0.1 0.3'
     type = TransientMultiApp
     input_files = sub.i
@@ -76,14 +76,14 @@
 []
 
 [Transfers]
-  [./layered_transfer]
+  [layered_transfer]
     user_object = layered_average
     variable = multi_layered_average
     type = MultiAppUserObjectTransfer
     from_multi_app = sub_app
     skip_coordinate_collapsing = true
   [../]
-  [./element_layered_transfer]
+  [element_layered_transfer]
     user_object = layered_average
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer

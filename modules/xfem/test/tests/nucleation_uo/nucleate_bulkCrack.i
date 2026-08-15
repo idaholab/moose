@@ -129,7 +129,7 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]

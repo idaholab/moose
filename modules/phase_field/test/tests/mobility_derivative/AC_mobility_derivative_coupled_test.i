@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./op]
+  [op]
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [ICs]
-  [./op_IC]
+  [op_IC]
     type = SmoothCircleIC
     x1 = 25.0
     y1 = 25.0
@@ -26,7 +26,7 @@
     int_width = 3.0
     variable = op
   [../]
-  [./v_IC]
+  [v_IC]
     type = BoundingBoxIC
     x1 = 0.0
     x2 = 25.0
@@ -39,29 +39,29 @@
 []
 
 [Kernels]
-  [./op_dot]
+  [op_dot]
     type = TimeDerivative
     variable = op
   [../]
-  [./op_bulk]
+  [op_bulk]
     type = AllenCahn
     variable = op
     f_name = F
     mob_name = L
     coupled_variables = v
   [../]
-  [./op_interface]
+  [op_interface]
     type = ACInterface
     variable = op
     kappa_name = 1
     mob_name = L
     coupled_variables = v
   [../]
-  [./v_dot]
+  [v_dot]
     type = TimeDerivative
     variable = v
   [../]
-  [./v_diff]
+  [v_diff]
     type = MatDiffusion
     variable = v
     diffusivity = 50.0
@@ -69,7 +69,7 @@
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = DerivativeParsedMaterial
     property_name  = L
     expression = 'l:=0.1+1*(v+op)^2; if(l<0.01, 0.01, l)'
@@ -78,7 +78,7 @@
     output_properties = 'L dL/dop dL/dv'
     derivative_order = 2
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'op'
@@ -88,7 +88,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

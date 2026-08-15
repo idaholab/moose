@@ -3,33 +3,33 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = u
   [../]
 
-  [./ie]
+  [ie]
     type = SpecificHeatConductionTimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0.0
   [../]
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -38,13 +38,13 @@
 []
 
 [Materials]
-  [./constant]
+  [constant]
     type = HeatConductionMaterial
     block = 1
     thermal_conductivity = 1
     specific_heat = 1
   [../]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     block = 1
     prop_names = density

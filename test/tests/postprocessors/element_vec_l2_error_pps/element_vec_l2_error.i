@@ -15,12 +15,12 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -31,28 +31,28 @@
 
   # A ParsedFunction allows us to supply analytic expressions
   # directly in the input file
-  [./bc_u]
+  [bc_u]
     type = ParsedFunction
     expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '2'
   [../]
 
-  [./bc_v]
+  [bc_v]
     type = ParsedFunction
     expression = sin(alpha*pi*y)
     symbol_names = 'alpha'
     symbol_values = '2'
   [../]
 
-  [./f_u]
+  [f_u]
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '2'
   [../]
 
-  [./f_v]
+  [f_v]
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*y)
     symbol_names = 'alpha'
@@ -63,24 +63,24 @@
 [Kernels]
   active = 'diff_u diff_v forcing_u forcing_v'
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
 
   # This Kernel can take a function name to use
-  [./forcing_u]
+  [forcing_u]
     type = BodyForce
     variable = u
     function = f_u
   [../]
 
-  [./forcing_v]
+  [forcing_v]
     type = BodyForce
     variable = v
     function = f_v
@@ -91,14 +91,14 @@
   active = 'all_u all_v'
 
   # The BC can take a function name to use
-  [./all_u]
+  [all_u]
     type = FunctionDirichletBC
     variable = u
     boundary = 'bottom right top left'
     function = bc_u
   [../]
 
-  [./all_v]
+  [all_v]
     type = FunctionDirichletBC
     variable = v
     boundary = 'bottom right top left'
@@ -109,7 +109,7 @@
 [Executioner]
   type = Steady
 
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = 1.0
     coarsen_fraction = 0.0
     max_h_level = 10
@@ -118,12 +118,12 @@
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
     execute_on = 'initial timestep_end'
   [../]
 
-  [./integral]
+  [integral]
     type = ElementVectorL2Error
     var_x = u
     var_y = v

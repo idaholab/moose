@@ -30,7 +30,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     generate_output = 'stress_zz'
@@ -38,25 +38,25 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
   [../]
-  [./stress]
+  [stress]
   [../]
 []
 
 [BCs]
 # pin particle along symmetry planes
-  [./no_disp_r]
+  [no_disp_r]
     type = DirichletBC
     variable = disp_r
     boundary = xzero
     value = 0.0
   [../]
 
-  [./no_disp_z]
+  [no_disp_z]
     type = DirichletBC
     variable = disp_z
     boundary = yzero
@@ -64,28 +64,28 @@
   [../]
 
 # exterior and internal pressures
-  [./exterior_pressure_r]
+  [exterior_pressure_r]
     type = Pressure
     variable = disp_r
     boundary = outer
     factor = 200000
   [../]
 
- [./exterior_pressure_z]
+ [exterior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = outer
     factor = 200000
   [../]
 
-  [./interior_pressure_r]
+  [interior_pressure_r]
     type = Pressure
     variable = disp_r
     boundary = inner
     factor = 100000
   [../]
 
-  [./interior_pressure_z]
+  [interior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = inner
@@ -122,7 +122,7 @@
   dtmax = 5e6
   dtmin = 1
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
     optimal_iterations = 6
@@ -130,7 +130,7 @@
     linear_iteration_ratio = 100
   [../]
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -138,7 +138,7 @@
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
   [../]
 []

@@ -15,14 +15,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
      type = LatticeSmoothCircleIC
      variable = c
      invalue = 1.0
@@ -39,12 +39,12 @@
 [Kernels]
 active = 'ie_c diff'
 
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = c
   [../]
 
-  [./diff]
+  [diff]
     type = MatDiffusion
     variable = c
     diffusivity = D_v
@@ -58,7 +58,7 @@ active = 'ie_c diff'
 [Materials]
 active = 'Dv'
 
-  [./Dv]
+  [Dv]
     type = GenericConstantMaterial
     prop_names = D_v
     prop_values = 0.074802
@@ -68,7 +68,7 @@ active = 'Dv'
 [Postprocessors]
   active = 'bubbles'
 
-  [./bubbles]
+  [bubbles]
     type = FeatureFloodCount
     variable = c
     execute_on = 'initial timestep_end'

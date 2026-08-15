@@ -5,16 +5,16 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./u_dt]
+  [u_dt]
     type = TimeDerivative
     variable = u
   [../]
-  [./u_source]
+  [u_source]
     type = BodyForce
     variable = u
     value = 1
@@ -22,7 +22,7 @@
 []
 
 [BCs]
-  [./u_left]
+  [u_left]
     type = DirichletBC
     boundary = left
     variable = u
@@ -31,7 +31,7 @@
 []
 
 [Dampers]
-  [./limit]
+  [limit]
     type = BoundingValueNodalDamper
     variable = u
     max_value = 1.5
@@ -46,11 +46,11 @@
 []
 
 [Postprocessors]
-  [./u_avg]
+  [u_avg]
     type = ElementAverageValue
     variable = u
   [../]
-  [./dt]
+  [dt]
     type = TimestepSize
   [../]
 []

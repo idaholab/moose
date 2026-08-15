@@ -11,12 +11,12 @@
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = -2*(x*x+y*y-2)+(1-x*x)*(1-y*y)
   [../]
 
-  [./solution]
+  [solution]
     type = ParsedGradFunction
     value = (1-x*x)*(1-y*y)
     grad_x = 2*(x*y*y-x)
@@ -25,7 +25,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = HIERARCHIC
   [../]
@@ -33,17 +33,17 @@
 
 [Kernels]
   active = 'diff forcing reaction'
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
   [../]
 
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = ADBodyForce
     variable = u
     function = forcing_fn
@@ -52,7 +52,7 @@
 
 [BCs]
   active = 'bc_all'
-  [./bc_all]
+  [bc_all]
     type = ADPenaltyDirichletBC
     variable = u
     value = 0
@@ -62,25 +62,25 @@
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
   [../]
 
-  [./h]
+  [h]
     type = AverageElementSize
   [../]
 
-  [./L2error]
+  [L2error]
     type = ElementL2Error
     variable = u
     function = solution
   [../]
-  [./H1error]
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
   [../]
-  [./H1Semierror]
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution

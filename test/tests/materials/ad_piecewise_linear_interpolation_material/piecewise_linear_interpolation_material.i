@@ -8,28 +8,28 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff1]
+  [diff1]
     type = ADDiffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
@@ -38,7 +38,7 @@
 []
 
 [Materials]
-  [./m1]
+  [m1]
     type = ADPiecewiseLinearInterpolationMaterial
     property = m1
     variable = u
@@ -48,7 +48,7 @@
     outputs = all
   [../]
 
-  [./m2]
+  [m2]
     type = ADPiecewiseLinearInterpolationMaterial
     property = m2
     variable = u

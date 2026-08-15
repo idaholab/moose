@@ -9,8 +9,8 @@
 [Adaptivity]
   steps = 5
   marker = marker
-  [./Markers]
-    [./marker]
+  [Markers]
+    [marker]
       type = UniformMarker
       mark = REFINE
     [../]
@@ -18,18 +18,18 @@
 []
 
 [Variables]
-  [./phi]
+  [phi]
   [../]
 []
 
 [AuxVariables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
   [../]
 []
 
 [ICs]
-  [./vel_ic]
+  [vel_ic]
     type = VectorFunctionIC
     variable = velocity
     function = velocity_func
@@ -37,7 +37,7 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     boundary = 'left'
     function = phi_exact
@@ -46,19 +46,19 @@
 []
 
 [Functions]
-  [./phi_exact]
+  [phi_exact]
     type = ParsedFunction
     expression = 'a*sin(pi*x/b)*cos(pi*x)'
     symbol_names = 'a b'
     symbol_values = '2 12'
   [../]
-  [./phi_mms]
+  [phi_mms]
     type = ParsedFunction
     expression = '-2*pi*a*sin(pi*x)*sin(pi*x/b) + 2*pi*a*cos(pi*x)*cos(pi*x/b)/b'
     symbol_names = 'a b'
     symbol_values = '2 12'
   [../]
-  [./velocity_func]
+  [velocity_func]
     type = ParsedVectorFunction
     expression_x = '2'
     expression_y = '2'
@@ -66,12 +66,12 @@
 []
 
 [Kernels]
-  [./phi_advection]
+  [phi_advection]
     type = LevelSetAdvection
     variable = phi
     velocity = velocity
   [../]
-  [./phi_forcing]
+  [phi_forcing]
     type = BodyForce
     variable = phi
     function = phi_mms
@@ -79,19 +79,19 @@
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     function = phi_exact
     variable = phi
   [../]
-  [./h]
+  [h]
     type = AverageElementSize
   [../]
 []
 
 [VectorPostprocessors]
   active = ''
-  [./results]
+  [results]
     type = LineValueSampler
     variable = phi
     start_point = '0 0 0'

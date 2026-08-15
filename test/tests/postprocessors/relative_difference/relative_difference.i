@@ -16,15 +16,15 @@
 []
 
 [Postprocessors]
-  [./num_elems]
+  [num_elems]
     # number of elements, equal to 2
     type = NumElements
   [../]
-  [./num_nodes]
+  [num_nodes]
     # number of nodes, equal to 3
     type = NumNodes
   [../]
-  [./zero]
+  [zero]
     # zero post-processor value
     type = EmptyPostprocessor
   [../]
@@ -35,7 +35,7 @@
   # When the command-line modification "Postprocessors/relative_difference/value2=zero" is used,
   #   y = abs(num_nodes - zero)
   #   y = abs(3         - 0   ) = 3
-  [./relative_difference]
+  [relative_difference]
     type = RelativeDifferencePostprocessor
     value1 = num_nodes
     value2 = num_elems
@@ -43,7 +43,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = relative_difference
   [../]

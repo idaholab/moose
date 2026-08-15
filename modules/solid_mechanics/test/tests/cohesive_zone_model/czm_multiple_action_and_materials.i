@@ -1,5 +1,5 @@
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 1
@@ -8,12 +8,12 @@
     zmin = 0
     zmax = 4
   [../]
-  [./subdomain_id]
+  [subdomain_id]
     type = SubdomainPerElementGenerator
     input = msh
     subdomain_ids = '0 1 2 3'
   []
-  [./split]
+  [split]
     type = BreakMeshByBlockGenerator
     input = subdomain_id
     split_interface = true
@@ -37,7 +37,7 @@
 []
 
 [Functions]
-  [./stretch]
+  [stretch]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 100'
@@ -60,28 +60,28 @@
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = x0
     variable = disp_x
   [../]
-  [./fix_y]
+  [fix_y]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = y0
     variable = disp_y
   [../]
-  [./fix_z]
+  [fix_z]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = z0
     variable = disp_z
   [../]
-  [./back_z]
+  [back_z]
     type = FunctionNeumannBC
     boundary = z1
     variable = disp_z
@@ -92,11 +92,11 @@
 
 
 [Physics/SolidMechanics/CohesiveZone]
-  [./czm_ik_012]
+  [czm_ik_012]
     boundary = 'Block0_Block1 Block1_Block2'
     base_name = 'czm_b012'
   [../]
-  [./czm_ik_23]
+  [czm_ik_23]
     boundary = 'Block2_Block3'
     base_name = 'czm_b23'
   [../]
@@ -104,7 +104,7 @@
 
 [Materials]
   # cohesive materials
-  [./czm_3dc]
+  [czm_3dc]
     type = SalehaniIrani3DCTraction
     boundary = 'Block0_Block1 Block1_Block2'
     normal_gap_at_maximum_normal_traction = 1
@@ -113,7 +113,7 @@
     maximum_shear_traction = 300
     base_name = 'czm_b012'
   [../]
-  [./czm_elastic_incremental]
+  [czm_elastic_incremental]
     type = PureElasticTractionSeparationIncremental
     boundary = 'Block2_Block3'
     normal_stiffness = 500
@@ -121,10 +121,10 @@
     base_name = 'czm_b23'
   [../]
   # bulk materials
-  [./stress]
+  [stress]
     type = ADComputeFiniteStrainElasticStress
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200e4
     poissons_ratio = 0.3
@@ -134,7 +134,7 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      [./all]
+      [all]
         strain = FINITE
         add_variables = true
         use_finite_deform_jacobian = true
@@ -146,7 +146,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

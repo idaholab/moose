@@ -23,31 +23,31 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
   [../]
 []
 
 [BCs]
-  [./obstruction]
+  [obstruction]
     type = StickyBC
     variable = disp_y
     boundary = top
     max_value = 0.49
   [../]
-  [./bottom]
+  [bottom]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = bottom
     function = t
   [../]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
-  [./front]
+  [front]
     type = DirichletBC
     variable = disp_z
     boundary = front
@@ -56,10 +56,10 @@
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.2
@@ -67,7 +67,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

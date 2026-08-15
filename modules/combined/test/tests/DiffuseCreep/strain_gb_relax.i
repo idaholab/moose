@@ -10,53 +10,53 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = 'x0:=5.0;thk:=0.5;m:=2;r:=abs(x-x0);v:=exp(-(r/thk)^m);0.1+0.1*v'
     [../]
   [../]
-  [./mu]
+  [mu]
   [../]
-  [./jx]
+  [jx]
   [../]
-  [./jy]
+  [jy]
   [../]
 []
 
 [AuxVariables]
-  [./gb]
+  [gb]
     family = LAGRANGE
     order  = FIRST
   [../]
-  [./strain_xx]
+  [strain_xx]
     family = MONOMIAL
     order  = CONSTANT
   [../]
-  [./strain_yy]
+  [strain_yy]
     family = MONOMIAL
     order  = CONSTANT
   [../]
-  [./strain_xy]
+  [strain_xy]
     family = MONOMIAL
     order  = CONSTANT
   [../]
 []
 
 [Kernels]
-  [./conc]
+  [conc]
     type = CHSplitConcentration
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
   [../]
-  [./chempot]
+  [chempot]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
   [../]
-  [./flux_x]
+  [flux_x]
     type = CHSplitFlux
     variable = jx
     component = 0
@@ -64,7 +64,7 @@
     mu = mu
     c = c
   [../]
-  [./flux_y]
+  [flux_y]
     type = CHSplitFlux
     variable = jy
     component = 1
@@ -72,33 +72,33 @@
     mu = mu
     c = c
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [AuxKernels]
-  [./gb]
+  [gb]
     type = FunctionAux
     variable = gb
     function = 'x0:=5.0;thk:=0.5;m:=2;r:=abs(x-x0);v:=exp(-(r/thk)^m);v'
   [../]
-  [./strain_xx]
+  [strain_xx]
     type = RankTwoAux
     variable = strain_xx
     rank_two_tensor = strain
     index_i = 0
     index_j = 0
   [../]
-  [./strain_yy]
+  [strain_yy]
     type = RankTwoAux
     variable = strain_yy
     rank_two_tensor = strain
     index_i = 1
     index_j = 1
   [../]
-  [./strain_xy]
+  [strain_xy]
     type = RankTwoAux
     variable = strain_xy
     rank_two_tensor = strain
@@ -108,7 +108,7 @@
 []
 
 [Materials]
-  [./chemical_potential]
+  [chemical_potential]
     type = DerivativeParsedMaterial
     block = 0
     property_name = mu_prop
@@ -116,7 +116,7 @@
     expression = 'c'
     derivative_order = 1
   [../]
-  [./var_dependence]
+  [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
     expression = 'c*(1.0-c)'
@@ -124,7 +124,7 @@
     property_name = var_dep
     derivative_order = 1
   [../]
-  [./mobility]
+  [mobility]
     type = CompositeMobilityTensor
     block = 0
     M_name = mobility_prop
@@ -132,12 +132,12 @@
     weights = var_dep
     coupled_variables = c
   [../]
-  [./phase_normal]
+  [phase_normal]
     type = PhaseNormalTensor
     phase = gb
     normal_tensor_name = gb_normal
   [../]
-  [./aniso_tensor]
+  [aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
     bulk_parameter = 0.1
@@ -145,7 +145,7 @@
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]
-  [./diffusivity]
+  [diffusivity]
     type = GBDependentDiffusivity
     gb = gb
     bulk_parameter = 0.1
@@ -153,7 +153,7 @@
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
-  [./gb_relax_prefactor]
+  [gb_relax_prefactor]
     type = DerivativeParsedMaterial
     block = 0
     expression = '0.01*(c-0.15)*gb'
@@ -161,13 +161,13 @@
     property_name = gb_relax_prefactor
     derivative_order = 1
   [../]
-  [./gb_relax]
+  [gb_relax]
     type = GBRelaxationStrainIncrement
     property_name = gb_relax
     prefactor_name = gb_relax_prefactor
     gb_normal_name = gb_normal
   [../]
-  [./strain]
+  [strain]
     type = SumTensorIncrements
     tensor_name = strain
     coupled_tensor_increment_names = gb_relax
@@ -175,8 +175,8 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
     [../]
   [../]
@@ -195,7 +195,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
      type = SMP
      full = true
   [../]

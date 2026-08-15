@@ -6,29 +6,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./scalar]
+  [scalar]
     order = THIRD
     family = SCALAR
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -37,7 +37,7 @@
 []
 
 [VectorPostprocessors]
-  [./constant]
+  [constant]
     type = ConstantVectorPostprocessor
     value = '1.7 2.3 4.7'
     execute_on = 'initial'
@@ -56,7 +56,7 @@
 []
 
 [ScalarKernels]
-  [./vppsk]
+  [vppsk]
     variable = scalar
     vector = value
     type = VectorPostprocessorScalarKernel

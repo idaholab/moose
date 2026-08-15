@@ -6,43 +6,43 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = 't'
   [../]
-  [./left_v]
+  [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = left
     function = 't'
   [../]
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
@@ -51,7 +51,7 @@
 []
 
 [VectorPostprocessors]
-  [./line_sample]
+  [line_sample]
     type = LineValueSampler
     variable = 'u v'
     start_point = '0 0.5 0'
@@ -60,14 +60,14 @@
     sort_by = id
     outputs = none
   [../]
-  [./least_squares_fit_coeffs]
+  [least_squares_fit_coeffs]
     type = LeastSquaresFitHistory
     vectorpostprocessor = line_sample
     x_name = 'id'
     y_name = 'u'
     order = 1
   [../]
-  [./shift_and_scale_x_least_squares_fit_coeffs]
+  [shift_and_scale_x_least_squares_fit_coeffs]
     type = LeastSquaresFitHistory
     vectorpostprocessor = line_sample
     x_name = 'id'
@@ -76,7 +76,7 @@
     x_scale = 10
     order = 1
   [../]
-  [./shift_and_scale_y_least_squares_fit_coeffs]
+  [shift_and_scale_y_least_squares_fit_coeffs]
     type = LeastSquaresFitHistory
     vectorpostprocessor = line_sample
     x_name = 'id'

@@ -9,7 +9,7 @@
 []
 
 [UserObjects]
-  [./level_set_cut_uo]
+  [level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = ls
     heal_always = true
@@ -29,14 +29,14 @@
 []
 
 [AuxVariables]
-  [./ls]
+  [ls]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./ls_function]
+  [ls_function]
     type = FunctionAux
     variable = ls
     function = ls_func
@@ -44,31 +44,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Functions]
-  [./ls_func]
+  [ls_func]
     type = ParsedFunction
     expression = 'x-0.76+0.21*t'
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADMatDiffusion
     variable = u
     diffusivity = diffusion_coefficient
   [../]
-  [./time_deriv]
+  [time_deriv]
     type = ADTimeDerivative
     variable = u
   [../]
 []
 
 [Constraints]
-  [./u_constraint]
+  [u_constraint]
     type = XFEMSingleVariableConstraint
     use_displaced_mesh = false
     variable = u
@@ -80,13 +80,13 @@
 []
 
 [BCs]
-  [./right_u]
+  [right_u]
     type = ADDirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./left_u]
+  [left_u]
     type = ADDirichletBC
     variable = u
     boundary = right
@@ -95,19 +95,19 @@
 []
 
 [Materials]
-  [./diffusivity_A]
+  [diffusivity_A]
     type = ADGenericConstantMaterial
     prop_names = A_diffusion_coefficient
     prop_values = 5
   [../]
 
-  [./diffusivity_B]
+  [diffusivity_B]
     type = ADGenericConstantMaterial
     prop_names = B_diffusion_coefficient
     prop_values = 0.5
   [../]
 
-  [./diff_combined]
+  [diff_combined]
     type = ADLevelSetBiMaterialReal
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
@@ -141,7 +141,7 @@
   execute_on = timestep_end
   file_base = moving_diffusion_out
   perf_graph = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

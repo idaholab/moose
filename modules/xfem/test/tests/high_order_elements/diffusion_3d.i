@@ -25,7 +25,7 @@
 []
 
 [UserObjects]
-  [./square_planar_cut_uo]
+  [square_planar_cut_uo]
     type = RectangleCutUserObject
     cut_data = '  0.35 1.01 -0.001
                   0.35 0.49 -0.001
@@ -35,12 +35,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Functions]
-  [./u_left]
+  [u_left]
     type = PiecewiseLinear
     x = '0   2'
     y = '0  0.1'
@@ -48,7 +48,7 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -56,14 +56,14 @@
 
 [BCs]
 # Define boundary conditions
-  [./left_u]
+  [left_u]
     type = FunctionDirichletBC
     variable = u
     boundary = left
     function = u_left
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
@@ -92,7 +92,7 @@
   time_step_interval = 1
   execute_on = timestep_end
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

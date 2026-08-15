@@ -6,18 +6,18 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [ICs]
-  [./left]
+  [left]
     type = ConstantIC
     variable = u
     boundary = left
     value = 0.5
   [../]
-  [./left2]
+  [left2]
     type = ConstantIC
     variable = u
     boundary = left
@@ -26,20 +26,20 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

@@ -9,19 +9,19 @@
 []
 
 [Variables]
-  [./x_disp]
+  [x_disp]
     block = 0
   [../]
-  [./y_disp]
+  [y_disp]
     block = 0
   [../]
-  [./z_disp]
+  [z_disp]
     block = 0
   [../]
 []
 
 [SolidMechanics]
-  [./solid]
+  [solid]
 #    disp_x = x_disp
 #    disp_y = y_disp
 #    disp_z = z_disp
@@ -31,7 +31,7 @@
 
 [Materials]
   active = 'fcrysp'
-  [./felastic]
+  [felastic]
     type = FiniteStrainElasticMaterial
     block = 0
     fill_method = symmetric9
@@ -40,7 +40,7 @@
     disp_z = z_disp
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
   [../]
-  [./fcrysp]
+  [fcrysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
     disp_y = y_disp
@@ -57,36 +57,36 @@
 []
 
 [Functions]
-  [./topdisp]
+  [topdisp]
     type = ParsedFunction
     expression = 0.7*t
   [../]
-  [./tpress]
+  [tpress]
     type = ParsedFunction
     expression = -200*t
   [../]
 []
 
 [BCs]
-  [./zbc]
+  [zbc]
     type = DirichletBC
     variable = z_disp
     boundary = back
     value = 0
   [../]
-  [./ybc]
+  [ybc]
     type = DirichletBC
     variable = y_disp
     boundary = bottom
     value = 0
   [../]
-  [./xbc]
+  [xbc]
     type = DirichletBC
     variable = x_disp
     boundary = left
     value = 0
   [../]
-  [./zmove]
+  [zmove]
     type = FunctionDirichletBC
     variable = z_disp
     boundary = front
@@ -95,12 +95,12 @@
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./e_zz]
+  [e_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -108,7 +108,7 @@
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
@@ -117,7 +117,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./e_zz]
+  [e_zz]
     type = RankTwoAux
     rank_two_tensor = lage
     variable = e_zz
@@ -129,12 +129,12 @@
 []
 
 [Postprocessors]
-  [./szz]
+  [szz]
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./ezz]
+  [ezz]
     type = ElementAverageValue
     variable = e_zz
     block = 'ANY_BLOCK_ID 0'
@@ -142,7 +142,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

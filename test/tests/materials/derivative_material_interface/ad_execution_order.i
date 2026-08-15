@@ -7,13 +7,13 @@
 
 [Materials]
   # fetch the properties first...
-  [./client]
+  [client]
     type = ADDerivativeMaterialInterfaceTestClient
     block = 0
   [../]
 
   # ...then declare them!
-  [./provider]
+  [provider]
     type = ADDerivativeMaterialInterfaceTestProvider
     block = 0
     outputs = exodus

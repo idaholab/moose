@@ -8,20 +8,20 @@
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
   [../]
-  [./conc]
+  [conc]
   [../]
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = RandomIC
     variable = pressure
     min = 1
     max = 2
   [../]
-  [./conc_ic]
+  [conc_ic]
     type = RandomIC
     variable = conc
     min = -1
@@ -31,12 +31,12 @@
 
 
 [Kernels]
-  [./flow_from_matrix]
+  [flow_from_matrix]
     type = DesorptionFromMatrix
     variable = conc
     pressure_var = pressure
   [../]
-  [./flux_to_porespace]
+  [flux_to_porespace]
     type = DesorptionToPorespace
     variable = pressure
     conc_var = conc
@@ -44,7 +44,7 @@
 []
 
 [Materials]
-  [./langmuir_params]
+  [langmuir_params]
     type = LangmuirMaterial
     block = 0
     one_over_desorption_time_const = 0.813
@@ -58,7 +58,7 @@
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'

@@ -6,29 +6,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -37,8 +37,8 @@
 []
 
 [Adaptivity]
-  [./Markers]
-    [./uni]
+  [Markers]
+    [uni]
       type = UniformMarker
       mark = REFINE
     [../]
@@ -53,7 +53,7 @@
 []
 
 [Postprocessors]
-  [./physical]
+  [physical]
     type = MemoryUsage
     mem_type = physical_memory
     value_type = total
@@ -61,23 +61,23 @@
     # out of all samples that have been taken (at linear and non-linear iterations)
     execute_on = 'INITIAL TIMESTEP_END NONLINEAR LINEAR'
   [../]
-  [./virtual]
+  [virtual]
     type = MemoryUsage
     mem_type = virtual_memory
     value_type = total
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./page_faults]
+  [page_faults]
     type = MemoryUsage
     mem_type = page_faults
     value_type = total
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./DOFs]
+  [DOFs]
     type = NumDOFs
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./walltime]
+  [walltime]
     type = PerfGraphData
     section_name = "Root"
     data_type = total

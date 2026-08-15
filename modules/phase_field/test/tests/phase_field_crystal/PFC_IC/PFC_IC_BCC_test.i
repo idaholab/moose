@@ -8,12 +8,12 @@
 []
 
 [Variables]
-  [./rho]
+  [rho]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = rho
   [../]
@@ -34,7 +34,7 @@
 []
 
 [ICs]
-  [./rho_IC]
+  [rho_IC]
     y2 = 12.5
     lc = 5
     y1 = 2.5

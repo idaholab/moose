@@ -11,28 +11,28 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
   [../]
 []
 
 [ICs]
-  [./ic_u]
+  [ic_u]
     type = ZeroIC
     variable = u
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = u
     boundary = 'left right top bottom front back'
@@ -41,7 +41,7 @@
 []
 
 [Postprocessors]
-  [./l2_norm]
+  [l2_norm]
     type = ElementL2Norm
     variable = u
   [../]
@@ -50,7 +50,7 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = FIRST
   [../]

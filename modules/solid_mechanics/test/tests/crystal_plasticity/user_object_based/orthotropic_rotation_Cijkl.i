@@ -18,80 +18,80 @@
 []
 
 [AuxVariables]
-  [./lage_xx]
+  [lage_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./lage_yy]
+  [lage_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./pk2_yy]
+  [pk2_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./lage_zz]
+  [lage_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./fp_yy]
+  [fp_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c11]
+  [c11]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c12]
+  [c12]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c13]
+  [c13]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c22]
+  [c22]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c23]
+  [c23]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c33]
+  [c33]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c44]
+  [c44]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c55]
+  [c55]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./c66]
+  [c66]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     expression = 0.01*t
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
   [../]
 []
 
 [AuxKernels]
-  [./lage_xx]
+  [lage_xx]
     type = RankTwoAux
     rank_two_tensor = lage
     variable = lage_xx
@@ -99,7 +99,7 @@
     index_j = 0
     execute_on = timestep_end
   [../]
-  [./lage_yy]
+  [lage_yy]
     type = RankTwoAux
     rank_two_tensor = lage
     variable = lage_yy
@@ -107,7 +107,7 @@
     index_j = 1
     execute_on = timestep_end
   [../]
-  [./pk2_yy]
+  [pk2_yy]
     type = RankTwoAux
     variable = pk2_yy
     rank_two_tensor = pk2
@@ -115,7 +115,7 @@
     index_i = 1
     execute_on = timestep_end
   [../]
-  [./lage_zz]
+  [lage_zz]
     type = RankTwoAux
     rank_two_tensor = lage
     variable = lage_zz
@@ -123,7 +123,7 @@
     index_j = 2
     execute_on = timestep_end
   [../]
-  [./fp_yy]
+  [fp_yy]
     type = RankTwoAux
     variable = fp_yy
     rank_two_tensor = fp
@@ -131,7 +131,7 @@
     index_j = 1
     execute_on = timestep_end
   [../]
-  [./c11]
+  [c11]
     type = RankFourAux
     variable = c11
     rank_four_tensor = elasticity_tensor
@@ -141,7 +141,7 @@
     index_l = 0
     execute_on = timestep_end
   [../]
-  [./c12]
+  [c12]
     type = RankFourAux
     variable = c12
     rank_four_tensor = elasticity_tensor
@@ -151,7 +151,7 @@
     index_l = 1
     execute_on = timestep_end
   [../]
-  [./c13]
+  [c13]
     type = RankFourAux
     variable = c13
     rank_four_tensor = elasticity_tensor
@@ -161,7 +161,7 @@
     index_l = 2
     execute_on = timestep_end
   [../]
-  [./c22]
+  [c22]
     type = RankFourAux
     variable = c22
     rank_four_tensor = elasticity_tensor
@@ -171,7 +171,7 @@
     index_l = 1
     execute_on = timestep_end
   [../]
-  [./c23]
+  [c23]
     type = RankFourAux
     variable = c23
     rank_four_tensor = elasticity_tensor
@@ -181,7 +181,7 @@
     index_l = 2
     execute_on = timestep_end
   [../]
-  [./c33]
+  [c33]
     type = RankFourAux
     variable = c33
     rank_four_tensor = elasticity_tensor
@@ -191,7 +191,7 @@
     index_l = 2
     execute_on = timestep_end
   [../]
-  [./c44]
+  [c44]
     type = RankFourAux
     variable = c44
     rank_four_tensor = elasticity_tensor
@@ -201,7 +201,7 @@
     index_l = 2
     execute_on = timestep_end
   [../]
-  [./c55]
+  [c55]
     type = RankFourAux
     variable = c55
     rank_four_tensor = elasticity_tensor
@@ -211,7 +211,7 @@
     index_l = 0
     execute_on = timestep_end
   [../]
-  [./c66]
+  [c66]
     type = RankFourAux
     variable = c66
     rank_four_tensor = elasticity_tensor
@@ -224,25 +224,25 @@
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
-  [./back]
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
-  [./top]
+  [top]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
@@ -251,7 +251,7 @@
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainUObasedCP
     stol = 1e-2
     tan_mod_type = exact
@@ -260,7 +260,7 @@
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     C_ijkl = '11e3 12e3 13e3 22e3 23e3 33e3 44e3 55e3 66e3'
     fill_method = symmetric9
@@ -271,7 +271,7 @@
 []
 
 [UserObjects]
-  [./slip_rate_gss]
+  [slip_rate_gss]
     type = CrystalPlasticitySlipRateGSS
     variable_size = 12
     slip_sys_file_name = input_slip_sys.txt
@@ -279,12 +279,12 @@
     flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
     uo_state_var_name = state_var_gss
   [../]
-  [./slip_resistance_gss]
+  [slip_resistance_gss]
     type = CrystalPlasticitySlipResistanceGSS
     variable_size = 12
     uo_state_var_name = state_var_gss
   [../]
-  [./state_var_gss]
+  [state_var_gss]
     type = CrystalPlasticityStateVariable
     variable_size = 12
     groups = '0 4 8 12'
@@ -292,7 +292,7 @@
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
   [../]
-  [./state_var_evol_rate_comp_gss]
+  [state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 109.8 2.5'
@@ -302,59 +302,59 @@
 []
 
 [Postprocessors]
-  [./lage_xx]
+  [lage_xx]
     type = ElementAverageValue
     variable = lage_xx
   [../]
-  [./pk2_yy]
+  [pk2_yy]
     type = ElementAverageValue
     variable = pk2_yy
   [../]
-  [./lage_yy]
+  [lage_yy]
     type = ElementAverageValue
     variable = lage_yy
   [../]
-  [./lage_zz]
+  [lage_zz]
     type = ElementAverageValue
     variable = lage_zz
   [../]
-  [./fp_yy]
+  [fp_yy]
     type = ElementAverageValue
     variable = fp_yy
   [../]
-  [./c11]
+  [c11]
     type = ElementAverageValue
     variable = c11
   [../]
-  [./c12]
+  [c12]
     type = ElementAverageValue
     variable = c12
   [../]
-  [./c13]
+  [c13]
     type = ElementAverageValue
     variable = c13
   [../]
-  [./c22]
+  [c22]
     type = ElementAverageValue
     variable = c22
   [../]
-  [./c23]
+  [c23]
     type = ElementAverageValue
     variable = c23
   [../]
-  [./c33]
+  [c33]
     type = ElementAverageValue
     variable = c33
   [../]
-  [./c44]
+  [c44]
     type = ElementAverageValue
     variable = c44
   [../]
-  [./c55]
+  [c55]
     type = ElementAverageValue
     variable = c55
   [../]
-  [./c66]
+  [c66]
     type = ElementAverageValue
     variable = c66
   [../]

@@ -6,7 +6,7 @@
 []
 
 [Materials]
-  [./time]
+  [time]
     type = TimeStepMaterial
     outputs = exodus
   [../]
@@ -21,7 +21,7 @@
   type = Transient
   num_steps = 6
 
-  [./TimeStepper]
+  [TimeStepper]
     type = TimeSequenceStepper
     time_sequence = '4 8 15 16 23 42'
   [../]

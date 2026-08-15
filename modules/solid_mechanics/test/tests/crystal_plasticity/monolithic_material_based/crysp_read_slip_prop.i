@@ -9,27 +9,27 @@
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./fp_zz]
+  [fp_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./rotout]
+  [rotout]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./e_zz]
+  [e_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./gss1]
+  [gss1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -37,14 +37,14 @@
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     expression = 0.01*t
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true
@@ -53,7 +53,7 @@
 
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     variable = stress_zz
     rank_two_tensor = stress
@@ -62,7 +62,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./fp_zz]
+  [fp_zz]
     type = RankTwoAux
     variable = fp_zz
     rank_two_tensor = fp
@@ -71,7 +71,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./e_zz]
+  [e_zz]
     type = RankTwoAux
     variable = e_zz
     rank_two_tensor = lage
@@ -80,7 +80,7 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./gss1]
+  [gss1]
     type = MaterialStdVectorAux
     variable = gss1
     property = gss
@@ -91,25 +91,25 @@
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
   [../]
-  [./symmx]
+  [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
   [../]
-  [./symmz]
+  [symmz]
     type = DirichletBC
     variable = uz
     boundary = back
     value = 0
   [../]
-  [./tdisp]
+  [tdisp]
     type = FunctionDirichletBC
     variable = uz
     boundary = front
@@ -118,7 +118,7 @@
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
     gtol = 1e-2
@@ -131,7 +131,7 @@
     intvar_read_type = slip_sys_file
     num_slip_sys_props = 1
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
@@ -140,22 +140,22 @@
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./fp_zz]
+  [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./e_zz]
+  [e_zz]
     type = ElementAverageValue
     variable = e_zz
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./gss1]
+  [gss1]
     type = ElementAverageValue
     variable = gss1
     block = 'ANY_BLOCK_ID 0'
@@ -163,7 +163,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

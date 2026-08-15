@@ -11,11 +11,11 @@
 []
 
 [Functions]
-  [./f_fn]
+  [f_fn]
     type = ParsedFunction
     expression = -4
   [../]
-  [./bc_all_fn]
+  [bc_all_fn]
     type = ParsedFunction
     expression = x*x+y*y
   [../]
@@ -24,22 +24,22 @@
 # NL
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
   [../]
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./uff]
+  [uff]
     type = BodyForce
     variable = u
     function = f_fn
@@ -47,7 +47,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -58,7 +58,7 @@
 # Aux
 
 [AuxVariables]
-  [./y]
+  [y]
     family = SCALAR
     order = FIRST
     initial_condition = 1
@@ -66,7 +66,7 @@
 []
 
 [AuxScalarKernels]
-  [./ode1]
+  [ode1]
     type = ExplicitODE
     variable = y
   [../]

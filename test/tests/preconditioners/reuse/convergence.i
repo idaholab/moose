@@ -86,7 +86,7 @@
   dtmin = 1.0
   end_time = 10.0
 
-  [./Adaptivity]
+  [Adaptivity]
     interval = 5
     max_h_level = 1
     start_time = 11.0
@@ -101,7 +101,7 @@
 
 [Outputs]
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
     file_base = base_case
   [../]

@@ -21,20 +21,20 @@
 []
 
 [AuxVariables]
-  [./eta1]
-    [./InitialCondition]
+  [eta1]
+    [InitialCondition]
       type = FunctionIC
       function = x
     [../]
   [../]
-  [./eta2]
-    [./InitialCondition]
+  [eta2]
+    [InitialCondition]
       type = FunctionIC
       function = 1.0-x
     [../]
   [../]
-  [./eta3]
-    [./InitialCondition]
+  [eta3]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
     [../]
@@ -42,7 +42,7 @@
 []
 
 [Materials]
-  [./h_material_1]
+  [h_material_1]
     type = SwitchingFunction3PhaseMaterial
     property_name = h_i1
     eta_i = eta1
@@ -52,7 +52,7 @@
   [../]
 # Next we reverse eta2 and eta3 to make sure the switching function is symmetric
 # with respect to interchanging these two, as it is designed to be
-  [./h_material_2]
+  [h_material_2]
     type = SwitchingFunction3PhaseMaterial
     property_name = h_i2
     eta_i = eta1

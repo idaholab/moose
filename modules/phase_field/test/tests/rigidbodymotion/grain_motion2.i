@@ -12,41 +12,41 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./vadvx]
+  [vadvx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vadvy]
+  [vadvy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./unique_grains]
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./centroids]
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
@@ -54,17 +54,17 @@
     w = w
     coupled_variables = eta
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
-  [./motion]
+  [motion]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -73,11 +73,11 @@
     grain_force = grain_force
     grain_volumes = grain_volumes
   [../]
-  [./eta_dot]
+  [eta_dot]
     type = TimeDerivative
     variable = eta
   [../]
-  [./vadv_eta]
+  [vadv_eta]
     type = SingleGrainRigidBodyMotion
     variable = eta
     c = c
@@ -86,14 +86,14 @@
     grain_force = grain_force
     grain_volumes = grain_volumes
   [../]
-  [./acint_eta]
+  [acint_eta]
     type = ACInterface
     variable = eta
     mob_name = M
     coupled_variables = c
     kappa_name = kappa_eta
   [../]
-  [./acbulk_eta]
+  [acbulk_eta]
     type = AllenCahn
     variable = eta
     mob_name = M
@@ -103,7 +103,7 @@
 []
 
 [AuxKernels]
-  [./vadv_x]
+  [vadv_x]
     type = GrainAdvectionAux
     component = x
     grain_tracker_object = grain_center
@@ -111,7 +111,7 @@
     grain_volumes = grain_volumes
     variable = vadvx
   [../]
-  [./vadv_y]
+  [vadv_y]
     type = GrainAdvectionAux
     component = y
     grain_tracker_object = grain_center
@@ -119,14 +119,14 @@
     grain_volumes = grain_volumes
     variable = vadvy
   [../]
-  [./unique_grains]
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_center
     field_display = UNIQUE_REGION
     execute_on = 'initial timestep_begin'
   [../]
-  [./centroids]
+  [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = 'initial timestep_begin'
@@ -136,12 +136,12 @@
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '5.0  2.0      0.1'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     coupled_variables = 'c eta'
     constant_names = 'barr_height  cv_eq'
@@ -152,11 +152,11 @@
 []
 
 [VectorPostprocessors]
-  [./forces]
+  [forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
@@ -164,14 +164,14 @@
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = FauxGrainTracker
     variable = eta
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
   [../]
-  [./grain_force]
+  [grain_force]
     type = ConstantGrainForceAndTorque
     execute_on = 'initial linear nonlinear'
     force = '0.5 0.0 0.0 '
@@ -180,7 +180,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -206,7 +206,7 @@
 []
 
 [ICs]
-  [./rect_c]
+  [rect_c]
     y2 = 20.0
     y1 = 5.0
     inside = 1.0
@@ -215,7 +215,7 @@
     x1 = 10.0
     type = BoundingBoxIC
   [../]
-  [./rect_eta]
+  [rect_eta]
     y2 = 20.0
     y1 = 5.0
     inside = 1.0

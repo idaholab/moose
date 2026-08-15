@@ -5,7 +5,7 @@
 [Mesh]
   type = MeshGeneratorMesh
 
-  [./cmg]
+  [cmg]
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1.3 1.9'
@@ -17,7 +17,7 @@
                     0 3 0'
   [../]
 
-  [./inner_bottom]
+  [inner_bottom]
     type = SideSetsBetweenSubdomainsGenerator
     input = cmg
     primary_block = 1
@@ -25,7 +25,7 @@
     new_boundary = 'inner_bottom'
   [../]
 
-  [./inner_left]
+  [inner_left]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_bottom
     primary_block = 4
@@ -33,7 +33,7 @@
     new_boundary = 'inner_left'
   [../]
 
-  [./inner_right]
+  [inner_right]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_left
     primary_block = 2
@@ -41,7 +41,7 @@
     new_boundary = 'inner_right'
   [../]
 
-  [./inner_top]
+  [inner_top]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_right
     primary_block = 3
@@ -49,14 +49,14 @@
     new_boundary = 'inner_top'
   [../]
 
-  [./rename]
+  [rename]
     type = RenameBlockGenerator
     old_block = '1 2 3 4'
     new_block = '0 0 0 0'
     input = inner_top
   [../]
 
-  [./split_inner_bottom]
+  [split_inner_bottom]
     type = PatchSidesetGenerator
     boundary = 4
     n_patches = 2
@@ -65,7 +65,7 @@
     input = rename
   [../]
 
-  [./split_inner_left]
+  [split_inner_left]
     type = PatchSidesetGenerator
     boundary = 5
     n_patches = 2
@@ -74,7 +74,7 @@
     input = split_inner_bottom
   [../]
 
-  [./split_inner_right]
+  [split_inner_right]
     type = PatchSidesetGenerator
     boundary = 6
     n_patches = 2
@@ -83,7 +83,7 @@
     input = split_inner_left
   [../]
 
-  [./split_inner_top]
+  [split_inner_top]
     type = PatchSidesetGenerator
     boundary = 7
     n_patches = 3
@@ -94,13 +94,13 @@
 []
 
 [Variables]
-  [./temperature]
+  [temperature]
     block = 0
   [../]
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temperature
     block = 0
@@ -109,7 +109,7 @@
 []
 
 [UserObjects]
-  [./gray_lambert]
+  [gray_lambert]
     type = ViewFactorObjectSurfaceRadiation
     boundary = 'inner_bottom_0 inner_bottom_1
                 inner_left_0 inner_left_1
@@ -127,7 +127,7 @@
     execute_on = 'LINEAR TIMESTEP_END'
   [../]
 
-  [./view_factor]
+  [view_factor]
     type = UnobstructedPlanarViewFactor
     boundary = 'inner_bottom_0 inner_bottom_1
                 inner_left_0 inner_left_1
@@ -139,21 +139,21 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temperature
     boundary = left
     value = 600
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = temperature
     boundary = right
     value = 300
   [../]
 
-  [./radiation]
+  [radiation]
     type = GrayLambertNeumannBC
     variable = temperature
     surface_radiation_object_name = gray_lambert
@@ -163,7 +163,7 @@
 []
 
 [Postprocessors]
-  [./average_T_inner_right]
+  [average_T_inner_right]
     type = SideAverageValue
     variable = temperature
     boundary = inner_right

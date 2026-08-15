@@ -6,22 +6,22 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./element_l2_error]
+  [element_l2_error]
     # Aux field variable representing the L2 error on each element
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./element_h1_error]
+  [element_h1_error]
     # Aux field variable representing the H1 error on each element
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./element_l2_norm]
+  [element_l2_norm]
     # Aux field variable representing the L^2 norm of the solution variable
     order = CONSTANT
     family = MONOMIAL
@@ -29,23 +29,23 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = sin(2*pi*x)*sin(2*pi*y)
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = 8*pi^2*sin(2*pi*x)*sin(2*pi*y)
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -53,12 +53,12 @@
 []
 
 [AuxKernels]
-  [./l2_norm_aux]
+  [l2_norm_aux]
     type = ElementLpNormAux
     variable = element_l2_norm
     coupled_variable = u
   [../]
-  [./l2_error_aux]
+  [l2_error_aux]
     type = ElementL2ErrorFunctionAux
     variable = element_l2_error
     # A function representing the exact solution for the solution
@@ -66,7 +66,7 @@
     # The nonlinear variable representing the FEM solution
     coupled_variable = u
   [../]
-  [./h1_error_aux]
+  [h1_error_aux]
     type = ElementH1ErrorFunctionAux
     variable = element_h1_error
     # A function representing the exact solution for the solution
@@ -77,7 +77,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = 'bottom left right top'
@@ -86,7 +86,7 @@
 []
 
 [Postprocessors]
-  [./L2_error]
+  [L2_error]
     # The L2 norm of the error over the entire mesh.  Note: this is
     # *not* equal to the sum over all the elements of the L2-error
     # norms.

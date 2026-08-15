@@ -10,17 +10,17 @@
 []
 
 [AuxVariables]
-  [./v]
+  [v]
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Functions]
-  [./constant_func]
+  [constant_func]
     type = ConstantFunction
     value = 2.798
   [../]
@@ -28,7 +28,7 @@
 
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     variable = u
     value = 2
@@ -36,7 +36,7 @@
 []
 
 [AuxKernels]
-  [./one]
+  [one]
     type = ConstantAux
     variable = v
     value = 1
@@ -45,20 +45,20 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -67,12 +67,12 @@
 []
 
 [Postprocessors]
-  [./value1]
+  [value1]
     type = FunctionValuePostprocessor
     function = constant_func
     execute_on = 'initial timestep_end'
   [../]
-  [./value2]
+  [value2]
     type = FunctionValuePostprocessor
     function = 2*t
     execute_on = 'initial timestep_end'

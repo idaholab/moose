@@ -1,4 +1,4 @@
-  [./<JOB_NAME>]
+  [<JOB_NAME>]
     test_name = <TEST_NAME>
     type = PBSJob
     chunks = 1

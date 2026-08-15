@@ -19,7 +19,7 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     newmark_beta = 0.3025
     newmark_gamma = 0.6
@@ -47,11 +47,11 @@
 
 
 [AuxVariables]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_yy]
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -60,14 +60,14 @@
 
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 0
     index_j = 1
   [../]
-  [./strain_yy]
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
@@ -79,85 +79,85 @@
 
 
 [BCs]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value=0.0
   [../]
-  [./top_x]
+  [top_x]
     type = DirichletBC
     variable = disp_x
     boundary = top
     value=0.0
   [../]
-  [./top_z]
+  [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
     value=0.0
   [../]
-  [./right_x]
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value=0.0
   [../]
-  [./right_z]
+  [right_z]
     type = DirichletBC
     variable = disp_z
     boundary = right
     value=0.0
   [../]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value=0.0
   [../]
-  [./left_z]
+  [left_z]
     type = DirichletBC
     variable = disp_z
     boundary = left
     value=0.0
   [../]
-  [./front_x]
+  [front_x]
     type = DirichletBC
     variable = disp_x
     boundary = front
     value=0.0
   [../]
-  [./front_z]
+  [front_z]
     type = DirichletBC
     variable = disp_z
     boundary = front
     value=0.0
   [../]
-  [./back_x]
+  [back_x]
     type = DirichletBC
     variable = disp_x
     boundary = back
     value=0.0
   [../]
-  [./back_z]
+  [back_z]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value=0.0
   [../]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value=0.0
   [../]
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value=0.0
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = bottom
@@ -166,7 +166,7 @@
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
@@ -174,12 +174,12 @@
   [../]
 
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
   [../]
 
-  [./density]
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
@@ -199,7 +199,7 @@
 
 
 [Functions]
-  [./displacement_bc]
+  [displacement_bc]
     type = PiecewiseLinear
     data_file = 'sine_wave.csv'
     format = columns
@@ -208,25 +208,25 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
   [../]
-  [./disp_1]
+  [disp_1]
     type = NodalVariableValue
     nodeid = 1
     variable = disp_y
   [../]
-  [./disp_2]
+  [disp_2]
     type = NodalVariableValue
     nodeid = 3
     variable = disp_y
   [../]
-  [./disp_3]
+  [disp_3]
     type = NodalVariableValue
     nodeid = 10
     variable = disp_y
   [../]
-  [./disp_4]
+  [disp_4]
     type = NodalVariableValue
     nodeid = 14
     variable = disp_y

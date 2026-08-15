@@ -10,17 +10,17 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./coupledforce]
+  [coupledforce]
     type = CoupledForce
     variable = u
     v = aux_u
@@ -28,20 +28,20 @@
 []
 
 [AuxVariables]
-  [./aux_u]
+  [aux_u]
     family = LAGRANGE
     order = FIRST
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -50,7 +50,7 @@
 []
 
 [Postprocessors]
-  [./to_postprocessor]
+  [to_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = aux_u
     execute_on = 'transfer'

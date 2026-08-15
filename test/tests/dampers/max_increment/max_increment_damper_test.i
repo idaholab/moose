@@ -18,21 +18,21 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
@@ -40,7 +40,7 @@
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
@@ -50,7 +50,7 @@
 []
 
 [Dampers]
-  [./max_inc_damp]
+  [max_inc_damp]
     type = MaxIncrement
     max_increment = 0.1
     variable = u

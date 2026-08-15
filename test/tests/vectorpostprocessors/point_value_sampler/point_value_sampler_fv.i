@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
     fv = true
   [../]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
@@ -19,12 +19,12 @@
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 1
   [../]
-  [./diff_v]
+  [diff_v]
     type = FVDiffusion
     variable = v
     coeff = 1
@@ -32,25 +32,25 @@
 []
 
 [FVBCs]
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = right
     value = 1
   [../]
-  [./left_v]
+  [left_v]
     type = FVDirichletBC
     variable = v
     boundary = left
     value = 1
   [../]
-  [./right_v]
+  [right_v]
     type = FVDirichletBC
     variable = v
     boundary = right
@@ -59,7 +59,7 @@
 []
 
 [VectorPostprocessors]
-  [./point_sample]
+  [point_sample]
     type = PointValueSampler
     warn_discontinuous_face_values = false
     variable = 'u v'

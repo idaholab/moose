@@ -7,55 +7,55 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./from_parent]
+  [from_parent]
   [../]
-  [./elemental_from_parent]
+  [elemental_from_parent]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./radial_from_parent]
+  [radial_from_parent]
   [../]
-  [./radial_elemental_from_parent]
+  [radial_elemental_from_parent]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./disp_x]
+  [disp_x]
     initial_condition = -0.2
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./displaced_target_from_parent]
+  [displaced_target_from_parent]
   [../]
-  [./displaced_source_from_parent]
+  [displaced_source_from_parent]
   [../]
-  [./elemental_from_parent_elemental]
+  [elemental_from_parent_elemental]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./nodal_from_parent_elemental]
+  [nodal_from_parent_elemental]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

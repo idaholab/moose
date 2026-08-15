@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 16
     ny = 16
@@ -9,19 +9,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
@@ -29,7 +29,7 @@
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false

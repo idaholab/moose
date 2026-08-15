@@ -6,31 +6,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 'left'
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
@@ -45,7 +45,7 @@
   dt = 0.001
 
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ActuallyExplicitEuler
     solve_type = lumped
   [../]

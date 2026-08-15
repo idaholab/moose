@@ -6,7 +6,7 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
@@ -15,11 +15,11 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./strain_zz]
+  [strain_zz]
   [../]
 []
 
@@ -31,18 +31,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

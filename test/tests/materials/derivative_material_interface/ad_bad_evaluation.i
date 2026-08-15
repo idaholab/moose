@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADMatDiffusion
     variable = u
     diffusivity = F
@@ -17,19 +17,19 @@
 []
 
 [Materials]
-  [./time_no_ad]
+  [time_no_ad]
     type = GenericFunctionMaterial
     prop_names = 'time_no_ad'
     prop_values = 't'
     outputs = all
   [../]
-  [./time]
+  [time]
     type = MaterialADConverter
     reg_props_in = time_no_ad
     ad_props_out = time
   [../]
 
-  [./F]
+  [F]
     type = ADDerivativeParsedMaterial
     property_name = F
     material_property_names = 'time'

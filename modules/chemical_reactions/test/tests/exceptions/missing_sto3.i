@@ -12,19 +12,19 @@
 []
 
 [Variables]
-  [./a]
+  [a]
   [../]
-  [./b]
+  [b]
   [../]
 []
 
 [AuxVariables]
-  [./mineral]
+  [mineral]
   [../]
 []
 
 [AuxKernels]
-  [./mineral_conc]
+  [mineral_conc]
     type = KineticDisPreConcAux
     variable = mineral
     sto_v = 1
@@ -33,18 +33,18 @@
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
   [../]
-  [./b_ie]
+  [b_ie]
     type = PrimaryTimeDerivative
     variable = b
   [../]
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.2

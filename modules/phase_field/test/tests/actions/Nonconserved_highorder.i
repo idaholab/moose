@@ -14,9 +14,9 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Nonconserved]
-      [./eta]
+  [PhaseField]
+    [Nonconserved]
+      [eta]
         family = LAGRANGE
         order = SECOND
         free_energy = F
@@ -29,7 +29,7 @@
 []
 
 [ICs]
-  [./InitialCondition]
+  [InitialCondition]
     type = SmoothCircleIC
     variable = eta
     x1 = 20.0
@@ -42,7 +42,7 @@
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'eta'

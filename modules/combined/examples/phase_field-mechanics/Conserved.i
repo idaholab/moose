@@ -21,10 +21,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0
       y1 = 0
@@ -34,38 +34,38 @@
       int_width = 50.0
     [../]
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y'
   [../]
 
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
@@ -76,24 +76,24 @@
 # The AuxVariables and AuxKernels below are added to visualize the xx and yy stress tensor components
 #
 [AuxVariables]
-  [./sigma11_aux]
+  [sigma11_aux]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./sigma22_aux]
+  [sigma22_aux]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 [AuxKernels]
-  [./matl_sigma11]
+  [matl_sigma11]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     variable = sigma11_aux
   [../]
-  [./matl_sigma22]
+  [matl_sigma22]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
@@ -103,7 +103,7 @@
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 5'
@@ -113,7 +113,7 @@
   [../]
 
   # simple chemical free energy with a miscibility gap
-  [./chemical_free_energy]
+  [chemical_free_energy]
     type = DerivativeParsedMaterial
     block = 0
     property_name = Fc
@@ -126,7 +126,7 @@
   [../]
 
   # undersized solute (voidlike)
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     # lambda, mu values
@@ -137,11 +137,11 @@
     # '15 15' results in a high stiffness (the elastic free energy will dominate)
     # '7 7' results in a low stiffness (the chemical free energy will dominate)
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
   [../]
-  [./var_dependence]
+  [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
     # eigenstrain coefficient
@@ -153,7 +153,7 @@
     enable_jit = true
     derivative_order = 2
   [../]
-  [./eigenstrain]
+  [eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
     eigen_base = '1 1 1 0 0 0'
@@ -162,13 +162,13 @@
     args = 'c'
     eigenstrain_name = eigenstrain
   [../]
-  [./strain]
+  [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]
-  [./elastic_free_energy]
+  [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
     block = 0
@@ -177,7 +177,7 @@
   [../]
 
   # Sum up chemical and elastic contributions
-  [./free_energy]
+  [free_energy]
     type = DerivativeSumMaterial
     block = 0
     property_name = F
@@ -188,13 +188,13 @@
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'top'
@@ -204,7 +204,7 @@
     #  5 will result in a tensile stress
     value = -5
   [../]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
@@ -214,7 +214,7 @@
 
 [Preconditioning]
   # active = ' '
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -236,7 +236,7 @@
   start_time = 0.0
   num_steps = 200
 
-  [./TimeStepper]
+  [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 1
   [../]

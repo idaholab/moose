@@ -5,40 +5,40 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
   [../]
-  [./temperature]
+  [temperature]
   [../]
-  [./specific_enthalpy]
+  [specific_enthalpy]
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./pressure_ak]
+  [pressure_ak]
     type = ConstantAux
     variable = pressure
     value = 10e6
   [../]
-  [./temperature_ak]
+  [temperature_ak]
     type = ConstantAux
     variable = temperature
     value = 400.0
   [../]
-  [./specific_enthalpy_ak]
+  [specific_enthalpy_ak]
     type = SpecificEnthalpyAux
     variable = specific_enthalpy
     fp = eos
@@ -48,7 +48,7 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
@@ -59,14 +59,14 @@
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 1
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1

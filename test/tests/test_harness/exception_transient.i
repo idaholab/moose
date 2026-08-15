@@ -10,14 +10,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./exception]
+  [exception]
     type = ExceptionKernel
     variable = u
     when = residual
@@ -25,25 +25,25 @@
     # This exception won't be caught and will crash the simulation
     throw_std_exception = true
   [../]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./time_deriv]
+  [time_deriv]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 2
     value = 1
   [../]
-  [./right2]
+  [right2]
     type = DirichletBC
     variable = u
     preset = false

@@ -128,28 +128,28 @@
 []
 
 [Variables]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
-  [./wc_x]
+  [wc_x]
   [../]
 []
 
 [Kernels]
-  [./cy_elastic]
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_y
     component = 1
   [../]
-  [./cz_elastic]
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_z
     component = 2
   [../]
-  [./x_couple]
+  [x_couple]
     type = StressDivergenceTensors
     use_displaced_mesh = false
     variable = wc_x
@@ -157,13 +157,13 @@
     component = 0
     base_name = couple
   [../]
-  [./x_moment]
+  [x_moment]
     type = MomentBalancing
     use_displaced_mesh = false
     variable = wc_x
     component = 0
   [../]
-  [./gravity]
+  [gravity]
     type = Gravity
     use_displaced_mesh = false
     variable = disp_z
@@ -173,123 +173,123 @@
 
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./wc_y]
+  [wc_y]
   [../]
-  [./wc_z]
+  [wc_z]
   [../]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./mc_shear]
+  [mc_shear]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./mc_tensile]
+  [mc_tensile]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./wp_shear]
+  [wp_shear]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./wp_tensile]
+  [wp_tensile]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./wp_shear_f]
+  [wp_shear_f]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./wp_tensile_f]
+  [wp_tensile_f]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./mc_shear_f]
+  [mc_shear_f]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./mc_tensile_f]
+  [mc_tensile_f]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
   [../]
-  [./mc_shear]
+  [mc_shear]
     type = MaterialStdVectorAux
     index = 0
     property = mc_plastic_internal_parameter
     variable = mc_shear
   [../]
-  [./mc_tensile]
+  [mc_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = mc_plastic_internal_parameter
     variable = mc_tensile
   [../]
-  [./wp_shear]
+  [wp_shear]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_internal_parameter
     variable = wp_shear
   [../]
-  [./wp_tensile]
+  [wp_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_internal_parameter
     variable = wp_tensile
   [../]
-  [./mc_shear_f]
+  [mc_shear_f]
     type = MaterialStdVectorAux
     index = 6
     property = mc_plastic_yield_function
     variable = mc_shear_f
   [../]
-  [./mc_tensile_f]
+  [mc_tensile_f]
     type = MaterialStdVectorAux
     index = 0
     property = mc_plastic_yield_function
     variable = mc_tensile_f
   [../]
-  [./wp_shear_f]
+  [wp_shear_f]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_yield_function
     variable = wp_shear_f
   [../]
-  [./wp_tensile_f]
+  [wp_tensile_f]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_yield_function
@@ -300,25 +300,25 @@
 
 
 [BCs]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = '11 12 16 21' # note addition of 16 and 21
     value = 0.0
   [../]
-  [./no_z]
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = '16'
     value = 0.0
   [../]
-  [./no_wc_x]
+  [no_wc_x]
     type = DirichletBC
     variable = wc_x
     boundary = '11 12'
     value = 0.0
   [../]
-  [./roof]
+  [roof]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 21
@@ -327,21 +327,21 @@
 []
 
 [Functions]
-  [./ini_xx]
+  [ini_xx]
     type = ParsedFunction
     expression = '-0.8*2500*10E-6*(400-z)'
   [../]
-  [./ini_zz]
+  [ini_zz]
     type = ParsedFunction
     expression = '-2500*10E-6*(400-z)'
   [../]
-  [./excav_sideways]
+  [excav_sideways]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  e_h  closure_dist'
     symbol_values = '1.0   0    150.0 -3.0 15.0'
     expression = 'e_h*max(min((min(t/end_t,1)*(ymax-ymin)+ymin-y)/closure_dist,1),0)'
   [../]
-  [./excav_downwards]
+  [excav_downwards]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  e_h  closure_dist'
     symbol_values = '1.0   0    150.0 -3.0 15.0'
@@ -350,56 +350,56 @@
 []
 
 [UserObjects]
-  [./mc_coh_strong_harden]
+  [mc_coh_strong_harden]
     type = SolidMechanicsHardeningExponential
     value_0 = 2.99 # MPa
     value_residual = 3.01 # MPa
     rate = 1.0
   [../]
-  [./mc_fric]
+  [mc_fric]
     type = SolidMechanicsHardeningConstant
     value = 0.65 # 37deg
   [../]
-  [./mc_dil]
+  [mc_dil]
     type = SolidMechanicsHardeningConstant
     value = 0.15 # 8deg
   [../]
 
-  [./mc_tensile_str_strong_harden]
+  [mc_tensile_str_strong_harden]
     type = SolidMechanicsHardeningExponential
     value_0 = 1.0 # MPa
     value_residual = 1.0 # MPa
     rate = 1.0
   [../]
-  [./mc_compressive_str]
+  [mc_compressive_str]
     type = SolidMechanicsHardeningCubic
     value_0 = 100 # Large!
     value_residual = 100
     internal_limit = 0.1
   [../]
 
-  [./wp_coh_harden]
+  [wp_coh_harden]
     type = SolidMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
   [../]
-  [./wp_tan_fric]
+  [wp_tan_fric]
     type = SolidMechanicsHardeningConstant
     value = 0.36 # 20deg
   [../]
-  [./wp_tan_dil]
+  [wp_tan_dil]
     type = SolidMechanicsHardeningConstant
     value = 0.18 # 10deg
   [../]
 
-  [./wp_tensile_str_harden]
+  [wp_tensile_str_harden]
     type = SolidMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
   [../]
-  [./wp_compressive_str_soften]
+  [wp_compressive_str_soften]
     type = SolidMechanicsHardeningCubic
     value_0 = 100
     value_residual = 1
@@ -408,7 +408,7 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 8E3 # MPa
     poisson = 0.25
@@ -417,17 +417,17 @@
     joint_shear_stiffness = 1E3
   [../]
 
-  [./strain]
+  [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
   [../]
-  [./ini_stress]
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
     eigenstrain_name = ini_stress
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticCosseratStress
     block = 0
     inelastic_models = 'mc wp'
@@ -438,7 +438,7 @@
     tangent_operator = nonlinear
     perform_finite_strain_rotations = false
   [../]
-  [./mc]
+  [mc]
     type = CappedMohrCoulombCosseratStressUpdate
     block = 0
     warn_about_precision_loss = false
@@ -456,7 +456,7 @@
     perfect_guess = true
     min_step_size = 1.0
   [../]
-  [./wp]
+  [wp]
     type = CappedWeakPlaneCosseratStressUpdate
     block = 0
     warn_about_precision_loss = false
@@ -475,7 +475,7 @@
   [../]
 
 
-  [./density]
+  [density]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 2500
@@ -483,7 +483,7 @@
 []
 
 [Postprocessors]
-  [./subsidence]
+  [subsidence]
     type = PointValue
     point = '0 0 400'
     variable = disp_z
@@ -491,7 +491,7 @@
   [../]
 []
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
@@ -526,7 +526,7 @@
   print_linear_residuals = false
   csv = true
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = false
   [../]

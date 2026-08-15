@@ -26,13 +26,13 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo0]
+  [line_seg_cut_uo0]
     type = LineSegmentCutUserObject
     cut_data = '0.0000e+00   6.3330e-01   3.9000e-01   6.3330e-01'
     time_start_cut = 0.0
     time_end_cut = 0.0
   [../]
-  [./line_seg_cut_uo1]
+  [line_seg_cut_uo1]
     type = LineSegmentCutUserObject
     cut_data = '3.9000e-01   6.3330e-01   6.8000e-01   6.3330e-01'
     time_start_cut = 0.0
@@ -41,38 +41,38 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
   [../]
 []
 
 [Functions]
-  [./right_trac_x]
+  [right_trac_x]
     type = ParsedFunction
     expression = '-(t*M*y)/I'
     symbol_names = 'M E I'
     symbol_values = '2e4 1e6 0.666666667'
   [../]
-  [./bottom_disp_y]
+  [bottom_disp_y]
     type = ParsedFunction
     expression = '((t*M)/(2*E*I))*(1-nu*nu)*(x*x-0.25*l*l)'
     symbol_names = 'M E I l nu'
     symbol_values = '2e4 1e6 0.666666667 2.0 0.3'
   [../]
-  [./soln_x]
+  [soln_x]
     type = ParsedFunction
     expression = '-(M/(E*I))*(1-nu*nu)*x*y'
     symbol_names = 'M E I nu'
     symbol_values = '2e4 1e6 0.666666667 0.3'
   [../]
-  [./soln_y]
+  [soln_y]
     type = ParsedFunction
     expression = '(M/(2*E*I))*(1-nu*nu)*(x*x-0.25*l*l+(nu/(1-nu))*y*y)'
     symbol_names = 'M E I l nu'
@@ -81,19 +81,19 @@
 []
 
 [BCs]
-  [./right_x]
+  [right_x]
     type = FunctionNeumannBC
     boundary = 1
     variable = disp_x
     function = right_trac_x
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = FunctionDirichletBC
     boundary = 0
     variable = disp_y
     function = bottom_disp_y
   [../]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     boundary = 3
     variable = disp_x
@@ -102,12 +102,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 []
@@ -121,12 +121,12 @@
 
   line_search = 'none'
 
-#  [./Quadrature]
+#  [Quadrature]
 #    order = FOURTH
 #    type = MONOMIAL
 #  [../]
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -148,11 +148,11 @@
 []
 
 [Postprocessors]
-  [./numel]
+  [numel]
     type = NumElements
     execute_on = timestep_end
   [../]
-  [./integral]
+  [integral]
     type = ElementVectorL2Error
     var_x = disp_x
     var_y = disp_y
@@ -164,7 +164,7 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

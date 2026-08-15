@@ -4,7 +4,7 @@
 []
 
 [Variables]
-  [./dummy1]
+  [dummy1]
   [../]
 []
 
@@ -13,7 +13,7 @@
 []
 
 [Functions]
-  [./left_bc]
+  [left_bc]
     type = ParsedFunction
     expression = dummy2
     symbol_values = invalid

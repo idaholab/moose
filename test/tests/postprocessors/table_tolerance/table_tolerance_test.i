@@ -10,14 +10,14 @@
 []
 
 [AuxVariables]
-  [./aux]
+  [aux]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./func]
+  [func]
     type = FunctionAux
     function = 'sin(x + 1e12*t)'
     variable = aux
@@ -38,7 +38,7 @@
 []
 
 [Postprocessors]
-  [./integral]
+  [integral]
     type = ElementIntegralVariablePostprocessor
     variable = aux
   [../]
@@ -51,11 +51,11 @@
 
 [Outputs]
   exodus = false
-  [./out]
+  [out]
     type = CSV
     new_row_tolerance = 1e-14
   [../]
-  [./console]
+  [console]
     type = Console
     new_row_tolerance = 1e-14
   [../]

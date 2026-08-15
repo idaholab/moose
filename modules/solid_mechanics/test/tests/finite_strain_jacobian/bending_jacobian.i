@@ -35,7 +35,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     use_finite_deform_jacobian = true
@@ -44,10 +44,10 @@
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
@@ -55,25 +55,25 @@
 []
 
 [BCs]
- [./fix_corner_x]
+ [fix_corner_x]
    type = DirichletBC
    variable = disp_x
    boundary = 101
    value = 0
  [../]
- [./fix_corner_y]
+ [fix_corner_y]
    type = DirichletBC
    variable = disp_y
    boundary = 101
    value = 0
  [../]
- [./fix_y]
+ [fix_y]
    type = DirichletBC
    variable = disp_y
    boundary = 102
    value = 0
  [../]
- [./move_y]
+ [move_y]
    type = FunctionDirichletBC
    variable = disp_y
    boundary = 103
@@ -101,7 +101,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

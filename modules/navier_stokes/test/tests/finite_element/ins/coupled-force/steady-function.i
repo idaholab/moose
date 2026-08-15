@@ -9,7 +9,7 @@
     nx = 16
     ny = 16
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
@@ -18,10 +18,10 @@
 []
 
 [Variables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
   [../]
-  [./p]
+  [p]
   [../]
   [u]
     family = LAGRANGE_VEC
@@ -38,26 +38,26 @@
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
   [../]
-  [./mass_pspg]
+  [mass_pspg]
     type = INSADMassPSPG
     variable = p
   [../]
 
-  [./momentum_convection]
+  [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
   [../]
 
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
   [../]
 
-  [./momentum_pressure]
+  [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
@@ -70,7 +70,7 @@
     vector_function = 'vector_func'
   []
 
-  [./momentum_supg]
+  [momentum_supg]
     type = INSADMomentumSUPG
     variable = velocity
     velocity = velocity
@@ -83,13 +83,13 @@
 []
 
 [BCs]
-  [./no_slip]
+  [no_slip]
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'bottom right left top'
   [../]
 
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
@@ -114,7 +114,7 @@
 []
 
 [Materials]
-  [./const]
+  [const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'

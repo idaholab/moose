@@ -3,7 +3,7 @@ diff=1.1
 
 [Mesh]
   coord_type = 'RZ'
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 2
@@ -16,7 +16,7 @@ diff=1.1
 []
 
 [Variables]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
@@ -25,7 +25,7 @@ diff=1.1
 []
 
 [FVKernels]
-  [./advection]
+  [advection]
     type = FVAdvection
     variable = v
     velocity = '${a} ${a} 0'
@@ -82,7 +82,7 @@ diff=1.1
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact

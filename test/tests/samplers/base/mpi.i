@@ -6,19 +6,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Samplers]
-  [./sample]
+  [sample]
     type = TestSampler
     execute_on = 'initial'
   [../]
 []
 
 [Postprocessors]
-  [./test]
+  [test]
     type = SamplerTester
     sampler = sample
     test_type = MPI

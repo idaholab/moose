@@ -9,25 +9,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Functions]
-  [./force]
+  [force]
     type = ParsedFunction
     expression = t
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./force]
+  [force]
     type = BodyForce
     variable = u
     function = force
@@ -35,13 +35,13 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
   [../]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
@@ -63,8 +63,8 @@
   marker = box
   max_h_level = 2
   initial_steps = 2
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       bottom_left = '0.3 0.3 0'
       inside = refine
       top_right = '0.6 0.6 0'

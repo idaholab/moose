@@ -5,14 +5,14 @@
     nx = 20
     xmax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
   [../]
-  [./interface]
+  [interface]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = '0'
@@ -22,22 +22,22 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = '0'
   [../]
-  [./v]
+  [v]
     block = '1'
   [../]
   [w][]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
     block = 0
   [../]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
     block = 1
@@ -49,7 +49,7 @@
 []
 
 [InterfaceKernels]
-  [./interface]
+  [interface]
     type = ADCoupledInterfacialSource
     variable = u
     neighbor_var = v
@@ -61,19 +61,19 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
     value = 10
   [../]
-  [./middle]
+  [middle]
     type = MatchedValueBC
     variable = v
     boundary = 'primary0_interface'

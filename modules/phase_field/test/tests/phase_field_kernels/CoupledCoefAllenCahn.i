@@ -19,12 +19,12 @@
 []
 
 [Variables]
-  [./w]
+  [w]
   [../]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 25.0
       y1 = 25.0
@@ -37,29 +37,29 @@
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
   [../]
-  [./ACBulk]
+  [ACBulk]
     type = CoupledAllenCahn
     variable = w
     v = eta
     f_name = F
     mob_name = 1
   [../]
-  [./W]
+  [W]
     type = MatReaction
     variable = w
     reaction_rate = -1
   [../]
-  [./CoupledBulk]
+  [CoupledBulk]
     type = MatReaction
     variable = eta
     v = w
     reaction_rate = L
   [../]
-  [./ACInterface]
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = 1
@@ -69,14 +69,14 @@
 []
 
 [Materials]
-  [./mobility]
+  [mobility]
     type = DerivativeParsedMaterial
     property_name  = L
     coupled_variables = 'eta w'
     expression = '(1.5-eta)^2+(1.5-w)^2'
     derivative_order = 2
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'eta'
@@ -86,7 +86,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

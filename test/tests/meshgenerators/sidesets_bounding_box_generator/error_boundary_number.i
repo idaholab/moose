@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
@@ -7,7 +7,7 @@
     parallel_type = replicated
   []
 
-  [./createNewSidesetOne]
+  [createNewSidesetOne]
     type = SideSetsFromBoundingBoxGenerator
     input = gmg
     included_boundaries = 'right'
@@ -16,7 +16,7 @@
     top_right = '1.9 1.9 0'
   []
 
-  [./createNewSidesetTwo]
+  [createNewSidesetTwo]
     type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetOne
     included_boundaries = 'left'

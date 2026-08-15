@@ -64,7 +64,7 @@
 []
 
 [Functions]
-  [./temp]
+  [temp]
     type = PiecewiseLinear
     x = '0   1'
     y = '100 200'
@@ -72,20 +72,20 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
    initial_condition = 100
   [../]
 []
 
 [AuxVariables]
-  [./gap_conductance]
+  [gap_conductance]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temp
   [../]
@@ -93,7 +93,7 @@
 
 
 [AuxKernels]
-  [./gap_cond]
+  [gap_cond]
     type = MaterialRealAux
     property = gap_conductance
     variable = gap_conductance
@@ -102,7 +102,7 @@
 []
 
 [Materials]
-  [./heat1]
+  [heat1]
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
@@ -111,7 +111,7 @@
 []
 
 [ThermalContact]
-  [./thermal_contact]
+  [thermal_contact]
     type = GapHeatTransfer
     variable = temp
     primary = 3
@@ -126,13 +126,13 @@
 []
 
 [BCs]
-  [./mid]
+  [mid]
     type = FunctionDirichletBC
     boundary = 5
     variable = temp
     function = temp
   [../]
-  [./temp_far_right]
+  [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
@@ -154,7 +154,7 @@
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-7
 
-  [./Quadrature]
+  [Quadrature]
      order = fifth
      side_order = seventh
   [../]
@@ -162,32 +162,32 @@
 
 [Outputs]
   exodus = true
-  [./Console]
+  [Console]
     type = Console
   [../]
 []
 
 [Postprocessors]
-  [./temp_left]
+  [temp_left]
     type = SideAverageValue
     boundary = 2
     variable = temp
   [../]
 
-  [./temp_right]
+  [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
   [../]
 
-  [./flux_left]
+  [flux_left]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
   [../]
 
-  [./flux_right]
+  [flux_right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 3

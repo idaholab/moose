@@ -9,23 +9,23 @@
 []
 
 [Variables]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
-  [./scalar_strain_xx]
+  [scalar_strain_xx]
     order = FIRST
     family = SCALAR
   [../]
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./generalized_plane_strain]
+  [generalized_plane_strain]
     block = 1
     strain = SMALL
     scalar_out_of_plane_strain = scalar_strain_xx
@@ -35,18 +35,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

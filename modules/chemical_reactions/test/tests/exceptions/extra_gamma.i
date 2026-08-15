@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./a]
+  [a]
   [../]
-  [./b]
+  [b]
   [../]
 []
 
 [AuxVariables]
-  [./c]
+  [c]
   [../]
-  [./gamma_a]
+  [gamma_a]
   [../]
-  [./gamma_b]
+  [gamma_b]
   [../]
-  [./gamma_c]
+  [gamma_c]
   [../]
 []
 
 [AuxKernels]
-  [./c]
+  [c]
     type = AqueousEquilibriumRxnAux
     variable = c
     v = 'a b'
@@ -35,18 +35,18 @@
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
   [../]
-  [./b_ie]
+  [b_ie]
     type = PrimaryTimeDerivative
     variable = b
   [../]
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.2

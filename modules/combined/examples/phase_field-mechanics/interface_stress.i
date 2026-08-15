@@ -17,15 +17,15 @@
 []
 
 [Functions]
-  [./sphere]
+  [sphere]
     type = ParsedFunction
     expression = 'r:=sqrt(x^2+y^2+z^2); R:=(4.0-r)/2.0; if(R>1,1,if(R<0,0,3*R^2-2*R^3))'
   [../]
 []
 
 [AuxVariables]
-  [./eta]
-    [./InitialCondition]
+  [eta]
+    [InitialCondition]
       type = FunctionIC
       function = sphere
     [../]
@@ -33,30 +33,30 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     generate_output = 'hydrostatic_stress stress_xx'
   [../]
 []
 
 [Materials]
-  [./ym]
+  [ym]
     type = DerivativeParsedMaterial
     property_name = ym
     expression = (1-eta)*7+0.5
     coupled_variables = eta
   [../]
-  [./elasticity]
+  [elasticity]
     type = ComputeVariableIsotropicElasticityTensor
     poissons_ratio = 0.45
     youngs_modulus = ym
     args = eta
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
-  [./interface]
+  [interface]
     type = ComputeInterfaceStress
     v = eta
     stress = 1.0
@@ -64,7 +64,7 @@
 []
 
 [VectorPostprocessors]
-  [./line]
+  [line]
     type = SphericalAverage
     variable = 'hydrostatic_stress'
     radius = 10

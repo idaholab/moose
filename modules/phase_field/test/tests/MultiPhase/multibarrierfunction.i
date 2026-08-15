@@ -12,10 +12,10 @@
 []
 
 [AuxVariables]
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 7.0
       y1 = 10.0
@@ -25,10 +25,10 @@
       int_width = 2.0
     [../]
   [../]
-  [./eta2]
+  [eta2]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 13.0
       y1 = 10.0
@@ -41,7 +41,7 @@
 []
 
 [Materials]
-  [./multibarrier]
+  [multibarrier]
     type = MultiBarrierFunctionMaterial
     etas = 'eta1 eta2'
     function_name = g

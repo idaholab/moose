@@ -10,22 +10,22 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     expression = 10.0*(2*x/504)
   [../]
-  [./cte_func]
+  [cte_func]
     type = PiecewiseLinear
     x = '-10 -6 -2 0 2 6 10'
     y = '1.484e-5 1.489e-5 1.494e-5 1.496e-5 1.498e-5 1.502e-5 1.505e-5'
@@ -47,7 +47,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
@@ -58,13 +58,13 @@
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
   [../]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
@@ -73,21 +73,21 @@
 []
 
 [BCs]
-  [./crack_y]
+  [crack_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
   [../]
 
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 400
     value = 0.0
   [../]
 
-  [./no_x1]
+  [no_x1]
     type = DirichletBC
     variable = disp_x
     boundary = 900
@@ -96,15 +96,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion_strain]
+  [thermal_expansion_strain]
     type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
     block = 1
     thermal_expansion_function = cte_func
@@ -142,7 +142,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     pc_side = left
     ksp_norm = preconditioned

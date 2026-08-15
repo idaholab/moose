@@ -30,19 +30,19 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Functions]
-  [./temperature_load]
+  [temperature_load]
     type = ParsedFunction
     expression = t*(500.0)+300.0
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./solid]
+  [solid]
     strain = SMALL
     incremental = true
     add_variables = true
@@ -52,7 +52,7 @@
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = temperature_load
@@ -60,19 +60,19 @@
 []
 
 [BCs]
-  [./x_bot]
+  [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./y_bot]
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./z_bot]
+  [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
@@ -81,22 +81,22 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./small_stress]
+  [small_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion_strain1]
+  [thermal_expansion_strain1]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.0e-5
     temperature = temp
     eigenstrain_name = eigenstrain1
   [../]
-  [./thermal_expansion_strain2]
+  [thermal_expansion_strain2]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 0.3e-5
@@ -127,22 +127,22 @@
 []
 
 [Postprocessors]
-  [./strain_xx]
+  [strain_xx]
     type = ElementAverageValue
     variable = strain_xx
     block = 0
   [../]
-  [./strain_yy]
+  [strain_yy]
     type = ElementAverageValue
     variable = strain_yy
     block = 0
   [../]
-  [./strain_zz]
+  [strain_zz]
     type = ElementAverageValue
     variable = strain_zz
     block = 0
   [../]
-  [./temperature]
+  [temperature]
     type = AverageNodalVariableValue
     variable = temp
     block = 0

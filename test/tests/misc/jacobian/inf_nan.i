@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = NanKernel
     variable = u
   [../]

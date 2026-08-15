@@ -22,7 +22,7 @@
 []
 
 [Functions]
-  [./kifunc]
+  [kifunc]
     type = PiecewiseLinear
     x = '0.0 1.0 2.0'
     y = '0.0 1.0 2.0'
@@ -46,22 +46,22 @@
 []
 
 [AuxVariables]
-  [./dq_x]
+  [dq_x]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./dq_y]
+  [dq_y]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./dq_z]
+  [dq_z]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
@@ -70,7 +70,7 @@
 []
 
 [BCs]
-  [./all_x]
+  [all_x]
     type = InteractionIntegralBenchmarkBC
     variable = disp_x
     component = x
@@ -83,7 +83,7 @@
     crack_front_definition = crackFrontDefinition
     crack_front_point_index = 0
   [../]
-  [./all_y]
+  [all_y]
     type = InteractionIntegralBenchmarkBC
     variable = disp_y
     component = y
@@ -96,7 +96,7 @@
     crack_front_definition = crackFrontDefinition
     crack_front_point_index = 0
   [../]
-  [./all_z]
+  [all_z]
     type = InteractionIntegralBenchmarkBC
     variable = disp_z
     component = z
@@ -112,12 +112,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 30000
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -144,15 +144,15 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
   [../]
 
-  [./nl_its]
+  [nl_its]
     type = NumNonlinearIterations
   [../]
 
-  [./lin_its]
+  [lin_its]
     type = NumLinearIterations
   [../]
 

@@ -9,7 +9,7 @@
     nx = 4
     ny = 4
   []
-  [./block_1]
+  [block_1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     top_right = '0.5 0.5 0'
@@ -19,28 +19,28 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./mat]
+  [mat]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./mat]
+  [mat]
     type = MaterialRealAux
     variable = mat
     property = prop
@@ -48,13 +48,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -63,7 +63,7 @@
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     block = 1
     prop_names = prop
@@ -78,7 +78,7 @@
 
 [Outputs]
   file_base = out
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]

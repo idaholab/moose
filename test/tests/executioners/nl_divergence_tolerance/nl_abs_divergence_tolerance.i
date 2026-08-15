@@ -6,13 +6,13 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     type = MooseVariableFVReal
   [../]
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 1
@@ -34,13 +34,13 @@
 []
 
 [FVBCs]
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = right

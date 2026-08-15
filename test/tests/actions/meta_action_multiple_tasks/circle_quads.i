@@ -3,21 +3,21 @@
 []
 
 [Functions]
-  [./all_bc_fn]
+  [all_bc_fn]
     type = ParsedFunction
     expression = x*x+y*y
   [../]
 
-  [./f_fn]
+  [f_fn]
     type = ParsedFunction
     expression = -4
   [../]
 
-  [./analytical_normal_x]
+  [analytical_normal_x]
     type = ParsedFunction
     expression = x
   [../]
-  [./analytical_normal_y]
+  [analytical_normal_y]
     type = ParsedFunction
     expression = y
   [../]
@@ -28,16 +28,16 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = f_fn
@@ -45,7 +45,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '1'
@@ -54,13 +54,13 @@
 []
 
 [Postprocessors]
-  [./nx_pps]
+  [nx_pps]
     type = NodalL2Error
     variable = nodal_normal_x
     boundary = '1'
     function = analytical_normal_x
   [../]
-  [./ny_pps]
+  [ny_pps]
     type = NodalL2Error
     variable = nodal_normal_y
     boundary = '1'

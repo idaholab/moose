@@ -28,29 +28,29 @@
 
 [Variables]
   # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     coloring_algorithm = bt
   [../]
-  [./grain_tracker]
+  [grain_tracker]
     type = FauxGrainTracker # Note: FauxGrainTracker only used for testing purposes. Use GrainTracker when using GrainTextureVectorPostprocessor.
     flood_entity_type = ELEMENTAL
     outputs = none
   [../]
-  [./euler_angle_file]
+  [euler_angle_file]
     type = EulerAngleFileReader
     file_name = grn_3_rand_2D.tex
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
     [../]
   [../]
@@ -58,7 +58,7 @@
 
 [AuxVariables]
   # Dependent variables
-  [./unique_grains]
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -66,14 +66,14 @@
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
   [../]
 []
 
 [AuxKernels]
   # AuxKernel block, defining the equations used to calculate the auxvars
-  [./unique_grains]
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = timestep_end
@@ -83,7 +83,7 @@
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
     block = 0 # Block ID (only one block in this problem)
@@ -96,7 +96,7 @@
 []
 
 [VectorPostprocessors]
-  [./textureInfo]
+  [textureInfo]
     type = GrainTextureVectorPostprocessor
     unique_grains = unique_grains
     euler_angle_provider = euler_angle_file

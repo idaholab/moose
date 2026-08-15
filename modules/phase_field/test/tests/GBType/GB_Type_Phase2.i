@@ -39,12 +39,12 @@
 []
 
 [UserObjects]
-  [./initial_grains]
+  [initial_grains]
     type = SolutionUserObject
     mesh = 'GB_Type_Phase1_out.e'
     timestep = LATEST
   [../]
-  [./grain_tracker]
+  [grain_tracker]
     type = GrainTracker
     threshold = 0.2
     connecting_threshold = 0.08
@@ -55,14 +55,14 @@
 []
 
 [Variables]
-  [./cx_AEH] #composition used for the x-component of the AEH solve
+  [cx_AEH] #composition used for the x-component of the AEH solve
     initial_condition = 0.5
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./gr]
+  [Periodic]
+    [gr]
       auto_direction = 'x y'
       variable = 'gr0 gr1 gr2 gr3 gr4 gr5'
     [../]
@@ -70,116 +70,116 @@
 []
 
 [AuxVariables]
-  [./gr0]
+  [gr0]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./gr1]
+  [gr1]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./gr2]
+  [gr2]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./gr3]
+  [gr3]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./gr4]
+  [gr4]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./gr5]
+  [gr5]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./bnds_LAGB]
+  [bnds_LAGB]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./bnds_HAGB]
+  [bnds_HAGB]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./gb_type]
+  [gb_type]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./EBSD_grain]
+  [EBSD_grain]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./init_grO]
+  [init_grO]
     type = SolutionAux
     execute_on = INITIAL
     variable = gr0
     solution = initial_grains
     from_variable = gr0
   [../]
-  [./init_gr1]
+  [init_gr1]
     type = SolutionAux
     execute_on = INITIAL
     variable = gr1
     solution = initial_grains
     from_variable = gr1
   [../]
-  [./init_gr2]
+  [init_gr2]
     type = SolutionAux
     execute_on = INITIAL
     variable = gr2
     solution = initial_grains
     from_variable = gr2
   [../]
-  [./init_gr3]
+  [init_gr3]
     type = SolutionAux
     execute_on = INITIAL
     variable = gr3
     solution = initial_grains
     from_variable = gr3
   [../]
-  [./init_gr4]
+  [init_gr4]
     type = SolutionAux
     execute_on = INITIAL
     variable = gr4
     solution = initial_grains
     from_variable = gr4
   [../]
-  [./init_gr5]
+  [init_gr5]
     type = SolutionAux
     execute_on = INITIAL
     variable = gr5
     solution = initial_grains
     from_variable = gr5
   [../]
-  [./init_EBSD_grain]
+  [init_EBSD_grain]
     type = SolutionAux
     execute_on = INITIAL
     variable = EBSD_grain
     solution = initial_grains
     from_variable = ebsd_numbers
   [../]
-  [./gb_type]
+  [gb_type]
     type = SolutionAux
     execute_on = 'INITIAL TIMESTEP_END'
     variable = gb_type
     solution = initial_grains
     from_variable = gb_type
   [../]
-  [./bnds_aux]
+  [bnds_aux]
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./bnds_LAGB]
+  [bnds_LAGB]
     # Calculate the bnds for specific GB type
     type = SolutionAuxMisorientationBoundary
     variable = bnds_LAGB
@@ -188,7 +188,7 @@
     from_variable = gb_type
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./bnds_HAGB]
+  [bnds_HAGB]
     # Calculate the bnds for specific GB type
     type = SolutionAuxMisorientationBoundary
     variable = bnds_HAGB
@@ -201,7 +201,7 @@
 
 
 [Kernels]
-  [./Diff_x]
+  [Diff_x]
     type = MatDiffusion
     diffusivity = D_Scaling
     variable = cx_AEH
@@ -211,13 +211,13 @@
 
 [Materials]
   #=========================================================== Generic Constants
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names =  'R            T   '
     prop_values = '8.3145       1450'
     # unit         J.mol-1.K-1  K
   [../]
-  [./consts_expected]
+  [consts_expected]
     type = GenericConstantMaterial
     prop_names =  'Db          Dgbl     Dgbh'
     prop_values = '0.007       0.302    821.672'
@@ -225,7 +225,7 @@
     outputs = exodus
   [../]
   #===================================================== Interpolation functions
-  [./hgb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
+  [hgb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
     type = DerivativeParsedMaterial
     coupled_variables = 'bnds'
     constant_names =       'bnds_middle width tanh_cst_x2'
@@ -234,7 +234,7 @@
     property_name = 'hgb'
     outputs = exodus
   [../]
-  [./hgb_lagb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
+  [hgb_lagb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
     type = DerivativeParsedMaterial
     coupled_variables = 'bnds_LAGB'
     constant_names =       'bnds_middle width tanh_cst_x2'
@@ -243,7 +243,7 @@
     property_name = 'hgb_lagb'
     outputs = exodus
   [../]
-  [./hgb_hagb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
+  [hgb_hagb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
     type = DerivativeParsedMaterial
     coupled_variables = 'bnds_HAGB'
     constant_names =       'bnds_middle width tanh_cst_x2'
@@ -254,7 +254,7 @@
   [../]
   #====================================================== Diffusion coefficients
   #====================== Diffusion coefficients - Basic values and coefficients
-  [./Grain_boundary_width] # size of grain boundaries in input polycrystal, as well as length scales for domain size
+  [Grain_boundary_width] # size of grain boundaries in input polycrystal, as well as length scales for domain size
     type = GenericConstantMaterial
     prop_names =  'wGB_ref wGB  L  '
     prop_values = '1       6   9000'
@@ -262,7 +262,7 @@
   [../]
   #============================================ Corrected Diffusion coefficients
   #========================================================= Analytical 1 - 1x1y
-  [./Diffusion_coefficient_D]
+  [Diffusion_coefficient_D]
     type = DerivativeParsedMaterial
     property_name = 'D_Scaling'
     coupled_variables = 'bnds'
@@ -279,7 +279,7 @@
 [../]
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     off_diag_row = 'cx_AEH'
     off_diag_column = 'cx_AEH'

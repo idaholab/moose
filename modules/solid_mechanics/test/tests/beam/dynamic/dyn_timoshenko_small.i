@@ -42,85 +42,85 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_z]
+  [disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_x]
+  [rot_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_y]
+  [rot_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_z]
+  [rot_z]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./vel_x]
+  [vel_x]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./vel_y]
+  [vel_y]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./vel_z]
+  [vel_z]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./accel_x]
+  [accel_x]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./accel_y]
+  [accel_y]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./accel_z]
+  [accel_z]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./rot_vel_x]
+  [rot_vel_x]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./rot_vel_y]
+  [rot_vel_y]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./rot_vel_z]
+  [rot_vel_z]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./rot_accel_x]
+  [rot_accel_x]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./rot_accel_y]
+  [rot_accel_y]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./rot_accel_z]
+  [rot_accel_z]
   order = FIRST
   family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./accel_x]
+  [accel_x]
     type = NewmarkAccelAux
     variable = accel_x
     displacement = disp_x
@@ -128,14 +128,14 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./vel_x]
+  [vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./accel_y]
+  [accel_y]
     type = NewmarkAccelAux
     variable = accel_y
     displacement = disp_y
@@ -143,14 +143,14 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./vel_y]
+  [vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./accel_z]
+  [accel_z]
     type = NewmarkAccelAux
     variable = accel_z
     displacement = disp_z
@@ -158,14 +158,14 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./vel_z]
+  [vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./rot_accel_x]
+  [rot_accel_x]
     type = NewmarkAccelAux
     variable = rot_accel_x
     displacement = rot_x
@@ -173,14 +173,14 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./rot_vel_x]
+  [rot_vel_x]
     type = NewmarkVelAux
     variable = rot_vel_x
     acceleration = rot_accel_x
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./rot_accel_y]
+  [rot_accel_y]
     type = NewmarkAccelAux
     variable = rot_accel_y
     displacement = rot_y
@@ -188,14 +188,14 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./rot_vel_y]
+  [rot_vel_y]
     type = NewmarkVelAux
     variable = rot_vel_y
     acceleration = rot_accel_y
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./rot_accel_z]
+  [rot_accel_z]
     type = NewmarkAccelAux
     variable = rot_accel_z
     displacement = rot_z
@@ -203,7 +203,7 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./rot_vel_z]
+  [rot_vel_z]
     type = NewmarkVelAux
     variable = rot_vel_z
     acceleration = rot_accel_z
@@ -213,37 +213,37 @@
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./fixy1]
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = left
     value = 0.0
   [../]
-  [./fixz1]
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = left
     value = 0.0
   [../]
-  [./fixr1]
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = left
     value = 0.0
   [../]
-  [./fixr2]
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = left
     value = 0.0
   [../]
-  [./fixr3]
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = left
@@ -252,7 +252,7 @@
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = UserForcingFunctorNodalKernel
     variable = disp_y
     boundary = right
@@ -261,7 +261,7 @@
 []
 
 [Functions]
-  [./force]
+  [force]
     type = PiecewiseLinear
     x = '0.0 0.005 0.01 1.0'
     y = '0.0 1.0  0.0  0.0'
@@ -269,7 +269,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -288,7 +288,7 @@
 []
 
 [Kernels]
-  [./solid_disp_x]
+  [solid_disp_x]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -296,7 +296,7 @@
     component = 0
     variable = disp_x
   [../]
-  [./solid_disp_y]
+  [solid_disp_y]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -304,7 +304,7 @@
     component = 1
     variable = disp_y
   [../]
-  [./solid_disp_z]
+  [solid_disp_z]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -312,7 +312,7 @@
     component = 2
     variable = disp_z
   [../]
-  [./solid_rot_x]
+  [solid_rot_x]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -320,7 +320,7 @@
     component = 3
     variable = rot_x
   [../]
-  [./solid_rot_y]
+  [solid_rot_y]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -328,7 +328,7 @@
     component = 4
     variable = rot_y
   [../]
-  [./solid_rot_z]
+  [solid_rot_z]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -336,7 +336,7 @@
     component = 5
     variable = rot_z
   [../]
-  [./inertial_force_x]
+  [inertial_force_x]
     type = InertialForceBeam
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -355,7 +355,7 @@
     component = 0
     variable = disp_x
   [../]
-  [./inertial_force_y]
+  [inertial_force_y]
     type = InertialForceBeam
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -374,7 +374,7 @@
     component = 1
     variable = disp_y
   [../]
-  [./inertial_force_z]
+  [inertial_force_z]
     type = InertialForceBeam
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -393,7 +393,7 @@
     component = 2
     variable = disp_z
   [../]
-  [./inertial_force_rot_x]
+  [inertial_force_rot_x]
     type = InertialForceBeam
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -412,7 +412,7 @@
     component = 3
     variable = rot_x
   [../]
-  [./inertial_force_rot_y]
+  [inertial_force_rot_y]
     type = InertialForceBeam
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -431,7 +431,7 @@
     component = 4
     variable = rot_y
   [../]
-  [./inertial_force_rot_z]
+  [inertial_force_rot_z]
     type = InertialForceBeam
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -453,14 +453,14 @@
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 2e4
     poissons_ratio = 0.0
     shear_coefficient = 1.0
     block = 0
   [../]
-  [./strain]
+  [strain]
     type = ComputeIncrementalBeamStrain
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -472,11 +472,11 @@
     Iz = 1.0
     y_orientation = '0.0 1.0 0.0'
   [../]
-  [./stress]
+  [stress]
     type = ComputeBeamResultants
     block = 0
   [../]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
@@ -485,22 +485,22 @@
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_x
   [../]
-  [./disp_y]
+  [disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_y
   [../]
-  [./vel_y]
+  [vel_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = vel_y
   [../]
-  [./accel_y]
+  [accel_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = accel_y

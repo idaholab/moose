@@ -108,27 +108,27 @@
 
 [Variables]
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./A]
+  [A]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./scaled_u]
+  [scaled_u]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./R]
+  [R]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -137,7 +137,7 @@
 [Functions]
 
 
-  [./u]
+  [u]
     type = PiecewiseBilinear
     x = '0 1 3'
     y = '0 1 3'
@@ -161,7 +161,7 @@
 # At time = 2, the value of u at nodes with x-coordinate = 1 is 3.
 #            , the value of u at nodes with x-coordinate = 2 is 4.
 #
-  [./v]
+  [v]
     type = PiecewiseBilinear
     x = '0 1 3'
     y = '0 1 3'
@@ -183,7 +183,7 @@
 # At time = 2, the value of v at nodes with y-coordinate = 1 is 3.
 #            , the value of v at nodes with y-coordinate = 2 is 4.
 #
-  [./w]
+  [w]
     type = PiecewiseBilinear
     x = '0 1 3'
     y = '0 1 3'
@@ -205,7 +205,7 @@
 # At time = 2, the value of w at nodes with z-coordinate = 1 is 2.
 #            , the value of w at nodes with z-coordinate = 2 is 4.
 #
-  [./A]
+  [A]
     type = PiecewiseBilinear
     x = '0 1 3'
     y = '0 1 3'
@@ -233,7 +233,7 @@
 # as a function of x and y postion, but is constant in time.
 #
 #
-  [./scaled_u]
+  [scaled_u]
     type = PiecewiseBilinear
     x = '0 1 3'
     y = '0 1 3'
@@ -246,7 +246,7 @@
 #
 #
 #
-  [./R]
+  [R]
     type = PiecewiseBilinear
     x = '0 1 3'
     y = '0 1 3'
@@ -279,27 +279,27 @@
 
 [Kernels]
 
-  [./diffu]
+  [diffu]
     type = Diffusion
     variable = u
   [../]
-  [./diffv]
+  [diffv]
     type = Diffusion
     variable = v
   [../]
-  [./diffw]
+  [diffw]
     type = Diffusion
     variable = w
   [../]
-  [./diffA]
+  [diffA]
     type = Diffusion
     variable = A
   [../]
-  [./diff_scaled_u]
+  [diff_scaled_u]
     type = Diffusion
     variable = scaled_u
   [../]
-  [./diffR]
+  [diffR]
     type = Diffusion
     variable = R
   [../]
@@ -307,37 +307,37 @@
 
 [BCs]
 
-  [./u]
+  [u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1'
     function = u
   [../]
-  [./v]
+  [v]
     type = FunctionDirichletBC
     variable = v
     boundary = '1'
     function = v
   [../]
-  [./w]
+  [w]
     type = FunctionDirichletBC
     variable = w
     boundary = '1'
     function = w
   [../]
-  [./A]
+  [A]
     type = FunctionDirichletBC
     variable = A
     boundary = '1'
     function = A
   [../]
-  [./scaled_u]
+  [scaled_u]
     type = FunctionDirichletBC
     variable = scaled_u
     boundary = '1'
     function = scaled_u
   [../]
-  [./R]
+  [R]
     type = FunctionDirichletBC
     variable = R
     boundary = '1'

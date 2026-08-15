@@ -15,7 +15,7 @@
 []
 
 [Functions]
-  [./rampConstant]
+  [rampConstant]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
@@ -40,7 +40,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
@@ -50,20 +50,20 @@
 []
 
 [BCs]
-  [./crack_y]
+  [crack_y]
     type = DirichletBC
     variable = disp_x
     boundary = 100
     value = 0.0
   [../]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_y
     boundary = 700
     value = 0.0
   [../]
-  [./Pressure]
-    [./Side1]
+  [Pressure]
+    [Side1]
       boundary = 400
       function = rampConstant
     [../]
@@ -71,12 +71,12 @@
 [] # BCs
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []

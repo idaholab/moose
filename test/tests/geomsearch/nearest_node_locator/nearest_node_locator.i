@@ -13,26 +13,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./distance]
+  [distance]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./distance]
+  [distance]
     type = NearestNodeDistanceAux
     variable = distance
     boundary = 2
@@ -41,25 +41,25 @@
 []
 
 [BCs]
-  [./block1_left]
+  [block1_left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
-  [./block1_right]
+  [block1_right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
   [../]
-  [./block2_left]
+  [block2_left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
-  [./block2_right]
+  [block2_right]
     type = DirichletBC
     variable = u
     boundary = 4
@@ -76,7 +76,7 @@
 
 [Outputs]
   exodus = true
-   [./pgraph]
+   [pgraph]
     type = PerfGraphOutput
     heaviest_branch = true
     heaviest_sections = 5

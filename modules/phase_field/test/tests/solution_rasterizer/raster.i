@@ -13,7 +13,7 @@
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionRasterizer
     system_variables = 'c'
     mesh = diffuse_out.e

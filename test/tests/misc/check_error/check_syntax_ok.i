@@ -4,27 +4,27 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
   [../]
 
-  [./lm]
+  [lm]
     order = FIRST
     family = SCALAR
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [ScalarKernels]
-  [./ced]
+  [ced]
     type = NodalEqualValueConstraint
     variable = lm
     var = u
@@ -33,21 +33,21 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = '1'
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = '2'
     value = 3
   [../]
 
-  [./evc1]
+  [evc1]
     type = OneDEqualValueConstraintBC
     variable = u
     boundary = '100'
@@ -56,7 +56,7 @@
     vg = 1
   [../]
 
-  [./evc2]
+  [evc2]
     type = OneDEqualValueConstraintBC
     variable = u
     boundary = '101'
@@ -67,7 +67,7 @@
 []
 
 [Preconditioning]
-  [./fmp]
+  [fmp]
     type = SMP
     full = true
     solve_type = 'NEWTON'

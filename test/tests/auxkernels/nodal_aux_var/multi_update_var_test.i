@@ -10,26 +10,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./tt]
+  [tt]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
   [../]
 
-  [./ten]
+  [ten]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
   [../]
 
-  [./2k]
+  [2k]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
@@ -37,14 +37,14 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./all]
+  [all]
     variable = tt
     type = MultipleUpdateAux
     u = u
@@ -56,14 +56,14 @@
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 3

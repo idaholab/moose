@@ -11,45 +11,45 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     disp_x = disp_x
     disp_y = disp_y
   [../]
 []
 
 [AuxVariables]
-  [./c]
+  [c]
   [../]
-  [./C11_aux]
+  [C11_aux]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./s11_aux]
+  [s11_aux]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
- [./matl_s11]
+ [matl_s11]
     type = RankTwoAux
     variable = s11_aux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
   [../]
-  [./matl_C11]
+  [matl_C11]
     type = RankFourAux
     variable = C11_aux
     rank_four_tensor = elasticity_tensor
@@ -61,7 +61,7 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeConcentrationDependentElasticityTensor
     block = 0
     c = c
@@ -70,11 +70,11 @@
     fill_method1 = symmetric_isotropic
     fill_method0 = symmetric_isotropic
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
   [../]
-  [./strain]
+  [strain]
     type = ComputeSmallStrain
     block = 0
     disp_x = disp_x
@@ -83,25 +83,25 @@
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
-  [./right_x]
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0
   [../]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
@@ -110,7 +110,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -134,7 +134,7 @@
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     int_width = 0.2
     x1 = 0
     y1 = 0

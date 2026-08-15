@@ -11,37 +11,37 @@
 []
 
 [Functions]
-  [./left_fn]
+  [left_fn]
     type = ParsedFunction
     expression = 't + 1'
   [../]
 
-  [./disp_x_fn]
+  [disp_x_fn]
     type = ParsedFunction
     expression = '-x'
   [../]
-  [./disp_z_fn]
+  [disp_z_fn]
     type = ParsedFunction
     expression = 'x'
   [../]
 []
 
 [AuxVariables]
-  [./la]
+  [la]
     family = MONOMIAL
     order = CONSTANT
   [../]
 
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [AuxKernels]
-  [./la_ak]
+  [la_ak]
     type = SpatialUserObjectAux
     variable = la
     user_object = la_uo
@@ -49,17 +49,17 @@
     use_displaced_mesh = true
   [../]
 
-  [./disp_x_ak]
+  [disp_x_ak]
     type = FunctionAux
     variable = disp_x
     function = 'disp_x_fn'
   [../]
-  [./disp_y_ak]
+  [disp_y_ak]
     type = ConstantAux
     variable = disp_y
     value = 0
   [../]
-  [./disp_z_ak]
+  [disp_z_ak]
     type = FunctionAux
     variable = disp_z
     function = 'disp_z_fn'
@@ -67,7 +67,7 @@
 []
 
 [UserObjects]
-  [./la_uo]
+  [la_uo]
     type = LayeredAverage
     direction = z
     variable = u
@@ -78,31 +78,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = u
     boundary = left
     function = left_fn
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

@@ -5,32 +5,32 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./distance_to_left_nodes]
+  [distance_to_left_nodes]
   [../]
-  [./penetration_to_left]
+  [penetration_to_left]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./nodal_distance_aux]
+  [nodal_distance_aux]
     type = NearestNodeDistanceAux
     variable = distance_to_left_nodes
     boundary = 100
     paired_boundary = left
   [../]
-  [./penetration_aux]
+  [penetration_aux]
     type = PenetrationAux
     variable = penetration_to_left
     boundary = 100
@@ -39,13 +39,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

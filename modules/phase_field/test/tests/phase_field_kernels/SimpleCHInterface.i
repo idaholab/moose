@@ -16,14 +16,14 @@
 []
 
 [Variables]
-  [./cv]
+  [cv]
     order = THIRD
     family = HERMITE
   [../]
 []
 
 [ICs]
-  [./InitialCondition]
+  [InitialCondition]
     type = CrossIC
     x1 = 5.0
     y1 = 5.0
@@ -34,17 +34,17 @@
 []
 
 [Kernels]
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = cv
   [../]
-  [./CHSolid]
+  [CHSolid]
     type = CahnHilliard
     variable = cv
     f_name = F
     mob_name = M
   [../]
-  [./CHInterface]
+  [CHInterface]
     type = SimpleCHInterface
     variable = cv
     mob_name = M
@@ -53,12 +53,12 @@
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 0.1'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'cv'
@@ -85,7 +85,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     refinements = 1
   [../]

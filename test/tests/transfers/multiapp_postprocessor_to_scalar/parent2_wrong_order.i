@@ -6,37 +6,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./from_sub_app]
+  [from_sub_app]
     order = FOURTH
     family = SCALAR
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.01
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -45,7 +45,7 @@
 []
 
 [Postprocessors]
-  [./average]
+  [average]
     type = ElementAverageValue
     variable = u
   [../]
@@ -66,7 +66,7 @@
 []
 
 [MultiApps]
-  [./pp_sub]
+  [pp_sub]
     app_type = MooseTestApp
     positions = '0.5 0.5 0
                  0.7 0.7 0
@@ -78,7 +78,7 @@
 []
 
 [Transfers]
-  [./pp_transfer]
+  [pp_transfer]
     type = MultiAppPostprocessorToAuxScalarTransfer
     from_multi_app = pp_sub
     from_postprocessor = point_value

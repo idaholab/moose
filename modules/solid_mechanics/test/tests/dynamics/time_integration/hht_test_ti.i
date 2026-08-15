@@ -26,7 +26,7 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
     incremental = false
@@ -51,11 +51,11 @@
 
 
 [AuxVariables]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_yy]
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -64,14 +64,14 @@
 
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 0
     index_j = 1
   [../]
-  [./strain_yy]
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
@@ -82,38 +82,38 @@
 
 
 [BCs]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value=0.0
   [../]
-  [./top_x]
+  [top_x]
     type = DirichletBC
     variable = disp_x
     boundary = top
     value=0.0
   [../]
-  [./top_z]
+  [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
     value=0.0
   [../]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value=0.0
   [../]
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value=0.0
   [../]
-  [./Pressure]
-    [./Side1]
+  [Pressure]
+    [Side1]
       boundary = bottom
       function = pressure
       displacements = 'disp_x disp_y disp_z'
@@ -124,7 +124,7 @@
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
@@ -132,11 +132,11 @@
   [../]
 
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
   [../]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
@@ -157,7 +157,7 @@
 
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0.0 0.1 0.2 1.0 2.0 5.0'
     y = '0.0 0.1 0.2 1.0 1.0 1.0'
@@ -166,29 +166,29 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
   [../]
-  [./disp]
+  [disp]
     type = NodalExtremeValue
     variable = disp_y
     boundary = bottom
   [../]
-  [./vel]
+  [vel]
     type = NodalExtremeValue
     variable = vel_y
     boundary = bottom
   [../]
-  [./accel]
+  [accel]
     type = NodalExtremeValue
     variable = accel_y
     boundary = bottom
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
   [../]
-  [./strain_yy]
+  [strain_yy]
     type = ElementAverageValue
     variable = strain_yy
   [../]

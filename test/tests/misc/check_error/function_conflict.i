@@ -6,18 +6,18 @@
 []
 
 [Functions]
-  [./x]
+  [x]
     type = ConstantFunction
   [../]
 []
 
 [Variables]
-  [./var]
+  [var]
   [../]
 []
 
 [ICs]
-  [./dummy]
+  [dummy]
     type = FunctionIC
     variable = var
     function = x
@@ -26,7 +26,7 @@
 
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = var
   [../]

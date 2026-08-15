@@ -6,14 +6,14 @@
 []
 
 [AuxVariables]
-  [./aux]
+  [aux]
     family = MONOMIAL
     order = THIRD
   [../]
 []
 
 [AuxKernels]
-  [./aux]
+  [aux]
     type = FunctionAux
     function = x*y
     variable = aux
@@ -22,25 +22,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -57,7 +57,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = timestep_end
@@ -65,7 +65,7 @@
 []
 
 [Transfers]
-  [./to_sub]
+  [to_sub]
     type = MultiAppCopyTransfer
     source_variable = aux
     variable = u

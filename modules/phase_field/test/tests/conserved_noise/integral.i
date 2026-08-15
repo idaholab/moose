@@ -11,12 +11,12 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.9
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -24,7 +24,7 @@
 
 [Preconditioning]
   active = 'SMP'
-  [./SMP]
+  [SMP]
    type = SMP
    off_diag_row = 'w c'
    off_diag_column = 'c w'
@@ -32,26 +32,26 @@
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = SplitCHMath
     variable = c
     kappa_name = kappa_c
     w = w
   [../]
 
-  [./wres]
+  [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
 
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
 
-  [./conserved_langevin]
+  [conserved_langevin]
     type = ConservedLangevinNoise
     amplitude = 0.5
     variable = w
@@ -60,8 +60,8 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = 'c w'
       auto_direction = 'x y'
     [../]
@@ -69,7 +69,7 @@
 []
 
 [Materials]
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 2.0'
@@ -77,13 +77,13 @@
 []
 
 [UserObjects]
-  [./uniform_noise]
+  [uniform_noise]
     type = ConservedUniformNoise
   [../]
 []
 
 [Postprocessors]
-  [./total_c]
+  [total_c]
     type = ElementIntegralVariablePostprocessor
     execute_on = 'initial timestep_end'
     variable = c

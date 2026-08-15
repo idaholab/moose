@@ -8,34 +8,34 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -45,14 +45,14 @@
 
 [Materials]
   # This material couples in a stateful property from StatefulTest
-  [./coupled_mat]
+  [coupled_mat]
     type = CoupledMaterial
     mat_prop = 'some_prop'
     coupled_mat_prop = 'thermal_conductivity'
     use_old_prop = true
   [../]
 
-  [./stateful_mat]
+  [stateful_mat]
     type = StatefulTest
     prop_names = thermal_conductivity
     prop_values = 1.0

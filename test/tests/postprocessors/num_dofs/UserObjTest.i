@@ -5,7 +5,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -20,7 +20,7 @@
 
 
 [Postprocessors]
-  [./num_dofs_nl]
+  [num_dofs_nl]
     type = NumDOFs
     system = NL
   [../]

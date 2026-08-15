@@ -12,16 +12,16 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./resid_z]
+  [resid_z]
   [../]
 []
 
 [Functions]
-  [./rampConstantUp]
+  [rampConstantUp]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 0.1'
@@ -52,7 +52,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
@@ -61,7 +61,7 @@
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
@@ -70,26 +70,26 @@
 []
 
 [BCs]
-  [./crack_y]
+  [crack_y]
     type = DirichletBC
     variable = disp_z
     boundary = 6
     value = 0.0
   [../]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 12
     value = 0.0
   [../]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./Pressure]
-    [./Side1]
+  [Pressure]
+    [Side1]
       boundary = 5
       function = rampConstantUp
     [../]
@@ -97,12 +97,12 @@
 [] # BCs
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -134,16 +134,16 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
   [../]
-  [./nl_its]
+  [nl_its]
     type = NumNonlinearIterations
   [../]
-  [./lin_its]
+  [lin_its]
     type = NumLinearIterations
   [../]
-  [./react_z]
+  [react_z]
     type = NodalSum
     variable = resid_z
     boundary = 5

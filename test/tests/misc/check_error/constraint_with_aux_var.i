@@ -6,19 +6,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./v]
+  [v]
   [../]
 []
 
 [Constraints]
-  [./nope]
+  [nope]
     type = CoupledTiedValueConstraint
     variable = v
     secondary = 2
@@ -28,14 +28,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2

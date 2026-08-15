@@ -6,31 +6,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./scalar]
+  [scalar]
     family = SCALAR
     initial_condition = 0
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [AuxScalarKernels]
-  [./scalar_aux]
+  [scalar_aux]
     type = FunctionScalarAux
     variable = scalar
     function = func
@@ -38,13 +38,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = u
     boundary = left
     function = left_bc
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -53,13 +53,13 @@
 []
 
 [Functions]
-  [./left_bc]
+  [left_bc]
     type = ParsedFunction
     expression = s
     symbol_values = scalar
     symbol_names = s
   [../]
-  [./func]
+  [func]
     type = ParsedFunction
     expression = t
   [../]

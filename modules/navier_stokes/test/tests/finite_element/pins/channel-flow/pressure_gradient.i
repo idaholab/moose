@@ -35,7 +35,7 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = SimpleFluidProperties
     density0 = 100              # kg/m^3
     thermal_expansion = 0       # K^{-1}

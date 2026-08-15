@@ -18,7 +18,7 @@
 []
 
 [FVKernels]
-  [./time]
+  [time]
     type = FVFunctorTimeKernel
     variable = v
   [../]

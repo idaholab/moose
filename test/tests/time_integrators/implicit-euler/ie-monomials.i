@@ -11,14 +11,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = MONOMIAL
   [../]
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     variable = u
     value = 1
@@ -28,12 +28,12 @@
 [Functions]
   active = 'forcing_fn exact_fn'
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
   [../]
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedGradFunction
     value = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
@@ -42,22 +42,22 @@
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./abs]          # u * v
+  [abs]          # u * v
     type = Reaction
     variable = u
   [../]
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -65,7 +65,7 @@
 []
 
 [DGKernels]
-  [./dg_diff]
+  [dg_diff]
     type = DGDiffusion
     variable = u
     epsilon = -1
@@ -74,7 +74,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DGFunctionDiffusionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -85,7 +85,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'

@@ -13,29 +13,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -57,7 +57,7 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     type = TransientMultiApp
     positions = '0 0 0  0.5 0.5 0'
     input_files = 'sub.i failing_sub.i'

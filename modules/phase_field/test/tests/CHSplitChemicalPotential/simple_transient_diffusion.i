@@ -8,52 +8,52 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./mu]
+  [mu]
   [../]
 []
 
 [Kernels]
-  [./conc]
+  [conc]
     type = CHSplitConcentration
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
   [../]
-  [./chempot]
+  [chempot]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [Materials]
-  [./chemical_potential]
+  [chemical_potential]
     type = DerivativeParsedMaterial
     property_name = mu_prop
     coupled_variables = c
     expression = 'c'
     derivative_order = 1
   [../]
-  [./var_dependence]
+  [var_dependence]
     type = DerivativeParsedMaterial
     expression = '0.1'
     coupled_variables = c
     property_name = var_dep
     derivative_order = 1
   [../]
-  [./mobility_tensor]
+  [mobility_tensor]
     type = ConstantAnisotropicMobility
     M_name = mobility_tensor
     tensor = '1 0 0 0 1 0 0 0 1'
   [../]
-  [./mobility]
+  [mobility]
     type = CompositeMobilityTensor
     M_name = mobility_prop
     tensors = mobility_tensor
@@ -63,13 +63,13 @@
 []
 
 [BCs]
-  [./leftc]
+  [leftc]
     type = DirichletBC
     variable = c
     boundary = left
     value = 0
   [../]
-  [./rightc]
+  [rightc]
     type = DirichletBC
     variable = c
     boundary = right
@@ -92,7 +92,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
      type = SMP
      full = true
   [../]

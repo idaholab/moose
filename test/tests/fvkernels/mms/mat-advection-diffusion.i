@@ -6,7 +6,7 @@ a=1.1
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = -0.6
@@ -16,7 +16,7 @@ a=1.1
 []
 
 [Variables]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
@@ -24,12 +24,12 @@ a=1.1
 []
 
 [FVKernels]
-  [./advection]
+  [advection]
     type = FVMatAdvection
     variable = v
     vel = 'fv_velocity'
   [../]
-  [./diffusion]
+  [diffusion]
     type = FVDiffusion
     variable = v
     coeff = coeff
@@ -87,7 +87,7 @@ a=1.1
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact

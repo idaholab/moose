@@ -60,7 +60,7 @@
 []
 
 [UserObjects]
-  [./level_set_cut_uo]
+  [level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = phi
     heal_always = true
@@ -68,29 +68,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./phi]
+  [phi]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./heat_cond]
+  [heat_cond]
     type = MatDiffusion
     variable = u
     diffusivity = 'diffusion_coefficient'
   [../]
-  [./vol_heat_src]
+  [vol_heat_src]
     type = BodyForce
     variable = u
     function = src_func
   [../]
-  [./mat_time_deriv]
+  [mat_time_deriv]
     type = TestMatTimeDerivative
     variable = u
     mat_prop_value = rhoCp
@@ -98,7 +98,7 @@
 []
 
 [AuxKernels]
-  [./ls_function]
+  [ls_function]
     type = FunctionAux
     variable = phi
     function = ls_func
@@ -106,7 +106,7 @@
 []
 
 [Constraints]
-  [./xfem_constraint]
+  [xfem_constraint]
     type = XFEMSingleVariableConstraint
     variable = u
     geometric_cut_userobject = 'level_set_cut_uo'
@@ -117,7 +117,7 @@
 []
 
 [Functions]
-  [./src_func]
+  [src_func]
     type = ParsedFunction
     expression = 'phi:=(0.75-x-0.001*t);
         i:=(0.75-0.001*t);
@@ -125,12 +125,12 @@
             10*(8-x),
             (7/(1-i))*((i-2)*x + (8-7*i)) )'
   [../]
-  [./right_du_func]
+  [right_du_func]
     type = ParsedFunction
     expression = 'i:=(0.75-0.001*t);
         (2.0/(1-i))*(-5+5*i+i*t-2*t)'
   [../]
-  [./exact_u_func]
+  [exact_u_func]
     type = ParsedFunction
     expression = 'phi:=(0.75-x-0.001*t);
         i:=(0.75-0.001*t);
@@ -138,7 +138,7 @@
             605 - 5*x + t*(8-x),
             (1/(1-i))*((-5+5*i+i*t-2*t)*x + (605-605*i+8*t-7*t*i)) )'
   [../]
-  [./jump_flux_func]
+  [jump_flux_func]
     type = ParsedFunction
     expression = 'i:=(0.75-0.001*t);
         k_1:=(20.0);
@@ -146,32 +146,32 @@
         k_1*(5+t) + (k_2/(1-i))*(-5+5*i+i*t-2*t)'
   [../]
 
-  [./ls_func]
+  [ls_func]
     type = ParsedFunction
     expression = '0.75 - x - 0.001*t'
   [../]
 []
 
 [Materials]
-  [./mat_time_deriv_prop]
+  [mat_time_deriv_prop]
     type = GenericConstantMaterial
     prop_names = 'A_rhoCp B_rhoCp'
     prop_values = '10 7'
   [../]
-  [./therm_cond_prop]
+  [therm_cond_prop]
     type = GenericConstantMaterial
     prop_names = 'A_diffusion_coefficient B_diffusion_coefficient'
     prop_values = '20.0 2.0'
   [../]
 
-  [./combined_rhoCp]
+  [combined_rhoCp]
     type = LevelSetBiMaterialReal
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
     level_set_var = phi
     prop_name = rhoCp
   [../]
-  [./combined_diffusion_coefficient]
+  [combined_diffusion_coefficient]
     type = LevelSetBiMaterialReal
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
@@ -181,13 +181,13 @@
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left'
     function = exact_u_func
   [../]
-  [./right_du]
+  [right_du]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
@@ -196,7 +196,7 @@
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     value = 600
     variable = u
@@ -227,7 +227,7 @@
   time_step_interval = 1
   execute_on = 'initial timestep_end'
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

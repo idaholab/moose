@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -10,7 +10,7 @@
 [Preconditioning]
   active = 'PBP FDP'
 
-  [./PBP]
+  [PBP]
     type = PBP
     solve_order = 'u v'
     preconditioner  = 'LU LU'
@@ -18,7 +18,7 @@
     off_diag_column = 'u'
   [../]
 
-  [./FDP]
+  [FDP]
     type = FDP
     off_diag_row    = 'v'
     off_diag_column = 'u'
@@ -28,12 +28,12 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -42,18 +42,18 @@
 [Kernels]
   active = 'diff_u conv_v diff_v'
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
 
-  [./conv_v]
+  [conv_v]
     type = CoupledForce
     variable = v
     v = u
   [../]
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
@@ -62,28 +62,28 @@
 [BCs]
   active = 'left_u right_u left_v'
 
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 100
   [../]
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 0
   [../]
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 1

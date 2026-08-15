@@ -5,7 +5,7 @@
     nx = 4
     ny = 4
   []
-  [./box]
+  [box]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
@@ -15,20 +15,20 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = L2_LAGRANGE
     order = FIRST
   [../]
 []
 
 [ICs]
-  [./ic0]
+  [ic0]
     type = ConstantIC
     variable = u
     block = 0
     value = 4
   [../]
-  [./ic1]
+  [ic1]
     type = ConstantIC
     variable = u
     block = 1
@@ -37,18 +37,18 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [DGKernels]
-  [./dgdiff]
+  [dgdiff]
     type = DGDiffusion
     variable = u
     sigma = 4
@@ -57,7 +57,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = VacuumBC
     variable = u
     boundary = '0 1 2 3'
@@ -65,16 +65,16 @@
 []
 
 [Postprocessors]
-  [./L2_norm]
+  [L2_norm]
     type = ElementL2Norm
     variable = u
   [../]
-  [./jump]
+  [jump]
     type = InternalSideJump
     variable = u
     execute_on = 'initial timestep_end'
   [../]
-  [./jumpold]
+  [jumpold]
     type = InternalSideJump
     variable = u
     implicit = false

@@ -12,7 +12,7 @@
 []
 
 [VectorPostprocessors]
-  [./elems]
+  [elems]
     type = ElementsAlongPlane
     point = '0.55 0.0 0.0'
     normal = '1.0 0.0 0.0'

@@ -18,7 +18,7 @@
 # of 0.16%.
 
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 1
@@ -29,7 +29,7 @@
     ymax = 20.0
   [../]
 
-  [./c_node]
+  [c_node]
     type = ExtraNodesetGenerator
     input = gmg
     new_boundary = 100
@@ -38,42 +38,42 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_z]
+  [disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_x]
+  [rot_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_y]
+  [rot_y]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [BCs]
-  [./simply_support_x]
+  [simply_support_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'right top bottom left'
     value = 0.0
   [../]
-  [./simply_support_y]
+  [simply_support_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'right top bottom left'
     value = 0.0
   [../]
-  [./simply_support_z]
+  [simply_support_z]
     type = DirichletBC
     variable = disp_z
     boundary = 'bottom left'
@@ -82,31 +82,31 @@
 []
 
 [NodalKernels]
-  [./force_C]
+  [force_C]
     type = ConstantRate
     variable = disp_z
     boundary = 100
     rate = -2.0
   [../]
-  [./Mx_AB]
+  [Mx_AB]
     type = ConstantRate
     variable = rot_x
     boundary = bottom
     rate = 20.0
   [../]
-  [./Mx_CD]
+  [Mx_CD]
     type = ConstantRate
     variable = rot_x
     boundary = top
     rate = -20.0
   [../]
-  [./My_BC]
+  [My_BC]
     type = ConstantRate
     variable = rot_y
     boundary = right
     rate = 10.0
   [../]
-  [./My_AD]
+  [My_AD]
     type = ConstantRate
     variable = rot_y
     boundary = left
@@ -115,7 +115,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -135,35 +135,35 @@
 []
 
 [Kernels]
-  [./solid_disp_x]
+  [solid_disp_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 0
     variable = disp_x
     through_thickness_order = SECOND
   [../]
-  [./solid_disp_y]
+  [solid_disp_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 1
     variable = disp_y
     through_thickness_order = SECOND
   [../]
-  [./solid_disp_z]
+  [solid_disp_z]
     type = ADStressDivergenceShell
     block = '0'
     component = 2
     variable = disp_z
     through_thickness_order = SECOND
   [../]
-  [./solid_rot_x]
+  [solid_rot_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 3
     variable = rot_x
     through_thickness_order = SECOND
   [../]
-  [./solid_rot_y]
+  [solid_rot_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 4
@@ -173,14 +173,14 @@
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ADComputeIsotropicElasticityTensorShell
     youngs_modulus = 1e3
     poissons_ratio = 0.3
     block = 0
     through_thickness_order = SECOND
   [../]
-  [./strain]
+  [strain]
     type = ADComputeIncrementalShellStrain
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -188,7 +188,7 @@
     thickness = 1.0
     through_thickness_order = SECOND
   [../]
-  [./stress]
+  [stress]
     type = ADComputeShellStress
     block = 0
     through_thickness_order = SECOND
@@ -196,7 +196,7 @@
 []
 
 [Postprocessors]
-  [./disp_z2]
+  [disp_z2]
     type = PointValue
     point = '40.0 20.0 0.0'
     variable = disp_z

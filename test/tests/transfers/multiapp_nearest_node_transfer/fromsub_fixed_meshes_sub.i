@@ -9,37 +9,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [Functions]
-  [./disp_fun]
+  [disp_fun]
     type = ParsedFunction
     expression = 2*t
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./disp_kern]
+  [disp_kern]
     type = FunctionAux
     variable = disp_x
     function = disp_fun
@@ -47,13 +47,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

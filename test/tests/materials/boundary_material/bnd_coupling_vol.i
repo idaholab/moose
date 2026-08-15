@@ -27,26 +27,26 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = x*x+y*y
   [../]
 
-  [./f_fn]
+  [f_fn]
     type = ParsedFunction
     expression = -4*3+x*x+y*y
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = DiffMKernel
     variable = u
 
@@ -54,12 +54,12 @@
     mat_prop = k3vol
   [../]
 
-  [./r]
+  [r]
     type = Reaction
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = f_fn
@@ -67,7 +67,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = MatDivergenceBC
     variable = u
     prop_name = k3bnd
@@ -76,27 +76,27 @@
 []
 
 [Materials]
-  [./k1vol]
+  [k1vol]
     type = GenericConstantMaterial
     prop_names = 'k1vol'
     prop_values = 1
     block = 0
   [../]
 
-  [./k2vol]
+  [k2vol]
     type = GenericConstantMaterial
     prop_names = 'k2vol'
     prop_values = 2
     block = 0
   [../]
-  [./k2bnd]
+  [k2bnd]
     type = GenericConstantMaterial
     prop_names = 'k2bnd'
     prop_values = 2
     boundary = 'left right top bottom'
   [../]
 
-  [./k3vol]
+  [k3vol]
     type = SumMaterial
     sum_prop_name = k3vol
     mp1 = k1vol
@@ -107,7 +107,7 @@
     val2 = 2
   [../]
 
-  [./k3bnd]
+  [k3bnd]
     type = SumMaterial
     sum_prop_name = 'k3bnd'
     mp1 = k1vol
@@ -120,7 +120,7 @@
 []
 
 [Postprocessors]
-  [./l2err]
+  [l2err]
     type = ElementL2Error
     variable = u
     function = exact_fn

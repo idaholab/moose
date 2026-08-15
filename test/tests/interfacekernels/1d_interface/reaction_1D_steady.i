@@ -32,14 +32,14 @@
     nx = 10
     xmax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
   [../]
-  [./interface]
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = 'subdomain1'
     primary_block = '0'
@@ -49,12 +49,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = '0'
   [../]
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     block = '1'
@@ -62,13 +62,13 @@
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = MatDiffusion
     variable = u
     block = '0'
     diffusivity = D
   [../]
-  [./diff_v]
+  [diff_v]
     type = MatDiffusion
     variable = v
     block = '1'
@@ -77,7 +77,7 @@
 []
 
 [InterfaceKernels]
-  [./interface]
+  [interface]
     type = InterfaceDiffusion
     variable = u
     neighbor_var = 'v'
@@ -85,7 +85,7 @@
     D = D
     D_neighbor = D
   [../]
-  [./interface_reaction]
+  [interface_reaction]
     type = InterfaceReaction
     variable = u
     neighbor_var = 'v'
@@ -96,13 +96,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
@@ -111,13 +111,13 @@
 []
 
 [Materials]
-  [./block0]
+  [block0]
     type = GenericConstantMaterial
     block = '0'
     prop_names = 'D'
     prop_values = '4'
   [../]
-  [./block1]
+  [block1]
     type = GenericConstantMaterial
     block = '1'
     prop_names = 'D'
@@ -126,7 +126,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -150,13 +150,13 @@
 []
 
 [Postprocessors]
-  [./elemental_error_u]
+  [elemental_error_u]
     type = ElementL2Error
     function = -0.2*x+1
     variable = 'u'
     block = '0'
   [../]
-  [./elemental_error_v]
+  [elemental_error_v]
     type = ElementL2Error
     function = -0.4*x+0.8
     variable = 'v'

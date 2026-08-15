@@ -11,7 +11,7 @@
 []
 
 [Variables]
-  [./n]
+  [n]
     family = SCALAR
     order = FIRST
     initial_condition = 1
@@ -19,11 +19,11 @@
 []
 
 [ScalarKernels]
-  [./dn]
+  [dn]
     type = ODETimeDerivative
     variable = n
   [../]
-  [./ode1]
+  [ode1]
     type = ParsedODEKernel
     expression = '-n'
     variable = n
@@ -33,7 +33,7 @@
 
 [Executioner]
   type = Transient
-  [./TimeIntegrator]
+  [TimeIntegrator]
     # type = ImplicitEuler
     # type = BDF2
     type = CrankNicolson
@@ -59,14 +59,14 @@
 []
 
 [Functions]
-  [./exact_solution]
+  [exact_solution]
     type = ParsedFunction
     expression = exp(t)
   [../]
 []
 
 [Postprocessors]
-  [./error_n]
+  [error_n]
     # Post processor that computes the difference between the computed
     # and exact solutions.  For the exact solution used here, the
     # error at the final time should converge at O(dt^p), where p is

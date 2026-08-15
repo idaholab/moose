@@ -7,31 +7,31 @@
 []
 
 [Functions]
-  [./u_fn]
+  [u_fn]
     type = ParsedFunction
     expression = t*x
   [../]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression = x
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
-  [./fn]
+  [fn]
     type = BodyForce
     variable = u
     function = ffn
@@ -39,13 +39,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right

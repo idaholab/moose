@@ -11,14 +11,14 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = matp
@@ -26,35 +26,35 @@
 []
 
 [Materials]
-  [./mat1]
+  [mat1]
     type = MTMaterial
     block = '1 2'
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
   [../]
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 100
     value = 0
   [../]
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 101

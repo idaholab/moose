@@ -13,14 +13,14 @@
 []
 
 [AuxVariables]
-  [./disp_x]
-    [./InitialCondition]
+  [disp_x]
+    [InitialCondition]
       type = FunctionIC
       function = '0.1*sin(2*x/10*3.14159265359)'
     [../]
   [../]
-  [./disp_y]
-    [./InitialCondition]
+  [disp_y]
+    [InitialCondition]
       type = FunctionIC
       function = '0.1*sin(1*y/10*3.14159265359)'
     [../]
@@ -28,59 +28,59 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
     initial_condition = 0
   [../]
 
-  [./gxx]
+  [gxx]
   [../]
-  [./gxy]
+  [gxy]
   [../]
-  [./gyx]
+  [gyx]
   [../]
-  [./gyy]
+  [gyy]
   [../]
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = c
   [../]
-  [./bulk]
+  [bulk]
     type = CahnHilliard
     variable = c
     mob_name = M
     f_name = F
   [../]
-  [./int]
+  [int]
     type = CHInterface
     variable = c
     mob_name = M
     kappa_name = kappa_c
   [../]
 
-  [./gxx]
+  [gxx]
     type = GradientComponent
     variable = gxx
     v = disp_x
     component = 0
   [../]
-  [./gxy]
+  [gxy]
     type = GradientComponent
     variable = gxy
     v = disp_x
     component = 1
   [../]
-  [./gyx]
+  [gyx]
     type = GradientComponent
     variable = gyx
     v = disp_y
     component = 0
   [../]
-  [./gyy]
+  [gyy]
     type = GradientComponent
     variable = gyy
     v = disp_y
@@ -89,24 +89,24 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'M  kappa_c'
     prop_values = '1  0.1'
   [../]
-  [./straingradderiv]
+  [straingradderiv]
     type = StrainGradDispDerivatives
   [../]
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeConcentrationDependentElasticityTensor
     c = c
     C0_ijkl = '1.0 1.0'
@@ -114,13 +114,13 @@
     fill_method0 = symmetric_isotropic
     fill_method1 = symmetric_isotropic
   [../]
-  [./smallstrain]
+  [smallstrain]
     type = ComputeSmallStrain
   [../]
-  [./linearelastic_a]
+  [linearelastic_a]
     type = ComputeLinearElasticStress
   [../]
-  [./elastic_free_energy]
+  [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = F
     coupled_variables = 'c'

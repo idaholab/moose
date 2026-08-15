@@ -10,23 +10,23 @@
 []
 
 [Variables]
-  [./phi]
+  [phi]
   [../]
 []
 
 [AuxVariables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
   [../]
 []
 
 [ICs]
-  [./phi_ic]
+  [phi_ic]
     type = FunctionIC
     function = phi_exact
     variable = phi
   [../]
-  [./vel_ic]
+  [vel_ic]
     type = VectorFunctionIC
     variable = velocity
     function = velocity_func
@@ -34,13 +34,13 @@
 []
 
 [Functions]
-  [./phi_exact]
+  [phi_exact]
     type = LevelSetOlssonBubble
     epsilon = 0.05
     center = '0.5 0.5 0'
     radius = 0.15
   [../]
-  [./velocity_func]
+  [velocity_func]
     type = ParsedVectorFunction
     expression_x = '3'
     expression_y = '3'
@@ -48,8 +48,8 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = phi
       auto_direction = 'x y'
     [../]
@@ -57,12 +57,12 @@
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = phi
   [../]
 
-  [./advection]
+  [advection]
     type = LevelSetAdvection
     velocity = velocity
     variable = phi
@@ -70,7 +70,7 @@
 []
 
 [Postprocessors]
-  [./cfl]
+  [cfl]
     type = LevelSetCFLCondition
     velocity = velocity
     execute_on = 'initial'
@@ -85,7 +85,7 @@
   scheme = crank-nicolson
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm      ilu'
-  [./TimeStepper]
+  [TimeStepper]
     type = PostprocessorDT
     postprocessor = cfl
     scale = 0.8

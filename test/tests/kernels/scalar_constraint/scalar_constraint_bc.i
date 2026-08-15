@@ -13,12 +13,12 @@
 # NL
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
   [../]
 
-  [./alpha]
+  [alpha]
     family = SCALAR
     order = FIRST
     initial_condition = 1
@@ -26,14 +26,14 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [ScalarKernels]
-  [./alpha_ced]
+  [alpha_ced]
     type = AlphaCED
     variable = alpha
     value = 10
@@ -41,14 +41,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = ScalarVarBC
     variable = u
     boundary = '3'
     alpha = alpha
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = '1'
@@ -59,14 +59,14 @@
 [Preconditioning]
   active = 'pc'
 
-  [./pc]
+  [pc]
     type = SMP
     full = true
 
   solve_type = 'PJFNK'
   [../]
 
-  [./FDP_PJFNK]
+  [FDP_PJFNK]
     type = FDP
     full = true
 

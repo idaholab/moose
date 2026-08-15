@@ -9,7 +9,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
@@ -17,21 +17,21 @@
 []
 
 [AuxVariables]
-  [./en]
+  [en]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./en]
+  [en]
     type = SolutionAux
     solution = soln
     variable = en
@@ -41,7 +41,7 @@
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionUserObject
     mesh = cubesource.e
     system_variables = 'source_element'
@@ -50,7 +50,7 @@
 []
 
 [BCs]
-  [./stuff]
+  [stuff]
     type = DirichletBC
     variable = u
     boundary = '1 2'

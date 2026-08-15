@@ -13,16 +13,16 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Nonconserved]
-      [./eta1]
+  [PhaseField]
+    [Nonconserved]
+      [eta1]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
         coupled_variables = 'eta2'
       [../]
-      [./eta2]
+      [eta2]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
@@ -34,7 +34,7 @@
 []
 
 [ICs]
-  [./eta1_IC]
+  [eta1_IC]
     type = SmoothCircleIC
     variable = eta1
     x1 = 20.0
@@ -44,7 +44,7 @@
     outvalue = 0.0
     int_width = 3.0
   [../]
-  [./eta2_IC]
+  [eta2_IC]
     type = SmoothCircleIC
     variable = eta2
     x1 = 20.0
@@ -57,7 +57,7 @@
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'eta1 eta2'
@@ -67,7 +67,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

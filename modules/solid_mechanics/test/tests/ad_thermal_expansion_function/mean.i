@@ -3,7 +3,7 @@
 # from positive to negative strain.
 
 [Mesh]
-  [./gen]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 3
   [../]
@@ -14,12 +14,12 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     eigenstrain_names = eigenstrain
@@ -29,21 +29,21 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
 
-  [./back]
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
@@ -52,7 +52,7 @@
 []
 
 [AuxKernels]
-  [./temp]
+  [temp]
     type = FunctionAux
     variable = temp
     function = '1 + t'
@@ -60,15 +60,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ADComputeLinearElasticStress
   [../]
-  [./thermal_expansion_strain]
+  [thermal_expansion_strain]
     type = ADComputeMeanThermalExpansionFunctionEigenstrain
     thermal_expansion_function = cte_func_mean
     thermal_expansion_function_reference_temperature = 1.2
@@ -79,7 +79,7 @@
 []
 
 [Functions]
-  [./cte_func_mean]
+  [cte_func_mean]
     type = ParsedFunction
     symbol_names = 'T T_stress_free T_ref end_strain'
     symbol_values = '2 1.5           1.2   1e-4'
@@ -88,12 +88,12 @@
 []
 
 [Postprocessors]
-  [./disp_x_max]
+  [disp_x_max]
     type = SideAverageValue
     variable = disp_x
     boundary = right
   [../]
-  [./temp_avg]
+  [temp_avg]
     type = ElementAverageValue
     variable = temp
   [../]

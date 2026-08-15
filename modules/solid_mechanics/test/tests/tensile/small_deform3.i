@@ -30,7 +30,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     strain = finite
@@ -40,19 +40,19 @@
 
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0.25E-6*x'
   [../]
-  [./y]
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
   [../]
-  [./z]
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
@@ -61,14 +61,14 @@
 []
 
 [AuxVariables]
-  [./yield_fcn]
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./yield_fcn_auxk]
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
@@ -77,37 +77,37 @@
 []
 
 [Postprocessors]
-  [./s_xx]
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
   [../]
-  [./s_xy]
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
   [../]
-  [./s_xz]
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
   [../]
-  [./s_yy]
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
   [../]
-  [./s_yz]
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
   [../]
-  [./s_zz]
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
   [../]
-  [./f]
+  [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
@@ -115,11 +115,11 @@
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = SolidMechanicsHardeningConstant
     value = 1
   [../]
-  [./mc]
+  [mc]
     type = SolidMechanicsPlasticTensile
     tensile_strength = ts
     yield_function_tolerance = 1E-6
@@ -129,13 +129,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 2.0E6'
   [../]
-  [./mc]
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-5
@@ -155,7 +155,7 @@
 [Outputs]
   file_base = small_deform3
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
     [../]
 []

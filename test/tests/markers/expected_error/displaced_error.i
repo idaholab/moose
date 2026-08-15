@@ -11,26 +11,26 @@
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
@@ -43,8 +43,8 @@
 []
 
 [Adaptivity]
-  [./Markers]
-    [./test]
+  [Markers]
+    [test]
       type = UniformMarker
       # this triggers the expected error
       use_displaced_mesh = true

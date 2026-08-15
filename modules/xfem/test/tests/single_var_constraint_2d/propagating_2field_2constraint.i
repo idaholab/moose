@@ -21,7 +21,7 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.5 1.0 0.5 0.0'
     time_start_cut = 0.0
@@ -30,32 +30,32 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
 []
 
 [Constraints]
-  [./xfem_constraint_u]
+  [xfem_constraint_u]
     type = XFEMSingleVariableConstraint
     variable = u
     jump = 0
     jump_flux = 0
     geometric_cut_userobject = 'line_seg_cut_uo'
   [../]
-  [./xfem_constraint_v]
+  [xfem_constraint_v]
     type = XFEMSingleVariableConstraint
     variable = v
     jump = 0
@@ -66,28 +66,28 @@
 
 [BCs]
 # Define boundary conditions
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 1
   [../]
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
@@ -116,7 +116,7 @@
   time_step_interval = 1
   execute_on = timestep_end
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

@@ -11,28 +11,28 @@
 []
 
 [Functions]
-  [./ic]
+  [ic]
     type = ParsedFunction
     expression = 0
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = (x+y)
   [../]
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = t*(x+y)
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = ic
     [../]
@@ -40,20 +40,20 @@
 []
 
 [Kernels]
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
     lumping = true
     implicit = true
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     implicit = false
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -64,7 +64,7 @@
 [BCs]
   active = 'all'
 
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -77,8 +77,8 @@
   steps = 1
   marker = box
   max_h_level = 2
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       bottom_left = '-0.4 -0.4 0'
       inside = refine
       top_right = '0.4 0.4 0'
@@ -89,7 +89,7 @@
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
@@ -107,7 +107,7 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     max_rows = 10
   [../]

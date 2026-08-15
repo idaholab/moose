@@ -8,7 +8,7 @@
 []
 
 [Materials]
-  [./tensor]
+  [tensor]
     type = ADGenericConstantRankTwoTensor
     tensor_name = constant
     # tensor values are column major-ordered

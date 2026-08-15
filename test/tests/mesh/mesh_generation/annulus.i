@@ -15,25 +15,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./inner]
+  [inner]
     type = DirichletBC
     variable = u
     value = 0.0
     boundary = rmin
   [../]
-  [./outer]
+  [outer]
     type = FunctionDirichletBC
     variable = u
     function = log(5)

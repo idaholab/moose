@@ -3,7 +3,7 @@
 []
 
 [Variables]
-  [./u_new]
+  [u_new]
     order = FIRST
     family = LAGRANGE
 
@@ -16,27 +16,27 @@
 [Kernels]
   active = 'bodyforce ie'
 
-  [./bodyforce]
+  [bodyforce]
     type = BodyForce
     variable = u_new
     value = 10.0
   [../]
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u_new
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u_new
     boundary = 3
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u_new
     boundary = 1

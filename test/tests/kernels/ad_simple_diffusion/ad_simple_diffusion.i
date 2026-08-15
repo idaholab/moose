@@ -6,7 +6,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
@@ -33,7 +33,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

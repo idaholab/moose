@@ -17,7 +17,7 @@
 []
 
 [Physics/SolidMechanics/LineElement/QuasiStatic]
-  [./block_all]
+  [block_all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -35,37 +35,37 @@
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./fixy1]
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = left
     value = 0.0
   [../]
-  [./fixz1]
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = left
     value = 0.0
   [../]
-  [./fixr1]
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = left
     value = 0.0
   [../]
-  [./fixr2]
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = left
     value = 0.0
   [../]
-  [./fixr3]
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = left
@@ -74,7 +74,7 @@
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = ConstantRate
     variable = rot_x
     boundary = right
@@ -83,7 +83,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -102,21 +102,21 @@
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 2.0e9
     poissons_ratio = 0.3
     shear_coefficient = 1.0
     block = 0
   [../]
-  [./stress]
+  [stress]
     type = ComputeBeamResultants
     block = 0
   [../]
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = PointValue
     point = '1.0 0.0 0.0'
     variable = rot_x

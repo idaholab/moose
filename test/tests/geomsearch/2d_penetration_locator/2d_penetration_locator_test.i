@@ -5,42 +5,42 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./penetration]
+  [penetration]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./tangential_distance]
+  [tangential_distance]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./normal_x]
+  [normal_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./normal_y]
+  [normal_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./closest_point_x]
+  [closest_point_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./closest_point_y]
+  [closest_point_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./element_id]
+  [element_id]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./side]
+  [side]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -49,28 +49,28 @@
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./penetrate]
+  [penetrate]
     type = PenetrationAux
     variable = penetration
     boundary = 2
     paired_boundary = 3
   [../]
 
-  [./penetrate2]
+  [penetrate2]
     type = PenetrationAux
     variable = penetration
     boundary = 3
     paired_boundary = 2
   [../]
 
-  [./penetrate3]
+  [penetrate3]
     type = PenetrationAux
     variable = tangential_distance
     boundary = 2
@@ -78,7 +78,7 @@
     quantity = tangential_distance
   [../]
 
-  [./penetrate4]
+  [penetrate4]
     type = PenetrationAux
     variable = tangential_distance
     boundary = 3
@@ -86,7 +86,7 @@
     quantity = tangential_distance
   [../]
 
-  [./penetrate5]
+  [penetrate5]
     type = PenetrationAux
     variable = normal_x
     boundary = 2
@@ -94,7 +94,7 @@
     quantity = normal_x
   [../]
 
-  [./penetrate6]
+  [penetrate6]
     type = PenetrationAux
     variable = normal_x
     boundary = 3
@@ -102,7 +102,7 @@
     quantity = normal_x
   [../]
 
-  [./penetrate7]
+  [penetrate7]
     type = PenetrationAux
     variable = normal_y
     boundary = 2
@@ -110,7 +110,7 @@
     quantity = normal_y
   [../]
 
-  [./penetrate8]
+  [penetrate8]
     type = PenetrationAux
     variable = normal_y
     boundary = 3
@@ -118,7 +118,7 @@
     quantity = normal_y
   [../]
 
-  [./penetrate9]
+  [penetrate9]
     type = PenetrationAux
     variable = closest_point_x
     boundary = 2
@@ -126,7 +126,7 @@
     quantity = closest_point_x
   [../]
 
-  [./penetrate10]
+  [penetrate10]
     type = PenetrationAux
     variable = closest_point_x
     boundary = 3
@@ -134,7 +134,7 @@
     quantity = closest_point_x
   [../]
 
-  [./penetrate11]
+  [penetrate11]
     type = PenetrationAux
     variable = closest_point_y
     boundary = 2
@@ -142,7 +142,7 @@
     quantity = closest_point_y
   [../]
 
-  [./penetrate12]
+  [penetrate12]
     type = PenetrationAux
     variable = closest_point_y
     boundary = 3
@@ -150,7 +150,7 @@
     quantity = closest_point_y
   [../]
 
-  [./penetrate13]
+  [penetrate13]
     type = PenetrationAux
     variable = element_id
     boundary = 2
@@ -158,7 +158,7 @@
     quantity = element_id
   [../]
 
-  [./penetrate14]
+  [penetrate14]
     type = PenetrationAux
     variable = element_id
     boundary = 3
@@ -166,7 +166,7 @@
     quantity = element_id
   [../]
 
-  [./penetrate15]
+  [penetrate15]
     type = PenetrationAux
     variable = side
     boundary = 2
@@ -174,7 +174,7 @@
     quantity = side
   [../]
 
-  [./penetrate16]
+  [penetrate16]
     type = PenetrationAux
     variable = side
     boundary = 3
@@ -186,28 +186,28 @@
 [BCs]
   active = 'block1_left block1_right block2_left block2_right'
 
-  [./block1_left]
+  [block1_left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
 
-  [./block1_right]
+  [block1_right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
   [../]
 
-  [./block2_left]
+  [block2_left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./block2_right]
+  [block2_right]
     type = DirichletBC
     variable = u
     boundary = 4

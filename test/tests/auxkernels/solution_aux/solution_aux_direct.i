@@ -6,28 +6,28 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./u_aux]
+  [u_aux]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./initial_cond_aux]
+  [initial_cond_aux]
     type = SolutionAux
     solution = soln
     variable = u_aux
@@ -37,7 +37,7 @@
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionUserObject
     mesh = build_out_0001_mesh.xda
     es = build_out_0001.xda
@@ -46,13 +46,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1

@@ -20,13 +20,13 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalCircleGrainIC]
+  [PolycrystalICs]
+    [BicrystalCircleGrainIC]
       radius = 300
       x = 400
       y = 0
@@ -35,26 +35,26 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
   [../]
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
@@ -65,14 +65,14 @@
 []
 
 [Postprocessors]
-  [./gr1area]
+  [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -94,7 +94,7 @@
   num_steps = 5
   dt = 80.0
 
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 2
     refine_fraction = 0.8
     coarsen_fraction = 0.05

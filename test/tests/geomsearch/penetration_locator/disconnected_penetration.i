@@ -24,21 +24,21 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./penetration]
+  [penetration]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./l2]
+  [l2]
     type = MassMatrix
     variable = u
     matrix_tags = 'system'
@@ -46,7 +46,7 @@
 []
 
 [AuxKernels]
-  [./penetrate]
+  [penetrate]
     type = PenetrationAux
     variable = penetration
     boundary = 2

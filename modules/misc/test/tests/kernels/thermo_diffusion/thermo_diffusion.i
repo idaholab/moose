@@ -34,35 +34,35 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
   [../]
-  [./temp]
+  [temp]
     initial_condition = 1
   [../]
 []
 
 [Kernels]
-  [./soret]
+  [soret]
     type = ThermoDiffusion
     variable = u
     temp = temp
     gas_constant = 1
   [../]
-  [./diffC]
+  [diffC]
     type = Diffusion
     variable = u
   [../]
 
   # Heat diffusion gives a linear temperature profile to drive the Soret diffusion.
-  [./diffT]
+  [diffT]
     type = Diffusion
     variable = temp
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
@@ -70,14 +70,14 @@
     value = 1
   [../]
 
-  [./leftt]
+  [leftt]
     type = DirichletBC
     variable = temp
     preset = false
     boundary = left
     value = 1
   [../]
-  [./rightt]
+  [rightt]
     type = DirichletBC
     variable = temp
     preset = false
@@ -87,7 +87,7 @@
 []
 
 [Materials]
-  [./fake_material]
+  [fake_material]
      type = GenericConstantMaterial
      block = 0
      prop_names = 'mass_diffusivity heat_of_transport'
@@ -100,7 +100,7 @@
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = NodalL2Error
     variable = u
     function = 'exp(-x/(x+1))'

@@ -31,7 +31,7 @@
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     grain_num = 15
     rand_seed = 42
@@ -40,8 +40,8 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
     [../]
   [../]
@@ -49,28 +49,28 @@
 
 [Variables]
   # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
     # Custom action that created all of the grain variables and sets their initial condition
   [../]
 []
 
 [AuxVariables]
   # Dependent variables
-  [./bnds]
+  [bnds]
     # Variable used to visualize the grain boundaries in the simulation
   [../]
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
   [../]
 []
 
 [AuxKernels]
   # AuxKernel block, defining the equations used to calculate the auxvars
-  [./bnds_aux]
+  [bnds_aux]
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
@@ -80,15 +80,15 @@
 
 [BCs]
   # Boundary Condition block
-  [./Periodic]
-    [./top_bottom]
+  [Periodic]
+    [top_bottom]
       auto_direction = 'x y' # Makes problem periodic in the x and y directions
     [../]
   [../]
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
     GBmob0 = 2.5e-6 # Mobility prefactor for Cu from schonfelder1997molecular bibtex entry
@@ -101,7 +101,7 @@
 
 [Postprocessors]
   # Scalar postprocessors
-  [./dt]
+  [dt]
     # Outputs the current time step
     type = TimestepSize
   [../]
@@ -123,7 +123,7 @@
   nl_abs_tol = 1e-11 # Relative tolerance for nonlienar solves
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
 
-  [./TimeStepper]
+  [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 25 # Initial time step.  In this simulation it changes.
   [../]
@@ -136,14 +136,14 @@
 [Adaptivity]
   marker = errorfrac
   max_h_level = 4
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = GradientJumpIndicator
       variable = bnds
     [../]
   [../]
-  [./Markers]
-    [./bound_adapt]
+  [Markers]
+    [bound_adapt]
       type = ValueThresholdMarker
       third_state = DO_NOTHING
       coarsen = 1.0
@@ -151,7 +151,7 @@
       variable = bnds
       invert = true
     [../]
-    [./errorfrac]
+    [errorfrac]
       type = ErrorFractionMarker
       coarsen = 0.1
       indicator = error
@@ -163,7 +163,7 @@
 [Outputs]
   exodus = true
   csv = true
-  [./console]
+  [console]
     type = Console
     max_rows = 20
   [../]

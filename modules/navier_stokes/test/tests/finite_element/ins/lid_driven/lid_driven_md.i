@@ -13,7 +13,7 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -34,7 +34,7 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = SimpleFluidProperties
     density0 = 100              # kg/m^3
     thermal_expansion = 0       # K^{-1}
@@ -45,16 +45,16 @@
 
 [Variables]
   # velocity
-  [./vel_x]
+  [vel_x]
     scaling = 1.e-1
     initial_condition = 0.0
   [../]
-  [./vel_y]
+  [vel_y]
     scaling = 1.e-1
     initial_condition = 0.0
   [../]
   # Pressure
-  [./p]
+  [p]
     scaling = 1
     initial_condition = 1.0e5
   [../]
@@ -179,11 +179,11 @@
   print_linear_residuals = false
   time_step_interval = 1
   execute_on = 'initial timestep_end'
-  [./console]
+  [console]
     type = Console
     output_linear = false
   [../]
-  [./out]
+  [out]
     type = Exodus
     hide = 'porosity'
   [../]

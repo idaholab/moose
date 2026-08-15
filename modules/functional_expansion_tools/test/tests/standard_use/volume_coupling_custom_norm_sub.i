@@ -8,35 +8,35 @@
 []
 
 [Variables]
-  [./empty]
+  [empty]
   [../]
 []
 
 [AuxVariables]
-  [./s]
+  [s]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./m_in]
+  [m_in]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./null_kernel]
+  [null_kernel]
     type = NullKernel
     variable = empty
   [../]
 []
 
 [AuxKernels]
-  [./reconstruct_m_in]
+  [reconstruct_m_in]
     type = FunctionSeriesToAux
     function = FX_Basis_Value_Sub
     variable = m_in
   [../]
-  [./calculate_s]
+  [calculate_s]
     type = ParsedAux
     variable = s
     coupled_variables = m_in
@@ -45,7 +45,7 @@
 []
 
 [Functions]
-  [./FX_Basis_Value_Sub]
+  [FX_Basis_Value_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '3'
@@ -57,7 +57,7 @@
 []
 
 [UserObjects]
-  [./FX_Value_UserObject_Sub]
+  [FX_Value_UserObject_Sub]
     type = FXVolumeUserObject
     function = FX_Basis_Value_Sub
     variable = s

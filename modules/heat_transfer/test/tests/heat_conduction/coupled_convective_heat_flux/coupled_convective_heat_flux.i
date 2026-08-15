@@ -6,34 +6,34 @@
 []
 
 [Functions]
-  [./T_infinity_fn]
+  [T_infinity_fn]
     type = ParsedFunction
     expression = (x*x+y*y)+500
   [../]
-  [./Hw_fn]
+  [Hw_fn]
     type = ParsedFunction
     expression = ((1-x)*(1-x)+(1-y)*(1-y))+1000
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./T_infinity]
+  [T_infinity]
   [../]
-  [./Hw]
+  [Hw]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./force]
+  [force]
     type = BodyForce
     variable = u
     value = 1000
@@ -41,13 +41,13 @@
 []
 
 [AuxKernels]
-  [./T_infinity_ak]
+  [T_infinity_ak]
     type = FunctionAux
     variable = T_infinity
     function = T_infinity_fn
     execute_on = initial
   [../]
-  [./Hw_ak]
+  [Hw_ak]
     type = FunctionAux
     variable = Hw
     function = Hw_fn
@@ -56,7 +56,7 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = CoupledConvectiveHeatFluxBC
     variable = u
     boundary = right

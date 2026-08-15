@@ -20,14 +20,14 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./rampConstant]
+  [rampConstant]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
@@ -48,7 +48,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
@@ -57,7 +57,7 @@
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
@@ -66,34 +66,34 @@
 []
 
 [BCs]
-  [./crack_y]
+  [crack_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
   [../]
-  [./no_z]
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 500
     value = 0.0
   [../]
-  [./no_z2]
+  [no_z2]
     type = DirichletBC
     variable = disp_z
     boundary = 510
     value = 0.0
   [../]
 
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 700
     value = 0.0
   [../]
 
-  [./Pressure]
-    [./Side1]
+  [Pressure]
+    [Side1]
       boundary = 400
       function = rampConstant
     [../]
@@ -102,12 +102,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []

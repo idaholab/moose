@@ -9,13 +9,13 @@
 []
 
 [Functions]
-  [./up]
+  [up]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 0.5001'
   [../]
 
-  [./lateral]
+  [lateral]
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 0 1 0'
@@ -24,22 +24,22 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
   [../]
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 2
     secondary = 3
     penalty = 1e6
@@ -50,28 +50,28 @@
 
 [BCs]
 
-  [./bottom_lateral]
+  [bottom_lateral]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 1
     function = lateral
   [../]
 
-  [./bottom_up]
+  [bottom_up]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = up
   [../]
 
-  [./bottom_out]
+  [bottom_out]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
   [../]
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = disp_y
     boundary = 4
@@ -80,32 +80,32 @@
 []
 
 [Materials]
-  [./stiffStuff1]
+  [stiffStuff1]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff1_strain]
+  [stiffStuff1_strain]
     type= ComputeFiniteStrain
     block = '1'
   [../]
-  [./stiffStuff1_stress]
+  [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
   [../]
 
-  [./stiffStuff2]
+  [stiffStuff2]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff2_strain]
+  [stiffStuff2_strain]
     type= ComputeFiniteStrain
     block = '2'
   [../]
-  [./stiffStuff2_stress]
+  [stiffStuff2_stress]
     type = ComputeFiniteStrainElasticStress
     block = '2'
   [../]
@@ -131,7 +131,7 @@
   dt = 0.1
   num_steps = 30
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -139,10 +139,10 @@
 
 [Postprocessors]
   active = ''
-  [./resid]
+  [resid]
     type = Residual
   [../]
-  [./iters]
+  [iters]
     type = NumNonlinearIterations
   [../]
 []

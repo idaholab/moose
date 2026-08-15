@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 32
@@ -8,23 +8,23 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Functions]
-  [./exact_func]
+  [exact_func]
     type = ParsedFunction
     expression = x*x
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = 2
@@ -32,13 +32,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = FunctionNeumannBC
     function = x
     variable = u

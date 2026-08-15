@@ -119,19 +119,19 @@ angle = 45
     variable = rho_v
   []
 
-  [./momentum_y_advection]
+  [momentum_y_advection]
     type = CNSFVMomentumHLLC
     variable = rho_v
     momentum_component = y
   []
 
   # Fluid energy conservation
-  [./fluid_energy_time]
+  [fluid_energy_time]
     type = FVTimeKernel
     variable = rho_E
   []
 
-  [./fluid_energy_advection]
+  [fluid_energy_advection]
     type = CNSFVFluidEnergyHLLC
     variable = rho_E
     fp = fp
@@ -147,7 +147,7 @@ angle = 45
     boundary = 'left right top bottom'
   []
 
-  [./momentum_x_outflow]
+  [momentum_x_outflow]
     type = CNSFVHLLCMomentumImplicitBC
     variable = rho_u
     momentum_component = x

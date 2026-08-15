@@ -24,14 +24,14 @@
 []
 
 [Functions]
-  [./tempBC]
+  [tempBC]
     type = ParsedFunction
     expression = '700+2*t*t'
   [../]
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 700
@@ -39,39 +39,39 @@
 []
 
 [AuxVariables]
-  [./hydro_constant]
+  [hydro_constant]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./hydro_first]
+  [hydro_first]
     order = FIRST
     family = MONOMIAL
   [../]
-  [./hydro_second]
+  [hydro_second]
     order = SECOND
     family = MONOMIAL
   [../]
-  [./sxx_constant]
+  [sxx_constant]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./sxx_first]
+  [sxx_first]
     order = FIRST
     family = MONOMIAL
   [../]
-  [./sxx_second]
+  [sxx_second]
     order = SECOND
     family = MONOMIAL
   [../]
-  [./szz_constant]
+  [szz_constant]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./szz_first]
+  [szz_first]
     order = FIRST
     family = MONOMIAL
   [../]
-  [./szz_second]
+  [szz_second]
     order = SECOND
     family = MONOMIAL
   [../]
@@ -80,7 +80,7 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      [./all]
+      [all]
         add_variables = true
         strain = SMALL
         incremental = true
@@ -92,67 +92,67 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = Diffusion
     variable = temp
   [../]
 []
 
 [AuxKernels]
-  [./hydro_constant_aux]
+  [hydro_constant_aux]
     type = RankTwoScalarAux
     variable = hydro_constant
     rank_two_tensor = stress
     scalar_type = Hydrostatic
   [../]
-  [./hydro_first_aux]
+  [hydro_first_aux]
     type = RankTwoScalarAux
     variable = hydro_first
     rank_two_tensor = stress
     scalar_type = Hydrostatic
   [../]
-  [./hydro_second_aux]
+  [hydro_second_aux]
     type = RankTwoScalarAux
     variable = hydro_second
     rank_two_tensor = stress
     scalar_type = Hydrostatic
   [../]
-  [./sxx_constant_aux]
+  [sxx_constant_aux]
     type = RankTwoAux
     variable = sxx_constant
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
   [../]
-  [./sxx_first_aux]
+  [sxx_first_aux]
     type = RankTwoAux
     variable = sxx_first
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
   [../]
-  [./sxx_second_aux]
+  [sxx_second_aux]
     type = RankTwoAux
     variable = sxx_second
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
   [../]
-  [./szz_constant_aux]
+  [szz_constant_aux]
     type = RankTwoAux
     variable = szz_constant
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
   [../]
-  [./szz_first_aux]
+  [szz_first_aux]
     type = RankTwoAux
     variable = szz_first
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
   [../]
-  [./szz_second_aux]
+  [szz_second_aux]
     type = RankTwoAux
     variable = szz_second
     rank_two_tensor = stress
@@ -162,26 +162,26 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0.0
   [../]
 
-  [./temp_right]
+  [temp_right]
     type = FunctionDirichletBC
     variable = temp
     boundary = right
     function = tempBC
   [../]
-  [./temp_left]
+  [temp_left]
     type = FunctionDirichletBC
     variable = temp
     boundary = left
@@ -191,22 +191,22 @@
 
 
 [Materials]
-  [./fuel_stress]
+  [fuel_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0
   [../]
-  [./fuel_thermal_expansion]
+  [fuel_thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
     temperature = temp
     stress_free_temperature = 700.0
     eigenstrain_name = 'thermal_eigenstrain'
   [../]
-  [./reduced_order_eigenstrain]
+  [reduced_order_eigenstrain]
     type = ComputeReducedOrderEigenstrain
     input_eigenstrain_names = 'thermal_eigenstrain'
     eigenstrain_name = 'fred'
@@ -215,7 +215,7 @@
 
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -235,7 +235,7 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
   [../]
 []

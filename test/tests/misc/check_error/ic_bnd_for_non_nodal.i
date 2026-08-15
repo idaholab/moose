@@ -10,14 +10,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     value = 1
     variable = u
@@ -26,21 +26,21 @@
 [../]
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

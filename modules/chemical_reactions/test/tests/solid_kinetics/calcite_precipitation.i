@@ -22,26 +22,26 @@
 []
 
 [Variables]
-  [./ca++]
+  [ca++]
     initial_condition = 2.0e-2
   [../]
-  [./h+]
+  [h+]
     initial_condition = 1.0e-8
   [../]
-  [./hco3-]
+  [hco3-]
     initial_condition = 1.0e-2
   [../]
 []
 
 [AuxVariables]
-  [./caco3_s]
+  [caco3_s]
   [../]
-  [./ph]
+  [ph]
   [../]
 []
 
 [AuxKernels]
-  [./ph]
+  [ph]
     type = PHAux
     h_conc = h+
     variable = ph
@@ -49,7 +49,7 @@
 []
 
 [ReactionNetwork]
-  [./AqueousEquilibriumReactions]
+  [AqueousEquilibriumReactions]
     primary_species = 'ca++ hco3- h+'
     secondary_species = 'co2_aq co3-- caco3_aq cahco3+ caoh+ oh-'
     reactions = 'h+ + hco3- = co2_aq 6.3447,
@@ -59,7 +59,7 @@
                  ca++ - h+ = caoh+ -12.85,
                  - h+ = oh- -13.9951'
   [../]
-  [./SolidKineticReactions]
+  [SolidKineticReactions]
     primary_species = 'ca++ hco3- h+'
     kin_reactions = 'ca++ + hco3- - h+ = caco3_s'
     secondary_species = caco3_s
@@ -74,22 +74,22 @@
 []
 
 [Kernels]
-  [./ca++_ie]
+  [ca++_ie]
     type = PrimaryTimeDerivative
     variable = ca++
   [../]
-  [./h+_ie]
+  [h+_ie]
     type = PrimaryTimeDerivative
     variable = h+
   [../]
-  [./hco3-_ie]
+  [hco3-_ie]
     type = PrimaryTimeDerivative
     variable = hco3-
   [../]
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'porosity diffusivity conductivity'
     prop_values = '0.25 1e-9 1.0'
@@ -105,59 +105,59 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
 []
 
 [Postprocessors]
-  [./h+]
+  [h+]
     type = ElementIntegralVariablePostprocessor
     variable = h+
     execute_on = 'initial timestep_end'
   [../]
-  [./ca++]
+  [ca++]
     type = ElementIntegralVariablePostprocessor
     variable = ca++
     execute_on = 'initial timestep_end'
   [../]
-  [./hco3-]
+  [hco3-]
     type = ElementIntegralVariablePostprocessor
     variable = hco3-
     execute_on = 'initial timestep_end'
   [../]
-  [./co2_aq]
+  [co2_aq]
     type = ElementIntegralVariablePostprocessor
     variable = co2_aq
     execute_on = 'initial timestep_end'
   [../]
-  [./oh-]
+  [oh-]
     type = ElementIntegralVariablePostprocessor
     variable = oh-
     execute_on = 'initial timestep_end'
   [../]
-  [./co3--]
+  [co3--]
     type = ElementIntegralVariablePostprocessor
     variable = co3--
     execute_on = 'initial timestep_end'
   [../]
-  [./caco3_aq]
+  [caco3_aq]
     type = ElementIntegralVariablePostprocessor
     variable = caco3_aq
     execute_on = 'initial timestep_end'
   [../]
-  [./caco3_s]
+  [caco3_s]
     type = ElementIntegralVariablePostprocessor
     variable = caco3_s
     execute_on = 'initial timestep_end'
   [../]
-  [./ph]
+  [ph]
     type = ElementIntegralVariablePostprocessor
     variable = ph
     execute_on = 'initial timestep_end'
   [../]
-  [./calcite_vf]
+  [calcite_vf]
     type = TotalMineralVolumeFraction
     variable = caco3_s
     molar_volume = 36.934e-6

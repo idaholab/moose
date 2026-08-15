@@ -10,7 +10,7 @@
     ny = 16
     elem_type = QUAD9
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
@@ -43,62 +43,62 @@
 []
 
 [Variables]
-  [./velocity]
+  [velocity]
     order = SECOND
     family = LAGRANGE_VEC
   [../]
 
-  [./T]
+  [T]
     order = SECOND
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 1.0
     [../]
   [../]
 
-  [./p]
+  [p]
   [../]
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
   [../]
 
-  [./momentum_time]
+  [momentum_time]
     type = INSADMomentumTimeDerivative
     variable = velocity
   [../]
 
-  [./momentum_convection]
+  [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
   [../]
 
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
   [../]
 
-  [./momentum_pressure]
+  [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
     integrate_p_by_parts = true
   [../]
 
- [./temperature_time]
+ [temperature_time]
    type = INSADHeatConductionTimeDerivative
    variable = T
  [../]
 
- [./temperature_advection]
+ [temperature_advection]
    type = INSADEnergyAdvection
    variable = T
  [../]
 
- [./temperature_conduction]
+ [temperature_conduction]
    type = ADHeatConduction
    variable = T
    thermal_conductivity = 'k'
@@ -106,34 +106,34 @@
 []
 
 [BCs]
-  [./no_slip]
+  [no_slip]
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'bottom right left'
   [../]
 
-  [./lid]
+  [lid]
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'top'
     function_x = 'lid_function'
   [../]
 
-  [./T_hot]
+  [T_hot]
     type = DirichletBC
     variable = T
     boundary = 'bottom'
     value = 1
   [../]
 
-  [./T_cold]
+  [T_cold]
     type = DirichletBC
     variable = T
     boundary = 'top'
     value = 0
   [../]
 
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
@@ -142,7 +142,7 @@
 []
 
 [Materials]
-  [./const]
+  [const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  .01'
@@ -156,7 +156,7 @@
 []
 
 [Functions]
-  [./lid_function]
+  [lid_function]
     # We pick a function that is exactly represented in the velocity
     # space so that the Dirichlet conditions are the same regardless
     # of the mesh spacing.
@@ -166,7 +166,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'

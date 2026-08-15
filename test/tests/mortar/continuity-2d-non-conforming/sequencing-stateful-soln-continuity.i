@@ -4,13 +4,13 @@
     type = FileMeshGenerator
     file = nodal_normals_test_offset_nonmatching_gap.e
   []
-  [./primary]
+  [primary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   [../]
-  [./secondary]
+  [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
@@ -19,11 +19,11 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     block = '1 2'
     order = SECOND
   [../]
-  [./lambda]
+  [lambda]
     block = '10'
   [../]
 []
@@ -37,7 +37,7 @@
 []
 
 [BCs]
-  [./neumann]
+  [neumann]
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln
     variable = T
@@ -46,17 +46,17 @@
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = '1 2'
   [../]
-  [./sink]
+  [sink]
     type = Reaction
     variable = T
     block = '1 2'
   [../]
-  [./forcing_function]
+  [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
@@ -74,18 +74,18 @@
 []
 
 [Materials]
-  [./ssm]
+  [ssm]
     type = SpatialStatefulMaterial
     block = '1 2'
   [../]
 []
 
 [Functions]
-  [./forcing_function]
+  [forcing_function]
     type = ParsedFunction
     expression= '-4 + x^2 + y^2'
   [../]
-  [./exact_soln]
+  [exact_soln]
     type = ParsedFunction
     expression= 'x^2 + y^2'
   [../]
@@ -97,7 +97,7 @@
 
 # This is the consumer of material properties, through its default diffusivity parameters
 [Constraints]
-  [./mortar]
+  [mortar]
     type = EqualValueConstraint
     primary_boundary = 2
     secondary_boundary = 1
@@ -109,7 +109,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

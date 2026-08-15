@@ -6,44 +6,44 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./aux0]
+  [aux0]
     order = SECOND
     family = SCALAR
   [../]
-  [./aux1]
+  [aux1]
     family = SCALAR
     initial_condition = 5
   [../]
-  [./aux2]
+  [aux2]
     family = SCALAR
     initial_condition = 10
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
   [../]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
@@ -53,15 +53,15 @@
 []
 
 [Postprocessors]
-  [./num_vars]
+  [num_vars]
     type = NumVars
     system = 'NL'
   [../]
-  [./num_aux]
+  [num_aux]
     type = NumVars
     system = 'AUX'
   [../]
-  [./norm]
+  [norm]
     type = ElementL2Norm
     variable = u
   [../]
@@ -78,7 +78,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [out]
     type = CSV
     align = true
     delimiter = ', '
@@ -88,7 +88,7 @@
 []
 
 [ICs]
-  [./aux0_IC]
+  [aux0_IC]
     variable = aux0
     values = '12 13'
     type = ScalarComponentIC

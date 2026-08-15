@@ -14,12 +14,12 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
   [../]
 []
 
 [ICs]
-  [./IC_eta]
+  [IC_eta]
     type = SmoothCircleIC
     variable = eta
     x1 = 10
@@ -32,31 +32,31 @@
 []
 
 [Kernels]
-  [./eta_bulk]
+  [eta_bulk]
     type = AllenCahn
     variable = eta
     f_name = F
   [../]
-  [./eta_interface]
+  [eta_interface]
     type = ACInterface
     variable = eta
     kappa_name = kappa_eta
   [../]
 
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
   [../]
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1.0 1.0'
   [../]
 
-  [./switching]
+  [switching]
     type = MixedSwitchingFunctionMaterial
     function_name = h
     eta = eta
@@ -64,14 +64,14 @@
     weight = 1.0
   [../]
 
-  [./barrier]
+  [barrier]
     type = BarrierFunctionMaterial
     eta = eta
     g_order = SIMPLE
   [../]
 
 # Total free energy: F = Fa*(1-h) + Fb*h
-  [./free_energy]
+  [free_energy]
     type = DerivativeTwoPhaseMaterial
     property_name = F
     fa_name = '0'
@@ -84,8 +84,8 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
     [../]
   [../]
@@ -104,7 +104,7 @@
   start_time = 0.0
   num_steps = 2
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 9
     iteration_window = 2

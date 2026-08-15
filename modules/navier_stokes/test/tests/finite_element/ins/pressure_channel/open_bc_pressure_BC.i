@@ -16,29 +16,29 @@
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     order = SECOND
     family = LAGRANGE
   [../]
-  [./vel_y]
+  [vel_y]
     order = SECOND
     family = LAGRANGE
   [../]
-  [./p]
+  [p]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     pressure = p
   [../]
-  [./x_momentum_space]
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
@@ -47,7 +47,7 @@
     component = 0
     integrate_p_by_parts = false
   [../]
-  [./y_momentum_space]
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
@@ -59,25 +59,25 @@
 []
 
 [BCs]
-  [./x_no_slip]
+  [x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'top bottom'
     value = 0.0
   [../]
-  [./y_no_slip]
+  [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'left top bottom'
     value = 0.0
   [../]
-  [./inlet_p]
+  [inlet_p]
     type = DirichletBC
     variable = p
     boundary = left
     value = 1.0
   [../]
-  [./outlet_p]
+  [outlet_p]
     type = DirichletBC
     variable = p
     boundary = right
@@ -86,7 +86,7 @@
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
@@ -95,7 +95,7 @@
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     solve_type = PJFNK

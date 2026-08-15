@@ -9,8 +9,8 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
@@ -18,8 +18,8 @@
       y2 = 30.0
     [../]
   [../]
-  [./d]
-    [./InitialCondition]
+  [d]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 15
       y1 = 15
@@ -32,38 +32,38 @@
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = MatDiffusion
     variable = c
     diffusivity = Dc
     args = d
   [../]
-  [./ctime]
+  [ctime]
     type = TimeDerivative
     variable = c
   [../]
 
-  [./dres]
+  [dres]
     type = MatDiffusion
     variable = d
     diffusivity = Dd
     args = c
   [../]
-  [./dtime]
+  [dtime]
     type = TimeDerivative
     variable = d
   [../]
 []
 
 [Materials]
-  [./Dc]
+  [Dc]
     type = DerivativeParsedMaterial
     property_name = Dc
     expression = '0.01+c^2+d'
     coupled_variables = 'c d'
     derivative_order = 1
   [../]
-  [./Dd]
+  [Dd]
     type = DerivativeParsedMaterial
     property_name = Dd
     expression = 'd^2+c+1.5'
@@ -73,7 +73,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

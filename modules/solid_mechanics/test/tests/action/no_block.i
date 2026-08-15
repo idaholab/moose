@@ -34,18 +34,18 @@
 []
 
 [AuxVariables]
-  [./stress_theta]
+  [stress_theta]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_theta]
+  [strain_theta]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./stress_theta]
+  [stress_theta]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
@@ -53,7 +53,7 @@
     variable = stress_theta
     execute_on = timestep_end
   [../]
-  [./strain_theta]
+  [strain_theta]
     type = RankTwoAux
     rank_two_tensor = total_strain
     index_i = 2
@@ -64,41 +64,41 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
   [../]
-  [./_elastic_stress1]
+  [_elastic_stress1]
     type = ComputeFiniteStrainElasticStress
     block = 1
   [../]
-  [./_elastic_stress2]
+  [_elastic_stress2]
     type = ComputeFiniteStrainElasticStress
     block = 2
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = 'left'
     variable = disp_x
     value = 0.0
   [../]
-  [./top]
+  [top]
     type = DirichletBC
     boundary = 'top'
     variable = disp_y
     value = 0.0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     boundary = 'right'
     variable = disp_x
     value = 0.01
   [../]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     boundary = 'bottom'
     variable = disp_y

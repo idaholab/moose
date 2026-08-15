@@ -5,17 +5,17 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     block = bulk
   [../]
-  [./heating]
+  [heating]
     type = BodyForce
     variable = u
     function = 1
@@ -24,7 +24,7 @@
 []
 
 [BCs]
-  [./outside]
+  [outside]
     type = DirichletBC
     variable = u
     boundary = outside
@@ -33,7 +33,7 @@
 []
 
 [Materials]
-  [./diffusivity]
+  [diffusivity]
     type = GenericConstantMaterial
     block = 'bulk heater'
     prop_names = diffusivity
@@ -42,7 +42,7 @@
 []
 
 [Postprocessors]
-  [./total_flux]
+  [total_flux]
     type = SideDiffusiveFluxIntegral
     variable = u
     boundary = outside

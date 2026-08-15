@@ -26,7 +26,7 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     newmark_beta = 0.25
     newmark_gamma = 0.5

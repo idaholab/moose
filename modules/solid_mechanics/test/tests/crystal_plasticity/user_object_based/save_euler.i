@@ -12,45 +12,45 @@
 []
 
 [AuxVariables]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./e_yy]
+  [e_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./fp_yy]
+  [fp_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./gss]
+  [gss]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./euler1]
+  [euler1]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./euler2]
+  [euler2]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./euler3]
+  [euler3]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     expression = 0.01*t
   [../]
 []
 
 [UserObjects]
-  [./prop_read]
+  [prop_read]
     type = PropertyReadFile
     prop_file_name = 'euler_ang_file.txt'
     # Enter file data as prop#1, prop#2, .., prop#nprop
@@ -60,7 +60,7 @@
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     variable = stress_yy
     rank_two_tensor = stress
@@ -68,7 +68,7 @@
     index_i = 1
     execute_on = timestep_end
   [../]
-  [./e_yy]
+  [e_yy]
     type = RankTwoAux
     variable = e_yy
     rank_two_tensor = lage
@@ -76,7 +76,7 @@
     index_i = 1
     execute_on = timestep_end
   [../]
-  [./fp_yy]
+  [fp_yy]
     type = RankTwoAux
     variable = fp_yy
     rank_two_tensor = fp
@@ -84,28 +84,28 @@
     index_i = 1
     execute_on = timestep_end
   [../]
-  [./gss]
+  [gss]
     type = MaterialStdVectorAux
     variable = gss
     property = state_var_gss
     index = 0
     execute_on = timestep_end
   [../]
-  [./euler1]
+  [euler1]
     type = MaterialRealVectorValueAux
     variable = euler1
     property = Euler_angles
     component = 0
     execute_on = timestep_end
   [../]
-  [./euler2]
+  [euler2]
     type = MaterialRealVectorValueAux
     variable = euler2
     property = Euler_angles
     component = 1
     execute_on = timestep_end
   [../]
-  [./euler3]
+  [euler3]
     type = MaterialRealVectorValueAux
     variable = euler3
     property = Euler_angles
@@ -115,19 +115,19 @@
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
   [../]
-  [./fix_y]
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
-  [./tdisp]
+  [tdisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
@@ -136,7 +136,7 @@
 []
 
 [UserObjects]
-  [./slip_rate_gss]
+  [slip_rate_gss]
     type = CrystalPlasticitySlipRateGSS
     variable_size = 12
     slip_sys_file_name = input_slip_sys.txt
@@ -144,12 +144,12 @@
     flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
     uo_state_var_name = state_var_gss
   [../]
-  [./slip_resistance_gss]
+  [slip_resistance_gss]
     type = CrystalPlasticitySlipResistanceGSS
     variable_size = 12
     uo_state_var_name = state_var_gss
   [../]
-  [./state_var_gss]
+  [state_var_gss]
     type = CrystalPlasticityStateVariable
     variable_size = 12
     groups = '0 4 8 12'
@@ -157,7 +157,7 @@
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
   [../]
-  [./state_var_evol_rate_comp_gss]
+  [state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 109.8 2.5'
@@ -167,7 +167,7 @@
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainUObasedCP
     stol = 1e-2
     tan_mod_type = exact
@@ -176,7 +176,7 @@
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
   [../]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
@@ -185,26 +185,26 @@
 []
 
 [Postprocessors]
-  [./stress_yy]
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
   [../]
-  [./e_yy]
+  [e_yy]
     type = ElementAverageValue
     variable = e_yy
   [../]
-  [./fp_yy]
+  [fp_yy]
     type = ElementAverageValue
     variable = fp_yy
   [../]
-  [./gss]
+  [gss]
     type = ElementAverageValue
     variable = gss
   [../]
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -232,7 +232,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true

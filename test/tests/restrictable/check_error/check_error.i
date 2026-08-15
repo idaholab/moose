@@ -5,13 +5,13 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = '1 2'
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = BlkResTestDiffusion
     variable = u
     block = '1 2'
@@ -19,13 +19,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -34,13 +34,13 @@
 []
 
 [Materials]
-  [./mat0]
+  [mat0]
     type = GenericConstantMaterial
     block = '1'
     prop_names = 'a b'
     prop_values = '1 2'
   [../]
-  [./mat1]
+  [mat1]
     type = GenericConstantMaterial
     block = '2'
     prop_names = 'a'

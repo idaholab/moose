@@ -17,12 +17,12 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = NestedBoundingBoxIC
     variable = c
     smaller_coordinate_corners = '20 12 20 15 8 15 5 4 8'

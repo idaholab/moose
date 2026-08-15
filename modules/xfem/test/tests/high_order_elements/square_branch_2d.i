@@ -23,7 +23,7 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_set_uo]
+  [line_seg_cut_set_uo]
     type = LineSegmentCutSetUserObject
     cut_data = '-1.0000e-10   6.6340e-01   6.6340e-01  -1.0000e-10  0.0  1.0
                  3.3120e-01   3.3200e-01   1.0001e+00   3.3200e-01  1.0  2.0'
@@ -31,25 +31,25 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
   [../]
 []
 
 [Functions]
-  [./right_disp_x]
+  [right_disp_x]
     type = PiecewiseLinear
     x = '0  1.0    2.0   3.0'
     y = '0  0.005  0.01  0.01'
   [../]
-  [./top_disp_y]
+  [top_disp_y]
     type = PiecewiseLinear
     x = '0  1.0    2.0   3.0'
     y = '0  0.005  0.01  0.01'
@@ -57,25 +57,25 @@
 []
 
 [BCs]
-  [./right_x]
+  [right_x]
     type = FunctionDirichletBC
     boundary = 1
     variable = disp_x
     function = right_disp_x
   [../]
-  [./top_y]
+  [top_y]
     type = FunctionDirichletBC
     boundary = 2
     variable = disp_y
     function = top_disp_y
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
   [../]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     boundary = 3
     variable = disp_x
@@ -84,12 +84,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 []
@@ -103,7 +103,7 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -126,7 +126,7 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

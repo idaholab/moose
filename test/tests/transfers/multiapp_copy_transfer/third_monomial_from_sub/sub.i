@@ -6,14 +6,14 @@
 []
 
 [AuxVariables]
-  [./aux]
+  [aux]
     family = MONOMIAL
     order = THIRD
   [../]
 []
 
 [AuxKernels]
-  [./aux]
+  [aux]
     type = FunctionAux
     variable = aux
     execute_on = initial
@@ -27,25 +27,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

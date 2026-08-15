@@ -6,34 +6,34 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./q]
+  [q]
     family = MONOMIAL
     order = third
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
@@ -52,7 +52,7 @@
 []
 
 [MoreAuxVariables]
-  [./q]
+  [q]
     family = MONOMIAL
     order = CONSTANT
   [../]

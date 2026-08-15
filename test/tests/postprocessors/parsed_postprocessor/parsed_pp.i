@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -33,11 +33,11 @@
 []
 
 [Postprocessors]
-  [./L2_norm]
+  [L2_norm]
     type = ElementL2Norm
     variable = u
   [../]
-  [./L2:norm]
+  [L2:norm]
     type = ElementL2Norm
     variable = u
   [../]

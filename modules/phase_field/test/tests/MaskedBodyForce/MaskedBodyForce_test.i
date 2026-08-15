@@ -7,22 +7,22 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./c]
+  [c]
   [../]
 []
 
 [ICs]
-  [./initial]
+  [initial]
     value = 1.0
     variable = u
     type = ConstantIC
   [../]
-  [./c_IC]
+  [c_IC]
     int_width = 0.1
     x1 = 0.5
     y1 = 0.5
@@ -35,15 +35,15 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
-  [./source]
+  [source]
     type = MaskedBodyForce
     variable = u
     value = 1
@@ -52,7 +52,7 @@
 []
 
 [Materials]
-  [./mask]
+  [mask]
     type = ParsedMaterial
     expression = if(c>0.5,0,1)
     property_name = mask

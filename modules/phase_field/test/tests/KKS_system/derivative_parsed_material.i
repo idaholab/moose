@@ -18,25 +18,25 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = c1
     boundary = 'left'
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = c1
     boundary = 'right'
     value = 1
   [../]
-  [./top]
+  [top]
     type = DirichletBC
     variable = c2
     boundary = 'top'
     value = 0
   [../]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = c2
     boundary = 'bottom'
@@ -46,20 +46,20 @@
 
 [Variables]
   # concentration 1
-  [./c1]
+  [c1]
     order = FIRST
     family = LAGRANGE
   [../]
 
   # concentration 2
-  [./c2]
+  [c2]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Materials]
-  [./fa]
+  [fa]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'c1 c2'
@@ -71,12 +71,12 @@
 []
 
 [Kernels]
-  [./c1diff]
+  [c1diff]
     type = Diffusion
     variable = c1
   [../]
 
-  [./c2diff]
+  [c2diff]
     type = Diffusion
     variable = c2
   [../]

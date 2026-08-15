@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -41,7 +41,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./exodus]
+  [exodus]
     type = Exodus
     refinements = 1
     file_base = exodus_oversample_custom_name

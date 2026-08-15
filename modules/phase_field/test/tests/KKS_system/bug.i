@@ -19,13 +19,13 @@
 
 # We set u
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0.1
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
@@ -35,25 +35,25 @@
 
 [Variables]
   # primary variable
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
   # secondary variable
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./udiff]
+  [udiff]
     type = Diffusion
     variable = u
   [../]
 
-  [./valgebra]
+  [valgebra]
     type = AlgebraDebug
     variable = v
     v = u
@@ -67,7 +67,7 @@
 []
 
 #[Preconditioning]
-#  [./mydebug]
+#  [mydebug]
 #    type = FDP
 #    full = true
 #  [../]

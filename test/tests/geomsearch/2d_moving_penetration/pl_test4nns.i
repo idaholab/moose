@@ -9,51 +9,51 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [AuxVariables]
-  [./distance]
+  [distance]
   [../]
-  [./tangential_distance]
+  [tangential_distance]
   [../]
-  [./normal_x]
+  [normal_x]
   [../]
-  [./normal_y]
+  [normal_y]
   [../]
-  [./closest_point_x]
+  [closest_point_x]
   [../]
-  [./closest_point_y]
+  [closest_point_y]
   [../]
-  [./element_id]
+  [element_id]
   [../]
-  [./side]
+  [side]
   [../]
 []
 
 [Kernels]
-  [./diff_x]
+  [diff_x]
     type = Diffusion
     variable = disp_x
   [../]
-  [./diff_y]
+  [diff_y]
     type = Diffusion
     variable = disp_y
   [../]
 []
 
 [AuxKernels]
-  [./penetrate]
+  [penetrate]
     type = PenetrationAux
     variable = distance
     boundary = 11            #secondary
     paired_boundary = 12     #primary
   [../]
 
-  [./penetrate2]
+  [penetrate2]
     type = PenetrationAux
     variable = distance
     boundary = 12            #secondary
@@ -61,7 +61,7 @@
     normal_smoothing_method = nodal_normal_based
   [../]
 
-  [./penetrate3]
+  [penetrate3]
     type = PenetrationAux
     variable = tangential_distance
     boundary = 11
@@ -69,7 +69,7 @@
     quantity = tangential_distance
   [../]
 
-  [./penetrate4]
+  [penetrate4]
     type = PenetrationAux
     variable = tangential_distance
     boundary = 12
@@ -77,7 +77,7 @@
     quantity = tangential_distance
   [../]
 
-  [./penetrate5]
+  [penetrate5]
     type = PenetrationAux
     variable = normal_x
     boundary = 11
@@ -85,7 +85,7 @@
     quantity = normal_x
   [../]
 
-  [./penetrate6]
+  [penetrate6]
     type = PenetrationAux
     variable = normal_x
     boundary = 12
@@ -93,7 +93,7 @@
     quantity = normal_x
   [../]
 
-  [./penetrate7]
+  [penetrate7]
     type = PenetrationAux
     variable = normal_y
     boundary = 11
@@ -101,7 +101,7 @@
     quantity = normal_y
   [../]
 
-  [./penetrate8]
+  [penetrate8]
     type = PenetrationAux
     variable = normal_y
     boundary = 12
@@ -109,7 +109,7 @@
     quantity = normal_y
   [../]
 
-  [./penetrate9]
+  [penetrate9]
     type = PenetrationAux
     variable = closest_point_x
     boundary = 11
@@ -117,7 +117,7 @@
     quantity = closest_point_x
   [../]
 
-  [./penetrate10]
+  [penetrate10]
     type = PenetrationAux
     variable = closest_point_x
     boundary = 12
@@ -125,7 +125,7 @@
     quantity = closest_point_x
   [../]
 
-  [./penetrate11]
+  [penetrate11]
     type = PenetrationAux
     variable = closest_point_y
     boundary = 11
@@ -133,7 +133,7 @@
     quantity = closest_point_y
   [../]
 
-  [./penetrate12]
+  [penetrate12]
     type = PenetrationAux
     variable = closest_point_y
     boundary = 12
@@ -141,7 +141,7 @@
     quantity = closest_point_y
   [../]
 
-  [./penetrate13]
+  [penetrate13]
     type = PenetrationAux
     variable = element_id
     boundary = 11
@@ -149,7 +149,7 @@
     quantity = element_id
   [../]
 
-  [./penetrate14]
+  [penetrate14]
     type = PenetrationAux
     variable = element_id
     boundary = 12
@@ -157,7 +157,7 @@
     quantity = element_id
   [../]
 
-  [./penetrate15]
+  [penetrate15]
     type = PenetrationAux
     variable = side
     boundary = 11
@@ -165,7 +165,7 @@
     quantity = side
   [../]
 
-  [./penetrate16]
+  [penetrate16]
     type = PenetrationAux
     variable = side
     boundary = 12
@@ -175,28 +175,28 @@
 []
 
 [BCs]
-  [./b1x]
+  [b1x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0
   [../]
 
-  [./b1y]
+  [b1y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0
   [../]
 
-  [./b2x]
+  [b2x]
     type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0
   [../]
 
-  [./b2y]
+  [b2y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
@@ -205,7 +205,7 @@
 []
 
 [Functions]
-  [./disp_y]
+  [disp_y]
     type = PiecewiseLinear
     x = '0.0 0.25 0.75 1.0'
     y = '0.0 2.0 -2.0  0.0'

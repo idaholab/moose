@@ -63,12 +63,12 @@
     order = SECOND
     family = LAGRANGE
   []
-  [./lm1]
+  [lm1]
     order = FIRST
     family = LAGRANGE
     block = secondary_left
   [../]
-  [./lm2]
+  [lm2]
     order = FIRST
     family = LAGRANGE
     block = secondary_bottom

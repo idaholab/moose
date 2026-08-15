@@ -7,14 +7,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Functions]
-  [./temp_spike]
+  [temp_spike]
     type = PiecewiseLinear
     x = '0 1 1.1 1.2 2'
     y = '1 1 2   1   1'
@@ -22,24 +22,24 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = u
     boundary = left
     function = temp_spike
   [../]
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
@@ -53,7 +53,7 @@
   start_time = 0.0
   end_time = 2.0
   verbose = true
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.9
     optimal_iterations = 10
@@ -63,7 +63,7 @@
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
   [../]
 []

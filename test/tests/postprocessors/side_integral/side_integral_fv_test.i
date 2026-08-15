@@ -12,7 +12,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
     fv = true
@@ -22,7 +22,7 @@
 [FVKernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = '1'
@@ -32,14 +32,14 @@
 [FVBCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = 1
@@ -54,7 +54,7 @@
 []
 
 [Postprocessors]
-  [./integral]
+  [integral]
     type = SideIntegralVariablePostprocessor
     boundary = 0
     variable = u

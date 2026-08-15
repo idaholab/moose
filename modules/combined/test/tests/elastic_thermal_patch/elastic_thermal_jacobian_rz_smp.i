@@ -12,31 +12,31 @@
 []
 
 [Functions]
-  [./ur]
+  [ur]
     type = ParsedFunction
     expression = '0'
   [../]
-  [./uz]
+  [uz]
     type = ParsedFunction
     expression = '0'
   [../]
-  [./body]
+  [body]
     type = ParsedFunction
     expression = '-400/x'
   [../]
-  [./temp]
+  [temp]
     type = ParsedFunction
     expression = '117.56+100*t'
   [../]
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 
-  [./temp]
+  [temp]
     initial_condition = 117.56
   [../]
 []
@@ -58,27 +58,27 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
   [../]
 []
 
 [BCs]
-  [./ur]
+  [ur]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 1
     function = ur
   [../]
-  [./uz]
+  [uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = uz
   [../]
 
-  [./temp]
+  [temp]
     type = FunctionDirichletBC
     variable = temp
     boundary = 10
@@ -87,35 +87,35 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
   [../]
-  [./thermal_strain]
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain
   [../]
-  [./stress]
+  [stress]
     type = ComputeStrainIncrementBasedStress
   [../]
 
-  [./heat]
+  [heat]
     type = HeatConductionMaterial
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]
 
-  [./density]
+  [density]
     type = Density
     density = 0.283
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -138,7 +138,7 @@
 
 [Outputs]
   file_base = elastic_thermal_jacobian_rz_smp_out
-  [./exodus]
+  [exodus]
     type = Exodus
     execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100

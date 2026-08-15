@@ -6,38 +6,38 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./flux]
+  [flux]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./bc_func]
+  [bc_func]
     type = ParsedFunction
     expression = y+1
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./flux_average]
+  [flux_average]
     type = FluxAverageAux
     variable = flux
     coupled = u
@@ -47,13 +47,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right

@@ -4,7 +4,7 @@
   nx = 1
 []
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 [Kernels]

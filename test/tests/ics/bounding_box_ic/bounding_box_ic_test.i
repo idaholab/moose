@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -11,11 +11,11 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.1
       y1 = 0.1
@@ -30,11 +30,11 @@
 [AuxVariables]
   active = 'u_aux'
 
-  [./u_aux]
+  [u_aux]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.1
       y1 = 0.1
@@ -49,7 +49,7 @@
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -58,14 +58,14 @@
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1

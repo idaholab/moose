@@ -38,23 +38,23 @@
 []
 
 [Variables]
-  [./y1]
+  [y1]
     family = SCALAR
     order = FIRST
   [../]
-  [./y2]
+  [y2]
     family = SCALAR
     order = FIRST
   [../]
 []
 
 [ICs]
-  [./y1_init]
+  [y1_init]
     type = FunctionScalarIC
     variable = y1
     function = y1_exact
   [../]
-  [./y2_init]
+  [y2_init]
     type = FunctionScalarIC
     variable = y2
     function = y2_exact
@@ -62,21 +62,21 @@
 []
 
 [ScalarKernels]
-  [./y1_time]
+  [y1_time]
     type = ODETimeDerivative
     variable = y1
   [../]
-  [./y1_space]
+  [y1_space]
     type = ParsedODEKernel
     variable = y1
     expression = '-(${LAMBDA})*y1 - y2^${Y2_EXPONENT}'
     coupled_variables = 'y2'
   [../]
-  [./y2_time]
+  [y2_time]
     type = ODETimeDerivative
     variable = y2
   [../]
-  [./y2_space]
+  [y2_space]
     type = ParsedODEKernel
     variable = y2
     expression = 'y2'
@@ -85,7 +85,7 @@
 
 [Executioner]
   type = Transient
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = LStableDirk2
   [../]
   start_time = 0
@@ -99,62 +99,62 @@
 []
 
 [Functions]
-  [./y1_exact]
+  [y1_exact]
     type = ParsedFunction
     expression = '-exp(-${Y2_EXPONENT}*t)/(lambda+${Y2_EXPONENT})'
     symbol_names = 'lambda'
     symbol_values = ${LAMBDA}
   [../]
-  [./y2_exact]
+  [y2_exact]
     type = ParsedFunction
     expression = exp(-t)
   [../]
 []
 
 [Postprocessors]
-  [./error_y1]
+  [error_y1]
     type = ScalarL2Error
     variable = y1
     function = y1_exact
     execute_on = 'initial timestep_end'
   [../]
-  [./error_y2]
+  [error_y2]
     type = ScalarL2Error
     variable = y2
     function = y2_exact
     execute_on = 'initial timestep_end'
   [../]
-  [./max_error_y1]
+  [max_error_y1]
     # Estimate ||e_1||_{\infty}
     type = TimeExtremeValue
     value_type = max
     postprocessor = error_y1
     execute_on = 'initial timestep_end'
   [../]
-  [./max_error_y2]
+  [max_error_y2]
     # Estimate ||e_2||_{\infty}
     type = TimeExtremeValue
     value_type = max
     postprocessor = error_y2
     execute_on = 'initial timestep_end'
   [../]
-  [./value_y1]
+  [value_y1]
     type = ScalarVariable
     variable = y1
     execute_on = 'initial timestep_end'
   [../]
-  [./value_y2]
+  [value_y2]
     type = ScalarVariable
     variable = y2
     execute_on = 'initial timestep_end'
   [../]
-  [./value_y1_abs_max]
+  [value_y1_abs_max]
     type = TimeExtremeValue
     value_type = abs_max
     postprocessor = value_y1
     execute_on = 'initial timestep_end'
   [../]
-  [./value_y2_abs_max]
+  [value_y2_abs_max]
     type = TimeExtremeValue
     value_type = abs_max
     postprocessor = value_y2

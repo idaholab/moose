@@ -19,12 +19,12 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     rand_seed = 102
     grain_num = 4
@@ -33,28 +33,28 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./Moly_GB]
+  [Moly_GB]
     type = GBEvolution
     time_scale = 1.0
     GBmob0 = 3.986e-6
@@ -66,7 +66,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

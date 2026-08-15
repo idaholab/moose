@@ -43,7 +43,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true

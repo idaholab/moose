@@ -8,14 +8,14 @@
 [Adaptivity]
   marker = error_frac
   steps = 2
-  [./Indicators]
-    [./jump_indicator]
+  [Indicators]
+    [jump_indicator]
       type = GradientJumpIndicator
       variable = u
     [../]
   [../]
-  [./Markers]
-    [./error_frac]
+  [Markers]
+    [error_frac]
       type = ErrorFractionMarker
       indicator = jump_indicator
       refine = 0.7
@@ -24,33 +24,33 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./u_aux]
+  [u_aux]
   [../]
 []
 
 [Functions]
-  [./u_xda_func]
+  [u_xda_func]
     type = SolutionFunction
     solution = xda_u
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./aux_xda_kernel]
+  [aux_xda_kernel]
     type = SolutionAux
     variable = u_aux
     solution = xda_u_aux
@@ -59,13 +59,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -74,7 +74,7 @@
 []
 
 [UserObjects]
-  [./xda_u_aux]
+  [xda_u_aux]
     type = SolutionUserObject
     system = aux0
     mesh = aux_nonlinear_solution_adapt_out_0004_mesh.xda
@@ -82,7 +82,7 @@
     system_variables = u_aux
     execute_on = initial
   [../]
-  [./xda_u]
+  [xda_u]
     type = SolutionUserObject
     system = nl0
     mesh = aux_nonlinear_solution_adapt_out_0004_mesh.xda
@@ -103,7 +103,7 @@
 []
 
 [ICs]
-  [./u_func_ic]
+  [u_func_ic]
     function = u_xda_func
     variable = u
     type = FunctionIC

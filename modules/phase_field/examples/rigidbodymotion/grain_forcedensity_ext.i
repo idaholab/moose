@@ -19,10 +19,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SpecifiedSmoothCircleIC
       invalue = 1.0
       outvalue = 0.0
@@ -35,38 +35,38 @@
       variable = c
     [../]
   [../]
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Functions]
-  [./load]
+  [load]
     type = ConstantFunction
     value = -0.01
   [../]
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
   [../]
-  [./motion]
+  [motion]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -78,12 +78,12 @@
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '1.0  2.0      0.1'
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = c
@@ -92,7 +92,7 @@
     expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     derivative_order = 2
   [../]
-  [./force_density]
+  [force_density]
     type = ExternalForceDensityMaterial
     c = c
     etas = 'eta0 eta1'
@@ -102,57 +102,57 @@
 []
 
 [AuxVariables]
-  [./eta0]
+  [eta0]
   [../]
-  [./eta1]
+  [eta1]
   [../]
-  [./bnds]
+  [bnds]
   [../]
-  [./df00]
+  [df00]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./df01]
+  [df01]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./df10]
+  [df10]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./df11]
+  [df11]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./bnds]
+  [bnds]
     type = BndsCalcAux
     variable = bnds
     var_name_base = eta
     op_num = 2
     v = 'eta0 eta1'
   [../]
-  [./df01]
+  [df01]
     type = MaterialStdVectorRealGradientAux
     variable = df01
     component = 1
     property = force_density_ext
   [../]
-  [./df11]
+  [df11]
     type = MaterialStdVectorRealGradientAux
     variable = df11
     index = 1
     component = 1
     property = force_density_ext
   [../]
-  [./df00]
+  [df00]
     type = MaterialStdVectorRealGradientAux
     variable = df00
     property = force_density_ext
   [../]
-  [./df10]
+  [df10]
     type = MaterialStdVectorRealGradientAux
     variable = df10
     index = 1
@@ -161,7 +161,7 @@
 []
 
 [ICs]
-  [./ic_eta0]
+  [ic_eta0]
     int_width = 6.0
     x1 = 20.0
     y1 = 0.0
@@ -171,7 +171,7 @@
     invalue = 1.0
     type = SmoothCircleIC
   [../]
-  [./IC_eta1]
+  [IC_eta1]
     int_width = 6.0
     x1 = 30.0
     y1 = 25.0
@@ -184,11 +184,11 @@
 []
 
 [VectorPostprocessors]
-  [./forces]
+  [forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
@@ -196,13 +196,13 @@
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
   [../]
-  [./grain_force]
+  [grain_force]
     type = ComputeExternalGrainForceAndTorque
     c = c
     etas = 'eta0 eta1'
@@ -213,7 +213,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -231,7 +231,7 @@
   start_time = 0.0
   num_steps = 5
   dt = 0.1
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = 0.7
     coarsen_fraction = 0.1
     max_h_level = 2

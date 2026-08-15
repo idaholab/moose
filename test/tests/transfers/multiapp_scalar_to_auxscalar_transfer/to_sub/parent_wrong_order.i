@@ -6,19 +6,19 @@
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     family = SCALAR
     order = FIFTH
   [../]
 []
 
 [Variables]
-  [./dummy]
+  [dummy]
   [../]
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = dummy
   [../]
@@ -30,7 +30,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     positions = '0 0 0'
     input_files = 'sub_wrong_order.i'
@@ -38,7 +38,7 @@
 []
 
 [Transfers]
-  [./to_sub]
+  [to_sub]
     type = MultiAppScalarToAuxScalarTransfer
     to_multi_app = sub
     source_variable = 'a'

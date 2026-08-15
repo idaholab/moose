@@ -6,7 +6,7 @@
 # Convergence to these values as num_sectors is increased is verified.
 
 [Mesh]
-  [./ccmg]
+  [ccmg]
     type = ConcentricCircleMeshGenerator
     num_sectors = 8
     radii = '0.1 0.2 0.3 0.4 0.5'
@@ -15,7 +15,7 @@
     preserve_volumes = true
     smoothing_max_it = 3
   []
-  [./extruder]
+  [extruder]
     type = MeshExtruderGenerator
     input = ccmg
     extrusion_vector = '0 0 1'
@@ -24,23 +24,23 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./ring_average]
+  [ring_average]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./reac]
+  [reac]
     type = Reaction
     variable = u
   [../]
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = func
@@ -55,7 +55,7 @@
 []
 
 [AuxKernels]
-  [./np_layered_average]
+  [np_layered_average]
     type = SpatialUserObjectAux
     variable = ring_average
     execute_on = timestep_end
@@ -64,7 +64,7 @@
 []
 
 [UserObjects]
-  [./nrla]
+  [nrla]
     type = NearestRadiusLayeredAverage
     direction = z
     num_layers = 2

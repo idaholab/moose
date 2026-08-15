@@ -8,10 +8,10 @@
 []
 
 [Functions]
-  [./clamp]
+  [clamp]
     type = ClampTestFunction
   [../]
-  [./exact]
+  [exact]
     type = PiecewiseLinear
     x = '0   0.2 0.8 1.0'
     y = '0.2 0.2 0.8 0.8'
@@ -20,7 +20,7 @@
 []
 
 [VectorPostprocessors]
-  [./functions]
+  [functions]
     type = LineFunctionSampler
     functions = 'clamp exact'
     start_point = '0 0 0'

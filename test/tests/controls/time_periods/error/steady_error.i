@@ -6,31 +6,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
 #  The TimeDerivative existing in a Steady calculation will trigger an error itself!
-#  [./time]
+#  [time]
 #    type = TimeDerivative
 #    variable = u
 #  [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -46,14 +46,14 @@
 []
 
 [Dampers]
-  [./const_damp]
+  [const_damp]
     type = ConstantDamper
     damping = 0.9
   [../]
 []
 
 [Controls]
-  [./damping_control]
+  [damping_control]
     type = TimePeriod
     disable_objects = 'const_damp'
     start_time = 0.25

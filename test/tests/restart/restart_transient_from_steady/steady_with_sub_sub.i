@@ -6,25 +6,25 @@
 []
 
 [AuxVariables]
-  [./power_density]
+  [power_density]
   [../]
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
      type = Diffusion
      variable = temp
   [../]
-  [./heat_ie]
+  [heat_ie]
     type = TimeDerivative
     variable = temp
   [../]
-  [./heat_source_fuel]
+  [heat_source_fuel]
     type = CoupledForce
     variable = temp
     v = power_density
@@ -55,12 +55,12 @@
 []
 
 [Postprocessors]
-  [./temp_fuel_avg]
+  [temp_fuel_avg]
     type = ElementAverageValue
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
-  [./pwr_density]
+  [pwr_density]
     type = ElementIntegralVariablePostprocessor
     variable = power_density
     execute_on = 'initial timestep_end'

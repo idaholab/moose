@@ -9,8 +9,8 @@
   initial_marker = marker
   initial_steps = 2
   max_h_level = 2
-  [./Markers]
-    [./marker]
+  [Markers]
+    [marker]
       type = BoxMarker
       bottom_left = '0 0 0'
       top_right = '0.5 0.5 0'
@@ -21,12 +21,12 @@
 []
 
 [AuxVariables]
-  [./bubble]
+  [bubble]
   [../]
 []
 
 [AuxKernels]
-  [./bubble_aux]
+  [bubble_aux]
     type = FunctionAux
     variable = bubble
     function = bubble_func
@@ -36,7 +36,7 @@
 
 
 [Functions]
-  [./bubble_func]
+  [bubble_func]
     type = LevelSetOlssonBubble
     center = '0.25 0.25 0'
     radius = 0.15

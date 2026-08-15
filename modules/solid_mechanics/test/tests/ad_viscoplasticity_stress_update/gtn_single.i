@@ -22,7 +22,7 @@
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = PiecewiseLinear
     x = '0 0.1'
     y = '0 1e-5'
@@ -30,26 +30,26 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
     base_name = 'total'
   [../]
-  [./stress]
+  [stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = gtn
     outputs = all
     base_name = 'total'
   [../]
-  [./porosity]
+  [porosity]
     type = ADPorosityFromStrain
     initial_porosity = 0.1
     inelastic_strain = 'total_combined_inelastic_strain'
     outputs = 'all'
   [../]
 
-  [./gtn]
+  [gtn]
     type = ADViscoplasticityStressUpdate
     total_strain_base_name = 'total'
     coefficient = 'coef'
@@ -58,7 +58,7 @@
     outputs = all
     relative_tolerance = 1e-11
   [../]
-  [./coef]
+  [coef]
     type = ADParsedMaterial
     property_name = coef
     # Example of creep power law
@@ -67,19 +67,19 @@
 []
 
 [BCs]
-  [./no_disp_x]
+  [no_disp_x]
     type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./no_disp_y]
+  [no_disp_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./pull_disp_y]
+  [pull_disp_y]
     type = ADFunctionDirichletBC
     variable = disp_y
     boundary = top
@@ -95,40 +95,40 @@
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = SideAverageValue
     variable = disp_x
     boundary = right
   [../]
-  [./disp_y]
+  [disp_y]
     type = SideAverageValue
     variable = disp_y
     boundary = top
   [../]
-  [./avg_hydro]
+  [avg_hydro]
     type = ElementAverageValue
     variable = total_hydrostatic_stress
   [../]
-  [./avg_vonmises]
+  [avg_vonmises]
     type = ElementAverageValue
     variable = total_vonmises_stress
   [../]
-  [./dt]
+  [dt]
     type = TimestepSize
   [../]
-  [./num_lin]
+  [num_lin]
     type = NumLinearIterations
     outputs = console
   [../]
-  [./num_nonlin]
+  [num_nonlin]
     type = NumNonlinearIterations
     outputs = console
   [../]
-  [./eff_creep_strain]
+  [eff_creep_strain]
     type = ElementAverageValue
     variable = effective_viscoplasticity
   [../]
-  [./porosity]
+  [porosity]
     type = ElementAverageValue
     variable = porosity
   [../]

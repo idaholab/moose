@@ -13,21 +13,21 @@
     zmax = 40
     elem_type = HEX8
   []
-  [./left_side]
+  [left_side]
     input = gen
     type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '24.9 50 50'
   [../]
-  [./right_side]
+  [right_side]
     input = left_side
     type = SubdomainBoundingBoxGenerator
     block_id = 2
     bottom_left = '25.1 0 0'
     top_right = '50 50 50'
   [../]
-  [./iface_u]
+  [iface_u]
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = 1
     paired_block = 2
@@ -37,14 +37,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   []
 []
 
 [ICs]
-  [./c]
+  [c]
     type = SpecifiedSmoothCircleIC
     variable = c
     invalue = 1.0
@@ -58,7 +58,7 @@
 []
 
 [Postprocessors]
-  [./flood_count]
+  [flood_count]
     type = FeatureFloodCount
     variable = c
 
@@ -70,7 +70,7 @@
 []
 
 [VectorPostprocessors]
-  [./features]
+  [features]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count
 

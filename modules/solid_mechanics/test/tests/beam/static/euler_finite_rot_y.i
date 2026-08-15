@@ -28,64 +28,64 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_z]
+  [disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_x]
+  [rot_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_y]
+  [rot_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_z]
+  [rot_z]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./fixy1]
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-  [./fixz1]
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
   [../]
-  [./fixr1]
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 1
     value = 0.0
   [../]
-  [./fixr2]
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 1
     value = 0.0
   [../]
-  [./fixr3]
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = 1
@@ -94,7 +94,7 @@
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = UserForcingFunctorNodalKernel
     variable = disp_y
     boundary = 2
@@ -103,7 +103,7 @@
 []
 
 [Functions]
-  [./force]
+  [force]
     type = PiecewiseLinear
     x = '0.0 2.0  8.0'
     y = '0.0 300.0 300.0'
@@ -111,7 +111,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -133,7 +133,7 @@
 []
 
 [Kernels]
-  [./solid_disp_x]
+  [solid_disp_x]
     type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
@@ -141,7 +141,7 @@
     component = 0
     variable = disp_x
   [../]
-  [./solid_disp_y]
+  [solid_disp_y]
     type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
@@ -149,7 +149,7 @@
     component = 1
     variable = disp_y
   [../]
-  [./solid_disp_z]
+  [solid_disp_z]
     type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
@@ -157,7 +157,7 @@
     component = 2
     variable = disp_z
   [../]
-  [./solid_rot_x]
+  [solid_rot_x]
     type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
@@ -165,7 +165,7 @@
     component = 3
     variable = rot_x
   [../]
-  [./solid_rot_y]
+  [solid_rot_y]
     type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
@@ -173,7 +173,7 @@
     component = 4
     variable = rot_y
   [../]
-  [./solid_rot_z]
+  [solid_rot_z]
     type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
@@ -184,14 +184,14 @@
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 1e4
     poissons_ratio = -0.99995
     shear_coefficient = 1.0
     block = 1
   [../]
-  [./strain]
+  [strain]
     type = ComputeFiniteBeamStrain
     block = '1'
     displacements = 'disp_x disp_y disp_z'
@@ -204,24 +204,24 @@
     y_orientation = '0.0 1.0 0.0'
     large_strain = true
   [../]
-  [./stress]
+  [stress]
     type = ComputeBeamResultants
     block = 1
   [../]
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_x
   [../]
-  [./disp_y]
+  [disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_y
   [../]
-  [./rot_z]
+  [rot_z]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = rot_z

@@ -16,7 +16,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -25,12 +25,12 @@
 [AuxVariables]
   active = 'aux1 aux2'
 
-  [./aux1]
+  [aux1]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./aux2]
+  [aux2]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -39,18 +39,18 @@
 [Kernels]
   active = 'ie diff force'
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
   #Coupling of nonlinear to Aux
-  [./force]
+  [force]
     type = CoupledForce
     variable = u
     v = aux2
@@ -61,14 +61,14 @@
   active = 'constant field'
 
   #Simple Aux Kernel
-  [./constant]
+  [constant]
     variable = aux1
     type = ConstantAux
     value = 1
   [../]
 
   #Shows coupling of Aux to nonlinear
-  [./field]
+  [field]
     variable = aux2
     type = CoupledAux
     value = 2
@@ -80,14 +80,14 @@
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 3

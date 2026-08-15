@@ -6,30 +6,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -48,7 +48,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [out]
     type = Exodus
     time_step_interval = 5
     execute_on = 'final timestep_end'

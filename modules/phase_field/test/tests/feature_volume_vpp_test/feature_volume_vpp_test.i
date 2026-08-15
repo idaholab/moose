@@ -33,7 +33,7 @@
 []
 
 [Postprocessors]
-  [./flood_count]
+  [flood_count]
     type = FeatureFloodCount
     variable = c
 
@@ -46,7 +46,7 @@
 []
 
 [VectorPostprocessors]
-  [./features]
+  [features]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count
 

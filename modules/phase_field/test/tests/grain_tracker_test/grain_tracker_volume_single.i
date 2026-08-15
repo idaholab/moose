@@ -17,14 +17,14 @@
 []
 
 [Variables]
-  [./gr0]
+  [gr0]
   [../]
-  [./gr1]
+  [gr1]
   [../]
 []
 
 [ICs]
-  [./circle]
+  [circle]
     type = SmoothCircleIC
     x1 = 0
     y1 = 0
@@ -34,7 +34,7 @@
     outvalue = 0
     variable = gr0
   [../]
-  [./boxes]
+  [boxes]
     type = MultiBoundingBoxIC
     corners = '-1.5 -0.25 0
                   1 -0.5  0'
@@ -47,7 +47,7 @@
 []
 
 [Postprocessors]
-  [./grain_tracker]
+  [grain_tracker]
     type = GrainTracker
     variable = 'gr0 gr1'
     threshold = 0.1
@@ -57,7 +57,7 @@
 []
 
 [VectorPostprocessors]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_tracker
     single_feature_per_element = true
@@ -68,7 +68,7 @@
 [Executioner]
   type = Steady
 
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 3
     refine_fraction = 0.7
     coarsen_fraction = 0.1

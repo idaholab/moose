@@ -8,28 +8,28 @@
 []
 
 [Functions]
-  [./ic]
+  [ic]
     type = ParsedFunction
     expression = 0
   [../]
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = x
   [../]
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = t*x
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = ic
     [../]
@@ -37,18 +37,18 @@
 []
 
 [Kernels]
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
     lumping = true
   [../]
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
@@ -56,7 +56,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     preset = false
@@ -66,7 +66,7 @@
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
@@ -80,14 +80,14 @@
   num_steps = 20
   dt = 0.00005
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ActuallyExplicitEuler
   [../]
 []
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     max_rows = 10
   [../]

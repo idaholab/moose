@@ -9,10 +9,10 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
       y1 = 0.0
@@ -26,16 +26,16 @@
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./pa2]
+  [pa2]
   [../]
 []
 
 [AuxKernels]
-  [./pa2eq]
+  [pa2eq]
     type = AqueousEquilibriumRxnAux
     variable = pa2
     v = a
@@ -45,7 +45,7 @@
 []
 
 [ICs]
-  [./pressure]
+  [pressure]
     type = FunctionIC
     variable = pressure
     function = 2-x
@@ -53,34 +53,34 @@
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
   [../]
-  [./a_diff]
+  [a_diff]
     type = PrimaryDiffusion
     variable = a
   [../]
-  [./a_conv]
+  [a_conv]
     type = PrimaryConvection
     variable = a
     p = pressure
   [../]
-  [./aeq]
+  [aeq]
     type = CoupledBEEquilibriumSub
     variable = a
     log_k = 1
     weight = 2
     sto_u = 2
   [../]
-  [./adiff]
+  [adiff]
     type = CoupledDiffusionReactionSub
     variable = a
     log_k = 1
     weight = 2
     sto_u = 2
   [../]
-  [./aconv]
+  [aconv]
     type = CoupledConvectionReactionSub
     variable = a
     log_k = 1
@@ -91,7 +91,7 @@
 []
 
 [BCs]
-  [./a_right]
+  [a_right]
     type = ChemicalOutFlowBC
     variable = a
     boundary = right
@@ -99,7 +99,7 @@
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
@@ -125,7 +125,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

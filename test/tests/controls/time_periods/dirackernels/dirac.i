@@ -7,26 +7,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.5
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [DiracKernels]
-  [./point_source]
+  [point_source]
     type = ConstantPointSource
     variable = u
     value = 1
@@ -35,14 +35,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -64,7 +64,7 @@
 []
 
 [Controls]
-  [./point_source]
+  [point_source]
     type = TimePeriod
     disable_objects = 'DiracKernel::point_source'
     start_time = '0.15'

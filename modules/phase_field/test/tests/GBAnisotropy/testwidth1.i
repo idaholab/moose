@@ -21,24 +21,24 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [Functions]
-  [./ic_func_eta1]
+  [ic_func_eta1]
     type = ParsedFunction
     expression = '0.5*(1.0-tanh((x)*sqrt(m/kappa/2.0)))'
     symbol_names = 'm kappa'
     symbol_values = '0.26514 331.414'
   [../]
-  [./ic_func_eta2]
+  [ic_func_eta2]
     type = ParsedFunction
     expression = '0.5*(1.0+tanh((x)*sqrt(m/kappa/2.0)))*0.5*(1.0-tanh((x-500)*sqrt(m/kappa/2.0)))'
     symbol_names = 'm kappa'
     symbol_values = '0.26514 331.414'
   [../]
-  [./ic_func_eta3]
+  [ic_func_eta3]
     type = ParsedFunction
     expression = '0.5*(1.0+tanh((x-500)*sqrt(m/kappa/2.0)))'
     symbol_names = 'm kappa'
@@ -47,17 +47,17 @@
 []
 
 [ICs]
-  [./eta1_ic]
+  [eta1_ic]
     variable = gr0
     type = FunctionIC
     function = ic_func_eta1
   [../]
-  [./eta2_ic]
+  [eta2_ic]
     variable = gr1
     type = FunctionIC
     function = ic_func_eta2
   [../]
-  [./eta3_ic]
+  [eta3_ic]
     variable = gr2
     type = FunctionIC
     function = ic_func_eta3
@@ -65,27 +65,27 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./unique_grains]
+  [unique_grains]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./var_indices]
+  [var_indices]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./bnds_aux]
+  [bnds_aux]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
@@ -93,7 +93,7 @@
 []
 
 [Materials]
-  [./CuGrGranisotropic]
+  [CuGrGranisotropic]
     type = GBWidthAnisotropy
     kappa = 331.414
     mu = 0.26514

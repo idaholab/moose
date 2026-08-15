@@ -16,7 +16,7 @@
 []
 
 [Materials]
-  [./fp_mat]
+  [fp_mat]
     type = SodiumPropertiesMaterial
     temperature = 100
     outputs = all
@@ -29,11 +29,11 @@
 []
 
 [Postprocessors]
-  [./k_avg]
+  [k_avg]
     type = ElementAverageValue
     variable = k
   [../]
-  [./cp_avg]
+  [cp_avg]
     type = ElementAverageValue
     variable = cp
   [../]

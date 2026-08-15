@@ -10,20 +10,20 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = a
   [../]
 
-  [./conv]
+  [conv]
     type = MatConvection
     variable = u
     x = 1
@@ -33,14 +33,14 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = 1
     value = 1
   [../]
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
@@ -49,28 +49,28 @@
 []
 
 [Materials]
-  [./matA]
+  [matA]
     type = CoupledMaterial
     block = 0
     mat_prop = 'a'
     coupled_mat_prop = 'b'
   [../]
 
-  [./matB]
+  [matB]
     type = CoupledMaterial
     block = 0
     mat_prop = 'b'
     coupled_mat_prop = 'c'
   [../]
 
-  [./matC]
+  [matC]
     type = CoupledMaterial
     block = 0
     mat_prop = 'c'
     coupled_mat_prop = 'd'
   [../]
 
-  [./matD]
+  [matD]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'd'

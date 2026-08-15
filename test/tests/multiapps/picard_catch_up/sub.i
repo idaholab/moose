@@ -6,26 +6,26 @@
 []
 
 [Variables]
-  [./v]
+  [v]
   [../]
 []
 
 [AuxVariables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
-  [./force_v]
+  [force_v]
     type = CoupledForce
     variable = v
     v = u
   [../]
-  [./nan]
+  [nan]
     type = NanAtCountKernel
     variable = v
     count = 32
@@ -33,14 +33,14 @@
 []
 
 [BCs]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     preset = false
     boundary = left
     value = 1
   [../]
-  [./right_v]
+  [right_v]
     type = FunctionDirichletBC
     variable = v
     preset = false

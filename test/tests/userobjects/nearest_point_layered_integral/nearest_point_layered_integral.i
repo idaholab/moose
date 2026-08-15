@@ -10,26 +10,26 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./np_layered_average]
+  [np_layered_average]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./np_layered_average]
+  [np_layered_average]
     type = SpatialUserObjectAux
     variable = np_layered_average
     execute_on = timestep_end
@@ -38,13 +38,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./one]
+  [one]
     type = DirichletBC
     variable = u
     boundary = 'right back top'
@@ -53,7 +53,7 @@
 []
 
 [UserObjects]
-  [./npla]
+  [npla]
     type = NearestPointLayeredIntegral
     direction = y
     num_layers = 10

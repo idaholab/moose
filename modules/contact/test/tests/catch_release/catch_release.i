@@ -8,7 +8,7 @@
 []
 
 [Functions]
-  [./up]
+  [up]
     type = PiecewiseLinear
     x = '0 1 2.00 3 4'
     y = '0 1 1.01 1 0'
@@ -17,7 +17,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     generate_output = 'stress_yy'
@@ -25,7 +25,7 @@
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 2
     secondary = 3
     penalty = 1e6
@@ -34,14 +34,14 @@
 []
 
 [BCs]
-  [./lateral]
+  [lateral]
     type = DirichletBC
     variable = disp_x
     boundary = '1 4'
     value = 0.0
   [../]
 
-  [./bottom_up]
+  [bottom_up]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
@@ -49,14 +49,14 @@
     function = up
   [../]
 
-  [./out]
+  [out]
     type = DirichletBC
     variable = disp_z
     boundary = '1 4'
     value = 0.0
   [../]
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = disp_y
     boundary = 4
@@ -65,13 +65,13 @@
 []
 
 [Materials]
-  [./stiffStuff]
+  [stiffStuff]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuffStress]
+  [stiffStuffStress]
     type = ComputeFiniteStrainElasticStress
   []
 []

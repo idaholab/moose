@@ -6,7 +6,7 @@
 # Its inverse is 0.5*(a/PI)^2 = 5.0660591821169. Here a is equal to 10.
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     # Use a good initial so that Newton can converge when we do not use free power iterations
@@ -16,12 +16,12 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./rhs]
+  [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
@@ -30,13 +30,13 @@
 []
 
 [BCs]
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
   [../]
-  [./eigen]
+  [eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -52,7 +52,7 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
   [../]

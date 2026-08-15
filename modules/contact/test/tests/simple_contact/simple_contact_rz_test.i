@@ -22,7 +22,7 @@
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 1'
@@ -31,7 +31,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     strain = FINITE
@@ -40,7 +40,7 @@
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 3
     secondary = 2
     penalty = 1e5
@@ -48,22 +48,22 @@
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
 
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 10
     value = 0.0
   [../]
 
-  [./Pressure]
-    [./right_pressure]
+  [Pressure]
+    [right_pressure]
       boundary = 4
       function = pressure
     [../]
@@ -71,13 +71,13 @@
 []
 
 [Materials]
-  [./stiffStuff]
+  [stiffStuff]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff_stress]
+  [stiffStuff_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
@@ -102,7 +102,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
   [../]

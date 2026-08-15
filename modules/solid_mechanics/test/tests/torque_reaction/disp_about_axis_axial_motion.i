@@ -22,7 +22,7 @@
 []
 
 [BCs]
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
@@ -32,7 +32,7 @@
 # Because rotation is prescribed about the z axis, the
 # DisplacementAboutAxis BC is only needed for the x and y
 # displacements.
-  [./top_x]
+  [top_x]
     type = DisplacementAboutAxis
     boundary = top
     function = 't'
@@ -43,7 +43,7 @@
     variable = disp_x
   [../]
 
-  [./top_y]
+  [top_y]
     type = DisplacementAboutAxis
     boundary = top
     function = 't'
@@ -56,33 +56,33 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
 
 [Postprocessors]
-  [./disp_x_5]
+  [disp_x_5]
     type = NodalVariableValue
     variable = disp_x
     nodeid = 5
   [../]
-  [./disp_y_5]
+  [disp_y_5]
     type = NodalVariableValue
     variable = disp_y
     nodeid = 5
   [../]
-  [./disp_x_6]
+  [disp_x_6]
     type = NodalVariableValue
     variable = disp_x
     nodeid = 6
   [../]
-  [./disp_y_6]
+  [disp_y_6]
     type = NodalVariableValue
     variable = disp_y
     nodeid = 6

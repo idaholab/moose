@@ -20,19 +20,19 @@
 
 
 [ICs]
-  [./x]
+  [x]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_x
   [../]
-  [./y]
+  [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
   [../]
-  [./z]
+  [z]
     type = RandomIC
     min = -0.1
     max = 0.1
@@ -41,19 +41,19 @@
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0'
   [../]
-  [./y]
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
   [../]
-  [./z]
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
@@ -62,24 +62,24 @@
 []
 
 [AuxVariables]
-  [./yield_fcn]
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [iter]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./yield_fcn_auxk]
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_yield_function
     variable = yield_fcn
   [../]
-  [./iter]
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
@@ -87,17 +87,17 @@
 []
 
 [Postprocessors]
-  [./yield_fcn_at_zero]
+  [yield_fcn_at_zero]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
     outputs = 'console'
   [../]
-  [./should_be_zero]
+  [should_be_zero]
     type = FunctionValuePostprocessor
     function = should_be_zero_fcn
   [../]
-  [./av_iter]
+  [av_iter]
     type = ElementAverageValue
     variable = iter
     outputs = 'console'
@@ -105,7 +105,7 @@
 []
 
 [Functions]
-  [./should_be_zero_fcn]
+  [should_be_zero_fcn]
     type = ParsedFunction
     expression = 'if(a<1E-3,0,a)'
     symbol_names = 'a'
@@ -114,21 +114,21 @@
 []
 
 [UserObjects]
-  [./mc_coh]
+  [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 1E3
   [../]
-  [./mc_phi]
+  [mc_phi]
     type = SolidMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
   [../]
-  [./mc_psi]
+  [mc_psi]
     type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
   [../]
-  [./mc]
+  [mc]
     type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
@@ -141,13 +141,13 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.7E7 1E7'
   [../]
-  [./mc]
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 0
     max_NR_iterations = 1000
@@ -160,7 +160,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     strain = finite
@@ -178,7 +178,7 @@
 [Outputs]
   file_base = random
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
     [../]
 []

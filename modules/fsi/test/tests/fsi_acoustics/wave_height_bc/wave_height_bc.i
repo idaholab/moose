@@ -30,28 +30,28 @@
 []
 
 [Variables]
-  [./p]
+  [p]
   [../]
 []
 
 [AuxVariables]
-  [./Wave1]
+  [Wave1]
   [../]
 []
 
 [Kernels]
-  [./diffusion]
+  [diffusion]
     type = Diffusion
     variable = 'p'
   [../]
-  [./inertia]
+  [inertia]
     type = AcousticInertia
     variable = p
   [../]
 []
 
 [AuxKernels]
-  [./waves]
+  [waves]
     type = WaveHeightAuxKernel
     variable = 'Wave1'
     pressure = p
@@ -62,13 +62,13 @@
 []
 
 [BCs]
-  [./leftright_pressure]
+  [leftright_pressure]
     type = DirichletBC
     variable = p
     boundary = 'left right top bottom'
     value = 0
   [../]
-  [./free]
+  [free]
     type = FluidFreeSurfaceBC
     variable = p
     boundary = 'front'
@@ -77,7 +77,7 @@
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = 'p'
     function = initial_cond
@@ -86,14 +86,14 @@
 []
 
 [Functions]
-  [./initial_cond]
+  [initial_cond]
     type = ParsedFunction
     expression = '0.00001*exp(-((x-0.5)/0.1)^2-((y-0.5)/0.1)^2)'
   [../]
 []
 
 [Materials]
-  [./co_sq]
+  [co_sq]
     type = GenericConstantMaterial
     prop_names = inv_co_sq
     prop_values = 4.44e-7
@@ -121,7 +121,7 @@
 []
 
 [Postprocessors]
-  [./W1]
+  [W1]
     type = PointValue
     point = '0.5 0.5 0.01'
     variable = Wave1

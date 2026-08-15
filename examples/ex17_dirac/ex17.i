@@ -3,21 +3,21 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
   [../]
 []
 
 [DiracKernels]
-  [./example_point_source]
+  [example_point_source]
     type = ExampleDirac
     variable = diffused
     value = 1.0
@@ -26,14 +26,14 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = diffused
     boundary = 'right'
     value = 0
   [../]
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = diffused
     boundary = 'left'

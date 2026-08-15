@@ -1,12 +1,12 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
     ny = 10
   []
 
-  [./createNewSidesetOne]
+  [createNewSidesetOne]
     type = SideSetsFromBoundingBoxGenerator
     input = gmg
     included_boundaries = 'left'

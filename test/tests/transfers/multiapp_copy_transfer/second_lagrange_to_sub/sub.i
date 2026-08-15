@@ -7,7 +7,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
   [../]

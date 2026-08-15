@@ -13,14 +13,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     variable = c
     type = SmoothCircleIC
     x1 = 5.0

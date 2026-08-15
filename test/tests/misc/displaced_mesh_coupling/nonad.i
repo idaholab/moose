@@ -8,19 +8,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [Kernels]
-  [./u]
+  [u]
     type = Diffusion
     use_displaced_mesh = true
     variable = u
   [../]
-  [./v]
+  [v]
     type = Diffusion
     use_displaced_mesh = false
     variable = v
@@ -28,20 +28,20 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = NeumannBC
     variable = u
     boundary = left
     value = 1.0e-3
     use_displaced_mesh = true
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
   [../]
-  [./lright]
+  [lright]
     type = DirichletBC
     variable = v
     boundary = right
@@ -50,7 +50,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

@@ -6,13 +6,13 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADMatDiffusionTest
     variable = u
     prop_to_use = 'AdAd'
@@ -22,14 +22,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
@@ -39,7 +39,7 @@
 []
 
 [Materials]
-  [./ad_coupled_mat]
+  [ad_coupled_mat]
     type = ADCoupledMaterial
     coupled_var = u
     ad_mat_prop = ad_diffusivity

@@ -4,7 +4,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1.0
@@ -12,12 +12,12 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     block = 1
@@ -25,14 +25,14 @@
     function = 'x+y'
   [../]
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2

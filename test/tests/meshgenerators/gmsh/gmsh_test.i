@@ -1,5 +1,5 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = sample.msh
   []

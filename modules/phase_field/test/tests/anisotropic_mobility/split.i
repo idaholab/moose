@@ -8,8 +8,8 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
@@ -17,24 +17,24 @@
       y2 = 30.0
     [../]
   [../]
-  [./w]
+  [w]
   [../]
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = SplitCHParsed
     variable = c
     kappa_name = kappa_c
     w = w
     f_name = F
   [../]
-  [./wres]
+  [wres]
     type = SplitCHWResAniso
     variable = w
     mob_name = M
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
@@ -42,19 +42,19 @@
 []
 
 [Materials]
-  [./kappa]
+  [kappa]
     type = GenericConstantMaterial
     prop_names = 'kappa_c'
     prop_values = '2.0'
   [../]
-  [./mob]
+  [mob]
     type = ConstantAnisotropicMobility
     tensor = '0.1 0 0
               0   1 0
               0   0 0'
     M_name = M
   [../]
-  [./free_energy]
+  [free_energy]
     type = MathEBFreeEnergy
     property_name = F
     c = c
@@ -62,7 +62,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
   [../]

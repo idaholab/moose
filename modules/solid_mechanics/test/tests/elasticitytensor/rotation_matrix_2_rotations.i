@@ -10,43 +10,43 @@
 []
 
 [AuxVariables]
-  [./C1111_aux_matrix]  # C11
+  [C1111_aux_matrix]  # C11
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./C1122_aux_matrix]  # C12
+  [C1122_aux_matrix]  # C12
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./C1133_aux_matrix]  # C13
+  [C1133_aux_matrix]  # C13
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./C1112_aux_matrix]  # C16
+  [C1112_aux_matrix]  # C16
     order = CONSTANT
     family = MONOMIAL
   [../]
 
-  [./C1111_aux_euler]  # C11
+  [C1111_aux_euler]  # C11
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./C1122_aux_euler]  # C12
+  [C1122_aux_euler]  # C12
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./C1133_aux_euler]  # C13
+  [C1133_aux_euler]  # C13
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./C1112_aux_euler]  # C16
+  [C1112_aux_euler]  # C16
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./matl_C1111_matrix]  # C11
+  [matl_C1111_matrix]  # C11
     type = RankFourAux
     rank_four_tensor = rotation_matrix_elasticity_tensor
     index_i = 0
@@ -56,7 +56,7 @@
     variable = C1111_aux_matrix
     execute_on = initial
   [../]
-  [./matl_C1122_matrix]  # C12
+  [matl_C1122_matrix]  # C12
     type = RankFourAux
     rank_four_tensor = rotation_matrix_elasticity_tensor
     index_i = 0
@@ -66,7 +66,7 @@
     variable = C1122_aux_matrix
     execute_on = initial
   [../]
-  [./matl_C1133_matrix]  # C13
+  [matl_C1133_matrix]  # C13
     type = RankFourAux
     rank_four_tensor = rotation_matrix_elasticity_tensor
     index_i = 0
@@ -76,7 +76,7 @@
     variable = C1133_aux_matrix
     execute_on = initial
   [../]
-  [./matl_C1112_matrix]  # C16
+  [matl_C1112_matrix]  # C16
     type = RankFourAux
     rank_four_tensor = rotation_matrix_elasticity_tensor
     index_i = 0
@@ -87,7 +87,7 @@
     execute_on = initial
   [../]
 
-  [./matl_C1111_euler]  # C11
+  [matl_C1111_euler]  # C11
     type = RankFourAux
     rank_four_tensor = euler_elasticity_tensor
     index_i = 0
@@ -97,7 +97,7 @@
     variable = C1111_aux_euler
     execute_on = initial
   [../]
-  [./matl_C1122_euler]  # C12
+  [matl_C1122_euler]  # C12
     type = RankFourAux
     rank_four_tensor = euler_elasticity_tensor
     index_i = 0
@@ -107,7 +107,7 @@
     variable = C1122_aux_euler
     execute_on = initial
   [../]
-  [./matl_C1133_euler]  # C13
+  [matl_C1133_euler]  # C13
     type = RankFourAux
     rank_four_tensor = euler_elasticity_tensor
     index_i = 0
@@ -117,7 +117,7 @@
     variable = C1133_aux_euler
     execute_on = initial
   [../]
-  [./matl_C1112_euler]  # C16
+  [matl_C1112_euler]  # C16
     type = RankFourAux
     rank_four_tensor = euler_elasticity_tensor
     index_i = 0
@@ -130,7 +130,7 @@
 []
 
 [Materials]
-  [./elasticity_matrix]
+  [elasticity_matrix]
     type = ComputeElasticityTensor
     block = 0
     base_name = 'rotation_matrix'
@@ -146,7 +146,7 @@
                       -0.70710678  0.40824829  0.57735027
                        0.         -0.81649658  0.57735027'
   [../]
-  [./elasticity_euler]
+  [elasticity_euler]
     type = ComputeElasticityTensor
     block = 0
     base_name = 'euler'
@@ -173,43 +173,43 @@
 
 [Postprocessors]
   # corresponding values in "matrix" and "euler" postprocessors should match
-  [./C11_matrix]
+  [C11_matrix]
     type = ElementAverageValue
     variable = C1111_aux_matrix
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./C12_matrix]
+  [C12_matrix]
     type = ElementAverageValue
     variable = C1122_aux_matrix
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./C13_matrix]
+  [C13_matrix]
     type = ElementAverageValue
     variable = C1133_aux_matrix
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./C16_matrix]
+  [C16_matrix]
     type = ElementAverageValue
     variable = C1112_aux_matrix
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
 
-  [./C11_euler]
+  [C11_euler]
     type = ElementAverageValue
     variable = C1111_aux_euler
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./C12_euler]
+  [C12_euler]
     type = ElementAverageValue
     variable = C1122_aux_euler
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./C13_euler]
+  [C13_euler]
     type = ElementAverageValue
     variable = C1133_aux_euler
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./C16_euler]
+  [C16_euler]
     type = ElementAverageValue
     variable = C1112_aux_euler
     execute_on = 'INITIAL TIMESTEP_END'

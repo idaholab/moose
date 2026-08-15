@@ -14,7 +14,7 @@
 
 
 [AuxVariables]
-  [./var]
+  [var]
     order = CONSTANT
     family = MONOMIAL
     block = p1
@@ -22,7 +22,7 @@
 []
 
 [ICs]
-  [./var]
+  [var]
     type = FunctionIC
     variable = var
     function = setvar
@@ -31,14 +31,14 @@
 []
 
 [Functions]
-  [./setvar]
+  [setvar]
     type = ParsedFunction
     expression = '1 + z * z'
   [../]
 []
 
 [UserObjects]
-  [./sub_app_uo]
+  [sub_app_uo]
     type = LayeredAverage
     direction = z
     variable = var

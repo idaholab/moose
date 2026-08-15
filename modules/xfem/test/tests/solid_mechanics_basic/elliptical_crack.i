@@ -27,7 +27,7 @@
 []
 
 [UserObjects]
-  [./ellip_cut_uo]
+  [ellip_cut_uo]
     type = EllipseCutUserObject
     cut_data = '-0.5 -0.5 0
                 -0.5 -0.1 0
@@ -36,7 +36,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
@@ -44,7 +44,7 @@
 []
 
 [Functions]
-  [./top_trac_z]
+  [top_trac_z]
     type = ConstantFunction
     value = 10
   [../]
@@ -52,37 +52,37 @@
 
 
 [BCs]
-  [./top_z]
+  [top_z]
     type = FunctionNeumannBC
     boundary = 2
     variable = disp_z
     function = top_trac_z
   [../]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
   [../]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     boundary = 1
     variable = disp_y
     value = 0.0
   [../]
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     boundary = 1
     variable = disp_z
     value = 0.0
   [../]
-  [./sym_y]
+  [sym_y]
     type = DirichletBC
     boundary = 3
     variable = disp_y
     value = 0.0
   [../]
-  [./sym_x]
+  [sym_x]
     type = DirichletBC
     boundary = 4
     variable = disp_x
@@ -91,12 +91,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
@@ -110,7 +110,7 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
   [../]
@@ -134,7 +134,7 @@
   file_base = elliptical_crack_out
   exodus = true
   execute_on = timestep_end
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

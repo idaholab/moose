@@ -6,43 +6,43 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./nearest_node]
+  [nearest_node]
   [../]
-  [./mesh_function]
+  [mesh_function]
   [../]
-  [./user_object]
+  [user_object]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./interpolation]
+  [interpolation]
   [../]
 []
 
 [Kernels]
-  [./cd]
+  [cd]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

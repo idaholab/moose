@@ -6,8 +6,8 @@
 []
 
 [Adaptivity]
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = VectorValueJumpIndicator
       variable = something
     [../]
@@ -16,7 +16,7 @@
 
 
 [ICs]
-  [./leftright_1]
+  [leftright_1]
     type = BoundingBoxIC
     variable = something_1
     inside = 1
@@ -28,12 +28,12 @@
 []
 
 [AuxVariables]
-  [./something]
+  [something]
     type = VectorMooseVariable
     order = CONSTANT
     family = MONOMIAL_VEC
   [../]
-  [./something_1]
+  [something_1]
     order = CONSTANT
     family = MONOMIAL
     outputs = 'none'

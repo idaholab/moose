@@ -14,28 +14,28 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./GrainGrowth]
+  [PhaseField]
+    [GrainGrowth]
       c = c
     [../]
   [../]
 []
 
 [AuxVariables]
-  [./c]
+  [c]
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalCircleGrainIC]
+  [PolycrystalICs]
+    [BicrystalCircleGrainIC]
       radius = 300
       x = 400
       y = 0
       int_width = 60
     [../]
   [../]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     variable = c
     x1 = 100
@@ -48,7 +48,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
@@ -59,14 +59,14 @@
 []
 
 [Postprocessors]
-  [./gr1area]
+  [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

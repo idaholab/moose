@@ -6,30 +6,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -38,7 +38,7 @@
 []
 
 [VectorPostprocessors]
-  [./point_sample]
+  [point_sample]
     type = PointValueSampler
     variable = 'u'
     points = '0.1 0.1 0'
@@ -49,7 +49,7 @@
 []
 
 [Postprocessors]
-  [./old_vpp_value]
+  [old_vpp_value]
     type = UseOldVectorPostprocessor
     vpp = point_sample
     vector_name = u

@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -8,13 +8,13 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
   [../]
 
-  [./v]
+  [v]
     order = CONSTANT
     family = MONOMIAL
     fv = true
@@ -24,13 +24,13 @@
 [FVKernels]
   active = 'diff body_force'
 
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 1
   [../]
 
-  [./body_force]
+  [body_force]
     type = FVBodyForce
     variable = u
     value = 10
@@ -40,14 +40,14 @@
 [FVBCs]
   active = 'right'
 
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = 1

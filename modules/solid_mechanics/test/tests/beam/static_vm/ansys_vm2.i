@@ -64,7 +64,7 @@
 []
 
 [Physics/SolidMechanics/LineElement/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -79,7 +79,7 @@
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 30.0e6
     # poissons_ratio = -0.9998699638
@@ -88,39 +88,39 @@
     shear_coefficient = 0.85
     block = 0
   [../]
-  [./stress]
+  [stress]
     type = ComputeBeamResultants
     block = 0
   [../]
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 'BC1'
     value = 0.0
   [../]
-  [./fixy1]
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 'BC1'
     value = 0.0
   [../]
-  [./fixz1]
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 'BC1'
     value = 0.0
   [../]
 
-  [./fixy2]
+  [fixy2]
     type = DirichletBC
     variable = disp_y
     boundary = 'BC2'
     value = 0.0
   [../]
-  [./fixz2]
+  [fixz2]
     type = DirichletBC
     variable = disp_z
     boundary = 'BC2'
@@ -129,12 +129,12 @@
 []
 
 [Functions]
-  [./force_50e3]
+  [force_50e3]
     type = PiecewiseLinear
     x = '0.0 10.0'
     y = '0.0 50000.0'
   [../]
-  [./force_25e3]
+  [force_25e3]
     type = PiecewiseLinear
     x = '0.0 10.0'
     y = '0.0 25000.0'
@@ -142,26 +142,26 @@
 []
 
 [NodalKernels]
-  [./force_z2]
+  [force_z2]
     type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'two'
     functor = force_50e3
   [../]
-  [./force_z8]
+  [force_z8]
     type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'eight'
     functor = force_50e3
   [../]
 
-  [./force_z1]
+  [force_z1]
     type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'one'
     functor = force_25e3
   [../]
-  [./force_z9]
+  [force_z9]
     type =  UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'nine'
@@ -170,7 +170,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -189,47 +189,47 @@
 []
 
 [Postprocessors]
-  [./disp_z1]
+  [disp_z1]
     type = PointValue
     point = '0.0 0.0 0.0'
     variable = disp_z
   [../]
-  [./disp_x1]
+  [disp_x1]
     type = PointValue
     point = '0.0 0.0 0.0'
     variable = disp_x
   [../]
-  [./disp_z2]
+  [disp_z2]
     type = PointValue
     point = '60.0 0.0 0.0'
     variable = disp_z
   [../]
-  [./disp_zBC1]
+  [disp_zBC1]
     type = PointValue
     point = '120.0 0.0 0.0'
     variable = disp_z
   [../]
-  [./disp_z5]
+  [disp_z5]
     type = PointValue
     point = '240.0 0.0 0.0'
     variable = disp_z
   [../]
-  [./disp_zBC2]
+  [disp_zBC2]
     type = PointValue
     point = '360.0 0.0 0.0'
     variable = disp_z
   [../]
-  [./disp_xBC2]
+  [disp_xBC2]
     type = PointValue
     point = '360.0 0.0 0.0'
     variable = disp_x
   [../]
-  [./disp_z8]
+  [disp_z8]
     type = PointValue
     point = '420.0 0.0 0.0'
     variable = disp_z
   [../]
-  [./disp_z9]
+  [disp_z9]
     type = PointValue
     point = '480.0 0.0 0.0'
     variable = disp_z

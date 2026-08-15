@@ -10,21 +10,21 @@
     ymax = 50
     elem_type = QUAD4
   []
-  [./left_side]
+  [left_side]
     type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '24.9 50 0'
     input = gen
   [../]
-  [./right_side]
+  [right_side]
     type = SubdomainBoundingBoxGenerator
     block_id = 2
     bottom_left = '25.1 0 0'
     top_right = '50 50 0'
     input = left_side
   [../]
-  [./iface_u]
+  [iface_u]
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = 1
     paired_block = 2
@@ -34,21 +34,21 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
   []
 []
 
 [AuxVariables]
-  [./unique_regions]
+  [unique_regions]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = SpecifiedSmoothCircleIC
     variable = c
     invalue = 1.0
@@ -62,7 +62,7 @@
 []
 
 [Postprocessors]
-  [./flood_count]
+  [flood_count]
     type = FeatureFloodCount
     variable = c
 
@@ -74,7 +74,7 @@
 []
 
 [VectorPostprocessors]
-  [./features]
+  [features]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count
 
@@ -94,7 +94,7 @@
 []
 
 [AuxKernels]
-  [./unique_regions]
+  [unique_regions]
     type = FeatureFloodCountAux
     variable = unique_regions
     flood_counter = flood_count

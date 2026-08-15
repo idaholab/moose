@@ -8,11 +8,11 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     scaling = 1e1
-    [./InitialCondition]
+    [InitialCondition]
       type = RampIC
       variable = c
       value_left = -0.2

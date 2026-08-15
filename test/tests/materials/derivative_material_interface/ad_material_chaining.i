@@ -15,32 +15,32 @@
 []
 
 [Variables]
-  [./eta1]
+  [eta1]
   [../]
-  [./eta2]
+  [eta2]
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     variable = eta1
     boundary = left
     type = DirichletBC
     value = 0
   [../]
-  [./right]
+  [right]
     variable = eta1
     boundary = right
     type = DirichletBC
     value = 1
   [../]
-  [./top]
+  [top]
     variable = eta2
     boundary = top
     type = DirichletBC
     value = 0
   [../]
-  [./bottom]
+  [bottom]
     variable = eta2
     boundary = bottom
     type = DirichletBC
@@ -50,7 +50,7 @@
 
 [Materials]
   # T1 := (eta1+1)^4
-  [./term]
+  [term]
     type = ADDerivativeParsedMaterial
     property_name= T1
     coupled_variables = 'eta1'
@@ -59,14 +59,14 @@
   [../]
 
   # in this material we substitute T1 explicitly
-  [./full]
+  [full]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'eta1 eta2'
     property_name = F1
     expression = '(1-eta2)^4+(eta1+1)^4'
   [../]
   # in this material we utilize the T1 derivative material property
-  [./subs]
+  [subs]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'eta1 eta2'
     property_name = F2
@@ -78,19 +78,19 @@
   # the use if the T1 property should include dT1/deta1 contributions!
   # This also demonstrated the explicit use of material property derivatives using
   # the D[...] syntax.
-  [./diff0]
+  [diff0]
     type = ADParsedMaterial
     property_name = D0
     expression = '(F1-F2)^2'
     material_property_names = 'F1 F2'
   [../]
-  [./diff1]
+  [diff1]
     type = ADParsedMaterial
     property_name = D1
     expression = '(dF1-dF2)^2'
     material_property_names = 'dF1:=D[F1,eta1] dF2:=D[F2,eta1]'
   [../]
-  [./diff2]
+  [diff2]
     type = ADParsedMaterial
     property_name = D2
     expression = '(d2F1-d2F2)^2'
@@ -100,7 +100,7 @@
   # check that explicitly pulling a derivative yields the correct result by
   # taking the difference of the manually calculated 1st derivative of T1 and the
   # automatic derivative dT1 pulled in through dT1:=D[T1,eta1]
-  [./diff3]
+  [diff3]
     type = ADParsedMaterial
     property_name = E0
     expression = '(dTd1-(4*(eta1+1)^3))^2'
@@ -110,30 +110,30 @@
 []
 
 [Kernels]
-  [./eta1diff]
+  [eta1diff]
     type = Diffusion
     variable = eta1
   [../]
-  [./eta2diff]
+  [eta2diff]
     type = Diffusion
     variable = eta2
   [../]
 []
 
 [Postprocessors]
-  [./D0]
+  [D0]
     type = ADElementIntegralMaterialProperty
     mat_prop = D0
   [../]
-  [./D1]
+  [D1]
     type = ADElementIntegralMaterialProperty
     mat_prop = D1
   [../]
-  [./D2]
+  [D2]
     type = ADElementIntegralMaterialProperty
     mat_prop = D2
   [../]
-  [./E0]
+  [E0]
     type = ADElementIntegralMaterialProperty
     mat_prop = E0
   [../]

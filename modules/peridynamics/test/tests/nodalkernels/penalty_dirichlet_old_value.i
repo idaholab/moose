@@ -5,7 +5,7 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gfm]
+  [gfm]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = -1.1
@@ -16,7 +16,7 @@
     ny = 11
     elem_type = QUAD4
   [../]
-  [./gpd]
+  [gpd]
     type = MeshGeneratorPD
     input = gfm
     retain_fe_mesh = false
@@ -24,22 +24,22 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [AuxVariables]
-  [./bond_status]
+  [bond_status]
     initial_condition = 1
   [../]
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConductionBPD
     variable = temp
   [../]
-  [./source]
+  [source]
     type = HeatSourceBPD
     variable = temp
     power_density = '-4'
@@ -47,7 +47,7 @@
 []
 
 [Materials]
-  [./thermal_material]
+  [thermal_material]
     type = ThermalConstantHorizonMaterialBPD
     thermal_conductivity = 1
     temperature = temp
@@ -55,7 +55,7 @@
 []
 
 [NodalKernels]
-  [./bc_all]
+  [bc_all]
     type = PenaltyDirichletOldValuePD
     variable = temp
     boundary = 'pd_nodes_top pd_nodes_left pd_nodes_right pd_nodes_bottom'
@@ -64,7 +64,7 @@
 []
 
 # [BCs]
-#   [./fix]
+#   [fix]
 #     type = DirichletBC
 #     variable = temp
 #     value = 0

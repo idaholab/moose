@@ -6,12 +6,12 @@
 []
 
 [AuxVariables]
-  [./t]
+  [t]
   [../]
 []
 
 [AuxKernels]
-  [./t]
+  [t]
     type = FunctionAux
     variable = t
     function = t

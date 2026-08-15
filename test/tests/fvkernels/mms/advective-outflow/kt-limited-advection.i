@@ -7,7 +7,7 @@ max_abs_eig=${fparse c + a}
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0.1
@@ -29,14 +29,14 @@ max_abs_eig=${fparse c + a}
 []
 
 [Variables]
-  [./u]
+  [u]
     two_term_boundary_expansion = true
     type = MooseVariableFVReal
   [../]
 []
 
 [FVKernels]
-  [./advection_u]
+  [advection_u]
     type = FVKTLimitedAdvection
     variable = u
     velocity = '${a} 0 0'
@@ -107,7 +107,7 @@ max_abs_eig=${fparse c + a}
 []
 
 [Postprocessors]
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = u
     function = exact

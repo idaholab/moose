@@ -6,19 +6,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 2
   [../]
 []
 
 [Functions]
-  [./right_bc]
+  [right_bc]
     type = ParsedFunction
     expression = a+1
     symbol_values = left_avg
     symbol_names = a
   [../]
-  [./left_bc]
+  [left_bc]
     type = ParsedFunction
     expression = a
     symbol_values = left_avg
@@ -27,20 +27,20 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = u
     boundary = left
     function = left_bc
   [../]
-  [./right]
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = 'right right'
@@ -49,7 +49,7 @@
 []
 
 [Postprocessors]
-  [./left_avg]
+  [left_avg]
     type = SideAverageValue
     variable = u
     execute_on = initial

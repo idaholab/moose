@@ -6,7 +6,7 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     x = '0   0.85  2'
     y = '0.2 0.25  0.25'
@@ -14,30 +14,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -57,7 +57,7 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
     min_dt = 0.01

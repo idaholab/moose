@@ -11,37 +11,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [AuxVariables]
-  [./aux0]
+  [aux0]
     order = SECOND
     family = SCALAR
   [../]
-  [./aux1]
+  [aux1]
     family = SCALAR
     initial_condition = 5
   [../]
-  [./aux2]
+  [aux2]
     family = SCALAR
     initial_condition = 10
   [../]
-  [./aux3]
+  [aux3]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
-  [./diff_v]
+  [diff_v]
     type = CoefDiffusion
     variable = v
     coef = 2
@@ -49,25 +49,25 @@
 []
 
 [BCs]
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
   [../]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 3
   [../]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
@@ -76,11 +76,11 @@
 []
 
 [Postprocessors]
-  [./num_vars]
+  [num_vars]
     type = NumVars
     system = 'NL'
   [../]
-  [./num_aux]
+  [num_aux]
     type = NumVars
     system = 'AUX'
   [../]
@@ -95,7 +95,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [out]
     type = Exodus
     hide = 'u v aux0 aux1'
     scalar_as_nodal = true
@@ -107,7 +107,7 @@
 []
 
 [ICs]
-  [./aux0_IC]
+  [aux0_IC]
     variable = aux0
     values = '12 13'
     type = ScalarComponentIC

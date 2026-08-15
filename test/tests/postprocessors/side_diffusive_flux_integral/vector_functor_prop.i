@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Functions]
-  [./right_bc]
+  [right_bc]
     # Flux BC for computing the analytical solution in the postprocessor
     type = ParsedFunction
     expression = exp(y)+1
@@ -19,20 +19,20 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = FunctionNeumannBC
     variable = u
     boundary = right
@@ -41,7 +41,7 @@
 []
 
 [Materials]
-  [./mat_props_vector_functor]
+  [mat_props_vector_functor]
     type = ADGenericVectorFunctorMaterial
     prop_names = diffusivity_vec
     prop_values = '1 1.5 1'
@@ -54,14 +54,14 @@
 []
 
 [Postprocessors]
-  [./avg_flux_right]
+  [avg_flux_right]
     # Computes -\int(exp(y)+1) from 0 to 1 which is -2.718281828
     type = ADSideVectorDiffusivityFluxIntegral
     variable = u
     boundary = right
     diffusivity = diffusivity_vec
   [../]
-  [./avg_flux_top]
+  [avg_flux_top]
     type = ADSideVectorDiffusivityFluxIntegral
     variable = u
     boundary = top

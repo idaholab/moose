@@ -6,18 +6,18 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
   [v][]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = ADTimeDerivative
     variable = u
   [../]
@@ -41,25 +41,25 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
   [../]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
   [../]
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right

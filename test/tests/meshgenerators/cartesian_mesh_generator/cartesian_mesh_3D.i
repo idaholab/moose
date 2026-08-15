@@ -1,5 +1,5 @@
 [Mesh]
-  [./cmg]
+  [cmg]
     type = CartesianMeshGenerator
     dim = 3
     dx = '1.5 2.4 0.1'

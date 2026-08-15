@@ -124,13 +124,13 @@
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = SolidMechanicsHardeningPowerRule
     value_0 = 100.0
     epsilon0 = 1.0
     exponent = 1.0
   [../]
-  [./j2]
+  [j2]
     type = SolidMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3

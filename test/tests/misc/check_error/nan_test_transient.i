@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -8,14 +8,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./nan]
+  [nan]
     type = NanKernel
     variable = u
     timestep_to_nan = 2
@@ -23,7 +23,7 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1

@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = 'diff'
@@ -19,7 +19,7 @@
 []
 
 [AuxKernels]
-  [./error]
+  [error]
     type = ElementLpNormAux
     variable = error
     coupled_variable = u
@@ -27,21 +27,21 @@
 []
 
 [AuxVariables]
-  [./error]
+  [error]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
@@ -51,7 +51,7 @@
 []
 
 [Materials]
-  [./call_me_mat]
+  [call_me_mat]
     type = IncrementMaterial
     prop_names = 'diff'
     prop_values = '1'

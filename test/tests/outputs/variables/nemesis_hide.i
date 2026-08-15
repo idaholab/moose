@@ -18,79 +18,79 @@
   # out for the "Mesh" information.
   parallel_type = distributed
 
-  [./Partitioner]
+  [Partitioner]
     type = LibmeshPartitioner
     partitioner = linear
   [../]
 []
 
 [Functions]
-  [./fn_x]
+  [fn_x]
     type = ParsedFunction
     expression = x
   [../]
-  [./fn_y]
+  [fn_y]
     type = ParsedFunction
     expression = y
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
-  [./v]
+  [v]
   [../]
 []
 
 [AuxVariables]
-  [./aux_u]
+  [aux_u]
   [../]
-  [./aux_v]
+  [aux_v]
   [../]
-  [./proc_id]
+  [proc_id]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
   [../]
 []
 
 [AuxKernels]
-  [./auxk_u]
+  [auxk_u]
     type = FunctionAux
     variable = aux_u
     function = 'x*x+y*y'
   [../]
-  [./auxk_v]
+  [auxk_v]
     type = FunctionAux
     variable = aux_v
     function = '-(x*x+y*y)'
   [../]
-  [./auxk_proc_id]
+  [auxk_proc_id]
     variable = proc_id
     type = ProcessorIDAux
   [../]
 []
 
 [BCs]
-  [./u_bc]
+  [u_bc]
     type = FunctionDirichletBC
     variable = u
     boundary = '1 3'
     function = fn_x
   [../]
 
-  [./v_bc]
+  [v_bc]
     type = FunctionDirichletBC
     variable = v
     boundary = '0 2'
@@ -105,7 +105,7 @@
 
 [Outputs]
   console = true
-  [./out]
+  [out]
     type = Nemesis
     hide = 'u aux_v'
   [../]

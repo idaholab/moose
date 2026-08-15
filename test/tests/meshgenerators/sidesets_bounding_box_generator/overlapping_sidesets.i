@@ -1,6 +1,6 @@
 [Mesh]
 #active = 'gmg'
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 10
@@ -8,7 +8,7 @@
     nz = 10
   []
 
-  [./createNewSidesetOne]
+  [createNewSidesetOne]
     type = SideSetsFromBoundingBoxGenerator
     input = gmg
     included_boundaries = 'bottom back left'
@@ -17,7 +17,7 @@
     top_right = '1.1 1.1 1.1'
     boundary_id_overlap = true
   []
-  [./createNewSidesetTwo]
+  [createNewSidesetTwo]
     type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetOne
     included_boundaries = 'right bottom'
@@ -26,7 +26,7 @@
     top_right = '1.1 1.1 1.1'
     boundary_id_overlap = true
   []
-  [./createNewSidesetThree]
+  [createNewSidesetThree]
     type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetTwo
     included_boundaries = 'top front'
@@ -38,31 +38,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./BCone]
+  [BCone]
     type = DirichletBC
     variable = u
     boundary = 10
     value = 1
   [../]
-  [./BCtwo]
+  [BCtwo]
     type = DirichletBC
     variable = u
     boundary = 11
     value = 1
   [../]
-  [./BCthree]
+  [BCthree]
     type = DirichletBC
     variable = u
     boundary = 12

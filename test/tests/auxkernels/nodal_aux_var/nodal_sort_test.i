@@ -1,5 +1,5 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
@@ -8,27 +8,27 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./one]
+  [one]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
   [../]
 
-  [./two]
+  [two]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -37,7 +37,7 @@
 [AuxKernels]
   # Intentionally out of order to test sorting capabiilties
   active = 'one two'
-  [./two]
+  [two]
     variable = two
     type = CoupledAux
     value = 2
@@ -45,13 +45,13 @@
     coupled = one
   [../]
 
-  [./one]
+  [one]
     variable = one
     type = ConstantAux
     value = 1
   [../]
 
-  [./five]
+  [five]
     type = ConstantAux
     variable = five
     boundary = '3 1'
@@ -63,14 +63,14 @@
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
@@ -85,7 +85,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
   [../]

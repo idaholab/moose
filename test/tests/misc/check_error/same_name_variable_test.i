@@ -13,14 +13,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]

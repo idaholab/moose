@@ -134,7 +134,7 @@
 []
 
 [Functions]
-  [./freq2]
+  [freq2]
     type = ParsedFunction
     symbol_names = density
     symbol_values = 2.7e3 #Al kg/m3
@@ -143,7 +143,7 @@
 []
 
 [Controls]
-  [./func_control]
+  [func_control]
     type = RealFunctionControl
     parameter = 'Kernels/*/rate'
     function = 'freq2'

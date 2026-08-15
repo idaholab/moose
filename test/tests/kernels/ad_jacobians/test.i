@@ -4,16 +4,16 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./damage_dt]
+  [damage_dt]
     type = ADTimeDerivative
     variable = u
   [../]
-  [./damage]
+  [damage]
     type = ADBodyForce
     value = 1
     variable = u
@@ -21,7 +21,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

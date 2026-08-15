@@ -15,7 +15,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./block1]
+  [block1]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_yy strain_yy' #use the yy option to get the zz component in axisymmetric coords
@@ -23,12 +23,12 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1e-9
     plastic_models = J2
@@ -36,11 +36,11 @@
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = SolidMechanicsHardeningConstant
     value = 2.4e2
   [../]
-  [./J2]
+  [J2]
     type = SolidMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3
@@ -49,19 +49,19 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
   [../]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
   [../]
-  [./top]
+  [top]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = top
@@ -70,7 +70,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -89,12 +89,12 @@
 []
 
 [Postprocessors]
-  [./ave_stress_bottom]
+  [ave_stress_bottom]
     type = SideAverageValue
     variable = stress_yy
     boundary = bottom
   [../]
-  [./ave_strain_bottom]
+  [ave_strain_bottom]
     type = SideAverageValue
     variable = strain_yy
     boundary = bottom

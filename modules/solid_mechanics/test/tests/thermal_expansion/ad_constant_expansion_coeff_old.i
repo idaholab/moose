@@ -21,12 +21,12 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Functions]
-  [./temperature_load]
+  [temperature_load]
     type = ParsedFunction
     expression = t*(500.0)+300.0
   [../]
@@ -35,7 +35,7 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      [./all]
+      [all]
         strain = SMALL
         incremental = true
         add_variables = true
@@ -48,32 +48,32 @@
 []
 
 [Kernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = Diffusion
     variable = temp
   [../]
 []
 
 [BCs]
-  [./x_bot]
+  [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./y_bot]
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./z_bot]
+  [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
   [../]
-  [./temp]
+  [temp]
     type = FunctionDirichletBC
     variable = temp
     function = temperature_load
@@ -82,15 +82,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./small_stress]
+  [small_stress]
     type = ADComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion_strain]
+  [thermal_expansion_strain]
     type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.3e-5
@@ -101,7 +101,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -128,19 +128,19 @@
 []
 
 [Postprocessors]
-  [./strain_xx]
+  [strain_xx]
     type = ElementAverageValue
     variable = strain_xx
   [../]
-  [./strain_yy]
+  [strain_yy]
     type = ElementAverageValue
     variable = strain_yy
   [../]
-  [./strain_zz]
+  [strain_zz]
     type = ElementAverageValue
     variable = strain_zz
   [../]
-  [./temperature]
+  [temperature]
     type = AverageNodalVariableValue
     variable = temp
   [../]

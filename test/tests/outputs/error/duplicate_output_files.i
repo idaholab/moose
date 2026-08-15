@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -41,11 +41,11 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./exodus]
+  [exodus]
     type = Exodus
     file_base = duplicate_output_files_out
   [../]
-  [./exodus_two]
+  [exodus_two]
     type = Exodus
     file_base = duplicate_output_files_out
   [../]

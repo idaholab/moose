@@ -46,61 +46,61 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./disp_z]
+  [disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_x]
+  [rot_x]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_y]
+  [rot_y]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./rot_z]
+  [rot_z]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./vel_x]
+  [vel_x]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./vel_y]
+  [vel_y]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./vel_z]
+  [vel_z]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./accel_x]
+  [accel_x]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./accel_y]
+  [accel_y]
   order = FIRST
   family = LAGRANGE
   [../]
-  [./accel_z]
+  [accel_z]
   order = FIRST
   family = LAGRANGE
   [../]
 []
 
 [AuxKernels]
-  [./accel_x]
+  [accel_x]
     type = NewmarkAccelAux
     variable = accel_x
     displacement = disp_x
@@ -108,14 +108,14 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./vel_x]
+  [vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./accel_y]
+  [accel_y]
     type = NewmarkAccelAux
     variable = accel_y
     displacement = disp_y
@@ -123,14 +123,14 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./vel_y]
+  [vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
     gamma = 0.5
     execute_on = timestep_end
   [../]
-  [./accel_z]
+  [accel_z]
     type = NewmarkAccelAux
     variable = accel_z
     displacement = disp_z
@@ -138,7 +138,7 @@
     beta = 0.25
     execute_on = timestep_end
   [../]
-  [./vel_z]
+  [vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
@@ -148,37 +148,37 @@
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./fixy1]
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = left
     value = 0.0
   [../]
-  [./fixz1]
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = left
     value = 0.0
   [../]
-  [./fixr1]
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = left
     value = 0.0
   [../]
-  [./fixr2]
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = left
     value = 0.0
   [../]
-  [./fixr3]
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = left
@@ -187,7 +187,7 @@
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = NodalGravity
     variable = disp_y
     boundary = 'left right'
@@ -196,7 +196,7 @@
   #  nodal_mass_file = nodal_mass.csv # commented out for testing purposes
   # mass = 0.01899772 # commented out for testing purposes
   [../]
-  [./x_inertial]
+  [x_inertial]
     type = NodalTranslationalInertia
     variable = disp_x
     velocity = vel_x
@@ -206,7 +206,7 @@
     gamma = 0.5
     mass = 0.01899772
   [../]
-  [./y_inertial]
+  [y_inertial]
     type = NodalTranslationalInertia
     variable = disp_y
     velocity = vel_y
@@ -216,7 +216,7 @@
     gamma = 0.5
     mass = 0.01899772
   [../]
-  [./z_inertial]
+  [z_inertial]
     type = NodalTranslationalInertia
     variable = disp_z
     velocity = vel_z
@@ -229,7 +229,7 @@
 []
 
 [Functions]
-  [./force]
+  [force]
     type = PiecewiseLinear
     x = '0.0 0.1 0.2 10.0'
     y = '0.0 1e-2  0.0  0.0'
@@ -237,7 +237,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -256,7 +256,7 @@
 []
 
 [Kernels]
-  [./solid_disp_x]
+  [solid_disp_x]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -264,7 +264,7 @@
     component = 0
     variable = disp_x
   [../]
-  [./solid_disp_y]
+  [solid_disp_y]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -272,7 +272,7 @@
     component = 1
     variable = disp_y
   [../]
-  [./solid_disp_z]
+  [solid_disp_z]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -280,7 +280,7 @@
     component = 2
     variable = disp_z
   [../]
-  [./solid_rot_x]
+  [solid_rot_x]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -288,7 +288,7 @@
     component = 3
     variable = rot_x
   [../]
-  [./solid_rot_y]
+  [solid_rot_y]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -296,7 +296,7 @@
     component = 4
     variable = rot_y
   [../]
-  [./solid_rot_z]
+  [solid_rot_z]
     type = StressDivergenceBeam
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -307,14 +307,14 @@
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 1.0e4
     poissons_ratio = -0.999875
     shear_coefficient = 1.0
     block = 0
   [../]
-  [./strain]
+  [strain]
     type = ComputeIncrementalBeamStrain
     block = '0'
     displacements = 'disp_x disp_y disp_z'
@@ -326,29 +326,29 @@
     Iz = 1.0e-4
     y_orientation = '0.0 1.0 0.0'
   [../]
-  [./stress]
+  [stress]
     type = ComputeBeamResultants
     block = 0
   [../]
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_x
   [../]
-  [./disp_y]
+  [disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_y
   [../]
-  [./vel_y]
+  [vel_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = vel_y
   [../]
-  [./accel_y]
+  [accel_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = accel_y

@@ -3,12 +3,12 @@
 []
 
 [Functions]
-  [./all_bc_fn]
+  [all_bc_fn]
     type = ParsedFunction
     expression = x*x+y*y
   [../]
 
-  [./f_fn]
+  [f_fn]
     type = ParsedFunction
     expression = -4
   [../]
@@ -20,16 +20,16 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = f_fn
@@ -37,7 +37,7 @@
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '1'

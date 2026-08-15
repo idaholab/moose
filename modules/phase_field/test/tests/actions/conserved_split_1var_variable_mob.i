@@ -12,9 +12,9 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./cv]
+  [PhaseField]
+    [Conserved]
+      [cv]
         solve_type = REVERSE_SPLIT
         free_energy = F
         kappa = 2.0
@@ -26,7 +26,7 @@
 []
 
 [ICs]
-  [./InitialCondition]
+  [InitialCondition]
     type = CrossIC
     x1 = 5.0
     y1 = 5.0
@@ -37,14 +37,14 @@
 []
 
 [Materials]
-  [./variable_mob]
+  [variable_mob]
     type = DerivativeParsedMaterial
     property_name = M
     coupled_variables = 'cv'
     expression = '0.1 + (1 + cv)/2'
     outputs = exodus
   [../]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'cv'
@@ -53,7 +53,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

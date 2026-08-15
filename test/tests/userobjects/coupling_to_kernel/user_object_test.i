@@ -11,7 +11,7 @@
 []
 
 [UserObjects]
-  [./ud]
+  [ud]
     type = MTUserObject
     scalar = 2
     vector = '9 7 5'
@@ -19,32 +19,32 @@
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = -2
   [../]
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     expression = x*x
   [../]
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
   # this kernel will user user data object from above
-  [./ffn]
+  [ffn]
     type = UserObjectKernel
     variable = u
     user_object = ud
@@ -54,7 +54,7 @@
 [BCs]
   active = 'all'
 
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     function = exact_fn

@@ -4,7 +4,7 @@
 []
 
 [Functions]
-  [./series]
+  [series]
     type = FunctionSeries
     series_type = CylindricalDuo
     orders = '0 1'

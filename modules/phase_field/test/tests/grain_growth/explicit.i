@@ -21,13 +21,13 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalCircleGrainIC]
+  [PolycrystalICs]
+    [BicrystalCircleGrainIC]
       radius = 300
       x = 400
       y = 0
@@ -36,19 +36,19 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
@@ -56,7 +56,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
@@ -67,7 +67,7 @@
 []
 
 [Postprocessors]
-  [./gr1area]
+  [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
     execute_on = 'initial timestep_end'
@@ -75,7 +75,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

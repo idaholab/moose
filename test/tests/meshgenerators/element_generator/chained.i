@@ -1,5 +1,5 @@
 [Mesh]
-  [./eg]
+  [eg]
     type = ElementGenerator
     nodal_positions = '0 0 0
                        1 0 0
@@ -12,7 +12,7 @@
     subdomain_name = 'left'
   []
 
-  [./eg2]
+  [eg2]
     type = ElementGenerator
     input = eg
     nodal_positions = '2 0 0

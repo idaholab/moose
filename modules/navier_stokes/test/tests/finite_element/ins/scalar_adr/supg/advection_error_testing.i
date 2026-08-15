@@ -15,14 +15,14 @@ velocity=1
 []
 
 [Variables]
-  [./c]
+  [c]
     family = LAGRANGE
     order = FIRST
   [../]
 []
 
 [Kernels]
-  [./adv]
+  [adv]
     type = AdvectionSUPG
     variable = c
     forcing_func = 'ffn'
@@ -30,7 +30,7 @@ velocity=1
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = c
     boundary = left
@@ -39,7 +39,7 @@ velocity=1
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names = 'mu rho'
     prop_values = '0 1'
@@ -47,11 +47,11 @@ velocity=1
 []
 
 [Functions]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     expression = '1-x^2'
   [../]
-  [./c_func]
+  [c_func]
     type = ParsedFunction
     expression = 'x-x^3/3'
   [../]
@@ -64,22 +64,22 @@ velocity=1
 []
 
 [Outputs]
-  [./exodus]
+  [exodus]
     type = Exodus
   [../]
-  [./csv]
+  [csv]
     type = CSV
   [../]
 []
 
 [Postprocessors]
-  [./L2c]
+  [L2c]
     type = ElementL2Error
     variable = c
     function = c_func
     outputs = 'console'    execute_on = 'timestep_end'
   [../]
-  [./L2cx]
+  [L2cx]
     type = ElementL2Error
     variable = cx
     function = ffn
@@ -88,14 +88,14 @@ velocity=1
 []
 
 [AuxVariables]
-  [./cx]
+  [cx]
     family = MONOMIAL
     order = FIRST
   [../]
 []
 
 [AuxKernels]
-  [./cx]
+  [cx]
     type = VariableGradientComponent
     component = x
     variable = cx

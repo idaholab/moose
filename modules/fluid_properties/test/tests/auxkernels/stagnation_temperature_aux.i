@@ -5,47 +5,47 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./specific_internal_energy]
+  [specific_internal_energy]
   [../]
-  [./specific_volume]
+  [specific_volume]
   [../]
-  [./velocity]
+  [velocity]
   [../]
-  [./stagnation_temperature]
+  [stagnation_temperature]
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
   [../]
 []
 
 [AuxKernels]
-  [./specific_internal_energy_ak]
+  [specific_internal_energy_ak]
     type = ConstantAux
     variable = specific_internal_energy
     value = 1026.2e3
   [../]
-  [./specific_volume_ak]
+  [specific_volume_ak]
     type = ConstantAux
     variable = specific_volume
     value = 0.0012192
   [../]
-  [./velocity_ak]
+  [velocity_ak]
     type = ConstantAux
     variable = velocity
     value = 10.0
   [../]
-  [./stagnation_temperature_ak]
+  [stagnation_temperature_ak]
     type = StagnationTemperatureAux
     variable = stagnation_temperature
     e = specific_internal_energy
@@ -56,7 +56,7 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
@@ -67,14 +67,14 @@
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 1
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1

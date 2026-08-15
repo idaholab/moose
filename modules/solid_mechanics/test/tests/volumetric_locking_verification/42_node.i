@@ -28,7 +28,7 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      [./all]
+      [all]
         add_variables = true
         strain = SMALL
         incremental = true
@@ -38,13 +38,13 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
@@ -53,7 +53,7 @@
 []
 
 [NodalKernels]
-  [./y_force]
+  [y_force]
     type = ConstantRate
     variable = disp_y
     boundary = 2
@@ -62,19 +62,19 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 250.0
     poissons_ratio = 0.4999
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
 
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -92,7 +92,7 @@
 
 
 [Postprocessors]
-  [./a_disp_y]
+  [a_disp_y]
     type = PointValue
     variable = disp_y
     point = '48.0 60.0 0.0'

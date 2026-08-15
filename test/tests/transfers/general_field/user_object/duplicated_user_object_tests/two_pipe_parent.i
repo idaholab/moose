@@ -14,7 +14,7 @@
     zmax = 5
     nz = 5
   []
-  [./blocks]
+  [blocks]
     input = gen
     type = SubdomainBoundingBoxGenerator
     block_id = 1
@@ -24,7 +24,7 @@
 []
 
 [AuxVariables]
-  [./from_sub_app_var]
+  [from_sub_app_var]
     order = CONSTANT
     family = MONOMIAL
     block = 1

@@ -15,81 +15,81 @@
 []
 
 [Variables]
-  [./global_strain]
+  [global_strain]
     order = SIXTH
     family = SCALAR
   [../]
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./disp_z]
+  [disp_z]
   [../]
-  [./s00]
+  [s00]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./s11]
+  [s11]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./e00]
+  [e00]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./e11]
+  [e11]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [AuxKernels]
-  [./disp_x]
+  [disp_x]
     type = GlobalDisplacementAux
     variable = disp_x
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 0
   [../]
-  [./disp_y]
+  [disp_y]
     type = GlobalDisplacementAux
     variable = disp_y
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 1
   [../]
-  [./disp_z]
+  [disp_z]
     type = GlobalDisplacementAux
     variable = disp_z
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 2
   [../]
-  [./s00]
+  [s00]
     type = RankTwoAux
     variable = s00
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
   [../]
-  [./s11]
+  [s11]
     type = RankTwoAux
     variable = s11
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
   [../]
-  [./e00]
+  [e00]
     type = RankTwoAux
     variable = e00
     rank_two_tensor = total_strain
     index_i = 0
     index_j = 0
   [../]
-  [./e11]
+  [e11]
     type = RankTwoAux
     variable = e11
     rank_two_tensor = total_strain
@@ -104,7 +104,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     incremental = false
     strain = small
@@ -113,7 +113,7 @@
 []
 
 [ScalarKernels]
-  [./global_strain]
+  [global_strain]
     type = GlobalStrain
     variable = global_strain
     global_strain_uo = global_strain_uo
@@ -121,27 +121,27 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y z'
       variable = ' u_x u_y u_z'
     [../]
   [../]
 
   # fix center point location
-  [./centerfix_x]
+  [centerfix_x]
     type = DirichletBC
     boundary = 100
     variable = u_x
     value = 0
   [../]
-  [./centerfix_y]
+  [centerfix_y]
     type = DirichletBC
     boundary = 100
     variable = u_y
     value = 0
   [../]
-  [./centerfix_z]
+  [centerfix_z]
     type = DirichletBC
     boundary = 100
     variable = u_z
@@ -150,24 +150,24 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '70e9 0.33'
     fill_method = symmetric_isotropic_E_nu
   [../]
-  [./global_strain]
+  [global_strain]
     type = ComputeGlobalStrain
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 []
 
 [UserObjects]
-  [./global_strain_uo]
+  [global_strain_uo]
     type = GlobalStrainUserObject
     applied_stress_tensor = '5e9 0 0 0 0 0'
     execute_on = 'Initial Linear Nonlinear'
@@ -175,12 +175,12 @@
 []
 
 [Postprocessors]
-  [./l2err_e00]
+  [l2err_e00]
     type = ElementL2Error
     variable = e00
     function = 0.07142857 #strain_xx = C1111/sigma_xx
   [../]
-  [./l2err_e11]
+  [l2err_e11]
     type = ElementL2Error
     variable = e11
     function = -0.07142857*0.33 #strain_yy = -nu*strain_xx
@@ -188,7 +188,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

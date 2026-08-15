@@ -16,25 +16,25 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
-  [./axial_strain]
+  [axial_strain]
     order = FIRST
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./temperature_load]
+  [temperature_load]
     type = ParsedFunction
     expression = t*(500.0)+300.0
   [../]
 []
 
 [Physics]
-  [./SolidMechanics]
-    [./QuasiStatic]
-      [./all]
+  [SolidMechanics]
+    [QuasiStatic]
+      [all]
         strain = SMALL
         incremental = true
         add_variables = true
@@ -45,12 +45,12 @@
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = temperature_load
   [../]
-  [./axial_strain]
+  [axial_strain]
     type = RankTwoAux
     variable = axial_strain
     rank_two_tensor = total_strain
@@ -61,13 +61,13 @@
 []
 
 [BCs]
-  [./x_bot]
+  [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./y_bot]
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
@@ -76,15 +76,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./small_stress]
+  [small_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion_strain]
+  [thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.3e-5
@@ -122,7 +122,7 @@
 []
 
 [VectorPostprocessors]
-  [./axial_str]
+  [axial_str]
     type = LineValueSampler
     warn_discontinuous_face_values = false
     start_point = '0.5 0.0 0.0'
@@ -134,7 +134,7 @@
 []
 
 [Postprocessors]
-  [./end_disp]
+  [end_disp]
     type = PointValue
     variable = disp_y
     point = '0.5 0.150080 0.0'

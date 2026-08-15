@@ -9,12 +9,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./v]
+  [v]
   [../]
   [pid]
     family = MONOMIAL
@@ -31,15 +31,15 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
-  [./cf]
+  [cf]
     type = CoupledForce
     coef = 10000
     variable = u
@@ -48,13 +48,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -84,14 +84,14 @@
 []
 
 [Postprocessors]
-  [./picard_its]
+  [picard_its]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   [../]
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     type = TransientMultiApp
     input_files = 'petsc_transient_as_sub.i'
     app_type = ExternalPetscSolverApp
@@ -100,7 +100,7 @@
 []
 
 [Transfers]
-  [./fromsub]
+  [fromsub]
     type = MultiAppShapeEvaluationTransfer
     from_multi_app = sub_app
     source_variable = u

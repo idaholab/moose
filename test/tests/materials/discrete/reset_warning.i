@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = 'prop'
@@ -19,13 +19,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -34,7 +34,7 @@
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names = 'prop'
     prop_values = 1

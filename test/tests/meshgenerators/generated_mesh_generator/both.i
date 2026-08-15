@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 3

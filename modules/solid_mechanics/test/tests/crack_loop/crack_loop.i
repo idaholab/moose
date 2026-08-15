@@ -8,7 +8,7 @@
 []
 
 [UserObjects]
-  [./crack]
+  [crack]
     type = CrackFrontDefinition
     crack_direction_method = CurvedCrackFront
     boundary = 1001

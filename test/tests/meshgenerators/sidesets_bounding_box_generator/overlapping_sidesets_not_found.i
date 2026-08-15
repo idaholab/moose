@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 10
@@ -7,7 +7,7 @@
     nz = 10
   []
 
-  [./createNewSidesetOne]
+  [createNewSidesetOne]
     type = SideSetsFromBoundingBoxGenerator
     input = gmg
     included_boundaries = 'bottom top'
@@ -19,25 +19,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./BCone]
+  [BCone]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
-  [./BCtwo]
+  [BCtwo]
     type = DirichletBC
     variable = u
     boundary = 11

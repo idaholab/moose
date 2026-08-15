@@ -24,7 +24,7 @@
 []
 
 [UserObjects]
-  [./square_planar_cut_uo]
+  [square_planar_cut_uo]
     type = RectangleCutUserObject
     cut_data = ' 0.5 -0.001 -0.001
                  0.5  1.001 -0.001
@@ -34,19 +34,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [Constraints]
-  [./xfem_constraint]
+  [xfem_constraint]
     type = XFEMSingleVariableConstraint
     variable = u
     jump = 0
@@ -57,14 +57,14 @@
 
 [BCs]
 # Define boundary conditions
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
   [../]
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
@@ -93,7 +93,7 @@
   time_step_interval = 1
   execute_on = timestep_end
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
   [../]

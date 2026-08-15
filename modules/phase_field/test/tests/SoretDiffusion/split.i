@@ -10,15 +10,15 @@
 []
 
 [Variables]
-  [./c]
+  [c]
   [../]
-  [./w]
+  [w]
     scaling = 1.0e3
   [../]
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     x1 = 175.0
     y1 = 0.0
@@ -31,24 +31,24 @@
 []
 
 [AuxVariables]
-  [./T]
+  [T]
   [../]
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     kappa_name = kappa
     w = w
     f_name = F
   [../]
-  [./w_res]
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
   [../]
-  [./w_res_soret]
+  [w_res_soret]
     type = SoretDiffusion
     variable = w
     c = c
@@ -56,7 +56,7 @@
     diff_name = D
     Q_name = Qstar
   [../]
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
@@ -64,7 +64,7 @@
 []
 
 [AuxKernels]
-  [./Temp]
+  [Temp]
     type = FunctionAux
     variable = T
     function = 1000.0+0.025*x
@@ -72,7 +72,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = PFParamsPolyFreeEnergy
     c = c
     T = T # K
@@ -84,7 +84,7 @@
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.708 # Total guess
   [../]
-  [./free_energy]
+  [free_energy]
     type = PolynomialFreeEnergy
     c = c
     outputs = exodus
@@ -93,7 +93,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

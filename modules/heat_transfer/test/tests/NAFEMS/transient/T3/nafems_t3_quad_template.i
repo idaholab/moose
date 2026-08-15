@@ -12,19 +12,19 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 0.0
   [../]
 []
 
 [BCs]
-  [./FixedTempLeft]
+  [FixedTempLeft]
     type = DirichletBC
     variable = temp
     boundary = left
     value = 0.0
   [../]
-  [./FunctionTempRight]
+  [FunctionTempRight]
     type = FunctionDirichletBC
     variable = temp
     boundary = right
@@ -33,18 +33,18 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
   [../]
-  [./HeatTdot]
+  [HeatTdot]
     type = HeatConductionTimeDerivative
     variable = temp
   [../]
 []
 
 [Materials]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '35.0 440.5 7200.0'
@@ -65,7 +65,7 @@
 []
 
 [Postprocessors]
-  [./target_temp]
+  [target_temp]
     type = NodalVariableValue
     variable = temp
     nodeid = 9

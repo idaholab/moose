@@ -11,24 +11,24 @@
 []
 
 [AuxVariables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
   [../]
 []
 
 [Variables]
-  [./phi]
+  [phi]
   [../]
 []
 
 [Functions]
-  [./phi_exact]
+  [phi_exact]
     type = LevelSetOlssonBubble
     epsilon = 0.05
     center = '0.5 0.5 0'
     radius = 0.15
   [../]
-  [./velocity_func]
+  [velocity_func]
     type = ParsedVectorFunction
     expression_x = '1'
     expression_y = '1'
@@ -36,8 +36,8 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = phi
       auto_direction = 'x y'
     [../]
@@ -45,12 +45,12 @@
 []
 
 [ICs]
-  [./phi_ic]
+  [phi_ic]
     type = FunctionIC
     function = phi_exact
     variable = phi
   [../]
-  [./vel_ic]
+  [vel_ic]
     type = VectorFunctionIC
     variable = velocity
     function = velocity_func
@@ -58,12 +58,12 @@
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = phi
   [../]
 
-  [./advection]
+  [advection]
     type = LevelSetAdvection
     velocity = velocity
     variable = phi
@@ -72,7 +72,7 @@
 
 [Postprocessors]
 
-  [./area]
+  [area]
     type = LevelSetVolume
     threshold = 0.5
     variable = phi
@@ -80,7 +80,7 @@
     execute_on = 'initial timestep_end'
   [../]
 
-  [./cfl]
+  [cfl]
     type = LevelSetCFLCondition
     velocity = velocity
     execute_on = 'initial'
@@ -97,7 +97,7 @@
   scheme = crank-nicolson
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm      ilu'
-  [./TimeStepper]
+  [TimeStepper]
     type = PostprocessorDT
     postprocessor = cfl
     scale = 1
@@ -106,7 +106,7 @@
 []
 
 [MultiApps]
-  [./reinit]
+  [reinit]
     type = LevelSetReinitializationMultiApp
     input_files = 'reinit.i'
     execute_on = 'timestep_end'
@@ -114,7 +114,7 @@
 []
 
 [Transfers]
-  [./to_sub]
+  [to_sub]
     type = MultiAppCopyTransfer
     variable = phi
     source_variable = phi
@@ -122,7 +122,7 @@
     execute_on = 'timestep_end'
   [../]
 
-  [./to_sub_init]
+  [to_sub_init]
     type = MultiAppCopyTransfer
     variable = phi_0
     source_variable = phi
@@ -130,7 +130,7 @@
     execute_on = 'timestep_end'
   [../]
 
-  [./from_sub]
+  [from_sub]
     type = MultiAppCopyTransfer
     variable = phi
     source_variable = phi

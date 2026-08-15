@@ -48,34 +48,34 @@
 []
 
 [AuxVariables] # variables that are calculated for output
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_xx]
+  [strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_yy]
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_zz]
+  [strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     newmark_beta = 0.25
     newmark_gamma = 0.5
@@ -87,42 +87,42 @@
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
   [../]
-  [./strain_xx]
+  [strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xx
     index_i = 0
     index_j = 0
   [../]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
   [../]
-  [./strain_yy]
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
   [../]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
   [../]
-  [./strain_zz]
+  [strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_zz
@@ -132,7 +132,7 @@
 []
 
 [Functions]
-  [./displacement_front]
+  [displacement_front]
     type = PiecewiseLinear
     data_file = 'displacement.csv'
     format = columns
@@ -140,7 +140,7 @@
 []
 
 [BCs]
-  [./Preset_displacement]
+  [Preset_displacement]
     type = PresetDisplacement
     variable = disp_z
     function = displacement_front
@@ -149,19 +149,19 @@
     velocity = vel_z
     acceleration = accel_z
   [../]
-  [./anchor_x]
+  [anchor_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-  [./anchor_y]
+  [anchor_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-  [./anchor_z]
+  [anchor_z]
     type = DirichletBC
     variable = disp_z
     boundary = back
@@ -170,18 +170,18 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     youngs_modulus = 325e6 #Pa
     poissons_ratio = 0.3
     type = ComputeIsotropicElasticityTensor
     block = 0
   [../]
-  [./stress]
+  [stress]
     #Computes the stress, using linear elasticity
     type = ComputeLinearElasticStress
     block = 0
   [../]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
@@ -204,50 +204,50 @@
 []
 
 [Postprocessors] # These quantites are printed to a csv file at every time step
-  [./_dt]
+  [_dt]
     type = TimestepSize
   [../]
-  [./accel_6x]
+  [accel_6x]
     type = NodalVariableValue
     nodeid = 6
     variable = accel_x
   [../]
-  [./accel_6y]
+  [accel_6y]
     type = NodalVariableValue
     nodeid = 6
     variable = accel_y
   [../]
-  [./accel_6z]
+  [accel_6z]
     type = NodalVariableValue
     nodeid = 6
     variable = accel_z
   [../]
-  [./vel_6x]
+  [vel_6x]
     type = NodalVariableValue
     nodeid = 6
     variable = vel_x
   [../]
-  [./vel_6y]
+  [vel_6y]
     type = NodalVariableValue
     nodeid = 6
     variable = vel_y
   [../]
-  [./vel_6z]
+  [vel_6z]
     type = NodalVariableValue
     nodeid = 6
     variable = vel_z
   [../]
-  [./disp_6x]
+  [disp_6x]
     type = NodalVariableValue
     nodeid = 6
     variable = disp_x
   [../]
-  [./disp_6y]
+  [disp_6y]
     type = NodalVariableValue
     nodeid = 6
     variable = disp_y
   [../]
-  [./disp_6z]
+  [disp_6z]
     type = NodalVariableValue
     nodeid = 6
     variable = disp_z

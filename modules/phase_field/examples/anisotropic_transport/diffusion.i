@@ -10,8 +10,8 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0.0
       y1 = 0.0
@@ -24,19 +24,19 @@
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = MatAnisoDiffusion
     diffusivity = D
     variable = c
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [Materials]
-  [./D]
+  [D]
     type = ConstantAnisotropicMobility
     tensor = '.505 .495 .0
               .495 .505 .0
@@ -46,7 +46,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
   [../]

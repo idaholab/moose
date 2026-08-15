@@ -11,9 +11,9 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./c]
+  [PhaseField]
+    [Conserved]
+      [c]
         free_energy = F
         mobility = 1.0
         kappa = 20.0
@@ -21,8 +21,8 @@
         solve_type = direct
       [../]
     [../]
-    [./Nonconserved]
-      [./eta]
+    [Nonconserved]
+      [eta]
         free_energy = F
         mobility = 1.0
         kappa = 20
@@ -35,7 +35,7 @@
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = BoundingBoxIC
     variable = c
     x1 = 10
@@ -45,7 +45,7 @@
     inside = 0.1
     outside = 0.9
   [../]
-  [./eta_IC]
+  [eta_IC]
     type = ConstantIC
     variable = eta
     value = 0.5
@@ -53,7 +53,7 @@
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'eta c'
@@ -62,7 +62,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -89,7 +89,7 @@
 
 [Outputs]
   perf_graph = true
-  [./out]
+  [out]
     type = Exodus
     refinements = 2
   [../]

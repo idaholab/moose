@@ -78,11 +78,11 @@
     order = SECOND
     family = SCALAR
   []
-  [./flux_x]
+  [flux_x]
       order = FIRST
       family = MONOMIAL
   [../]
-  [./flux_y]
+  [flux_y]
       order = FIRST
       family = MONOMIAL
   [../]
@@ -98,7 +98,7 @@
 []
 
 [AuxKernels]
-  [./flux_x]
+  [flux_x]
     type = DiffusionFluxAux
     diffusivity = 'conductivity'
     variable = flux_x
@@ -106,7 +106,7 @@
     component = x
     block = 1
   [../]
-  [./flux_y]
+  [flux_y]
     type = DiffusionFluxAux
     diffusivity = 'conductivity'
     variable = flux_y

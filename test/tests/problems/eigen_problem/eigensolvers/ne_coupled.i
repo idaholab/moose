@@ -11,44 +11,44 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./T]
+  [T]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./power]
+  [power]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = DiffMKernel
     variable = u
     mat_prop = diffusion
     offset = 0.0
   [../]
 
-  [./rhs]
+  [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
   [../]
 
-  [./diff_T]
+  [diff_T]
     type = Diffusion
     variable = T
   [../]
-  [./src_T]
+  [src_T]
     type = CoupledForce
     variable = T
     v = power
@@ -56,7 +56,7 @@
 []
 
 [AuxKernels]
-  [./power_ak]
+  [power_ak]
     type = NormalizationAux
     variable = power
     source_variable = u
@@ -68,20 +68,20 @@
 []
 
 [BCs]
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
   [../]
 
-  [./eigenU]
+  [eigenU]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
   [../]
 
-  [./homogeneousT]
+  [homogeneousT]
     type = DirichletBC
     variable = T
     boundary = '0 1 2 3'
@@ -90,7 +90,7 @@
 []
 
 [Materials]
-  [./dc]
+  [dc]
     type = VarCouplingMaterial
     var = T
     block = 0
@@ -105,7 +105,7 @@
 []
 
 [Postprocessors]
-  [./unorm]
+  [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
@@ -113,7 +113,7 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
   [../]

@@ -6,21 +6,21 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./t_infinity]
+  [t_infinity]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./force]
+  [force]
     type = BodyForce
     variable = u
     value = 1000
@@ -28,7 +28,7 @@
 []
 
 [AuxKernels]
-  [./t_infinity]
+  [t_infinity]
     type = ConstantAux
     variable = t_infinity
     value = 500
@@ -37,7 +37,7 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = CoupledConvectiveHeatFluxBC
     variable = u
     boundary = right

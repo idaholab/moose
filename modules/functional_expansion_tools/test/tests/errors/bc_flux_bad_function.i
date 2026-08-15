@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./v]
+  [v]
   [../]
 []
 
 [BCs]
-  [./this_could_be_bad]
+  [this_could_be_bad]
     type = FXFluxBC
     boundary = right
     function = const
@@ -18,7 +18,7 @@
 []
 
 [Functions]
-  [./const]
+  [const]
     type = ConstantFunction
     value = -1
   [../]

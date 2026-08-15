@@ -9,34 +9,34 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./b]
+  [b]
     order = FIRST
     family = LAGRANGE
   [../]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./pressure]
+  [pressure]
     type = RandomIC
     variable = pressure
     max = 5
     min = 1
   [../]
-  [./a]
+  [a]
     type = RandomIC
     variable = a
     max = 1
     min = 0
   [../]
-  [./b]
+  [b]
     type = RandomIC
     variable = b
     max = 1
@@ -45,7 +45,7 @@
 []
 
 [ReactionNetwork]
-  [./AqueousEquilibriumReactions]
+  [AqueousEquilibriumReactions]
     primary_species = 'a b'
     reactions = '2a = pa2     2
                  a + b = pab 2'
@@ -55,35 +55,35 @@
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
   [../]
-  [./a_diff]
+  [a_diff]
     type = PrimaryDiffusion
     variable = a
   [../]
-  [./a_conv]
+  [a_conv]
     type = PrimaryConvection
     variable = a
     p = pressure
     gravity = '0 -10 0'
   [../]
-  [./b_ie]
+  [b_ie]
     type = PrimaryTimeDerivative
     variable = b
   [../]
-  [./b_diff]
+  [b_diff]
     type = PrimaryDiffusion
     variable = b
   [../]
-  [./b_conv]
+  [b_conv]
     type = PrimaryConvection
     variable = b
     p = pressure
     gravity = '0 -10 0'
   [../]
-  [./pressure]
+  [pressure]
     type = DarcyFluxPressure
     variable = pressure
     gravity = '0 -10 0'
@@ -91,7 +91,7 @@
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity density'
     prop_values = '1e-4 1e-4 0.2 10'
@@ -109,7 +109,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

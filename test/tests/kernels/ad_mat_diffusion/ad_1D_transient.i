@@ -13,12 +13,12 @@
 []
 
 [Variables]
-  [./T]
+  [T]
   [../]
 []
 
 [ICs]
-  [./T_IC]
+  [T_IC]
     type = FunctionIC
     variable = T
     function = '100*sin(pi*x/80)'
@@ -26,12 +26,12 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADMatDiffusion
     variable = T
     diffusivity = diffusivity
   [../]
-  [./dt]
+  [dt]
     type = CoefTimeDerivative
     variable = T
     Coefficient = 0.82064
@@ -39,7 +39,7 @@
 []
 
 [BCs]
-  [./sides]
+  [sides]
     type = DirichletBC
     variable = T
     boundary = 'left right'
@@ -48,7 +48,7 @@
 []
 
 [Materials]
-  [./k]
+  [k]
     type = ADGenericConstantMaterial
     prop_names = 'diffusivity'
     prop_values = '0.95'
@@ -62,7 +62,7 @@
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = NodalL2Error
     function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
     variable = T

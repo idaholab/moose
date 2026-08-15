@@ -29,23 +29,23 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
   [../]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
   [../]
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
   [../]
 
-  [./lm]
+  [lm]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
@@ -53,14 +53,14 @@
 []
 
 [Materials]
-  [./left]
+  [left]
     type = ADHeatConductionMaterial
     block = 1
     thermal_conductivity = 1000
     specific_heat = 1
   [../]
 
-  [./right]
+  [right]
     type = ADHeatConductionMaterial
     block = 2
     thermal_conductivity = 500
@@ -69,13 +69,13 @@
 []
 
 [Kernels]
-  [./hc_displaced_block]
+  [hc_displaced_block]
     type = ADHeatConduction
     variable = temp
     use_displaced_mesh = true
     block = '1'
   [../]
-  [./hc_undisplaced_block]
+  [hc_undisplaced_block]
     type = ADHeatConduction
     variable = temp
     use_displaced_mesh = false
@@ -117,14 +117,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temp
     boundary = 'left'
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = temp
     boundary = 'right'
@@ -155,7 +155,7 @@
 []
 
 [Preconditioning]
-  [./fmp]
+  [fmp]
     type = SMP
     full = true
     solve_type = 'NEWTON'

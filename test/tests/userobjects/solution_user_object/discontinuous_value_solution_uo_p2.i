@@ -10,25 +10,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./one]
+  [one]
     type = DirichletBC
     variable = u
     boundary = 'right top bottom'
@@ -37,7 +37,7 @@
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionUserObject
     mesh = discontinuous_value_solution_uo_p1.e
     system_variables = 'discontinuous_variable continuous_variable'
@@ -46,26 +46,26 @@
 
 [Postprocessors]
 
-  [./discontinuous_value_left]
+  [discontinuous_value_left]
     type = TestDiscontinuousValuePP
     variable = discontinuous_variable
     point = '0.25 0.25 0.0'
     solution = soln
   [../]
-  [./discontinuous_value_face]
+  [discontinuous_value_face]
     type = TestDiscontinuousValuePP
     variable = discontinuous_variable
     point = '0.5 0.25 0.0'
     solution = soln
   [../]
-  [./discontinuous_value_right]
+  [discontinuous_value_right]
     type = TestDiscontinuousValuePP
     variable = discontinuous_variable
     point = '0.75 0.25 0.0'
     solution = soln
   [../]
 
-  [./continuous_gradient_left]
+  [continuous_gradient_left]
     type = TestDiscontinuousValuePP
     variable = continuous_variable
     evaluate_gradient = true
@@ -73,7 +73,7 @@
     point = '0.25 0.25 0.0'
     solution = soln
   [../]
-  [./continuous_gradient_value_face]
+  [continuous_gradient_value_face]
     type = TestDiscontinuousValuePP
     variable = continuous_variable
     evaluate_gradient = true
@@ -81,7 +81,7 @@
     point = '0.5 0.25 0.0'
     solution = soln
   [../]
-  [./continuous_gradient_right]
+  [continuous_gradient_right]
     type = TestDiscontinuousValuePP
     variable = continuous_variable
     evaluate_gradient = true

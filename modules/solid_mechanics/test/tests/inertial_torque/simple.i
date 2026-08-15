@@ -37,17 +37,17 @@
 []
 
 [Variables]
-  [./disp_y]
+  [disp_y]
   [../]
 []
 
 [Kernels]
-  [./icm_x]
+  [icm_x]
     type = InertialTorque
     component = 0
     variable = disp_y
   [../]
-  [./source_x]
+  [source_x]
     type = BodyForce
     variable = disp_y
     function = -3
@@ -55,60 +55,60 @@
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_z]
+  [disp_z]
     initial_condition = 3
   [../]
-  [./vel_x]
+  [vel_x]
   [../]
-  [./vel_y]
+  [vel_y]
   [../]
-  [./vel_z]
+  [vel_z]
   [../]
-  [./accel_x]
+  [accel_x]
   [../]
-  [./accel_y]
+  [accel_y]
     initial_condition = 2
   [../]
-  [./accel_z]
+  [accel_z]
   [../]
 []
 
 [AuxKernels]
-  [./vel_x]
+  [vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
     execute_on = timestep_end
   [../]
-  [./vel_y]
+  [vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
     execute_on = timestep_end
   [../]
-  [./vel_z]
+  [vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
     execute_on = timestep_end
   [../]
-  [./accel_x]
+  [accel_x]
     type = NewmarkAccelAux
     variable = accel_x
     displacement = disp_x
     velocity = vel_x
     execute_on = timestep_end
   [../]
-  [./accel_y]
+  [accel_y]
     type = NewmarkAccelAux
     variable = accel_y
     displacement = disp_y
     velocity = vel_y
     execute_on = timestep_end
   [../]
-  [./accel_z]
+  [accel_z]
     type = NewmarkAccelAux
     variable = accel_z
     displacement = disp_z
@@ -127,7 +127,7 @@
 []
 
 [Materials]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 0.5
@@ -135,7 +135,7 @@
 []
 
 [Postprocessors]
-  [./y_disp]
+  [y_disp]
     type = PointValue
     point = '0 0 0'
     use_displaced_mesh = false
@@ -144,7 +144,7 @@
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'

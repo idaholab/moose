@@ -4,12 +4,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [UserObjects]
-  [./side_uo]
+  [side_uo]
     type = MatSideUserObject
     mat_prop = 'foo'
     boundary = 1

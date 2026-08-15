@@ -6,14 +6,14 @@
 []
 
 [Variables]
-  [./lambda]
+  [lambda]
     order=FIRST
     family=SCALAR
   [../]
 []
 
 [ScalarKernels]
-  [./alpha]
+  [alpha]
     type = AlphaCED
     variable = lambda
     value = 0.123
@@ -27,7 +27,7 @@
 []
 
 [Outputs]
-  [./debug] # This is only test, use [Debug] block to enable this
+  [debug] # This is only test, use [Debug] block to enable this
     type = TopResidualDebugOutput
     num_residuals = 1
   [../]

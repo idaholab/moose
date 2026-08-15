@@ -6,19 +6,19 @@
 []
 
 [FluidProperties]
-  [./fp_nitrogen]
+  [fp_nitrogen]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 0.02867055103448276
   [../]
-  [./fp_primary]
+  [fp_primary]
     type = IdealGasFluidProperties
     gamma = 1.3
     molar_mass = 0.027714866
     T_c = 126.19
     rho_c = 313.189812
   [../]
-  [./fp_vapor_mix]
+  [fp_vapor_mix]
     type = IdealRealGasMixtureFluidProperties
     fp_primary = fp_primary
     fp_secondary = 'fp_nitrogen'

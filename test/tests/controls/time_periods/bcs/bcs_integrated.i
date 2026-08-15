@@ -6,36 +6,36 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = 1
   [../]
-  [./right2]
+  [right2]
     type = FunctionNeumannBC
     variable = u
     boundary = right
@@ -57,7 +57,7 @@
 []
 
 [Controls]
-  [./period0]
+  [period0]
     type = TimePeriod
     disable_objects = 'BCs::right2'
     start_time = '0'
@@ -65,7 +65,7 @@
     execute_on = 'initial timestep_begin'
   [../]
 
-  [./period2]
+  [period2]
     type = TimePeriod
     disable_objects = 'BCs::right'
     start_time = '1'

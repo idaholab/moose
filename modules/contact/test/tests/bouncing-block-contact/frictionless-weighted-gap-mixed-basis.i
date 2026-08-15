@@ -14,15 +14,15 @@ offset = 1e-2
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = '1 2'
     order = SECOND
   [../]
-  [./disp_y]
+  [disp_y]
     block = '1 2'
     order = SECOND
   [../]
-  [./normal_lm]
+  [normal_lm]
     block = 3
   [../]
 []
@@ -42,7 +42,7 @@ offset = 1e-2
 # []
 
 [ICs]
-  [./disp_y]
+  [disp_y]
     block = 2
     variable = disp_y
     value = ${fparse starting_point + offset}
@@ -51,11 +51,11 @@ offset = 1e-2
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = MatDiffusion
     variable = disp_x
   [../]
-  [./disp_y]
+  [disp_y]
     type = MatDiffusion
     variable = disp_y
   [../]
@@ -76,7 +76,7 @@ offset = 1e-2
 []
 
 [Constraints]
-  [./weighted_gap_lm]
+  [weighted_gap_lm]
     type = ComputeWeightedGapLMMechanicalContact
     primary_boundary = 20
     secondary_boundary = 10
@@ -118,28 +118,28 @@ offset = 1e-2
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
     preset = false
   [../]
-  [./boty]
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 40
     value = 0.0
     preset = false
   [../]
-  [./topy]
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
     preset = false
   [../]
-  [./leftx]
+  [leftx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
@@ -174,7 +174,7 @@ offset = 1e-2
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]
@@ -182,10 +182,10 @@ offset = 1e-2
 
 [Postprocessors]
   active = 'num_nl cumulative contact'
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
   [../]
-  [./cumulative]
+  [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
   [../]

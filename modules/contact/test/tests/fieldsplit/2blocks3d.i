@@ -13,7 +13,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     incremental = true
     add_variables = true
@@ -21,21 +21,21 @@
 []
 
 [AuxVariables]
-  [./penetration]
+  [penetration]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Functions]
-  [./horizontal_movement]
+  [horizontal_movement]
     type = ParsedFunction
     expression = t/10.0
   [../]
 []
 
 [AuxKernels]
-  [./penetration]
+  [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 2
@@ -45,25 +45,25 @@
 []
 
 [BCs]
-  [./push_x]
+  [push_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 1
     function = horizontal_movement
   [../]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
   [../]
-  [./fix_y]
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = '1 4'
     value = 0.0
   [../]
-  [./fix_z]
+  [fix_z]
     type = DirichletBC
     variable = disp_z
     boundary = '1 4'
@@ -72,31 +72,31 @@
 []
 
 [Materials]
-  [./elasticity_tensor_left]
+  [elasticity_tensor_left]
     type = ComputeIsotropicElasticityTensor
     block = 1
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
   [../]
-  [./stress_left]
+  [stress_left]
     type = ComputeFiniteStrainElasticStress
     block = 1
   [../]
 
-  [./elasticity_tensor_right]
+  [elasticity_tensor_right]
     type = ComputeIsotropicElasticityTensor
     block = 2
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
   [../]
-  [./stress_right]
+  [stress_right]
     type = ComputeFiniteStrainElasticStress
     block = 2
   [../]
 []
 
 [Contact]
-  [./leftright]
+  [leftright]
     secondary = 2
     primary = 3
     model = frictionless
@@ -108,15 +108,15 @@
 []
 
 [Preconditioning]
-  [./FSP]
+  [FSP]
     type = FSP
     # It is the starting point of splitting
     topsplit = 'contact_interior' # 'contact_interior' should match the following block name
-    [./contact_interior]
+    [contact_interior]
       splitting          = 'contact interior'
       splitting_type     = multiplicative
     [../]
-    [./interior]
+    [interior]
       type = ContactSplit
       vars = 'disp_x disp_y disp_z'
       uncontact_primary   = '3'
@@ -127,7 +127,7 @@
       petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -pc_hypre_boomeramg_strong_threshold'
       petsc_options_value = 'preonly   hypre    boomeramg      1                            0.25'
     [../]
-    [./contact]
+    [contact]
       type = ContactSplit
       vars = 'disp_x disp_y disp_z'
       contact_primary   = '3'
@@ -158,10 +158,10 @@
 
 [Outputs]
   file_base = 2blocks3d_out
-  [./exodus]
+  [exodus]
     type = Exodus
   [../]
-  [./console]
+  [console]
     type = Console
     max_rows = 5
   [../]

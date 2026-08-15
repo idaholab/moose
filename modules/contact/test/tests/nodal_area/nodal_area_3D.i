@@ -3,26 +3,26 @@
 []
 
 [Variables]
-  [./dummy]
+  [dummy]
   [../]
 []
 
 [AuxVariables]
-  [./nodal_area]
+  [nodal_area]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = dummy
   [../]
 []
 
 [UserObjects]
-  [./nodal_area]
+  [nodal_area]
     type = NodalArea
     variable = nodal_area
     boundary = 1
@@ -31,7 +31,7 @@
 []
 
 [BCs]
-  [./dummy]
+  [dummy]
     type = DirichletBC
     variable = dummy
     boundary = 1

@@ -7,8 +7,8 @@
 []
 
 [Variables]
-  [./phi]
-    [./InitialCondition]
+  [phi]
+    [InitialCondition]
       type = FunctionIC
       function = if(x<1,1-x,0)
     [../]
@@ -16,24 +16,24 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = phi
   [../]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = phi
   [../]
 []
 
 [BCs]
-  [./influx]
+  [influx]
     type = NeumannBC
     boundary = left
     variable = phi
     value = 1
   [../]
-  [./fix]
+  [fix]
     type = DirichletBC
     boundary = right
     variable = phi
@@ -42,7 +42,7 @@
 []
 
 [Postprocessors]
-  [./pos]
+  [pos]
     type = FindValueOnLine
     target = 0.5
     v = phi

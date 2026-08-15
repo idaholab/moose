@@ -3,7 +3,7 @@
 # from positive to negative strain.
 
 [Mesh]
-  [./gen]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 3
   [../]
@@ -14,12 +14,12 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     eigenstrain_names = eigenstrain
@@ -28,21 +28,21 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
 
-  [./back]
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
@@ -51,7 +51,7 @@
 []
 
 [AuxKernels]
-  [./temp]
+  [temp]
     type = FunctionAux
     variable = temp
     function = '1 + t'
@@ -59,15 +59,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.3
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
-  [./thermal_expansion_strain]
+  [thermal_expansion_strain]
     type = ComputeDilatationThermalExpansionFunctionEigenstrain
     dilatation_function = cte_dilatation
     stress_free_temperature = 1.5
@@ -77,7 +77,7 @@
 []
 
 [Functions]
-  [./cte_dilatation]
+  [cte_dilatation]
     type = PiecewiseLinear
     x = '1 2'
     y = '-1e-4 1e-4'
@@ -85,12 +85,12 @@
 []
 
 [Postprocessors]
-  [./disp_x_max]
+  [disp_x_max]
     type = SideAverageValue
     variable = disp_x
     boundary = right
   [../]
-  [./temp_avg]
+  [temp_avg]
     type = ElementAverageValue
     variable = temp
   [../]

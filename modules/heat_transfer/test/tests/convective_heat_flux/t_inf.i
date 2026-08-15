@@ -6,22 +6,22 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 200.0
   [../]
 []
 
 [Kernels]
-  [./heat_dt]
+  [heat_dt]
     type = TimeDerivative
     variable = temp
   [../]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temp
     thermal_conductivity = 1
   [../]
-  [./heat]
+  [heat]
     type = BodyForce
     variable = temp
     value = 0
@@ -29,7 +29,7 @@
 []
 
 [BCs]
-  [./right]
+  [right]
     type = ConvectiveHeatFluxBC
     variable = temp
     boundary = 'right'
@@ -40,18 +40,18 @@
 []
 
 [Postprocessors]
-  [./left_temp]
+  [left_temp]
     type = SideAverageValue
     variable = temp
     boundary = left
     execute_on = 'TIMESTEP_END initial'
   [../]
-  [./right_temp]
+  [right_temp]
     type = SideAverageValue
     variable = temp
     boundary = right
   [../]
-  [./right_flux]
+  [right_flux]
     type = SideDiffusiveFluxAverage
     variable = temp
     boundary = right

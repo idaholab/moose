@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
   [../]
 []
 
 [ICs]
-  [./c]
+  [c]
     type = SmoothCircleIC
     variable = c
     x1 = 15.0
@@ -30,8 +30,8 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
     [../]
   [../]
@@ -48,7 +48,7 @@
 
 [Outputs]
   exodus = false
-  [./out]
+  [out]
     type = Exodus
     refinements = 1
   [../]

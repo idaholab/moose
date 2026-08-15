@@ -8,7 +8,7 @@
     ny = 20
     elem_type = QUAD9
   []
-  [./bottom_left]
+  [bottom_left]
     type = ExtraNodesetGenerator
     new_boundary = corner
     coord = '0 0'
@@ -18,7 +18,7 @@
 
 
 [Preconditioning]
-  [./Newton_SMP]
+  [Newton_SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
@@ -50,7 +50,7 @@
     order = SECOND
   []
   [p][]
-  [./temp]
+  [temp]
     order = SECOND
     initial_condition = 340
     scaling = 1e-4
@@ -59,7 +59,7 @@
 
 
 [BCs]
-  [./velocity_dirichlet]
+  [velocity_dirichlet]
     type = VectorDirichletBC
     boundary = 'left right bottom top'
     variable = velocity
@@ -70,19 +70,19 @@
   # boundary conditions on the velocity p doesn't appear in the system of
   # equations. Thus we must pin the pressure somewhere in order to ensure a
   # unique solution
-  [./p_zero]
+  [p_zero]
     type = DirichletBC
     boundary = corner
     variable = p
     value = 0
   [../]
-  [./cold]
+  [cold]
     type = DirichletBC
     variable = temp
     boundary = left
     value = 300
   [../]
-  [./hot]
+  [hot]
     type = DirichletBC
     variable = temp
     boundary = right
@@ -92,11 +92,11 @@
 
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
   [../]
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
   [../]
@@ -119,13 +119,13 @@
     variable = temp
     thermal_conductivity = 'k'
   [../]
-  [./buoyancy]
+  [buoyancy]
     type = INSADBoussinesqBodyForce
     variable = velocity
     temperature = temp
     gravity = '0 -9.81 0'
   [../]
-  [./gravity]
+  [gravity]
     type = INSADGravityForce
     variable = velocity
     gravity = '0 -9.81 0'
@@ -133,13 +133,13 @@
 []
 
 [Materials]
-  [./ad_const]
+  [ad_const]
     type = ADGenericConstantMaterial
     # alpha = coefficient of thermal expansion where rho  = rho0 -alpha * rho0 * delta T
     prop_names =  'mu        rho   alpha   k        cp'
     prop_values = '30.74e-6  .5757 2.9e-3  46.38e-3 1054'
   [../]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     prop_names =  'temp_ref'
     prop_values = '900'

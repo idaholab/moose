@@ -5,7 +5,7 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -14,12 +14,12 @@
 [Kernels]
   active = 'diff body_force'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     block = 1
@@ -30,14 +30,14 @@
 [BCs]
   active = 'right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
@@ -46,21 +46,21 @@
 []
 
 [Materials]
-  [./mat_3]
+  [mat_3]
     type = GenericConstantMaterial
     prop_names = 'prop3'
     prop_values = '300'
     block = '1 2'
   [../]
 
-  [./mat_2]
+  [mat_2]
     type = CoupledMaterial
     mat_prop = 'prop2'
     coupled_mat_prop = 'prop3'
     block = '1 2'
   [../]
 
-  [./mat_1]
+  [mat_1]
     type = CoupledMaterial2
     mat_prop = 'prop1'
     coupled_mat_prop1 = 'prop2'

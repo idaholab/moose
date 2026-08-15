@@ -15,7 +15,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = Newton
@@ -37,40 +37,40 @@
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     family = LAGRANGE
     order = SECOND
   [../]
-  [./vel_y]
+  [vel_y]
     family = LAGRANGE
     order = SECOND
   [../]
-  [./p]
+  [p]
     family = LAGRANGE
     order = FIRST
   [../]
 []
 
 [BCs]
-  [./u_in]
+  [u_in]
     type = FunctionDirichletBC
     boundary = 'top'
     variable = vel_x
     function = vel_x_inlet
   [../]
-  [./v_in]
+  [v_in]
     type = FunctionDirichletBC
     boundary = 'top'
     variable = vel_y
     function = vel_y_inlet
   [../]
-  [./vel_x_no_slip]
+  [vel_x_no_slip]
     type = DirichletBC
     boundary = 'left bottom'
     variable = vel_x
     value = 0
   [../]
-  [./vel_y_no_slip]
+  [vel_y_no_slip]
     type = DirichletBC
     boundary = 'bottom'
     variable = vel_y
@@ -83,13 +83,13 @@
 []
 
 [Functions]
-  [./vel_x_inlet]
+  [vel_x_inlet]
     type = ParsedFunction
     expression = 'k*x'
     symbol_names = 'k'
     symbol_values = '1'
   [../]
-  [./vel_y_inlet]
+  [vel_y_inlet]
     type = ParsedFunction
     expression = '-k*y'
     symbol_names = 'k'
@@ -99,22 +99,22 @@
 
 
 [Kernels]
-  [./x_momentum_time]
+  [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
   [../]
-  [./y_momentum_time]
+  [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
   [../]
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     pressure = p
   [../]
-  [./x_momentum_space]
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
@@ -122,7 +122,7 @@
     pressure = p
     component = 0
   [../]
-  [./y_momentum_space]
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
@@ -133,7 +133,7 @@
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
@@ -143,14 +143,14 @@
 
 [Outputs]
   exodus = true
-  [./out]
+  [out]
     type = CSV
     execute_on = 'final'
   [../]
 []
 
 [VectorPostprocessors]
-  [./nodal_sample]
+  [nodal_sample]
     # Pick off the wall pressure values.
     type = NodalValueSampler
     variable = p

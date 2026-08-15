@@ -15,8 +15,8 @@
 []
 
 [Variables]
-  [./gr0]
-    [./InitialCondition]
+  [gr0]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0
       y1 = 0
@@ -30,7 +30,7 @@
 []
 
 [Postprocessors]
-  [./area]
+  [area]
     type = GrainBoundaryArea
     grains_per_side = 1
   [../]

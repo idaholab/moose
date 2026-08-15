@@ -19,12 +19,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = PiecewiseLinear
     x = '0.0 0.1 0.2    0.3  0.4    0.5  0.6'
     y = '0.0 0.0 0.0025 0.01 0.0175 0.02 0.02'
@@ -32,26 +32,26 @@
 []
 
 [Kernels]
-  [./ie]
+  [ie]
     type = ADTimeDerivative
     variable = u
   [../]
 
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = ADFunctionDirichletBC
     variable = u
     preset = false
     boundary = 'left'
     function = forcing_fn
   [../]
-  [./right]
+  [right]
     type = ADFunctionDirichletBC
     variable = u
     preset = false
@@ -72,7 +72,7 @@
 []
 
 [Postprocessors]
-  [./udotdot]
+  [udotdot]
     type = ADElementAverageSecondTimeDerivative
     variable = u
   [../]

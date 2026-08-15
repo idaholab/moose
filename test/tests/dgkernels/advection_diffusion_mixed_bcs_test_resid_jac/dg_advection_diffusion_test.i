@@ -5,17 +5,17 @@
 []
 
 [Kernels]
-  [./source]
+  [source]
     type = BodyForce
     variable = u
     function = 'forcing_func'
   [../]
-  [./convection]
+  [convection]
     type = ConservativeAdvection
     variable = u
     velocity = '1 0 0'
   [../]
-  [./diffusion]
+  [diffusion]
     type = MatDiffusionTest
     variable = u
     prop_name = 'k'
@@ -23,12 +23,12 @@
 []
 
 [DGKernels]
-  [./convection]
+  [convection]
     type = DGConvection
     variable = u
     velocity = '1 0 0'
   [../]
-  [./diffusion]
+  [diffusion]
     type = DGDiffusion
     variable = u
     diff = 'k'
@@ -38,13 +38,13 @@
 []
 
 [BCs]
-  [./advection]
+  [advection]
     type = OutflowBC
     boundary = 'right'
     variable = u
     velocity = '1 0 0'
   [../]
-  [./diffusion_left]
+  [diffusion_left]
     type = DGFunctionDiffusionDirichletBC
     boundary = 'left'
     variable = u
@@ -56,14 +56,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = THIRD
   [../]
 []
 
 [Materials]
-  [./test]
+  [test]
     block = 0
     type = GenericFunctionMaterial
     prop_names = 'k'
@@ -77,22 +77,22 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
 []
 
 [Functions]
-  [./forcing_func]
+  [forcing_func]
     type = ParsedFunction
     expression = '1'
   [../]
-  [./boundary_left_func]
+  [boundary_left_func]
     type = ParsedFunction
     expression = '0'
   [../]
-  [./k_func]
+  [k_func]
     type = ParsedFunction
     expression = '1 + x'
   [../]

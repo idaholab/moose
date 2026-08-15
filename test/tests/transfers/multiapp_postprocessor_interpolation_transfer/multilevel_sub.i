@@ -6,21 +6,21 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./subsub_average]
+  [subsub_average]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./force]
+  [force]
     type = CoupledForce
     variable = u
     v = subsub_average
@@ -28,13 +28,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -43,7 +43,7 @@
 []
 
 [Postprocessors]
-  [./sub_average]
+  [sub_average]
     type = ElementAverageValue
     variable = u
   [../]
@@ -65,7 +65,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0 0.5 0.5 0'
@@ -74,7 +74,7 @@
 []
 
 [Transfers]
-  [./subsub_average]
+  [subsub_average]
     type = MultiAppPostprocessorInterpolationTransfer
     from_multi_app = sub
     variable = subsub_average

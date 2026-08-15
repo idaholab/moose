@@ -6,21 +6,21 @@
 []
 
 [Functions]
-  [./test_function]
+  [test_function]
     type = ParsedFunction
     expression = '2.5*x^2 + 0.75*y^2 + 0.15*x*y'
   [../]
 []
 
 [AuxVariables]
-  [./from_sub]
+  [from_sub]
     family = monomial
     order = first
   [../]
-  [./test_var]
+  [test_var]
     family = monomial
     order = first
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = test_function
     [../]
@@ -28,25 +28,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -65,7 +65,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     app_type = MooseTestApp
     execute_on = initial
@@ -75,14 +75,14 @@
 []
 
 [Transfers]
-  [./from]
+  [from]
     type = MultiAppProjectionTransfer
     execute_on = same_as_multiapp
     from_multi_app = sub
     source_variable = test_var
     variable = from_sub
   [../]
-  [./to]
+  [to]
     type = MultiAppProjectionTransfer
     execute_on = same_as_multiapp
     to_multi_app = sub

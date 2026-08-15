@@ -9,18 +9,18 @@
     nz = 2
     zmax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 1 1'
     block_id = 1
     input = gen
   [../]
-  [./break_boundary]
+  [break_boundary]
     input = subdomain1
     type = BreakBoundaryOnSubdomainGenerator
   [../]
-  [./interface]
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = break_boundary
     primary_block = '0'
@@ -30,13 +30,13 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = 0
   [../]
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     block = 1
@@ -46,19 +46,19 @@
 
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = CoeffParamDiffusion
     variable = u
     D = 4
     block = 0
   [../]
-  [./diff_v]
+  [diff_v]
     type = CoeffParamDiffusion
     variable = v
     D = 2
     block = 1
   [../]
-  [./source_u]
+  [source_u]
     type = BodyForce
     variable = u
     value = 1
@@ -66,7 +66,7 @@
 []
 
 [AuxVariables]
-  [./jump_var]
+  [jump_var]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -83,7 +83,7 @@
 
 
 [InterfaceKernels]
-  [./interface]
+  [interface]
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
@@ -94,7 +94,7 @@
 []
 
 [Materials]
-  [./jump]
+  [jump]
     type = JumpInterfaceMaterial
     var = u
     neighbor_var = v
@@ -103,12 +103,12 @@
 []
 
 [BCs]
-  [./u]
+  [u]
     type = VacuumBC
     variable = u
     boundary = 'left_to_0 bottom_to_0 back_to_0 right top front'
   [../]
-  [./v]
+  [v]
     type = VacuumBC
     variable = v
     boundary = 'left_to_1 bottom_to_1 back_to_1'
@@ -116,12 +116,12 @@
 []
 
 [Postprocessors]
-  [./u_int]
+  [u_int]
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = 0
   [../]
-  [./v_int]
+  [v_int]
     type = ElementIntegralVariablePostprocessor
     variable = v
     block = 1
@@ -137,7 +137,7 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   [../]

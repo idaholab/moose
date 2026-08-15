@@ -28,36 +28,36 @@
 []
 
 [Variables]
-  [./velocity]
+  [velocity]
     order = SECOND
     family = LAGRANGE_VEC
   [../]
-  [./p]
+  [p]
   [../]
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
   [../]
 
-  [./momentum_time]
+  [momentum_time]
     type = INSADMomentumTimeDerivative
     variable = velocity
   [../]
 
-  [./momentum_convection]
+  [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
   [../]
 
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
   [../]
 
-  [./momentum_pressure]
+  [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
@@ -90,14 +90,14 @@
 []
 
 [Functions]
-  [./inlet_func]
+  [inlet_func]
     type = ParsedFunction
     expression = '-4 * x^2 + 1'
   [../]
 []
 
 [Materials]
-  [./const]
+  [const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
@@ -110,7 +110,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
@@ -142,20 +142,20 @@
 
 [Outputs]
   console = true
-  [./out]
+  [out]
     type = Exodus
   [../]
 []
 
 [Postprocessors]
-  [./flow_in]
+  [flow_in]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'bottom'
     outputs = 'console'    execute_on = 'timestep_end'
   [../]
-  [./flow_out]
+  [flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y

@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./v]
+  [v]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
-  [./cf]
+  [cf]
     type = CoupledForce
     coef = 10000
     variable = u
@@ -33,13 +33,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -62,7 +62,7 @@
 []
 
 [Postprocessors]
-  [./picard_its]
+  [picard_its]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   [../]

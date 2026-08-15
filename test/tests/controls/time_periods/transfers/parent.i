@@ -6,30 +6,30 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.01
   [../]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -38,7 +38,7 @@
 []
 
 [Postprocessors]
-  [./average]
+  [average]
     type = ElementAverageValue
     variable = u
   [../]
@@ -59,7 +59,7 @@
 []
 
 [MultiApps]
-  [./pp_sub]
+  [pp_sub]
     app_type = MooseTestApp
     positions = '0.5 0.5 0 0.7 0.7 0'
     execute_on = timestep_end
@@ -69,7 +69,7 @@
 []
 
 [Transfers]
-  [./pp_transfer]
+  [pp_transfer]
     type = MultiAppPostprocessorToAuxScalarTransfer
     to_multi_app = pp_sub
     from_postprocessor = average
@@ -78,7 +78,7 @@
 []
 
 [Controls]
-  [./transfers]
+  [transfers]
     type = TimePeriod
     enable_objects = Transfer::pp_transfer
     start_time = 2

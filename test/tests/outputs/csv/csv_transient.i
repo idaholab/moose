@@ -7,42 +7,42 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./aux0]
+  [aux0]
     order = SECOND
     family = SCALAR
   [../]
-  [./aux1]
+  [aux1]
     family = SCALAR
     initial_condition = 5
   [../]
-  [./aux2]
+  [aux2]
     family = SCALAR
     initial_condition = 10
   [../]
-  [./aux_sum]
+  [aux_sum]
     family = SCALAR
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [AuxScalarKernels]
-  [./sum_nodal_aux]
+  [sum_nodal_aux]
     type = SumNodalValuesAux
     variable = aux_sum
     sum_var = u
@@ -51,13 +51,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -66,7 +66,7 @@
 []
 
 [Postprocessors]
-  [./mid_point]
+  [mid_point]
     type = PointValue
     variable = u
     point = '0.5 0.5 0'

@@ -4,7 +4,7 @@
     type = FileMeshGenerator
     file = chimney_quad.e
   []
-  [./extrude]
+  [extrude]
     input = file
     type = MeshExtruderGenerator
     num_layers = 20

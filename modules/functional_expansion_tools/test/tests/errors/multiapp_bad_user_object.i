@@ -8,29 +8,29 @@
 []
 
 [Variables]
-  [./m]
+  [m]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./s_in]
+  [s_in]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff_m]
+  [diff_m]
     type = Diffusion
     variable = m
   [../]
-  [./time_diff_m]
+  [time_diff_m]
     type = TimeDerivative
     variable = m
   [../]
-  [./s_in]
+  [s_in]
     type = CoupledForce
     variable = m
     v = s_in
@@ -38,7 +38,7 @@
 []
 
 [AuxKernels]
-  [./reconstruct_s_in]
+  [reconstruct_s_in]
     type = FunctionSeriesToAux
     variable = s_in
     function = FX_Basis_Value_Main
@@ -46,7 +46,7 @@
 []
 
 [ICs]
-  [./start_m]
+  [start_m]
     type = ConstantIC
     variable = m
     value = 1
@@ -54,7 +54,7 @@
 []
 
 [BCs]
-  [./surround]
+  [surround]
     type = DirichletBC
     variable = m
     value = 1
@@ -63,7 +63,7 @@
 []
 
 [Functions]
-  [./FX_Basis_Value_Main]
+  [FX_Basis_Value_Main]
     type = FunctionSeries
     series_type = Cartesian
     orders = '3'
@@ -73,27 +73,27 @@
 []
 
 [UserObjects]
-  [./FX_Value_UserObject_Main]
+  [FX_Value_UserObject_Main]
     type = FXVolumeUserObject
     function = FX_Basis_Value_Main
     variable = m
   [../]
-  [./AnotheruserObject]
+  [AnotheruserObject]
     type = EmptyPostprocessor
   [../]
 []
 
 [Postprocessors]
-  [./average_value]
+  [average_value]
     type = ElementAverageValue
     variable = m
   [../]
-  [./peak_value]
+  [peak_value]
     type = ElementExtremeValue
     value_type = max
     variable = m
   [../]
-  [./picard_iterations]
+  [picard_iterations]
     type = NumFixedPointIterations
   [../]
 []
@@ -113,20 +113,20 @@
 []
 
 [MultiApps]
-  [./FXTransferApp]
+  [FXTransferApp]
     type = TransientMultiApp
     input_files = multiapp_sub.i
   [../]
 []
 
 [Transfers]
-  [./ValueToSub]
+  [ValueToSub]
     type = MultiAppFXTransfer
     to_multi_app = FXTransferApp
     this_app_object_name = AnotheruserObject
     multi_app_object_name = FX_Basis_Value_Sub
   [../]
-  [./ValueToMe]
+  [ValueToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Value_Main

@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./w]
+  [w]
   [../]
-  [./T]
+  [T]
   [../]
 []
 
 [ICs]
-  [./wIC]
+  [wIC]
     type = SmoothCircleIC
     variable = w
     int_width = 0.1
@@ -29,36 +29,36 @@
 []
 
 [Kernels]
-  [./w_dot]
+  [w_dot]
     type = ADTimeDerivative
     variable = w
   [../]
-  [./anisoACinterface1]
+  [anisoACinterface1]
     type = ADACInterfaceKobayashi1
     variable = w
     mob_name = adM
   [../]
-  [./anisoACinterface2]
+  [anisoACinterface2]
     type = ADACInterfaceKobayashi2
     variable = w
     mob_name = adM
   [../]
-  [./AllenCahn]
+  [AllenCahn]
     type = AllenCahn
     variable = w
     mob_name = M
     f_name = fbulk
     coupled_variables = T
   [../]
-  [./T_dot]
+  [T_dot]
     type = ADTimeDerivative
     variable = T
   [../]
-  [./CoefDiffusion]
+  [CoefDiffusion]
     type = ADDiffusion
     variable = T
   [../]
-  [./w_dot_T]
+  [w_dot_T]
     type = ADCoefCoupledTimeDerivative
     variable = T
     v = w
@@ -67,7 +67,7 @@
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = fbulk
     coupled_variables = 'w T'
@@ -77,16 +77,16 @@
     derivative_order = 2
     outputs = exodus
   [../]
-  [./material]
+  [material]
     type = ADInterfaceOrientationMaterial
     op = w
   [../]
-  [./consts1]
+  [consts1]
     type = ADGenericConstantMaterial
     prop_names  = 'adM'
     prop_values = '3333.333'
   [../]
-  [./consts2]
+  [consts2]
     type = GenericConstantMaterial
     prop_names  = 'M'
     prop_values = '3333.333'
@@ -94,7 +94,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -114,7 +114,7 @@
 
   end_time = 1
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 6
     iteration_window = 2
@@ -122,7 +122,7 @@
     growth_factor = 1.1
     cutback_factor = 0.75
   [../]
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 3 # Number of times mesh is adapted to initial condition
     refine_fraction = 0.7 # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened

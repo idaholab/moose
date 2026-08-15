@@ -3,7 +3,7 @@
 []
 
 [Mesh]
-  [./cmg]
+  [cmg]
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1.3 1.9'
@@ -13,7 +13,7 @@
     subdomain_id = '0 1 2'
   [../]
 
-    [./inner_left]
+    [inner_left]
       type = SideSetsBetweenSubdomainsGenerator
       input = cmg
       primary_block = 0
@@ -21,7 +21,7 @@
       new_boundary = 'inner_left'
     [../]
 
-    [./inner_right]
+    [inner_right]
       type = SideSetsBetweenSubdomainsGenerator
       input = inner_left
       primary_block = 2
@@ -29,7 +29,7 @@
       new_boundary = 'inner_right'
     [../]
 
-    [./inner_top]
+    [inner_top]
       type = ParsedGenerateSideset
       combinatorial_geometry = 'abs(y - 6) < 1e-10'
       normal = '0 1 0'
@@ -38,7 +38,7 @@
       input = 'inner_right'
     [../]
 
-    [./inner_bottom]
+    [inner_bottom]
       type = ParsedGenerateSideset
       combinatorial_geometry = 'abs(y) < 1e-10'
       normal = '0 -1 0'
@@ -47,7 +47,7 @@
       input = 'inner_top'
     [../]
 
-    [./rename]
+    [rename]
       type = RenameBlockGenerator
       old_block = '2'
       new_block = '0'
@@ -56,13 +56,13 @@
 []
 
 [Variables]
-  [./temperature]
+  [temperature]
     block = 0
   [../]
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temperature
     block = 0
@@ -71,7 +71,7 @@
 []
 
 [GrayDiffuseRadiation]
-  [./cavity]
+  [cavity]
     boundary = '4 5 6 7'
     emissivity = '0.9 0.8 eps_fn 1'
     n_patches = '2 2 2 3'
@@ -93,14 +93,14 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temperature
     boundary = left
     value = 1000
   [../]
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = temperature
     boundary = right
@@ -109,7 +109,7 @@
 []
 
 [Postprocessors]
-  [./average_T_inner_right]
+  [average_T_inner_right]
     type = SideAverageValue
     variable = temperature
     boundary = inner_right

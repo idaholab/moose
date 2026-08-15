@@ -5,7 +5,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
@@ -14,7 +14,7 @@
     type = TimeDerivative
     variable = u
   []
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
@@ -25,13 +25,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

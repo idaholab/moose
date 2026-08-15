@@ -1,10 +1,10 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = twoblocks.e
   []
 
-  [./extrude]
+  [extrude]
     type = SideSetsBetweenSubdomainsGenerator
     input = fmg
     primary_block = 'left'

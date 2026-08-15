@@ -6,7 +6,7 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
@@ -27,11 +27,11 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
   [../]
-  [./ad_coupled_value]
+  [ad_coupled_value]
     type = ADCoupledValueTest
     variable = u
     v = v
@@ -39,13 +39,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

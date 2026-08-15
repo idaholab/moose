@@ -17,8 +17,8 @@
 []
 
 [Adaptivity]
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       type = BoxMarker
       bottom_left = '0.3 0.3 0'
       top_right = '0.6 0.6 0'

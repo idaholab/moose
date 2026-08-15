@@ -7,13 +7,13 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 8
     ny = 8
   [../]
-  [./gpd]
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
@@ -21,29 +21,29 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
 
-  [./strain_zz]
+  [strain_zz]
   [../]
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1003
     value = 0.0
   [../]
-  [./left_y]
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1003
     value = 0.0
   [../]
-  [./right_x]
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1001
@@ -52,36 +52,36 @@
 []
 
 [Modules/Peridynamics/Mechanics/Master]
-  [./all]
+  [all]
     formulation = NONORDINARY_STATE
     stabilization = BOND_HORIZON_I
   [../]
 []
 
 [Kernels]
-  [./strain_zz]
+  [strain_zz]
     type = WeakPlaneStressNOSPD
     variable = strain_zz
   [../]
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e8
     poissons_ratio = 0.3
   [../]
-  [./strain]
+  [strain]
     type = ComputePlaneSmallStrainNOSPD
     stabilization = BOND_HORIZON_I
   [../]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
   [../]
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]
@@ -95,7 +95,7 @@
   start_time = 0
   end_time = 1
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
   [../]

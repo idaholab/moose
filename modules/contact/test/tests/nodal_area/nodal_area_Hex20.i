@@ -8,7 +8,7 @@
 []
 
 [Functions]
-  [./disp]
+  [disp]
     type = PiecewiseLinear
     x = '0     1'
     y = '0  20e-6'
@@ -16,25 +16,25 @@
 []
 
 [Variables]
-  [./displ_x]
+  [displ_x]
   [../]
-  [./displ_y]
+  [displ_y]
   [../]
-  [./displ_z]
+  [displ_z]
   [../]
 []
 
 [AuxVariables]
-  [./react_x]
+  [react_x]
   [../]
-  [./react_y]
+  [react_y]
   [../]
-  [./react_z]
+  [react_z]
   [../]
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     incremental = true
     save_in = 'react_x react_y react_z'
     add_variables = true
@@ -44,28 +44,28 @@
 []
 
 [BCs]
-  [./move_right]
+  [move_right]
     type = FunctionDirichletBC
     boundary = '1'
     variable = displ_x
     function = disp
   [../]
 
-  [./fixed_x]
+  [fixed_x]
     type = DirichletBC
     boundary = '3 4'
     variable = displ_x
     value = 0
   [../]
 
-  [./fixed_y]
+  [fixed_y]
     type = DirichletBC
     boundary = 10
     variable = displ_y
     value = 0
   [../]
 
-  [./fixed_z]
+  [fixed_z]
     type = DirichletBC
     boundary = 11
     variable = displ_z
@@ -74,7 +74,7 @@
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 3
     secondary = 2
     penalty = 1e7
@@ -83,14 +83,14 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
   [../]
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   [../]
@@ -112,19 +112,19 @@
   dt = 1.0
   end_time = 1.0
 
-  [./Quadrature]
+  [Quadrature]
     order = THIRD
   [../]
 []
 
 [Postprocessors]
-  [./react_x]
+  [react_x]
     type = NodalSum
     variable = react_x
     boundary = 1
     execute_on = 'initial timestep_end'
   [../]
-  [./total_area]
+  [total_area]
     type = NodalSum
     variable = nodal_area
     boundary = 2

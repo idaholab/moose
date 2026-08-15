@@ -17,14 +17,14 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Functions]
-  [./rampConstantUp]
+  [rampConstantUp]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
@@ -33,7 +33,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
@@ -43,7 +43,7 @@
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
@@ -52,20 +52,20 @@
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0.0
   [../]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
   [../]
-  [./Pressure]
-    [./top]
+  [Pressure]
+    [top]
       boundary = 'top'
       function = rampConstantUp
     [../]
@@ -73,15 +73,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 30e+6
     poissons_ratio = 0.3
   [../]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./strain_energy_density]
+  [strain_energy_density]
     type = StrainEnergyDensity
     incremental = true
   [../]
@@ -109,34 +109,34 @@
 []
 
 [Postprocessors]
-  [./epxx]
+  [epxx]
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 0
   [../]
-  [./epyy]
+  [epyy]
     type = ElementalVariableValue
     variable = strain_yy
     elementid = 0
   [../]
-  [./epzz]
+  [epzz]
     type = ElementalVariableValue
     variable = strain_zz
     elementid = 0
   [../]
-  [./sigxx]
+  [sigxx]
     type = ElementAverageValue
     variable = stress_xx
   [../]
-  [./sigyy]
+  [sigyy]
     type = ElementAverageValue
     variable = stress_yy
   [../]
-  [./sigzz]
+  [sigzz]
     type = ElementAverageValue
     variable = stress_zz
   [../]
-  [./SED]
+  [SED]
     type = ElementAverageValue
     variable = SED
   [../]

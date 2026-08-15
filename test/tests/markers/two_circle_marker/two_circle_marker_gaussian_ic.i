@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [ICs]
-  [./gaussian_ic]
+  [gaussian_ic]
     type = FunctionIC
     variable = u
     function = gaussian_2d
@@ -19,7 +19,7 @@
 []
 
 [Functions]
-  [./gaussian_2d]
+  [gaussian_2d]
     type = ParsedFunction
     expression = exp(-((x-x0)*(x-x0)+(y-y0)*(y-y0))/2.0/sigma/sigma)
     symbol_names = 'sigma x0 y0'
@@ -28,20 +28,20 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.02
   [../]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = u
       auto_direction = 'x y'
     [../]
@@ -63,8 +63,8 @@
   cycles_per_step = 1
   marker = two_circle_marker
   max_h_level = 1
-  [./Markers]
-    [./two_circle_marker]
+  [Markers]
+    [two_circle_marker]
       type = TwoCircleMarker
       point1 = '0.5 0.5 0'
       radius1 = 0.3
@@ -79,7 +79,7 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     print_mesh_changed_info = true
   [../]

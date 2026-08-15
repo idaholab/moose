@@ -6,19 +6,19 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     family = SCALAR
     order = FIRST
   [../]
 []
 
 [AuxScalarKernels]
-  [./a_sk]
+  [a_sk]
     type = ConstantScalarAux
     variable = a
     value = 0
@@ -26,7 +26,7 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
@@ -34,13 +34,13 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
@@ -60,7 +60,7 @@
 []
 
 [Functions]
-  [./func_coef]
+  [func_coef]
     type = ParsedFunction
     expression = 1
   [../]
@@ -70,14 +70,14 @@
   # We start with a = 0, control2 sets its value to 1 and then control1 will multiply it by 3,
   # so the end value has to be 3. If dependecy is broken, we multiply by 3 and then set to 1,
   # which is wrong
-  [./control1]
+  [control1]
     type = TestControl
     parameter = 'AuxScalarKernels/a_sk/value'
     test_type = MULT
     execute_on = 'initial timestep_begin'
     depends_on = control2
   [../]
-  [./control2]
+  [control2]
     type = RealFunctionControl
     parameter = 'AuxScalarKernels/a_sk/value'
     function = 'func_coef'

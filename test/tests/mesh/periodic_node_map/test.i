@@ -6,27 +6,27 @@
 [../]
 
 [Variables]
-  [./c]
+  [c]
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = c
     [../]
   [../]
 []
 
 [UserObjects]
-  [./test]
+  [test]
     type = PeriodicNodeMapTester
     v = c
     execute_on = 'INITIAL'

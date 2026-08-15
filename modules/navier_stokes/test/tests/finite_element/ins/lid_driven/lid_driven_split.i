@@ -14,7 +14,7 @@
     ny = 40
     elem_type = QUAD4
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     boundary = 99
     nodes = '0'
@@ -24,55 +24,55 @@
 
 [Variables]
   # x-velocity
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
     [../]
   [../]
 
   # y-velocity
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
     [../]
   [../]
 
   # x-acceleration
-  [./a1]
+  [a1]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
     [../]
   [../]
 
   # y-acceleration
-  [./a2]
+  [a2]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
     [../]
   [../]
 
   # Pressure
-  [./p]
+  [p]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0
     [../]
@@ -83,7 +83,7 @@
 
 [Kernels]
   # split-momentum, x
-  [./x_split_momentum]
+  [x_split_momentum]
     type = INSSplitMomentum
     variable = a1
     u = u
@@ -94,7 +94,7 @@
   [../]
 
   # split-momentum, y
-  [./y_split_momentum]
+  [y_split_momentum]
     type = INSSplitMomentum
     variable = a2
     u = u
@@ -105,7 +105,7 @@
   [../]
 
   # projection-x, space
-  [./x_proj_space]
+  [x_proj_space]
     type = INSProjection
     variable = u
     a1 = a1
@@ -115,7 +115,7 @@
   [../]
 
   # projection-y, space
-  [./y_proj_space]
+  [y_proj_space]
     type = INSProjection
     variable = v
     a1 = a1
@@ -125,19 +125,19 @@
   [../]
 
   # projection-x, time
-  [./x_proj_time]
+  [x_proj_time]
     type = TimeDerivative
     variable = u
   [../]
 
   # projection-y, time
-  [./y_proj_time]
+  [y_proj_time]
     type = TimeDerivative
     variable = v
   [../]
 
   # Pressure
-  [./pressure_poisson]
+  [pressure_poisson]
     type = INSPressurePoisson
     variable = p
     a1 = a1
@@ -149,21 +149,21 @@
 
 
 [BCs]
-  [./x_no_slip]
+  [x_no_slip]
     type = DirichletBC
     variable = u
     boundary = 'bottom right left'
     value = 0.0
   [../]
 
-  [./lid]
+  [lid]
     type = DirichletBC
     variable = u
     boundary = 'top'
     value = 100.0
   [../]
 
-  [./y_no_slip]
+  [y_no_slip]
     type = DirichletBC
     variable = v
     boundary = 'bottom right top left'
@@ -175,14 +175,14 @@
   # values of acceleration at one node but that didn't seem to work.
   # I also tried setting non-zero acceleration values on the lid but
   # that didn't converge.
-  [./x_no_accel]
+  [x_no_accel]
     type = DirichletBC
     variable = a1
     boundary = 'bottom right top left'
     value = 0.0
   [../]
 
-  [./y_no_accel]
+  [y_no_accel]
     type = DirichletBC
     variable = a2
     boundary = 'bottom right top left'
@@ -194,7 +194,7 @@
   # solves without pinning the pressure somewhere, but the pressure
   # bounces around a lot during the solve, possibly because of
   # the addition of arbitrary constants.
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = '99'
@@ -203,7 +203,7 @@
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     # rho = 1000    # kg/m^3
@@ -218,7 +218,7 @@
 []
 
 [Preconditioning]
-# [./FDP_Newton]
+# [FDP_Newton]
 #   type = FDP
 #   full = true
 #   petsc_options = '-snes'
@@ -226,7 +226,7 @@
 #   #petsc_options_value = '1.e-10'
 # [../]
 
-[./SMP_PJFNK]
+[SMP_PJFNK]
   type = SMP
   full = true
 

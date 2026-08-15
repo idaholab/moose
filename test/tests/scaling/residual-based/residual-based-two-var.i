@@ -29,7 +29,7 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     extra_vector_tags = 'ref'
@@ -40,7 +40,7 @@
     variable = u
     extra_vector_tags = 'ref'
   []
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
     extra_vector_tags = 'ref'
@@ -54,25 +54,25 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1000
   [../]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
   [../]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1e-3
   [../]
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right

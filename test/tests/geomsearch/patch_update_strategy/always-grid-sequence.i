@@ -13,28 +13,28 @@
 []
 
 [Variables]
-  [./u]
+  [u]
   [../]
 []
 
 [AuxVariables]
-  [./linear_field]
+  [linear_field]
   [../]
-  [./receiver]
+  [receiver]
     # The field to transfer into
   [../]
-  [./disp_x]
+  [disp_x]
   [../]
-  [./disp_y]
+  [disp_y]
   [../]
-  [./elemental_reciever]
+  [elemental_reciever]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 1
@@ -43,14 +43,14 @@
 []
 
 [AuxKernels]
-  [./linear_in_y]
+  [linear_in_y]
     # This just gives us something to transfer that varies in y so we can ensure the transfer is working properly...
     type = FunctionAux
     variable = linear_field
     function = y
     execute_on = initial
   [../]
-  [./right_to_left]
+  [right_to_left]
     type = GapValueAux
     variable = receiver
     paired_variable = linear_field
@@ -58,14 +58,14 @@
     execute_on = 'nonlinear timestep_end'
     boundary = leftright
   [../]
-  [./y_displacement]
+  [y_displacement]
     type = FunctionAux
     variable = disp_y
     function = t
     execute_on = 'linear timestep_begin'
     block = left
   [../]
-  [./elemental_right_to_left]
+  [elemental_right_to_left]
     type = GapValueAux
     variable = elemental_reciever
     paired_variable = linear_field
@@ -75,13 +75,13 @@
 []
 
 [BCs]
-  [./top]
+  [top]
     type = FunctionDirichletBC
     variable = u
     boundary = 'lefttop righttop'
     function = 't'
   [../]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 'leftbottom rightbottom'

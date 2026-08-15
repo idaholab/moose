@@ -22,15 +22,15 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalCircleGrainIC]
+  [PolycrystalICs]
+    [BicrystalCircleGrainIC]
       radius = 333.33
       x = 500
       y = 500
@@ -39,19 +39,19 @@
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   [../]
 []
 
 [AuxKernels]
-  [./bnds_aux]
+  [bnds_aux]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
@@ -59,15 +59,15 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./top_bottom]
+  [Periodic]
+    [top_bottom]
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./CuGrGranisotropic]
+  [CuGrGranisotropic]
     type = GBAnisotropy
     T = 600 # K
 
@@ -81,12 +81,12 @@
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     # Outputs the current time step
     type = TimestepSize
   [../]
 
-  [./gr1_area]
+  [gr1_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
   [../]

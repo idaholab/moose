@@ -18,8 +18,8 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./GrainGrowth]
+  [PhaseField]
+    [GrainGrowth]
       coupled_variables = T
       variable_mobility = true
     [../]
@@ -28,15 +28,15 @@
 
 
 [Functions]
-  [./TGradient]
+  [TGradient]
     type = ParsedFunction
     expression = '450 + 0.1*x'
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalBoundingBoxIC]
+  [PolycrystalICs]
+    [BicrystalBoundingBoxIC]
       x1 = 0.0
       x2 = 500.0
       y1 = 0.0
@@ -46,12 +46,12 @@
 []
 
 [AuxVariables]
-  [./T]
+  [T]
   [../]
 []
 
 [AuxKernels]
-  [./Tgrad]
+  [Tgrad]
     type = FunctionAux
     variable = T
     function = TGradient
@@ -59,7 +59,7 @@
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = T # K
     wGB = 60 # nm
@@ -70,7 +70,7 @@
 []
 
 [Postprocessors]
-  [./gr0_area]
+  [gr0_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr0
     execute_on = 'initial TIMESTEP_END'
@@ -78,7 +78,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   [../]

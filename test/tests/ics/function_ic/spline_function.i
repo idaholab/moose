@@ -14,14 +14,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = THIRD
     family = HERMITE
   [../]
 []
 
 [Functions]
-  [./spline_function]
+  [spline_function]
     type = SplineFunction
     x = '0 1 2 3'
     y = '0 1 0 1'
@@ -29,7 +29,7 @@
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = 'u'
     function = spline_function
@@ -46,7 +46,7 @@
 
 [Outputs]
   file_base = spline
-  [./OverSampling]
+  [OverSampling]
     type = Exodus
     refinements = 3
   [../]

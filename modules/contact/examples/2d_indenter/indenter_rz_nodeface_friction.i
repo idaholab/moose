@@ -20,7 +20,7 @@
 [] # Mesh
 
 [Functions]
-  [./disp_y]
+  [disp_y]
     type = PiecewiseLinear
     x = '0.  1.0     1.8    2.   3.0'
     y = '0.  -4.5   -5.4   -5.4  -4.0'
@@ -28,12 +28,12 @@
 [] # Functions
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -47,7 +47,7 @@
   []
 []
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     block = '1 2'
@@ -63,14 +63,14 @@
 [BCs]
 
 # Symmetries of the Problem
-[./symm_x_indenter]
+[symm_x_indenter]
   type = DirichletBC
   variable = disp_x
   boundary = 5
   value = 0.0
 [../]
 
-[./symm_x_material]
+[symm_x_material]
   type = DirichletBC
   variable = disp_x
   boundary = 9
@@ -78,7 +78,7 @@
 [../]
 
 # Material should not fly away
-[./material_base_y]
+[material_base_y]
   type = DirichletBC
   variable = disp_y
   boundary = 8
@@ -86,7 +86,7 @@
 [../]
 
 # Drive indenter motion
-[./disp_y]
+[disp_y]
   type = FunctionDirichletBC
   variable = disp_y
   boundary = 1
@@ -97,7 +97,7 @@
 
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 6
     secondary = 4
     model = coulomb
@@ -111,7 +111,7 @@
 
 
 [Dampers]
-  [./contact_slip]
+  [contact_slip]
     type = ContactSlipDamper
     secondary = 4
     primary = 6
@@ -119,31 +119,31 @@
 []
 
 [Materials]
-  [./tensor]
+  [tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1.0e7
     poissons_ratio = 0.25
   [../]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
   [../]
 
-  [./tensor_2]
+  [tensor_2]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
   [../]
 
-  [./power_law_hardening]
+  [power_law_hardening]
     type = IsotropicPowerLawHardeningStressUpdate
     strength_coefficient = 1e5 #K
     strain_hardening_exponent = 0.5 #n
     block = '2'
   [../]
-  [./radial_return_stress]
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'power_law_hardening'
     tangent_operator = elastic
@@ -153,7 +153,7 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
@@ -177,7 +177,7 @@
 []
 
 [Postprocessors]
-  [./maxdisp]
+  [maxdisp]
     type = NodalVariableValue
     nodeid = 39 # 40-1 where 40 is the exodus node number
     variable = disp_y
@@ -190,7 +190,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
   [../]
