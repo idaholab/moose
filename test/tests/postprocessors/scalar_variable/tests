@@ -1,5 +1,5 @@
 [Tests]
-  [./scalar_pps]
+  [scalar_pps]
     type = 'CSVDiff'
     input = 'scalar_variable_pps.i'
     csvdiff = 'scalar_variable_pps_out.csv'

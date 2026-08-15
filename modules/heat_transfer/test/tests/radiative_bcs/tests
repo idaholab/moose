@@ -1,5 +1,5 @@
 [Tests]
-  [./radiative_bc_cyl]
+  [radiative_bc_cyl]
     type = CSVDiff
     input = 'radiative_bc_cyl.i'
     csvdiff = 'radiative_bc_cyl_out.csv'
@@ -31,7 +31,7 @@
     # see #21185
     allow_warnings = true
   []
-  [./function_radiative_bc]
+  [function_radiative_bc]
     type = Exodiff
     input = 'function_radiative_bc.i'
     exodiff = 'function_radiative_bc_out.e'

@@ -2,7 +2,7 @@
   issues = '#3268'
   design = 'DifferencePostprocessor.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'difference_pps.i'
     exodiff = 'difference_pps_out.e'
@@ -10,7 +10,7 @@
     requirement = 'The system shall support computing the difference between two scalar Postprocessor values.'
   []
 
-  [./depend_check]
+  [depend_check]
     type = 'CSVDiff'
     input = 'difference_depend_check.i'
     csvdiff = 'difference_depend_check_out.csv'

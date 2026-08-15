@@ -1,14 +1,14 @@
 [Tests]
   design = 'supplementalRadialReturnStressUpdate.md'
   issues = '#13232'
-  [./ten]
+  [ten]
     type = 'CSVDiff'
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
     requirement = 'The system shall compute the proper stress update using the radial return isotropic power law creep model.'
   []
-  [./zero]
+  [zero]
     type = 'CSVDiff'
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
@@ -17,7 +17,7 @@
                    "return isotropic power law creep models where one of the models returns zero."
     prereq = ten
   []
-  [./sum]
+  [sum]
     type = 'CSVDiff'
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
@@ -26,7 +26,7 @@
                    "return isotropic power law creep models."
     prereq = zero
   []
-  [./cycle]
+  [cycle]
     type = 'CSVDiff'
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
@@ -35,13 +35,13 @@
     prereq = sum
   []
 
-  [./ten_jacobian]
+  [ten_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
     requirement = "The system shall produce the correct Jacobians for radial return isotropic power law creep models."
   []
-  [./zero_jacobian]
+  [zero_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero"'
@@ -49,7 +49,7 @@
     requirement = "The system shall produce the correct Jacobians for radial return isotropic power law creep "
                    "models when one of the models returns zero."
   []
-  [./sum_jacobian]
+  [sum_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one"'
@@ -57,7 +57,7 @@
     requirement = "The system shall produce the correct Jacobians for summed radial return isotropic power law creep "
                    "models."
   []
-  [./cycle_jacobian]
+  [cycle_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true'

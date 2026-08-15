@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
-  [./multi_same_times]
+  [multi_same_times]
     # Test the ability to control multiple AuxScalarKernels with the same start/end times
     type = CSVDiff
     input = 'control.i'
@@ -9,7 +9,7 @@
     requirement = "The Control system shall be capable of activating or deactivating AuxScalarKernel objects with time, given identical start end times."
   []
 
-  [./multi_different_times]
+  [multi_different_times]
     # Test the ability to control multiple AuxScalarKernels with different start/end times
     type = CSVDiff
     input = 'control_different.i'

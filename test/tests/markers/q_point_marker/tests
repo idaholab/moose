@@ -2,7 +2,7 @@
   issues = '#3279'
   design = 'Markers/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'q_point_marker.i'
     exodiff = 'q_point_marker_out.e'

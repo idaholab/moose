@@ -1,49 +1,49 @@
 [Tests]
   design = "MaxVarNDofsPerElem.md"
   issues = "#5658"
-  [./1d]
+  [1d]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
     csvdiff = '1d.csv'
     cli_args = 'Mesh/dim=1 Outputs/file_base=1d'
     requirement = "The maximum number of degrees of freedom for a single variable on a 1D EDGE2 elem shall be 2"
   []
-  [./2d]
+  [2d]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
     csvdiff = '2d.csv'
     cli_args = 'Mesh/dim=2 Outputs/file_base=2d'
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D QUAD4 elem shall be 4"
   []
-  [./2d_high_order]
+  [2d_high_order]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
     csvdiff = '2d_high_order.csv'
     cli_args = 'Mesh/dim=2 Mesh/elem_type=quad9 Variables/u/order=SECOND Outputs/file_base=2d_high_order'
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D QUAD9 elem shall be 9"
   []
-  [./triangles]
+  [triangles]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
     csvdiff = 'triangles.csv'
     cli_args = 'Mesh/dim=2 Mesh/elem_type=tri3 Outputs/file_base=triangles'
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI3 elem shall be 3"
   []
-  [./triangles_second_order]
+  [triangles_second_order]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
     csvdiff = 'triangles_second_order.csv'
     cli_args = 'Mesh/dim=2 Mesh/elem_type=tri6 Variables/u/order=SECOND Outputs/file_base=triangles_second_order'
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI6 elem shall be 6"
   []
-  [./triangles_third_order]
+  [triangles_third_order]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
     csvdiff = 'triangles_third_order.csv'
     cli_args = 'Mesh/dim=2 Mesh/elem_type=tri7 Variables/u/order=THIRD Outputs/file_base=triangles_third_order'
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI7 elem shall be 7"
   []
-  [./3d]
+  [3d]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
     csvdiff = '3d.csv'

@@ -2,7 +2,7 @@
   issues = '#4799'
   design = 'FunctionSideIntegral.md'
 
-  [./function_sideintegral]
+  [function_sideintegral]
     type = 'CSVDiff'
     input = 'function_sideintegral.i'
     csvdiff = 'function_sideintegral.csv'

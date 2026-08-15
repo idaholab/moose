@@ -2,7 +2,7 @@
   design = 'Executioner/TimeIntegrator/index.md'
   issues = '#1953'
 
-  [./testdt2]
+  [testdt2]
     type = 'Exodiff'
     input = 'dt2_adapt.i'
     exodiff = 'dt2_out_adapt.e-s038'

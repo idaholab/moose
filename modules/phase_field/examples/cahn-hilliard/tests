@@ -1,5 +1,5 @@
 [Tests]
-  [./Math_CH]
+  [Math_CH]
     type = RunApp
     input = 'Math_CH.i'
     issues = '#3834'
@@ -7,7 +7,7 @@
     design = 'CHMath.md'
     requirement = 'The system shall syntax check a Cahn-Hilliard example using a hard-coded polynomial free energy expression.'
   []
-  [./Parsed_CH]
+  [Parsed_CH]
     type = RunApp
     input = 'Parsed_CH.i'
     issues = '#4406'
@@ -16,7 +16,7 @@
     design = 'phase_field/Phase_Field_Equations.md'
     requirement = 'The system shall syntax check a Cahn-Hilliard example in the direct (non-split) form using a parsed free energy expression.'
   []
-  [./Parsed_SplitCH]
+  [Parsed_SplitCH]
     type = RunApp
     input = 'Parsed_SplitCH.i'
     issues = '#4406'

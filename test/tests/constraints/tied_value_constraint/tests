@@ -1,7 +1,7 @@
 [Tests]
   issues = '#665'
   design = 'source/constraints/TiedValueConstraint.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'tied_value_constraint_test.i'
     exodiff = 'out.e'

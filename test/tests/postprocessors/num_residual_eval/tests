@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'num_residual_eval.i'
     csvdiff = 'out.csv'

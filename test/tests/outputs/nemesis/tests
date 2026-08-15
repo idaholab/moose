@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     # Tests the for existence of Nemesis files
     type = 'CheckFiles'
     input = 'nemesis.i'
@@ -10,7 +10,7 @@
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
   []
-  [./nemesis_elemental_replicated]
+  [nemesis_elemental_replicated]
     type = 'Exodiff'
     input = nemesis_elemental.i
     exodiff = 'nemesis_elemental_replicated.n.4.0 nemesis_elemental_replicated.n.4.1 nemesis_elemental_replicated.n.4.2 nemesis_elemental_replicated.n.4.3'
@@ -28,7 +28,7 @@
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
   []
-  [./nemesis_elemental_distributed]
+  [nemesis_elemental_distributed]
     type = 'Exodiff'
     input = nemesis_elemental.i
     exodiff = 'nemesis_elemental_distributed.n.4.0 nemesis_elemental_distributed.n.4.1 nemesis_elemental_distributed.n.4.2 nemesis_elemental_distributed.n.4.3'
@@ -42,7 +42,7 @@
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
   []
-  [./nemesis_scalar_replicated]
+  [nemesis_scalar_replicated]
     type = 'Exodiff'
     input = nemesis_scalar.i
     exodiff = 'nemesis_scalar_replicated.n.4.0 nemesis_scalar_replicated.n.4.1 nemesis_scalar_replicated.n.4.2 nemesis_scalar_replicated.n.4.3'
@@ -61,7 +61,7 @@
     issues = '#2122'
     recover = false
   []
-  [./nemesis_scalar_distributed]
+  [nemesis_scalar_distributed]
     type = 'Exodiff'
     input = nemesis_scalar.i
     exodiff = 'nemesis_scalar_distributed.n.4.0 nemesis_scalar_distributed.n.4.1 nemesis_scalar_distributed.n.4.2 nemesis_scalar_distributed.n.4.3'

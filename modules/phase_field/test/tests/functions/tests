@@ -1,5 +1,5 @@
 [Tests]
-  [./fourier_noise]
+  [fourier_noise]
     type = 'Exodiff'
     input = 'fourier_noise.i'
     exodiff = 'fourier_noise_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./nl_pingpong]
+  [nl_pingpong]
     type = RunException
     input = 'nonlinear_residual_pingpong.i'
     expect_err = "Solve Did NOT Converge"

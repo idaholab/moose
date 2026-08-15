@@ -1,20 +1,20 @@
 [Tests]
   design = 'phase_field/MultiPhase/KKS.md'
-  [./kks_example_dirichlet]
+  [kks_example_dirichlet]
     type = RunApp
     input = 'kks_example_dirichlet.i'
     issues = '#5924'
     check_input = True
     requirement = 'The system shall syntax check a two-phase Kim-Kim-Suzuki example with Dirichlet boundary conditions.'
   []
-  [./kks_example_noflux]
+  [kks_example_noflux]
     type = RunApp
     input = 'kks_example_noflux.i'
     issues = '#5924'
     check_input = True
     requirement = 'The system shall syntax check a two-phase Kim-Kim-Suzuki example with no-flux boundary conditions.'
   []
-  [./kks_example_ternary]
+  [kks_example_ternary]
     type = RunApp
     input = 'kks_example_ternary.i'
     issues = '#6244'

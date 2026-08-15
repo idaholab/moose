@@ -1,7 +1,7 @@
 [Tests]
   issues = '#1927'
   design = 'CoupledDirectionalMeshHeightInterpolation.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'coupled_directional_mesh_height_interpolation.i'
     exodiff = 'coupled_directional_mesh_height_interpolation_out.e'

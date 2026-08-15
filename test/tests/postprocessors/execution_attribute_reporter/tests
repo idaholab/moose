@@ -2,7 +2,7 @@
   issues = '#5037'
   design = 'source/executioners/Executioner.md'
 
-  [./reporting]
+  [reporting]
     # Tests that a value may be reported from an Executioner via addAttributeReporter
     type = 'Exodiff'
     input = 'execution_attribute_reporter.i'

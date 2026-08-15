@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md'
-  [./non_controllable_error]
+  [non_controllable_error]
     # Test non-controllable parameter error
     type = RunException
     input = 'non_controllable_error.i'
@@ -10,7 +10,7 @@
     requirement = "The Control system shall error if an attempt to alter a non-controllable parameter is performed."
   []
 
-  [./multiple_params_found_warning]
+  [multiple_params_found_warning]
     # Test error message when single parameter is requested, but multiple exist
     type = RunApp
     input = 'multiple_parameters_found.i'
@@ -19,7 +19,7 @@
     requirement = "The Control system shall error if multiple controllable parameters exists, but only a single parameter is expected to be controlled."
   []
 
-  [./no_param_found]
+  [no_param_found]
     # Test that an invalid parameter name errors properly
     type = RunException
     input = 'no_parameter_found.i'
@@ -28,7 +28,7 @@
     requirement = "The Control system shall error if an unknown parameter is supplied for control."
   []
 
-  [./tid_warehouse_error]
+  [tid_warehouse_error]
     # Test tid assert on MooseObjectWarehouse
     type = RunException
     input = 'tid_warehouse_error.i'
@@ -37,7 +37,7 @@
     requirement = "The Control system shall error if a thread id greater than the number of threads available is supplied when retrieving a Control object."
   []
 
-  [./disable_executioner]
+  [disable_executioner]
     # Test that certain objects (e.g., Executioner) may not be disabled
     type = RunException
     input = 'disable_executioner.i'
@@ -45,7 +45,7 @@
     requirement = "The Control system shall error if an attempt is made to disable the Executioner."
   []
 
-  [./non_existing_dependency]
+  [non_existing_dependency]
     # Test that non existing dependency errors out properly
     type = RunException
     input = 'non_existing_dependency.i'

@@ -2,7 +2,7 @@
   issues = '#3312'
   design = 'syntax/ICs/index.md'
 
-  [./parsed_function]
+  [parsed_function]
     type = 'Exodiff'
     input = 'parsed_function.i'
     exodiff = 'parsed.e'
@@ -11,7 +11,7 @@
     requirement = 'The system shall support setting gradient values for shape functions that support them.'
   []
 
-  [./spline_function]
+  [spline_function]
     type = 'Exodiff'
     input = 'spline_function.i'
     exodiff = 'spline.e'

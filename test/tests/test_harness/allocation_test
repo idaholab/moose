@@ -1,5 +1,5 @@
 [Tests]
-  [./allocation_test]
+  [allocation_test]
     type = RunApp
     input = good.i
     max_parallel = 3

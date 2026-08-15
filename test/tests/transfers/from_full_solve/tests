@@ -2,7 +2,7 @@
   design = 'FullSolveMultiApp.md'
   issues = '#1940'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'parent.i'
     exodiff = 'parent_out.e parent_out_full_solve0.e'

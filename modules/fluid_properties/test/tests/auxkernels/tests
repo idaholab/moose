@@ -1,5 +1,5 @@
 [Tests]
-  [./specific_enthalpy_aux]
+  [specific_enthalpy_aux]
     type = 'Exodiff'
     input = 'specific_enthalpy_aux.i'
     exodiff = 'specific_enthalpy_aux_out.e'
@@ -7,7 +7,7 @@
     issues = '#19225'
     design = 'SpecificEnthalpyAux.md'
   []
-  [./stagnation_pressure_aux]
+  [stagnation_pressure_aux]
     type = 'Exodiff'
     input = 'stagnation_pressure_aux.i'
     exodiff = 'stagnation_pressure_aux_out.e'
@@ -15,7 +15,7 @@
     issues = '#19225'
     design = 'StagnationPressureAux.md'
   []
-  [./stagnation_temperature_aux]
+  [stagnation_temperature_aux]
     type = 'Exodiff'
     input = 'stagnation_temperature_aux.i'
     exodiff = 'stagnation_temperature_aux_out.e'
@@ -23,7 +23,7 @@
     issues = '#19225'
     design = 'StagnationTemperatureAux.md'
   []
-  [./fluid_density_aux]
+  [fluid_density_aux]
     type = 'Exodiff'
     input = 'fluid_density_aux.i'
     exodiff = 'fluid_density_aux_out.e'

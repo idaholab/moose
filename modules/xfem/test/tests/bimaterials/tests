@@ -1,5 +1,5 @@
 [Tests]
-  [./glued_bimaterial]
+  [glued_bimaterial]
     type = Exodiff
     input = glued_bimaterials_2d.i
     exodiff = 'glued_bimaterials_2d_out.e'
@@ -15,7 +15,7 @@
     design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
     issues = '#10421'
   []
-  [./inclusion_bimaterial]
+  [inclusion_bimaterial]
     type = Exodiff
     input = inclusion_bimaterials_2d.i
     exodiff = 'inclusion_bimaterials_2d_out.e'
@@ -31,7 +31,7 @@
     design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
     issues = '#10421'
   []
-  [./glued_ad_bimaterial]
+  [glued_ad_bimaterial]
     type = Exodiff
     input = glued_ad_bimaterials_2d.i
     exodiff = 'glued_bimaterials_2d_out.e'
@@ -48,7 +48,7 @@
     design = 'LevelSetBiMaterialRankTwo.md LevelSetBiMaterialRankFour.md'
     issues = '#15437'
   []
-  [./inclusion_ad_bimaterial]
+  [inclusion_ad_bimaterial]
     type = Exodiff
     input = inclusion_ad_bimaterials_2d.i
     exodiff = 'inclusion_bimaterials_2d_out.e'

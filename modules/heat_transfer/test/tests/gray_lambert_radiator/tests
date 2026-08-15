@@ -2,7 +2,7 @@
   issues = '#13918'
 
   ## check error checking
-  [./inconsistent_bnd_eps]
+  [inconsistent_bnd_eps]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/gray_lambert/emissivity="1"'
@@ -11,7 +11,7 @@
     design = 'ViewFactorObjectSurfaceRadiation.md'
   []
 
-  [./inconsistent_bnd_view_factors]
+  [inconsistent_bnd_view_factors]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/view_factors_uo/boundary="top bottom"
@@ -25,7 +25,7 @@
     design = 'ViewFactorObjectSurfaceRadiation.md'
   []
 
-  [./inconsistent_iso_temperature]
+  [inconsistent_iso_temperature]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/view_factors_uo/boundary="top bottom"
@@ -38,7 +38,7 @@
     design = 'ViewFactorObjectSurfaceRadiation.md'
   []
 
-  [./inconsistent_bnd_iso_bnd]
+  [inconsistent_bnd_iso_bnd]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
@@ -51,7 +51,7 @@
     design = 'ViewFactorObjectSurfaceRadiation.md'
   []
 
-  [./inconsistent_bnd_adiabatic_bnd]
+  [inconsistent_bnd_adiabatic_bnd]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
@@ -64,7 +64,7 @@
     design = 'ViewFactorObjectSurfaceRadiation.md'
   []
 
-  [./incorrect_view_factor_shape]
+  [incorrect_view_factor_shape]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/view_factors_uo/view_factors="0.25 0.25 0.25 0.25; 0.5 0.5 ; 1 1 1 1; 1 1 1 1"'
@@ -73,7 +73,7 @@
     design = 'SpecifiedViewFactor.md ViewFactorObjectSurfaceRadiation.md'
   []
 
-  [./bad_rowsum]
+  [bad_rowsum]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/view_factors_uo/view_factors="0.25 0.25 0.25 0.25; 0.2 0.25 0.25 0.25 ; 0.25 0.25 0.25 0.25; 0.25 0.25 0.25 0.25"'
@@ -83,7 +83,7 @@
     design = 'SpecifiedViewFactor.md ViewFactorObjectSurfaceRadiation.md'
   []
 
-  [./gray_lambert_cavity]
+  [gray_lambert_cavity]
     type = CSVDiff
     input = 'gray_lambert_cavity.i'
     csvdiff = 'gray_lambert_cavity_out.csv gray_lambert_cavity_out_lambert_vpp_0001.csv gray_lambert_cavity_out_view_factors_0001.csv'
@@ -92,7 +92,7 @@
     design = 'ViewFactorObjectSurfaceRadiation.md SurfaceRadiationVectorPostprocessor.md ViewFactorVectorPostprocessor.md'
   []
 
-  [./coupled_heat_conduction]
+  [coupled_heat_conduction]
     type = Exodiff
     input = 'coupled_heat_conduction.i'
     exodiff = 'coupled_heat_conduction_out.e'
@@ -101,7 +101,7 @@
     design = 'ConstantViewFactorSurfaceRadiation.md'
   []
 
-  [./coupled_heat_conduction_emission_reconstruction]
+  [coupled_heat_conduction_emission_reconstruction]
     type = Exodiff
     input = 'coupled_heat_conduction.i'
     exodiff = 'coupled_heat_conduction_emission_er.e'
@@ -111,7 +111,7 @@
     design = 'GrayLambertNeumannBC.md'
   []
 
-  [./gray_lambert_cavity_automatic_vf]
+  [gray_lambert_cavity_automatic_vf]
     type = CSVDiff
     input = 'gray_lambert_cavity_automatic_vf.i'
     csvdiff = 'gray_lambert_cavity_automatic_vf_out.csv'
@@ -120,7 +120,7 @@
     mesh_mode = REPLICATED
   []
 
-  [./gray_lambert_cavity_automatic_vf_3D]
+  [gray_lambert_cavity_automatic_vf_3D]
     type = CSVDiff
     input = 'gray_lambert_cavity_automatic_vf_3D.i'
     csvdiff = 'gray_lambert_cavity_automatic_vf_3D_out.csv'

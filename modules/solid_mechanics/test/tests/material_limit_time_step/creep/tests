@@ -1,6 +1,6 @@
 [Tests]
   design = 'MaterialTimeStepPostprocessor.md'
-  [./test5a_lim]
+  [test5a_lim]
     type = 'Exodiff'
     input = 'nafems_test5a_lim.i'
     exodiff = 'nafems_test5a_lim_out.e'
@@ -10,7 +10,7 @@
     requirement = 'The system shall compute a timestep size that is limited by a power law creep model and a specified maximum inelastic strain increment.'
     capabilities = 'superlu & method!=dbg'
   []
-  [./test5a_lim_on_initial]
+  [test5a_lim_on_initial]
     type = 'CSVDiff'
     input = 'nafems_test5a_lim.i'
     cli_args = 'Postprocessors/matl_ts_min/execute_on="initial timestep_end"

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'displaced_mesh.i'
     exodiff = 'displaced_mesh_in.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./simpleeigenstrain]
+  [simpleeigenstrain]
     type = 'Exodiff'
     input = 'simpleeigenstrain.i'
     exodiff = 'simpleeigenstrain_out.e'
@@ -8,7 +8,7 @@
     design = 'ComputeVariableEigenstrain.md'
     issues = '#4373'
   []
-  [./elasticenergymaterial]
+  [elasticenergymaterial]
     type = 'Exodiff'
     input = 'elasticenergymaterial.i'
     exodiff = 'elasticenergymaterial_out.e'
@@ -18,7 +18,7 @@
     design = 'ElasticEnergyMaterial.md'
     issues = '#4269'
   []
-  [./twophasestress]
+  [twophasestress]
     type = 'Exodiff'
     input = 'twophasestress.i'
     exodiff = 'twophasestress_out.e'
@@ -28,7 +28,7 @@
     design = 'TwoPhaseStressMaterial.md'
     issues = '#4269'
   []
-  [./multiphasestress]
+  [multiphasestress]
     type = 'Exodiff'
     input = 'multiphasestress.i'
     exodiff = 'multiphasestress_out.e'
@@ -38,7 +38,7 @@
     design = 'MultiPhaseStressMaterial.md'
     issues = '#4886'
   []
-  [./nonsplit_gradderiv]
+  [nonsplit_gradderiv]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv.i'
     exodiff = 'nonsplit_gradderiv_out.e'
@@ -50,7 +50,7 @@
     design = 'GradientComponent.md StrainGradDispDerivatives.md ComputeConcentrationDependentElasticityTensor.md'
     issues = '#5631'
   []
-  [./nonsplit_gradderiv_action]
+  [nonsplit_gradderiv_action]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv_action.i'
     exodiff = 'nonsplit_gradderiv_out.e'
@@ -63,7 +63,7 @@
     design = 'DisplacementGradientsAction.md'
     issues = '#5631'
   []
-  [./gradientcomponent]
+  [gradientcomponent]
     type = 'Exodiff'
     input = 'gradientcomponent.i'
     exodiff = 'gradientcomponent_out.e'

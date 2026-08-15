@@ -32,7 +32,7 @@
     recover = false
   []
 
-  [./oriented_subdomain_bounding_box_generator_test_outside]
+  [oriented_subdomain_bounding_box_generator_test_outside]
     type = 'Exodiff'
     input = 'oriented_subdomain_bounding_box_generator.i'
     cli_args = 'Mesh/subdomains/location=OUTSIDE Outputs/file_base=outside'

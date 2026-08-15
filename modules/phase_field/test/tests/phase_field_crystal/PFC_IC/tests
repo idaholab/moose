@@ -1,9 +1,9 @@
 [Tests]
   issues = '#5336'
   design = 'PFCFreezingIC.md'
-  [./lattice]
+  [lattice]
     requirement = 'The system shall provide an initial condition for a phase field crystal model that seeds a'
-    [./BCC_test]
+    [BCC_test]
       type = 'Exodiff'
       input = 'PFC_IC_BCC_test.i'
       exodiff = 'PFC_IC_BCC_test_out.e'
@@ -12,7 +12,7 @@
       detail = 'body-centered cubic lattice, and'
     []
 
-    [./FCC_test]
+    [FCC_test]
       type = 'Exodiff'
       input = 'PFC_IC_FCC_test.i'
       exodiff = 'PFC_IC_FCC_test_out.e'

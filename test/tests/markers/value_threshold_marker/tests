@@ -2,7 +2,7 @@
   issues = '#1313'
   design = 'ValueThresholdMarker.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'value_threshold_marker_test.i'
     exodiff = 'value_threshold_marker_test_out.e'

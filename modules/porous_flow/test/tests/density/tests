@@ -1,5 +1,5 @@
 [Tests]
-  [./GravDensity01]
+  [GravDensity01]
     type = 'CSVDiff'
     input = 'GravDensity01.i'
     csvdiff = 'GravDensity01.csv'

@@ -3,7 +3,7 @@
   issues = '#4989 #5021'
   design = 'Mesh/index.md'
 
-  [./test_quad4_refine]
+  [test_quad4_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_quad4_refine_out.e'
@@ -12,7 +12,7 @@
     requirement = 'The system shall support refinement of QUAD4 mesh elements.'
   []
 
-  [./test_quad8_refine]
+  [test_quad8_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_quad8_refine_out.e'
@@ -21,7 +21,7 @@
     requirement = 'The system shall support refinement of QUAD8 mesh elements.'
   []
 
-  [./test_quad9_refine]
+  [test_quad9_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_quad9_refine_out.e'
@@ -30,7 +30,7 @@
     requirement = 'The system shall support refinement of QUAD9 mesh elements.'
   []
 
-  [./test_tri3_refine]
+  [test_tri3_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tri3_refine_out.e'
@@ -39,7 +39,7 @@
     requirement = 'The system shall support refinement of TRI3 mesh elements.'
   []
 
-  [./test_tri6_refine]
+  [test_tri6_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tri6_refine_out.e'
@@ -48,7 +48,7 @@
     requirement = 'The system shall support refinement of TRI6 mesh elements.'
   []
 
-  [./test_tri7_refine]
+  [test_tri7_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tri7_refine_out.e'
@@ -59,7 +59,7 @@
 
   # 3D elements
 
-  [./test_hex8_refine]
+  [test_hex8_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_hex8_refine_out.e'
@@ -68,7 +68,7 @@
     requirement = 'The system shall support refinement of HEX8 mesh elements.'
   []
 
-  [./test_hex20_refine]
+  [test_hex20_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_hex20_refine_out.e'
@@ -77,7 +77,7 @@
     requirement = 'The system shall support refinement of HEX20 mesh elements.'
   []
 
-  [./test_hex27_refine]
+  [test_hex27_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_hex27_refine_out.e'
@@ -86,7 +86,7 @@
     requirement = 'The system shall support refinement of HEX27 mesh elements.'
   []
 
-  [./test_tet4_refine]
+  [test_tet4_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tet4_refine_out.e'
@@ -95,7 +95,7 @@
     requirement = 'The system shall support refinement of TET4 mesh elements.'
   []
 
-  [./test_tet10_refine]
+  [test_tet10_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tet10_refine_out.e'
@@ -104,7 +104,7 @@
     requirement = 'The system shall support refinement of TET10 mesh elements.'
   []
 
-  [./test_tet14_refine]
+  [test_tet14_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tet14_refine_out.e'
@@ -113,7 +113,7 @@
     requirement = 'The system shall support refinement of TET14 mesh elements.'
   []
 
-  [./test_prism6_refine]
+  [test_prism6_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_prism6_refine_out.e'
@@ -122,7 +122,7 @@
     requirement = 'The system shall support refinement of PRISM6 mesh elements.'
   []
 
-  [./test_prism15_refine]
+  [test_prism15_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_prism15_refine_out.e'
@@ -132,7 +132,7 @@
   []
 
   # Note: Paraview (as of version 4.1.0) does not correctly display Prism18 elements
-  [./test_prism18_refine]
+  [test_prism18_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_prism18_refine_out.e'
@@ -142,7 +142,7 @@
   []
 
   # Libmesh (still!) does not support uniform or adaptive refinement of pyramids
-  [./test_pyramid5]
+  [test_pyramid5]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_pyramid5_out.e'
@@ -153,7 +153,7 @@
 
   # Libmesh (still!) does not support uniform or adaptive refinement of pyramids
   # Note: Paraview (as of version 4.1.0) does not correctly display Pyramid13 elements
-  [./test_pyramid13]
+  [test_pyramid13]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_pyramid13_out.e'
@@ -164,7 +164,7 @@
 
   # Libmesh (still!) does not support uniform or adaptive refinement of pyramids
   # Note: Paraview (as of version 4.1.0) does not correctly display Pyramid14 elements
-  [./test_pyramid14]
+  [test_pyramid14]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_pyramid14_out.e'

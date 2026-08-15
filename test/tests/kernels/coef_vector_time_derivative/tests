@@ -2,7 +2,7 @@
   issues = '#34183'
   design = 'CoefVectorTimeDerivative.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'coef_vector_time_derivative_diffusion.i'
     exodiff = 'coef_vector_time_derivative_diffusion_out.e'

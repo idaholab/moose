@@ -1,5 +1,5 @@
 [Tests]
-  [./j2_hard1_mod]
+  [j2_hard1_mod]
     type = 'CSVDiff'
     input = 'j2_hard1_mod.i'
     csvdiff = 'j2_hard1_mod_out.csv'

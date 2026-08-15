@@ -1,5 +1,5 @@
 [Tests]
- [./test]
+ [test]
    type = 'CSVDiff'
    input = 'input.i'
    csvdiff = '360degree_model_out.csv'

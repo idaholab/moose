@@ -1,7 +1,7 @@
 [Tests]
   issues = '#11561'
   design = 'PeridynamicsMesh.md'
-  [./initial_run]
+  [initial_run]
     type = 'Exodiff'
     input = '2D_mesh_restartable_H1NOSPD.i'
     exodiff = '2D_mesh_restartable_H1NOSPD_out.e'
@@ -10,7 +10,7 @@
                    mesh data for peridynamics models.'
   []
 
-  [./restart_run]
+  [restart_run]
     type = 'Exodiff'
     input = '2D_mesh_restartable_H1NOSPD_second.i'
     exodiff = '2D_mesh_restartable_H1NOSPD_second_out.e'

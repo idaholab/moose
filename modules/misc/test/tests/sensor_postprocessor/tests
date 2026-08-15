@@ -1,5 +1,5 @@
 [Tests]
-  [./transient_general_sensor]
+  [transient_general_sensor]
     type = 'CSVDiff'
     input = 'transient_general_sensor.i'
     csvdiff = 'transient_general_sensor_out.csv'
@@ -7,7 +7,7 @@
     design = 'GeneralSensorPostprocessor.md'
     issues = '#25590'
   []
-  [./steady_general_sensor]
+  [steady_general_sensor]
     type = 'CSVDiff'
     input = 'steady_general_sensor.i'
     csvdiff = 'steady_general_sensor_out.csv'
@@ -15,7 +15,7 @@
     design = 'GeneralSensorPostprocessor.md'
     issues = '#25590'
   []
-  [./transient_thermocouple_sensor]
+  [transient_thermocouple_sensor]
     type = 'CSVDiff'
     input = 'transient_thermocouple_sensor.i'
     csvdiff = 'transient_thermocouple_sensor_out.csv'
@@ -23,7 +23,7 @@
     design = 'ThermocoupleSensorPostprocessor.md'
     issues = '#25590'
   []
-  [./steady_thermocouple_sensor]
+  [steady_thermocouple_sensor]
     type = 'CSVDiff'
     input = 'steady_thermocouple_sensor.i'
     csvdiff = 'steady_thermocouple_sensor_out.csv'
@@ -31,7 +31,7 @@
     design = 'ThermocoupleSensorPostprocessor.md'
     issues = '#25590'
   []
-  [./time_delay_test]
+  [time_delay_test]
     type = 'CSVDiff'
     input = 'time_delay_test.i'
     csvdiff = 'time_delay_test_out.csv'

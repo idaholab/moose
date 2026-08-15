@@ -1,5 +1,5 @@
 [Tests]
-  [./GrainBoundaryVelocityTest]
+  [GrainBoundaryVelocityTest]
     type = 'Exodiff'
     input = 'GrainBoundaryVelocityTest.i'
     exodiff = 'GrainBoundaryVelocityTest_out.e'

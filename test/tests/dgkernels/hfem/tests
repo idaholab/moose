@@ -1,7 +1,7 @@
 [Tests]
   issues = '#20191'
   design = 'HFEMTestJump.md HFEMTrialJump.md'
-  [./jacobian]
+  [jacobian]
     type = 'PetscJacobianTester'
     input = 'hfem_jacobian.i'
     run_sim = True

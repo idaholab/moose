@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
-  [./enable_false]
+  [enable_false]
     # Tests that MooseObject parameter operates correctly when set to 'false'
     type = RunApp
     input = 'enable_disable.i'
@@ -9,7 +9,7 @@
     cli_args = "Dampers/const_damp/enable=false Outputs/exodus=false"
     requirement = "The system shall support disabling an object using an input parameter."
   []
-  [./enable_true]
+  [enable_true]
     # Tests that MooseObject parameter operates correctly when set to 'true'
     type = RunApp
     input = 'enable_disable.i'
@@ -17,7 +17,7 @@
     cli_args = "Dampers/const_damp/enable=true Outputs/exodus=false"
     requirement = "The system shall support enabling an object using an input parameter."
   []
-  [./control]
+  [control]
     # Test that a damper may be disabled during simulation
     type = CSVDiff
     input = 'control.i'

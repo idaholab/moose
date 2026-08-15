@@ -1,7 +1,7 @@
 [Tests]
   issues = '#4281 #4871'
   design = 'auxkernels/ParsedAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'

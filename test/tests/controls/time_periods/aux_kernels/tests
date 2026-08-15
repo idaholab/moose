@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
-  [./test]
+  [test]
     # Test the ability to control multiple AuxKernels
     type = Exodiff
     input = 'control.i'

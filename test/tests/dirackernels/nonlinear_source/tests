@@ -1,13 +1,13 @@
 [Tests]
   issues = '#668'
   design = 'syntax/DiracKernels/index.md'
-  [./nonlinear_source]
+  [nonlinear_source]
     type = 'Exodiff'
     input = 'nonlinear_source.i'
     exodiff = 'nonlinear_source_out.e'
     requirement = "The system shall support the computation of off diagonal Jacobian terms for residual terms defined with a Dirac delta function."
   []
-  [./resid_and_jac_together]
+  [resid_and_jac_together]
     type = 'Exodiff'
     input = 'nonlinear_source.i'
     exodiff = 'nonlinear_source_out.e'

@@ -2,7 +2,7 @@
   issues = '#1405'
   design = 'ElementH1Error.md'
 
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'element_h1_error_pp_test.i'
     csvdiff = 'out.csv'

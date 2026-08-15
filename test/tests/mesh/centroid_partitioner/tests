@@ -2,7 +2,7 @@
   design = 'Mesh/index.md'
   issues = '#2270 #2289'
 
-  [./centroid_partitioner_test]
+  [centroid_partitioner_test]
     type = 'Exodiff'
     input = 'centroid_partitioner_test.i'
     exodiff = 'out.e'

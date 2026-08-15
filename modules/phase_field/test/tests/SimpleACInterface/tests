@@ -1,5 +1,5 @@
 [Tests]
-  [./SimpleACInterface]
+  [SimpleACInterface]
     type = 'Exodiff'
     input = 'SimpleACInterface.i'
     exodiff = 'SimpleACInterface_out.e'
@@ -8,7 +8,7 @@
     requirement = 'The system shall provide a simplified Allen-Cahn interface energy kernel with constant mobility and interfacial parameter, for novice users.'
   []
 
-  [./SimpleCoupledACInterface]
+  [SimpleCoupledACInterface]
     type = 'Exodiff'
     input = 'SimpleCoupledACInterface.i'
     exodiff = 'SimpleCoupledACInterface_out.e'

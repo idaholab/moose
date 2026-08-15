@@ -1,7 +1,7 @@
 [Tests]
   issues = '#2885'
   design = 'OutputWarehouse.md'
-  [./getOutput]
+  [getOutput]
     type = RunException
     input = warehouse_access.i
     cli_args = 'Outputs/test/test_type=getOutput'
@@ -10,7 +10,7 @@
 
     requirement = "The system shall provide an API for retrieving an output object by type and name."
   []
-  [./getOutputs]
+  [getOutputs]
     type = RunException
     input = warehouse_access.i
     cli_args = 'Outputs/test/test_type=getOutputs'
@@ -19,7 +19,7 @@
 
     requirement = "The system shall provide an API for retrieving all output objects of a type."
   []
-  [./getOutputs_with_names]
+  [getOutputs_with_names]
     type = RunException
     input = warehouse_access.i
     cli_args = 'Outputs/test/test_type=getOutputs-names'
@@ -28,7 +28,7 @@
 
     requirement = "The system shall provide an API for retrieving output objects for the given names and type."
   []
-  [./getOutputNames]
+  [getOutputNames]
     type = RunException
     input = warehouse_access.i
     cli_args = 'Outputs/test/test_type=getOutputNames'
@@ -37,7 +37,7 @@
 
     requirement = "The system shall provide an API for retrieving all output object names of a type."
   []
-  [./default_names]
+  [default_names]
     type = CheckFiles
     input = default_names.i
     check_files = 'default_names_out.e default_names_oversample.e'

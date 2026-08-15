@@ -1,5 +1,5 @@
 [Tests]
-  [./error]
+  [error]
     # Test error when a property is declared on multiple blocks by different matrials.
     type = RunException
     input = error.i

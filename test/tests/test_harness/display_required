@@ -1,5 +1,5 @@
 [Tests]
-  [./display_required]
+  [display_required]
     type = RunCommand
     command = ls
     display_required = true

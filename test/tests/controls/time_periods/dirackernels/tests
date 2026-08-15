@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
-  [./test]
+  [test]
     type = Exodiff
     input = 'dirac.i'
     exodiff = 'dirac_out.e'

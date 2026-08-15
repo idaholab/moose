@@ -1,5 +1,5 @@
 [Tests]
-  [./cahn_hilliard]
+  [cahn_hilliard]
     type = RunApp
     input = 'cahn_hilliard.i'
     check_input = True
@@ -7,7 +7,7 @@
     design = 'phase_field/Nucleation/DiscreteNucleation.md'
     issues = '#5472'
   []
-  [./refine]
+  [refine]
     type = RunApp
     input = 'refine.i'
     check_input = True

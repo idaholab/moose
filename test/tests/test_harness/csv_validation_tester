@@ -1,5 +1,5 @@
 [Tests]
-  [./csv_validation_tester_01]
+  [csv_validation_tester_01]
     type = CSVValidationTester
     input = csv_validation_tester_01.i
     csvdiff = csv_validation_tester_01.csv
@@ -7,7 +7,7 @@
     std_limit = 0.011
   []
 
-  [./csv_validation_tester_02]
+  [csv_validation_tester_02]
     type = CSVValidationTester
     input = csv_validation_tester_01.i
     csvdiff = csv_validation_tester_01.csv

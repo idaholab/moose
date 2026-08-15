@@ -1,7 +1,7 @@
 [Tests]
   design = 'Transient.md'
   issues = '02ae277ceb83dcd5'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'abort.i'
     exodiff = 'out.e'

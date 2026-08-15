@@ -77,7 +77,7 @@
                   "not contained within any sub application domains."
   []
 
-  [./two_pipes]
+  [two_pipes]
     type = 'Exodiff'
     input = 'two_pipe_parent.i'
     exodiff = 'two_pipe_parent_out.e'

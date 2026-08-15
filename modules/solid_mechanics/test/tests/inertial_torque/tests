@@ -1,5 +1,5 @@
 [Tests]
-  [./residual]
+  [residual]
     type = 'CSVDiff'
     input = 'residual.i'
     csvdiff = 'residual_out.csv'
@@ -9,7 +9,7 @@
 
     issues = '#13634'
   []
-  [./simple]
+  [simple]
     type = 'CSVDiff'
     input = 'simple.i'
     csvdiff = 'simple_out.csv'

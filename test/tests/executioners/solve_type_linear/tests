@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Executioner/index.md'
-  [./linear_with_full_smp]
+  [linear_with_full_smp]
     type = 'Exodiff'
     input = 'linear_with_full_smp.i'
     exodiff = 'linear_with_full_smp_out.e'

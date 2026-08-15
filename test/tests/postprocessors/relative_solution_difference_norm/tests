@@ -2,7 +2,7 @@
   design = 'RelativeSolutionDifferenceNorm.md'
   issues = '#7118'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'

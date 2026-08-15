@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'hardware_id_aux.i'
     exodiff = 'hardware_id_aux_out.e'

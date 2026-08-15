@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'bounding_box_ic_test.i'
     exodiff = 'out.e'
@@ -7,7 +7,7 @@
     issues = '#11034'
     design = 'ics/BoundingBoxIC.md'
   []
-  [./diffuse]
+  [diffuse]
     type = 'Exodiff'
     input = 'bounding_box_ic_diffuse_test.i'
     exodiff = 'bounding_box_ic_diffuse_test_out.e'

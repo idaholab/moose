@@ -1,5 +1,5 @@
 [Tests]
-  [./deleted]
+  [deleted]
     type = Exodiff
     input = exodiff.i
     exodiff = exodiff_out.e

@@ -2,7 +2,7 @@
   issues = '#7206'
   design = 'VariableResidual.md'
 
-  [./variable_residual_test]
+  [variable_residual_test]
     type = 'CSVDiff'
     input = 'variable_residual.i'
     csvdiff = 'variable_residual_out.csv'

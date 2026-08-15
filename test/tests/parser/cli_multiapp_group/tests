@@ -2,7 +2,7 @@
   design = 'CommandLine.md'
   issues = '#2137'
 
-  [./cli_override_group]
+  [cli_override_group]
     type = 'Exodiff'
     input = 'dt_from_parent.i'
     exodiff = 'dt_from_parent_out_sub_left0.e dt_from_parent_out_sub_left1.e dt_from_parent_out_sub_left2.e dt_from_parent_out_sub_left3.e '

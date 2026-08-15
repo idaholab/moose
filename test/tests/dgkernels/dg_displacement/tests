@@ -1,7 +1,7 @@
 [Tests]
   issues = '#3536'
   design = 'syntax/DGKernels/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'dg_displacement.i'
     exodiff = 'out.e'

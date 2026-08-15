@@ -1,5 +1,5 @@
 [Tests]
-  [./material]
+  [material]
     type = 'Exodiff'
     input = 'material.i'
     exodiff = 'material_out.e'
@@ -8,7 +8,7 @@
     issues = '#5472'
   []
 
-  [./parallel]
+  [parallel]
     type = 'CSVDiff'
     input = 'parallel.i'
     csvdiff = 'parallel_out.csv'
@@ -21,9 +21,9 @@
   []
 
   #
-  # manual recover test for [./material]
+  # manual recover test for [material]
   #
-  [./material_recover1]
+  [material_recover1]
     type = 'CheckFiles'
     input = 'material.i'
     check_files = 'material_recover_cp/0005-restart-0.rd/data'
@@ -35,7 +35,7 @@
     design = 'materials/DiscreteNucleation.md'
     issues = '#5472'
   []
-  [./material_recover2]
+  [material_recover2]
     # Recover the solve from part1 with a specified file
     type = 'Exodiff'
     input = 'material.i'
@@ -50,9 +50,9 @@
   []
 
   #
-  # manual recover test for [./parallel]
+  # manual recover test for [parallel]
   #
-  [./parallel_recover1]
+  [parallel_recover1]
     type = 'CheckFiles'
     input = 'parallel.i'
     check_files = 'parallel_recover_cp/0005-restart-0.rd/data'
@@ -64,7 +64,7 @@
     design = 'userobjects/DiscreteNucleationInserter.md'
     issues = '#5472'
   []
-  [./parallel_recover2]
+  [parallel_recover2]
     # Recover the solve from part1 with a specified file
     type = 'CSVDiff'
     input = 'parallel.i'
@@ -79,7 +79,7 @@
     issues = '#5472'
   []
 
-  [./soft]
+  [soft]
     type = 'Exodiff'
     input = 'soft.i'
     exodiff = 'soft_out.e'
@@ -89,7 +89,7 @@
     issues = '#5526'
   []
 
-  [./marker]
+  [marker]
     type = 'Exodiff'
     input = 'marker.i'
     exodiff = 'marker_out.e-s002'
@@ -98,7 +98,7 @@
     issues = '#12099'
   []
 
-  [./timestep]
+  [timestep]
     type = 'CSVDiff'
     input = 'timestep.i'
     csvdiff = 'timestep_out.csv'
@@ -107,7 +107,7 @@
     issues = '#12104'
   []
 
-  [./data]
+  [data]
     type = 'CSVDiff'
     input = 'data.i'
     csvdiff = 'data_out.csv'
@@ -115,7 +115,7 @@
     design = 'postprocessors/DiscreteNucleationData.md'
     issues = '#12114'
   []
-  [./auxkernel]
+  [auxkernel]
     type = 'Exodiff'
     input = 'auxkernel.i'
     exodiff = 'auxkernel_out.e'
@@ -123,7 +123,7 @@
     design = 'auxkernels/DiscreteNucleationAux.md'
     issues = '#12114'
   []
-  [./force]
+  [force]
     type = 'Exodiff'
     input = 'force.i'
     exodiff = 'force_out.e'
@@ -132,7 +132,7 @@
     issues = '#12114'
   []
 
-  [./file]
+  [file]
     type = 'Exodiff'
     input = 'file.i'
     exodiff = 'file_out.e'
@@ -141,7 +141,7 @@
     issues = '#12262'
   []
 
-  [./file2]
+  [file2]
     type = 'Exodiff'
     input = 'file2.i'
     exodiff = 'file2_out.e'

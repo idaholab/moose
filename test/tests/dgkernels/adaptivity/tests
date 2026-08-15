@@ -1,6 +1,6 @@
 [Tests]
   group = "DGKernel Adaptivity"
-  [./dg_adaptivity]
+  [dg_adaptivity]
     type = 'Exodiff'
     input = 'adaptivity.i'
     exodiff = 'adaptivity_out.e adaptivity_out.e-s002'
@@ -9,7 +9,7 @@
     design = "/DGKernels/index.md"
     issues = '#10977'
   []
-  [./error_stateful_dg_adaptivity]
+  [error_stateful_dg_adaptivity]
     type = 'RunException'
     input = 'adaptivity.i'
     expect_err = 'Stateful neighbor material properties do not work with mesh adaptivity'

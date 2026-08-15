@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'function_element_integral.i'
     csvdiff = 'function_element_integral_out.csv'

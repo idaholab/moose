@@ -1,7 +1,7 @@
 [Tests]
   # SVN issue r18100
   issues = '#7769'
-  [./volume_fraction_test]
+  [volume_fraction_test]
     type = CSVDiff
     input = 'feature_volume_fraction.i'
     csvdiff = 'feature_volume_fraction_out.csv'
@@ -11,7 +11,7 @@
     design = 'FeatureVolumeFraction.md'
   []
 
-  [./Avrami_test]
+  [Avrami_test]
     type = CSVDiff
     input = 'Avrami.i'
     csvdiff = 'Avrami_out.csv'

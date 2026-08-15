@@ -2,7 +2,7 @@
   issues = '#13874'
   design = 'Executioner/TimeStepper/index.md'
 
-  [./constant_dt_cutback]
+  [constant_dt_cutback]
     type = 'Exodiff'
     input = 'constant_dt_cutback.i'
     exodiff = 'constant_dt_cutback_out.e'
@@ -10,7 +10,7 @@
                    Here, the original time step size is specified as a constant value."
   []
 
-  [./function_dt_cutback]
+  [function_dt_cutback]
     type = 'Exodiff'
     input = 'function_dt_cutback.i'
     exodiff = 'function_dt_cutback_out.e'

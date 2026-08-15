@@ -1,5 +1,5 @@
 [Tests]
-  [./patch_sideset_generator]
+  [patch_sideset_generator]
     type = 'Exodiff'
     input = 'patch_sideset_generator.i'
     exodiff = 'patch_sideset_generator_in.e'
@@ -11,7 +11,7 @@
     recover = false
   []
 
-  [./patch_sideset_generator_linear]
+  [patch_sideset_generator_linear]
     type = 'Exodiff'
     input = 'patch_sideset_generator.i'
     exodiff = 'patch_sideset_generator_linear.e'
@@ -23,7 +23,7 @@
     recover = false
   []
 
-  [./patch_sideset_generator_centroid]
+  [patch_sideset_generator_centroid]
     type = 'Exodiff'
     input = 'patch_sideset_generator.i'
     exodiff = 'patch_sideset_generator_centroid.e'
@@ -35,7 +35,7 @@
     recover = false
   []
 
-  [./patch_sideset_generator_centroid_error]
+  [patch_sideset_generator_centroid_error]
     type = RunException
     input = 'patch_sideset_generator.i'
     expect_err = "If using the centroid partitioner you _must_ specify centroid_partitioner_direction!"
@@ -47,7 +47,7 @@
     recover = false
   []
 
-  [./patch_sideset_generator_grid]
+  [patch_sideset_generator_grid]
     type = 'Exodiff'
     input = 'patch_sideset_generator.i'
     exodiff = 'patch_sideset_generator_grid.e'
@@ -59,7 +59,7 @@
     recover = false
   []
 
-  [./patch_sideset_generator_grid_2D]
+  [patch_sideset_generator_grid_2D]
     type = 'Exodiff'
     input = 'patch_sideset_generator_grid_2D.i'
     exodiff = 'patch_sideset_generator_grid_2D_in.e'
@@ -71,7 +71,7 @@
     recover = false
   []
 
-  [./patch_sideset_generator_grid_2D_overpart]
+  [patch_sideset_generator_grid_2D_overpart]
     type = 'Exodiff'
     input = 'patch_sideset_generator_grid_2D.i'
     exodiff = 'patch_sideset_generator_grid_2D_overpart.e'

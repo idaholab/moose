@@ -1,7 +1,7 @@
 [Tests]
   issues = '#6881'
   design = '/auxkernels/AuxKernel.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'array_var_component.i'
     exodiff = 'array_var_component_out.e'

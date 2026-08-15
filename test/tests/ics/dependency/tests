@@ -1,7 +1,7 @@
 [Tests]
   design = 'syntax/ICs/index.md'
   issues = '#534'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
@@ -11,7 +11,7 @@
                   ' to other nodal variables for computing values for the current variable.'
   []
 
-  [./monomial]
+  [monomial]
     type = 'Exodiff'
     input = 'monomial.i'
     exodiff = 'monomial_out.e'

@@ -1,7 +1,7 @@
 [Tests]
   issues = '#1700'
   design = "syntax/Adaptivity/index.md syntax/Adaptivity/Markers/index.md"
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'initial_adapt.i'
     exodiff = 'initial_adapt_out.e'

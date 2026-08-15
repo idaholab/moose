@@ -3,7 +3,7 @@
   # thus the naming is the same to correspond with the differing syntax
   issues = '#5676'
   design = 'syntax/Controls/index.md'
-  [./param]
+  [param]
     # Test that all parameters with the same name change
     type = Exodiff
     input = param.i
@@ -11,7 +11,7 @@
     requirement = "The Control system shall allow multiple parameters to be changed by the parameter name alone using a tag."
   []
 
-  [./object_param]
+  [object_param]
     # Test that all objects with the same name change
     type = Exodiff
     input = object_param.i
@@ -19,7 +19,7 @@
     requirement = "The Control system shall allow multiple parameters to be changed given a tag and parameter names, given a tag assigned across input blocks."
   []
 
-  [./system_object_param]
+  [system_object_param]
     # Test that all aspects of the name may be specified using base class name
     type = Exodiff
     input = system_object_param.i
@@ -27,7 +27,7 @@
     requirement = "The Control system shall allow for a single parameter to be changes given a tag and parameter name, given a tag assigned to a single object."
   []
 
-  [./system_asterisk_param]
+  [system_asterisk_param]
     # Test that all objects with the same name change, in the same system may be changed
     type = Exodiff
     input = system_asterisk_param.i

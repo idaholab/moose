@@ -1,5 +1,5 @@
 [Tests]
-  [./coarse]
+  [coarse]
     type = CSVDiff
     heavy = true
     max_time = 1000

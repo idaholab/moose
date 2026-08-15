@@ -1,5 +1,5 @@
 [Tests]
-  [./brine]
+  [brine]
     type = CSVDiff
     input = 'brine.i'
     csvdiff = 'brine_out.csv'
@@ -8,7 +8,7 @@
     design = 'BrineFluidProperties.md'
     issues = '#6972'
   []
-  [./brine_tabulated]
+  [brine_tabulated]
     type = CSVDiff
     input = 'brine_tabulated.i'
     csvdiff = 'brine_out.csv'

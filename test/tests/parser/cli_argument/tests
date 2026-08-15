@@ -2,7 +2,7 @@
   design = 'CommandLine.md'
   issues = '#581'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'cli_arg_test.i'
     exodiff = 'out.e'

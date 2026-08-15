@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = Exodiff
     input = materialpropertyvalue.i
     exodiff = materialpropertyvalue_out.e

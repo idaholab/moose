@@ -1,5 +1,5 @@
 [Tests]
-  [./grain_growth_2D_graintracker]
+  [grain_growth_2D_graintracker]
     type = RunApp
     input = 'grain_growth_2D_graintracker.i'
     issues = '#4827'
@@ -9,7 +9,7 @@
     design = 'GrainGrowthAction.md GrainTracker.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example that uses the GrainGrowth action and tracks grains.'
   []
-  [./grain_growth_2D_random]
+  [grain_growth_2D_random]
     type = RunApp
     input = 'grain_growth_2D_random.i'
     issues = '#3834'
@@ -18,7 +18,7 @@
     design = 'GrainGrowthAction.md PolycrystalRandomIC.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example that uses the GrainGrowth action with a randomly seeded polycrystal initial condition.'
   []
-  [./grain_growth_2D_voronoi]
+  [grain_growth_2D_voronoi]
     type = RunApp
     input = 'grain_growth_2D_voronoi.i'
     issues = '#3834'
@@ -27,7 +27,7 @@
     design = 'GBEvolution.md PolycrystalVoronoi.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example built explicitly from a Voronoi tessellation polycrystal initial condition.'
   []
-  [./grain_growth_2D_voronoi_newadapt]
+  [grain_growth_2D_voronoi_newadapt]
     type = RunApp
     input = 'grain_growth_2D_voronoi_newadapt.i'
     issues = '#3834'
@@ -37,7 +37,7 @@
     design = 'GBEvolution.md PolycrystalVoronoi.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 2D grain growth example built from a Voronoi tessellation polycrystal initial condition with mesh adaptivity.'
   []
-  [./grain_growth_3D]
+  [grain_growth_3D]
     type = RunApp
     input = 'grain_growth_3D.i'
     issues = '#7200'
@@ -49,7 +49,7 @@
     design = 'GrainGrowthAction.md GrainTracker.md phase_field/Grain_Growth_Model.md'
     requirement = 'The system shall syntax check a 3D grain growth example that uses the GrainGrowth action and tracks grains.'
   []
-  [./grain_growth_3D_large]
+  [grain_growth_3D_large]
     type = RunApp
     input = '3D_6000_gr.i'
     # Only run in opt mode to avoid timeouts in dbg.

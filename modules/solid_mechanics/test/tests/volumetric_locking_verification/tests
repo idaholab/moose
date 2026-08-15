@@ -1,6 +1,6 @@
 [Tests]
   issues = '#11220'
-  [./vol_lock_2D]
+  [vol_lock_2D]
     type = Exodiff
     input = '42_node.i'
     exodiff = '42_node_out.e'
@@ -8,7 +8,7 @@
     requirement = 'The mechanics system shall correctly model the deformation of a 2D membrane with nearly incompressible material when volumetric locking correction is set to true.'
     capabilities = 'method!=dbg'
   []
-  [./no_vol_lock_2D]
+  [no_vol_lock_2D]
     type = Exodiff
     input = '42_node.i'
     exodiff = '42_node_no_vol_lock_out.e'

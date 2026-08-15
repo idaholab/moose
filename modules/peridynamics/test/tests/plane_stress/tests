@@ -1,5 +1,5 @@
 [Tests]
-  [./conventional_planestress_OSPD]
+  [conventional_planestress_OSPD]
     type = 'Exodiff'
     input = 'conventional_planestress_OSPD.i'
     exodiff = 'conventional_planestress_OSPD.e'
@@ -9,7 +9,7 @@
     design = 'ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   []
-  [./conventional_planestress_H1NOSPD]
+  [conventional_planestress_H1NOSPD]
     type = 'Exodiff'
     input = 'conventional_planestress_H1NOSPD.i'
     exodiff = 'conventional_planestress_H1NOSPD.e'
@@ -21,7 +21,7 @@
     issues = '#11561'
     allow_test_objects = true
   []
-  [./weak_planestress_H1NOSPD]
+  [weak_planestress_H1NOSPD]
     type = 'Exodiff'
     input = 'weak_planestress_H1NOSPD.i'
     exodiff = 'weak_planestress_H1NOSPD.e'

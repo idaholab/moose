@@ -1,5 +1,5 @@
 [Tests]
-  [./water_60degC]
+  [water_60degC]
     type = CSVDiff
     input = water_60degC.i
     csvdiff = water_60degC_out.csv
@@ -7,7 +7,7 @@
     issues = '#15693'
     design = 'forge.md'
   []
-  [./water_60_to_220degC]
+  [water_60_to_220degC]
     type = CSVDiff
     input = water_60_to_220degC.i
     csvdiff = water_60_to_220degC_out.csv
@@ -17,7 +17,7 @@
     # Geochemistry solver does not support recover (see #15816)
     recover = false
   []
-  [./kinetic]
+  [kinetic]
     type = CSVDiff
     input = kinetic.i
     csvdiff = kinetic_out.csv
@@ -27,7 +27,7 @@
     # Geochemistry solver does not support recover (see #15816)
     recover = false
   []
-  [./water_3]
+  [water_3]
     type = CSVDiff
     input = water_3.i
     csvdiff = water_3_out.csv
@@ -35,7 +35,7 @@
     issues = '#15693'
     design = 'forge.md'
   []
-  [./natural_reservoir]
+  [natural_reservoir]
     type = CSVDiff
     input = natural_reservoir.i
     csvdiff = natural_reservoir_out.csv
@@ -46,7 +46,7 @@
     # Geochemistry solver does not support recover (see #15816)
     recover = false
   []
-  [./reservoir_and_water_3]
+  [reservoir_and_water_3]
     type = CSVDiff
     input = reservoir_and_water_3.i
     csvdiff = reservoir_and_water_3_out.csv
@@ -57,7 +57,7 @@
     # Geochemistry solver does not support recover (see #15816)
     recover = false
   []
-  [./porous_flow]
+  [porous_flow]
     type = CSVDiff
     input = porous_flow.i
     csvdiff = porous_flow_out.csv
@@ -66,7 +66,7 @@
     issues = '#15693'
     design = 'forge.md'
   []
-  [./aquifer_geochemistry_alone]
+  [aquifer_geochemistry_alone]
     type = CSVDiff
     input = aquifer_geochemistry.i
     csvdiff = aquifer_geochemistry_out.csv

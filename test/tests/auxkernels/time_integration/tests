@@ -1,7 +1,7 @@
 [Tests]
   issues = '#5737'
   design = 'source/auxkernels/VariableTimeIntegrationAux.md'
-  [./time_integration_aux]
+  [time_integration_aux]
     type = 'Exodiff'
     input = 'time_integration.i'
     exodiff = 'time_integration_out.e'

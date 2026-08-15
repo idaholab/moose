@@ -1,15 +1,15 @@
 [Tests]
-  [./in_tree_type]
+  [in_tree_type]
     type = RunCommand
     command = "true"
     installation_type = IN_TREE
   []
-  [./installed_type]
+  [installed_type]
     type = RunCommand
     command = "true"
     installation_type = INSTALLED
   []
-  [./all_type]
+  [all_type]
     type = RunCommand
     command = "true"
     installation_type = ALL

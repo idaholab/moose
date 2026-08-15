@@ -1,10 +1,10 @@
 [Tests]
-  [./always_skipped]
+  [always_skipped]
     type = RunApp
     input = foo.i
     skip = "always skipped"
   []
-  [./needs_always_skipped]
+  [needs_always_skipped]
     type = RunApp
     input = foo.i
     prereq = always_skipped

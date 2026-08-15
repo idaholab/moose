@@ -1,15 +1,15 @@
 [Tests]
-  [./testA]
+  [testA]
     type = RunApp
     input = foo.i
     prereq = testC
   []
-  [./testB]
+  [testB]
     type = RunApp
     input = foo.i
     prereq = testA
   []
-  [./testC]
+  [testC]
     type = RunApp
     input = foo.i
     prereq = testB

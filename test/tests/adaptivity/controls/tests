@@ -1,7 +1,7 @@
 [Tests]
   issues = '#33708'
   design = 'syntax/Adaptivity/index.md'
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'control.i'
     csvdiff = 'control_out.csv'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'RunApp'
     cli_args = '--show-type'
     expect_out = "MooseTestApp"

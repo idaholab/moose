@@ -1,5 +1,5 @@
 [Tests]
-  [./except1]
+  [except1]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -9,7 +9,7 @@
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./except2]
+  [except2]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -20,7 +20,7 @@
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./except3]
+  [except3]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -30,7 +30,7 @@
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./except4]
+  [except4]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -40,7 +40,7 @@
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./except5]
+  [except5]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -50,7 +50,7 @@
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./except6]
+  [except6]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -60,7 +60,7 @@
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./add_feldspar]
+  [add_feldspar]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -70,7 +70,7 @@
     issues = '#15330'
     design = 'adding_feldspar.md'
   []
-  [./calcite_dumping_dump]
+  [calcite_dumping_dump]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -80,7 +80,7 @@
     issues = '#15330'
     design = 'calcite_buffer.md'
   []
-  [./calcite_no_dumping]
+  [calcite_no_dumping]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -92,7 +92,7 @@
     issues = '#15330'
     design = 'calcite_buffer.md'
   []
-  [./changing_fugacity_calcite]
+  [changing_fugacity_calcite]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -102,7 +102,7 @@
     issues = '#15330'
     design = 'changing_fugacity_with_calcite.md'
   []
-  [./changing_pH_ferric_hydroxide]
+  [changing_pH_ferric_hydroxide]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -112,7 +112,7 @@
     issues = '#15330'
     design = 'changing_pH_iron.md'
   []
-  [./cooling]
+  [cooling]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -122,7 +122,7 @@
     issues = '#15330'
     design = 'cooling_feldspar.md'
   []
-  [./dissolution_pyrite_1]
+  [dissolution_pyrite_1]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -132,7 +132,7 @@
     issues = '#15330'
     design = 'adding_pyrite.md'
   []
-  [./dissolution_pyrite_2]
+  [dissolution_pyrite_2]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -143,7 +143,7 @@
     issues = '#15330'
     design = 'adding_pyrite.md'
   []
-  [./mixing_seawater_step1]
+  [mixing_seawater_step1]
     type = RunApp
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -204,7 +204,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'pickup.md'
   []
-  [./mixing_seawater_step2]
+  [mixing_seawater_step2]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -215,7 +215,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'pickup.md'
   []
-  [./mixing]
+  [mixing]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -226,7 +226,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'pickup.md'
   []
-  [./seawater_evaporation_flow_through]
+  [seawater_evaporation_flow_through]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -236,7 +236,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'flow_through.md'
   []
-  [./seawater_evaporation_no_flow_through]
+  [seawater_evaporation_no_flow_through]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -246,7 +246,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'flow_through.md'
   []
-  [./simple]
+  [simple]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -257,7 +257,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./simple_no_action]
+  [simple_no_action]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -269,7 +269,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   []
-  [./flushing_equilibrium_at70degC]
+  [flushing_equilibrium_at70degC]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -279,7 +279,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'flush.md'
   []
-  [./flushing]
+  [flushing]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

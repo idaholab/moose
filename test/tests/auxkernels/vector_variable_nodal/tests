@@ -4,7 +4,7 @@
 [Tests]
   issues = '#16076'
   design = 'VectorVariableMagnitudeAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'vector_variable_nodal.i'
     exodiff = 'vector_variable_nodal_out.e'

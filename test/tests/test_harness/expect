@@ -1,11 +1,11 @@
 [Tests]
-  [./no_expect_err_pattern]
+  [no_expect_err_pattern]
     type = RunException
     input = bad_kernel.i
     expect_err = 'Wrong Error \w+'
   []
 
-  [./no_expect_err_literal]
+  [no_expect_err_literal]
     type = RunException
     input = bad_kernel.i
     expect_err = 'Wrong Error'
@@ -19,26 +19,26 @@
     expect_exit_code = 2
   []
 
-  [./no_expect_out_pattern]
+  [no_expect_out_pattern]
     type = RunApp
     input = good.i
     expect_out = 'Wrong Output \w+'
   []
 
-  [./no_expect_out_literal]
+  [no_expect_out_literal]
     type = RunApp
     input = good.i
     expect_out = 'Wrong Output'
     match_literal = true
   []
 
-  [./absent_out_pattern]
+  [absent_out_pattern]
     type = RunApp
     input = good.i
     absent_out = '\w+ Converged!'
   []
 
-  [./absent_out_literal]
+  [absent_out_literal]
     type = RunApp
     input = good.i
     absent_out = 'Solve Converged!'

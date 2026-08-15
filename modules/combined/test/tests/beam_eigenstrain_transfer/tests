@@ -1,9 +1,9 @@
 [Tests]
-  [./transfer]
+  [transfer]
     design = 'MultiAppUserObjectTransfer.md LineValueSampler.md'
     issues = '#10313'
     requirement = 'The system shall use transfer values from multiple sub applications to an auxvariable in the parent action'
-    [./test]
+    [test]
       type = Exodiff
       input = 'parent_uo_transfer.i'
       exodiff = 'parent_uo_transfer_out.e'
@@ -11,14 +11,14 @@
       # Beam moves and line value sampler ends up getting values outside of sampled points
       allow_warnings = true
     []
-    [./error_1]
+    [error_1]
       type = RunException
       input = 'subapp1_uo_transfer.i'
       cli_args = "VectorPostprocessors/axial_str/end_point='0.5 0 0' Outputs/csv=false Outputs/exodus=false"
       expect_err = 'LineValueSampler: `start_point` and `end_point` must be different.'
       detail = 'and LineValueSampler shall report an error if the line segment provided as input has zero length.'
     []
-    [./error_2]
+    [error_2]
       type = RunException
       input = 'parent_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_2.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
@@ -28,7 +28,7 @@
                     ' are provided as input to the sampler when it is used with'
                     ' MultiAppUserObjectTransfer.'
     []
-    [./error_3]
+    [error_3]
       type = RunException
       input = 'parent_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_3.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
@@ -36,7 +36,7 @@
       detail = 'and LineValueSampler shall report an error if sorting method'
                     ' is not set to `id` when it is used with MultiAppUserObjectTransfer.'
     []
-    [./error_4]
+    [error_4]
       type = RunException
       input = 'parent_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_4.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"

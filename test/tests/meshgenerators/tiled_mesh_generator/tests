@@ -1,5 +1,5 @@
 [Tests]
-  [./tiled_mesh_generator_test]
+  [tiled_mesh_generator_test]
     type = 'Exodiff'
     input = 'tiled_mesh_generator.i'
     cli_args = '--mesh-only'

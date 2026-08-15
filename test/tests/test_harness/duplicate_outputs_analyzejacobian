@@ -3,11 +3,11 @@
   # race condition checks to be skipped
   parallel_scheduling = true
 
-  [./a]
+  [a]
     type = 'AnalyzeJacobian'
     input = 'good.i'
   []
-  [./b]
+  [b]
     type = 'AnalyzeJacobian'
     input = 'good.i'
   []

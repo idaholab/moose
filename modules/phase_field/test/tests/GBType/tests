@@ -1,5 +1,5 @@
 [Tests]
-  [./phase1]
+  [phase1]
     type = 'Exodiff'
     input = 'GB_Type_Phase1.i'
     exodiff = 'GB_Type_Phase1_out.e'
@@ -7,7 +7,7 @@
     design = 'ComputeGBMisorientationType.md'
     requirement = 'The system shall output GB type for all GBs.'
   []
-  [./phase2]
+  [phase2]
     type = 'Exodiff'
     input = 'GB_Type_Phase2.i'
     exodiff = 'GB_Type_Phase2_out.e'

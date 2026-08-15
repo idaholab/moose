@@ -1,7 +1,7 @@
 [Tests]
   issues = "#1699"
   design = "syntax/Adaptivity/index.md"
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'max_h_level.i'
     exodiff = 'max_h_level_out.e-s003'

@@ -2,7 +2,7 @@
   issues = '#2514'
   design = 'OrientedBoxMarker.md'
 
-  [./obm]
+  [obm]
     type = 'Exodiff'
     input = 'obm.i'
     exodiff = 'obm_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./stvenantkirchhoff]
+  [stvenantkirchhoff]
     type = RunException
     input = stvenantkirchhoff.i
     expect_err = 'ComputeStVenantKirchhoffStress requires an isotropic elasticity'
@@ -7,7 +7,7 @@
     issues = '#17472'
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
   []
-  [./simo_hughes_j2_small_kinematics]
+  [simo_hughes_j2_small_kinematics]
     type = RunException
     input = '../correctness/hyperelastic_J2_plastic.i'
     cli_args = 'GlobalParams/large_kinematics=false'

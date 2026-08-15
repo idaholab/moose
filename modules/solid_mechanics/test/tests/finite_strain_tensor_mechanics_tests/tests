@@ -1,6 +1,6 @@
 [Tests]
   design = 'StressDivergenceTensors.md'
-  [./rotation_test]
+  [rotation_test]
     type = 'Exodiff'
     input = 'elastic_rotation.i'
     exodiff = 'elastic_rotation_out.e'
@@ -10,7 +10,7 @@
     rel_err = 3e-5
   []
 
-  [./patch_test]
+  [patch_test]
     type = 'Exodiff'
     input = 'finite_strain_patch.i'
     exodiff = 'finite_strain_patch_out.e'

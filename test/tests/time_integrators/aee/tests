@@ -1,7 +1,7 @@
 [Tests]
   design = 'AB2PredictorCorrector.md'
   issues = '#1288'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'aee.i'
     exodiff = 'aee_out.e'

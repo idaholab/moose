@@ -1,7 +1,7 @@
 [Tests]
   design = "Axisymmetric2D3DSolutionFunction.md"
   issues = "#5120"
-  [./axisymmetric_2d3d_solution_function_2d]
+  [axisymmetric_2d3d_solution_function_2d]
     type = 'Exodiff'
     input = '2d.i'
     exodiff = '2d_out.e'
@@ -9,7 +9,7 @@
                    'produce a solution file for use as the source solution which is then '
                    'mapped between cylindrical and 3D cartesian coordinates.'
   []
-  [./axisymmetric_2d3d_solution_function_3dy]
+  [axisymmetric_2d3d_solution_function_3dy]
     type = 'Exodiff'
     input = '3dy.i'
     exodiff = '3dy_out.e'
@@ -17,7 +17,7 @@
     requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
                    'onto a full 3D mesh whose axis of symmetry is the y-axis.'
   []
-  [./axisymmetric_2d3d_solution_function_3dy_scale]
+  [axisymmetric_2d3d_solution_function_3dy_scale]
     type = 'Exodiff'
     input = '3dy.i'
     cli_args = 'Mesh/file=3dy_scale.e Functions/soln_func_temp/axial_dimension_ratio=2.0 Functions/soln_func_disp_x/axial_dimension_ratio=2.0 Functions/soln_func_disp_y/axial_dimension_ratio=2.0 Functions/soln_func_disp_y/scale_factor=2.0 Functions/soln_func_disp_z/axial_dimension_ratio=2.0 Outputs/file_base=3dy_scale_out'
@@ -27,7 +27,7 @@
                    'onto a full 3D mesh whose axis of symmetry is the y-axis while stretching '
                    'the axial dimension and scaling the mapped axial displacement.'
   []
-  [./axisymmetric_2d3d_solution_function_3dz]
+  [axisymmetric_2d3d_solution_function_3dz]
     type = 'Exodiff'
     input = '3dy.i'
     cli_args = "Mesh/file=3dz.e Functions/soln_func_temp/3d_axis_point2='0 0 1' Functions/soln_func_disp_x/3d_axis_point2='0 0 1' Functions/soln_func_disp_y/3d_axis_point2='0 0 1' Functions/soln_func_disp_z/3d_axis_point2='0 0 1' AuxKernels/hoop_stress/point2='0 0 1' Outputs/file_base=3dz_out"
@@ -36,7 +36,7 @@
     requirement = 'The system shall map a 2D axisymmetric temperature and displacement solution '
                    'onto a full 3D mesh whose axis of symmetry is the z-axis.'
   []
-  [./axisymmetric_2d3d_solution_function_3dz_scale]
+  [axisymmetric_2d3d_solution_function_3dz_scale]
     type = 'Exodiff'
     input = '3dy.i'
     cli_args = "Mesh/file=3dz_scale.e Functions/soln_func_temp/3d_axis_point2='0 0 1' Functions/soln_func_temp/axial_dimension_ratio=2.0 Functions/soln_func_disp_x/3d_axis_point2='0 0 1' Functions/soln_func_disp_x/axial_dimension_ratio=2.0 Functions/soln_func_disp_y/3d_axis_point2='0 0 1' Functions/soln_func_disp_y/axial_dimension_ratio=2.0 Functions/soln_func_disp_z/3d_axis_point2='0 0 1' Functions/soln_func_disp_z/axial_dimension_ratio=2.0 Functions/soln_func_disp_z/scale_factor=2.0 AuxKernels/hoop_stress/point2='0 0 1' Outputs/file_base=3dz_scale_out"

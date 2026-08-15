@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'file_mesh_skip_partitioning.i'
     exodiff = 'file_mesh_skip_partitioning_out.e'

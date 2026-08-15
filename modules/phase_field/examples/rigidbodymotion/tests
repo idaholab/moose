@@ -1,5 +1,5 @@
 [Tests]
-  [./AC_CH_Multigrain]
+  [AC_CH_Multigrain]
     type = RunApp
     input = 'AC_CH_Multigrain.i'
     issues = '#6725'
@@ -14,7 +14,7 @@
     design = 'MultiGrainRigidBodyMotion.md'
     requirement = 'The system shall syntax check an example of rigid body motion for multiple grains coupled to Cahn-Hilliard and Allen-Cahn evolution.'
   []
-  [./AC_CH_advection_constforce_rect]
+  [AC_CH_advection_constforce_rect]
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
     issues = '#5279'
@@ -29,7 +29,7 @@
     design = 'SingleGrainRigidBodyMotion.md ConstantGrainForceAndTorque.md'
     requirement = 'The system shall syntax check an example of advection of a single grain under a constant applied force, coupled to Cahn-Hilliard and Allen-Cahn evolution.'
   []
-  [./grain_forcedensity_ext]
+  [grain_forcedensity_ext]
     type = RunApp
     input = 'grain_forcedensity_ext.i'
     issues = '#5279'

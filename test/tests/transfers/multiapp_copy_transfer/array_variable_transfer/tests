@@ -2,7 +2,7 @@
   issues = '#14391'
   design = 'MultiAppCopyTransfer.md'
 
-  [./test]
+  [test]
     type = Exodiff
     input = parent.i
     exodiff = 'parent_out.e parent_out_sub0.e'

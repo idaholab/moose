@@ -2,14 +2,14 @@
   issues = '#4489'
   design = 'syntax/Materials/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
 
     requirement = 'The system shall be capable of outputting material properties through auxiliary field variables.'
   []
-  [./except1]
+  [except1]
     type = 'RunException'
     input = test.i
     prereq = test

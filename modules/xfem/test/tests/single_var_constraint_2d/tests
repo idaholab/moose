@@ -1,5 +1,5 @@
 [Tests]
-  [./propagating_1field]
+  [propagating_1field]
     type = Exodiff
     input = propagating_1field.i
     exodiff = 'propagating_1field_out.e propagating_1field_out.e-s002'
@@ -10,7 +10,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./propagating_2field_1constraint]
+  [propagating_2field_1constraint]
     type = Exodiff
     input = propagating_2field_1constraint.i
     exodiff = 'propagating_2field_1constraint_out.e propagating_2field_1constraint_out.e-s002'
@@ -21,7 +21,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./propagating_2field_2constraint]
+  [propagating_2field_2constraint]
     type = Exodiff
     input = propagating_2field_2constraint.i
     exodiff = 'propagating_2field_2constraint_out.e propagating_2field_2constraint_out.e-s002'
@@ -32,7 +32,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./stationary_equal]
+  [stationary_equal]
     type = Exodiff
     input = stationary_equal.i
     exodiff = 'stationary_equal_out.e'
@@ -43,7 +43,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./stationary_fluxjump]
+  [stationary_fluxjump]
     type = Exodiff
     input = stationary_fluxjump.i
     exodiff = 'stationary_fluxjump_out.e'
@@ -54,7 +54,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./stationary_fluxjump_func]
+  [stationary_fluxjump_func]
     type = Exodiff
     input = stationary_fluxjump_func.i
     exodiff = 'stationary_fluxjump_func_out.e'
@@ -65,7 +65,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#13756'
   []
-  [./stationary_jump]
+  [stationary_jump]
     type = Exodiff
     input = stationary_jump.i
     exodiff = 'stationary_jump_out.e'
@@ -76,7 +76,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./stationary_jump_func]
+  [stationary_jump_func]
     type = Exodiff
     input = stationary_jump_func.i
     exodiff = 'stationary_jump_func_out.e'
@@ -87,7 +87,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#13756'
   []
-  [./stationary_jump_fluxjump]
+  [stationary_jump_fluxjump]
     type = Exodiff
     input = stationary_jump_fluxjump.i
     exodiff = 'stationary_jump_fluxjump_out.e'
@@ -99,7 +99,7 @@
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   []
-  [./equal_value]
+  [equal_value]
     type = Exodiff
     input = equal_value.i
     exodiff = 'equal_value_out.e'

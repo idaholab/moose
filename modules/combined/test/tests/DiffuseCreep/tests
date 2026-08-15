@@ -1,5 +1,5 @@
 [Tests]
-  [./strain]
+  [strain]
     type = 'Exodiff'
     input = 'strain.i'
     exodiff = 'strain_out.e'
@@ -8,7 +8,7 @@
     design = 'FluxBasedStrainIncrement.md SumTensorIncrements.md'
     issues = '#6612'
   []
-  [./strain_gb_relax]
+  [strain_gb_relax]
     type = 'Exodiff'
     input = 'strain_gb_relax.i'
     exodiff = 'strain_gb_relax_out.e'
@@ -17,7 +17,7 @@
     design = 'GBRelaxationStrainIncrement.md SumTensorIncrements.md'
     issues = '#6612'
   []
-  [./stress]
+  [stress]
     type = 'Exodiff'
     input = 'stress.i'
     exodiff = 'stress_out.e'
@@ -28,7 +28,7 @@
     design = 'FluxBasedStrainIncrement.md ComputeStrainIncrementBasedStress.md'
     issues = '#6612'
   []
-  [./stress_flux_n_gb_relax]
+  [stress_flux_n_gb_relax]
     type = 'Exodiff'
     input = 'stress_flux_n_gb_relax.i'
     exodiff = 'stress_flux_n_gb_relax_out.e'
@@ -39,7 +39,7 @@
     design = 'FluxBasedStrainIncrement.md GBRelaxationStrainIncrement.md SumTensorIncrements.md'
     issues = '#6612'
   []
-  [./stress_based_chem_pot]
+  [stress_based_chem_pot]
     type = 'Exodiff'
     input = 'stress_based_chem_pot.i'
     exodiff = 'stress_based_chem_pot_out.e'
@@ -50,7 +50,7 @@
     design = 'StressBasedChemicalPotential.md'
     issues = '#6612'
   []
-  [./variable_base_eigen_strain]
+  [variable_base_eigen_strain]
     type = 'Exodiff'
     input = 'variable_base_eigen_strain.i'
     exodiff = 'variable_base_eigen_strain_out.e'

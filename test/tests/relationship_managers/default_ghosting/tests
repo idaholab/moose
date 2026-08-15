@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'RunApp'
     input = 'default_ghosting.i'
     expect_out = "Default:\s+libMesh::"

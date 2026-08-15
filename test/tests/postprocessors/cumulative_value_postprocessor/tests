@@ -2,7 +2,7 @@
   issues = '#7976'
   design = 'CumulativeValuePostprocessor.md'
 
-  [./cumulative_value_postprocessor]
+  [cumulative_value_postprocessor]
     type = 'CSVDiff'
     input = 'cumulative_value_postprocessor.i'
     csvdiff = 'cumulative_value_postprocessor_out.csv'

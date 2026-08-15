@@ -1,7 +1,7 @@
 [Tests]
   issues = '#3036 #7350'
   design = 'cgfe.md'
-  [./bump]
+  [bump]
     type = 'Exodiff'
     input = 'bump.i'
     exodiff = 'bump_out.e'

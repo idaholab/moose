@@ -1,7 +1,7 @@
 [Tests]
   design = 'fsi_acoustics.md'
   issues = '#15712'
-  [./1D_fluid_test]
+  [1D_fluid_test]
     type = 'CSVDiff'
     input = '1D_fluid_only.i'
     csvdiff = '1D_fluid_only_out.csv'

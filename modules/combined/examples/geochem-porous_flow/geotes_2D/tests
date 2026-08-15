@@ -1,5 +1,5 @@
 [Tests]
-  [./aquifer_equilibrium]
+  [aquifer_equilibrium]
     type = CSVDiff
     input = aquifer_equilibrium.i
     csvdiff = aquifer_equilibrium_out.csv
@@ -7,7 +7,7 @@
     issues = '#15693'
     design = 'geotes_2D.md'
   []
-  [./aquifer_un_quartz_equilibrium]
+  [aquifer_un_quartz_equilibrium]
     type = CSVDiff
     input = aquifer_un_quartz_equilibrium.i
     csvdiff = aquifer_un_quartz_equilibrium_out.csv
@@ -15,7 +15,7 @@
     issues = '#15693'
     design = 'geotes_2D.md'
   []
-  [./aquifer_geochemistry_only]
+  [aquifer_geochemistry_only]
     type = 'CSVDiff'
     input = 'aquifer_geochemistry.i'
     csvdiff = 'aquifer_geochemistry_out.csv'
@@ -24,7 +24,7 @@
     issues = '#15693'
     design = 'geotes_2D.md'
   []
-  [./aquifer_un_quartz_geochemistry_only]
+  [aquifer_un_quartz_geochemistry_only]
     type = 'CSVDiff'
     input = 'aquifer_un_quartz_geochemistry.i'
     csvdiff = 'aquifer_un_quartz_geochemistry_out.csv'
@@ -33,7 +33,7 @@
     issues = '#15693'
     design = 'geotes_2D.md'
   []
-  [./porous_flow]
+  [porous_flow]
     type = 'Exodiff'
     input = 'porous_flow.i'
     exodiff = 'porous_flow_out_react0.e'
@@ -43,7 +43,7 @@
     issues = '#15693'
     design = 'geotes_2D.md'
   []
-  [./exchanger]
+  [exchanger]
     type = CSVDiff
     input = exchanger.i
     csvdiff = exchanger_2steps.csv
@@ -54,7 +54,7 @@
     issues = '#15693'
     design = 'geotes_2D.md'
   []
-  [./exchanger_un_quartz]
+  [exchanger_un_quartz]
     type = CSVDiff
     input = exchanger_un_quartz.i
     csvdiff = exchanger_un_quartz_2steps.csv

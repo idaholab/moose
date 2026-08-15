@@ -1,5 +1,5 @@
 [Tests]
-  [./bulk_constraints]
+  [bulk_constraints]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -26,7 +26,7 @@ NaCl;  molality = 0.02402mol/kg(solvent water);  free_conc = 1184mg/kg(soln);  a
     issues = '#15641'
     design = 'gwb_diff.md'
   []
-  [./ph_constraint]
+  [ph_constraint]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -43,7 +43,7 @@ CaHCO3+;  molality = 0.001048mol/kg(solvent water);  free_conc = 105.6mg/kg(soln
     issues = '#15641'
     design = 'gwb_diff.md'
   []
-  [./seawater_no_precip]
+  [seawater_no_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -117,7 +117,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7276767V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md seawater.md'
   []
-  [./seawater_precip]
+  [seawater_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -164,7 +164,7 @@ CaHCO3+;  molality = 2.69e-05mol/kg(solvent water);  free_conc = 2.624mg/kg(soln
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md seawater.md'
   []
-  [./amazon]
+  [amazon]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -228,7 +228,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md amazon.md'
   []
-  [./amazon_with_minerals]
+  [amazon_with_minerals]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -285,7 +285,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md amazon.md'
   []
-  [./red_sea_no_precip]
+  [red_sea_no_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -371,7 +371,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md red_sea.md'
   []
-  [./red_sea_precip]
+  [red_sea_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -455,7 +455,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md red_sea.md'
   []
-  [./HCl]
+  [HCl]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -466,7 +466,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'HCl.md GeochemistryTimeIndependentReactor.md'
   []
-  [./HCl_no_action]
+  [HCl_no_action]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -478,7 +478,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'HCl.md GeochemistryTimeIndependentReactor.md'
   []
-  [./except1]
+  [except1]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -490,7 +490,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   []
-  [./except2]
+  [except2]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -502,7 +502,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   []
-  [./except3]
+  [except3]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -514,7 +514,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   []
-  [./except4]
+  [except4]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -526,7 +526,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   []
-  [./except5]
+  [except5]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -538,7 +538,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   []
-  [./except6]
+  [except6]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'
@@ -550,7 +550,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   []
-  [./except7]
+  [except7]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'installation_type=in_tree'

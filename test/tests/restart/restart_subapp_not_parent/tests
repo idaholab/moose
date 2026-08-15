@@ -3,7 +3,7 @@
   design = 'DataIO.md Restartable.md'
 
   # only parent, 0 <= t <= 4
-  [./complete_solve_no_subapp]
+  [complete_solve_no_subapp]
     type = 'Exodiff'
     input = 'complete_solve_no_subapp.i'
     exodiff = 'complete_solve_no_subapp.e'
@@ -12,7 +12,7 @@
   []
   # split into sub solve 0 <= t <= 2 && parent 2 <= t <= 4
   # also write cp files for restart case
-  [./two_step_solve_parent]
+  [two_step_solve_parent]
     type = 'Exodiff'
     input = 'two_step_solve_parent.i'
     exodiff = 'two_step_solve_parent.e'
@@ -24,7 +24,7 @@
   []
   # split into sub solve 0 <= t <= 2 && parent 2 <= t <= 4
   # this time restart the sub but _not_ the parent
-  [./two_step_solve_parent_restart]
+  [two_step_solve_parent_restart]
     type = 'Exodiff'
     input = 'two_step_solve_parent.i'
     exodiff = 'two_step_solve_parent_restart.e'

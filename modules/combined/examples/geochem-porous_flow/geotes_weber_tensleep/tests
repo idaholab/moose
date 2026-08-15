@@ -1,5 +1,5 @@
 [Tests]
-  [./eqm_model_25degC]
+  [eqm_model_25degC]
     type = 'RunApp'
     input = 'eqm_model_25degC_no_precip.i'
     expect_out = 'Minerals:
@@ -23,7 +23,7 @@ Goethite = 1.5*H2O - 1.875*H+ + 0.125*SO4-- + 1*Fe++ - 0.125*HS-;  log10K = 9.30
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   []
-  [./eqm_model_25_to_92degC]
+  [eqm_model_25_to_92degC]
     type = 'RunApp'
     input = 'eqm_model_25_to_92degC.i'
     expect_out = 'Basis Species:
@@ -51,7 +51,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   []
-  [./scaling]
+  [scaling]
     type = 'CSVDiff'
     input = 'scaling.i'
     csvdiff = 'scaling_out.csv'
@@ -60,7 +60,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   []
-  [./aquifer_geochemistry_only]
+  [aquifer_geochemistry_only]
     type = 'CSVDiff'
     input = 'aquifer_geochemistry.i'
     csvdiff = 'aquifer_geochemistry_out.csv'
@@ -70,7 +70,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   []
-  [./porous_flow]
+  [porous_flow]
     type = 'Exodiff'
     input = 'porous_flow.i'
     exodiff = 'porous_flow_out_react0.e'
@@ -81,7 +81,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   []
-  [./whole_sim]
+  [whole_sim]
     type = 'CSVDiff'
     input = 'exchanger.i'
     csvdiff = 'exchanger_out_porous_flow_sim0_react0.csv'

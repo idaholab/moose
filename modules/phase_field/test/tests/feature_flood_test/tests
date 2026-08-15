@@ -1,7 +1,7 @@
 [Tests]
   issues = '#6711'
   design = 'FeatureFloodCount.md'
-  [./spiral]
+  [spiral]
     type = CSVDiff
     input = parallel_feature_count.i
     csvdiff = parallel_feature_count_out.csv
@@ -11,7 +11,7 @@
     requirement = 'The system shall correctly identify and count a single spiral-shaped feature read from an image.'
   []
 
-  [./boxes]
+  [boxes]
     type = CSVDiff
     input = parallel_feature_count.i
     csvdiff = boxes_out.csv
@@ -22,7 +22,7 @@
     requirement = 'The system shall correctly identify and count multiple box-shaped features read from an image.'
   []
 
-  [./l_shapes]
+  [l_shapes]
     type = CSVDiff
     input = parallel_feature_count.i
     csvdiff = l_shapes_out.csv

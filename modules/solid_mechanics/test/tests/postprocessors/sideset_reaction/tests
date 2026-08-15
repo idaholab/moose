@@ -1,5 +1,5 @@
 [tests]
-  [./sideset_force]
+  [sideset_force]
     type = 'CSVDiff'
     input = 'sideset_reaction.i'
     csvdiff = 'sideset_reaction_out.csv'

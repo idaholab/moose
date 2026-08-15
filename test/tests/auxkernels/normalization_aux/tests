@@ -1,6 +1,6 @@
 [Tests]
   design = 'auxkernels/NormalizationAux.md'
-  [./normalization_aux]
+  [normalization_aux]
     type = 'Exodiff'
     input = 'normalization_aux.i'
     exodiff = 'normalization_aux_out.e'
@@ -8,7 +8,7 @@
     requirement = "The system shall include the ability to normalize a variable based on a Postprocessor value."
     issues = '#4281'
   []
-  [./normalization_aux_shift]
+  [normalization_aux_shift]
     type = 'Exodiff'
     input = 'normalization_aux.i'
     exodiff = 'normalization_aux_shift.e'

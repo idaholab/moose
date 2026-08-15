@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'ad_simple_diffusion.i'
     exodiff = 'ad_simple_diffusion_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = Exodiff
     input = nearest_point_average.i
     exodiff = nearest_point_average_out.e

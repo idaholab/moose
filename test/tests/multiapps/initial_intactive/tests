@@ -1,5 +1,5 @@
 [Tests]
-  [./initial_inactive]
+  [initial_inactive]
     type = 'Exodiff'
     input = 'parent.i'
     exodiff = 'parent_out_sub0.e'
