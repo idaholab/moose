@@ -23,6 +23,7 @@ import subprocess
 import sys
 import typing
 from collections import defaultdict, namedtuple
+from enum import Enum
 from socket import gethostname
 from typing import TYPE_CHECKING, Optional, Tuple
 
@@ -33,6 +34,8 @@ from FactorySystem.Warehouse import Warehouse
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
+
+    from TestHarness.schedulers.Job import Job
 
 from TestHarness import RaceChecker, util
 from TestHarness.capability_util import (
@@ -416,7 +419,7 @@ class TestHarness:
         self.factory.loadPlugins(dirs, "testers", "IS_TESTER")
 
         self.parse_errors = []
-        self.finished_jobs: list = []
+        self.finished_jobs: list[Job] = []
         self.num_passed = 0
         self.num_failed = 0
         self.num_skipped = 0
@@ -600,7 +603,7 @@ class TestHarness:
                     and name not in AUGMENTED_CAPABILITY_NAMES
                 ):
                     util.errorExit(
-                        "--ignore-capability: Unknown " f"capability '{name}'",
+                        f"--ignore-capability: Unknown capability '{name}'",
                         colored=options.colored,
                     )
 
@@ -697,7 +700,6 @@ class TestHarness:
                                 and os.path.abspath(os.path.join(dirpath, file))
                                 not in launched_tests
                             ):
-
                                 if self.notMySpecFile(dirpath, file):
                                     continue
 
@@ -757,7 +759,6 @@ class TestHarness:
 
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
-
             self.augmentParameters(file, tester, testroot_params)
             if testroot_params.get("caveats"):
                 # Show what executable we are using if using a different testroot file
@@ -990,16 +991,24 @@ class TestHarness:
         jobs = sorted(jobs, key=lambda job: job.getTiming(), reverse=True)
         return jobs[0:num]
 
-    def getHeaviestJobs(self, num: int) -> list:
-        """
-        Get the heaviest jobs by memory, if available
-        """
+    class MemoryType(Enum):
+        """A type of memory (cpu or GPU)."""
+
+        CPU = 0
+        GPU = 1
+
+    def getHeaviestJobs(self, num: int, memory_type: MemoryType) -> list:
+        """Get the heaviest jobs by memory, if available."""
         jobs = [j for j in self.finished_jobs if (not j.isSkip() and j.getMaxMemory())]
-        jobs = sorted(
-            jobs,
-            key=lambda job: job.getMaxMemory().cpu / job.getSlots(),
-            reverse=True,
-        )
+
+        def key(job):
+            max_memory = job.getMaxMemory()
+            numer = (
+                max_memory.cpu if memory_type == self.MemoryType.CPU else max_memory.gpu
+            )
+            return numer / job.getSlots()
+
+        jobs = sorted(jobs, key=key, reverse=True)
         return jobs[0:num]
 
     def getLongestFolders(self, num: int) -> list[typing.Tuple[str, float]]:
@@ -1062,8 +1071,8 @@ class TestHarness:
                 flush=True,
             )
 
-        cpu_memory = None if self.shouldOutputCPUMemory() else False
-        gpu_memory = None if self.shouldOutputGPUMemory() else False
+        cpu_memory = self.shouldOutputCPUMemory()
+        gpu_memory = self.shouldOutputGPUMemory()
 
         # Longest jobs and longest folders
         if not self.options.dry_run and self.options.longest_jobs:
@@ -1080,19 +1089,33 @@ class TestHarness:
                     )
 
             # Heaviest jobs by memory
-            if self.shouldOutputCPUMemory() and (
-                heaviest_jobs := self.getHeaviestJobs(self.options.longest_jobs)
-            ):
-                print(
-                    header(f"{self.options.longest_jobs} Heaviest Jobs (memory/slot)")
+            for condition, memory_type in [
+                (cpu_memory, self.MemoryType.CPU),
+                (gpu_memory, self.MemoryType.GPU),
+            ]:
+                if not condition:
+                    continue
+
+                heaviest_jobs = self.getHeaviestJobs(
+                    self.options.longest_jobs, memory_type
                 )
+                if not heaviest_jobs:
+                    continue
+
+                print(
+                    header(
+                        f"{self.options.longest_jobs} Heaviest {memory_type.name} "
+                        "Jobs (memory/slot)"
+                    )
+                )
+
                 for job in heaviest_jobs:
                     print_status(
                         job,
                         timing=True,
                         caveats=True,
-                        cpu_memory=True,
-                        gpu_memory=(gpu_memory is True),
+                        cpu_memory=cpu_memory,
+                        gpu_memory=gpu_memory,
                         memory_per_slot=True,
                     )
 
@@ -1135,12 +1158,12 @@ class TestHarness:
         # Final summary for the bottom
         summary = ""
         if self.options.dry_run:
-            summary += f'Processed {self.num_passed + self.num_skipped} tests in {stats["time_total"]:.1f} seconds.\n'
+            summary += f"Processed {self.num_passed + self.num_skipped} tests in {stats['time_total']:.1f} seconds.\n"
             summary += f"<b>{self.num_passed} would run</b>, <b>{self.num_skipped} would be skipped</b>"
         else:
-            summary += f'Ran {self.num_passed + self.num_failed} tests in {stats["time_total"]:.1f} seconds.'
-            summary += f' Average test time {stats["time_average"]:.1f} seconds,'
-            summary += f' maximum test time {stats["time_max"]:.1f} seconds.\n'
+            summary += f"Ran {self.num_passed + self.num_failed} tests in {stats['time_total']:.1f} seconds."
+            summary += f" Average test time {stats['time_average']:.1f} seconds,"
+            summary += f" maximum test time {stats['time_max']:.1f} seconds.\n"
 
             # Get additional results from the scheduler
             scheduler_summary = self.scheduler.appendResultFooter(stats)
@@ -1914,10 +1937,22 @@ class TestHarness:
             help=("The maximum percent CPU to allow for a job, per slot"),
         )
         resourcesgroup.add_argument(
+            "--max-cpu-memory-per-slot",
+            nargs=1,
+            type=float,
+            help="The maximum CPU memory to allow for a job in MB, per slot",
+        )
+        resourcesgroup.add_argument(
+            "--max-gpu-memory-per-slot",
+            nargs=1,
+            type=float,
+            help="The maximum GPU memory to allow for a job in MB, per slot",
+        )
+        resourcesgroup.add_argument(
             "--max-memory-per-slot",
             nargs=1,
             type=float,
-            help="The maximum memory to allow for a job in MB, per slot",
+            help="The maximum CPU memory to allow for a job in MB, per slot (deprecated, use --max-cpu-memory-per-slot)",
         )
         resourcesgroup.add_argument(
             "--no-cpu-tracking",
@@ -1928,6 +1963,11 @@ class TestHarness:
             "--no-memory-tracking",
             action="store_true",
             help="Disable all memory tracking of jobs",
+        )
+        resourcesgroup.add_argument(
+            "--no-gpu-memory-tracking",
+            action="store_true",
+            help="Disable all GPU memory tracking of jobs",
         )
 
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
@@ -2139,6 +2179,17 @@ class TestHarness:
             )
             opts.minimal_capabilities = True
 
+        # Set --max-cpu-memory-per-slot from deprecated --max-memory-per-slot
+        if (
+            opts.max_memory_per_slot is not None
+            and opts.max_cpu_memory_per_slot is None
+        ):
+            opts.max_cpu_memory_per_slot = opts.max_memory_per_slot
+            print_info(
+                f"Setting --max-cpu-memory-per-slot={opts.max_cpu_memory_per_slot} "
+                "from deprecated --max-memory-per-slot"
+            )
+
         # Convert extend action params to lists if they have a single value
         for name in ["ignore_capability"]:
             if (value := getattr(opts, name)) is not None and isinstance(value, str):
@@ -2157,6 +2208,10 @@ class TestHarness:
 
     def getOptions(self):
         return self.options
+
+    def isGPUComputeDevice(self) -> bool:
+        """Whether or not the set --compute-device includes GPUs."""
+        return self.options.compute_device in ["cuda"]
 
     # Helper tuple for storing information about a cluster
     HPCCluster = namedtuple("HPCCluster", ["scheduler", "apptainer_modules", "srun"])
