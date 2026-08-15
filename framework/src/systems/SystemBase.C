@@ -1471,7 +1471,7 @@ SystemBase::needSolutionState(const unsigned int state,
   if (hasSolutionState(state, iteration_type))
     return;
 
-  auto & solution_states = _solution_states[static_cast<unsigned short>(iteration_type)];
+  auto & solution_states = getSolutionStates(iteration_type);
   solution_states.resize(state + 1);
 
   // The 0-th (current) solution state is owned by libMesh
