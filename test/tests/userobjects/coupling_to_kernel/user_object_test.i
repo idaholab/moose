@@ -15,33 +15,33 @@
     type = MTUserObject
     scalar = 2
     vector = '9 7 5'
-  [../]
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = -2
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = x*x
-  [../]
+  []
 []
 
 [Variables]
   [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   # this kernel will user user data object from above
   [ffn]
@@ -59,7 +59,7 @@
     variable = u
     function = exact_fn
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Executioner]

@@ -9,13 +9,13 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [mu]
-  [../]
+  []
   [jx]
-  [../]
+  []
   [jy]
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,13 +24,13 @@
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
-  [../]
+  []
   [chempot]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
-  [../]
+  []
   [flux_x]
     type = CHSplitFlux
     variable = jx
@@ -38,7 +38,7 @@
     mobility_name = mobility_prop
     mu = mu
     c = c
-  [../]
+  []
   [flux_y]
     type = CHSplitFlux
     variable = jy
@@ -46,11 +46,11 @@
     mobility_name = mobility_prop
     mu = mu
     c = c
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -61,7 +61,7 @@
     coupled_variables = c
     expression = 'c'
     derivative_order = 1
-  [../]
+  []
   [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
@@ -69,13 +69,13 @@
     coupled_variables = c
     property_name = var_dep
     derivative_order = 1
-  [../]
+  []
   [mobility_tensor]
     type = ConstantAnisotropicMobility
     block = 0
     M_name = mobility_tensor
     tensor = '1 0 0 0 1 0 0 0 1'
-  [../]
+  []
   [mobility]
     type = CompositeMobilityTensor
     block = 0
@@ -83,7 +83,7 @@
     tensors = mobility_tensor
     weights = var_dep
     coupled_variables = c
-  [../]
+  []
 []
 
 [BCs]
@@ -92,13 +92,13 @@
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
   [rightc]
     type = DirichletBC
     variable = c
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -117,7 +117,7 @@
   [smp]
      type = SMP
      full = true
-  [../]
+  []
 []
 
 [Outputs]

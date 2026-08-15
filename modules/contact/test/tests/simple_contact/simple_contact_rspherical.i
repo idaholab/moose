@@ -25,7 +25,7 @@
   [ur]
     type = ParsedFunction
     expression = '-3e-3*x'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -33,7 +33,7 @@
     add_variables = true
     strain = FINITE
     generate_output = 'stress_xx stress_yy stress_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -42,14 +42,14 @@
     variable = disp_x
     boundary = '1 4'
     function = ur
-  [../]
+  []
 []
 
 [Contact]
   [fred]
     primary = 2
     secondary = 3
-  [../]
+  []
 []
 
 [Materials]
@@ -58,11 +58,11 @@
     block = '1 2 3'
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
+  []
   [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2 3'
-  [../]
+  []
 []
 
 

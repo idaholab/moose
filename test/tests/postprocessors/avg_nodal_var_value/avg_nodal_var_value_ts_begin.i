@@ -8,12 +8,12 @@
   [u]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -22,17 +22,17 @@
   [force_fn]
     type = ParsedFunction
     expression = '1-x*x+2*t'
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = '(1-x*x)*t'
-  [../]
+  []
 
   [left_bc]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -43,28 +43,28 @@
   [time_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn_u]
     type = BodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 
   [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -75,21 +75,21 @@
     variable = u
     boundary = '1'
     function = exact_fn
-  [../]
+  []
 
   [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '3'
     function = left_bc
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = '2'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -97,20 +97,20 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 
   [node1]
     type = AverageNodalVariableValue
     variable = u
     boundary = 10
     execute_on = TIMESTEP_BEGIN
-  [../]
+  []
 
   [node4]
     type = AverageNodalVariableValue
     variable = v
     boundary = 13
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,7 +10,7 @@
     type = ImageSubdomainGenerator
     file = kitten.png
     threshold = 100
-  [../]
+  []
 []
 
 [Variables]
@@ -18,28 +18,28 @@
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -49,25 +49,25 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 100
-  [../]
+  []
   [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Problem]
@@ -103,21 +103,21 @@
       # petsc_options_value = 'full selfp'
       splitting = 'u v' # 'u' and 'v'
       splitting_type = additive
-    [../]
+    []
     [u]
       # PETSc options for this subsolver
       # A prefix will be applied, so just put the options for this subsolver only
       vars = u
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre preonly'
-    [../]
+    []
     [v]
       # PETSc options for this subsolver
       vars = v
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre  preonly'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

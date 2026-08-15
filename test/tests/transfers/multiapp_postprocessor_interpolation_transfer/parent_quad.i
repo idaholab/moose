@@ -7,12 +7,12 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [pp_aux]
-  [../]
+  []
 []
 
 [Kernels]
@@ -20,11 +20,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,7 +61,7 @@
     app_type = MooseTestApp
     positions = '0.1 0.1 0 0.9 0.1 0 0.1 0.9 0 0.9 0.9 0'
     input_files = 'quad_sub1.i quad_sub1.i quad_sub2.i quad_sub2.i'
-  [../]
+  []
 []
 
 [Transfers]
@@ -70,5 +70,5 @@
     from_multi_app = quad
     variable = pp_aux
     postprocessor = pp
-  [../]
+  []
 []

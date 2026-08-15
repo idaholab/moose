@@ -9,7 +9,7 @@
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -30,14 +30,14 @@
     solution = soln
     from_variable = temperature
     #direct = true
-  [../]
+  []
   [nn2]
     type = SolutionAux
     variable = pressure_field
     solution = soln
     from_variable = pressure
     #direct = true
-  [../]
+  []
 []
 
 [UserObjects]
@@ -46,18 +46,18 @@
     mesh = write_exodus_second_order_out.e
     system_variables = 'temperature pressure'
     nodal_variable_order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -66,13 +66,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

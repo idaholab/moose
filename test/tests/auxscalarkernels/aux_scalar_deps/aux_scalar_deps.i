@@ -18,22 +18,22 @@
   [a]
     family = SCALAR
     order = FIRST
-  [../]
+  []
   [b]
     family = SCALAR
     order = FIRST
-  [../]
+  []
   [c]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -41,28 +41,28 @@
     type = ScalarConstantIC
     variable = a
     value = 0
-  [../]
+  []
   [b_ic]
     type = ScalarConstantIC
     variable = b
     value = 2
-  [../]
+  []
 []
 
 [Functions]
   [exact_fn]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 
   [a_fn]
     type = ParsedFunction
     expression = t
-  [../]
+  []
   [b_fn]
     type = ParsedFunction
     expression = (4-t)/2
-  [../]
+  []
 []
 
 # NOTE: The execute_on = 'timestep_end' is crucial for this test. Without it
@@ -78,31 +78,31 @@
     numerator = a
     denominator = b
     execute_on = 'timestep_end'
-  [../]
+  []
   [a_saux]
     type = FunctionScalarAux
     variable = a
     function = a_fn
     execute_on = 'timestep_end'
-  [../]
+  []
   [b_saux]
     type = FunctionScalarAux
     variable = b
     function = b_fn
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Kernels]
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -111,7 +111,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]

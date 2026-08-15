@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -16,7 +16,7 @@
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+  []
 []
 
 [BCs]
@@ -27,7 +27,7 @@
     value = 0
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
@@ -35,14 +35,14 @@
     value = 1
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

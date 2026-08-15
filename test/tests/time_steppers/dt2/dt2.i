@@ -22,7 +22,7 @@
     type = ParsedFunction
     expression = 'atan((t-2)*pi)'   # atan((t-t_jump)*pi*slope) - has to match global params above
 
-  [../]
+  []
 []
 
 [Variables]
@@ -34,8 +34,8 @@
 
     [InitialCondition]
       type = TEIC
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -44,17 +44,17 @@
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = TEJumpFFN
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -64,7 +64,7 @@
     type = TEJumpBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -72,13 +72,13 @@
 
   [dt]
     type = TimestepSize
-  [../]
+  []
 
   [l2]
     type = ElementL2Error
     variable = u
     function = u_func
-  [../]
+  []
 []
 
 [Executioner]
@@ -100,7 +100,7 @@
     dt = 0.1
     e_max = 3e-1
     e_tol = 1e-1
-  [../]
+  []
 []
 
 [Outputs]

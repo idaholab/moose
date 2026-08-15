@@ -73,7 +73,7 @@ u_inlet=1
     boundary = 'left'
     function_x = vel_x_inlet
     function_y = 0
-  [../]
+  []
   [wall]
     type = VectorFunctionDirichletBC
     variable = velocity

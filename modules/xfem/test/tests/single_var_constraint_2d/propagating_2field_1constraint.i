@@ -26,25 +26,25 @@
     cut_data = '0.5 1.0 0.5 0.0'
     time_start_cut = 0.0
     time_end_cut = 2.0
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [Constraints]
@@ -54,7 +54,7 @@
     jump = 0
     jump_flux = 0
     geometric_cut_userobject = 'line_seg_cut_uo'
-  [../]
+  []
 []
 
 [BCs]
@@ -64,28 +64,28 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 1
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -112,5 +112,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

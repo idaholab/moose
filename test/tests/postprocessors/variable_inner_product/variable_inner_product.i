@@ -17,42 +17,42 @@
     [InitialCondition]
       type = FunctionIC
       function = leg2
-    [../]
-  [../]
+    []
+  []
   [g]
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
       type = FunctionIC
       function = leg1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Functions]
   [leg1]
     type = ParsedFunction
     expression = 'x'
-  [../]
+  []
 
   [leg2]
     type = ParsedFunction
     expression = '0.5*(3.0*x*x-1.0)'
-  [../]
+  []
 []
 
 [BCs]
@@ -63,14 +63,14 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,18 +88,18 @@
     type = VariableInnerProduct
     variable = f
     second_variable = g
-  [../]
+  []
 
   [f_dot_f]
     type = VariableInnerProduct
     variable = f
     second_variable = f
-  [../]
+  []
 
   [norm_f]
     type = ElementL2Norm
     variable = f
-  [../]
+  []
 []
 
 [Outputs]

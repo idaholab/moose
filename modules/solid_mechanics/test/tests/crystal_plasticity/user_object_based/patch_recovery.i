@@ -32,7 +32,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 

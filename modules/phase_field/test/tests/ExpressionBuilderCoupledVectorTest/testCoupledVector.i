@@ -15,21 +15,21 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
   [gr1]
     [InitialCondition]
       type = FunctionIC
       function = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   [Tester]
     type = EBCoupledVarTest
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]
@@ -38,7 +38,7 @@
 
 [Problem]
   solve = false
-[../]
+[]
 
 [Outputs]
   exodus = true

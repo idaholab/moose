@@ -21,7 +21,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]

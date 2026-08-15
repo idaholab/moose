@@ -13,7 +13,7 @@
   [u]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
@@ -23,15 +23,15 @@
     expression_x = 'y'
     expression_y = '-x'
     curl_z = '-2'
-  [../]
+  []
   [ffn_x]
     type = ParsedFunction
     expression = 'y'
-  [../]
+  []
   [ffn_y]
     type = ParsedFunction
     expression = '-x'
-  [../]
+  []
 []
 
 [Kernels]
@@ -40,7 +40,7 @@
     variable = u
     x_forcing_func = ffn_x
     y_forcing_func = ffn_y
-  [../]
+  []
 []
 
 [BCs]
@@ -49,7 +49,7 @@
     curl_value = field
     variable = u
     boundary = 'left right top bottom'
-  [../]
+  []
 []
 
 [Executioner]

@@ -42,12 +42,12 @@
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 795.77471545947674 # 10000/pi/2^2
-  [../]
+  []
   [disp_y]
     type = PiecewiseLinear
     x = '0.  1.    2.'
     y = '0. -0.01 -0.01'
-  [../]
+  []
 [] # Functions
 
 [Variables]
@@ -55,12 +55,12 @@
   [disp_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
   [disp_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
 [] # Variables
 
@@ -69,35 +69,35 @@
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [hydrostatic]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 [] # AuxVariables
 
@@ -105,7 +105,7 @@
   [all]
     add_variables = true
     strain = SMALL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -115,42 +115,42 @@
     index_i = 0
     index_j = 0
     variable = stress_xx
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
     variable = stress_yy
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     variable = stress_zz
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 1
     variable = stress_xy
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 1
     index_j = 2
     variable = stress_yz
-  [../]
+  []
   [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 0
     variable = stress_zx
-  [../]
+  []
 [] # AuxKernels
 
 [BCs]
@@ -160,20 +160,20 @@
     variable = disp_y
     boundary = 1000
     value = 0.0
-  [../]
+  []
 
   [symm_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [disp_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = disp_y
-  [../]
+  []
 
 [] # BCs
 
@@ -186,7 +186,7 @@
     tangential_tolerance = 1e-3
     penalty = 1e+10
 
-  [../]
+  []
 []
 
 
@@ -196,22 +196,22 @@
     block = '1'
     youngs_modulus = 1.40625e7
     poissons_ratio = 0.25
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = '1'
-  [../]
+  []
 
   [tensor_1000]
     type = ComputeIsotropicElasticityTensor
     block = '1000'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
   [stress_1000]
     type = ComputeLinearElasticStress
     block = '1000'
-  [../]
+  []
 [] # Materials
 
 [Preconditioning]
@@ -241,7 +241,7 @@
 
   [Quadrature]
     order = FIFTH
-  [../]
+  []
 
 [] # Executioner
 
@@ -250,11 +250,11 @@
     type = NodalVariableValue
     nodeid = 103 # 104-1 where 104 is the exodus node number of the top-left node
     variable = disp_y
-  [../]
+  []
 []
 
 [Outputs]
   [out]
     type = Exodus
-  [../]
+  []
 [] # Output

@@ -17,18 +17,18 @@
 
 [Variables]
   [s]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_s]
     type = HeatConduction
     variable = s
-  [../]
+  []
   [time_diff_s]
     type = HeatConductionTimeDerivative
     variable = s
-  [../]
+  []
 []
 
 [Materials]
@@ -36,7 +36,7 @@
     type = GenericConstantMaterial
     prop_names =  'thermal_conductivity specific_heat density'
     prop_values = '1.0                  1.0           1.0' # W/(cm K), J/(g K), g/cm^3
-  [../]
+  []
 []
 
 [ICs]
@@ -44,7 +44,7 @@
     type = ConstantIC
     value = 2
     variable = s
-  [../]
+  []
 []
 
 [BCs]
@@ -53,13 +53,13 @@
     variable = s
     boundary = bottom
     value = 0.1
-  [../]
+  []
   [interface_flux]
     type = FXFluxBC
     boundary = left
     variable = s
     function = FX_Basis_Flux_Sub
-  [../]
+  []
 []
 
 [Functions]
@@ -69,14 +69,14 @@
     orders = '4'
     physical_bounds = '0.0 10'
     y = Legendre
-  [../]
+  []
   [FX_Basis_Flux_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '7'
     physical_bounds = '0.0 10'
     y = Legendre
-  [../]
+  []
 []
 
 [UserObjects]
@@ -85,14 +85,14 @@
     function = FX_Basis_Value_Sub
     variable = s
     boundary = left
-  [../]
+  []
   [FX_Flux_UserObject_Sub]
     type = FXBoundaryFluxUserObject
     function = FX_Basis_Flux_Sub
     variable = s
     boundary = left
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [Executioner]

@@ -13,12 +13,12 @@
   [exact_fn]
     type = ParsedFunction
     expression = t*((x*x)+(y*y))
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = -4+(x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
@@ -27,7 +27,7 @@
   [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,18 +36,18 @@
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -56,13 +56,13 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Executioner]
@@ -82,5 +82,5 @@
     file_base = out_gen_oversample
     type = Exodus
     refinements = 3
-  [../]
+  []
 []

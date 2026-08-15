@@ -14,7 +14,7 @@
 
 [Variables]
   [T]
-  [../]
+  []
 []
 
 [ICs]
@@ -22,18 +22,18 @@
     type = FunctionIC
     variable = T
     function = '100*sin(pi*x/80)'
-  [../]
+  []
 []
 
 [Kernels]
   [HeatDiff]
     type = HeatConduction
     variable = T
-  [../]
+  []
   [HeatTdot]
     type = HeatConductionTimeDerivative
     variable = T
-  [../]
+  []
 []
 
 [BCs]
@@ -42,7 +42,7 @@
     variable = T
     boundary = 'left right'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -50,17 +50,17 @@
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '0.95' #copper in cal/(cm sec C)
-  [../]
+  []
   [cp]
     type = GenericConstantMaterial
     prop_names = 'specific_heat'
     prop_values = '0.092' #copper in cal/(g C)
-  [../]
+  []
   [rho]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8.92' #copper in g/(cm^3)
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -68,7 +68,7 @@
     type = NodalL2Error
     function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
     variable = T
-  [../]
+  []
 []
 
 [Executioner]

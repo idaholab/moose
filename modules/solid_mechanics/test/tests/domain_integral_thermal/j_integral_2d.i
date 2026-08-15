@@ -13,18 +13,18 @@
   [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [tempfunc]
     type = ParsedFunction
     expression = 10.0*(2*x/504)
-  [../]
+  []
 []
 
 [DomainIntegral]
@@ -50,7 +50,7 @@
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = thermal_expansion
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -59,13 +59,13 @@
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  [../]
+  []
   [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
     block = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -74,21 +74,21 @@
     variable = disp_y
     boundary = 100
     value = 0.0
-  [../]
+  []
 
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 400
     value = 0.0
-  [../]
+  []
 
   [no_x1]
     type = DirichletBC
     variable = disp_x
     boundary = 900
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -96,17 +96,17 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
+  []
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
   [thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 0.0
     thermal_expansion_coeff = 1.35e-5
     temperature = temp
     eigenstrain_name = thermal_expansion
-  [../]
+  []
 []
 
 [Executioner]
@@ -143,5 +143,5 @@
     pc_side = left
     ksp_norm = preconditioned
     full = true
-  [../]
+  []
 []

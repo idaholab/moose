@@ -24,7 +24,7 @@
     bottom_left = '-0.1 -0.1 0'
     top_right = '0.3 0.3 0'
     boundary_id_overlap = true
-  [../]
+  []
 []
 
 [Outputs]

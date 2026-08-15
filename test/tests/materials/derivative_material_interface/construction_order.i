@@ -27,19 +27,19 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [dummy1]
     type = Diffusion
     variable = c
-  [../]
+  []
   [dummy2]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -50,20 +50,20 @@
     sum_materials = 'Fa'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
   [free_energy_a]
     type = DerivativeParsedMaterial
     property_name = Fa
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
+  []
   [sum_a_2]
     type = DerivativeSumMaterial
     property_name = Fa2
     sum_materials = 'Fa'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
 
   # derivatives declared after being used
   [sum_b_1]
@@ -72,13 +72,13 @@
     sum_materials = 'Fb'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
   [free_energy_b]
     type = DerivativeParsedMaterial
     property_name = Fb
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
+  []
 
   # derivatives declared before being used
   [free_energy_c]
@@ -86,14 +86,14 @@
     property_name = Fc
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
+  []
   [sum_c_2]
     type = DerivativeSumMaterial
     property_name = Fc2
     sum_materials = 'Fc'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
 
   # non-existing derivatives
   [free_energy_d]
@@ -101,14 +101,14 @@
     property_name = Fd
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
+  []
   [sum_d_1]
     type = DerivativeSumMaterial
     property_name = Fd1
     sum_materials = 'Fd'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

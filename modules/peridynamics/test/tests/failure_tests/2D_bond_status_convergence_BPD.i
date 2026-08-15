@@ -14,26 +14,26 @@
     dim = 2
     nx = 8
     ny = 8
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [AuxVariables]
   [critical_stretch]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -41,7 +41,7 @@
     type = StretchBasedFailureCriterionPD
     critical_variable = critical_stretch
     variable = bond_status
-  [../]
+  []
 []
 
 [ICs]
@@ -49,7 +49,7 @@
     type = ConstantIC
     variable = critical_stretch
     value = 0.001
-  [../]
+  []
 []
 
 [BCs]
@@ -58,36 +58,36 @@
     variable = disp_x
     boundary = 1003
     value = 0.0
-  [../]
+  []
   [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1002
     value = 0.0
-  [../]
+  []
   [bottom_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1000
     function = '-0.001*t'
-  [../]
+  []
 
   [rbm_x]
     type = RBMPresetOldValuePD
     variable = disp_x
     boundary = 999
-  [../]
+  []
   [rbm_y]
     type = RBMPresetOldValuePD
     variable = disp_y
     boundary = 999
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
   [all]
     formulation = BOND
-  [../]
+  []
 []
 
 [Materials]
@@ -95,23 +95,23 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.33
-  [../]
+  []
   [force_density]
     type = ComputeSmallStrainConstantHorizonMaterialBPD
-  [../]
+  []
 []
 
 [Postprocessors]
   [bond_status_updated_times]
     type = BondStatusConvergedPostprocessorPD
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

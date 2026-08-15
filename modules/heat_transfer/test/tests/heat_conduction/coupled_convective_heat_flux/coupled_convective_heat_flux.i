@@ -9,35 +9,35 @@
   [T_infinity_fn]
     type = ParsedFunction
     expression = (x*x+y*y)+500
-  [../]
+  []
   [Hw_fn]
     type = ParsedFunction
     expression = ((1-x)*(1-x)+(1-y)*(1-y))+1000
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [T_infinity]
-  [../]
+  []
   [Hw]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [force]
     type = BodyForce
     variable = u
     value = 1000
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -46,13 +46,13 @@
     variable = T_infinity
     function = T_infinity_fn
     execute_on = initial
-  [../]
+  []
   [Hw_ak]
     type = FunctionAux
     variable = Hw
     function = Hw_fn
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -62,7 +62,7 @@
     boundary = right
     htc = Hw
     T_infinity = T_infinity
-  [../]
+  []
 []
 
 [Executioner]

@@ -22,14 +22,14 @@
     scale = '0.5 1 1'
     translation = '2 0 0'
     transformation_order = 'scale translation'
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -37,7 +37,7 @@
     type = FunctionIC
     variable = u
     function = solution_fcn
-  [../]
+  []
 []
 
 [Functions]
@@ -45,14 +45,14 @@
     type = SolutionFunction
     from_variable = u
     solution = solution_uo
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

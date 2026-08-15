@@ -57,11 +57,11 @@
 
 [Variables]
   [wc_x]
-  [../]
+  []
   [wc_y]
-  [../]
+  []
   [wc_z]
-  [../]
+  []
 []
 
 [Kernels]
@@ -70,57 +70,57 @@
     component = 0
     variable = wc_x
     save_in = res_x
-  [../]
+  []
   [icm_y]
     type = InertialTorque
     component = 1
     variable = wc_y
     density = another_density
     save_in = res_y
-  [../]
+  []
   [icm_z]
     type = InertialTorque
     component = 2
     variable = wc_z
     density = yet_another_density
     save_in = res_z
-  [../]
+  []
 []
 
 [AuxVariables]
   [res_x]
-  [../]
+  []
   [res_y]
-  [../]
+  []
   [res_z]
-  [../]
+  []
   [disp_x]
     initial_condition = 1
-  [../]
+  []
   [disp_y]
     initial_condition = -2
-  [../]
+  []
   [disp_z]
     initial_condition = 2
-  [../]
+  []
   [vel_x]
     initial_condition = -2
-  [../]
+  []
   [vel_y]
     initial_condition = -5
-  [../]
+  []
   [vel_z]
     initial_condition = 1
-  [../]
+  []
   [accel_x]
     initial_condition = 2
-  [../]
+  []
   [accel_y]
     initial_condition = 2
-  [../]
+  []
   [accel_z]
     initial_condition = 2
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -128,47 +128,47 @@
     type = FunctionAux
     variable = disp_x
     function = '1+t'
-  [../]
+  []
   [disp_y]
     type = FunctionAux
     variable = disp_y
     function = '-2*(1+t)'
-  [../]
+  []
   [disp_z]
     type = FunctionAux
     variable = disp_z
     function = '2*(1+t)'
-  [../]
+  []
   [vel_x]
     type = FunctionAux
     variable = vel_x
     function = '-2*t'
-  [../]
+  []
   [vel_y]
     type = FunctionAux
     variable = vel_y
     function = '-5*t'
-  [../]
+  []
   [vel_z]
     type = FunctionAux
     variable = vel_z
     function = 't'
-  [../]
+  []
   [accel_x]
     type = FunctionAux
     variable = accel_x
     function = '-t+2'
-  [../]
+  []
   [accel_y]
     type = FunctionAux
     variable = accel_y
     function = '-5*t+2'
-  [../]
+  []
   [accel_z]
     type = FunctionAux
     variable = accel_z
     function = 't+2'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -176,17 +176,17 @@
     type = PointValue
     point = '0 0 0'
     variable = res_x
-  [../]
+  []
   [res_y]
     type = PointValue
     point = '0 0 0'
     variable = res_y
-  [../]
+  []
   [res_z]
     type = PointValue
     point = '0 0 0'
     variable = res_z
-  [../]
+  []
 []
 
 [Materials]
@@ -194,7 +194,7 @@
     type = GenericConstantMaterial
     prop_names = 'density another_density yet_another_density'
     prop_values = '2.0 8.0 16.0'
-  [../]
+  []
 []
 
 [Executioner]

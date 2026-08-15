@@ -17,7 +17,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -33,27 +33,27 @@
     rand_seed = 2000
     radius_variation = 2 #This is the standard deviation
     radius_variation_type = normal
-  [../]
+  []
 []
 
 [Kernels]
   [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [diff]
     type = MatDiffusion
     variable = c
     diffusivity = D_v
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -61,7 +61,7 @@
     type = GenericConstantMaterial
     prop_names = D_v
     prop_values = 0.074802
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -69,7 +69,7 @@
     type = FeatureFloodCount
     variable = c
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

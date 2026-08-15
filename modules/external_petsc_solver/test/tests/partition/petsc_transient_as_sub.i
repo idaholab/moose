@@ -7,7 +7,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Problem]
@@ -19,7 +19,7 @@
   type = Transient
   [TimeStepper]
     type = ExternalPetscTimeStepper
-  [../]
+  []
 []
 
 [AuxVariables]

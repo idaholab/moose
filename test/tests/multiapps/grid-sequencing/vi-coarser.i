@@ -25,14 +25,14 @@ num_steps=2
     bounded_variable = u
     bound_type = upper
     bound_value = ${l}
-  [../]
+  []
   [u_lower_bounds]
     type = ConstantBounds
     variable = bounds
     bounded_variable = u
     bound_type = lower
     bound_value = 0
-  [../]
+  []
 []
 
 [ICs]

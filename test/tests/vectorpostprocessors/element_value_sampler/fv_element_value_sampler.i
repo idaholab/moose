@@ -12,11 +12,11 @@
   [u_fn]
     type = ParsedFunction
     expression = '2 * x + 3 * y'
-  [../]
+  []
   [v_fn]
     type = ParsedFunction
     expression = 'x + y'
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -24,12 +24,12 @@
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
   [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [ICs]
@@ -37,12 +37,12 @@
     type = FunctionIC
     variable = u
     function = u_fn
-  [../]
+  []
   [v_ic]
     type = FunctionIC
     variable = v
     function = v_fn
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -51,7 +51,7 @@
     variable = 'u v'
     sort_by = id
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]

@@ -18,26 +18,26 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [c]
     type = Diffusion
     variable = c
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -46,7 +46,7 @@
     op_names  = c
     op_values = 1
     map = map
-  [../]
+  []
 []
 
 [UserObjects]
@@ -55,19 +55,19 @@
     hold_time = 1
     probability = 0.01
     radius = 4
-  [../]
+  []
   [map]
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Postprocessors]
   [sum]
     type = ElementIntegralMaterialProperty
     mat_prop = F
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,5 +81,5 @@
   execute_on = 'timestep_end'
   [out]
     type = CSV
-  [../]
+  []
 []

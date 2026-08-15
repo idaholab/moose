@@ -12,37 +12,37 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [creep_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [SolidMechanics]
     displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -53,7 +53,7 @@
     index_j = 0
     index_i = 0
     execute_on = timestep_end
-  [../]
+  []
   [strain_xx]
     type = RankTwoAux
     variable = strain_xx
@@ -61,7 +61,7 @@
     index_j = 0
     index_i = 0
     execute_on = timestep_end
-  [../]
+  []
   [creep_strain_xx]
     type = RankTwoAux
     variable = creep_strain_xx
@@ -69,7 +69,7 @@
     index_j = 0
     index_i = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -78,25 +78,25 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
+  []
   [axial_load]
     type = NeumannBC
     variable = disp_x
     boundary = right
     value    = 10e6
-  [../]
+  []
 []
 
 [Materials]
@@ -106,21 +106,21 @@
     creep_viscosity = '1 10'
     poisson_ratio = 0.2
     young_modulus = 10e9
-  [../]
+  []
   [stress]
     type = ComputeLinearViscoelasticStress
-  [../]
+  []
   [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [UserObjects]
   [update]
     type = LinearViscoelasticityManager
     viscoelastic_model = kelvin_voigt
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -128,24 +128,24 @@
     type = ElementAverageValue
     variable = stress_xx
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [strain_xx]
     type = ElementAverageValue
     variable = strain_xx
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [creep_strain_xx]
     type = ElementAverageValue
     variable = creep_strain_xx
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -163,7 +163,7 @@
     type = LogConstantDT
     first_dt = 0.1
     log_dt = 0.1
-  [../]
+  []
 
 []
 

@@ -14,14 +14,14 @@ u_right = 90
     xmin = 0
     xmax = 1
     nx = 2
-  [../]
+  []
 []
 
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     allow_imperfect_jacobians = true
-  [../]
+  []
 []
 
 [Problem]
@@ -32,15 +32,15 @@ u_right = 90
   [rho]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [rho_u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [rho_E]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -48,19 +48,19 @@ u_right = 90
     type = FunctionIC
     variable = rho
     function = 'if (x < 0.5, ${rho_left}, ${rho_right})'
-  [../]
+  []
 
   [rho_u_ic]
     type = FunctionIC
     variable = rho_u
     function = 'if (x < 0.5, ${fparse rho_left * u_left}, ${fparse rho_right * u_right})'
-  [../]
+  []
 
   [rho_E_ic]
     type = FunctionIC
     variable = rho_E
     function = 'if (x < 0.5, ${fparse E_left * rho_left}, ${fparse E_right * rho_right})'
-  [../]
+  []
 []
 
 [Materials]
@@ -70,14 +70,14 @@ u_right = 90
     rhou = rho_u
     rho_et = rho_E
     fp = fp
-  [../]
+  []
 []
 
 [UserObjects]
   [hllc]
     type = HLLCUserObject
     fp = fp
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -86,7 +86,7 @@ u_right = 90
     hllc_uo = hllc
     elem_id = 0
     side_id = 1
-  [../]
+  []
 []
 
 [Executioner]

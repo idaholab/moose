@@ -81,11 +81,11 @@
   [flux_x]
       order = FIRST
       family = MONOMIAL
-  [../]
+  []
   [flux_y]
       order = FIRST
       family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -105,7 +105,7 @@
     diffusion_variable = u
     component = x
     block = 1
-  [../]
+  []
   [flux_y]
     type = DiffusionFluxAux
     diffusivity = 'conductivity'
@@ -113,7 +113,7 @@
     diffusion_variable = u
     component = y
     block = 1
-  [../]
+  []
 []
 
 [Kernels]

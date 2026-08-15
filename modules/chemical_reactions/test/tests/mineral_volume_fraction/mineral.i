@@ -10,7 +10,7 @@
 [Variables]
   [mineral_conc]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [Problem]
@@ -27,7 +27,7 @@
     variable = mineral_conc
     molar_volume = 20
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

@@ -6,7 +6,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -14,15 +14,15 @@
     type = ExceptionKernel
     variable = u
     when = jacobian
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time_deriv]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -31,13 +31,13 @@
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
   [right2]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

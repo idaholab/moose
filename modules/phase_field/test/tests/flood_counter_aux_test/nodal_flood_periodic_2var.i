@@ -15,36 +15,36 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [bubble_map0]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [bubble_map1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [diffv]
     type = Diffusion
     variable = v
-  [../]
+  []
 
   [forcing_1]
     type = GaussContForcing
@@ -53,7 +53,7 @@
     y_center = 1.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_2]
     type = GaussContForcing
@@ -62,7 +62,7 @@
     y_center = 39.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_3]
     type = GaussContForcing
@@ -71,7 +71,7 @@
     y_center = 20.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_4]
     type = GaussContForcing
@@ -80,7 +80,7 @@
     y_center = 15.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_1v]
     type = GaussContForcing
@@ -89,7 +89,7 @@
     y_center = 8.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_2v]
     type = GaussContForcing
@@ -98,7 +98,7 @@
     y_center = 22.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_3v]
     type = GaussContForcing
@@ -107,7 +107,7 @@
     y_center = 20.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [forcing_4v]
     type = GaussContForcing
@@ -116,17 +116,17 @@
     y_center = 8.0
     x_spread = 0.5
     y_spread = 0.5
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [dotv]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -136,7 +136,7 @@
     execute_on = timestep_end
     flood_counter = bubbles
     map_index = 0
-  [../]
+  []
 
   [mapper1]
     type = FeatureFloodCountAux
@@ -144,7 +144,7 @@
     execute_on = timestep_end
     flood_counter = bubbles
     map_index = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -152,8 +152,8 @@
     [all]
       variable = 'u v'
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [UserObjects]
@@ -166,7 +166,7 @@
     use_global_numbering = true
     outputs = none
     flood_entity_type = NODAL
-  [../]
+  []
 []
 
 [Executioner]

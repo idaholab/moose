@@ -17,8 +17,8 @@
       variable = c
       value_left = -0.2
       value_right = 1.3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Problem]

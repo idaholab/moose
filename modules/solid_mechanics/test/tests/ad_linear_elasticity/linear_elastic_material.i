@@ -15,8 +15,8 @@
   [diffused]
      [InitialCondition]
       type = RandomIC
-     [../]
-  [../]
+     []
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic/All]
@@ -30,7 +30,7 @@
   [diff]
     type = ADDiffusion
     variable = diffused
-  [../]
+  []
 []
 
 [Materials]
@@ -38,10 +38,10 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0
-  [../]
+  []
   [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
 []
 
 [BCs]
@@ -50,37 +50,37 @@
     variable = diffused
     boundary = 'right'
     value = 1
-  [../]
+  []
   [top]
     type = ADDirichletBC
     variable = diffused
     boundary = 'top'
     value = 0
-  [../]
+  []
   [disp_x_BC]
     type = ADDirichletBC
     variable = disp_x
     boundary = 'bottom top'
     value = 0.5
-  [../]
+  []
   [disp_x_BC2]
     type = ADDirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0.01
-  [../]
+  []
   [disp_y_BC]
     type = ADDirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0.8
-  [../]
+  []
   [disp_y_BC2]
     type = ADDirichletBC
     variable = disp_y
     boundary = 'left right'
     value = 0.02
-  [../]
+  []
 []
 
 [Executioner]

@@ -12,19 +12,19 @@
   [c]
     [InitialCondition]
       type = RandomIC
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [w_res]
     type = Diffusion
     variable = c
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -33,13 +33,13 @@
     property_name = Fa
     coupled_variables = 'c'
     expression = (c-0.1)^4*(1-0.1-c)^4
-  [../]
+  []
   [free_energy2]
     type = DerivativeParsedMaterial
     property_name = Fb
     coupled_variables = 'c'
     expression = -0.25*(c-0.1)^4*(1-0.1-c)^4
-  [../]
+  []
 
   # Fa+Fb+Fb == Fc
   [free_energy3]
@@ -48,7 +48,7 @@
     coupled_variables = 'c'
     expression = 0.5*(c-0.1)^4*(1-0.1-c)^4
     outputs = all
-  [../]
+  []
   [dfree_energy3]
     type = DerivativeParsedMaterial
     property_name = dFc
@@ -56,7 +56,7 @@
     material_property_names = 'F:=D[Fc,c]'
     expression = F
     outputs = all
-  [../]
+  []
   [d2free_energy3]
     type = DerivativeParsedMaterial
     property_name = d2Fc
@@ -64,7 +64,7 @@
     material_property_names = 'F:=D[Fc,c,c]'
     expression = F
     outputs = all
-  [../]
+  []
 
   [free_energy]
     type = DerivativeSumMaterial
@@ -72,7 +72,7 @@
     sum_materials = 'Fa Fb Fb'
     coupled_variables = 'c'
     outputs = all
-  [../]
+  []
   [dfree_energy]
     type = DerivativeParsedMaterial
     property_name = dF_sum
@@ -80,7 +80,7 @@
     expression = F
     coupled_variables = 'c'
     outputs = all
-  [../]
+  []
   [d2free_energy]
     type = DerivativeParsedMaterial
     property_name = d2F_sum
@@ -88,7 +88,7 @@
     expression = F
     coupled_variables = 'c'
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
@@ -100,27 +100,27 @@
   [F_sum]
     type = ElementAverageValue
     variable = F_sum
-  [../]
+  []
   [F_check]
     type = ElementAverageValue
     variable = Fc
-  [../]
+  []
   [dF_sum]
     type = ElementAverageValue
     variable = dF_sum
-  [../]
+  []
   [dF_check]
     type = ElementAverageValue
     variable = dFc
-  [../]
+  []
   [d2F_sum]
     type = ElementAverageValue
     variable = d2F_sum
-  [../]
+  []
   [d2F_check]
     type = ElementAverageValue
     variable = d2Fc
-  [../]
+  []
 []
 
 [Outputs]

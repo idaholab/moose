@@ -32,19 +32,19 @@ rho=2.5
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
   [vel_x]
-  [../]
+  []
 
   [vel_y]
-  [../]
+  []
 
   [p]
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
@@ -52,7 +52,7 @@ rho=2.5
   [mass]
     type = INSMass
     variable = p
-  [../]
+  []
 
   # x-momentum, space
   [x_momentum_space]
@@ -60,7 +60,7 @@ rho=2.5
     variable = vel_x
     component = 0
     forcing_func = vel_x_source_func
-  [../]
+  []
 
   # y-momentum, space
   [y_momentum_space]
@@ -68,13 +68,13 @@ rho=2.5
     variable = vel_y
     component = 1
     forcing_func = vel_y_source_func
-  [../]
+  []
 
   [p_source]
     type = BodyForce
     function = p_source_func
     variable = p
-  [../]
+  []
 []
 
 [BCs]
@@ -84,52 +84,52 @@ rho=2.5
     boundary = 'left right top bottom'
     function = vel_x_func
     variable = vel_x
-  [../]
+  []
   [vel_y]
     type = FunctionDirichletBC
     preset = false
     boundary = 'left right top bottom'
     function = vel_y_func
     variable = vel_y
-  [../]
+  []
   [p]
     type = FunctionDirichletBC
     preset = false
     boundary = 'left right top bottom'
     function = p_func
     variable = p
-  [../]
+  []
 []
 
 [Functions]
   [vel_x_source_func]
     type = ParsedFunction
     expression = '-${mu}*(-0.028*pi^2*x^2*sin(0.2*pi*x*y) - 0.028*pi^2*y^2*sin(0.2*pi*x*y) - 0.1*pi^2*sin(0.5*pi*x) - 0.4*pi^2*sin(pi*y)) + ${rho}*(0.14*pi*x*cos(0.2*pi*x*y) + 0.4*pi*cos(pi*y))*(0.6*sin(0.8*pi*x) + 0.3*sin(0.3*pi*y) + 0.2*sin(0.3*pi*x*y) + 0.3) + ${rho}*(0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x))*(0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5) + 0.1*pi*y*cos(0.2*pi*x*y) + 0.25*pi*cos(0.5*pi*x)'
-  [../]
+  []
   [vel_y_source_func]
     type = ParsedFunction
     expression = '-${mu}*(-0.018*pi^2*x^2*sin(0.3*pi*x*y) - 0.018*pi^2*y^2*sin(0.3*pi*x*y) - 0.384*pi^2*sin(0.8*pi*x) - 0.027*pi^2*sin(0.3*pi*y)) + ${rho}*(0.06*pi*x*cos(0.3*pi*x*y) + 0.09*pi*cos(0.3*pi*y))*(0.6*sin(0.8*pi*x) + 0.3*sin(0.3*pi*y) + 0.2*sin(0.3*pi*x*y) + 0.3) + ${rho}*(0.06*pi*y*cos(0.3*pi*x*y) + 0.48*pi*cos(0.8*pi*x))*(0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5) + 0.1*pi*x*cos(0.2*pi*x*y) + 0.3*pi*cos(0.3*pi*y)'
-  [../]
+  []
   [p_source_func]
     type = ParsedFunction
     expression = '-0.06*pi*x*cos(0.3*pi*x*y) - 0.14*pi*y*cos(0.2*pi*x*y) - 0.2*pi*cos(0.5*pi*x) - 0.09*pi*cos(0.3*pi*y)'
-  [../]
+  []
   [vel_x_func]
     type = ParsedFunction
     expression = '0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5'
-  [../]
+  []
   [vel_y_func]
     type = ParsedFunction
     expression = '0.6*sin(0.8*pi*x) + 0.3*sin(0.3*pi*y) + 0.2*sin(0.3*pi*x*y) + 0.3'
-  [../]
+  []
   [p_func]
     type = ParsedFunction
     expression = '0.5*sin(0.5*pi*x) + 1.0*sin(0.3*pi*y) + 0.5*sin(0.2*pi*x*y) + 0.5'
-  [../]
+  []
   [vxx_func]
     type = ParsedFunction
     expression = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
-  [../]
+  []
 []
 
 [Materials]
@@ -138,7 +138,7 @@ rho=2.5
     block = 0
     prop_names = 'rho mu'
     prop_values = '${rho}  ${mu}'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -146,7 +146,7 @@ rho=2.5
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]
@@ -165,10 +165,10 @@ rho=2.5
 [Outputs]
   [exodus]
     type = Exodus
-  [../]
+  []
   [csv]
     type = CSV
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -177,32 +177,32 @@ rho=2.5
     variable = vel_x
     function = vel_x_func
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
   [L2vel_y]
     variable = vel_y
     function = vel_y_func
     type = ElementL2Error
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
   [L2p]
     variable = p
     function = p_func
     type = ElementL2Error
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
   [L2vxx]
     variable = vxx
     function = vxx_func
     type = ElementL2Error
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [AuxVariables]
   [vxx]
     family = MONOMIAL
     order = FIRST
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -211,5 +211,5 @@ rho=2.5
     component = x
     variable = vxx
     gradient_variable = vel_x
-  [../]
+  []
 []

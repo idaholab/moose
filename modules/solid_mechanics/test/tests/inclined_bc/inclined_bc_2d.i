@@ -32,20 +32,20 @@
     [top]
       boundary = top
       function = '-1000*t'
-    [../]
-  [../]
+    []
+  []
   [InclinedNoDisplacementBC]
     [right]
       boundary = right
       penalty = 1.0e8
       displacements = 'disp_x disp_y'
-    [../]
+    []
     [bottom]
       boundary = bottom
       penalty = 1.0e8
       displacements = 'disp_x disp_y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -53,10 +53,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -86,7 +86,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

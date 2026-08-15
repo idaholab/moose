@@ -36,14 +36,14 @@
     rotation1_angle = 45
     # so, in total: a point y = +/-0.7 takes values from x = -/+0.7, so solution_function_rot3 should have u = -y
     transformation_order = 'rotation0 rotation1'
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -51,7 +51,7 @@
     type = FunctionIC
     variable = u
     function = solution_fcn
-  [../]
+  []
 []
 
 [Functions]
@@ -59,14 +59,14 @@
     type = SolutionFunction
     from_variable = u
     solution = solution_uo
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

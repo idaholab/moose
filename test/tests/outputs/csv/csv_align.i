@@ -7,33 +7,33 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux0]
     order = SECOND
     family = SCALAR
-  [../]
+  []
   [aux1]
     family = SCALAR
     initial_condition = 5
-  [../]
+  []
   [aux2]
     family = SCALAR
     initial_condition = 10
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -42,13 +42,13 @@
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
   [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
 []
 
@@ -56,15 +56,15 @@
   [num_vars]
     type = NumVars
     system = 'NL'
-  [../]
+  []
   [num_aux]
     type = NumVars
     system = 'AUX'
-  [../]
+  []
   [norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -84,7 +84,7 @@
     delimiter = ', '
     sync_times = '0.123456789123412 0.15 0.2'
     precision = 8
-  [../]
+  []
 []
 
 [ICs]
@@ -92,5 +92,5 @@
     variable = aux0
     values = '12 13'
     type = ScalarComponentIC
-  [../]
+  []
 []

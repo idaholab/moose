@@ -32,9 +32,9 @@
         add_variables = true
         strain = SMALL
         incremental = true
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [BCs]
@@ -43,13 +43,13 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -58,7 +58,7 @@
     variable = disp_y
     boundary = 2
     rate = 2.38095238095
-  [../]
+  []
 []
 
 [Materials]
@@ -66,10 +66,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 250.0
     poissons_ratio = 0.4999
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 
@@ -77,7 +77,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -96,7 +96,7 @@
     type = PointValue
     variable = disp_y
     point = '48.0 60.0 0.0'
-  [../]
+  []
 []
 
 [Outputs]

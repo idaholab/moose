@@ -21,14 +21,14 @@
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = ADHeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -38,7 +38,7 @@
     eigenstrain_names = thermal_expansion
     generate_output = 'stress_xx stress_yy stress_zz stress_yz stress_xz stress_xy'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Contact]
@@ -48,7 +48,7 @@
     formulation = kinematic
     tangential_tolerance = 1e-1
     penalty = 1e10
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -61,7 +61,7 @@
     emissivity_secondary = 0
     gap_conductivity = 1e4
     quadrature = true
-  [../]
+  []
 []
 
 [BCs]
@@ -70,65 +70,65 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 7
     value = 0
-  [../]
+  []
   [top_temp]
     type = DirichletBC
     variable = temp
     boundary = 7
     value = 1000.0
-  [../]
+  []
   [bot_temp]
     type = DirichletBC
     variable = temp
     boundary = 6
     value = 500.0
-  [../]
+  []
 []
 
 [Materials]
   [density]
     type = Density
     density = 100
-  [../]
+  []
   [temp]
     type = ADHeatConductionMaterial
     thermal_conductivity = 1e5
     specific_heat = 620.0
-  [../]
+  []
   [Elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
-  [../]
+  []
   [thermal_eigenstrain]
     type = ADComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 500
     temperature = temp
     eigenstrain_name = thermal_expansion
-  [../]
+  []
   [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

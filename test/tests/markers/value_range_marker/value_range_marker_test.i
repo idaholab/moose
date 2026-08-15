@@ -12,14 +12,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -52,7 +52,7 @@
       buffer_size = 0.1
       variable = u
       third_state = DO_NOTHING
-    [../]
+    []
     [inverted_marker]
       type = ValueRangeMarker
       invert = true
@@ -61,8 +61,8 @@
       buffer_size = 0.1
       variable = u
       third_state = DO_NOTHING
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

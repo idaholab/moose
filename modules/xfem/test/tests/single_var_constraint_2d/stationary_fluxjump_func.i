@@ -24,19 +24,19 @@
   [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.5 1.0 0.5 0.0'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Constraints]
@@ -46,14 +46,14 @@
     jump = 0
     jump_flux = jump_flux_func
     geometric_cut_userobject = 'line_seg_cut_uo'
-  [../]
+  []
 []
 
 [Functions]
   [jump_flux_func]
     type = ParsedFunction
     expression = '1'
-  [../]
+  []
 []
 
 [BCs]
@@ -63,14 +63,14 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -97,5 +97,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

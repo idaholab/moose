@@ -10,10 +10,10 @@
 [Variables]
   [u]
     block = '1 2'
-  [../]
+  []
   [v]
     block = 2
-  [../]
+  []
 []
 
 [Kernels]
@@ -21,12 +21,12 @@
     type = BlkResTestDiffusion
     variable = u
     block = '1 2'
-  [../]
+  []
   [v_diff]
     type = Diffusion
     variable = v
     block = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -35,13 +35,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -50,13 +50,13 @@
     block = 1
     prop_names = 'a b'
     prop_values = '1 2'
-  [../]
+  []
   [mat1]
     type = GenericConstantMaterial
     block = 2
     prop_names = a
     prop_values = 10
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -64,7 +64,7 @@
     type = NodalVariableValue
     variable = v
     nodeid = 0
-  [../]
+  []
 []
 
 [Executioner]

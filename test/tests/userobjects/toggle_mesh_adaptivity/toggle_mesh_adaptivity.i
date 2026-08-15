@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Problem]
@@ -38,15 +38,15 @@
       top_right = '0.5 0.5 0'
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [UserObjects]
   [mesh_adaptivity_off]
     type = ToggleMeshAdaptivity
     mesh_adaptivity = 'off'
-  [../]
+  []
 []
 
 [Outputs]
@@ -54,6 +54,6 @@
   [console]
     type = Console
     print_mesh_changed_info = true
-  [../]
+  []
 []
 

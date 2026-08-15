@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
   [initial_func]
     type = ParsedFunction
     expression = sin(pi*x)*sin(pi*y)
-  [../]
+  []
 []
 
 [Kernels]
@@ -22,16 +22,16 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [source]
     type = BodyForce
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -41,26 +41,26 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
   [func_bc]
     type = FunctionDirichletBC
     variable = u
     boundary = 'bottom right top left'
     function = initial_func
-  [../]
+  []
 []
 
 [Postprocessors]
   [test_pp]
     type = TestCopyInitialSolution
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,5 +78,5 @@
     function = initial_func
     variable = u
     type = FunctionIC
-  [../]
+  []
 []

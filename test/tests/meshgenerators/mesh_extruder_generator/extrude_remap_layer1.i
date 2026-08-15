@@ -18,21 +18,21 @@
     new_ids = '10 12 15
                30 32 35
                50 52 55'
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -41,14 +41,14 @@
     variable = u
     boundary = 'new_bottom'
     value = 0
-  [../]
+  []
 
   [top]
     type = DirichletBC
     variable = u
     boundary = 'new_top'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

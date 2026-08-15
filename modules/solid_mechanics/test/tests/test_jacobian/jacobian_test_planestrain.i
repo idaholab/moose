@@ -20,12 +20,12 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
 []
 
@@ -35,7 +35,7 @@
 
 [Kernels]
   [SolidMechanics]
-  [../]
+  []
 []
 
 [BCs]
@@ -45,14 +45,14 @@
     variable = disp_y
     boundary = top
     value = -1.0
-  [../]
+  []
 
   [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
 []
 
@@ -62,13 +62,13 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 0
-  [../]
+  []
   [strain]
     block = 0
-  [../]
+  []
   [stress]
     block = 0
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -76,7 +76,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

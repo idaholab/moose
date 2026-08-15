@@ -17,18 +17,18 @@
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = 1e-6
-  [../]
+  []
 []
 
 [AuxVariables]
   [vonmises]
     order = CONSTANT
     family = MONOMIAL
- [../]
+ []
  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
- [../]
+ []
 []
 
 [AuxKernels]
@@ -37,7 +37,7 @@
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = VonMisesStress
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -48,7 +48,7 @@
     property = stress
     scalar_type = VonMisesStress
     sort_by = id
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -56,7 +56,7 @@
     add_variables = true
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 
@@ -66,25 +66,25 @@
     variable = z_disp
     boundary = 5
     function = rampConstant
-  [../]
+  []
   [back_x]
     type = DirichletBC
     variable = x_disp
     boundary = 0
     value = 0.0
-  [../]
+  []
   [back_y]
     type = DirichletBC
     variable = y_disp
     boundary = 0
     value = 0.0
-  [../]
+  []
   [back_z]
     type = DirichletBC
     variable = z_disp
     boundary = 0
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -92,10 +92,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = .3
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]

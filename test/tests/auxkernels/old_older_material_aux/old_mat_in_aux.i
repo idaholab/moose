@@ -9,7 +9,7 @@
   [aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -17,19 +17,19 @@
     type = OldMaterialAux
     property_name = prop
     variable = aux
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
   [func]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -37,11 +37,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -50,13 +50,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -65,7 +65,7 @@
     prop_names = prop
     prop_values = func
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

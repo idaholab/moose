@@ -58,20 +58,20 @@
     incremental = true
     add_variables = true
     generate_output = 'stress_yy creep_strain_yy'
-  [../]
+  []
 []
 
 [Functions]
   [pressure]
     type = ParsedFunction
     expression = 'sqrt(t)'
-  [../]
+  []
 
   [dts]
     type = PiecewiseLinear
     y = '1e-2 1e-1 1e0 1e1 1e2'
     x = '0    7e-1 7e0 7e1 1e2'
-  [../]
+  []
 []
 
 [BCs]
@@ -80,25 +80,25 @@
     variable = disp_y
     boundary = top
     function = pressure
-  [../]
+  []
   [u_bottom_fix]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [u_yz_fix]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [u_xy_fix]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -106,24 +106,24 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.8e7
     poissons_ratio = 0.3
-  [../]
+  []
   [creep_plas]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'creep plas'
     tangent_operator = elastic
-  [../]
+  []
   [creep]
     type = PowerLawCreepStressUpdate
     coefficient = 3.0e-24
     n_exponent = 4
     m_exponent = 0
     activation_energy = 0
-  [../]
+  []
   [plas]
     type = IsotropicPlasticityStressUpdate
     hardening_constant = 1
     yield_stress = 1e30
-  [../]
+  []
 []
 
 [Executioner]
@@ -147,13 +147,13 @@
   [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Postprocessors]
   [timestep]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

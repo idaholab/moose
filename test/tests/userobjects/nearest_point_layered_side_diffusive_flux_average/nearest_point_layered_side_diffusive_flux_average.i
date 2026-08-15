@@ -8,21 +8,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [np_layered_flux_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -32,7 +32,7 @@
     execute_on = timestep_end
     user_object = nplsfa
     boundary = 'bottom top'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -45,7 +45,7 @@
     diffusivity = 1.0
     execute_on = linear
     boundary = 'bottom top'
-  [../]
+  []
 []
 
 [BCs]
@@ -54,13 +54,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [one]
     type = DirichletBC
     variable = u
     boundary = 'right back top'
     value = 1
-  [../]
+  []
 []
 
 

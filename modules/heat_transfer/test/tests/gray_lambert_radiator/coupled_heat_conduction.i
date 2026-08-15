@@ -13,13 +13,13 @@
     dy = '5'
     iy = '10'
     subdomain_id = '1 2 3'
-  [../]
+  []
 
   [break_sides]
     type = BreakBoundaryOnSubdomainGenerator
     boundaries = 'bottom top'
     input = cartesian
-  [../]
+  []
 
   [left_interior]
     type = SideSetsBetweenSubdomainsGenerator
@@ -27,7 +27,7 @@
     paired_block = 2
     new_boundary = left_interior
     input = break_sides
-  [../]
+  []
 
   [right_interior]
     type = SideSetsBetweenSubdomainsGenerator
@@ -35,13 +35,13 @@
     paired_block = 2
     new_boundary = right_interior
     input = left_interior
-  [../]
+  []
   [rename]
     type = RenameBlockGenerator
     input = right_interior
     old_block = '1 2 3'
     new_block = '1 4 3'
-  [../]
+  []
 []
 
 
@@ -49,7 +49,7 @@
   [temperature]
     initial_condition = 300
     block = '1 3'
-  [../]
+  []
 []
 
 [Kernels]
@@ -58,7 +58,7 @@
     variable = temperature
     thermal_conductivity = 1
     block = '1 3'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -75,7 +75,7 @@
                     0.45 0.45  0 0.1;
                     0.45 0.45 0.1  0'
     execute_on = 'INITIAL LINEAR TIMESTEP_END'
-  [../]
+  []
 []
 
 [BCs]
@@ -85,7 +85,7 @@
     variable = temperature
     boundary = bottom_to_1
     value = 1500
-  [../]
+  []
 
   [top_right]
     type = DirichletBC
@@ -93,7 +93,7 @@
     variable = temperature
     boundary = top_to_3
     value = 300
-  [../]
+  []
 
   [radiation]
     type = GrayLambertNeumannBC
@@ -101,7 +101,7 @@
     reconstruct_emission = false
     surface_radiation_object_name = cavity_radiation
     boundary = 'left_interior right_interior'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -110,28 +110,28 @@
     boundary = left_interior
     surface_radiation_object_name = cavity_radiation
     return_type = HEAT_FLUX_DENSITY
-  [../]
+  []
 
   [qdot_right]
     type = GrayLambertSurfaceRadiationPP
     boundary = right_interior
     surface_radiation_object_name = cavity_radiation
     return_type = HEAT_FLUX_DENSITY
-  [../]
+  []
 
   [qdot_top]
     type = GrayLambertSurfaceRadiationPP
     boundary = top_to_2
     surface_radiation_object_name = cavity_radiation
     return_type = HEAT_FLUX_DENSITY
-  [../]
+  []
 
   [qdot_bottom]
     type = GrayLambertSurfaceRadiationPP
     boundary = bottom_to_2
     surface_radiation_object_name = cavity_radiation
     return_type = HEAT_FLUX_DENSITY
-  [../]
+  []
 []
 
 [Executioner]

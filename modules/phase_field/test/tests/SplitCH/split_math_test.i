@@ -21,14 +21,14 @@
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
+    []
+  []
 
   [w]
     order = FIRST
     family = LAGRANGE
 
-  [../]
+  []
 
 
 []
@@ -41,12 +41,12 @@ active = 'SMP'
    preconditioner = 'AMG ASM'
    off_diag_row = 'c '
    off_diag_column = 'w '
-  [../]
+  []
 
   [SMP]
    type = SMP
    coupled_groups = 'c,w'
-  [../]
+  []
 []
 
 [Kernels]
@@ -56,19 +56,19 @@ active = 'SMP'
     variable = c
     kappa_name = kappa_c
     w = w
-  [../]
+  []
 
   [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
 
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 
 []
 
@@ -78,14 +78,14 @@ active = 'SMP'
       primary = 0
       secondary = 2
       translation = '0 30.0 0'
-    [../]
+    []
 
     [left_right]
       primary = 1
       secondary = 3
       translation = '-30.0 0 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -95,7 +95,7 @@ active = 'SMP'
     prop_names  = 'M kappa_c'
     prop_values = '1.0 2.0'
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -46,7 +46,7 @@
     incremental = true
     eigenstrain_names = ini_stress
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz plastic_strain_xx plastic_strain_xy plastic_strain_xz plastic_strain_yy plastic_strain_yz plastic_strain_zz strain_xx strain_xy strain_xz strain_yy strain_yz strain_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -55,38 +55,38 @@
     variable = disp_x
     boundary = back
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
-  [../]
+  []
   [bottomz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
   [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = '0.5*t'
-  [../]
+  []
   [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = 't'
-  [../]
+  []
   [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = '0.5*t'
-  [../]
+  []
 []
 
 
@@ -94,31 +94,31 @@
   [f_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [f_compressive]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [intnl_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [intnl_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [ls]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -127,41 +127,41 @@
     property = plastic_yield_function
     index = 0
     variable = f_shear
-  [../]
+  []
   [f_tensile]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f_tensile
-  [../]
+  []
   [f_compressive]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f_compressive
-  [../]
+  []
   [intnl_shear]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 0
     variable = intnl_shear
-  [../]
+  []
   [intnl_tensile]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 1
     variable = intnl_tensile
-  [../]
+  []
   [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
   [ls]
     type = MaterialRealAux
     property = plastic_linesearch_needed
     variable = ls
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -169,127 +169,127 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
+  []
   [stress_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
+  []
   [stress_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
+  []
   [stress_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
+  []
   [stress_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
+  []
   [stress_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
+  []
   [strainp_xx]
     type = PointValue
     point = '0 0 0'
     variable = plastic_strain_xx
-  [../]
+  []
   [strainp_xy]
     type = PointValue
     point = '0 0 0'
     variable = plastic_strain_xy
-  [../]
+  []
   [strainp_xz]
     type = PointValue
     point = '0 0 0'
     variable = plastic_strain_xz
-  [../]
+  []
   [strainp_yy]
     type = PointValue
     point = '0 0 0'
     variable = plastic_strain_yy
-  [../]
+  []
   [strainp_yz]
     type = PointValue
     point = '0 0 0'
     variable = plastic_strain_yz
-  [../]
+  []
   [strainp_zz]
     type = PointValue
     point = '0 0 0'
     variable = plastic_strain_zz
-  [../]
+  []
   [straint_xx]
     type = PointValue
     point = '0 0 0'
     variable = strain_xx
-  [../]
+  []
   [straint_xy]
     type = PointValue
     point = '0 0 0'
     variable = strain_xy
-  [../]
+  []
   [straint_xz]
     type = PointValue
     point = '0 0 0'
     variable = strain_xz
-  [../]
+  []
   [straint_yy]
     type = PointValue
     point = '0 0 0'
     variable = strain_yy
-  [../]
+  []
   [straint_yz]
     type = PointValue
     point = '0 0 0'
     variable = strain_yz
-  [../]
+  []
   [straint_zz]
     type = PointValue
     point = '0 0 0'
     variable = strain_zz
-  [../]
+  []
   [f_shear]
     type = PointValue
     point = '0 0 0'
     variable = f_shear
-  [../]
+  []
   [f_tensile]
     type = PointValue
     point = '0 0 0'
     variable = f_tensile
-  [../]
+  []
   [f_compressive]
     type = PointValue
     point = '0 0 0'
     variable = f_compressive
-  [../]
+  []
   [intnl_shear]
     type = PointValue
     point = '0 0 0'
     variable = intnl_shear
-  [../]
+  []
   [intnl_tensile]
     type = PointValue
     point = '0 0 0'
     variable = intnl_tensile
-  [../]
+  []
   [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
-  [../]
+  []
   [ls]
     type = PointValue
     point = '0 0 0'
     variable = ls
-  [../]
+  []
 []
 
 [UserObjects]
@@ -298,29 +298,29 @@
     value_0 = 1
     value_residual = 2
     rate = 1
-  [../]
+  []
   [tanphi]
     type = SolidMechanicsHardeningExponential
     value_0 = 1.0
     value_residual = 0.5
     rate = 2
-  [../]
+  []
   [tanpsi]
     type = SolidMechanicsHardeningExponential
     value_0 = 0.1
     value_residual = 0.05
     rate = 1
-  [../]
+  []
   [t_strength]
     type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 0
     rate = 1
-  [../]
+  []
   [c_strength]
     type = SolidMechanicsHardeningConstant
     value = 1E8
-  [../]
+  []
 []
 
 [Materials]
@@ -328,17 +328,17 @@
     type = ComputeIsotropicElasticityTensor
     lambda = 4.0
     shear_modulus = 4.0
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 2 0 0 4 2 4 6'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = stress
     perform_finite_strain_rotations = false
-  [../]
+  []
   [stress]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
@@ -351,7 +351,7 @@
     smoothing_tol = 1
     yield_function_tol = 1E-3
     perfect_guess = false
-  [../]
+  []
 []
 
 
@@ -366,5 +366,5 @@
   file_base = small_deform11
   [csv]
     type = CSV
-  [../]
+  []
 []

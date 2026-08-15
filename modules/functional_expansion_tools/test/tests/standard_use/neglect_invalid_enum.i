@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diffusion]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Functions]
@@ -25,7 +25,7 @@
     disc = Zernike
     orders = '0'
     physical_bounds = '-1 1'
-  [../]
+  []
 []
 
 [Executioner]

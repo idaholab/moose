@@ -9,7 +9,7 @@
   [aux]
     family = MONOMIAL
     order = THIRD
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -18,7 +18,7 @@
     variable = aux
     execute_on = initial
     function = 10*x*y
-  [../]
+  []
 []
 
 [Problem]
@@ -28,14 +28,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -44,13 +44,13 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 2
-  [../]
+  []
 []
 
 [Executioner]

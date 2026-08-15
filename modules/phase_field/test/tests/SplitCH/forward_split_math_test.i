@@ -10,9 +10,9 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [w]
-  [../]
+  []
 []
 
 [ICs]
@@ -23,44 +23,44 @@
     x2 = 25
     y1 = 0
     y2 = 25
-  [../]
+  []
 []
 
 [Kernels]
   [cdot]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [grad_w]
     type = MatDiffusion
     variable = c
     v = w
     diffusivity = 1.0
-  [../]
+  []
   [grad_c]
     type = MatDiffusion
     variable = w
     v = c
     diffusivity = 2.0
-  [../]
+  []
   [w2]
     type = CoupledMaterialDerivative
     variable = w
     v = c
     f_name = F
-  [../]
+  []
   [w3]
     type = CoefReaction
     variable = w
     coefficient = -1.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [local_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -70,7 +70,7 @@
     f_name = F
     kappa_names = kappa_c
     interfacial_vars = c
-  [../]
+  []
 []
 
 [Materials]
@@ -78,32 +78,32 @@
     type = GenericConstantMaterial
     prop_names = kappa_c
     prop_values = 2.0
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     coupled_variables = c
     expression = '(1 - c)^2 * (1 + c)^2'
     property_name = F
-  [../]
+  []
 []
 
 [Postprocessors]
   [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
+  []
   [total_c]
     type = ElementIntegralVariablePostprocessor
     variable = c
     execute_on = 'initial TIMESTEP_END'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -8,7 +8,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -17,12 +17,12 @@
   [heat]
     type = HeatConduction
     variable = u
-  [../]
+  []
 
   [ie]
     type = SpecificHeatConductionTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,14 +33,14 @@
     variable = u
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [top]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -50,25 +50,25 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = '1'
-  [../]
+  []
 
   [p_2]
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = '2'
-  [../]
+  []
 
   [p_3]
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = '3'
-  [../]
+  []
 
   [p_all]
     type = ElementIntegralVariablePostprocessor
     variable = u
     block = '1 2 3'
-  [../]
+  []
 []
 
 
@@ -78,21 +78,21 @@
     block = 1
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '1.0 1.0 1.0'
-  [../]
+  []
 
   [constant2]
     type = GenericConstantMaterial
     block = 2
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '0.8 0.8 0.8'
-  [../]
+  []
 
   [constant3]
     type = GenericConstantMaterial
     block = 3
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '5 5 5'
-  [../]
+  []
 []
 
 

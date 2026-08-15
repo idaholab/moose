@@ -25,7 +25,7 @@
     eigenstrain_names = ini_stress
     incremental = true
     strain = small
-  [../]
+  []
 []
 
 [Materials]
@@ -33,16 +33,16 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.25
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '1 2 3 4 5 6 7 8 9'
     initial_stress_aux = '1 2 3'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 

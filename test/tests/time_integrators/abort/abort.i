@@ -17,7 +17,7 @@
     order =  FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [Functions]
@@ -26,7 +26,7 @@
   [func]
     type = ParsedFunction
     expression = 2.0*t
-  [../]
+  []
 []
 
 [Kernels]
@@ -35,13 +35,13 @@
   [t_time]
     type = TimeDerivative
     variable = Time
-  [../]
+  []
 
   [func_time]
     type = BodyForce
     variable = Time
     function = func
-  [../]
+  []
 []
 
 [BCs]
@@ -51,7 +51,7 @@
     type = NeumannBC
     variable = Time
     boundary = 'left right'
-  [../]
+  []
 
 []
 
@@ -66,7 +66,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
   steady_state_tolerance = .00000000000000001
   steady_state_detection = true

@@ -31,7 +31,7 @@
 
 [Variables]
   [p]
-  [../]
+  []
 []
 
 [BCs]
@@ -40,50 +40,50 @@
     boundary = 'bottom top'
     variable = p
     function = t
-  [../]
+  []
   [xmin]
     type = DirichletBC
     boundary = left
     variable = disp_x
     value = 0
-  [../]
+  []
   [ymin]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0
-  [../]
+  []
   [zmin]
     type = DirichletBC
     boundary = back
     variable = disp_z
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
   [unimportant_p]
     type = Diffusion
     variable = p
-  [../]
+  []
   [poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
     porepressure = p
     component = 0
-  [../]
+  []
   [poro_y]
     type = PoroMechanicsCoupling
     variable = disp_y
     porepressure = p
     component = 1
-  [../]
+  []
   [poro_z]
     type = PoroMechanicsCoupling
     variable = disp_z
     porepressure = p
     component = 2
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -92,34 +92,34 @@
     incremental = false
     strain = small
     block = 0
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -129,42 +129,42 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -172,17 +172,17 @@
     type = PointValue
     point = '1 1 1'
     variable = disp_x
-  [../]
+  []
   [corner_y]
     type = PointValue
     point = '1 1 1'
     variable = disp_y
-  [../]
+  []
   [corner_z]
     type = PointValue
     point = '1 1 1'
     variable = disp_z
-  [../]
+  []
 []
 
 
@@ -192,15 +192,15 @@
     # bulk modulus = 1, poisson ratio = 0.2
     C_ijkl = '0.5 0.75'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [biot]
     type = GenericConstantMaterial
     prop_names = biot_coefficient
     prop_values = 2.0
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -209,7 +209,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
     petsc_options_value = 'gmres bjacobi 1E-10 1E-10 10 1E-15 1E-10'
-  [../]
+  []
 []
 
 [Executioner]

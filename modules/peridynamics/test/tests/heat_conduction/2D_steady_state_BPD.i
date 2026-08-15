@@ -10,17 +10,17 @@
     dim = 2
     nx = 10
     ny = 10
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -28,26 +28,26 @@
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 1
-  [../]
+  []
 []
 
 [Functions]
   [analytical_sol]
     type = ParsedFunction
     expression = 'x*x+y*y'
-  [../]
+  []
 []
 
 [Kernels]
   [heat_conduction]
     type = HeatConductionBPD
     variable = temp
-  [../]
+  []
   [heat_source]
     type = HeatSourceBPD
     variable = temp
     power_density = -4
-  [../]
+  []
 []
 
 [BCs]
@@ -56,25 +56,25 @@
     variable = temp
     boundary = 1003
     function = analytical_sol
-  [../]
+  []
   [bottom]
     type = FunctionDirichletBC
     variable = temp
     boundary = 1000
     function = analytical_sol
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = temp
     boundary = 1001
     function = analytical_sol
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = temp
     boundary = 1002
     function = analytical_sol
-  [../]
+  []
 []
 
 [Materials]
@@ -82,7 +82,7 @@
     type = ThermalConstantHorizonMaterialBPD
     temperature = temp
     thermal_conductivity = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -90,14 +90,14 @@
     type = NodalL2Error
     function = 'analytical_sol'
     variable = temp
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

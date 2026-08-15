@@ -22,8 +22,8 @@
     [GrainGrowth]
       coupled_variables = T
       variable_mobility = true
-    [../]
-  [../]
+    []
+  []
 []
 
 
@@ -31,7 +31,7 @@
   [TGradient]
     type = ParsedFunction
     expression = '450 + 0.1*x'
-  [../]
+  []
 []
 
 [ICs]
@@ -41,13 +41,13 @@
       x2 = 500.0
       y1 = 0.0
       y2 = 500.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [T]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -55,7 +55,7 @@
     type = FunctionAux
     variable = T
     function = TGradient
-  [../]
+  []
 []
 
 [Materials]
@@ -66,7 +66,7 @@
     GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
     Q = 0.23 # Migration energy in eV
     GBenergy = 0.708 # GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -74,14 +74,14 @@
     type = ElementIntegralVariablePostprocessor
     variable = gr0
     execute_on = 'initial TIMESTEP_END'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

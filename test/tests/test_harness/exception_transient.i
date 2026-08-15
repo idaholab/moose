@@ -13,7 +13,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,15 +24,15 @@
 
     # This exception won't be caught and will crash the simulation
     throw_std_exception = true
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time_deriv]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -42,14 +42,14 @@
     preset = false
     boundary = 2
     value = 1
-  [../]
+  []
   [right2]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

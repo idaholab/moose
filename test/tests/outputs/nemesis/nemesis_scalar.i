@@ -12,12 +12,12 @@
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
+  []
   [f_times_mult]
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
+  []
 []
 
 [ScalarKernels]
@@ -25,40 +25,40 @@
     type = CoupledODETimeDerivative
     variable = f
     v = f_times_mult
-  [../]
+  []
 
   [src]
     type = ParsedODEKernel
     variable = f
     expression = '-1'
-  [../]
+  []
 
   [f_times_mult_1]
     type = ParsedODEKernel
     variable = f_times_mult
     expression = 'f_times_mult'
-  [../]
+  []
 
   [f_times_mult_2]
     type = ParsedODEKernel
     variable = f_times_mult
     expression = '-f * g'
     coupled_variables = 'f g'
-  [../]
+  []
 []
 
 [AuxVariables]
   [g]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
   [function_g]
     type = ParsedFunction
     expression = '(1 + t)'
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -67,7 +67,7 @@
     function = function_g
     variable = g
     execute_on = 'linear initial'
-  [../]
+  []
 []
 
 [Executioner]

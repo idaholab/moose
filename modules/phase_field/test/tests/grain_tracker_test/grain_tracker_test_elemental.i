@@ -17,7 +17,7 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [UserObjects]
@@ -26,65 +26,65 @@
     grain_num = 12 # Number of grains
     coloring_algorithm = bt # bt will assign one grain to each op if they are the same
     rand_seed = 8675
-  [../]
+  []
   [grain_tracker]
     type = GrainTracker
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
   [BndsCalc]
     type = BndsCalcAux
     variable = bnds
-  [../]
+  []
   [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
-  [../]
+  []
   [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -96,13 +96,13 @@
     Q = 0.23
     GBenergy = 0.708
     molar_volume = 7.11e-6
-  [../]
+  []
 []
 
 [Postprocessors]
   [DOFs]
     type = NumDOFs
-  [../]
+  []
 []
 
 [Executioner]
@@ -132,20 +132,20 @@
       coarsen = 0.975
       third_state = DO_NOTHING
       variable = bnds
-    [../]
+    []
     [error_marker]
       type = ErrorFractionMarker
       coarsen = 0.1
       indicator = bnds_error
       refine = 0.7
-    [../]
-  [../]
+    []
+  []
   [Indicators]
     [bnds_error]
       type = GradientJumpIndicator
       variable = bnds
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

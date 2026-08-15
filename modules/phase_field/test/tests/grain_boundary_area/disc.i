@@ -25,15 +25,15 @@
       int_width = 0.15
       invalue = 1
       outvalue = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
   [area]
     type = GrainBoundaryArea
     grains_per_side = 1
-  [../]
+  []
 []
 
 [Problem]

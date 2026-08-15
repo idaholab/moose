@@ -11,26 +11,26 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_aux]
-  [../]
+  []
 []
 
 [Functions]
   [u_xdr_func]
     type = SolutionFunction
     solution = xdr_u
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -39,7 +39,7 @@
     variable = u_aux
     solution = xdr_u_aux
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -48,13 +48,13 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [UserObjects]
@@ -64,14 +64,14 @@
     mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
     es = aux_nonlinear_solution_xdr_0001.xdr
     execute_on = initial
-  [../]
+  []
   [xdr_u]
     type = SolutionUserObject
     system = nl0
     mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
     es = aux_nonlinear_solution_xdr_0001.xdr
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]
@@ -89,5 +89,5 @@
     function = u_xdr_func
     variable = u
     type = FunctionIC
-  [../]
+  []
 []

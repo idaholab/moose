@@ -16,28 +16,28 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [strain11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [c]
-  [../]
+  []
   [eigenstrain00]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -50,12 +50,12 @@
     variable = c
     invalue = 1
     type = SmoothCircleIC
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -65,21 +65,21 @@
     index_i = 0
     index_j = 0
     variable = strain11
-  [../]
+  []
   [stress11]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 1
     variable = stress11
-  [../]
+  []
   [eigenstrain00]
     type = RankTwoAux
     variable = eigenstrain00
     rank_two_tensor = eigenstrain
     index_j = 0
     index_i = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -88,7 +88,7 @@
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
@@ -99,7 +99,7 @@
     f_name = var_dep
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
   [eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
@@ -107,17 +107,17 @@
     args = c
     prefactor = var_dep
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -126,26 +126,26 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [top_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = 0.0005*t
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

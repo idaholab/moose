@@ -38,14 +38,14 @@
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
-  [../]
+  []
   [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = 'subdomain1'
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
-  [../]
+  []
 []
 
 [Variables]
@@ -53,12 +53,12 @@
     order = FIRST
     family = LAGRANGE
     block = '0'
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
     block = '1'
-  [../]
+  []
 []
 
 [Kernels]
@@ -67,13 +67,13 @@
     variable = u
     block = '0'
     diffusivity = D
-  [../]
+  []
   [diff_v]
     type = MatDiffusion
     variable = v
     block = '1'
     diffusivity = D
-  [../]
+  []
 []
 
 [InterfaceKernels]
@@ -84,7 +84,7 @@
     boundary = 'primary0_interface'
     D = D
     D_neighbor = D
-  [../]
+  []
   [interface_reaction]
     type = InterfaceReaction
     variable = u
@@ -92,7 +92,7 @@
     boundary = 'primary0_interface'
     kf = 1 # Forward reaction rate coefficient
     kb = 2 # Backward reaction rate coefficient
-  [../]
+  []
 []
 
 [BCs]
@@ -101,13 +101,13 @@
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -116,20 +116,20 @@
     block = '0'
     prop_names = 'D'
     prop_values = '4'
-  [../]
+  []
   [block1]
     type = GenericConstantMaterial
     block = '1'
     prop_names = 'D'
     prop_values = '2'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -155,11 +155,11 @@
     function = -0.2*x+1
     variable = 'u'
     block = '0'
-  [../]
+  []
   [elemental_error_v]
     type = ElementL2Error
     function = -0.4*x+0.8
     variable = 'v'
     block = '1'
-  [../]
+  []
 []

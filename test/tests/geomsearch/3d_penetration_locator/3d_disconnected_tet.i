@@ -18,14 +18,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [gap_distance]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -33,7 +33,7 @@
     type = MassMatrix
     variable = u
     matrix_tags = 'system'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,7 +43,7 @@
     boundary = 'leftright'
     paired_boundary = 'rightleft'
     search_method = all_proximate_sides
-  [../]
+  []
 []
 
 [VectorPostprocessors]

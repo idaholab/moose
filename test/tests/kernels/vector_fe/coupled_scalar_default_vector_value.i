@@ -11,24 +11,24 @@
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = v
-  [../]
+  []
   [source]
     type = BodyForce
     variable = v
-  [../]
+  []
   [advection]
     type = EFieldAdvection
     variable = v
     charge = 'positive'
     mobility = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -50,7 +50,7 @@
   [pre]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

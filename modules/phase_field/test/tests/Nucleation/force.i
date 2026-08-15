@@ -13,7 +13,7 @@
 
 [Variables]
   [c]
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,11 +23,11 @@
     map = map
     no_nucleus_value = -1
     nucleus_value = 2
-  [../]
+  []
   [c_react]
     type = Reaction
     variable = c
-  [../]
+  []
 []
 
 [UserObjects]
@@ -37,13 +37,13 @@
     probability = 0.01
     seed = 12346
     radius = 3.27
-  [../]
+  []
   [map]
     type = DiscreteNucleationMap
     int_width = 2
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Executioner]

@@ -35,27 +35,27 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [rot_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [rot_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [rot_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
@@ -64,37 +64,37 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = left
     value = 0.0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = left
     value = 0.0
-  [../]
+  []
   [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = left
     value = 0.0
-  [../]
+  []
   [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = left
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -103,14 +103,14 @@
     variable = disp_z
     boundary = right
     rate = 1.0e-4
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -134,7 +134,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 0
     variable = disp_x
-  [../]
+  []
   [solid_disp_y]
     type = StressDivergenceBeam
     block = '0'
@@ -142,7 +142,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 1
     variable = disp_y
-  [../]
+  []
   [solid_disp_z]
     type = StressDivergenceBeam
     block = '0'
@@ -150,7 +150,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 2
     variable = disp_z
-  [../]
+  []
   [solid_rot_x]
     type = StressDivergenceBeam
     block = '0'
@@ -158,7 +158,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 3
     variable = rot_x
-  [../]
+  []
   [solid_rot_y]
     type = StressDivergenceBeam
     block = '0'
@@ -166,7 +166,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 4
     variable = rot_y
-  [../]
+  []
   [solid_rot_z]
     type = StressDivergenceBeam
     block = '0'
@@ -174,7 +174,7 @@
     rotations = 'rot_x rot_y rot_z'
     component = 5
     variable = rot_z
-  [../]
+  []
 []
 
 [Materials]
@@ -184,7 +184,7 @@
     poissons_ratio = -0.9998699638
     shear_coefficient = 0.85
     block = 0
-  [../]
+  []
   [strain]
     type = ComputeIncrementalBeamStrain
     block = '0'
@@ -196,11 +196,11 @@
     Iy = 0.0141889
     Iz = 0.0141889
     y_orientation = '0.0 1.0 0.0'
-  [../]
+  []
   [stress]
     type = ComputeBeamResultants
     block = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -208,12 +208,12 @@
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_x
-  [../]
+  []
   [disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_z
-  [../]
+  []
 []
 
 [Outputs]

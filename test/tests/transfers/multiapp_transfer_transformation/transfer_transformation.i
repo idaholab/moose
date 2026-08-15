@@ -59,21 +59,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
   [fromsubelem]
     order = constant
     family = monomial
-  [../]
+  []
 
   [fromsub]
   []
@@ -85,28 +85,28 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
   [right0]
     type = DirichletBC
     variable = u
     boundary = boundary01
     value = 1
-  [../]
+  []
 
   [right1]
     type = DirichletBC
     variable = u
     boundary = boundary12
     value = 0
-  [../]
+  []
 
   [right2]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

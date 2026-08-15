@@ -7,18 +7,18 @@
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
   [td_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -27,13 +27,13 @@
     variable = v
     boundary = left
     value = 1
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

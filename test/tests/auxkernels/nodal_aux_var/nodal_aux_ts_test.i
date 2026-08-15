@@ -19,7 +19,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -28,12 +28,12 @@
   [aux1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [aux2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,19 +42,19 @@
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   #Coupling of nonlinear to Aux
   [force]
     type = CoupledForce
     variable = u
     v = aux2
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -65,7 +65,7 @@
     variable = aux1
     type = ConstantAux
     value = 1
-  [../]
+  []
 
   #Shows coupling of Aux to nonlinear
   [field]
@@ -74,7 +74,7 @@
     value = 2
     coupled = u
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -85,14 +85,14 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

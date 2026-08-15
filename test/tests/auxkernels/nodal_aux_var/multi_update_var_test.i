@@ -13,7 +13,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -21,26 +21,26 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
-  [../]
+  []
 
   [ten]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 
   [2k]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -50,7 +50,7 @@
     u = u
     var1 = ten
     var2 = 2k
-  [../]
+  []
 []
 
 [BCs]
@@ -61,14 +61,14 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

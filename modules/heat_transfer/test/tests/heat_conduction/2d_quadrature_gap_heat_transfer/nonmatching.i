@@ -4,14 +4,14 @@
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [Kernels]
   [hc]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -20,13 +20,13 @@
     variable = temp
     boundary = leftleft
     value = 1000
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = temp
     boundary = rightright
     value = 400
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -38,7 +38,7 @@
     primary = rightleft
     variable = temp
     type = GapHeatTransfer
-  [../]
+  []
 []
 
 [Materials]
@@ -47,13 +47,13 @@
     block = 'left right'
     specific_heat = 1
     thermal_conductivity = 1
-  [../]
+  []
   [gap_conductance]
     type = GenericConstantMaterial
     prop_names = 'gap_conductance gap_conductance_dT'
     boundary = 'leftright rightleft'
     prop_values = '1 0'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -62,13 +62,13 @@
     variable = temp
     boundary = leftright
     diffusivity = thermal_conductivity
-  [../]
+  []
   [right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = rightleft
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [Executioner]

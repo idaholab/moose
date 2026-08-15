@@ -24,7 +24,7 @@
     # Test that stateful material properties
     # are updated properly with subcycling
     sub_cycling = true
-  [../]
+  []
 []
 
 [Outputs]

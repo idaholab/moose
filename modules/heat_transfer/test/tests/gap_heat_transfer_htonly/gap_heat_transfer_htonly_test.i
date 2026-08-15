@@ -42,7 +42,7 @@
     type = PiecewiseLinear
     x = '0   1   2'
     y = '100 200 200'
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -53,7 +53,7 @@
     secondary = 2
     emissivity_primary = 0
     emissivity_secondary = 0
-  [../]
+  []
   [awesomium_contact]
     type = GapHeatTransfer
     variable = awesomium
@@ -63,7 +63,7 @@
     emissivity_secondary = 0
     gap_conductivity = 10
     appended_property_name = _awesomium
-  [../]
+  []
 []
 
 [Variables]
@@ -71,34 +71,34 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
+  []
   [awesomium]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
+  []
 []
 
 [AuxVariables]
   [gap_cond]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [gap_cond_awesomium]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
   [awe]
     type = HeatConduction
     variable = awesomium
-  [../]
+  []
 []
 
 
@@ -108,25 +108,25 @@
     boundary = 1
     variable = temp
     function = temp
-  [../]
+  []
   [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
-  [../]
+  []
   [awesomium_far_left]
     type = FunctionDirichletBC
     boundary = 1
     variable = awesomium
     function = temp
-  [../]
+  []
   [awesomium_far_right]
     type = DirichletBC
     boundary = 4
     variable = awesomium
     value = 100
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -135,13 +135,13 @@
     property = gap_conductance
     variable = gap_cond
     boundary = 2
-  [../]
+  []
   [conductance_awe]
     type = MaterialRealAux
     property = gap_conductance_awesomium
     variable = gap_cond_awesomium
     boundary = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -151,13 +151,13 @@
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 100000000.0
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     block = '1 2'
     prop_names = 'density'
     prop_values = '1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -183,14 +183,14 @@
     boundary = 2
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [flux_left]
     type = SideDiffusiveFluxIntegral
@@ -198,7 +198,7 @@
     boundary = 2
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [flux_right]
     type = SideDiffusiveFluxIntegral
@@ -206,21 +206,21 @@
     boundary = 3
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [awe_left]
     type = SideAverageValue
     boundary = 2
     variable = awesomium
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [awe_right]
     type = SideAverageValue
     boundary = 3
     variable = awesomium
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [awe_flux_left]
     type = SideDiffusiveFluxIntegral
@@ -228,7 +228,7 @@
     boundary = 2
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [awe_flux_right]
     type = SideDiffusiveFluxIntegral
@@ -236,7 +236,7 @@
     boundary = 3
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

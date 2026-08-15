@@ -6,19 +6,19 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [gap_distance]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,13 +27,13 @@
     variable = u
     boundary = left_left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right_right
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -42,7 +42,7 @@
     variable = gap_distance
     boundary = left_right
     paired_boundary = right_left
-  [../]
+  []
 []
 
 [Executioner]

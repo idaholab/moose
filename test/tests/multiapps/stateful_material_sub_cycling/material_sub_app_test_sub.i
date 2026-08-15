@@ -13,7 +13,7 @@
   [x]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -21,13 +21,13 @@
     type = ConstantScalarAux
     variable = x
     value = 0
-  [../]
+  []
 []
 
 [Materials]
   [stateful]
     type = StatefulMaterial
-  [../]
+  []
 []
 
 [Executioner]
@@ -40,7 +40,7 @@
     mat_prop = diffusivity
     execute_on = timestep_end
     outputs = 'console csv'
-  [../]
+  []
 []
 
 [Outputs]

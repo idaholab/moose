@@ -9,25 +9,25 @@
 [Variables]
   [a]
     initial_condition = 0.1
-  [../]
+  []
   [b]
     initial_condition = 0.1
-  [../]
+  []
   [c]
     initial_condition = 0.1
-  [../]
+  []
   [d]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [AuxVariables]
   [m1]
-  [../]
+  []
   [m2]
-  [../]
+  []
   [m3]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,7 +43,7 @@
     gas_const = 8.314
     ref_temp = 298.15
     sys_temp = 298.15
-  [../]
+  []
   [m2]
     type = KineticDisPreConcAux
     variable = m2
@@ -56,7 +56,7 @@
     gas_const = 8.314
     ref_temp = 298.15
     sys_temp = 298.15
-  [../]
+  []
   [m3]
     type = KineticDisPreConcAux
     variable = m3
@@ -69,50 +69,50 @@
     gas_const = 8.314
     ref_temp = 298.15
     sys_temp = 298.15
-  [../]
+  []
 []
 
 [Kernels]
   [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
+  []
   [b_ie]
     type = PrimaryTimeDerivative
     variable = b
-  [../]
+  []
   [c_ie]
     type = PrimaryTimeDerivative
     variable = c
-  [../]
+  []
   [d_ie]
     type = PrimaryTimeDerivative
     variable = d
-  [../]
+  []
   [a_kin]
     type = CoupledBEKinetic
     variable = a
     v = 'm1 m3'
     weight = '1 1'
-  [../]
+  []
   [b_kin]
     type = CoupledBEKinetic
     variable = b
     v = m1
     weight = 1
-  [../]
+  []
   [c_kin]
     type = CoupledBEKinetic
     variable = c
     v = 'm2 m3'
     weight = '2 -2'
-  [../]
+  []
   [d_kin]
     type = CoupledBEKinetic
     variable = d
     v = m2
     weight = 3
-  [../]
+  []
 []
 
 [Materials]
@@ -120,7 +120,7 @@
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.1
-  [../]
+  []
 []
 
 [Executioner]
@@ -135,7 +135,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

@@ -17,50 +17,50 @@
   [ffn]
     type = ParsedFunction
     expression = -4
-  [../]
+  []
 
   [exactfn]
     type = ParsedFunction
     expression = x*x+y*y
-  [../]
+  []
 
   [aux_exact_fn]
     type = ParsedFunction
     expression = t*(x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   #Coupling of nonlinear to Aux
   [force]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux_u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -68,7 +68,7 @@
     type = FunctionAux
     variable = aux_u
     function = aux_exact_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -77,7 +77,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exactfn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -85,13 +85,13 @@
     type = ElementalVariableValue
     variable = u
     elementid = 56
-  [../]
+  []
 
   [aux_elem_99]
     type = ElementalVariableValue
     variable = aux_u
     elementid = 99
-  [../]
+  []
 []
 
 [Executioner]

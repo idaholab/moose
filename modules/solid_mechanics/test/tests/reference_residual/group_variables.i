@@ -120,7 +120,7 @@
     temperature = temp
     save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [AuxKernels]

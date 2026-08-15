@@ -4,38 +4,38 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [ts_func]
     type = TimestepSetupFunction
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [u_td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,7 +43,7 @@
     type = FunctionAux
     variable = u_aux
     function = ts_func
-  [../]
+  []
 []
 
 [BCs]
@@ -52,13 +52,13 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

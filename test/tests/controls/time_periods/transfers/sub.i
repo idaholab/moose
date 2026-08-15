@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [from_master_app]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [Kernels]
@@ -22,11 +22,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.01
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -35,20 +35,20 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 2
-  [../]
+  []
 []
 
 [Postprocessors]
   [from_master]
     type = ScalarVariable
     variable = from_master_app
-  [../]
+  []
 []
 
 [Executioner]

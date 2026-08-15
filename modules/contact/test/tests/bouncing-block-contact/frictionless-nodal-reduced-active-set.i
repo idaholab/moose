@@ -11,9 +11,9 @@ starting_point = .5
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [ICs]
@@ -22,18 +22,18 @@ starting_point = .5
     variable = disp_y
     value = ${starting_point}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Kernels]
   [disp_x]
     type = MatDiffusion
     variable = disp_x
-  [../]
+  []
   [disp_y]
     type = MatDiffusion
     variable = disp_y
-  [../]
+  []
 []
 
 
@@ -45,7 +45,7 @@ starting_point = .5
     variable = disp_x
     primary_variable = disp_x
     component = x
-  [../]
+  []
   [disp_y]
     type = RANFSNormalMechanicalContact
     secondary = 10
@@ -53,7 +53,7 @@ starting_point = .5
     variable = disp_y
     primary_variable = disp_y
     component = y
-  [../]
+  []
 []
 
 [BCs]
@@ -63,28 +63,28 @@ starting_point = .5
     preset = false
     boundary = 40
     value = 0.0
-  [../]
+  []
   [topx]
     type = DirichletBC
     variable = disp_x
     preset = false
     boundary = 30
     value = 0.0
-  [../]
+  []
   [boty]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = 40
     value = 0.0
-  [../]
+  []
   [topy]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = 30
     function = '${starting_point} - t'
-  [../]
+  []
 []
 
 [Executioner]
@@ -121,9 +121,9 @@ starting_point = .5
 [Postprocessors]
   [num_nl]
     type = NumNonlinearIterations
-  [../]
+  []
   [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  [../]
+  []
 []

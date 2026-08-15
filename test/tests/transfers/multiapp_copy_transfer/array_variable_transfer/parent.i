@@ -36,7 +36,7 @@
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
-  [../]
+  []
 []
 
 [Transfers]
@@ -46,7 +46,7 @@
     source_variable = u
     variable = v
     from_multi_app = sub
-  [../]
+  []
 []
 
 [Outputs]

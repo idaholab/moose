@@ -7,29 +7,29 @@
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [AuxVariables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
   [force_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
   [nan]
     type = NanAtCountKernel
     variable = v
     count = 32
-  [../]
+  []
 []
 
 [BCs]
@@ -39,14 +39,14 @@
     preset = false
     boundary = left
     value = 1
-  [../]
+  []
   [right_v]
     type = FunctionDirichletBC
     variable = v
     preset = false
     boundary = right
     function = 't + 1'
-  [../]
+  []
 []
 
 [Executioner]

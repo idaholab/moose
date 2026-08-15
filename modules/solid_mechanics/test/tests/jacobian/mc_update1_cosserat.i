@@ -24,15 +24,15 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
   [wc_x]
-  [../]
+  []
   [wc_y]
-  [../]
+  []
 []
 
 [Kernels]
@@ -40,66 +40,66 @@
     type = CosseratStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
+  []
   [cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
+  []
   [cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
+  []
   [x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
+  []
   [y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
+  []
   [x_moment]
     type = MomentBalancing
     variable = wc_x
     component = 0
-  [../]
+  []
   [y_moment]
     type = MomentBalancing
     variable = wc_y
     component = 1
-  [../]
+  []
 []
 
 [AuxVariables]
   [wc_z]
-  [../]
+  []
 []
 
 [UserObjects]
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1
-  [../]
+  []
   [cs]
     type = SolidMechanicsHardeningConstant
     value = 1E6
-  [../]
+  []
   [coh]
     type = SolidMechanicsHardeningConstant
     value = 1E6
-  [../]
+  []
   [ang]
     type = SolidMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
@@ -110,16 +110,16 @@
     layer_thickness = 1.0
     joint_normal_stiffness = 1.0E3
     joint_shear_stiffness = 2.0E3
-  [../]
+  []
   [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '2 0 0  0 0 0  0 0 -2'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [cmc]
     type = CappedMohrCoulombCosseratStressUpdate
     host_youngs_modulus = 3E3
@@ -131,12 +131,12 @@
     dilation_angle = ang
     smoothing_tol = 0.1
     yield_function_tol = 1.0E-12
-  [../]
+  []
   [stress]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = cmc
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -145,7 +145,7 @@
     full = true
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]

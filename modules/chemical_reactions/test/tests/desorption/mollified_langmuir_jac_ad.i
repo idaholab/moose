@@ -9,9 +9,9 @@
 
 [Variables]
   [pressure]
-  [../]
+  []
   [conc]
-  [../]
+  []
 []
 
 [ICs]
@@ -20,13 +20,13 @@
     variable = pressure
     min = 0
     max = 1
-  [../]
+  []
   [conc_ic]
     type = RandomIC
     variable = conc
     min = -1
     max = 1
-  [../]
+  []
 []
 
 
@@ -35,12 +35,12 @@
     type = DesorptionFromMatrix
     variable = conc
     pressure_var = pressure
-  [../]
+  []
   [flux_to_porespace]
     type = DesorptionToPorespace
     variable = pressure
     conc_var = conc
-  [../]
+  []
 []
 
 [Materials]
@@ -53,7 +53,7 @@
     langmuir_pressure = 1.5
     conc_var = conc
     pressure_var = pressure
-  [../]
+  []
 []
 
 
@@ -64,7 +64,7 @@
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -53,7 +53,7 @@
     type = PiecewiseLinear
     x = '0 1'
     y = '0 300'
-  [../]
+  []
 []
 
 [BCs]
@@ -63,28 +63,28 @@
     value = 0.0
     boundary = x0
     variable = disp_x
-  [../]
+  []
   [fix_y]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = y0
     variable = disp_y
-  [../]
+  []
   [fix_z]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = z0
     variable = disp_z
-  [../]
+  []
   [back_z]
     type = FunctionNeumannBC
     boundary = z1
     variable = disp_z
     use_displaced_mesh = false
     function = stretch
-  [../]
+  []
 
   [rotate_x]
     type = DisplacementAboutAxis
@@ -96,7 +96,7 @@
     component = 0
     variable = disp_x
     angular_velocity = true
-  [../]
+  []
   [rotate_y]
     type = DisplacementAboutAxis
     boundary = 'x0 y0 z0 z1'
@@ -107,7 +107,7 @@
     component = 1
     variable = disp_y
     angular_velocity = true
-  [../]
+  []
   [rotate_z]
     type = DisplacementAboutAxis
     boundary = 'x0 y0 z0 z1'
@@ -118,7 +118,7 @@
     component = 2
     variable = disp_z
     angular_velocity = true
-  [../]
+  []
 []
 
 
@@ -128,7 +128,7 @@
     boundary = 'Block0_Block1'
     strain = FINITE
     generate_output='traction_x traction_y traction_z jump_x jump_y jump_z normal_traction tangent_traction normal_jump tangent_jump pk1_traction_x pk1_traction_y pk1_traction_z'
-  [../]
+  []
 []
 
 [Controls]
@@ -139,7 +139,7 @@
     start_time = '0'
     end_time = '1.01'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Physics]
@@ -151,34 +151,34 @@
         use_finite_deform_jacobian = true
         use_automatic_differentiation = true
         generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 
 [Materials]
   [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
   [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e3
     poissons_ratio = 0.3
-  [../]
+  []
   [czm_mat]
     type = PureElasticTractionSeparation
     boundary = 'Block0_Block1'
     normal_stiffness = 10000
     tangent_stiffness = 7000
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

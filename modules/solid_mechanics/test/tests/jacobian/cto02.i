@@ -16,19 +16,19 @@
     variable = disp_x
     min = -0.1
     max = 0.1
-  [../]
+  []
   [disp_y]
     type = RandomIC
     variable = disp_y
     min = -0.1
     max = 0.1
-  [../]
+  []
   [disp_z]
     type = RandomIC
     variable = disp_z
     min = -0.1
     max = 0.1
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -37,7 +37,7 @@
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
@@ -45,13 +45,13 @@
   [str]
     type = SolidMechanicsHardeningConstant
     value = 0
-  [../]
+  []
   [wpt]
     type = SolidMechanicsPlasticWeakPlaneTensile
     tensile_strength = str
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5
-  [../]
+  []
 []
 
 [Materials]
@@ -59,19 +59,19 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '1 2'
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '1 2 3  2 -4 -5  3 -5 2'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [mc]
     type = ComputeMultiPlasticityStress
     tangent_operator = linear
     plastic_models = wpt
     transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-5
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -80,7 +80,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

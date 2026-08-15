@@ -9,46 +9,46 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [nn]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 #  [ne]
 #    order = FIRST
 #    family = LAGRANGE
-#  [../]
+#  []
   [en]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 #  [ee]
 #    order = CONSTANT
 #    family = MONOMIAL
-#  [../]
+#  []
 []
 
 [Functions]
   [sourcen]
     type = SolutionFunction
     solution = cube_soln
-  [../]
+  []
 #  [sourcee]
 #    type = SolutionFunction
 #    file_type = exodusII
 #    mesh = cubesource.e
 #    variable = source_element
-#  [../]
+#  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -56,22 +56,22 @@
      type = FunctionAux
      variable = nn
      function = sourcen
-  [../]
+  []
 #  [ne]
 #     type = FunctionAux
 #     variable = ne
 #     function = sourcee
-#  [../]
+#  []
   [en]
      type = FunctionAux
      variable = en
      function = sourcen
-  [../]
+  []
 #  [ee]
 #     type = FunctionAux
 #     variable = ee
 #     function = sourcee
-#  [../]
+#  []
 []
 
 [BCs]
@@ -80,7 +80,7 @@
     variable = u
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 []
 
 [UserObjects]
@@ -88,7 +88,7 @@
     type = SolutionUserObject
     mesh = cubesource.e
     system_variables = source_nodal
-  [../]
+  []
 []
 
 #[Executioner]

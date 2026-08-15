@@ -11,7 +11,7 @@
   [num_elem_qps]
     type = NumElemQPs
     block = 0
-  [../]
+  []
 []
 
 [Problem]
@@ -27,7 +27,7 @@
   [Quadrature]
     type = GAUSS_LOBATTO
     order = FIFTH
-  [../]
+  []
 []
 
 [Outputs]

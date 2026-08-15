@@ -17,24 +17,24 @@
 [Variables]
   [temp]
     initial_condition = 300
-  [../]
+  []
 []
 
 [Kernels]
   [time]
     type = ADHeatConductionTimeDerivative
     variable = temp
-  [../]
+  []
   [heat_conduct]
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = thermal_conductivity
-  [../]
+  []
   [heat_source]
     type = ADMatHeatSource
     material_property = volumetric_heat
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -43,7 +43,7 @@
     variable = temp
     boundary = 1
     value = 300
-  [../]
+  []
 []
 
 [Materials]
@@ -51,12 +51,12 @@
     type = ADHeatConductionMaterial
     specific_heat = 603
     thermal_conductivity = 10e-2
-  [../]
+  []
   [density]
     type = ADGenericConstantMaterial
     prop_names = 'density'
     prop_values = '4.43e-6'
-  [../]
+  []
   [volumetric_heat]
     type = FunctionPathEllipsoidHeatSource
     rx = 1
@@ -68,22 +68,22 @@
     function_x= path_x
     function_y= path_y
     function_z= path_z
-  [../]
+  []
 []
 
 [Functions]
   [path_x]
     type = ParsedFunction
     expression = 2*cos(2.0*pi*t)
-  [../]
+  []
   [path_y]
     type = ParsedFunction
     expression = 2*sin(2.0*pi*t)
-  [../]
+  []
   [path_z]
     type = ParsedFunction
     expression = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -106,7 +106,7 @@
   [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

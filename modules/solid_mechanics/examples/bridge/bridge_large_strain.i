@@ -24,15 +24,15 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -41,7 +41,7 @@
     type = Gravity
     variable = disp_y
     value = -9.81
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -50,7 +50,7 @@
     incremental = true
     strain = finite
     block = 1
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -58,7 +58,7 @@
     #Dependent variable used to visualize the Von Mises stress
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -69,7 +69,7 @@
     rank_two_tensor = stress
     execute_on = timestep_end
     scalar_type = VonMisesStress
-  [../]
+  []
 []
 
 [BCs]
@@ -78,29 +78,29 @@
       #Applies the pressure
       boundary = top
       factor = 5e5 # Pa
-    [../]
-  [../]
+    []
+  []
   [anchor_x]
     #Anchors the bottom and sides against deformation in the x-direction
     type = DirichletBC
     variable = disp_x
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
-  [../]
+  []
   [anchor_y]
     #Anchors the bottom and sides against deformation in the y-direction
     type = DirichletBC
     variable = disp_y
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
-  [../]
+  []
   [anchor_z]
     #Anchors the bottom and sides against deformation in the z-direction
     type = DirichletBC
     variable = disp_z
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -111,33 +111,33 @@
     poissons_ratio = 0.3
     type = ComputeIsotropicElasticityTensor
     block = 1
-  [../]
+  []
   [elasticity_tensor_concrete]
     #Creates the elasticity tensor using concrete parameters
     youngs_modulus = 16.5e9 #Pa
     poissons_ratio = 0.2
     type = ComputeIsotropicElasticityTensor
     block = 1
-  [../]
+  []
   [stress]
     #Computes the stress, using linear elasticity
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
   [density_steel]
     #Defines the density of steel
     type = GenericConstantMaterial
     block = 1
     prop_names = density
     prop_values = 7850 # kg/m^3
-  [../]
+  []
   [density_concrete]
     #Defines the density of concrete
     type = GenericConstantMaterial
     block = 1
     prop_names = density
     prop_values = 2400 # kg/m^3
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -145,7 +145,7 @@
     #Creates the entire Jacobian, for the Newton solve
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

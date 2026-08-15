@@ -9,19 +9,19 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_aux]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -29,7 +29,7 @@
     type = FunctionAux
     function = x*y
     variable = u_aux
-  [../]
+  []
 []
 
 [BCs]
@@ -38,13 +38,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,15 +60,15 @@
     [jump_indicator]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
+    []
+  []
   [Markers]
     [error_frac]
       type = ErrorFractionMarker
       indicator = jump_indicator
       refine = 0.7
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

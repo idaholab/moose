@@ -13,7 +13,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
@@ -22,7 +22,7 @@
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -34,7 +34,7 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -43,25 +43,25 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = '0.01*t'
-  [../]
+  []
 []
 
 [Materials]
@@ -72,13 +72,13 @@
     stress_name = stress
     jacobian_name = Jacobian_mult
     block = 0
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '2.8e5 1.2e5 1.2e5 2.8e5 1.2e5 2.8e5 0.8e5 0.8e5 0.8e5'
     fill_method = symmetric9
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -86,14 +86,14 @@
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

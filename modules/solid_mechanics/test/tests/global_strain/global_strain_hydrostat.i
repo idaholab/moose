@@ -18,16 +18,16 @@
   [global_strain]
     order = SIXTH
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -37,21 +37,21 @@
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 1
-  [../]
+  []
   [disp_y]
     type = GlobalDisplacementAux
     variable = disp_y
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 1
-  [../]
+  []
   [disp_z]
     type = GlobalDisplacementAux
     variable = disp_z
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 2
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -65,7 +65,7 @@
     strain = small
     incremental = false
     global_strain = global_strain
-  [../]
+  []
 []
 
 
@@ -74,7 +74,7 @@
     type = GlobalStrain
     variable = global_strain
     global_strain_uo = global_strain_uo
-  [../]
+  []
 []
 
 [BCs]
@@ -82,8 +82,8 @@
     [all]
       auto_direction = 'x y z'
       variable = ' u_x u_y u_z'
-    [../]
-  [../]
+    []
+  []
 
   # fix center point location
   [centerfix_x]
@@ -91,19 +91,19 @@
     boundary = 100
     variable = u_x
     value = 0
-  [../]
+  []
   [centerfix_y]
     type = DirichletBC
     boundary = 100
     variable = u_y
     value = 0
-  [../]
+  []
   [centerfix_z]
     type = DirichletBC
     boundary = 100
     variable = u_z
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -112,15 +112,15 @@
     block = 0
     C_ijkl = '70e9 0.33'
     fill_method = symmetric_isotropic_E_nu
-  [../]
+  []
   [global_strain]
     type = ComputeGlobalStrain
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [UserObjects]
@@ -128,7 +128,7 @@
     type = GlobalStrainUserObject
     applied_stress_tensor = '-5e9 -5e9 -5e9 0 0 0'
     execute_on = 'Initial Linear Nonlinear'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -136,14 +136,14 @@
     type = ScalarL2Error
     variable = global_strain
     function = -0.02428571 #strain = E*(1-2*nu)/sigma
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

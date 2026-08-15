@@ -10,9 +10,9 @@
 
 [Variables]
   [w]
-  [../]
+  []
   [T]
-  [../]
+  []
 []
 
 [ICs]
@@ -25,45 +25,45 @@
     radius = 0.07
     outvalue = 0
     invalue = 1
-  [../]
+  []
 []
 
 [Kernels]
   [w_dot]
     type = ADTimeDerivative
     variable = w
-  [../]
+  []
   [anisoACinterface1]
     type = ADACInterfaceKobayashi1
     variable = w
     mob_name = adM
-  [../]
+  []
   [anisoACinterface2]
     type = ADACInterfaceKobayashi2
     variable = w
     mob_name = adM
-  [../]
+  []
   [AllenCahn]
     type = AllenCahn
     variable = w
     mob_name = M
     f_name = fbulk
     coupled_variables = T
-  [../]
+  []
   [T_dot]
     type = ADTimeDerivative
     variable = T
-  [../]
+  []
   [CoefDiffusion]
     type = ADDiffusion
     variable = T
-  [../]
+  []
   [w_dot_T]
     type = ADCoefCoupledTimeDerivative
     variable = T
     v = w
     coef = -1.8
-  [../]
+  []
 []
 
 [Materials]
@@ -76,28 +76,28 @@
     expression = 'm:=0.9 * atan(10 * (1 - T)) / pi; 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * w^2'
     derivative_order = 2
     outputs = exodus
-  [../]
+  []
   [material]
     type = ADInterfaceOrientationMaterial
     op = w
-  [../]
+  []
   [consts1]
     type = ADGenericConstantMaterial
     prop_names  = 'adM'
     prop_values = '3333.333'
-  [../]
+  []
   [consts2]
     type = GenericConstantMaterial
     prop_names  = 'M'
     prop_values = '3333.333'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -121,7 +121,7 @@
     dt = 0.0005
     growth_factor = 1.1
     cutback_factor = 0.75
-  [../]
+  []
   [Adaptivity]
     initial_adaptivity = 3 # Number of times mesh is adapted to initial condition
     refine_fraction = 0.7 # Fraction of high error that will be refined
@@ -129,7 +129,7 @@
     max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
     weight_names = 'w T'
     weight_values = '1 0.5'
-  [../]
+  []
 []
 
 [Outputs]

@@ -15,27 +15,27 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [eig]
     type = MassEigenKernel
     variable = u
     eigen_postprocessor = 1.0002920196258376e+01
     eigen = false
-  [../]
+  []
 
   [force]
     type = CoupledForce
     variable = u
     v = aux_v
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -45,8 +45,8 @@
     [InitialCondition]
       type = FunctionIC
       function = eigen_mode
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxKernels]
@@ -55,7 +55,7 @@
     variable = aux_v
     function = contaminated_second_harmonic
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [Functions]
@@ -64,14 +64,14 @@
     expression = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
     symbol_names = 'L  mode'
     symbol_values = '10 1'
-  [../]
+  []
 
   [contaminated_second_harmonic]
     type = ParsedFunction
     expression = 'sqrt(2.0 / L) * sin(mode * pi  * x / L) + a * sqrt(2.0 / L) * sin(pi * x / L)'
     symbol_names = 'L  mode a'
     symbol_values = '10 2    1'
-  [../]
+  []
 []
 
 [BCs]
@@ -80,7 +80,7 @@
     variable = u
     boundary = '0 1'
     value = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -92,14 +92,14 @@
     sort_by = x
     num_points = 9
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Preconditioning]
   [prec]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

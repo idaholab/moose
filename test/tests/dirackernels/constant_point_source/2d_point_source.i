@@ -4,7 +4,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
   uniform_refine = 4
 []
 
@@ -14,12 +14,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -28,7 +28,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -38,13 +38,13 @@
     variable = u
     value = 1.0
     point = '0.2 0.3'
-  [../]
+  []
   [point_source2]
     type = ConstantPointSource
     variable = u
     value = -0.5
     point = '0.2 0.8'
-  [../]
+  []
 []
 
 [BCs]
@@ -55,14 +55,14 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

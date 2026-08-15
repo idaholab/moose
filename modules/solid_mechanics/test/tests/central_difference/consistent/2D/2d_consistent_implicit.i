@@ -9,7 +9,7 @@
     add_variables = true
     strain = SMALL
     incremental = true
-  [../]
+  []
 []
 
 
@@ -31,7 +31,7 @@
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [x_bot]
     type = PresetDisplacement
     boundary = bottom
@@ -40,7 +40,7 @@
     velocity = vel_x
     acceleration = accel_x
     function = disp
-  [../]
+  []
 []
 
 [Functions]
@@ -48,7 +48,7 @@
     type = PiecewiseLinear
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # displacement
-  [../]
+  []
 []
 
 [Materials]
@@ -57,24 +57,24 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
+  []
   [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
     prop_values = 1e4
-  [../]
+  []
 []
 
 [Preconditioning]
   [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -90,23 +90,23 @@
     type = NewmarkBeta
     beta = 0.25
     gamma = 0.5
-  [../]
+  []
 []
 
 [Postprocessors]
   [_dt]
     type = TimestepSize
-  [../]
+  []
   [accel_2x]
     type = PointValue
     point = '1.0 2.0 0.0'
     variable = accel_x
-  [../]
+  []
   [accel_2y]
     type = PointValue
     point = '1.0 2.0 0.0'
     variable = accel_y
-  [../]
+  []
 []
 
 [Outputs]

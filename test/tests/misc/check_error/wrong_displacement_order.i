@@ -14,28 +14,28 @@
     [InitialCondition]
       type = ConstantIC
       value = 0.0
-    [../]
-  [../]
+    []
+  []
 []
 
 # We are *not* allowed to use FIRST-order displacement vars!
 [AuxVariables]
   [disp_x]
-  [../]
+  []
 
   [disp_y]
     [InitialCondition]
       type = FunctionIC
       function = displ
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   [displ]
     type = ParsedFunction
     expression = -1/2*x*(y-0.5)
-  [../]
+  []
 []
 
 [Kernels]
@@ -43,7 +43,7 @@
     type = Diffusion
     variable = temperature
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
@@ -53,14 +53,14 @@
     boundary = left
     value = 1
     use_displaced_mesh = true
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
     value = 0
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -68,7 +68,7 @@
     type = SMP
     full = true
     solve_type = PJFNK
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,7 +87,7 @@
   [TimeStepper]
     type = ConstantDT
     dt = 0.001
-  [../]
+  []
   dtmin = .001
 []
 

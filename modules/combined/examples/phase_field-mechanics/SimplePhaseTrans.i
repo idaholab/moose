@@ -35,8 +35,8 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 5.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -44,7 +44,7 @@
     add_variables = true
     generate_output = 'stress_xx stress_yy'
     eigenstrain_names = 'eigenstrain'
-  [../]
+  []
 []
 
 [Kernels]
@@ -52,16 +52,16 @@
     type = AllenCahn
     variable = eta
     f_name = F
-  [../]
+  []
   [eta_interface]
     type = ACInterface
     variable = eta
     kappa_name = kappa_eta
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [Materials]
@@ -69,7 +69,7 @@
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1 1'
-  [../]
+  []
 
   [chemical_free_energy]
     type = DerivativeParsedMaterial
@@ -80,17 +80,17 @@
     expression = A2/2*eta^2+A3/3*eta^3+A4/4*eta^4
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
 
   [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '70 30 30 70 30 70 30 30 30'
     fill_method = symmetric9
-  [../]
+  []
 
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 
   [var_dependence]
     type = DerivativeParsedMaterial
@@ -99,7 +99,7 @@
     property_name = var_dep
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
 
   [eigenstrain]
     type = ComputeVariableEigenstrain
@@ -108,14 +108,14 @@
     #outputs = exodus
     coupled_variables = 'eta'
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
   [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
     coupled_variables = 'eta'
     derivative_order = 2
-  [../]
+  []
 
   [free_energy]
     type = DerivativeSumMaterial
@@ -123,7 +123,7 @@
     sum_materials = 'Fc Fe'
     coupled_variables = 'eta'
     derivative_order = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -132,13 +132,13 @@
     variable = disp_y
     boundary = 'top bottom left right'
     value = 0
-  [../]
+  []
   [all_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'top bottom left right'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -146,7 +146,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -173,7 +173,7 @@
     growth_factor = 1.1
     cutback_factor = 0.75
     dt = 0.3
-  [../]
+  []
 []
 
 [Outputs]

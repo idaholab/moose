@@ -19,7 +19,7 @@
     type = SMP
     full = true
     solve_type = Newton
-  [../]
+  []
 []
 
 [Executioner]
@@ -40,15 +40,15 @@
   [vel_x]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
   [vel_y]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
   [p]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [BCs]
@@ -57,25 +57,25 @@
     boundary = 'top'
     variable = vel_x
     function = vel_x_inlet
-  [../]
+  []
   [v_in]
     type = FunctionDirichletBC
     boundary = 'top'
     variable = vel_y
     function = vel_y_inlet
-  [../]
+  []
   [vel_x_no_slip]
     type = DirichletBC
     boundary = 'left bottom'
     variable = vel_x
     value = 0
-  [../]
+  []
   [vel_y_no_slip]
     type = DirichletBC
     boundary = 'bottom'
     variable = vel_y
     value = 0
-  [../]
+  []
   # Note: setting INSMomentumNoBCBC on the outlet boundary causes the
   # matrix to be singular.  The natural BC, on the other hand, is
   # sufficient to specify the value of the pressure without requiring
@@ -88,13 +88,13 @@
     expression = 'k*x'
     symbol_names = 'k'
     symbol_values = '1'
-  [../]
+  []
   [vel_y_inlet]
     type = ParsedFunction
     expression = '-k*y'
     symbol_names = 'k'
     symbol_values = '1'
-  [../]
+  []
 []
 
 
@@ -102,18 +102,18 @@
   [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
+  []
   [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
+  []
   [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
@@ -121,7 +121,7 @@
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
@@ -129,7 +129,7 @@
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -138,7 +138,7 @@
     block = 0
     prop_names = 'rho mu'
     prop_values = '1 .01389' # 2/144
-  [../]
+  []
 []
 
 [Outputs]
@@ -146,7 +146,7 @@
   [out]
     type = CSV
     execute_on = 'final'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -156,5 +156,5 @@
     variable = p
     boundary = 'bottom'
     sort_by = x
-  [../]
+  []
 []

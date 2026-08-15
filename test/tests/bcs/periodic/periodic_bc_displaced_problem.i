@@ -20,44 +20,44 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing]
     type = GaussContForcing
     variable = u
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff_x]
     type = Diffusion
     variable = disp_x
-  [../]
+  []
 
   [diff_y]
     type = Diffusion
     variable = disp_y
-  [../]
+  []
 
 []
 
@@ -68,29 +68,29 @@
       primary = 3
       secondary = 1
       translation = '40 0 0'
-    [../]
+    []
 
     [y]
       variable = u
       primary = 0
       secondary = 2
       translation = '0 40 0'
-    [../]
-  [../]
+    []
+  []
 
   [disp_0]
     type = DirichletBC
     variable = disp_x
     boundary = '0'
     value = 0.01
-  [../]
+  []
 
   [disp_1]
     type = DirichletBC
     variable = disp_y
     boundary = '0'
     value = 0.01
-  [../]
+  []
 []
 
 [Executioner]

@@ -80,41 +80,41 @@
   # Variable block, where all variables in the simulation are declared
   [PolycrystalVariables]
     # Custom action that created all of the grain variables and sets their initial condition
-  [../]
+  []
 []
 
 [AuxVariables]
   # Dependent variables
   [bnds]
     # Variable used to visualize the grain boundaries in the simulation
-  [../]
+  []
   [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [aphi1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [bPhi]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [cphi2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [ebsd_numbers]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
   [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -124,7 +124,7 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
+  []
   # generate the unique ID from grain_tracker
   [unique_grains]
     type = FeatureFloodCountAux
@@ -132,7 +132,7 @@
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
-  [../]
+  []
   # The phi will output the Euler angle from EBSD data, and the data structure
   # will change with the guide from grain_tracker
   [aphi1]
@@ -142,7 +142,7 @@
     grain_tracker = grain_tracker
     output_euler_angle = 'phi1'
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
   [bPhi]
     type = OutputEulerAngles
     variable = bPhi
@@ -150,7 +150,7 @@
     grain_tracker = grain_tracker
     output_euler_angle = 'Phi'
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
   [cphi2]
     type = OutputEulerAngles
     variable = cphi2
@@ -158,7 +158,7 @@
     grain_tracker = grain_tracker
     output_euler_angle = 'phi2'
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
   # Import the unique grain ID from ebsd data, and the data structure
   # will change with the guide from grain_tracker
   [ebsd_numbers]
@@ -168,7 +168,7 @@
     grain_tracker = grain_tracker
     variable = ebsd_numbers
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
@@ -176,8 +176,8 @@
   [Periodic]
     [top_bottom]
       auto_direction = 'x y' # Makes problem periodic in the x and y directions
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -189,7 +189,7 @@
     Q = 0.23 # Activation energy for grain growth from Schonfelder 1997
     T = 450 # Constant temperature of the simulation (for mobility calculation)
     wGB = 6 # Width of the diffuse GB
-  [../]
+  []
   [GB_type]
     # The new developed Miso Bnds Aux Kernel
     type = ComputeGBMisorientationType
@@ -197,7 +197,7 @@
     grain_tracker = grain_tracker
     output_properties = 'gb_type'
     outputs = exodus
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -205,7 +205,7 @@
   [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
+  []
   [n_elements]
     type = NumElements
     execute_on = 'initial timestep_end'
@@ -227,8 +227,8 @@
     [error]
       type = GradientJumpIndicator
       variable = bnds
-    [../]
-  [../]
+    []
+  []
   [Markers]
     [bound_adapt]
       type = ValueThresholdMarker
@@ -237,18 +237,18 @@
       refine = 0.95 #0.95
       variable = bnds
       invert = true
-    [../]
+    []
     [errorfrac]
       type = ErrorFractionMarker
       coarsen = 0.1
       indicator = error
       refine = 0.7
-    [../]
+    []
     [combined]
       type = ComboMarker
       markers = 'bound_adapt errorfrac'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -285,5 +285,5 @@
  [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []

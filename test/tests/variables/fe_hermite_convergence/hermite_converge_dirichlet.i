@@ -19,34 +19,34 @@
     value = -sin(pi*x)*sin(pi*y)
     grad_x = -pi*cos(pi*x)*sin(pi*y)
     grad_y = -pi*sin(pi*x)*cos(pi*y)
-  [../]
+  []
   [forcing_fn]
     type = ParsedFunction
     expression = -2*pi*pi*sin(pi*x)*sin(pi*y)-sin(pi*x)*sin(pi*y)
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -56,31 +56,31 @@
     boundary = 'bottom right top left'
     function = bc_fn
     penalty = 1e10
-  [../]
+  []
 []
 
 [Postprocessors]
   [dofs]
     type = NumDOFs
-  [../]
+  []
   [h]
     type = AverageElementSize
-  [../]
+  []
   [L2error]
     type = ElementL2Error
     variable = u
     function = bc_fn
-  [../]
+  []
   [H1error]
     type = ElementH1Error
     variable = u
     function = bc_fn
-  [../]
+  []
   [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = bc_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,7 +91,7 @@
   # is integrated accurately.
   [Quadrature]
     order=ELEVENTH
-  [../]
+  []
 []
 
 [Adaptivity]
@@ -101,8 +101,8 @@
     [uniform]
       type = UniformMarker
       mark = refine
-    [../]
-  [../]
+    []
+  []
 []
 
 

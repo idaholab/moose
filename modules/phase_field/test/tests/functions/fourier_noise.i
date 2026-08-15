@@ -7,14 +7,14 @@
 
 [Variables]
   [c]
-  [../]
+  []
 []
 
 [Functions]
   [fn]
     type = FourierNoise
     lambda = 0.2
-  [../]
+  []
 []
 
 [ICs]
@@ -22,7 +22,7 @@
     type = FunctionIC
     variable = c
     function = fn
-  [../]
+  []
 []
 
 [Problem]

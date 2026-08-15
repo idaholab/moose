@@ -7,18 +7,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,13 +27,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -62,5 +62,5 @@
 
     # Here we set an input file specific relative library path instead of using MOOSE_LIBRARY_PATH
     library_path = '../../../../../phase_field/lib'
-  [../]
+  []
 []

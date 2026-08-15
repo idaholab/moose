@@ -23,7 +23,7 @@
 [Variables]
   [temp]
     initial_condition = 100.0
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,7 +31,7 @@
     type = HeatConduction
     variable = temp
     thermal_conductivity = 10
-  [../]
+  []
 []
 
 [BCs]
@@ -40,7 +40,7 @@
     variable = temp
     boundary = left
     value = 100.0
-  [../]
+  []
   [right]
     type = ConvectiveHeatFluxBC
     variable = temp
@@ -48,7 +48,7 @@
     T_infinity = 200.0
     heat_transfer_coefficient = 10
     heat_transfer_coefficient_dT = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -57,7 +57,7 @@
     variable = temp
     boundary = right
     diffusivity = 10
-  [../]
+  []
 []
 
 [Executioner]

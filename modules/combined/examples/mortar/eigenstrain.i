@@ -18,13 +18,13 @@
     type = ExtraNodesetGenerator
     coord = '0.0 0.0'
     new_boundary = 100
-  [../]
+  []
   [anode]
     input = cnode
     type = ExtraNodesetGenerator
     coord = '0.0 0.5'
     new_boundary = 101
-  [../]
+  []
   [secondary_x]
     input = anode
     type = LowerDBlockFromSidesetGenerator
@@ -66,7 +66,7 @@
   [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -77,7 +77,7 @@
     variable = local_energy
     interfacial_vars = 'c'
     kappa_names = 'kappa_c'
-  [../]
+  []
 []
 
 [Variables]
@@ -87,63 +87,63 @@
       type = RandomIC
       min = 0.49
       max = 0.51
-    [../]
+    []
     block = 0
-  [../]
+  []
   [w]
     block = 0
-  [../]
+  []
 
   # Mesh displacement
   [disp_x]
     block = 0
-  [../]
+  []
   [disp_y]
     block = 0
-  [../]
+  []
 
   # Lagrange multipliers for gradient component periodicity
   [lm_left_right_xx]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
-  [../]
+  []
   [lm_left_right_xy]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
-  [../]
+  []
   [lm_left_right_yx]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
-  [../]
+  []
   [lm_left_right_yy]
     order = FIRST
     family = LAGRANGE
     block = secondary_x
-  [../]
+  []
 
   [lm_up_down_xx]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
-  [../]
+  []
   [lm_up_down_xy]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
-  [../]
+  []
   [lm_up_down_yx]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
-  [../]
+  []
   [lm_up_down_yy]
     order = FIRST
     family = LAGRANGE
     block = secondary_y
-  [../]
+  []
 []
 
 [Constraints]
@@ -157,7 +157,7 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
+  []
   [ud_disp_x_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_xy
@@ -168,7 +168,7 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
+  []
   [ud_disp_y_grad_x]
     type = EqualGradientConstraint
     variable = lm_up_down_yx
@@ -179,7 +179,7 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
+  []
   [ud_disp_y_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_yy
@@ -190,7 +190,7 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
+  []
 
   [lr_disp_x_grad_x]
     type = EqualGradientConstraint
@@ -202,7 +202,7 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
+  []
   [lr_disp_x_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_xy
@@ -213,7 +213,7 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
+  []
   [lr_disp_y_grad_x]
     type = EqualGradientConstraint
     variable = lm_left_right_yx
@@ -224,7 +224,7 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
+  []
   [lr_disp_y_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_yy
@@ -235,14 +235,14 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
+  []
 []
 
 [Kernels]
   # Set up stress divergence kernels
   [TensorMechanics]
     block = 0
-  [../]
+  []
 
   # Cahn-Hilliard kernels
   [c_dot]
@@ -250,7 +250,7 @@
     variable = w
     v = c
     block = 0
-  [../]
+  []
   [c_res]
     type = SplitCHParsed
     variable = c
@@ -258,13 +258,13 @@
     kappa_name = kappa_c
     w = w
     block = 0
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
     block = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -274,26 +274,26 @@
     block = '0 10 11'
     prop_names  = 'M   kappa_c'
     prop_values = '0.2 0.01   '
-  [../]
+  []
 
   [shear1]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '0 0 0 0 0 0.5'
     tensor_name = shear1
-  [../]
+  []
   [shear2]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '0 0 0 0 0 -0.5'
     tensor_name = shear2
-  [../]
+  []
   [expand3]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '1 1 0 0 0 0'
     tensor_name = expand3
-  [../]
+  []
 
   [weight1]
     type = DerivativeParsedMaterial
@@ -301,21 +301,21 @@
     expression = '0.3*c^2'
     property_name = weight1
     coupled_variables = c
-  [../]
+  []
   [weight2]
     type = DerivativeParsedMaterial
     block = 0
     expression = '0.3*(1-c)^2'
     property_name = weight2
     coupled_variables = c
-  [../]
+  []
   [weight3]
     type = DerivativeParsedMaterial
     block = 0
     expression = '4*(0.5-c)^2'
     property_name = weight3
     coupled_variables = c
-  [../]
+  []
 
   # matrix phase
   [elasticity_tensor]
@@ -323,13 +323,13 @@
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
-  [../]
+  []
 
   [eigenstrain]
     type = CompositeEigenstrain
@@ -338,12 +338,12 @@
     weights = 'weight1 weight2 weight3'
     coupled_variables = c
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
   [stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
+  []
 
   # chemical free energies
   [chemical_free_energy]
@@ -354,7 +354,7 @@
     coupled_variables = 'c'
     outputs = exodus
     output_properties = Fc
-  [../]
+  []
 
   # elastic free energies
   [elastic_free_energy]
@@ -364,7 +364,7 @@
     coupled_variables = 'c'
     outputs = exodus
     output_properties = Fe
-  [../]
+  []
 
   # free energy (chemical + elastic)
   [free_energy]
@@ -373,7 +373,7 @@
     property_name = F
     sum_materials = 'Fc Fe'
     coupled_variables = 'c'
-  [../]
+  []
 []
 
 [BCs]
@@ -383,14 +383,14 @@
       secondary = bottom
       translation = '0 -1 0'
       variable = 'c w'
-    [../]
+    []
     [left_right]
       primary = left
       secondary = right
       translation = '1 0 0'
       variable = 'c w'
-    [../]
-  [../]
+    []
+  []
 
   # fix center point location
   [centerfix_x]
@@ -398,13 +398,13 @@
     boundary = 100
     variable = disp_x
     value = 0
-  [../]
+  []
   [centerfix_y]
     type = DirichletBC
     boundary = 100
     variable = disp_y
     value = 0
-  [../]
+  []
 
   # fix side point x coordinate to inhibit rotation
   [angularfix]
@@ -412,14 +412,14 @@
     boundary = 101
     variable = disp_x
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 # We monitor the total free energy and the total solute concentration (should be constant)
@@ -429,27 +429,27 @@
     block = 0
     execute_on = 'initial TIMESTEP_END'
     variable = local_energy
-  [../]
+  []
   [total_solute]
     type = ElementIntegralVariablePostprocessor
     block = 0
     execute_on = 'initial TIMESTEP_END'
     variable = c
-  [../]
+  []
   [min]
     type = ElementExtremeValue
     block = 0
     execute_on = 'initial TIMESTEP_END'
     value_type = min
     variable = c
-  [../]
+  []
   [max]
     type = ElementExtremeValue
     block = 0
     execute_on = 'initial TIMESTEP_END'
     value_type = max
     variable = c
-  [../]
+  []
 []
 
 [Executioner]
@@ -477,7 +477,7 @@
   [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.01
-  [../]
+  []
 []
 
 [Outputs]
@@ -487,5 +487,5 @@
   [table]
     type = CSV
     delimiter = ' '
-  [../]
+  []
 []

@@ -46,76 +46,76 @@
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [rot_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [rot_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   # aux variables for dynamics
   [vel_x]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [vel_y]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [vel_z]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [accel_x]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [accel_y]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [accel_z]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [rot_vel_x]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [rot_vel_y]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [rot_accel_x]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
   [rot_accel_y]
   order = FIRST
   family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -125,14 +125,14 @@
     rank_two_tensor = global_stress_t_points_0
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     variable = stress_yz
     rank_two_tensor = global_stress_t_points_0
     index_i = 1
     index_j = 2
-  [../]
+  []
 
 # Kernels for dynamics
 [accel_x]
@@ -142,14 +142,14 @@
   velocity = vel_x
   beta = 0.25
   execute_on = timestep_end
-[../]
+[]
 [vel_x]
   type = NewmarkVelAux
   variable = vel_x
   acceleration = accel_x
   gamma = 0.5
   execute_on = timestep_end
-[../]
+[]
 [accel_y]
   type = NewmarkAccelAux
   variable = accel_y
@@ -157,14 +157,14 @@
   velocity = vel_y
   beta = 0.25
   execute_on = timestep_end
-[../]
+[]
 [vel_y]
   type = NewmarkVelAux
   variable = vel_y
   acceleration = accel_y
   gamma = 0.5
   execute_on = timestep_end
-[../]
+[]
 [accel_z]
   type = NewmarkAccelAux
   variable = accel_z
@@ -172,14 +172,14 @@
   velocity = vel_z
   beta = 0.25
   execute_on = timestep_end
-[../]
+[]
 [vel_z]
   type = NewmarkVelAux
   variable = vel_z
   acceleration = accel_z
   gamma = 0.5
   execute_on = timestep_end
-[../]
+[]
 [rot_accel_x]
   type = NewmarkAccelAux
   variable = rot_accel_x
@@ -187,14 +187,14 @@
   velocity = rot_vel_x
   beta = 0.25
   execute_on = timestep_end
-[../]
+[]
 [rot_vel_x]
   type = NewmarkVelAux
   variable = rot_vel_x
   acceleration = rot_accel_x
   gamma = 0.5
   execute_on = timestep_end
-[../]
+[]
 [rot_accel_y]
   type = NewmarkAccelAux
   variable = rot_accel_y
@@ -202,14 +202,14 @@
   velocity = rot_vel_y
   beta = 0.25
   execute_on = timestep_end
-[../]
+[]
 [rot_vel_y]
   type = NewmarkVelAux
   variable = rot_vel_y
   acceleration = rot_accel_y
   gamma = 0.5
   execute_on = timestep_end
-[../]
+[]
 
 []
 
@@ -219,31 +219,31 @@
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
   [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
   [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
   [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
 []
 
 [Functions]
@@ -251,7 +251,7 @@
     type = PiecewiseLinear
     x = '0.0 1.0'
     y = '0.0 0.5'
-  [../]
+  []
 []
 [NodalKernels]
   [force_y2]
@@ -259,7 +259,7 @@
     variable = disp_z
     boundary = 'top'
     functor = force_function
-  [../]
+  []
 []
 [Kernels]
   [solid_disp_x]
@@ -268,35 +268,35 @@
     component = 0
     variable = disp_x
     through_thickness_order = SECOND
-  [../]
+  []
   [solid_disp_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 1
     variable = disp_y
     through_thickness_order = SECOND
-  [../]
+  []
   [solid_disp_z]
     type = ADStressDivergenceShell
     block = '0'
     component = 2
     variable = disp_z
     through_thickness_order = SECOND
-  [../]
+  []
   [solid_rot_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 3
     variable = rot_x
     through_thickness_order = SECOND
-  [../]
+  []
   [solid_rot_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 4
     variable = rot_y
     through_thickness_order = SECOND
-  [../]
+  []
 
   [inertial_force_x]
     type = ADInertialForceShell
@@ -310,7 +310,7 @@
     component = 0
     variable = disp_x
     thickness = 0.1
-  [../]
+  []
 
   [inertial_force_y]
     type = ADInertialForceShell
@@ -324,7 +324,7 @@
     component = 1
     variable = disp_y
     thickness = 0.1
-  [../]
+  []
 
   [inertial_force_z]
     type = ADInertialForceShell
@@ -338,7 +338,7 @@
     component = 2
     variable = disp_z
     thickness = 0.1
-  [../]
+  []
 
   [inertial_force_rot_x]
     type = ADInertialForceShell
@@ -352,7 +352,7 @@
     component = 3
     variable = rot_x
     thickness = 0.1
-  [../]
+  []
 
   [inertial_force_rot_y]
     type = ADInertialForceShell
@@ -366,7 +366,7 @@
     component = 4
     variable = rot_y
     thickness = 0.1
-  [../]
+  []
 []
 
 [Materials]
@@ -376,7 +376,7 @@
     poissons_ratio = 0.0
     block = 0
     through_thickness_order = SECOND
-  [../]
+  []
   [strain]
     type = ADComputeIncrementalShellStrain
     block = '0'
@@ -384,18 +384,18 @@
     rotations = 'rot_x rot_y'
     thickness = 0.1
     through_thickness_order = SECOND
-  [../]
+  []
   [stress]
     type = ADComputeShellStress
     block = 0
     through_thickness_order = SECOND
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
     prop_values = '1.0'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -403,58 +403,58 @@
     type = PointValue
     point = '1.0 10.0 0.0'
     variable = disp_z
-  [../]
+  []
   [rot_x_tip]
     type = PointValue
     point = '0.0 10.0 0.0'
     variable = rot_x
-  [../]
+  []
   [stress_yy_el_0]
     type = ElementalVariableValue
     elementid = 0
     variable = stress_yy
-  [../]
+  []
   [stress_yy_el_1]
     type = ElementalVariableValue
     elementid = 1
     variable = stress_yy
-  [../]
+  []
   [stress_yy_el_2]
     type = ElementalVariableValue
     elementid = 2
     variable = stress_yy
-  [../]
+  []
   [stress_yy_el_3]
     type = ElementalVariableValue
     elementid = 3
     variable = stress_yy
-  [../]
+  []
   [stress_yz_el_0]
     type = ElementalVariableValue
     elementid = 0
     variable = stress_yz
-  [../]
+  []
   [stress_yz_el_1]
     type = ElementalVariableValue
     elementid = 1
     variable = stress_yz
-  [../]
+  []
   [stress_yz_el_2]
     type = ElementalVariableValue
     elementid = 2
     variable = stress_yz
-  [../]
+  []
   [stress_yz_el_3]
     type = ElementalVariableValue
     elementid = 3
     variable = stress_yz
-  [../]
+  []
 []
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

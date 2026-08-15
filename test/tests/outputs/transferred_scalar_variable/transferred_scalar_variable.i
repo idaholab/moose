@@ -7,20 +7,20 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [average_scalar]
     family = SCALAR
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -29,13 +29,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -58,7 +58,7 @@
     execute_on = timestep_end
     positions = '0 0 0'
     input_files = sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -67,5 +67,5 @@
     from_multi_app = sub
     from_postprocessor = average
     to_aux_scalar = average_scalar
-  [../]
+  []
 []

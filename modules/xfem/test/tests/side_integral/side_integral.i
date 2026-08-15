@@ -26,19 +26,19 @@
     cut_data = '0.55 1.0 0.55 0.0'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -48,14 +48,14 @@
     variable = u
     boundary = 2
     value = 3
-  [../]
+  []
 
   [bottom]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -80,12 +80,12 @@
     type = SideIntegralVariablePostprocessor
     variable = u
     boundary = 2
-  [../]
+  []
   [bottom_surface]
     type = SideIntegralVariablePostprocessor
     variable = u
     boundary = 0
-  [../]
+  []
 []
 
 [Outputs]
@@ -95,5 +95,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

@@ -20,7 +20,7 @@
   [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
@@ -29,7 +29,7 @@
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = -100
-  [../]
+  []
 []
 
 [DomainIntegral]
@@ -55,7 +55,7 @@
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -64,7 +64,7 @@
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -73,19 +73,19 @@
     variable = disp_x
     boundary = 300
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
-  [../]
+  []
   [Pressure]
     [top]
       boundary = 200
       function = rampConstantUp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -93,10 +93,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 30e+6
     poissons_ratio = 0.3
-  [../]
+  []
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]

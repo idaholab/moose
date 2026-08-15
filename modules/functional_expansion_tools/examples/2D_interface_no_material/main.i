@@ -14,23 +14,23 @@
 
 [Variables]
   [m]
-  [../]
+  []
 []
 
 [Kernels]
   [diff_m]
     type = Diffusion
     variable = m
-  [../]
+  []
   [time_diff_m]
     type = TimeDerivative
     variable = m
-  [../]
+  []
   [source_m]
     type = BodyForce
     variable = m
     value = 100
-  [../]
+  []
 []
 
 [ICs]
@@ -38,7 +38,7 @@
     type = ConstantIC
     value = 2
     variable = m
-  [../]
+  []
 []
 
 [BCs]
@@ -47,13 +47,13 @@
     variable = m
     boundary = right
     function = FX_Basis_Value_Main
-  [../]
+  []
   [interface_flux]
     type = FXFluxBC
     boundary = right
     variable = m
     function = FX_Basis_Flux_Main
-  [../]
+  []
 []
 
 [Functions]
@@ -63,14 +63,14 @@
     orders = '4'
     physical_bounds = '0.0 10'
     y = Legendre
-  [../]
+  []
   [FX_Basis_Flux_Main]
     type = FunctionSeries
     series_type = Cartesian
     orders = '5'
     physical_bounds = '0.0 10'
     y = Legendre
-  [../]
+  []
 []
 
 [UserObjects]
@@ -80,7 +80,7 @@
     variable = m
     boundary = right
     diffusivity = 0.1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -88,17 +88,17 @@
     type = SideAverageValue
     variable = m
     boundary = right
-  [../]
+  []
   [total_flux]
     type = SideDiffusiveFluxIntegral
     variable = m
     boundary = right
     diffusivity = 0.1
-  [../]
+  []
   [picard_iterations]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -124,7 +124,7 @@
     type = TransientMultiApp
     input_files = sub.i
     sub_cycling = true
-  [../]
+  []
 []
 
 [Transfers]
@@ -133,17 +133,17 @@
     to_multi_app = FXTransferApp
     this_app_object_name = FX_Flux_UserObject_Main
     multi_app_object_name = FX_Basis_Flux_Sub
-  [../]
+  []
   [ValueToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Value_Main
     multi_app_object_name = FX_Value_UserObject_Sub
-  [../]
+  []
   [FluxToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Flux_Main
     multi_app_object_name = FX_Flux_UserObject_Sub
-  [../]
+  []
 []

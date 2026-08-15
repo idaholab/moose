@@ -17,9 +17,9 @@
 
 [Variables]
   [gr0]
-  [../]
+  []
   [gr1]
-  [../]
+  []
 []
 
 [ICs]
@@ -32,7 +32,7 @@
     invalue = 1
     outvalue = 0
     variable = gr0
-  [../]
+  []
   [boxes]
     type = MultiBoundingBoxIC
     corners = '-1 -1 0
@@ -42,7 +42,7 @@
     inside = 1
     outside = 0
     variable = gr1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -52,12 +52,12 @@
     threshold = 0.1
     compute_var_to_feature_map = true
     execute_on = 'initial'
-  [../]
+  []
   [avg_feature_vol]
     type = AverageGrainVolume
     feature_counter = grain_tracker
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -65,7 +65,7 @@
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_tracker
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,7 +75,7 @@
     refine_fraction = 0.7
     coarsen_fraction = 0.1
     max_h_level = 3
-  [../]
+  []
 []
 
 [Problem]

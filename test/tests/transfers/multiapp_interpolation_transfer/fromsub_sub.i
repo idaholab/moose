@@ -10,33 +10,33 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_x]
     initial_condition = -0.4
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [elemental]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [x_func]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -45,7 +45,7 @@
     variable = elemental
     function = x_func
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -54,13 +54,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

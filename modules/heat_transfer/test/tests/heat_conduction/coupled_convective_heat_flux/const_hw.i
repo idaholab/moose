@@ -7,24 +7,24 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [t_infinity]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [force]
     type = BodyForce
     variable = u
     value = 1000
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -33,7 +33,7 @@
     variable = t_infinity
     value = 500
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -43,7 +43,7 @@
     boundary = right
     htc = 10
     T_infinity = t_infinity
-  [../]
+  []
 []
 
 [Executioner]

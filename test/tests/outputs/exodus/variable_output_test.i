@@ -12,32 +12,32 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux]
     family = SCALAR
-  [../]
+  []
 []
 
 [Functions]
   [force]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [force]
     type = BodyForce
     variable = u
     function = force
-  [../]
+  []
 []
 
 [BCs]
@@ -46,13 +46,13 @@
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
   [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -73,8 +73,8 @@
       top_right = '0.6 0.6 0'
       outside = do_nothing
       type = BoxMarker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
@@ -82,7 +82,7 @@
     type = ScalarVariable
     variable = aux
     outputs = none
-  [../]
+  []
 []
 
 [Outputs]
@@ -93,8 +93,8 @@
     hide_variables = 'u box aux_pp'
     scalar_as_nodal = true
     execute_scalars_on = none
-  [../]
+  []
   [console]
     Type = Console
-  [../]
+  []
 []

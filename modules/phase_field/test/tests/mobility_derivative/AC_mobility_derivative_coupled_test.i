@@ -10,9 +10,9 @@
 
 [Variables]
   [op]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [ICs]
@@ -25,7 +25,7 @@
     outvalue = 0.1
     int_width = 3.0
     variable = op
-  [../]
+  []
   [v_IC]
     type = BoundingBoxIC
     x1 = 0.0
@@ -35,37 +35,37 @@
     inside = 1.0
     outside = 0.0
     variable = v
-  [../]
+  []
 []
 
 [Kernels]
   [op_dot]
     type = TimeDerivative
     variable = op
-  [../]
+  []
   [op_bulk]
     type = AllenCahn
     variable = op
     f_name = F
     mob_name = L
     coupled_variables = v
-  [../]
+  []
   [op_interface]
     type = ACInterface
     variable = op
     kappa_name = 1
     mob_name = L
     coupled_variables = v
-  [../]
+  []
   [v_dot]
     type = TimeDerivative
     variable = v
-  [../]
+  []
   [v_diff]
     type = MatDiffusion
     variable = v
     diffusivity = 50.0
-  [../]
+  []
 []
 
 [Materials]
@@ -77,21 +77,21 @@
     outputs = exodus
     output_properties = 'L dL/dop dL/dv'
     derivative_order = 2
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'op'
     expression = '2*op^2*(1-op)^2 - 0.2*op'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

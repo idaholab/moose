@@ -13,19 +13,19 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Postprocessors]
   [receive]
     type = Receiver
-  [../]
+  []
 
   [send]
     type = ScalePostprocessor
     value = receive
     scaling_factor = 2
-  [../]
+  []
 []
 
 [Executioner]

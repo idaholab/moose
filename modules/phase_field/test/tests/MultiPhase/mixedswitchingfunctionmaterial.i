@@ -15,7 +15,7 @@
 
 [Variables]
   [eta]
-  [../]
+  []
 []
 
 [ICs]
@@ -28,7 +28,7 @@
     invalue = 1
     outvalue = 0
     int_width = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,17 +36,17 @@
     type = AllenCahn
     variable = eta
     f_name = F
-  [../]
+  []
   [eta_interface]
     type = ACInterface
     variable = eta
     kappa_name = kappa_eta
-  [../]
+  []
 
   [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [Materials]
@@ -54,7 +54,7 @@
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1.0 1.0'
-  [../]
+  []
 
   [switching]
     type = MixedSwitchingFunctionMaterial
@@ -62,13 +62,13 @@
     eta = eta
     h_order = MIX234
     weight = 1.0
-  [../]
+  []
 
   [barrier]
     type = BarrierFunctionMaterial
     eta = eta
     g_order = SIMPLE
-  [../]
+  []
 
 # Total free energy: F = Fa*(1-h) + Fb*h
   [free_energy]
@@ -80,15 +80,15 @@
     W = 3.1
     derivative_order = 2
     outputs = exodus
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -111,7 +111,7 @@
     growth_factor = 1.1
     cutback_factor = 0.75
     dt = 0.3
-  [../]
+  []
 []
 
 [Outputs]

@@ -11,12 +11,12 @@
     bottom_left = '0 0 0'
     top_right = '1 0.5 0'
     block_id = 1
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,11 +24,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -37,13 +37,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,37 +60,37 @@
     type = InternalSideSetupInterfaceCount
     count_type = 'initial'
     execute_on = 'initial timestep_begin timestep_end'
-  [../]
+  []
   [timestep] # once per timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'timestep'
     execute_on = 'initial timestep_begin timestep_end'
-  [../]
+  []
   [subdomain] # 1 on initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'subdomain'
     execute_on = 'initial timestep_begin timestep_end'
-  [../]
+  []
   [initialize] # 1 for initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'initialize'
     execute_on = 'initial timestep_begin timestep_end'
-  [../]
+  []
   [finalize] # 1 for initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'finalize'
     execute_on = 'initial timestep_begin timestep_end'
-  [../]
+  []
   [execute] # 4 for initial and 8 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'execute'
     execute_on = 'initial timestep_begin timestep_end'
-  [../]
+  []
   [threadjoin] # 1 for initial and 2 for each timestep
     type = InternalSideSetupInterfaceCount
     count_type = 'threadjoin'
     execute_on = 'initial timestep_begin timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

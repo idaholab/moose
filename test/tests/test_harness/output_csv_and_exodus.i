@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,11 +15,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -51,17 +51,17 @@
     type = PointValue
     variable = u
     point = '0.5 0.5 0'
-  [../]
+  []
   [y_field]
     type = PointValue
     variable = u
     point = '0.25 0.25 0'
-  [../]
+  []
   [z_field]
     type = PointValue
     variable = u
     point = '0.75 0.75 0'
-  [../]
+  []
 []
 
 [Outputs]

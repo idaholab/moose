@@ -23,43 +23,43 @@
     variable = disp_x
     boundary = '1 2 3'
     value = 0.0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = '1 2 3'
     value = 0.0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = '1 3'
     value = 0.0
-  [../]
+  []
   [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = '1 2 3'
     value = 0.0
-  [../]
+  []
   [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = '1 2 3'
     value = 0.0
-  [../]
+  []
   [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = '1 2 3'
     value = 0.0
-  [../]
+  []
   [move_z4]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 2
     function = pull
-  [../]
+  []
 []
 
 [Functions]
@@ -67,14 +67,14 @@
     type = PiecewiseLinear
     x = '0.0 1.0 2.0  3.0  4.0  5.0  6.0  7.0   8.0  9.0 10.0 11.0 12.0 13.0'
     y = '0.0 0.0 -0.2 -0.4 -0.6 -0.8 -0.6 -0.4 -0.2  0.0 0.2 0.4  0.6 0.8'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -106,26 +106,26 @@
     Iy = 1e-5
     Iz = 1e-5
     block = 1
-  [../]
+  []
   [block_2]
     Iy = 8e-4
     Iz = 8e-4
     block = '2 3'
-  [../]
+  []
 []
 
 [Materials]
   [stress]
     type = ComputeBeamResultants
     block = '1 2 3'
-  [../]
+  []
   [elasticity_1]
     type = ComputeElasticityBeam
     youngs_modulus = 2.0
     poissons_ratio = 0.3
     shear_coefficient = 1.0
     block = '1 2 3'
-  [../]
+  []
 []
 
 [Constraints]
@@ -136,7 +136,7 @@
     secondary = 4
     variable = disp_z
     formulation = kinematic
-  [../]
+  []
   [tie_z2]
     type = NodalStickConstraint
     penalty = 1e8
@@ -144,7 +144,7 @@
     secondary = 5
     variable = disp_z
     formulation = kinematic
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -152,22 +152,22 @@
     type = NodalVariableValue
     nodeid = 1
     variable = disp_x
-  [../]
+  []
   [disp_x_2]
     type = NodalVariableValue
     nodeid = 2
     variable = disp_x
-  [../]
+  []
   [disp_z_1]
     type = NodalVariableValue
     nodeid = 1
     variable = disp_z
-  [../]
+  []
   [disp_z_2]
     type = NodalVariableValue
     nodeid = 2
     variable = disp_z
-  [../]
+  []
 []
 
 [Outputs]

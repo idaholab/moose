@@ -9,30 +9,30 @@
 
 [AuxVariables]
   [penetration]
-  [../]
+  []
   [saved_x]
-  [../]
+  []
   [saved_y]
-  [../]
+  []
   [diag_saved_x]
-  [../]
+  []
   [diag_saved_y]
-  [../]
+  []
   [inc_slip_x]
-  [../]
+  []
   [inc_slip_y]
-  [../]
+  []
   [accum_slip_x]
-  [../]
+  []
   [accum_slip_y]
-  [../]
+  []
 []
 
 [Functions]
   [horizontal_movement]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -41,7 +41,7 @@
     strain = FINITE
     save_in = 'saved_x saved_y'
     diag_save_in = 'diag_saved_x diag_saved_y'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -51,32 +51,32 @@
     quantity = incremental_slip_x
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
   [incslip_y]
     type = PenetrationAux
     variable = inc_slip_y
     quantity = incremental_slip_y
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
   [accum_slip_x]
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
-  [../]
+  []
   [accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
-  [../]
+  []
   [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -85,37 +85,37 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [botx2]
     type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0.0
-  [../]
+  []
   [boty2]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
   [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = horizontal_movement
-  [../]
+  []
   [topy]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = -0.005
-  [../]
+  []
 []
 
 [Materials]
@@ -124,17 +124,17 @@
     block = '1'
     youngs_modulus = 1.0e9
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
   [top]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -142,32 +142,32 @@
     type = NodalSum
     variable = saved_x
     boundary = 1
-  [../]
+  []
   [bot_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 1
-  [../]
+  []
   [top_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 4
-  [../]
+  []
   [top_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 4
-  [../]
+  []
   [ref_resid_x]
     type = NodalL2Norm
     execute_on = timestep_end
     variable = saved_x
-  [../]
+  []
   [ref_resid_y]
     type = NodalL2Norm
     execute_on = timestep_end
     variable = saved_y
-  [../]
+  []
 []
 
 [Executioner]
@@ -192,7 +192,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]
@@ -202,7 +202,7 @@
   [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Contact]
@@ -211,7 +211,7 @@
     secondary = 3
     model = coulomb
     friction_coefficient = '0.25'
-  [../]
+  []
 []
 
 [Dampers]
@@ -219,5 +219,5 @@
     type = ContactSlipDamper
     primary = '2'
     secondary = '3'
-  [../]
+  []
 []

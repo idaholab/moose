@@ -31,27 +31,27 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 3.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 
   [ACBulk]
     type = AllenCahn
     variable = eta
     f_name = F
-  [../]
+  []
 
   [ACInterface]
     type = SimpleACInterface
     variable = eta
     kappa_name = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -60,7 +60,7 @@
     block = 0
     prop_names  = 'L'
     prop_values = '1'
-  [../]
+  []
 
   [free_energy]
     type = DerivativeParsedMaterial
@@ -69,7 +69,7 @@
     coupled_variables = 'eta'
     expression = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Executioner]

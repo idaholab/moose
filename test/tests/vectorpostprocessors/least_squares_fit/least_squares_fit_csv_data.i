@@ -20,7 +20,7 @@
     csv_file = fit_data_0.csv
     header = true
     outputs = none
-  [../]
+  []
   [least_squares_fit_coeffs]
     type = LeastSquaresFit
     vectorpostprocessor = csv_data
@@ -30,7 +30,7 @@
     output = coefficients
     truncate_order = false
     execute_on = initial
-  [../]
+  []
 []
 
 [Outputs]

@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,7 +36,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -11,7 +11,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -19,7 +19,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -29,13 +29,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [Constraints]
@@ -45,7 +45,7 @@
     secondary = 2
     primary = 3
     primary_variable = u
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -56,7 +56,7 @@
     # off_diag_row    = 'v'
     # off_diag_column = 'u'
     type = FDP
-  [../]
+  []
 []
 
 [Executioner]

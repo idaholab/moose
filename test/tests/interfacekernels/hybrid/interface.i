@@ -77,7 +77,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -99,7 +99,7 @@
     boundary = primary1_interface
     D = 'D'
     D_neighbor = 'D'
-  [../]
+  []
 
   [penalty]
     type = PenaltyInterfaceDiffusion
@@ -107,7 +107,7 @@
     neighbor_var = u
     boundary = primary1_interface
     penalty = 1e3
-  [../]
+  []
 []
 
 [Materials]

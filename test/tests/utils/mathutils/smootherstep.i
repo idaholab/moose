@@ -10,23 +10,23 @@
 [Functions]
   [smootherstep_value]
     type = SmootherStepTestFunction
-  [../]
+  []
   [exact_value]
     type = ParsedFunction
     expression = 'u := (x - 0.2) / (0.8 - 0.2);
              val := 6.0 * u^5 - 15 * u^4 + 10 * u^3;
              if(x < 0.2, 0, if(x > 0.8, 1, val))'
-  [../]
+  []
   [smootherstep_derivative]
     type = SmootherStepTestFunction
     derivative = true
-  [../]
+  []
   [exact_derivative]
     type = ParsedFunction
     expression = 'u := (x - 0.2) / (0.8 - 0.2);
              val := 30.0 * u^4 - 60 * u^3 + 30 * u^2;
              if(x < 0.2, 0, if(x > 0.8, 0, val / (0.8 - 0.2)))'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -37,7 +37,7 @@
     end_point = '1 0 0'
     num_points = 10
     sort_by = x
-  [../]
+  []
 []
 
 [Executioner]

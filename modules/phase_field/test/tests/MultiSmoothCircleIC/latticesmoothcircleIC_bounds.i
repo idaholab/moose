@@ -14,7 +14,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -29,7 +29,7 @@
      int_width = 5.0
      radius_variation_type = uniform
      avoid_bounds = false
-  [../]
+  []
 []
 
 [BCs]
@@ -37,15 +37,15 @@
     [c]
       variable = c
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
 []
 
 [Problem]

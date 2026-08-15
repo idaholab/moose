@@ -8,14 +8,14 @@
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [Kernels]
   [hc]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -24,13 +24,13 @@
     variable = temp
     boundary = leftleft
     value = 300
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = temp
     boundary = rightright
     value = 400
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -42,7 +42,7 @@
     emissivity_secondary = 0
     variable = temp
     type = GapHeatTransfer
-  [../]
+  []
 []
 
 [Materials]
@@ -51,7 +51,7 @@
     block = 'left right'
     specific_heat = 1
     thermal_conductivity = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,7 +63,7 @@
 
   [Quadrature]
     order = THIRD
-  [../]
+  []
 []
 
 [Outputs]

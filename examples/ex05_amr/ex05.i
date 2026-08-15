@@ -14,8 +14,8 @@
       type = GradientJumpIndicator
       variable = convected
       outputs = none
-    [../]
-  [../]
+    []
+  []
 
   # Create a marker that determines which elements to refine/coarsen based on error estimates
   # from an indicator:
@@ -26,19 +26,19 @@
       refine = 0.5 # split/refine elements in the upper half of the indicator error range
       coarsen = 0 # don't do any coarsening
       outputs = none
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
   [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -46,16 +46,16 @@
     type = ExampleCoefDiffusion
     variable = convected
     coef = 0.125
-  [../]
+  []
   [conv]
     type = ExampleConvection
     variable = convected
     some_variable = diffused
-  [../]
+  []
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [BCs]
@@ -65,25 +65,25 @@
     variable = convected
     boundary = inside
     value = 1
-  [../]
+  []
   [exterior_convected]
     type = DirichletBC
     variable = convected
     boundary = 'left top bottom'
     value = 0
-  [../]
+  []
   [left_diffused]
     type = DirichletBC
     variable = diffused
     boundary = left
     value = 0
-  [../]
+  []
   [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = right
     value = 10
-  [../]
+  []
 []
 
 [Executioner]

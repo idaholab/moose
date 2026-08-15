@@ -19,40 +19,40 @@
       max = 0.8
       min = 0.2
       seed = 12345
-    [../]
-  [../]
+    []
+  []
   [CHPFCRFFSplitVariables]
     sub_filenames = PFCRFF_split_test_sub.i
     n_name = n
     #sub_file_name = test_sub.i
-  [../]
+  []
 []
 
 [Kernels]
   [CHPFCRFFSplitKernel]
     log_approach = expansion
     n_name = n
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   [PFC]
     type = PFCRFFMaterial
-  [../]
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -60,11 +60,11 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
   [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -103,5 +103,5 @@
     variable = n
     x1 = 1.5
     type = PFCFreezingIC
-  [../]
+  []
 []

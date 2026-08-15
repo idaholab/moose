@@ -30,12 +30,12 @@
     cut_data = '0.5 1.0 0.5 0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
@@ -43,14 +43,14 @@
     type = PiecewiseLinear
     x = '0   2'
     y = '0  0.1'
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -60,14 +60,14 @@
     variable = u
     boundary = 3
     function = u_left
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -94,5 +94,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

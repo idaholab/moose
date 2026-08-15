@@ -20,30 +20,30 @@
   [all]
     add_variables = true
     incremental = true
-  [../]
+  []
 []
 
 [UserObjects]
   [coh]
     type = SolidMechanicsHardeningConstant
     value = 1
-  [../]
+  []
   [tanphi]
     type = SolidMechanicsHardeningConstant
     value = 0.05
-  [../]
+  []
   [tanpsi]
     type = SolidMechanicsHardeningConstant
     value = 0.1111077
-  [../]
+  []
   [t_strength]
     type = SolidMechanicsHardeningConstant
     value = 1
-  [../]
+  []
   [c_strength]
     type = SolidMechanicsHardeningConstant
     value = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -51,12 +51,12 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-  [../]
+  []
   [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = stress
     perform_finite_strain_rotations = false
-  [../]
+  []
   [stress]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
@@ -67,7 +67,7 @@
     tip_smoother = 0
     smoothing_tol = 1
     yield_function_tol = 1E-5
-  [../]
+  []
 []
 
 [Executioner]

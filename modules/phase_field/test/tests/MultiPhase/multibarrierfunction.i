@@ -23,8 +23,8 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 2.0
-    [../]
-  [../]
+    []
+  []
   [eta2]
     order = FIRST
     family = LAGRANGE
@@ -36,8 +36,8 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 2.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -46,7 +46,7 @@
     etas = 'eta1 eta2'
     function_name = g
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

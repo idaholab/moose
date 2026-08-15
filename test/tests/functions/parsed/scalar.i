@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [scalar]
     family = SCALAR
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -22,11 +22,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -34,7 +34,7 @@
     type = FunctionScalarAux
     variable = scalar
     function = func
-  [../]
+  []
 []
 
 [BCs]
@@ -43,13 +43,13 @@
     variable = u
     boundary = left
     function = left_bc
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Functions]
@@ -58,11 +58,11 @@
     expression = s
     symbol_values = scalar
     symbol_names = s
-  [../]
+  []
   [func]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Executioner]

@@ -22,38 +22,38 @@
     [InitialCondition]
       type = FunctionIC
       function = exact_fn
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = ((x*x)+(y*y))-(4*t)
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*((x*x)+(y*y))
-  [../]
+  []
 []
 
 [Kernels]
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -62,7 +62,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -70,7 +70,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,7 +88,7 @@
 
   [TimeIntegrator]
     type = LStableDirk2
-  [../]
+  []
 []
 
 [Outputs]

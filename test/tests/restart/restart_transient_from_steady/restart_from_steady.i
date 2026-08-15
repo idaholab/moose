@@ -13,19 +13,19 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,21 +34,21 @@
     variable = u
     boundary = 'left'
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Postprocessors]
   [unorm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

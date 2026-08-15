@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,11 +15,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,24 +28,24 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [aux_serialized]
     type = TestSerializedSolution
     system = aux
-  [../]
+  []
   [nl_serialized]
     type = TestSerializedSolution
     system = nl
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,8 +66,8 @@
       top_right = '0.8 0.8 0'
       inside = REFINE
       outside = DONT_MARK
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

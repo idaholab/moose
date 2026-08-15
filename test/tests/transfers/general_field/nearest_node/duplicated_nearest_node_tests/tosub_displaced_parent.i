@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -54,7 +54,7 @@
     execute_on = timestep_end
     positions = '0.48 0 0'
     input_files = tosub_displaced_sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -64,12 +64,12 @@
     source_variable = u
     variable = from_parent
     displaced_target_mesh = true
-  [../]
+  []
   [elemental_to_sub]
     type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = elemental_from_parent
     displaced_target_mesh = true
-  [../]
+  []
 []

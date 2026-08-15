@@ -13,37 +13,37 @@
   [scalar_strain_yy]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
   [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [temp]
     initial_condition = 580.0
-  [../]
+  []
 []
 
 [Functions]
@@ -51,12 +51,12 @@
     type = PiecewiseLinear
     x = '0   1   2'
     y = '580 580 680'
-  [../]
+  []
   [disp_x]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 2e-6'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -67,7 +67,7 @@
     planar_formulation = GENERALIZED_PLANE_STRAIN
     scalar_out_of_plane_strain = scalar_strain_yy
     eigenstrain_names = eigenstrain
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -77,21 +77,21 @@
     variable = strain_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
   [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -99,7 +99,7 @@
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -107,7 +107,7 @@
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -115,13 +115,13 @@
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
+  []
   [temp]
     type = FunctionAux
     variable = temp
     function = temp
     execute_on = 'timestep_begin'
-  [../]
+  []
 []
 
 [BCs]
@@ -130,13 +130,13 @@
     boundary = 1
     value = 0
     variable = disp_x
-  [../]
+  []
   [disp_x]
     type = FunctionDirichletBC
     boundary = 2
     function = disp_x
     variable = disp_x
-  [../]
+  []
 []
 
 [Materials]
@@ -144,18 +144,18 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3600
     poissons_ratio = 0.2
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-8
     temperature = temp
     stress_free_temperature = 580
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]

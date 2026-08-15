@@ -22,25 +22,25 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
   [prop1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [prop2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -48,12 +48,12 @@
     type = MaterialRealAux
     variable = prop1
     property = s1
-  [../]
+  []
   [prop2_output]
     type = MaterialRealAux
     variable = prop2
     property = s2
-  [../]
+  []
 []
 
 [BCs]
@@ -62,13 +62,13 @@
     variable = u
     boundary = 'left'
     value = 1.0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 1.0
-  [../]
+  []
 []
 
 [Materials]
@@ -76,21 +76,21 @@
     type = GenericConstantMaterial
     prop_names = 'a'
     prop_values = '.42'
-  [../]
+  []
   [stateful1]
     type = ImplicitStateful
     prop_name = 's1'
     coupled_prop_name = 'a'
     add_time = true
     older = false
-  [../]
+  []
   [stateful2]
     type = ImplicitStateful
     prop_name = 's2'
     coupled_prop_name = 's1'
     add_time = false
     older = false
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -98,12 +98,12 @@
     type = ElementAverageValue
     variable = prop1
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [integ2]
     type = ElementAverageValue
     variable = prop2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

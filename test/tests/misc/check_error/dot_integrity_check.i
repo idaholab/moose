@@ -8,10 +8,10 @@
 
 [Variables]
   [v]
-  [../]
+  []
 
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -19,13 +19,13 @@
     type = CoefDiffusion
     variable = u
     coef = 0.5
-  [../]
+  []
 
   [conv_v]
     type = DotCouplingKernel
     variable = v
     v = u
-  [../]
+  []
 []
 
 [Executioner]

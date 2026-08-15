@@ -15,7 +15,7 @@
     cut_data = '0.0 1.0 0.5 1.0'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
   [crack_tip]
     type = CrackFrontDefinition
     crack_direction_method = CrackDirectionVector
@@ -23,7 +23,7 @@
     crack_direction_vector = '1 0 0'
     2d = true
     axis_2d = 2
-  [../]
+  []
 []
 
 [Mesh]
@@ -44,59 +44,59 @@
     top_right = '1 2 0'
     bottom_left = '0 0 0'
     input = gen
-  [../]
+  []
   [right_bottom_node]
     type = ExtraNodesetGenerator
     new_boundary = 'right_bottom_node'
     coord = '1.0 0.0'
     input = all_node
-  [../]
+  []
   [right_top_node]
     type = ExtraNodesetGenerator
     new_boundary = 'right_top_node'
     coord = '1.0 2.0'
     input = right_bottom_node
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
  [saved_x]
-  [../]
+  []
   [saved_y]
-  [../]
+  []
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
     displacements = 'disp_x disp_y'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -107,7 +107,7 @@
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -115,7 +115,7 @@
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -123,14 +123,14 @@
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
+  []
   [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = vonmisesStress
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -140,32 +140,32 @@
     boundary = top
     factor = -1
     displacements = 'disp_x disp_y'
-  [../]
+  []
   [bottom_y]
     type = Pressure
     variable = disp_y
     boundary = bottom
     factor = -1
     displacements = 'disp_x disp_y'
-  [../]
+  []
   [fix_y]
     type = DirichletBC
     boundary = right_bottom_node
     variable = disp_y
     value = 0.0
-  [../]
+  []
   [fix_x]
     type = DirichletBC
     boundary = right_bottom_node
     variable = disp_x
     value =  0.0
-  [../]
+  []
   [fix_x2]
     type = DirichletBC
     boundary = right_top_node
     variable = disp_x
     value =  0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -173,16 +173,16 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [strain]
     type = ComputeCrackTipEnrichmentSmallStrain
     displacements = 'disp_x disp_y'
     crack_front_definition = crack_tip
     enrichment_displacements = 'enrich1_x enrich2_x enrich3_x enrich4_x enrich1_y enrich2_y enrich3_y enrich4_y'
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -203,12 +203,12 @@
   [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
   # controls for linear iterations
   l_max_its = 10
@@ -230,7 +230,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 
@@ -240,5 +240,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

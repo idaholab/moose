@@ -31,12 +31,12 @@
       radii = '14.0 14.0'
       3D_spheres = false
       variable = c
-    [../]
-  [../]
+    []
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -46,17 +46,17 @@
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [Materials]
@@ -64,7 +64,7 @@
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '5.0  2.0      0.1'
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
@@ -73,37 +73,37 @@
     constant_expressions = '0.1          1.0e-2'
     expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     derivative_order = 2
-  [../]
+  []
   [force_density]
     type = ForceDensityMaterial
     c = c
     etas ='eta0 eta1'
-  [../]
+  []
 []
 
 [AuxVariables]
   [eta0]
-  [../]
+  []
   [eta1]
-  [../]
+  []
   [bnds]
-  [../]
+  []
   [df00]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [df01]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [df10]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [df11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -116,7 +116,7 @@
     variable = eta0
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
+  []
   [IC_eta1]
     int_width = 6.0
     x1 = 30.0
@@ -126,22 +126,22 @@
     variable = eta1
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
+  []
 []
 
 [VectorPostprocessors]
   [forces_dns]
     type = GrainForcesPostprocessor
     grain_force = grain_force_dns
-  [../]
+  []
   [forces_cosnt]
     type = GrainForcesPostprocessor
     grain_force = grain_force_const
-  [../]
+  []
   [forces_total]
     type = GrainForcesPostprocessor
     grain_force = grain_force
-  [../]
+  []
 []
 
 [UserObjects]
@@ -150,7 +150,7 @@
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
-  [../]
+  []
   [grain_force_dns]
     type = ComputeGrainForceAndTorque
     c = c
@@ -158,26 +158,26 @@
     execute_on = 'linear nonlinear'
     grain_data = grain_center
     force_density = force_density
-  [../]
+  []
   [grain_force_const]
     type = ConstantGrainForceAndTorque
     execute_on = 'linear nonlinear'
     force =  '2.0 0.0 0.0 0.0 0.0 0.0'
     torque = '0.0 0.0 0.0 0.0 0.0 0.0'
-  [../]
+  []
   [grain_force]
     type = GrainForceAndTorqueSum
     execute_on = 'linear nonlinear'
     grain_forces = 'grain_force_dns grain_force_const'
     grain_num = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

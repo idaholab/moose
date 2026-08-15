@@ -14,51 +14,51 @@
   [exact_p1]
     type = ParsedFunction
     expression = t*((x*x)+(y*y))
-  [../]
+  []
   [ffn_p1]
     type = ParsedFunction
     expression = (x*x+y*y)-4*t
-  [../]
+  []
 
   [exact_p2]
     type = ParsedFunction
     expression = t*((x*x*x)+(y*y*y))
-  [../]
+  []
   [ffn_p2]
     type = ParsedFunction
     expression = (x*x*x+y*y*y)-6*t*(x+y)
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn1]
     type = BodyForce
     variable = u
     function = ffn_p1
-  [../]
+  []
 
   [ffn2]
     type = BodyForce
     variable = u
     function = ffn_p2
-  [../]
+  []
 []
 
 [BCs]
@@ -67,13 +67,13 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_p1
-  [../]
+  []
   [all2]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_p2
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,7 +92,7 @@
     disable_objects = '*/ffn2 */all2'
     execute_on = 'initial timestep_begin'
     set_sync_times = true
-  [../]
+  []
 []
 
 [Outputs]

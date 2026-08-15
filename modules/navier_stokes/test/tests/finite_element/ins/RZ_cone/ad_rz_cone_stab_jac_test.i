@@ -20,7 +20,7 @@
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
   coord_type = RZ
 []
 
@@ -29,7 +29,7 @@
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]
@@ -41,10 +41,10 @@
 [Variables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
   [p]
     order = FIRST
-  [../]
+  []
 []
 
 
@@ -63,7 +63,7 @@
   [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [mass_pspg]
     type = INSADMassPSPG
     variable = p
@@ -80,13 +80,13 @@
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
   [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
-  [../]
+  []
   [momentum_supg]
     type = INSADMomentumSUPG
     variable = velocity
@@ -101,7 +101,7 @@
     boundary = 'bottom'
     function_x = 0
     function_y = 1
-  [../]
+  []
   [wall]
     type = VectorFunctionDirichletBC
     variable = velocity
@@ -139,7 +139,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1.1 1.1'
-  [../]
+  []
   [ins_mat]
     type = INSADTauMaterial
     velocity = velocity

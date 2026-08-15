@@ -13,7 +13,7 @@
     x = '0 1 2.00 3 4'
     y = '0 1 1.01 1 0'
     scale_factor = 0.5
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -30,7 +30,7 @@
     secondary = 3
     penalty = 1e6
     model = frictionless
-  [../]
+  []
 []
 
 [BCs]
@@ -39,7 +39,7 @@
     variable = disp_x
     boundary = '1 4'
     value = 0.0
-  [../]
+  []
 
   [bottom_up]
     type = FunctionDirichletBC
@@ -47,21 +47,21 @@
     preset = false
     boundary = 1
     function = up
-  [../]
+  []
 
   [out]
     type = DirichletBC
     variable = disp_z
     boundary = '1 4'
     value = 0.0
-  [../]
+  []
 
   [top]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -70,7 +70,7 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stiffStuffStress]
     type = ComputeFiniteStrainElasticStress
   []

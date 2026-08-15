@@ -14,26 +14,26 @@
   [T]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [power]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff_T]
     type = Diffusion
     variable = T
-  [../]
+  []
   [src_T]
     type = CoupledForce
     variable = T
     v = power
-  [../]
+  []
 []
 
 [BCs]
@@ -42,7 +42,7 @@
     variable = T
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

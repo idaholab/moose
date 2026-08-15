@@ -11,14 +11,14 @@
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [AuxVariables]
   [layered_side_flux_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [FVKernels]
@@ -26,7 +26,7 @@
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
 []
 
 [FVBCs]
@@ -35,13 +35,13 @@
     variable = u
     boundary = bottom
     value = 0
-  [../]
+  []
   [top]
     type = FVDirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -50,7 +50,7 @@
     variable = layered_side_flux_average
     boundary = top
     user_object = layered_side_flux_average
-  [../]
+  []
 []
 
 [Materials]
@@ -59,7 +59,7 @@
     prop_values = 2
     prop_names = diffusivity
     boundary = 'right top'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -71,7 +71,7 @@
     variable = u
     execute_on = linear
     boundary = top
-  [../]
+  []
 []
 
 [Executioner]

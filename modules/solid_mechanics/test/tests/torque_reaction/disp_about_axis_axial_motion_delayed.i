@@ -27,7 +27,7 @@
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
 # Because rotation is prescribed about the z axis, the
 # DisplacementAboutAxis BC is only needed for the x and y
@@ -41,7 +41,7 @@
     axis_direction = '0. 0. 1.'
     component = 0
     variable = disp_x
-  [../]
+  []
 
   [top_y]
     type = DisplacementAboutAxis
@@ -52,7 +52,7 @@
     axis_direction = '0. 0. 1.'
     component = 1
     variable = disp_y
-  [../]
+  []
 
   # DisplacementAboutAxis incremental
   [top_x_rate]
@@ -65,7 +65,7 @@
     component = 0
     variable = disp_x
     angular_velocity = true
-  [../]
+  []
 
   [top_y_rate]
     type = DisplacementAboutAxis
@@ -77,7 +77,7 @@
     component = 1
     variable = disp_y
     angular_velocity = true
-  [../]
+  []
 []
 
   # Engage the incremental DisplacementAboutAxis after 30 seconds
@@ -88,7 +88,7 @@
     disable_objects = 'BCs::top_x_rate BCs::top_y_rate'
     start_time = '0'
     end_time = '30'
-  [../]
+  []
 []
 
 [Materials]
@@ -96,10 +96,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
+  []
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -107,22 +107,22 @@
     type = NodalVariableValue
     variable = disp_x
     nodeid = 5
-  [../]
+  []
   [disp_y_5]
     type = NodalVariableValue
     variable = disp_y
     nodeid = 5
-  [../]
+  []
   [disp_x_6]
     type = NodalVariableValue
     variable = disp_x
     nodeid = 6
-  [../]
+  []
   [disp_y_6]
     type = NodalVariableValue
     variable = disp_y
     nodeid = 6
-  [../]
+  []
 []
 
 [Executioner]

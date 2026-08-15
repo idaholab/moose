@@ -9,7 +9,7 @@
 [Variables]
   [u]
     block = 0
-  [../]
+  []
 []
 
 [Functions]
@@ -18,7 +18,7 @@
     expression = sin(y)
     symbol_names = y        # <- This is a bad - you can't specify x, y, z, or t
     symbol_values = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -26,7 +26,7 @@
     type = Diffusion
     variable = u
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -35,13 +35,13 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = sin_func
-  [../]
+  []
 []
 
 [Executioner]

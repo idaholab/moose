@@ -15,7 +15,7 @@
   [A]
     family = LAGRANGE_VEC
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
@@ -25,7 +25,7 @@
     x_value = 2
     y_value = 3
     z_value = 4
-  [../]
+  []
 []
 
 [Executioner]

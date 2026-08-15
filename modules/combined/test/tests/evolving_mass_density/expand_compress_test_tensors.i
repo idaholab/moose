@@ -46,21 +46,21 @@
     x = '0.00 1.00  2.0   3.00'
     y = '0.00 0.25  0.0  -0.25'
     scale_factor = 1
-  [../]
+  []
 [] # Functions
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
-  [../]
+  []
 []
 
 [BCs]
@@ -68,22 +68,22 @@
     type = DirichletBC
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bot_y]
     type = DirichletBC
     variable = disp_y
     value = 0
-  [../]
+  []
   [bot_z]
     type = DirichletBC
     variable = disp_z
     value = 0
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     preset = false
     function = rampConstant1
-  [../]
+  []
 []
 
 [Materials]
@@ -92,17 +92,17 @@
     block = '1 2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
   [small_strain]
     type = ComputeSmallStrain
     block = ' 1 2 3 4 5 6 7'
-  [../]
+  []
 
   [elastic_stress]
     type = ComputeLinearElasticStress
     block = '1 2 3 4 5 6 7'
-  [../]
+  []
 []
 
 [Executioner]
@@ -124,7 +124,7 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -132,5 +132,5 @@
     type = Mass
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

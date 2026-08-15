@@ -38,12 +38,12 @@
     type = PiecewiseLinear
     x = '0 0.1 0.2 0.3 0.4'
     y = '0 0.0026 0 -0.0026 0'
-  [../]
+  []
   [pressure]
     type = PiecewiseLinear
     x = '0 0.1 0.2 0.3 0.4'
     y = '0 0   0    0   0'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -52,7 +52,7 @@
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [BCs]
@@ -61,31 +61,31 @@
     variable = disp_y
     boundary = 4
     function = displ
-  [../]
+  []
   [pin_x]
     type = ADDirichletBC
     variable = disp_x
     boundary = '1  4'
     value = 0.0
-  [../]
+  []
   [pin_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [back]
     type = ADDirichletBC
     variable = disp_z
     boundary = '3'
     value = 0.0
-  [../]
+  []
   [front]
     type = ADPressure
     variable = disp_z
     boundary = 6
     function = pressure
-  [../]
+  []
 []
 
 [Materials]
@@ -93,19 +93,19 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200.0e3
     poissons_ratio = .3
-  [../]
+  []
   [elastic_stress]
     type = ADComputeSmearedCrackingStress
     cracking_stress = 120
     cracked_elasticity_type = DIAGONAL
     shear_retention_factor = 0.1
     softening_models = exponential_softening
-  [../]
+  []
   [exponential_softening]
     type = ADExponentialSoftening
     residual_stress = 0.1
     beta = 0.1
-  [../]
+  []
 []
 
 [Executioner]

@@ -16,43 +16,43 @@
   [right_u]
     type = ParsedFunction
     expression = 0.1*t
-  [../]
+  []
 
   [fn_v]
     type = ParsedFunction
     expression = (x+1)*y*0.1*t
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [td_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [td_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -61,20 +61,20 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
   [right_u]
     type = FunctionDirichletBC
     variable = u
     boundary = 1
     function = right_u
-  [../]
+  []
 
   [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '0 2'
     function = fn_v
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,5 +92,5 @@
   [out_displaced]
     type = Exodus
     use_displaced = true
-  [../]
+  []
 []

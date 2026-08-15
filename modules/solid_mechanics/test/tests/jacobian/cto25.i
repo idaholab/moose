@@ -25,7 +25,7 @@
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
@@ -34,23 +34,23 @@
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
+  []
   [cs]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
+  []
   [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
+  []
   [phi]
     type = SolidMechanicsHardeningConstant
     value = 0.8
-  [../]
+  []
   [psi]
     type = SolidMechanicsHardeningConstant
     value = 0.4
-  [../]
+  []
   [dp]
     type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
@@ -58,7 +58,7 @@
     mc_dilation_angle = psi
     yield_function_tolerance = 1E-11     # irrelevant here
     internal_constraint_tolerance = 1E-9 # irrelevant here
-  [../]
+  []
 []
 
 [Materials]
@@ -67,16 +67,16 @@
     block = 0
     lambda = 0.0
     shear_modulus = 1.0
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '6 5 4  5 7 2  4 2 2'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = dp
-  [../]
+  []
   [dp]
     type = CappedDruckerPragerStressUpdate
     DP_model = dp
@@ -85,7 +85,7 @@
     yield_function_tol = 1E-11
     tip_smoother = 1
     smoothing_tol = 1
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -94,7 +94,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

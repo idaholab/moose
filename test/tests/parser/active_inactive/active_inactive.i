@@ -16,7 +16,7 @@
   active = 'u'
 
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -27,14 +27,14 @@
   [aux1]
     type = DoesntExist
     flintstones = 'fred wilma'
-  [../]
+  []
   [aux2]
-  [../]
+  []
   [aux3]
     order = TENZILLION
-  [../]
+  []
   [aux4]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -45,22 +45,22 @@
     type = ConstantAux
     value = 1
     variable = aux1
-  [../]
+  []
   [aux2]
     type = ConstantAux
     value = 2
     variable = aux2
-  [../]
+  []
   [aux3]
     type = ConstantAux
     value = 3
     variable = aux3
-  [../]
+  []
   [aux4]
     type = ConstantAux
     value = 4
     variable = aux4
-  [../]
+  []
 []
 
 [Kernels]
@@ -69,7 +69,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -79,14 +79,14 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -94,7 +94,7 @@
 
   inactive = Adaptivity
   [Adaptivity]
-  [../]
+  []
 []
 
 # No output so we can override several parameters and test them concurrently

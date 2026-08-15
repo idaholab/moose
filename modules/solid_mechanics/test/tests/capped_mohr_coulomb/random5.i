@@ -33,7 +33,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
@@ -44,19 +44,19 @@
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
+  []
   [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
+  []
   [z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
@@ -65,34 +65,34 @@
     variable = disp_x
     boundary = 'front back'
     function = '0'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
   [Smax]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [Smid]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [Smin]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -101,44 +101,44 @@
     rank_two_tensor = stress
     variable = Smax
     scalar_type = MaxPrincipal
-  [../]
+  []
   [Smid]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = Smid
     scalar_type = MidPrincipal
-  [../]
+  []
   [Smin]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = Smin
     scalar_type = MinPrincipal
-  [../]
+  []
 []
 
 [UserObjects]
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1.5
-  [../]
+  []
   [cs]
     type = SolidMechanicsHardeningConstant
     value = 3.0
-  [../]
+  []
   [coh]
     type = SolidMechanicsHardeningConstant
     value = 1.0
-  [../]
+  []
   [phi]
     type = SolidMechanicsHardeningConstant
     value = 20
     convert_to_radians = true
-  [../]
+  []
   [psi]
     type = SolidMechanicsHardeningConstant
     value = 3
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
@@ -146,7 +146,7 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100
     poissons_ratio = 0.3
-  [../]
+  []
   [capped_mc]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
@@ -157,12 +157,12 @@
     smoothing_tol = 0.2
     yield_function_tol = 1.0E-12
     max_NR_iterations = 1000
-  [../]
+  []
   [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = capped_mc
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 

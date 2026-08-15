@@ -5,7 +5,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -13,7 +13,7 @@
     type = ADMatDiffusion
     variable = u
     diffusivity = F
-  [../]
+  []
 []
 
 [Materials]
@@ -22,12 +22,12 @@
     prop_names = 'time_no_ad'
     prop_values = 't'
     outputs = all
-  [../]
+  []
   [time]
     type = MaterialADConverter
     reg_props_in = time_no_ad
     ad_props_out = time
-  [../]
+  []
 
   [F]
     type = ADDerivativeParsedMaterial
@@ -36,7 +36,7 @@
     expression = 'if (time < 1.9, 1, log(-1))'
     disable_fpoptimizer = true
     evalerror_behavior = nan
-  [../]
+  []
 []
 
 [Executioner]

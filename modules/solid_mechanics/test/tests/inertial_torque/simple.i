@@ -38,7 +38,7 @@
 
 [Variables]
   [disp_y]
-  [../]
+  []
 []
 
 [Kernels]
@@ -46,33 +46,33 @@
     type = InertialTorque
     component = 0
     variable = disp_y
-  [../]
+  []
   [source_x]
     type = BodyForce
     variable = disp_y
     function = -3
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
   [disp_z]
     initial_condition = 3
-  [../]
+  []
   [vel_x]
-  [../]
+  []
   [vel_y]
-  [../]
+  []
   [vel_z]
-  [../]
+  []
   [accel_x]
-  [../]
+  []
   [accel_y]
     initial_condition = 2
-  [../]
+  []
   [accel_z]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -81,40 +81,40 @@
     variable = vel_x
     acceleration = accel_x
     execute_on = timestep_end
-  [../]
+  []
   [vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
     execute_on = timestep_end
-  [../]
+  []
   [vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
     execute_on = timestep_end
-  [../]
+  []
   [accel_x]
     type = NewmarkAccelAux
     variable = accel_x
     displacement = disp_x
     velocity = vel_x
     execute_on = timestep_end
-  [../]
+  []
   [accel_y]
     type = NewmarkAccelAux
     variable = accel_y
     displacement = disp_y
     velocity = vel_y
     execute_on = timestep_end
-  [../]
+  []
   [accel_z]
     type = NewmarkAccelAux
     variable = accel_z
     displacement = disp_z
     velocity = vel_z
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -131,7 +131,7 @@
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 0.5
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -140,7 +140,7 @@
     point = '0 0 0'
     use_displaced_mesh = false
     variable = disp_y
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -149,7 +149,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'gmres bjacobi 1E-15 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

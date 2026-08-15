@@ -20,12 +20,12 @@
 
 [Variables]
   [V]
-  [../]
+  []
   [A]
     family = LAGRANGE_VEC
     order = FIRST
     scaling = 1e-10
-  [../]
+  []
 []
 
 [Kernels]
@@ -33,34 +33,34 @@
     type = CoefDiffusion
     variable = V
     coef = 5
-  [../]
+  []
   [V_frc]
     type = BodyForce
     function = 'V_forcing_function'
     variable = V
-  [../]
+  []
   [A_diff]
     type = VectorCoefDiffusion
     variable = A
     coef = 5
-  [../]
+  []
   [A_coeff_reaction]
     type = VectorCoeffReaction
     variable = A
     coefficient = -.09
-  [../]
+  []
   [A_coupled_grad_td]
     type = VectorCoupledGradientTimeDerivative
     variable = A
     v = V
-  [../]
+  []
   [A_frc]
     type = VectorBodyForce
     variable = A
     function_x = 'Ax_forcing_function'
     function_y = 'Ay_forcing_function'
     function_z = '0'
-  [../]
+  []
 []
 
 [BCs]
@@ -69,7 +69,7 @@
     variable = V
     boundary = 'left right top bottom'
     function = 'V_exact_sln'
-  [../]
+  []
   [bnd_A]
     type = VectorPenaltyDirichletBC
     variable = A
@@ -78,41 +78,41 @@
     z_exact_sln = '0'
     penalty = 1e10
     boundary = 'left right top bottom'
-  [../]
+  []
 []
 
 [Functions]
   [V_exact_sln]
     type = ParsedFunction
     expression = 'cos(0.3*t)*cos(1.1*x)*cos(1.2*y)'
-  [../]
+  []
   [Ax_exact_sln]
     type = ParsedFunction
     expression = 'cos(0.3*t)*cos(0.4*x)*cos(0.5*y)'
-  [../]
+  []
   [Ay_exact_sln]
     type = ParsedFunction
     expression = 'cos(0.3*t)*cos(0.6*x)*cos(0.7*y)'
-  [../]
+  []
   [V_forcing_function]
     type = ParsedFunction
     expression = '0.33*sin(0.3*t)*sin(1.1*x)*cos(1.2*y) + 13.25*cos(0.3*t)*cos(1.1*x)*cos(1.2*y)'
-  [../]
+  []
   [Ax_forcing_function]
     type = ParsedFunction
     expression = '0.33*sin(0.3*t)*sin(1.1*x)*cos(1.2*y) + 1.96*cos(0.3*t)*cos(0.4*x)*cos(0.5*y)'
-  [../]
+  []
   [Ay_forcing_function]
     type = ParsedFunction
     expression = '0.36*sin(0.3*t)*sin(1.2*y)*cos(1.1*x) + 4.16*cos(0.3*t)*cos(0.6*x)*cos(0.7*y)'
-  [../]
+  []
 []
 
 [Preconditioning]
   [pre]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

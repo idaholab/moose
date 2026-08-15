@@ -14,24 +14,24 @@
   [ic]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = 2*t*((x*x)+(y*y))-(4*t*t)
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*t*((x*x)+(y*y))
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -39,20 +39,20 @@
     type = TimeDerivative
     variable = u
     implicit = true
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
     implicit = false
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
     implicit = false
-  [../]
+  []
 []
 
 [ICs]
@@ -60,7 +60,7 @@
     type = FunctionIC
     variable = u
     function = ic
-  [../]
+  []
 []
 
 [BCs]
@@ -69,7 +69,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -77,7 +77,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,7 +85,7 @@
 
   [TimeIntegrator]
     type = ExplicitTVDRK2
-  [../]
+  []
   solve_type = 'LINEAR'
 
   start_time = 0.0

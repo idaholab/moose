@@ -11,22 +11,22 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [u_IC_fn]
     type = ParsedFunction
     expression = 'x'
-  [../]
+  []
   [v_IC_fn]
     type = ParsedFunction
     expression = 'sin(x)'
-  [../]
+  []
 []
 
 [ICs]
@@ -34,12 +34,12 @@
     type = FunctionIC
     variable = u
     function = u_IC_fn
-  [../]
+  []
   [v_IC]
     type = FunctionIC
     variable = v
     function = v_IC_fn
-  [../]
+  []
 []
 
 [Kernels]
@@ -48,12 +48,12 @@
     variable = u
     coupled_variables = 'u v'
     material_property = material_derivative_test_property
-  [../]
+  []
   # add a dummy kernel for v to prevent singular Jacobian
   [dummy_kernel]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [Materials]
@@ -61,7 +61,7 @@
     type = MaterialDerivativeTestMaterial
     var1 = u
     var2 = v
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -71,7 +71,7 @@
     solve_type = newton
     petsc_options_iname = '-snes_type -snes_test_err'
     petsc_options_value = 'test       1e-10'
-  [../]
+  []
 []
 
 [Executioner]

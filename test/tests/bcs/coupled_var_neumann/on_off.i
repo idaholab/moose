@@ -13,23 +13,23 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
   [coupled_bc_var]
-  [../]
+  []
 
   [active]
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -38,7 +38,7 @@
     variable = active
     value = 0.5
     boundary = 1
-  [../]
+  []
 []
 
 [ICs]
@@ -46,14 +46,14 @@
     type = FunctionIC
     variable = coupled_bc_var
     function = set_coupled_bc_var
-  [../]
+  []
 []
 
 [Functions]
   [set_coupled_bc_var]
     type = ParsedFunction
     expression = 'y - 0.5'
-  [../]
+  []
 []
 
 [BCs]
@@ -62,7 +62,7 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = CoupledVarNeumannBC
@@ -70,7 +70,7 @@
     boundary = 1
     v = coupled_bc_var
     scale_factor = active
-  [../]
+  []
 []
 
 [Executioner]

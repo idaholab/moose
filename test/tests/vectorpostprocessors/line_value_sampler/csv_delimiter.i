@@ -7,20 +7,20 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [v]
     initial_condition = 1.23456789
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -29,13 +29,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -46,7 +46,7 @@
     end_point = '1 0.5 0'
     num_points = 11
     sort_by = id
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,5 +63,5 @@
     type = CSV
     delimiter = ' '
     precision = 5
-  [../]
+  []
 []

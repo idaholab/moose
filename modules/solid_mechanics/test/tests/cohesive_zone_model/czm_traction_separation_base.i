@@ -26,7 +26,7 @@
   [breakmesh]
     input = subdomain_2
     type = BreakMeshByBlockGenerator
-  [../]
+  []
   [add_side_sets]
     input = breakmesh
     type = SideSetsFromNormalsGenerator
@@ -50,7 +50,7 @@
     strain = SMALL
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_yz stress_xz stress_xy'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/CohesiveZone]
@@ -58,7 +58,7 @@
     strain = SMALL
     boundary = 'Block1_Block2'
     generate_output = 'traction_x traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z normal_jump tangent_jump'
-  [../]
+  []
 []
 
 [BCs]
@@ -68,39 +68,39 @@
     preset = false
     boundary = x0
     value = 0.0
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = x0
     value = 0.0
-  [../]
+  []
   [left_z]
     type = DirichletBC
     variable = disp_z
     preset = false
     boundary = x0
     value = 0.0
-  [../]
+  []
   [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = x1
-  [../]
+  []
   [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = x1
-  [../]
+  []
   [right_z]
     type = FunctionDirichletBC
     variable = disp_z
     preset = false
     boundary = x1
-  [../]
+  []
 []
 
 [Materials]
@@ -109,21 +109,21 @@
     block = '1 2'
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = '1 2'
-  [../]
+  []
   [czm_mat]
     boundary = 'Block1_Block2'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -146,5 +146,5 @@
 [Outputs]
   [out]
     type = Exodus
-  [../]
+  []
 []

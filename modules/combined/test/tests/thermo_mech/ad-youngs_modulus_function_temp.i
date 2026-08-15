@@ -42,25 +42,25 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
   [temp]
     initial_condition = 400
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [elastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
@@ -68,18 +68,18 @@
     type = PiecewiseLinear
     x = '1       4'
     y = '400   700'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = ADDiffusion
     variable = temp
-  [../]
+  []
   [TensorMechanics]
     use_displaced_mesh = true
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 
@@ -90,7 +90,7 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
 
  [elastic_strain_xx]
     type = ADRankTwoAux
@@ -99,7 +99,7 @@
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -108,25 +108,25 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [u_bottom_fix]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [u_back_fix]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
   [u_pull_right]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0.001
-  [../]
+  []
 
   [temp_bc_1]
     type = ADFunctionDirichletBC
@@ -134,7 +134,7 @@
     preset = false
     boundary = '1 2 3 4'
     function = temperature_function
-  [../]
+  []
 []
 
 [Materials]
@@ -146,26 +146,26 @@
                99900      10e3'
     property = youngs_modulus
     variable = temp
-  [../]
+  []
 
   [elasticity_tensor]
     type = ADComputeVariableIsotropicElasticityTensor
     youngs_modulus = youngs_modulus
     poissons_ratio = 0.0
-  [../]
+  []
   [strain]
     type = ADComputeIncrementalStrain
-  [../]
+  []
   [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -178,15 +178,15 @@
   [elastic_strain_xx]
     type = ElementAverageValue
     variable = elastic_strain_xx
-  [../]
+  []
   [elastic_stress_xx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
+  []
   [temp]
     type = AverageNodalVariableValue
     variable = temp
-  [../]
+  []
 []
 
 [Outputs]

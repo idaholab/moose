@@ -6,7 +6,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -17,7 +17,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [rxn]
     type = Reaction
     variable = u
@@ -30,13 +30,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 

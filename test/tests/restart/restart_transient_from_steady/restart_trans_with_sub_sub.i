@@ -7,29 +7,29 @@
 
 [AuxVariables]
   [power_density]
-  [../]
+  []
 []
 
 [Variables]
   [temp]
 #    initial_condition = 1000000
-  [../]
+  []
 []
 
 [Kernels]
   [heat_conduction]
      type = Diffusion
      variable = temp
-  [../]
+  []
   [heat_ie]
     type = TimeDerivative
     variable = temp
-  [../]
+  []
   [heat_source_fuel]
     type = CoupledForce
     variable = temp
     v = power_density
-  [../]
+  []
 []
 
 [BCs]
@@ -61,13 +61,13 @@
     variable = temp
     block = '0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [pwr_density]
     type = ElementIntegralVariablePostprocessor
     block = '0'
     variable = power_density
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

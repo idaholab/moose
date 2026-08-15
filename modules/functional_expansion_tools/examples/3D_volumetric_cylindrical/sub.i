@@ -17,18 +17,18 @@
 # the AuxKernels that we need.
 [Variables]
   [empty]
-  [../]
+  []
 []
 
 [AuxVariables]
   [s]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [m_in]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 # We must have a kernel for every variable, hence this null kernel to match the variable 'empty'
@@ -36,7 +36,7 @@
   [null_kernel]
     type = NullKernel
     variable = empty
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,13 +44,13 @@
     type = FunctionSeriesToAux
     function = FX_Basis_Value_Sub
     variable = m_in
-  [../]
+  []
   [calculate_s] # Something to make 's' change each time, but allow a converging solution
     type = ParsedAux
     variable = s
     coupled_variables = m_in
     expression = '2*exp(-m_in/0.8)'
-  [../]
+  []
 []
 
 [Functions]
@@ -61,7 +61,7 @@
     physical_bounds = '-2.5 2.5   0 0 1' # z_min z_max   x_center y_center radius
     z = Legendre # Axial in z
     disc = Zernike # (r, t) default to unit disc in x-y plane
-  [../]
+  []
 []
 
 [UserObjects]
@@ -69,7 +69,7 @@
     type = FXVolumeUserObject
     function = FX_Basis_Value_Sub
     variable = s
-  [../]
+  []
 []
 
 [Executioner]

@@ -16,7 +16,7 @@
 
 [Variables]
   [T]
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,7 +24,7 @@
     type = MatDiffusion
     variable = T
     diffusivity = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = T
     boundary = 'left right bottom'
     value = 0
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = T
     boundary = top
     function = '10*sin(pi*x*0.5)'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -48,13 +48,13 @@
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
+  []
   [elemental_error]
     type = ElementL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
+  []
 []
 
 [Executioner]

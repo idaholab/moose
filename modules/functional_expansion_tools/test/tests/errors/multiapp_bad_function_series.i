@@ -11,30 +11,30 @@
   [m]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [s_in]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff_m]
     type = Diffusion
     variable = m
-  [../]
+  []
   [time_diff_m]
     type = TimeDerivative
     variable = m
-  [../]
+  []
   [s_in]
     type = CoupledForce
     variable = m
     v = s_in
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -42,7 +42,7 @@
     type = FunctionSeriesToAux
     variable = s_in
     function = FX_Basis_Value_Main
-  [../]
+  []
 []
 
 [ICs]
@@ -50,7 +50,7 @@
     type = ConstantIC
     variable = m
     value = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -59,7 +59,7 @@
     variable = m
     value = 1
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Functions]
@@ -69,11 +69,11 @@
     orders = '3'
     physical_bounds = '0.0  10.0'
     x = Legendre
-  [../]
+  []
   [AnotherFunction]
     type = ConstantFunction
     value = -1
-  [../]
+  []
 []
 
 [UserObjects]
@@ -81,22 +81,22 @@
     type = FXVolumeUserObject
     function = FX_Basis_Value_Main
     variable = m
-  [../]
+  []
 []
 
 [Postprocessors]
   [average_value]
     type = ElementAverageValue
     variable = m
-  [../]
+  []
   [peak_value]
     type = ElementExtremeValue
     value_type = max
     variable = m
-  [../]
+  []
   [picard_iterations]
     type = NumFixedPointIterations
-  [../]
+  []
 []
 
 [Executioner]
@@ -117,7 +117,7 @@
   [FXTransferApp]
     type = TransientMultiApp
     input_files = multiapp_sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -126,11 +126,11 @@
     to_multi_app = FXTransferApp
     this_app_object_name = AnotherFunction
     multi_app_object_name = FX_Basis_Value_Sub
-  [../]
+  []
   [ValueToMe]
     type = MultiAppFXTransfer
     from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Value_Main
     multi_app_object_name = FX_Value_UserObject_Sub
-  [../]
+  []
 []

@@ -25,24 +25,24 @@
     type = LineSegmentCutSetUserObject
     cut_data = '0.3 1.0 0.3 0.2 0 3'
     heal_always = false
-  [../]
+  []
   [level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = ls
     heal_always = true
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [ls]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -50,7 +50,7 @@
     type = FunctionAux
     variable = ls
     function = ls_func
-  [../]
+  []
 []
 
 [Functions]
@@ -58,11 +58,11 @@
     type = PiecewiseLinear
     x = '0   2'
     y = '3   5'
-  [../]
+  []
   [ls_func]
     type = ParsedFunction
     expression = 'x-0.7-0.07*(t-1)'
-  [../]
+  []
 []
 
 [Constraints]
@@ -73,14 +73,14 @@
     variable = u
     use_penalty = true
     alpha = 1e5
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -90,14 +90,14 @@
     variable = u
     boundary = 3
     value = 3
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
 []
 
@@ -128,5 +128,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

@@ -17,15 +17,15 @@
 
 [AuxVariables]
   [T]
-  [../]
+  []
   [stress_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_tt]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -33,7 +33,7 @@
     type = FunctionIC
     variable = T
     function = '1000-0.7*sqrt(x^2+y^2)'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -42,7 +42,7 @@
     strain = small
     incremental = false
     eigenstrain_names = eigenstrain
-  [../]
+  []
 []
 
 
@@ -54,7 +54,7 @@
     index_j = 0
     index_i = 0
     center_point = '0 0 0'
-  [../]
+  []
   [stress_tt]
     type = CylindricalRankTwoAux
     variable = stress_tt
@@ -62,7 +62,7 @@
     index_j = 1
     index_i = 1
     center_point = '0 0 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -71,13 +71,13 @@
     variable = disp_x
     boundary = 2
     value = 0
-  [../]
+  []
   [outer_y]
     type = DirichletBC
     variable = disp_y
     boundary = '2 10'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -86,11 +86,11 @@
     fill_method = symmetric_isotropic
     C_ijkl = '2.15e5 0.74e5'
     block = 1
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = 1
-  [../]
+  []
   [thermal_strain]
     type= ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
@@ -98,7 +98,7 @@
     stress_free_temperature = 273
     block = 1
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]

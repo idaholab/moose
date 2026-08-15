@@ -11,17 +11,17 @@
   [ic]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = x*x-2*t
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*x*x
-  [../]
+  []
 []
 
 [Variables]
@@ -32,26 +32,26 @@
     [InitialCondition]
       type = FunctionIC
       function = ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -61,7 +61,7 @@
     preset = false
     boundary = '0 1'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -69,7 +69,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -82,7 +82,7 @@
 
   [TimeIntegrator]
     type = ActuallyExplicitEuler
-  [../]
+  []
 []
 
 [Outputs]
@@ -90,5 +90,5 @@
   [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []

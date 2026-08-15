@@ -11,7 +11,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -19,12 +19,12 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
 
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,14 +33,14 @@
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -50,7 +50,7 @@
     mat_prop = 'some_prop'
     coupled_mat_prop = 'thermal_conductivity'
     use_old_prop = true
-  [../]
+  []
 
   [stateful_mat]
     type = StatefulTest
@@ -58,7 +58,7 @@
     prop_values = 1.0
     output_properties = thermal_conductivity
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

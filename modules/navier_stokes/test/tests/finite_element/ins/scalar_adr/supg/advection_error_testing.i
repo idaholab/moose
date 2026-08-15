@@ -18,7 +18,7 @@ velocity=1
   [c]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
@@ -26,7 +26,7 @@ velocity=1
     type = AdvectionSUPG
     variable = c
     forcing_func = 'ffn'
-  [../]
+  []
 []
 
 [BCs]
@@ -35,7 +35,7 @@ velocity=1
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -43,18 +43,18 @@ velocity=1
     type = GenericConstantMaterial
     prop_names = 'mu rho'
     prop_values = '0 1'
-  [../]
+  []
 []
 
 [Functions]
   [ffn]
     type = ParsedFunction
     expression = '1-x^2'
-  [../]
+  []
   [c_func]
     type = ParsedFunction
     expression = 'x-x^3/3'
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,10 +66,10 @@ velocity=1
 [Outputs]
   [exodus]
     type = Exodus
-  [../]
+  []
   [csv]
     type = CSV
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -78,20 +78,20 @@ velocity=1
     variable = c
     function = c_func
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
   [L2cx]
     type = ElementL2Error
     variable = cx
     function = ffn
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [AuxVariables]
   [cx]
     family = MONOMIAL
     order = FIRST
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -100,5 +100,5 @@ velocity=1
     component = x
     variable = cx
     gradient_variable = c
-  [../]
+  []
 []

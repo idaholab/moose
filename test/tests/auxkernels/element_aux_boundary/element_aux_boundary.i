@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [real_property]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -23,7 +23,7 @@
     variable = real_property
     property = real_property
     boundary = '1 2'
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,11 +31,11 @@
     type = CoefDiffusion
     variable = u
     coef = 1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -44,13 +44,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -59,13 +59,13 @@
     boundary = 1
     real_factor = 2
     variable = u
-  [../]
+  []
   [boundary_2]
     type = OutputTestMaterial
     boundary = 2
     real_factor = 2
     variable = u
- [../]
+ []
 []
 
 [Executioner]

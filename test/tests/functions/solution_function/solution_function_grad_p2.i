@@ -14,18 +14,18 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [test_variable_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [test_variable_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -34,13 +34,13 @@
     variable = test_variable_x
     component = x
     function = solution_function
-  [../]
+  []
   [test_variable_y_aux]
     type = FunctionDerivativeAux
     variable = test_variable_y
     component = y
     function = solution_function
-  [../]
+  []
 []
 
 [UserObjects]
@@ -48,21 +48,21 @@
     type = SolutionUserObject
     system_variables = test_variable
     mesh = solution_function_grad_p1.e
-  [../]
+  []
 []
 
 [Functions]
   [solution_function]
     type = SolutionFunction
     solution = ex_soln
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -71,13 +71,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

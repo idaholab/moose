@@ -10,21 +10,21 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [nn]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -32,7 +32,7 @@
     type = SolutionAux
     variable = nn
     solution = soln
-  [../]
+  []
 []
 
 [UserObjects]
@@ -40,7 +40,7 @@
     type = SolutionUserObject
     mesh = cubesource.e
     system_variables = source_nodal
-  [../]
+  []
 []
 
 [BCs]
@@ -49,7 +49,7 @@
     variable = u
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]

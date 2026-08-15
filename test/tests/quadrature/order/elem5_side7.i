@@ -11,11 +11,11 @@
   [numsideqps]
     type = NumSideQPs
     boundary = 0
-  [../]
+  []
   [numelemqps]
     type = NumElemQPs
     block = 0
-  [../]
+  []
 []
 
 [Problem]

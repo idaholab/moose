@@ -25,11 +25,11 @@
   [c]   # Mole fraction of Cr (unitless)
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [w]   # Chemical potential (eV/mol)
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -39,15 +39,15 @@
     max = 0.48774
     seed = 210
     variable = c
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [c_bcs]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -55,19 +55,19 @@
     variable = w
     v = c
     type = CoupledTimeDerivative
-  [../]
+  []
   [coupled_res]
     variable = w
     type = SplitCHWRes
     mob_name = M
-  [../]
+  []
   [coupled_parsed]
     variable = c
     type = SplitCHParsed
     f_name = f_loc
     kappa_name = kappa_c
     w = w
-  [../]
+  []
 []
 
 [Materials]
@@ -79,7 +79,7 @@
     prop_names = 'kappa_c'
     prop_values = '8.125e-16*6.24150934e+18*1e+09^2*1e-27'
                   # kappa_c *eV_J*nm_m^2* d
-  [../]
+  []
   [mobility]               # Mobility (nm^2 mol/eV/s)
     # NOTE: This is a fitted equation, so only 'Conv' has units
     type = DerivativeParsedMaterial
@@ -103,7 +103,7 @@
                 Efe*c*(1-c)+Ffe*c*(1-c)*(2*c-1)+Gfe*c*(1-c)*(2*c-1)^2))'
     derivative_order = 1
     outputs = exodus
-  [../]
+  []
   [local_energy]           # Local free energy function (eV/mol)
     type = DerivativeParsedMaterial
     property_name = f_loc
@@ -115,44 +115,44 @@
     expression = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
                 E*c*(1-c)+F*c*(1-c)*(2*c-1)+G*c*(1-c)*(2*c-1)^2)'
     derivative_order = 2
-  [../]
+  []
   [precipitate_indicator]  # Returns 1/625 if precipitate
     type = ParsedMaterial
     property_name = prec_indic
     coupled_variables = c
     expression = if(c>0.6,0.0016,0)
-  [../]
+  []
 []
 
 [Postprocessors]
   [step_size]             # Size of the time step
     type = TimestepSize
-  [../]
+  []
   [iterations]            # Number of iterations needed to converge timestep
     type = NumNonlinearIterations
-  [../]
+  []
   [nodes]                 # Number of nodes in mesh
     type = NumNodes
-  [../]
+  []
   [evaluations]           # Cumulative residual calculations for simulation
     type = NumResidualEvaluations
-  [../]
+  []
   [precipitate_area]      # Fraction of surface devoted to precipitates
     type = ElementIntegralMaterialProperty
     mat_prop = prec_indic
-  [../]
+  []
   [active_time]           # Time computer spent on simulation
     type = PerfGraphData
     section_name = "Root"
     data_type = total
-  [../]
+  []
 []
 
 [Preconditioning]
   [coupled]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -173,12 +173,12 @@
     cutback_factor = 0.8
     growth_factor = 1.5
     optimal_iterations = 7
-  [../]
+  []
   [Adaptivity]
     coarsen_fraction = 0.1
     refine_fraction = 0.7
     max_h_level = 2
-  [../]
+  []
 []
 
 [Debug]
@@ -192,5 +192,5 @@
   [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []

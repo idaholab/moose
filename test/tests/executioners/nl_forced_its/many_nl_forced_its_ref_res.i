@@ -11,7 +11,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -19,12 +19,12 @@
     type = Diffusion
     variable = u
     extra_vector_tags = ref
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = u
     extra_vector_tags = ref
-  [../]
+  []
 []
 
 [BCs]
@@ -34,14 +34,14 @@
     preset = false
     boundary = left
     value = -1
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

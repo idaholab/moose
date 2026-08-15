@@ -20,15 +20,15 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
   [wc_x]
-  [../]
+  []
   [wc_y]
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,69 +36,69 @@
     type = CosseratStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
+  []
   [cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
+  []
   [cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
+  []
   [x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
+  []
   [y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
+  []
   [x_moment]
     type = MomentBalancing
     variable = wc_x
     component = 0
-  [../]
+  []
   [y_moment]
     type = MomentBalancing
     variable = wc_y
     component = 1
-  [../]
+  []
 []
 
 [AuxVariables]
   [wc_z]
-  [../]
+  []
 []
 
 [UserObjects]
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
+  []
   [cs]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
+  []
   [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
+  []
   [phi]
     type = SolidMechanicsHardeningConstant
     value = 0.8
-  [../]
+  []
   [psi]
     type = SolidMechanicsHardeningConstant
     value = 0.4
-  [../]
+  []
   [dp]
     type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
@@ -106,7 +106,7 @@
     mc_dilation_angle = psi
     yield_function_tolerance = 1E-11     # irrelevant here
     internal_constraint_tolerance = 1E-9 # irrelevant here
-  [../]
+  []
 []
 
 [Materials]
@@ -117,23 +117,23 @@
     layer_thickness = 10.0
     joint_normal_stiffness = 2.5
     joint_shear_stiffness = 2.0
-  [../]
+  []
   [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '10 0 0  0 10 0  0 0 10'
     eigenstrain_name = ini_stress
-  [../]
+  []
   [admissible]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = 'dp'
     relative_tolerance = 2.0
     absolute_tolerance = 1E6
     max_iterations = 1
-  [../]
+  []
   [dp]
     type = CappedDruckerPragerCosseratStressUpdate
     host_youngs_modulus = 10.0
@@ -145,7 +145,7 @@
     yield_function_tol = 1E-11
     tip_smoother = 1
     smoothing_tol = 1
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -154,7 +154,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

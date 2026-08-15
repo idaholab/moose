@@ -29,13 +29,13 @@
     order = FIRST
     family = LAGRANGE
     block = '1 2'
-  [../]
+  []
 
   [lm]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
-  [../]
+  []
 []
 
 [Materials]
@@ -44,14 +44,14 @@
     block = 1
     thermal_conductivity = 1000
     specific_heat = 1
-  [../]
+  []
 
   [right]
     type = HeatConductionMaterial
     block = 2
     thermal_conductivity = 500
     specific_heat = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -60,7 +60,7 @@
     variable = temp
     use_displaced_mesh = false
     block = '1 2'
-  [../]
+  []
 []
 
 [Constraints]
@@ -73,7 +73,7 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
-  [../]
+  []
 []
 
 [BCs]
@@ -82,21 +82,21 @@
     variable = temp
     boundary = 'left'
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = temp
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [fmp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

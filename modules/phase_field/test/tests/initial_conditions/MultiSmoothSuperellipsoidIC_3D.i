@@ -17,7 +17,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -38,7 +38,7 @@
     exponent = '2 3'
     prevent_overlap = true
     check_extremes = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -57,7 +57,7 @@
   dt = 100.0
   [Adaptivity]
     refine_fraction = .5
-  [../]
+  []
 []
 
 [Outputs]

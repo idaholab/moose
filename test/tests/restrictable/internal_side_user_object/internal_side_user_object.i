@@ -6,14 +6,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -22,30 +22,30 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [all_pp]
     type = NumInternalSides
     execute_on = 'initial timestep_end'
-   [../]
+   []
   [block_1_pp]
     type = NumInternalSides
     block = 1
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [block_2_pp]
     type = NumInternalSides
     block = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

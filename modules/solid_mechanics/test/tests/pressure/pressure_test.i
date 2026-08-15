@@ -24,19 +24,19 @@
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 1.0
-  [../]
+  []
   [zeroRamp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 0. 1.'
     scale_factor = 1.0
-  [../]
+  []
   [rampUnramp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 0.'
     scale_factor = 10.0
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -44,7 +44,7 @@
     add_variables = true
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 
@@ -54,34 +54,34 @@
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 5
     value = 0.0
-  [../]
+  []
   [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 6
     value = 0.0
-  [../]
+  []
   [Pressure]
     [Side1]
       boundary = 1
       function = rampConstant
-    [../]
+    []
     [Side2]
       boundary = 2
       function = zeroRamp
       factor = 2.0
-    [../]
+    []
     [Side3]
       boundary = 3
       function = rampUnramp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -90,11 +90,11 @@
     block = 1
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
     block = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -112,5 +112,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

@@ -18,20 +18,20 @@
     [InitialCondition]
       type = ConstantIC
       value = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [tag_variable1]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 
   [tag_variable2]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -40,28 +40,28 @@
     variable = tag_variable1
     v = u
     vector_tag = vec_tag2
-  [../]
+  []
 
   [TagVectorAux2]
     type = TagMatrixAux
     variable = tag_variable2
     v = u
     matrix_tag = mat_tag2
-  [../]
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
-  [../]
+  []
 
   [exact_fn]
     type = ParsedGradFunction
     value = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
-  [../]
+  []
 []
 
 [Kernels]
@@ -70,14 +70,14 @@
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+  []
 
   [abs]
     type = Reaction
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+  []
 
   [forcing]
     type = BodyForce
@@ -85,7 +85,7 @@
     function = forcing_fn
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 []
 
 [DGKernels]
@@ -96,7 +96,7 @@
     sigma = 6
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+  []
 []
 
 [BCs]
@@ -109,7 +109,7 @@
     sigma = 6
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+  []
 []
 
 [Problem]
@@ -131,17 +131,17 @@
 [Postprocessors]
   [h]
     type = AverageElementSize
-  [../]
+  []
 
   [dofs]
     type = NumDOFs
-  [../]
+  []
 
   [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Outputs]

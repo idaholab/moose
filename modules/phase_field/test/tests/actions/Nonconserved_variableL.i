@@ -19,9 +19,9 @@
         free_energy = F
         kappa = 2.0
         mobility = variable_L
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -34,7 +34,7 @@
     invalue = 0.9
     outvalue = 0.1
     int_width = 3.0
-  [../]
+  []
 []
 
 [Materials]
@@ -45,14 +45,14 @@
     expression = '0.5 * eta + 1.5 * (1 - eta)'
     derivative_order = 1
     outputs = exodus
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'eta'
     expression = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Executioner]

@@ -14,38 +14,38 @@
   [u]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [ffn]
     type = BodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 []
 
 [Functions]
   [left_bc_func]
     type = ParsedFunction
     expression = '1+y*y'
-  [../]
+  []
   [top_bc_func]
     type = ParsedFunction
     expression = '1+x*x'
-  [../]
+  []
   [bottom_bc_func]
     type = ParsedFunction
     expression = '1+x*x'
-  [../]
+  []
   [force_fn]
     type = ParsedFunction
     expression = -4
-  [../]
+  []
 []
 
 [BCs]
@@ -54,24 +54,24 @@
     variable = u
     boundary = left
     function = left_bc_func
-  [../]
+  []
   [bottom]
     type = FunctionDirichletBC
     variable = u
     boundary = bottom
     function = bottom_bc_func
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = u
     boundary = top
     function = top_bc_func
-  [../]
+  []
   [right_test]
     type = TestLapBC
     variable = u
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

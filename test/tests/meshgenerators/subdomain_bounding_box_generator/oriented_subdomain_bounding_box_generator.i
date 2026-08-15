@@ -34,7 +34,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Executioner]

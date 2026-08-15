@@ -49,26 +49,26 @@
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 0.5380168369562588'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [volumetric_strain]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -77,7 +77,7 @@
     decomposition_method = EigenSolution
     incremental = true
     strain = FINITE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -87,7 +87,7 @@
     variable = volumetric_strain
     scalar_type = VolumetricStrain
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -96,21 +96,21 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 
   [x]
     type = FunctionDirichletBC
     boundary = 3
     variable = disp_x
     function = disp_x
-  [../]
+  []
 []
 
 [Materials]
@@ -118,11 +118,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -139,17 +139,17 @@
     type = InternalVolume
     boundary = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [volStrain0]
     type = ElementalVariableValue
     elementid = 0
     variable = volumetric_strain
-  [../]
+  []
   [volStrain1]
     type = ElementalVariableValue
     elementid = 1
     variable = volumetric_strain
-  [../]
+  []
 []
 
 [Outputs]

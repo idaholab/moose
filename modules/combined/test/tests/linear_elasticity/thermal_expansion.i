@@ -34,15 +34,15 @@
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [eigenstrain]
     type = ComputeEigenstrain
     eigen_base = '1e-4'
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [BCs]
@@ -51,20 +51,20 @@
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
+  []
   [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

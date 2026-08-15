@@ -19,9 +19,9 @@
         free_energy = F
         kappa = 2.0
         mobility = 1.0
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -32,7 +32,7 @@
     x2 = 45.0
     y2 = 45.0
     variable = cv
-  [../]
+  []
 []
 
 [Materials]
@@ -41,7 +41,7 @@
     property_name = F
     coupled_variables = 'cv'
     expression = '(1-cv)^2 * (1+cv)^2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -64,5 +64,5 @@
   [out]
     type = Exodus
     refinements = 2
-  [../]
+  []
 []

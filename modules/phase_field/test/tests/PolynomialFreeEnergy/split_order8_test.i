@@ -12,9 +12,9 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [w]
-  [../]
+  []
 []
 
 [ICs]
@@ -27,7 +27,7 @@
     outvalue = 0.1
     int_width = 60.0
     variable = c
-  [../]
+  []
 []
 
 [Kernels]
@@ -37,17 +37,17 @@
     kappa_name = kappa
     w = w
     f_name = F
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [Materials]
@@ -62,19 +62,19 @@
     Em = 0.71 # in eV, from Balluffi1978 Table 2
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.7 # Total guess
-  [../]
+  []
   [free_energy]
     type = PolynomialFreeEnergy
     c = c
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

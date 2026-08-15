@@ -6,7 +6,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -14,13 +14,13 @@
     type = Diffusion
     variable = u
     block = bulk
-  [../]
+  []
   [heating]
     type = BodyForce
     variable = u
     function = 1
     block = heater
-  [../]
+  []
 []
 
 [BCs]
@@ -29,7 +29,7 @@
     variable = u
     boundary = outside
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -38,7 +38,7 @@
     block = 'bulk heater'
     prop_names = diffusivity
     prop_values = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -47,7 +47,7 @@
     variable = u
     boundary = outside
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [Executioner]

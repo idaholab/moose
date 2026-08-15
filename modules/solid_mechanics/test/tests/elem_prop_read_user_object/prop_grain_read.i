@@ -16,19 +16,19 @@
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [e_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [Functions]
   [tdisp]
     type = ParsedFunction
     expression = 0.05*t
-  [../]
+  []
 []
 
 [UserObjects]
@@ -42,7 +42,7 @@
     use_random_voronoi = true
     rand_seed = 25346
     rve_type = periodic
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -54,7 +54,7 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [e_yy]
     type = RankTwoAux
     variable = e_yy
@@ -63,7 +63,7 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -72,19 +72,19 @@
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
   [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
@@ -94,11 +94,11 @@
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
     read_prop_user_object = prop_read
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -106,19 +106,19 @@
     type = ElementAverageValue
     variable = stress_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [e_yy]
     type = ElementAverageValue
     variable = e_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -150,6 +150,6 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 

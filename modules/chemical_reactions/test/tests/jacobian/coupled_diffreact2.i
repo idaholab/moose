@@ -12,15 +12,15 @@
   [a]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [b]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -29,30 +29,30 @@
     variable = pressure
     min = 1
     max = 5
-  [../]
+  []
   [a]
     type = RandomIC
     variable = a
     max = 1
     min = 0
-  [../]
+  []
   [b]
     type = RandomIC
     variable = b
     max = 1
     min = 0
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = DarcyFluxPressure
     variable = pressure
-  [../]
+  []
   [diff_b]
     type = Diffusion
     variable = b
-  [../]
+  []
   [a1diff]
     type = CoupledDiffusionReactionSub
     variable = a
@@ -64,7 +64,7 @@
     gamma_eq = 2
     gamma_u = 2.5
     gamma_v = 1.5
-  [../]
+  []
 []
 
 [Materials]
@@ -72,7 +72,7 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,5 +88,5 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

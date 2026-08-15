@@ -38,7 +38,7 @@
     input = interface
     type = BreakBoundaryOnSubdomainGenerator
     boundaries = 'bottom interface'
-  [../]
+  []
 []
 
 [Outputs]

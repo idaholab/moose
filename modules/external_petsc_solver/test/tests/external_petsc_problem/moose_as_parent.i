@@ -7,29 +7,29 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [v]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [cf]
     type = CoupledForce
     coef = 10000
     variable = u
     v=v
-  [../]
+  []
 []
 
 [BCs]
@@ -38,13 +38,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -72,7 +72,7 @@
   [picard_its]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [MultiApps]
@@ -81,7 +81,7 @@
     input_files = 'petsc_transient_as_sub.i'
     app_type = ExternalPetscSolverApp
     library_path = '../../../../external_petsc_solver/lib'
-  [../]
+  []
 []
 
 [Transfers]
@@ -90,5 +90,5 @@
     from_multi_app = sub_app
     source_variable = u
     variable = v
-  [../]
+  []
 []

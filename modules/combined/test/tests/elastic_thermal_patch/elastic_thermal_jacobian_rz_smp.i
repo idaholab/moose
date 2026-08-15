@@ -15,30 +15,30 @@
   [ur]
     type = ParsedFunction
     expression = '0'
-  [../]
+  []
   [uz]
     type = ParsedFunction
     expression = '0'
-  [../]
+  []
   [body]
     type = ParsedFunction
     expression = '-400/x'
-  [../]
+  []
   [temp]
     type = ParsedFunction
     expression = '117.56+100*t'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 
   [temp]
     initial_condition = 117.56
-  [../]
+  []
 []
 
 [Physics]
@@ -52,16 +52,16 @@
                 incremental = true
                 eigenstrain_names = eigenstrain
                 generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-            [../]
-        [../]
-    [../]
+            []
+        []
+    []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -70,20 +70,20 @@
     variable = disp_x
     boundary = 1
     function = ur
-  [../]
+  []
   [uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = uz
-  [../]
+  []
 
   [temp]
     type = FunctionDirichletBC
     variable = temp
     boundary = 10
     function = temp
-  [../]
+  []
 []
 
 [Materials]
@@ -91,34 +91,34 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
+  []
 
   [heat]
     type = HeatConductionMaterial
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
-  [../]
+  []
 
   [density]
     type = Density
     density = 0.283
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -142,5 +142,5 @@
     type = Exodus
     execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
-  [../]
+  []
 []

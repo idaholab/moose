@@ -13,13 +13,13 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.5 # shortcut/convenience for setting constant initial condition
-  [../]
+  []
 
   [convected]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0 # shortcut/convenience for setting constant initial condition
-  [../]
+  []
 []
 
 [Kernels]
@@ -27,28 +27,28 @@
   [convection]
     type = ExampleConvection
     variable = convected
-  [../]
+  []
 
   [diff_convected]
     type = Diffusion
     variable = convected
-  [../]
+  []
 
   [example_diff]
     # This Kernel uses "diffusivity" from the active material
     type = ExampleDiffusion
     variable = diffused
-  [../]
+  []
 
   [time_deriv_diffused]
     type = TimeDerivative
     variable = diffused
-  [../]
+  []
 
   [time_deriv_convected]
     type = TimeDerivative
     variable = convected
-  [../]
+  []
 []
 
 [BCs]
@@ -57,28 +57,28 @@
     variable = diffused
     boundary = 'bottom'
     value = 0
-  [../]
+  []
 
   [top_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'top'
     value = 5
-  [../]
+  []
 
   [bottom_convected]
     type = DirichletBC
     variable = convected
     boundary = 'bottom'
     value = 0
-  [../]
+  []
 
   [top_convected]
     type = NeumannBC
     variable = convected
     boundary = 'top'
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -90,7 +90,7 @@
     # Approximate Parabolic Diffusivity
     independent_vals = '0 0.25 0.5 0.75 1.0'
     dependent_vals = '1e-2 5e-3 1e-3 5e-3 1e-2'
-  [../]
+  []
 
   [example1]
     type = ExampleMaterial
@@ -100,7 +100,7 @@
     # Constant Diffusivity
     independent_vals = '0 1.0'
     dependent_vals = '1e-1 1e-1'
-  [../]
+  []
 []
 
 [Executioner]

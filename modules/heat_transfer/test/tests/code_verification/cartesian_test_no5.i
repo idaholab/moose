@@ -14,13 +14,13 @@
     dim = 1
     elem_type = EDGE2
     nx = 1
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
@@ -29,25 +29,25 @@
     symbol_names = 'q L beta'
     symbol_values = '1200 1 0.1'
     expression = 'q * (1-beta*x/L)'
-  [../]
+  []
   [exact]
     type = ParsedFunction
     symbol_names = 'uo q k L beta'
     symbol_values = '300 1200 1 1 0.1'
     expression = 'uo + (0.5*q*L^2/k) * ( (1-(x/L)^2) - (1-(x/L)^3) * beta/3 )'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = u
-  [../]
+  []
   [heatsource]
     type = HeatSource
     function = volumetric_heat
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -56,7 +56,7 @@
     boundary = right
     variable = u
     value = 300
-  [../]
+  []
 []
 
 [Materials]
@@ -64,7 +64,7 @@
     type = GenericConstantMaterial
     prop_names = 'density specific_heat thermal_conductivity'
     prop_values = '1.0 1.0 1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -76,7 +76,7 @@
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
+  []
   [h]
     type = AverageElementSize
   []

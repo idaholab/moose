@@ -8,16 +8,16 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [random_nodal]
-  [../]
+  []
   [random_elemental]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -25,11 +25,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -37,13 +37,13 @@
     type = RandomAux
     variable = random_nodal
     execute_on = 'LINEAR'
-  [../]
+  []
   [random_elemental]
     type = RandomAux
     variable = random_elemental
     generate_integers = true
     execute_on = 'LINEAR'
-  [../]
+  []
 []
 
 [BCs]
@@ -52,13 +52,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

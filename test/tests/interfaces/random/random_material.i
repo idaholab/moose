@@ -8,7 +8,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -16,11 +16,11 @@
     type = CoefDiffusion
     variable = u
     coef = 1e-5
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Materials]
@@ -29,7 +29,7 @@
     block = 0
     outputs = exodus
     output_properties = rand_real
-  [../]
+  []
 []
 
 [BCs]
@@ -38,13 +38,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

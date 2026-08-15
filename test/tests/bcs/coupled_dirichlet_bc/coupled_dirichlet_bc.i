@@ -9,30 +9,30 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [coupled_force_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -44,14 +44,14 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 2
-  [../]
+  []
 
   # BCs on right
   # u: c*u + u^2 + v^2 = 9
@@ -62,7 +62,7 @@
     boundary = 1
     value = 9
     v=v
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -72,7 +72,7 @@
     # called.  If you comment this out, you should see that this test
     # requires a different number of linear and nonlinear iterations.
     full = true
-  [../]
+  []
 []
 
 [Executioner]

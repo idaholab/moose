@@ -9,30 +9,30 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [AuxVariables]
   [penetration]
-  [../]
+  []
   [saved_x]
-  [../]
+  []
   [saved_y]
-  [../]
+  []
   [diag_saved_x]
-  [../]
+  []
   [diag_saved_y]
-  [../]
+  []
   [inc_slip_x]
-  [../]
+  []
   [inc_slip_y]
-  [../]
+  []
   [accum_slip_x]
-  [../]
+  []
   [accum_slip_y]
-  [../]
+  []
 []
 
 [Functions]
@@ -40,14 +40,14 @@
     type = PiecewiseLinear
     x = '0 0.001  0.101'
     y = '0 0.0   -0.10'
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
     use_displaced_mesh = true
     save_in = 'saved_x saved_y'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -57,32 +57,32 @@
     quantity = incremental_slip_x
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
   [incslip_y]
     type = PenetrationAux
     variable = inc_slip_y
     quantity = incremental_slip_y
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
   [accum_slip_x]
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
-  [../]
+  []
   [accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
-  [../]
+  []
   [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -91,25 +91,25 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = appl_disp
-  [../]
+  []
   [topy]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = -0.002001
-  [../]
+  []
 []
 
 [Materials]
@@ -118,29 +118,29 @@
     block = '1'
     youngs_modulus = 1e9
     poissons_ratio = 0.3
-  [../]
+  []
   [bot_strain]
     type = ComputePlaneFiniteStrain
     block = '1'
-  [../]
+  []
   [bot_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
-  [../]
+  []
   [top_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [top_strain]
     type = ComputePlaneFiniteStrain
     block = '2'
-  [../]
+  []
   [top_stress]
     type = ComputeFiniteStrainElasticStress
     block = '2'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -148,52 +148,52 @@
     type = NodalSum
     variable = saved_x
     boundary = 1
-  [../]
+  []
   [bot_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 1
-  [../]
+  []
   [top_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 4
-  [../]
+  []
   [top_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 4
-  [../]
+  []
   [disp_x]
     type = NodalVariableValue
     nodeid = 5
     variable = disp_x
-  [../]
+  []
   [disp_y]
     type = NodalVariableValue
     nodeid = 5
     variable = disp_y
-  [../]
+  []
   [inc_slip_x]
     type = NodalVariableValue
     nodeid = 5
     variable = inc_slip_x
-  [../]
+  []
   [inc_slip_y]
     type = NodalVariableValue
     nodeid = 5
     variable = inc_slip_y
-  [../]
+  []
   [accum_slip_x]
     type = NodalVariableValue
     nodeid = 5
     variable = accum_slip_x
-  [../]
+  []
   [accum_slip_y]
     type = NodalVariableValue
     nodeid = 5
     variable = accum_slip_y
-  [../]
+  []
 []
 
 [Executioner]
@@ -224,7 +224,7 @@
   [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Contact]
@@ -237,7 +237,7 @@
     normalize_penalty = true
     friction_coefficient = '0.2'
     tangential_tolerance = 1e-3
-  [../]
+  []
 []
 
  [Dampers]
@@ -245,5 +245,5 @@
      type = ContactSlipDamper
      primary = '2'
      secondary = '3'
-   [../]
+   []
  []

@@ -23,12 +23,12 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 3.0
-    [../]
-  [../]
+    []
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [eta1]
     order = FIRST
@@ -41,65 +41,65 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 2.0
-    [../]
-  [../]
+    []
+  []
   [eta2]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.5
-  [../]
+  []
 
   [lambda]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1.0
-  [../]
+  []
 []
 
 [Kernels]
   [deta1dt]
     type = TimeDerivative
     variable = eta1
-  [../]
+  []
   [ACBulk1]
     type = AllenCahn
     variable = eta1
     coupled_variables = 'c eta2'
     f_name = F
-  [../]
+  []
   [ACInterface1]
     type = ACInterface
     variable = eta1
     kappa_name = kappa_eta
-  [../]
+  []
   [lagrange1]
     type = SwitchingFunctionConstraintEta
     variable = eta1
     h_name   = h1
     lambda = lambda
-  [../]
+  []
 
   [deta2dt]
     type = TimeDerivative
     variable = eta2
-  [../]
+  []
   [ACBulk2]
     type = AllenCahn
     variable = eta2
     coupled_variables = 'c eta1'
     f_name = F
-  [../]
+  []
   [ACInterface2]
     type = ACInterface
     variable = eta2
     kappa_name = kappa_eta
-  [../]
+  []
   [lagrange2]
     type = SwitchingFunctionConstraintEta
     variable = eta2
     h_name   = h2
     lambda = lambda
-  [../]
+  []
 
   [lagrange]
     type = SwitchingFunctionConstraintLagrange
@@ -107,7 +107,7 @@
     etas    = 'eta1 eta2'
     h_names = 'h1   h2'
     epsilon = 0
-  [../]
+  []
 
   [c_res]
     type = SplitCHParsed
@@ -116,25 +116,25 @@
     kappa_name = kappa_c
     w = w
     coupled_variables = 'eta1 eta2'
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time1]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -142,12 +142,12 @@
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1 1        '
-  [../]
+  []
   [consts2]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 1'
-  [../]
+  []
 
   [switching1]
     type = SwitchingFunctionMaterial
@@ -155,19 +155,19 @@
     eta = eta1
     h_order = SIMPLE
     outputs = exodus
-  [../]
+  []
   [switching2]
     type = SwitchingFunctionMaterial
     function_name = h2
     eta = eta2
     h_order = SIMPLE
     outputs = exodus
-  [../]
+  []
 
   [barrier]
     type = MultiBarrierFunctionMaterial
     etas = 'eta1 eta2'
-  [../]
+  []
 
   [free_energy_A]
     type = DerivativeParsedMaterial
@@ -176,7 +176,7 @@
     expression = '(c-0.1)^2'
     derivative_order = 2
     enable_jit = true
-  [../]
+  []
   [free_energy_B]
     type = DerivativeParsedMaterial
     property_name = Fb
@@ -184,7 +184,7 @@
     expression = '(c-0.9)^2'
     derivative_order = 2
     enable_jit = true
-  [../]
+  []
 
   [free_energy]
     type = DerivativeMultiPhaseMaterial
@@ -194,14 +194,14 @@
     etas     = 'eta1 eta2'
     coupled_variables = 'c'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

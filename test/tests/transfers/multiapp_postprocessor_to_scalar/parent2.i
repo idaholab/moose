@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [from_sub_app]
     order = THIRD
     family = SCALAR
-  [../]
+  []
 []
 
 [Kernels]
@@ -22,11 +22,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.01
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -35,35 +35,35 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [average]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
   [point_value_0]
     type = ScalarVariable
     variable = from_sub_app
     component = 0
-  [../]
+  []
   [point_value_1]
     type = ScalarVariable
     variable = from_sub_app
     component = 1
-  [../]
+  []
   [point_value_2]
     type = ScalarVariable
     variable = from_sub_app
     component = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -90,7 +90,7 @@
     execute_on = timestep_end
     type = TransientMultiApp
     input_files = sub2.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -99,5 +99,5 @@
     from_multi_app = pp_sub
     from_postprocessor = point_value
     to_aux_scalar = from_sub_app
-  [../]
+  []
 []

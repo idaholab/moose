@@ -7,21 +7,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [dummy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -30,7 +30,7 @@
     variable = dummy
     execute_on = 'initial timestep_end'
     value = 4
-  [../]
+  []
 []
 
 [BCs]
@@ -39,13 +39,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -53,7 +53,7 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,8 +70,8 @@
     [indicator]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
+    []
+  []
   [Markers]
     [box]
       type = BoxMarker
@@ -79,8 +79,8 @@
       top_right = '0.8 0.8 0'
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
@@ -91,5 +91,5 @@
 [LotsOfAuxVariables]
   [avar]
     number = 20
-  [../]
+  []
 []

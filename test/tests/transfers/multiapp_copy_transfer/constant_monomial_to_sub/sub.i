@@ -9,7 +9,7 @@
   [u]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Problem]

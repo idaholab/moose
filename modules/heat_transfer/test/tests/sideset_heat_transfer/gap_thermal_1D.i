@@ -62,7 +62,7 @@
     diff = conductivity
     # Ignoring gap side set because no diffusion accross there
     exclude_boundary = 'interface0'
-  [../]
+  []
 []
 
 [InterfaceKernels]

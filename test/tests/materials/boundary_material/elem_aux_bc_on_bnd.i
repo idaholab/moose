@@ -15,13 +15,13 @@
    [foo]
      order = CONSTANT
      family = MONOMIAL
-   [../]
+   []
 []
 
 [Variables]
    [temp]
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -31,7 +31,7 @@
     variable = foo
     boundary = right
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Kernels]
@@ -39,7 +39,7 @@
     type = CoefDiffusion
     variable = temp
     coef = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -48,7 +48,7 @@
     boundary =  left
     value    =  2
     variable =  temp
-  [../]
+  []
 []
 
 [Materials]
@@ -57,7 +57,7 @@
     prop_names = 'bar'
     prop_values = '1'
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -19,15 +19,15 @@
   [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
   [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -37,7 +37,7 @@
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
@@ -46,7 +46,7 @@
     pressure = p
     component = 0
     integrate_p_by_parts = false
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
@@ -55,7 +55,7 @@
     pressure = p
     component = 1
     integrate_p_by_parts = false
-  [../]
+  []
 []
 
 [BCs]
@@ -64,25 +64,25 @@
     variable = vel_x
     boundary = 'top bottom'
     value = 0.0
-  [../]
+  []
   [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'left top bottom'
     value = 0.0
-  [../]
+  []
   [inlet_p]
     type = DirichletBC
     variable = p
     boundary = left
     value = 1.0
-  [../]
+  []
   [outlet_p]
     type = DirichletBC
     variable = p
     boundary = right
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -91,7 +91,7 @@
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -132,7 +132,7 @@
       # The preconditioning matrix is set as selfp, which means we explicitly form a
       # matrix \hat{S} = C(diag(A))^{-1}B. We do not compute the inverse of A, but instead, we compute
       # the inverse of diag(A).
-    [../]
+    []
     [u]
       vars = 'vel_x vel_y'
       # PETSc options for this subsolver
@@ -142,7 +142,7 @@
       # Specify options to solve A^{-1} in the steps (1), (2) and (3).
       # Solvers for A^{-1} could be different in different steps. We could
       # choose in the following pressure block.
-    [../]
+    []
     [p]
       vars = 'p'
       # PETSc options for this subsolver in the step (2)
@@ -150,8 +150,8 @@
       petsc_options_value = '   jacobi    gmres     1e-4'
       # Use -inner_ksp_type and -inner_pc_type to override A^{-1} in the step (2)
       # Use -lower_ksp_type and -lower_pc_type to override A^{-1} in the step (1)
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

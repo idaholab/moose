@@ -8,7 +8,7 @@
     dim = 2
     nx = 10
     ny = 10
-  [../]
+  []
   [lower_d]
     type = LowerDBlockFromSidesetGenerator
     input = square
@@ -20,7 +20,7 @@
 [Variables]
   [u]
     block = 0
-  [../]
+  []
   [lower]
     block = 'lower'
   []
@@ -31,7 +31,7 @@
     type = Diffusion
     variable = u
     block = 0
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -54,13 +54,13 @@
     variable = u
     boundary = 'left bottom'
     value = 0
-  [../]
+  []
   [neumann]
     type = ADCoupledLowerValue
     variable = u
     boundary = 'right top'
     lower_d_var = lower
-  [../]
+  []
 []
 
 [Executioner]

@@ -25,17 +25,17 @@
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 1 1 1'
-  [../]
+  []
   [disply]
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 0 1 1'
-  [../]
+  []
   [displz]
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 0 0 1'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -43,7 +43,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-  [../]
+  []
 []
 
 [BCs]
@@ -52,37 +52,37 @@
     variable = disp_x
     boundary = right
     function = displx
-  [../]
+  []
   [pully]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = disply
-  [../]
+  []
   [pullz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = displz
-  [../]
+  []
   [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -90,24 +90,24 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.8e7
     poissons_ratio = 0
-  [../]
+  []
   [elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 1.68e6
     cracked_elasticity_type = FULL
     softening_models = 'power_law_softening exponential_softening abrupt_softening'
     prescribed_crack_directions = 'x y z'
-  [../]
+  []
   [power_law_softening]
     type = PowerLawSoftening
     stiffness_reduction = 0.3333
-  [../]
+  []
   [exponential_softening]
     type = ExponentialSoftening
-  [../]
+  []
   [abrupt_softening]
     type = AbruptSoftening
-  [../]
+  []
 []
 
 [Executioner]

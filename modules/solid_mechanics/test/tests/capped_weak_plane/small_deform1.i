@@ -32,7 +32,7 @@
     add_variables = true
     strain = small
     incremental = true
-  [../]
+  []
 []
 
 
@@ -42,89 +42,89 @@
     variable = disp_x
     boundary = back
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
-  [../]
+  []
   [bottomz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
   [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = 8*t
-  [../]
+  []
   [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = 6*t
-  [../]
+  []
   [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = t
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strainp_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strainp_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strainp_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strainp_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strainp_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strainp_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -134,84 +134,84 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
   [strainp_xx]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [strainp_xy]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [strainp_xz]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_xz
     index_i = 0
     index_j = 2
-  [../]
+  []
   [strainp_yy]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [strainp_yz]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_yz
     index_i = 1
     index_j = 2
-  [../]
+  []
   [strainp_zz]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -219,62 +219,62 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
+  []
   [stress_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
+  []
   [stress_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
+  []
   [stress_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
+  []
   [stress_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
+  []
   [stress_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
+  []
   [strainp_xx]
     type = PointValue
     point = '0 0 0'
     variable = strainp_xx
-  [../]
+  []
   [strainp_xy]
     type = PointValue
     point = '0 0 0'
     variable = strainp_xy
-  [../]
+  []
   [strainp_xz]
     type = PointValue
     point = '0 0 0'
     variable = strainp_xz
-  [../]
+  []
   [strainp_yy]
     type = PointValue
     point = '0 0 0'
     variable = strainp_yy
-  [../]
+  []
   [strainp_yz]
     type = PointValue
     point = '0 0 0'
     variable = strainp_yz
-  [../]
+  []
   [strainp_zz]
     type = PointValue
     point = '0 0 0'
     variable = strainp_zz
-  [../]
+  []
 []
 
 [Materials]
@@ -282,12 +282,12 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1'
-  [../]
+  []
   [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = ''
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 [Executioner]

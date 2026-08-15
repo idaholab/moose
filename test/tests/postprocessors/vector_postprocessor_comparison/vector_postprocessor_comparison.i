@@ -14,12 +14,12 @@
   [a_fn]
     type = ConstantFunction
     value = 2
-  [../]
+  []
   # Sampled values will be [0, 1, 2]
   [b_fn]
     type = ParsedFunction
     expression = 'x'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -31,7 +31,7 @@
     end_point = '2 0 0'
     sort_by = x
     execute_on = 'initial'
-  [../]
+  []
   [b_vpp]
     type = LineFunctionSampler
     functions = 'b_fn'
@@ -40,7 +40,7 @@
     end_point = '2 0 0'
     sort_by = x
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -52,7 +52,7 @@
     vector_name_b = b_fn
     comparison_type = greater_than_equals
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]

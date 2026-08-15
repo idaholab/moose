@@ -14,15 +14,15 @@
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
   [p]
-  [../]
+  []
   [u]
     family = LAGRANGE_VEC
   []
@@ -41,28 +41,28 @@
   [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [mass_pspg]
     type = INSADMassPSPG
     variable = p
-  [../]
+  []
 
   [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
-  [../]
+  []
 
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
   [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
     integrate_p_by_parts = true
-  [../]
+  []
 
   [momentum_coupled_force]
     type = INSADMomentumCoupledForce
@@ -74,7 +74,7 @@
     type = INSADMomentumSUPG
     variable = velocity
     velocity = velocity
-  [../]
+  []
 
   [u_diff]
     type = VectorDiffusion
@@ -87,14 +87,14 @@
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'bottom right left top'
-  [../]
+  []
 
   [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 
   [u_left]
     type = VectorFunctionDirichletBC
@@ -118,7 +118,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
   [ins_mat]
     type = INSADTauMaterial
     velocity = velocity

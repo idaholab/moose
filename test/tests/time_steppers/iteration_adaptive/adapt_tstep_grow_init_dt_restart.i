@@ -10,18 +10,18 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -30,13 +30,13 @@
     variable = u
     boundary = left
     value = 10
-  [../]
+  []
   [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = -1
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,13 +49,13 @@
     type = IterationAdaptiveDT
     optimal_iterations = 10
     dt = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
   [_dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

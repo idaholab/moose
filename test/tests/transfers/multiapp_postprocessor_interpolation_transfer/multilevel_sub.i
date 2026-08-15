@@ -7,24 +7,24 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [subsub_average]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [force]
     type = CoupledForce
     variable = u
     v = subsub_average
-  [../]
+  []
 []
 
 [BCs]
@@ -33,20 +33,20 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [sub_average]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
     app_type = MooseTestApp
     positions = '0 0 0 0.5 0.5 0'
     input_files = multilevel_subsub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -79,5 +79,5 @@
     from_multi_app = sub
     variable = subsub_average
     postprocessor = subsub_average
-  [../]
+  []
 []

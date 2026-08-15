@@ -11,23 +11,23 @@
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
   [scalar_strain_zz]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
   [temp]
-  [../]
+  []
   [saved_x]
-  [../]
+  []
   [saved_y]
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -36,7 +36,7 @@
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -49,7 +49,7 @@
     scalar_out_of_plane_strain = scalar_strain_zz
     temperature = temp
     save_in = 'saved_x saved_y'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,14 +58,14 @@
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Functions]
   [tempfunc]
     type = ParsedFunction
     expression = '(1-x)*t'
-  [../]
+  []
 []
 
 [BCs]
@@ -74,13 +74,13 @@
     boundary = 0
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -88,24 +88,24 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

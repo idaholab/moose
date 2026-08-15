@@ -15,41 +15,41 @@
     nx = 1
     ny = 5
     ymax = 5
-  [../]
+  []
   [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = top_right
     coord = '0 5'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
   [vel_x]
     order = SECOND
-  [../]
+  []
   [vel_y]
     order = SECOND
-  [../]
+  []
   [p]
-  [../]
+  []
 []
 
 [Kernels]
   [mass]
     type = INSMass
     variable = p
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     component = 0
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     component = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -58,19 +58,19 @@
     variable = vel_x
     boundary = 'top bottom left right'
     value = 0.0
-  [../]
+  []
   [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'top bottom left right'
     value = 0.0
-  [../]
+  []
   [p_corner]
     type = DirichletBC
     boundary = top_right
     value = 0
     variable = p
-  [../]
+  []
 []
 
 [Materials]
@@ -78,7 +78,7 @@
     type = GenericConstantMaterial
     prop_names  = 'rho mu'
     prop_values = '100  1'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -86,7 +86,7 @@
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]

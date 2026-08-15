@@ -15,7 +15,7 @@
   [temp]
     block = '1 3'
     initial_condition = 1.0
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,13 +23,13 @@
     type = HeatConduction
     variable = temp
     block = '1 3'
-  [../]
+  []
   [source]
     type = HeatSource
     variable = temp
     block = 3
     value = 10.0
-  [../]
+  []
 []
 
 [BCs]
@@ -38,7 +38,7 @@
     variable = temp
     boundary = 1
     value = 1.0
-  [../]
+  []
 []
 
 [ThermalContact]
@@ -50,7 +50,7 @@
     emissivity_primary = 0
     emissivity_secondary = 0
     gap_conductivity = 0.5
-  [../]
+  []
 []
 
 [Materials]
@@ -59,7 +59,7 @@
     block = '1 3'
     temp = temp
     thermal_conductivity = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -78,5 +78,5 @@
 [Outputs]
   [out]
     type = Exodus
-  [../]
+  []
 []

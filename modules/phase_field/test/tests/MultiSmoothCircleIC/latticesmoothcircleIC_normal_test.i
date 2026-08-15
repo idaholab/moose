@@ -18,7 +18,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -33,7 +33,7 @@
      int_width = 12.0
      radius_variation = 2
      radius_variation_type = normal
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,13 +42,13 @@ active = 'ie_c diff'
   [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 
   [diff]
     type = MatDiffusion
     variable = c
     diffusivity = D_v
-  [../]
+  []
 []
 
 [BCs]
@@ -62,7 +62,7 @@ active = 'Dv'
     type = GenericConstantMaterial
     prop_names = D_v
     prop_values = 0.074802
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -73,7 +73,7 @@ active = 'Dv'
     variable = c
     execute_on = 'initial timestep_end'
     flood_entity_type = NODAL
-  [../]
+  []
 []
 
 [Executioner]

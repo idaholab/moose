@@ -13,13 +13,13 @@
     dim = 1
     elem_type = EDGE2
     nx = 1
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
@@ -28,19 +28,19 @@
     symbol_names = 'q L k ui uo'
     symbol_values = '1200 1 12 100 0'
     expression = 'ui + (uo-ui)*x/L + (q/k) * x * (L-x) / 2'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = u
-  [../]
+  []
   [heatsource]
     type = HeatSource
     function = 1200
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -49,13 +49,13 @@
     boundary = left
     variable = u
     value = 100
-  [../]
+  []
   [uo]
     type = DirichletBC
     boundary = right
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -63,7 +63,7 @@
     type = GenericConstantMaterial
     prop_names = 'density specific_heat thermal_conductivity'
     prop_values = '1.0 1.0 12.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,7 +75,7 @@
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
+  []
   [h]
     type = AverageElementSize
   []

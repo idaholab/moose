@@ -14,7 +14,7 @@
     type = PiecewiseLinear
     x = '0 1 2 3  4'
     y = '0 1 0 -1 0'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -23,7 +23,7 @@
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [BCs]
@@ -32,19 +32,19 @@
     variable = disp_x
     boundary = 2
     function = displ
-  [../]
+  []
   [left]
     type = ADDirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [bottom]
     type = ADDirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -52,16 +52,16 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 4.0e7
     poissons_ratio = 0.0
-  [../]
+  []
   [elastic_stress]
     type = ADComputeSmearedCrackingStress
     cracking_stress = 1.68e6
     cracked_elasticity_type = FULL
     softening_models = abrupt_softening
-  [../]
+  []
   [abrupt_softening]
     type = ADAbruptSoftening
-  [../]
+  []
 []
 
 [Executioner]

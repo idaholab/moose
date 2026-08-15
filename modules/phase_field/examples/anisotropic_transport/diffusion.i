@@ -19,8 +19,8 @@
       int_width = 1
       invalue = 1
       outvalue = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -28,11 +28,11 @@
     type = MatAnisoDiffusion
     diffusivity = D
     variable = c
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
@@ -42,14 +42,14 @@
               .495 .505 .0
               .0   .0   .0'
     M_name = D
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

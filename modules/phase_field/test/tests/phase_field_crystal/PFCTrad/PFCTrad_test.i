@@ -13,70 +13,70 @@
       type = RandomIC
       min = -1
       max = 4
-    [../]
-  [../]
+    []
+  []
   [u]
     scaling = 1e2
-  [../]
+  []
   [v]
     scaling = 1e1
-  [../]
+  []
 []
 
 [Kernels]
   [ndot]
     type = TimeDerivative
     variable = n
-  [../]
+  []
   [n_bulk]
     type = CHBulkPFCTrad
     variable = n
-  [../]
+  []
   [u_term]
     type = MatDiffusion
     variable = n
     v = u
     diffusivity = C2
-  [../]
+  []
   [v_term]
     type = MatDiffusion
     variable = n
     v = v
     diffusivity = C4
-  [../]
+  []
   [u_rctn]
     type = Reaction
     variable = u
-  [../]
+  []
   [u_gradn]
     type = LaplacianSplit
     variable = u
     c = n
-  [../]
+  []
   [v_rctn]
     type = Reaction
     variable = v
-  [../]
+  []
   [v_gradu]
     type = LaplacianSplit
     variable = v
     c = u
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   [PFCTrad]
     type = PFCTradMaterial
     order = FOURTH
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -86,11 +86,11 @@
     full = false
     off_diag_row    = 'u n n v'
     off_diag_column = 'n u v u'
-  [../]
+  []
   [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

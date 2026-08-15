@@ -76,17 +76,17 @@
     type = PiecewiseLinear
     x = '0.  1.     2.'
     y = '0. -0.003 -0.0103923'
-  [../]
+  []
   [disp_y]
     type = PiecewiseLinear
     x = '0.  1.    2.'
     y = '0. -0.003 0.'
-  [../]
+  []
   [disp_z]
     type = PiecewiseLinear
     x = '0. 1.    2.'
     y = '0. 0.006 0.0103923'
-  [../]
+  []
   [stress_xx]
     type = ParsedFunction
     # The paper gives 0.201 as the time at initial yield, but 0.20097635952803425 is the exact value.
@@ -99,7 +99,7 @@
                   if(t<=timeAtYield, -474*t,
                   if(t<=1, stressAtYield,
                   (a+b*sqrt(exp(expFac*t))+c*exp(expFac*t))/(1.0+d*exp(expFac*t))))' # tends to -a
-  [../]
+  []
   [stress_yy]
     type = ParsedFunction
     # The paper gives 0.201 as the time at initial yield, but 0.20097635952803425 is the exact value.
@@ -112,7 +112,7 @@
                   if(t<=timeAtYield, -474*t,
                   if(t<=1, stressAtYield,
                   (a+b*sqrt(exp(expFac*t))+c*exp(expFac*t))/(1.0+d*exp(expFac*t))))' # tends to -a
-  [../]
+  []
   [stress_zz]
     type = ParsedFunction
     # The paper gives 0.201 as the time at initial yield, but 0.20097635952803425 is the exact value.
@@ -125,39 +125,39 @@
                   if(t<=timeAtYield, 948*t,
                   if(t<=1, stressAtYield,
                   (a+b*sqrt(exp(expFac*t))+c*exp(expFac*t))/(1.0+d*exp(expFac*t))))' # tends to -a
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [plastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [plastic_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 []
 
@@ -166,7 +166,7 @@
     add_variables = true
     strain = small
     incremental = true
-  [../]
+  []
 []
 
 
@@ -178,7 +178,7 @@
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -186,7 +186,7 @@
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -194,14 +194,14 @@
     index_i = 2
     index_j = 2
     execute_on = 'timestep_end'
-  [../]
+  []
   [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = vonmisesStress
     execute_on = 'timestep_end'
-  [../]
+  []
 
   [plastic_strain_xx]
     type = RankTwoAux
@@ -210,7 +210,7 @@
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
-  [../]
+  []
   [plastic_strain_yy]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
@@ -218,7 +218,7 @@
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
-  [../]
+  []
   [plastic_strain_zz]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
@@ -226,7 +226,7 @@
     index_i = 2
     index_j = 2
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [BCs]
@@ -235,38 +235,38 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [fixed_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [fixed_z]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
   [disp_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = disp_x
-  [../]
+  []
   [disp_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = disp_y
-  [../]
+  []
   [disp_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = disp_z
-  [../]
+  []
 []
 
 [Materials]
@@ -274,19 +274,19 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 210666666666.666667
     poissons_ratio = 0.3333333333333333
-  [../]
+  []
 
 
   [isotropic_plasticity]
     type = IsotropicPlasticityStressUpdate
     yield_stress = 285788383.2488647 # = sqrt(3)*165e6 = sqrt(3) * yield in shear
     hardening_constant = 0.0
-  [../]
+  []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress
     tangent_operator = elastic
     inelastic_models = 'isotropic_plasticity'
-  [../]
+  []
 []
 
 [Executioner]
@@ -311,47 +311,47 @@
   [analytic_xx]
     type = FunctionValuePostprocessor
     function = stress_xx
-  [../]
+  []
   [analytic_yy]
     type = FunctionValuePostprocessor
     function = stress_yy
-  [../]
+  []
   [analytic_zz]
     type = FunctionValuePostprocessor
     function = stress_zz
-  [../]
+  []
 
   [stress_xx]
     type = ElementalVariableValue
     variable = stress_xx
     elementid = 0
-  [../]
+  []
   [stress_yy]
     type = ElementalVariableValue
     variable = stress_yy
     elementid = 0
-  [../]
+  []
   [stress_zz]
     type = ElementalVariableValue
     variable = stress_zz
     elementid = 0
-  [../]
+  []
 
   [stress_xx_l2_error]
     type = ElementL2Error
     variable = stress_xx
     function = stress_xx
-  [../]
+  []
   [stress_yy_l2_error]
     type = ElementL2Error
     variable = stress_yy
     function = stress_yy
-  [../]
+  []
   [stress_zz_l2_error]
     type = ElementL2Error
     variable = stress_zz
     function = stress_zz
-  [../]
+  []
 []
 
 [Outputs]

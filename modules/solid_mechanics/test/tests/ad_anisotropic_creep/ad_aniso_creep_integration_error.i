@@ -196,7 +196,7 @@
   timestep_limiting_postprocessor = matl_ts_min
   reject_large_step = true
   reject_large_step_threshold = 0.999
-[../]
+[]
 []
 
 [Postprocessors]

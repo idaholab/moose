@@ -12,25 +12,25 @@
     type = PiecewiseLinear
     x = '0     1'
     y = '0  20e-6'
-  [../]
+  []
 []
 
 [Variables]
   [displ_x]
-  [../]
+  []
   [displ_y]
-  [../]
+  []
   [displ_z]
-  [../]
+  []
 []
 
 [AuxVariables]
   [react_x]
-  [../]
+  []
   [react_y]
-  [../]
+  []
   [react_z]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -40,7 +40,7 @@
     add_variables = true
     strain = FINITE
     generate_output = 'stress_xx'
-  [../]
+  []
 []
 
 [BCs]
@@ -49,28 +49,28 @@
     boundary = '1'
     variable = displ_x
     function = disp
-  [../]
+  []
 
   [fixed_x]
     type = DirichletBC
     boundary = '3 4'
     variable = displ_x
     value = 0
-  [../]
+  []
 
   [fixed_y]
     type = DirichletBC
     boundary = 10
     variable = displ_y
     value = 0
-  [../]
+  []
 
   [fixed_z]
     type = DirichletBC
     boundary = 11
     variable = displ_z
     value = 0
-  [../]
+  []
 []
 
 [Contact]
@@ -80,7 +80,7 @@
     formulation = penalty
     penalty = 1e9
     tangential_tolerance = 1e-5
-  [../]
+  []
 []
 
 [Materials]
@@ -89,12 +89,12 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -117,7 +117,7 @@
 
   [Quadrature]
     order = THIRD
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -125,12 +125,12 @@
     type = NodalSum
     variable = react_x
     boundary = 1
-  [../]
+  []
   [total_area]
     type = NodalSum
     variable = nodal_area
     boundary = 2
-  [../]
+  []
 []
 
 [Outputs]

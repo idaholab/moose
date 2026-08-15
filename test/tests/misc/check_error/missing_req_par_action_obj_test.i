@@ -4,7 +4,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 
   uniform_refine = 4
 []
@@ -22,7 +22,7 @@
     variable = convected
     boundary = '3'
     value = 0
-  [../]
+  []
 
   [right_convected]
     type = DirichletBC
@@ -31,21 +31,21 @@
     value = 1
 
     some_var = diffused
-  [../]
+  []
 
   [left_diffused]
     type = DirichletBC
     variable = diffused
     boundary = '3'
     value = 0
-  [../]
+  []
 
   [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = '1'
     value = 1
-  [../]
+  []
 
 []
 

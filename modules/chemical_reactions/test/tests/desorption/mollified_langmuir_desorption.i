@@ -9,11 +9,11 @@
 
 [Variables]
   [pressure]
-  [../]
+  []
   [conc]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [ICs]
@@ -21,12 +21,12 @@
     type = ConstantIC
     variable = pressure
     value = 1.0
-  [../]
+  []
   [conc_ic]
     type = ConstantIC
     variable = conc
     value = 1.0
-  [../]
+  []
 []
 
 
@@ -34,21 +34,21 @@
   [c_dot]
     type = TimeDerivative
     variable = conc
-  [../]
+  []
   [flow_from_matrix]
     type = DesorptionFromMatrix
     variable = conc
     pressure_var = pressure
-  [../]
+  []
   [rho_dot]
     type = TimeDerivative
     variable = pressure
-  [../]
+  []
   [flux_to_porespace]
     type = DesorptionToPorespace
     variable = pressure
     conc_var = conc
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -57,30 +57,30 @@
     block = 0
     variable = pressure
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [mass_conc]
     type = ElementIntegralVariablePostprocessor
     block = 0
     variable = conc
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [mass_tot]
     type = FunctionValuePostprocessor
     function = mass_fcn
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [p0]
     type = PointValue
     variable = pressure
     point = '0 0 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [c0]
     type = PointValue
     variable = conc
     point = '0 0 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Functions]
@@ -89,7 +89,7 @@
     expression = a+b
     symbol_names = 'a b'
     symbol_values = 'mass_rho mass_conc'
-  [../]
+  []
 []
 
 [Materials]
@@ -103,7 +103,7 @@
     pressure_var = pressure
     conc_var = conc
     mollifier = 1E-4
-  [../]
+  []
 []
 
 
@@ -114,7 +114,7 @@
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

@@ -5,7 +5,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -13,7 +13,7 @@
     type = CoupledForce
     variable = u
     v = u
-  [../]
+  []
 []
 
 [Executioner]

@@ -18,13 +18,13 @@
     type = ExtraNodesetGenerator
     coord = '0.0 0.0'
     new_boundary = 100
-  [../]
+  []
   [anode]
     input = cnode
     type = ExtraNodesetGenerator
     coord = '0.0 0.5'
     new_boundary = 101
-  [../]
+  []
 []
 
 [Modules/PhaseField/MortarPeriodicity]
@@ -32,7 +32,7 @@
     variable = 'disp_x disp_y'
     periodicity = gradient
     periodic_directions = 'x y'
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -46,7 +46,7 @@
   [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -57,7 +57,7 @@
     variable = local_energy
     interfacial_vars = 'c'
     kappa_names = 'kappa_c'
-  [../]
+  []
 []
 
 [Variables]
@@ -67,45 +67,45 @@
       type = RandomIC
       min = 0.49
       max = 0.51
-    [../]
+    []
     block = 0
-  [../]
+  []
   [w]
     block = 0
-  [../]
+  []
 
   # Mesh displacement
   [disp_x]
     block = 0
-  [../]
+  []
   [disp_y]
     block = 0
-  [../]
+  []
 []
 
 [Kernels]
   # Set up stress divergence kernels
   [TensorMechanics]
-  [../]
+  []
 
   # Cahn-Hilliard kernels
   [c_dot]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
   [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
 []
 
 [Materials]
@@ -115,26 +115,26 @@
     block = '0'
     prop_names  = 'M   kappa_c'
     prop_values = '0.2 0.01   '
-  [../]
+  []
 
   [shear1]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '0 0 0 0 0 0.5'
     tensor_name = shear1
-  [../]
+  []
   [shear2]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '0 0 0 0 0 -0.5'
     tensor_name = shear2
-  [../]
+  []
   [expand3]
     type = GenericConstantRankTwoTensor
     block = 0
     tensor_values = '1 1 0 0 0 0'
     tensor_name = expand3
-  [../]
+  []
 
   [weight1]
     type = DerivativeParsedMaterial
@@ -142,21 +142,21 @@
     expression = '0.3*c^2'
     property_name = weight1
     coupled_variables = c
-  [../]
+  []
   [weight2]
     type = DerivativeParsedMaterial
     block = 0
     expression = '0.3*(1-c)^2'
     property_name = weight2
     coupled_variables = c
-  [../]
+  []
   [weight3]
     type = DerivativeParsedMaterial
     block = 0
     expression = '4*(0.5-c)^2'
     property_name = weight3
     coupled_variables = c
-  [../]
+  []
 
   # matrix phase
   [elasticity_tensor]
@@ -164,12 +164,12 @@
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
+  []
   [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
-  [../]
+  []
 
   [eigenstrain]
     type = CompositeEigenstrain
@@ -178,12 +178,12 @@
     weights = 'weight1 weight2 weight3'
     coupled_variables = c
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
   [stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
+  []
 
   # chemical free energies
   [chemical_free_energy]
@@ -194,7 +194,7 @@
     coupled_variables = 'c'
     outputs = exodus
     output_properties = Fc
-  [../]
+  []
 
   # elastic free energies
   [elastic_free_energy]
@@ -204,7 +204,7 @@
     coupled_variables = 'c'
     outputs = exodus
     output_properties = Fe
-  [../]
+  []
 
   # free energy (chemical + elastic)
   [free_energy]
@@ -213,7 +213,7 @@
     property_name = F
     sum_materials = 'Fc Fe'
     coupled_variables = 'c'
-  [../]
+  []
 []
 
 [BCs]
@@ -223,14 +223,14 @@
       secondary = bottom
       translation = '0 -1 0'
       variable = 'c w'
-    [../]
+    []
     [left_right]
       primary = left
       secondary = right
       translation = '1 0 0'
       variable = 'c w'
-    [../]
-  [../]
+    []
+  []
 
   # fix center point location
   [centerfix_x]
@@ -238,13 +238,13 @@
     boundary = 100
     variable = disp_x
     value = 0
-  [../]
+  []
   [centerfix_y]
     type = DirichletBC
     boundary = 100
     variable = disp_y
     value = 0
-  [../]
+  []
 
   # fix side point x coordinate to inhibit rotation
   [angularfix]
@@ -252,14 +252,14 @@
     boundary = 101
     variable = disp_x
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 # We monitor the total free energy and the total solute concentration (should be constant)
@@ -269,27 +269,27 @@
     block = 0
     execute_on = 'initial TIMESTEP_END'
     variable = local_energy
-  [../]
+  []
   [total_solute]
     type = ElementIntegralVariablePostprocessor
     block = 0
     execute_on = 'initial TIMESTEP_END'
     variable = c
-  [../]
+  []
   [min]
     type = ElementExtremeValue
     block = 0
     execute_on = 'initial TIMESTEP_END'
     value_type = min
     variable = c
-  [../]
+  []
   [max]
     type = ElementExtremeValue
     block = 0
     execute_on = 'initial TIMESTEP_END'
     value_type = max
     variable = c
-  [../]
+  []
 []
 
 [Executioner]
@@ -317,7 +317,7 @@
   [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.01
-  [../]
+  []
 []
 
 [Outputs]
@@ -327,5 +327,5 @@
   [table]
     type = CSV
     delimiter = ' '
-  [../]
+  []
 []

@@ -14,17 +14,17 @@
   [ic]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = (x+y)
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*(x+y)
-  [../]
+  []
 []
 
 [Variables]
@@ -35,8 +35,8 @@
     [InitialCondition]
       type = FunctionIC
       function = ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -45,20 +45,20 @@
     variable = u
     lumping = true
     implicit = true
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
     implicit = false
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
     implicit = false
-  [../]
+  []
 []
 
 [BCs]
@@ -71,7 +71,7 @@
     boundary = '0 1 2 3'
     function = exact_fn
     implicit = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -79,7 +79,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -97,5 +97,5 @@
   [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []

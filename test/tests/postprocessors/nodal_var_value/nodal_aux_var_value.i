@@ -19,7 +19,7 @@
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -28,7 +28,7 @@
   [v1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 
@@ -38,7 +38,7 @@
   [left_bc]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -47,12 +47,12 @@
   [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -64,7 +64,7 @@
     coupled = v
     value = 1
     operator = '+'
-  [../]
+  []
 []
 
 [BCs]
@@ -75,14 +75,14 @@
     variable = v
     boundary = '3'
     function = left_bc
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = '1'
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -92,13 +92,13 @@
     type = NodalVariableValue
     variable = v
     nodeid = 3
-  [../]
+  []
 
   [node4v1]
     type = NodalVariableValue
     variable = v1
     nodeid = 3
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,7 +10,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -18,18 +18,18 @@
     type = PiecewiseLinear
     x = '0.  40.'
     y = '10. 1. '
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -38,13 +38,13 @@
     variable = u
     boundary = left
     value = 10
-  [../]
+  []
   [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = -1
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,19 +59,19 @@
     optimal_iterations = 10
     timestep_limiting_postprocessor = timestep_pp
     dt = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
   [_dt]
     type = TimestepSize
-  [../]
+  []
 
 # Just use a simple postprocessor to test capability to limit the time step length to the postprocessor value
   [timestep_pp]
     type = FunctionValuePostprocessor
     function = timestep_fn
-  [../]
+  []
 []
 
 [Outputs]

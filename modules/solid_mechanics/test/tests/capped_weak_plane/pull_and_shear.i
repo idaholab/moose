@@ -68,7 +68,7 @@
     incremental = true
     stiffness_damping_coefficient = 1E-2 # higher values mean more damping via stiffness
     hht_alpha = 0 # better nonlinear convergence than for alpha>0
-  [../]
+  []
 []
 
 

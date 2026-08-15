@@ -15,7 +15,7 @@ velocity=1
 
 [Variables]
   [c]
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,7 +23,7 @@ velocity=1
     type = AdvectionSUPG
     variable = c
     forcing_func = 'ffn'
-  [../]
+  []
 []
 
 [BCs]
@@ -32,7 +32,7 @@ velocity=1
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -41,14 +41,14 @@ velocity=1
     type = GenericConstantMaterial
     prop_names = 'mu rho'
     prop_values = '0 1'
-  [../]
+  []
 []
 
 [Functions]
   [ffn]
     type = ParsedFunction
     expression = 'if(x < 6, 1 - .25 * x, if(x < 8, -2 + .25 * x, 0))'
-  [../]
+  []
 []
 
 [Executioner]

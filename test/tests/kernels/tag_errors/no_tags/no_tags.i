@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,7 +15,7 @@
     type = Diffusion
     variable = u
     vector_tags = ''
-  [../]
+  []
 []
 
 [BCs]
@@ -24,13 +24,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

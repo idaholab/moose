@@ -11,14 +11,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [prop1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -26,7 +26,7 @@
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,11 +34,11 @@
     type = MatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
-  [../]
+  []
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -47,21 +47,21 @@
     variable = u
     boundary = 3
     value = 0.0
-  [../]
+  []
   [top]
     type = MTBC
     variable = u
     boundary = 1
     grad = 1.0
     prop_name = thermal_conductivity
-  [../]
+  []
 []
 
 [Materials]
   [stateful]
     type = StatefulSpatialTest
     block = 0
-  [../]
+  []
 []
 
 [UserObjects]
@@ -70,7 +70,7 @@
     copy_times = 0.3
     copy_from_element = 0
     copy_to_element = 15
-  [../]
+  []
 []
 
 [Executioner]

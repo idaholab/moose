@@ -16,7 +16,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 500
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -24,19 +24,19 @@
     order = FIRST
     family = L2_LAGRANGE
     initial_condition = 350
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
   [heat_source_fuel]
     type = CoupledForce
     variable = temp
     v = 'power'
-  [../]
+  []
 []
 
 [BCs]
@@ -45,7 +45,7 @@
     variable = temp
     boundary = 'bottom top left right'
     value = 300
-  [../]
+  []
 []
 
 [Materials]
@@ -54,11 +54,11 @@
     temp = temp
     specific_heat = 1000
     thermal_conductivity = 500
-  [../]
+  []
   [density]
     type = Density
     density = 2000
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -66,11 +66,11 @@
     type = ElementAverageValue
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [avg_power]
     type = ElementAverageValue
     variable = power
-  [../]
+  []
 []
 
 [Executioner]
@@ -105,7 +105,7 @@
     positions = '0 0 0'
     input_files = 'sub_ss.i'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
@@ -115,5 +115,5 @@
     variable = temp
     source_variable = temp
     execute_on = 'timestep_end'
-  [../]
+  []
 []

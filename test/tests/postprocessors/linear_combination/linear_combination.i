@@ -19,11 +19,11 @@
   [pp1]
     # number of elements, equal to 2
     type = NumElements
-  [../]
+  []
   [pp2]
     # number of nodes, equal to 3
     type = NumNodes
-  [../]
+  []
 
   # post-processor value being tested; value should be the following:
   #   value = c1 * pp1 + c2 * pp2 + b
@@ -33,7 +33,7 @@
     pp_names = 'pp1 pp2'
     pp_coefs = '2   -1'
     b = 5
-  [../]
+  []
 []
 
 [Outputs]

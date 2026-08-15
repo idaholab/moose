@@ -26,28 +26,28 @@
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 1.0
-  [../]
+  []
   [zeroRamp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 0. 1.'
     scale_factor = 2.0
-  [../]
+  []
   [rampUnramp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 0.'
     scale_factor = 10.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [pressure_1]
-  [../]
+  []
   [pressure_2]
-  [../]
+  []
   [pressure_3]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -56,19 +56,19 @@
     variable = pressure_1
     boundary = 1
     function = rampConstant
-  [../]
+  []
   [side2_pressure_ak]
     type = FunctionAux
     variable = pressure_2
     boundary = 2
     function = zeroRamp
-  [../]
+  []
   [side3_pressure_ak]
     type = FunctionAux
     variable = pressure_3
     boundary = 3
     function = rampUnramp
-  [../]
+  []
 []
 
 [Physics]
@@ -77,9 +77,9 @@
       [all]
         strain = SMALL
         add_variables = true
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [BCs]
@@ -88,31 +88,31 @@
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 5
     value = 0.0
-  [../]
+  []
   [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 6
     value = 0.0
-  [../]
+  []
   [CoupledPressure]
     [Side1]
       boundary = '1'
       pressure = pressure_1
       displacements = 'disp_x disp_y disp_z'
-    [../]
+    []
     [Side2]
       boundary = '2'
       pressure = pressure_2
       displacements = 'disp_x disp_y disp_z'
-    [../]
-  [../]
+    []
+  []
 
   [side3_x]
     type = CoupledPressureBC
@@ -120,21 +120,21 @@
     boundary = '3'
     pressure = pressure_3
     component = 0
-  [../]
+  []
   [side3_y]
     type = CoupledPressureBC
     variable = 'disp_y'
     boundary = '3'
     pressure = pressure_3
     component = 1
-  [../]
+  []
   [side3_z]
     type = CoupledPressureBC
     variable = 'disp_z'
     boundary = '3'
     pressure = pressure_3
     component = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -142,10 +142,10 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -163,5 +163,5 @@
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

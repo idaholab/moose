@@ -10,14 +10,14 @@
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -26,13 +26,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -48,7 +48,7 @@
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Transfers]
@@ -57,7 +57,7 @@
     source_variable = u
     variable = u
     to_multi_app = sub
-  [../]
+  []
 []
 
 [Outputs]

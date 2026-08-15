@@ -5,7 +5,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
@@ -17,8 +17,8 @@
     [InitialCondition]
       type = FunctionIC
       function = ic_function
-    [../]
-  [../]
+    []
+  []
 
 []
 
@@ -29,7 +29,7 @@
     xy_in_file_only = false
     y_index_in_file = 3 # will generate an error because no forth row of data
     scale_factor = 1.0
-  [../]
+  []
 []
 
 [Kernels]
@@ -38,7 +38,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -49,14 +49,14 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

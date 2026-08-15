@@ -19,8 +19,8 @@
     [InitialCondition]
       type = ConstantIC
       value = 2.8
-    [../]
-  [../]
+    []
+  []
 
   [v]
     order = SECOND
@@ -28,8 +28,8 @@
     [InitialCondition]
       type = ConstantIC
       value = 5.4
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
@@ -38,17 +38,17 @@
   [force_fn]
     type = ParsedFunction
     expression = '1-x*x+2*t'
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = '(1-x*x)*t'
-  [../]
+  []
 
   [left_bc]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -59,28 +59,28 @@
   [time_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn_u]
     type = BodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 
   [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -91,21 +91,21 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 
   [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '3'
     function = left_bc
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = '1'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -115,13 +115,13 @@
     variable = v
     execute_on = timestep_end
     boundary = '0 1 2 3'
-  [../]
+  []
 
   [passsidepp]
     type = ElementSidePP
     side_pp = sidepp
     execute_on = timestep_end
-  [../]
+  []
 
 []
 

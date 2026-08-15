@@ -11,7 +11,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -19,12 +19,12 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
 
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,21 +33,21 @@
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Materials]
   [stateful_mat]
     type = BadStatefulMaterial
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

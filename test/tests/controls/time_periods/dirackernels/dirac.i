@@ -10,7 +10,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -18,11 +18,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.5
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -31,7 +31,7 @@
     variable = u
     value = 1
     point = '0.25 0.25'
-  [../]
+  []
 []
 
 [BCs]
@@ -40,14 +40,14 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,5 +70,5 @@
     start_time = '0.15'
     end_time = '0.35'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []

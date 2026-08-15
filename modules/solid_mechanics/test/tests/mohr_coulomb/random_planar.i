@@ -26,19 +26,19 @@
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
+  []
   [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
+  []
   [z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
@@ -47,30 +47,30 @@
     variable = disp_x
     boundary = 'front back'
     function = '0'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
   [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -79,12 +79,12 @@
     index = 0
     property = plastic_yield_function
     variable = yield_fcn
-  [../]
+  []
   [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -93,16 +93,16 @@
     point = '0 0 0'
     variable = yield_fcn
     outputs = 'console'
-  [../]
+  []
   [should_be_zero]
     type = FunctionValuePostprocessor
     function = should_be_zero_fcn
-  [../]
+  []
   [av_iter]
     type = ElementAverageValue
     variable = iter
     outputs = 'console'
-  [../]
+  []
 []
 
 [Functions]
@@ -111,7 +111,7 @@
     expression = 'if(a<1E-3,0,a)'
     symbol_names = 'a'
     symbol_values = 'yield_fcn_at_zero'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -120,18 +120,18 @@
     value_0 = 1000
     value_residual = 100
     internal_limit = 4
-  [../]
+  []
   [phi]
     type = SolidMechanicsHardeningCubic
     value_0 = 0.8
     value_residual = 0.3
     internal_limit = 2
-  [../]
+  []
   [psi]
     type = SolidMechanicsHardeningConstant
     value = 15
     convert_to_radians = true
-  [../]
+  []
   [mc]
     type = SolidMechanicsPlasticMohrCoulombMulti
     cohesion = coh
@@ -140,7 +140,7 @@
     yield_function_tolerance = 1E-3
     shift = 1E-10
     internal_constraint_tolerance = 1E-6
-  [../]
+  []
 []
 
 [Materials]
@@ -149,7 +149,7 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.7E7 1E7'
-  [../]
+  []
   [mc]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -157,7 +157,7 @@
     plastic_models = mc
     min_stepsize = 1
     max_stepsize_for_dumb = 1
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -165,7 +165,7 @@
     add_variables = true
     incremental = true
     strain = finite
-  [../]
+  []
 []
 
 
@@ -181,5 +181,5 @@
   exodus = false
   [csv]
     type = CSV
-    [../]
+    []
 []

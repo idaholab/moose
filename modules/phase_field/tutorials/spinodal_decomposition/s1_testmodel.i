@@ -23,11 +23,11 @@
   [c]   # Mole fraction of Cr (unitless)
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [w]   # Chemical potential (eV/mol)
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -42,7 +42,7 @@
     y2 = 20
     inside = 0.823
     outside = 0.236
-  [../]
+  []
 []
 
 [BCs]
@@ -50,8 +50,8 @@
   [Periodic]
     [c_bcs]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -62,19 +62,19 @@
     variable = w
     v = c
     type = CoupledTimeDerivative
-  [../]
+  []
   [coupled_res]
     variable = w
     type = SplitCHWRes
     mob_name = M
-  [../]
+  []
   [coupled_parsed]
     variable = c
     type = SplitCHParsed
     f_name = f_loc
     kappa_name = kappa_c
     w = w
-  [../]
+  []
 []
 
 [Materials]
@@ -90,7 +90,7 @@
                    2.2841e-26*1e+09^2/6.24150934e+18/1e-27'
                    # kappa_c*eV_J*nm_m^2*d
                    # M*nm_m^2/eV_J/d
-  [../]
+  []
   [local_energy]
     # Defines the function for the local free energy density as given in the
     # problem, then converts units and adds scaling factor.
@@ -103,7 +103,7 @@
                             6.24150934e+18 1e-27'
     expression = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
                 E*c*(1-c)+F*c*(1-c)*(2*c-1)+G*c*(1-c)*(2*c-1)^2)'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -113,7 +113,7 @@
   [coupled]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

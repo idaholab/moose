@@ -11,27 +11,27 @@
 [FluidProperties]
   [fp_liquid]
     type = IdealGasFluidProperties
-  [../]
+  []
   [fp_vapor]
     type = IdealGasFluidProperties
-  [../]
+  []
   [fp_2phase]
     type = TestTwoPhaseFluidProperties
     fp_liquid = fp_liquid
     fp_vapor = fp_vapor
-  [../]
+  []
 []
 
 [Functions]
   [T]
     type = ConstantFunction
     value = 5
-  [../]
+  []
   [p_sat]
     type = SaturationPressureFunction
     T = T
     fp_2phase = fp_2phase
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -39,7 +39,7 @@
     type = FunctionValuePostprocessor
     function = p_sat
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Problem]

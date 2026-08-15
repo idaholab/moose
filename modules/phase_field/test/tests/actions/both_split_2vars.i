@@ -19,17 +19,17 @@
         kappa = 20.0
         coupled_variables = 'eta'
         solve_type = REVERSE_SPLIT
-      [../]
-    [../]
+      []
+    []
     [Nonconserved]
       [eta]
         free_energy = F
         mobility = 1.0
         kappa = 20
         coupled_variables = 'c'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -42,12 +42,12 @@
     y2 = 35
     inside = 0.15
     outside = 0.85
-  [../]
+  []
   [eta_IC]
     type = ConstantIC
     variable = eta
     value = 0.5
-  [../]
+  []
 []
 
 [Materials]
@@ -57,14 +57,14 @@
     coupled_variables = 'eta c'
     expression = '(1 - eta)*10.0*(c - 0.1)^2 + eta*(8.0*(c - 0.9)^2) + 10.0*eta^2*(1-eta)^2'
     outputs = exodus
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

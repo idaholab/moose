@@ -30,12 +30,12 @@
   [level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = ls
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
@@ -43,18 +43,18 @@
     type = PiecewiseLinear
     x = '0   2'
     y = '0  0.1'
-  [../]
+  []
   [ls_func]
     type = ParsedFunction
     expression = 'sqrt(x*x + y*y + z*z) - 0.5'
-  [../]
+  []
 []
 
 [AuxVariables]
   [ls]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -62,14 +62,14 @@
     type = FunctionAux
     variable = ls
     function = ls_func
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -79,14 +79,14 @@
     variable = u
     boundary = left
     value = 2
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,5 +114,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

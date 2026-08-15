@@ -18,14 +18,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,7 +34,7 @@
     variable = u
     boundary = '1 3'
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -42,13 +42,13 @@
     type = ElementalVariableValue
     variable = u
     elementid = 56
-  [../]
+  []
 
   [elem_12]
     type = ElementalVariableValue
     variable = u
     elementid = 12
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,5 +61,5 @@
     type = Console
     show = 'elem_56'
     hide = 'elem_56'
-  [../]
+  []
 []

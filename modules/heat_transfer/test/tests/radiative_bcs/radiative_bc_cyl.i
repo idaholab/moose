@@ -15,34 +15,34 @@
     ix = '1 10'
     dy = '1 1'
     subdomain_id = '1 2 1 2'
-  [../]
+  []
 
   [remove_1]
     type = BlockDeletionGenerator
     block = 1
     input = cartesian
-  [../]
+  []
 
   [readd_left]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'abs(x - 1) < 1e-4'
     new_sideset_name = left
     input = remove_1
-  [../]
+  []
   coord_type = RZ
 []
 
 [Variables]
   [temp]
     initial_condition = 800.0
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -51,7 +51,7 @@
     boundary = left
     variable = temp
     value = 800
-  [../]
+  []
 
   [radiative_bc]
     type = InfiniteCylinderRadiativeBC
@@ -62,7 +62,7 @@
     cylinder_radius = 3
     cylinder_emissivity = 0.7
     Tinfinity = 500
-  [../]
+  []
 []
 
 [Materials]
@@ -70,14 +70,14 @@
     type = GenericConstantMaterial
     prop_names = 'density  thermal_conductivity'
     prop_values = '1 1.0e5'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -94,19 +94,19 @@
     variable = temp
     boundary = right
     diffusivity = thermal_conductivity
-  [../]
+  []
 
   [min_temp]
     type = ElementExtremeValue
     variable = temp
     value_type = min
-  [../]
+  []
 
   [max_temp]
     type = ElementExtremeValue
     variable = temp
     value_type = max
-  [../]
+  []
 []
 
 [Outputs]

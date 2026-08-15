@@ -12,9 +12,9 @@
   [aux_scalar]
     order = FIRST
     family = SCALAR
-  [../]
+  []
   [coupled]
-  [../]
+  []
 []
 
 [ICs]
@@ -22,7 +22,7 @@
     type = ScalarConstantIC
     variable = aux_scalar
     value = 123
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -31,19 +31,19 @@
     variable = coupled
     coupled = aux_scalar
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -52,7 +52,7 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

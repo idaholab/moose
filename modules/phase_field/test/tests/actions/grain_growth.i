@@ -17,8 +17,8 @@
   [PhaseField]
     [GrainGrowth]
       variable_mobility = false
-    [../]
-  [../]
+    []
+  []
 []
 
 [ICs]
@@ -28,8 +28,8 @@
       x = 400
       y = 0
       int_width = 60
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -40,21 +40,21 @@
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
   [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -8,13 +8,13 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -23,14 +23,14 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [body_force]
     type = BodyForce
     variable = v
     block = 2
     value = 10
-  [../]
+  []
 []
 
 [BCs]
@@ -41,14 +41,14 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

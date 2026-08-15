@@ -10,7 +10,7 @@
     add_variables = true
     strain = SMALL
     incremental = true
-  [../]
+  []
 []
 
 
@@ -29,7 +29,7 @@
     variable = disp_x
     boundary = right
     functor = force_x
-  [../]
+  []
 []
 
 [Functions]
@@ -38,7 +38,7 @@
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # force
     scale_factor = 1e3
-  [../]
+  []
 []
 
 [BCs]
@@ -47,7 +47,7 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -56,17 +56,17 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
+  []
   [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
     prop_values = 2500
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,7 +83,7 @@
     type = NewmarkBeta
     beta = 0.25
     gamma = 0.5
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -91,17 +91,17 @@
     type = NodalVariableValue
     nodeid = 1
     variable = disp_x
-  [../]
+  []
   [vel_x]
     type = NodalVariableValue
     nodeid = 1
     variable = vel_x
-  [../]
+  []
   [accel_x]
     type = NodalVariableValue
     nodeid = 1
     variable = accel_x
-  [../]
+  []
 []
 
 [Outputs]

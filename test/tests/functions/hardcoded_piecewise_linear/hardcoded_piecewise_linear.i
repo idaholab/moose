@@ -44,7 +44,7 @@
     variable = funcval
     elementid = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

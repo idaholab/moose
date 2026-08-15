@@ -10,23 +10,23 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [stretch]
-  [../]
+  []
 []
 
 [Functions]
   [stretch_func]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,7 +34,7 @@
     type = Diffusion
     variable = u
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,13 +44,13 @@
     direction = x
     execute_on = timestep_begin
     coupled_var = stretch
-  [../]
+  []
   [stretch_aux]
     type = FunctionAux
     variable = stretch
     function = stretch_func
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [BCs]
@@ -60,14 +60,14 @@
     boundary = left
     value = 0
     use_displaced_mesh = true
-  [../]
+  []
   [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = 1
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Executioner]

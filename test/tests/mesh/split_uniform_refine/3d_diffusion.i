@@ -5,19 +5,19 @@
     ny = 16
     nz = 16
     dim = 3
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,7 +27,7 @@
     preset = false
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
@@ -35,7 +35,7 @@
     preset = false
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

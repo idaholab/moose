@@ -24,28 +24,28 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 3.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [detadt]
     type = ADTimeDerivative
     variable = eta
-  [../]
+  []
 
   [ACBulk]
     type = ADAllenCahn
     variable = eta
     f_name = F
-  [../]
+  []
 
   [ACInterface]
     type = ADACInterface
     variable = eta
     kappa_name = 1
     variable_L = false
-  [../]
+  []
 []
 
 [Materials]
@@ -53,14 +53,14 @@
     type = ADGenericConstantMaterial
     prop_names  = 'L'
     prop_values = '1'
-  [../]
+  []
 
   [free_energy]
     type = ADTestDerivativeFunction
     function = F1
     f_name = F
     op = 'eta'
-  [../]
+  []
 []
 
 [Executioner]

@@ -50,23 +50,23 @@
 [Variables]
   [vel_x]
     block = 0
-  [../]
+  []
   [vel_y]
     block = 0
-  [../]
+  []
   [p]
     block = 0
-  [../]
+  []
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [vel_x_solid]
     block = 1
-  [../]
+  []
   [vel_y_solid]
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -74,12 +74,12 @@
     type = INSMomentumTimeDerivative
     variable = vel_x
     block = 0
-  [../]
+  []
   [vel_y_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
     block = 0
-  [../]
+  []
   [mass]
     type = INSMass
     variable = p
@@ -89,7 +89,7 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-  [../]
+  []
   [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
@@ -100,7 +100,7 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-  [../]
+  []
   [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
@@ -111,7 +111,7 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-  [../]
+  []
   [vel_x_mesh]
     type = ConvectedMesh
     disp_x = disp_x
@@ -121,7 +121,7 @@
     v = vel_y
     pressure = p
     block = 0
-  [../]
+  []
   [vel_y_mesh]
     type = ConvectedMesh
     disp_x = disp_x
@@ -131,7 +131,7 @@
     v = vel_y
     pressure = p
     block = 0
-  [../]
+  []
   [p_mesh]
     type = ConvectedMeshPSPG
     disp_x = disp_x
@@ -141,61 +141,61 @@
     v = vel_y
     pressure = p
     block = 0
-  [../]
+  []
   [disp_x_fluid]
     type = Diffusion
     variable = disp_x
     block = 0
     use_displaced_mesh = false
-  [../]
+  []
   [disp_y_fluid]
     type = Diffusion
     variable = disp_y
     block = 0
     use_displaced_mesh = false
-  [../]
+  []
   [accel_tensor_x]
     type = CoupledTimeDerivative
     variable = disp_x
     v = vel_x_solid
     block = 1
     use_displaced_mesh = false
-  [../]
+  []
   [accel_tensor_y]
     type = CoupledTimeDerivative
     variable = disp_y
     v = vel_y_solid
     block = 1
     use_displaced_mesh = false
-  [../]
+  []
   [vxs_time_derivative_term]
     type = CoupledTimeDerivative
     variable = vel_x_solid
     v = disp_x
     block = 1
     use_displaced_mesh = false
-  [../]
+  []
   [vys_time_derivative_term]
     type = CoupledTimeDerivative
     variable = vel_y_solid
     v = disp_y
     block = 1
     use_displaced_mesh = false
-  [../]
+  []
   [source_vxs]
     type = MatReaction
     variable = vel_x_solid
     block = 1
     reaction_rate = 1
     use_displaced_mesh = false
-  [../]
+  []
   [source_vys]
     type = MatReaction
     variable = vel_y_solid
     block = 1
     reaction_rate = 1
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [InterfaceKernels]
@@ -206,7 +206,7 @@
     secondary_coupled_var = vel_x_solid
     boundary = master0_interface
     penalty = 1e6
-  [../]
+  []
   [penalty_interface_y]
     type = CoupledPenaltyInterfaceDiffusion
     variable = vel_y
@@ -214,7 +214,7 @@
     secondary_coupled_var = vel_y_solid
     boundary = master0_interface
     penalty = 1e6
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -223,7 +223,7 @@
     incremental = false
     # generate_output = 'strain_xx strain_yy strain_zz' ## Not at all necessary, but nice
     block = '1'
-  [../]
+  []
 []
 
 [Materials]
@@ -233,18 +233,18 @@
     poissons_ratio = 0.3
     block = '1'
     use_displaced_mesh = false
-  [../]
+  []
   [small_stress]
     type = ComputeLinearElasticStress
     block = 1
-  [../]
+  []
   [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [BCs]
@@ -253,50 +253,50 @@
     variable = vel_x
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
   [fluid_y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom left_to_0'
     value = 0.0
-  [../]
+  []
   [x_inlet]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'left_to_0'
     function = 'inlet_func'
-  [../]
+  []
   [no_disp_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'bottom top left_to_1 right_to_1 left_to_0 right_to_0'
     value = 0
-  [../]
+  []
   [no_disp_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom top left_to_1 right_to_1 left_to_0 right_to_0'
     value = 0
-  [../]
+  []
   [solid_x_no_slip]
     type = DirichletBC
     variable = vel_x_solid
     boundary = 'top left_to_1 right_to_1'
     value = 0.0
-  [../]
+  []
   [solid_y_no_slip]
     type = DirichletBC
     variable = vel_y_solid
     boundary = 'top left_to_1 right_to_1'
     value = 0.0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -316,12 +316,12 @@
 [Outputs]
   [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Functions]
   [inlet_func]
     type = ParsedFunction
     expression = '(-16 * (y - 0.25)^2 + 1) * (1 + cos(t))'
-  [../]
+  []
 []

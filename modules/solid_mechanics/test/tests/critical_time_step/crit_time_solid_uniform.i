@@ -24,7 +24,7 @@
     add_variables = true
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 
@@ -34,19 +34,19 @@
     variable = disp_x
     boundary = 3
     value = 0.0
-  [../]
+  []
   [2_y]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
   [2_z]
     type = DirichletBC
     variable = disp_z
     boundary = 3
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -54,15 +54,15 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.1
     youngs_modulus = 1e6
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8050.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,7 +83,7 @@
   [time_step]
     type = CriticalTimeStep
     density = density
-  [../]
+  []
 []
 
 [Outputs]

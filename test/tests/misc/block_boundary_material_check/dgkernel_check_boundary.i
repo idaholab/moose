@@ -5,7 +5,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [DGKernels]
@@ -14,7 +14,7 @@
     mat_prop = 'foo'
     variable = u
     boundary = 1
-  [../]
+  []
 []
 
 [Problem]

@@ -15,19 +15,19 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [left]
     type = ParsedFunction
     expression = 'y'
-  [../]
+  []
 
   [right]
     type = ParsedFunction
     expression = '1+y'
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,7 +36,7 @@
   [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -47,14 +47,14 @@
     variable = u
     boundary = 3
     function = left
-  [../]
+  []
 
   [right]
     type = ADFunctionDirichletBC
     variable = u
     boundary = 1
     function = right
-  [../]
+  []
 []
 
 [Executioner]

@@ -5,7 +5,7 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [Problem]
@@ -20,7 +20,7 @@
     format = columns
     epsilon = 0.1
     x_scale = 0.03
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -29,7 +29,7 @@
     function = input
     execute_on = INITIAL
     outputs = vpp
-  [../]
+  []
 []
 
 [Executioner]
@@ -41,5 +41,5 @@
   [vpp]
     type = CSV
     execute_vector_postprocessors_on = INITIAL
-  [../]
+  []
 []

@@ -11,16 +11,16 @@
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [AuxVariables]
   [temp]
-  [../]
+  []
   [saved_x]
-  [../]
+  []
   [saved_y]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -29,14 +29,14 @@
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Functions]
   [tempfunc]
     type = ParsedFunction
     expression = '(1-x)*t'
-  [../]
+  []
 []
 
 [BCs]
@@ -45,13 +45,13 @@
     boundary = 0
     variable = disp_x
     value = 0.0
-  [../]
+  []
   [bottomy]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -63,7 +63,7 @@
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = eigenstrain
     save_in = 'saved_x saved_y'
-  [../]
+  []
 []
 
 [Materials]
@@ -71,17 +71,17 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [elastic_stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 0.02
     temperature = temp
     stress_free_temperature = 0.5
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -90,7 +90,7 @@
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Executioner]

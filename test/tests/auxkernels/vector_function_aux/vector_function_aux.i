@@ -30,7 +30,7 @@
     variable = vec
     function = function
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Problem]

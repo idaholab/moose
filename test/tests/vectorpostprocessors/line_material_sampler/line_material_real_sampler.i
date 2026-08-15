@@ -31,14 +31,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [mat]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -46,7 +46,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = matp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -55,7 +55,7 @@
     variable = mat
     property = matp
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -65,7 +65,7 @@
     end   = '0.875 0.375 0.0'
     property = matp
     sort_by = id
-  [../]
+  []
 []
 
 [BCs]
@@ -74,7 +74,7 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
   [right]
     type = MTBC
@@ -82,14 +82,14 @@
     boundary = 1
     grad = 8
     prop_name = matp
-  [../]
+  []
 []
 
 [Materials]
   [mat]
     type = MTMaterial
     block = '0 1'
-  [../]
+  []
 []
 
 [Executioner]
@@ -105,5 +105,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

@@ -6,7 +6,7 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -15,7 +15,7 @@
 
 [AuxVariables]
   [temp]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -25,7 +25,7 @@
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [BCs]
@@ -34,21 +34,21 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 
   [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
   [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -56,7 +56,7 @@
     type = FunctionAux
     variable = temp
     function = '1 + t'
-  [../]
+  []
 []
 
 [Materials]
@@ -64,17 +64,17 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
   [thermal_expansion_strain]
     type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
     thermal_expansion_function = 4e-4
     stress_free_temperature = 1.5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -82,11 +82,11 @@
     type = SideAverageValue
     variable = disp_x
     boundary = right
-  [../]
+  []
   [temp_avg]
     type = ElementAverageValue
     variable = temp
-  [../]
+  []
 []
 
 [Executioner]

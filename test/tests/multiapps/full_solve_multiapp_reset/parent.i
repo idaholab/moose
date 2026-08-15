@@ -28,5 +28,5 @@
     input_files = sub.i
     reset_apps = '0'
     reset_time = 1
-  [../]
+  []
 []

@@ -36,10 +36,10 @@
 [Variables]
   [u]
     initial_condition = 1
-  [../]
+  []
   [temp]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -47,17 +47,17 @@
     type = ADThermoDiffusion
     variable = u
     temperature = temp
-  [../]
+  []
   [diffC]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 
   # Heat diffusion gives a linear temperature profile to drive the Soret diffusion.
   [diffT]
     type = ADDiffusion
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -67,7 +67,7 @@
     preset = false
     boundary = left
     value = 1
-  [../]
+  []
 
   [leftt]
     type = DirichletBC
@@ -75,14 +75,14 @@
     preset = false
     boundary = left
     value = 1
-  [../]
+  []
   [rightt]
     type = DirichletBC
     variable = temp
     preset = false
     boundary = right
     value = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -90,14 +90,14 @@
     type = ADSoretCoeffTest
     temperature = temp
     coupled_var = u
-  [../]
+  []
 []
 
 [Preconditioning]
   [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,7 +109,7 @@
     type = NodalL2Error
     variable = u
     function = 'exp(-x/(x+1))'
-  [../]
+  []
 []
 
 [Outputs]

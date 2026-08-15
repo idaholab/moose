@@ -25,13 +25,13 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [time]
     type = TimePostprocessor
-  [../]
+  []
 []
 
 [UserObjects]
@@ -42,7 +42,7 @@
     message = "This is an info"
     fail_mode = SOFT
     error_level = INFO
-  [../]
+  []
   [arnold2]
     type = Terminator
     expression = 'time = 0.5'
@@ -50,26 +50,26 @@
     message = "This is a warning!"
     fail_mode = SOFT
     error_level = WARNING
-  [../]
+  []
   [arnold3]
     type = Terminator
     expression = 'time = 0.25'
     execute_on = TIMESTEP_END
     message = "This is an error!"
     error_level = ERROR
-  [../]
+  []
 []
 
 [Kernels]
   [cres]
     type = Diffusion
     variable = c
-  [../]
+  []
 
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [BCs]
@@ -78,7 +78,7 @@
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

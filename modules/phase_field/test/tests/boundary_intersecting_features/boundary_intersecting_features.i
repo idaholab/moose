@@ -26,19 +26,19 @@
   [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxVariables]
   [grain_auxvar]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [centroids]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -47,7 +47,7 @@
     type = FeatureFloodCountAux
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [centroids]
     type = FeatureFloodCountAux
@@ -55,7 +55,7 @@
     flood_counter = flood_count_pp
     field_display = CENTROID
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Functions]
@@ -68,7 +68,7 @@
     # In these sample images the features we want to analyze are RED (or close to pure red). The
     # background is BLUE so we can easily distinguish between the two by selecting only the red channel.
     component = 0
-  [../]
+  []
 []
 
 [ICs]
@@ -76,7 +76,7 @@
     type = FunctionIC
     function = tif
     variable = u
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -86,7 +86,7 @@
     threshold = 1.0
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -94,13 +94,13 @@
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Steady

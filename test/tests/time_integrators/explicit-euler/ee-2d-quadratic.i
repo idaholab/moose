@@ -14,17 +14,17 @@
   [ic]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = ((x*x)+(y*y))-(4*t)
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*((x*x)+(y*y))
-  [../]
+  []
 []
 
 [Variables]
@@ -35,8 +35,8 @@
     [InitialCondition]
       type = FunctionIC
       function = ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -44,20 +44,20 @@
     type = TimeDerivative
     variable = u
     implicit = true
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
     implicit = false
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
     implicit = false
-  [../]
+  []
 []
 
 [BCs]
@@ -69,7 +69,7 @@
     boundary = '0 1 2 3'
     function = exact_fn
     implicit = true
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -77,7 +77,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -96,5 +96,5 @@
   [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []

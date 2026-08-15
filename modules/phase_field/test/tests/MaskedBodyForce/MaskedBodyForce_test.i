@@ -8,12 +8,12 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [c]
-  [../]
+  []
 []
 
 [ICs]
@@ -21,7 +21,7 @@
     value = 1.0
     variable = u
     type = ConstantIC
-  [../]
+  []
   [c_IC]
     int_width = 0.1
     x1 = 0.5
@@ -31,24 +31,24 @@
     variable = c
     invalue = 1
     type = SmoothCircleIC
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [source]
     type = MaskedBodyForce
     variable = u
     value = 1
     mask = mask
-  [../]
+  []
 []
 
 [Materials]
@@ -57,7 +57,7 @@
     expression = if(c>0.5,0,1)
     property_name = mask
     coupled_variables = c
-  [../]
+  []
 []
 
 [Executioner]

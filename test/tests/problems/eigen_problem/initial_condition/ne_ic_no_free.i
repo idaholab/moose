@@ -12,21 +12,21 @@
     # Use a good initial so that Newton can converge when we do not use free power iterations
     initial_from_file_var = u
     initial_from_file_timestep = 1
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
-  [../]
+  []
 []
 
 [BCs]
@@ -35,12 +35,12 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
   [eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,7 +55,7 @@
   [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

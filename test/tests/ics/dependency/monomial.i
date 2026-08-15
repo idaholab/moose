@@ -16,18 +16,18 @@
 
 [AuxVariables]
   [a]
-  [../]
+  []
 
   [b]
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 
   [v]
-  [../]
+  []
 []
 
 [ICs]
@@ -35,27 +35,27 @@
     type = ConstantIC
     variable = u
     value = -1
-  [../]
+  []
 
   [v_ic]
     type = MTICSum
     variable = v
     var1 = u
     var2 = a
-  [../]
+  []
 
   [a_ic]
     type = ConstantIC
     variable = a
     value = 10
-  [../]
+  []
 
   [b_ic]
     type = MTICMult
     variable = b
     var1 = v
     factor = 2
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -63,25 +63,25 @@
     type = ConstantAux
     variable = a
     value = 256
-  [../]
+  []
 
   [b_ak]
     type = ConstantAux
     variable = b
     value = 42
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -91,7 +91,7 @@
     boundary = left
     value = 0
     penalty = 1000
-  [../]
+  []
 
   [right_u]
     type = PenaltyDirichletBC
@@ -99,7 +99,7 @@
     boundary = right
     value = 1
     penalty = 1000
-  [../]
+  []
 
 
   [left_v]
@@ -108,7 +108,7 @@
     boundary = left
     value = 2
     penalty = 1000
-  [../]
+  []
 
   [right_v]
     type = PenaltyDirichletBC
@@ -116,7 +116,7 @@
     boundary = right
     value = 1
     penalty = 1000
-  [../]
+  []
 []
 
 [Problem]

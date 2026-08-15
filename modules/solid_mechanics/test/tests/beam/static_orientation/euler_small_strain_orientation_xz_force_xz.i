@@ -41,7 +41,7 @@
     Iy = 0.0141889
     Iz = 0.0141889
     y_orientation = '0.0 1.0 0.0'
-  [../]
+  []
 []
 
 [Materials]
@@ -51,11 +51,11 @@
     poissons_ratio = -0.9998699638
     shear_coefficient = 0.85
     block = 0
-  [../]
+  []
   [stress]
     type = ComputeBeamResultants
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -64,37 +64,37 @@
     variable = disp_x
     boundary = 0
     value = 0.0
-  [../]
+  []
   [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 0
     value = 0.0
-  [../]
+  []
   [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 0
     value = 0.0
-  [../]
+  []
   [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 0
     value = 0.0
-  [../]
+  []
   [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 0
     value = 0.0
-  [../]
+  []
   [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = 0
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -103,21 +103,21 @@
     variable = disp_x
     boundary = 1
     rate = 0.70710678e-4
-  [../]
+  []
 
   [force_z2]
     type = ConstantRate
     variable = disp_z
     boundary = 1
     rate = -0.70710678e-4
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 [Executioner]
   type = Transient
@@ -137,12 +137,12 @@
     type = PointValue
     point = '2.8284271  0.0 2.8284271'
     variable = disp_x
-  [../]
+  []
   [disp_z]
     type = PointValue
     point = '2.8284271  0.0 2.8284271'
     variable = disp_z
-  [../]
+  []
 []
 
 [Outputs]

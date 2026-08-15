@@ -28,7 +28,7 @@
     formulation = augmented_lagrange
     al_penetration_tolerance = 1e-8
     tangential_tolerance = 1e-3
-  [../]
+  []
 []
 
 [BCs]
@@ -37,35 +37,35 @@
     variable = disp_x
     boundary = 3
     value = 0.0
-  [../]
+  []
 
   [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [z]
     type = DirichletBC
     variable = disp_z
     boundary = 5
     value = 0.0
-  [../]
+  []
 
   [Pressure]
     [press]
       boundary = 7
       factor = 1e3
-    [../]
-  [../]
+    []
+  []
 
   [down]
     type = DirichletBC
     variable = disp_y
     boundary = 8
     value = -2e-3
-  [../]
+  []
 []
 
 [Materials]
@@ -74,11 +74,11 @@
     block = '1 2'
     youngs_modulus = 1.0e6
     poissons_ratio = 0.0
-  [../]
+  []
   [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Dampers]
@@ -86,14 +86,14 @@
     type = MaxIncrement
     max_increment = 1e-5
     variable = disp_x
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

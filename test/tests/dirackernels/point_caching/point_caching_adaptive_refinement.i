@@ -15,7 +15,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -24,7 +24,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -33,7 +33,7 @@
   [point_source]
     type = CachingPointSource
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -42,14 +42,14 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,7 +71,7 @@
       # uniformly-refined initial grid.
       type = ComboMarker
       markers = 'box1 box2 box3'
-    [../]
+    []
 
     [box1]
       type = BoxMarker
@@ -79,7 +79,7 @@
       top_right = '0.375 0.875 0'
       inside = refine
       outside = dont_mark
-    [../]
+    []
 
     [box2]
       type = BoxMarker
@@ -87,7 +87,7 @@
       top_right = '0.875 0.875 0'
       inside = refine
       outside = dont_mark
-    [../]
+    []
 
     [box3]
       type = BoxMarker
@@ -95,8 +95,8 @@
       top_right = '0.875 0.375 0'
       inside = refine
       outside = dont_mark
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

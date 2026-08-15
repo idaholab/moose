@@ -15,14 +15,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [bubble_map]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,7 +31,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing_1]
     type = GaussContForcing
@@ -41,7 +41,7 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [forcing_2]
     type = GaussContForcing
@@ -51,7 +51,7 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [forcing_3]
     type = GaussContForcing
@@ -61,7 +61,7 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [forcing_4]
     type = GaussContForcing
@@ -71,12 +71,12 @@
     x_spread = 0.5
     y_spread = 0.5
     amplitude = 2.0
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -85,7 +85,7 @@
     variable = bubble_map
     execute_on = 'initial timestep_end'
     flood_counter = bubbles
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -95,7 +95,7 @@
     threshold = 0.1
     execute_on = 'initial timestep_end'
     boundary = 'top right left bottom'
-  [../]
+  []
 []
 
 [Executioner]

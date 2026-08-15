@@ -21,29 +21,29 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [distance]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -52,12 +52,12 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [u_time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -66,34 +66,34 @@
     variable = disp_x
     function = 0
     block = 1
-  [../]
+  []
 
   [y]
     type = FunctionAux
     variable = disp_y
     function = 0
     block = 1
-  [../]
+  []
 
   [z]
     type = FunctionAux
     variable = disp_z
     function = t
     block = 1
-  [../]
+  []
   [gap_distance]
     type = NearestNodeDistanceAux
     variable = distance
     boundary = 2
     paired_boundary = 3
-  [../]
+  []
 
   [gap_distance2]
     type = NearestNodeDistanceAux
     variable = distance
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -104,28 +104,28 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [block1_right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 
   [block2_left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [block2_right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

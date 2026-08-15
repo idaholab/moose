@@ -17,21 +17,21 @@
     strain = FINITE
     incremental = true
     add_variables = true
-  [../]
+  []
 []
 
 [AuxVariables]
   [penetration]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [horizontal_movement]
     type = ParsedFunction
     expression = t/10.0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -41,7 +41,7 @@
     boundary = 2
     paired_boundary = 3
     order = FIRST
-  [../]
+  []
 []
 
 [BCs]
@@ -50,25 +50,25 @@
     variable = disp_x
     boundary = 1
     function = horizontal_movement
-  [../]
+  []
   [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
   [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = '1 4'
     value = 0.0
-  [../]
+  []
   [fix_z]
     type = DirichletBC
     variable = disp_z
     boundary = '1 4'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -77,22 +77,22 @@
     block = 1
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress_left]
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
 
   [elasticity_tensor_right]
     type = ComputeIsotropicElasticityTensor
     block = 2
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress_right]
     type = ComputeFiniteStrainElasticStress
     block = 2
-  [../]
+  []
 []
 
 [Contact]
@@ -104,7 +104,7 @@
     normalize_penalty = true
     formulation = kinematic
     normal_smoothing_distance = 0.1
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -115,7 +115,7 @@
     [contact_interior]
       splitting          = 'contact interior'
       splitting_type     = multiplicative
-    [../]
+    []
     [interior]
       type = ContactSplit
       vars = 'disp_x disp_y disp_z'
@@ -126,7 +126,7 @@
       include_all_contact_nodes = 1
       petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -pc_hypre_boomeramg_strong_threshold'
       petsc_options_value = 'preonly   hypre    boomeramg      1                            0.25'
-    [../]
+    []
     [contact]
       type = ContactSplit
       vars = 'disp_x disp_y disp_z'
@@ -136,8 +136,8 @@
       include_all_contact_nodes = 1
       petsc_options_iname = '-ksp_type -pc_type -pc_asm_overlap -sub_pc_type'
       petsc_options_value = 'preonly   asm      1               lu'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -160,9 +160,9 @@
   file_base = 2blocks3d_out
   [exodus]
     type = Exodus
-  [../]
+  []
   [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []

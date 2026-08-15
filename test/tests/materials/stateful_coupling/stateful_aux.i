@@ -9,7 +9,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -17,7 +17,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
@@ -25,12 +25,12 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
 
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 
@@ -40,14 +40,14 @@
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -60,7 +60,7 @@
     prop_values = -1 # ignored
     output_properties = thermal_conductivity
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

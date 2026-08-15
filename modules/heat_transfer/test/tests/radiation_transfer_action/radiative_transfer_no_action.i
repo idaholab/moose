@@ -15,7 +15,7 @@
     subdomain_id = '0 1 0
                     4 5 2
                     0 3 0'
-  [../]
+  []
 
   [inner_bottom]
     type = SideSetsBetweenSubdomainsGenerator
@@ -23,7 +23,7 @@
     primary_block = 1
     paired_block = 5
     new_boundary = 'inner_bottom'
-  [../]
+  []
 
   [inner_left]
     type = SideSetsBetweenSubdomainsGenerator
@@ -31,7 +31,7 @@
     primary_block = 4
     paired_block = 5
     new_boundary = 'inner_left'
-  [../]
+  []
 
   [inner_right]
     type = SideSetsBetweenSubdomainsGenerator
@@ -39,7 +39,7 @@
     primary_block = 2
     paired_block = 5
     new_boundary = 'inner_right'
-  [../]
+  []
 
   [inner_top]
     type = SideSetsBetweenSubdomainsGenerator
@@ -47,14 +47,14 @@
     primary_block = 3
     paired_block = 5
     new_boundary = 'inner_top'
-  [../]
+  []
 
   [rename]
     type = RenameBlockGenerator
     old_block = '1 2 3 4'
     new_block = '0 0 0 0'
     input = inner_top
-  [../]
+  []
 
   [split_inner_bottom]
     type = PatchSidesetGenerator
@@ -63,7 +63,7 @@
     partitioner = centroid
     centroid_partitioner_direction = x
     input = rename
-  [../]
+  []
 
   [split_inner_left]
     type = PatchSidesetGenerator
@@ -72,7 +72,7 @@
     partitioner = centroid
     centroid_partitioner_direction = y
     input = split_inner_bottom
-  [../]
+  []
 
   [split_inner_right]
     type = PatchSidesetGenerator
@@ -81,7 +81,7 @@
     partitioner = centroid
     centroid_partitioner_direction = y
     input = split_inner_left
-  [../]
+  []
 
   [split_inner_top]
     type = PatchSidesetGenerator
@@ -90,13 +90,13 @@
     partitioner = centroid
     centroid_partitioner_direction = x
     input = split_inner_right
-  [../]
+  []
 []
 
 [Variables]
   [temperature]
     block = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -105,7 +105,7 @@
     variable = temperature
     block = 0
     thermal_conductivity = 5
-  [../]
+  []
 []
 
 [UserObjects]
@@ -125,7 +125,7 @@
     temperature = temperature
     view_factor_object_name = view_factor
     execute_on = 'LINEAR TIMESTEP_END'
-  [../]
+  []
 
   [view_factor]
     type = UnobstructedPlanarViewFactor
@@ -135,7 +135,7 @@
                 inner_top_0 inner_top_1 inner_top_2'
     normalize_view_factor = true
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [BCs]
@@ -144,14 +144,14 @@
     variable = temperature
     boundary = left
     value = 600
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
     value = 300
-  [../]
+  []
 
   [radiation]
     type = GrayLambertNeumannBC
@@ -159,7 +159,7 @@
     surface_radiation_object_name = gray_lambert
     boundary = 'inner_left_0 inner_left_1
                 inner_right_0 inner_right_1'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -167,7 +167,7 @@
     type = SideAverageValue
     variable = temperature
     boundary = inner_right
-  [../]
+  []
 []
 
 [Executioner]

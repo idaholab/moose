@@ -13,7 +13,7 @@ max_abs_eig=${fparse c + a}
     xmin = 0.1
     xmax = 1.1
     nx = 2
-  [../]
+  []
 []
 
 [Problem]
@@ -32,7 +32,7 @@ max_abs_eig=${fparse c + a}
   [u]
     two_term_boundary_expansion = true
     type = MooseVariableFVReal
-  [../]
+  []
 []
 
 [FVKernels]
@@ -43,7 +43,7 @@ max_abs_eig=${fparse c + a}
     limiter = 'vanLeer'
     max_abs_eig = ${max_abs_eig}
     add_artificial_diff = true
-  [../]
+  []
   [body_u]
     type = FVBodyForce
     variable = u
@@ -113,7 +113,7 @@ max_abs_eig=${fparse c + a}
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

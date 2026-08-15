@@ -109,27 +109,27 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [A]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [scaled_u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [R]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -139,7 +139,7 @@
     type = PiecewiseBilinear
     data_file = fred.csv
     axis = 0
-  [../]
+  []
 #
 # Example 1 - variable u
 #
@@ -161,7 +161,7 @@
     type = PiecewiseBilinear
     data_file = fred.csv
     xaxis = 1
-  [../]
+  []
 #
 # Example 2 - variable v
 #
@@ -181,7 +181,7 @@
     type = PiecewiseBilinear
     data_file = fred.csv
     yaxis = 2
-  [../]
+  []
 #
 # Example 3 - variable w
 #
@@ -202,7 +202,7 @@
     data_file = fred.csv
     xaxis = 0
     yaxis = 1
-  [../]
+  []
 #
 # Example 4 - variable A
 #
@@ -228,7 +228,7 @@
     data_file = fred.csv
     axis = 0
     scale_factor = 2
-  [../]
+  []
 #
 # Example 5 - variable scaled_u.  This is just a scaled version of Example 1 to see if the scale_factor works
 #
@@ -240,7 +240,7 @@
     xaxis = 0
     yaxis = 1
     radial = true
-  [../]
+  []
 #
 # Example 6 - variable R
 #
@@ -268,27 +268,27 @@
   [diffu]
     type = Diffusion
     variable = u
-  [../]
+  []
   [diffv]
     type = Diffusion
     variable = v
-  [../]
+  []
   [diffw]
     type = Diffusion
     variable = w
-  [../]
+  []
   [diffA]
     type = Diffusion
     variable = A
-  [../]
+  []
   [diff_scaled_u]
     type = Diffusion
     variable = scaled_u
-  [../]
+  []
   [diffR]
     type = Diffusion
     variable = R
-  [../]
+  []
 []
 
 [BCs]
@@ -298,37 +298,37 @@
     variable = u
     boundary = '1'
     function = u
-  [../]
+  []
   [v]
     type = FunctionDirichletBC
     variable = v
     boundary = '1'
     function = v
-  [../]
+  []
   [w]
     type = FunctionDirichletBC
     variable = w
     boundary = '1'
     function = w
-  [../]
+  []
   [A]
     type = FunctionDirichletBC
     variable = A
     boundary = '1'
     function = A
-  [../]
+  []
   [scaled_u]
     type = FunctionDirichletBC
     variable = scaled_u
     boundary = '1'
     function = scaled_u
-  [../]
+  []
   [R]
     type = FunctionDirichletBC
     variable = R
     boundary = '1'
     function = R
-  [../]
+  []
 []
 
 [Executioner]

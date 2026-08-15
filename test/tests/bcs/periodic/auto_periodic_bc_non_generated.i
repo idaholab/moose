@@ -9,14 +9,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [periodic_dist]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -25,7 +25,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing]
     type = GaussContForcing
@@ -34,12 +34,12 @@
     y_center = 0.3
     x_spread = 0.1
     y_spread = 0.1
-  [../]
+  []
 
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -47,7 +47,7 @@
     type = PeriodicDistanceAux
     variable = periodic_dist
     point = '0.2 0.3 0.0'
-  [../]
+  []
 []
 
 # This test verifies that autodirection works with an arbitrary
@@ -57,8 +57,8 @@
     [all]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

@@ -16,18 +16,18 @@
     bottom_left = '0 0 0'
     top_right = '1 1 1'
     block_id = 1
-  [../]
+  []
   [break_boundary]
     type = BreakBoundaryOnSubdomainGenerator
     input = subdomain1
-  [../]
+  []
   [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = break_boundary
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
-  [../]
+  []
 []
 
 [Variables]
@@ -35,13 +35,13 @@
     order = FIRST
     family = NEDELEC_ONE
     block = 0
-  [../]
+  []
 
   [v]
     order = FIRST
     family = NEDELEC_ONE
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -52,12 +52,12 @@
     y_forcing_func = 1
     z_forcing_func = 1
     block = 0
-  [../]
+  []
   [curl_v_plus_v]
     type = VectorFEWave
     variable = v
     block = 1
-  [../]
+  []
 []
 
 [InterfaceKernels]
@@ -67,7 +67,7 @@
     neighbor_var = v
     boundary = primary0_interface
     penalty = 1e6
-  [../]
+  []
 []
 
 [BCs]
@@ -78,7 +78,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

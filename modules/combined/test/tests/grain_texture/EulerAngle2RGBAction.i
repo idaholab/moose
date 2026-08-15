@@ -15,7 +15,7 @@
 
 [Variables]
   [PolycrystalVariables]
-  [../]
+  []
 []
 
 [ICs]
@@ -25,32 +25,32 @@
       y1 = 0
       x2 = 500
       y2 = 1000
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [active_bounds_elemental]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [PolycrystalKernel]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,28 +58,28 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
   [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_tracker
     execute_on = 'initial timestep_begin'
     field_display = UNIQUE_REGION
-  [../]
+  []
   [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
     execute_on = 'initial timestep_begin'
     field_display = VARIABLE_COLORING
-  [../]
+  []
   [active_bounds_elemental]
     type = FeatureFloodCountAux
     variable = active_bounds_elemental
     field_display = ACTIVE_BOUNDS
     execute_on = 'initial timestep_begin'
     flood_counter = grain_tracker
-  [../]
+  []
 []
 
 [Modules]
@@ -88,8 +88,8 @@
       crystal_structure = cubic
       euler_angle_provider = euler_angle_file
       grain_tracker = grain_tracker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -102,7 +102,7 @@
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
     time_scale = 1.0e-6
-  [../]
+  []
 []
 
 [UserObjects]
@@ -113,25 +113,25 @@
     flood_entity_type = elemental
     execute_on = 'initial timestep_begin'
     outputs = none
-  [../]
+  []
   [euler_angle_file]
     type = EulerAngleFileReader
     file_name = test.tex
-  [../]
+  []
 []
 
 [Postprocessors]
   [gr0_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr0
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

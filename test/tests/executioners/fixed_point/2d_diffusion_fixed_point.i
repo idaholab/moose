@@ -13,26 +13,26 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [pseudo_time]
     type = CoefReaction
     variable = u
     coefficient = -0.1
     # comment out this will make fixed point iteration converged in one iteration
     vector_tags = 'previous'
-  [../]
+  []
   [pseudo_time_compensation]
     type = CoefReaction
     variable = u
     coefficient = 0.1
-  [../]
+  []
 []
 
 [BCs]
@@ -40,21 +40,21 @@
     type = VacuumBC
     variable = u
     boundary = left
-  [../]
+  []
 
   [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [unorm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Problem]

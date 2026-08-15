@@ -13,15 +13,15 @@
     type = PiecewiseLinear
     x = '0 1'
     y = '0 0.00175'
-  [../]
+  []
   [velocity_y]
     type = ParsedFunction
     expression = 'if(t < 2, 0.00175, 0)'
-  [../]
+  []
   [velocity_z]
     type = ParsedFunction
     expression = 0.00175
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -29,7 +29,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-  [../]
+  []
 []
 
 [BCs]
@@ -38,41 +38,41 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [move_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = displx
-  [../]
+  []
 
   [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
   [move_y]
     type = PresetVelocity
     variable = disp_y
     boundary = 5
     function = velocity_y
 #    time_periods = 'p2 p3'
-  [../]
+  []
 
   [fix_z]
     type = DirichletBC
     variable = disp_z
     boundary = 3
     value = 0.0
-  [../]
+  []
   [move_z]
     type = PresetVelocity
     variable = disp_z
     boundary = 6
     function = velocity_z
 #    time_periods = 'p3'
-  [../]
+  []
 []
 
 [Materials]
@@ -80,16 +80,16 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 186.5e9
     poissons_ratio = .316
-  [../]
+  []
   [elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 119.3e6
     cracked_elasticity_type = FULL
     softening_models = exponential_softening
-  [../]
+  []
   [exponential_softening]
     type = ExponentialSoftening
-  [../]
+  []
 []
 
 [Executioner]
@@ -123,7 +123,7 @@
     disable_objects = 'BCs/move_y BCs/move_z'
     reverse_on_false = false
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 
   [p2]
     type = TimePeriod
@@ -133,7 +133,7 @@
     enable_objects = 'BCs/move_y'
     reverse_on_false = false
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 
   [p3]
     type = TimePeriod
@@ -143,7 +143,7 @@
     reverse_on_false = false
     execute_on = 'initial timestep_begin'
     set_sync_times = true
-  [../]
+  []
 []
 
 [Outputs]

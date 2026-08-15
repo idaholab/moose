@@ -17,13 +17,13 @@
     strain = FINITE
     add_variables = true
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [AuxVariables]
   [temperature]
     initial_condition = 298.0
-  [../]
+  []
 []
 
 [BCs]
@@ -32,19 +32,19 @@
     variable = disp_r
     value = 0
     boundary = left
-  [../]
+  []
   [roller_z]
     type = ADDirichletBC
     variable = disp_z
     value = 0
     boundary = bottom
-  [../]
+  []
   [top_load]
     type = ADFunctionDirichletBC
     variable = disp_z
     function = -0.01*t
     boundary = top
-  [../]
+  []
 []
 
 [Materials]
@@ -52,17 +52,17 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-  [../]
+  []
   [_elastic_strain]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,7 +87,7 @@
     type = AxisymmetricCenterlineAverageValue
     variable = temperature
     boundary = left
-  [../]
+  []
 []
 
 [Outputs]

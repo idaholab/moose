@@ -13,18 +13,18 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [Functions]
   [top_displacement]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [BCs]
@@ -33,38 +33,38 @@
     variable = 'disp_x'
     boundary = bottom
     value = 0
-  [../]
+  []
   [bottom_y]
     type = DirichletBC
     variable = 'disp_y'
     boundary = bottom
     value = 0
-  [../]
+  []
   [bottom_z]
     type = DirichletBC
     variable = 'disp_z'
     boundary = bottom
     value = 0
-  [../]
+  []
 
   [top_x]
     type = DirichletBC
     variable = 'disp_x'
     boundary = top
     value = 0
-  [../]
+  []
   [top_y]
     type = FunctionDirichletBC
     variable = 'disp_y'
     boundary = top
     function = top_displacement
-  [../]
+  []
   [top_z]
     type = DirichletBC
     variable = 'disp_z'
     boundary = top
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -72,17 +72,17 @@
     type = ADStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
+  []
   [y]
     type = ADStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
+  []
   [z]
     type = ADStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -92,23 +92,23 @@
     # shear_modulus = 1.2e7
     youngs_modulus = 1
     poissons_ratio = 0.45 # the closer this gets to 0.5 the worse the problem becomes
-  [../]
+  []
 []
 
 [Materials]
   [strain]
     type = ADComputeGreenLagrangeStrain
-  [../]
+  []
   [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

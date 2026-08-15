@@ -5,7 +5,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -14,7 +14,7 @@
     variable = u
     # 'a' does not exist -> error
     v = a
-  [../]
+  []
 []
 
 [Executioner]

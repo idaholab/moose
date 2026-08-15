@@ -11,37 +11,37 @@
 [Variables]
   [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxVariables]
   [layered_average_value]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [axial_force]
     type = ParsedFunction
     expression = 1000*y
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [force]
     type = BodyForce
     variable = u
     function = axial_force
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -50,7 +50,7 @@
     variable = layered_average_value
     execute_on = timestep_end
     user_object = layered_average
-  [../]
+  []
 []
 
 [BCs]
@@ -59,7 +59,7 @@
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
@@ -68,7 +68,7 @@
     variable = u
     direction = y
     num_layers = 4
-  [../]
+  []
 []
 
 [Executioner]

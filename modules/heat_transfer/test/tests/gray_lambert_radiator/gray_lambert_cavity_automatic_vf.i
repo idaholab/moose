@@ -16,7 +16,7 @@
 [Variables]
   [temperature]
     initial_condition = 300
-  [../]
+  []
 []
 
 [UserObjects]
@@ -29,14 +29,14 @@
     emissivity = '1 0.75 0.75 0.75'
     temperature = temperature
     view_factor_object_name = view_factor
-  [../]
+  []
 
   [view_factor]
     type = UnobstructedPlanarViewFactor
     boundary = 'left right bottom top'
     normalize_view_factor = true
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -45,28 +45,28 @@
     surface_radiation_object_name = gray_lambert
     return_type = HEAT_FLUX_DENSITY
     boundary = bottom
-  [../]
+  []
 
   [temperature_left]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = TEMPERATURE
     boundary = left
-  [../]
+  []
 
   [temperature_right]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = TEMPERATURE
     boundary = right
-  [../]
+  []
 
   [brightness_top]
     type = GrayLambertSurfaceRadiationPP
     surface_radiation_object_name = gray_lambert
     return_type = RADIOSITY
     boundary = top
-  [../]
+  []
 []
 
 [Executioner]

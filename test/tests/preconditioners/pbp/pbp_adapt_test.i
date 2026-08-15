@@ -16,48 +16,48 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = -4
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = ((x*x)+(y*y))
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 
   [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -66,21 +66,21 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -88,7 +88,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -98,7 +98,7 @@
     preconditioner  = 'AMG ASM'
     off_diag_row    = 'v'
     off_diag_column = 'u'
-  [../]
+  []
 []
 
 [Executioner]
@@ -111,7 +111,7 @@
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
-  [../]
+  []
 []
 
 [Outputs]

@@ -12,11 +12,11 @@
   [yx1]
     type = ParsedFunction
     expression = '3*z^2'
-  [../]
+  []
   [yx2]
     type = ParsedFunction
     expression = '6*x^2'
-  [../]
+  []
   [spline_fn]
     type = BicubicSplineFunction
     normal_component = y
@@ -29,35 +29,35 @@
     yx2n = '216 216 216'
     yx1 = 'yx1'
     yx2 = 'yx2'
-  [../]
+  []
   [u_func]
     type = ParsedFunction
     expression = 'z^3 + 2*x^3'
-  [../]
+  []
   [u2_forcing_func]
     type = ParsedFunction
     expression = '-6*z - 12*x'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [bi_func_value]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [x_deriv]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [z_deriv]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -65,31 +65,31 @@
     type = FunctionAux
     variable = bi_func_value
     function = spline_fn
-  [../]
+  []
   [deriv_1]
     type = FunctionDerivativeAux
     function = spline_fn
     variable = z_deriv
     component = z
-  [../]
+  []
   [deriv_2]
     type = FunctionDerivativeAux
     function = spline_fn
     variable = x_deriv
     component = x
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [body_force]
     type = BodyForce
     variable = u
     function = u2_forcing_func
-  [../]
+  []
 []
 
 [BCs]
@@ -98,7 +98,7 @@
     variable = u
     boundary = 'left right front back'
     function = u_func
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -107,25 +107,25 @@
     variable = u
     function = spline_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [nodal_l2_err_analytic]
     type = NodalL2Error
     variable = u
     function = u_func
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [x_deriv_err_analytic]
     type = NodalL2Error
     variable = x_deriv
     function = yx2
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [z_deriv_err_analytic]
     type = NodalL2Error
     variable = z_deriv
     function = yx1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

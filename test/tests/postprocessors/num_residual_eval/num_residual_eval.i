@@ -20,7 +20,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -29,7 +29,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -40,14 +40,14 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,22 +60,22 @@
   [nodes]
     type = NumNodes
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [elements]
     type = NumElements
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [dofs]
     type = NumDOFs
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   [residuals]
     type = NumResidualEvaluations
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

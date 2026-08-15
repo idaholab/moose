@@ -23,7 +23,7 @@ ay=1
   [c]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,7 +31,7 @@ ay=1
     type = AdvectionSUPG
     variable = c
     forcing_func = 'ffn'
-  [../]
+  []
 []
 
 [BCs]
@@ -40,7 +40,7 @@ ay=1
     variable = c
     boundary = 'left right top bottom'
     function = 'c_func'
-  [../]
+  []
 []
 
 [Materials]
@@ -48,22 +48,22 @@ ay=1
     type = GenericConstantMaterial
     prop_names = 'mu rho'
     prop_values = '0 1'
-  [../]
+  []
 []
 
 [Functions]
   [ffn]
     type = ParsedFunction
     expression = '${ax}*(0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)) + ${ay}*(0.14*pi*x*cos(0.2*pi*x*y) + 0.4*pi*cos(pi*y))'
-  [../]
+  []
   [c_func]
     type = ParsedFunction
     expression = '0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5'
-  [../]
+  []
   [cx_func]
     type = ParsedFunction
     expression = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
-  [../]
+  []
 []
 
 # [Executioner]
@@ -90,16 +90,16 @@ ay=1
     cutback_factor = 0.4
     growth_factor = 1.2
     optimal_iterations = 20
-  [../]
+  []
 []
 
 [Outputs]
   [exodus]
     type = Exodus
-  [../]
+  []
   [csv]
     type = CSV
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -108,20 +108,20 @@ ay=1
     variable = c
     function = c_func
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
   [L2cx]
     type = ElementL2Error
     variable = cx
     function = cx_func
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [AuxVariables]
   [cx]
     family = MONOMIAL
     order = FIRST
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -130,5 +130,5 @@ ay=1
     component = x
     variable = cx
     gradient_variable = c
-  [../]
+  []
 []

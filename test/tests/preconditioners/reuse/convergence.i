@@ -91,7 +91,7 @@
     max_h_level = 1
     start_time = 11.0
     stop_time = 6.0
-  [../]
+  []
 
 []
 
@@ -104,5 +104,5 @@
   [csv]
     type = CSV
     file_base = base_case
-  [../]
+  []
 []

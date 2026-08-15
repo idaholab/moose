@@ -11,12 +11,12 @@
     dim = 2
     nx = 50
     ny = 50
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 # This input file is intended to be run with the "--mesh-only" option so

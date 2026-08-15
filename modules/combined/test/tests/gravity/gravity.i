@@ -41,11 +41,11 @@
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic/All]
@@ -60,7 +60,7 @@
     type = Gravity
     variable = disp_x
     value = 20
-  [../]
+  []
 []
 
 [BCs]
@@ -69,19 +69,19 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
   [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 5
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -89,16 +89,16 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     bulk_modulus = 0.333333333333333e6
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
   [density]
     type = Density
     block = 1
     density = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,5 +114,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

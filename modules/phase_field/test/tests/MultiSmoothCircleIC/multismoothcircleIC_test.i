@@ -17,7 +17,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -32,27 +32,27 @@
     int_width = 12.0
     radius_variation = 0.2
     radius_variation_type = uniform
-  [../]
+  []
 []
 
 [Kernels]
   [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [diff]
     type = MatDiffusion
     variable = c
     diffusivity = D_v
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -60,7 +60,7 @@
     type = GenericConstantMaterial
     prop_names = D_v
     prop_values = 0.074802
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -68,7 +68,7 @@
     type = FeatureFloodCount
     variable = c
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,7 +87,7 @@
   dt = 100.0
   [Adaptivity]
     refine_fraction = .5
-  [../]
+  []
 []
 
 [Outputs]

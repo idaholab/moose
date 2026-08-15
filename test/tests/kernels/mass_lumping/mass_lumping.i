@@ -8,7 +8,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [ICs]
@@ -16,30 +16,30 @@
     type = FunctionIC
     variable = u
     function = init_f
-  [../]
+  []
 []
 
 [Kernels]
   [time_deriv]
     type = MassLumpedTimeDerivative
     variable = u
-  [../]
+  []
   [diff]
     type = FuncCoefDiffusion
     variable = u
     coef = diff_f
-  [../]
+  []
 []
 
 [Functions]
   [init_f]
     type = ParsedFunction
     expression = max(x,0) #(x>0)
-  [../]
+  []
   [diff_f]
     type = ParsedFunction
     expression = max(x,0)
-  [../]
+  []
 []
 
 

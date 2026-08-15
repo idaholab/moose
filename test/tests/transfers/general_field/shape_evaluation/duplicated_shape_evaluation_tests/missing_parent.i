@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -54,7 +54,7 @@
     app_type = MooseTestApp
     input_files = tosub_sub.i
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Transfers]
@@ -64,12 +64,12 @@
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     to_multi_app = sub
     error_on_miss = true
-  [../]
+  []
   [elemental_to_sub]
     source_variable = u
     variable = elemental_transferred_u
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     to_multi_app = sub
     error_on_miss = true
-  [../]
+  []
 []

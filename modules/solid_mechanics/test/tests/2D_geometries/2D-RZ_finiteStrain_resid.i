@@ -34,34 +34,34 @@
     strain = FINITE
     add_variables = true
     save_in = 'force_r force_z'
-  [../]
+  []
 []
 
 [AuxVariables]
   [stress_r]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_r]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [strain_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [force_r]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [force_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -72,7 +72,7 @@
     index_j = 0
     variable = stress_r
     execute_on = timestep_end
-  [../]
+  []
   [strain_r]
     type = RankTwoAux
     rank_two_tensor = total_strain
@@ -80,7 +80,7 @@
     index_j = 0
     variable = strain_r
     execute_on = timestep_end
-  [../]
+  []
   [stress_z]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -88,7 +88,7 @@
     index_j = 1
     variable = stress_z
     execute_on = timestep_end
-  [../]
+  []
   [strain_z]
     type = RankTwoAux
     rank_two_tensor = total_strain
@@ -96,7 +96,7 @@
     index_j = 1
     variable = strain_z
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
@@ -104,11 +104,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
   [_elastic_strain]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [BCs]
@@ -117,25 +117,25 @@
     variable = disp_r
     boundary = left
     value = 0.0
-  [../]
+  []
   [no_disp_r_right]
     type = DirichletBC
     variable = disp_r
     boundary = right
     value = 0.0
-  [../]
+  []
   [no_disp_z_bottom]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = top
     function = 't'
-  [../]
+  []
 []
 
 [Debug]
@@ -169,29 +169,29 @@
   [strainR]
     type = ElementAverageValue
     variable = strain_r
-  [../]
+  []
   [stressR]
     type = ElementAverageValue
     variable = stress_r
-  [../]
+  []
   [strainZ]
     type = ElementAverageValue
     variable = strain_z
-  [../]
+  []
   [stressZ]
     type = ElementAverageValue
     variable = stress_z
-  [../]
+  []
   [force_r]
     type = NodalSum
     variable = force_r
     boundary = top
-  [../]
+  []
   [force_z]
     type = NodalSum
     variable = force_z
     boundary = top
-  [../]
+  []
 []
 
 [Outputs]

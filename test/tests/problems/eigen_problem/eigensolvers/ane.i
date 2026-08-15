@@ -28,7 +28,7 @@
   [uic]
     type = RandomIC
     variable = u
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,7 +36,7 @@
     type = PHarmonic
     variable = u
     p = 3
-  [../]
+  []
 
   [rhs]
     type = PMassKernel
@@ -44,7 +44,7 @@
     variable = u
     coefficient = -1.0
     p = 3
-  [../]
+  []
 []
 
 [BCs]
@@ -53,12 +53,12 @@
     variable = u
     boundary = '0 2'
     value = 0
-  [../]
+  []
   [eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,7 +71,7 @@
   [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

@@ -8,5 +8,5 @@
 [FluidProperties]
   [fp]
     type = SodiumProperties
-  [../]
+  []
 []

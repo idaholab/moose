@@ -9,21 +9,21 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [uo_e]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -32,7 +32,7 @@
     variable = uo_e
     material_user_object = uo
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -41,14 +41,14 @@
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Materials]
@@ -57,7 +57,7 @@
     type = GenericConstantMaterial
     prop_names = 'e'
     prop_values = 2.718281828459
-  [../]
+  []
 []
 
 [UserObjects]
@@ -65,7 +65,7 @@
     type = MaterialPropertyUserObject
     mat_prop = 'e'
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Executioner]

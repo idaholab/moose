@@ -19,7 +19,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_yy strain_yy vonmises_stress'
-  [../]
+  []
 []
 
 [Materials]
@@ -27,12 +27,12 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1e-9
     plastic_models = J2
-  [../]
+  []
 []
 
 [UserObjects]
@@ -42,13 +42,13 @@
     value_residual = 3.0e2
     internal_0 = 0
     internal_limit = 0.005
-  [../]
+  []
   [J2]
     type = SolidMechanicsPlasticJ2
     yield_strength = hardening
     yield_function_tolerance = 1E-9
     internal_constraint_tolerance = 1E-9
-  [../]
+  []
 []
 
 [BCs]
@@ -57,26 +57,26 @@
     variable = disp_r
     boundary = left
     value = 0.0
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = top
     function = '0.0007*t'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -96,12 +96,12 @@
     type = SideAverageValue
     variable = stress_yy
     boundary = bottom
-  [../]
+  []
   [ave_strain_bottom]
     type = SideAverageValue
     variable = strain_yy
     boundary = bottom
-  [../]
+  []
 []
 
 [Outputs]

@@ -12,7 +12,7 @@ a=1
     xmin = -1
     xmax = 0
     nx = 2
-  [../]
+  []
 []
 
 [Variables]
@@ -20,7 +20,7 @@ a=1
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
@@ -29,12 +29,12 @@ a=1
     variable = v
     velocity = '${a} 0 0'
     force_boundary_execution = true
-  [../]
+  []
   [diffusion]
     type = FVDiffusion
     variable = v
     coeff = coeff
-  [../]
+  []
   [body_v]
     type = FVBodyForce
     variable = v
@@ -87,7 +87,7 @@ a=1
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

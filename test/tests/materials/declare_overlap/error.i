@@ -11,14 +11,14 @@
     bottom_left = '0 0 0'
     top_right = '0.5 1 0'
     block_id = 10
-  [../]
+  []
 []
 
 
 [Variables]
   [u]
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
@@ -26,7 +26,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = 'p'
-  [../]
+  []
 []
 
 [BCs]
@@ -35,13 +35,13 @@
     variable = u
     boundary = left
     value = 2
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [Materials]
@@ -52,7 +52,7 @@
     prop_values = '2 2.5     2.468'
     block = ANY_BLOCK_ID
     outputs = all
-  [../]
+  []
 
   [left]
     type = GenericConstantMaterial
@@ -60,7 +60,7 @@
     prop_values = '1 0.5     1.2345'
     block = 10
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

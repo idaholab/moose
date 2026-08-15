@@ -17,12 +17,12 @@
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
@@ -30,7 +30,7 @@
     type = PiecewiseLinear
     x = '0 1     2'
     y = '0 0.025 0.05'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -38,7 +38,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
@@ -49,7 +49,7 @@
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
 
   [total_strain_yy]
     type = RankTwoAux
@@ -57,7 +57,7 @@
     variable = total_strain_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
 []
 
 
@@ -67,28 +67,28 @@
     variable = disp_y
     boundary = 3
     function = top_pull
-  [../]
+  []
 
   [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
 
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
 
   [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = 0
     value = 0.0
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -96,7 +96,7 @@
     type = ElementalVariableValue
     variable = stress_yy
     elementid = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -104,17 +104,17 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 2e5
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Dampers]
   [disp_x_damp]
     type = ElementJacobianDamper
     max_increment = 0.002
-  [../]
+  []
 []
 
 [Executioner]

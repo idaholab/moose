@@ -6,7 +6,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [ICs]
@@ -14,14 +14,14 @@
     type = ConstantIC
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -30,19 +30,19 @@
     variable = u
     boundary = left
     enable = false
-  [../]
+  []
   [right]
     type = RobinBC
     variable = u
     boundary = right
-  [../]
+  []
 []
 
 [Preconditioning]
   [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

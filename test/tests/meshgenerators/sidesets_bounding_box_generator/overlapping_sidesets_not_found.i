@@ -15,19 +15,19 @@
     bottom_left = '-1.1 -1.1 -1.1'
     top_right = '1.1 1.1 1.1'
     boundary_id_overlap = true
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -36,13 +36,13 @@
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
   [BCtwo]
     type = DirichletBC
     variable = u
     boundary = 11
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

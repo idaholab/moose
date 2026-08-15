@@ -7,9 +7,9 @@
 
 [Variables]
   [u_x]
-  [../]
+  []
   [u_y]
-  [../]
+  []
 []
 
 [Kernels]
@@ -17,12 +17,12 @@
     type = CoefDiffusion
     variable = u_x
     coef = 0.1
-  [../]
+  []
   [diff_y]
     type = CoefDiffusion
     variable = u_y
     coef = 0.1
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -30,12 +30,12 @@
     type = JacobianCheck
     variable = u_y
     boundary = top
-  [../]
+  []
   [test_x]
     type = JacobianCheck
     variable = u_x
     boundary = top
-  [../]
+  []
 []
 
 [BCs]
@@ -45,21 +45,21 @@
     preset = false
     boundary = left
     value = 0
-  [../]
+  []
   [right_x]
     type = DirichletBC
     variable = u_x
     preset = false
     boundary = right
     value = 1
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = u_y
     preset = false
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

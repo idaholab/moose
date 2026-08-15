@@ -36,15 +36,15 @@
     grain_num = 15
     rand_seed = 42
     coloring_algorithm = bt # We must use bt to force the UserObject to assign one grain to each op
-  [../]
+  []
 []
 
 [ICs]
   [PolycrystalICs]
     [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
@@ -53,7 +53,7 @@
     # Custom action that created all of the grain variables
     order = FIRST # element type used by each grain variable
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -63,14 +63,14 @@
     # Variable used to visualize the grain boundaries in the simulation
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
   [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -81,7 +81,7 @@
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -89,8 +89,8 @@
   [Periodic]
     [top_bottom]
       auto_direction = 'x y' # Makes problem periodic in the x and y directions
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -102,7 +102,7 @@
     Q = 0.23 #Activation energy for grain growth from Schonfelder 1997
     T = 450 # K   #Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # nm      #Width of the diffuse GB
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -111,7 +111,7 @@
   [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
+  []
 []
 
 [Executioner]
@@ -137,7 +137,7 @@
     type = IterationAdaptiveDT
     dt = 25 # Initial time step.  In this simulation it changes.
     optimal_iterations = 6 #Time step will adapt to maintain this number of nonlinear iterations
-  [../]
+  []
 
   [Adaptivity]
     # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
@@ -145,7 +145,7 @@
     refine_fraction = 0.7 # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
     max_h_level = 4 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-  [../]
+  []
 []
 
 [Outputs]
@@ -154,5 +154,5 @@
   [console]
     type = Console
     max_rows = 20
-  [../]
+  []
 []

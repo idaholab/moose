@@ -8,26 +8,26 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [ssm]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [conv]
     type = Convection
     variable = u
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -35,7 +35,7 @@
     type = MaterialRealAux
     variable = ssm
     property = diffusivity
-  [../]
+  []
 []
 
 [BCs]
@@ -44,20 +44,20 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
   [ssm]
     type = SpatialStatefulMaterial
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,8 +79,8 @@
       top_right = '0.4 0.4 0'
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

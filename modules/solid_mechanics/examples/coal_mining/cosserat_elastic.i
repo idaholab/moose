@@ -125,11 +125,11 @@
 
 [Variables]
   [disp_y]
-  [../]
+  []
   [disp_z]
-  [../]
+  []
   [wc_x]
-  [../]
+  []
 []
 
 [Kernels]
@@ -138,13 +138,13 @@
     use_displaced_mesh = false
     variable = disp_y
     component = 1
-  [../]
+  []
   [cz_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_z
     component = 2
-  [../]
+  []
   [x_couple]
     type = StressDivergenceTensors
     use_displaced_mesh = false
@@ -152,97 +152,97 @@
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
+  []
   [x_moment]
     type = MomentBalancing
     use_displaced_mesh = false
     variable = wc_x
     component = 0
-  [../]
+  []
   [gravity]
     type = Gravity
     use_displaced_mesh = false
     variable = disp_z
     value = -10E-6 # remember this is in MPa
-  [../]
+  []
 []
 
 
 [AuxVariables]
   [disp_x]
-  [../]
+  []
   [wc_y]
-  [../]
+  []
   [wc_z]
-  [../]
+  []
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [dp_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [dp_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [wp_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [dp_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [dp_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -252,111 +252,111 @@
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
+  []
   [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
   [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
+  []
   [stress_yx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yx
     index_i = 1
     index_j = 0
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
+  []
   [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
+  []
   [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zx
     index_i = 2
     index_j = 0
-  [../]
+  []
   [stress_zy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zy
     index_i = 2
     index_j = 1
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
   [dp_shear]
     type = MaterialStdVectorAux
     index = 0
     property = dp_plastic_internal_parameter
     variable = dp_shear
-  [../]
+  []
   [dp_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = dp_plastic_internal_parameter
     variable = dp_tensile
-  [../]
+  []
   [wp_shear]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_internal_parameter
     variable = wp_shear
-  [../]
+  []
   [wp_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_internal_parameter
     variable = wp_tensile
-  [../]
+  []
   [dp_shear_f]
     type = MaterialStdVectorAux
     index = 0
     property = dp_plastic_yield_function
     variable = dp_shear_f
-  [../]
+  []
   [dp_tensile_f]
     type = MaterialStdVectorAux
     index = 1
     property = dp_plastic_yield_function
     variable = dp_tensile_f
-  [../]
+  []
   [wp_shear_f]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_yield_function
     variable = wp_shear_f
-  [../]
+  []
   [wp_tensile_f]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_yield_function
     variable = wp_tensile_f
-  [../]
+  []
 []
 
 
@@ -367,30 +367,30 @@
     variable = disp_y
     boundary = '11 12'
     value = 0.0
-  [../]
+  []
   [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = '16'
     value = 0.0
-  [../]
+  []
   [no_wc_x]
     type = DirichletBC
     variable = wc_x
     boundary = '11 12'
     value = 0.0
-  [../]
+  []
 []
 
 [Functions]
   [ini_xx]
     type = ParsedFunction
     expression = '-0.8*2500*10E-6*(403.003-z)'
-  [../]
+  []
   [ini_zz]
     type = ParsedFunction
     expression = '-2500*10E-6*(403.003-z)'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -399,26 +399,26 @@
     value_0 = 2.9 # MPa
     value_residual = 3.1 # MPa
     rate = 1.0
-  [../]
+  []
   [dp_fric]
     type = SolidMechanicsHardeningConstant
     value = 0.65 # 37deg
-  [../]
+  []
   [dp_dil]
     type = SolidMechanicsHardeningConstant
     value = 0.65
-  [../]
+  []
 
   [dp_tensile_str_strong_harden]
     type = SolidMechanicsHardeningExponential
     value_0 = 1.0 # MPa
     value_residual = 1.4 # MPa
     rate = 1.0
-  [../]
+  []
   [dp_compressive_str]
     type = SolidMechanicsHardeningConstant
     value = 1.0E3 # Large!
-  [../]
+  []
 
   [drucker_prager_model]
     type = SolidMechanicsPlasticDruckerPrager
@@ -427,29 +427,29 @@
     mc_dilation_angle = dp_dil
     internal_constraint_tolerance = 1 # irrelevant here
     yield_function_tolerance = 1      # irrelevant here
-  [../]
+  []
 
   [wp_coh]
     type = SolidMechanicsHardeningConstant
     value = 1E12
-  [../]
+  []
   [wp_tan_fric]
     type = SolidMechanicsHardeningConstant
     value = 0.36 # 20deg
-  [../]
+  []
   [wp_tan_dil]
     type = SolidMechanicsHardeningConstant
     value = 0.18 # 10deg
-  [../]
+  []
 
   [wp_tensile_str]
     type = SolidMechanicsHardeningConstant
     value = 1E12
-  [../]
+  []
   [wp_compressive_str]
     type = SolidMechanicsHardeningConstant
     value = 1E12
-  [../]
+  []
 []
 
 [Materials]
@@ -460,16 +460,16 @@
     layer_thickness = 1.0
     joint_normal_stiffness = 1E9 # huge
     joint_shear_stiffness = 1E3 # MPa
-  [../]
+  []
   [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
+  []
   [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
     eigenstrain_name = ini_stress
-  [../]
+  []
 
   [stress]
     # this is needed so as to correctly apply the initial stress
@@ -481,7 +481,7 @@
     max_iterations = 1
     tangent_operator = nonlinear
     perform_finite_strain_rotations = false
-  [../]
+  []
   [dp]
     type = CappedDruckerPragerCosseratStressUpdate
     block = 0
@@ -498,7 +498,7 @@
     yield_function_tol = 1E-11 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0
-  [../]
+  []
   [wp]
     type = CappedWeakPlaneCosseratStressUpdate
     block = 0
@@ -515,14 +515,14 @@
     yield_function_tol = 1E-11 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0E-3
-  [../]
+  []
 
 
   [density]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 2500
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -531,7 +531,7 @@
     point = '0 0 403.003'
     variable = disp_z
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -574,5 +574,5 @@
   #[console]
   #  type = Console
   #  output_linear = false
-  #[../]
+  #[]
 []

@@ -8,21 +8,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [layered_side_flux_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -31,13 +31,13 @@
     variable = u
     boundary = bottom
     value = 0
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -46,7 +46,7 @@
     variable = layered_side_flux_average
     boundary = top
     user_object = layered_side_flux_average
-  [../]
+  []
 []
 
 [Materials]
@@ -55,7 +55,7 @@
     prop_values = 2
     prop_names = diffusivity
     boundary = 'right top'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -67,7 +67,7 @@
     variable = u
     execute_on = linear
     boundary = top
-  [../]
+  []
 []
 
 [Executioner]

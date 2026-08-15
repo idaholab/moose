@@ -18,14 +18,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -34,13 +34,13 @@
     variable = u
     boundary = front
     value = 0
-  [../]
+  []
   [back]
     type = DirichletBC
     variable = u
     boundary = back
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

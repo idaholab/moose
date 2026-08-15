@@ -4,7 +4,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 #  init_unif_refine = 6
 []
 
@@ -14,12 +14,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -33,7 +33,7 @@
     off_diag_column = 'u'
 
     petsc_options = ''  # Test petsc options in PBP block
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,18 +42,18 @@
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -64,28 +64,28 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 100
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -7,37 +7,37 @@
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_jac]
-  [../]
+  []
   [v_jac]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
   [value_test_v]
     type = ValueTest
     variable = v
     diag_save_in = v_jac
-  [../]
+  []
   [ad_value_test]
     type = ADValueTest
     variable = u
     diag_save_in = u_jac
-  [../]
+  []
 []
 
 [BCs]
@@ -46,25 +46,25 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
   [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

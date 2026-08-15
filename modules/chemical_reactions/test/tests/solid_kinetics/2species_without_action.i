@@ -18,17 +18,17 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
-  [../]
+  []
   [b]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
-  [../]
+  []
 []
 
 [AuxVariables]
   [mineral]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,38 +44,38 @@
     sys_temp = 298.15
     sto_v = '1 1'
     v = 'a b'
-  [../]
+  []
 []
 
 [Kernels]
   [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
+  []
   [a_pd]
     type = PrimaryDiffusion
     variable = a
-  [../]
+  []
   [b_ie]
     type = PrimaryTimeDerivative
     variable = b
-  [../]
+  []
   [b_pd]
     type = PrimaryDiffusion
     variable = b
-  [../]
+  []
   [a_r]
     type = CoupledBEKinetic
     variable = a
     v = mineral
     weight = 1
-  [../]
+  []
   [b_r]
     type = CoupledBEKinetic
     variable = b
     v = mineral
     weight = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -85,28 +85,28 @@
     preset = false
     boundary = left
     value = 1.0e-2
-  [../]
+  []
   [a_right]
     type = DirichletBC
     variable = a
     preset = false
     boundary = right
     value = 0
-  [../]
+  []
   [b_left]
     type = DirichletBC
     variable = b
     preset = false
     boundary = left
     value = 0
-  [../]
+  []
   [b_right]
     type = DirichletBC
     variable = b
     preset = false
     boundary = right
     value = 1.0e-2
-  [../]
+  []
 []
 
 [Materials]
@@ -114,7 +114,7 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '5e-4 4e-3 0.4'
-  [../]
+  []
 []
 
 [Executioner]
@@ -128,7 +128,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

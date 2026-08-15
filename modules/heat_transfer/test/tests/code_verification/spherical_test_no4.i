@@ -15,14 +15,14 @@
     elem_type = EDGE2
     xmin = 0.2
     nx = 4
-  [../]
+  []
   coord_type = RSPHERICAL
 []
 
 [Variables]
   [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
@@ -31,19 +31,19 @@
     symbol_names = 'qin q k ri ro uf h'
     symbol_values = '100 1200 1.0 0.2 1 100 10'
     expression = 'uf+ (q/(6*k)) * ( ro^2-x^2 + 2*k*(ro^3-ri^3)/(h*ro^2) + 2 * ri^3 * (1/ro-1/x) ) + (1/x-1/ro+k/(h*ro^2)) * qin * ri^2 / k'
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = u
-  [../]
+  []
   [heatsource]
     type = HeatSource
     function = 1200
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -52,14 +52,14 @@
     boundary = left
     variable = u
     value = 100
-  [../]
+  []
   [uo]
     type = CoupledConvectiveHeatFluxBC
     boundary = right
     variable = u
     htc = 10.0
     T_infinity = 100
-  [../]
+  []
 []
 
 [Materials]
@@ -67,7 +67,7 @@
     type = GenericConstantMaterial
     prop_names = 'density specific_heat thermal_conductivity'
     prop_values = '1.0 1.0 1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,7 +79,7 @@
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
+  []
   [h]
     type = AverageElementSize
   []

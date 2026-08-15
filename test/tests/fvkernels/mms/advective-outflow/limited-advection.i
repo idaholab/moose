@@ -11,7 +11,7 @@ a=1.1
     xmin = 0.1
     xmax = 1.1
     nx = 2
-  [../]
+  []
 []
 
 [ICs]
@@ -26,7 +26,7 @@ a=1.1
   [u]
     two_term_boundary_expansion = true
     type = MooseVariableFVReal
-  [../]
+  []
 []
 
 [FVKernels]
@@ -36,7 +36,7 @@ a=1.1
     velocity = '${a} 0 0'
     boundaries_to_force = 'right'
     limiter = 'vanLeer'
-  [../]
+  []
   [body_u]
     type = FVBodyForce
     variable = u
@@ -86,7 +86,7 @@ a=1.1
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

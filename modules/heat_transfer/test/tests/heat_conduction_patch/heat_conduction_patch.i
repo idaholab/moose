@@ -34,7 +34,7 @@
   [temps]
     type = ParsedFunction
     expression ='200*x+100*y+200*z'
-  [../]
+  []
 [] # Functions
 
 [Variables]
@@ -42,7 +42,7 @@
   [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
 [] # Variables
 
@@ -51,7 +51,7 @@
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 
 [] # Kernels
 
@@ -62,7 +62,7 @@
     variable = temp
     boundary = 10
     function = temps
-  [../]
+  []
 
 [] # BCs
 
@@ -74,7 +74,7 @@
 
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
-  [../]
+  []
 
 [] # Materials
 

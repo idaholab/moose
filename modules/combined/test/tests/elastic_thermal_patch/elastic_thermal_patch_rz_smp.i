@@ -53,30 +53,30 @@
   [ur]
     type = ParsedFunction
     expression = '1e-3*x'
-  [../]
+  []
   [uz]
     type = ParsedFunction
     expression = '1e-3*(x+y)'
-  [../]
+  []
   [body]
     type = ParsedFunction
     expression = '-400/x'
-  [../]
+  []
   [temp]
     type = ParsedFunction
     expression = '117.56+100*t'
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 
   [temp]
     initial_condition = 117.56
-  [../]
+  []
 []
 
 [Physics]
@@ -90,16 +90,16 @@
                 incremental = true
                 eigenstrain_names = eigenstrain
                 generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-            [../]
-        [../]
-    [../]
+            []
+        []
+    []
 []
 
 [Kernels]
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -108,20 +108,20 @@
     variable = disp_x
     boundary = 10
     function = ur
-  [../]
+  []
   [uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
     function = uz
-  [../]
+  []
 
   [temp]
     type = FunctionDirichletBC
     variable = temp
     boundary = 10
     function = temp
-  [../]
+  []
 []
 
 [Materials]
@@ -129,35 +129,35 @@
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 666666.6666666667
     poissons_ratio = 0.25
-  [../]
+  []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
     stress_free_temperature = 117.56
     eigenstrain_name = eigenstrain
-  [../]
+  []
   [stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
+  []
 
   [heat]
     type = HeatConductionMaterial
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
-  [../]
+  []
 
   [density]
     type = Density
     block = 1
     density = 0.283
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -181,5 +181,5 @@
     type = Exodus
     execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
-  [../]
+  []
 []

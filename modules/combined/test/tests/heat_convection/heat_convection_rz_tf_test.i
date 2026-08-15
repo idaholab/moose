@@ -61,7 +61,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 294.26 # Initial cylinder temperature
-  [../]
+  []
 
 []    # Variables END
 
@@ -70,12 +70,12 @@
   [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 
   [heat_ie]
     type = HeatConductionTimeDerivative
     variable = temp
-  [../]
+  []
 
 []    # Kernels END
 
@@ -92,7 +92,7 @@
          final = 477.6            # final ambient (lab or oven) temperature (K)
    duration = 600.   # length of time in seconds that it takes the ambient
          #     temperature to ramp from initial to final
-  [../]          # Convective End
+  []          # Convective End
 
 []    # BCs END
 
@@ -102,12 +102,12 @@
     block = 1
     specific_heat = 826.4
     thermal_conductivity = 1.937  # this makes alpha 9.74e-7 m^2/s
-  [../]
+  []
   [density]
     type = Density
     block = 1
     density = 2405.28
-  [../]
+  []
 []      # Materials END
 
 [Executioner]    # Executioner Start

@@ -15,38 +15,38 @@
     new_boundary = 'pinned_node_0'
     coord = '0 0 0'
     input = gen
-  [../]
+  []
   [corner_node_1]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node_1'
     coord = '1 0 0'
     input = corner_node_0
-  [../]
+  []
   [subdomain1]
     input = corner_node_1
     type = SubdomainBoundingBoxGenerator
     bottom_left = '1 0 0'
     top_right = '2 1 0'
     block_id = 1
-  [../]
+  []
   [break_boundary]
     input = subdomain1
     type = BreakBoundaryOnSubdomainGenerator
-  [../]
+  []
   [interface0]
     type = SideSetsBetweenSubdomainsGenerator
     input = break_boundary
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'interface0'
-  [../]
+  []
   [interface1]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface0
     primary_block = '1'
     paired_block = '0'
     new_boundary = 'interface1'
-  [../]
+  []
 []
 
 [Variables]
@@ -69,38 +69,38 @@
   [mass0]
     type = INSADMass
     variable = p0
-  [../]
+  []
   [momentum_time0]
     type = INSADMomentumTimeDerivative
     variable = velocity0
-  [../]
+  []
   [momentum_convection0]
     type = INSADMomentumAdvection
     variable = velocity0
-  [../]
+  []
   [momentum_viscous0]
     type = INSADMomentumViscous
     variable = velocity0
-  [../]
+  []
   [momentum_pressure0]
     type = INSADMomentumPressure
     variable = velocity0
     pressure = p0
     integrate_p_by_parts = true
-  [../]
+  []
   [temperature_time0]
     type = INSADHeatConductionTimeDerivative
     variable = T0
-  [../]
+  []
   [temperature_advection0]
     type = INSADEnergyAdvection
     variable = T0
-  [../]
+  []
   [temperature_conduction0]
     type = ADHeatConduction
     variable = T0
     thermal_conductivity = 'k'
-  [../]
+  []
 []
 
 [BCs]
@@ -108,55 +108,55 @@
     type = VectorFunctionDirichletBC
     variable = velocity0
     boundary = 'bottom_to_0 interface0 left'
-  [../]
+  []
   [lid0]
     type = VectorFunctionDirichletBC
     variable = velocity0
     boundary = 'top_to_0'
     function_x = 'lid_function0'
-  [../]
+  []
   [T_hot0]
     type = DirichletBC
     variable = T0
     boundary = 'bottom_to_0'
     value = 1
-  [../]
+  []
   [T_cold0]
     type = DirichletBC
     variable = T0
     boundary = 'top_to_0'
     value = 0
-  [../]
+  []
   [pressure_pin0]
     type = DirichletBC
     variable = p0
     boundary = 'pinned_node_0'
     value = 0
-  [../]
+  []
 
   [no_slip1]
     type = VectorFunctionDirichletBC
     variable = velocity0
     boundary = 'bottom_to_1 interface1 right'
-  [../]
+  []
   [lid1]
     type = VectorFunctionDirichletBC
     variable = velocity0
     boundary = 'top_to_1'
     function_x = 'lid_function1'
-  [../]
+  []
   [T_hot1]
     type = DirichletBC
     variable = T0
     boundary = 'bottom_to_1'
     value = 1
-  [../]
+  []
   [T_cold1]
     type = DirichletBC
     variable = T0
     boundary = 'top_to_1'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -164,7 +164,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  .01'
-  [../]
+  []
   [ins_mat0]
     type = INSAD3Eqn
     velocity = velocity0
@@ -188,11 +188,11 @@
   [lid_function0]
     type = ParsedFunction
     expression = '4*x*(1-x)'
-  [../]
+  []
   [lid_function1]
     type = ParsedFunction
     expression = '4*(x-1)*(2-x)'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -200,7 +200,7 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

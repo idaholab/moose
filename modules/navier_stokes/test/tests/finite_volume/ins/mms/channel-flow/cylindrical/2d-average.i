@@ -245,19 +245,19 @@ velocity_interp_method='average'
     exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [L2v]
     type = ElementL2FunctorError
     approximate = v
     exact = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [L2p]
     approximate = pressure
     exact = exact_p
     type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

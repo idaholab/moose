@@ -4,7 +4,7 @@
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
@@ -12,13 +12,13 @@
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 
   [v]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
@@ -28,13 +28,13 @@
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
 
   [body_force]
     type = FVBodyForce
     variable = u
     value = 10
-  [../]
+  []
 []
 
 [FVBCs]
@@ -45,14 +45,14 @@
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
   [right]
     type = FVDirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

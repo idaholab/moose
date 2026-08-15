@@ -17,36 +17,36 @@
   [force_fn]
     type = ParsedFunction
     expression = -4
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = (x*x)+(y*y)
-  [../]
+  []
 
   [aux_fn]
     type = ParsedFunction
     expression = (1-x*x)*(1-y*y)
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [ffn]
     type = BodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -56,7 +56,7 @@
     preset = false
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 
@@ -64,7 +64,7 @@
   [aux1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -72,7 +72,7 @@
     type = FunctionAux
     variable = aux1
     function = aux_fn
-  [../]
+  []
 []
 
 [Executioner]

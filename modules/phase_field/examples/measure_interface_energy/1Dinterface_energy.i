@@ -11,7 +11,7 @@
   [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -20,7 +20,7 @@
     variable = local_energy
     kappa_names = kappa_c
     interfacial_vars = c
-  [../]
+  []
 []
 
 [Variables]
@@ -33,12 +33,12 @@
       variable = c
       value_left = 0
       value_right = 1
-    [../]
-  [../]
+    []
+  []
   [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -48,17 +48,17 @@
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 
 []
 
@@ -68,13 +68,13 @@
     symbol_values = 'total_solute Cleft Cright Fleft Fright volume'
     expression = '((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft'
     symbol_names = 'total_solute Cleft Cright Fleft Fright volume'
-  [../]
+  []
   [Diff]
     type = ParsedFunction
     symbol_values = 'total_free_energy total_no_int'
     symbol_names = 'total_free_energy total_no_int'
     expression = total_free_energy-total_no_int
-  [../]
+  []
 []
 
 [Materials]
@@ -82,14 +82,14 @@
     type = GenericConstantMaterial
     prop_names  = 'kappa_c M'
     prop_values = '25      150'
-  [../]
+  []
   [Free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     expression = 'c^2*(c-1)^2'
     coupled_variables = c
     derivative_order = 2
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -97,41 +97,41 @@
   [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
+  []
 
   # for testing we also monitor the total solute amount, which should be conserved,
   # gives Cavg in % for this problem.
   [total_solute]
     type = ElementIntegralVariablePostprocessor
     variable = c
-  [../]
+  []
   # Get simulation cell size (1D volume) from postprocessor
   [volume]
     type = ElementIntegralMaterialProperty
     mat_prop = 1
-  [../]
+  []
   # Find concentration in each phase using SideAverageValue
   [Cleft]
     type = SideAverageValue
     boundary = left
     variable = c
-  [../]
+  []
   [Cright]
     type = SideAverageValue
     boundary = right
     variable = c
-  [../]
+  []
   # Find local energy in each phase by checking boundaries
   [Fleft]
     type = SideAverageValue
     boundary = left
     variable = local_energy
-  [../]
+  []
   [Fright]
     type = SideAverageValue
     boundary = right
     variable = local_energy
-  [../]
+  []
   # Use concentrations and energies to find total free energy without any interface,
   # only applies once equilibrium is reached!!
   # Difference between energy with and without interface
@@ -139,11 +139,11 @@
   [total_no_int]
     type = FunctionValuePostprocessor
     function = Int_energy
-  [../]
+  []
   [Energy_of_Interface]
     type = FunctionValuePostprocessor
     function = Diff
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -153,7 +153,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -178,7 +178,7 @@
   [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.5
-  [../]
+  []
 []
 
 [Outputs]
@@ -188,10 +188,10 @@
     type = Exodus
     show = 'c local_energy'
     execute_on = 'failed initial nonlinear timestep_end final'
-  [../]
+  []
   [console]
     type = Console
     execute_on = 'FAILED INITIAL NONLINEAR TIMESTEP_END final'
-  [../]
+  []
   perf_graph = true
 []

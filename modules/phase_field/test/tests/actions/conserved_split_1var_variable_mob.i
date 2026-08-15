@@ -20,9 +20,9 @@
         kappa = 2.0
         mobility = M
         coupled_variables = 'cv'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -33,7 +33,7 @@
     x2 = 45.0
     y2 = 45.0
     variable = cv
-  [../]
+  []
 []
 
 [Materials]
@@ -43,20 +43,20 @@
     coupled_variables = 'cv'
     expression = '0.1 + (1 + cv)/2'
     outputs = exodus
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'cv'
     expression = '(1-cv)^2 * (1+cv)^2'
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

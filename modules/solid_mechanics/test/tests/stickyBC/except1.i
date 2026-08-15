@@ -11,7 +11,7 @@
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
-  [../]
+  []
 []
 
 [BCs]
@@ -21,18 +21,18 @@
     boundary = bottom
     min_value = 1
     max_value = -1
-  [../]
+  []
 []
 
 [Materials]
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.2
-  [../]
+  []
 []
 
 [Executioner]

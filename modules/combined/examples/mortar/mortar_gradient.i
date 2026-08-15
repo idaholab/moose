@@ -46,12 +46,12 @@
     # slope with a concentration spike close to the lower interface
     type = ParsedFunction
     expression = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3+y, y)'
-  [../]
+  []
   [init_flat]
     # no-slope and the same spike
     type = ParsedFunction
     expression = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3, 0)'
-  [../]
+  []
 []
 
 [Variables]
@@ -63,8 +63,8 @@
     [InitialCondition]
       type = FunctionIC
       function = init_slope
-    [../]
-  [../]
+    []
+  []
 
   # unconstrained concentrarion
   [v]
@@ -74,8 +74,8 @@
     [InitialCondition]
       type = FunctionIC
       function = init_slope
-    [../]
-  [../]
+    []
+  []
 
   # flat value periodic diffusion
   [p]
@@ -85,32 +85,32 @@
     [InitialCondition]
       type = FunctionIC
       function = init_flat
-    [../]
-  [../]
+    []
+  []
 
   # Lagrange multipliers for gradient component in the horizontal directon
   [lm_left_right_x]
     order = FIRST
     family = LAGRANGE
     block = "secondary_x"
-  [../]
+  []
   [lm_left_right_y]
     order = FIRST
     family = LAGRANGE
     block = "secondary_x"
-  [../]
+  []
 
   # Lagrange multipliers for gradient component in the vertical directon
   [lm_up_down_x]
     order = FIRST
     family = LAGRANGE
     block = "secondary_y"
-  [../]
+  []
   [lm_up_down_y]
     order = FIRST
     family = LAGRANGE
     block = "secondary_y"
-  [../]
+  []
 []
 
 [Kernels]
@@ -119,36 +119,36 @@
     type = Diffusion
     variable = c
     block = 0
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = c
     block = 0
-  [../]
+  []
 
   # the un-constrained concentration
   [diff2]
     type = Diffusion
     variable = v
     block = 0
-  [../]
+  []
   [dt2]
     type = TimeDerivative
     variable = v
     block = 0
-  [../]
+  []
 
   # the value periodic concentration
   [diff3]
     type = Diffusion
     variable = p
     block = 0
-  [../]
+  []
   [dt3]
     type = TimeDerivative
     variable = p
     block = 0
-  [../]
+  []
 []
 
 [Constraints]
@@ -162,7 +162,7 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
+  []
   [equaly_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_y
@@ -173,7 +173,7 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
+  []
 
   [equalx_grad_x]
     type = EqualGradientConstraint
@@ -185,7 +185,7 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
+  []
   [equalx_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_y
@@ -196,7 +196,7 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
+  []
 []
 
 [BCs]
@@ -205,12 +205,12 @@
     type = DiffusionFluxBC
     boundary = 'top bottom left right'
     variable = c
-  [../]
+  []
   [surface2]
     type = DiffusionFluxBC
     boundary = 'top bottom left right'
     variable = v
-  [../]
+  []
 
   # for the value periodic diffusion we skip the surface term and apply value PBCs
   [Periodic]
@@ -219,33 +219,33 @@
       primary = 0
       secondary = 2
       translation = '0 1 0'
-    [../]
+    []
     [left_right]
       variable = p
       primary = 1
       secondary = 3
       translation = '-1 0 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   [diff_constraint]
     block = 0
-  [../]
+  []
   [diff_periodic]
     block = 0
-  [../]
+  []
   [diff_slope]
     block = 0
-  [../]
+  []
   [slope]
     block = 0
     [InitialCondition]
       type = FunctionIC
       function = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxKernels]
@@ -256,7 +256,7 @@
     expression = 'c-v'
     coupled_variables = 'c v'
     block = 0
-  [../]
+  []
 
   # difference between the periodic gradient constrained diffusion and the flat
   # value period diffusien with a constant slope added. This should be the same,
@@ -269,7 +269,7 @@
     expression = 'c-p-slope'
     coupled_variables = 'c p slope'
     block = 0
-  [../]
+  []
 
   # subtract the constant slope from the gradient periodic simulation (should yield
   # almost p - per the argument above)
@@ -279,14 +279,14 @@
     expression = 'c-slope'
     coupled_variables = 'c slope'
     block = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

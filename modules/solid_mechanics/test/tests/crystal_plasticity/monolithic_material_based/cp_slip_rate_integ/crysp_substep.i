@@ -13,29 +13,29 @@
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [fp_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [e_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [gss1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [Functions]
   [tdisp]
     type = ParsedFunction
     expression = 0.01*t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -43,7 +43,7 @@
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
@@ -56,7 +56,7 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [fp_zz]
     type = RankTwoAux
     variable = fp_zz
@@ -65,7 +65,7 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [e_zz]
     type = RankTwoAux
     variable = e_zz
@@ -74,7 +74,7 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [gss1]
     type = MaterialStdVectorAux
     variable = gss1
@@ -82,7 +82,7 @@
     index = 0
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -91,25 +91,25 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
@@ -126,13 +126,13 @@
     tan_mod_type = exact
     slip_incr_tol = 1
     maximum_substep_iteration = 8
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -140,29 +140,29 @@
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [e_zz]
     type = ElementAverageValue
     variable = e_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
   [gss1]
     type = ElementAverageValue
     variable = gss1
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

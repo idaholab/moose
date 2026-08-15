@@ -12,26 +12,26 @@
     [indicator]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
+    []
+  []
   [Markers]
     [marker]
       type = ErrorFractionMarker
       coarsen = 0.1
       indicator = indicator
       refine = 0.7
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [aux_u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -39,11 +39,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -52,13 +52,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

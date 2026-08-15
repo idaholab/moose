@@ -6,14 +6,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -22,25 +22,25 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
   [right1]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 2
-  [../]
+  []
   [left2]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 3
-  [../]
+  []
   [right2]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 4
-  [../]
+  []
 []
 
 [Executioner]

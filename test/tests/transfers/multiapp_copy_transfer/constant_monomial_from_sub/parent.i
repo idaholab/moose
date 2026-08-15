@@ -9,7 +9,7 @@
   [u]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Problem]
@@ -30,7 +30,7 @@
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
-  [../]
+  []
 []
 
 [Transfers]
@@ -39,7 +39,7 @@
     source_variable = aux
     variable = u
     from_multi_app = sub
-  [../]
+  []
 []
 
 [Outputs]

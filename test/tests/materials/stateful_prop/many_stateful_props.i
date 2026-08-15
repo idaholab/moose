@@ -16,14 +16,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [prop1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
@@ -32,11 +32,11 @@
     variable = u
     prop_name = thermal_conductivity
     prop_state = 'old'                  # Use the "Old" value to compute conductivity
-  [../]
+  []
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -44,14 +44,14 @@
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
-  [../]
+  []
 
   [prop1_output_init]
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
@@ -60,13 +60,13 @@
     variable = u
     boundary = left
     value = 0.0
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1.0
-  [../]
+  []
 []
 
 [Materials]
@@ -74,32 +74,32 @@
     type = StatefulTest
     prop_names = 'thermal_conductivity'
     prop_values = '1'
-  [../]
+  []
   [stateful2]
     type = StatefulTest
     prop_names = 'foo2'
     prop_values = '2'
-  [../]
+  []
   [stateful3]
     type = StatefulTest
     prop_names = 'foo3'
     prop_values = '3'
-  [../]
+  []
   [stateful4]
     type = StatefulTest
     prop_names = 'foo4'
     prop_values = '4'
-  [../]
+  []
   [stateful5]
     type = StatefulTest
     prop_names = 'foo5'
     prop_values = '5'
-  [../]
+  []
   [stateful6]
     type = StatefulTest
     prop_names = 'foo6'
     prop_values = '6'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -107,7 +107,7 @@
     type = ElementAverageValue
     variable = prop1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

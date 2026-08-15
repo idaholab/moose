@@ -10,21 +10,21 @@
 [Variables]
   [T]
       initial_condition = 400.0   # unit in Kelvin only!!
-  [../]
+  []
 []
 
 [AuxVariables]
   [elec_conduct]
       order = FIRST
       family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = HeatConduction
     variable = T
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -33,7 +33,7 @@
     variable = elec_conduct
     property = electrical_conductivity
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -42,13 +42,13 @@
     variable = T
     boundary = left
     value = 1000 # K
-  [../]
+  []
   [outlet]
     type = DirichletBC
     variable = T
     boundary = right
     value = 400 # K
-  [../]
+  []
 []
 
 [Materials]
@@ -56,13 +56,13 @@
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '10' # in W/mK
-  [../]
+  []
   [sigma]
     type = SemiconductorLinearConductivity
     temp = T
     sh_coeff_A = 0.002
     sh_coeff_B = 0.001
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -74,7 +74,7 @@
     end_point = '1.0 0. 0'
     num_points = 11
     sort_by = id
-  [../]
+  []
 []
 
 [Executioner]

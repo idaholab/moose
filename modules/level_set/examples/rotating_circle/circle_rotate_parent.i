@@ -13,12 +13,12 @@
 [AuxVariables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [Variables]
   [phi]
-  [../]
+  []
 []
 
 [BCs]
@@ -27,7 +27,7 @@
     variable = phi
     boundary = 'top bottom left right'
     value = 0
-  [../]
+  []
 []
 
 [Functions]
@@ -36,12 +36,12 @@
     epsilon = 0.03
     center = '0 0.5 0'
     radius = 0.15
-  [../]
+  []
   [velocity_func]
     type = ParsedVectorFunction
     expression_x = '4*y'
     expression_y = '-4*x'
-  [../]
+  []
 []
 
 [ICs]
@@ -49,7 +49,7 @@
     type = FunctionIC
     function = phi_exact
     variable = phi
-  [../]
+  []
   [vel_ic]
     type = VectorFunctionIC
     variable = velocity
@@ -61,13 +61,13 @@
   [time]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
 
   [advection]
     type = LevelSetAdvection
     velocity = velocity
     variable = phi
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -77,12 +77,12 @@
     variable = phi
     location = outside
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [cfl]
     type = LevelSetCFLCondition
     velocity = velocity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -97,7 +97,7 @@
     type = PostprocessorDT
     postprocessor = cfl
     scale = 0.8
-  [../]
+  []
 []
 
 [MultiApps]
@@ -105,7 +105,7 @@
     type = LevelSetReinitializationMultiApp
     input_files = 'circle_rotate_sub.i'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
@@ -115,21 +115,21 @@
     variable = phi
     to_multi_app = reinit
     execute_on = 'timestep_end'
-  [../]
+  []
   [to_sub_init]
     type = MultiAppCopyTransfer
     source_variable = phi
     variable = phi_0
     to_multi_app = reinit
     execute_on = 'timestep_end'
-  [../]
+  []
   [from_sub]
     type = MultiAppCopyTransfer
     source_variable = phi
     variable = phi
     from_multi_app = reinit
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

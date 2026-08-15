@@ -15,15 +15,15 @@
     [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = t*x+1
-  [../]
+  []
 []
 
 [Kernels]
@@ -31,15 +31,15 @@
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
   [diffusion]
     type = Diffusion
     variable = u
-  [../]
+  []
   [timeDer]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -48,18 +48,18 @@
     variable = u
     boundary = '0 1'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
   [elementAvgTimeDerivative]
     type = ElementAverageTimeDerivative
     variable = u
-  [../]
+  []
   [elementAvgValue]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

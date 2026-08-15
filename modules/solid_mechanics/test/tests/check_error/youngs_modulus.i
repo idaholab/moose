@@ -11,7 +11,7 @@
     add_variables = true
     incremental = false
     strain = small
-  [../]
+  []
 []
 
 [BCs]
@@ -20,19 +20,19 @@
     variable = disp_x
     boundary = 2
     value = 0.0
-  [../]
+  []
   [2_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
   [2_z]
     type = DirichletBC
     variable = disp_z
     boundary = 2
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -40,10 +40,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = -1e6
     poissons_ratio = 0.0
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]

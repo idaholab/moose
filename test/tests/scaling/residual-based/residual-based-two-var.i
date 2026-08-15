@@ -33,7 +33,7 @@
     type = Diffusion
     variable = u
     extra_vector_tags = 'ref'
-  [../]
+  []
   [rxn]
     type = PReaction
     power = 2
@@ -44,7 +44,7 @@
     type = Diffusion
     variable = v
     extra_vector_tags = 'ref'
-  [../]
+  []
   [rxn_v]
     type = PReaction
     power = 2
@@ -59,25 +59,25 @@
     variable = u
     boundary = left
     value = 1000
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
   [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1e-3
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

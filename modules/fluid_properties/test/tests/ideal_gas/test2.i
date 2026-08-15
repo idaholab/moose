@@ -21,7 +21,7 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -29,48 +29,48 @@
     family = MONOMIAL
     order = CONSTANT
     initial_condition = 1e6
-  [../]
+  []
   [temperature]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = 350
-  [../]
+  []
   [density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [viscosity]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [cv]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [internal_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [enthalpy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [entropy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [thermal_cond]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [c]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -78,47 +78,47 @@
     type = MaterialRealAux
      variable = density
      property = density
-  [../]
+  []
   [viscosity]
     type = MaterialRealAux
      variable = viscosity
      property = viscosity
-  [../]
+  []
   [cp]
     type = MaterialRealAux
      variable = cp
      property = cp
-  [../]
+  []
   [cv]
     type = MaterialRealAux
      variable = cv
      property = cv
-  [../]
+  []
   [e]
     type = MaterialRealAux
      variable = internal_energy
      property = e
-  [../]
+  []
   [enthalpy]
     type = MaterialRealAux
      variable = enthalpy
      property = h
-  [../]
+  []
   [entropy]
     type = MaterialRealAux
      variable = entropy
      property = s
-  [../]
+  []
   [thermal_cond]
     type = MaterialRealAux
      variable = thermal_cond
      property = k
-  [../]
+  []
   [c]
     type = MaterialRealAux
      variable = c
      property = c
-  [../]
+  []
 []
 
 [FluidProperties]
@@ -126,7 +126,7 @@
     type = IdealGasFluidProperties
     gamma = 1.401537772469394
     molar_mass = 0.0319988
-  [../]
+  []
 []
 
 [Materials]
@@ -135,14 +135,14 @@
     pressure = pressure
     temperature = temperature
     fp = idealgas
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [Executioner]

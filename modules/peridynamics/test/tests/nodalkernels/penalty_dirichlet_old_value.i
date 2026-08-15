@@ -15,35 +15,35 @@
     nx = 11
     ny = 11
     elem_type = QUAD4
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gfm
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [AuxVariables]
   [bond_status]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
   [heat]
     type = HeatConductionBPD
     variable = temp
-  [../]
+  []
   [source]
     type = HeatSourceBPD
     variable = temp
     power_density = '-4'
-  [../]
+  []
 []
 
 [Materials]
@@ -51,7 +51,7 @@
     type = ThermalConstantHorizonMaterialBPD
     thermal_conductivity = 1
     temperature = temp
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -60,7 +60,7 @@
     variable = temp
     boundary = 'pd_nodes_top pd_nodes_left pd_nodes_right pd_nodes_bottom'
     penalty = 1e10
-  [../]
+  []
 []
 
 # [BCs]
@@ -69,7 +69,7 @@
 #     variable = temp
 #     value = 0
 #     boundary = 'pd_nodes_top pd_nodes_left pd_nodes_right pd_nodes_bottom'
-#   [../]
+#   []
 # []
 
 [Executioner]

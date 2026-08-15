@@ -18,14 +18,14 @@
     system_variables = u
     scale_multiplier = '2 2 0'
     transformation_order = scale_multiplier
-  [../]
+  []
 []
 
 [Variables]
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -33,7 +33,7 @@
     type = FunctionIC
     variable = u
     function = solution_fcn
-  [../]
+  []
 []
 
 [Functions]
@@ -41,14 +41,14 @@
     type = SolutionFunction
     from_variable = u
     solution = solution_uo
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

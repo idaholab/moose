@@ -6,19 +6,19 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,14 +28,14 @@
     preset = false
     boundary = 'z_all'
     function = 'z'
-  [../]
+  []
 
   [Periodic]
     [all]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

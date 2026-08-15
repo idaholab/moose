@@ -5,14 +5,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diffusion]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Functions]
@@ -22,7 +22,7 @@
     x = Legendre
     orders = '0'
     physical_bounds = '-1 1 0 3'
-  [../]
+  []
 []
 
 [Executioner]

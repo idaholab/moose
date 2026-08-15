@@ -14,7 +14,7 @@
   [mask_func]
     type = ParsedFunction
     expression = 'r:=sqrt((x-5)^2+(y-5)^2); if (r<3, 1.0, 0.0)'
-  [../]
+  []
 []
 
 [Variables]
@@ -22,14 +22,14 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [Kernels]
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 
   [conserved_langevin]
     type = ConservedLangevinNoise
@@ -44,8 +44,8 @@
     [all]
       variable = c
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -53,21 +53,21 @@
     type = GenericFunctionMaterial
     prop_names  = 'mask_prop'
     prop_values = 'mask_func'
-  [../]
+  []
 []
 
 [UserObjects]
   [normal_masked_noise]
     type = ConservedMaskedNormalNoise
     mask = mask_prop
-  [../]
+  []
 []
 
 [Postprocessors]
   [total_c]
     type = ElementIntegralVariablePostprocessor
     variable = c
-  [../]
+  []
 []
 
 [Executioner]
@@ -95,5 +95,5 @@
   file_base = normal_masked
   [csv]
     type = CSV
-  [../]
+  []
 []

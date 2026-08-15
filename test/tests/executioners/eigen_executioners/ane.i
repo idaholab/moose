@@ -22,14 +22,14 @@
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
   [uic]
     type = RandomIC
     variable = u
-  [../]
+  []
 []
 
 [Kernels]
@@ -39,13 +39,13 @@
     type = PHarmonic
     variable = u
     p = 3
-  [../]
+  []
 
   [rhs]
     type = PMassEigenKernel
     variable = u
     p = 3
-  [../]
+  []
 []
 
 [BCs]
@@ -56,7 +56,7 @@
     variable = u
     boundary = '0 2'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -86,13 +86,13 @@
     variable = u
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
-  [../]
+  []
 
   [udiff]
     type = ElementL2Diff
     variable = u
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]

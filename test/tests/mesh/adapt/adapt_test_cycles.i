@@ -12,12 +12,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -26,23 +26,23 @@
   [udiff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [uconv]
     type = Convection
     variable = u
     velocity = '20 1 0'
-  [../]
+  []
 
   [uie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [vdiff]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -53,28 +53,28 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [uright]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [vleft]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 1
-  [../]
+  []
 
   [vright]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -90,7 +90,7 @@
     refine_fraction = 0.3
     max_h_level = 7
     cycles_per_step = 2
-  [../]
+  []
 []
 
 [Outputs]

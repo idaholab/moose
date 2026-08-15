@@ -13,12 +13,12 @@
     #  and since dot(p10)>0, we get dot(p0)<0)
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
   [conc]
     family = MONOMIAL
     order = CONSTANT
     block = centre_block
-  [../]
+  []
 []
 
 [ICs]
@@ -26,13 +26,13 @@
     type = ConstantIC
     variable = pressure
     value = 1.0
-  [../]
+  []
   [conc_ic]
     type = ConstantIC
     variable = conc
     value = 1.0
     block = centre_block
-  [../]
+  []
 []
 
 
@@ -41,30 +41,30 @@
     type = TimeDerivative
     block = centre_block
     variable = conc
-  [../]
+  []
   [flow_from_matrix]
     type = DesorptionFromMatrix
     block = centre_block
     variable = conc
     pressure_var = pressure
-  [../]
+  []
   [rho_dot]
     type = TimeDerivative
     variable = pressure
-  [../]
+  []
   [flux_to_porespace]
     type = DesorptionToPorespace
     block = centre_block
     variable = pressure
     conc_var = conc
-  [../]
+  []
 []
 
 [Materials]
   [rock]
     type = GenericConstantMaterial
     block = 'left_block centre_block right_block'
-  [../]
+  []
   [lang_stuff]
     type = LangmuirMaterial
     block = centre_block
@@ -73,7 +73,7 @@
     mat_langmuir_density = 1
     mat_langmuir_pressure = 1
     pressure_var = pressure
-  [../]
+  []
 []
 
 
@@ -84,7 +84,7 @@
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

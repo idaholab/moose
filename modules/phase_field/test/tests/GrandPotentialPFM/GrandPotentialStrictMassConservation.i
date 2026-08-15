@@ -88,13 +88,13 @@
     constant_names = 'a b'
     constant_expressions = '-0.0017 140.16'
     expression = 'a*T + b'
-  [../]
+  []
   [kv]
     type = ParsedMaterial
     property_name = kv
     material_property_names = 'ks'
     expression = '10*ks'
-  [../]
+  []
   # Diffusivity and mobilities
   [chiD]
     type = GrandPotentialTensorMaterial

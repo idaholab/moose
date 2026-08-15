@@ -12,15 +12,15 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
 []
 
 [BCs]
@@ -29,13 +29,13 @@
     variable = c
     boundary = left
     function = x
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = c
     boundary = right
     function = x
-  [../]
+  []
 []
 
 [Materials]
@@ -45,7 +45,7 @@
     c = c
     outputs = out
     log_tol = 0.2
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,5 +61,5 @@
   [out]
     type = Exodus
     execute_on = timestep_end
-  [../]
+  []
 []

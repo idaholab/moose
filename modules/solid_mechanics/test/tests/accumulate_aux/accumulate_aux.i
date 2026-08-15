@@ -13,28 +13,28 @@
     xmax = 0.5
     ymin = -0.5
     ymax = 0.5
-  [../]
+  []
 []
 
 [Variables]
   [v]
-  [../]
+  []
 []
 
 [AuxVariables]
   [node_accum]
-  [../]
+  []
   [elem_accum]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,13 +43,13 @@
     variable = node_accum
     accumulate_from_variable = v
     execute_on = timestep_end
-  [../]
+  []
   [ea]
     type = AccumulateAux
     variable = elem_accum
     accumulate_from_variable = v
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -58,14 +58,14 @@
     variable = v
     boundary = 0
     value = 0
-  [../]
+  []
 
   [b2x]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [Executioner]

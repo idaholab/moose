@@ -24,9 +24,9 @@
         mobility = M
         kappa = kappa_c
         solve_type = REVERSE_SPLIT
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
@@ -35,7 +35,7 @@
     variable = c
     min = 0.2
     max = 0.21
-  [../]
+  []
 []
 
 [Materials]
@@ -43,7 +43,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 25'
-  [../]
+  []
   [chemical_free_energy]
     # simple double well free energy
     type = DerivativeParsedMaterial
@@ -54,7 +54,7 @@
     expression = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
     derivative_order = 2
     outputs = exodus
-  [../]
+  []
   [probability]
     # This is a made up toy nucleation rate it should be replaced by
     # classical nucleation theory in a real simulation.
@@ -63,7 +63,7 @@
     coupled_variables = c
     expression = c*1e-7
     outputs = exodus
-  [../]
+  []
   [nucleation]
     # The nucleation material is configured to insert nuclei into the free energy
     # tht force the concentration to go to 0.95, and holds this enforcement for 500
@@ -76,14 +76,14 @@
     penalty_mode = MIN
     map = map
     outputs = exodus
-  [../]
+  []
   [free_energy]
     # add the chemical and nucleation free energy contributions together
     type = DerivativeSumMaterial
     derivative_order = 2
     coupled_variables = c
     sum_materials = 'Fc Fn'
-  [../]
+  []
 []
 
 [UserObjects]
@@ -94,7 +94,7 @@
     hold_time = 100
     probability = P
     radius = 10
-  [../]
+  []
   [map]
     # The map UO runs at the beginning of a timestep and generates a per-element/qp
     # map of nucleus locations. The map is only regenerated if the mesh changed or
@@ -103,28 +103,28 @@
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
   [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Executioner]
@@ -147,7 +147,7 @@
     growth_factor = 1.5
     cutback_factor = 0.5
     optimal_iterations = 5
-  [../]
+  []
 []
 
 [Outputs]

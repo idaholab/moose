@@ -4,14 +4,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -20,13 +20,13 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
@@ -36,7 +36,7 @@
     failure_type = WARNING
     upper_bound = 1.0
     lower_bound = 0.5
-  [../]
+  []
 []
 
 [Executioner]

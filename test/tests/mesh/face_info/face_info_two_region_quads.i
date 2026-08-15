@@ -5,7 +5,7 @@
     dx = '1 1'
     dy = '1 1'
     subdomain_id = '1 2 2 2'
-  [../]
+  []
 []
 
 [Problem]
@@ -17,18 +17,18 @@
     family = MONOMIAL
     order = CONSTANT
     block = 1
-  [../]
+  []
 
   [v]
     family = MONOMIAL
     order = CONSTANT
     block = 2
-  [../]
+  []
 
   [w]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
   [_trigger_fv_on]
     fv = true
@@ -41,17 +41,17 @@
   [face_info_1]
     type = TestFaceInfo
     vars = 'u'
-  [../]
+  []
 
   [face_info_2]
     type = TestFaceInfo
     vars = 'v'
-  [../]
+  []
 
   [face_info_3]
     type = TestFaceInfo
     vars = 'w'
-  [../]
+  []
 []
 
 [Executioner]

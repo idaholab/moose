@@ -18,7 +18,7 @@
   [x]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Variables]
@@ -29,8 +29,8 @@
     [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [ICs]
@@ -38,19 +38,19 @@
     type = ScalarConstantIC
     variable = x
     value = 11
-  [../]
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = ((x*x)+(y*y))-(4*t)
-  [../]
+  []
 
   [exact_fn]
     type = ParsedFunction
     expression = t*((x*x)+(y*y))
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -58,25 +58,25 @@
     type = ConstantScalarAux
     variable = x
     value = 11
-  [../]
+  []
 []
 
 [Kernels]
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -85,7 +85,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -94,7 +94,7 @@
     variable = u
     function = exact_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
 []
 
@@ -112,7 +112,7 @@
 #    refine_fraction = 0.2
 #    coarsen_fraction = 0.3
 #    max_h_level = 4
-#  [../]
+#  []
 []
 
 [Outputs]

@@ -17,8 +17,8 @@
       outvalue = 0
       radius = 0.7
       int_width = 0.5
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -27,7 +27,7 @@
     prop = grad_c
     variable = c
     outputs = 'out'
-  [../]
+  []
 []
 
 [Problem]

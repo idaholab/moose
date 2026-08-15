@@ -14,7 +14,7 @@
   [block1]
     strain = SMALL #Small linearized strain, automatically set to XY coordinates
     add_variables = true #Add the variables from the displacement string in GlobalParams
-  [../]
+  []
 []
 
 [Materials]
@@ -22,10 +22,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [BCs]
@@ -34,26 +34,26 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.05
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

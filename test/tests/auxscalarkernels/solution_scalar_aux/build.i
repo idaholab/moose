@@ -8,28 +8,28 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [a]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
   [a_fn]
     type = ParsedFunction
     expression = '4 - t'
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -38,7 +38,7 @@
     variable = a
     function = a_fn
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [BCs]
@@ -47,13 +47,13 @@
     variable = u
     boundary = left
     value = 2
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [Executioner]

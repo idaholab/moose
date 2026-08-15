@@ -10,17 +10,17 @@
   [a_fn]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 []
 
 [AuxVariables]
   [v]
-  [../]
+  []
 
   [a]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -28,7 +28,7 @@
     type = FunctionScalarAux
     variable = a
     function = a_fn
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -37,19 +37,19 @@
     variable = v
     coupled = a
     lag = OLD
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

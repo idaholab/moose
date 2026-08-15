@@ -17,8 +17,8 @@
     [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -27,7 +27,7 @@
     coupled_variables  = 'eta'
     expression ='(eta-0.5)^2'
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]

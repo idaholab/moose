@@ -12,19 +12,19 @@
     bottom_left = '0 0.5 0'
     block_id = 100
     block_name = 'top'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,13 +33,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -48,13 +48,13 @@
     prop_names = combo
     block = 100
     prop_values = 12345
-  [../]
+  []
   [top]
     type = GenericConstantMaterial
     prop_names = combo
     block = 0
     prop_values = 99999
-  [../]
+  []
 []
 
 [UserObjects]
@@ -63,7 +63,7 @@
     expected_names = 'top 0'
     property_name = combo
     test_type = 'block'
-  [../]
+  []
 []
 
 [Executioner]

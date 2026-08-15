@@ -25,7 +25,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -33,26 +33,26 @@
     type = NodalExtremeValue
     variable = c
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [UserObjects]
   [arnold]
     type = Terminator
     expression = 'max_c < 0.5'
-  [../]
+  []
 []
 
 [Kernels]
   [cres]
     type = Diffusion
     variable = c
-  [../]
+  []
 
   [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [BCs]
@@ -61,7 +61,7 @@
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

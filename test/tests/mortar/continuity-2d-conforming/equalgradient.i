@@ -24,18 +24,18 @@
     order = FIRST
     family = LAGRANGE
     block = '1 2'
-  [../]
+  []
 
   [lmx]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
-  [../]
+  []
   [lmy]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
-  [../]
+  []
 []
 
 [ICs]
@@ -44,24 +44,24 @@
     variable = u
     block = 1
     function = y
-  [../]
+  []
   [block2]
     type = FunctionIC
     variable = u
     block = 2
     function = y-0.5
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Constraints]
@@ -74,7 +74,7 @@
     secondary_boundary = 101
     secondary_subdomain = 10001
     component = 0
-  [../]
+  []
   [cedy]
     type = EqualGradientConstraint
     secondary_variable = u
@@ -84,7 +84,7 @@
     secondary_boundary = 101
     secondary_subdomain = 10001
     component = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -92,19 +92,19 @@
     type = DiffusionFluxBC
     variable = u
     boundary = '2 4 100 101'
-  [../]
+  []
   [boundary]
     type = DirichletBC
     boundary = 1
     variable = u
     value = 0.0
-  [../]
+  []
   [top]
     type = FunctionDirichletBC
     boundary = 3
     variable = u
     function = 0.5-t
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -112,7 +112,7 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

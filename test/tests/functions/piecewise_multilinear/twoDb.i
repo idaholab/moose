@@ -17,20 +17,20 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [Kernels]
   [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
   [moving_disk_var]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -38,7 +38,7 @@
     type = FunctionAux
     variable = moving_disk_var
     function = moving_disk_fcn
-  [../]
+  []
 []
 
 
@@ -46,7 +46,7 @@
   [moving_disk_fcn]
     type = PiecewiseMultilinear
     data_file = twoD2.txt
-  [../]
+  []
 []
 
 

@@ -25,7 +25,7 @@ angle = 45
     ymin = -0.5
     ymax = 0.5
     ny = 10
-  [../]
+  []
 
 
   [rotate]
@@ -48,7 +48,7 @@ angle = 45
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 
   [rho_u]
     family = MONOMIAL

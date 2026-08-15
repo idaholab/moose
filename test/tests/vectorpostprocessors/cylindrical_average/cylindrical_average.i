@@ -18,12 +18,12 @@
 
 [Variables]
   [c]
-  [../]
+  []
 []
 
 [AuxVariables]
   [d]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -32,14 +32,14 @@
     variable = d
     function = set_d
     execute_on = initial
-  [../]
+  []
 []
 
 [Functions]
   [set_d]
     type = ParsedFunction
     expression = 'r := sqrt(x * x + y * y); r'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -51,7 +51,7 @@
     origin = '0 0 0'
     cylinder_axis = '0 0 1'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -23,13 +23,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -37,13 +37,13 @@
     type = Receiver
     default = 12345
     execute_on = 'timestep_end initial'
-  [../]
+  []
   [report_old]
     type = TestPostprocessor
     execute_on = 'timestep_end initial'
     test_type = report_old
     report_name = receiver
-  [../]
+  []
 []
 
 [Executioner]

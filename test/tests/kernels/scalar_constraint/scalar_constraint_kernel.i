@@ -14,63 +14,63 @@
   [exact_fn]
     type = ParsedFunction
     expression = 'x*x+y*y'
-  [../]
+  []
 
   [ffn]
     type = ParsedFunction
     expression = -4
-  [../]
+  []
 
   [bottom_bc_fn]
     type = ParsedFunction
     expression = -2*y
-  [../]
+  []
 
   [right_bc_fn]
     type = ParsedFunction
     expression =  2*x
-  [../]
+  []
 
   [top_bc_fn]
     type = ParsedFunction
     expression =  2*y
-  [../]
+  []
 
   [left_bc_fn]
     type = ParsedFunction
     expression = -2*x
-  [../]
+  []
 []
 
 [Variables]
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 
   [lambda]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ffnk]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 
   [sk_lm]
     type = ScalarLagrangeMultiplier
     variable = u
     lambda = lambda
-  [../]
+  []
 []
 
 [ScalarKernels]
@@ -79,7 +79,7 @@
     variable = lambda
     pp_name = pp
     value = 2.666666666666666
-  [../]
+  []
 []
 
 [BCs]
@@ -88,25 +88,25 @@
     variable = u
     boundary = 'bottom'
     function = bottom_bc_fn
-  [../]
+  []
   [right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = right_bc_fn
-  [../]
+  []
   [top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = top_bc_fn
-  [../]
+  []
   [left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -114,13 +114,13 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
-  [../]
+  []
   [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -128,7 +128,7 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

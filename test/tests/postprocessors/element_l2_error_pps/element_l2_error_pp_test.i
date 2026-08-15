@@ -29,7 +29,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -40,14 +40,14 @@
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '4'
-  [../]
+  []
 
   [u_func]
     type = ParsedFunction
     expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '4'
-  [../]
+  []
 []
 
 [Kernels]
@@ -56,13 +56,13 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_func
-  [../]
+  []
 []
 
 [BCs]
@@ -73,14 +73,14 @@
     variable = u
     boundary = '1'
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = '3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,7 +91,7 @@
     coarsen_fraction = 0.0
     max_h_level = 10
     steps = 4
-  [../]
+  []
 []
 
 # Postprocessor System
@@ -101,7 +101,7 @@
     variable = u
     function = u_func
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

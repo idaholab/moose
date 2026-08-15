@@ -34,11 +34,11 @@ t_transition = 2
   [u]
     family = SCALAR
     order = FIRST
-  [../]
+  []
   [v]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
@@ -46,42 +46,42 @@ t_transition = 2
     type = ScalarConstantIC
     variable = u
     value = ${u_initial}
-  [../]
+  []
   [v_ic]
     type = ScalarConstantIC
     variable = v
     value = ${v_initial}
-  [../]
+  []
 []
 
 [ScalarKernels]
   [u_time]
     type = ODETimeDerivative
     variable = u
-  [../]
+  []
   [u_src]
     type = ParsedODEKernel
     variable = u
     expression = '-${u_growth}'
-  [../]
+  []
 
   [v_time]
     type = ODETimeDerivative
     variable = v
     enable = false
-  [../]
+  []
   [v_src]
     type = ParsedODEKernel
     variable = v
     expression = '-${v_growth}'
     enable = false
-  [../]
+  []
   [v_constraint]
     type = ParsedODEKernel
     variable = v
     coupled_variables = 'u'
     expression = 'v - u'
-  [../]
+  []
 []
 
 [Controls]
@@ -91,7 +91,7 @@ t_transition = 2
     enable_objects = 'ScalarKernel::v_constraint'
     disable_objects = 'ScalarKernel::v_time ScalarKernel::v_src'
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Executioner]

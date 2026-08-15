@@ -126,7 +126,7 @@
     temperature = temperature
     ray_tracing_face_order = SECOND
     normalize_view_factor = false
-  [../]
+  []
 []
 
 [Postprocessors]

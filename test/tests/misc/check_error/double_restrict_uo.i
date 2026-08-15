@@ -7,22 +7,22 @@
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -31,25 +31,25 @@
     variable = u
     boundary = 6
     value = 0
-  [../]
+  []
   [right_u]
     type = NeumannBC
     variable = u
     boundary = 8
     value = 4
-  [../]
+  []
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 6
     value = 1
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 6
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -59,7 +59,7 @@
     variable = v
     block = 1   # Block restricted
     boundary = 1 # Boundary restricted
-  [../]
+  []
 []
 
 [Executioner]

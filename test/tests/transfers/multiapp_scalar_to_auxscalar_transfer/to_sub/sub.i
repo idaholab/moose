@@ -11,25 +11,25 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [b]
     family = SCALAR
     order = SIXTH
-  [../]
+  []
 []
 
 [Kernels]
   [diffusion]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

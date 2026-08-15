@@ -13,7 +13,7 @@
 #    dy = '1'
 #    iy = '10'
 #    subdomain_id = '1 2'
-#  [../]
+#  []
 #
 #  [interior_bc]
 #    type = SideSetsBetweenSubdomainsGenerator
@@ -21,7 +21,7 @@
 #    paired_block = 2
 #    new_boundary = 12
 #    input = cartesian
-#  [../]
+#  []
 #[]
 
 [Mesh]
@@ -35,7 +35,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,13 +59,13 @@
     type = BIDAux
     variable = id1
     boundary = 'top'
-  [../]
+  []
 
   [id2]
     type = BIDAux
     variable = id2
     boundary = '12'
-  [../]
+  []
 []
 
 

@@ -20,25 +20,25 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [restricted]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [unrestricted]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -47,13 +47,13 @@
     variable = restricted
     execute_on = timestep_end
     user_object = restricted
-  [../]
+  []
   [unrestricted]
     type = SpatialUserObjectAux
     variable = unrestricted
     execute_on = timestep_end
     user_object = unrestricted
-  [../]
+  []
 []
 
 [BCs]
@@ -62,25 +62,25 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [lu]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 8
-  [../]
+  []
   [ul]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 12
-  [../]
+  []
   [uu]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 16
-  [../]
+  []
 []
 
 [UserObjects]
@@ -91,14 +91,14 @@
     variable = u
     execute_on = linear
     block = 1
-  [../]
+  []
   [unrestricted]
     type = LayeredAverage
     direction = y
     num_layers = 4
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [Executioner]

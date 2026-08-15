@@ -15,33 +15,33 @@
       type = RandomIC
       min = -0.1
       max =  0.1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [c_dot]
     type = TimeDerivative
     variable = c
-  [../]
+  []
   [CHbulk]
     type = CHMath
     variable = c
-  [../]
+  []
   [CHint]
     type = CHInterface
     variable = c
     mob_name = M
     kappa_name = kappa_c
-  [../]
+  []
 []
 
 [BCs]
   [Periodic]
     [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -49,7 +49,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M   kappa_c'
     prop_values = '1.0 0.5'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -57,7 +57,7 @@
     type = SideIntegralVariablePostprocessor
     variable = c
     boundary = top
-  [../]
+  []
 []
 
 [Executioner]

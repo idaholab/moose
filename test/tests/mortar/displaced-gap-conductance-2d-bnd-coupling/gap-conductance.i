@@ -11,13 +11,13 @@
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
-  [../]
+  []
   [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -60,12 +60,12 @@
 [Variables]
   [T]
     block = '1 2'
-  [../]
+  []
   [lambda]
     block = '10'
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [BCs]
@@ -74,13 +74,13 @@
     variable = T
     boundary = '5'
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = T
     boundary = '8'
     value = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -88,7 +88,7 @@
     type = Diffusion
     variable = T
     block = '1 2'
-  [../]
+  []
 []
 
 [Debug]
@@ -107,7 +107,7 @@
     use_displaced_mesh = true
     auxkernel_variable = 'aux_var'
     correct_edge_dropping = true
-  [../]
+  []
 []
 
 [Materials]
@@ -124,7 +124,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

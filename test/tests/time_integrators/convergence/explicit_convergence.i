@@ -20,20 +20,20 @@
     [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   [exact_fn]
     type = ParsedFunction
     expression = t*t*t*((x*x)+(y*y))
-  [../]
+  []
 
   [forcing_fn]
     type = ParsedFunction
     expression = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,20 +42,20 @@
   [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = u
     implicit = false
-  [../]
+  []
 
   [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
     implicit = false
-  [../]
+  []
 []
 
 [BCs]
@@ -64,7 +64,7 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -72,7 +72,7 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -89,7 +89,7 @@
 
   [TimeIntegrator]
     type = Heun
-  [../]
+  []
 
    # For explicit methods, we use the LINEAR solve type.
    solve_type = 'LINEAR'

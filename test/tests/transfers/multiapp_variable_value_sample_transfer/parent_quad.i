@@ -7,21 +7,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [parent_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [func]
     type = ParsedFunction
     expression = x*y*t
-  [../]
+  []
 []
 
 [Kernels]
@@ -29,11 +29,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -41,7 +41,7 @@
     type = FunctionAux
     variable = parent_aux
     function = func
-  [../]
+  []
 []
 
 [BCs]
@@ -50,13 +50,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,7 +79,7 @@
     app_type = MooseTestApp
     positions = '0.05 0.05 0 0.95 0.05 0 0.05 0.95 0 0.95 0.95 0'
     input_files = quad_sub.i
-  [../]
+  []
 []
 
 [Transfers]
@@ -88,5 +88,5 @@
     to_multi_app = quad
     source_variable = parent_aux
     postprocessor = pp
-  [../]
+  []
 []

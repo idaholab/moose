@@ -10,7 +10,7 @@
   [fmg]
     type = FileMeshGenerator
     file = 2D_4blocks.e
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = fmg
@@ -20,7 +20,7 @@
     bonding_block_pairs = '1 2; 2 3; 3 4'
     merge_pd_interfacial_blocks = true
     construct_pd_sidesets = true
-  [../]
+  []
 []
 
 # This input file is intended to be run with the "--mesh-only" option so

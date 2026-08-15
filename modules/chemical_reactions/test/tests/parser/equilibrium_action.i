@@ -7,14 +7,14 @@
 
 [Variables]
   [a]
-  [../]
+  []
   [b]
-  [../]
+  []
 []
 
 [AuxVariables]
   [pressure]
-  [../]
+  []
 []
 
 [ICs]
@@ -27,7 +27,7 @@
     y2 = 1
     inside = 1.0e-2
     outside = 1.0e-10
-  [../]
+  []
   [b]
     type = BoundingBoxIC
     variable = b
@@ -37,12 +37,12 @@
     y2 = 1
     inside = 1.0e-2
     outside = 1.0e-10
-  [../]
+  []
   [pressure]
     type = FunctionIC
     variable = pressure
     function = 2-x
-  [../]
+  []
 []
 
 [ReactionNetwork]
@@ -52,36 +52,36 @@
                  (1.0)a + (1.0)b = pab -2'
     secondary_species = 'pa2 pab'
     pressure = pressure
-  [../]
+  []
 []
 
 [Kernels]
   [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
+  []
   [a_diff]
     type = PrimaryDiffusion
     variable = a
-  [../]
+  []
   [a_conv]
     type = PrimaryConvection
     variable = a
     p = pressure
-  [../]
+  []
   [b_ie]
     type = PrimaryTimeDerivative
     variable = b
-  [../]
+  []
   [b_diff]
     type = PrimaryDiffusion
     variable = b
-  [../]
+  []
   [b_conv]
     type = PrimaryConvection
     variable = b
     p = pressure
-  [../]
+  []
 []
 
 [BCs]
@@ -90,23 +90,23 @@
     variable = a
     boundary = left
     value = 1.0e-2
-  [../]
+  []
   [a_right]
     type = ChemicalOutFlowBC
     variable = a
     boundary = right
-  [../]
+  []
   [b_left]
     type = DirichletBC
     variable = b
     boundary = left
     value = 1.0e-2
-  [../]
+  []
   [b_right]
     type = ChemicalOutFlowBC
     variable = b
     boundary = right
-  [../]
+  []
 []
 
 [Materials]
@@ -114,7 +114,7 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -136,5 +136,5 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

@@ -8,18 +8,18 @@
 
 [Variables]
   [not_u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [u]
     family = MONOMIAL
     order = FIRST
-  [../]
+  []
   [grad_u_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -27,7 +27,7 @@
     type = FunctionIC
     variable = u
     function = 'if(x>0.5,if(x<1.5,2*x,3),0)'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -37,7 +37,7 @@
     component = x
     gradient_variable = u
     execute_on = initial
-  [../]
+  []
 []
 
 [Problem]

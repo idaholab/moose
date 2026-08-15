@@ -5,7 +5,7 @@ diff=1.1
   [gen_mesh]
     type = FileMeshGenerator
     file = skewed.msh
-  [../]
+  []
 []
 
 
@@ -14,7 +14,7 @@ diff=1.1
     initial_condition = 1
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
-  [../]
+  []
 []
 
 [FVKernels]
@@ -69,7 +69,7 @@ diff=1.1
     variable = v
     function = exact
     outputs = 'console csv'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

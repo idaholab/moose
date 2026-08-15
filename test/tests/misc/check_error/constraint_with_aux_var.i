@@ -9,12 +9,12 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [v]
-  [../]
+  []
 []
 
 [Constraints]
@@ -24,7 +24,7 @@
     secondary = 2
     primary = 3
     primary_variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -33,14 +33,14 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

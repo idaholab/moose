@@ -139,7 +139,7 @@
     symbol_names = density
     symbol_values = 2.7e3 #Al kg/m3
     expression = '-t*t*density'
-  [../]
+  []
 []
 
 [Controls]
@@ -148,7 +148,7 @@
     parameter = 'Kernels/*/rate'
     function = 'freq2'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Executioner]

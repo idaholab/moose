@@ -30,19 +30,19 @@
                  0.5  1.001 -0.001
                  0.5  1.001  1.001
                  0.5 -0.001  1.001'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Constraints]
@@ -52,7 +52,7 @@
     jump = 0
     jump_flux = 0
     geometric_cut_userobject = 'square_planar_cut_uo'
-  [../]
+  []
 []
 
 [BCs]
@@ -62,14 +62,14 @@
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -96,5 +96,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

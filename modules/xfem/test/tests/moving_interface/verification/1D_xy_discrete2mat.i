@@ -64,19 +64,19 @@
     type = LevelSetCutUserObject
     level_set_var = phi
     heal_always = true
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [phi]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -84,17 +84,17 @@
     type = MatDiffusion
     variable = u
     diffusivity = 'diffusion_coefficient'
-  [../]
+  []
   [vol_heat_src]
     type = BodyForce
     variable = u
     function = src_func
-  [../]
+  []
   [mat_time_deriv]
     type = TestMatTimeDerivative
     variable = u
     mat_prop_value = rhoCp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -102,7 +102,7 @@
     type = FunctionAux
     variable = phi
     function = ls_func
-  [../]
+  []
 []
 
 [Constraints]
@@ -113,7 +113,7 @@
     jump_flux = jump_flux_func
     use_penalty = true
     alpha = 1e5
-  [../]
+  []
 []
 
 [Functions]
@@ -124,12 +124,12 @@
         if (phi>=0,
             10*(8-x),
             (7/(1-i))*((i-2)*x + (8-7*i)) )'
-  [../]
+  []
   [right_du_func]
     type = ParsedFunction
     expression = 'i:=(0.75-0.001*t);
         (2.0/(1-i))*(-5+5*i+i*t-2*t)'
-  [../]
+  []
   [exact_u_func]
     type = ParsedFunction
     expression = 'phi:=(0.75-x-0.001*t);
@@ -137,19 +137,19 @@
         if (phi>=0,
             605 - 5*x + t*(8-x),
             (1/(1-i))*((-5+5*i+i*t-2*t)*x + (605-605*i+8*t-7*t*i)) )'
-  [../]
+  []
   [jump_flux_func]
     type = ParsedFunction
     expression = 'i:=(0.75-0.001*t);
         k_1:=(20.0);
         k_2:=(2.0);
         k_1*(5+t) + (k_2/(1-i))*(-5+5*i+i*t-2*t)'
-  [../]
+  []
 
   [ls_func]
     type = ParsedFunction
     expression = '0.75 - x - 0.001*t'
-  [../]
+  []
 []
 
 [Materials]
@@ -157,12 +157,12 @@
     type = GenericConstantMaterial
     prop_names = 'A_rhoCp B_rhoCp'
     prop_values = '10 7'
-  [../]
+  []
   [therm_cond_prop]
     type = GenericConstantMaterial
     prop_names = 'A_diffusion_coefficient B_diffusion_coefficient'
     prop_values = '20.0 2.0'
-  [../]
+  []
 
   [combined_rhoCp]
     type = LevelSetBiMaterialReal
@@ -170,14 +170,14 @@
     levelset_negative_base = 'B'
     level_set_var = phi
     prop_name = rhoCp
-  [../]
+  []
   [combined_diffusion_coefficient]
     type = LevelSetBiMaterialReal
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
     level_set_var = phi
     prop_name = diffusion_coefficient
-  [../]
+  []
 []
 
 [BCs]
@@ -186,13 +186,13 @@
     variable = u
     boundary = 'left'
     function = exact_u_func
-  [../]
+  []
   [right_du]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = right_du_func
-  [../]
+  []
 []
 
 [ICs]
@@ -200,7 +200,7 @@
     type = ConstantIC
     value = 600
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -230,5 +230,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

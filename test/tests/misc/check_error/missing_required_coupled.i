@@ -14,19 +14,19 @@
   [bc_fn_v]
     type = ParsedFunction
     expression = (x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
   [v]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
@@ -34,17 +34,17 @@
   [td_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
   [diff_v]
     type = CoefDiffusion
     variable = v
     coef = 0.5
-  [../]
+  []
   [conv_v]
     type = CoupledConvection
     variable = v
     # Coupled parameter is missing for CoupledConvection
-  [../]
+  []
 []
 
 [BCs]
@@ -53,7 +53,7 @@
     variable = v
     boundary = 'top'
     function = bc_fn_v
-  [../]
+  []
 []
 
 [Executioner]

@@ -9,11 +9,11 @@
   [min]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [max]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -22,14 +22,14 @@
     variable = min
     method = min
     execute_on = initial
-  [../]
+  []
   [max]
     type = ElementLengthAux
     variable = max
     method = max
     execute_on = initial
-  [../]
-[../]
+  []
+[]
 
 [Problem]
   type = FEProblem

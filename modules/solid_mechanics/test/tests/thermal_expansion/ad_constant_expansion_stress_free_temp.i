@@ -27,41 +27,41 @@
 [Variables]
   [temp]
     initial_condition = 300.0
-  [../]
+  []
 []
 
 [AuxVariables]
   [eigenstrain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [eigenstrain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [eigenstrain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [total_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [total_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [temperature_load]
     type = ParsedFunction
     expression = t*(5000.0)+300.0
-  [../]
+  []
 []
 
 [Physics]
@@ -73,16 +73,16 @@
         add_variables = true
         eigenstrain_names = eigenstrain
         use_automatic_differentiation = true
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Kernels]
   [temp]
     type = Diffusion
     variable = temp
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -93,7 +93,7 @@
     index_i = 1
     index_j = 1
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [eigenstrain_xx]
     type = ADRankTwoAux
     rank_two_tensor = eigenstrain
@@ -101,7 +101,7 @@
     index_i = 0
     index_j = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [eigenstrain_zz]
     type = ADRankTwoAux
     rank_two_tensor = eigenstrain
@@ -109,7 +109,7 @@
     index_i = 2
     index_j = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [total_strain_yy]
     type = ADRankTwoAux
     rank_two_tensor = total_strain
@@ -117,7 +117,7 @@
     index_i = 1
     index_j = 1
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [total_strain_xx]
     type = ADRankTwoAux
     rank_two_tensor = total_strain
@@ -125,7 +125,7 @@
     index_i = 0
     index_j = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [total_strain_zz]
     type = ADRankTwoAux
     rank_two_tensor = total_strain
@@ -133,7 +133,7 @@
     index_i = 2
     index_j = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
@@ -142,25 +142,25 @@
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
   [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
   [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
   [temp]
     type = FunctionDirichletBC
     variable = temp
     function = temperature_load
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Materials]
@@ -168,24 +168,24 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
+  []
   [small_stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
   [thermal_expansion_strain]
     type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 200
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -214,35 +214,35 @@
     type = ElementAverageValue
     variable = eigenstrain_xx
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [eigenstrain_yy]
     type = ElementAverageValue
     variable = eigenstrain_yy
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [eigenstrain_zz]
     type = ElementAverageValue
     variable = eigenstrain_zz
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [total_strain_xx]
     type = ElementAverageValue
     variable = total_strain_xx
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [total_strain_yy]
     type = ElementAverageValue
     variable = total_strain_yy
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [total_strain_zz]
     type = ElementAverageValue
     variable = total_strain_zz
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [temperature]
     type = AverageNodalVariableValue
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

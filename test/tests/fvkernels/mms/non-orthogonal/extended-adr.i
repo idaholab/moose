@@ -12,7 +12,7 @@ diff=1.1
     nx = 2
     ny = 2
     elem_type = TRI3
-  [../]
+  []
 []
 
 [Variables]
@@ -23,7 +23,7 @@ diff=1.1
     initial_condition = 1
     type = MooseVariableFVReal
     face_interp_method = vertex-based
-  [../]
+  []
 []
 
 [FVKernels]
@@ -32,7 +32,7 @@ diff=1.1
     variable = v
     velocity = '${a} ${fparse 2*a} 0'
     advected_interp_method = 'average'
-  [../]
+  []
   [reaction]
     type = FVReaction
     variable = v
@@ -90,7 +90,7 @@ diff=1.1
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

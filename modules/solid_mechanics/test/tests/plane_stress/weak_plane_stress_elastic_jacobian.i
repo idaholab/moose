@@ -11,16 +11,16 @@
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
   [strain_zz]
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -35,17 +35,17 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

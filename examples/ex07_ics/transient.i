@@ -12,20 +12,20 @@
     [InitialCondition]
       type = ExampleIC
       coefficient = 2.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   [td]
     type = TimeDerivative
     variable = diffused
-  [../]
+  []
 
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [BCs]
@@ -34,14 +34,14 @@
     variable = diffused
     boundary = 'top'
     value = 2
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = diffused
     boundary = 'bottom'
     value = 8
-  [../]
+  []
 []
 
 [Executioner]

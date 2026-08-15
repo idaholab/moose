@@ -11,21 +11,21 @@
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
-  [../]
+  []
   [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
-  [../]
+  []
   [interface_again]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface
     primary_block = '1'
     paired_block = '0'
     new_boundary = 'primary1_interface'
-  [../]
+  []
 []
 
 [Variables]
@@ -33,23 +33,23 @@
     order = FIRST
     family = LAGRANGE
     block = '0'
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
     block = '1'
-  [../]
+  []
 []
 
 [AuxVariables]
   [primary_resid]
-  [../]
+  []
   [secondary_resid]
-  [../]
+  []
   [primary_jac]
-  [../]
+  []
   [secondary_jac]
-  [../]
+  []
 []
 
 [Kernels]
@@ -59,14 +59,14 @@
     D = 4
     block = 0
     save_in = 'primary_resid'
-  [../]
+  []
   [diff_v]
     type = CoeffParamDiffusion
     variable = v
     D = 2
     block = 1
     save_in = 'secondary_resid'
-  [../]
+  []
 []
 
 [InterfaceKernels]
@@ -81,7 +81,7 @@
     save_in = 'primary_resid secondary_resid'
     diag_save_in_var_side = 'm s'
     diag_save_in = 'primary_jac secondary_jac'
-  [../]
+  []
 []
 
 [BCs]
@@ -91,28 +91,28 @@
     boundary = 'left'
     value = 0
     save_in = 'primary_resid'
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
     value = 1
     save_in = 'secondary_resid'
-  [../]
+  []
   [middle]
     type = MatchedValueBC
     variable = v
     boundary = 'primary0_interface'
     v = u
     save_in = 'secondary_resid'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

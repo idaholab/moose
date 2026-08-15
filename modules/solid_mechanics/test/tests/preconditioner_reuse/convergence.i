@@ -160,5 +160,5 @@
   [csv]
     type = CSV
     file_base = base_case
-  [../]
+  []
 []

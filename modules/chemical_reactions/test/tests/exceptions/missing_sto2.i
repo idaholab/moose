@@ -7,26 +7,26 @@
 
 [Variables]
   [a]
-  [../]
+  []
   [b]
-  [../]
+  []
   [c]
-  [../]
+  []
 []
 
 [Kernels]
   [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
+  []
   [b_ie]
     type = PrimaryTimeDerivative
     variable = b
-  [../]
+  []
   [c_ie]
     type = PrimaryTimeDerivative
     variable = c
-  [../]
+  []
   [aeq]
     type = CoupledBEEquilibriumSub
     variable = a
@@ -36,7 +36,7 @@
     v = 'b c'
     sto_v = 1
     gamma_v = '2 2'
-  [../]
+  []
 []
 
 [Materials]
@@ -44,7 +44,7 @@
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.2
-  [../]
+  []
 []
 
 [Executioner]

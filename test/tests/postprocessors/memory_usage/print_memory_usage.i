@@ -7,18 +7,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -27,13 +27,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Adaptivity]
@@ -41,8 +41,8 @@
     [uni]
       type = UniformMarker
       mark = REFINE
-    [../]
-  [../]
+    []
+  []
 
   # this marker will tag every element for refinement, growing the problem
   # exponentially with each timestep
@@ -60,28 +60,28 @@
     # by default MemoryUsage reports the peak value for the current timestep
     # out of all samples that have been taken (at linear and non-linear iterations)
     execute_on = 'INITIAL TIMESTEP_END NONLINEAR LINEAR'
-  [../]
+  []
   [virtual]
     type = MemoryUsage
     mem_type = virtual_memory
     value_type = total
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
   [page_faults]
     type = MemoryUsage
     mem_type = page_faults
     value_type = total
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
   [DOFs]
     type = NumDOFs
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
   [walltime]
     type = PerfGraphData
     section_name = "Root"
     data_type = total
-  [../]
+  []
 []
 
 [Executioner]

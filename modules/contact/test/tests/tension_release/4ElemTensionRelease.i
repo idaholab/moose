@@ -12,7 +12,7 @@
     type = PiecewiseLinear
     x = '0 1      2 3'
     y = '0 0.0001 0 -.0001'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -29,7 +29,7 @@
     penalty = 1e6
     model = frictionless
     tangential_tolerance = 0.01
-  [../]
+  []
 []
 
 [BCs]
@@ -38,21 +38,21 @@
     variable = disp_x
     boundary = '1 4'
     value = 0
-  [../]
+  []
 
   [bottom_up]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = up
-  [../]
+  []
 
   [top]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -61,11 +61,11 @@
     block = '1 2'
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,7 +88,7 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]

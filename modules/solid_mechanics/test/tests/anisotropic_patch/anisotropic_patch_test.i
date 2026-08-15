@@ -35,53 +35,53 @@
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 1e-6
-  [../]
+  []
   [rampConstant2]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 2e-6
-  [../]
+  []
   [rampConstant3]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 3e-6
-  [../]
+  []
   [rampConstant4]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 4e-6
-  [../]
+  []
   [rampConstant6]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 6e-6
-  [../]
+  []
 [] # Functions
 
 [Variables]
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 [] # Variables
 
 [AuxVariables]
   [elastic_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 [] # AuxVariables
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -89,14 +89,14 @@
     strain = SMALL
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx vonmises_stress hydrostatic_stress firstinv_stress secondinv_stress thirdinv_stress'
-  [../]
+  []
 []
 
 [AuxKernels]
   [elastic_energy]
     type = ElasticEnergyAux
     variable = elastic_energy
-  [../]
+  []
 [] # AuxKernels
 
 [BCs]
@@ -105,152 +105,152 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [node1_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = rampConstant2
-  [../]
+  []
   [node1_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 1
     function = rampConstant3
-  [../]
+  []
 
   [node2_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 2
     function = rampConstant1
-  [../]
+  []
   [node2_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = rampConstant2
-  [../]
+  []
   [node2_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 2
     function = rampConstant6
-  [../]
+  []
 
   [node3_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 3
     function = rampConstant1
-  [../]
+  []
   [node3_y]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
   [node3_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 3
     function = rampConstant3
-  [../]
+  []
 
   [node4_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
   [node4_y]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
   [node4_z]
     type = DirichletBC
     variable = disp_z
     boundary = 4
     value = 0.0
-  [../]
+  []
 
   [node5_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 5
     function = rampConstant1
-  [../]
+  []
   [node5_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 5
     function = rampConstant4
-  [../]
+  []
   [node5_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 5
     function = rampConstant3
-  [../]
+  []
 
   [node6_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 6
     function = rampConstant2
-  [../]
+  []
   [node6_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 6
     function = rampConstant4
-  [../]
+  []
   [node6_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 6
     function = rampConstant6
-  [../]
+  []
 
   [node7_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 7
     function = rampConstant2
-  [../]
+  []
   [node7_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 7
     function = rampConstant2
-  [../]
+  []
   [node7_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 7
     function = rampConstant3
-  [../]
+  []
 
   [node8_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 8
     function = rampConstant1
-  [../]
+  []
   [node8_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 8
     function = rampConstant2
-  [../]
+  []
   [node8_z]
     type = DirichletBC
     variable = disp_z
     boundary = 8
     value = 0.0
-  [../]
+  []
 [] # BCs
 
 [Materials]
@@ -265,10 +265,10 @@
 #    The three euler angles do not matter
 #    youngs_modulus = 1e6
 #    poissons_ratio = 0.0
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 [] # Materials
 
 [Executioner]
@@ -288,5 +288,5 @@
   [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 [] # Outputs

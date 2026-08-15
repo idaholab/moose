@@ -20,7 +20,7 @@
   [SERD]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
@@ -29,7 +29,7 @@
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = -100
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -39,7 +39,7 @@
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy strain_zz'
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -48,7 +48,7 @@
     variable = SERD
     property = strain_energy_rate_density
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -57,19 +57,19 @@
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
   [Pressure]
     [top]
       boundary = 'top'
       function = rampConstantUp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -77,11 +77,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
     poissons_ratio = 0.0
-  [../]
+  []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'powerlawcrp'
-  [../]
+  []
   [powerlawcrp]
     type = PowerLawCreepStressUpdate
     coefficient = 3.125e-21 # 7.04e-17 #
@@ -89,11 +89,11 @@
     m_exponent = 0.0
     activation_energy = 0.0
     # max_inelastic_increment = 0.01
-  [../]
+  []
   [strain_energy_rate_density]
     type = StrainEnergyRateDensity
     inelastic_models = 'powerlawcrp'
-  [../]
+  []
 []
 
 [Executioner]
@@ -122,33 +122,33 @@
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 0
-  [../]
+  []
   [epyy]
     type = ElementalVariableValue
     variable = strain_yy
     elementid = 0
-  [../]
+  []
   [epzz]
     type = ElementalVariableValue
     variable = strain_zz
     elementid = 0
-  [../]
+  []
   [sigxx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
+  []
   [sigyy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
+  []
   [sigzz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
+  []
   [SERD]
     type = ElementAverageValue
     variable = SERD
-  [../]
+  []
 []
 
 [Outputs]

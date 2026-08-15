@@ -7,21 +7,21 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [flux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
   [bc_func]
     type = ParsedFunction
     expression = y+1
-  [../]
+  []
 []
 
 [Kernels]
@@ -29,11 +29,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -43,7 +43,7 @@
     coupled = u
     diffusivity = 0.1
     boundary = right
-  [../]
+  []
 []
 
 [BCs]
@@ -52,13 +52,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = bc_func
-  [../]
+  []
 []
 
 [Executioner]

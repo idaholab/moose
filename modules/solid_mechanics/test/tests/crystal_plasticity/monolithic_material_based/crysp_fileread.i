@@ -22,34 +22,34 @@
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [fp_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [rotout]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [e_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
   [gss1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [Functions]
   [tdisp]
     type = ParsedFunction
     expression = 0.01*t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -58,7 +58,7 @@
     incremental = true
     strain = finite
     block = 0
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -70,7 +70,7 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [fp_zz]
     type = RankTwoAux
     variable = fp_zz
@@ -79,7 +79,7 @@
     index_i = 2
     execute_on = 'initial timestep_end'
     block = 0
-  [../]
+  []
   [e_zz]
     type = RankTwoAux
     variable = e_zz
@@ -88,7 +88,7 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
   [gss1]
     type = MaterialStdVectorAux
     variable = gss1
@@ -96,7 +96,7 @@
     index = 0
     execute_on = 'initial timestep_end'
     block = 0
-  [../]
+  []
 []
 
 [BCs]
@@ -105,25 +105,25 @@
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
   [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
   [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
+  []
   [tdisp]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
@@ -137,13 +137,13 @@
     hprops = '1.0 541.5 60.8 109.8 2.5'
     nss = 12
     intvar_read_type = slip_sys_res_file
-  [../]
+  []
   [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -151,29 +151,29 @@
     type = ElementAverageValue
     variable = stress_zz
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [e_zz]
     type = ElementAverageValue
     variable = e_zz
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [gss1]
     type = ElementAverageValue
     variable = gss1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

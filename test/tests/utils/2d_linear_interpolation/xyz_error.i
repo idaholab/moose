@@ -11,7 +11,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -23,7 +23,7 @@
     y = '0 1 3'
     z = '0 0 0 0 1 3 0 5 7'
     axis = 0
-  [../]
+  []
 [] # End Functions
 
 [Kernels]
@@ -31,7 +31,7 @@
   [diffu]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -41,7 +41,7 @@
     variable = u
     boundary = '1'
     function = u
-  [../]
+  []
 []
 
 [Executioner]

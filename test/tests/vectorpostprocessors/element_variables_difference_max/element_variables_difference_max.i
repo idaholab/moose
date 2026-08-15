@@ -10,44 +10,44 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   [forcing_v]
     type = ParsedFunction
     expression = 'x * y * z'
-  [../]
+  []
 []
 
 [Kernels]
   [diffusion_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [time_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diffusion_v]
     type = Diffusion
     variable = v
-  [../]
+  []
   [forcing_v]
     type = BodyForce
     variable = v
     function = forcing_v
-  [../]
+  []
   [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
@@ -56,14 +56,14 @@
     variable = 'u'
     boundary = 'bottom'
     value = 1
-  [../]
+  []
 
   [top]
     type = DirichletBC
     variable = 'u'
     boundary = 'top'
     value = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -71,7 +71,7 @@
     type = ElementVariablesDifferenceMax
     compare_a = u
     compare_b = v
-  [../]
+  []
 []
 
 [Executioner]

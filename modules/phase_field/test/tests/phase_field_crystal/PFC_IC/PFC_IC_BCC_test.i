@@ -9,14 +9,14 @@
 
 [Variables]
   [rho]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = rho
-  [../]
+  []
 []
 
 [Problem]
@@ -45,6 +45,6 @@
     type = PFCFreezingIC
     min = .3
     max = .7
-  [../]
+  []
 []
 

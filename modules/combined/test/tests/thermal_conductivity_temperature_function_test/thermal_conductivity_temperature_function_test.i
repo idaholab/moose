@@ -44,19 +44,19 @@
     type = PiecewiseLinear
     x = '100 199 200'
     y = '1   1   2'
-  [../]
+  []
 
   [c_func]
     type = PiecewiseLinear
     x = '100    200'
     y = '0.116  0.116'
-  [../]
+  []
 
   [t_func]
     type = PiecewiseLinear
     x = '0   1   2'
     y = '100 100 200'
-  [../]
+  []
 [] # Functions
 
 [Variables]
@@ -65,7 +65,7 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
+  []
 
 [] # Variables
 
@@ -74,7 +74,7 @@
   [heat_r]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 
 
 [] # Kernels
@@ -86,14 +86,14 @@
     variable = temp
     boundary = 1000
     function = t_func
-  [../]
+  []
 
   [flux_in]
     type = NeumannBC
     variable = temp
     boundary = 100
     value = 10
-  [../]
+  []
 
 [] # BCs
 
@@ -105,13 +105,13 @@
     temp = temp
     thermal_conductivity_temperature_function = k_func
     specific_heat_temperature_function = c_func
-  [../]
+  []
 
   [density]
     type = Density
     block = 1
     density = 0.283
-  [../]
+  []
 
 [] # Materials
 

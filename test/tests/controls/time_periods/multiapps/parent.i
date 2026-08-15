@@ -7,7 +7,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
@@ -15,11 +15,11 @@
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -28,13 +28,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -58,7 +58,7 @@
     input_files = sub.i
     execute_on = 'initial timestep_end'
     output_in_position = true
-  [../]
+  []
 []
 
 [Controls]
@@ -68,5 +68,5 @@
     start_time = '0'
     end_time = '0.25'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []

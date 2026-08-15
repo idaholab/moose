@@ -8,21 +8,21 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [penetration]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -31,7 +31,7 @@
     variable = penetration
     boundary = 2
     paired_boundary = 3
-  [../]
+  []
 []
 
 [BCs]
@@ -40,25 +40,25 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [block1_right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
   [block2_left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
   [block2_right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

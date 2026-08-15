@@ -5,13 +5,13 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Postprocessors]
   [ndofs]
     type = NumDOFs
-  [../]
+  []
 []
 
 [Problem]

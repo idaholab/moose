@@ -17,7 +17,7 @@
 [Variables]
   [u]
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
@@ -25,7 +25,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = 'p'
-  [../]
+  []
 []
 
 [BCs]
@@ -34,13 +34,13 @@
     variable = u
     boundary = left
     value = 2
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [Materials]
@@ -54,7 +54,7 @@
     output_properties = 'f f_prime p'
     constant = 3
     compute = false # make this material "discrete"
-  [../]
+  []
 
   [newton]
     type = NewtonMaterial
@@ -64,7 +64,7 @@
     f_prime_name = 'f_prime'
     p_name = 'p'
     material = 'recompute_props'
-  [../]
+  []
 
 
   [left]
@@ -73,7 +73,7 @@
     prop_values = '1 0.5     1.2345'
     block = 10
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

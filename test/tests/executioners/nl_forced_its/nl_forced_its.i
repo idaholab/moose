@@ -8,7 +8,7 @@
 [Variables]
   [u]
     type = MooseVariableFVReal
-  [../]
+  []
 []
 
 [FVKernels]
@@ -16,7 +16,7 @@
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
   [force]
     type = FVCoupledForce
     v = v
@@ -39,13 +39,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = FVDirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,14 +10,14 @@
     [InitialCondition]
       type = FunctionIC
       function = sin(10*x+y)
-    [../]
-  [../]
+    []
+  []
   [t]
     [InitialCondition]
       type = FunctionIC
       function = sin(13*y+x)
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -25,19 +25,19 @@
     type = WrongJacobianDiffusion
     variable = s
     coupled = t
-  [../]
+  []
   [difft]
     type = WrongJacobianDiffusion
     variable = t
     coupled = s
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -27,15 +27,15 @@
       type = RandomIC
       min = 0
       max = 0.1
-    [../]
-  [../]
+    []
+  []
   [eta2]
     [InitialCondition]
       type = RandomIC
       min = 0
       max = 0.1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -43,7 +43,7 @@
     add_variables = true
     generate_output = 'stress_xx stress_yy'
     eigenstrain_names = 'eigenstrain1 eigenstrain2'
-  [../]
+  []
 []
 
 [Kernels]
@@ -52,32 +52,32 @@
     variable = eta1
     coupled_variables = 'eta2'
     f_name = F
-  [../]
+  []
   [eta_bulk2]
     type = AllenCahn
     variable = eta2
     coupled_variables = 'eta1'
     f_name = F
-  [../]
+  []
   [eta_interface1]
     type = ACInterface
     variable = eta1
     kappa_name = kappa_eta
-  [../]
+  []
   [eta_interface2]
     type = ACInterface
     variable = eta2
     kappa_name = kappa_eta
-  [../]
+  []
 
   [deta1dt]
     type = TimeDerivative
     variable = eta1
-  [../]
+  []
   [deta2dt]
     type = TimeDerivative
     variable = eta2
-  [../]
+  []
 []
 
 [Materials]
@@ -85,7 +85,7 @@
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1 1'
-  [../]
+  []
 
   [chemical_free_energy]
     type = DerivativeParsedMaterial
@@ -96,17 +96,17 @@
     expression = 'A2/2*(eta1^2+eta2^2) + A3/3*(eta1^3+eta2^3) + A4/4*(eta1^2+eta2^2)^2'
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
 
   [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '700 300 300 700 300 700 300 300 300'
     fill_method = symmetric9
-  [../]
+  []
 
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 
   [var_dependence1]
     type = DerivativeParsedMaterial
@@ -115,7 +115,7 @@
     expression = eta1
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
   [var_dependence2]
     type = DerivativeParsedMaterial
     property_name = var_dep2
@@ -123,7 +123,7 @@
     expression = eta2
     enable_jit = true
     derivative_order = 2
-  [../]
+  []
 
   [eigenstrain1]
     type = ComputeVariableEigenstrain
@@ -131,7 +131,7 @@
     prefactor = var_dep1
     args = 'eta1'
     eigenstrain_name = eigenstrain1
-  [../]
+  []
 
   [eigenstrain2]
     type = ComputeVariableEigenstrain
@@ -139,14 +139,14 @@
     prefactor = var_dep2
     args = 'eta2'
     eigenstrain_name = eigenstrain2
-  [../]
+  []
 
   [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
     coupled_variables = 'eta1 eta2'
     derivative_order = 2
-  [../]
+  []
 
   [totol_free_energy]
     type = DerivativeSumMaterial
@@ -154,7 +154,7 @@
     sum_materials = 'Fc Fe'
     coupled_variables = 'eta1 eta2'
     derivative_order = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -163,13 +163,13 @@
     variable = disp_y
     boundary = 'top bottom left right'
     value = 0
-  [../]
+  []
   [all_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'top bottom left right'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -177,7 +177,7 @@
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -204,7 +204,7 @@
     growth_factor = 1.1
     cutback_factor = 0.75
     dt = 0.3
-  [../]
+  []
 []
 
 [Outputs]

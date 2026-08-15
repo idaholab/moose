@@ -6,19 +6,19 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [u_dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
   [u_source]
     type = BodyForce
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [BCs]
@@ -27,7 +27,7 @@
     boundary = left
     variable = u
     value = 0.0
-  [../]
+  []
 []
 
 [Dampers]
@@ -37,7 +37,7 @@
     max_value = 1.5
     min_value = -1.5
     min_damping = 0.001
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,8 +49,8 @@
   [u_avg]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
   [dt]
     type = TimestepSize
-  [../]
+  []
 []

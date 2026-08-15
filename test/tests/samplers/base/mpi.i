@@ -7,14 +7,14 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Samplers]
   [sample]
     type = TestSampler
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -22,7 +22,7 @@
     type = SamplerTester
     sampler = sample
     test_type = MPI
-  [../]
+  []
 []
 
 [Executioner]

@@ -9,29 +9,29 @@
 
 [AuxVariables]
   [penetration]
-  [../]
+  []
   [inc_slip_x]
-  [../]
+  []
   [inc_slip_y]
-  [../]
+  []
   [accum_slip_x]
-  [../]
+  []
   [accum_slip_y]
-  [../]
+  []
 []
 
 [Functions]
   [vertical_movement]
     type = ParsedFunction
     expression = -t
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     strain = FINITE
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -41,32 +41,32 @@
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
+  []
   [zeroslip_y]
     type = ConstantAux
     variable = inc_slip_y
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
+  []
   [accum_slip_x]
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
-  [../]
+  []
   [accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
-  [../]
+  []
   [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -75,26 +75,26 @@
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
   [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     #Initial gap is 0.01
     value = -0.01
-  [../]
+  []
   [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
@@ -103,17 +103,17 @@
     block = '1'
     youngs_modulus = 1e7
     poissons_ratio = 0.3
-  [../]
+  []
   [right]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -139,18 +139,18 @@
   [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]
   [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
   [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Contact]
@@ -159,5 +159,5 @@
     secondary = 3
     model = glued
     penalty = 1e+6
-  [../]
+  []
 []

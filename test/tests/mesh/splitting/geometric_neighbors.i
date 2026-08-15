@@ -14,18 +14,18 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [AuxVariables]
   [ghosted_elements]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [proc]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -35,12 +35,12 @@
     element_user_object = ghost_uo
     field_name = "ghosted"
     execute_on = initial
-  [../]
+  []
   [proc]
     type = ProcessorIDAux
     variable = proc
     execute_on = initial
-  [../]
+  []
 []
 
 [UserObjects]
@@ -48,13 +48,13 @@
     type = ElemSideNeighborLayersGeomTester
     execute_on = initial
     element_side_neighbor_layers = 2
-  [../]
+  []
 []
 
 [Postprocessors]
   [num_elems]
     type = NumElements
-  [../]
+  []
 []
 
 [Executioner]

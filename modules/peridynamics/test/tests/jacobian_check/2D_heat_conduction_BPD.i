@@ -7,17 +7,17 @@
     dim = 2
     nx = 4
     ny = 4
-  [../]
+  []
   [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
   [temp]
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -25,14 +25,14 @@
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
   [HeatConduction]
     type = HeatConductionBPD
     variable = temp
-  [../]
+  []
 []
 
 [Materials]
@@ -40,7 +40,7 @@
     type = ThermalConstantHorizonMaterialBPD
     temperature = temp
     thermal_conductivity = 1.0
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -49,7 +49,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'
     petsc_options_value = 'bcgs bjacobi test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -13,7 +13,7 @@
     type = SMP
     full = true
     solve_type = Newton
-  [../]
+  []
 []
 
 [Executioner]
@@ -34,7 +34,7 @@
   console = true
   [out]
     type = Exodus
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -42,12 +42,12 @@
     # Velocity in radial (r) direction
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
   [vel_y]
     # Velocity in axial (z) direction
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -73,7 +73,7 @@
   [p]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [BCs]
@@ -83,34 +83,34 @@
     boundary = top_right
     value = 0
     variable = p
-  [../]
+  []
   [velocity_out]
     type = INSADMomentumNoBCBC
     boundary = top
     variable = velocity
     pressure = p
-  [../]
+  []
   [velocity_in]
     type = VectorFunctionDirichletBC
     boundary = bottom
     variable = velocity
     function_x = 0
     function_y = 'inlet_func'
-  [../]
+  []
   [wall]
     type = VectorFunctionDirichletBC
     boundary = 'right'
     variable = velocity
     function_x = 0
     function_y = 0
-  [../]
+  []
   [axis]
     type = ADVectorFunctionDirichletBC
     boundary = 'left'
     variable = velocity
     set_y_comp = false
     function_x = 0
-  [../]
+  []
 []
 
 
@@ -118,28 +118,28 @@
   [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
 
   [momentum_time]
     type = INSADMomentumTimeDerivative
     variable = velocity
-  [../]
+  []
 
   [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
-  [../]
+  []
 
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
   [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     pressure = p
-  [../]
+  []
 []
 
 [Materials]
@@ -147,7 +147,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
   [ins_mat]
     type = INSADMaterial
     velocity = velocity
@@ -159,7 +159,7 @@
   [inlet_func]
     type = ParsedFunction
     expression = '-4 * x^2 + 1'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -169,12 +169,12 @@
     vel_y = vel_y
     boundary = 'bottom'
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
   [flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'top'
     outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+  []
 []

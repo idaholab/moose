@@ -5,7 +5,7 @@
 
 [AuxVariables]
   [v]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -13,14 +13,14 @@
     type = FunctionSeriesToAux
     function = const
     variable = v
-  [../]
+  []
 []
 
 [Functions]
   [const]
     type = ConstantFunction
     value = -1
-  [../]
+  []
 []
 
 [Executioner]

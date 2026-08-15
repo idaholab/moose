@@ -5,7 +5,7 @@
     dx = '1.0 1.0'
     ix = '1 1'
     subdomain_id = '0 1'
-  [../]
+  []
 []
 
 [Adaptivity]
@@ -15,7 +15,7 @@
     type = UniformMarker
     mark = refine
     block = 0
-  [../]
+  []
 []
 
 [Problem]
@@ -30,7 +30,7 @@
   [max_level]
     type = ElementMaxLevelPostProcessor
     level = 'h'
-  [../]
+  []
 []
 
 [Outputs]

@@ -37,7 +37,7 @@
     incremental = true
     strain = finite
     generate_output = 'max_principal_stress mid_principal_stress min_principal_stress stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
-  [../]
+  []
 []
 
 [BCs]
@@ -46,26 +46,26 @@
     variable = disp_x
     boundary = 'front back'
     function = '0.25E-6*x'
-  [../]
+  []
   [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
+  []
   [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0.25E-6*z'
-  [../]
+  []
 []
 
 [AuxVariables]
   [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -74,7 +74,7 @@
     property = plastic_yield_function
     index = 0
     variable = yield_fcn
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -82,44 +82,44 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
+  []
   [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
+  []
   [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
+  []
   [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
+  []
   [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
+  []
   [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
+  []
   [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
 []
 
 [UserObjects]
   [ts]
     type = SolidMechanicsHardeningConstant
     value = 1
-  [../]
+  []
 []
 
 [Materials]
@@ -128,18 +128,18 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 2.0E6'
-  [../]
+  []
   [tensile]
     type = TensileStressUpdate
     tensile_strength = ts
     smoothing_tol = 0.1
     yield_function_tol = 1.0E-9
-  [../]
+  []
   [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = tensile
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 
@@ -155,5 +155,5 @@
   exodus = false
   [csv]
     type = CSV
-    [../]
+    []
 []

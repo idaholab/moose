@@ -16,8 +16,8 @@
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
+    []
+  []
   [d]
     [InitialCondition]
       type = SmoothCircleIC
@@ -27,8 +27,8 @@
       int_width = 3
       invalue = 2
       outvalue = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -37,22 +37,22 @@
     variable = c
     diffusivity = Dc
     args = d
-  [../]
+  []
   [ctime]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 
   [dres]
     type = MatDiffusion
     variable = d
     diffusivity = Dd
     args = c
-  [../]
+  []
   [dtime]
     type = TimeDerivative
     variable = d
-  [../]
+  []
 []
 
 [Materials]
@@ -62,21 +62,21 @@
     expression = '0.01+c^2+d'
     coupled_variables = 'c d'
     derivative_order = 1
-  [../]
+  []
   [Dd]
     type = DerivativeParsedMaterial
     property_name = Dd
     expression = 'd^2+c+1.5'
     coupled_variables = 'c d'
     derivative_order = 1
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

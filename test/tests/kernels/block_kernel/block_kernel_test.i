@@ -8,14 +8,14 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 1.0
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [body_force]
     type = BodyForce
@@ -23,12 +23,12 @@
     block = 1
     value = 10
     function = 'x+y'
-  [../]
+  []
 
   [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -37,7 +37,7 @@
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

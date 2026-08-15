@@ -13,12 +13,12 @@
 
 [Variables]
   [u]
-  [../]
+  []
 
   [a]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
@@ -26,13 +26,13 @@
     type = ScalarUOIC
     variable = a
     user_object = scalar_uo
-  [../]
+  []
 []
 
 [UserObjects]
   [scalar_uo]
     type = MTUserObject
-  [../]
+  []
 []
 
 [Executioner]

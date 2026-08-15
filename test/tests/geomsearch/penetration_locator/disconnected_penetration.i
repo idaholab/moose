@@ -27,14 +27,14 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [penetration]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,7 +42,7 @@
     type = MassMatrix
     variable = u
     matrix_tags = 'system'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -52,7 +52,7 @@
     boundary = 2
     paired_boundary = 3
     search_method = all_proximate_sides
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,14 +6,14 @@
   [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -22,7 +22,7 @@
     variable = diffused
     value = 1.0
     point = '-2.1 -5.08 0.7'
-  [../]
+  []
 []
 
 [BCs]
@@ -31,14 +31,14 @@
     variable = diffused
     boundary = 'right'
     value = 0
-  [../]
+  []
 
   [left]
     type = DirichletBC
     variable = diffused
     boundary = 'left'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

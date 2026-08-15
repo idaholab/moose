@@ -24,8 +24,8 @@
       top_right = '0.6 0.6 0'
       inside = refine
       outside = do_nothing
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

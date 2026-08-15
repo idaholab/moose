@@ -21,8 +21,8 @@
   [diffused]
      [InitialCondition]
       type = RandomIC
-     [../]
-  [../]
+     []
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic/All]
@@ -35,7 +35,7 @@
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [Materials]
@@ -44,10 +44,10 @@
     fill_method = symmetric9
     #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
     C_ijkl ='1.0e6  0.0   0.0 1.0e6  0.0  1.0e6 0.5e6 0.5e6 0.5e6'
-  [../]
+  []
   [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [BCs]
@@ -56,37 +56,37 @@
     variable = diffused
     boundary = '1'
     value = 1
-  [../]
+  []
   [top]
     type = DirichletBC
     variable = diffused
     boundary = '2'
     value = 0
-  [../]
+  []
   [disp_x_BC]
     type = DirichletBC
     variable = disp_x
     boundary = '0 2'
     value = 0.5
-  [../]
+  []
   [disp_x_BC2]
     type = DirichletBC
     variable = disp_x
     boundary = '1 3'
     value = 0.01
-  [../]
+  []
   [disp_y_BC]
     type = DirichletBC
     variable = disp_y
     boundary = '0 2'
     value = 0.8
-  [../]
+  []
   [disp_y_BC2]
     type = DirichletBC
     variable = disp_y
     boundary = '1 3'
     value = 0.02
-  [../]
+  []
 []
 
 [Executioner]

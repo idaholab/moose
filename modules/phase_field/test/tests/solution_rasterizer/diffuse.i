@@ -16,7 +16,7 @@
   [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
@@ -30,7 +30,7 @@
     invalue = 1.0
     outvalue = 0.0
     int_width = 1.0
-  [../]
+  []
 []
 
 [Executioner]

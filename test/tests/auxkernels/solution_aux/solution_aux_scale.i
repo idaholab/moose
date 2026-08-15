@@ -15,21 +15,21 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -38,7 +38,7 @@
     solution = xda_soln
     execute_on = initial
     variable = u_aux
-  [../]
+  []
 []
 
 [UserObjects]
@@ -49,7 +49,7 @@
     system_variables = u
     scale = '3 2 1'
     translation = '1 1 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -58,13 +58,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -17,7 +17,7 @@
     type = ElementsAlongPlane
     point = '0.525 0.525 0.0'
     normal = '1.0 1.0 0.0'
-  [../]
+  []
 []
 
 [Executioner]

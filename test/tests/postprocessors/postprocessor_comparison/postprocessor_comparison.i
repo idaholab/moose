@@ -15,14 +15,14 @@
     pp_names = ''
     pp_coefs = ''
     b = 1
-  [../]
+  []
   [pp_comparison]
     type = PostprocessorComparison
     value_a = pp_to_compare
     value_b = 2
     comparison_type = greater_than
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]

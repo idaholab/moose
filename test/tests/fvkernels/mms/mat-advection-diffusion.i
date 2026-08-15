@@ -12,7 +12,7 @@ a=1.1
     xmin = -0.6
     xmax = 0.6
     nx = 64
-  [../]
+  []
 []
 
 [Variables]
@@ -20,7 +20,7 @@ a=1.1
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
@@ -28,12 +28,12 @@ a=1.1
     type = FVMatAdvection
     variable = v
     vel = 'fv_velocity'
-  [../]
+  []
   [diffusion]
     type = FVDiffusion
     variable = v
     coeff = coeff
-  [../]
+  []
   [body_v]
     type = FVBodyForce
     variable = v
@@ -93,7 +93,7 @@ a=1.1
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

@@ -13,19 +13,19 @@
     [marker]
       type = UniformMarker
       mark = REFINE
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
   [phi]
-  [../]
+  []
 []
 
 [AuxVariables]
   [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [ICs]
@@ -42,7 +42,7 @@
     boundary = 'left'
     function = phi_exact
     variable = phi
-  [../]
+  []
 []
 
 [Functions]
@@ -51,18 +51,18 @@
     expression = 'a*sin(pi*x/b)*cos(pi*x)'
     symbol_names = 'a b'
     symbol_values = '2 12'
-  [../]
+  []
   [phi_mms]
     type = ParsedFunction
     expression = '-2*pi*a*sin(pi*x)*sin(pi*x/b) + 2*pi*a*cos(pi*x)*cos(pi*x/b)/b'
     symbol_names = 'a b'
     symbol_values = '2 12'
-  [../]
+  []
   [velocity_func]
     type = ParsedVectorFunction
     expression_x = '2'
     expression_y = '2'
-  [../]
+  []
 []
 
 [Kernels]
@@ -70,12 +70,12 @@
     type = LevelSetAdvection
     variable = phi
     velocity = velocity
-  [../]
+  []
   [phi_forcing]
     type = BodyForce
     variable = phi
     function = phi_mms
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -83,10 +83,10 @@
     type = ElementL2Error
     function = phi_exact
     variable = phi
-  [../]
+  []
   [h]
     type = AverageElementSize
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -98,7 +98,7 @@
     end_point = '12 0 0'
     num_points = 500
     sort_by = x
-  [../]
+  []
 []
 
 [Executioner]

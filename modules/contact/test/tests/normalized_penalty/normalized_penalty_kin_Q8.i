@@ -15,9 +15,9 @@
 
 [AuxVariables]
   [saved_x]
-  [../]
+  []
   [saved_y]
-  [../]
+  []
 []
 
 [Functions]
@@ -25,7 +25,7 @@
     type = PiecewiseLinear
     x = '0 1 2'
     y = '0 0.02 0'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -45,7 +45,7 @@
     penalty = 1e10
     normalize_penalty = true
     tangential_tolerance = 1e-3
-  [../]
+  []
 []
 
 [BCs]
@@ -54,21 +54,21 @@
     variable = disp_x
     boundary = 1
     function = left_x
-  [../]
+  []
 
   [y]
     type = DirichletBC
     variable = disp_y
     boundary = '1 2 3 4'
     value = 0.0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = disp_x
     boundary = '3 4'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -77,11 +77,11 @@
     block = '1 2 3 4 1000'
     youngs_modulus = 3e8
     poissons_ratio = 0.0
-  [../]
+  []
   [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2 3 4 1000'
-  [../]
+  []
 []
 
 [Executioner]

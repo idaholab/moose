@@ -14,7 +14,7 @@
   [u]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [DGKernels]
@@ -32,7 +32,7 @@
     type = Reaction
     variable = u
     extra_vector_tags = 'eigen'
-  [../]
+  []
 []
 
 [Executioner]
@@ -46,7 +46,7 @@
   [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

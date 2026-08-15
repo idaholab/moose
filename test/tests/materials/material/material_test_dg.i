@@ -12,8 +12,8 @@
     [InitialCondition]
       type = ConstantIC
       value = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
@@ -22,7 +22,7 @@
   [forcing_fn]
     type = ParsedFunction
     expression = (x*x*x)-6.0*x
-  [../]
+  []
 
   [exact_fn]
     type = ParsedGradFunction
@@ -30,7 +30,7 @@
     value = (x*x*x)
     grad_x = 3*x*x
     grad_y = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -40,18 +40,18 @@
     type = MatDiffusionTest
     variable = u
     prop_name = matp
-  [../]
+  []
 
   [abs]
     type = Reaction
     variable = u
-  [../]
+  []
 
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [DGKernels]
@@ -63,7 +63,7 @@
     sigma = 6
     epsilon = -1.0
     diff = matp
-  [../]
+  []
 []
 
 [BCs]
@@ -77,7 +77,7 @@
     prop_name = matp
     sigma = 6
     epsilon = -1.0
-  [../]
+  []
 []
 
 [Materials]
@@ -87,13 +87,13 @@
     type = MTMaterial
     block = 1
     value = 1
-  [../]
+  []
 
   [mat_2]
     type = MTMaterial
     block = 2
     value = 2
-  [../]
+  []
 []
 
 [Executioner]

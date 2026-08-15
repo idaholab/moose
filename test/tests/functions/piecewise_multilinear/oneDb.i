@@ -12,22 +12,22 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [Kernels]
   [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
   [linear1_var]
-  [../]
+  []
   [linear2_var]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -35,12 +35,12 @@
     type = FunctionAux
     variable = linear1_var
     function = linear1_fcn
-  [../]
+  []
   [linear2_AuxK]
     type = FunctionAux
     variable = linear2_var
     function = linear2_fcn
-  [../]
+  []
 []
 
 
@@ -49,21 +49,21 @@
   [linear1_fcn]
     type = PiecewiseMultilinear
     data_file = linear1.txt
-  [../]
+  []
   [linear1_answer]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 
 # This is a hat function
   [linear2_fcn]
     type = PiecewiseMultilinear
     data_file = linear2.txt
-  [../]
+  []
   [linear2_answer]
     type = ParsedFunction
     expression = min(x,1)+min(2-x,1)-1
-  [../]
+  []
 
 []
 
@@ -72,12 +72,12 @@
     type = NodalL2Error
     function = linear1_answer
     variable = linear1_var
-  [../]
+  []
   [linear2_pp]
     type = NodalL2Error
     function = linear2_answer
     variable = linear2_var
-  [../]
+  []
 []
 
 [Executioner]

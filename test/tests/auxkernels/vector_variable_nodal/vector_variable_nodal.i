@@ -10,20 +10,20 @@
   nx = 2
   ny = 2
   nz = 2
-[../]
+[]
 
 [Variables]
   [u]
     family = LAGRANGE_VEC
     order = first
-  [../]
+  []
 []
 
 [Kernels]
   [none]
     type = VectorDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -32,18 +32,18 @@
     variable = u
     boundary = left
     values = '0 0 0'
-  [../]
+  []
   [right]
     type = VectorDirichletBC
     variable = u
     boundary = right
     values = '1 2 3'
-  [../]
+  []
 []
 
 [AuxVariables]
   [u_mag]
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -52,7 +52,7 @@
     variable = u_mag # the auxvariable to compute
     vector_variable = u # vector variable to compute from
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

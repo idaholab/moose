@@ -10,19 +10,19 @@
     type = SubdomainPerElementGenerator
     element_ids   = '0 1 2 3'
     subdomain_ids = '1 2 3 4'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -31,13 +31,13 @@
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -45,7 +45,7 @@
     type = PointValue
     variable = u
     point = '0.371 .41 0'
-  [../]
+  []
 []
 
 [Executioner]

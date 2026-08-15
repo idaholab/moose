@@ -24,21 +24,21 @@
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = 1e4
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     incremental = true
     strain = FINITE
-  [../]
+  []
 []
 
 [BCs]
@@ -47,7 +47,7 @@
     variable = disp_x
     boundary = '1 2 3 4'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -56,12 +56,12 @@
     block = '1 3'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 3'
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,31 +79,31 @@
     boundary = 10
     component = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [intVol1]
     type = InternalVolume
     boundary = 2
     component = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [intVol1Again]
     type = InternalVolume
     boundary = 9
     component = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [intVol2]
     type = InternalVolume
     boundary = 11
     component = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
   [intVolTotal]
     type = InternalVolume
     boundary = 4
     component = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

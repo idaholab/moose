@@ -15,34 +15,34 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [ddt_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
   [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [ddt_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
   [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [DiracKernels]
@@ -52,7 +52,7 @@
     coupled_var = v
     scale_factor = 1000
     point = '0.2 0.3 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -61,28 +61,28 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 1
-  [../]
+  []
 
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -98,7 +98,7 @@
     # petsc_options = '-snes_test_display' # print out all the matrix entries
     # petsc_options_iname = '-snes_type'
     # petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]
@@ -118,7 +118,7 @@
     type = PointValue
     variable = u
     point = '0.2 0.3 0'
-  [../]
+  []
 []
 
 [Outputs]

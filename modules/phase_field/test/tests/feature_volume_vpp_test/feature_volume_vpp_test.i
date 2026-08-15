@@ -42,7 +42,7 @@
     threshold = 0.5
     outputs = none
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [VectorPostprocessors]
@@ -53,7 +53,7 @@
     # Turn on centroid output
     output_centroids = true
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [Kernels]

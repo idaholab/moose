@@ -10,7 +10,7 @@
     # Testing that we can load a solution from a different variable name
     initial_from_file_var = u
     initial_from_file_timestep = 2
-  [../]
+  []
 []
 
 [Kernels]
@@ -20,12 +20,12 @@
     type = BodyForce
     variable = u_new
     value = 10.0
-  [../]
+  []
 
   [ie]
     type = TimeDerivative
     variable = u_new
-  [../]
+  []
 []
 
 [BCs]
@@ -34,14 +34,14 @@
     variable = u_new
     boundary = 3
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
     variable = u_new
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

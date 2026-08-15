@@ -19,25 +19,25 @@
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
   [vel_x]
-  [../]
+  []
 
   [vel_y]
-  [../]
+  []
 
   [T]
     [InitialCondition]
       type = ConstantIC
       value = 1.0
-    [../]
-  [../]
+    []
+  []
 
   [p]
-  [../]
+  []
 []
 
 [Kernels]
@@ -48,13 +48,13 @@
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
 
   # x-momentum, time
   [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
+  []
 
   # x-momentum, space
   [x_momentum_space]
@@ -64,13 +64,13 @@
     v = vel_y
     pressure = p
     component = 0
-  [../]
+  []
 
   # y-momentum, time
   [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
+  []
 
   # y-momentum, space
   [y_momentum_space]
@@ -80,20 +80,20 @@
     v = vel_y
     pressure = p
     component = 1
-  [../]
+  []
 
  # temperature
  [temperature_time]
    type = INSTemperatureTimeDerivative
    variable = T
- [../]
+ []
 
  [temperature_space]
    type = INSTemperature
    variable = T
    u = vel_x
    v = vel_y
- [../]
+ []
 
   [malloc]
     type = MallocKernel
@@ -108,42 +108,42 @@
     variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
-  [../]
+  []
 
   [lid]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
     function = 'lid_function'
-  [../]
+  []
 
   [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
-  [../]
+  []
 
   [T_hot]
     type = DirichletBC
     variable = T
     boundary = 'bottom'
     value = 1
-  [../]
+  []
 
   [T_cold]
     type = DirichletBC
     variable = T
     boundary = 'top'
     value = 0
-  [../]
+  []
 
   [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -152,7 +152,7 @@
     block = 0
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  .01'
-  [../]
+  []
 []
 
 [Functions]
@@ -162,7 +162,7 @@
     # of the mesh spacing.
     type = ParsedFunction
     expression = '4*x*(1-x)'
-  [../]
+  []
 []
 
 [Executioner]

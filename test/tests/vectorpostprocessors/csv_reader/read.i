@@ -18,14 +18,14 @@
     vector = year
     gold = '1980 1980 2011 2013'
     rank = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
   [reader]
     type = CSVReaderVectorPostprocessor
     csv_file = example.csv
-  [../]
+  []
 []
 
 [Outputs]

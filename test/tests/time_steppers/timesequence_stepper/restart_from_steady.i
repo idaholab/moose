@@ -49,5 +49,5 @@
   [TimeStepper]
     type = TimeSequenceStepper
     time_sequence  = '0 1 2'
-  [../]
+  []
 []

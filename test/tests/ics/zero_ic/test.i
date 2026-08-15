@@ -14,21 +14,21 @@
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [ICs]
   [ic_u]
     type = ZeroIC
     variable = u
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -37,14 +37,14 @@
     variable = u
     boundary = 'left right top bottom front back'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
   [l2_norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -53,7 +53,7 @@
   [Quadrature]
     type = GAUSS
     order = FIRST
-  [../]
+  []
 []
 
 [Outputs]

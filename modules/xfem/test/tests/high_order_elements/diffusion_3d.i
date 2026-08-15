@@ -31,12 +31,12 @@
                   0.35 0.49 -0.001
                   0.35 0.49  0.201
                   0.35 1.01  0.201'
-  [../]
+  []
 []
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [Functions]
@@ -44,14 +44,14 @@
     type = PiecewiseLinear
     x = '0   2'
     y = '0  0.1'
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -61,14 +61,14 @@
     variable = u
     boundary = left
     function = u_left
-  [../]
+  []
 
   [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -95,5 +95,5 @@
   [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

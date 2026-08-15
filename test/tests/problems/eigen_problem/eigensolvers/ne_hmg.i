@@ -17,37 +17,37 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
   [rhs]
     type = CoefReaction
     variable = u
     coefficient = -1.0
     extra_vector_tags = 'eigen'
-  [../]
+  []
 
   [diffv]
     type = Diffusion
     variable = v
-  [../]
+  []
 
   [rhsv]
     type = CoefReaction
     variable = v
     coefficient = -1.0
     extra_vector_tags = 'eigen'
-  [../]
+  []
 []
 
 [BCs]
@@ -56,24 +56,24 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
   [eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 
   [homogeneousv]
     type = DirichletBC
     variable = v
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
   [eigenv]
     type = EigenDirichletBC
     variable = v
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Executioner]
@@ -89,7 +89,7 @@
   [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

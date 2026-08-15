@@ -15,11 +15,11 @@
   [u]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
   [v]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [DGKernels]
@@ -27,7 +27,7 @@
     type = DGCoupledDiffusion
     variable = u
     v = v
-  [../]
+  []
 []
 
 [Executioner]
@@ -39,7 +39,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]
@@ -52,11 +52,11 @@
     min = 0.1
     max = 0.9
     variable = u
-  [../]
+  []
   [v]
     type = RandomIC
     min = 0.1
     max = 0.9
     variable = v
-  [../]
+  []
 []

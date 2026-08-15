@@ -53,7 +53,7 @@
     T_infinity = 300.0
     heat_transfer_coefficient = 3.0
     heat_transfer_coefficient_dT = 0
-  [../]
+  []
   [bot_right]
     type = FunctionRadiativeBC
     variable = temp
@@ -62,7 +62,7 @@
     emissivity_function = '3/(5.670367e-8*4*300*300*300)'
     # Using previous default
     Tinfinity = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -70,7 +70,7 @@
     type = GenericConstantMaterial
     prop_names = 'density  thermal_conductivity specific_heat'
     prop_values = '1 10 100'
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -79,23 +79,23 @@
     variable = temp
     boundary = top_left
     execute_on = 'TIMESTEP_END initial'
-  [../]
+  []
   [bot_left_temp]
     type = SideAverageValue
     variable = temp
     boundary = bot_left
     execute_on = 'TIMESTEP_END initial'
-  [../]
+  []
   [top_right_temp]
     type = SideAverageValue
     variable = temp
     boundary = top_right
-  [../]
+  []
   [bot_right_temp]
     type = SideAverageValue
     variable = temp
     boundary = bot_right
-  [../]
+  []
 []
 
 [Executioner]

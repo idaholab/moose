@@ -11,10 +11,10 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [w]
     scaling = 1.0e3
-  [../]
+  []
 []
 
 [ICs]
@@ -27,12 +27,12 @@
     outvalue = 0.01
     int_width = 100.0
     variable = c
-  [../]
+  []
 []
 
 [AuxVariables]
   [T]
-  [../]
+  []
 []
 
 [Kernels]
@@ -42,12 +42,12 @@
     kappa_name = kappa
     w = w
     f_name = F
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [w_res_soret]
     type = SoretDiffusion
     variable = w
@@ -55,12 +55,12 @@
     T = T
     diff_name = D
     Q_name = Qstar
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -68,7 +68,7 @@
     type = FunctionAux
     variable = T
     function = 1000.0+0.025*x
-  [../]
+  []
 []
 
 [Materials]
@@ -83,20 +83,20 @@
     Em = 0.71 # in eV, from Balluffi1978 Table 2
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.708 # Total guess
-  [../]
+  []
   [free_energy]
     type = PolynomialFreeEnergy
     c = c
     outputs = exodus
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

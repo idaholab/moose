@@ -15,9 +15,9 @@
   [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [resid_z]
-  [../]
+  []
 []
 
 [Functions]
@@ -26,7 +26,7 @@
     x = '0. 1.'
     y = '0. 1'
     scale_factor = -68.95 #MPa
-  [../]
+  []
 []
 
 [DomainIntegral]
@@ -49,7 +49,7 @@
     add_variables = true
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -58,7 +58,7 @@
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -67,25 +67,25 @@
     variable = disp_z
     boundary = 6
     value = 0.0
-  [../]
+  []
   [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 12
     value = 0.0
-  [../]
+  []
   [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
   [Pressure]
     [Side1]
       boundary = 5
       function = rampConstantUp
-    [../]
-  [../]
+    []
+  []
 [] # BCs
 
 [Materials]
@@ -93,10 +93,10 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
     poissons_ratio = 0.3
-  [../]
+  []
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -127,18 +127,18 @@
 [Postprocessors]
   [_dt]
     type = TimestepSize
-  [../]
+  []
   [nl_its]
     type = NumNonlinearIterations
-  [../]
+  []
   [lin_its]
     type = NumLinearIterations
-  [../]
+  []
   [react_z]
     type = NodalSum
     variable = resid_z
     boundary = 5
-  [../]
+  []
 []
 
 [Outputs]

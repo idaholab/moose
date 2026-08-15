@@ -15,20 +15,20 @@
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
+  []
 []
 
 [ScalarKernels]
   [dn]
     type = ODETimeDerivative
     variable = n
-  [../]
+  []
   [ode1]
     type = ParsedODEKernel
     expression = '-n'
     variable = n
     # implicit = false
-  [../]
+  []
 []
 
 [Executioner]
@@ -48,7 +48,7 @@
     # type = ExplicitMidpoint
     # type = Heun
     # type = Ralston
-  [../]
+  []
   start_time = 0
   end_time = 1
   dt = 0.001
@@ -62,7 +62,7 @@
   [exact_solution]
     type = ParsedFunction
     expression = exp(t)
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -76,7 +76,7 @@
     function = exact_solution
     # final is not currently supported for Postprocessor execute_on...
     # execute_on = 'final'
-  [../]
+  []
 []
 
 [Outputs]

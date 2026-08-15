@@ -11,9 +11,9 @@ offset = 1e-2
 
 [Variables]
   [disp_x]
-  [../]
+  []
   [disp_y]
-  [../]
+  []
 []
 
 [ICs]
@@ -22,7 +22,7 @@ offset = 1e-2
     variable = disp_y
     value = ${fparse starting_point + offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -52,7 +52,7 @@ offset = 1e-2
     variable = disp_x
     primary_variable = disp_x
     component = x
-  [../]
+  []
   [disp_y]
     type = RANFSNormalMechanicalContact
     secondary = 10
@@ -60,7 +60,7 @@ offset = 1e-2
     variable = disp_y
     primary_variable = disp_y
     component = y
-  [../]
+  []
 []
 
 [BCs]
@@ -69,25 +69,25 @@ offset = 1e-2
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
+  []
   [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 40
     value = 0.0
-  [../]
+  []
   [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
-  [../]
+  []
   [leftx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
     function = '1e-2 * t'
-  [../]
+  []
 []
 
 [Executioner]
@@ -120,5 +120,5 @@ offset = 1e-2
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

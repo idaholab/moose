@@ -6,21 +6,21 @@
   [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 
   # Include our time derivative here
   [euler]
     type = ExampleTimeDerivative
     variable = diffused
     time_coefficient = 20.0
-  [../]
+  []
 []
 
 [BCs]
@@ -29,14 +29,14 @@
     variable = diffused
     boundary = 'bottom'
     value = 0
-  [../]
+  []
 
   [top_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'top'
     value = 1
-  [../]
+  []
 []
 
 # Transient (time-dependent) details for simulations go here:

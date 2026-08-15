@@ -6,37 +6,37 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   [distance]
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [conv]
     type = Convection
     variable = u
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [AuxKernels]
   [zero]
     type = ConstantAux
     variable = distance
-  [../]
+  []
   [distance]
     type = NearestNodeDistanceAux
     variable = distance
     boundary = 2
     paired_boundary = 3
-  [../]
+  []
 []
 
 [BCs]
@@ -45,25 +45,25 @@
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
   [block1_right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
   [block2_left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
   [block2_right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,8 +83,8 @@
     [uniform]
       type = UniformMarker
       mark = refine
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

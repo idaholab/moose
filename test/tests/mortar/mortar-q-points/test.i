@@ -8,13 +8,13 @@
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
-  [../]
+  []
   [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
-  [../]
+  []
   uniform_refine = 2
 []
 
@@ -25,7 +25,7 @@
 [Variables]
   [T]
     block = '1 2'
-  [../]
+  []
 []
 
 [Kernels]
@@ -33,12 +33,12 @@
     type = Diffusion
     variable = T
     block = '1 2'
-  [../]
+  []
   [reaction]
     type = Reaction
     variable = T
     block = '1 2'
-  [../]
+  []
 []
 
 [Constraints]
@@ -49,14 +49,14 @@
     primary_subdomain = 20
     secondary_subdomain = 10
     secondary_variable = T
-  [../]
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

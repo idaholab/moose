@@ -19,16 +19,16 @@
 
 [Variables]
   [c]
-  [../]
+  []
   [w]
-  [../]
+  []
 []
 
 [AuxVariables]
   [local_free_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
@@ -41,7 +41,7 @@
     invalue = 1.0
     outvalue = 0.1
     int_width = 30.0
-  [../]
+  []
 []
 
 [Kernels]
@@ -51,17 +51,17 @@
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
+  []
   [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
   [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -70,7 +70,7 @@
     variable = local_free_energy
     kappa_names = kappa_c
     interfacial_vars = c
-  [../]
+  []
 []
 
 [Materials]
@@ -78,7 +78,7 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1e-3 0.1'
-  [../]
+  []
   [free_energy]
     type = DerivativeParsedMaterial
     coupled_variables = c
@@ -86,21 +86,21 @@
     constant_expressions = '0.1          1.0e-2'
     expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     derivative_order = 2
-  [../]
+  []
 []
 
 [Postprocessors]
   [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_free_energy
-  [../]
+  []
 []
 
 [Preconditioning]
   [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

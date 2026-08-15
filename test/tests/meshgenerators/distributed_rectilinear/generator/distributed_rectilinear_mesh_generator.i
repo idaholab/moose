@@ -11,7 +11,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -42,7 +42,7 @@
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -52,7 +52,7 @@
     preset = false
     boundary = 'left'
     value = 0
-  [../]
+  []
 
   [right]
     type = DirichletBC
@@ -60,7 +60,7 @@
     preset = false
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

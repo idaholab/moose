@@ -7,7 +7,7 @@
   [top_bc]
     type = ParsedFunction
     expression = 'x'
-  [../]
+  []
 []
 
 [Variables]
@@ -16,7 +16,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
@@ -26,7 +26,7 @@
     tensor_coeff = '2 0 0
                     0 4 0
         0 0 0'
-  [../]
+  []
 []
 
 [BCs]
@@ -37,20 +37,20 @@
     variable = u
     boundary = '1 4'
     value = 1
-  [../]
+  []
 
   [top]
     type = FunctionNeumannBC
     variable = u
     boundary = 3
     function = top_bc
-  [../]
+  []
 
   [right]
     type = NeumannBC
     variable = u
     boundary = 2
-  [../]
+  []
 []
 
 [Executioner]

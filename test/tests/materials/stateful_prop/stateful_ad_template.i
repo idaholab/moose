@@ -5,7 +5,7 @@
 
 [Variables]
   [dummy]
-  [../]
+  []
 []
 
 [Kernels]
@@ -13,14 +13,14 @@
     type = ADMatDiffusion
     variable = dummy
     diffusivity = dummy_prop
-  [../]
+  []
 []
 
 [Materials]
   [matprop]
     type = ADTemplateStateful
     property_name = dummy_prop
-  [../]
+  []
 []
 
 [Executioner]

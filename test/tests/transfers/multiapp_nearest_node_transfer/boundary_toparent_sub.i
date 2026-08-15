@@ -10,14 +10,14 @@
   [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
@@ -26,13 +26,13 @@
     variable = u
     boundary = top
     value = 0.0
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1.0
-  [../]
+  []
 []
 
 [Executioner]

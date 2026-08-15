@@ -10,7 +10,7 @@
 
 [Variables]
   [u]
-  [../]
+  []
 []
 
 [ICs]
@@ -18,7 +18,7 @@
     type = ConstantIC
     value = 1.2345
     variable = u
-  [../]
+  []
 []
 
 [Materials]
@@ -27,7 +27,7 @@
     var = u
     declare_old = true
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]

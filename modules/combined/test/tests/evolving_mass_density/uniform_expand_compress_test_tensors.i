@@ -44,27 +44,27 @@
     x = '0.00 1.00  2.0   3.00'
     y = '0.00 0.25  0.0  -0.25'
     scale_factor = 1
-  [../]
+  []
 []
 
 [Variables]
   [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   [TensorMechanics]
-  [../]
+  []
 []
 
 [BCs]
@@ -73,19 +73,19 @@
     variable = disp_y
     boundary = 9
     value = 0
-  [../]
+  []
   [10_y]
     type = DirichletBC
     variable = disp_x
     boundary = 10
     value = 0
-  [../]
+  []
   [14_y]
     type = DirichletBC
     variable = disp_z
     boundary = 14
     value = 0
-  [../]
+  []
 
   [top]
     type = FunctionDirichletBC
@@ -93,21 +93,21 @@
     preset = false
     boundary = 11
     function = rampConstant2
-  [../]
+  []
   [front]
     type = FunctionDirichletBC
     variable = disp_z
     preset = false
     boundary = 13
     function = rampConstant2
-  [../]
+  []
   [side]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = 12
     function = rampConstant2
-  [../]
+  []
 []
 
 [Materials]
@@ -116,17 +116,17 @@
     block = '1 2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
   [small_strain]
     type = ComputeSmallStrain
     block = ' 1 2 3 4 5 6 7'
-  [../]
+  []
 
   [elastic_stress]
     type = ComputeLinearElasticStress
     block = '1 2 3 4 5 6 7'
-  [../]
+  []
 []
 
 [Executioner]
@@ -149,7 +149,7 @@
     type = Exodus
     elemental_as_nodal = true
     file_base = uniform_expand_compress_test_out
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -157,5 +157,5 @@
     type = Mass
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

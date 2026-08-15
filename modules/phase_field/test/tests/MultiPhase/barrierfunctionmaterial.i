@@ -14,7 +14,7 @@
 
 [Variables]
   [eta]
-  [../]
+  []
 []
 
 [ICs]
@@ -27,7 +27,7 @@
     invalue = 1
     outvalue = 0
     int_width = 1
-  [../]
+  []
 []
 
 [Kernels]
@@ -36,18 +36,18 @@
     variable = eta
     f_name = 0
     mob_name = 1
-  [../]
+  []
   [eta_interface]
     type = ACInterface
     variable = eta
     kappa_name = 1
     mob_name = 1
-  [../]
+  []
 
   [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [Materials]
@@ -56,7 +56,7 @@
     eta = eta
     g_order = HIGH
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

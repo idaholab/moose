@@ -7,9 +7,9 @@
 
 [Variables]
   [u]
-  [../]
+  []
   [v]
-  [../]
+  []
 []
 
 [Kernels]
@@ -17,12 +17,12 @@
     type = DiffMKernel
     variable = u
     mat_prop = diff1
-  [../]
+  []
   [diff2]
     type = DiffMKernel
     variable = v
     mat_prop = diff2
-  [../]
+  []
 []
 
 [BCs]
@@ -31,25 +31,25 @@
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
   [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
   [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 1
-  [../]
+  []
   [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Materials]
@@ -57,12 +57,12 @@
     type = GenericConstantMaterial
     prop_names  = 'diff1'
     prop_values = '2'
-  [../]
+  []
   [dm2]
     type = GenericConstantMaterial
     prop_names  = 'diff2'
     prop_values = '4'
-  [../]
+  []
 []
 
 [Executioner]

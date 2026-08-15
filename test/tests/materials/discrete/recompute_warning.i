@@ -11,14 +11,14 @@
     bottom_left = '0 0 0'
     top_right = '0.5 1 0'
     block_id = 10
-  [../]
+  []
 []
 
 
 [Variables]
   [u]
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
@@ -26,7 +26,7 @@
     type = MatDiffusionTest
     variable = u
     prop_name = 'p'
-  [../]
+  []
 []
 
 [BCs]
@@ -35,13 +35,13 @@
     variable = u
     boundary = left
     value = 2
-  [../]
+  []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [Materials]
@@ -52,7 +52,7 @@
     prop_values = '22 24'
     block = 0
     compute = true # the default, but should trigger a warning because newton is calling getMaterial on this
-  [../]
+  []
 
   [newton]
     type = NewtonMaterial
@@ -63,7 +63,7 @@
     p_name = 'p'
     material = recompute_props
     max_iterations = 0
-  [../]
+  []
 
 
   [left]
@@ -72,7 +72,7 @@
     prop_values = '1 0.5     1.2345'
     block = 10
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

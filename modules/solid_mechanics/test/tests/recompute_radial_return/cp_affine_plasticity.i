@@ -132,32 +132,32 @@
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
   [plastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
   [plastic_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 []
 
@@ -166,7 +166,7 @@
     add_variables = true
     strain = small
     incremental = true
-  [../]
+  []
 []
 
 
@@ -178,7 +178,7 @@
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
-  [../]
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -186,7 +186,7 @@
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
-  [../]
+  []
   [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -194,14 +194,14 @@
     index_i = 2
     index_j = 2
     execute_on = 'timestep_end'
-  [../]
+  []
   [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = vonmisesStress
     execute_on = 'timestep_end'
-  [../]
+  []
 
   [plastic_strain_xx]
     type = RankTwoAux
@@ -210,7 +210,7 @@
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
-  [../]
+  []
   [plastic_strain_yy]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
@@ -218,7 +218,7 @@
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
-  [../]
+  []
   [plastic_strain_zz]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
@@ -226,7 +226,7 @@
     index_i = 2
     index_j = 2
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [BCs]
@@ -274,7 +274,7 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 210666666666.666667
     poissons_ratio = 0.3333333333333333
-  [../]
+  []
 
 
   [creep]

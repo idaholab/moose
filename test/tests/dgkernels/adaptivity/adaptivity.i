@@ -20,20 +20,20 @@
     [InitialCondition]
       type = ConstantIC
       value = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   [forcing_fn]
     type = ParsedFunction
     expression = (x*x*x)-6.0*x
-  [../]
+  []
 
   [bc_fn]
     type = ParsedFunction
     expression = (x*x*x)
-  [../]
+  []
 []
 
 [Kernels]
@@ -41,16 +41,16 @@
     type = MatDiffusionTest
     variable = u
     prop_name = diffusivity
-  [../]
+  []
   [abs]
     type = Reaction
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [DGKernels]
@@ -60,7 +60,7 @@
     sigma = 6
     epsilon = -1.0
     diff = diffusivity
-  [../]
+  []
 []
 
 [BCs]
@@ -74,7 +74,7 @@
     prop_name = diffusivity
     sigma = 6
     epsilon = -1.0
-  [../]
+  []
 []
 
 [Materials]
@@ -83,12 +83,12 @@
     type = StatefulTest
     prop_names = 'diffusivity'
     prop_values = '1'
-  [../]
+  []
   [constant]
     type = GenericConstantMaterial
     prop_names = 'diffusivity'
     prop_values = '1'
-  [../]
+  []
 []
 
 [Executioner]
@@ -104,16 +104,16 @@
     [error]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
+    []
+  []
   [Markers]
     [marker]
       type = ErrorFractionMarker
       coarsen = 0.5
       indicator = error
       refine = 0.5
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

@@ -53,7 +53,7 @@
     # tensor values are column major-ordered
     tensor_functions = 'fcn_00 fcn_10 fcn_20 fcn_01 fcn_11 fcn_21 fcn_02 fcn_12 fcn_22'
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

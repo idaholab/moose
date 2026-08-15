@@ -10,9 +10,9 @@
   [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [pot]
-  [../]
+  []
 []
 
 [Kernels]
@@ -27,7 +27,7 @@
     denom_user_object = denom_user_object
     v = u
     Vb = 1
-  [../]
+  []
 []
 
 [UserObjects]
@@ -36,13 +36,13 @@
     u = u
     boundary = left
     execute_on = 'linear nonlinear'
-  [../]
+  []
   [denom_user_object]
     type = DenomShapeSideUserObject
     u = u
     boundary = left
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []
 
 [Problem]
@@ -55,7 +55,7 @@
   [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -72,9 +72,9 @@
   [u]
     type = RandomIC
     variable = u
-  [../]
+  []
   [pot]
     type = RandomIC
     variable = pot
-  [../]
+  []
 []
