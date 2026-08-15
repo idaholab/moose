@@ -1,40 +1,78 @@
 [Tests]
-    design = 'meshgenerators/CutMeshByLevelSetGenerator.md'
-    issues = '#29703 #31293'
-    [test]
-      requirement = "The system shall be able to "
-      [simple_hex_cut]
-        type = 'Exodiff'
-        input = 'simple_cut.i'
-        exodiff = 'simple_hex_cut_in.e'
-        cli_args = '--mesh-only simple_hex_cut_in.e'
-        mesh_mode = 'REPLICATED'
-        recover = false
-        detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned using the full conversion approach.'
-      []
-      [simple_hex_cut_transition]
-        type = 'Exodiff'
-        input = 'simple_cut.i'
-        exodiff = 'simple_hex_cut_transition_in.e'
-        cli_args = '--mesh-only simple_hex_cut_transition_in.e
-                    Mesh/lsc/generate_transition_layer=true
-                    Mesh/gmg/nx=6
-                    Mesh/gmg/ny=6
-                    Mesh/gmg/nz=6'
-        mesh_mode = 'REPLICATED'
-        recover = false
-        detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned using the transition layer approach.'
-      []
-      [with_xyzd]
-        type = 'CSVDiff'
-        input = 'cut_xyzd.i'
-        csvdiff = 'cut_xyzd_out.csv'
-        mesh_mode = 'REPLICATED'
-        recover = false
-        detail ='cut a 3D mesh to generate a raw level set mesh that can be used for 3D Delaunay mesh generation.'
-        valgrind = none # see #31360
-        capabilities = 'netgen'
-      []
+  design = 'meshgenerators/CutMeshByLevelSetGenerator.md'
+  issues = '#29703 #31293'
+  [test]
+    requirement = "The system shall be able to "
+    [simple_hex_cut]
+      type = 'Exodiff'
+      input = 'simple_cut.i'
+      exodiff = 'simple_hex_cut_in.e'
+      cli_args = '--mesh-only simple_hex_cut_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned using the full conversion approach.'
     []
-  # Does not need error tests as they have been covered by CutMeshByPlaneGenerator
+    [simple_hex_cut_transition]
+      type = 'Exodiff'
+      input = 'simple_cut.i'
+      exodiff = 'simple_hex_cut_transition_in.e'
+      cli_args = '--mesh-only simple_hex_cut_transition_in.e
+                  Mesh/lsc/generate_transition_layer=true
+                  Mesh/gmg/nx=6
+                  Mesh/gmg/ny=6
+                  Mesh/gmg/nz=6'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned using the transition layer approach.'
+    []
+    [with_xyzd]
+      type = 'CSVDiff'
+      input = 'cut_xyzd.i'
+      csvdiff = 'cut_xyzd_out.csv'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='cut a 3D mesh to generate a raw level set mesh that can be used for 3D Delaunay mesh generation.'
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
+    [plane_cut_poly]
+      type = 'Exodiff'
+      input = 'plane_cut_poly.i'
+      exodiff = 'plane_cut_poly_in.e'
+      cli_args = '--mesh-only plane_cut_poly_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'cut a 3D HEX8 mesh by a plane level set using C0POLYHEDRON elements at the interface, then convert the polyhedra to TET4 for output.'
+    []
+    [cylinder_cut_poly]
+      type = 'Exodiff'
+      input = 'cylinder_cut_poly.i'
+      exodiff = 'cylinder_cut_poly_in.e'
+      cli_args = '--mesh-only cylinder_cut_poly_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'cut a 3D HEX8 mesh by a cylindrical level set using C0POLYHEDRON elements at the interface, then convert the polyhedra to TET4 for output.'
+    []
+    [sphere_cut_poly]
+      type = 'Exodiff'
+      input = 'sphere_cut_poly.i'
+      exodiff = 'sphere_cut_poly_in.e'
+      cli_args = '--mesh-only sphere_cut_poly_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'cut a 3D HEX8 mesh by a spherical level set using C0POLYHEDRON elements at the interface (which exercises the cut-face triangulation path for non-planar cut polygons), then convert the polyhedra to TET4 for output.'
+    []
+  []
+  [error]
+    requirement = "The system shall report a clear error when a polyhedron cut produces a non-convex retained region in a single element, which the C0POLYHEDRON representation cannot hold,"
+    [non_convex_polyhedron]
+      type = 'RunException'
+      input = 'sphere_cut_poly_nonconvex_err.i'
+      cli_args = '--mesh-only sphere_cut_poly_nonconvex_err_in.e'
+      expect_err = 'produces a non-convex polyhedron after cutting'
+      mesh_mode = 'REPLICATED'
+      capabilities = 'method=dbg'
+      detail = 'when retaining the concave side of a curved level set leaves a non-convex retained region within a cell.'
+    []
+  []
 []
