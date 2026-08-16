@@ -61,7 +61,8 @@ class SchedulerOptions:
     """Whether or not to monitor Job memory usage."""
     monitor_job_gpu_memory: bool
     """Whether or not to monitor Job GPU memory usage."""
-
+    memory_tracking_interval: float
+    """Interval at which to poll for memory usage"""
     time_utility_path: Optional[str]
     """The path to the time utility found, if any."""
     time_utility_type: TimeUtilityType
@@ -276,6 +277,7 @@ class Scheduler(MooseObject):
             monitor_job_cpu=monitor_job_cpu,
             monitor_job_memory=monitor_job_memory,
             monitor_job_gpu_memory=monitor_job_gpu_memory,
+            memory_tracking_interval=self.options.memory_tracking_interval,
             time_utility_path=time_utility_path,
             time_utility_type=time_utility_type,
         )
