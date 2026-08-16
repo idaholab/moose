@@ -1,0 +1,141 @@
+[Tests]
+  design = 'TangentPredictor.md'
+  issues = '#32975'
+
+  [prediction]
+    type = CSVDiff
+    input = 'tangent_predictor_test.i'
+    csvdiff = 'tangent_predictor_test_out.csv'
+    min_parallel = 1
+    max_parallel = 1
+    requirement = 'The system shall predict transient finite-element solutions from an accepted tangent response to a tagged load increment.'
+  []
+  [prediction_parallel]
+    type = CSVDiff
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Outputs/file_base=tangent_predictor_parallel_out Outputs/hide=num_linear_iterations'
+    csvdiff = 'tangent_predictor_parallel_out.csv'
+    min_parallel = 4
+    max_parallel = 4
+    requirement = 'The system shall predict transient finite-element solutions from an accepted tangent response to a tagged load increment in parallel.'
+  []
+  [prediction_diagonal]
+    type = CSVDiff
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Executioner/Predictor/use_diagonal_approximation=true Outputs/file_base=tangent_predictor_diagonal_test_out'
+    csvdiff = 'tangent_predictor_diagonal_test_out.csv'
+    min_parallel = 1
+    max_parallel = 1
+    requirement = 'The system shall predict transient finite-element solutions from a diagonal approximation to an accepted tangent response.'
+  []
+  [prediction_diagonal_parallel]
+    type = CSVDiff
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Executioner/Predictor/use_diagonal_approximation=true Outputs/file_base=tangent_predictor_diagonal_parallel_out Outputs/hide=num_linear_iterations'
+    csvdiff = 'tangent_predictor_diagonal_parallel_out.csv'
+    min_parallel = 4
+    max_parallel = 4
+    requirement = 'The system shall predict transient finite-element solutions from a diagonal approximation to an accepted tangent response in parallel.'
+  []
+  [prediction_varying_dt]
+    type = CSVDiff
+    input = 'tangent_predictor_test.i'
+    # The large t=0.3 initial_residual is deliberate; later residuals decrease as the load saturates.
+    cli_args = "Executioner/TimeStepper/type=TimeSequenceStepper Executioner/TimeStepper/time_sequence='0 0.1 0.3 0.55 0.75' Functions/ramp/expression='1-exp(-10*t)' Outputs/file_base=tangent_predictor_varying_dt_out"
+    csvdiff = 'tangent_predictor_varying_dt_out.csv'
+    max_parallel = 1
+    requirement = 'The system shall apply tangent prediction approximately for a varying time step and nonlinear load history.'
+  []
+  [prediction_nonlinear]
+    type = CSVDiff
+    input = 'tangent_predictor_nonlinear.i'
+    csvdiff = 'tangent_predictor_nonlinear_out.csv'
+    max_parallel = 1
+    requirement = 'The system shall apply tangent prediction as an approximation when the tangent changes between nonlinear finite-element steps.'
+  []
+  [missing_tag]
+    type = RunException
+    input = 'tangent_predictor_missing_tag.i'
+    expect_err = "The load vector tag 'load_increment' does not exist"
+    requirement = 'The system shall report an input error if a tangent predictor load vector tag is not declared.'
+  []
+  [matrix_tag]
+    type = RunException
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Executioner/Predictor/load_vector_tag=system'
+    expect_err = "was declared as a matrix tag"
+    requirement = 'The system shall report an input error if a tangent predictor load vector tag names a matrix tag.'
+  []
+  [wrong_system_tag]
+    type = RunException
+    input = 'tangent_predictor_wrong_system.i'
+    expect_err = "is not associated with nonlinear system 'nl0'"
+    requirement = 'The system shall report an input error if a tangent predictor load vector tag is not associated with the predictor nonlinear system.'
+  []
+  [zero_linear_tolerance]
+    type = RunException
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Executioner/Predictor/linear_solve_tol=0'
+    expect_err = 'The predictor linear solve tolerance must be positive'
+    requirement = 'The system shall report an input error if a tangent predictor linear solve tolerance is zero.'
+  []
+  [zero_linear_iterations]
+    type = RunException
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Executioner/Predictor/linear_solve_max_its=0'
+    expect_err = 'The predictor linear solve maximum iteration count must be greater than zero'
+    requirement = 'The system shall report an input error if a tangent predictor linear solve maximum iteration count is zero.'
+  []
+  [solve_failure_warn]
+    type = CSVDiff
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Executioner/Predictor/error_on_solve_failure=false Executioner/Predictor/linear_solve_tol=1e-100 Executioner/Predictor/linear_solve_max_its=1 Outputs/file_base=tangent_predictor_solve_failure_warn_out'
+    csvdiff = 'tangent_predictor_solve_failure_warn_out.csv'
+    expect_out = 'TangentPredictor auxiliary linear solve failed; skipping prediction'
+    allow_warnings = true
+    max_parallel = 1
+    requirement = 'The system shall warn, skip tangent prediction, and continue when the auxiliary tangent solve fails and predictor solve errors are disabled.'
+  []
+  [diagonal_nonfinite]
+    type = CSVDiff
+    input = 'tangent_predictor_diagonal_failure.i'
+    cli_args = 'Executioner/Predictor/error_on_solve_failure=false Outputs/file_base=tangent_predictor_diagonal_nonfinite_out'
+    csvdiff = 'tangent_predictor_diagonal_nonfinite_out.csv'
+    expect_out = 'zero tangent diagonal entry; skipping prediction'
+    allow_warnings = true
+    max_parallel = 1
+    requirement = 'The system shall warn, skip diagonal tangent prediction, and continue when the diagonal approximation would produce a non-finite direction.'
+  []
+  [diagonal_nonfinite_error]
+    type = RunException
+    input = 'tangent_predictor_diagonal_failure.i'
+    cli_args = 'Outputs/csv=false'
+    expect_err = 'which would produce a non-finite direction'
+    requirement = 'The system shall report an error when diagonal tangent prediction produces a non-finite direction.'
+  []
+  [restart_pre]
+    type = RunApp
+    input = 'tangent_predictor_test.i'
+    cli_args = 'Executioner/num_steps=2 Outputs/checkpoint=true Outputs/file_base=tangent_predictor_restart'
+    recover = false
+    max_parallel = 1
+    requirement = 'The system shall write a checkpoint containing tangent predictor state.'
+  []
+  [restart]
+    type = CSVDiff
+    input = 'tangent_predictor_restart.i'
+    csvdiff = 'tangent_predictor_restart_out.csv'
+    prereq = restart_pre
+    recover = false
+    max_parallel = 1
+    requirement = 'The system shall restore tangent predictor state and apply prediction after restart.'
+  []
+  [skip_old_time]
+    type = CSVDiff
+    input = 'tangent_predictor_test.i'
+    cli_args = "Executioner/Predictor/skip_times_old='0.25' Outputs/file_base=tangent_predictor_skip_old_time_out"
+    csvdiff = 'tangent_predictor_skip_old_time_out.csv'
+    max_parallel = 1
+    requirement = 'The system shall skip tangent prediction when the old time is listed in skip_times_old.'
+  []
+[]

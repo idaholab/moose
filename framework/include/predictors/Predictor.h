@@ -35,6 +35,8 @@ public:
 
   virtual int order() { return 0; }
   virtual void timestepSetup();
+  /// Called after a transient timestep has converged and has been accepted.
+  virtual void timestepAccepted() {}
   virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln) = 0;
 
