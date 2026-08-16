@@ -72,7 +72,9 @@ class RunLocal(Scheduler):
                     )
 
             self._memory_monitor = MemoryMonitor(
-                os.getpid(), track_nvidia=track_nvidia, interval=0.1
+                os.getpid(),
+                track_nvidia=track_nvidia,
+                interval=self.scheduler_options.memory_tracking_interval,
             )
 
             self._track_cpu_memory = True

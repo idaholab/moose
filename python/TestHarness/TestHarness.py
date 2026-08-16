@@ -1466,6 +1466,13 @@ class TestHarness:
         if term_format == "tpnsc":
             term_format = "tmpnsc"
 
+        # Helper for requiring a positive float argument
+        def positive_float(value):
+            value = float(value)
+            if value <= 0:
+                raise argparse.ArgumentTypeError("must be positive")
+            return value
+
         parser = argparse.ArgumentParser(
             description="A tool used to test MOOSE-based applications"
         )
@@ -1968,6 +1975,12 @@ class TestHarness:
             "--no-gpu-memory-tracking",
             action="store_true",
             help="Disable all GPU memory tracking of jobs",
+        )
+        resourcesgroup.add_argument(
+            "--memory-tracking-interval",
+            type=positive_float,
+            default=0.25,
+            help="Interval at which to poll for memory usage (default: %(default)s)",
         )
 
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
