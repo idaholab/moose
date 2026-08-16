@@ -817,8 +817,9 @@ class Scheduler(MooseObject):
             # Job is done (or needs to re-enter the queue)
             self.queueJobs(jobs)
 
-        except Exception:
-            print("runWorker Exception: %s" % (traceback.format_exc()))
+        except Exception as e:
+            if not isinstance(Exception, ValueError) and str(e) != "Pool not running":
+                print("runWorker Exception: %s" % (traceback.format_exc()))
             self.killRemaining()
 
         except KeyboardInterrupt:
