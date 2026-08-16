@@ -21,7 +21,7 @@ import mooseutils
 from FactorySystem.InputParameters import InputParameters
 from FactorySystem.MooseObject import MooseObject
 
-from TestHarness import OutputInterface
+from TestHarness import OutputInterface, TestHarness
 from TestHarness.capability_util import checkAppCapabilities
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.validation import ValidationCase, ValidationCaseClasses
@@ -237,6 +237,13 @@ class Tester(MooseObject, OutputInterface):
             "hpc_mem_per_cpu", "Memory requirement per CPU to use for HPC submission"
         )
 
+        # Compute devices
+        device_list_str = "', '".join(
+            d.upper() for d in TestHarness.validComputeDevices()
+        )
+        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
+        params.addParam("compute_devices", ["CPU"], device_param_doc)
+
         params.addParam(
             "validation_test", None, "List of validation scripts to run with this test"
         )
@@ -443,6 +450,10 @@ class Tester(MooseObject, OutputInterface):
 
         self._capability_names: Optional[set[str]] = None
         """The capability names from the checked "capabilities" param, if any."""
+
+        for value in params["compute_devices"]:
+            if value.lower() not in TestHarness.validComputeDevices():
+                raise Exception(f'Unknown compute_device="{value}"')
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -737,7 +748,7 @@ class Tester(MooseObject, OutputInterface):
     def processResults(self, moose_dir, options, exit_code, runner_output):
         """method to process the results of a finished tester"""
         if self.specs["expect_exit_code"] != exit_code:
-            reason = f'EXIT CODE {exit_code} != {self.specs["expect_exit_code"]}'
+            reason = f"EXIT CODE {exit_code} != {self.specs['expect_exit_code']}"
             self.setStatus(self.fail, str(reason))
             return f"\n\nExit Code: {exit_code}"
 
@@ -1084,6 +1095,12 @@ class Tester(MooseObject, OutputInterface):
         # Use shell not supported for HPC
         if self.specs["use_shell"] and options.hpc:
             reasons["use_shell"] = "no use_shell with hpc"
+
+        devices_lower = [x.lower() for x in self.specs["compute_devices"]]
+        if options.compute_device not in devices_lower:
+            reasons["invalid_compute_devices"] = (
+                f"{options.compute_device} not in compute_devices"
+            )
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
