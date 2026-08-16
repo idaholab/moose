@@ -369,7 +369,6 @@ FixedPointSolve::solve()
   {
     // Fixed point iteration loop ends right above
     _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
     if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, autoAdvance()))
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
@@ -419,12 +418,10 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   _app.solutionInvalidity().resetTimeStepOccurences();
 
   _executioner.preSolve();
-  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
 
   if (_fixed_point_it == 0)
   {
     _problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
     if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, autoAdvance()))
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
@@ -518,7 +515,6 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
-    _problem.execTransfers(EXEC_TIMESTEP_END);
     if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
 
