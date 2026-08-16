@@ -398,9 +398,10 @@ EOF
         LIBTORCH_FLAGS=()
         # Require CUDA if we have cuda available
         if [ -n "${CUDA_DIR:-}" ]; then
-            # 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
+            # 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild),
+            # 8.9 L4 (rod, cone), 9.0 H200 (arco)
             LIBTORCH_FLAGS+=(
-                "-DTORCH_CUDA_ARCH_LIST=8.0;8.6;8.9"
+                "-DTORCH_CUDA_ARCH_LIST=8.0;8.6;8.9;9.0"
                 "-DUSE_CUDA:BOOL=ON"
                 "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}"
             )
