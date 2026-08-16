@@ -1473,6 +1473,13 @@ class TestHarness:
                 raise argparse.ArgumentTypeError("must be positive")
             return value
 
+        # Helper for requiring a positive integer argument
+        def positive_int(value):
+            value = int(value)
+            if value <= 0:
+                raise argparse.ArgumentTypeError("must be a positive integer")
+            return value
+
         parser = argparse.ArgumentParser(
             description="A tool used to test MOOSE-based applications"
         )
@@ -1540,7 +1547,7 @@ class TestHarness:
             "--jobs",
             nargs="?",
             action="store",
-            type=int,
+            type=positive_int,
             dest="jobs",
             const=1,
             help="Set the number of parallel jobs for tests",
@@ -1549,7 +1556,7 @@ class TestHarness:
             "-l",
             "--load-average",
             action="store",
-            type=float,
+            type=positive_float,
             dest="load",
             help="Do not run additional tests if the load average is at least LOAD",
         )
@@ -1558,7 +1565,7 @@ class TestHarness:
             "--parallel",
             nargs="?",
             action="store",
-            type=int,
+            type=positive_int,
             dest="parallel",
             const=1,
             help="Number of MPI processes to use for each job",
@@ -1567,10 +1574,10 @@ class TestHarness:
             "--n-threads",
             nargs=1,
             action="store",
-            type=int,
+            type=positive_int,
             dest="nthreads",
             default=1,
-            help="Number of threads to use when running mpiexec",
+            help="Number of threads to use when running mpiexec (default: %(default)s)",
         )
 
         filtergroup = parser.add_argument_group(
@@ -1626,13 +1633,13 @@ class TestHarness:
         filtergroup.add_argument(
             "--min-parallel",
             dest="min_parallel",
-            type=int,
+            type=positive_int,
             help="Skip tests that cannot run with at least this many MPI procs",
         )
         filtergroup.add_argument(
             "--min-threads",
             dest="min_threads",
-            type=int,
+            type=positive_int,
             help="Skip tests that cannot run with at least this many threads",
         )
         filtergroup.add_argument(
@@ -1859,9 +1866,9 @@ class TestHarness:
         screengroup.add_argument(
             "--longest-jobs",
             action="store",
-            type=int,
+            type=positive_int,
             default=0,
-            help="Print the longest running jobs upon completion",
+            help="Print the longest LONGEST_JOBS running jobs upon completion",
         )
         screengroup.add_argument(
             "--no-report",
@@ -1880,9 +1887,9 @@ class TestHarness:
         screengroup.add_argument(
             "--term-cols",
             action="store",
-            type=int,
+            type=positive_int,
             default=term_cols,
-            help="The number columns to use in output",
+            help="The number columns to use in output (default: %(default)s)",
         )
         screengroup.add_argument(
             "--term-format",
@@ -1922,16 +1929,22 @@ class TestHarness:
         failgroup.add_argument(
             "--max-fails",
             nargs=1,
-            type=int,
+            type=positive_int,
             default=50,
-            help="The number of tests allowed to fail before any additional tests will run",
+            help=(
+                "The number of tests allowed to fail before any "
+                "additional tests will run (default: %(default)s)"
+            ),
         )
         failgroup.add_argument(
             "--valgrind-max-fails",
             nargs=1,
-            type=int,
+            type=positive_int,
             default=5,
-            help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
+            help=(
+                "The number of valgrind tests allowed to fail before "
+                "any additional valgrind tests will run (default: %(default)s)"
+            ),
         )
 
         resourcesgroup = parser.add_argument_group(
@@ -1940,26 +1953,29 @@ class TestHarness:
         resourcesgroup.add_argument(
             "--max-cpu-per-slot",
             nargs=1,
-            type=float,
+            type=positive_float,
             help=("The maximum percent CPU to allow for a job, per slot"),
         )
         resourcesgroup.add_argument(
             "--max-cpu-memory-per-slot",
             nargs=1,
-            type=float,
+            type=positive_float,
             help="The maximum CPU memory to allow for a job in MB, per slot",
         )
         resourcesgroup.add_argument(
             "--max-gpu-memory-per-slot",
             nargs=1,
-            type=float,
+            type=positive_float,
             help="The maximum GPU memory to allow for a job in MB, per slot",
         )
         resourcesgroup.add_argument(
             "--max-memory-per-slot",
             nargs=1,
-            type=float,
-            help="The maximum CPU memory to allow for a job in MB, per slot (deprecated, use --max-cpu-memory-per-slot)",
+            type=positive_float,
+            help=(
+                "The maximum CPU memory to allow for a job in MB,"
+                "per slot (deprecated, use --max-cpu-memory-per-slot)"
+            ),
         )
         resourcesgroup.add_argument(
             "--no-cpu-tracking",
@@ -2006,10 +2022,10 @@ class TestHarness:
         hpcgroup.add_argument(
             "--hpc-file-timeout",
             nargs=1,
-            type=int,
+            type=positive_float,
             action="store",
             default=300,
-            help="The time in seconds to wait for HPC output",
+            help="The time in seconds to wait for HPC output (default: %(default)s)",
         )
         hpcgroup.add_argument(
             "--hpc-host",
@@ -2050,11 +2066,14 @@ class TestHarness:
         hpcgroup.add_argument(
             "--hpc-scatter-procs",
             nargs=1,
-            type=int,
+            type=positive_int,
             action="store",
             dest="hpc_scatter_procs",
             default=None,
-            help="Set to run HPC jobs with scatter placement when the processor count is this or lower",
+            help=(
+                "Set to run HPC jobs with scatter placement processor count "
+                "is this or lower (default: %(default)s)"
+            ),
         )
         hpcgroup.add_argument(
             "--pbs-queue",
