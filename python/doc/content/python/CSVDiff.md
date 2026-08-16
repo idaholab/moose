@@ -4,13 +4,13 @@ The supplied CSVDiff tool (csvdiff.py) provides the TestHarness the capability t
 
 ## Basic Usage
 
-In it's simplest behavior, performing a differentiation on two CSV files (a and b) requires the following syntax:
+In its simplest behavior, performing a differentiation on two CSV files (a and b) requires the following syntax:
 
 ```
 csvdiff.py a b
 ```
 
-If the two files are the same, the program will state that it is so, and exit with return code 0. Example:
+If the two files are the same, the program will state this and exit with return code 0. Example:
 
 ```
 > echo -e "x\n0" | tee a b
@@ -21,7 +21,7 @@ Files are the same
 0
 ```
 
-A detected difference will be stated, and exit with a non-zero error code. Example:
+If any differences are detected, the program will state this and exit with a non-zero error code. Example:
 
 ```
 > echo -e "x\n0.000001" > a
@@ -43,24 +43,17 @@ of a comparison file.
 
 ## Syntax
 
+The basic usage is
+
 ```
-./csvdiff.py CSV_FILE CSV_FILE [additional arguments]
+./csvdiff.py CSV_FILE1 CSV_FILE2 [additional arguments]
 ```
 
-!alert note
-Always specify the two files you wish to perform a differentiation on, before any other options
+To see an up-to-date list of options, use the help option:
 
-| Arguments | Value | Help |
-| :- | :- | :- |
-| `--summary or -s` | *csv_file* | Create a comparison file based on *csv file* |
-| `--comparison-file or -c` | *comparison file* | Use specified comparison file while performing differentiations |
-| `--ignore-fields` | *str* | A list of space separated fields to ignore when performing differentiations |
-| `--diff-fields` | *str* | A list of space separated fields to include when performing differentiations |
-| `--abs-zero` | *str float* | A scientific notation or float value representing zero (the floor). Any values lower than this amount will be considered zero. (default: 1e-11) |
-| `--relative-tolerance` | *str float* | A float or scientific notation value representing an acceptable degree of tolerance between two opposing values. Any float comparison which falls within this tolerance will be considered the same number. (default 5.5e-6) |
-| `--custom-columns` | *str* | Space separated list of custom field IDs to compare |
-| `--custom-abs-zero` | *str float* | Space separated list of scientific notations or floats for absolute zero, corresponding to the values in --custom-columns |
-| `--custom-rel-err` | *str float* | Space separated list of scientific notations or floats for relative tolerance, corresponding to the values in --custom-columns |
+```
+./csvdiff.py -h
+```
 
 ## Comparison File
 
@@ -84,8 +77,8 @@ You can then edit this file and modify key sections to control tolerances, or in
 
 The 'TIME STEPS' field is a special header, which currently is not used and is present for future capabilities yet to be added to the CSVDiff tool.
 
-The 'GLOBAL VARIABLES' field allows you to change the tolerance for every field present in the CSV file. There are two key parameters; relative and floor. You can modify one or both of the
-values immediately following the parameter to suite your needs. You can also modify the tolerances for each individual field. In the case of our example, 'x' is the only field in our CSV
+The 'GLOBAL VARIABLES' field allows you to change the tolerance for every field present in the CSV file. There are three key parameters: `absolute`, `relative`, and `floor`. You can modify one or more of these
+values immediately following the parameter to suit your needs. You can also modify the tolerances for each individual field. In the case of our example, 'x' is the only field in our CSV
 file. To adjust only that field's tolerance values, we can add a parameter directly proceeding the 'x' label:
 
 ```

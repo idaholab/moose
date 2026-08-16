@@ -34,8 +34,8 @@ class TestCsvDiff(unittest.TestCase):
         args = mooseutils.csvdiff.parseArgs(["--summary", self._tmpfile0])
         with mooseutils.csvdiff.CSVSummary(args) as csv_summary:
             self.assertIn(
-                "TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 0 @ t0\n\n"
-                "GLOBAL VARIABLES relative 5.5e-06 floor 1e-11\n"
+                "TIME STEPS absolute 0 relative 1 floor 0  # min: 0 @ t0  max: 0 @ t0\n\n"
+                "GLOBAL VARIABLES absolute 1e-10 relative 5.5e-06 floor 1e-11\n"
                 "    name1                    # min: 1.000e+00 @ t0          max: 1.000e+00 @ t0\n"
                 "    name2                    # min: 2.220e+00 @ t0          max: 2.220e+00 @ t0\n"
                 "    name3                    # min: 3.300e+00 @ t0          max: 3.300e+00 @ t0",
