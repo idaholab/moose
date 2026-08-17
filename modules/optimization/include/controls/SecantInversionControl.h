@@ -24,7 +24,9 @@ public:
 
   SecantInversionControl(const InputParameters & parameters);
 
-  virtual void execute() override;
+protected:
+  virtual IterationUpdate
+  computeUpdate(unsigned int it, Real p_used, Real y, Real y_target) override;
 
 private:
   /// Perturbation applied on the first iteration of each sweep to seed the secant method

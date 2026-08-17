@@ -26,7 +26,9 @@ public:
 
   NewtonInversionControl(const InputParameters & parameters);
 
-  virtual void execute() override;
+protected:
+  virtual IterationUpdate
+  computeUpdate(unsigned int it, Real p_used, Real y, Real y_target) override;
 
 private:
   /// Finite-difference perturbation applied on each base iteration to form df/dp

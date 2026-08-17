@@ -37,14 +37,9 @@ SecantInversionControl::SecantInversionControl(const InputParameters & parameter
 {
 }
 
-void
-SecantInversionControl::execute()
+InversionControlBase::IterationUpdate
+SecantInversionControl::computeUpdate(unsigned int it, Real p_used, Real y, Real y_target)
 {
-  const unsigned int it = sweepIteration();
-  const Real p_used = _param;
-  const Real y = _output;
-  const Real y_target = targetValue();
-
   Real p_next;
   if (it == 1)
     // Only one (p, y) pair known: seed the secant method with a perturbation.
@@ -57,12 +52,6 @@ SecantInversionControl::execute()
   _p_prev = p_used;
   _y_prev = y;
 
-  // Report the normalized convergence residual for the current (p_used, y) sample.
-  setResidual(normalizedResidual(y));
-
-  // Publish the parameter that produced the current output (the solution at convergence).
-  publishConvergedParameter(p_used);
-
-  // Write the next guess back to the working parameter postprocessor.
-  setParameter(p_next);
+  // Every secant iteration reports the normalized residual and publishes its evaluated parameter.
+  return {p_next, normalizedResidual(y), true};
 }

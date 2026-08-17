@@ -61,10 +61,10 @@ InversionControlBase::InversionControlBase(const InputParameters & parameters)
     _output(getPostprocessorValue("output_postprocessor")),
     _param(getPostprocessorValue("parameter_postprocessor")),
     _param_name(getParam<PostprocessorName>("parameter_postprocessor")),
-    _converged_param_name(isParamValid("converged_parameter_postprocessor")
-                              ? getParam<PostprocessorName>("converged_parameter_postprocessor")
-                              : PostprocessorName("")),
-    _has_converged_param(isParamValid("converged_parameter_postprocessor")),
+    _converged_param_name(
+        isParamValid("converged_parameter_postprocessor")
+            ? std::make_optional(getParam<PostprocessorName>("converged_parameter_postprocessor"))
+            : std::nullopt),
     _target_function(getFunction("target_function")),
     _residual_name(getParam<PostprocessorName>("residual_postprocessor")),
     _abs_tol(getParam<Real>("absolute_tolerance")),
@@ -91,10 +91,29 @@ InversionControlBase::targetValue() const
 }
 
 void
+InversionControlBase::execute()
+{
+  const unsigned int it = sweepIteration();
+  const Real p_used = _param;
+  const Real y = _output;
+  const Real y_target = targetValue();
+
+  const IterationUpdate update = computeUpdate(it, p_used, y, y_target);
+
+  // Publish the parameter that produced the current output (the solution at convergence).
+  if (update.publish)
+    publishConvergedParameter(p_used);
+  // Report the convergence residual the fixed-point Convergence object compares against 1.
+  setResidual(update.residual);
+  // Write the next guess back to the working parameter postprocessor.
+  setParameter(update.next_parameter);
+}
+
+void
 InversionControlBase::publishConvergedParameter(Real p)
 {
-  if (_has_converged_param)
-    _fe_problem.setPostprocessorValueByName(_converged_param_name, p);
+  if (_converged_param_name)
+    _fe_problem.setPostprocessorValueByName(*_converged_param_name, p);
 }
 
 void

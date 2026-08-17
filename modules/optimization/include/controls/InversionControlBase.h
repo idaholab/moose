@@ -11,6 +11,8 @@
 
 #include "Control.h"
 
+#include <optional>
+
 class Function;
 
 /**
@@ -18,8 +20,8 @@ class Function;
  * fixed-point iteration so that a sub-application output postprocessor matches a target function of
  * time. It factors the shared plumbing (parameter/output postprocessors, target function, and
  * optional publishing of the converged parameter) and the guarded secant update; derived classes
- * implement execute() with their specific iteration scheme. The outer iteration, convergence, and
- * time-step cutting are owned by the executioner and the Convergence system.
+ * implement computeUpdate() with their specific iteration scheme. The outer iteration, convergence,
+ * and time-step cutting are owned by the executioner and the Convergence system.
  */
 class InversionControlBase : public Control
 {
@@ -28,7 +30,31 @@ public:
 
   InversionControlBase(const InputParameters & parameters);
 
+  /**
+   * Template method: reads the current (parameter, output) sample, delegates the scheme-specific
+   * decision to computeUpdate(), and applies it (publish, residual, next parameter). Derived
+   * classes implement computeUpdate(), not this.
+   */
+  virtual void execute() override final;
+
 protected:
+  /// One iteration's update, produced by the derived scheme and applied by execute().
+  struct IterationUpdate
+  {
+    /// Parameter guess to write for the next solve
+    Real next_parameter;
+    /// Residual to report for the current sample (compared against 1 by the Convergence object)
+    Real residual;
+    /// Whether the current (already-evaluated) parameter is the solution of record to publish
+    bool publish;
+  };
+
+  /**
+   * Compute this iteration's update from the current sample: the 1-based sweep iteration \c it and
+   * the (parameter, output) pair (\c p_used, \c y) that produced it, against target \c y_target.
+   */
+  virtual IterationUpdate computeUpdate(unsigned int it, Real p_used, Real y, Real y_target) = 0;
+
   /// 1-based fixed-point sweep iteration (1 on the first iteration of each sweep, including restep)
   unsigned int sweepIteration() const;
 
@@ -67,9 +93,7 @@ protected:
   /// Name of the parameter postprocessor to update with the next guess
   const PostprocessorName _param_name;
   /// Optional postprocessor to publish the parameter value that produced the current output
-  const PostprocessorName _converged_param_name;
-  /// Whether the optional converged-parameter postprocessor was provided
-  const bool _has_converged_param;
+  const std::optional<PostprocessorName> _converged_param_name;
   /// Target output as a function of time
   const Function & _target_function;
   /// Name of the postprocessor the control writes with the normalized convergence residual
