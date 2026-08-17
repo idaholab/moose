@@ -146,12 +146,12 @@
     coupled_variables = phase2
     expression = '0.5*tanh(20*(phase2-0.5))+0.5'
   []
-  [./C]
+  [C]
     type = CompositeElasticityTensor
     coupled_variables = 'phase1 phase2'
     tensors = 'C1   C2'
     weights = 'h1   h2'
-  [../]
+  []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'power_law_creep plas'
@@ -165,15 +165,15 @@
     switching_functions = 'h1 h2'
     temperature = temp
   []
-  [./plas]
+  [plas]
     type = IsotropicPlasticityStressUpdate
     hardening_constant = 1
     yield_stress = 1e30
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./soln]
+  [soln]
     type = LineValueSampler
     warn_discontinuous_face_values = false
     sort_by = x
@@ -182,7 +182,7 @@
     end_point = '1.0 1.0 1.0'
     num_points = 5
     outputs = tests
-  [../]
+  []
 []
 
 [Executioner]
@@ -208,9 +208,9 @@
 
 [Outputs]
   exodus = false
-  [./tests]
+  [tests]
     type = CSV
     execute_on = final
-  [../]
+  []
 []
 

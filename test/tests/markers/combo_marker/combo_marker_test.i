@@ -9,32 +9,32 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -44,26 +44,26 @@
 []
 
 [Adaptivity]
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       type = BoxMarker
       bottom_left = '0.3 0.3 0'
       top_right = '0.6 0.6 0'
       inside = refine
       outside = do_nothing
-    [../]
-    [./combo]
+    []
+    [combo]
       type = ComboMarker
       markers = 'box box2'
-    [../]
-    [./box2]
+    []
+    [box2]
       type = BoxMarker
       bottom_left = '0.5 0.5 0'
       top_right = '0.8 0.8 0'
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

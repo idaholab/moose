@@ -6,73 +6,73 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./coupled_force_u]
+  [coupled_force_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
   # BCs on left
   # u: u=1
   # v: v=2
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 2
-  [../]
+  []
 
   # BCs on right
   # u: c*u + u^2 + v^2 = 9
   # v: no flux
-  [./right_u]
+  [right_u]
     type = CoupledDirichletBC
     variable = u
     boundary = 1
     value = 9
     v=v
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./precond]
+  [precond]
     type = SMP
     # 'full = true' is required for computeOffDiagJacobian() to get
     # called.  If you comment this out, you should see that this test
     # requires a different number of linear and nonlinear iterations.
     full = true
-  [../]
+  []
 []
 
 [Executioner]

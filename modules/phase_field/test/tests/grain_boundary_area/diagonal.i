@@ -15,25 +15,25 @@
 []
 
 [Variables]
-  [./gr0]
-    [./InitialCondition]
+  [gr0]
+    [InitialCondition]
       type = FunctionIC
       function = 'd:=(x-y)*80;if(d<pi&d>-pi,sin(d/2)/2+0.5,if(d<0,0,1))'
-    [../]
-  [../]
-  [./gr1]
-    [./InitialCondition]
+    []
+  []
+  [gr1]
+    [InitialCondition]
       type = FunctionIC
       function = 'd:=(x-y)*80;1-if(d<pi&d>-pi,sin(d/2)/2+0.5,if(d<0,0,1))'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./area]
+  [area]
     type = GrainBoundaryArea
     grains_per_side = 2
-  [../]
+  []
 []
 
 [Problem]

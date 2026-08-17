@@ -13,49 +13,49 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE_VEC
-  [../]
-  [./v]
+  []
+  [v]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [Kernels]
-  [./time_u]
+  [time_u]
     type = VectorTimeDerivative
     variable = u
-  [../]
-  [./fn_u]
+  []
+  [fn_u]
     type = VectorBodyForce
     variable = u
     function_x = 1
     function_y = 1
-  [../]
-  [./time_v]
+  []
+  [time_v]
     type = VectorCoupledTimeDerivative
     variable = v
     v = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = VectorDiffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = VectorDirichletBC
     variable = v
     boundary = 'left'
     values = '0 0 0'
-  [../]
-  [./right]
+  []
+  [right]
     type = VectorDirichletBC
     variable = v
     boundary = 'right'
     values = '1 1 0'
-  [../]
+  []
 []
 
 [Executioner]

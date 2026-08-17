@@ -1,5 +1,5 @@
 [Tests]
-  [./crack_tip_enrichment_edge_2d]
+  [crack_tip_enrichment_edge_2d]
     type = Exodiff
     input = edge_crack_2d.i
     exodiff = 'edge_crack_2d_out.e'
@@ -10,8 +10,8 @@
     design = 'LineSegmentCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
-  [../]
-  [./crack_tip_enrichment_penny_crack_3d]
+  []
+  [crack_tip_enrichment_penny_crack_3d]
     type = Exodiff
     input = penny_crack_3d.i
     exodiff = 'penny_crack_3d_out.e'
@@ -24,5 +24,5 @@
     design = 'CircleCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
-  [../]
+  []
 []

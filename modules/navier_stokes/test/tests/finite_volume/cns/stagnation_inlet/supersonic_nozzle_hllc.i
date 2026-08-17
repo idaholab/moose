@@ -127,7 +127,7 @@ stagnation_temperature = 1
     stagnation_pressure = ${stagnation_pressure}
     stagnation_temperature = ${stagnation_temperature}
     boundary = left
-  [../]
+  []
 
   [fluid_energy_stagnation_inflow]
     type = CNSFVHLLCFluidEnergyStagnationInletBC

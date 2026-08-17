@@ -4,78 +4,78 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./prop1]
+  [prop1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = MatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
     prop_state = 'older'                  # Use the "Older" value to compute conductivity
-  [../]
+  []
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./prop1_output_init]
+  [prop1_output_init]
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
     execute_on = initial
-  [../]
+  []
 
-  [./prop1_output]
+  [prop1_output]
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1.0
-  [../]
+  []
 []
 
 [Materials]
-  [./stateful]
+  [stateful]
     type = StatefulTest
     prop_names = thermal_conductivity
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./integral]
+  [integral]
     type = ElementAverageValue
     variable = prop1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

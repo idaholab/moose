@@ -35,210 +35,210 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = finite
     incremental = true
-  [../]
+  []
 []
 
 
 
 [ICs]
-  [./x]
+  [x]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
-  [./y]
+  []
+  [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
-  [./z]
+  []
+  [z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0'
-  [../]
-  [./y]
+  []
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./linesearch]
+  []
+  [linesearch]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./ld]
+  []
+  [ld]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./constr_added]
+  []
+  [constr_added]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./iter]
+  []
+  [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./linesearch]
+  []
+  [linesearch]
     type = MaterialRealAux
     property = plastic_linesearch_needed
     variable = linesearch
-  [../]
-  [./ld]
+  []
+  [ld]
     type = MaterialRealAux
     property = plastic_linear_dependence_encountered
     variable = ld
-  [../]
-  [./constr_added]
+  []
+  [constr_added]
     type = MaterialRealAux
     property = plastic_constraints_added
     variable = constr_added
-  [../]
-  [./iter]
+  []
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./max_iter]
+  [max_iter]
     type = ElementExtremeValue
     variable = iter
     outputs = console
-  [../]
-  [./av_linesearch]
+  []
+  [av_linesearch]
     type = ElementAverageValue
     variable = linesearch
     outputs = 'console csv'
-  [../]
-  [./av_ld]
+  []
+  [av_ld]
     type = ElementAverageValue
     variable = ld
     outputs = 'console csv'
-  [../]
-  [./av_constr_added]
+  []
+  [av_constr_added]
     type = ElementAverageValue
     variable = constr_added
     outputs = 'console csv'
-  [../]
-  [./av_iter]
+  []
+  [av_iter]
     type = ElementAverageValue
     variable = iter
     outputs = 'console csv'
-  [../]
+  []
 []
 
 
 [UserObjects]
-  [./mc_coh]
+  [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 4E7
-  [../]
-  [./mc_phi]
+  []
+  [mc_phi]
     type = SolidMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
-  [../]
-  [./mc_psi]
+  []
+  [mc_psi]
     type = SolidMechanicsHardeningConstant
     value = 5
     convert_to_radians = true
-  [../]
-  [./mc]
+  []
+  [mc]
     type = SolidMechanicsPlasticMohrCoulombMulti
     cohesion = mc_coh
     friction_angle = mc_phi
@@ -247,8 +247,8 @@
     yield_function_tolerance = 1.0E+2  # Note larger value
     shift = 1.0E+2                     # Note larger value
     internal_constraint_tolerance = 1.0E-7
-  [../]
-  [./mc_smooth]
+  []
+  [mc_smooth]
     type = SolidMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
@@ -256,13 +256,13 @@
     mc_tip_smoother = 4E6
     yield_function_tolerance = 1.0
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
 
-  [./ts]
+  [ts]
     type = SolidMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./tensile]
+  []
+  [tensile]
     type = SolidMechanicsPlasticTensileMulti
     tensile_strength = ts
     yield_function_tolerance = 1.0E+2  # Note larger value
@@ -270,24 +270,24 @@
     internal_constraint_tolerance = 1.0E-7
     use_custom_returnMap = false
     use_custom_cto = false
-  [../]
-  [./tensile_smooth]
+  []
+  [tensile_smooth]
     type = SolidMechanicsPlasticTensile
     tensile_strength = ts
     tensile_tip_smoother = 1E5
     yield_function_tolerance = 1.0
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '1.0E9 1.3E9'
-  [../]
-  [./multi]
+  []
+  [multi]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-5  # Note larger value, to match the larger yield_function_tolerances
@@ -306,7 +306,7 @@
     debug_stress_change = 1E1
     debug_pm_change = '1E-6 1E-6 1E-6 1E-6'
     debug_intnl_change = '1E-6 1E-6 1E-6 1E-6'
-  [../]
+  []
 []
 
 

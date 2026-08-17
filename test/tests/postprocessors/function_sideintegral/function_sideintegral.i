@@ -16,57 +16,57 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [ICs]
-  [./u]
+  [u]
     type = ConstantIC
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./zmin]
+  [zmin]
     # no function is provided, so it should default to 1
     # yielding postprocessor = 8
     type = FunctionSideIntegral
     boundary = back
-  [../]
-  [./zmax]
+  []
+  [zmax]
     # result should be -6*area_of_zmax_sideset = -48
     type = FunctionSideIntegral
     boundary = front
     function = '-z'
-  [../]
-  [./ymin]
+  []
+  [ymin]
     # since the integrand is odd in x, the result should be zero
     type = FunctionSideIntegral
     boundary = bottom
     function = 'x*pow(z,4)'
-  [../]
-  [./ymax]
+  []
+  [ymax]
     # result should be 24
     type = FunctionSideIntegral
     boundary = top
     function = 'y*(1+x)*(z-2)'
-  [../]
-  [./xmin_and_xmax]
+  []
+  [xmin_and_xmax]
     # here the integral is over two sidesets
     # result should be 432
     type = FunctionSideIntegral
     boundary = 'left right'
     function = '(3+x)*z'
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,7 +81,7 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = function_sideintegral
-  [./csv]
+  [csv]
     type = CSV
-  [../]
+  []
 []

@@ -6,7 +6,7 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = SodiumProperties
-  [../]
+  []
 []

@@ -15,35 +15,35 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./gap_distance]
+  [gap_distance]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./l2]
+  [l2]
     type = MassMatrix
     variable = u
     matrix_tags = 'system'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./distance]
+  [distance]
     type = PenetrationAux
     variable = gap_distance
     boundary = 'leftright'
     paired_boundary = 'rightleft'
     search_method = all_proximate_sides
-  [../]
+  []
 []
 
 [VectorPostprocessors]

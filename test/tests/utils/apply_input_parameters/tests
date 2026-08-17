@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     # Runs simple_transient_diffusion but with the kernel added via an action an the parameters for the
     # Kernel are set using applyParameters
     type = 'Exodiff'
@@ -9,5 +9,5 @@
     requirement = 'The system shall provide a method for transferring common parameters from one object to another.'
     issues = '#3352'
     design = 'InputParameters.md'
-  [../]
+  []
 []

@@ -18,12 +18,12 @@
 []
 
 [AuxVariables]
-  [./c]
-  [../]
+  [c]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = BoundingBoxIC
     variable = c
     x1 = -1
@@ -33,94 +33,94 @@
     inside = 0
     outside = 1
     block = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '104 74 74 104 74 104 47.65 47.65 47.65'
     fill_method = symmetric9
     base_name = matrix
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
     base_name = matrix
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     block = 0
     base_name = matrix
-  [../]
-  [./elasticity_tensor_ppt]
+  []
+  [elasticity_tensor_ppt]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '0.104 0.074 0.074 0.104 0.074 0.104 0.04765 0.04765 0.04765'
     fill_method = symmetric9
     base_name = ppt
-  [../]
-  [./stress_ppt]
+  []
+  [stress_ppt]
     type = ComputeLinearElasticStress
     block = 0
     base_name = ppt
-  [../]
-  [./strain_ppt]
+  []
+  [strain_ppt]
     type = ComputeSmallStrain
     block = 0
     base_name = ppt
-  [../]
-  [./const_stress]
+  []
+  [const_stress]
     type = ComputeExtraStressConstant
     block = 0
     base_name = ppt
     extra_stress_tensor = '-0.288 -0.373 -0.2747 0 0 0'
-  [../]
-  [./global_stress]
+  []
+  [global_stress]
     type = TwoPhaseStressMaterial
     base_A = matrix
     base_B = ppt
-  [../]
-  [./switching]
+  []
+  [switching]
     type = SwitchingFunctionMaterial
     eta = c
-  [../]
+  []
 []
 
 [BCs]
   active = 'left_x right_x bottom_y top_y'
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./left_x]
+  []
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

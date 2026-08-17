@@ -39,15 +39,15 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalVoronoiVoidIC]
+  [PolycrystalICs]
+    [PolycrystalVoronoiVoidIC]
       invalue = 1.0
       outvalue = 0.0
       polycrystal_ic_uo = voronoi
       rand_seed = 10
-    [../]
-  [../]
-  [./bubble_IC]
+    []
+  []
+  [bubble_IC]
     variable = bubble
     type = PolycrystalVoronoiVoidIC
     structure_type = voids
@@ -55,7 +55,7 @@
     outvalue = 0.0
     polycrystal_ic_uo = voronoi
     rand_seed = 10
-  [../]
+  []
 []
 
 [Materials]
@@ -67,18 +67,18 @@
     outputs = exodus
     output_properties = 'diffusivity'
   []
-  [./hb]
+  [hb]
     type = SwitchingFunctionMultiPhaseMaterial
     h_name = hb
     all_etas = 'bubble gr0 gr1 gr2 gr3'
     phase_etas = 'bubble'
-  [../]
-  [./hm]
+  []
+  [hm]
     type = SwitchingFunctionMultiPhaseMaterial
     h_name = hm
     all_etas = 'bubble gr0 gr1 gr2 gr3'
     phase_etas = 'gr0 gr1 gr2 gr3'
-  [../]
+  []
 []
 
 [UserObjects]

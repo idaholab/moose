@@ -10,45 +10,45 @@
 []
 
 [Variables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./u_nodal]
-  [../]
-  [./u_elemental]
+  [u_nodal]
+  []
+  [u_elemental]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x_elemental]
+  []
+  [x_elemental]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x_nodal]
-  [../]
+  []
+  [x_nodal]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,8 +60,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

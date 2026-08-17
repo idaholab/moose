@@ -1,26 +1,26 @@
 [Tests]
   issues = '#6750'
   design = 'ThermalContactAction.md'
-  [./nonmatching]
+  [nonmatching]
     type = 'Exodiff'
     input = 'nonmatching.i'
     exodiff = 'nonmatching_out.e'
     requirement = 'The system shall support thermal contact with linear 3d hexahedral elements'
-  [../]
+  []
 
-  [./second]
+  [second]
     type = 'Exodiff'
     input = 'second.i'
     exodiff = 'second_out.e'
     requirement = 'The system shall support thermal contact with second-order 3d hexahedral elements'
-  [../]
+  []
 
-  [./moving]
+  [moving]
     type = 'Exodiff'
     input = 'moving.i'
     exodiff = 'moving_out.e'
     valgrind = 'HEAVY'
     allow_warnings = true
     requirement = 'The system shall support thermal contact with 3d hexahedral elements where the surfaces move relative to one another'
-  [../]
+  []
 []

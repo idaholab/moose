@@ -5,32 +5,32 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionDirichletBC
     variable = u
     preset = false
     boundary = right
     function = constant
-  [../]
+  []
 []
 
 [Functions]

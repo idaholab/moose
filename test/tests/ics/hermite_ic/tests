@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'hermite_ic.i'
     exodiff = 'hermite_ic_out.e'
@@ -7,5 +7,5 @@
     requirement = 'The system shall support setting initial conditions for the Hermite set of shape functions.'
     design = 'syntax/ICs/index.md'
     issues = '#1493'
-  [../]
+  []
 []

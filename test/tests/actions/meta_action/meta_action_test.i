@@ -8,12 +8,12 @@
 ###########################################################
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
   uniform_refine = 4
 []
 
@@ -28,53 +28,53 @@
 []
 
 #[Variables]
-#  [./convected]
-#  [../]
-#  [./diffused]
-#  [../]
+#  [convected]
+#  []
+#  [diffused]
+#  []
 #[]
 #
 #[Kernels]
-#  [./diff_v]
+#  [diff_v]
 #    type = Diffusion
 #    variable = convected
-#  [../]
-#  [./diff_u]
+#  []
+#  [diff_u]
 #    type = Diffusion
 #    variable = diffused
-#  [../]
+#  []
 #[]
 
 [BCs]
   active = 'left_convected right_convected left_diffused right_diffused'
 
-  [./left_convected]
+  [left_convected]
     type = DirichletBC
     variable = convected
     boundary = '3'
     value = 0
-  [../]
+  []
 
-  [./right_convected]
+  [right_convected]
     type = DirichletBC
     variable = convected
     boundary = '1'
     value = 1
-  [../]
+  []
 
-  [./left_diffused]
+  [left_diffused]
     type = DirichletBC
     variable = diffused
     boundary = '3'
     value = 0
-  [../]
+  []
 
-  [./right_diffused]
+  [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = '1'
     value = 1
-  [../]
+  []
 
 []
 

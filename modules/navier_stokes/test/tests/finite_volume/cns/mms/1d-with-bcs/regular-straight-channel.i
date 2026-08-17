@@ -3,12 +3,12 @@
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmax = 1.5
     nx = 15
-  [../]
+  []
 []
 
 [FluidProperties]

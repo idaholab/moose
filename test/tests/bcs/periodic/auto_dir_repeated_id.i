@@ -5,37 +5,37 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./z_all]
+  [z_all]
     type = FunctionDirichletBC
     variable = u
     preset = false
     boundary = 'z_all'
     function = 'z'
-  [../]
+  []
 
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

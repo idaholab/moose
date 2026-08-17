@@ -14,14 +14,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./c]
+  [c]
     type = MultiSmoothSuperellipsoidIC
     variable = c
     invalue = 1.0
@@ -38,7 +38,7 @@
     exponent = '2 3'
     prevent_overlap = true
     check_extremes = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,9 +55,9 @@
   start_time = 0.0
   num_steps = 1
   dt = 100.0
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = .5
-  [../]
+  []
 []
 
 [Outputs]

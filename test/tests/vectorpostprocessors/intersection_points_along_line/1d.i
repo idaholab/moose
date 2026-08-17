@@ -7,38 +7,38 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./intersections]
+  [intersections]
     type = IntersectionPointsAlongLine
     start = '0.05 0 0'
     end = '0.405 0 0'
-  [../]
+  []
 []
 
 [Executioner]

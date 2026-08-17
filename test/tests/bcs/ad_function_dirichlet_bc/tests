@@ -1,15 +1,15 @@
 [Tests]
   issues = '#13261'
   design = 'bcs/ADFunctionDirichletBC.md'
-  [./ad]
+  [ad]
     requirement = 'The system shall support Dirichlet type boundary conditions defined by a function'
-    [./test]
+    [test]
       type = 'Exodiff'
       input = 'test.i'
       exodiff = 'test_out.e'
       detail = 'using automatic differentiation.'
-    [../]
-    [./test-jac]
+    []
+    [test-jac]
       type = 'PetscJacobianTester'
       input = 'test.i'
       run_sim = False
@@ -17,6 +17,6 @@
       difference_tol = 3e-6
       detail = 'using automatic differentiation and shall be able to produce the exact Jacobian.'
       cli_args = 'Mesh/square/nx=3 Mesh/square/ny=3 -snes_test_err 1e-6'
-    [../]
-  [../]
+    []
+  []
 []

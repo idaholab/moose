@@ -1,13 +1,13 @@
 [Tests]
-  [./fluidpropic]
+  [fluidpropic]
     type = 'CSVDiff'
     input = 'fluidpropic.i'
     csvdiff = 'fluidpropic_out.csv'
     requirement = 'PorousFlow shall calculate an initial condition for a fluid property given pressure and temperature'
     design = 'PorousFlowFluidPropertyIC.md'
     issues = '#13108'
-  [../]
-  [./fluidpropic_celsius]
+  []
+  [fluidpropic_celsius]
     type = 'CSVDiff'
     input = 'fluidpropic_celsius.i'
     csvdiff = 'fluidpropic_out.csv'
@@ -15,5 +15,5 @@
     requirement = 'PorousFlow shall calculate an initial condition for a fluid property given pressure and temperature (in C)'
     design = 'PorousFlowFluidPropertyIC.md'
     issues = '#13108'
-  [../]
+  []
 []

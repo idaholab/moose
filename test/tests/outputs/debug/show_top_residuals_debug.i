@@ -7,60 +7,60 @@
     nx = 2
     ny = 2
   []
-  [./subdomain_id]
+  [subdomain_id]
     input = gen
     type = SubdomainIDGenerator
     subdomain_id = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
-  [./v]
+  []
+  [v]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./w]
+  []
+  [w]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./u_kernel]
+  [u_kernel]
     type = Diffusion
     variable = u
-  [../]
-  [./v_kernel]
+  []
+  [v_kernel]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./u_bc]
+  [u_bc]
     type = DirichletBC
     variable = u
     value = 100
     boundary = left
-  [../]
-  [./v_bc]
+  []
+  [v_bc]
     type = NeumannBC
     variable = v
     value = 100
     boundary = left
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./w_kernel]
+  [w_kernel]
     type = AlphaCED
     variable = w
     value = 100
-  [../]
+  []
 []
 
 [Executioner]

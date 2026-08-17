@@ -4,88 +4,88 @@
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
     block = 1
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./disp_x_kernel]
+  [disp_x_kernel]
     type = ConstantAux
     variable = disp_x
     value = 0.1
-  [../]
+  []
 
-  [./disp_y_kernel]
+  [disp_y_kernel]
     type = ConstantAux
     variable = disp_y
     value = 0
-  [../]
+  []
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     block = '1 2 3'
-  [../]
+  []
 []
 
 [Materials]
-  [./left]
+  [left]
     type = HeatConductionMaterial
     block = 1
     thermal_conductivity = 1000
     specific_heat = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = HeatConductionMaterial
     block = 2
     thermal_conductivity = 500
     specific_heat = 1
-  [../]
+  []
 
-  [./middle]
+  [middle]
     type = HeatConductionMaterial
     block = 3
     thermal_conductivity = 100
     specific_heat = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./hc]
+  [hc]
     type = HeatConduction
     variable = temp
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temp
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = temp
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

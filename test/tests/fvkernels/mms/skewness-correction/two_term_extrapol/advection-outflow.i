@@ -6,35 +6,35 @@ a=1
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = FileMeshGenerator
     file = skewed.msh
-  [../]
+  []
 []
 
 [Variables]
-  [./v]
+  [v]
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
-  [../]
+  []
 []
 
 [FVKernels]
-  [./advection]
+  [advection]
     type = FVAdvection
     variable = v
     velocity = '${a} 0 0'
-  [../]
-  [./diffusion]
+  []
+  [diffusion]
     type = FVDiffusion
     variable = v
     coeff = coeff
-  [../]
-  [./body]
+  []
+  [body]
     type = FVBodyForce
     variable = v
     function = 'forcing'
-  [../]
+  []
 []
 
 [FVBCs]
@@ -95,13 +95,13 @@ a=1
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

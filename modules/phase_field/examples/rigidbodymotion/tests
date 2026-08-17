@@ -1,5 +1,5 @@
 [Tests]
-  [./AC_CH_Multigrain]
+  [AC_CH_Multigrain]
     type = RunApp
     input = 'AC_CH_Multigrain.i'
     cli_args = 'Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
@@ -10,8 +10,8 @@
     check_input = True
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
-  [../]
-  [./AC_CH_advection_constforce_rect]
+  []
+  [AC_CH_advection_constforce_rect]
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
 
@@ -22,8 +22,8 @@
 
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
-  [../]
-  [./grain_forcedensity_ext]
+  []
+  [grain_forcedensity_ext]
     type = RunApp
     input = 'grain_forcedensity_ext.i'
 
@@ -33,5 +33,5 @@
     check_input = True
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
-  [../]
+  []
 []

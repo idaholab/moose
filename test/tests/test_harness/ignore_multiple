@@ -1,8 +1,8 @@
 [Tests]
-  [./ignore_multiple]
+  [ignore_multiple]
     type = RunApp
     input = good.i
     skip = "always skipped"
     heavy = true
-  [../]
+  []
 []

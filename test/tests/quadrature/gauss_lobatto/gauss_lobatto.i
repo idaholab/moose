@@ -8,10 +8,10 @@
 []
 
 [Postprocessors]
-  [./num_elem_qps]
+  [num_elem_qps]
     type = NumElemQPs
     block = 0
-  [../]
+  []
 []
 
 [Problem]
@@ -24,10 +24,10 @@
 
   # In 1D, 5th-order Gauss-Lobatto quadrature has 4 points, so in 2D
   # it should have 16.
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS_LOBATTO
     order = FIFTH
-  [../]
+  []
 []
 
 [Outputs]

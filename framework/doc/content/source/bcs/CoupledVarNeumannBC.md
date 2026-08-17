@@ -14,7 +14,7 @@ This can be used to locally turn the BC on or off.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/coupled_var_neumann/coupled_var_neumann.i start=[./right] end=[../] include-end=true
+!listing test/tests/bcs/coupled_var_neumann/coupled_var_neumann.i start=[right] end=[] include-end=true
 
 !syntax parameters /BCs/CoupledVarNeumannBC
 

@@ -1,11 +1,11 @@
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0
     xmax = 10
     nx = 50
-  [../]
+  []
 []
 
 [Problem]
@@ -13,38 +13,38 @@
 []
 
 [Variables]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [ICs]
-  [./v_ic]
+  [v_ic]
     type = FunctionIC
     variable = v
     function = 'if (x > 2 & x < 3, 0.5, 0)'
-  [../]
+  []
 []
 
 [FVKernels]
-  [./burgers]
+  [burgers]
     type = FVBurgers1D
     variable = v
-  [../]
-  [./time]
+  []
+  [time]
     type = FVTimeKernel
     variable = v
-  [../]
+  []
 []
 
 [FVBCs]
-  [./fv_burgers_outflow]
+  [fv_burgers_outflow]
     type = FVBurgersOutflowBC
     variable = v
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Executioner]

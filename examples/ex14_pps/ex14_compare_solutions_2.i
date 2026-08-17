@@ -10,51 +10,51 @@
 []
 
 [Variables]
-  [./forced]
+  [forced]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = forced
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = forced
     function = 'x*x+y*y' # Any object expecting a function name can also receive a ParsedFunction string
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = forced
     boundary = 'bottom right top left'
     value = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./fine_solution]
+  [fine_solution]
     # Read in the fine grid solution
     type = SolutionUserObject
     system_variables = forced
     mesh = ex14_compare_solutions_1_out_0000_mesh.xda
     es = ex14_compare_solutions_1_out_0000.xda
-  [../]
+  []
 []
 
 [Functions]
-  [./fine_function]
+  [fine_function]
     # Create a Function out of the fine grid solution
     # Note: This references the SolutionUserObject above
     type = SolutionFunction
     solution = fine_solution
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,22 +63,22 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 
-  [./Quadrature]
+  [Quadrature]
     # The integration of the error happens on the coarse mesh
     # To reduce integration error of the finer solution we can
     # raise the integration order.
     # Note: This will slow down the calculation a bit
     order = SIXTH
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     # Compute the error between the computed solution and the fine-grid solution
     type = ElementL2Error
     variable = forced
     function = fine_function
-  [../]
+  []
 []
 
 [Outputs]

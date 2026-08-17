@@ -15,7 +15,7 @@ combining this kernel with [MatchedValueBC.md] or other strong interface conditi
 
 ## Example Input File Syntax
 
-!listing test/tests/interfacekernels/hybrid/interface.i start=[./diffusion] end=[../] include-end=true
+!listing test/tests/interfacekernels/hybrid/interface.i start=[diffusion] end=[] include-end=true
 
 !syntax parameters /InterfaceKernels/InterfaceDiffusion
 

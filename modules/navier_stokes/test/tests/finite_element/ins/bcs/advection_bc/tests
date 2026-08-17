@@ -1,12 +1,12 @@
 [Tests]
   design = 'AdvectionBC.md'
   issues = '#13283'
-  [./advection_bc]
+  [advection_bc]
     type = 'Exodiff'
     input = 'advection_bc.i'
     exodiff = 'advection_bc_out.e'
     requirement = "The system shall compute inflow and outflow boundary conditions for advected variables"
-  [../]
+  []
   [check_too_few_components]
     type = 'RunException'
     expect_err = 'Number of components of velocity_vector must be at least equal to the mesh dimension'

@@ -155,8 +155,8 @@ The curvature properties can be visualised by coupling them to `MaterialRealAux`
 
 ```
 [AuxVariables]
-  [kappa1]  [../]
-  [kappa2]  [../]
+  [kappa1]  []
+  [kappa2]  []
 []
 
 [AuxKernels]

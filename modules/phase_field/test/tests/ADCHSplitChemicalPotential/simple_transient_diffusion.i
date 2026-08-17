@@ -5,58 +5,58 @@
 []
 
 [Variables]
-  [./c]
-  [../]
-  [./mu]
-  [../]
+  [c]
+  []
+  [mu]
+  []
 []
 
 [Kernels]
-  [./conc]
+  [conc]
     type = ADCHSplitConcentration
     variable = c
     chemical_potential_var = mu
     mobility = mobility_prop
-  [../]
-  [./chempot]
+  []
+  [chempot]
     type = ADCHSplitChemicalPotential
     variable = mu
     chemical_potential = mu_prop
-  [../]
-  [./time]
+  []
+  [time]
     type = ADTimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
-  [./chemical_potential]
+  [chemical_potential]
     type = ADPiecewiseLinearInterpolationMaterial
     property = mu_prop
     variable = c
     x = '0 1'
     y = '0 1'
-  [../]
-  [./mobility_prop]
+  []
+  [mobility_prop]
     type = ADGenericConstantMaterial
     prop_names = mobility_prop
     prop_values = 0.1
-  [../]
+  []
 []
 
 [BCs]
-  [./leftc]
+  [leftc]
     type = DirichletBC
     variable = c
     boundary = left
     value = 0
-  [../]
-  [./rightc]
+  []
+  [rightc]
     type = DirichletBC
     variable = c
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,10 +69,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
      type = SMP
      full = true
-  [../]
+  []
 []
 
 [Outputs]

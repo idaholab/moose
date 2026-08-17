@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
@@ -7,5 +7,5 @@
     requirement = 'The system shall be able to set an initial condition for density of vapor mixture given pressure and temperature as variables'
     design = 'RhoVaporMixtureFromPressureTemperatureIC.md'
     issues = '#15524'
-  [../]
+  []
 []

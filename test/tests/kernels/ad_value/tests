@@ -1,18 +1,18 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'ad_value.i'
     exodiff = 'ad_value_out.e'
     requirement = "Jacobian entries generated with AD shall match hand-coded Jacobian entries as measured through save-in values"
     design = "syntax/Kernels/index.md"
     issues = "#5658"
-  [../]
-  [./generic_test]
+  []
+  [generic_test]
     type = 'Exodiff'
     input = 'generic_value.i'
     exodiff = 'generic_value_out.e'
     requirement = "The system shall provide a generic kernel object that allows for easy switching between hand-coded and automatic computation of the Jacobian, and encourages maximum kernel code-reuse."
     design = "syntax/Kernels/index.md"
     issues = "#15552"
-  [../]
+  []
 []

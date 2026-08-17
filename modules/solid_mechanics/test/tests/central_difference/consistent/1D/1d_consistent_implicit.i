@@ -6,11 +6,11 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
     incremental = true
-  [../]
+  []
 []
 
 
@@ -24,49 +24,49 @@
 
 
 [NodalKernels]
-  [./force_x]
+  [force_x]
     type = UserForcingFunctorNodalKernel
     variable = disp_x
     boundary = right
     functor = force_x
-  [../]
+  []
 []
 
 [Functions]
-  [./force_x]
+  [force_x]
     type = PiecewiseLinear
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # force
     scale_factor = 1e3
-  [../]
+  []
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_block]
+  [elasticity_tensor_block]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
-  [./stress_block]
+  []
+  [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
     prop_values = 2500
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,29 +79,29 @@
   start_time = -0.005
   end_time = 0.1
   dt = 0.005
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = NewmarkBeta
     beta = 0.25
     gamma = 0.5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = NodalVariableValue
     nodeid = 1
     variable = disp_x
-  [../]
-  [./vel_x]
+  []
+  [vel_x]
     type = NodalVariableValue
     nodeid = 1
     variable = vel_x
-  [../]
-  [./accel_x]
+  []
+  [accel_x]
     type = NodalVariableValue
     nodeid = 1
     variable = accel_x
-  [../]
+  []
 []
 
 [Outputs]

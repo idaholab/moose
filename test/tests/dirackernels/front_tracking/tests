@@ -1,10 +1,10 @@
 [Tests]
   issues = '#2357'
   design = 'syntax/DiracKernels/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'front_tracking.i'
     exodiff = 'front_tracking_out.e'
     requirement = "The system shall allow for source locations to be set by a user-defined object."
-  [../]
+  []
 []

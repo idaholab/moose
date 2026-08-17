@@ -1,14 +1,14 @@
 [Tests]
   issues = '#5658 #12650'
-  [./linear-hand-coded]
+  [linear-hand-coded]
     type = 'Exodiff'
     input = 'linear-hand-coded.i'
     exodiff = 'linear-out.e'
     absent_out = '3 Nonlinear'
     requirement = 'We shall be able to run a simple linear small-strain problem using a hand-coded Jacobian'
     design = 'ComputeSmallStrain.md'
-  [../]
-  [./linear-ad]
+  []
+  [linear-ad]
     type = 'Exodiff'
     input = 'linear-ad.i'
     exodiff = 'linear-out.e'
@@ -16,8 +16,8 @@
     prereq = 'linear-hand-coded'
     requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation in the production stress divergence kernel'
     design = 'ADComputeSmallStrain.md'
-  [../]
-  [./linear-ad-reverse]
+  []
+  [linear-ad-reverse]
     type = 'Exodiff'
     input = 'linear-ad-reverse-dependency.i'
     exodiff = 'linear-out.e'
@@ -25,8 +25,8 @@
     prereq = 'linear-ad'
     requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation with reversed stress and strain materials'
     design = 'ADComputeSmallStrain.md'
-  [../]
-  [./linear-hand-coded-jac]
+  []
+  [linear-hand-coded-jac]
     type = 'PetscJacobianTester'
     input = 'linear-hand-coded.i'
     run_sim = 'True'
@@ -34,8 +34,8 @@
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the hand-coded problem shall be perfect'
     design = 'ComputeSmallStrain.md'
-  [../]
-  [./linear-ad-jac]
+  []
+  [linear-ad-jac]
     type = 'PetscJacobianTester'
     input = 'linear-ad.i'
     run_sim = 'True'
@@ -43,8 +43,8 @@
     difference_tol = 1e-4
     requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
     design = 'ADComputeSmallStrain.md'
-  [../]
-  [./linear-ad-jac-reverse]
+  []
+  [linear-ad-jac-reverse]
     type = 'PetscJacobianTester'
     input = 'linear-ad-reverse-dependency.i'
     run_sim = 'True'
@@ -52,5 +52,5 @@
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the automatic differentiation problem with reversed stress and strain materials shall be perfect'
     design = 'ADComputeSmallStrain.md'
-  [../]
+  []
 []

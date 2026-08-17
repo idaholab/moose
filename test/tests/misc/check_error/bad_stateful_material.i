@@ -8,46 +8,46 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./stateful_mat]
+  [stateful_mat]
     type = BadStatefulMaterial
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

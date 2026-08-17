@@ -552,11 +552,11 @@ public:
    * parameters exist
    * in the input file:
    *   e.g.
-   *   [./foo]
+   *   [foo]
    *     ...
    *     some_base = base_
    *     some_num  = 5
-   *   [../]
+   *   []
    *
    *   # The coupling parameter will be passed this vector: "base_0 base_1 base_2 base_3 base_4"
    */

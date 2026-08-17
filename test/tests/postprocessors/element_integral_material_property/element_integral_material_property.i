@@ -8,47 +8,47 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     block = 0
     prop_names = prop
     prop_values = 2.0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./prop_integral]
+  [prop_integral]
     type = ElementIntegralMaterialProperty
     mat_prop = prop
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

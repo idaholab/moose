@@ -1,5 +1,5 @@
 [Tests]
-  [./residual]
+  [residual]
     type = 'CSVDiff'
     input = 'residual.i'
     csvdiff = 'residual_out.csv'
@@ -8,8 +8,8 @@
                   'situation correctly'
 
     issues = '#13634'
-  [../]
-  [./simple]
+  []
+  [simple]
     type = 'CSVDiff'
     input = 'simple.i'
     csvdiff = 'simple_out.csv'
@@ -18,5 +18,5 @@
                   'inertial torque where the only degree of freedom in y'
 
     issues = '#13634'
-  [../]
+  []
 []

@@ -14,8 +14,8 @@
 []
 
 [Variables]
-  [./eta]
-    [./InitialCondition]
+  [eta]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0.0
       y1 = 0.0
@@ -23,30 +23,30 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 16.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 
-  [./ACInterfaceStress]
+  [ACInterfaceStress]
     type = ACInterfaceStress
     variable = eta
     mob_name = 1
     stress = 2.7
-  [../]
+  []
 []
 
 [Materials]
-  [./strain]
+  [strain]
     type = GenericConstantRankTwoTensor
     tensor_name = elastic_strain
     tensor_values = '0.11 0.12 0.13 0.21 0.22 0.23 0.31 0.32 0.33'
-  [../]
+  []
 []
 
 [Executioner]

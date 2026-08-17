@@ -6,29 +6,29 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.02
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = u
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -46,8 +46,8 @@
   cycles_per_step = 1
   marker = two_circle_marker
   max_h_level = 1
-  [./Markers]
-    [./two_circle_marker]
+  [Markers]
+    [two_circle_marker]
       type = TwoCircleMarker
       point1 = '0.5 0.5 0'
       radius1 = 0.3
@@ -55,15 +55,15 @@
       radius2 = 0.3
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     print_mesh_changed_info = true
-  [../]
+  []
 []
 

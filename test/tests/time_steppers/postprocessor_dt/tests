@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'postprocessor_dt.i'
     exodiff = 'postprocessor_dt_out.e'
@@ -8,5 +8,5 @@
     issues = '#1963'
     design = 'PostprocessorDT.md'
     requirement = 'The system shall support the ability to use a scalar value computed after a solve to be used as a scaled time step size.'
-  [../]
+  []
 []

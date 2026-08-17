@@ -1,5 +1,5 @@
 [Tests]
-  [./2D_heat_conduction_BPD]
+  [2D_heat_conduction_BPD]
     type = 'PetscJacobianTester'
     input = '2D_heat_conduction_BPD.i'
     ratio_tol = 1E-7
@@ -8,8 +8,8 @@
                    jacobian for bond-based peridynamic heat conduction model.'
     design = 'HeatConductionBPD.md'
     issues = '#11561'
-  [../]
-  [./2D_heat_conduction_free_node_BPD]
+  []
+  [2D_heat_conduction_free_node_BPD]
     type = 'PetscJacobianTester'
     input = '2D_heat_conduction_BPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -20,8 +20,8 @@
                    jacobian for bond-based peridynamic heat conduction model with arbitrarily broken bonds.'
     design = 'HeatConductionBPD.md'
     issues = '#15393'
-  [../]
-  [./2D_mechanics_BPD]
+  []
+  [2D_mechanics_BPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_BPD.i'
     ratio_tol = 1E-7
@@ -30,8 +30,8 @@
                    for bond-based peridynamic mechanics model.'
     design = 'MechanicsBPD.md'
     issues = '#11561'
-  [../]
-  [./2D_mechanics_free_node_BPD]
+  []
+  [2D_mechanics_free_node_BPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_BPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -42,8 +42,8 @@
                    for bond-based peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'MechanicsBPD.md'
     issues = '#15393'
-  [../]
-  [./2D_thermomechanics_BPD]
+  []
+  [2D_thermomechanics_BPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_BPD.i'
     ratio_tol = 1E-7
@@ -52,8 +52,8 @@
                    residual and jacobian for bond-based peridynamic thermomechanics model.'
     design = 'MechanicsBPD.md'
     issues = '#11561'
-  [../]
-  [./2D_thermomechanics_free_node_BPD]
+  []
+  [2D_thermomechanics_free_node_BPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_BPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -64,8 +64,8 @@
                    residual and jacobian for bond-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'MechanicsBPD.md'
     issues = '#15393'
-  [../]
-  [./2D_mechanics_OSPD]
+  []
+  [2D_mechanics_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_OSPD.i'
     ratio_tol = 1E-7
@@ -74,8 +74,8 @@
                    for ordinary state-based peridynamic mechanics model.'
     design = 'MechanicsOSPD.md'
     issues = '#11561'
-  [../]
-  [./2D_mechanics_free_node_OSPD]
+  []
+  [2D_mechanics_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -86,8 +86,8 @@
                    for ordinary state-based peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'MechanicsOSPD.md'
     issues = '#15393'
-  [../]
-  [./2D_thermomechanics_OSPD]
+  []
+  [2D_thermomechanics_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_OSPD.i'
     ratio_tol = 1E-7
@@ -96,8 +96,8 @@
                    residual and jacobian for ordinary state-based peridynamic thermomechanics model.'
     design = 'MechanicsOSPD.md'
     issues = '#11561'
-  [../]
-  [./2D_thermomechanics_free_node_OSPD]
+  []
+  [2D_thermomechanics_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -108,8 +108,8 @@
                    residual and jacobian for ordinary state-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'MechanicsOSPD.md'
     issues = '#15393'
-  [../]
-  [./2D_mechanics_FNOSPD]
+  []
+  [2D_mechanics_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_FNOSPD.i'
     ratio_tol = 1E-7
@@ -119,8 +119,8 @@
                    correspondence model under small strain assumptions.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./2D_mechanics_free_node_FNOSPD]
+  []
+  [2D_mechanics_free_node_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_FNOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -132,8 +132,8 @@
                    non-ordinary state-based peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#15393'
-  [../]
-  [./2D_thermomechanics_FNOSPD]
+  []
+  [2D_thermomechanics_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_FNOSPD.i'
     ratio_tol = 1E-7
@@ -143,8 +143,8 @@
                    under small strain assumptions.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./2D_thermomechanics_free_node_FNOSPD]
+  []
+  [2D_thermomechanics_free_node_FNOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_FNOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -155,8 +155,8 @@
                    small-strain non-ordinary state-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#15393'
-  [../]
-  [./2D_mechanics_smallstrain_H1NOSPD]
+  []
+  [2D_mechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -166,8 +166,8 @@
                    under small strain assumptions in 2D.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./2D_mechanics_smallstrain_free_node_H1NOSPD]
+  []
+  [2D_mechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -179,8 +179,8 @@
                    peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#15393'
-  [../]
-  [./2D_mechanics_smallstrain_H2NOSPD]
+  []
+  [2D_mechanics_smallstrain_H2NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_mechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
@@ -190,8 +190,8 @@
                    under small strain assumptions.'
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./2D_thermomechanics_smallstrain_free_node_H1NOSPD]
+  []
+  [2D_thermomechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -203,8 +203,8 @@
                    non-ordinary state-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#15393'
-  [../]
-  [./2D_thermomechanics_smallstrain_H1NOSPD]
+  []
+  [2D_thermomechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -215,8 +215,8 @@
                    under small strain assumptions.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./2D_thermomechanics_smallstrain_H2NOSPD]
+  []
+  [2D_thermomechanics_smallstrain_H2NOSPD]
     type = 'PetscJacobianTester'
     input = '2D_thermomechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
@@ -227,8 +227,8 @@
                    under small strain assumptions.'
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./3D_mechanics_smallstrain_H1NOSPD]
+  []
+  [3D_mechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '3D_mechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -238,8 +238,8 @@
                    under small strain assumptions in 3D.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./3D_mechanics_smallstrain_H2NOSPD]
+  []
+  [3D_mechanics_smallstrain_H2NOSPD]
     type = 'PetscJacobianTester'
     input = '3D_mechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
@@ -249,8 +249,8 @@
                    under small strain assumptions in 3D.'
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
-  [../]
-  [./3D_mechanics_smallstrain_free_node_H1NOSPD]
+  []
+  [3D_mechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = '3D_mechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -263,8 +263,8 @@
                    state-based peridynamic mechanics model with arbitrarily broken bonds in 3D.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#15393'
-  [../]
-  [./gps_OSPD]
+  []
+  [gps_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_OSPD.i'
     ratio_tol = 1E-7
@@ -274,8 +274,8 @@
                    for the ordinary state-based peridynamic generalized plane strain model.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#11561'
-  [../]
-  [./gps_free_node_OSPD]
+  []
+  [gps_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -287,8 +287,8 @@
                    for ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#15393'
-  [../]
-  [./gps_thermomechanics_OSPD]
+  []
+  [gps_thermomechanics_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_OSPD.i'
     ratio_tol = 1E-7
@@ -298,8 +298,8 @@
                    for the ordinary state-based peridynamic generalized plane strain model.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#11561'
-  [../]
-  [./gps_thermomechanics_free_node_OSPD]
+  []
+  [gps_thermomechanics_free_node_OSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_OSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -311,8 +311,8 @@
                    for ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
     issues = '#15393'
-  [../]
-  [./gps_H1NOSPD]
+  []
+  [gps_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -323,8 +323,8 @@
                    generalized plane strain model.'
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#11561'
-  [../]
-  [./gps_free_node_H1NOSPD]
+  []
+  [gps_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -336,8 +336,8 @@
                    for non-ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#15393'
-  [../]
-  [./gps_thermomechanics_smallstrain_H1NOSPD]
+  []
+  [gps_thermomechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -348,8 +348,8 @@
                    generalized plane strain model.'
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#11561'
-  [../]
-  [./gps_thermomechanics_smallstrain_free_node_H1NOSPD]
+  []
+  [gps_thermomechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'generalized_planestrain_thermomechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -361,8 +361,8 @@
                    for ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
     design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#15393'
-  [../]
-  [./weak_planestress_thermomechanics_smallstrain_H1NOSPD]
+  []
+  [weak_planestress_thermomechanics_smallstrain_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'weak_planestress_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
@@ -371,8 +371,8 @@
                    jacobian for the coupled peridynamic weak plane stress model.'
     design = 'WeakPlaneStressNOSPD.md'
     issues = '#11561'
-  [../]
-  [./weak_planestress_thermomechanics_smallstrain_free_node_H1NOSPD]
+  []
+  [weak_planestress_thermomechanics_smallstrain_free_node_H1NOSPD]
     type = 'PetscJacobianTester'
     input = 'weak_planestress_thermomechanics_smallstrain_H1NOSPD.i'
     cli_args = 'UserObjects/breakbonds/type=ZeroBondStatusUserObjectPD UserObjects/breakbonds/bond_ids_list="0 1 2 3 4 5 6 7 8 9"'
@@ -383,5 +383,5 @@
                    jacobian for coupled peridynamic weak plane stress model with arbitrarily broken bonds.'
     design = 'WeakPlaneStressNOSPD.md'
     issues = '#15393'
-  [../]
+  []
 []

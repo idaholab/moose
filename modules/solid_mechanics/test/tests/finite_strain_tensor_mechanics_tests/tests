@@ -1,6 +1,6 @@
 [Tests]
   design = 'StressDivergenceTensors.md'
-  [./rotation_test]
+  [rotation_test]
     type = 'Exodiff'
     input = 'elastic_rotation.i'
     exodiff = 'elastic_rotation_out.e'
@@ -9,9 +9,9 @@
     issues = '#8422'
     # PR #26848. Clang 16 Apple Si is not compatible.
     capabilities = 'machine=x86_64'
-  [../]
+  []
 
-  [./patch_test]
+  [patch_test]
     type = 'Exodiff'
     input = 'finite_strain_patch.i'
     exodiff = 'finite_strain_patch_out.e'
@@ -19,5 +19,5 @@
     max_parallel = 1
     requirement = 'The system shall compute a uniform stress state given a uniform strain state with finite strains'
     issues = '#12584'
-  [../]
+  []
 []

@@ -12,52 +12,52 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./mat1]
+  [mat1]
     type = CoupledMaterial
     mat_prop = 'prop-a'
     coupled_mat_prop = 'prop-b'
     use_old_prop = true
     block = 0
-  [../]
+  []
 
-  [./mat2]
+  [mat2]
     type = CoupledMaterial
     mat_prop = 'prop-b'
     coupled_mat_prop = 'prop-a'
     use_old_prop = false
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

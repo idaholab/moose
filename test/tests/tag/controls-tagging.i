@@ -10,21 +10,21 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Controls]
@@ -38,27 +38,27 @@
 []
 
 [DiracKernels]
-  [./point_source]
+  [point_source]
     type = FunctionDiracSource
     variable = u
     function = 1
     point = '0.3 0.3 0.0'
-  [../]
-  [./point_source2]
+  []
+  [point_source2]
     type = FunctionDiracSource
     variable = u
     function = 1
     point = '-0.3 -0.3 0.0'
-  [../]
+  []
 []
 
 [BCs]
-  [./external]
+  [external]
     type = NeumannBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

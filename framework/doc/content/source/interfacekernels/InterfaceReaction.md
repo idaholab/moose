@@ -33,7 +33,7 @@ Two examples (steady-state and transient-state) are shown in the MOOSE test dire
 
 ## Example Input Syntax
 
-!listing test/tests/interfacekernels/1d_interface/reaction_1D_steady.i start=[./interface_reaction] end=[../] include-end=true
+!listing test/tests/interfacekernels/1d_interface/reaction_1D_steady.i start=[interface_reaction] end=[] include-end=true
 
 !syntax parameters /InterfaceKernels/InterfaceReaction
 

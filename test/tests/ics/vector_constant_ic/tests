@@ -1,18 +1,18 @@
 [Tests]
-  [./vector_constant_ic]
+  [vector_constant_ic]
     type = 'Exodiff'
     input = 'vector_constant_ic.i'
     exodiff = 'vector_constant_ic_out.e'
     design = 'VectorConstantIC.md'
     requirement = 'The system shall allow to set constant vector-valued initial conditions.'
     issues = '#12311'
-  [../]
-  [./vector_short_constant_ic]
+  []
+  [vector_short_constant_ic]
     type = 'Exodiff'
     input = 'vector_short_constant_ic.i'
     exodiff = 'vector_short_constant_ic_out.e'
     design = 'VectorConstantIC.md'
     requirement = 'The system shall allow to set constant vector-valued initial conditions when adding vector variables.'
     issues = '#12311'
-  [../]
+  []
 []

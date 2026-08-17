@@ -12,57 +12,57 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = ExampleGaussContForcing
     variable = u
     x_center = 2
     y_center = 4
-  [../]
+  []
 
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
+  [Periodic]
     #Note: Enable either "auto" or both "manual" conditions for this example
     active = 'manual_x manual_y'
 
     # Can use auto_direction with Generated Meshes
-    [./auto]
+    [auto]
       variable = u
       auto_direction = 'x y'
-    [../]
+    []
 
      # Use Translation vectors for everything else
-     [./manual_x]
+     [manual_x]
        variable = u
        primary = 'left'
        secondary = 'right'
        translation = '40 0 0'
-     [../]
+     []
 
-     [./manual_y]
+     [manual_y]
        variable = u
        primary = 'bottom'
        secondary = 'top'
        translation = '0 40 0'
-     [../]
-  [../]
+     []
+  []
 []
 
 [Executioner]

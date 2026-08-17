@@ -4,36 +4,36 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = left
     value = -1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

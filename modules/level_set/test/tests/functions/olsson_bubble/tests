@@ -1,17 +1,17 @@
 [Tests]
   design = 'LevelSetOlssonBubble.md'
-  [./test]
+  [test]
     type = Exodiff
     input = olsson_bubble.i
     exodiff = olsson_bubble_out.e
     issues = '#8465'
     requirement = "The level set module shall include the bubble function defined in [!cite](olsson2005conservative)."
-  [../]
-  [./adjac]
+  []
+  [adjac]
     type = PetscJacobianTester
     input = olsson_bubble_adjac.i
     ratio_tol = 1e-7
     issues = '#20193'
     requirement = "The Olsson bubble function shall return correct derivatives for dual number points."
-  [../]
+  []
 []

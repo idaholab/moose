@@ -1,11 +1,11 @@
 [Tests]
   issues = '#8905'
-  [./creep]
+  [creep]
     type = 'Exodiff'
     input = 'creep_nl1.i'
     exodiff = 'creep_nl1_out.e'
     abs_zero = 7e-5
     design = 'PowerLawCreepStressUpdate.md'
     requirement = 'The system shall compute and output the effective creep strain'
-  [../]
+  []
 []

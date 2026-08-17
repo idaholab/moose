@@ -20,93 +20,93 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 
-  [./p]
-  [../]
-  [./q]
-  [../]
+  [p]
+  []
+  [q]
+  []
 []
 
 # Single Matrix Preconditioner
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     coupled_groups = 'u,v p,q'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./conv_u]
+  []
+  [conv_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 
-  [./diff_p]
+  [diff_p]
     type = Diffusion
     variable = p
-  [../]
-  [./conv_p]
+  []
+  [conv_p]
     type = CoupledForce
     variable = p
     v = q
-  [../]
-  [./diff_q]
+  []
+  [diff_q]
     type = Diffusion
     variable = q
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
-  [./bottom_v]
+  []
+  [bottom_v]
     type = DirichletBC
     variable = v
     boundary = 0
     value = 5
-  [../]
-  [./top_v]
+  []
+  [top_v]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 2
-  [../]
+  []
 
-  [./left_p]
+  [left_p]
     type = DirichletBC
     variable = p
     boundary = 1
     value = 2
-  [../]
-  [./bottom_q]
+  []
+  [bottom_q]
     type = DirichletBC
     variable = q
     boundary = 0
     value = 3
-  [../]
-  [./top_q]
+  []
+  [top_q]
     type = DirichletBC
     variable = q
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

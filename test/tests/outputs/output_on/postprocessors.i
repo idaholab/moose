@@ -6,44 +6,44 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sum]
+  [sum]
     type = PerfGraphData
     section_name = "Root"
     data_type = total
     execute_on = 'initial nonlinear timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -57,8 +57,8 @@
 
 [Outputs]
   exodus = false
-  [./console]
+  [console]
     type = Console
     execute_postprocessors_on = 'initial nonlinear timestep_end'
-  [../]
+  []
 []

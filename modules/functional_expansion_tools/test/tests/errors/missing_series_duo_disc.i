@@ -4,13 +4,13 @@
 []
 
 [Functions]
-  [./series]
+  [series]
     type = FunctionSeries
     series_type = CylindricalDuo
     orders = '0 1'
     physical_bounds = '-1.0 1.0   0.0 0.0   1'
     x = Legendre
-  [../]
+  []
 []
 
 [Executioner]

@@ -39,15 +39,15 @@
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalVoronoiVoidIC]
+  [PolycrystalICs]
+    [PolycrystalVoronoiVoidIC]
       invalue = 1.0
       outvalue = 0.0
       polycrystal_ic_uo = voronoi
       rand_seed = 10
-    [../]
-  [../]
-  [./bubble_IC]
+    []
+  []
+  [bubble_IC]
     variable = c
     type = PolycrystalVoronoiVoidIC
     structure_type = voids
@@ -55,7 +55,7 @@
     outvalue = 0.0
     polycrystal_ic_uo = voronoi
     rand_seed = 10
-  [../]
+  []
 []
 
 [Materials]
@@ -67,19 +67,19 @@
     outputs = exodus
     output_properties = 'diffusivity'
   []
-  [./hb]
+  [hb]
     type = DerivativeParsedMaterial
     property_name = hb
     coupled_variables = 'c'
     expression = 'c * c * c * (6 * c * c - 15 * c + 10)'
-  [../]
-  [./hm]
+  []
+  [hm]
     type = DerivativeParsedMaterial
     property_name = hm
     coupled_variables = 'c'
     material_property_names = 'hb'
     expression =  '(1-hb)'
-  [../]
+  []
 []
 
 [UserObjects]

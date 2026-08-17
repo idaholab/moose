@@ -7,48 +7,48 @@
 []
 
 [AuxVariables]
-  [./ux]
-    [./InitialCondition]
+  [ux]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
-  [./uy]
-    [./InitialCondition]
+    []
+  []
+  [uy]
+    [InitialCondition]
       type = FunctionIC
       function = y
-    [../]
-  [../]
-  [./c]
+    []
+  []
+  [c]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./a]
-  [../]
+  [a]
+  []
 []
 [Kernels]
-  [./a]
+  [a]
     type = Diffusion
     variable = a
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./without]
+  [without]
     type = SideIntegralVariablePostprocessor
     variable = c
     execute_on = initial
     boundary = left
-  [../]
-  [./with]
+  []
+  [with]
     type = SideIntegralVariablePostprocessor
     variable = c
     use_displaced_mesh = true
     execute_on = initial
     boundary = left
-  [../]
+  []
 []
 
 [Problem]
@@ -61,7 +61,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

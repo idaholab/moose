@@ -30,41 +30,41 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./eigenstrain]
+  []
+  [eigenstrain]
     type = ComputeEigenstrain
     eigen_base = '1e-4'
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
-  [./left_x]
+  []
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

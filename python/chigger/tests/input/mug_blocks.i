@@ -4,90 +4,90 @@
 []
 
 [MeshModifiers]
-  [./subdomains]
+  [subdomains]
     type = SubdomainBoundingBox
     top_right = '3 3 3'
     bottom_left = '0 -3 -2.1'
     block_id = '76'
-  [../]
+  []
 []
 
 [Variables]
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./diffused]
+  []
+  [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./aux_elem]
+  [aux_elem]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_convected]
+  [diff_convected]
     type = Diffusion
     variable = convected
-  [../]
-  [./conv]
+  []
+  [conv]
     # Couple a variable into the convection kernel using local_name = simulationg_name syntax
     type = Convection
     variable = convected
     velocity = '1 1 1'
-  [../]
-  [./diff_diffused]
+  []
+  [diff_diffused]
     type = Diffusion
     variable = diffused
-  [../]
-  [./diff_t]
+  []
+  [diff_t]
     type = TimeDerivative
     variable = diffused
-  [../]
-  [./conv_t]
+  []
+  [conv_t]
     type = TimeDerivative
     variable = convected
     block = '76'
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_convected]
+  [bottom_convected]
     type = DirichletBC
     variable = convected
     boundary = bottom
     value = 1
-  [../]
-  [./top_convected]
+  []
+  [top_convected]
     type = DirichletBC
     variable = convected
     boundary = top
     value = 0
-  [../]
-  [./bottom_diffused]
+  []
+  [bottom_diffused]
     type = DirichletBC
     variable = diffused
     boundary = bottom
     value = 2
-  [../]
-  [./top_diffused]
+  []
+  [top_diffused]
     type = DirichletBC
     variable = diffused
     boundary = top
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./func_pp]
+  [func_pp]
     type = FunctionValuePostprocessor
     function = 2*t
-  [../]
+  []
 []
 
 [Executioner]
@@ -103,10 +103,10 @@
 []
 
 [ICs]
-  [./aux_ic]
+  [aux_ic]
     variable = aux_elem
     max = 10
     seed = 2
     type = RandomIC
-  [../]
+  []
 []

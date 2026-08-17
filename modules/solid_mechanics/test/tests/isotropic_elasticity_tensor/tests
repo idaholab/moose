@@ -1,29 +1,29 @@
 [Tests]
   issues = '#4783'
   design = 'ComputeIsotropicElasticityTensor.md'
-  [./lambda_shear]
+  [lambda_shear]
     type = Exodiff
     input = 'lambda_shear_modulus_test.i'
     exodiff = 'lambda_shear_modulus_test_out.e'
     requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the lambda and shear modulus for an isotropic material.'
-  [../]
-  [./youngs_poissons]
+  []
+  [youngs_poissons]
     type = Exodiff
     input = 'youngs_modulus_poissons_ratio_test.i'
     exodiff = 'youngs_modulus_poissons_ratio_test_out.e'
     requirement = "The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the Young's modulus and Poisson's ratio for an isotropic material."
-  [../]
-  [./bulk_shear]
+  []
+  [bulk_shear]
     type = Exodiff
     input = 'bulk_modulus_shear_modulus_test.i'
     exodiff = 'bulk_modulus_shear_modulus_test_out.e'
     requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from their bulk modulus and shear modulus for an isotropic material.'
-  [../]
-  [./axisymmetric_rz]
+  []
+  [axisymmetric_rz]
     type = Exodiff
     input = '2D-axisymmetric_rz_test.i'
     exodiff = '2D-axisymmetric_rz_test_out.e'
     requirement = 'The ComputeElasticityTensor class shall correctly compute the elasticity tensor for an isotropic axisymmetric problem.'
     design = 'ComputeElasticityTensor.md'
-  [../]
+  []
 []

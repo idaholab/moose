@@ -6,9 +6,9 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.640243719999999
-  [../]
+  []
 []

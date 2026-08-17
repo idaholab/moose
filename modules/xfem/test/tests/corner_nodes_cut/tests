@@ -1,5 +1,5 @@
 [Tests]
-  [./corner_node_cut_twice]
+  [corner_node_cut_twice]
     type = Exodiff
     input = corner_node_cut_twice.i
     exodiff = 'corner_node_cut_twice_out.e'
@@ -10,8 +10,8 @@
                   'in 2D.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
-  [./corner_edge_cut]
+  []
+  [corner_edge_cut]
     type = Exodiff
     input = corner_edge_cut.i
     exodiff = 'corner_edge_cut_out.e'
@@ -23,8 +23,8 @@
                   'same mesh.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
-  [./corner_node_cut]
+  []
+  [corner_node_cut]
     type = Exodiff
     input = corner_node_cut.i
     exodiff = 'corner_node_cut_out.e'
@@ -35,8 +35,8 @@
                   'are generated to separate the previously connected elements.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
-  [./notch]
+  []
+  [notch]
     type = Exodiff
     input = notch.i
     exodiff = 'notch_out.e'
@@ -46,5 +46,5 @@
                   'crack front along a prescribed cut in 2D.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
+  []
 []

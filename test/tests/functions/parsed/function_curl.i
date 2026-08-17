@@ -10,46 +10,46 @@
 
 [Variables]
   # u = (y, -x, 0)
-  [./u]
+  [u]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
   # Simple "clockwise rotating" field in XY plane. curl(u) = (0, 0, -2)
-  [./field]
+  [field]
     type = ParsedVectorFunction
     expression_x = 'y'
     expression_y = '-x'
     curl_z = '-2'
-  [../]
-  [./ffn_x]
+  []
+  [ffn_x]
     type = ParsedFunction
     expression = 'y'
-  [../]
-  [./ffn_y]
+  []
+  [ffn_y]
     type = ParsedFunction
     expression = '-x'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = VectorFEWave
     variable = u
     x_forcing_func = ffn_x
     y_forcing_func = ffn_y
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = VectorCurlBC
     curl_value = field
     variable = u
     boundary = 'left right top bottom'
-  [../]
+  []
 []
 
 [Executioner]

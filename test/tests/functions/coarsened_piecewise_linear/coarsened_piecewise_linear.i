@@ -4,8 +4,8 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Problem]
@@ -14,22 +14,22 @@
 []
 
 [Functions]
-  [./input]
+  [input]
     type = CoarsenedPiecewiseLinear
     data_file = input.csv
     format = columns
     epsilon = 0.1
     x_scale = 0.03
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./F]
+  [F]
     type = PiecewiseFunctionTabulate
     function = input
     execute_on = INITIAL
     outputs = vpp
-  [../]
+  []
 []
 
 [Executioner]
@@ -38,8 +38,8 @@
 []
 
 [Outputs]
-  [./vpp]
+  [vpp]
     type = CSV
     execute_vector_postprocessors_on = INITIAL
-  [../]
+  []
 []

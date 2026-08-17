@@ -43,11 +43,11 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = false
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 

@@ -11,14 +11,14 @@
 []
 
 [Variables]
-  [./c]
-  [../]
-  [./w]
-  [../]
+  [c]
+  []
+  [w]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     x1 = 0.0
     y1 = 0.0
@@ -27,31 +27,31 @@
     outvalue = 0.1
     int_width = 60.0
     variable = c
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     kappa_name = kappa
     w = w
     f_name = F
-  [../]
-  [./w_res]
+  []
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
-  [./time]
+  []
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = PFParamsPolyFreeEnergy
     c = c
     T = 1000 # K
@@ -62,19 +62,19 @@
     Em = 0.71 # in eV, from Balluffi1978 Table 2
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.7 # Total guess
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = PolynomialFreeEnergy
     c = c
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

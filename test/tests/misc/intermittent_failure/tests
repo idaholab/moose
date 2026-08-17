@@ -1,5 +1,5 @@
 [Tests]
-  [./intermittent_failure]
+  [intermittent_failure]
     type = 'RunApp'
     input = 'intermittent_failure.i'
     max_time = 10
@@ -12,5 +12,5 @@
 
     # HPC runs could lead to a timeout
     capabilities = 'method!=dbg & !hpc'
-  [../]
+  []
 []

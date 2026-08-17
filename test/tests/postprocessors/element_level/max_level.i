@@ -1,21 +1,21 @@
 [Mesh]
-  [./cmg]
+  [cmg]
     type = CartesianMeshGenerator
     dim = 1
     dx = '1.0 1.0'
     ix = '1 1'
     subdomain_id = '0 1'
-  [../]
+  []
 []
 
 [Adaptivity]
   steps = 1
   marker = 'uniform'
-  [./Markers/uniform]
+  [Markers/uniform]
     type = UniformMarker
     mark = refine
     block = 0
-  [../]
+  []
 []
 
 [Problem]
@@ -27,10 +27,10 @@
 []
 
 [Postprocessors]
-  [./max_level]
+  [max_level]
     type = ElementMaxLevelPostProcessor
     level = 'h'
-  [../]
+  []
 []
 
 [Outputs]

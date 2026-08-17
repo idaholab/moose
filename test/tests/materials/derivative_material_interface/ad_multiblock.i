@@ -4,72 +4,72 @@
 []
 
 [Variables]
-  [./c]
-  [../]
+  [c]
+  []
 []
 
 [Materials]
-  [./mat1]
+  [mat1]
     type = ADDefaultMatPropConsumerMaterial
     block = 1
-  [../]
-  [./mat2]
+  []
+  [mat2]
     type = ADDefaultMatPropConsumerMaterial
     block = 2
-  [../]
-  [./mat1b]
+  []
+  [mat1b]
     type = ADDefaultMatPropConsumerMaterial
     mat_prop = prop2
     block = 1
-  [../]
-  [./mat2b]
+  []
+  [mat2b]
     type = ADDefaultMatPropConsumerMaterial
     mat_prop = prop2
     block = 2
-  [../]
+  []
 
-  [./generic]
+  [generic]
     type = ADGenericConstantMaterial
     block = '1 2'
     prop_names = prop3
     prop_values = 9
-  [../]
+  []
 
-  [./mat1c]
+  [mat1c]
     type = ADDefaultMatPropConsumerMaterial
     mat_prop = prop3
     block = 1
-  [../]
-  [./mat2c]
+  []
+  [mat2c]
     type = ADDefaultMatPropConsumerMaterial
     mat_prop = prop3
     block = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./kern1]
+  [kern1]
     type = ADDefaultMatPropConsumerKernel
     variable = c
     block = 1
-  [../]
-  [./kern2]
+  []
+  [kern2]
     type = ADDefaultMatPropConsumerKernel
     variable = c
     block = 2
-  [../]
-  [./kern1b]
+  []
+  [kern1b]
     type = ADDefaultMatPropConsumerKernel
     variable = c
     mat_prop = prop3
     block = 1
-  [../]
-  [./kern2b]
+  []
+  [kern2b]
     type = ADDefaultMatPropConsumerKernel
     variable = c
     mat_prop = prop3
     block = 2
-  [../]
+  []
 []
 
 [Executioner]

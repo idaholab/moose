@@ -1,5 +1,5 @@
 [Tests]
-  [./coarse]
+  [coarse]
     type = CSVDiff
     input = 'coarse.i'
     csvdiff = 'coarse_csv_xmass_0011.csv'
@@ -7,8 +7,8 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a coarse mesh in 2D'
-  [../]
-  [./coarse_3D]
+  []
+  [coarse_3D]
     type = CSVDiff
     heavy = true
     max_time = 1000
@@ -18,8 +18,8 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a coarse mesh in 3D'
-  [../]
-  [./fine_steady]
+  []
+  [fine_steady]
     type = Exodiff
     heavy = true
     input = 'fine_steady.i'
@@ -29,8 +29,8 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to find the steady-state solution for flow and solute transport along a fracture embedded in a porous matrix, using a fine mesh'
-  [../]
-  [./fine_transient]
+  []
+  [fine_transient]
     type = CSVDiff
     heavy = true
     input = 'fine_transient.i'
@@ -41,8 +41,8 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a fine mesh'
-  [../]
-  [./fine_thick_fracture_steady]
+  []
+  [fine_thick_fracture_steady]
     type = Exodiff
     heavy = true
     input = 'fine_thick_fracture_steady.i'
@@ -52,8 +52,8 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to find the steady-state solution for flow and solute transport along a finite-sized fracture embedded in a porous matrix, using a fine mesh'
-  [../]
-  [./fine_thick_fracture_transient]
+  []
+  [fine_thick_fracture_transient]
     type = CSVDiff
     heavy = true
     input = 'fine_thick_fracture_transient.i'
@@ -64,8 +64,8 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a finite-sized fracture embedded in a porous matrix, using a fine mesh'
-  [../]
-  [./diffusion]
+  []
+  [diffusion]
     type = Exodiff
     input = 'diffusion.i'
     exodiff = 'diffusion_out.e'
@@ -73,5 +73,5 @@
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'The system shall be able to simulate diffusion along fracture embedded in a porous matrix'
-  [../]
+  []
 []

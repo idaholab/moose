@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     xmax = 3
@@ -10,7 +10,7 @@
     nz = 3
   []
 
-  [./central_block]
+  [central_block]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 2
@@ -18,7 +18,7 @@
     top_right = '2 2 2'
   []
 
-  [./central_boundary]
+  [central_boundary]
     type = SideSetsBetweenSubdomainsGenerator
     input = central_block
     primary_block = 2

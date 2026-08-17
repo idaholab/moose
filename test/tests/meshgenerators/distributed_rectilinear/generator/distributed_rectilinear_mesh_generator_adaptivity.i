@@ -8,35 +8,35 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -54,20 +54,20 @@
   marker = marker
   initial_marker = marker
   max_h_level = 2
-  [./Indicators]
-    [./indicator]
+  [Indicators]
+    [indicator]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
-  [./Markers]
-    [./marker]
+    []
+  []
+  [Markers]
+    [marker]
       type = ErrorFractionMarker
       indicator = indicator
       coarsen = 0.1
       refine = 0.7
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

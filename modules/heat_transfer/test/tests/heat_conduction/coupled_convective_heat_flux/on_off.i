@@ -6,56 +6,56 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./t_infinity]
-  [../]
+  [t_infinity]
+  []
 
-  [./active]
+  [active]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./force]
+  []
+  [force]
     type = BodyForce
     variable = u
     value = 1000
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./t_infinity]
+  [t_infinity]
     type = ConstantAux
     variable = t_infinity
     value = 500
     execute_on = initial
-  [../]
+  []
 
-  [./active_right]
+  [active_right]
     type = ConstantAux
     variable = active
     value = 0
     boundary = right
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = CoupledConvectiveHeatFluxBC
     variable = u
     boundary = 'left right top bottom'
     htc = 10
     T_infinity = t_infinity
     scale_factor = active
-  [../]
+  []
 []
 
 [Executioner]

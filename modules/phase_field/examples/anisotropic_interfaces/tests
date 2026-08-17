@@ -1,16 +1,16 @@
 [Tests]
-  [./snow]
+  [snow]
     type = RunApp
     input = 'snow.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     capabilities = 'method!=dbg'
     check_input = True
-  [../]
-  [./echebarria_iso]
+  []
+  [echebarria_iso]
       type = RunApp
       input = 'echebarria_iso.i'
       cli_args = 'Mesh/nx=6 Mesh/ny=15'
       capabilities = 'method!=dbg'
       check_input = True
-  [../]
+  []
 []

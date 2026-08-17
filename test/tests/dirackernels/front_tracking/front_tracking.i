@@ -6,59 +6,59 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./time_v]
+  []
+  [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./v_all_around]
+  []
+  [v_all_around]
     type = DirichletBC
     variable = v
     boundary = 'bottom left right top'
     value = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./tdf]
+  [tdf]
     type = TrackDiracFront
     var = u
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,9 +75,9 @@
 []
 
 [DiracKernels]
-  [./front_source]
+  [front_source]
     front_uo = tdf
     variable = v
     type = FrontSource
-  [../]
+  []
 []

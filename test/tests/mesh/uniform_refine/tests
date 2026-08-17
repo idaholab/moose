@@ -1,7 +1,7 @@
 [Tests]
   design = 'Mesh/index.md'
 
-  [./square]
+  [square]
     type = 'Exodiff'
     input = '3d_diffusion.i'
     exodiff = '3d_diffusion_out.n.3.0	3d_diffusion_out.n.3.1	3d_diffusion_out.n.3.2'
@@ -9,5 +9,5 @@
     max_parallel = 3
     issues = '#18571'
     requirement = 'The system shall support avoiding repartitioning the mesh and deleting remote elements after uniform refinements'
-  [../]
+  []
 []

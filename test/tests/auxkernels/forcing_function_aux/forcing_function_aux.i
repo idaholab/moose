@@ -14,90 +14,90 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./grad_u_x]
+  [grad_u_x]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 2
-  [../]
-  [./T]
+  []
+  [T]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 100
-  [../]
+  []
 []
 
 [Functions]
-  [./u_ic_func]
+  [u_ic_func]
     type = ParsedFunction
     expression = '2*x'
-  [../]
-  [./f]
+  []
+  [f]
     type = ParsedFunction
     symbol_names = f
     symbol_values = grad_int
     expression = f
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = u
     function = u_ic_func
-  [../]
+  []
 []
 
 [Kernels]
-  [./dudt]
+  [dudt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./grad_u_x_aux]
+  [grad_u_x_aux]
     type = VariableGradientComponent
     variable = grad_u_x
     component = x
     gradient_variable = u
-  [../]
-  [./T_increment]
+  []
+  [T_increment]
     type = ForcingFunctionAux
     variable = T
     function = f
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./grad_int]
+  [grad_int]
     type = ElementIntegralVariablePostprocessor
     variable = grad_u_x
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 2
-  [../]
+  []
 []
 
 [Executioner]

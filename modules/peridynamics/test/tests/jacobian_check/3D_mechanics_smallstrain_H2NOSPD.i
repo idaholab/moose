@@ -7,58 +7,58 @@
   type = PeridynamicsMesh
   horizon_number = 2
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 3
     ny = 3
     nz = 3
-  [../]
-  [./gpd]
+  []
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
-  [./all]
+  [all]
     formulation = NONORDINARY_STATE
     stabilization = BOND_HORIZON_II
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.0
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrainNOSPD
     stabilization = BOND_HORIZON_II
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'
     petsc_options_value = 'bcgs bjacobi test'
-  [../]
+  []
 []
 
 [Executioner]
@@ -68,8 +68,8 @@
   dt = 1
   num_steps = 1
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
-  [../]
+  []
 []

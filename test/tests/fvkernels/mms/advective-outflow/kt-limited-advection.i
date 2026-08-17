@@ -7,13 +7,13 @@ max_abs_eig=${fparse c + a}
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0.1
     xmax = 1.1
     nx = 2
-  [../]
+  []
 []
 
 [Problem]
@@ -29,21 +29,21 @@ max_abs_eig=${fparse c + a}
 []
 
 [Variables]
-  [./u]
+  [u]
     two_term_boundary_expansion = true
     type = MooseVariableFVReal
-  [../]
+  []
 []
 
 [FVKernels]
-  [./advection_u]
+  [advection_u]
     type = FVKTLimitedAdvection
     variable = u
     velocity = '${a} 0 0'
     limiter = 'vanLeer'
     max_abs_eig = ${max_abs_eig}
     add_artificial_diff = true
-  [../]
+  []
   [body_u]
     type = FVBodyForce
     variable = u
@@ -107,13 +107,13 @@ max_abs_eig=${fparse c + a}
 []
 
 [Postprocessors]
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = u
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

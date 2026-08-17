@@ -14,28 +14,28 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./GrainGrowth]
+  [PhaseField]
+    [GrainGrowth]
       c = c
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./c]
-  [../]
+  [c]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalCircleGrainIC]
+  [PolycrystalICs]
+    [BicrystalCircleGrainIC]
       radius = 300
       x = 400
       y = 0
       int_width = 60
-    [../]
-  [../]
-  [./c_IC]
+    []
+  []
+  [c_IC]
     type = SmoothCircleIC
     variable = c
     x1 = 100
@@ -44,32 +44,32 @@
     int_width = 40
     invalue = 1.0
     outvalue = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./gr1area]
+  [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

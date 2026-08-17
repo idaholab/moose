@@ -77,11 +77,11 @@ One can enable the usage of +dual basis+ by enabling `use_dual = true` in the `V
 
 ```
 [Variables]
- [./lm]
+ [lm]
    order = FIRST
    family = LAGRANGE
    use_dual = true
- [../]
+ []
 []
 ```
 

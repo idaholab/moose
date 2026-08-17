@@ -6,30 +6,30 @@
 []
 
 [AuxVariables]
-  [./min]
+  [min]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./max]
+  []
+  [max]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./min]
+  [min]
     type = ElementLengthAux
     variable = min
     method = min
     execute_on = initial
-  [../]
-  [./max]
+  []
+  [max]
     type = ElementLengthAux
     variable = max
     method = max
     execute_on = initial
-  [../]
-[../]
+  []
+[]
 
 [Problem]
   type = FEProblem

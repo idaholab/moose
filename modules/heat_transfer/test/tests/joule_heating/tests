@@ -1,21 +1,21 @@
 [Tests]
-  [./joule_heating]
+  [joule_heating]
     type = 'Exodiff'
     input = 'transient_jouleheating.i'
     exodiff = 'transient_jouleheating_out.e'
     requirement = 'The system shall compute Joule heating'
     issues = '#8220'
     design = 'JouleHeatingSource.md'
-  [../]
-  [./ad_joule_heating]
+  []
+  [ad_joule_heating]
     type = 'Exodiff'
     input = 'transient_ad_jouleheating.i'
     exodiff = 'transient_ad_jouleheating_out.e'
     requirement = 'The system shall compute Joule heating using automatic differentiation'
     issues = '#15536'
     design = 'ADJouleHeatingSource.md'
-  [../]
-  [./ad_joule_heating_jacobian]
+  []
+  [ad_joule_heating_jacobian]
     type = 'PetscJacobianTester'
     input = 'transient_ad_jouleheating.i'
     cli_args = 'Executioner/end_time=1'
@@ -24,8 +24,8 @@
     requirement = 'The system shall compute a perfect jacobian for Joule heating using automatic differentiation'
     issues = '#15536'
     design = 'ADJouleHeatingSource.md'
-  [../]
-  [./deprecated_ad_joule_heating]
+  []
+  [deprecated_ad_joule_heating]
     type = 'Exodiff'
     input = 'transient_ad_jouleheating.i'
     exodiff = 'transient_ad_jouleheating_out.e'
@@ -33,17 +33,17 @@
     requirement = 'The system shall compute Joule heating using the deprecated method with automatic differentiation'
     issues = '#15536 #30000'
     design = 'ADJouleHeatingSource.md'
-  [../]
+  []
 
-  [./aux_joule_heating]
+  [aux_joule_heating]
     type = 'Exodiff'
     input = 'transient_aux_jouleheating.i'
     exodiff = 'transient_aux_jouleheating_out.e'
     requirement = 'The system shall compute Joule heating as an AuxVariable.'
     issues = '#30000'
     design = 'JouleHeatingHeatGeneratedAux.md'
-  [../]
-  [./deprecated_aux_joule_heating]
+  []
+  [deprecated_aux_joule_heating]
     type = 'Exodiff'
     input = 'transient_aux_jouleheating.i'
     exodiff = 'transient_aux_jouleheating_out.e'
@@ -51,5 +51,5 @@
     requirement = 'The system shall compute Joule heating as an AuxVariable using the deprecated method.'
     issues = '#30000'
     design = 'JouleHeatingHeatGeneratedAux.md'
-  [../]
+  []
 []

@@ -65,34 +65,34 @@
 []    # Mesh END
 
 [Variables]  # Variables Start
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 294.26 # Initial parallelpiped temperature
-  [../]
+  []
 
 []    # Variables END
 
 
 [Kernels]  # Kernels Start
-  [./heat]
+  [heat]
 #    type = HeatConductionRZ
      type = HeatConduction
      variable = temp
-  [../]
+  []
 
-  [./heat_ie]
+  [heat_ie]
 #  type = HeatConductionTimeDerivativeRZ
   type = HeatConductionTimeDerivative
   variable = temp
-  [../]
+  []
 
 []    # Kernels END
 
 
 [BCs]    # Boundary Conditions Start
 # Heat transfer coefficient on outer parallelpiped radius and ends
-  [./convective_clad_surface]    # Convective Start
+  [convective_clad_surface]    # Convective Start
 #         type = ConvectiveFluxRZ  # Convective flux, e.g. q'' = h*(Tw - Tf)
          type = ConvectiveFluxBC  # Convective flux, e.g. q'' = h*(Tw - Tf)
          boundary = '1 2 3 4 5 6'  # BC applied on top, along length, and bottom
@@ -102,12 +102,12 @@
          final = 477.6      # final ambient (lab or oven) temperature (K)
    duration = 600.    # length of time in seconds that it takes the ambient
            #     temperature to ramp from initial to final
-  [../]          # Convective End
+  []          # Convective End
 
 []    # BCs END
 
 [Materials]    # Materials Start
-  [./thermal]
+  [thermal]
     type = HeatConductionMaterial
     block = 1
     specific_heat = 826.4
@@ -116,13 +116,13 @@
           # above conductivity arbitrarily increased by 2 decades to make the
           #   object soak faster for the present purposes
 
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     block = 1
     density = 2405.28
-  [../]
+  []
 []      # Materials END
 
 [Executioner]    # Executioner Start

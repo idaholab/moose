@@ -1,5 +1,5 @@
 [Tests]
-  [./mesh_only_warning]
+  [mesh_only_warning]
     type = 'Exodiff'
     input = 'tetgen_mesh.i'
     cli_args = '--mesh-only'
@@ -9,5 +9,5 @@
     issues = '#20694'
     design = 'FileMeshGenerator.md'
     requirement = 'The system shall read TetGen file meshes.'
-  [../]
+  []
 []

@@ -5,7 +5,7 @@
   [group]
     requirement = "The system shall support the failure of sub-application that operates with differing time steps than the parent application."
 
-    [./test_failure]
+    [test_failure]
       type = 'Exodiff'
       input = 'parent.i'
       exodiff = 'parent_out.e parent_out_sub0.e'

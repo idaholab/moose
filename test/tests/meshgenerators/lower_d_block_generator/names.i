@@ -1,12 +1,12 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
     ny = 10
   []
 
-  [./lower_d_block]
+  [lower_d_block]
     type = LowerDBlockFromSidesetGenerator
     input = gmg
     new_block_id = 10
@@ -15,46 +15,46 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = 0
-  [../]
-  [./v]
+  []
+  [v]
     block = 10
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     block = 0
-  [../]
-  [./srcv]
+  []
+  [srcv]
     type = BodyForce
     block = 10
     variable = v
     function = 1
-  [../]
-  [./time_v]
+  []
+  [time_v]
     type = TimeDerivative
     block = 10
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

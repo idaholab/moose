@@ -1,17 +1,17 @@
 [Tests]
-  [./BCC_test]
+  [BCC_test]
     type = 'Exodiff'
     input = 'PFC_IC_BCC_test.i'
     exodiff = 'PFC_IC_BCC_test_out.e'
     # 0-step transient does not recover
     recover = false
-  [../]
+  []
 
-  [./FCC_test]
+  [FCC_test]
     type = 'Exodiff'
     input = 'PFC_IC_FCC_test.i'
     exodiff = 'PFC_IC_FCC_test_out.e'
     # 0-step transient does not recover
     recover = false
-  [../]
+  []
 []

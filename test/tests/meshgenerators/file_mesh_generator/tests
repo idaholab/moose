@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'file_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -10,8 +10,8 @@
     requirement = 'The system shall have the ability to generate a mesh by reading it from a file.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#11640 #32487'
-  [../]
-  [./extra_integer_test]
+  []
+  [extra_integer_test]
     type = 'Exodiff'
     input = 'exodus_file_mesh_with_id.i'
     exodiff = 'exodus_file_mesh_with_id_out.e'
@@ -20,9 +20,9 @@
     requirement = 'The system shall have the ability to assign element extra integers with elemental variables in an Exodus mesh file.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#14916'
-  [../]
+  []
 
-  [./exodus_iga_test]
+  [exodus_iga_test]
     type = XMLDiff
     input = '2d_diffusion_iga.i'
     expect_out = 'Solve Converged'
@@ -39,7 +39,7 @@
     issues = '#18768'
   []
 
-  [./exodus_iga_exodiff]
+  [exodus_iga_exodiff]
     type = Exodiff
     input = '2d_diffusion_iga.i'
     cli_args = 'Outputs/vtk=false Outputs/exodus=true'
@@ -52,7 +52,7 @@
     issues = '#18768'
   []
 
-  [./exodus_iga_nosplines_test]
+  [exodus_iga_nosplines_test]
     type = XMLDiff
     input = '2d_diffusion_iga_nosplines.i'
     expect_out = 'Solve Converged'
@@ -69,7 +69,7 @@
     issues = '#18768'
   []
 
-  [./exodus_iga_nosplines_exodiff]
+  [exodus_iga_nosplines_exodiff]
     type = Exodiff
     input = '2d_diffusion_iga_nosplines.i'
     cli_args = 'Outputs/vtk=false Outputs/exodus=true'
@@ -83,7 +83,7 @@
     issues = '#18768'
   []
 
-  [./exodus_pseudoiga_test]
+  [exodus_pseudoiga_test]
     type = XMLDiff
     input = '3d_steady_diffusion_iga.i'
     expect_out = 'Solve Converged'
@@ -100,7 +100,7 @@
     issues = '#18768'
   []
 
-  [./exodus_discontinuous_iga_2d_l2_test]
+  [exodus_discontinuous_iga_2d_l2_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
     input = '2d_discontinuous_iga_l2.i'
@@ -114,7 +114,7 @@
     issues = '#18768'
   []
 
-  [./exodus_discontinuous_iga_exact_test]
+  [exodus_discontinuous_iga_exact_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
     input = 'exact_discontinuous_iga.i'
@@ -128,7 +128,7 @@
     issues = '#18768'
   []
 
-  [./exodus_discontinuous_iga_1d_test]
+  [exodus_discontinuous_iga_1d_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
     input = '1d_discontinuous_iga.i'
@@ -233,7 +233,7 @@
   []
 
 
-  [./exodus_discontinuous_iga_2d_test]
+  [exodus_discontinuous_iga_2d_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
     input = '2d_discontinuous_iga.i'
@@ -247,7 +247,7 @@
     issues = '#18768'
   []
 
-  [./pre_checkpoint_load_test]
+  [pre_checkpoint_load_test]
     type = 'RunApp'
     input = '2d_diffusion_test.i'
     expect_out = 'Solve Converged'
@@ -258,7 +258,7 @@
     issues = '#16192'
   []
 
-  [./checkpoint_load_test]
+  [checkpoint_load_test]
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = '2d_diffusion_test_out.e'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'gap_heat_transfer_convex.i'
     exodiff = 'gap_heat_transfer_convex_out.e'
@@ -8,8 +8,8 @@
                   "block and a larger convex block."
     design = "/materials/GapConductance.md"
     issues = "#2714"
-  [../]
-  [./test_gap_offsets]
+  []
+  [test_gap_offsets]
     type = 'Exodiff'
     input = 'gap_heat_transfer_convex_gap_offsets.i'
     exodiff = 'gap_heat_transfer_convex_gap_offsets_out.e'
@@ -18,5 +18,5 @@
                   "block and a larger convex block."
     design = "PenetrationAux.md"
     issues = '#14089'
-  [../]
+  []
 []

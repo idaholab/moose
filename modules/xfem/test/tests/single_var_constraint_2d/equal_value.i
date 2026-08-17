@@ -21,50 +21,50 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.5 1.0 0.5 0.0'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Constraints]
-  [./xfem_constraint]
+  [xfem_constraint]
     type = XFEMEqualValueAtInterface
     geometric_cut_userobject = 'line_seg_cut_uo'
     use_displaced_mesh = false
     variable = u
     value = 1
     alpha = 1e5
-  [../]
+  []
 []
 
 [BCs]
 # Define boundary conditions
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,8 +85,8 @@
   execute_on = timestep_end
   exodus = true
   perf_graph = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

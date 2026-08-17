@@ -5,61 +5,61 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./foo]
+  [foo]
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff body_force'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./body_force]
+  [body_force]
     type = BodyForce
     variable = u
     block = 1
     value = 10
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./foo]
+  [foo]
     type = ConstantAux
     variable = foo
     value = 1
     block = 2
-  [../]
+  []
 []
 
 [BCs]
   active = 'right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

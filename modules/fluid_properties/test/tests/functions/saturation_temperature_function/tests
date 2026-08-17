@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'saturation_temperature_function.i'
     csvdiff = 'saturation_temperature_function_out.csv'
@@ -8,5 +8,5 @@
     requirement = 'The system shall provide a function that computes saturation temperature from a pressure function'
     design = '/SaturationTemperatureFunction.md'
     issues = '#14755'
-  [../]
+  []
 []

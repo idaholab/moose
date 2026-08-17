@@ -27,168 +27,168 @@
     nx = 50
     xmax = 20
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '10.0 0 0'
     block_id = 1
     top_right = '20.0 0.0 0'
-  [../]
-  [./interface1]
+  []
+  [interface1]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     primary_block = '1'
     paired_block = 0
     new_boundary = 'interface1'
-  [../]
+  []
 []
 
 [GlobalParams]
 []
 
 [Variables]
-  [./p]
+  [p]
     block = 1
-  [../]
-  [./disp_x]
+  []
+  [disp_x]
     block = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./vel_x]
+  [vel_x]
     order = FIRST
     family = LAGRANGE
     block = 0
-  [../]
-  [./accel_x]
+  []
+  [accel_x]
     order = FIRST
     family = LAGRANGE
     block = 0
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./diffusion]
+  [diffusion]
     type = Diffusion
     variable = 'p'
     block = 1
-  [../]
-  [./inertia]
+  []
+  [inertia]
     type = AcousticInertia
     variable = p
     block = 1
-  [../]
-  [./DynamicTensorMechanics]
+  []
+  [DynamicTensorMechanics]
     displacements = 'disp_x'
     block = 0
-  [../]
-  [./inertia_x1]
+  []
+  [inertia_x1]
     type = InertialForce
     variable = disp_x
     block = 0
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./accel_x]
+  [accel_x]
     type = TestNewmarkTI
     displacement = disp_x
     variable = accel_x
     first = false
     block = 0
-  [../]
-  [./vel_x]
+  []
+  [vel_x]
     type = TestNewmarkTI
     displacement = disp_x
     variable = vel_x
     block = 0
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     block = 0
-  [../]
+  []
 []
 
 [InterfaceKernels]
-  [./interface1]
+  [interface1]
     type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_x
     boundary = 'interface1'
     D = 1e-6
     component = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_accel]
+  [bottom_accel]
     type = FunctionDirichletBC
     variable = p
     boundary = 'right'
     function = accel_bottom
-  [../]
-  [./disp_x1]
+  []
+  [disp_x1]
     type = NeumannBC
     boundary = 'left'
     variable = disp_x
     value = 0.0
-  [../]
+  []
 []
 
 [Functions]
-  [./accel_bottom]
+  [accel_bottom]
     type = PiecewiseLinear
     data_file = Input_1Peak_highF.csv
     scale_factor = 1e-2
     format = 'columns'
-  [../]
+  []
 []
 
 [Materials]
-  [./co_sq]
+  [co_sq]
     type = GenericConstantMaterial
     prop_names = inv_co_sq
     prop_values = 4.44e-7
     block = '1'
-  [../]
-  [./density0]
+  []
+  [density0]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
     prop_values = 4e-6
-  [../]
-  [./elasticity_base]
+  []
+  [elasticity_base]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 2.25
     shear_modulus = 0.0
     block = 0
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x'
-  [../]
-  [./stress]
+  []
+  [stress]
     type =  ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -212,16 +212,16 @@
 []
 
 [Postprocessors]
-  [./p1]
+  [p1]
     type = PointValue
     point = '10.0 0.0 0.0'
     variable = p
-  [../]
-  [./stress1]
+  []
+  [stress1]
     type = PointValue
     point = '10.0 0.0 0.0'
     variable = stress_xx
-  [../]
+  []
 []
 
 [Outputs]

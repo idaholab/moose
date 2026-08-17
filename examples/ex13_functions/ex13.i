@@ -13,52 +13,52 @@
 []
 
 [Variables]
-  [./forced]
+  [forced]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   # A ParsedFunction allows us to supply analytic expressions
   # directly in the input file
-  [./bc_func]
+  [bc_func]
     type = ParsedFunction
     expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '16'
-  [../]
+  []
 
   # This function is an actual compiled function
   # We could have used ParsedFunction for this as well
-  [./forcing_func]
+  [forcing_func]
     type = ExampleFunction
     alpha = 16
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = forced
-  [../]
+  []
 
   # This Kernel can take a function name to use
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = forced
     function = forcing_func
-  [../]
+  []
 []
 
 [BCs]
   # The BC can take a function name to use
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = forced
     boundary = 'bottom right top left'
     function = bc_func
-  [../]
+  []
 []
 
 [Executioner]

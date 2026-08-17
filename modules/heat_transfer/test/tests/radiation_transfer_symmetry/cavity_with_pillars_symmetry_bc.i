@@ -116,7 +116,7 @@
 []
 
 [GrayDiffuseRadiation]
-  [./cavity]
+  [cavity]
     boundary = '6 7 8 9 10 11'
     emissivity = '1 1 1 1 1 1'
     n_patches = '1 1 1 1 1 1'
@@ -126,7 +126,7 @@
     temperature = temperature
     ray_tracing_face_order = SECOND
     normalize_view_factor = false
-  [../]
+  []
 []
 
 [Postprocessors]

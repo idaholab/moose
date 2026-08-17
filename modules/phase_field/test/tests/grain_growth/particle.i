@@ -20,27 +20,27 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalCircleGrainIC]
+  [PolycrystalICs]
+    [BicrystalCircleGrainIC]
       radius = 333.333
       x = 500
       y = 500
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./c]
-    [./InitialCondition]
+  []
+  [c]
+    [InitialCondition]
       int_width = 60
       x1 = 167
       y1 = 500
@@ -49,54 +49,54 @@
       variable = c
       invalue = 1
       type = SmoothCircleIC
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     c = c
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./gr1area]
+  [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -115,12 +115,12 @@
   num_steps = 10
   dt = 80.0
 
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 2
     refine_fraction = 0.8
     coarsen_fraction = 0.05
     max_h_level = 2
-  [../]
+  []
 []
 
 [Outputs]

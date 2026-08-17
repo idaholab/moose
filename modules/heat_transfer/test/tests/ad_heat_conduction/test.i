@@ -11,79 +11,79 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 1.5
-  [../]
-  [./c]
+  []
+  [c]
     initial_condition = 1.5
-  [../]
+  []
 []
 
 [Kernels]
-  [./HeatDiff]
+  [HeatDiff]
     type = ADHeatConduction
     variable = T
     thermal_conductivity = thermal_conductivity
-  [../]
-  [./heat_dt]
+  []
+  [heat_dt]
     type = ADHeatConductionTimeDerivative
     variable = T
     specific_heat = thermal_conductivity
     density_name = thermal_conductivity
-  [../]
-  [./c]
+  []
+  [c]
     type = ADDiffusion
     variable = c
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_dt]
+  [c_dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./left_c]
+  [left_c]
     type = DirichletBC
     variable = c
     boundary = left
     value = 2
-  [../]
-  [./right_c]
+  []
+  [right_c]
     type = DirichletBC
     variable = c
     boundary = right
     value = 1
-  [../]
-  [./left_T]
+  []
+  [left_T]
     type = DirichletBC
     variable = T
     boundary = top
     value = 1
-  [../]
-  [./right_T]
+  []
+  [right_T]
     type = DirichletBC
     variable = T
     boundary = bottom
     value = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [k]
     type = ADThermalConductivityTest
     c = c
     temperature = T
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -3,45 +3,45 @@
 []
 
 [Variables]
-  [./u_new]
+  [u_new]
     order = FIRST
     family = LAGRANGE
 
     # Testing that we can load a solution from a different variable name
     initial_from_file_var = u
     initial_from_file_timestep = 2
-  [../]
+  []
 []
 
 [Kernels]
   active = 'bodyforce ie'
 
-  [./bodyforce]
+  [bodyforce]
     type = BodyForce
     variable = u_new
     value = 10.0
-  [../]
+  []
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u_new
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u_new
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u_new
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

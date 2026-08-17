@@ -1,24 +1,24 @@
 [Tests]
   issues = '#2848 #16354'
   design = 'syntax/AuxKernels/index.md syntax/Postprocessors/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'pp_depend.i'
     exodiff = 'pp_depend_out.e'
     requirement = "Execution of a UserObject shall occur after the execution of the AuxKernel objects if the former depends on the latter."
-  [../]
+  []
 
-  [./pp_depend_indirect_wrong]
+  [pp_depend_indirect_wrong]
     type = 'RunException'
     input = 'pp_depend_indirect_wrong.i'
     cli_args = 'Problem/check_uo_aux_state=true'
     expect_err = 'Aux kernels, user objects appear to have states for real reporter values on TIMESTEP_END'
     requirement = "The system shall be able to detect wrong implicit dependencies of a function value postprocessor that depends on a function which depends on a second postprocessor."
-  [../]
-  [./pp_depend_indirect_correct]
+  []
+  [pp_depend_indirect_correct]
     type = 'CSVDiff'
     input = 'pp_depend_indirect_correct.i'
     csvdiff = 'pp_depend_indirect_correct_out.csv'
     requirement = "Explicit dependencies of function value postprocessors may be declared to resolve execution order independently of construction order."
-  [../]
+  []
 []

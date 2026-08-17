@@ -106,40 +106,40 @@
 
 [Variables]
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./v]
+  []
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./w]
+  []
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./A]
+  []
+  [A]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./scaled_u]
+  []
+  [scaled_u]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./R]
+  []
+  [R]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
 
 
-  [./u]
+  [u]
     type = PiecewiseBilinear
     data_file = fred.csv
     axis = 0
-  [../]
+  []
 #
 # Example 1 - variable u
 #
@@ -157,11 +157,11 @@
 # At time = 2, the value of u at nodes with x-coordinate = 1 is 3.
 #            , the value of u at nodes with x-coordinate = 2 is 4.
 #
-  [./v]
+  [v]
     type = PiecewiseBilinear
     data_file = fred.csv
     xaxis = 1
-  [../]
+  []
 #
 # Example 2 - variable v
 #
@@ -177,11 +177,11 @@
 # At time = 2, the value of v at nodes with y-coordinate = 1 is 3.
 #            , the value of v at nodes with y-coordinate = 2 is 4.
 #
-  [./w]
+  [w]
     type = PiecewiseBilinear
     data_file = fred.csv
     yaxis = 2
-  [../]
+  []
 #
 # Example 3 - variable w
 #
@@ -197,12 +197,12 @@
 # At time = 2, the value of w at nodes with z-coordinate = 1 is 2.
 #            , the value of w at nodes with z-coordinate = 2 is 4.
 #
-  [./A]
+  [A]
     type = PiecewiseBilinear
     data_file = fred.csv
     xaxis = 0
     yaxis = 1
-  [../]
+  []
 #
 # Example 4 - variable A
 #
@@ -223,24 +223,24 @@
 # as a function of x and y postion, but is constant in time.
 #
 #
-  [./scaled_u]
+  [scaled_u]
     type = PiecewiseBilinear
     data_file = fred.csv
     axis = 0
     scale_factor = 2
-  [../]
+  []
 #
 # Example 5 - variable scaled_u.  This is just a scaled version of Example 1 to see if the scale_factor works
 #
 #
 #
-  [./R]
+  [R]
     type = PiecewiseBilinear
     data_file = fred.csv
     xaxis = 0
     yaxis = 1
     radial = true
-  [../]
+  []
 #
 # Example 6 - variable R
 #
@@ -265,70 +265,70 @@
 
 [Kernels]
 
-  [./diffu]
+  [diffu]
     type = Diffusion
     variable = u
-  [../]
-  [./diffv]
+  []
+  [diffv]
     type = Diffusion
     variable = v
-  [../]
-  [./diffw]
+  []
+  [diffw]
     type = Diffusion
     variable = w
-  [../]
-  [./diffA]
+  []
+  [diffA]
     type = Diffusion
     variable = A
-  [../]
-  [./diff_scaled_u]
+  []
+  [diff_scaled_u]
     type = Diffusion
     variable = scaled_u
-  [../]
-  [./diffR]
+  []
+  [diffR]
     type = Diffusion
     variable = R
-  [../]
+  []
 []
 
 [BCs]
 
-  [./u]
+  [u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1'
     function = u
-  [../]
-  [./v]
+  []
+  [v]
     type = FunctionDirichletBC
     variable = v
     boundary = '1'
     function = v
-  [../]
-  [./w]
+  []
+  [w]
     type = FunctionDirichletBC
     variable = w
     boundary = '1'
     function = w
-  [../]
-  [./A]
+  []
+  [A]
     type = FunctionDirichletBC
     variable = A
     boundary = '1'
     function = A
-  [../]
-  [./scaled_u]
+  []
+  [scaled_u]
     type = FunctionDirichletBC
     variable = scaled_u
     boundary = '1'
     function = scaled_u
-  [../]
-  [./R]
+  []
+  [R]
     type = FunctionDirichletBC
     variable = R
     boundary = '1'
     function = R
-  [../]
+  []
 []
 
 [Executioner]

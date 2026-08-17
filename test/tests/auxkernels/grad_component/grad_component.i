@@ -6,56 +6,56 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./grad_u_x]
+  [grad_u_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./grad_u_y]
+  []
+  [grad_u_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./grad_u_x_aux]
+  [grad_u_x_aux]
     type = VariableGradientComponent
     variable = grad_u_x
     component = x
     gradient_variable = u
-  [../]
-  [./grad_u_y_aux]
+  []
+  [grad_u_y_aux]
     type = VariableGradientComponent
     variable = grad_u_y
     component = y
     gradient_variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

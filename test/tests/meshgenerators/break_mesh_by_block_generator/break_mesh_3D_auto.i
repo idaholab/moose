@@ -1,10 +1,10 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = coh3D_3Blocks.e
   []
 
-  [./breakmesh]
+  [breakmesh]
     type = BreakMeshByBlockGenerator
     input = fmg
     split_interface = true

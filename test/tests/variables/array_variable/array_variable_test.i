@@ -11,42 +11,42 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     components = 4
     initial_condition = '1 2 3 4'
-  [../]
-  [./uu]
+  []
+  [uu]
     order = FIRST
     family = LAGRANGE
     components = 2
     initial_condition = '1 2'
-  [../]
-  [./v]
+  []
+  [v]
     order = FIRST
     family = LAGRANGE
     components = 2
     initial_condition = '5 6'
-  [../]
-  [./w]
+  []
+  [w]
     order = CONSTANT
     family = MONOMIAL
     components = 3
     initial_condition = '7 8 9'
-  [../]
-  [./x]
+  []
+  [x]
     order = THIRD
     family = MONOMIAL
     components = 2
     initial_condition = '10 11'
-  [../]
-  [./y]
+  []
+  [y]
     order = FIRST
     family = L2_LAGRANGE
     components = 3
     initial_condition = '12 13 14'
-  [../]
+  []
 []
 
 [Postprocessors]

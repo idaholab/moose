@@ -13,45 +13,45 @@
 [Variables]
   active = 'Time'
 
-  [./Time]
+  [Time]
     order =  FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [Functions]
   active = 'func'
 
-  [./func]
+  [func]
     type = ParsedFunction
     expression = 2.0*t
-  [../]
+  []
 []
 
 [Kernels]
   active = 't_time func_time'
 
-  [./t_time]
+  [t_time]
     type = TimeDerivative
     variable = Time
-  [../]
+  []
 
-  [./func_time]
+  [func_time]
     type = BodyForce
     variable = Time
     function = func
-  [../]
+  []
 []
 
 [BCs]
   active = 'Top_Temperature'
 
-  [./Top_Temperature]
+  [Top_Temperature]
     type = NeumannBC
     variable = Time
     boundary = 'left right'
-  [../]
+  []
 
 []
 

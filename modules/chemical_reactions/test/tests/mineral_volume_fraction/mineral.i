@@ -8,9 +8,9 @@
 []
 
 [Variables]
-  [./mineral_conc]
+  [mineral_conc]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [Problem]
@@ -22,12 +22,12 @@
 []
 
 [Postprocessors]
-  [./volume_frac]
+  [volume_frac]
     type = TotalMineralVolumeFraction
     variable = mineral_conc
     molar_volume = 20
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

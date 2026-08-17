@@ -15,55 +15,55 @@
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [Kernels]
-  [./HeatDiff]
+  [HeatDiff]
     type = ADMatDiffusion
     variable = T
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [BCs]
-  [./zero]
+  [zero]
     type = DirichletBC
     variable = T
     boundary = 'left right bottom'
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = ADFunctionDirichletBC
     variable = T
     boundary = top
     function = '10*sin(pi*x*0.5)'
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [k]
     type = ADGenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1
-  [../]
+  []
 []
 
 
 [Postprocessors]
-  [./nodal_error]
+  [nodal_error]
     type = NodalL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
-  [./elemental_error]
+  []
+  [elemental_error]
     type = ElementL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
+  []
 []
 
 [Executioner]

@@ -19,82 +19,82 @@
 []
 
 [Functions]
-  [./rampConstant]
+  [rampConstant]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 1.0
-  [../]
-  [./zeroRamp]
+  []
+  [zeroRamp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 0. 1.'
     scale_factor = 1.0
-  [../]
-  [./rampUnramp]
+  []
+  [rampUnramp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 0.'
     scale_factor = 10.0
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 5
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 6
     value = 0.0
-  [../]
-  [./Pressure]
-    [./Side1]
+  []
+  [Pressure]
+    [Side1]
       boundary = 1
       function = rampConstant
-    [../]
-    [./Side2]
+    []
+    [Side2]
       boundary = 2
       function = zeroRamp
       factor = 2.0
-    [../]
-    [./Side3]
+    []
+    [Side3]
       boundary = 3
       function = rampUnramp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     block = 1
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
     block = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,8 +109,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

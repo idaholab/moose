@@ -1,10 +1,10 @@
 [Tests]
-  [./displaced_error]
+  [displaced_error]
     type = 'RunException'
     input = 'displaced_error.i'
     expect_err = "displaced_error.i:50.7: parameter 'Adaptivity/Markers/test/use_displaced_mesh' is private and cannot be set"
     requirement = "It shall not be possible to specify Markers to run on the displaced mesh."
     issues = '#11430'
     design = "Markers/index.md"
-  [../]
+  []
 []

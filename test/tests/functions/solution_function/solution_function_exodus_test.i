@@ -13,92 +13,92 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  # [./ne]
+  # [ne]
   # order = FIRST
   # family = LAGRANGE
-  # [../]
-  # [./ee]
+  # []
+  # [ee]
   # order = CONSTANT
   # family = MONOMIAL
-  # [../]
-  [./nn]
+  # []
+  [nn]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./en]
+  []
+  [en]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  # [./sourcee]
+  # [sourcee]
   # type = SolutionFunction
   # file_type = exodusII
   # mesh = cubesource.e
   # variable = source_element
-  # [../]
-  [./sourcen]
+  # []
+  [sourcen]
     type = SolutionFunction
     scale_factor = 2.0
     solution = cube_soln
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  # [./ne]
+  # [ne]
   # type = FunctionAux
   # variable = ne
   # function = sourcee
-  # [../]
-  # [./ee]
+  # []
+  # [ee]
   # type = FunctionAux
   # variable = ee
   # function = sourcee
-  # [../]
-  [./nn]
+  # []
+  [nn]
     type = FunctionAux
     variable = nn
     function = sourcen
-  [../]
-  [./en]
+  []
+  [en]
     type = FunctionAux
     variable = en
     function = sourcen
-  [../]
+  []
 []
 
 [BCs]
-  [./stuff]
+  [stuff]
     type = DirichletBC
     variable = u
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./cube_soln]
+  [cube_soln]
     type = SolutionUserObject
     timestep = 2
     system_variables = source_nodal
     mesh = cubesource.e
-  [../]
+  []
 []
 
 [Executioner]

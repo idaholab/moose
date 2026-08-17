@@ -6,48 +6,48 @@
 []
 
 [Variables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./force_v]
+  []
+  [force_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./elem_average_value]
+  [elem_average_value]
     type = ElementAverageValue
     variable = v
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

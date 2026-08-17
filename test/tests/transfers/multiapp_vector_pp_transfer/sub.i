@@ -12,20 +12,20 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Postprocessors]
-  [./receive]
+  [receive]
     type = Receiver
-  [../]
+  []
 
-  [./send]
+  [send]
     type = ScalePostprocessor
     value = receive
     scaling_factor = 2
-  [../]
+  []
 []
 
 [Executioner]
