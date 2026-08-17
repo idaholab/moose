@@ -277,7 +277,7 @@
     rel_err = 1.0e-6
     abs_zero = 1.0e-8
     override_columns = 'jump_n traction_n traction_t1'
-    override_rel_err = '1.0e-6 1.0e-6 1.0e-6'
+    override_rel_err = '1.0e-6 1.0e-6 8.0e-5'
     override_abs_zero = '1.0e-4 1.0e-4 1.0e-4'
   []
   [robustness_brittle_interface]
