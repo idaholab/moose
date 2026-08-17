@@ -47,34 +47,24 @@ NewtonInversionControl::NewtonInversionControl(const InputParameters & parameter
 {
 }
 
-void
-NewtonInversionControl::execute()
+InversionControlBase::IterationUpdate
+NewtonInversionControl::computeUpdate(unsigned int it, Real p_used, Real y, Real y_target)
 {
-  // sweepIteration() returns 1 on the first iteration of each fresh sweep (including a restep
-  // retry). Odd -> base solve at p; even -> perturbed solve at p + parameter_delta. _p_base/_y_base
-  // are plain members re-seeded on every base iteration, so no restartable state is needed.
-  const unsigned int it = sweepIteration();
-  const Real p_used = _param;
-  const Real y = _output;
-  const Real y_target = targetValue();
-
+  // Odd -> base solve at p; even -> perturbed solve at p + parameter_delta. _p_base/_y_base are
+  // plain members re-seeded on every base iteration, so no restartable state is needed.
   if (it % 2 == 1)
   {
     // Base solve: record the sample, publish it as the solution of record, report the normalized
     // residual, and set the perturbed parameter for the next (even) iteration.
     _p_base = p_used;
     _y_base = y;
-    publishConvergedParameter(p_used);
-    setResidual(normalizedResidual(y));
-    setParameter(p_used + _parameter_delta);
+    return {p_used + _parameter_delta, normalizedResidual(y), true};
   }
-  else
-  {
-    // Perturbed solve: a single guarded linear-model step over the base and perturbed samples is
-    // the finite-difference Newton update. Force a non-converged residual so that convergence is
-    // only ever declared on a base iteration (where the recorded parameter is un-perturbed).
-    const Real p_next = linearRootUpdate(_p_base, _y_base, p_used, y, y_target);
-    setResidual(_nonconverged_residual);
-    setParameter(p_next);
-  }
+
+  // Perturbed solve: a single guarded linear-model step over the base and perturbed samples is the
+  // finite-difference Newton update. Force a non-converged residual (and do not publish) so that
+  // convergence is only ever declared on a base iteration (where the recorded parameter is
+  // un-perturbed).
+  const Real p_next = linearRootUpdate(_p_base, _y_base, p_used, y, y_target);
+  return {p_next, _nonconverged_residual, false};
 }
