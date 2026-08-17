@@ -1,5 +1,6 @@
 [Tests]
   design = 'TorchScriptProfileFunctorMaterial.md TorchScriptUserObject.md'
+  issues = '#33552'
 
   [interpolation]
     type = CSVDiff
