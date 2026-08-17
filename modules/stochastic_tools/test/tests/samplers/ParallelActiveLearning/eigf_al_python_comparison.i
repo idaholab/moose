@@ -1,4 +1,4 @@
-#* Active learning with the VIGF (Variance Improvement for Global Fit)
+#* Active learning with the EIGF (Expected Improvement for Global Fit)
 #* acquisition function, on the toy function
 #*
 #*     f(x) = sin(x) + 2*x ,   x in [0, 5]
@@ -46,8 +46,8 @@
 []
 
 [ParallelAcquisition]
-  [vigf]
-    type = VarianceImprovementGlobalFit
+  [eigf]
+    type = ExpectedImprovementGlobalFit
   []
 []
 
@@ -68,7 +68,7 @@
 [MultiApps]
   [sub]
     type = SamplerFullSolveMultiApp
-    input_files = vigf_al_sub.i
+    input_files = eigf_al_sub.i
     sampler = sample
   []
 []
@@ -102,7 +102,7 @@
     sampler = sample
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
-    acquisition = 'vigf'
+    acquisition = 'eigf'
     execute_on = 'timestep_begin'
   []
 []
@@ -153,7 +153,7 @@
 []
 
 [Outputs]
-  file_base = 'vigf_al_out'
+  file_base = 'eigf_al_out'
   csv = true
   # JSON output is kept alongside CSV because the "constant" Reporter's
   # data is nested (constant/reporter_transfer:average:value growing over

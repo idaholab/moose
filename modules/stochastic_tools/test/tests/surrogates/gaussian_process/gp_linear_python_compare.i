@@ -11,7 +11,7 @@
 # Adapted from your GP_linear.i example. Two differences from that file,
 # both because our "physical model" here is just a closed-form toy function
 # rather than a heat-conduction sub-app:
-#   - Samplers/response use CSVSampler + CSVReader directly on train_x.csv /
+#   - Samplers/response use CSVSampler + CSVReaderVectorPostprocessor directly on train_x.csv /
 #     train_y.csv instead of MonteCarlo + MultiApp + SamplerReporterTransfer.
 #   - standardize_params/standardize_data are OFF (not 'true' as in your
 #     example) so the hyperparameter values here live directly in raw x,y
@@ -27,18 +27,20 @@
 #   - "..._optimized" -- identical starting point, but tune_parameters is set
 #                        so GaussianProcessTrainer maximizes the marginal
 #                        likelihood ("Optimized hyperparameters"). This
-#                        tune_parameters/tuning_min/tuning_max/tuning_algorithm
-#                        block is NOT shown in your example file (which only
-#                        demonstrates a fixed, untrained GP) -- it follows the
-#                        syntax documented in MOOSE's stochastic_tools docs,
-#                        so please double-check it against your local build.
+#                        tune_parameters/tuning_min/tuning_max block is NOT
+#                        shown in your example file (which only demonstrates
+#                        a fixed, untrained GP) -- it follows the syntax
+#                        documented in MOOSE's stochastic_tools docs, so
+#                        please double-check it against your local build.
+#                        (tuning_algorithm was removed after your build
+#                        flagged it as unused -- see the Trainers block.)
 #   noise_variance (1e-6) is kept FIXED in both cases, following your
 #   example's "numerical stability" framing rather than treating it as a
 #   parameter to be learned.
 #
 # Outputs (all via [Outputs], file_base = gp_linear_out):
 #   gp_linear_out_train_x_echo_0000.csv   -> training x (echoed from sampler)
-#   gp_linear_out_Y_train_0000.csv        -> training y (echoed from CSVReader)
+#   gp_linear_out_Y_train_0000.csv        -> training y (echoed from CSVReaderVectorPostprocessor)
 #   gp_linear_out_test_pred_initial_0000.csv    -> X, gp prediction (untuned)
 #   gp_linear_out_test_pred_optimized_0000.csv  -> X, gp prediction (tuned)
 #   gp_linear_out_hyperparams_initial_0000.csv    -> Initial hyperparameters
@@ -76,7 +78,8 @@
 # -----------------------------------------------------------------------------
 [VectorPostprocessors]
   [Y_train]
-    type = CSVReader
+    type = CSVReaderVectorPostprocessor
+    header = true
     csv_file = 'train_y.csv'
   []
   [train_x_echo]
@@ -147,9 +150,12 @@
     tuning_min      = '1e-6                              1e-6                            -10'
     tuning_max      = '1e3                               1e3                             10'
 
-    tuning_algorithm = 'tao'
-    # tao_options = '-tao_bncg_type kd'   # uncomment to match the bounded CG
-    #                                       variant used in the MOOSE docs examples
+    # tuning_algorithm intentionally omitted: your build reported it as an
+    # "unused parameter" for GaussianProcessTrainer, so this leaves the
+    # optimizer at whatever the trainer defaults to (the underlying
+    # GPOptimizerOptions struct defaults opt_type to 'adam'). If your build
+    # supports a different way to select TAO vs Adam, let me know the exact
+    # parameter name and I'll wire it back in.
   []
 []
 

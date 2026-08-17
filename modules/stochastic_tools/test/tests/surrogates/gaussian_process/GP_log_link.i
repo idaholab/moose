@@ -8,15 +8,25 @@
 []
 
 [Distributions]
-  [k_dist]
+  [k_dist_train]
     type = Uniform
-    lower_bound = 1
+    lower_bound = 0
     upper_bound = 10
   []
-  [q_dist]
+  [q_dist_train]
     type = Uniform
-    lower_bound = 9000
-    upper_bound = 11000
+    lower_bound = 0
+    upper_bound = 1000
+  []
+  [k_dist_test]
+    type = Uniform
+    lower_bound = 0
+    upper_bound = 15
+  []
+  [q_dist_test]
+    type = Uniform
+    lower_bound = 0
+    upper_bound = 1500
   []
 []
 
@@ -24,13 +34,13 @@
   [train_sample]
     type = MonteCarlo
     num_rows = 10
-    distributions = 'k_dist q_dist'
+    distributions = 'k_dist_train q_dist_train'
     execute_on = PRE_MULTIAPP_SETUP
   []
   [test_sample]
     type = MonteCarlo
-    num_rows = 20
-    distributions = 'k_dist q_dist'
+    num_rows = 500
+    distributions = 'k_dist_test q_dist_test'
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -88,7 +98,7 @@
     response = results/data:avg:value
     # Enforce positivity: log link with lower bound 0
     link_function = log
-    link_lower_bound = 0.0
+    link_lower_bound = 305.30
   []
 []
 

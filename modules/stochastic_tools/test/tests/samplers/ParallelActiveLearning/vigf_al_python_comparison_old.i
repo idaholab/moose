@@ -111,7 +111,7 @@
   [sample_data]
     type = SamplerData
     sampler = sample
-    execute_on = 'timestep_end'
+    execute_on = 'initial timestep_end'
   []
 []
 

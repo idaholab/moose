@@ -36,7 +36,8 @@
 
 [VectorPostprocessors]
   [Y_train]
-    type = CSVReader
+    type = CSVReaderVectorPostprocessor
+    header = true
     csv_file = 'train_y.csv'
   []
   [train_x_echo]
@@ -146,7 +147,7 @@
     tuning_min      = '1e-6                          1e-6                       1e-6                              1e-6'
     tuning_max      = '1e3                           1e3                        1e3                               1e3'
 
-    tuning_algorithm = 'tao'
+    # tuning_algorithm intentionally omitted -- see gp_linear.i for why.
   []
 []
 
