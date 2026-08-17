@@ -10,6 +10,7 @@
 #pragma once
 
 #include "libmesh/utility.h"
+#include "libmesh/type_vector.h"
 
 #include <memory>
 #include <string>
