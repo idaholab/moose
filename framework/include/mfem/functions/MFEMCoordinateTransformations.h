@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MooseParsedFunction.h"
 #include "MFEMProblem.h"
 
 /**
@@ -31,24 +30,18 @@ public:
   MFEMCoordinateTransformations(const InputParameters & parameters);
   virtual ~MFEMCoordinateTransformations() = default;
 
-  using Function::value;
-  virtual Real value(Real /*t*/, const Point & /*p*/) const override { return 0.0; }
-
   const MooseEnum & coordType() const { return _coord_type; }
-  Real invREps() const { return _inv_r_eps; }
+  mfem::real_t invREps() const { return _inv_r_eps; }
 
 protected:
   void declareRZCoefficients();
-  void declareRZRadialCoefficient();
-  void declareRZInverseRadialCoefficient();
-  void declareRZTwoPiRCoefficient();
 
   /// Reference to the MFEMProblem instance
   MFEMProblem & _mfem_problem;
   /// Coordinate system type
   const MooseEnum _coord_type;
   /// Regularization parameter used in inv_r = 1/sqrt(r^2 + eps^2)
-  const Real _inv_r_eps;
+  const mfem::real_t _inv_r_eps;
 };
 
 #endif
