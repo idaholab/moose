@@ -248,6 +248,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     clean_system_packages
 
 %test
+    #!/bin/bash
+
     # If we're using openmpi, we need to allow running as root
     # if we're in a fakeroot environment
     if [ $(whoami) == root ] && which ompi_info &> /dev/null; then
