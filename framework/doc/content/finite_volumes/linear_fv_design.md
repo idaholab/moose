@@ -112,6 +112,37 @@ time over an iteration. The setbacks of this design choice are:
   multiple times to get a converged solution.
 - It may increase the number of iterations needed to resolve nonlinearities.
 
+The algorithm used to construct a cell gradient is separated from the variable and
+from the kernels that consume the gradient. Gradient algorithms are represented by
+`FVGradientMethod` objects. These objects are runtime-selectable and may be declared
+by name in the [FVGradientMethods] block.
+
+An `FVGradientMethod` is responsible for computing the cell-centered gradient
+and applying any limiter associated with that method. For example,
+[FVGreenGaussGradient.md] implements the Green–Gauss reconstruction,
+while the base FVGradientMethod applies the configured gradient limiter
+after the unrestricted gradient has been computed.
+
+Gradient method names identify a complete reconstruction policy rather than only the
+underlying gradient formula. For convenience, `green-gauss` denotes unrestricted
+Green–Gauss and `green-gauss-venkatakrishnan` denotes Green–Gauss followed by
+the Venkatakrishnan limiter. Users may also construct named `FVGradientMethod`
+objects with custom settings and share those definitions between variables
+and interpolation methods.
+
+Gradients are computed on demand. A `MooseLinearVariableFV` does not allocate
+every possible form of its gradient. Instead, a consumer requests a gradient
+using `requestCellGradients()`, optionally specifying the gradient method that
+should produce it. The variable registers that (variable, method) combination with
+the `LinearFVGradientInterface` implemented by its owning linear or
+auxiliary system and receives a read-only `LinearFVGradientReader`.
+
+Gradient storage is grouped by gradient method. Consequently, multiple variables using
+the same method can be updated together, while the same variable may simultaneously
+have gradients produced by different methods when different consumers require them.
+Adding a new gradient algorithm therefore does not require adding a new set
+of dedicated gradient containers to the system.
+
 ## Boundary Conditions
 
 A significant difference compared to other systems in MOOSE is the way
