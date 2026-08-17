@@ -1874,7 +1874,12 @@ MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
                                        const Point & point) const
 {
   const Elem * elem = (*pl)(point, &blocks);
-  return (elem != nullptr);
+  // We added a call to contains_point because it was observed that functor transfers
+  // which did call "contains_point" have a smaller source domain than shape evaluation
+  // transfers which did not call it
+  // NOTE: if there are more than one candidate point, this could be returning the wrong result
+  return (elem != nullptr) &&
+         (elem->contains_point(point, libMesh::TOLERANCE * libMesh::TOLERANCE));
 }
 
 bool
