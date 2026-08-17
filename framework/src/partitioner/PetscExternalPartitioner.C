@@ -121,6 +121,9 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   // Call libmesh to build the dual graph of mesh
   build_graph(mesh);
   num_local_elems = _dual_graph.size();
+  // PETSc requires that each row be sorted
+  for (auto & row : _dual_graph)
+    std::sort(row.begin(), row.end());
 
   elem_weights.clear();
   if (_apply_element_weight)
@@ -149,11 +152,13 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
 
   local_elem_id = 0;
   nj = 0;
+  std::map<dof_id_type, dof_id_type> global_index_to_weight;
   for (auto & row : _dual_graph)
   {
     mooseAssert(local_elem_id < static_cast<dof_id_type>(_local_id_to_elem.size()),
                 "Local element id " << local_elem_id << " is not smaller than "
                                     << _local_id_to_elem.size());
+    global_index_to_weight.clear();
     auto elem = _local_id_to_elem[local_elem_id];
     unsigned int n_neighbors = 0;
 
@@ -165,9 +170,8 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       if (neighbor != nullptr && neighbor->active())
       {
         if (_apply_side_weight)
-          side_weights[nj] = computeSideWeight(*elem, side);
-
-        nj++;
+          global_index_to_weight.emplace(libmesh_map_find(_global_index_by_pid_map, neighbor->id()),
+                                         computeSideWeight(*elem, side));
         n_neighbors++;
       }
 
@@ -176,6 +180,12 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
     if (n_neighbors != row.size())
       mooseError(
           "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
+    if (_apply_side_weight)
+    {
+      mooseAssert(global_index_to_weight.size() == row.size(), "These must match");
+      for (const auto [_, weight] : global_index_to_weight)
+        side_weights[nj++] = weight;
+    }
 
     local_elem_id++;
   }
@@ -231,7 +241,7 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   // Fill up adjacency
   i = 0;
   for (auto & row : graph)
-    for (auto elem : row)
+    for (const auto elem : row)
       adjncy[i++] = elem;
 
   // If there are no neighbors at all, no side weights should be proivded
@@ -258,16 +268,15 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
       MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual));
 
   LibmeshPetscCallA(comm.get(), MatPartitioningCreate(comm.get(), &part));
-#if !PETSC_VERSION_LESS_THAN(3, 12, 3)
-  LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
-#endif
+  if (values)
+    // This should only be set to true if the adjacency matrix has valid edge weights (which
+    // correspond to \p values)
+    LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
   LibmeshPetscCallA(comm.get(), MatPartitioningSetAdjacency(part, dual));
 
   if (!num_local_elems)
-  {
     mooseAssert(!elem_weights.size(),
                 "No element weights should be provided since there are no elements at all");
-  }
 
   // Handle element weights
   if (elem_weights.size())
@@ -286,12 +295,8 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   }
 
   LibmeshPetscCallA(comm.get(), MatPartitioningSetNParts(part, num_parts));
-#if PETSC_VERSION_LESS_THAN(3, 9, 2)
   mooseAssert(part_package != "party", "PETSc-3.9.3 or higher is required for using party");
-#endif
-#if PETSC_VERSION_LESS_THAN(3, 9, 0)
   mooseAssert(part_package != "chaco", "PETSc-3.9.0 or higher is required for using chaco");
-#endif
   LibmeshPetscCallA(comm.get(), MatPartitioningSetType(part, part_package.c_str()));
   if (part_package == "hierarch")
     LibmeshPetscCallA(comm.get(),
@@ -313,13 +318,13 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
 }
 
 dof_id_type
-PetscExternalPartitioner::computeElementWeight(Elem & /*elem*/)
+PetscExternalPartitioner::computeElementWeight(Elem & /*elem*/) const
 {
   return 1;
 }
 
 dof_id_type
-PetscExternalPartitioner::computeSideWeight(Elem & /*elem*/, unsigned int /*side*/)
+PetscExternalPartitioner::computeSideWeight(Elem & /*elem*/, unsigned int /*side*/) const
 {
   return 1;
 }
