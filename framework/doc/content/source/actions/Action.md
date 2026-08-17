@@ -168,6 +168,10 @@ These flags are used in a `Debug` block:
 []
 ```
 
+## Command line arguments
+
+- `--show-actions` Shows the list of Actions as they execute, in order of execution.
+
 ## Additional Notes
 
 The following is a list of miscellaneous notes that may be useful to advanced

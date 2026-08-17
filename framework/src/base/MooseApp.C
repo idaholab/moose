@@ -296,6 +296,11 @@ MooseApp::validParams()
       "Setup and output the input mesh in CSG format only (Default: "
       "\"<input_file_name>_out_csg.json\")");
   params.addCommandLineParam<bool>(
+      "show_actions",
+      "--show-actions",
+      "Shows the list of Actions as they execute, in order of execution");
+  params.setGlobalCommandLineParam("show_actions");
+  params.addCommandLineParam<bool>(
       "show_input", "--show-input", "Shows the parsed input file before running the simulation");
   params.setGlobalCommandLineParam("show_input");
   params.addCommandLineParam<bool>(
@@ -912,6 +917,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
     // Sleep to allow time for the debugger to attach
     std::this_thread::sleep_for(std::chrono::seconds(getParam<unsigned int>("stop_for_debugger")));
   }
+
+  if (isParamSetByUser("show_actions"))
+    _action_warehouse.showActions(true);
 
   if (_master_mesh && isUltimateMaster())
     mooseError("Mesh can be passed in only for sub-apps");
