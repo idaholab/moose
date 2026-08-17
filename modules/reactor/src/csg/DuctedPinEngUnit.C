@@ -100,6 +100,7 @@ DuctedPinEngUnit::expandUnit()
       std::vector<std::string> pin_fill_mats;
       for (const auto j : make_range(n_ring + 1))
         pin_fill_mats.push_back(_region_names[i][j]);
+      // Create a PinUniverseEngUnit engineering unit and add it to CSGBase
       std::unique_ptr<CSG::PinUniverseEngUnit> pin_ptr =
           std::make_unique<CSG::PinUniverseEngUnit>(unit_name, _ring_radii, pin_fill_mats);
       auto & pin_unit = _internal_base->addEngUnit(std::move(pin_ptr));

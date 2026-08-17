@@ -70,13 +70,13 @@ This is the resulting "region_id" extra element integer layout, which was chosen
 
 ## Constructive Solid Geometry (CSG)
 
-`PinMeshGenerator` can generate a [constructive solid geometry (CSG)](syntax/CSG/index.md), meaning that `--csg-only` can be called on a mesh input file that contains PinMeshGenerator to represent the pin structure as a CSG object. The generation of the CSG object is controlled by the `PinEngineeringUnit` object, which can represent the pin using engineering units or as expanded CSG surfaces, cells, and universes. How the CSG object is represented is set by [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/expand_units).
+`PinMeshGenerator` can generate a [constructive solid geometry (CSG)](syntax/CSG/index.md), meaning that `--csg-only` can be called on a mesh input file that contains PinMeshGenerator to represent the pin structure as a CSG object. The generation of the CSG object is controlled by the [`DuctedPinEngUnit`](DuctedPinEngUnit.md) object, which can represent the pin as an engineering unit or as expanded CSG surfaces, cells, and universes. How the CSG object is represented is controlled by [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/expand_units).
 
 In the engineering unit representation, the ouput CSG object stores the following attributes on the pin using `getAttributes()`:
 
 - `ring_radii`: the radii of all ring regions in the pin cell, listed in ascending order
 - `duct_apothems`: the apothems (center to flat distances) of all duct and outer pin boundary layers, listed in ascending order
-- `region_ids`: a 2-D vector of region IDs corresponding to the radial and axial zones of the pin cell. Inner indexing is radial zones (rings, background, and ducts), while outer index is axial zones
+- `region_names`: a 2-D vector of region names corresponding to the radial and axial zones of the pin cell. Inner indexing is radial zones (rings, background, and ducts), while outer index is axial zones
 - `geometry_type`: String representing the geometry of the pin cell ("Hex" for hexagonal pins or "Square" for square pins)
 - `axial_boundaries`: Length of each axial region, where the bottom-most region is assumed to start at 0. Only gets outputted for extruded geometries.
 
