@@ -62,3 +62,36 @@ ways in which SubApp syntax can be overridden or supplied on the command line.
 ./MyApp-opt -i input.i sub_app_left0:Section/object/some_parameter=new_value
                        sub_app_left1:Section/object/some_parameter=different_value
 ```
+
+## Removing Input File Syntax
+
+Command line overrides can change or add a parameter, but sometimes an input
+file needs a parameter (or an entire block) taken out entirely, e.g. when reusing
+a shared input file across several tests. The `--remove` option takes one or
+more (whitespace separated) fully-qualified paths, given in HIT syntax, and
+deletes the parameter or block found at each of those paths after the input
+file(s) and any other command line HIT arguments have been applied.
+
+```
+[Section]
+  [object]
+     some_parameter = foo
+     another_parameter = bar
+  []
+[]
+
+# Removes 'some_parameter', which will fall back to its default value (or
+# cause a "missing required parameter" error if the parameter is required
+# and not supplied some other way)
+./MyApp-opt -i input.i --remove Section/object/some_parameter
+
+# Removes the entire 'object' block
+./MyApp-opt -i input.i --remove Section/object
+
+# Multiple paths may be removed at once
+./MyApp-opt -i input.i --remove Section/object/some_parameter Section/object/another_parameter
+```
+
+It is an error to attempt to remove a path that does not exist in the parsed
+input.
+
