@@ -831,7 +831,7 @@ SCMTriAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
       elem->set_node(1, mesh_base.node_ptr(indx2));
     }
 
-  mesh_base.subdomain_name(_pin_block_id) = "fuel_pins";
+  mesh_base.set_subdomain_name(_pin_block_id, "fuel_pins", true);
 }
 
 std::unique_ptr<MeshBase>
@@ -886,7 +886,7 @@ SCMTriAssemblyMeshGenerator::generate()
   boundary_info.nodeset_name(1) = "outlet";
 
   // Naming the block
-  mesh_base->subdomain_name(_subchannel_block_id) = "subchannel";
+  mesh_base->set_subdomain_name(_subchannel_block_id, "subchannel", true);
   buildPinMesh(*mesh_base);
 
   mesh_base->prepare_for_use();

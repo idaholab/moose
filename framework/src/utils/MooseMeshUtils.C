@@ -1165,7 +1165,7 @@ createSubdomainFromSidesets(MeshBase & mesh,
 
   // Assign block name, if provided
   if (new_subdomain_name.size())
-    mesh.subdomain_name(new_block_id) = new_subdomain_name;
+    mesh.set_subdomain_name(new_block_id, new_subdomain_name);
 
   const bool skip_partitioning_old = mesh.skip_partitioning();
   mesh.skip_partitioning(true);
@@ -1253,7 +1253,7 @@ convertBlockToMesh(MeshBase & source_mesh,
 
   // Move subdomain names
   for (const auto sbd_id : target_block_ids)
-    target_mesh.subdomain_name(sbd_id) = source_mesh.subdomain_name(sbd_id);
+    target_mesh.set_subdomain_name(sbd_id, source_mesh.subdomain_name(sbd_id));
 }
 
 void

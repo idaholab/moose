@@ -420,7 +420,7 @@ AzimuthalBlockSplitGenerator::generate()
 
   // Assign new Block Names if applicable
   for (unsigned int i = 0; i < _new_block_names.size(); i++)
-    mesh.subdomain_name(_new_block_ids[i]) = _new_block_names[i];
+    mesh.set_subdomain_name(_new_block_ids[i], _new_block_names[i]);
 
   MeshTools::Modification::rotate(mesh, -90.0, 0.0, 0.0);
 

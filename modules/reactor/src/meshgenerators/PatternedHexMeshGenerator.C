@@ -977,9 +977,9 @@ PatternedHexMeshGenerator::generate()
   if (!_peripheral_block_names.empty())
   {
     for (unsigned i = 0; i < _peripheral_block_names.size(); i++)
-      out_mesh->subdomain_name(_peripheral_block_ids.empty() ? (PERIPHERAL_ID_SHIFT + i)
-                                                             : _peripheral_block_ids[i]) =
-          _peripheral_block_names[i];
+      out_mesh->set_subdomain_name(_peripheral_block_ids.empty() ? (PERIPHERAL_ID_SHIFT + i)
+                                                                 : _peripheral_block_ids[i],
+                                   _peripheral_block_names[i]);
   }
   // Assign customized outer surface boundary id and name
   if (_external_boundary_id > 0)

@@ -122,7 +122,7 @@ ManifoldSubdomainGenerator::generate()
 
   // Preserve the optional user-facing subdomain name for the assigned id.
   if (isParamValid("block_name"))
-    mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
+    mesh->set_subdomain_name(_block_id, getParam<SubdomainName>("block_name"), true);
 
   // Mark derived mesh data as stale because element subdomain assignments have changed.
   mesh->unset_has_cached_elem_data();
