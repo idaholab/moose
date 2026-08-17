@@ -75,9 +75,13 @@ InversionControlBase::InversionControlBase(const InputParameters & parameters)
 unsigned int
 InversionControlBase::sweepIteration() const
 {
+  Executioner * const executioner = _app.getExecutioner();
+  if (!executioner || !executioner->hasFixedPointSolve())
+    mooseError("requires an executioner that runs a fixed-point (MultiApp) solve; the current "
+               "executioner does not provide one.");
   // numFixedPointIts() returns _fixed_point_it + 1, i.e. 1 on the first iteration of each fresh
   // fixed-point sweep (including a restep retry).
-  return _app.getExecutioner()->fixedPointSolve().numFixedPointIts();
+  return executioner->fixedPointSolve().numFixedPointIts();
 }
 
 Real
@@ -104,13 +108,17 @@ InversionControlBase::linearRootUpdate(Real p_a, Real y_a, Real p_b, Real y_b, R
 {
   const Real dp = p_b - p_a;
   const Real dy = y_b - y_a;
-  // Guard a vanishing denominator or slope before dividing. The magnitude-scaled threshold is a
-  // pragmatic "dy too small" heuristic, not a principled relative tolerance.
-  if (std::abs(dp) < 1e-15 || std::abs(dy) < 1e-15 * (std::abs(y_b) + std::abs(y_a) + 1.0))
+  // Guard a vanishing or non-finite denominator/slope before dividing. The magnitude-scaled
+  // threshold is a pragmatic "dy too small" heuristic, not a principled relative tolerance; the
+  // finiteness check also traps a NaN/Inf sample from a diverging forward solve, which the "<"
+  // comparisons alone would let through (every comparison with NaN is false).
+  if (!std::isfinite(dp) || !std::isfinite(dy) || std::abs(dp) < 1e-15 ||
+      std::abs(dy) < 1e-15 * (std::abs(y_b) + std::abs(y_a) + 1.0))
   {
     mooseWarning("The parameter update at t = ",
                  _t,
-                 " has a vanishing denominator or slope; leaving the parameter unchanged.");
+                 " has a vanishing or non-finite denominator or slope; leaving the parameter "
+                 "unchanged.");
     return p_b;
   }
   return p_b - (y_b - y_target) * dp / dy;

@@ -33,6 +33,12 @@ The outer iteration count, convergence test, and time-step cutting are owned by 
 compared against a tolerance of 1). Because each Newton step spans two fixed-point iterations, `max_iterations` on the
 Convergence object must allow roughly twice the number of Newton steps.
 
+!alert note
+When accept-on-max is enabled and the iteration cap falls on a perturbed iteration (which happens
+whenever `max_iterations` is even), the accepted solution is the parameter from the last base
+iteration -- the most recent value actually solved and residual-measured -- rather than the
+un-evaluated Newton extrapolation computed on the perturbed iteration.
+
 ## Example Input Syntax
 
 !listing test/tests/controls/newton_inverse_solve/main_newton.i block=Controls Convergence
