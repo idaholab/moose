@@ -19,7 +19,7 @@ MFEMSamplerBase::validParams()
 {
   InputParameters params = MFEMVectorPostprocessor::validParams();
   // The MFEM ordering option names the index that varies fastest in the flattened point vector.
-  MooseEnum ordering("NODES VDIM", "VDIM", false);
+  MooseEnum ordering("NODES VDIM", "VDIM");
   ordering.addDocumentation("NODES", "Point/node index varies fastest: x0 x1 ... y0 y1 ...");
   ordering.addDocumentation("VDIM",
                             "Spatial-component index varies fastest: x0 y0 z0 x1 y1 z1 ...");
@@ -39,8 +39,7 @@ MFEMSamplerBase::MFEMSamplerBase(const InputParameters & parameters,
     _query_points(points),
     _mesh(mesh),
     _finder(this->comm().get()),
-    _points_ordering(getParam<MooseEnum>("point_ordering") == "NODES" ? mfem::Ordering::byNODES
-                                                                      : mfem::Ordering::byVDIM),
+    _points_ordering(getParam<MooseEnum>("point_ordering").getEnum<mfem::Ordering::Type>()),
     _points(
         Moose::MFEM::libMeshPointsToMFEMVector(points, _mesh.SpaceDimension(), _points_ordering))
 {

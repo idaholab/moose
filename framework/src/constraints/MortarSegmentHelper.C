@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "MortarSegmentHelper.h"
 #include "MooseError.h"
-#include "MooseTypes.h"
+#include "MooseUtils.h"
 
+#include "libmesh/enum_elem_quality.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/fe_map.h"
 #include "libmesh/face_quad4.h"
@@ -43,14 +44,46 @@ namespace
 
 constexpr Real mortar_reference_mapping_tolerance = 1e-8;
 
-bool
-isFinitePoint(const Point & point)
+void
+validateProjectedQuadrilateral(const std::vector<Point> & polygon, const char * const side)
 {
-  for (const auto component : make_range(Moose::dim))
-    if (!std::isfinite(point(component)))
-      return false;
+  if (polygon.size() != 4)
+    return;
 
-  return true;
+  Point origin;
+  for (const auto & point : polygon)
+  {
+    if (!MooseUtils::isFinitePoint(point))
+      mooseException("The projected ", side, " mortar quadrilateral contains a non-finite vertex.");
+    origin += point;
+  }
+  origin /= polygon.size();
+
+  Real scale = 0.;
+  for (const auto & point : polygon)
+    scale = std::max(scale, (point - origin).norm());
+
+  if (!std::isfinite(scale) || scale == 0.)
+    mooseException("The projected ", side, " mortar quadrilateral has a zero local length scale.");
+
+  std::array<Node, 4> nodes;
+  Quad4 element;
+  for (const auto i : index_range(polygon))
+  {
+    nodes[i] = (polygon[i] - origin) / scale;
+    nodes[i].set_id(i);
+    element.set_node(i, &nodes[i]);
+  }
+
+  // Normalization makes the libMesh map checks relative to the local projected size. The value
+  // matches other mortar projection and clipping decisions.
+  const Real scaled_jacobian = element.quality(SCALED_JACOBIAN);
+  if (!element.has_invertible_map(mortar_reference_mapping_tolerance) ||
+      !std::isfinite(scaled_jacobian) || scaled_jacobian <= mortar_reference_mapping_tolerance)
+    mooseException("The projected ",
+                   side,
+                   " mortar quadrilateral is folded, singular, or non-injective in the clipping "
+                   "plane.");
 }
 
 // Signed-area test for the 2D triangle (a, b, c). Returns twice the signed area:
@@ -336,6 +369,9 @@ MortarSegmentHelper::MortarSegmentHelper(std::vector<Point> secondary_nodes,
     _secondary_poly.emplace_back(pt * _u, pt * _v, 0);
   }
 
+  // Half-plane clipping assumes that the projected secondary polygon has a unique orientation.
+  validateProjectedQuadrilateral(_secondary_poly, "secondary");
+
   // Initialize area of secondary polygon
   _remaining_area_fraction = 1.0;
   _secondary_area = area(_secondary_poly);
@@ -435,6 +471,9 @@ MortarSegmentHelper::projectPrimaryPoly(const std::vector<Point> & primary_nodes
     Point pt = (orient > 0) ? primary_nodes[n] - _center : primary_nodes[n_verts - 1 - n] - _center;
     primary_poly.emplace_back(pt * _u, pt * _v, 0.);
   }
+
+  // Validate the primary clipping polygon once before its edges are used as half planes.
+  validateProjectedQuadrilateral(primary_poly, "primary");
 
   return primary_poly;
 }
@@ -1116,15 +1155,15 @@ MortarSegmentHelper::referencePoint(const Point & point,
     return std::nullopt;
   };
 
-  if (!isFinitePoint(point))
+  if (!MooseUtils::isFinitePoint(point))
     return fail("the projected target point contains a non-finite coordinate");
 
   for (const auto i : index_range(poly))
   {
-    if (!isFinitePoint(poly[i]))
+    if (!MooseUtils::isFinitePoint(poly[i]))
       return fail("projected polygon vertex " + std::to_string(i) +
                   " contains a non-finite coordinate");
-    if (!isFinitePoint(reference_points[i]))
+    if (!MooseUtils::isFinitePoint(reference_points[i]))
       return fail("parent reference vertex " + std::to_string(i) +
                   " contains a non-finite coordinate");
   }
@@ -1199,7 +1238,7 @@ MortarSegmentHelper::referencePoint(const Point & point,
 
     Point local_reference = FEMap::inverse_map(
         2, &element, normalized_point, mortar_reference_mapping_tolerance, false, false);
-    if (!isFinitePoint(local_reference))
+    if (!MooseUtils::isFinitePoint(local_reference))
       return fail("libMesh inverse_map produced a non-finite reference point");
 
     const Real inverse_map_error =
@@ -1263,7 +1302,7 @@ MortarSegmentHelper::referencePoint(const Point & point,
       parent_reference +=
           FEInterface::shape(fe_type, &element, i, local_reference, false) * reference_points[i];
 
-    if (!isFinitePoint(parent_reference))
+    if (!MooseUtils::isFinitePoint(parent_reference))
       return fail("reference interpolation produced a non-finite parent reference point");
 
     return parent_reference;

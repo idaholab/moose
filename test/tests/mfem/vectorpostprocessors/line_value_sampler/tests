@@ -1,5 +1,5 @@
 [Tests]
-  design = 'MFEMLineVariableValueSampler.md'
+  design = 'MFEMVariableLineValueSampler.md'
   issues = '#31249'
   [MFEMLineVariableValueSamplerDiffusion]
     type = CSVDiff
@@ -27,7 +27,7 @@
     type = RunException
     input = line_value_sampler_diffusion.i
     cli_args = 'VectorPostprocessors/line_sample/num_points=1'
-    expect_err = 'In MFEMLineVariableValueSampler "line_sample": line must have at least 2 points'
+    expect_err = 'In MFEMVariableLineValueSampler "line_sample": line must have at least 2 points'
     requirement = 'The system shall identify the input block when a line variable sampler is '
                   'configured with fewer than two points.'
     capabilities = 'mfem'

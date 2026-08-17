@@ -14,9 +14,7 @@
 TEST_F(TestNumericalFlux3EqnCentered, testSymmetry) { testSymmetry(); }
 TEST_F(TestNumericalFlux3EqnCentered, testConsistency) { testConsistency(); }
 
-TestNumericalFlux3EqnCentered::TestNumericalFlux3EqnCentered() : TestNumericalFlux3EqnBase()
-{
-}
+TestNumericalFlux3EqnCentered::TestNumericalFlux3EqnCentered() : TestNumericalFlux3EqnBase() {}
 
 const NumericalFlux1D &
 TestNumericalFlux3EqnCentered::createFluxObject()

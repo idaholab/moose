@@ -34,6 +34,8 @@ public:
 
   SideUserObject(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   MooseMesh & _mesh;
 
@@ -63,4 +65,7 @@ protected:
    * sideset. Sidesets are oriented!
    */
   void getFaceInfos();
+
+private:
+  void checkNoInterfaceMaterialPropertyDependencies() const;
 };

@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#33474'
+  design = 'SIMPLE.md PIMPLE.md Eigenvalue.md FullSolveMultiApp.md'
+  [petsc-options]
+    requirement = 'The system shall isolate custom PETSc options when combining eigenvalue and '
+                  'segregated fluid solves in MultiApps '
+    [eigen-main]
+      type = RunApp
+      input = eigen.i
+      cli_args = "MultiApps/inactive='' Executioner/fixed_point_min_its=2
+                  Executioner/fixed_point_max_its=2
+                  Executioner/auto_advance=true
+                  Executioner/accept_on_max_fixed_point_iteration=true"
+      capabilities = 'slepc>=3.12.0'
+      recover = false
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'with the eigenvalue problem as the main application and both SIMPLE and PIMPLE as sub-applications.'
+    []
+    [simple-main]
+      type = RunApp
+      input = simple.i
+      cli_args = "MultiApps/inactive='' Executioner/fixed_point_min_its=2
+                  Executioner/fixed_point_max_its=2
+                  Executioner/auto_advance=true
+                  Executioner/accept_on_max_fixed_point_iteration=true"
+      capabilities = 'slepc>=3.12.0'
+      recover = false
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'with SIMPLE as the main application and the eigenvalue problem as a sub-application.'
+    []
+    [pimple-main]
+      type = RunApp
+      input = pimple.i
+      cli_args = "MultiApps/inactive='' Executioner/fixed_point_min_its=2
+                  Executioner/fixed_point_max_its=2
+                  Executioner/auto_advance=true
+                  Executioner/accept_on_max_fixed_point_iteration=true"
+      capabilities = 'slepc>=3.12.0'
+      recover = false
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'with PIMPLE as the main application and the eigenvalue problem as a sub-application.'
+    []
+  []
+[]

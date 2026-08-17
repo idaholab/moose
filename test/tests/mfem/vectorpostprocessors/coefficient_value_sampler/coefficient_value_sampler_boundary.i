@@ -30,7 +30,7 @@
 
 [VectorPostprocessors]
   [boundary_sample]
-    type = MFEMPointScalarCoefficientValueSampler
+    type = MFEMScalarCoefficientPointValueSampler
     coefficient = piecewise_coefficient
     points = '0.5 0.5 0'
   []

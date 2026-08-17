@@ -42,6 +42,7 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
 
 protected:
   /// The fluid temperature, we use the functor form to enable situations when

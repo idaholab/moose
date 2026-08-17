@@ -42,6 +42,16 @@ ADKernelScalarBase::ADKernelScalarBase(const InputParameters & parameters)
 {
 }
 
+std::set<std::string>
+ADKernelScalarBase::additionalROVariables()
+{
+  auto variables = ADKernel::additionalROVariables();
+  if (_compute_scalar_residuals)
+    variables.insert(_kappa_var_ptr->name());
+
+  return variables;
+}
+
 void
 ADKernelScalarBase::computeResidual()
 {
@@ -116,7 +126,16 @@ ADKernelScalarBase::computeScalarResidualsForJacobian()
     sr = 0;
 
   // precalculateResidual was already run for the field variable
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_h = 0; _h < _k_order; _h++)
-      _scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      _r = _ad_JxW[_qp];
+      _r *= _ad_coord[_qp];
+      for (_h = 0; _h < _k_order; _h++)
+        _scalar_residuals[_h] += _r * computeScalarQpResidual();
+    }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_h = 0; _h < _k_order; _h++)
+        _scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
 }

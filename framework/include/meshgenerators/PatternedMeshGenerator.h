@@ -32,6 +32,13 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /**
+   * Generate the patterned mesh.
+   *
+   * @param input_meshes If non-null, the input meshes used to generate the output mesh.
+   */
+  std::unique_ptr<MeshBase> generate(std::vector<std::unique_ptr<ReplicatedMesh>> * input_meshes);
+
   /// The mesh generators to read
   const std::vector<MeshGeneratorName> & _input_names;
 
@@ -40,12 +47,6 @@ protected:
 
   /// The pattern, starting with the upper left corner
   const std::vector<std::vector<unsigned int>> & _pattern;
-
-  /// Holds the pointers to the input generated meshes
-  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
-
-  /// Holds a mesh for each row, these will be stitched together in the end
-  std::vector<std::unique_ptr<ReplicatedMesh>> _row_meshes;
 
   /**
    * Merges the subdomain name maps between two meshes, throws an error

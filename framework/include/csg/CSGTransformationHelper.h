@@ -12,6 +12,10 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
+
 namespace CSG
 {
 
@@ -99,6 +103,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithTransform);
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithNullTransform);
+  FRIEND_TEST(CSGEngUnitTest, testEngUnitEqual);
   ///@}
 #endif
 };

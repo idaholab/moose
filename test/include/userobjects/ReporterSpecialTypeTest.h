@@ -24,9 +24,9 @@ public:
   ReporterSpecialTypeTest(const InputParameters & params);
 
   void initialSetup() override;
-  void initialize() override{};
-  void execute() override{};
-  void finalize() override{};
+  void initialize() override {};
+  void execute() override {};
+  void finalize() override {};
 
 private:
   bool isPostprocessor(const std::string & param_name) const;

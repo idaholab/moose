@@ -34,11 +34,6 @@ selected strain formulation.  We recommend that users employ the
 [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.
 
-Although not recommended, it is possible to directly use the `ComputeIncrementalStrain` material
-in the input file.
-
-!listing modules/solid_mechanics/test/tests/thermal_expansion/multiple_thermal_eigenstrains.i block=Materials/small_strain
-
 !syntax parameters /Materials/ComputeIncrementalStrain
 
 !syntax inputs /Materials/ComputeIncrementalStrain

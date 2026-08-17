@@ -1,6 +1,19 @@
 # Test for Newmark Beta integration for a 1D element
 # Consistent mass matrix
 
+[GlobalParams]
+  displacements = 'disp_x'
+[]
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    incremental = true
+  [../]
+[]
+
+
 [Mesh]
   type = GeneratedMesh
   xmin = 0
@@ -9,43 +22,6 @@
   dim = 1
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[AuxVariables]
-  [./accel_x]
-  [../]
-  [./vel_x]
-  [../]
-[]
-
-[AuxKernels]
-  [./accel_x]
-    type = TestNewmarkTI
-    variable = accel_x
-    displacement = disp_x
-    first = false
-  [../]
-  [./vel_x]
-    type = TestNewmarkTI
-    variable = vel_x
-    displacement = disp_x
-  [../]
-[]
-
-[Kernels]
-  [./DynamicSolidMechanics]
-    displacements = 'disp_x'
-  [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-  [../]
-[]
 
 [NodalKernels]
   [./force_x]
@@ -80,11 +56,6 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
-  [./strain_block]
-    type = ComputeIncrementalStrain
-    block = 0
-    displacements = 'disp_x'
   [../]
   [./stress_block]
     type = ComputeFiniteStrainElasticStress

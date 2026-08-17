@@ -6,6 +6,10 @@
 # the initial stress, otherwise it does not converge.
 # This test is testing that subdivision process.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -21,20 +25,15 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
+    eigenstrain_names = ini_stress
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 
 [BCs]
@@ -240,11 +239,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
-    eigenstrain_names = ini_stress
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress

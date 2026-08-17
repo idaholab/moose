@@ -358,7 +358,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     LinearImplicitSystem & momentum_system =
         libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
   }
 
   // We reset this to ensure the preconditioner is recomputed new time we go to the momentum
@@ -637,6 +637,8 @@ LinearAssemblySegregatedSolve::solve()
   // Do not solve if problem is set not to
   if (!_problem.shouldSolve())
     return true;
+
+  Moose::PetscSupport::PetscOptionsScope petsc_options_scope(_problem);
 
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;

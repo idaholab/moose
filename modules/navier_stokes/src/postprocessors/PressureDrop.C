@@ -155,8 +155,8 @@ PressureDrop::execute()
               _downstream_boundaries.end())
         status_known = true;
 
-        // in debug mode we will check all boundaries the face info is a part of
-        // to make sure they are consistently upstream or downstream
+      // in debug mode we will check all boundaries the face info is a part of
+      // to make sure they are consistently upstream or downstream
 #ifdef NDEBUG
       if (status_known)
         break;

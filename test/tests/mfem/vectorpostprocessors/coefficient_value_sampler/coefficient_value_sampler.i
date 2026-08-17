@@ -30,14 +30,14 @@
 
 [VectorPostprocessors]
   [function_sample]
-    type = MFEMPointScalarCoefficientValueSampler
+    type = MFEMScalarCoefficientPointValueSampler
     coefficient = linear_coefficient
     points = '0.125 0.125 0
               0.375 0.625 0
               0.875 0.875 0'
   []
   [material_sample]
-    type = MFEMPointScalarCoefficientValueSampler
+    type = MFEMScalarCoefficientPointValueSampler
     coefficient = material_coefficient
     points = '0.125 0.125 0
               0.375 0.625 0

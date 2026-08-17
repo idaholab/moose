@@ -64,7 +64,7 @@ public:
                                    mfem::DenseMatrix & elmat) override;
 
 protected:
-  mfem::CurlCurlIntegrator _curlcurl_res_integ;      // (k(|curl u|) curl u, curl phi_j)
+  mfem::CurlCurlIntegrator _curlcurl_res_integ; // (k(|curl u|) curl u, curl phi_j)
   NLCurlCurlJacMatrixCoefficient _curlcurl_jac_matrix_coef;
   mfem::CurlCurlIntegrator _curlcurl_jac_integ;
 };

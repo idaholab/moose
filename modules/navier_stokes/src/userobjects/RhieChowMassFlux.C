@@ -18,7 +18,9 @@
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
+#include "LinearFVPressureFluxBC.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -45,11 +47,6 @@ RhieChowMassFlux::validParams()
   params.addRequiredParam<std::string>(
       "p_diffusion_kernel",
       "The LinearFVPressureCorrectionDiffusion kernel acting on the pressure.");
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "body_force_kernel_names",
-      {},
-      "The body force kernel names."
-      "this double vector would have size index_x_dim: 'f1x f2x; f1y f2y; f1z f2z'");
 
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
 
@@ -86,8 +83,6 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _face_mass_flux(
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
-    _body_force_kernel_names(
-        getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
     _rho(getFunctor<Real>(NS::density)),
     _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method")),
     _pressure_diffusion_interp_method(getParam<MooseEnum>("pressure_diffusion_interpolation") ==
@@ -142,6 +137,35 @@ RhieChowMassFlux::linkMomentumPressureSystems(
   }
 
   setupMeshInformation();
+
+  std::set<BoundaryID> velocity_boundary_ids;
+  for (const auto dim_i : make_range(_dim))
+    for (const auto & [boundary_id, _] : _vel[dim_i]->getBoundaryConditionMap())
+      velocity_boundary_ids.insert(boundary_id);
+
+  const auto is_dirichlet =
+      [](const MooseLinearVariableFVReal & variable, const BoundaryID boundary_id)
+  {
+    return dynamic_cast<const LinearFVAdvectionDiffusionFunctorDirichletBC *>(
+               variable.getBoundaryCondition(boundary_id)) != nullptr;
+  };
+
+  // The legacy boundary HbyA reconstruction uses the x-velocity BC as a proxy for every velocity
+  // component, so all components must have the same Dirichlet classification on those boundaries.
+  for (const auto boundary_id : velocity_boundary_ids)
+  {
+    const auto * const pressure_bc = _p->getBoundaryCondition(boundary_id);
+    if (dynamic_cast<const LinearFVPressureFluxBC *>(pressure_bc))
+      continue;
+
+    const bool velocity_is_dirichlet = is_dirichlet(*_vel[0], boundary_id);
+    for (const auto dim_i : make_range(_dim))
+      if (is_dirichlet(*_vel[dim_i], boundary_id) != velocity_is_dirichlet)
+        mooseError("All velocity components must either have Dirichlet boundary conditions or "
+                   "non-Dirichlet boundary conditions on boundary '",
+                   _moose_mesh.getBoundaryName(boundary_id),
+                   "' when the pressure boundary condition is not a LinearFVPressureFluxBC.");
+  }
 }
 
 void
@@ -173,40 +197,8 @@ RhieChowMassFlux::initialSetup()
   _p_diffusion_kernel = dynamic_cast<LinearFVPressureCorrectionDiffusion *>(flux_kernel[0]);
   if (!_p_diffusion_kernel)
     paramError("p_diffusion_kernel",
-               "The provided diffusion kernel should be of type "
+               "The provided diffusion kernel must be of type "
                "LinearFVPressureCorrectionDiffusion.");
-
-  // We fetch the body forces kernel to ensure that the face flux correction
-  // is accurate.
-
-  // Check if components match the dimension.
-
-  if (!_body_force_kernel_names.empty())
-  {
-    if (_body_force_kernel_names.size() != _dim)
-      paramError("body_force_kernel_names",
-                 "The dimension of the body force vector does not match the problem dimension.");
-
-    _body_force_kernels.resize(_dim);
-
-    for (const auto dim_i : make_range(_dim))
-      for (const auto & force_name : _body_force_kernel_names[dim_i])
-      {
-        std::vector<LinearFVElementalKernel *> temp_storage;
-        auto base_query_force = _fe_problem.theWarehouse()
-                                    .query()
-                                    .template condition<AttribThread>(_tid)
-                                    .template condition<AttribSysNum>(_vel[dim_i]->sys().number())
-                                    .template condition<AttribSystem>("LinearFVElementalKernel")
-                                    .template condition<AttribName>(force_name)
-                                    .queryInto(temp_storage);
-        if (temp_storage.size() != 1)
-          paramError("body_force_kernel_names",
-                     "The kernel with the given name: " + force_name +
-                         " could not be found or multiple instances were identified.");
-        _body_force_kernels[dim_i].push_back(temp_storage[0]);
-      }
-  }
 }
 
 void
@@ -503,9 +495,15 @@ RhieChowMassFlux::populateCouplingFunctors(
       const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-      // If it is a Dirichlet BC, we use the dirichlet value the make sure the face flux
-      // is consistent
-      if (_vel[0]->isDirichletBoundaryFace(*fi))
+      mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
+      const auto * pressure_bc = _p->getBoundaryCondition(*fi->boundaryIDs().begin());
+
+      // For the legacy Dirichlet-velocity plus extrapolated-pressure path, we still need a
+      // special boundary HbyA reconstruction to keep the face flux consistent. When the pressure
+      // BC itself is a LinearFVPressureFluxBC, that object already enforces the prescribed
+      // boundary mass flux, so we use the standard one-term boundary expansion instead.
+      if (_vel[0]->isDirichletBoundaryFace(*fi) &&
+          !dynamic_cast<const LinearFVPressureFluxBC *>(pressure_bc))
       {
         const Moose::FaceArg boundary_face{
             fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
@@ -516,15 +514,6 @@ RhieChowMassFlux::populateCouplingFunctors(
 
           face_hbya(dim_i) =
               -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
-
-          if (!_body_force_kernel_names.empty())
-            for (const auto & force_kernel : _body_force_kernels[dim_i])
-            {
-              force_kernel->setCurrentElemInfo(&elem_info);
-              face_hbya(dim_i) -=
-                  force_kernel->computeRightHandSideContribution() * ainv_reader[dim_i](elem_dof) /
-                  (elem_info.volume() * elem_info.coordFactor()); // zero-term expansion
-            }
           face_hbya(dim_i) *= boundary_normal_multiplier;
         }
       }

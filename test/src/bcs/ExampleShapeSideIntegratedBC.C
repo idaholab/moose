@@ -68,7 +68,8 @@ ExampleShapeSideIntegratedBC::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-Real ExampleShapeSideIntegratedBC::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
+Real
+ExampleShapeSideIntegratedBC::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
 {
   return 0;
 }

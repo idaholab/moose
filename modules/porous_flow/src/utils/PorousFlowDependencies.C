@@ -59,6 +59,7 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowPropertyAux", "porosity_qp");
 
   // BC dependencies
+  _deps.insertDependency("PorousFlowAquiferBC", "PorousFlowSink");
   _deps.insertDependency("PorousFlowHalfCubicSink", "PorousFlowSink");
   _deps.insertDependency("PorousFlowHalfGaussianSink", "PorousFlowSink");
   _deps.insertDependency("PorousFlowPiecewiseLinearSink", "PorousFlowSink");

@@ -188,7 +188,7 @@ EFAFragment2D::combineTipEdges()
       {
         if (_host_elem->getEdge(i)->containsEdge(*_boundary_edges[j]))
           frag_tip_edge_id.push_back(j);
-      }                                 // j
+      } // j
       if (frag_tip_edge_id.size() == 2) // combine the two frag edges on this elem edge
       {
         has_tip_edges = true;

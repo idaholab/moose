@@ -63,7 +63,7 @@ private:
   /**
    * Constructor; private so that it can only be created with the singleton
    */
-  ParameterRegistry() {};
+  ParameterRegistry() {}
 
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::ParameterRegistryTest, add);

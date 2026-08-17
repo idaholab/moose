@@ -235,7 +235,7 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
     }
 
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
   }
 
   return its_normalized_residuals;
@@ -438,6 +438,8 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
 bool
 SIMPLESolveNonlinearAssembly::solve()
 {
+  Moose::PetscSupport::PetscOptionsScope petsc_options_scope(_problem);
+
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;
   solver_params._type = Moose::SolveType::ST_LINEAR;

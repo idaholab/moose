@@ -27,7 +27,7 @@ class ComputeLagrangianStressPK1 : public ComputeLagrangianStressBase
 public:
   static InputParameters validParams();
   ComputeLagrangianStressPK1(const InputParameters & parameters);
-  virtual ~ComputeLagrangianStressPK1(){};
+  virtual ~ComputeLagrangianStressPK1() {}
 
 protected:
   /// Calculate the stress update to provide both measures (cauchy and pk1)

@@ -15,7 +15,11 @@
 class IdealGasFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  IdealGasFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp"), _molar_mass(0.028966206103678928) { buildObjects(); }
+  IdealGasFluidPropertiesTest()
+    : MooseObjectUnitTest("FluidPropertiesApp"), _molar_mass(0.028966206103678928)
+  {
+    buildObjects();
+  }
 
 protected:
   void buildObjects()

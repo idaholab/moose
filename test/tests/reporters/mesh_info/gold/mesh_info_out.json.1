@@ -1,21 +1,18 @@
 {
-    "number_of_parts": 2,
+    "number_of_parts": 4,
     "part": 1,
     "reporters": {
         "mesh_info": {
             "type": "MeshInfo",
             "values": {
-                "local_sideset_elems": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo>"
+                "local_elems": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::ElemInfo, MeshInfo::ElemInfoItems>"
                 },
                 "local_sidesets": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo>"
-                },
-                "local_subdomain_elems": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo>"
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<short, std::pair<unsigned long, unsigned int>>, MeshInfo::DomainInfoItems>"
                 },
                 "local_subdomains": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo>"
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long>, MeshInfo::DomainInfoItems>"
                 },
                 "num_dofs": {
                     "type": "unsigned int"
@@ -26,12 +23,6 @@
                 "num_dofs_constrained": {
                     "type": "unsigned int"
                 },
-                "num_dofs_local_auxiliary": {
-                    "type": "unsigned int"
-                },
-                "num_dofs_local_nonlinear": {
-                    "type": "unsigned int"
-                },
                 "num_dofs_nonlinear": {
                     "type": "unsigned int"
                 },
@@ -39,6 +30,12 @@
                     "type": "unsigned int"
                 },
                 "num_local_dofs": {
+                    "type": "unsigned int"
+                },
+                "num_local_dofs_auxiliary": {
+                    "type": "unsigned int"
+                },
+                "num_local_dofs_nonlinear": {
                     "type": "unsigned int"
                 },
                 "num_local_elements": {
@@ -56,18 +53,17 @@
     "time_steps": [
         {
             "mesh_info": {
-                "local_sideset_elems": null,
+                "local_elems": null,
                 "local_sidesets": null,
-                "local_subdomain_elems": null,
                 "local_subdomains": null,
                 "num_dofs": 0,
                 "num_dofs_auxiliary": 0,
                 "num_dofs_constrained": 0,
-                "num_dofs_local_auxiliary": 0,
-                "num_dofs_local_nonlinear": 0,
                 "num_dofs_nonlinear": 0,
                 "num_elements": 0,
                 "num_local_dofs": 0,
+                "num_local_dofs_auxiliary": 0,
+                "num_local_dofs_nonlinear": 0,
                 "num_local_elements": 0,
                 "num_local_nodes": 0,
                 "num_nodes": 0
@@ -77,104 +73,150 @@
         },
         {
             "mesh_info": {
-                "local_sideset_elems": [
+                "local_elems": [
                     {
-                        "id": 0,
-                        "name": "bottom",
-                        "sides": [
-                            {
-                                "elem_id": 50,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 51,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 52,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 53,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 54,
-                                "side": 0
-                            }
-                        ]
+                        "id": 24,
+                        "subdomain_id": 1
                     },
                     {
-                        "id": 1,
-                        "name": "right",
-                        "sides": [
-                            {
-                                "elem_id": 54,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 59,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 64,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 69,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 74,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 79,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 84,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 89,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 94,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 99,
-                                "side": 1
-                            }
-                        ]
+                        "id": 25,
+                        "subdomain_id": 1
                     },
                     {
-                        "id": 2,
-                        "name": "top",
-                        "sides": [
-                            {
-                                "elem_id": 95,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 96,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 97,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 98,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 99,
-                                "side": 2
-                            }
-                        ]
+                        "id": 26,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 27,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 28,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 29,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 30,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 31,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 32,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 33,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 34,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 35,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 36,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 37,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 38,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 39,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 40,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 41,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 42,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 43,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 44,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 45,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 46,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 47,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 48,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 49,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 50,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 51,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 52,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 53,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 54,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 55,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 56,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 57,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 58,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 59,
+                        "subdomain_id": 1
                     }
                 ],
                 "local_sidesets": [
@@ -185,84 +227,24 @@
                     {
                         "id": 1,
                         "name": "right"
-                    },
-                    {
-                        "id": 2,
-                        "name": "top"
-                    }
-                ],
-                "local_subdomain_elems": [
-                    {
-                        "elems": [
-                            50,
-                            51,
-                            52,
-                            53,
-                            54,
-                            55,
-                            56,
-                            57,
-                            58,
-                            59,
-                            60,
-                            61,
-                            62,
-                            63,
-                            64,
-                            65,
-                            66,
-                            67,
-                            68,
-                            69,
-                            70,
-                            71,
-                            72,
-                            73,
-                            74,
-                            75,
-                            76,
-                            77,
-                            78,
-                            79,
-                            80,
-                            81,
-                            82,
-                            83,
-                            84,
-                            85,
-                            86,
-                            87,
-                            88,
-                            89,
-                            90,
-                            91,
-                            92,
-                            93,
-                            94,
-                            95,
-                            96,
-                            97,
-                            98,
-                            99
-                        ],
-                        "id": 0
                     }
                 ],
                 "local_subdomains": [
                     {
-                        "id": 0
+                        "id": 1,
+                        "name": "foo"
                     }
                 ],
                 "num_dofs": 221,
                 "num_dofs_auxiliary": 100,
                 "num_dofs_constrained": 0,
-                "num_dofs_local_auxiliary": 50,
-                "num_dofs_local_nonlinear": 55,
                 "num_dofs_nonlinear": 121,
                 "num_elements": 100,
-                "num_local_dofs": 105,
-                "num_local_elements": 50,
-                "num_local_nodes": 55,
+                "num_local_dofs": 78,
+                "num_local_dofs_auxiliary": 36,
+                "num_local_dofs_nonlinear": 42,
+                "num_local_elements": 36,
+                "num_local_nodes": 42,
                 "num_nodes": 121
             },
             "time": 1.0,

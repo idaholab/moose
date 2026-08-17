@@ -24,15 +24,6 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
 [AuxVariables]
   [./temp]
   [../]
@@ -58,11 +49,15 @@
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    use_displaced_mesh = true
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
+    eigenstrain_names = 'eigenstrain1 eigenstrain2'
   [../]
 []
+
 
 [AuxKernels]
   [./tempfuncaux]
@@ -121,10 +116,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
-  [./small_strain]
-    type = ComputeIncrementalStrain
-    eigenstrain_names = 'eigenstrain1 eigenstrain2'
   [../]
   [./small_stress]
     type = ComputeFiniteStrainElasticStress

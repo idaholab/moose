@@ -63,7 +63,6 @@ protected:
   /// as opposed to if (_num_grids)
   const unsigned int _num_grid_steps;
 
-private:
   /// Performs setup related to Convergence objects
   void convergenceSetup();
 };

@@ -1,16 +1,12 @@
+[GlobalParams]
+  displacements = 'ux uy'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 2
   ny = 2
-  displacements = 'ux uy'
-[]
-
-[Variables]
-  [ux]
-  []
-  [uy]
-  []
 []
 
 [AuxVariables]
@@ -31,12 +27,14 @@
   []
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'ux uy'
-    use_displaced_mesh = true
-  []
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
+  [../]
 []
+
 
 [AuxKernels]
   [stress_xx_recovered]
@@ -128,10 +126,6 @@
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
-  []
-  [strain]
-    type = ComputeFiniteStrain
-    displacements = 'ux uy'
   []
   [elasticity_tensor]
     type = ComputeElasticityTensorCP

@@ -2174,7 +2174,7 @@ template <typename T>
 T *
 Coupleable::getVarHelper(const std::string & var_name_in, unsigned int comp)
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
   auto name_to_use = var_name;
 
   // First check for supplied name

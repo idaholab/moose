@@ -16,7 +16,8 @@ ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & f
 {
 }
 
-void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
+void
+ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
 {
   _fe_problem.lineSearch();
 }

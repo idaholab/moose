@@ -140,6 +140,78 @@ UnitsConversionEvaler::eval(hit::Field * n,
   return ss.str();
 }
 
+std::string
+EnumerateEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+{
+  std::vector<std::string> argv;
+  argv.insert(argv.begin(), args.begin(), args.end());
+
+  if (argv.size() != 3)
+  {
+    exp.errors.emplace_back(
+        "enumerate error: Expected 3 arguments ${enumerate prefix first_index last_index} in '" +
+            n->fullpath() + "'",
+        n);
+    return n->val();
+  }
+
+  const auto & prefix = argv[0];
+  std::array<int, 2> index;
+  for (const auto i : make_range(2))
+  {
+    const auto & arg = argv[i + 1];
+    if (arg.empty() || arg.find_first_not_of("0123456789") != std::string::npos)
+    {
+      exp.errors.emplace_back("enumerate error: index '" + arg +
+                                  "' is not a non-negative integer in '" + n->fullpath() + "'",
+                              n);
+      return n->val();
+    }
+    index[i] = MooseUtils::convert<int>(arg);
+  }
+
+  if (index[1] < index[0])
+  {
+    exp.errors.emplace_back("enumerate error: last index " + argv[2] +
+                                " is smaller than first index " + argv[1] + " in '" +
+                                n->fullpath() + "'",
+                            n);
+    return n->val();
+  }
+
+  std::vector<std::string> names;
+  for (const auto i : make_range(index[0], index[1] + 1))
+    names.push_back(prefix + std::to_string(i));
+
+  return MooseUtils::stringJoin(names);
+}
+
+std::string
+RepeatEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+{
+  std::vector<std::string> argv;
+  argv.insert(argv.begin(), args.begin(), args.end());
+
+  if (argv.size() != 2)
+  {
+    exp.errors.emplace_back(
+        "repeat error: Expected 2 arguments ${repeat name count} in '" + n->fullpath() + "'", n);
+    return n->val();
+  }
+
+  const auto & count_arg = argv[1];
+  if (count_arg.empty() || count_arg.find_first_not_of("0123456789") != std::string::npos)
+  {
+    exp.errors.emplace_back("repeat error: count '" + count_arg +
+                                "' is not a non-negative integer in '" + n->fullpath() + "'",
+                            n);
+    return n->val();
+  }
+
+  const std::vector<std::string> values(MooseUtils::convert<int>(count_arg), argv[0]);
+  return MooseUtils::stringJoin(values);
+}
+
 Parser::Parser(const std::vector<std::string> & input_filenames,
                const std::optional<std::vector<std::string>> & input_text /* = {} */)
   : _root(nullptr),
@@ -415,12 +487,16 @@ Parser::parse()
     hit::ReplaceEvaler repl;
     FuncParseEvaler fparse_ev;
     UnitsConversionEvaler units_ev;
+    EnumerateEvaler enumerate_ev;
+    RepeatEvaler repeat_ev;
     hit::BraceExpander exw;
     exw.registerEvaler("raw", raw);
     exw.registerEvaler("env", env);
     exw.registerEvaler("fparse", fparse_ev);
     exw.registerEvaler("replace", repl);
     exw.registerEvaler("units", units_ev);
+    exw.registerEvaler("enumerate", enumerate_ev);
+    exw.registerEvaler("repeat", repeat_ev);
     getRoot().walk(&exw);
     for (auto & var : exw.used)
       _extracted_vars.insert(var);

@@ -325,7 +325,7 @@ loopOverMortarSegments(
       act();
 
     } // End loop over msm segments on secondary face elem
-  }   // End loop over (active) secondary elems
+  } // End loop over (active) secondary elems
 }
 
 /**

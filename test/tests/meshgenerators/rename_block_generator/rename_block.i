@@ -29,11 +29,13 @@
 
 [Reporters/mesh_info]
   type = MeshInfo
-  items = subdomain_elems
+  items = subdomains
+  subdomain_items = elems
 []
 
 [Outputs/out]
   type = JSON
+  execute_system_information_on = none
 []
 
 [Problem]

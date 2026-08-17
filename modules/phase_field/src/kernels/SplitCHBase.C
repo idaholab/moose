@@ -63,6 +63,14 @@ SplitCHBase::computeQpOffDiagJacobian(unsigned int /*jvar*/)
   return 0.0;
 }
 
-Real SplitCHBase::computeDFDC(PFFunctionType /*type*/) { return 0.0; }
+Real
+SplitCHBase::computeDFDC(PFFunctionType /*type*/)
+{
+  return 0.0;
+}
 
-Real SplitCHBase::computeDEDC(PFFunctionType /*type*/) { return 0.0; }
+Real
+SplitCHBase::computeDEDC(PFFunctionType /*type*/)
+{
+  return 0.0;
+}

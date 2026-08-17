@@ -1,0 +1,25 @@
+# MFEMComplexVariablePointValueSampler
+
+!if! function=hasCapability('mfem')
+
+## Overview
+
+This class performs interpolation of complex scalar and vector quantities at a
+set of specified points using MFEM's
+[`FindPointsGSLIB`](https://mfem.org/howto/findpts/) `gslib` interpolation.
+The real and imaginary parts of each sampled component are output as separate columns.
+
+## Example Input File Syntax
+
+!listing mfem/variables/complex_aux_recovery.i block=VectorPostprocessors
+
+!syntax parameters /VectorPostprocessors/MFEMComplexVariablePointValueSampler
+
+!syntax inputs /VectorPostprocessors/MFEMComplexVariablePointValueSampler
+
+!syntax children /VectorPostprocessors/MFEMComplexVariablePointValueSampler
+
+!if-end!
+
+!else
+!include mfem/mfem_warning.md

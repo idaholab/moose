@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <ctime>
 #include <cstdlib>
+#include <cmath>
 #include <regex>
 
 // System includes
@@ -55,6 +56,16 @@
 
 namespace MooseUtils
 {
+bool
+isFinitePoint(const Point & point)
+{
+  for (const auto component : make_range(Moose::dim))
+    if (!std::isfinite(point(component)))
+      return false;
+
+  return true;
+}
+
 std::filesystem::path
 pathjoin(const std::filesystem::path & p)
 {

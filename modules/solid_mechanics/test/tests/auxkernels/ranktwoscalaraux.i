@@ -1,5 +1,8 @@
-[Mesh]
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+[]
+
+[Mesh]
   [generated_mesh]
     type = GeneratedMeshGenerator
     elem_type = HEX8
@@ -28,26 +31,14 @@
   []
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
- [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 
 
@@ -62,11 +53,6 @@
     block = 0
     C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
     fill_method = symmetric9
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 

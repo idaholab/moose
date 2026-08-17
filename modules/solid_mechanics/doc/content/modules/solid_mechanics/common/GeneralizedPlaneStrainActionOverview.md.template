@@ -1,0 +1,109 @@
+## Description
+
+This action simplifies the input syntax for creating a generalized plane strain
+model. It creates the objects associated with the scalar out-of-plane strain
+variable and the out-of-plane equilibrium equation. A detailed description of
+the formulation is available on the
+[generalized plane strain](solid_mechanics/generalized_plane_strain.md) page.
+
+!alert! warning title=For 2D and 1D Simulations
+`GeneralizedPlaneStrainAction` supports 1D axisymmetric or 2D generalized plane
+strain cases. For 1D axisymmetric and 2D Cartesian cases in the x-y plane, the
+number of displacement variables must be one or two, respectively.
+
+For 2D generalized plane strain cases in the x-z or y-z planes, the number of
+displacement variables must be three.
+!alert-end!
+
+## Constructed Objects
+
+Without automatic differentiation, the action creates the UserObject,
+ScalarKernel, and off-diagonal Kernel objects listed below.
+
+!table id=gps_non_ad_action_objects caption=Non-AD objects created by `GeneralizedPlaneStrainAction`
+| Object | Purpose |
+| --- | --- |
+| [GeneralizedPlaneStrainOffDiag.md] | Couples the in-plane displacement variables and the scalar out-of-plane strain variable in the off-diagonal Jacobian. |
+| [GeneralizedPlaneStrain.md] | Assembles the scalar out-of-plane equilibrium residual. |
+| [GeneralizedPlaneStrainUserObject.md] | Computes the residual and diagonal Jacobian data used by the scalar kernel. |
+
+With
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/use_automatic_differentiation),
+the action creates exactly one [ADGeneralizedPlaneStrain.md] object.
+The non-AD UserObject, ScalarKernel, and off-diagonal Kernel objects are not
+created because `ADKernelScalarBase` assembles the scalar residual and its
+couplings through automatic differentiation. When
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/use_displaced_mesh)
+is `true`, the AD kernel uses displaced-mesh quadrature weights for that scalar
+assembly.
+
+!table id=gps_ad_action_objects caption=AD objects created by `GeneralizedPlaneStrainAction`
+| Object | Purpose |
+| --- | --- |
+| [ADGeneralizedPlaneStrain.md] | Assembles the scalar out-of-plane equilibrium residual and AD couplings. |
+
+The action also creates the scalar out-of-plane strain variable named by
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/scalar_out_of_plane_strain)
+when it is missing. The automatically created scalar variable is a `FIRST` order nonlinear
+scalar variable in the nonlinear system that contains the in-plane displacement
+variables. If the named scalar variable already exists in that system, the
+action reuses it. A field variable or a scalar variable in a different
+nonlinear system with the same name is rejected.
+
+## Out-of-Plane Pressure
+
+The residual assembled for the scalar out-of-plane strain is
+\begin{equation}
+  R_s = \int_A \left( \sigma_{oo} + p_o \right) dA = 0,
+\end{equation}
+where $p_o$ is the out-of-plane pressure. Positive pressure is applied toward
+the body. In Cartesian coordinates, the out-of-plane `x`, `y`, and `z`
+directions use $\sigma_{xx}$, $\sigma_{yy}$, and $\sigma_{zz}$, respectively.
+In RZ axisymmetry, the out-of-plane direction is the axial `y` direction and the
+residual uses axisymmetric coordinate weighting.
+
+The pressure may be supplied with
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_pressure_function),
+with
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_pressure_material),
+or with both; the two contributions are summed and scaled by
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/pressure_factor).
+With automatic differentiation, the pressure material is read as a regular
+`Real` material property, so it does not add derivatives to the scalar equation.
+
+## Example Input Syntax
+
+Rather than directly specifying the GeneralizedPlaneStrain action in the input file, it is recommended to
+create it using the solid mechanics [QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md),
+with `planar_formulation = GENERALIZED_PLANE_STRAIN` set in that block.
+The usage examples listed below primarily utilize the QuasiStatics Physics blocks to set up generalized
+plane strain.
+
+Both the GeneralizedPlaneStrain Action and the QuasiStatic Physics block can contain one or more
+subblocks nested within them. Each of these subblocks is used to set up a separate instance
+of the generalized plane strain conditions.
+
+### Application to the Entire Solution Domain
+
+When a generalized plane strain model is applied to the whole simulation domain,
+there is a single scalar variable defining the out-of-plane strain, and the
+entire domain has the same value of the out-of-plane strain.
+
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/out_of_plane_pressure.i block=Physics/SolidMechanics/QuasiStatic
+
+### Multiple Independent Instances of Generalized Plane Strain
+
+For different mesh subdomains to use different generalized plane strain conditions,
+specify multiple subblocks with subdomain restrictions. This is useful when there
+are disconnected portions of the domain.
+
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
+
+### Specifying Out-of-Plane Direction
+
+An example of using generalized plane strain through the Solid Mechanics
+QuasiStatic physics block with an
+[!param](/Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction/out_of_plane_direction)
+different from the default $z$ direction is given by:
+
+!listing modules/solid_mechanics/test/tests/2D_different_planes/gps_xz.i block=Physics/SolidMechanics/QuasiStatic

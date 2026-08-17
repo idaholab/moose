@@ -354,7 +354,7 @@ EFAFace::sortEdges()
           << "or a face with more than one lone edge contributing to the cut plane).";
       EFAError(oss.str());
     }
-  }   // i
+  } // i
   _edges = ordered_edges;
 }
 
