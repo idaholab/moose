@@ -616,4 +616,50 @@ void buildPolyLineMesh(MeshBase & mesh,
  * shell)
  */
 void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
+
+/**
+ * Sets flags stating whether the provided boundary is fully internal or fully external
+ *
+ * A face is external if its element has no neighbor across that side. A boundary is considered
+ * "fully external" if NONE of its faces have neighbors. Similary, a boundary is considered "fully
+ * internal" if ALL of its faces have neighbors. Note that is possible for a boundary to be neither
+ * fully internal nor fully external.
+ *
+ * Note that \c active_side_list may differ from the one produced by \c build_active_side_list()
+ * with the provided mesh. This allows for checking on a pre-stitch set of sides.
+ *
+ * @param[in] mesh  Mesh
+ * @param[in] boundary_id  Boundary ID of boundary to check
+ * @param[in] active_side_list  List of BC tuples (elem,side,boundary ID)
+ * @param[out] fully_internal  True if boundary is fully internal
+ * @param[out] fully_external  True if boundary is fully external
+ */
+void getBoundaryFullyInternalExternal(
+    const MeshBase & mesh,
+    const BoundaryID boundary_id,
+    const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list,
+    bool & fully_internal,
+    bool & fully_external);
+
+/**
+ * Returns true if a boundary is fully internal; see \c getBoundaryFullyInternalExternal
+ *
+ * @param[in] mesh  Mesh
+ * @param[in] boundary_id  Boundary ID of boundary to check
+ * @param[in] active_side_list  List of BC tuples (elem,side,boundary ID)
+ */
+bool boundaryIsFullyInternal(const MeshBase & mesh,
+                             const BoundaryID boundary_id,
+                             const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list);
+
+/**
+ * Returns true if a boundary is fully external; see \c getBoundaryFullyInternalExternal
+ *
+ * @param[in] mesh  Mesh
+ * @param[in] boundary_id  Boundary ID of boundary to check
+ * @param[in] active_side_list  List of BC tuples (elem,side,boundary ID)
+ */
+bool boundaryIsFullyExternal(const MeshBase & mesh,
+                             const BoundaryID boundary_id,
+                             const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list);
 }

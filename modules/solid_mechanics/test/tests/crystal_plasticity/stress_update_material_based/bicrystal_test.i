@@ -25,11 +25,10 @@
     input = brass
     subdomain_id = 1
   []
-  [sticher]
+  [stitcher]
     type = StitchedMeshGenerator
     inputs = 'copper_id brass_id'
     stitch_boundaries_pairs = 'front back'
-    prevent_boundary_ids_overlap = false
   []
 []
 

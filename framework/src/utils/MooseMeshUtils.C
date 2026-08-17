@@ -1565,4 +1565,58 @@ addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_ext
         binfo.add_side(elem, i_side, extern_bid);
       }
 }
+
+void
+getBoundaryFullyInternalExternal(
+    const MeshBase & mesh,
+    const BoundaryID boundary_id,
+    const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list,
+    bool & fully_internal,
+    bool & fully_external)
+{
+  fully_internal = true;
+  fully_external = true;
+
+  for (std::size_t i = 0; i < active_side_list.size(); ++i)
+  {
+    const auto elem_id = std::get<0>(active_side_list[i]);
+    const auto side_id = std::get<1>(active_side_list[i]);
+    const auto bid = std::get<2>(active_side_list[i]);
+
+    if (bid != boundary_id)
+      continue;
+
+    const Elem * elem = mesh.elem_ptr(elem_id);
+
+    if (elem->neighbor_ptr(side_id))
+      fully_external = false;
+    else
+      fully_internal = false;
+  }
+
+  mesh.comm().min(fully_internal);
+  mesh.comm().min(fully_external);
+}
+
+bool
+boundaryIsFullyInternal(const MeshBase & mesh,
+                        const BoundaryID boundary_id,
+                        const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list)
+{
+  bool fully_internal, fully_external;
+  getBoundaryFullyInternalExternal(
+      mesh, boundary_id, active_side_list, fully_internal, fully_external);
+  return fully_internal;
+}
+
+bool
+boundaryIsFullyExternal(const MeshBase & mesh,
+                        const BoundaryID boundary_id,
+                        const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list)
+{
+  bool fully_internal, fully_external;
+  getBoundaryFullyInternalExternal(
+      mesh, boundary_id, active_side_list, fully_internal, fully_external);
+  return fully_external;
+}
 }

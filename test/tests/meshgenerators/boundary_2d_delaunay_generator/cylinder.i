@@ -91,6 +91,7 @@
     stitch_boundaries_pairs = '0 0;0 0;0 0;0 0;0 0'
     merge_boundaries_with_same_name = true
     prevent_boundary_ids_overlap = false
+    require_boundaries_fully_stitch = false # stitch occurs only along one side in each step
   []
   [xyzd]
     type = XYZDelaunayGenerator
