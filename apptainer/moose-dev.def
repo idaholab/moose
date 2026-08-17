@@ -360,7 +360,9 @@ EOF
         # Build pythonfmu
         mkdir build
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPython3_INCLUDE_DIR="$(python3 -c "import sysconfig; print(sysconfig.get_paths()['include'])")"
         cmake --build . --parallel ${MOOSE_JOBS}
         cd ..
 
