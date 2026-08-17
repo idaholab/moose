@@ -114,8 +114,8 @@ time over an iteration. The setbacks of this design choice are:
 
 The algorithm used to construct a cell gradient is separated from the variable and
 from the kernels that consume the gradient. Gradient algorithms are represented by
-`FVGradientMethod` objects. These objects are runtime-selectable and may be declared
-by name in the [FVGradientMethods] block.
+[FVGradientMethods](FVGradientMethods/index.md) objects. These objects are runtime-selectable and may be declared
+by name in the `FVGradientMethods` block.
 
 An `FVGradientMethod` is responsible for computing the cell-centered gradient
 and applying any limiter associated with that method. For example,

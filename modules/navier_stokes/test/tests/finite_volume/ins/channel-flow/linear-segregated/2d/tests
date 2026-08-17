@@ -32,6 +32,7 @@
                   "solve to use a named Green-Gauss gradient method used by Rhie-Chow and "
                   "momentum pressure-gradient consumers."
     recover = false # we don't support recovery for SIMPLE yet
+    design = 'SIMPLE.md linear_fv_design.md'
     max_threads = 1 # see libmesh issue #3808
     issues = '#32999'
   []
