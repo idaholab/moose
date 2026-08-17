@@ -110,9 +110,9 @@ bool
 IncrementalDelaunay::containsPoint(const std::size_t t, const Point2D & p) const
 {
   for (const auto i : make_range(3u))
-    if (orient2d(xy(_triangles[t].vertices[(i + 1) % 3]),
-                 xy(_triangles[t].vertices[(i + 2) % 3]),
-                 coords(p)) < 0.0)
+    if (moose_orient2d(xy(_triangles[t].vertices[(i + 1) % 3]),
+                       xy(_triangles[t].vertices[(i + 2) % 3]),
+                       coords(p)) < 0.0)
       return false;
   return true;
 }
@@ -154,9 +154,9 @@ IncrementalDelaunay::locate(const Point2D & p) const
     auto next = invalid_index;
     bool inside = true;
     for (const auto i : make_range(3u))
-      if (orient2d(xy(_triangles[current].vertices[(i + 1) % 3]),
-                   xy(_triangles[current].vertices[(i + 2) % 3]),
-                   coords(p)) < 0.0)
+      if (moose_orient2d(xy(_triangles[current].vertices[(i + 1) % 3]),
+                         xy(_triangles[current].vertices[(i + 2) % 3]),
+                         coords(p)) < 0.0)
       {
         inside = false;
         next = _triangles[current].neighbors[i];
@@ -193,7 +193,7 @@ IncrementalDelaunay::growCavity(const std::size_t seed,
     {
       const auto v0 = _triangles[t].vertices[(i + 1) % 3];
       const auto v1 = _triangles[t].vertices[(i + 2) % 3];
-      const auto side = orient2d(xy(v0), xy(v1), xy(v_new));
+      const auto side = moose_orient2d(xy(v0), xy(v1), xy(v_new));
 
       if (isConstrainedEdge(v0, v1))
       {
@@ -217,10 +217,10 @@ IncrementalDelaunay::growCavity(const std::size_t seed,
       // Taking the neighbor in when the shared edge would give a triangle of zero or negative area
       // is what keeps the cavity star shaped about the new vertex; with exact predicates that only
       // happens when the new vertex falls exactly on the edge.
-      if (side <= 0.0 || incircle(xy(_triangles[n].vertices[0]),
-                                  xy(_triangles[n].vertices[1]),
-                                  xy(_triangles[n].vertices[2]),
-                                  xy(v_new)) > 0.0)
+      if (side <= 0.0 || moose_incircle(xy(_triangles[n].vertices[0]),
+                                        xy(_triangles[n].vertices[1]),
+                                        xy(_triangles[n].vertices[2]),
+                                        xy(v_new)) > 0.0)
       {
         cavity.insert(n);
         pending.push_back(n);
@@ -318,7 +318,7 @@ IncrementalDelaunay::triangulatePseudopolygon(
 
   auto best = first;
   for (const auto i : make_range(first + 1, last))
-    if (incircle(xy(v_start), xy(v_end), xy(chain[best]), xy(chain[i])) > 0.0)
+    if (moose_incircle(xy(v_start), xy(v_end), xy(chain[best]), xy(chain[i])) > 0.0)
       best = i;
 
   triangles.push_back({v_start, v_end, chain[best]});
@@ -422,7 +422,7 @@ IncrementalDelaunay::insertPoint(const Point2D & p)
   {
     const auto v0 = _triangles[seed].vertices[(i + 1) % 3];
     const auto v1 = _triangles[seed].vertices[(i + 2) % 3];
-    if (orient2d(xy(v0), xy(v1), coords(p)) == 0.0 && isConstrainedEdge(v0, v1))
+    if (moose_orient2d(xy(v0), xy(v1), coords(p)) == 0.0 && isConstrainedEdge(v0, v1))
     {
       split = makeSegment(toCaller(v0), toCaller(v1));
       _constraints.erase(split);
@@ -498,7 +498,7 @@ IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
       return;
     }
 
-    const auto next_side = orient2d(xy(v_from), xy(next_v), xy(v_to));
+    const auto next_side = moose_orient2d(xy(v_from), xy(next_v), xy(v_to));
 
     // Nothing has been changed yet, so recovering the two halves from scratch is safe.
     if (next_side == 0.0 && isStrictlyBetween(v_from, next_v, v_to))
@@ -508,7 +508,7 @@ IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
       return;
     }
 
-    if (next_side > 0.0 && orient2d(xy(v_from), xy(far_v), xy(v_to)) < 0.0)
+    if (next_side > 0.0 && moose_orient2d(xy(v_from), xy(far_v), xy(v_to)) < 0.0)
     {
       entered = current;
       right = next_v;
@@ -560,7 +560,7 @@ IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
       break;
     }
 
-    const auto side = orient2d(xy(v_from), xy(v_to), xy(apex));
+    const auto side = moose_orient2d(xy(v_from), xy(v_to), xy(apex));
     if (side == 0.0)
     {
       insertSegment(v0, toCaller(apex));
@@ -630,8 +630,8 @@ IncrementalDelaunay::checkInvariants() const
   for (const auto t : index_range(_triangles))
   {
     const auto & triangle = _triangles[t];
-    if (orient2d(xy(triangle.vertices[0]), xy(triangle.vertices[1]), xy(triangle.vertices[2])) <=
-        0.0)
+    if (moose_orient2d(
+            xy(triangle.vertices[0]), xy(triangle.vertices[1]), xy(triangle.vertices[2])) <= 0.0)
       violations.push_back("triangle " + std::to_string(t) +
                            " is not counter-clockwise, so its area is zero or negative");
 
@@ -667,10 +667,10 @@ IncrementalDelaunay::checkInvariants() const
         violations.push_back("triangle " + std::to_string(t) + " has neighbor " +
                              std::to_string(n) + ", which does not have it back");
 
-      if (!isConstrainedEdge(v0, v1) && incircle(xy(triangle.vertices[0]),
-                                                 xy(triangle.vertices[1]),
-                                                 xy(triangle.vertices[2]),
-                                                 xy(_triangles[n].vertices[j])) > 0.0)
+      if (!isConstrainedEdge(v0, v1) && moose_incircle(xy(triangle.vertices[0]),
+                                                       xy(triangle.vertices[1]),
+                                                       xy(triangle.vertices[2]),
+                                                       xy(_triangles[n].vertices[j])) > 0.0)
         violations.push_back("the edge between " + vertexName(v0) + " and " + vertexName(v1) +
                              " is not constrained and is not locally Delaunay, because " +
                              vertexName(_triangles[n].vertices[j]) +
@@ -699,7 +699,7 @@ IncrementalDelaunay::checkEmptyCircumcircle() const
     {
       if (v == triangle.vertices[0] || v == triangle.vertices[1] || v == triangle.vertices[2])
         continue;
-      if (incircle(
+      if (moose_incircle(
               xy(triangle.vertices[0]), xy(triangle.vertices[1]), xy(triangle.vertices[2]), xy(v)) >
           0.0)
         violations.push_back(vertexName(v) + " is inside the circumcircle of triangle " +

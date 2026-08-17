@@ -64,6 +64,8 @@
     input = to_quad
     algorithm = laplace
   []
+
+  allow_renumbering = false
 []
 
 [Problem]

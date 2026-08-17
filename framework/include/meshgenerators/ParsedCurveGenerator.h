@@ -46,6 +46,15 @@ public:
                             const bool is_closed_loop,
                             const Real oversample_factor);
 
+  /**
+   * Calculates the point coordinates {x(t), y(t), z(t)} based on parameter t. This is the one
+   * evaluator of the curve, so that whatever else works on the same curve evaluates the formulas
+   * this generator parsed rather than parsing them again.
+   * @param t_param parameter t that is used to determine the coordinates of the point
+   * @return the point coordinates
+   */
+  Point pointCalculator(const Real t_param);
+
 protected:
   /// function expression for x(t)
   const std::string _function_x;
@@ -81,13 +90,6 @@ protected:
   SymFunctionPtr _func_Fy;
   /// function parser object describing the z(t)
   SymFunctionPtr _func_Fz;
-
-  /**
-   * Calculates the point coordinates {x(t), y(t), 0.0} based on parameter t
-   * @param t_param parameter t that is used to determine the coordinates of the point
-   * @return the point coordinates
-   */
-  Point pointCalculator(const Real t_param);
 
   /**
    * Calculates the Euclidean distance between two given points

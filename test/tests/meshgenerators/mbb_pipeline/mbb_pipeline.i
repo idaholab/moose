@@ -65,8 +65,7 @@
     algorithm = laplace
   []
 
-  # Score ties in the greedy matching are broken by element id, so keep the ids stable
-  # across processor counts
+  # Greedy matching breaks score ties by element id, so keep the ids stable across processor counts
   allow_renumbering = false
 []
 
@@ -113,9 +112,6 @@
     block = 'mbb'
     outputs = none
   []
-  # The quadrilateral yield this pipeline is measured against: the fraction of the meshed
-  # area covered by the pairs the recombination merged, with the leftover triangles in
-  # their own subdomain making up the rest
   [quad_area_fraction]
     type = ParsedPostprocessor
     expression = 'quad_area / area'

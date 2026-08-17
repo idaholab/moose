@@ -119,7 +119,7 @@ counterClockwiseNodes(const libMesh::Elem & elem)
 void
 addTri(libMesh::MeshBase & mesh, libMesh::Node * n0, libMesh::Node * n1, libMesh::Node * n2)
 {
-  libMesh::Elem * elem = mesh.add_elem(new libMesh::Tri3);
+  libMesh::Elem * elem = mesh.add_elem(std::make_unique<libMesh::Tri3>());
   elem->set_node(0, n0);
   elem->set_node(1, n1);
   elem->set_node(2, n2);

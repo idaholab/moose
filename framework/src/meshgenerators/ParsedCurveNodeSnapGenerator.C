@@ -28,7 +28,6 @@ InputParameters
 ParsedCurveNodeSnapGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params += FunctionParserUtils<false>::validParams();
 
   params.addRequiredParam<MeshGeneratorName>(
       "input", "The input mesh whose boundary nodes are snapped onto the curve.");
@@ -52,13 +51,13 @@ ParsedCurveNodeSnapGenerator::validParams()
 
 ParsedCurveNodeSnapGenerator::ParsedCurveNodeSnapGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-    FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
     // The mesh of the curve is not used by this generator. It is requested so that the mesh
     // generator system builds the ParsedCurveGenerator before this generator, which reads the
-    // parameters of that generator below.
+    // parameters of that generator below and evaluates its curve.
     _curve_mesh(getMesh("curve_generator")),
-    _curve_params(curveGeneratorParams()),
+    _curve_generator(curveGenerator()),
+    _curve_params(_curve_generator.parameters()),
     _boundary_name(getParam<BoundaryName>("boundary")),
     _samples_per_section(getParam<unsigned int>("samples_per_section")),
     _section_bounding_t_values(_curve_params.get<std::vector<Real>>("section_bounding_t_values")),
@@ -69,32 +68,6 @@ ParsedCurveNodeSnapGenerator::ParsedCurveNodeSnapGenerator(const InputParameters
                "The ParsedCurveGenerator '",
                getParam<MeshGeneratorName>("curve_generator"),
                "' must have at least two 'section_bounding_t_values' to define a curve.");
-
-  // The constants are optional in a ParsedCurveGenerator and are shared by both formulas
-  const std::vector<std::string> constant_names =
-      _curve_params.isParamValid("constant_names")
-          ? _curve_params.get<std::vector<std::string>>("constant_names")
-          : std::vector<std::string>();
-  const std::vector<std::string> constant_expressions =
-      _curve_params.isParamValid("constant_expressions")
-          ? _curve_params.get<std::vector<std::string>>("constant_expressions")
-          : std::vector<std::string>();
-
-  _func_x = std::make_shared<SymFunction>();
-  _func_y = std::make_shared<SymFunction>();
-  parsedFunctionSetup(_func_x,
-                      _curve_params.get<std::string>("x_formula"),
-                      "t",
-                      constant_names,
-                      constant_expressions,
-                      comm());
-  parsedFunctionSetup(_func_y,
-                      _curve_params.get<std::string>("y_formula"),
-                      "t",
-                      constant_names,
-                      constant_expressions,
-                      comm());
-  _func_params.resize(1);
 
   // Sample each section of the curve uniformly, leaving out the end of the section as it is the
   // start of the next one
@@ -159,13 +132,14 @@ ParsedCurveNodeSnapGenerator::generate()
   return mesh;
 }
 
-const InputParameters &
-ParsedCurveNodeSnapGenerator::curveGeneratorParams() const
+ParsedCurveGenerator &
+ParsedCurveNodeSnapGenerator::curveGenerator() const
 {
   const MeshGenerator & curve_generator =
       _app.getMeshGenerator(getParam<MeshGeneratorName>("curve_generator"));
 
-  if (!dynamic_cast<const ParsedCurveGenerator *>(&curve_generator))
+  const auto parsed_curve_generator = dynamic_cast<const ParsedCurveGenerator *>(&curve_generator);
+  if (!parsed_curve_generator)
     paramError("curve_generator",
                "The mesh generator '",
                curve_generator.name(),
@@ -173,14 +147,16 @@ ParsedCurveNodeSnapGenerator::curveGeneratorParams() const
                curve_generator.type(),
                "', but a ParsedCurveGenerator is required to define the curve.");
 
-  return curve_generator.parameters();
+  // The mesh generator system only hands out const generators, and evaluating the curve stages the
+  // parameter in the parser of the generator that owns it, the same const_cast that
+  // MeshGeneratorSystem::getMeshGeneratorInternal() makes for the same reason
+  return const_cast<ParsedCurveGenerator &>(*parsed_curve_generator);
 }
 
 Point
 ParsedCurveNodeSnapGenerator::curvePoint(const Real t_param)
 {
-  _func_params[0] = _is_closed_loop ? wrappedParameter(t_param) : t_param;
-  return Point(evaluate(_func_x), evaluate(_func_y), 0.0);
+  return _curve_generator.pointCalculator(_is_closed_loop ? wrappedParameter(t_param) : t_param);
 }
 
 Real

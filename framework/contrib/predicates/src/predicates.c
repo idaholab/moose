@@ -58,6 +58,12 @@
 /*     and of the helpers (estimate) are generic enough that exporting them  */
 /*     from libmoose would risk symbol interposition against another library */
 /*     loaded into the same process, which would silently destroy exactness. */
+/*     The three that have to stay exported carry a moose_ prefix for the    */
+/*     same reason: libMesh's bundled Triangle defines exactinit() and its   */
+/*     own six-argument incircle() at global scope, so without the prefix a  */
+/*     call here could bind to Triangle's definition instead, leaving the    */
+/*     error bounds below at zero and calling incircle() with the wrong      */
+/*     number of arguments.                                                  */
 /*                                                                           */
 /*  5. Floating-point contraction is turned off, see the pragma below.       */
 /*                                                                           */
@@ -339,7 +345,7 @@ static REAL iccerrboundA, iccerrboundB, iccerrboundC;
 /*                                                                           */
 /*****************************************************************************/
 
-void exactinit(void)
+void moose_exactinit(void)
 {
   REAL half;
   REAL check, lastcheck;
@@ -635,7 +641,7 @@ static REAL orient2dadapt(const REAL *pa, const REAL *pb, const REAL *pc,
   return(D[Dlength - 1]);
 }
 
-REAL orient2d(const REAL *pa, const REAL *pb, const REAL *pc)
+REAL moose_orient2d(const REAL *pa, const REAL *pb, const REAL *pc)
 {
   REAL detleft, detright, det;
   REAL detsum, errbound;
@@ -1257,7 +1263,7 @@ static REAL incircleadapt(const REAL *pa, const REAL *pb, const REAL *pc,
   return finnow[finlength - 1];
 }
 
-REAL incircle(const REAL *pa, const REAL *pb, const REAL *pc, const REAL *pd)
+REAL moose_incircle(const REAL *pa, const REAL *pb, const REAL *pc, const REAL *pd)
 {
   REAL adx, bdx, cdx, ady, bdy, cdy;
   REAL bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;

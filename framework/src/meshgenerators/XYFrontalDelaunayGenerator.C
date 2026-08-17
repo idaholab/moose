@@ -9,6 +9,7 @@
 
 #include "XYFrontalDelaunayGenerator.h"
 
+#include "GeometryUtils.h"
 #include "MooseMeshUtils.h"
 
 #include "libmesh/boundary_info.h"
@@ -51,21 +52,6 @@ frontalPointLess(const Point & first, const Point & second)
   return (first(0) != second(0)) ? first(0) < second(0) : first(1) < second(1);
 }
 
-/// @return The signed area of a closed loop, which is positive when it runs counter-clockwise
-Real
-frontalSignedLoopArea(const std::vector<Point> & loop)
-{
-  Real twice_area = 0.0;
-  for (const auto i : index_range(loop))
-  {
-    const Point & start = loop[i];
-    const Point & end = loop[(i + 1) % loop.size()];
-    twice_area += start(0) * end(1) - end(0) * start(1);
-  }
-
-  return 0.5 * twice_area;
-}
-
 /**
  * Puts a closed loop of the input boundary in the one form the seeding accepts: running
  * counter-clockwise and opening at its lowest point. The vertex ids the loop is seeded with number
@@ -77,7 +63,7 @@ frontalSignedLoopArea(const std::vector<Point> & loop)
 void
 frontalCanonicalizeLoop(std::vector<Point> & loop)
 {
-  if (frontalSignedLoopArea(loop) < 0.0)
+  if (geom_utils::signedArea2D(loop) < 0.0)
     std::reverse(loop.begin(), loop.end());
 
   std::rotate(
@@ -110,20 +96,6 @@ frontalCircumradius(const Point & first, const Point & second, const Point & thi
   std::sort(sides.begin(), sides.end());
 
   return sides[0] * sides[1] * sides[2] / (2.0 * std::abs(twice_area));
-}
-
-/// @return The distance from a point to a segment
-Real
-frontalDistanceToSegment(const Point & point, const Point & start, const Point & end)
-{
-  const Point along = end - start;
-  const Real length_squared = along.norm_sq();
-  if (length_squared == 0.0)
-    return (point - start).norm();
-
-  const Real fraction = std::min(1.0, std::max(0.0, (point - start) * along / length_squared));
-
-  return (point - (start + fraction * along)).norm();
 }
 
 /**
@@ -240,56 +212,10 @@ InputParameters
 XYFrontalDelaunayGenerator::validParams()
 {
   InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
+  params += SurfaceDelaunayGeneratorBase::boundaryAndHolesParams();
 
   MooseEnum metric("L2 LINF", "LINF");
   MooseEnum orientation("BOUNDARY CROSS_FIELD", "CROSS_FIELD");
-
-  params.addRequiredParam<MeshGeneratorName>(
-      "boundary",
-      "The input MeshGenerator defining the output outer boundary and required Steiner points.");
-  params.addParam<std::vector<BoundaryName>>(
-      "input_boundary_names", "2D-input-mesh boundaries defining the output mesh outer boundary");
-  params.addParam<std::vector<SubdomainName>>(
-      "input_subdomain_names", "1D-input-mesh subdomains defining the output mesh outer boundary");
-  params.addParam<unsigned int>("add_nodes_per_boundary_segment",
-                                0,
-                                "How many more nodes to add in each outer boundary segment.");
-  params.addParam<bool>(
-      "refine_boundary", true, "Whether to allow automatically refining the outer boundary.");
-
-  params.addParam<SubdomainName>("output_subdomain_name",
-                                 "Subdomain name to set on new triangles.");
-
-  params.addParam<BoundaryName>(
-      "output_boundary",
-      "Boundary name to set on new outer boundary.  Default ID: 0 if no hole meshes are stitched; "
-      "or maximum boundary ID of all the stitched hole meshes + 1.");
-  params.addParam<std::vector<BoundaryName>>(
-      "hole_boundaries",
-      "Boundary names to set on holes.  Default IDs are numbered up from 1 if no hole meshes are "
-      "stitched; or from maximum boundary ID of all the stitched hole meshes + 2.");
-
-  params.addParam<bool>(
-      "verify_holes",
-      true,
-      "Verify holes do not intersect boundary or each other.  Asymptotically costly.");
-
-  params.addParam<std::vector<MeshGeneratorName>>(
-      "holes", std::vector<MeshGeneratorName>(), "The MeshGenerators that define mesh holes.");
-  params.addParam<std::vector<bool>>(
-      "stitch_holes", std::vector<bool>(), "Whether to stitch to the mesh defining each hole.");
-  params.addParam<std::vector<bool>>("refine_holes",
-                                     std::vector<bool>(),
-                                     "Whether to allow automatically refining each hole boundary.");
-  params.addRangeCheckedParam<Real>(
-      "desired_area",
-      0,
-      "desired_area>=0",
-      "Desired (maximum) triangle area, or 0 to skip uniform refinement");
-  params.addParam<std::string>(
-      "desired_area_func",
-      std::string(),
-      "Desired area as a function of x,y; omit to skip non-uniform refinement");
 
   params.addParam<std::vector<Point>>(
       "interior_points",
@@ -325,7 +251,6 @@ XYFrontalDelaunayGenerator::XYFrontalDelaunayGenerator(const InputParameters & p
     _hole_ptrs(getMeshes("holes")),
     _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
     _refine_bdy(getParam<bool>("refine_boundary")),
-    _verify_holes(getParam<bool>("verify_holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
     _desired_area(getParam<Real>("desired_area")),
@@ -334,43 +259,11 @@ XYFrontalDelaunayGenerator::XYFrontalDelaunayGenerator(const InputParameters & p
     _metric(getParam<MooseEnum>("metric")),
     _orientation(getParam<MooseEnum>("orientation")),
     _background_mean_area(0.0),
+    _boundary_cell(0.0),
     _grid_cell(0.0)
 {
-  if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
-      (_desired_area > 0.0 && _use_auto_area_func) ||
-      (!_desired_area_func.empty() && _use_auto_area_func))
-    paramError("desired_area_func",
-               "Only one of the three methods ('desired_area', 'desired_area_func', and "
-               "'use_auto_area_func') to set element area limit should be used.");
-
-  if (!_use_auto_area_func)
-    if (isParamSetByUser("auto_area_func_default_size") ||
-        isParamSetByUser("auto_area_func_default_size_dist") ||
-        isParamSetByUser("auto_area_function_num_points") ||
-        isParamSetByUser("auto_area_function_power"))
-      paramError("use_auto_area_func",
-                 "If this parameter is set to false, the following parameters should not be set: "
-                 "'auto_area_func_default_size', 'auto_area_func_default_size_dist', "
-                 "'auto_area_function_num_points', 'auto_area_function_power'.");
-
-  if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
-    paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
-
-  for (auto hole_i : index_range(_stitch_holes))
-    if (_stitch_holes[hole_i] && (hole_i >= _refine_holes.size() || _refine_holes[hole_i]))
-      paramError("refine_holes", "Disable auto refine of any hole boundary to be stitched.");
-
-  if (isParamValid("hole_boundaries"))
-    if (getParam<std::vector<BoundaryName>>("hole_boundaries").size() != _hole_ptrs.size())
-      paramError("hole_boundaries", "Need one hole_boundaries entry per hole, if specified.");
-
-  const bool has_duplicates = std::any_of(
-      _interior_points.begin(),
-      _interior_points.end(),
-      [this](const Point & point)
-      { return std::count(_interior_points.begin(), _interior_points.end(), point) > 1; });
-  if (has_duplicates)
-    paramError("interior_points", "Duplicate points were found in the provided interior points.");
+  checkBoundaryAndHolesParams(_hole_ptrs);
+  checkInteriorPoints(_interior_points);
 }
 
 std::set<std::size_t>
@@ -417,44 +310,6 @@ XYFrontalDelaunayGenerator::outerBoundaryIds(MeshBase & boundary_mesh) const
   }
 
   return ids;
-}
-
-MeshTriangulationUtils::XYDelaunayOptions
-XYFrontalDelaunayGenerator::delaunayOptions() const
-{
-  MeshTriangulationUtils::XYDelaunayOptions opts;
-
-  if (isParamValid("input_boundary_names"))
-    opts.input_boundary_names = getParam<std::vector<BoundaryName>>("input_boundary_names");
-  if (isParamValid("input_subdomain_names"))
-    opts.input_subdomain_names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
-  opts.add_nodes_per_boundary_segment = _add_nodes_per_boundary_segment;
-  opts.refine_bdy = _refine_bdy;
-  opts.verify_holes = _verify_holes;
-  opts.desired_area = _desired_area;
-  opts.desired_area_func = _desired_area_func;
-  opts.use_auto_area_func = _use_auto_area_func;
-  opts.auto_area_func_default_size = _auto_area_func_default_size;
-  opts.auto_area_func_default_size_dist = _auto_area_func_default_size_dist;
-  opts.auto_area_function_num_points = _auto_area_function_num_points;
-  opts.auto_area_function_power = _auto_area_function_power;
-  opts.stitch_holes = _stitch_holes;
-  opts.refine_holes = _refine_holes;
-
-  if (isParamValid("output_subdomain_name"))
-  {
-    opts.has_output_subdomain_name = true;
-    opts.output_subdomain_name = getParam<SubdomainName>("output_subdomain_name");
-  }
-  if (isParamValid("output_boundary"))
-  {
-    opts.has_output_boundary = true;
-    opts.output_boundary = getParam<BoundaryName>("output_boundary");
-  }
-  if (isParamValid("hole_boundaries"))
-    opts.hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
-
-  return opts;
 }
 
 std::unique_ptr<MeshBase>
@@ -594,23 +449,122 @@ XYFrontalDelaunayGenerator::targetCircumradius(const Real size) const
   return (_metric == "L2") ? size / std::sqrt(3.0) : size / std::sqrt(2.0);
 }
 
+std::pair<long, long>
+XYFrontalDelaunayGenerator::boundaryGridKey(const Point & point) const
+{
+  return {static_cast<long>(std::floor(point(0) / _boundary_cell)),
+          static_cast<long>(std::floor(point(1) / _boundary_cell))};
+}
+
+void
+XYFrontalDelaunayGenerator::buildBoundarySegmentGrid()
+{
+  mooseAssert(!_boundary_segments.empty(),
+              "The boundary was seeded before the grid over it is built.");
+
+  Real min_x = std::numeric_limits<Real>::max();
+  Real max_x = std::numeric_limits<Real>::lowest();
+  Real min_y = min_x;
+  Real max_y = max_x;
+  for (const auto & [start, end] : _boundary_segments)
+    for (const auto & corner : {start, end})
+    {
+      min_x = std::min(min_x, corner(0));
+      max_x = std::max(max_x, corner(0));
+      min_y = std::min(min_y, corner(1));
+      max_y = std::max(max_y, corner(1));
+    }
+
+  // Buckets that hold about one segment each: coarser ones leave a list to walk in every bucket the
+  // search reaches, finer ones leave the search reaching over more buckets to cover the same
+  // distance. They are never finer than the vertex grid, which is as fine as the mesh itself gets
+  const Real extent = (max_x - min_x) * (max_y - min_y);
+  _boundary_cell = std::max(_grid_cell, std::sqrt(extent / _boundary_segments.size()));
+
+  for (const auto segment : index_range(_boundary_segments))
+  {
+    const auto & [start, end] = _boundary_segments[segment];
+
+    // Walking the segment in steps of half a bucket puts consecutive steps in the same bucket or in
+    // neighboring ones, so every bucket the segment passes through neighbors one it is recorded in,
+    // which is the reach the search below adds to the distance it has covered
+    const auto steps =
+        std::max(std::size_t(1),
+                 static_cast<std::size_t>(std::ceil(2.0 * (end - start).norm() / _boundary_cell)));
+    for (const auto step : make_range(steps + 1))
+    {
+      auto & bucket =
+          _boundary_segment_grid[boundaryGridKey(start + (Real(step) / steps) * (end - start))];
+      // The steps of a straight segment reach a bucket in one run, so the last entry is the only
+      // one that can already be this segment
+      if (bucket.empty() || bucket.back() != segment)
+        bucket.push_back(segment);
+    }
+  }
+}
+
 std::pair<Point, Point>
 XYFrontalDelaunayGenerator::localFrame(const Point & point) const
 {
   if (_cross_field)
     return _cross_field->crossFrame(point);
 
+  mooseAssert(_boundary_cell > 0.0,
+              "The grid over the boundary segments is built before any frame is taken from them.");
+
+  const auto [center_i, center_j] = boundaryGridKey(point);
+
+  // The nearest segment is the one of the lowest index at the smallest distance, whichever buckets
+  // it is found in, so that the frame follows from the geometry and not from the order of the
+  // search. The distances are compared squared, which orders them the same way
   Real nearest = std::numeric_limits<Real>::max();
-  Point tangent(1.0, 0.0, 0.0);
-  for (const auto & segment : _boundary_segments)
+  std::size_t nearest_segment = std::numeric_limits<std::size_t>::max();
+  const auto search = [&](const long i, const long j)
   {
-    const Real distance = frontalDistanceToSegment(point, segment.first, segment.second);
-    if (distance < nearest)
+    const auto bucket = _boundary_segment_grid.find({i, j});
+    if (bucket == _boundary_segment_grid.end())
+      return;
+
+    for (const auto segment : bucket->second)
     {
-      nearest = distance;
-      tangent = (segment.second - segment.first).unit();
+      const auto & [start, end] = _boundary_segments[segment];
+      const Real distance = geom_utils::pointSegmentDistanceSq(point, start, end);
+      if (distance < nearest || (distance == nearest && segment < nearest_segment))
+      {
+        nearest = distance;
+        nearest_segment = segment;
+      }
     }
+  };
+
+  // The buckets are searched a ring at a time, until the nearest segment found is closer than the
+  // rings still to come can reach. A segment that has not been searched yet lies in a bucket more
+  // than one ring out, and so no nearer than the ring before the one just searched
+  for (long span = 0;; ++span)
+  {
+    if (span == 0)
+      search(center_i, center_j);
+    else
+    {
+      for (long i = center_i - span; i <= center_i + span; ++i)
+      {
+        search(i, center_j - span);
+        search(i, center_j + span);
+      }
+      for (long j = center_j - span + 1; j <= center_j + span - 1; ++j)
+      {
+        search(center_i - span, j);
+        search(center_i + span, j);
+      }
+    }
+
+    const Real covered = std::max(0L, span - 1) * _boundary_cell;
+    if (nearest < covered * covered)
+      break;
   }
+
+  const auto & [start, end] = _boundary_segments[nearest_segment];
+  const Point tangent = (end - start).unit();
 
   return {tangent, Point(-tangent(1), tangent(0), 0.0)};
 }
@@ -665,17 +619,18 @@ XYFrontalDelaunayGenerator::hasVertexWithin(const IncrementalDelaunay & delaunay
   const long span = static_cast<long>(std::ceil(reach / _grid_cell));
   const auto [center_i, center_j] = gridKey(point);
 
+  // The buckets are sized on the smallest triangle the advance is asked for, so where the target is
+  // coarser the reach spans many of them and all but a few are empty. Walking each row of the
+  // search from the first bucket at or past its start leaves the empty ones unvisited, rather than
+  // looked up one by one
   for (long i = center_i - span; i <= center_i + span; ++i)
-    for (long j = center_j - span; j <= center_j + span; ++j)
-    {
-      const auto bucket = _vertex_grid.find({i, j});
-      if (bucket == _vertex_grid.end())
-        continue;
-
+    for (auto bucket = _vertex_grid.lower_bound({i, center_j - span});
+         bucket != _vertex_grid.end() && bucket->first.first == i &&
+         bucket->first.second <= center_j + span;
+         ++bucket)
       for (const auto vertex : bucket->second)
         if (metricDistance(point, frontalToPoint(delaunay.point(vertex)), frame) < distance)
           return true;
-    }
 
   return false;
 }
@@ -956,7 +911,8 @@ XYFrontalDelaunayGenerator::generate()
                  "generator produces. Please reduce the order of the hole inputs.");
   }
 
-  const auto opts = delaunayOptions();
+  MeshTriangulationUtils::XYDelaunayOptions opts;
+  fillDelaunayOptions(opts);
 
   _background_mesh = buildBackgroundMesh(*boundary_mesh, hole_meshes, opts);
   _background_mesh->prepare_for_use();
@@ -1005,6 +961,11 @@ XYFrontalDelaunayGenerator::generate()
     const bool refine = (hole_i >= _refine_holes.size() || _refine_holes[hole_i]);
     appendLoop(hole_loop, refine, 0, static_cast<boundary_id_type>(hole_i + 1), points, segments);
   }
+
+  // The frame of the nearest boundary segment is only asked for once every segment has been seeded,
+  // and only when no cross field answers for it
+  if (_metric == "LINF" && !_cross_field)
+    buildBoundarySegmentGrid();
 
   // A point on a boundary would split the segment it lies on, which would leave the output mesh
   // with a side that belongs to no input boundary

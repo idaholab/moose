@@ -13,9 +13,9 @@ chord and the curve is real geometry that the mesh has lost.
 [!param](/Mesh/ParsedCurveNodeSnapGenerator/boundary) and moves each of its nodes to the closest
 point of the curve defined by the [ParsedCurveGenerator.md] named in
 [!param](/Mesh/ParsedCurveNodeSnapGenerator/curve_generator). The curve is not re-entered here:
-the `x_formula`, `y_formula`, `section_bounding_t_values`, `is_closed_loop` and constants are read
-from the parameters of that generator, so the nodes are snapped onto the same curve they were
-meshed from, and there is no second definition to keep in step.
+`section_bounding_t_values` and `is_closed_loop` are read from the parameters of that generator,
+and the curve itself is evaluated by that generator, so the nodes are snapped onto the same curve
+they were meshed from, and there is no second definition to keep in step.
 
 The boundary may be given as a sideset or as a nodeset; the nodes of both are collected. Since
 the curve is defined in the XY-plane, only the in-plane coordinates of a node are changed. The
@@ -23,7 +23,7 @@ input mesh must be replicated.
 
 This is worth doing after any step that adds nodes to a curved boundary, and
 [!param](/Mesh/TriToQuadGenerator/all_quad) is the case that motivates it: eliminating the
-leftover triangles subdivides every element, and the boundary nodes that creates are the
+leftover triangles subdivides every element, and the boundary nodes it creates are the
 midpoints of the existing chords. They sit strictly inside the curve until they are snapped.
 
 In the circle example below, the boundary mesh approximates a unit circle by the chords of a
@@ -62,8 +62,8 @@ geometry is kept while the elements just inside it are relaxed.
 
 [CircularBoundaryCorrectionGenerator.md] addresses a related but distinct problem. It corrects
 the radius of a circular polygonal boundary so that the polygon encloses the area of the circle
-it stands for, keeping the boundary polygonal. This generator moves nodes onto an arbitrary
-parametric curve, and reduces the polygonization error rather than compensating for it.
+it stands for, keeping the boundary polygonal. `ParsedCurveNodeSnapGenerator` moves nodes onto an
+arbitrary parametric curve, and reduces the polygonization error rather than compensating for it.
 
 ## Example Syntax
 

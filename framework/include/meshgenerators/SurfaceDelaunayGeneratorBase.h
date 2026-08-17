@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MeshGenerator.h"
+#include "MeshTriangulationUtils.h"
 
 /**
  * Base class for Delaunay mesh generators applied to a surface.
@@ -19,11 +20,42 @@ class SurfaceDelaunayGeneratorBase : public MeshGenerator
 public:
   static InputParameters validParams();
 
+  /**
+   * The parameters that select the outer boundary to triangulate within and the holes to leave out
+   * of the triangulation, together with the names and the element area limit the result gets. A
+   * generator that takes its region to mesh as a boundary mesh and hole meshes adds these to its
+   * own parameters; the ones derived from this class that select that region some other way do
+   * not, which is why the base class does not add them itself.
+   * @return the parameters shared by the generators that triangulate within an input boundary mesh
+   */
+  static InputParameters boundaryAndHolesParams();
+
   SurfaceDelaunayGeneratorBase(const InputParameters & parameters);
 
   virtual std::unique_ptr<MeshBase> generate() override = 0;
 
 protected:
+  /**
+   * Errors if the parameters boundaryAndHolesParams() adds contradict each other or the holes they
+   * refer to. Only for a generator that added those parameters.
+   * @param hole_ptrs The input meshes 'holes' resolved to
+   */
+  void
+  checkBoundaryAndHolesParams(const std::vector<std::unique_ptr<MeshBase> *> & hole_ptrs) const;
+
+  /**
+   * Errors if a point was given twice as an interior point, which the triangulation cannot honor.
+   * @param interior_points The interior points to be meshed through
+   */
+  void checkInteriorPoints(const std::vector<Point> & interior_points) const;
+
+  /**
+   * Fills the triangulation options that follow from the parameters boundaryAndHolesParams() adds,
+   * and only those: the caller fills whatever its own parameters set on top of them.
+   * @param opts The options to fill
+   */
+  void fillDelaunayOptions(MeshTriangulationUtils::XYDelaunayOptions & opts) const;
+
   /**
    * Calculate the normal vector of a 2D element based the first three vertices.
    * @param elem The element for which the normal vector is to be calculated

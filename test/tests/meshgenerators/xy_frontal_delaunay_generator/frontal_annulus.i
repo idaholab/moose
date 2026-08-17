@@ -69,9 +69,6 @@
     type = AverageElementSize
     outputs = csv
   []
-  # The hole boundary is a 12-sided polygon whose vertices the front never moves, so the
-  # perimeter of the 'inner' sideset is fixed by the input polygon no matter how the interior
-  # is triangulated; it also fails if the hole boundary name is not carried onto the sideset
   [hole_perimeter]
     type = AreaPostprocessor
     boundary = 'inner'

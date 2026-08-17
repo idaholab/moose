@@ -11,7 +11,7 @@
 
 #include "MeshGenerator.h"
 
-#include "FunctionParserUtils.h"
+class ParsedCurveGenerator;
 
 /**
  * Snaps the nodes of a boundary onto the parametric curve of a ParsedCurveGenerator.
@@ -21,7 +21,7 @@
  * point of the curve recovers the geometry that those chords approximate. The curve is used in
  * the XY plane, so only the x and y coordinates of the nodes are snapped.
  */
-class ParsedCurveNodeSnapGenerator : public MeshGenerator, public FunctionParserUtils<false>
+class ParsedCurveNodeSnapGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
@@ -35,6 +35,8 @@ protected:
   std::unique_ptr<MeshBase> & _input;
   /// Reference to the mesh pointer of the curve generator, which is requested for its dependency
   std::unique_ptr<MeshBase> & _curve_mesh;
+  /// The ParsedCurveGenerator that defines the curve to snap the nodes onto, and evaluates it
+  ParsedCurveGenerator & _curve_generator;
   /// Parameters of the ParsedCurveGenerator that define the curve to snap the nodes onto
   const InputParameters & _curve_params;
   /// Name of the boundary whose nodes are snapped onto the curve
@@ -47,20 +49,16 @@ protected:
   const bool _is_closed_loop;
   /// Sampled t values used to bracket the closest curve point
   std::vector<Real> _t_samples;
-  /// Function parser object describing the x(t) of the curve
-  SymFunctionPtr _func_x;
-  /// Function parser object describing the y(t) of the curve
-  SymFunctionPtr _func_y;
 
   /**
-   * Gets the parameters of the generator that defines the curve, after checking that it is a
-   * ParsedCurveGenerator
-   * @return The input parameters of the referenced mesh generator
+   * Gets the generator that defines the curve, after checking that it is a ParsedCurveGenerator
+   * @return The referenced mesh generator
    */
-  const InputParameters & curveGeneratorParams() const;
+  ParsedCurveGenerator & curveGenerator() const;
 
   /**
-   * Calculates the point coordinates {x(t), y(t), 0.0} of the curve
+   * Evaluates the curve through the generator that defines it. The nodes are only snapped in the
+   * XY plane, so a z coordinate of the curve is left out of everything done with the point here.
    * @param t_param Parameter t of the curve, which is wrapped into the bounding t values if the
    * curve is a closed loop
    * @return The point coordinates on the curve

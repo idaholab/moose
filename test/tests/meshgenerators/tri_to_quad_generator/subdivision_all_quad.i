@@ -15,6 +15,6 @@
     algorithm = SUBDIVISION
   []
 
-  # Both the triangulation and the recombination depend on element id numbering
+  # The subdivision of each triangle depends on element id numbering
   allow_renumbering = false
 []

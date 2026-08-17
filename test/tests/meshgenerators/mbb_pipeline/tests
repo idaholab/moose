@@ -2,28 +2,26 @@
   design = '/XYFrontalDelaunayGenerator.md /TriToQuadGenerator.md'
   issues = '#27545'
   [mbb_quads_yield_baseline]
+    type = 'CSVDiff'
+    input = 'mbb_pipeline.i'
+    csvdiff = 'mbb_pipeline_out.csv'
+    # The meshed area is fixed by the boundary polygons, but the element size, the shape quality
+    # and the fraction of the area the merged quadrilaterals cover depend on the order the front
+    # places points in, so they are compared loosely
+    override_columns = 'avg_quality elem_size quad_area_fraction'
+    override_rel_err = '1.0e-1 1.0e-1 1.5e-1'
+    override_abs_zero = '1.0e-10 1.0e-10 1.0e-10'
+    recover = false
+    mesh_mode = REPLICATED
     requirement = 'The system shall mesh a rectangular domain containing three circular holes from '
                   'its boundary curves alone by advancing a front that sizes triangles in the '
                   'L-infinity norm of a cross field, merging adjacent pairs of those triangles into '
                   'quadrilaterals, moving the triangles that could not be merged into a separate '
-                  'subdomain, and smoothing the mixed mesh that results, and shall report'
-    [quality]
-      type = 'CSVDiff'
-      input = 'mbb_pipeline.i'
-      csvdiff = 'mbb_pipeline_out.csv'
-      # The meshed area is fixed by the boundary polygons, but the element size, the shape quality
-      # and the fraction of the area the merged quadrilaterals cover depend on the order the front
-      # places points in, so they are compared loosely
-      override_columns = 'avg_quality elem_size quad_area_fraction'
-      override_rel_err = '1.0e-1 1.0e-1 1.5e-1'
-      override_abs_zero = '1.0e-10 1.0e-10 1.0e-10'
-      recover = false
-      mesh_mode = REPLICATED
-      detail = 'the meshed area, the average element size and the average element shape quality of '
-               'the mesh it produces, together with the fraction of the meshed area covered by the '
-               'elements it merged into quadrilaterals, which is the quadrilateral yield this '
-               'pipeline is measured against.'
-    []
+                  'subdomain, and smoothing the mixed mesh that results, and shall report the '
+                  'meshed area, the average element size and the average element shape quality of '
+                  'the mesh it produces, together with the fraction of the meshed area covered by '
+                  'the elements it merged into quadrilaterals, which is the quadrilateral yield '
+                  'this pipeline is measured against.'
   []
   [mbb_all_quad]
     requirement = 'The system shall mesh a rectangular domain containing three circular holes from '

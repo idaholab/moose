@@ -4,8 +4,9 @@
 
 ## Overview
 
-The input mesh must consist exclusively of TRI3 elements and must be replicated. Meshes of
-higher-order triangles, and meshes that mix triangles with other element types, are rejected.
+The input mesh must consist exclusively of TRI3 elements, must lie in the XY plane, and must be
+replicated. Meshes of higher-order triangles, and meshes that mix triangles with other element
+types, are rejected.
 
 Two conversion algorithms are available through
 [!param](/Mesh/TriToQuadGenerator/algorithm), and they trade a guaranteed pure-quadrilateral
@@ -37,16 +38,15 @@ Only pairs reaching [!param](/Mesh/TriToQuadGenerator/eta_min) are merged. Raisi
 buys quality at the cost of yield; lowering it leaves fewer triangles behind but admits
 flatter quadrilaterals.
 
-The pairing is selected by [!param](/Mesh/TriToQuadGenerator/matching). `GREEDY` takes the
-candidates in order of decreasing $\eta$, keeping each one whose two triangles are both still
-unmerged. It is fast but not optimal: a locally attractive merge can consume a triangle that a
-better global pairing needed. A `BLOSSOM` option, which solves the pairing as a minimum-cost
-perfect matching, is planned.
+[!param](/Mesh/TriToQuadGenerator/matching) selects the pairing algorithm. `GREEDY`, its only
+value, takes the candidates in order of decreasing $\eta$, keeping each one whose two triangles
+are both still unmerged. It is fast but not optimal: a locally attractive merge can consume a
+triangle that a better global pairing needed.
 
 Recombination is quad-dominant, not pure quad. Triangles are left over wherever no admissible
 partner remains.
 
-Two candidate pairs are never merged, regardless of their score:
+Two kinds of candidate pair are never merged, regardless of their score:
 
 - a pair whose shared edge carries any boundary id. Merging deletes that edge, which would take
   the sideset on it with it, so interior sidesets survive the conversion instead of being
@@ -58,7 +58,7 @@ Where the two triangles of a merged pair disagree on an extra element integer, t
 quadrilateral inherits the value of the +lower-id+ parent triangle. That rule makes the result
 reproducible from one run to the next; it does not attempt to reconcile the two values.
 
-### Leftover triangles
+### Leftover Triangles
 
 The triangles that recombination could not merge can be handled in either of two ways, which are
 mutually exclusive.
@@ -106,8 +106,8 @@ Running the same mesh through the same merges with
 
 !listing test/tests/meshgenerators/tri_to_quad_generator/all_quad_ids.i block=Mesh/to_quad
 
-Both examples disable renumbering, because the merges are chosen with element id as the
-tiebreaker and are therefore only reproducible while the numbering is.
+All three examples disable renumbering, because the triangulation and the merges are chosen with
+element id as the tiebreaker and are therefore only reproducible while the numbering is.
 
 Triangulations intended for recombination are best produced by
 [XYFrontalDelaunayGenerator.md], which biases the triangles toward right angles so that more

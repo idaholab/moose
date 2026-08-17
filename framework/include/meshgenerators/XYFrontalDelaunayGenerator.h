@@ -75,9 +75,6 @@ protected:
    */
   std::set<std::size_t> outerBoundaryIds(MeshBase & boundary_mesh) const;
 
-  /// @return The triangulation options this generator shares with XYDelaunayGenerator
-  MeshTriangulationUtils::XYDelaunayOptions delaunayOptions() const;
-
   /**
    * Triangulates the domain with the existing Delaunay triangulator at _background_area_factor
    * times the requested area. The result carries the cross field and, where no area limit is given,
@@ -125,6 +122,17 @@ protected:
 
   /// @return The circumradius of the target triangle of the given edge length
   Real targetCircumradius(Real size) const;
+
+  /// @return The bucket of the boundary segment grid a point falls in
+  std::pair<long, long> boundaryGridKey(const Point & point) const;
+
+  /**
+   * Sorts the boundary segments into the buckets the BOUNDARY frame searches, so that a search only
+   * has to reach out until it has covered the distance to the nearest segment rather than measure
+   * against every segment of the boundary. Only for that frame, and only once the whole boundary
+   * has been seeded.
+   */
+  void buildBoundarySegmentGrid();
 
   /// @return The local frame (u, v) the LINF metric measures in, at a point
   std::pair<Point, Point> localFrame(const Point & point) const;
@@ -206,9 +214,6 @@ protected:
   /// Whether to allow automatically refining the outer boundary
   const bool _refine_bdy;
 
-  /// Whether to verify holes do not intersect boundary or each other
-  const bool _verify_holes;
-
   /// Whether to stitch to the mesh defining each hole
   const std::vector<bool> _stitch_holes;
 
@@ -253,6 +258,12 @@ protected:
 
   /// Segments of the outer boundary and of the holes, whose tangents give the BOUNDARY frame
   std::vector<std::pair<Point, Point>> _boundary_segments;
+
+  /// Side of the buckets the boundary segments are sorted into so that the frame search stays local
+  Real _boundary_cell;
+
+  /// Indices into _boundary_segments, bucketed by the cells each of those segments passes through
+  std::map<std::pair<long, long>, std::vector<std::size_t>> _boundary_segment_grid;
 
   /// Side of the buckets the vertices are sorted into so that the rejection rule stays local
   Real _grid_cell;

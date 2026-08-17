@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest_include.h"
+#include "PolygonAreaTestUtils.h"
 #include "TriToQuadGenerator.h"
 
 #include "libmesh/int_range.h"
@@ -26,26 +27,7 @@ namespace
 /// Tolerance for the scores, which come out of an arc tangent and so are not exact
 constexpr Real tol = 1e-12;
 
-/**
- * Twice the signed area of a quadrilateral in the xy plane, which is positive when its corners are
- * ordered counter-clockwise. Computed here rather than taken from the generator so that the tests
- * check their own input against the ordering quadQuality() requires.
- * @param quad_points the four corners of the quadrilateral
- * @return twice the signed area
- */
-Real
-signedArea(const std::array<Point, 4> & quad_points)
-{
-  Real twice_area = 0.0;
-  for (const auto k : index_range(quad_points))
-  {
-    const Point & current = quad_points[k];
-    const Point & next = quad_points[(k + 1) % quad_points.size()];
-    twice_area += current(0) * next(1) - next(0) * current(1);
-  }
-
-  return twice_area;
-}
+using PolygonAreaTestUtils::twiceSignedArea;
 
 /**
  * A candidate carrying only the fields greedyMatching() acts on.
@@ -96,12 +78,12 @@ TEST(TriToQuadScoringTest, rectangleScoresOne)
 {
   const std::array<Point, 4> unit_square = {
       Point(0.0, 0.0), Point(1.0, 0.0), Point(1.0, 1.0), Point(0.0, 1.0)};
-  ASSERT_GT(signedArea(unit_square), 0.0);
+  ASSERT_GT(twiceSignedArea(unit_square), 0.0);
   EXPECT_NEAR(1.0, TriToQuadGenerator::quadQuality(unit_square), tol);
 
   const std::array<Point, 4> stretched = {
       Point(0.0, 0.0), Point(3.0, 0.0), Point(3.0, 1.0), Point(0.0, 1.0)};
-  ASSERT_GT(signedArea(stretched), 0.0);
+  ASSERT_GT(twiceSignedArea(stretched), 0.0);
   EXPECT_NEAR(1.0, TriToQuadGenerator::quadQuality(stretched), tol);
 }
 
@@ -118,7 +100,7 @@ TEST(TriToQuadScoringTest, nonConvexScoresZero)
 {
   const std::array<Point, 4> dart = {
       Point(0.0, 0.0), Point(2.0, 1.0), Point(4.0, 0.0), Point(2.0, 3.0)};
-  ASSERT_GT(signedArea(dart), 0.0);
+  ASSERT_GT(twiceSignedArea(dart), 0.0);
 
   EXPECT_DOUBLE_EQ(0.0, TriToQuadGenerator::quadQuality(dart));
 }
@@ -133,7 +115,7 @@ TEST(TriToQuadScoringTest, rhombusScoresTwoThirds)
   const Real half_root_three = std::sqrt(3.0) / 2.0;
   const std::array<Point, 4> rhombus = {
       Point(0.0, 0.0), Point(1.0, 0.0), Point(1.5, half_root_three), Point(0.5, half_root_three)};
-  ASSERT_GT(signedArea(rhombus), 0.0);
+  ASSERT_GT(twiceSignedArea(rhombus), 0.0);
 
   EXPECT_NEAR(2.0 / 3.0, TriToQuadGenerator::quadQuality(rhombus), tol);
 }

@@ -71,7 +71,7 @@ orientationSign(const IncrementalDelaunay & tri,
   const double b[2] = {tri.point(v1).x, tri.point(v1).y};
   const double c[2] = {tri.point(v2).x, tri.point(v2).y};
 
-  const auto determinant = orient2d(a, b, c);
+  const auto determinant = moose_orient2d(a, b, c);
   if (determinant > 0.0)
     return 1;
   if (determinant < 0.0)
@@ -210,8 +210,8 @@ eulerTriangleCount(const std::size_t n, const std::size_t h)
 
 /**
  * A 4 x 4 grid of points one apart, the classic degenerate input: the four corners of every cell
- * are exactly cocircular, so incircle() comes out exactly zero there and which diagonal the cell
- * gets is a tie the algorithm has to break rather than compute. Both rows and columns are four
+ * are exactly cocircular, so moose_incircle() comes out exactly zero there and which diagonal the
+ * cell gets is a tie the algorithm has to break rather than compute. Both rows and columns are four
  * exactly collinear points, and so are the two long diagonals.
  * @return the sixteen grid points, row by row
  */

@@ -9,6 +9,7 @@
 
 #include "TriToQuadGenerator.h"
 
+#include "GeometryUtils.h"
 #include "MooseMeshElementConversionUtils.h"
 #include "MooseMeshUtils.h"
 
@@ -40,21 +41,6 @@ constexpr unsigned int n_tri_sides = 3;
 
 /// Number of sides of a QUAD4 element
 constexpr unsigned int n_quad_sides = 4;
-
-/**
- * Twice the signed area of a triangle in the xy plane, which is positive when its vertices are
- * ordered counter-clockwise.
- * @param point_1 the first vertex of the triangle
- * @param point_2 the second vertex of the triangle
- * @param point_3 the third vertex of the triangle
- * @return twice the signed area
- */
-Real
-signedArea2D(const Point & point_1, const Point & point_2, const Point & point_3)
-{
-  return (point_2(0) - point_1(0)) * (point_3(1) - point_1(1)) -
-         (point_2(1) - point_1(1)) * (point_3(0) - point_1(0));
-}
 
 /**
  * The key that identifies an edge of the mesh, which is the ids of its two end nodes in increasing
@@ -353,8 +339,8 @@ TriToQuadGenerator::buildCandidate(const Elem & elem,
                                          elem.node_ptr((side + 1) % n_tri_sides)};
 
   // Order the corners counter-clockwise so that the quadrilateral has a positive Jacobian
-  if (signedArea2D(*corners[0], *corners[1], *corners[2]) +
-          signedArea2D(*corners[0], *corners[2], *corners[3]) <
+  if (geom_utils::signedArea2D(*corners[0], *corners[1], *corners[2]) +
+          geom_utils::signedArea2D(*corners[0], *corners[2], *corners[3]) <
       0.0)
     std::reverse(corners.begin(), corners.end());
 
@@ -388,6 +374,18 @@ TriToQuadGenerator::subdivide(ReplicatedMesh & mesh) const
   for (const auto & elem : mesh.active_element_ptr_range())
     elem_ids.push_back(elem->id());
 
+  // The subdivision an element is split by depends on nothing but its number of corners
+  const std::vector<QuadCorners> tri_subdivision = triSubdivisionTemplate();
+  const std::vector<QuadCorners> quad_subdivision = quadSubdivisionTemplate();
+
+  // Held across the loop so that the elements of the mesh are walked without reallocating them
+  std::vector<unsigned int> vertex_index;
+  std::vector<unsigned int> side_index;
+  std::vector<Node *> vertices;
+  std::vector<Node *> midpoints;
+  std::vector<Node *> points;
+  std::vector<Elem *> quads;
+
   for (const auto elem_id : elem_ids)
   {
     Elem * const parent = mesh.elem_ptr(elem_id);
@@ -401,21 +399,22 @@ TriToQuadGenerator::subdivide(ReplicatedMesh & mesh) const
     // whichever way the element itself is oriented. Every element here is convex, so the turn at
     // its first corner is the turn of the whole element
     const bool clockwise =
-        signedArea2D(*parent->node_ptr(0), *parent->node_ptr(1), *parent->node_ptr(2)) < 0.0;
+        geom_utils::signedArea2D(*parent->node_ptr(0), *parent->node_ptr(1), *parent->node_ptr(2)) <
+        0.0;
 
-    std::vector<unsigned int> vertex_index(n_corners);
-    std::vector<unsigned int> side_index(n_corners);
+    vertex_index.assign(n_corners, 0);
+    side_index.assign(n_corners, 0);
     for (const auto k : make_range(n_corners))
     {
       vertex_index[k] = clockwise ? (n_corners - k) % n_corners : k;
       side_index[k] = clockwise ? (2 * n_corners - k - 1) % n_corners : k;
     }
 
-    std::vector<Node *> vertices(n_corners);
+    vertices.assign(n_corners, nullptr);
     for (const auto k : index_range(vertices))
       vertices[k] = parent->node_ptr(vertex_index[k]);
 
-    std::vector<Node *> midpoints(n_corners);
+    midpoints.assign(n_corners, nullptr);
     for (const auto k : index_range(midpoints))
     {
       const Node & next_vertex = *vertices[(k + 1) % vertices.size()];
@@ -427,13 +426,16 @@ TriToQuadGenerator::subdivide(ReplicatedMesh & mesh) const
 
     // The point list the template indexes into holds the corners, then the midpoints, then the
     // centroid
-    std::vector<Node *> points = vertices;
+    points.clear();
+    points.insert(points.end(), vertices.begin(), vertices.end());
     points.insert(points.end(), midpoints.begin(), midpoints.end());
     points.push_back(centroid);
 
-    const auto quad_template = subdivisionTemplate(n_corners);
+    mooseAssert(n_corners == n_tri_sides || n_corners == n_quad_sides,
+                "Only triangles and quadrilaterals have a subdivision.");
+    const auto & quad_template = (n_corners == n_tri_sides) ? tri_subdivision : quad_subdivision;
 
-    std::vector<Elem *> quads;
+    quads.clear();
     for (const auto & quad_corners : quad_template)
     {
       Elem * const quad = mesh.add_elem(Elem::build(libMesh::ElemType::QUAD4));

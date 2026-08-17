@@ -20,9 +20,9 @@ those parameters, for how a boundary ring is read out of an input mesh, and for 
 What differs is how the interior points are chosen. Rather than refining a triangulation until
 every element meets the area limit, this generator advances a front
 [!citep](rebay1993frontaldelaunay). A triangle counts as too large when its circumradius exceeds
-the circumradius targeted at its centroid, the edges those triangles share with the acceptable
-ones form the front, and the front is advanced by placing one point at the target size ahead of
-an edge and inserting it with the Bowyer-Watson algorithm. Placing points at the size the mesh is
+the circumradius targeted at its centroid. The edges those triangles share with the acceptable
+ones form the front. The front is advanced by placing one point at the target size ahead of an
+edge and inserting it with the Bowyer-Watson algorithm. Placing points at the size the mesh is
 meant to have, instead of subdividing until that size is reached, gives a triangulation whose
 element shapes are chosen rather than inherited.
 
@@ -73,7 +73,7 @@ angle that is +not+ a multiple of $\pi/2$, and where the tangent of a curved bou
 enough that no smooth interpolation of the imposed directions exists in the interior. A circular
 boundary is the clearest case of the second kind.
 
-A reentrant corner is not by itself a source of one. The $270^\circ$ corner of a rectilinear
+A reentrant corner does not by itself force a singularity. The $270^\circ$ corner of a rectilinear
 L-shaped domain turns through $3\pi/2$, a multiple of $\pi/2$, so the field passes through it
 without a defect and no irregular vertex is required: three quadrilaterals meeting at that corner
 is the regular configuration for it.
@@ -87,7 +87,7 @@ in the frame of a cross field solved over the disk:
 
 !listing test/tests/meshgenerators/xy_frontal_delaunay_generator/frontal_circle.i block=Mesh
 
-A boundary containing a hole. The front advances from the hole boundary as well as from the outer
+A domain containing a hole. The front advances from the hole boundary as well as from the outer
 boundary, and the name given in
 [!param](/Mesh/XYFrontalDelaunayGenerator/hole_boundaries) is carried onto the sideset that the
 hole leaves behind:

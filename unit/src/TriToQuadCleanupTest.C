@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest_include.h"
+#include "PolygonAreaTestUtils.h"
 #include "TriToQuadGenerator.h"
 
 #include "libmesh/int_range.h"
@@ -36,27 +37,7 @@ using DirectedSide = std::pair<unsigned int, unsigned int>;
 /// A side of a patch, as the indices of its two ends in increasing order
 using SideKey = std::pair<unsigned int, unsigned int>;
 
-/**
- * Twice the signed area of a polygon in the xy plane, which is positive when its corners are
- * ordered counter-clockwise. Computed here rather than taken from the generator so that the tests
- * check their own input against the ordering the generator requires.
- * @param polygon_points the corners of the polygon, in order around it
- * @return twice the signed area
- */
-template <typename T>
-Real
-twiceSignedArea(const T & polygon_points)
-{
-  Real twice_area = 0.0;
-  for (const auto k : index_range(polygon_points))
-  {
-    const Point & current = polygon_points[k];
-    const Point & next = polygon_points[(k + 1) % polygon_points.size()];
-    twice_area += current(0) * next(1) - next(0) * current(1);
-  }
-
-  return twice_area;
-}
+using PolygonAreaTestUtils::twiceSignedArea;
 
 /**
  * The corners of one quadrilateral of a filling, taken out of the point list its indices run into.
