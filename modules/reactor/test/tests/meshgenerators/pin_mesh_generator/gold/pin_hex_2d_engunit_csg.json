@@ -6,10 +6,10 @@
           0.710315
         ],
         "geometry_type": "Hex",
-        "region_ids": [
+        "region_names": [
           [
-            1,
-            2
+            "rgmb_region_1",
+            "rgmb_region_2"
           ]
         ],
         "ring_radii": [

@@ -707,12 +707,14 @@ PinMeshGenerator::generateCSG()
   std::vector<Real> duct_apothems = _duct_halfpitch;
   duct_apothems.push_back(_pitch / 2);
 
-  // Create temporary region_ids variable that stores region IDs as 2-D vector of unsigned int.
-  // instead of subdomain_id_type, which is required by DuctedPinEngUnit constructor
-  std::vector<std::vector<unsigned int>> region_ids;
-  region_ids.resize(_region_ids.size());
+  // Convert region IDs to actual region names that will be stored as material fills.
+  std::vector<std::vector<std::string>> region_names(_region_ids.size());
   for (const auto i : index_range(_region_ids))
-    region_ids[i].assign(_region_ids[i].begin(), _region_ids[i].end());
+  {
+    region_names[i].resize(_region_ids[i].size());
+    for (const auto j : index_range(_region_ids[i]))
+      region_names[i][j] = "rgmb_region_" + std::to_string(_region_ids[i][j]);
+  }
 
   std::vector<Real> axial_boundaries;
   if (_mesh_dimensions == 3)
@@ -720,7 +722,7 @@ PinMeshGenerator::generateCSG()
 
   // Define pin engineering unit and add it to CSGBase
   std::unique_ptr<CSG::DuctedPinEngUnit> pin_ptr = std::make_unique<CSG::DuctedPinEngUnit>(
-      name(), _mesh_geometry, _ring_radii, duct_apothems, region_ids, axial_boundaries);
+      name(), _mesh_geometry, _ring_radii, duct_apothems, region_names, axial_boundaries);
   csg_obj->addEngUnit(std::move(pin_ptr));
 
   if (getReactorParam<bool>(RGMB::expand_units))

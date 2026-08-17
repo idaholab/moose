@@ -39,21 +39,21 @@ public:
    *                   order
    * @param duct_apothems list of duct apothems that surround cylindrical regions in pin, which need
    *                      to be in ascending order
-   * @param region_ids 2-D vector of region IDs that represent each radial (cylindrical and ducted)
-   *                   region and axial region
+   * @param region_names 2-D vector of region names that represent each radial (cylindrical and
+   *                     ducted) region and axial region
    * @param axial_boundaries list of axial boundaries of extruded pin
    */
   DuctedPinEngUnit(const std::string & name,
                    const std::string & geometry_type,
                    const std::vector<Real> & ring_radii,
                    const std::vector<Real> & duct_apothems,
-                   const std::vector<std::vector<unsigned int>> & region_ids,
+                   const std::vector<std::vector<std::string>> & region_names,
                    const std::vector<Real> & axial_boundaries);
   /**
    * @brief Return the pin engeering unit attributes for this object.
    *
    * @return map containing: geometry_type (std::string), ring_radii (std::vector<Real>),
-   * duct_apothems (std::vector<Real>), region_ids (std::vector<std::vector<unsigned int>>),
+   * duct_apothems (std::vector<Real>), region_names (std::vector<std::vector<std::string>>),
    * and axial_boundaries (std::vector<Real>)
    */
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override;
@@ -87,7 +87,7 @@ private:
   const std::vector<Real> _duct_apothems;
 
   /// Region IDs of pin cell
-  std::vector<std::vector<unsigned int>> _region_ids;
+  std::vector<std::vector<std::string>> _region_names;
 
   /// Axial boundaries for an extruded pin cell
   std::vector<Real> _axial_boundaries;

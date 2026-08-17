@@ -6,12 +6,12 @@
           0.710315
         ],
         "geometry_type": "Square",
-        "region_ids": [
+        "region_names": [
           [
-            1,
-            2,
-            3,
-            4
+            "rgmb_region_1",
+            "rgmb_region_2",
+            "rgmb_region_3",
+            "rgmb_region_4"
           ]
         ],
         "ring_radii": [

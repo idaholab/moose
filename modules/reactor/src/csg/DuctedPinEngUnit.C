@@ -20,12 +20,12 @@ DuctedPinEngUnit::DuctedPinEngUnit(const std::string & name,
                                    const std::string & geometry_type,
                                    const std::vector<Real> & ring_radii,
                                    const std::vector<Real> & duct_apothems,
-                                   const std::vector<std::vector<unsigned int>> & region_ids,
+                                   const std::vector<std::vector<std::string>> & region_names,
                                    const std::vector<Real> & axial_boundaries)
   : CSGCellEngUnit(name),
     _ring_radii(ring_radii),
     _duct_apothems(duct_apothems),
-    _region_ids(region_ids),
+    _region_names(region_names),
     _axial_boundaries(axial_boundaries)
 {
   // Check radii in ascending order
@@ -46,12 +46,12 @@ DuctedPinEngUnit::DuctedPinEngUnit(const std::string & name,
 
   // Check size of region ids
   unsigned int n_axial = _axial_boundaries.size() ? axial_boundaries.size() : 1;
-  if (_region_ids.size() != n_axial)
+  if (_region_names.size() != n_axial)
     mooseError("Size of region IDs must match the number of axial zones in pin");
 
   unsigned int n_radial = _ring_radii.size() + _duct_apothems.size();
-  for (const auto & region_ids_radial : _region_ids)
-    if (region_ids_radial.size() != n_radial)
+  for (const auto & region_names_radial : _region_names)
+    if (region_names_radial.size() != n_radial)
       mooseError("Size of entry in region IDs must match the number of radial zones in pin");
 
   _geometry_type = geometry_type;
@@ -63,7 +63,7 @@ DuctedPinEngUnit::getAttributes() const
   std::unordered_map<std::string, AttributeVariant> attr_map{
       {"duct_apothems", _duct_apothems},
       {"ring_radii", _ring_radii},
-      {"region_ids", _region_ids},
+      {"region_names", _region_names},
       {"geometry_type", getGeometryTypeString()}};
   if (_axial_boundaries.size())
     attr_map["axial_boundaries"] = _axial_boundaries;
@@ -73,8 +73,12 @@ DuctedPinEngUnit::getAttributes() const
 std::unique_ptr<CSGCellEngUnit>
 DuctedPinEngUnit::clone() const
 {
-  return std::make_unique<DuctedPinEngUnit>(
-      _name, getGeometryTypeString(), _ring_radii, _duct_apothems, _region_ids, _axial_boundaries);
+  return std::make_unique<DuctedPinEngUnit>(_name,
+                                            getGeometryTypeString(),
+                                            _ring_radii,
+                                            _duct_apothems,
+                                            _region_names,
+                                            _axial_boundaries);
 }
 
 void
@@ -95,7 +99,7 @@ DuctedPinEngUnit::expandUnit()
         unit_name += "_axial_" + std::to_string(i);
       std::vector<std::string> pin_fill_mats;
       for (const auto j : make_range(n_ring + 1))
-        pin_fill_mats.push_back("rgmb_region_" + std::to_string(_region_ids[i][j]));
+        pin_fill_mats.push_back(_region_names[i][j]);
       std::unique_ptr<CSG::PinUniverseEngUnit> pin_ptr =
           std::make_unique<CSG::PinUniverseEngUnit>(unit_name, _ring_radii, pin_fill_mats);
       auto & pin_unit = _internal_base->addEngUnit(std::move(pin_ptr));
@@ -192,9 +196,8 @@ DuctedPinEngUnit::expandUnit()
         _internal_base->createCell(cell_name, pin_units_by_axial_region[j], cell_region, &pin_univ);
       else
       {
-        // Otherwise, we fill the region with a material name based on region ID for region
-        const auto region_id = _region_ids[j][radial_index];
-        const auto mat_name = "rgmb_region_" + std::to_string(region_id);
+        // Otherwise, we fill the region with a material fill based on the region name
+        const auto mat_name = _region_names[j][radial_index];
         _internal_base->createCell(cell_name, mat_name, cell_region, &pin_univ);
       }
     }

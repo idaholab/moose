@@ -10,11 +10,11 @@
           3.551575
         ],
         "geometry_type": "Hex",
-        "region_ids": [
+        "region_names": [
           [
-            1,
-            2,
-            3
+            "rgmb_region_1",
+            "rgmb_region_2",
+            "rgmb_region_3"
           ]
         ],
         "ring_radii": [
