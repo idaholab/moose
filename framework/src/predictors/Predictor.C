@@ -28,7 +28,8 @@ Predictor::validParams()
   params.addParam<std::vector<Real>>(
       "skip_times_old",
       {},
-      "Skip the predictor if the previous solution time is in this list of times");
+      "Skip the predictor if a previous solution time used by the predictor is in this list of "
+      "times, marking that step as unrepresentative of the overall solution behavior");
   params.addParam<bool>("skip_after_failed_timestep",
                         false,
                         "Skip prediction in a repeated time step after a failed time step");

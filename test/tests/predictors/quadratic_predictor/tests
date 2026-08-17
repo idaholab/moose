@@ -1,0 +1,85 @@
+[Tests]
+  design = 'QuadraticPredictor.md'
+  issues = '#32982'
+
+  [constant_dt]
+    type = 'CSVDiff'
+    input = 'quadratic_predictor.i'
+    csvdiff = 'quadratic_predictor_out.csv'
+    abs_zero = 1e-12
+    ignore_columns = 'num_nonlinear_iterations'
+
+    requirement = 'The system shall support a quadratic solution predictor for constant '
+                  'time-step sizes.'
+  []
+
+  [variable_dt]
+    type = 'CSVDiff'
+    input = 'quadratic_predictor_variable_dt.i'
+    csvdiff = 'quadratic_predictor_variable_dt_out.csv'
+    abs_zero = 1e-12
+    ignore_columns = 'num_nonlinear_iterations'
+
+    requirement = 'The system shall support a quadratic solution predictor for variable '
+                  'time-step sizes.'
+  []
+
+  [variable_dt_cubic]
+    type = 'CSVDiff'
+    input = 'quadratic_predictor_variable_dt_cubic.i'
+    csvdiff = 'quadratic_predictor_variable_dt_cubic_out.csv'
+    abs_zero = 1e-12
+    ignore_columns = 'num_nonlinear_iterations'
+
+    requirement = 'The system shall apply nonuniform time-step quadratic prediction to solution '
+                  'histories that are not exactly quadratic in time.'
+  []
+
+  [skip_times_old]
+    type = 'CSVDiff'
+    input = 'quadratic_predictor_skip_times_old.i'
+    csvdiff = 'quadratic_predictor_skip_times_old_out.csv'
+    abs_zero = 1e-12
+    ignore_columns = 'num_nonlinear_iterations'
+
+    requirement = 'The system shall skip quadratic prediction when a previous solution time '
+                  'used by the predictor is marked as unrepresentative.'
+  []
+
+  [repeated_timestep]
+    type = 'CSVDiff'
+    input = 'quadratic_predictor_repeated_timestep.i'
+    csvdiff = 'quadratic_predictor_repeated_timestep_out.csv'
+    abs_zero = 1e-12
+    ignore_columns = 'num_nonlinear_iterations'
+    restep = false # This test intentionally exercises failed timestep behavior.
+
+    requirement = 'The system shall preserve quadratic predictor history on a repeated time step.'
+  []
+
+  [restart]
+    requirement = 'The system shall restart quadratic predictor state from checkpoint output.'
+
+    [part1]
+      type = 'RunApp'
+      input = 'quadratic_predictor.i'
+      cli_args = 'Outputs/checkpoint=true Outputs/file_base=quadratic_predictor_restart_part1'
+      recover = false
+
+      detail = 'by writing a checkpoint after enough solution history is available and'
+    []
+
+    [part2]
+      type = 'CSVDiff'
+      input = 'quadratic_predictor_restart_part2.i'
+      csvdiff = 'quadratic_predictor_restart_part2_out.csv'
+      prereq = 'restart/part1'
+      delete_output_before_running = false
+      recover = false
+      abs_zero = 1e-12
+      ignore_columns = 'num_nonlinear_iterations'
+
+      detail = 'by continuing from the checkpoint with exact quadratic predictions.'
+    []
+  []
+[]
