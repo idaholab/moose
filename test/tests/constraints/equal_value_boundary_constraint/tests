@@ -27,15 +27,15 @@
     requirement = "The system shall be able to enforce the equal value boundary constraint in parallel "
                   "with adaptivity."
   []
-  [distributed_mesh]
+  [evbc_parallel_test]
     type = Exodiff
-    input = 'distributed_mesh.i'
-    exodiff = 'distributed_mesh_out.e'
-    min_parallel = 3
-    max_parallel = 3
-    mesh_mode = DISTRIBUTED
-    requirement = "The system shall retain elements needed by an equal value boundary constraint "
-                  "when remote elements are deleted from a distributed mesh."
+    input = 'evbc_parallel_test.i'
+    exodiff = 'evbc_parallel_test_out.e'
+    abs_zero = 1e-9
+    requirement = "The system shall obtain the same equal value boundary constraint solution, with "
+                  "the primary node located by its coordinates, for any number of processors and on "
+                  "either a replicated or a distributed mesh, retaining the elements needed by the "
+                  "constraint when remote elements are deleted."
   []
   [set_primary_and_coord_error]
     type = RunException
