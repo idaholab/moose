@@ -24,12 +24,16 @@ NewtonInversionControl::validParams()
       1e-3,
       "parameter_delta>0",
       "Finite-difference perturbation applied on each base iteration to estimate df/dp.");
+  // Invariant: this sentinel must stay far above the fixed-point Convergence tolerance (1 for the
+  // generated PostprocessorConvergence) so a perturbed iteration is never seen as converged. The
+  // odd/even scheme's correctness depends on that gap never closing.
   params.addRangeCheckedParam<Real>(
       "nonconverged_residual",
       1e30,
       "nonconverged_residual>0",
       "Large residual written on perturbed iterations so that convergence is only ever declared on "
-      "a base iteration (where the recorded parameter is un-perturbed).");
+      "a base iteration (where the recorded parameter is un-perturbed). Must stay well above the "
+      "convergence tolerance so a perturbed iteration is never accepted.");
 
   return params;
 }

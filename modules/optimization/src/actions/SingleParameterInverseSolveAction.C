@@ -56,7 +56,9 @@ SingleParameterInverseSolveAction::validParams()
   params.addParam<unsigned int>(
       "max_iterations",
       50,
-      "Maximum number of fixed-point iterations on the generated convergence.");
+      "Maximum number of fixed-point iterations on the generated convergence. With method=newton "
+      "each Newton update consumes two fixed-point iterations (a base and a perturbed solve), so "
+      "the effective number of Newton updates is about half this value.");
   params.addParam<bool>(
       "accept_on_max_iterations",
       false,

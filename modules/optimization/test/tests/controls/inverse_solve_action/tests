@@ -39,6 +39,21 @@
     requirement = "The system shall converge a single-parameter inverse solve using the absolute "
                   "tolerance criterion when the relative tolerance is negligible."
   []
+  [action_newton_accept_on_max]
+    type = RunApp
+    input = action_newton.i
+    # max_iterations=2 is even, so the cap falls on a perturbed Newton iteration -- the case where
+    # the accepted solution comes from the last base iteration.
+    cli_args = 'SingleParameterInverseSolve/max_iterations=2 '
+               'SingleParameterInverseSolve/accept_on_max_iterations=true '
+               'Outputs/csv=false'
+    # Reuses action_newton.i, so its recover checkpoint would collide with the action_newton test.
+    recover = false
+    requirement = "The system shall, when the Newton single-parameter inverse-solve block reaches "
+                  "the maximum number of fixed-point iterations on a perturbed iteration and "
+                  "accept-on-max is enabled, accept the last base estimate and continue without "
+                  "error."
+  []
   [missing_convergence]
     type = RunException
     input = action_no_convergence.i
