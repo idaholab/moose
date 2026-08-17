@@ -31,7 +31,7 @@
 } -%}
 
 Bootstrap: docker
-From: {{ FROM_IMAGES.get(VARIANT, "ubuntu24_gcc") }}
+From: {{ FROM_IMAGES.get(VARIANT, FROM_IMAGES.get("ubuntu24_gcc")) }}
 
 %environment
     # Fix locale warnings
