@@ -623,8 +623,8 @@ public:
   bool needDual() const { return _need_dual; }
 
   /**
-   * Request the transformed dual basis for the mortar Lagrange multiplier trace basis on
-   * higher-order (TRI6/QUAD8) secondary faces
+   * Request the transformed dual basis for the mortar Lagrange multiplier on higher-order
+   * (TRI6/QUAD8) secondary faces
    */
   void activateTransformedDual() { _need_transformed_dual = true; }
 

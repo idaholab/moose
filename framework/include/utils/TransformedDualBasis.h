@@ -34,20 +34,20 @@ namespace Mortar
 bool transformedDualBasisSupported(libMesh::ElemType elem_type);
 
 /**
- * Compute the transformed dual shape-function coefficients for a second-order Lagrange trace basis
- * on a TRI6 or QUAD8 face element. See the transformed-dual documentation for the method.
+ * Compute the transformed dual shape-function coefficients for a second-order Lagrange basis on a
+ * TRI6 or QUAD8 face element. See the transformed-dual documentation for the method.
  *
  * The dual shapes are expressed in the standard nodal basis as dual_phi_j = sum_i dual_coeff(i,j)
- * phi_i, biorthogonal to the transformed primal basis Ntilde = T N with a strictly positive
- * diagonal dtilde = T d (d_i = integral(phi_i)). In (row = node k, column = dual index j) indexing
- * this is dual_coeff = A^-1 B with A(i,j) = integral(phi_i phi_j) and B = T^-1 diag(T d); T = I
- * reproduces libMesh's standard dual construction exactly.
+ * phi_i, biorthogonal to the transformed basis Ntilde = T N with a strictly positive diagonal
+ * dtilde = T d (d_i = integral(phi_i)). In (row = node k, column = dual index j) indexing this is
+ * dual_coeff = A^-1 B with A(i,j) = integral(phi_i phi_j) and B = T^-1 diag(T d); T = I reproduces
+ * libMesh's standard dual construction exactly.
  *
  * @param elem the lower-dimensional face element (must be TRI6 or QUAD8)
- * @param fe_type the trace basis FE type (second-order Lagrange)
+ * @param fe_type the FE type (second-order Lagrange)
  * @param pts reference points on elem at which the integration weights are given
  * @param JxW integration weights (mortar-segment JxW) matching pts one-to-one
- * @param dual_coeff (output) n-by-n coefficient matrix, n = number of trace shapes
+ * @param dual_coeff (output) n-by-n coefficient matrix, n = number of shape functions
  */
 void computeTransformedDualCoeffs(const libMesh::Elem & elem,
                                   const libMesh::FEType & fe_type,

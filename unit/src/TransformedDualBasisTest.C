@@ -30,14 +30,14 @@ using namespace libMesh;
 namespace
 {
 // Absolute tolerance for the biorthogonality / diagonal checks. The Gauss rule below integrates the
-// (at most cubic) trace shapes exactly, so the only error is the round-off of the dense linear
-// solves inside computeTransformedDualCoeffs (~1e-13 for these 6x6/8x8 systems).
+// (at most cubic) shape products exactly, so the only error is round-off in the dense linear solves
+// inside computeTransformedDualCoeffs (~1e-13 for these 6x6/8x8 systems).
 const Real tol = 1.0e-9;
 
 // Verify the transformed dual on a single second-order face type: the transformed diagonal dtilde
 // is the expected strictly positive value per node, the dual reproduces constants (partition of
-// unity), and it is biorthogonal to the transformed primal basis Ntilde = T N. The standard
-// (untransformed) vertex diagonal is passed in only to document the value the transform repairs.
+// unity), and it is biorthogonal to the transformed basis Ntilde = T N. standard_vertex_diagonal is
+// the untransformed vertex value the transform repairs.
 void
 checkTransformedDual(const ElemType type,
                      const Real vertex_dtilde,
@@ -93,8 +93,8 @@ checkTransformedDual(const ElemType type,
   auto expected_dtilde = [&](const unsigned int a)
   { return a < n_vertices ? vertex_dtilde : mid_dtilde; };
 
-  // U1: integral(dual_phi_j) == dtilde_j, strictly positive (the property the transform restores).
-  // integral(dual_phi_j) = sum_i coeff(i, j) d_i.
+  // integral(dual_phi_j) = sum_i coeff(i, j) d_i == dtilde_j, strictly positive (the property the
+  // transform restores).
   for (const auto j : make_range(n))
   {
     Real integral = 0.0;
@@ -104,7 +104,7 @@ checkTransformedDual(const ElemType type,
     EXPECT_NEAR(integral, expected_dtilde(j), tol);
   }
 
-  // U2: the transformed dual reproduces constants, sum_j dual_phi_j(q) == 1 at every point.
+  // The transformed dual reproduces constants: sum_j dual_phi_j(q) == 1 at every point.
   for (const auto q : index_range(JxW))
   {
     Real sum = 0.0;
@@ -114,10 +114,9 @@ checkTransformedDual(const ElemType type,
     EXPECT_NEAR(sum, 1.0, tol);
   }
 
-  // U3 (GATE-1): biorthogonality against the transformed primal basis Ntilde = T N. Rebuild T here
-  // independently of the helper and assert M(k, j) = integral(Ntilde_k dual_phi_j) == delta_kj
-  // dtilde_j numerically, rather than trusting a written index convention. alpha = 1/5 must match
-  // the value hard-coded in computeTransformedDualCoeffs.
+  // Biorthogonality against the transformed basis Ntilde = T N. Rebuild T here independently of the
+  // helper and assert M(k, j) = integral(Ntilde_k dual_phi_j) == delta_kj dtilde_j numerically,
+  // rather than trusting a written index convention. alpha = 1/5 must match the helper's value.
   const Real alpha = 1.0 / 5.0;
   DenseMatrix<Real> T(n, n);
   for (const auto a : make_range(n))

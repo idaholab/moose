@@ -120,11 +120,10 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
     _lm_var_ids.push_back(id);
   }
 
-  // The transform on quadratic (QUAD8/TRI6) secondary faces makes the coupling matrix D
-  // non-diagonal, so is_lm_coupling_diagonal = true (diagonal-only inverse) gives only an
-  // approximate preconditioner -- the solve stays accurate since Krylov applies the true operator,
-  // but warn and recommend is_lm_coupling_diagonal = false. The elem->dim() < mesh_dim test picks
-  // out mortar faces, not QUAD8 volume elements (which never carry the transform).
+  // The transform on QUAD8/TRI6 secondary faces makes the coupling matrix D non-diagonal, so a
+  // user-set is_lm_coupling_diagonal = true (diagonal-only inverse) is only approximate; warn and
+  // recommend the default false. The elem->dim() < mesh_dim test selects mortar faces, not QUAD8
+  // volume elements (which never carry the transform).
   if (_is_lm_coupling_diagonal)
   {
     const auto mesh_dim = _mesh.dimension();
