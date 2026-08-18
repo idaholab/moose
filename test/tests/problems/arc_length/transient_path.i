@@ -1,3 +1,11 @@
+# Snap-through path of cubic_snapthrough.i stepped along instead of traced in
+# one solve: every time step advances the trace by a single continuation
+# increment of radius step_size * dt and commits the state it reaches, so the
+# accumulated load factor rises to the peak of the path, falls through the
+# snap, and recovers, parting from the time as soon as the path turns. Time is
+# a pseudo parameter that counts arc steps; with the constant dt of 1 the
+# radius is step_size itself.
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -42,9 +50,6 @@
 [Problem]
   type = ArcLengthProblem
   step_size = 0.25
-  max_continuation_steps = 12
-  lambda_min = -2
-  end_on_max_continuation_steps = true
 []
 
 [Postprocessors]
@@ -82,8 +87,8 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  dt = 0.3
-  num_steps = 6
+  dt = 1
+  num_steps = 25
 []
 
 [Outputs]

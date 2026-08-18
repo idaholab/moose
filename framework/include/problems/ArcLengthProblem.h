@@ -42,48 +42,48 @@ class ArcLengthNonlinearSystem;
  * EXEC_TIMESTEP_END is what reports that final value.
  *
  * A softening branch never climbs back to 'lambda_max': past the peak the load parameter falls
- * monotonically, so running out of continuation steps is the only end such a path has.
- * 'end_on_max_continuation_steps' makes that budget the designed end of the path and reports a
- * solve that spends the whole of it as a converged one.
+ * monotonically, so running out of continuation steps is the only end such a path has. The step
+ * budget is therefore a designed end of the path by default, and a solve that spends the whole of
+ * it is reported as a converged one. Setting 'end_on_max_continuation_steps' to false takes that
+ * ending away and leaves 'lambda_max' as the only one a completed path has.
  *
- * A transient run traces one path per time step instead of one path for the whole simulation. The
- * load parameter PETSc solves for is step local there: it runs from 0 to 1 over the load increment
- * of the step alone, and the load factor the committed steps carry is added to it, so the residual
- * is F_int + (Lambda_accum + lambda * dt) * R_load. The load increment of a step is its time step
- * size, which makes the load factor a step ends at the time it ends at and turns the TimeStepper,
- * including the cutback that follows a step whose continuation runs out of steps, into control of
- * the load increment. State commits at the end of a step, so stateful materials advance along the
- * path and irreversible behavior accumulates across steps.
+ * A transient run steps along the path instead of tracing the whole of it in one solve: every time
+ * step advances the trace by a single continuation increment, whose load change may carry either
+ * sign, and commits the state that increment reaches. Stateful materials therefore advance along
+ * the path itself and irreversible behavior accumulates increment by increment, including down a
+ * descending branch. That ordering is what a history dependent material needs: a solve that
+ * crosses a falling stretch of path in one span evaluates the history only at the state it ends
+ * at, so the excursion never registers and the trace it commits is stiffer than the path it
+ * claims to have crossed. This stepping is the classical incremental arc-length method of Riks
+ * and Crisfield, with PETSc's solver as the engine of each increment.
  *
- * 'step_size', 'max_continuation_steps', 'psi_squared', 'correction_type' and 'lambda_min' stay
- * step local in a transient run: each governs the continuation a single step traces and is applied
- * again from the start of every step. 'lambda_max' is no longer a setting there, it has to be 1
- * because the step local load parameter spans the increment of one step.
+ * The load parameter PETSc solves for is step local: the residual of a step is
+ * F_int + (Lambda_accum + lambda * Delta) * R_load, with Lambda_accum the load factor the
+ * committed steps carry and Delta the time step size signed by the direction of travel. The
+ * committed load factor moves by the part of Delta the increment traversed, which may be any
+ * fraction of it and either sign, so the accumulated load factor is free to fall where the path
+ * descends and time does not measure it: time is a pseudo parameter that counts arc steps, and
+ * the load factor of the trace is what the load parameter postprocessor reports.
  *
- * 'end_on_max_continuation_steps' carries the softening branch exit above into a transient run,
- * where it ends the continuation of every step. A step then has two endings: its step local load
- * parameter reaches 1, which commits the whole load increment of that step, or the step budget runs
- * out, which commits that increment scaled by the step local parameter the last converged increment
- * reached. The second ending is what carries a path past the peak, because the step local parameter
- * is free to fall there, which is also why 'lambda_min' has to be negative for the clamp to let it.
- * A step that ends neither way is a failed step, and the TimeStepper cuts it back as it does any
- * other.
+ * The arc length of the increment a step takes is 'step_size' at every time step size: the
+ * cutback that follows a failed step shrinks the load span the retry covers and leaves the
+ * turning radius alone, because the solution excursion across a sharp turn of the path is set by
+ * the shape of the path and does not shrink with the span. 'psi_squared' and 'correction_type'
+ * govern each increment as they govern a one-shot continuation; 'max_continuation_steps',
+ * 'end_on_max_continuation_steps', 'lambda_max' and 'lambda_min' belong to the one-shot path
+ * alone and a transient run owns their values.
  *
- * The load increment of a step is signed there, because the direction the path is travelled in has
- * to survive a step boundary. PETSc's predictor carries that direction within a step alone, and
- * every step opens with a step local parameter running 0 to 1 again, so a step following one that
- * ended part way down a descending branch would read an increasing parameter as a climb back up the
- * branch just traced. The problem remembers a direction of travel of plus or minus one, the load
- * increment of a step is the time step size times it, and the tangent load carries that sign, which
- * is what makes an increasing step local parameter mean travel the way the path was already going.
- * A step ending at a step local parameter of 1 travelled forward the whole way and keeps the
- * direction; a step ending on a spent budget with a negative net change turned around, and the way
- * it came becomes the new forward.
- *
- * Time measures how much load change a step covers, up to the time step size of that step, in the
- * direction of travel, rather than the load level itself. The load factor a step ends at is the
- * time it ends at only while every step has ended at a step local parameter of 1 with the direction
- * still forward, and it parts from the time as soon as one has not.
+ * The direction of travel has to survive a step boundary, and PETSc's predictor cannot carry it
+ * there: its memory ends with the solve, and a fresh solve chooses the sign of its predictor from
+ * the state it opens at, which near a limit point can walk a step backward along the branch just
+ * traced. Such a step converges, because the branch it retraces is made of equilibrium points, so
+ * the outcome of the solve cannot expose it and the energy the step dissipates is what does: a
+ * descent along the path of a dissipative structure sheds load because the structure dissipates,
+ * while a walk back down an elastic branch sheds load without dissipating anything. A step that
+ * descends without dissipating is therefore failed, and its retry travels the other way. The
+ * problem remembers a direction of travel of plus or minus one that signs Delta, a step whose
+ * committed change ran against it turns it around, and the memory is restartable so that a
+ * recovered run resumes travelling the way it left off.
  *
  * A transient path is not output per increment. The increment index stands in for the time while
  * an increment is output, and that pseudo time written alongside the time the steps advance would
@@ -118,20 +118,20 @@ public:
   virtual void initPetscOutputAndSomeSolverSettings() override;
 
   /**
-   * Arms the load increment the transient step about to be solved applies, which is the time step
-   * size signed by the direction of travel, restarts the numbering of the increments because every
-   * step traces a path of its own, and clears the record of how the previous step ended.
+   * Arms the transient step about to be solved: arms the load increment scale, which is the time
+   * step size signed by the direction of travel, sets the floor of the step local load parameter
+   * to the fixed physical unloading span, and clears the records the previous attempt left.
    *
    * The executioner reaches this before every attempt at a step, so a step the TimeStepper cuts
-   * back arms the smaller increment its retry applies.
+   * back arms the smaller load span of its retry, with the turning radius left at 'step_size'.
    */
   virtual void onTimestepBegin() override;
 
   /**
-   * Narrows the armed load increment of a transient step whose continuation ended on a spent step
-   * budget down to the part of that increment the path traced, leaving a step that reached the end
-   * of its increment with the whole of it, and turns the direction of travel around when that part
-   * ran against it.
+   * Narrows the armed load increment of a transient step down to the part of it the increment
+   * traversed when the step ended on its spent internal budget, leaving a step whose increment
+   * reached the end of its load span with the whole of it, and turns the direction of travel
+   * around when the traversed part ran against it.
    *
    * The executioner reaches this after the solve of a step, before the objects executed at the end
    * of that step and before the checkpoint is written, so the load factor those objects report, the
@@ -153,8 +153,11 @@ public:
   virtual void advanceState() override;
 
   /**
-   * Reports a solve that spent the whole of its continuation step budget as converged when
-   * 'end_on_max_continuation_steps' is set, and defers to the base class in every other case.
+   * Reports a continuation that spent the whole of its step budget as converged where that budget
+   * is a designed ending, which a transient step's internal budget of one increment always is and
+   * a one-shot path's is while 'end_on_max_continuation_steps' holds, judges every committed
+   * descent of a transient step by the energy it dissipates, and defers to the base class in
+   * every other case.
    *
    * SNESSolve_NEWTONAL ends a spent budget with SNES_DIVERGED_MAX_IT, which is also the reason it
    * ends an increment that ran out of corrector iterations with, so the reason alone does not say
@@ -215,8 +218,9 @@ protected:
 
   /**
    * Publishes the state of a converged continuation increment: syncs the iterate into the
-   * solution, caches the load factor, and executes on EXEC_ARC_LENGTH_INCREMENT, outputting there
-   * as well outside a transient run.
+   * solution, caches the load factor, records the step local parameter against the deepest one the
+   * step has reached, and executes on EXEC_ARC_LENGTH_INCREMENT, outputting there as well outside a
+   * transient run.
    *
    * A whole continuation is traced within a single step of the solve, so every increment would be
    * output at the one time of that step and an output holding a frame per increment would keep
@@ -276,6 +280,17 @@ protected:
   /// instead of failing the solve
   const bool _end_on_max_continuation_steps;
 
+  /// Whether a transient step runs a continuation, with false solving the step as an ordinary
+  /// prescribed ramp at a load factor equal to the time. Controllable, and held by reference so
+  /// that a [Controls] object writing the parameter is obeyed by the next solve, which replaces
+  /// the checkpoint restart between a plain ramp and a continuation started from it
+  const bool & _use_continuation;
+
+  /// Whether the attempt being judged has already been failed as a dissipation-free descent, which
+  /// keeps a repeated convergence query from turning the direction of travel a second time. Reset
+  /// when a step is armed, so every attempt may be failed that way once
+  bool _retrace_handled;
+
   /// Index of the continuation increment being published, counted from the start of the path,
   /// which a transient run restarts at every step because each traces a path of its own
   unsigned int _increment;
@@ -288,8 +303,14 @@ protected:
   bool _checked_load_on_constrained_dofs;
 
   /// Step local load parameter of the most recent continuation state, which is the fraction of the
-  /// load increment of the transient step being solved that has been applied
+  /// load increment scale of the transient step being solved that has been applied
   Real _step_lambda;
+
+  /// Time step size of the first transient step, which is the nominal load increment scale the
+  /// input chose. The clamps on the step local load parameter are sized against it so that how
+  /// far a step may load or unload is a fixed span of physical load factor, however far the
+  /// TimeStepper has cut the step back. Restartable so a recovered run keeps the same span
+  Real & _nominal_dt;
 
   /// Direction the equilibrium path is being travelled in, which is 1 or -1 and signs the load
   /// increment of a step so that the step continues the way its predecessor was going. Restartable
@@ -311,6 +332,37 @@ protected:
 
 private:
 #if PETSC_RELEASE_GREATER_EQUALS(3, 22, 0)
+  /**
+   * The convergence decision of solverSystemConverged, separated out so that the outcome of every
+   * attempt is recorded on its way back to the executioner, which is what a retry reads to decide
+   * whether to shrink the continuation radius
+   *
+   * @param sys_num The solver system to report the convergence of
+   * @return Whether that system converged
+   */
+  bool continuationConverged(const unsigned int sys_num);
+
+  /**
+   * @return Whether the solve being made is a continuation. A steady solve always is; a transient
+   * step is while the controllable 'use_continuation' holds true, and otherwise it is an ordinary
+   * Newton solve at a prescribed load factor equal to the time
+   */
+  bool inContinuation() const;
+
+  /**
+   * @return Whether the step that just converged dissipated energy, measured by the increment
+   * Verhoosel and de Borst control their continuation with: dtau = (lambda_0 * f^T * du
+   * - dlambda * f^T * u_0) / 2, with f the load pattern, u_0 and lambda_0 the state and load
+   * factor the step started from, and du and dlambda the changes the step made. A descending
+   * stretch of the path of a damaging structure sheds load because the structure dissipates, while
+   * unloading it elastically, with the damage held by its irreversibility, descends without
+   * dissipating: the elastic unload of a linear structure is proportional, which cancels the two
+   * terms of dtau exactly. The magnitude of dtau against the magnitudes of its terms is therefore
+   * what tells a descent along the path from a walk back down an elastic branch, which converges
+   * just as well and which the outcome of the solve alone cannot expose
+   */
+  bool stepDissipated();
+
   /**
    * Maps the 'correction_type' parameter onto the PETSc correction type
    *
