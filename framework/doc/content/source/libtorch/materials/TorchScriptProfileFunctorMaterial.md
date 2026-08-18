@@ -12,7 +12,7 @@ coordinates and may be consumed by finite-element and finite-volume objects thro
 functor interface.
 
 The TorchScript module is loaded and evaluated through a
-[`TorchScriptUserObject`](../userobjects/TorchScriptUserObject.md). Unlike
+[TorchScriptUserObject.md]. Unlike
 [`TorchScriptMaterial`](TorchScriptMaterial.md), which creates conventional quadrature-point
 material properties, this object creates `ADReal` functors that can be evaluated using the spatial
 arguments supplied by a consuming MOOSE object.
