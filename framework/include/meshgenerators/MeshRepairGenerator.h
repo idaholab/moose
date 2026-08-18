@@ -80,13 +80,13 @@ private:
   /// @param mesh the mesh to modify
   void splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) const;
 
-  /// @brief Repair sliver (near-degenerate) first-order 2D elements (TRI3, QUAD4, polygons). Each
-  ///        sliver is removed and absorbed into its longest-edge neighbor, keeping the surface
+  /// @brief Repair sliver (near-degenerate) 2D first-order elements (TRI3, QUAD4, polygons).
+  ///        Each sliver is removed and absorbed into its longest-edge neighbor, keeping the surface
   ///        conformal (no holes or hanging nodes). A triangle sliver against a triangle neighbor
   ///        splits that neighbor into two triangles; otherwise the neighbor absorbs the sliver's
   ///        vertices and is promoted to a quad or polygon.
   /// @param mesh the mesh to modify
-  void repairSlivers(std::unique_ptr<MeshBase> & mesh) const;
+  void repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Repair sliver (near-degenerate) TET4 elements by edge collapse. Each sliver is removed
   ///        by collapsing one of its edges (merging a node onto another existing node), keeping a

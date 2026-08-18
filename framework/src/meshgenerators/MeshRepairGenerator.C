@@ -63,10 +63,9 @@ MeshRepairGenerator::validParams()
       "flat PYRAMID5 sliver is absorbed into the element across its quad base, which becomes a "
       "polyhedron. A flat PRISM6 (wedge) sliver is collapsed onto its opposite triangular face so "
       "its neighbors meet, while a thin-cross-section wedge is absorbed into the element across "
-      "its "
-      "longest quad side. A flat-slab HEX8 sliver is collapsed along its squashed pair of opposite "
-      "faces. Each repair keeps the mesh conformal, or leaves the sliver in place if no valid "
-      "repair exists.");
+      "its longest quad side. A flat-slab HEX8 sliver is collapsed along its squashed pair of "
+      "opposite faces. Each repair keeps the mesh conformal, or leaves the sliver in place if no "
+      "valid repair exists.");
   params.addRangeCheckedParam<Real>(
       "sliver_element_area_fraction",
       1e-10,
@@ -132,11 +131,9 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _tet_collapse_volume_floor(getParam<Real>("tet_collapse_volume_floor"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-      !_boundary_id_merge && !getParam<bool>("renumber_contiguously") && !_split_nonconvex_polygons)
-
-    if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-        !_boundary_id_merge && !_fix_sliver_elements && !getParam<bool>("renumber_contiguously"))
-      mooseError("No specific item to fix. Are any of the parameters misspelled?");
+      !_boundary_id_merge && !_fix_sliver_elements && !getParam<bool>("renumber_contiguously") &&
+      !_split_nonconvex_polygons)
+    mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
 std::unique_ptr<MeshBase>
@@ -156,25 +153,23 @@ MeshRepairGenerator::generate()
   if (_fix_overlapping_nodes)
     fixOverlappingNodes(mesh);
 
-  // Repair sliver elements by absorbing them into their longest-edge neighbor
   if (_fix_sliver_elements)
-    repairSlivers(mesh);
+  {
+    // Repair 2D sliver elements by either absorbing them into their longest-edge neighbor
+    repair2DSlivers(mesh);
 
-  // Repair sliver TET4 elements by edge collapse
-  if (_fix_sliver_elements)
+    // Repair sliver TET4 elements by edge collapse
     repairTetSlivers(mesh);
 
-  // Repair sliver PYRAMID5 elements by absorbing them into their quad-base neighbor
-  if (_fix_sliver_elements)
+    // Repair sliver PYRAMID5 elements by absorbing them into their quad-base neighbor
     repairPyramidSlivers(mesh);
 
-  // Repair sliver PRISM6 (wedge) elements by collapse (flat) or absorption (thin blade)
-  if (_fix_sliver_elements)
+    // Repair sliver PRISM6 (wedge) elements by collapse (flat) or absorption (thin blade)
     repairWedgeSlivers(mesh);
 
-  // Repair sliver HEX8 elements by collapsing their squashed pair of opposite faces
-  if (_fix_sliver_elements)
+    // Repair sliver HEX8 elements by collapsing their squashed pair of opposite faces
     repairHexSlivers(mesh);
+  }
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
@@ -563,7 +558,7 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
 }
 
 void
-MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
+MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
 {
   // Surface-area scale of the whole mesh, used by the area-based sliver test
   const auto bbox = MeshTools::create_bounding_box(*mesh);
@@ -666,6 +661,7 @@ MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
     }
 
     // Nodes already used by a repair this pass; a sliver or neighbor touching one is deferred
+    // to the next repair pass (or another after if the situation re-occurs)
     std::unordered_set<dof_id_type> touched_nodes;
     auto touches_repaired = [&touched_nodes](const Elem & e)
     {
@@ -818,6 +814,7 @@ MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
 
   if (num_repaired)
   {
+    // neighbors were invalidated
     mesh->prepare_for_use();
     _console << "Number of sliver elements repaired: " << num_repaired << std::endl;
   }
@@ -981,7 +978,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
         for (const auto eid : libmesh_map_find(node_to_elems, K->id()))
           star.insert(eid);
 
-        // Non-TET4 guard: a hybrid star cannot be reshaped by tet collapse
+        // Non-TET4 guard: other routines for repairing slivers of another element type
         for (const auto eid : star)
         {
           const Elem * e = mesh->query_elem_ptr(eid);
@@ -1280,6 +1277,8 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
     // reject path can leak the constructor's interior node (the C0Polyhedron constructor is not
     // exception-safe on its fallback tetrahedralization); valid (convex) unions are unaffected.
     // This should be fixed upstream in libMesh.
+    if (mid_node)
+      mid_node.release();
     return false;
   }
   poly_elem->subdomain_id() = sub;
@@ -1667,9 +1666,9 @@ MeshRepairGenerator::repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const
   // Floor below which a collapse-reshaped neighbor is rejected as inverting / re-slivering
   const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
 
-  // Classify a PRISM6: 0 = not a sliver, 1 = flat (top triangle squashed onto the bottom), 2 = thin
-  // (the triangular cross-section is a sliver, i.e. a blade). PRISM6 nodes: 0,1,2 bottom triangle,
-  // 3,4,5 top triangle (node 3 above 0, 4 above 1, 5 above 2).
+  // Classify a PRISM6: 0 = not a sliver or not a prism6, 1 = flat (top triangle squashed onto the
+  // bottom), 2 = thin (the triangular cross-section is a sliver, i.e. a blade). PRISM6 nodes: 0,1,2
+  // bottom triangle, 3,4,5 top triangle (node 3 above 0, 4 above 1, 5 above 2).
   auto wedgeMode = [&](const Elem & e) -> int
   {
     if (e.type() != PRISM6)
