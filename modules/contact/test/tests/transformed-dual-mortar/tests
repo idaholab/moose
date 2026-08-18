@@ -2,9 +2,10 @@
 # on higher-order (TRI6 / QUAD8) mortar contact secondary faces.
 #
 # All inputs use node-conforming BreakMeshByBlock interfaces promoted to second
-# order with ElementOrderConversionGenerator (SECOND_ORDER_NONFULL). The matching
-# HEX20 patch (single QUAD8 secondary face) runs at the default derivative
-# backing-array size. The TET10 patch splits each interface square into four TRI6
+# order with ElementOrderConversionGenerator (SECOND_ORDER_NONFULL). The QUAD8
+# secondary face (HEX20 volume mesh) runs at the default derivative backing-array
+# size and is exercised end-to-end by the vcp case below. The TET10 patch splits
+# each interface square into four TRI6
 # triangles meeting at a center node, so each secondary triangle couples to several
 # primary triangles and the mortar residual needs a larger derivative container;
 # those cases are capability-gated with ad_size>=100 (validated with a build of
@@ -24,15 +25,6 @@
     requirement = 'The system shall recover a spatially uniform mortar contact pressure using the '
                   'locally quadratic transformed dual basis on a node-conforming higher-order '
                   'secondary contact face discretized with '
-    [hex20]
-      type = 'CSVDiff'
-      input = 'transformed-dual-patch-3d.i'
-      cli_args = 'Mesh/gen/elem_type=HEX8 '
-                 'Outputs/file_base=transformed-dual-patch-3d_hex20_out'
-      csvdiff = 'transformed-dual-patch-3d_hex20_out.csv'
-      abs_zero = 1.0e-8
-      detail = 'QUAD8 faces on a HEX20 volume mesh, and'
-    []
     [tet10]
       type = 'CSVDiff'
       input = 'transformed-dual-patch-3d.i'
