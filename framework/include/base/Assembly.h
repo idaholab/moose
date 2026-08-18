@@ -623,8 +623,8 @@ public:
   bool needDual() const { return _need_dual; }
 
   /**
-   * Indicates that the locally-quadratic transformed dual basis of Popp et al. (2012) is requested
-   * for the mortar Lagrange multiplier trace basis on higher-order secondary faces
+   * Request the transformed dual basis for the mortar Lagrange multiplier trace basis on
+   * higher-order (TRI6/QUAD8) secondary faces
    */
   void activateTransformedDual() { _need_transformed_dual = true; }
 
@@ -2653,7 +2653,7 @@ protected:
   Real _current_neighbor_lower_d_elem_volume;
   /// Whether dual shape functions need to be computed for mortar constraints
   bool _need_dual;
-  /// Whether the Popp et al. (2012) transformed dual basis is requested on higher-order faces
+  /// Whether the transformed dual basis is requested on higher-order faces
   bool _need_transformed_dual;
 
   /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
@@ -2783,12 +2783,12 @@ protected:
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_lower;
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_dual_lower;
 
-  /// Popp (2012) transformed dual coefficient matrices for higher-order (TRI6/QUAD8) lower-d faces,
-  /// keyed by trace FEType. Computed in reinitDual and consumed in reinitLowerDElem; only valid for
-  /// the face element recorded in _transformed_dual_coeff_elem.
+  /// Transformed dual coefficient matrices for higher-order (TRI6/QUAD8) lower-d faces, keyed by
+  /// trace FEType. Built in reinitDual, consumed in reinitLowerDElem; valid only for the element in
+  /// _transformed_dual_coeff_elem.
   mutable std::map<FEType, DenseMatrix<Real>> _transformed_dual_coeff;
-  /// The face element the transformed dual coefficients were last computed for. Guards against
-  /// applying a stale coefficient matrix when reinitLowerDElem is not preceded by reinitDual.
+  /// Face element the transformed coefficients were last built for; guards against applying a stale
+  /// matrix when reinitLowerDElem is not preceded by reinitDual.
   mutable const Elem * _transformed_dual_coeff_elem = nullptr;
 
   /// Shape function values, gradients, second derivatives for each vector FE type

@@ -161,13 +161,10 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   if (_use_dual)
     _assembly.activateDual();
 
-  // The Popp et al. (2012) transformed dual basis is applied automatically for dual mortar. It is
-  // mutually exclusive with the Petrov-Galerkin approach: the transform repairs the dual trace
-  // basis used for the multiplier field (Popp, Seitz, Gee & Wall, CMAME 264:67-80 (2013), Eq. 40),
-  // but Petrov-Galerkin weights the multiplier with the standard basis (Eq. 41), whose
-  // normalization on QUAD8/TRI6 faces is a separate positivity problem the transform does not
-  // touch. It is therefore not activated under Petrov-Galerkin. The transform still fires only on
-  // QUAD8/TRI6 secondary faces (gated in Assembly::reinitDual).
+  // The transformed dual basis is applied automatically for dual mortar (firing only on QUAD8/TRI6
+  // secondary faces, gated in Assembly::reinitDual), but not under Petrov-Galerkin: the transform
+  // repairs the dual trace basis, whereas Petrov-Galerkin weights the multiplier with the standard
+  // basis, whose QUAD8/TRI6 normalization is a separate positivity problem the transform ignores.
   if (_use_dual && !_use_petrov_galerkin)
     _assembly.activateTransformedDual();
 
@@ -185,12 +182,9 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
 
-  // The transformed dual basis (see above) is not activated under Petrov-Galerkin, so a
-  // Petrov-Galerkin dual mortar problem on a QUAD8/TRI6 secondary face would silently fall back to
-  // libMesh's ill-posed standard dual (a zero or negative dual diagonal). Detect a higher-order
-  // secondary face here and error out rather than solving with an unsupported discretization. The
-  // secondary lower-dimensional subdomain is small, and the scan stops at the first match; the
-  // collective max keeps the decision consistent across ranks on a distributed mesh.
+  // Under Petrov-Galerkin the transform is off, so a dual mortar problem on a QUAD8/TRI6 secondary
+  // face would fall back to the ill-posed standard dual; detect such a face and error out. The
+  // scan stops at the first match; the collective max keeps the decision consistent across ranks.
   if (_use_petrov_galerkin && _use_dual)
   {
     bool higher_order_secondary = false;

@@ -1,13 +1,11 @@
 # 3D uniform-compression transformed-dual mortar patch, preconditioned with the
-# VariableCondensationPreconditioner (VCP). Same node-conforming HEX20 (QUAD8
-# secondary face) patch as transformed-dual-patch-3d.i (shared setup in
-# transformed-dual-3d-base.i), re-solved with VCP instead of the SMP / direct solve
-# to exercise the VCP condensation path together with the transformed dual basis.
+# VariableCondensationPreconditioner (VCP). Shared setup (mesh, physics, contact) is in
+# transformed-dual-3d-base.i; this input adds the VCP preconditioner and executioner. The
+# spec drives the HEX20 (QUAD8 face) mesh here and the TET10 (TRI6 face) mesh via cli_args.
+#
 # The transform makes the coupling matrix D non-diagonal, so the exact-inverse path
-# (is_lm_coupling_diagonal = false) must be used; the converged solution -- and
-# therefore the spatially uniform contact pressure -- matches the direct solve. A
-# companion RunApp case in the spec flips is_lm_coupling_diagonal = true to confirm
-# the guardrail warning fires.
+# (is_lm_coupling_diagonal = false) is required; a companion RunApp case flips it to true to
+# confirm the guardrail warning fires.
 
 !include transformed-dual-3d-base.i
 

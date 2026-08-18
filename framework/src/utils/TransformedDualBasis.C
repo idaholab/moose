@@ -41,20 +41,15 @@ computeTransformedDualCoeffs(const Elem & elem,
 
   const unsigned int dim = elem.dim();
   const unsigned int n = FEInterface::n_shape_functions(fe_type, &elem);
-  // This routine requires a nodal (Lagrange) trace basis whose shape index i corresponds to local
-  // node i, i.e. n == elem.n_nodes(); the vertex/mid-edge node ordering used to build T below
-  // relies on it. Assembly::reinitDual enforces this by falling back to the standard dual whenever
-  // the trace basis is not nodal (for example a first-order LM on a quadratic mesh).
+  // Requires a nodal (Lagrange) trace basis (shape index i == local node i, so n == n_nodes());
+  // Assembly::reinitDual guarantees this before calling.
 
-  // Standard trace shapes at the integration points: phi[i][qp]. FEInterface::all_shapes fills a
-  // pre-sized [n_shapes][n_points] container rather than allocating one, matching libMesh's own
-  // FE::reinit_dual_shape_coeffs, so it must be sized before the call.
+  // Standard trace shapes phi[i][qp]; all_shapes fills a pre-sized container, so size it first.
   std::vector<std::vector<Real>> phi(n, std::vector<Real>(pts.size()));
   FEInterface::all_shapes(dim, fe_type, &elem, pts, phi);
 
-  // Standard mass matrix A(i, j) = integral(phi_i phi_j) and the standard dual diagonal
-  // d(i) = integral(phi_i), integrated with the same (pts, JxW) libMesh uses for the untransformed
-  // dual so that T = I reproduces it exactly.
+  // Standard mass matrix A(i,j) = integral(phi_i phi_j) and diagonal d(i) = integral(phi_i), using
+  // the same (pts, JxW) as the untransformed dual so that T = I reproduces it exactly.
   DenseMatrix<Real> A(n, n);
   DenseVector<Real> d(n);
   for (const auto i : make_range(n))
@@ -65,28 +60,16 @@ computeTransformedDualCoeffs(const Elem & elem,
         A(i, j) += JxW[qp] * phi[i][qp] * phi[j][qp];
     }
 
-  // Popp (2012) locally-quadratic transform Ntilde = T N: each mid-edge (second-order) node scales
-  // its own column by (1 - 2 alpha) and deposits alpha into each of its adjacent vertex rows, while
-  // vertex columns stay the identity. This preserves the partition of unity (sum_a Ntilde_a = 1),
-  // so the dual also reproduces constants (patch-test consistency).
-  // alpha = 1/5 is the single shared scalar Popp, Wohlmuth, Gee & Wall adopt for both TRI6 and
-  // QUAD8 in "Dual quadratic mortar finite element methods for 3D finite deformation contact," SIAM
-  // J. Sci. Comput. 34(4):B421-B446 (2012), Sec. 4.4.1. They deliberately use one shared alpha
-  // rather than the undistorted-element pair alpha = 1/12 (TRI6), 1/5 (QUAD8) of their ref. [20]: a
-  // mixed TRI6/QUAD8 mesh needs a single alpha for global displacement continuity, and
-  // finite-deformation element distortion makes the ref. [20] piecewise-linear-inclusion criterion
-  // unattainable in general. With alpha = 1/5 the transformed diagonal dtilde is strictly positive
-  // under full-face integration (QUAD8 -> 1/5, 4/5; TRI6 -> 1/15, 1/10); do not change it without
-  // re-deriving that positivity guarantee.
+  // Locally-quadratic transform Ntilde = T N preserves the partition of unity, so the dual
+  // reproduces constants (patch consistency). alpha = 1/5 (Popp et al., SIAM J. Sci. Comput.
+  // 34(4):B421-B446, 2012, Sec. 4.4.1) keeps the transformed diagonal positive on a full face
+  // (QUAD8 -> 1/5, 4/5; TRI6 -> 1/15, 1/10); do not change it without re-deriving that positivity.
   const Real alpha = 1.0 / 5.0;
   DenseMatrix<Real> T(n, n);
   for (const auto i : make_range(n))
     T(i, i) = 1.0;
-  // Vertex nodes occupy the local indices [0, n_vertices()); the second-order (mid-edge) nodes
-  // follow at [n_vertices(), n_nodes()). This ordering is the classifier: for TRI6/QUAD8
-  // n_second_order_adjacent_vertices() returns 2 for every node (it cannot flag vertices), and
-  // second_order_adjacent_vertex(m, .) is only valid for m >= n_vertices(), so the vertex rows
-  // are left as the identity and only the trailing mid-edge columns are transformed.
+  // Mid-edge nodes are the trailing indices [n_vertices(), n_nodes()). Each scales its own column
+  // by (1 - 2 alpha) and adds alpha in its adjacent vertex rows; vertex columns stay identity.
   const unsigned int n_vertices = elem.n_vertices();
   for (const auto m : make_range(n_vertices, n))
   {
@@ -95,16 +78,14 @@ computeTransformedDualCoeffs(const Elem & elem,
       T(elem.second_order_adjacent_vertex(m, v), m) += alpha;
   }
 
-  // dtilde = T d. With alpha = 1/5 this is strictly positive for TRI6/QUAD8 when the trace shapes
-  // are integrated over the full face; partial contact and correct_edge_dropping integrate only the
-  // covered sub-segments, where the positivity guarantee does not hold.
+  // dtilde = T d (strictly positive on a full face; partial or edge-dropped coverage integrates
+  // only covered sub-segments, where positivity is not guaranteed).
   DenseVector<Real> dtilde(n);
   T.vector_mult(dtilde, d);
 
-  // dual_coeff = A^-1 T^-1 diag(dtilde), solved one column at a time (mirroring libMesh's
-  // untransformed dual path; A is SPD). Column j of T^-1 diag(dtilde) is dtilde(j) * (T^-1 e_j).
-  // The vector_mult above must precede the lu_solve, which factorizes T in place; T and A are each
-  // factorized on the first solve and reused for the remaining columns.
+  // dual_coeff = A^-1 T^-1 diag(dtilde), one column at a time: column j is dtilde(j) * (T^-1 e_j),
+  // back-solved through A (SPD). lu_solve/cholesky_solve factorize T and A in place on the first
+  // column and reuse them; dtilde is formed above before lu_solve factorizes T.
   dual_coeff.resize(n, n);
   DenseVector<Real> unit(n), tinv_col(n), coeffcol(n);
   for (const auto j : make_range(n))

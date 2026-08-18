@@ -34,11 +34,10 @@ namespace
 // solves inside computeTransformedDualCoeffs (~1e-13 for these 6x6/8x8 systems).
 const Real tol = 1.0e-9;
 
-// Verify the Popp et al. (2012) transformed dual on a single second-order face type: the
-// transformed diagonal dtilde is the expected strictly positive value per node, the dual reproduces
-// constants (partition of unity), and it is biorthogonal to the transformed primal basis Ntilde = T
-// N. The standard (untransformed) diagonal at a vertex node is passed in only to document the
-// non-positive value the transform repairs.
+// Verify the transformed dual on a single second-order face type: the transformed diagonal dtilde
+// is the expected strictly positive value per node, the dual reproduces constants (partition of
+// unity), and it is biorthogonal to the transformed primal basis Ntilde = T N. The standard
+// (untransformed) vertex diagonal is passed in only to document the value the transform repairs.
 void
 checkTransformedDual(const ElemType type,
                      const Real vertex_dtilde,
@@ -117,9 +116,8 @@ checkTransformedDual(const ElemType type,
 
   // U3 (GATE-1): biorthogonality against the transformed primal basis Ntilde = T N. Rebuild T here
   // independently of the helper and assert M(k, j) = integral(Ntilde_k dual_phi_j) == delta_kj
-  // dtilde_j numerically, rather than trusting a written index convention.
-  // alpha = 1/5 must match the value hard-coded in computeTransformedDualCoeffs
-  // (Popp et al., SIAM J. Sci. Comput. 34(4):B421-B446 (2012)).
+  // dtilde_j numerically, rather than trusting a written index convention. alpha = 1/5 must match
+  // the value hard-coded in computeTransformedDualCoeffs.
   const Real alpha = 1.0 / 5.0;
   DenseMatrix<Real> T(n, n);
   for (const auto a : make_range(n))

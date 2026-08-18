@@ -1,27 +1,18 @@
 # Shared setup for the 3D uniform-compression mortar-contact patch test on quadratic
-# secondary faces, included by transformed-dual-patch-3d.i (SMP / direct solve) and
-# transformed-dual-vcp-3d.i (VariableCondensationPreconditioner). Those two inputs
-# differ only in their [Preconditioning] and [Executioner] blocks; everything else --
-# mesh, variables, physics, contact, and postprocessors -- lives here.
+# secondary faces, included by transformed-dual-vcp-3d.i; the mesh, variables, physics,
+# contact, and postprocessors live here and the wrapper adds the preconditioner and
+# executioner.
 #
-# Two elastic blocks share a node-conforming mortar interface produced by
-# BreakMeshByBlockGenerator (a single grid split at x = 0 into blocks 1 and 2,
-# then separated so the two coincident faces Block1_Block2 / Block2_Block1 form
-# the mortar surfaces). The left block is pushed uniformly in +x against the
-# fixed right block, producing a spatially constant contact pressure. The
-# Lagrange multiplier uses the locally quadratic transformed dual basis of Popp
-# et al. (2012), which is applied automatically for dual mortar (use_dual = true)
-# on a second-order LM variable. The transform restores a positive-diagonal
-# dual basis on the quadratic secondary trace so the constant contact pressure is
-# reproduced exactly (max, min, and average of normal_lm all equal).
+# Two elastic blocks share a node-conforming mortar interface (BreakMeshByBlockGenerator
+# splits a single grid at x = 0). The left block is pushed uniformly in +x against the fixed
+# right block, giving a spatially constant contact pressure that the transformed dual basis
+# (applied automatically for dual mortar on a second-order LM) reproduces exactly -- max,
+# min, and average of normal_lm agree.
 #
-# The base mesh is first order and promoted with ElementOrderConversionGenerator
-# using SECOND_ORDER_NONFULL, i.e. libMesh all_second_order(false):
-#   HEX8 -> HEX20 (QUAD8 faces),  TET4 -> TET10 (TRI6 faces).
-# The tests spec drives both element families from transformed-dual-patch-3d.i via
-# cli_args (Mesh/gen/elem_type). Do NOT request the full second-order promotion
-# here: for hexes that yields HEX27 (QUAD9 faces), and QUAD9 is identity under the
-# transform.
+# The mesh is promoted with ElementOrderConversionGenerator using SECOND_ORDER_NONFULL
+# (all_second_order(false)): HEX8 -> HEX20 (QUAD8 faces), TET4 -> TET10 (TRI6 faces). Do
+# NOT use full promotion: hexes then become HEX27 (QUAD9 faces), which is identity under
+# the transform.
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
