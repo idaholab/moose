@@ -7,7 +7,7 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2026.06.16
+    version: 2026.08.12
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
@@ -112,7 +112,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.07.30
+    version: 2026.08.12
     conda: conda/moose-dev
     templates:
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml

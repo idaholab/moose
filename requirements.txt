@@ -25,6 +25,7 @@ mako
 matplotlib
 mock
 numpy
+nvidia-ml-py # not in conda moose-tools; used with gpu testing
 packaging
 pandas
 paramiko
