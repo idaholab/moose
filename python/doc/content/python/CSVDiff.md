@@ -56,7 +56,7 @@ Always specify the two files you wish to perform a differentiation on, before an
 | `--comparison-file or -c` | *comparison file* | Use specified comparison file while performing differentiations |
 | `--ignore-fields` | *str* | A list of space separated fields to ignore when performing differentiations |
 | `--diff-fields` | *str* | A list of space separated fields to include when performing differentiations |
-| `--abs-zero` | *str float* | A scientific notation or float value representing zero (the floor). Any values lower than this amount will be considered zero. (default: 1e-11) |
+| `--abs-zero` | *str float* | A scientific notation or float value representing zero (the floor). Any values lower than this amount will be considered zero. (default: 1e-10) |
 | `--relative-tolerance` | *str float* | A float or scientific notation value representing an acceptable degree of tolerance between two opposing values. Any float comparison which falls within this tolerance will be considered the same number. (default 5.5e-6) |
 | `--custom-columns` | *str* | Space separated list of custom field IDs to compare |
 | `--custom-abs-zero` | *str float* | Space separated list of scientific notations or floats for absolute zero, corresponding to the values in --custom-columns |
@@ -76,7 +76,7 @@ a comparison file from our csv file, and redirect the output to a file named `a.
 > cat a.cmp
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 0 @ t0
 
-GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
     x                    # min: 0.000e+00 @ t0          max: 0.000e+00 @ t0
 ```
 
@@ -91,14 +91,14 @@ file. To adjust only that field's tolerance values, we can add a parameter direc
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 0 @ t0
 
-GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
     x relative 5.5e-06   # min: 0.000e+00 @ t0          max: 0.000e+00 @ t0
 ```
 
 The above change does nothing, as the relative error value we added is the same as the global relative error value. You can also add both relative and floor tolerances to this line. As well as comments and other logical statements:
 
 ```
-GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
     # loosen tolerances for x
     x floor 1e-8 relative 2e-04
 
@@ -154,7 +154,7 @@ Loosen the error tolerances for 'y':
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
 
-GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
     y relative 5.501e-06 # min: 0.000e+00 @ t0          max: 1.000e-06 @ t1
     x                    # min: 0.000e+00 @ t0          max: 1.000e+00 @ t1
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
@@ -165,7 +165,7 @@ Raise the floor tolerance:
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
 
-GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
     y floor 1e-5         # min: 0.000e+00 @ t0          max: 1.000e-06 @ t1
     x                    # min: 0.000e+00 @ t0          max: 1.000e+00 @ t1
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
@@ -176,7 +176,7 @@ Ignore field 'y' by including a not '!' statement:
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
 
-GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
     !y                   # min: 0.000e+00 @ t0          max: 1.000e-06 @ t1
     x                    # min: 0.000e+00 @ t0          max: 1.000e+00 @ t1
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
@@ -187,7 +187,7 @@ Removing the offending field from the comparison file:
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
 
-GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
     x                    # min: 0.000e+00 @ t0          max: 1.000e+00 @ t1
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
 ```

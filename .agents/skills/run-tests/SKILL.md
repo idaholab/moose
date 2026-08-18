@@ -63,9 +63,8 @@ than assuming.
   you must still supply a matching `override_abs_zero` entry for it.
 - The effective default `rel_err`/`abs_zero` for *non-overridden* columns comes from the Tester's
   own `FileTester.validParams()` defaults (`rel_err=5.5e-6`, `abs_zero=1e-10`), which are always
-  passed explicitly to `csvdiff.py` — so `csvdiff.py`'s own argparse defaults (`5.5e-6`/`1e-11`)
-  never actually apply inside a MOOSE test run. If an `override_abs_zero` entry is meant to be a
-  no-op (just satisfying the length requirement), match `1e-10`, not `1e-11`.
+  passed explicitly to `csvdiff.py` (these match `csvdiff.py`'s own argparse defaults, which only
+  matter when it's run standalone outside the TestHarness).
 - `csvdiff.py` reports only the *first* mismatching row per column, then stops — it does not report
   the true worst-case relative diff over the run. To size a tolerance correctly, replicate its
   abs_zero/rel_diff logic over the full column yourself rather than trusting the reported value as
