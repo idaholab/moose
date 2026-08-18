@@ -66,12 +66,37 @@ range are handled:
 
 ## Example
 
-The following test model maps the two inputs `[a, b]` to two profiles at coordinates `[0, 1, 2]`:
+The following TorchScript model maps the two inputs `[a, b]` to two profiles at coordinates
+`[0, 1, 2]` and can be saved to `two_profiles.pt` for use with this material:
 
-!listing test/tests/functormaterials/torchscript_profile_functor_material/generate_model.py
-         language=python
+```python
+import torch
+from torch import nn
 
-For the input `[10, 5]`, the model returns
+
+class TwoProfileModel(nn.Module):
+    def forward(self, x):
+        # x is expected to have shape [1, 2] containing [a, b]
+        a = x[0, 0]
+        b = x[0, 1]
+
+        stations = torch.tensor([0.0, 1.0, 2.0], dtype=x.dtype, device=x.device)
+
+        # Given inputs [a, b], produce
+        # [[a, a + 2, a + 4],
+        #  [b, b - 1, b - 2]].
+        profile_a = a + 2.0 * stations
+        profile_b = b - 1.0 * stations
+
+        return torch.stack((profile_a, profile_b), dim=0)
+
+
+model = TwoProfileModel()
+scripted_model = torch.jit.script(model)
+scripted_model.save("two_profiles.pt")
+```
+
+For the input `[10, 5]`, this model returns
 
 !equation
 \begin{bmatrix}
