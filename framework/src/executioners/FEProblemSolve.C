@@ -211,12 +211,12 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     mooseDeprecated("line_search = '",
                     line_search_name,
                     "' is deprecated. Use a [LineSearch] block with type = "
-                    "PetscContactLineSearch or PetscProjectSolutionOntoBounds instead.");
+                    "NodeFaceContactLineSearch or PetscProjectSolutionOntoBounds instead.");
 
     std::shared_ptr<LineSearch> line_search;
     if (line_search_name == "contact")
     {
-      InputParameters ls_params = _app.getFactory().getValidParams("PetscContactLineSearch");
+      InputParameters ls_params = _app.getFactory().getValidParams("NodeFaceContactLineSearch");
 
       bool affect_ltol = _pars.isParamValid("contact_line_search_ltol");
       ls_params.set<bool>("affect_ltol") = affect_ltol;
@@ -229,7 +229,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
       ls_params.set<FEProblem *>("_fe_problem") = dynamic_cast<FEProblem *>(&_problem);
 
       line_search = _app.getFactory().create<LineSearch>(
-          "PetscContactLineSearch", "contact_line_search", ls_params);
+          "NodeFaceContactLineSearch", "contact_line_search", ls_params);
     }
     else // "project"
     {

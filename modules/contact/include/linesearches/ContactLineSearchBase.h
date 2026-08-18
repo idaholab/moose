@@ -12,29 +12,29 @@
 #include "LineSearch.h"
 #include "MooseEnum.h"
 
+#include "libmesh/libmesh_common.h"
+#include "libmesh/petsc_macro.h"
+#include "libmesh/petsc_nonlinear_solver.h"
+#include <petscsnes.h>
+
+using namespace libMesh;
+
 class FEProblem;
 
 /**
- * This class implements a custom line search for use with
- * mechanical contact. The line search is not fancy. It takes two parameters, set in the MOOSE
- * Executioner block: `contact_line_search_ltol` and `contact_line_search_allowed_lambda_cuts`. The
- * allowed_lambda_cuts parameter specifies the number of times the line search is allowed to cut
- * lambda. If allowed to be cut, lambda will be reduced by half, and a new residual will be
- * evaluated. If the residual is smaller with a smaller lambda, then cuts will continue until
- * reaching allowed_lambda_cuts. If the residual is larger with a smaller lambda, then the line
- * search is curtailed and the smaller residual is used. It's recommended that allowed_lambda_cuts
- * be <= 3, with smaller values being used for smaller contact problems. This is to allow necessary
- * residual increases when the transient problem requires significant changes in the contact state.
+ * Shared infrastructure for the PETSc-based contact line searches (node-face and mortar):
+ * creation/configuration of a secondary backing SNESLineSearch, and the optional linear-tolerance
+ * loosening applied while the contact set is changing.
  *
  * When the contact set is changing, the user may optionally use a looser linear tolerance set by
- * the `contact_line_search_ltol` parameter. Then when the contact set is changing during the
- * beginning of the Newton solve, unnecessary computational expense is avoided. Then when the
- * contact set is resolved late in the Newton solve, the linear tolerance will return to the finer
- * tolerance set through the traditional `l_tol` parameter.
+ * the `contact_ltol` parameter. Then when the contact set is changing during the beginning of the
+ * Newton solve, unnecessary computational expense is avoided. Then when the contact set is
+ * resolved late in the Newton solve, the linear tolerance will return to the finer tolerance set
+ * through the traditional `l_tol` parameter.
  *
- * The `contact_line_search_backing` parameter (`backing_line_search` internally) selects the
- * standard PETSc SNES line search type (`basic`, `bt`, `l2`, or `cp`) that a subclass may use as
- * the backing algorithm for a constraint-set-aware wrapper.
+ * The `backing_line_search` parameter selects the standard PETSc SNES line search type (`basic`,
+ * `bt`, `l2`, or `cp`) a subclass uses as the backing algorithm for its constraint-set-aware
+ * wrapper (see setupBackingLineSearch()).
  */
 class ContactLineSearchBase : public LineSearch
 {
@@ -42,38 +42,22 @@ public:
   static InputParameters validParams();
 
   ContactLineSearchBase(const InputParameters & parameters);
-
-  /**
-   * Method for printing the contact information
-   */
-  void printContactInfo(const std::set<dof_id_type> & contact_set);
-
-  /**
-   * Unionize sets from different constraints
-   */
-  void insertSet(const std::set<dof_id_type> & mech_set);
-
-  /**
-   * Reset the line search data
-   */
-  virtual void reset();
+  ~ContactLineSearchBase();
 
 protected:
-  /// The current contact set
-  std::set<dof_id_type> _current_contact_state;
-  /// The old contact set
-  std::set<dof_id_type> _old_contact_state;
+  /**
+   * Create and configure the secondary backing SNESLineSearch on first use, and rebind it to the
+   * solver's current SNES on every call. It is a standalone SNESLineSearch object (not another
+   * shell) set to the user-selected type with its own "contact_backing_" PETSc options prefix, so
+   * users can tune it with native PETSc options. The rebinding is necessary because the solver's
+   * SNES may be destroyed and recreated between solves.
+   */
+  void setupBackingLineSearch();
 
-  /// the linear tolerance set by the user in the input file
-  Real _user_ksp_rtol;
-  /// Whether the user linear tolerance has been set yet in this object
-  bool _user_ksp_rtol_set;
+  PetscNonlinearSolver<Real> * _solver;
 
-  /// The multiplier of the newton step
-  Real _contact_lambda;
-
-  /// How many times the linsearch is allowed to cut lambda
-  unsigned _allowed_lambda_cuts;
+  /// The secondary backing PETSc line search; null until setupBackingLineSearch() is first called
+  SNESLineSearch _backing_petsc_line_search;
 
   /// What the linear tolerance should be while the contact state is changing
   Real _contact_ltol;
