@@ -360,7 +360,6 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
 
-        // let's do something crazy. cast to operator first
         auto blf = _blfs.Get(test_var_name);
         blf->FormLinearSystem(_ess_tdof_lists.at(j),
                               *_var_ess_constraints.at(j),
@@ -381,6 +380,10 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
           // we'd like to see in our lf
           mfem::Vector aux_rhs_copy(aux_rhs);
 
+          // give them separate aux vectors
+          mfem::Vector nlf_rhs;
+          mfem::Vector nlf_x;
+
           // see comments in formsystemoperator
           mfem::Operator* oper; // dummy operator to pass downwards
           mfem::Operator* nlf = _nlfs.Get(test_var_name); // implicit cast
@@ -389,10 +392,13 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
             *_var_ess_constraints.at(j),
             aux_rhs_copy,
             oper,
-            aux_x,
-            aux_rhs,
+            nlf_x,
+            nlf_rhs,
             true
           );
+
+          aux_rhs = nlf_rhs; // += messed everything up
+          aux_x   = nlf_x;   // I think all the contributions are in now. Again, += was wrong
 
           delete oper;
         }
@@ -505,6 +511,16 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
       auto nlf = _nlfs.Get(test_var_name);
       mfem::HypreParMatrix * nlf_jac =
           dynamic_cast<mfem::HypreParMatrix *>(&nlf->GetGradient(update_vector.GetBlock(i)));
+
+      // I admit, this isn't nice. The issue we are trying to address here is the _jacobian_blocks
+      // operator erroneously having 2s on the diagonal, when it should be 1s. The source of the
+      // problem is a particular block having a blf and an nlf. This means both will contribute
+      // 1s to diagonal entries that are marked by ess_tdofs. When we do the ParAdd below, this
+      // means that the essential dofs have the wrong values, causing a subtle error in the final
+      // jacobian operator returned. The bool check determines if this variable has a blf and nlf
+      if (_blfs.Has(test_var_name))
+        nlf_jac->EliminateBC(_ess_tdof_lists.at(i), DIAG_ZERO);
+
       mooseAssert(nlf_jac,
                   "Jacobian contribution of nonlinear form associated with " + test_var_name +
                       " is not castable into a HypreParMatrix");
