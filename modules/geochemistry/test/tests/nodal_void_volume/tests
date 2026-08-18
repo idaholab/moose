@@ -46,4 +46,32 @@
     requirement = 'Geochemistry shall be able to compute nodal void volume, when the mesh is adapting and when using multiple threads'
     design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
   []
+  [nnv_block]
+    type = CSVDiff
+    input = nodal_void_volume_block.i
+    csvdiff = nodal_void_volume_block_out.csv
+    issues = '#15690 #33427'
+    requirement = 'Geochemistry shall compute nodal void volume over the elements of its blocks only when it is block restricted, so that a node on the boundary of those blocks is given its share of the restricted block alone'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
+  []
+  [nnv_block_threads]
+    type = CSVDiff
+    input = nodal_void_volume_block.i
+    csvdiff = nodal_void_volume_block_out.csv
+    min_threads = 3
+    max_threads = 3
+    prereq = nnv_block
+    issues = '#15690 #33427'
+    requirement = 'Geochemistry shall compute a block-restricted nodal void volume when using multiple threads'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
+  []
+  [except_block]
+    type = RunException
+    input = except_block.i
+    expect_err = 'block restricted and the node lies outside its blocks'
+    match_literal = true
+    issues = '#15690 #33427'
+    requirement = 'An error will be thrown when an object without a block restriction queries a block-restricted nodal void volume at a node outside its blocks'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
+  []
 []
