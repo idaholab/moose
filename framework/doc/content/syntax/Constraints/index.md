@@ -18,6 +18,8 @@ The mortar system in MOOSE uses a segment-based approach for evaluation of morta
 
 One has the option to use Petrov-Galerkin interpolation for the Lagrange multiplier variable. This is typically useful for mechanical contact problems (see [Petrov-Galerkin_approach_for_Lagrange_multipliers.md]).
 
+For dual mortar on higher-order secondary faces (TRI6/QUAD8), one has the option to use the locally quadratic transformed dual basis of [!cite](popp2012dual), which restores a well-posed positive-diagonal dual basis on quadratic faces (see [Transformed_dual_basis_for_higher_order_mortar.md]).
+
 ### Overview
 
 An excellent overview of the conservative mortar constraint implementation in MOOSE for 2D problems is given in

@@ -30,6 +30,11 @@ For 3D mortar contact, the triangulation of clipped overlap polygons can be sele
 `triangulation` parameter. The `triangulate_triangles` parameter controls whether polygons that
 are already triangles are left intact or centroid-subdivided again.
 
+For dual mortar contact on higher-order meshes (TET10/HEX20, i.e. TRI6/QUAD8 secondary faces),
+setting `use_dual = true` automatically applies the locally quadratic transformed dual basis of
+[!cite](popp2012dual), which restores a well-posed dual basis on quadratic faces (see
+[Transformed_dual_basis_for_higher_order_mortar.md]).
+
 ## Constructed Objects
 
 The primary task performed by this action is creating the Constraint classes that perform the contact enforcement.
