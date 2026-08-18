@@ -90,23 +90,22 @@
                   'rises to the fold, turns, and descends, with one row for every allowed '
                   'continuation step.'
   []
-  [transient_cubic]
+  [transient_path]
     type = 'CSVDiff'
-    input = 'transient_cubic.i'
-    csvdiff = 'transient_cubic_out_path.csv transient_cubic_out.csv'
+    input = 'transient_path.i'
+    csvdiff = 'transient_path_out_path.csv transient_path_out.csv'
     capabilities = 'petsc>=3.22.0'
-    # This is the snap through of 'cubic_snapthrough' above driven a step at a time instead of in
-    # one solve. Both limit points fall INSIDE the first step and that is the point of the leaf: the
-    # step targets a total load factor of 0.5, which the path reaches only on the far side of the
-    # snap, so a full path with two turning points is traced within one time step. The second step
-    # carries the load factor from 0.5 to 1 along the recovered branch and lands on the same
-    # equilibrium point the steady leaf ends at. 'lambda_min' is the step local floor, so the
-    # trough of -0.385 sits at -0.77 of the first step's own increment and -1 is the guard below it.
+    # This is the snap through of 'cubic_snapthrough' above stepped along instead of traced in one
+    # solve: every time step advances the trace by a single continuation increment of radius
+    # step_size * dt and commits the state it reaches. The committed load factor rises to the peak
+    # of 0.385, falls through the snap to the trough of -0.385, and recovers past 1, parting from
+    # the time at the first turn of the path while the solution advances monotonically, so the
+    # trace holds committed equilibrium states on every branch of the path.
     #
     # The checkpoint of a step is written before the load increment of that step is committed, so a
     # recovered run has to resume the path from the load factor the committed steps carry rather
-    # than from zero. Two steps of 0.5 put the harness half transient exactly on the step boundary
-    # in the middle of the path, which is what makes this leaf cover that.
+    # than from zero. The harness half transient cuts the 25 steps mid descent, so what the
+    # recovered run resumes is a trace already parted from the time.
     recover = true
     # A rejected step leaves the increments it already recorded in the history, which is never
     # reset, so a step the restep harness retries doubles the rows the path gold holds.
@@ -115,109 +114,53 @@
     # the path is traced one increment at a time, so linear solver differences accumulate along it
     abs_zero = 1e-8
     rel_err = 1e-4
-    requirement = 'The system shall trace a complete arc-length continuation within every step of a '
-                  'transient run, taking the load increment of a step from its time step size so '
-                  'that the load factor a step ends at is the time it ends at, carrying the '
-                  'equilibrium path of a snap through problem through both of its limit points '
-                  'inside a single time step, reporting the load parameter as the total that the '
-                  'committed steps and the step being traced add up to so that it stays continuous '
-                  'across a step boundary, and resuming that path at a step boundary from a '
-                  'recovery file.'
+    requirement = 'The system shall advance an arc-length trace by a single continuation increment '
+                  'per step of a transient run, committing the equilibrium state of every '
+                  'increment so that history accumulates along the path, carrying the committed '
+                  'load factor through both limit points of a snap-through problem, up to the '
+                  'peak, down through the snap, and back up the recovered branch, with the load '
+                  'factor free to part from the time, and shall resume that trace from a recovery '
+                  'file written mid descent.'
   []
-  [transient_cutback]
-    type = 'RunApp'
-    input = 'transient_cutback.i'
-    capabilities = 'petsc>=3.22.0'
-    # The load path of this input is a straight line on purpose, and deliberately NOT the snap
-    # through the leaves above trace. The arc length a transient step covers is
-    # sqrt((norm(du/dlambda) * dt)^2 + psi_squared), so cutting dt back shortens it only where the
-    # solution term dominates. Across a limit point the solution excursion is fixed by the shape of
-    # the path and does not shrink with dt at all, so a step whose target load factor lies past a
-    # limit point costs about the same number of continuation steps however far it is cut back. A
-    # cutback leaf written on the snap through would halve dt down to dtmin and die there instead of
-    # completing, so the cutback is exercised on a path a smaller increment really does make cheaper.
-    #
-    # u is exactly 10 * lambda at all five nodes, which makes the arc length of a step
-    # sqrt((10 * sqrt(5) * dt)^2 + 1) and the continuation spend ceil(that / step_size) steps: 23 at
-    # dt = 0.5 and 12 at dt = 0.25. max_continuation_steps = 17 sits between them, so the attempt at
-    # the full increment runs out of continuation steps and the halved retry does not.
-    #
-    # The matched sequence is the whole assertion: the full increment fails, IterationAdaptiveDT
-    # reports the cutback, the retried step carries half the load increment, the following step
-    # opens at the load factor the retried one committed, and the load parameter the run ends at is
-    # the end time.
-    expect_out = 'Time Step 1, time = 0\.5, dt = 0\.5[\s\S]*'
-                 'Solve Did NOT Converge[\s\S]*'
-                 'Solve failed, cutting timestep\.[\s\S]*'
-                 'Time Step 1, time = 0\.25, dt = 0\.25[\s\S]*'
-                 'Time Step 2, time = 0\.5, dt = 0\.25[\s\S]*'
-                 'Arc length increment 0, lambda = 0\.25[\s\S]*'
-                 '5\.000000e-01\s*\|\s*5\.000000e-01'
-    # the cutback happens in the first step, which the recovery half transient runs before the
-    # checkpoint, so the console of a recovered run does not carry the sequence matched above
-    recover = false
-    # the restep harness retries a step at the same time step size, which reorders that sequence
-    restep = false
-    max_parallel = 1
-    requirement = 'The system shall report a transient step whose arc-length continuation does not '
-                  'reach the end of its load increment within the allowed number of continuation '
-                  'steps as an unconverged step, so that the TimeStepper cuts the step back, the '
-                  'retried step applies half the load increment, and the run completes at a total '
-                  'load factor equal to its end time.'
-  []
-  [transient_softening]
+  [transient_continuation_control]
     type = 'CSVDiff'
-    input = 'transient_softening.i'
-    # The snap through of 'transient_cubic' above driven PAST both of its limit points instead of
-    # landing back on the rising branch within one step. 'end_on_max_continuation_steps' gives a
-    # transient step a second way to end: the step budget runs out and the step commits the part of
-    # its load increment the path actually traced rather than the whole of it. Past the peak that
-    # part is negative, so the load factor falls while the time keeps advancing, and the two stop
-    # being equal. That decoupling is the feature under test, not the tracing.
-    #
-    # 'dt' of 0.3 is what places the limit points on the inside of steps rather than at their ends:
-    # the peak of the path sits at a load parameter of 0.385, so the first step reaches 0.3 on the
-    # rising branch and ends the first way, and the second step cannot reach 0.6 at all and ends on
-    # its budget somewhere down the descending branch. 'lambda_min' is the step local floor and has
-    # to be negative for the descending branch to be reachable at all; -2 sits below the roughly
-    # -1.5 the second step is expected to reach.
-    #
-    # 'lambda_max' is deliberately left at its default of 1, which a transient run requires, because
-    # a step local load parameter spans the increment of one step there.
-    csvdiff = 'transient_softening_out_path.csv transient_softening_out.csv'
+    input = 'transient_path.i'
+    cli_args = 'Executioner/dt=0.1 '
+               'Executioner/num_steps=8 '
+               'Functions/switch_fn/type=ParsedFunction '
+               '"Functions/switch_fn/expression=t>0.29" '
+               'Controls/switch/type=BoolFunctionControl '
+               '"Controls/switch/parameter=*/*/use_continuation" '
+               'Controls/switch/function=switch_fn '
+               '"Controls/switch/execute_on=initial timestep_begin" '
+               'Outputs/file_base=transient_continuation_control_out'
+    csvdiff = 'transient_continuation_control_out.csv transient_continuation_control_out_path.csv'
     capabilities = 'petsc>=3.22.0'
-    # The half transient checkpoint of a six step run is written at the end of the third step, which
-    # is one of the two steps that end on a spent budget, so what a recovered run resumes from is a
-    # load increment already narrowed to the part of it the path traced. That is the state this
-    # setting exists to cover here.
-    recover = true
-    # A rejected step leaves the increments it already recorded in the history, which is never
-    # reset, so a step the restep harness retries doubles the rows the path gold holds.
-    restep = false
+    # The rising branch with the first steps solved as ordinary prescribed ramps: a
+    # BoolFunctionControl writes the controllable 'use_continuation' before every step, so any
+    # trigger a Control can express -- a function of time here, a postprocessor threshold in a
+    # custom control -- decides which steps are continued. The first three steps are single Newton
+    # solves whose load factor equals the time, and the continuation opens at the committed factor
+    # of 0.3 and steps along the path from there, with the load factor parting from the time on
+    # the first continued step.
+    recover = false
     max_parallel = 1
-    # the path is traced one increment at a time, so linear solver differences accumulate along it
-    abs_zero = 1e-8
-    rel_err = 1e-4
-    requirement = 'The system shall trace an arc-length equilibrium path through both limit points '
-                  'of a snap-through problem across committed transient steps, ending the '
-                  'continuation of a step that has spent its step budget by committing the part of '
-                  'that step load increment the path traced instead of the whole of it, so that the '
-                  'load parameter falls below the value the step started from and stops equalling '
-                  'the time while the time keeps advancing, holding every committed state on the '
-                  'equilibrium curve and carrying the solution monotonically along the one-shot '
-                  'path, and shall resume that path from a recovery file written at such a step.'
+    requirement = 'The system shall expose whether a transient step runs an arc-length '
+                  'continuation as a controllable parameter, so that a Controls object can switch '
+                  'the continuation on or off per step from a function or any other trigger, with '
+                  'the committed load factor carried across every switch.'
   []
-  [transient_softening_lambda_min_error]
+  [transient_steady_only_params_error]
     type = 'RunException'
-    input = 'transient_softening.i'
-    cli_args = 'Problem/lambda_min=0'
-    expect_err = "'lambda_min' has to be negative"
+    input = 'transient_path.i'
+    cli_args = 'Problem/lambda_min=-2'
+    expect_err = "belongs to a one-shot continuation alone"
     capabilities = 'petsc>=3.22.0'
     recover = false
-    requirement = 'The system shall report an error when an arc-length continuation is set up to '
-                  'end a transient step on a spent step budget with a load parameter floor that is '
-                  'not negative, which would hold every step at or above the load factor it started '
-                  'from and leave the descending branch that exit exists for impossible to trace.'
+    requirement = 'The system shall report an error when a transient arc-length run sets a '
+                  'continuation parameter that belongs to a one-shot path alone, because a '
+                  'transient run advances the trace by a single increment per time step and owns '
+                  'the step budget and the load parameter clamps such a parameter would set.'
   []
   [errors]
     requirement = 'The system shall report an error when an arc-length continuation problem is set '

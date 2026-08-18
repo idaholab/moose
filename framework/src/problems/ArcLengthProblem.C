@@ -26,6 +26,9 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/sparse_matrix.h"
 
+#include <cmath>
+#include <limits>
+
 using namespace libMesh;
 
 registerMooseObject("MooseApp", ArcLengthProblem);
@@ -49,31 +52,38 @@ ArcLengthProblem::validParams()
                            "respect to the solution. Put this name in the replacing parameter "
                            "'matrix_tags' of a deformation dependent, or follower, load object.");
   params.addRequiredRangeCheckedParam<Real>(
-      "step_size", "step_size > 0", "Arc length increment taken per continuation step.");
+      "step_size",
+      "step_size > 0",
+      "Arc length increment taken per continuation step, at every time step size. A TimeStepper "
+      "cutback shrinks the load span a transient step covers and leaves this turning radius "
+      "alone, because the solution excursion across a sharp turn of the path does not shrink "
+      "with the span.");
   params.addRangeCheckedParam<unsigned int>(
       "max_continuation_steps",
       100,
       "max_continuation_steps > 0",
-      "Maximum number of continuation steps. The solve fails when the "
-      "path does not reach 'lambda_max' within this many steps, which in "
-      "a transient run fails the time step and lets the TimeStepper cut "
-      "the load increment back and retry it. Set "
-      "'end_on_max_continuation_steps' to end the path there instead.");
+      "Maximum number of continuation steps of a one-shot path. A path that spends the whole "
+      "of this budget ends there and is reported as a converged solve, "
+      "which is what the default does. Set "
+      "'end_on_max_continuation_steps' to false to fail the solve there "
+      "instead. A transient run owns this: every time step advances the trace by a single "
+      "increment.");
   params.addParam<Real>("lambda_max",
                         1.0,
-                        "Load parameter the continuation stops at. This is the only criterion the "
-                        "solver ends a completed path with unless "
-                        "'end_on_max_continuation_steps' is set. A transient run traces the load "
-                        "increment of a single step with a load parameter spanning 0 to 1, so this "
-                        "has to be 1 there.");
+                        "Load parameter a one-shot continuation stops at. This is one of the two "
+                        "endings a completed path has, the other being the step budget of "
+                        "'max_continuation_steps', and it is the only one left when "
+                        "'end_on_max_continuation_steps' is set to false. A transient run owns "
+                        "this: end the run with the executioner, or with a Terminator watching "
+                        "the load parameter postprocessor.");
   params.addParam<Real>("lambda_min",
-                        0.0,
-                        "Lower clamp on the load parameter. A step that would take the load "
-                        "parameter below this value is truncated to it. This is not an exit "
-                        "criterion, so a path that descends to this value stays there until "
-                        "'max_continuation_steps' runs out. The clamp is on the parameter of the "
-                        "path being traced, so a transient run clamps how far a step may unload "
-                        "below the load factor it started from.");
+                        -1.0,
+                        "Lower clamp on the load parameter of a one-shot continuation. A "
+                        "continuation step that would take the load parameter below this value is "
+                        "truncated to it, which turns the path back the way it came rather than "
+                        "ending it, so this is a bound on where the path may go and never an exit "
+                        "criterion. A transient run owns this: a step loads or unloads at most "
+                        "its own increment scale, and the trace descends across steps.");
   params.addRangeCheckedParam<Real>("psi_squared",
                                     1.0,
                                     "psi_squared >= 0",
@@ -85,29 +95,45 @@ ArcLengthProblem::validParams()
                              "Scheme that corrects an iterate back onto the arc-length constraint "
                              "surface. 'exact' solves the quadratic constraint, 'normal' takes a "
                              "step orthogonal to the increment.");
+  params.addParam<TagName>(
+      "held_load_vector_tag",
+      "Name of a vector tag that holds the constant loads a transient continuation is run under, "
+      "such as a preload held while the tagged load is continued. Route each held load with "
+      "'extra_vector_tags', which leaves it in the residual it already contributes to and fills "
+      "this tag with a copy, and create the tag with 'extra_tag_vectors'. The dissipation "
+      "judgement of a descending step then accounts for the work the held loads do: without it, "
+      "unloading elastically under a held load reads as dissipative and a step that walks back "
+      "down an elastic branch is accepted as a descent along the path.");
+  params.addParam<bool>(
+      "use_continuation",
+      true,
+      "Whether a transient step runs a continuation. A step solved with this false is an ordinary "
+      "Newton solve with the whole of its load increment applied as a prescribed ramp along the "
+      "current direction of travel, so the load factor equals the time and one solve covers one "
+      "step. The parameter is controllable: a [Controls] object can switch the continuation on "
+      "or off per step from a function, a postprocessor, or any other trigger, with the committed "
+      "load factor carrying across every switch. This replaces the two-input pattern of ramping "
+      "a load with plain solves, writing a checkpoint, and restarting the continuation from it.");
+  params.declareControllable("use_continuation");
   params.addParam<bool>("end_on_max_continuation_steps",
-                        false,
-                        "Whether a continuation that spends the whole of "
+                        true,
+                        "Whether a one-shot continuation that spends the whole of "
                         "'max_continuation_steps' ends the path successfully instead of failing "
-                        "the solve, which is what the default does. Set this to trace a softening "
-                        "branch, where the load parameter falls monotonically past the peak and "
-                        "'lambda_max' is never reachable, so the step budget is the end of the "
-                        "path. A transient run ends the continuation of every step this way and "
-                        "commits the load increment of a step scaled by the step local load "
-                        "parameter its last converged increment reached, which is what lets the "
-                        "load factor fall below the one the step started from, so 'lambda_min' has "
-                        "to be negative there. The direction of travel is remembered across steps "
-                        "so that a path descending at the end of one step keeps descending in the "
-                        "next, which makes the time measure the load change a run has covered "
-                        "rather than the load factor it has reached. The exit is read off the "
-                        "count of increments a "
-                        "continuation traced, so it needs a single solve per path: a setup that "
-                        "solves the same path more than once carries that count past the budget "
-                        "and reports the solve as failed.");
+                        "the solve, which is what the default does. This is what traces a "
+                        "softening branch, where the load parameter falls monotonically past the "
+                        "peak and 'lambda_max' is never reachable, so the step budget is the end "
+                        "of the path. Set this to false to fail the solve on a spent budget "
+                        "instead, which leaves 'lambda_max' as the only ending a path has. The "
+                        "exit is read off the count of increments a continuation traced, so it "
+                        "needs a single solve per path: a setup that solves the same path more "
+                        "than once carries that count past the budget and reports the solve as "
+                        "failed. A transient run owns this: the internal budget of one increment "
+                        "per step is always a designed ending there.");
 
   params.addParamNamesToGroup("load_vector_tag load_matrix_tag", "Tagging");
-  params.addParamNamesToGroup("step_size max_continuation_steps lambda_max lambda_min psi_squared "
-                              "correction_type end_on_max_continuation_steps",
+  params.addParamNamesToGroup("step_size max_continuation_steps "
+                              "lambda_max lambda_min psi_squared correction_type "
+                              "end_on_max_continuation_steps use_continuation",
                               "Arc length continuation");
 
   return params;
@@ -118,10 +144,13 @@ ArcLengthProblem::ArcLengthProblem(const InputParameters & parameters)
 #if PETSC_RELEASE_GREATER_EQUALS(3, 22, 0)
     _correction_type(correctionType(getParam<MooseEnum>("correction_type"))),
     _end_on_max_continuation_steps(getParam<bool>("end_on_max_continuation_steps")),
+    _use_continuation(getParam<bool>("use_continuation")),
+    _retrace_handled(false),
     _increment(0),
     _ended_on_spent_budget(false),
     _checked_load_on_constrained_dofs(false),
     _step_lambda(0.0),
+    _nominal_dt(declareRestartableData<Real>("nominal_dt", 0.0)),
     _path_direction(declareRestartableData<int>("path_direction", 1)),
     _lambda_accum(declareRestartableData<Real>("lambda_accum", 0.0)),
     _step_load_increment(declareRestartableData<Real>("step_load_increment", 0.0)),
@@ -192,17 +221,23 @@ ArcLengthProblem::initialSetup()
 
   // SNESNEWTONAL takes its continuation settings from the options database only. The mapping is
   // done here, after the executioner has stored the options from the input, so that these win,
-  // and MOOSE applies them along with the rest on every solve.
+  // and MOOSE applies them along with the rest on every solve. A transient run owns the budget
+  // and the clamps: every step advances the trace by a single increment, whose load parameter
+  // spans the increment scale of that step alone, so the budget is one and the clamps are the
+  // symmetric span: a step loads or unloads at most its own increment scale, and the corrector
+  // is boxed against the runaway oscillation an open floor admits at a sharp turn of the path.
+  // The step size stored here is rewritten by onTimestepBegin with the radius of every attempt.
   auto & pairs = getPetscOptions().pairs;
   pairs.emplace_back("-snes_newtonal_step_size",
                      Moose::stringifyExact(getParam<Real>("step_size")));
-  pairs.emplace_back("-snes_newtonal_max_continuation_steps",
-                     Moose::stringify(getParam<unsigned int>("max_continuation_steps")));
+  pairs.emplace_back(
+      "-snes_newtonal_max_continuation_steps",
+      _transient ? "1" : Moose::stringify(getParam<unsigned int>("max_continuation_steps")));
   pairs.emplace_back("-snes_newtonal_psisq", Moose::stringifyExact(getParam<Real>("psi_squared")));
   pairs.emplace_back("-snes_newtonal_lambda_min",
-                     Moose::stringifyExact(getParam<Real>("lambda_min")));
+                     _transient ? "-1" : Moose::stringifyExact(getParam<Real>("lambda_min")));
   pairs.emplace_back("-snes_newtonal_lambda_max",
-                     Moose::stringifyExact(getParam<Real>("lambda_max")));
+                     _transient ? "1" : Moose::stringifyExact(getParam<Real>("lambda_max")));
   // The tangent load always comes from the callback below, never from a right hand side vector
   pairs.emplace_back("-snes_newtonal_scale_rhs", "false");
 }
@@ -235,21 +270,20 @@ ArcLengthProblem::checkProblemIntegrity()
                getParam<TagName>("load_vector_tag"),
                "' on the residual object that carries the load.");
 
-  if (_transient && getParam<Real>("lambda_max") != 1.0)
-    paramError("lambda_max",
-               "'lambda_max' has to be 1 in a transient run. A time step there traces the load "
-               "increment of that step alone, with a load parameter that spans the increment over "
-               "a range of 0 to 1, and the load increment is set by the time step size instead. "
-               "Control the load with the TimeStepper and the end_time.");
-
-  if (_transient && _end_on_max_continuation_steps && getParam<Real>("lambda_min") >= 0)
-    paramError("lambda_min",
-               "'lambda_min' has to be negative when 'end_on_max_continuation_steps' is set in a "
-               "transient run. The step local load parameter is what falls past the peak there, "
-               "and this clamp truncates a step that would take it below this value, so a floor at "
-               "or above zero holds every step at or above the load factor it started from and the "
-               "descending branch this setting is for cannot be traced. Set the floor to how far "
-               "below its starting load factor a single step is allowed to unload.");
+  // A transient run owns the budget and the clamps of its per-step increments, so a value from
+  // the input would be silently ignored and is refused instead
+  if (_transient)
+    for (const auto & name :
+         {"max_continuation_steps", "end_on_max_continuation_steps", "lambda_max", "lambda_min"})
+      if (isParamSetByUser(name))
+        paramError(name,
+                   "'",
+                   name,
+                   "' belongs to a one-shot continuation alone. A transient run advances the "
+                   "trace by a single increment per time step, so it owns the step budget and the "
+                   "load parameter clamps: control the radius with 'step_size' and the "
+                   "TimeStepper, and end the run with the executioner or a Terminator watching "
+                   "the load parameter postprocessor.");
 }
 
 PetscErrorCode
@@ -274,12 +308,26 @@ ArcLengthProblem::arcLengthUpdate(SNES snes, PetscInt /*step*/)
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
+bool
+ArcLengthProblem::inContinuation() const
+{
+  // 'use_continuation' is controllable and read through a reference, so a [Controls] object that
+  // flips it is obeyed by the next solve. A steady solve is one whole continuation and has no
+  // prescribed phase.
+  return !_transient || _use_continuation;
+}
+
 void
 ArcLengthProblem::initPetscOutputAndSomeSolverSettings()
 {
   // Creates the SNES and puts the MOOSE defaults, including the convergence test replaced below,
   // on it
   FEProblemBase::initPetscOutputAndSomeSolverSettings();
+
+  // A prescribed step keeps the solver MOOSE set up: an ordinary Newton solve, judged by the
+  // ordinary convergence test, at the load factor updateLoadParameter() prescribes
+  if (!inContinuation())
+    return;
 
   SNES snes = _arclength_nl->getSNES();
 
@@ -313,13 +361,38 @@ ArcLengthProblem::onTimestepBegin()
   if (!_transient)
     return;
 
-  // Taking the time step size as the magnitude of the load increment is what makes the load change
-  // a step covers the time it spans, so cutting a step back cuts its load increment back in the
-  // same proportion. The sign carries the direction of travel across the step boundary, which is
-  // where PETSc's own predictor, whose memory of it ends with the solve, does not reach.
+  // The radius of an increment is 'step_size' itself, at every time step size: a cutback shrinks
+  // the load span a step covers and leaves the turning radius alone, because the solution
+  // excursion across a sharp turn of the path is set by the shape of the path and does not shrink
+  // with the span, so a retry that shrank the radius with the span would confine the corrector
+  // exactly when the ladder needs its reach.
+
+  // The ceiling of the step local load parameter is the anchor of a step: 1, the end of the load
+  // increment, however far the step was cut back. The floor is a fixed span of physical load
+  // factor, sized against the nominal load increment scale of the input, which is the time step
+  // size of the first step: a floor fixed in step local units would shrink the physical span with
+  // every cutback, and the load drop of a sharp turn, which the shape of the path sets, would
+  // stop fitting inside a step exactly when the retry ladder needs it to, while no floor at all
+  // lets a corrector oscillation at such a turn run away by orders of magnitude. A thousand
+  // nominal increments of unloading span clears the transient dips a corrector makes rounding
+  // the sharpest turns, which reach far below what the step commits, and still catches an
+  // observed runaway dozens of times over. SNESNEWTONAL reads its settings from the options
+  // database, and the stored pairs reach that database once rather than once per solve, so the
+  // per-attempt value is written to the database directly.
+  if (_nominal_dt == 0.0)
+    _nominal_dt = _dt;
+  const Real floor = -std::max(1.0, 1000.0 * _nominal_dt / _dt);
+  LibmeshPetscCall(PetscOptionsSetValue(
+      LIBMESH_PETSC_NULLPTR, "-snes_newtonal_lambda_min", Moose::stringifyExact(floor).c_str()));
+
+  // The time step size is the scale of the load increment: the step local load parameter spans it
+  // over a range of 0 to 1, and the part of it the increment traverses is what the step commits.
+  // The sign carries the direction of travel across the step boundary, which is where PETSc's own
+  // predictor, whose memory of it ends with the solve, does not reach.
   _step_load_increment = _path_direction * _dt;
   _increment = 0;
   _ended_on_spent_budget = false;
+  _retrace_handled = false;
 }
 
 void
@@ -327,7 +400,10 @@ ArcLengthProblem::onTimestepEnd()
 {
   FEProblemBase::onTimestepEnd();
 
-  if (!_transient || !_ended_on_spent_budget)
+  if (!_transient)
+    return;
+
+  if (!_ended_on_spent_budget)
     return;
 
   // The path stopped where the budget ran out instead of at the end of the load increment of the
@@ -361,30 +437,135 @@ ArcLengthProblem::advanceState()
 bool
 ArcLengthProblem::solverSystemConverged(const unsigned int sys_num)
 {
-  if (FEProblemBase::solverSystemConverged(sys_num))
-    return true;
+  // A prescribed step is judged the ordinary way; the budget exit and the dissipation judgement
+  // belong to the continuation alone
+  return inContinuation() ? continuationConverged(sys_num)
+                          : FEProblemBase::solverSystemConverged(sys_num);
+}
 
-  if (!_end_on_max_continuation_steps)
+bool
+ArcLengthProblem::continuationConverged(const unsigned int sys_num)
+{
+  bool converged = FEProblemBase::solverSystemConverged(sys_num);
+
+  // The budget is a designed ending of a transient step always, its internal budget being the one
+  // increment every step advances by, and of a one-shot path while the input says so
+  if (!converged && (_transient || _end_on_max_continuation_steps))
+  {
+    // One publication happens at the top of every increment the path starts, so a budget spent in
+    // full leaves _increment at exactly the budget, and a corrector that fails earlier stops the
+    // count short of it. A corrector failing in the last permitted increment leaves the same
+    // count as a spent budget; the iteration count below is what tells the two apart.
+    //
+    // libMesh destroys the SNES at the end of a solve and asking for it again would build a new
+    // one, so the reason comes from the cache libMesh keeps of it.
+    auto & solver = static_cast<PetscNonlinearSolver<Number> &>(*_arclength_nl->nonlinearSolver());
+    const unsigned int budget = _transient ? 1 : getParam<unsigned int>("max_continuation_steps");
+    if (_increment == budget && solver.get_converged_reason() == SNES_DIVERGED_MAX_IT)
+    {
+      // A corrector that burns out its iterations inside the last permitted increment ends with
+      // the same reason and the same increment count as a spent budget, and the nonlinear
+      // iteration count at the exit is what tells them apart: SNESSolve_NEWTONAL consults its
+      // continuation budget only at the boundary a converged increment opens, so a budget stop
+      // leaves the count wherever the converged increment finished, short of the iteration cap,
+      // while a corrector stopped by the cap itself leaves the count sitting exactly at it. The
+      // count restarts at every boundary publication, so it is per increment. Accepting a
+      // burned-out corrector would commit a state that is not an equilibrium, whose
+      // contamination the steps that follow inherit. The corner is an increment that converges
+      // on exactly its last permitted iteration, which reads as a burnout here and is failed
+      // toward a retry, the safe direction.
+      const auto max_its = es().parameters.get<unsigned int>("nonlinear solver maximum iterations");
+      const auto exit_its = _arclength_nl->nNonlinearIterations();
+      if (exit_its < max_its)
+      {
+        // This is the one ending that leaves a transient step short of its whole load increment,
+        // and it is told apart from the other one here alone
+        _ended_on_spent_budget = true;
+        converged = true;
+      }
+      else
+        _console << "Arc length step spent its budget without converging an increment (the "
+                    "final increment burned all "
+                 << exit_its
+                 << " nonlinear iterations), so the attempt is failed rather than committed off "
+                    "equilibrium."
+                 << std::endl;
+    }
+  }
+
+  if (!converged)
     return false;
 
-  // One publication happens at the top of every increment the path starts, so a budget spent in
-  // full leaves _increment at exactly 'max_continuation_steps', and a corrector that fails earlier
-  // stops the count short of it. Accepted corner: a corrector failing in the last permitted
-  // increment leaves the same count as a spent budget and is reported here as a completed path.
-  // The test golds the traced path, so a regression into that corner still fails its CSVDiff.
-  if (_increment != getParam<unsigned int>("max_continuation_steps"))
+  // A step whose net load change runs downward is doing one of two things: tracing a descending
+  // stretch of the path, which sheds load because the structure dissipates, or walking back down
+  // an elastic branch, which sheds load without dissipating anything. The second converges just as
+  // well as the first, because an elastic branch is made of equilibrium points, and it is where a
+  // fresh predictor whose sign choice has no memory of the direction of travel strands a trace: at
+  // a reflection it walks back the branch just traced, and at the foot of a serration it takes the
+  // unloading half of the elastic line rather than the reloading half, either of which reads as a
+  // descent that never ends. Every converged step is judged, whichever ending it converged
+  // through, because a direction of travel turned the wrong way descends through whole load
+  // increments that end as ordinary converged solves. Failing the attempt hands the step to the
+  // TimeStepper like any other failure, and turning the direction of travel mirrors the tangent
+  // load of the retry, which walks it the way the path was actually going.
+  if (_transient && _step_lambda * _step_load_increment < 0 && !stepDissipated())
+  {
+    if (!_retrace_handled)
+    {
+      _retrace_handled = true;
+      _path_direction = -_path_direction;
+      _console << "Arc length step descended without dissipating, which is a walk back down an "
+                  "elastic branch rather than a descent along the path, so the attempt is failed "
+                  "and the retry travels the other way."
+               << std::endl;
+    }
     return false;
+  }
 
-  // libMesh destroys the SNES at the end of a solve and asking for it again would build a new one,
-  // so the reason comes from the cache libMesh keeps of it
-  auto & solver = static_cast<PetscNonlinearSolver<Number> &>(*_arclength_nl->nonlinearSolver());
-  if (solver.get_converged_reason() != SNES_DIVERGED_MAX_IT)
-    return false;
-
-  // This is the one ending that leaves a transient step short of its whole load increment, and it
-  // is told apart from the other one here alone
-  _ended_on_spent_budget = true;
   return true;
+}
+
+bool
+ArcLengthProblem::stepDissipated()
+{
+  // The executioner asks for the convergence of a solve that has returned, so the solution holds
+  // the state the step ended at and the change of the step is its distance from the old state
+  auto change = _arclength_nl->solution().clone();
+  *change -= _arclength_nl->solutionOld();
+
+  // The load tag was assembled by the last residual evaluation of the solve, which is close enough
+  // to the pattern at the start of the step for a measure that is only ever read against zero
+  const auto & load = _arclength_nl->getVector(_arclength_nl->loadVectorTag());
+  const Real pattern_dot_change = libmesh_real(load.dot(*change));
+  const Real pattern_dot_start = libmesh_real(load.dot(_arclength_nl->solutionOld()));
+
+  // The two terms of the dissipation increment of Verhoosel and de Borst, each carried separately
+  // so that their cancellation can be read: the elastic unload of a linear structure is
+  // proportional, which cancels them exactly, while a descent that dissipates leaves a remainder
+  // on the order of the terms themselves. The measure is read against the size of its terms rather
+  // than against a unit, because the load pattern carries the arbitrary scale of the input, and by
+  // magnitude, because the assembled load tag carries the sign convention of the residual.
+  const Real term_start = _lambda_accum * pattern_dot_change;
+  const Real term_change = _step_lambda * _step_load_increment * pattern_dot_start;
+
+  // A held load does work over the step that the two terms above never see: under one, elastic
+  // unloading follows an affine line rather than a proportional ray, the cancellation breaks by
+  // the work of the held load, and a walk back down an elastic branch would read as dissipative.
+  // Its work restores the cancellation, taken from the tag the input routes the held loads to.
+  Real term_held = 0.0;
+  if (isParamValid("held_load_vector_tag"))
+    term_held = libmesh_real(
+        _arclength_nl->getVector(getVectorTagID(getParam<TagName>("held_load_vector_tag")))
+            .dot(*change));
+
+  const Real dissipation = 0.5 * (term_start + term_held - term_change);
+  const Real scale = 0.5 * (std::abs(term_start) + std::abs(term_held) + std::abs(term_change));
+
+  // The cancellation of a dissipation-free descent is imperfect, holding to about a part in a
+  // thousand of the terms in practice, while a descent along the path leaves a remainder on the
+  // order of the terms themselves, so the threshold sits between the two with an order of
+  // magnitude of room on both sides
+  return std::abs(dissipation) > 1e-2 * scale;
 }
 
 void
@@ -394,11 +575,30 @@ ArcLengthProblem::computeResidualSys(NonlinearImplicitSystem & sys,
 {
   FEProblemBase::computeResidualSys(sys, soln, residual);
 
+  // A continuation reassembles the load tag in computeTangentLoad, which PETSc calls before every
+  // residual. A prescribed step has no tangent load, so the tag is assembled here instead, at the
+  // iterate the evaluation above already synced into the solution.
+  if (!inContinuation())
+  {
+    computeResidualTags({_arclength_nl->loadVectorTag()});
+    if (!_checked_load_on_constrained_dofs)
+    {
+      checkLoadOnConstrainedDofs();
+      _checked_load_on_constrained_dofs = true;
+    }
+  }
+
   // The load objects assemble into the load tag during the evaluation above, which is what keeps
   // them out of the residual MOOSE composes. Scaling that tag by the load factor here makes the
   // residual PETSc solves with F_int + lambda * R_load, where a transient run composes the factor
   // out of the load the committed steps carry and the increment of the step being traced.
-  residual.add(updateLoadParameter(), _arclength_nl->getVector(_arclength_nl->loadVectorTag()));
+  // An exception that interrupts the assembly is handled inside it, with the solve set to stop
+  // through the function domain error, but it can leave the tag half-assembled on the ranks the
+  // interruption reached; the close is a no-op otherwise and keeps the composition from
+  // aborting inside PETSc while the solve winds down
+  auto & load = _arclength_nl->getVector(_arclength_nl->loadVectorTag());
+  load.close();
+  residual.add(updateLoadParameter(), load);
   residual.close();
 }
 
@@ -446,8 +646,11 @@ ArcLengthProblem::computeTangentLoad(Vec x, Vec q)
   // one step, and its sign makes an increasing step local parameter mean travel in the remembered
   // direction, which is the only thing carrying that direction across a step boundary.
   PetscVector<Number> tangent_load(q, _communicator);
-  tangent_load.add(_transient ? -_step_load_increment : -1.0,
-                   _arclength_nl->getVector(_arclength_nl->loadVectorTag()));
+  // closed for the same reason the residual composition closes it: an interrupted assembly may
+  // have left the tag half-built while the solve winds down through the function domain error
+  auto & load = _arclength_nl->getVector(_arclength_nl->loadVectorTag());
+  load.close();
+  tangent_load.add(_transient ? -_step_load_increment : -1.0, load);
 }
 
 void
@@ -513,8 +716,10 @@ ArcLengthProblem::executeArcLengthIncrement(SNES snes)
            << std::endl;
 
   // PETSc numbers nonlinear iterations across the whole continuation, while SNESSolve_NEWTONAL
-  // bounds its corrector and continuation loops with counters of its own, so the running number is
-  // display state that can restart at the increment boundary and let every block count from zero
+  // bounds its corrector and continuation loops with counters of its own, so the running number
+  // restarts at the increment boundary and every block counts from zero. The budget ending is
+  // judged by the count this leaves at the exit of the solve, so it is per increment by
+  // construction
   LibmeshPetscCall(SNESSetIterationNumber(snes, 0));
 
   execute(EXEC_ARC_LENGTH_INCREMENT);
@@ -544,6 +749,17 @@ ArcLengthProblem::executeArcLengthIncrement(SNES snes)
 Real
 ArcLengthProblem::updateLoadParameter()
 {
+  // A prescribed step ramps the whole of its load increment: the load factor it solves at is the
+  // one the step ends at, held through the Newton iterations, and the step local parameter is
+  // left at one so that the step commits its full increment exactly as a completed continuation
+  // step does
+  if (!inContinuation())
+  {
+    _step_lambda = 1.0;
+    _load_parameter = _lambda_accum + _step_load_increment;
+    return _load_parameter;
+  }
+
   SNES snes = _arclength_nl->getSNES();
 
   PetscBool continuing;

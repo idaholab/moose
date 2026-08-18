@@ -59,6 +59,15 @@ after the row has been cleared. Either keep the load away from the constrained d
 an interior point load has this property — or enforce the constraint weakly with a
 [PenaltyDirichletBC.md], which is the supported pattern when the load is nonzero there.
 
+!alert warning title=Constant loads have to start in equilibrium
+A load left in the default tags is carried at full strength from the first increment, while the
+continuation looks for an equilibrium point within one arc length of the state the solve starts from.
+A constant load applied to a state that is not already in equilibrium with it puts no such point in
+reach, and the corrector settles on the nearest state it can find instead — characteristically a
+negative load factor that cancels the constant load back out. It converges, and it means nothing.
+Equilibrate the constant loads with an ordinary solve first and start the continuation from that
+state.
+
 ## Where the continuation stops
 
 [!param](/Problem/ArcLengthProblem/lambda_max) is by default the only criterion that ends a path
@@ -82,19 +91,18 @@ damage model such as Mazars — the load parameter falls monotonically and never
 stopping criterion is left for the path to meet. Tracing a softening response consequently ends as a
 diverged solve however faithfully the trace followed the branch. Setting this parameter makes the
 budget the designed end of the path instead: a continuation that runs its entire
-[!param](/Problem/ArcLengthProblem/max_continuation_steps) budget is reported converged, and a path
-whose corrector fails before the budget is spent still fails. To confirm a path ended at its budget
-rather than at a failed corrector, re-run it with a larger
-[!param](/Problem/ArcLengthProblem/max_continuation_steps): a genuine budget exit traces further,
-while a corrector failure stops at the same point and fails the solve there. The two are otherwise
-indistinguishable, a corrector failing in the last permitted increment being reported converged
-exactly as a spent budget is.
+[!param](/Problem/ArcLengthProblem/max_continuation_steps) budget through converged increments is
+reported converged, and a path whose corrector fails inside any increment — the last permitted one
+included — still fails. The two endings share the solver's exit reason and are told apart by the
+nonlinear iteration count at the exit: a spent budget is only reached through a converged
+increment, which leaves the count short of the iteration cap, while a corrector stopped by the cap
+sits exactly at it.
 
 The exit is read off the number of increments a continuation traced, so it needs a single solve per
 path: a setup that solves the same path more than once carries the count past the budget and reports
-the solve as failed. A [Transient.md] executioner takes the setting as well, where it ends the
-continuation of every step rather than one whole path and changes what the load factor measures;
-[#softening-transient] describes that regime.
+the solve as failed. The setting belongs to a one-shot path alone — a transient run advances by a
+single increment per step, whose internal budget is always a designed ending, and errors when the
+input sets this; [#per-timestep] describes that mode.
 
 This exit rests on PETSc's convergence reason alone, so the MOOSE-level checks that otherwise veto a
 converged solve stop applying once the budget is spent: a [Terminator.md] with `fail_mode = SOFT`, an
@@ -182,33 +190,42 @@ A diverged continuation writes no output at the end of the step. Adding
 point of failure, which is what shows whether the path was reflecting off
 [!param](/Problem/ArcLengthProblem/lambda_min) or circling a closed loop.
 
-## Per-timestep continuation id=per-timestep
+## Stepping along the path id=per-timestep
 
-Under a [Transient.md] executioner the continuation runs once per time step rather than once for the
-whole run. Each step traces a path of its own with a step-local load parameter that goes from 0 to 1
-over the load increment of that step alone, and the load factor the committed steps carry is added to
-it:
+Under a [Transient.md] executioner every time step advances the trace by a single continuation
+increment and commits the state that increment reaches, which is the classical incremental
+arc-length method of Riks and Crisfield with PETSc's solver as the engine of each increment. The
+step solves
 
 \begin{equation}
-R(u, \lambda) = F_\mathrm{int}(u) + \left(\Lambda + \lambda \, \Delta t\right) R_\mathrm{load}(u) = 0,
+R(u, \lambda) = F_\mathrm{int}(u) + \left(\Lambda + \lambda \, \Delta\right) R_\mathrm{load}(u) = 0,
 \end{equation}
 
-where $\Lambda$ is the load factor accumulated by the steps already committed, $\lambda$ is the
-step-local parameter the solver treats as the unknown, and $\Delta t$ is the time step size. The load
-increment of a step is its time step size. As long as every step reaches the end of its increment and
-the load factor only climbs, the load factor a step ends at is the time it ends at: [!param](/Executioner/Transient/dt) is the load
-increment per step, and [!param](/Executioner/Transient/end_time) is the load factor the run finishes
-at.
+where $\Lambda$ is the load factor the committed steps carry, $\lambda$ is the step-local parameter
+the solver treats as the unknown, and $\Delta$ is the time step size signed by the direction of
+travel. The committed load factor moves by the part of $\Delta$ the increment traverses, which may
+be any fraction of it and either sign, so the trace climbs where the path climbs and sheds load
+where it descends. Time is a pseudo parameter that counts arc steps: the load factor of the trace
+is what [ArcLengthLoadParameter.md] reports, and it parts from the time at the first turn of the
+path.
 
-!listing test/tests/problems/arc_length/transient_cubic.i block=Executioner
+!listing test/tests/problems/arc_length/transient_path.i block=Problem Executioner
 
-That schedule applies the load in increments of 0.5 up to a load factor of 1 in this case.
+State commits at the end of every step, which here is the end of every increment, so stateful
+materials advance along the path itself and irreversible behaviour accumulates increment by
+increment, including down a descending branch. That ordering is what a history dependent material
+needs. A solve that crosses a falling stretch of path in one span — a one-shot continuation, or any
+scheme whose increments span whole excursions — evaluates the history only at the state it ends at,
+so the excursion never registers in the material and the committed trace is stiffer than the path
+it claims to have crossed. The accumulated load factor and the direction of travel are restartable
+data, so a run recovered or restarted from a checkpoint resumes the trace where it left it.
 
-State commits at the end of every step, so stateful materials advance along the path and irreversible
-behaviour accumulates across steps, which a one-shot run cannot do because it commits nothing until
-the whole path has been traced. The accumulated load factor is restartable data, so a run recovered
-or restarted from a checkpoint resumes at the load factor of the last committed step and continues
-the path from there.
+A step whose increment converges short of its whole load span — the radius bounding it at a turn —
+commits the fraction it traced, and that ending is told apart from a corrector that burned out by
+the nonlinear iteration count at the exit: the solver consults its budget only at the boundary a
+converged increment opens, so a genuine budget stop leaves the count short of the iteration cap,
+while a corrector stopped by the cap itself sits exactly at it and the attempt is failed rather
+than committed off equilibrium.
 
 !alert warning title=Explicit time integrators are not supported
 Arc-length continuation is quasi-static path tracing: the continuation itself brings every step to
@@ -217,51 +234,56 @@ stages, which commits the load increment of that step before the step has been t
 code guards against this, because enumerating the explicit integrators is fragile and the combination
 has no physical meaning. Use an implicit time integrator.
 
-### Adapting and cutting back the load increment
+### Cutbacks shrink the load span, not the radius
 
-A step whose continuation does not reach the end of its load increment within
-[!param](/Problem/ArcLengthProblem/max_continuation_steps) increments reports the step unconverged.
-The executioner rejects that step, the [TimeStepper](syntax/Executioner/TimeStepper/index.md) cuts
-[!param](/Executioner/Transient/dt) back, and the step is retried with the smaller load increment
-armed in its place. Cutting the time step cuts the load increment in the same proportion, so whatever
-a `TimeStepper` does to the time step — growing it, shrinking it, cutting it back after a failure —
-it does to the load increment.
+The arc length of the increment a step takes is [!param](/Problem/ArcLengthProblem/step_size) at
+every time step size. A step whose increment fails — a corrector that overshoots a sharp turn
+characteristically converges cleanly step after step on the approach and diverges at the turn
+itself — is rejected, the [TimeStepper](syntax/Executioner/TimeStepper/index.md) cuts the time
+step back, and the retry covers a smaller load span with the same turning radius. The two are
+kept apart deliberately: the solution excursion across a sharp turn is set by the shape of the
+path and does not shrink with the load span, so a retry that shrank the radius with the span
+would confine the corrector exactly when the ladder needs its reach.
 
-A cutback does not, however, reduce the number of continuation increments a step needs when its load
-target lies past a limit point. The arc length a step covers is measured on the solution and the
-step-local load parameter together, and the solution excursion across a limit point is set by the
-shape of the equilibrium path rather than by the size of the load increment: it does not shrink with
-[!param](/Executioner/Transient/dt) at all. A step that has to cross a snap therefore costs about the
-same number of increments however far the time step is cut back. Cutback rescues a mismatch between
-the increment budget and the load target on the monotone stretches of a path, while
-[!param](/Problem/ArcLengthProblem/max_continuation_steps) has to be sized to cross a snap within a
-single step. Halving the time step is not a remedy for an under-sized increment budget at a limit
-point — the retries shrink the increment down to [!param](/Executioner/Transient/dtmin) and the step
-fails there instead.
+The radius sets the resolution of the trace as well as its robustness. An increment whose arc
+sphere spans a whole feature of the path — a serration of a crack advance, a small snap — converges
+past it in one committed jump: the state it lands on is an equilibrium and the history committed is
+the history of that jump, so a coarse radius surveys the path quickly at the cost of resolving its
+finest excursions, and a fine radius resolves them at the cost of more steps. The margin is real: a
+radius a factor of two above the one that threads a serration field can fail its first tooth at
+every load span, so size the radius on the finest feature of the path rather than on the smooth
+stretches.
 
-### Step-local settings
+### Non-smooth material events and lagged updates
+
+A material whose evolution has a corner — the onset of a bilinear cohesive law, a damage cap, an
+element exhausted — puts a facet in the residual, and a Newton corrector can limit-cycle across a
+facet without ever converging, at every load span a cutback ladder offers: the failure lives in the
+iteration itself, so nothing the stepping does removes it. Pair the continuation with the lagged
+update the material offers — `use_old_damage` on a damage model, `lag_displacement_jump` on a
+cohesive law — so every increment linearizes a smooth problem with the evolution frozen at the last
+committed state. The per-step commits are what bound the lag: the history runs at most one
+committed increment behind the path, a distance the radius sizes, where the same lag under a
+prescribed ramp trails by a whole ramp increment.
+
+### Settings a transient run owns
 
 [!param](/Problem/ArcLengthProblem/step_size),
-[!param](/Problem/ArcLengthProblem/max_continuation_steps),
-[!param](/Problem/ArcLengthProblem/psi_squared),
-[!param](/Problem/ArcLengthProblem/correction_type) and
-[!param](/Problem/ArcLengthProblem/lambda_min) each govern the continuation a single step traces and
-are applied again from the start of every step. Two of them are measured against the step-local
-parameter and so read differently than they do in a one-shot run:
-
-- [!param](/Problem/ArcLengthProblem/step_size) is arc length in the step-local coordinates, whose
-  load parameter spans 0 to 1 whatever the time step size is, so it is chosen against that fixed
-  range rather than against [!param](/Executioner/Transient/dt).
-- [!param](/Problem/ArcLengthProblem/lambda_min) clamps the step-local parameter, so it bounds how far
-  a step may unload below the load factor it started from. The default of 0 keeps the load factor from
-  falling below the value the step started at; tracing a path past its peak requires a negative value
-  instead, which [#softening-transient] describes.
-
-[!param](/Problem/ArcLengthProblem/lambda_max) is not a setting here. The step-local parameter spans
-the increment of one step by construction, so the value it ends at is 1; any other value is an error
-rather than a knob, and where the run finishes is set with
-[!param](/Executioner/Transient/end_time) instead. No other `[Problem]` parameter changes meaning or
-stops having an effect.
+[!param](/Problem/ArcLengthProblem/psi_squared) and
+[!param](/Problem/ArcLengthProblem/correction_type) govern every increment as they govern a
+one-shot continuation. [!param](/Problem/ArcLengthProblem/max_continuation_steps),
+[!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps),
+[!param](/Problem/ArcLengthProblem/lambda_max) and
+[!param](/Problem/ArcLengthProblem/lambda_min) belong to a one-shot path alone, and a transient run
+errors when the input sets one: every step advances by a single increment, so the run owns the step
+budget and the load parameter clamps — the step-local parameter is capped at the step's own
+increment of loading and floored at a fixed span of physical unloading sized from the nominal
+increment, so cutbacks shrink what a step may load without confining how deep the corrector may
+reach across a turn, and a descending stretch is traced across steps. Where the run finishes is set
+with
+[!param](/Executioner/Transient/end_time) or `num_steps`, which bound how long the trace runs, or
+with a [Terminator.md] watching [ArcLengthLoadParameter.md], which ends it at a load factor or any
+other measure of the state.
 
 ### Recording a transient path
 
@@ -278,55 +300,90 @@ under a transient executioner. Ordinary transient output is unaffected — each 
 its own time, which is the load factor it reached — and tracing the path in one shot is the way to get
 the per-increment animation.
 
+### Switching between plain solves and the continuation
+
+A path often begins with a stretch that plain Newton handles at a solve per step — an elastic climb,
+a preload ramp — and only later needs continuation.
+[!param](/Problem/ArcLengthProblem/use_continuation) puts the switch inside one run: a step solved
+with it false is an ordinary Newton solve with the whole of its load increment applied as a
+prescribed ramp along the current direction of travel, so the load factor equals the time and no
+continuation increments are spent, and the first step solved with it true opens a continuation at
+the committed load factor. The trace is continuous through every switch, and the two-input pattern
+this replaces — ramp with plain solves, write a checkpoint, restart the continuation from it — is
+no longer needed when the preparation is the same tagged load ramped. A preparation with different
+physics, such as a separate constant load that has to be equilibrated first, still belongs in a run
+of its own ahead of a restart.
+
+The parameter is controllable, and a [Controls](syntax/Controls/index.md) object that writes it
+decides step by step which regime solves: a [BoolFunctionControl.md] switches on a function of
+time, and a custom control can read a postprocessor and hand the run to the continuation when,
+say, a nonlinear iteration count or a damage measure crosses a threshold.
+
+```
+[Controls]
+  [switch]
+    type = BoolFunctionControl
+    parameter = '*/*/use_continuation'
+    function = switch_fn
+    execute_on = 'initial timestep_begin'
+  []
+[]
+```
+
 ### Choosing between the two modes
 
-Trace a path per time step for:
+Step along the path under [Transient.md] for:
 
 - path-dependent behaviour, where plasticity, damage or any other stateful material has to advance
-  along the path;
-- a path that a fixed load increment cannot get through, where a cutback retries the step at a smaller
-  increment;
-- output on the real time axis, one frame per step.
+  along the path — the history is committed at every increment, which a solve that spans whole
+  excursions cannot do;
+- a path with sharp turns, where a failed step hands the retry a smaller load span at the same
+  radius;
+- output one frame per committed state.
 
 Trace the whole path in one [Steady.md] solve for:
 
 - a single complete equilibrium path of a path-independent problem, where committing nothing along the
-  way costs nothing;
+  way costs nothing and the predictor carries its direction internally;
 - the per-increment animation of the path.
 
-### Tracing a softening path across time steps id=softening-transient
+### The direction of travel and the dissipation guard id=softening-transient
 
-[!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps) applies to a transient run as well,
-where it ends the continuation of every step and is what carries a path past its peak. A step then has
-two ways to finish: its step-local parameter reaches 1 and the step commits the whole load increment it
-was given, or the step spends [!param](/Problem/ArcLengthProblem/max_continuation_steps) and commits
-the net change it actually traced, which past the peak is a decrease. A step that does neither has
-failed, and the [TimeStepper](syntax/Executioner/TimeStepper/index.md) cuts it back as it would any
-other.
+The direction the path is travelled in has to survive a step boundary, and PETSc's predictor cannot
+carry it there: its memory ends with the solve, and a fresh solve opens its first increment with a
+sign choice made from the state it starts at. Near a limit point that choice can walk a step
+backward along the branch just traced. Such a step converges — the branch it retraces is made of
+equilibrium points — so the outcome of the solve cannot expose it, and the energy the step
+dissipates is what does [!citep](verhoosel2009). A descent along the path of a dissipative
+structure sheds load because the structure dissipates; unloading it elastically, with the
+irreversible state held by its own irreversibility, descends without dissipating, and the elastic
+unload of a linear structure is proportional, which cancels the dissipation increment
+$\tfrac{1}{2}\left(\Lambda\, \hat{f}^T \Delta u - \Delta\lambda\, \hat{f}^T u\right)$ exactly. A
+converged step whose net load change runs downward without dissipating is therefore failed, its
+retry travels the other way, and the console says so:
 
-The increment a step applies carries a direction of travel with it, and a step that ends having moved
-the load factor backward reverses that direction. The step after it therefore carries on the way the
-path was going rather than back up the branch it just came down.
+```
+Arc length step descended without dissipating, which is a walk back down an
+elastic branch rather than a descent along the path, so the attempt is failed
+and the retry travels the other way.
+```
 
-[!param](/Problem/ArcLengthProblem/lambda_min) has to be negative here and the problem errors if it is
-not. It bounds how far a single step may unload below the load factor it started from, so the default
-of zero forbids the descent this regime exists to trace.
+The problem also remembers a direction of travel of plus or minus one across steps: a step whose
+committed change ran against it turns it around, so a trace that has turned a genuine fold keeps
+descending rather than reading the next step as a climb back up the branch it just came down.
 
-The load factor stops equalling the time as a result. A step moves the load factor by up to
-[!param](/Executioner/Transient/dt) of change in the direction it is travelling, so the two agree only
-while the path is still climbing and every step reaches the end of its increment; a step that reverses,
-or that ends short on a spent budget, parts them for the rest of the run. That is the intended reading
-rather than a defect — time measures how far along the path the run has come rather than the level of
-the load, and [!param](/Executioner/Transient/end_time) bounds how long the trace runs rather than
-where it ends.
+The guard is decisive for dissipative physics — damage, cohesive fracture, plasticity — which is
+what stepping along the path with committed history exists for. On a purely elastic nonlinear path
+a retrace dissipates nothing *and* descends non-proportionally, so the measure cannot separate the
+two there; the direction memory still bounds a wrong turn, and the one-shot continuation, whose
+predictor carries its direction internally, is the mode of choice for such paths.
 
-Choose between this and an ordinary transient run on whether the load the run is after is known to sit
-below collapse. A load schedule needs it to be: the factor equals the time throughout and
-[!param](/Executioner/Transient/end_time) is the load factor reached, which is predictable and simple
-to set. Path tracing does not: the peak is what the run is looking for and the path descends past it,
-which a schedule cannot represent at all because it advances monotonically by construction. Trace the
-path when it goes past its peak and the run needs both real time steps and the committed, irreversible
-state a damage or plasticity model accumulates along the way.
+Choose between stepping along the path and an ordinary transient run on whether the load the run is
+after is known to sit below collapse. A load schedule needs it to be: the prescribed factor ramps
+with the time, which is predictable and simple to set, and has nothing to converge to past a limit
+point. Stepping along the path does not: the peak is what the run is looking for, and the trace
+commits the descent past it, with the irreversible state a damage or plasticity model accumulates
+committed along the way.
 
 ## Example Input File Syntax id=example
 
