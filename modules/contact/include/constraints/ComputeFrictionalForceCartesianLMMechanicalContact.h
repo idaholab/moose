@@ -87,6 +87,6 @@ protected:
   /// Friction coefficient
   const Real _mu;
 
-  /// Small contact pressure value to trigger computation of frictional forces
+  /// Minimum value of contact pressure that will trigger frictional enforcement
   const Real _epsilon;
 };

@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
+#include "MooseUtils.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
@@ -216,6 +217,61 @@ typename libMesh::CompareTypes<T, T2>::supertype
 dotProduct(const W<T> & a, const W2<T2> & b)
 {
   return a.contract(b);
+}
+
+/**
+ * Return the square of the Euclidean (L2) norm of \p value. Recurses into containers using the
+ * same \p MooseUtils::Has_size trait as \p MooseUtils::isZero, and into rank 1 and rank 2 tensors
+ * component by component. Composed entirely of sums and products, this is safe to call
+ * unconditionally on dual number types, including at zero.
+ */
+template <typename T>
+auto
+normSquared(const T & value)
+{
+  if constexpr (MooseUtils::Has_size<T>::value)
+  {
+    auto sum = normSquared(value[0]);
+    for (const auto i : make_range(std::size_t(1), value.size()))
+      sum += normSquared(value[i]);
+    return sum;
+  }
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
+    return value * value;
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 1)
+  {
+    auto sum = value(0) * value(0);
+    for (const auto i : make_range(std::size_t(1), Moose::dim))
+      sum += value(i) * value(i);
+    return sum;
+  }
+  else
+  {
+    auto sum = value(0, 0) * value(0, 0);
+    for (const auto j : make_range(std::size_t(1), Moose::dim))
+      sum += value(0, j) * value(0, j);
+    for (const auto i : make_range(std::size_t(1), Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+        sum += value(i, j) * value(i, j);
+    return sum;
+  }
+}
+
+/**
+ * Return the Euclidean (L2) norm of \p value.
+ *
+ * For dual number types, differentiating \p std::sqrt at a zero argument produces a NaN
+ * derivative (d(sqrt(x))/dx = 1 / (2 * sqrt(x))), so this short-circuits to a literal zero
+ * whenever \p value is (fuzzy) zero.
+ */
+template <typename T>
+auto
+norm(const T & value)
+{
+  using std::sqrt;
+  if (MooseUtils::isZero(value))
+    return decltype(normSquared(value)){};
+  return sqrt(normSquared(value));
 }
 
 /**
