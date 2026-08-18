@@ -20,10 +20,11 @@ On the *serendipity* quadratic faces QUAD8 and TRI6 the construction breaks down
 diagonal is no longer positive: QUAD8 corner nodes have $d_k = -1/3$ and TRI6 vertex nodes have
 $d_k = 0$. The per-node physical-gap normalization used by mortar mechanical contact divides the
 weighted gap by $\int_{\gamma} \Phi_j\,\mathrm{d}\gamma = d_j$, so a zero or negative diagonal makes
-the nodal contact logic ill posed. The full biquadratic QUAD9 face is unaffected -- its diagonals
-($1/9$, $4/9$, $16/9$) are all positive -- but HEX20 and TET10, the usual second-order 3D elements,
-present exactly the QUAD8 and TRI6 faces that fail, so dual mortar contact has in practice been
-confined to first-order secondary faces.
+the nodal contact logic ill posed. The full biquadratic QUAD9 face is unaffected -- its shape functions
+all satisfy the positivity condition and can be used directly, as [!cite](popp2012dual) show in
+Sec. 4.3, so its diagonals ($1/9$, $4/9$, $16/9$) are correspondingly all positive -- but HEX20 and
+TET10, the usual second-order 3D elements, present exactly the QUAD8 and TRI6 faces that fail, so
+dual mortar contact has in practice been confined to first-order secondary faces.
 
 [!cite](popp2012dual) resolve this with a *locally quadratic transformed basis*
 $\tilde{N} = T\,N$, in which each vertex node absorbs a fixed fraction $\alpha$ of its adjacent
@@ -51,7 +52,8 @@ biorthogonality weights $\tilde{d}_j$ are strictly positive and dual mortar cont
 HEX20 meshes becomes well posed. Note that biorthogonality now holds against $\tilde{N}$, not the
 standard basis $N$: the *diagonal* here is the set of weights $\tilde{d}_j$, whereas the assembled
 secondary coupling matrix $D = \int_{\gamma} \tilde{\Phi}_j\,N_k\,\mathrm{d}\gamma$ against the
-standard basis is *not* diagonal (unlike standard dual mortar). The multiplier can still be
+standard basis is *not* diagonal (unlike standard dual mortar); [!cite](popp2012dual) likewise show
+in Eq. (4.12) that the transform makes the mortar matrix non-diagonal. The multiplier can still be
 condensed, but not by a diagonal inverse (see the note below). Only the secondary basis used for
 biorthogonalization is transformed; the quadratic geometry and displacement interpolation are
 unchanged, and the dual basis is still expressed in the standard basis $N$ so consistency is
