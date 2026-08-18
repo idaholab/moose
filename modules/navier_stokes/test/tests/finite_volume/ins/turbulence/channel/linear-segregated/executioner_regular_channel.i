@@ -28,6 +28,8 @@
   pressure_petsc_options_value = 'hypre boomeramg'
   turbulence_petsc_options_iname = '-pc_type -pc_hypre_type'
   turbulence_petsc_options_value = 'hypre boomeramg'
+  # added to test PC reuse feature
+  turbulence_pc_recompute_frequency = 5
 
   print_fields = false
   continue_on_max_its = true
