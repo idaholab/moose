@@ -100,6 +100,15 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
       paramError(
           "friction_lm",
           "Frictional contact constraints only support elemental variables of CONSTANT order");
+
+  // The node-based Lagrange multiplier scaling stores the scaled multiplier zhat = kappa*lambda,
+  // but the Coulomb bound here reads the raw normal multiplier as the physical pressure, so the
+  // friction limit would be scaled by kappa. Reject the combination; scaling is currently only
+  // supported for frictionless normal contact (ComputeWeightedGapLMMechanicalContact).
+  if (_weighted_gap_uo.usesNodalScaling())
+    paramError("weighted_gap_uo",
+               "'use_nodal_scaling' is not supported with frictional contact; it is currently "
+               "implemented only for frictionless normal Lagrange multiplier contact.");
 }
 
 void

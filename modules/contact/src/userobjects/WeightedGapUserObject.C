@@ -16,6 +16,8 @@
 #include "AutomaticMortarGeneration.h"
 
 #include "libmesh/quadrature.h"
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/fe.h"
 
 #include <limits>
 
@@ -30,6 +32,16 @@ WeightedGapUserObject::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
+  params.addParam<bool>(
+      "use_nodal_scaling",
+      false,
+      "Whether to apply the node-based Lagrange-multiplier scaling of Popp, Seitz, Gee & Wall "
+      "(2013), CMAME 264:67-80, Sec. 4.2, to improve the conditioning of the linear system when "
+      "secondary elements are only partially covered (edge dropping). Requires "
+      "'correct_edge_dropping = true'. Supported for frictionless normal Lagrange multiplier "
+      "contact (LMWeightedGapUserObject with ComputeWeightedGapLMMechanicalContact) using a "
+      "first-order Lagrange multiplier on a replicated mesh, in Cartesian, RZ, or spherical "
+      "coordinates, and in parallel.");
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
@@ -49,7 +61,8 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     _primary_disp_y(_disp_y_var->adSlnNeighbor()),
     _secondary_disp_z(_has_disp_z ? &_disp_z_var->adSln() : nullptr),
     _primary_disp_z(_has_disp_z ? &_disp_z_var->adSlnNeighbor() : nullptr),
-    _coord(_assembly.mortarCoordTransformation())
+    _coord(_assembly.mortarCoordTransformation()),
+    _use_nodal_scaling(getParam<bool>("use_nodal_scaling"))
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
@@ -61,6 +74,28 @@ WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
   _test = &test();
+
+  if (_use_nodal_scaling)
+  {
+    // Only the LM formulation applies the scaling; other user objects would silently ignore it.
+    if (!nodalScalingApplied())
+      paramError("use_nodal_scaling",
+                 "Node-based scaling is only implemented for the Lagrange multiplier contact "
+                 "formulation (LMWeightedGapUserObject); it would be silently ignored here.");
+
+    // Scaling rescales the partially covered multiplier DOFs that the default treatment zeroes.
+    if (!getParam<bool>("correct_edge_dropping"))
+      paramError("use_nodal_scaling",
+                 "Node-based scaling requires 'correct_edge_dropping = true'.");
+
+    // n_j^e (adjacency count) is globally complete only on a replicated mesh; on a distributed mesh
+    // kappa_j would be partition dependent. Multi-rank on a replicated mesh is fine.
+    if (_subproblem.mesh().isDistributedMesh())
+      paramError("use_nodal_scaling",
+                 "Node-based scaling is not supported on a distributed mesh; run mortar contact on "
+                 "a replicated mesh (Mesh/parallel_type = REPLICATED). Parallel multi-rank "
+                 "execution on a replicated mesh is supported.");
+  }
 }
 
 void
@@ -133,6 +168,17 @@ WeightedGapUserObject::computeQpIProperties()
   normalization += (*_test)[_i][_qp] * _qp_factor;
 
   _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
+
+  if (_use_nodal_scaling)
+  {
+    // Numerator of kappa_j (Popp 2013 eq. 36): covered fraction (int_{e_int} N_j)/(int_e N_j)
+    // summed over adjacent elements, using the standard N_j (displacement basis, fePhiLower) -- not
+    // the dual test, so kappa_j = 1 at full coverage in every coordinate system, RZ/spherical
+    // included.
+    const auto & std_phi = _assembly.fePhiLower<Real>(_disp_x_var->feType());
+    _dof_to_covered_fraction_sum[dof] +=
+        std_phi[_i][_qp] * _qp_factor / fullNodalIntegrals(_lower_secondary_elem)[_i];
+  }
 }
 
 void
@@ -140,6 +186,9 @@ WeightedGapUserObject::initialize()
 {
   _dof_to_weighted_gap.clear();
   _dof_to_weighted_displacements.clear();
+  _dof_to_covered_fraction_sum.clear();
+  _dof_to_nodal_scale.clear();
+  _elem_to_full_nodal_integral.clear();
 }
 
 void
@@ -155,6 +204,24 @@ WeightedGapUserObject::finalize()
                                           /*normalize_c*/ true,
                                           _communicator,
                                           send_data_back);
+
+  if (_use_nodal_scaling)
+  {
+    // Reduce the processor-local numerators (the thread sums only rank-owned elements).
+    // send_data_back = true: non-owner ranks also need kappa_j for the primary-side coupling.
+    Moose::Mortar::Contact::communicateRealObject(_dof_to_covered_fraction_sum,
+                                                  _subproblem.mesh(),
+                                                  _nodal,
+                                                  _communicator,
+                                                  /*send_data_back=*/true);
+
+    // Divide by n_j^e (adjacent-element count, including fully dropped neighbors) for the eq. 36
+    // mean; the map is globally complete on the replicated mesh.
+    const auto & nodes_to_secondary_elem = amg().nodesToSecondaryElem();
+    for (const auto & [dof, fraction_sum] : _dof_to_covered_fraction_sum)
+      _dof_to_nodal_scale[dof] =
+          fraction_sum / libmesh_map_find(nodes_to_secondary_elem, dof->id()).size();
+  }
 }
 
 void
@@ -166,6 +233,37 @@ WeightedGapUserObject::execute()
     for (_i = 0; _i < _test->size(); ++_i)
       computeQpIProperties();
   }
+}
+
+const std::vector<Real> &
+WeightedGapUserObject::fullNodalIntegrals(const Elem * const elem)
+{
+  const auto it = _elem_to_full_nodal_integral.find(elem->id());
+  if (it != _elem_to_full_nodal_integral.end())
+    return it->second;
+
+  // Integrate int_e N_j (coordinate-weighted) per node with a temporary FE (as in
+  // Assembly::elementVolume / NodalArea), avoiding reinit of the shared mortar-segment state.
+  const FEType fe_type(FIRST, LAGRANGE);
+  std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
+  const std::vector<Real> & JxW = fe->get_JxW();
+  const std::vector<Point> & q_points = fe->get_xyz();
+  const std::vector<std::vector<Real>> & phi = fe->get_phi();
+
+  QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
+  fe->attach_quadrature_rule(&qrule);
+  fe->reinit(elem);
+
+  std::vector<Real> integrals(phi.size(), 0);
+  for (const auto qp : make_range(qrule.n_points()))
+  {
+    Real coord;
+    coordTransformFactor(_subproblem, elem->subdomain_id(), q_points[qp], coord);
+    for (const auto j : index_range(integrals))
+      integrals[j] += phi[j][qp] * JxW[qp] * coord;
+  }
+
+  return _elem_to_full_nodal_integral.emplace(elem->id(), std::move(integrals)).first->second;
 }
 
 Real
