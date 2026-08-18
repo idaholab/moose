@@ -45,9 +45,10 @@ than assuming.
 - For a numeric diff (EXODIFF/CSVDIFF), rerun just that test with `--verbose` for details, and
   check the test's spec file (named `tests`) for the `exodiff`/`csvdiff`/`abs_zero`/`rel_err`
   parameters controlling the comparison.
-- Gold files live in `gold/` next to the input. Don't regold without understanding *why* the
+- Gold files live in `gold/` next to the input. Don't regold or relax test tolerances or parameters without understanding *why* the
   result changed — if the diff only appears under certain compiler flags/hardware/thread counts,
-  use the brittle-numerics-root-cause skill instead of just re-goldening.
+  use the brittle-numerics-root-cause skill instead of just re-golding.
+- Re-golding or relaxing tolerances or parameters is always a last resort measure, only to be used after confirming that any code changes leading to the diff undoubtedly improve the code's scientific correctness or accuracy. All tolerances need to be as tight as possible, a test with a loose tolerance is useless.
 - For a CRASH/ERROR, rerun the input directly with the app binary (e.g. `./bison-opt -i
   <input>.i`) to get a full stack trace instead of TestHarness's summarized output.
 
