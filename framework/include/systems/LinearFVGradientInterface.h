@@ -94,10 +94,9 @@ protected:
   /**
    * Compute replacement field values for a registered gradient method.
    * @param method Gradient method used to compute the replacement values.
-   * @param container Method container whose next values should be computed.
+   * @return Method container whose replacement values were computed.
    */
-  void computeLinearFVGradientContainer(const FVGradientMethod & method,
-                                        LinearFVGradientContainer & container);
+  LinearFVGradientContainer & computeLinearFVGradientContainer(const FVGradientMethod & method);
 
   /**
    * Replace the current gradient storage with the freshly computed new gradients.

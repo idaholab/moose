@@ -68,7 +68,7 @@ LinearFVGradientInterface::computeGradients()
   // BCs may use cell gradients to compute the boundary face value, which is itself used to
   // compute cell gradients
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
-    computeLinearFVGradientContainer(*method_container_pair.first, method_container_pair.second);
+    computeLinearFVGradientContainer(*method_container_pair.first);
 
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
     finalizeLinearFVGradientContainer(method_container_pair.second);
@@ -94,8 +94,8 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientReader & reade
     mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
     PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
 
-    computeLinearFVGradientContainer(reader.method(), method_container_pair->second);
-    finalizeLinearFVGradientContainer(method_container_pair->second);
+    auto & container = computeLinearFVGradientContainer(reader.method());
+    finalizeLinearFVGradientContainer(container);
     return;
   }
 
@@ -120,10 +120,11 @@ LinearFVGradientInterface::initializeContainer(GradientContainer & container) co
     container.push_back(_sys.currentSolution()->zero_clone());
 }
 
-void
-LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMethod & method,
-                                                            LinearFVGradientContainer & container)
+LinearFVGradientInterface::LinearFVGradientContainer &
+LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMethod & method)
 {
+  auto & container = libmesh_map_find(_linear_fv_gradient_container_by_method, &method);
+
   if (container.values.empty())
     initializeContainer(container.values);
 
@@ -134,6 +135,8 @@ LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMeth
               "Next and current gradient containers must have the same size.");
 
   method.computeGradient(_sys, container.next_values, container.variable_numbers);
+
+  return container;
 }
 
 void
