@@ -170,18 +170,12 @@
     exodiff = 'generalized_plane_strain_squares_out.e'
     prereq = generalized_plane_strain_squares
     abs_zero = 1e-7
-    cli_args = 'Physics/SolidMechanics/GeneralizedPlaneStrain/gps1/use_automatic_differentiation=true '
-               'Physics/SolidMechanics/GeneralizedPlaneStrain/gps2/use_automatic_differentiation=true '
-               'Kernels/SolidMechanics/use_automatic_differentiation=true '
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/gps1/use_automatic_differentiation=true '
+               'Physics/SolidMechanics/QuasiStatic/gps2/use_automatic_differentiation=true '
                'Postprocessors/react_z1/type=ADMaterialTensorIntegral '
                'Postprocessors/react_z2/type=ADMaterialTensorIntegral '
-               'AuxKernels/stress_xx/type=ADRankTwoAux AuxKernels/stress_xy/type=ADRankTwoAux '
-               'AuxKernels/stress_yy/type=ADRankTwoAux AuxKernels/stress_zz/type=ADRankTwoAux '
-               'AuxKernels/strain_xx/type=ADRankTwoAux AuxKernels/strain_xy/type=ADRankTwoAux '
-               'AuxKernels/strain_yy/type=ADRankTwoAux AuxKernels/aux_strain_zz/type=ADRankTwoAux '
+               'AuxKernels/aux_strain_zz/type=ADRankTwoAux '
                'Materials/elastic_tensor/type=ADComputeIsotropicElasticityTensor '
-               'Materials/strain1/type=ADComputePlaneSmallStrain '
-               'Materials/strain2/type=ADComputePlaneSmallStrain '
                'Materials/thermal_strain/type=ADComputeThermalExpansionEigenstrain '
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall support setting up an automatic-differentiation generalized plane strain problem through an action'
@@ -195,18 +189,12 @@
     prereq = generalized_plane_strain_squares_ad
     ratio_tol = 1e-7
     difference_tol = 1e0
-    cli_args = 'Physics/SolidMechanics/GeneralizedPlaneStrain/gps1/use_automatic_differentiation=true '
-               'Physics/SolidMechanics/GeneralizedPlaneStrain/gps2/use_automatic_differentiation=true '
-               'Kernels/SolidMechanics/use_automatic_differentiation=true '
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/gps1/use_automatic_differentiation=true '
+               'Physics/SolidMechanics/QuasiStatic/gps2/use_automatic_differentiation=true '
                'Postprocessors/react_z1/type=ADMaterialTensorIntegral '
                'Postprocessors/react_z2/type=ADMaterialTensorIntegral '
-               'AuxKernels/stress_xx/type=ADRankTwoAux AuxKernels/stress_xy/type=ADRankTwoAux '
-               'AuxKernels/stress_yy/type=ADRankTwoAux AuxKernels/stress_zz/type=ADRankTwoAux '
-               'AuxKernels/strain_xx/type=ADRankTwoAux AuxKernels/strain_xy/type=ADRankTwoAux '
-               'AuxKernels/strain_yy/type=ADRankTwoAux AuxKernels/aux_strain_zz/type=ADRankTwoAux '
+               'AuxKernels/aux_strain_zz/type=ADRankTwoAux '
                'Materials/elastic_tensor/type=ADComputeIsotropicElasticityTensor '
-               'Materials/strain1/type=ADComputePlaneSmallStrain '
-               'Materials/strain2/type=ADComputePlaneSmallStrain '
                'Materials/thermal_strain/type=ADComputeThermalExpansionEigenstrain '
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall compute the Jacobian for an automatic-differentiation generalized plane strain action with multiple action blocks'
@@ -230,10 +218,6 @@
     abs_zero = 1e-9
     cli_args = 'Physics/SolidMechanics/QuasiStatic/gps/use_automatic_differentiation=true '
                'Postprocessors/react_z/type=ADMaterialTensorIntegral '
-               'AuxKernels/stress_xx/type=ADRankTwoAux AuxKernels/stress_xy/type=ADRankTwoAux '
-               'AuxKernels/stress_yy/type=ADRankTwoAux AuxKernels/stress_zz/type=ADRankTwoAux '
-               'AuxKernels/strain_xx/type=ADRankTwoAux AuxKernels/strain_xy/type=ADRankTwoAux '
-               'AuxKernels/strain_yy/type=ADRankTwoAux AuxKernels/strain_zz/type=ADRankTwoAux '
                'Materials/elastic_tensor/type=ADComputeIsotropicElasticityTensor '
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall support setting the out-of-plane pressure using a function for automatic-differentiation generalized plane strain problems'
@@ -259,10 +243,6 @@
                'Physics/SolidMechanics/QuasiStatic/gps/out_of_plane_pressure_function=0 '
                'Physics/SolidMechanics/QuasiStatic/gps/out_of_plane_pressure_material=traction_material '
                'Postprocessors/react_z/type=ADMaterialTensorIntegral '
-               'AuxKernels/stress_xx/type=ADRankTwoAux AuxKernels/stress_xy/type=ADRankTwoAux '
-               'AuxKernels/stress_yy/type=ADRankTwoAux AuxKernels/stress_zz/type=ADRankTwoAux '
-               'AuxKernels/strain_xx/type=ADRankTwoAux AuxKernels/strain_xy/type=ADRankTwoAux '
-               'AuxKernels/strain_yy/type=ADRankTwoAux AuxKernels/strain_zz/type=ADRankTwoAux '
                'Materials/elastic_tensor/type=ADComputeIsotropicElasticityTensor '
                'Materials/stress/type=ADComputeLinearElasticStress'
     abs_zero = 1e-9
@@ -282,10 +262,6 @@
                'Physics/SolidMechanics/QuasiStatic/gps/out_of_plane_pressure_function=0 '
                'Physics/SolidMechanics/QuasiStatic/gps/out_of_plane_pressure_material=traction_material '
                'Postprocessors/react_z/type=ADMaterialTensorIntegral '
-               'AuxKernels/stress_xx/type=ADRankTwoAux AuxKernels/stress_xy/type=ADRankTwoAux '
-               'AuxKernels/stress_yy/type=ADRankTwoAux AuxKernels/stress_zz/type=ADRankTwoAux '
-               'AuxKernels/strain_xx/type=ADRankTwoAux AuxKernels/strain_xy/type=ADRankTwoAux '
-               'AuxKernels/strain_yy/type=ADRankTwoAux AuxKernels/strain_zz/type=ADRankTwoAux '
                'Materials/elastic_tensor/type=ADComputeIsotropicElasticityTensor '
                'Materials/stress/type=ADComputeLinearElasticStress'
     requirement = 'The system shall compute the Jacobian for automatic-differentiation generalized plane strain with material-property out-of-plane pressure'
@@ -315,26 +291,22 @@
                'Kernels/SolidMechanics/use_automatic_differentiation=true '
                'Postprocessors/react_z1/type=ADMaterialTensorIntegral '
                'Postprocessors/react_z2/type=ADMaterialTensorIntegral '
-               'AuxKernels/stress_xx/type=ADRankTwoAux AuxKernels/stress_xy/type=ADRankTwoAux '
-               'AuxKernels/stress_yy/type=ADRankTwoAux AuxKernels/stress_zz/type=ADRankTwoAux '
-               'AuxKernels/strain_xx/type=ADRankTwoAux AuxKernels/strain_xy/type=ADRankTwoAux '
-               'AuxKernels/strain_yy/type=ADRankTwoAux AuxKernels/aux_strain_zz/type=ADRankTwoAux '
                'Materials/elastic_tensor/type=ADComputeIsotropicElasticityTensor '
                'Materials/strain1/type=ADComputePlaneSmallStrain '
                'Materials/thermal_strain/type=ADComputeThermalExpansionEigenstrain '
-               'Materials/stress/type=ADComputeLinearElasticStress'
+               'Materials/stress/type=ADComputeLinearElasticStress '
+               'AuxKernels/stress_xx/type=ADRankTwoAux AuxKernels/stress_xy/type=ADRankTwoAux '
+               'AuxKernels/stress_yy/type=ADRankTwoAux AuxKernels/stress_zz/type=ADRankTwoAux '
+               'AuxKernels/strain_xx/type=ADRankTwoAux AuxKernels/strain_xy/type=ADRankTwoAux '
+               'AuxKernels/strain_yy/type=ADRankTwoAux AuxKernels/aux_strain_zz/type=ADRankTwoAux'
     requirement = 'The system shall support listing all of the out-of-plane strain variables in the automatic-differentiation strain calculator'
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#7840 #33415'
   []
   [generalized_plane_strain_auto_scalar]
     type = 'Exodiff'
-    input = 'out_of_plane_pressure.i'
-    cli_args = "Variables/inactive=scalar_strain_zz
-                Problem/nl_sys_names=mechanics
-                Variables/disp_x/solver_sys=mechanics Variables/disp_y/solver_sys=mechanics"
-    exodiff = 'out_of_plane_pressure_out.e'
-    prereq = 'out_of_plane_pressure_material_ad'
+    input = 'generalized_plane_strain_auto_scalar.i'
+    exodiff = 'generalized_plane_strain_auto_scalar_out.e'
     abs_zero = 1e-9
     requirement = 'The system shall support automatic creation of the scalar out-of-plane strain variable for generalized plane strain problems without automatic differentiation'
     design = 'GeneralizedPlaneStrainAction.md'
@@ -343,10 +315,16 @@
   [generalized_plane_strain_auto_scalar_ad]
     type = 'Exodiff'
     input = 'generalized_plane_strain_auto_scalar.i'
+    cli_args = "Postprocessors/react_z/type=ADMaterialTensorIntegral
+                Materials/elastic_tensor/type=ADComputeIsotropicElasticityTensor
+                Materials/stress/type=ADComputeLinearElasticStress
+                Materials/traction_material/type=ADGenericFunctionMaterial
+                Physics/SolidMechanics/QuasiStatic/gps/use_automatic_differentiation=true"
     exodiff = 'generalized_plane_strain_auto_scalar_out.e'
     abs_zero = 1e-9
     requirement = 'The system shall support automatic creation of the scalar out-of-plane strain variable for automatic-differentiation generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
+    prereq = 'generalized_plane_strain_auto_scalar'
     issues = '#7840 #33415'
   []
 []
