@@ -97,13 +97,6 @@ MFEMProblem::initialSetup()
       .queryInto(objects);
   for (auto * const object : objects)
     object->initialSetup();
-
-  // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
-  // setup pass because they are no longer initialized through the libMesh/MOOSE user-object path.
-  std::vector<MFEMRefinementMarker *> markers;
-  theWarehouse().query().condition<AttribSystem>("Marker").queryInto(markers);
-  for (auto marker : markers)
-    marker->initialSetup();
 }
 
 void
