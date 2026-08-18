@@ -1,25 +1,12 @@
-# ProblemComposer System
+# MFEMProblemComposer System
 
 The `ProblemComposer` system allows the user to construct
 problem operators with custom inputs. This class is specifically intended for composing
 user defined custom operators which may be raw `mfem::Operator`'s optimised for specific
 purposes e.g. MHD with customised inputs. The operators may need thin layer access to the MOOSE
 multi-physics system. As of yet, only a single problem operator object per [MFEMProblem.md] is used (even if
-multiple classes are defined). The [problem composer](ProblemComposerBase.md) classes are built within the [MFEMProblem.md] class 
+multiple classes are defined). The [problem composer](MFEMProblemComposer.md) classes are built within the [MFEMProblem.md] class 
 however the [ProblemOperator.md]s are built and owned by the MFEM executioners.
-
-## SteadyProblemComposer
-
-The [SteadyProblemComposer.md] class is the default for the [MFEMSteady.md] executioner and does
-not need to be declared explicitly. The [SteadyProblemComposer.md] class uses systematic
-logic to build one of 3 possible `ProblemOperator`s: they are the `EquationSystemProblemOperator`,
-`ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
-
-## TransientProblemComposer
-
-The [TransientProblemComposer.md] class is the default for the [MFEMTransient.md] executioner and
-does not need to be declared explicitly. The [TransientProblemComposer.md] class builds 
-the `TimeDependentEquationSystemProblemOperator`.
 
 ## Using a custom problem composer to plug in a custom problem operator
 
@@ -186,7 +173,7 @@ void CustomDummyProblemOperator::Solve() override
 
 Once the `ProblemOperator` has been written the `ProblemComposer` class is needed,
 this class is constructed by `MFEMProblem` and called by the executioner. The composer class
-must inherit from `ProblemComposerBase` making it an `MFEMObject` and by proxy a 
+must inherit from `MFEMProblemComposer` making it an `MFEMObject` and by proxy a 
 `MooseObject` thus it has a fixed signature constructor and destructor, it has one method
 that has a fixed signature that is called by the executioner. All of the code must
 be within the `Moose::MFEM` namespace for simplicity. An example minimal class looks like:
@@ -194,7 +181,7 @@ be within the `Moose::MFEM` namespace for simplicity. An example minimal class l
 ```cpp
 namespace Moose::MFEM
 {
-class CustomDummyProblemComposer : public ProblemComposerBase
+class CustomDummyProblemComposer : public MFEMProblemComposer
 {
 private:
   type1 param1;
@@ -217,14 +204,14 @@ public:
 ```
 
 The `validParams()` method can be used to generate custom inputs for the problem operator,
-the inputs can be then put in the `MFEMProblemComposer` block of the input files.
+the inputs can be then put in the `ProblemComposer` block of the input files.
 
 ```cpp
 namespace Moose::MFEM
 {
 InputParameters CustomDummyProblemComposer::validParams()
 {
-  InputParameters params = ProblemComposerBase::validParams();
+  InputParameters params = MFEMProblemComposer::validParams();
   params.addParam<type1>("name", "default_value", "description of param");
   .
   .
@@ -244,7 +231,7 @@ namespace Moose::MFEM
 {
 CustomDummyProblemComposer::CustomDummyProblemComposer(
   const InputParameters & parameters)
-  : ProblemComposerBase(parameters) 
+  : MFEMProblemComposer(parameters) 
 {
   param1 = getParam<type1>("name");
   .
@@ -282,17 +269,17 @@ In the unit test example the complete code looks like this:
 ```cpp
 namespace Moose::MFEM
 {
-class CustomDummyProblemComposer : public ProblemComposerBase
+class CustomDummyProblemComposer : public MFEMProblemComposer
 {
 public:
   static InputParameters validParams()
   {
-    InputParameters params = ProblemComposerBase::validParams();
+    InputParameters params = MFEMProblemComposer::validParams();
     return params;
   };
 
   CustomDummyProblemComposer(const InputParameters & parameters)
-    : ProblemComposerBase(parameters) {};
+    : MFEMProblemComposer(parameters) {};
 
   ~CustomDummyProblemComposer() = default;
 

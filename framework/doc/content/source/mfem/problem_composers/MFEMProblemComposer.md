@@ -1,10 +1,10 @@
-# ProblemComposerBase
+# MFEMProblemComposer
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-`ProblemComposerBase` is the base class of those classes that build [ProblemOperator.md]
+`MFEMProblemComposer` is the base class of those classes that build [ProblemOperator.md]
 objects, e.g. when called by an [MFEMSteady.md] or [MFEMTransient.md] executioner object, through the method `createProblemOperator()`.
 The composer itself is created by and stored in the [MFEMProblem.md].
 
