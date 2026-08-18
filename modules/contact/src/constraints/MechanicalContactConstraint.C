@@ -21,7 +21,7 @@
 #include "AugmentedLagrangianContactProblem.h"
 #include "Executioner.h"
 #include "AddVariableAction.h"
-#include "ContactLineSearchBase.h"
+#include "NodeFaceContactLineSearch.h"
 #include "ContactAction.h"
 
 #include "libmesh/string_to_enum.h"
@@ -151,7 +151,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _primary_secondary_jacobian(getParam<bool>("primary_secondary_jacobian")),
     _connected_secondary_nodes_jacobian(getParam<bool>("connected_secondary_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
-    _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(
+    _contact_linesearch(dynamic_cast<NodeFaceContactLineSearch *>(
         _fe_problem.getNonlinearSystemBase(_sys.number()).getLineSearch())),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
     _augmented_lagrange_problem(

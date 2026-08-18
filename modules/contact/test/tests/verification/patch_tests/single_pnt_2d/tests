@@ -94,7 +94,7 @@
     mesh_mode = REPLICATED
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D plane "
-                  "strain single point contact model using a PetscContactLineSearch
+                  "strain single point contact model using a NodeFaceContactLineSearch
     selected "
                   "through a [LineSearch] block instead of the deprecated
     line_search = "
