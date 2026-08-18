@@ -1,64 +1,40 @@
-# Lee's frame traced by per-timestep arc-length continuation.
-#
-# A column and a beam of equal length meet at a right angle, hinged at the
-# column base and at the far end of the beam, with a dead load pressing down
-# on the beam near the joint. The frame resists by sway of the column, and the
-# load-deflection curve is the canonical post-buckling benchmark: it rises to
-# a limit point, falls on a steep descending branch, and snaps back before
-# rising again. The companion input runs the prescribed loading to its
-# failure:
-#   lee_frame_load_control.i  (Newton under load control: nothing to converge
-#                              to above the limit point)
-#
-# Every time step advances the trace by one continuation increment of radius
-# step_size and commits the state it reaches. On the elastic rise the load
-# factor tracks the time; at the limit point it parts from it, falling with
-# the descending branch and turning back up after the snap back, while the
-# time keeps counting arc steps. The path is elastic, so nothing needs
-# committing between increments -- what the per-step trace shows here is the
-# load factor running free of the time on a curve that neither prescribed
-# loading can follow.
-#
-# Geometry: legs 120 long and 2 thick, meshed as an L-shaped strip of 0.5
-# elements, four through the thickness. The load is a traction on the stiff
-# patch at 24 from the joint. lambda = 1 corresponds to a resultant of 5.
-
 leg = 120
 thick = 2
-nx = 240
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
 [Mesh]
-  [square]
+  [column]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = ${nx}
-    ny = ${nx}
+    nx = 4
+    ny = 236
+    xmax = ${thick}
+    ymax = ${fparse leg - thick}
+    elem_type = QUAD4
+    boundary_name_prefix = column
+  []
+  [beam]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 240
+    ny = 4
     xmax = ${leg}
+    ymin = ${fparse leg - thick}
     ymax = ${leg}
     elem_type = QUAD4
+    boundary_name_prefix = beam
   []
-  [interior]
-    type = SubdomainBoundingBoxGenerator
-    input = square
-    block_id = 9
-    bottom_left = '${thick} 0 0'
-    top_right = '${leg} ${fparse leg - thick} 0'
+  [frame]
+    type = StitchMeshGenerator
+    inputs = 'column beam'
+    stitch_boundaries_pairs = 'column_top beam_bottom'
   []
-  [carve]
-    type = BlockDeletionGenerator
-    input = interior
-    block = 9
-  []
-  # near-rigid patches at the supports and under the load spread the point
-  # reactions over the section, so the hinge is a rotation of the patch and
-  # not a finite-strain distortion of the two elements next to a point pin
   [base_patch]
     type = SubdomainBoundingBoxGenerator
-    input = carve
+    input = frame
     block_id = 2
     bottom_left = '0 0 0'
     top_right = '${thick} ${thick} 0'
@@ -77,8 +53,6 @@ nx = 240
     bottom_left = '${fparse thick + 23} ${fparse leg - thick} 0'
     top_right = '${fparse thick + 25} ${leg} 0'
   []
-  # hinges: a single mid-thickness node at each support leaves the section
-  # free to rotate about it
   [column_hinge]
     type = ExtraNodesetGenerator
     input = load_patch
@@ -91,8 +65,6 @@ nx = 240
     new_boundary = beam_hinge
     coord = '${leg} ${fparse leg - thick / 2} 0'
   []
-  # the top face of the load patch, so the load enters as a traction spread
-  # over the stiff patch rather than a point source
   [load_face]
     type = ParsedGenerateSideset
     input = beam_hinge
@@ -112,8 +84,6 @@ nx = 240
 []
 
 [BCs]
-  # the continuation load: a dead traction on the load patch, resultant 5
-  # downward at lambda = 1, at 24 from the joint
   [beam_load]
     type = NeumannBC
     variable = disp_y
@@ -167,10 +137,6 @@ nx = 240
 
 [Problem]
   type = ArcLengthProblem
-  # a radius that resolves the turns of the path, kept through every cutback:
-  # a retry shrinks the load span of the step, not the radius. On the smooth
-  # rise the radius is slack and the load factor tracks the time; past the
-  # limit point the radius is what carries the trace
   step_size = 10
   psi_squared = 0
   correction_type = normal
@@ -219,9 +185,6 @@ nx = 240
   solve_type = NEWTON
   line_search = none
   automatic_scaling = true
-  # pseudo time: counts arc steps; the trace runs past the limit point, down
-  # the descending branch, through the snap back and the negative trough, and
-  # onto the recovery
   dt = 0.1
   end_time = 80
   dtmin = 1e-12

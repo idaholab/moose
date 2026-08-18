@@ -8,7 +8,8 @@ requires that problem type and errors under any other.
 The table it produces has an `increment` column counting the published equilibrium states from zero, a
 `lambda` column holding the load parameter at each of them, and one further column per entry of
 [!param](/VectorPostprocessors/ArcLengthHistory/postprocessors), named after that postprocessor and
-holding its value at the same states.
+holding its value at the same states. A sampled postprocessor cannot itself be named `increment` or
+`lambda`, because those two column names are already taken.
 
 Sampling happens on the `ARC_LENGTH_INCREMENT` execution flag, which
 [!param](/VectorPostprocessors/ArcLengthHistory/execute_on) defaults to. Every postprocessor named in

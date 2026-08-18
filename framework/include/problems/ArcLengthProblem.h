@@ -161,8 +161,15 @@ public:
    *
    * SNESSolve_NEWTONAL ends a spent budget with SNES_DIVERGED_MAX_IT, which is also the reason it
    * ends an increment that ran out of corrector iterations with, so the reason alone does not say
-   * a path was traced to the end of its budget. The count of increments the path started is what
-   * separates the two, because only a budget spent in full reaches the count it allows.
+   * a path was traced to the end of its budget. The count of increments the path started separates
+   * the two everywhere but the last permitted increment, where a corrector that burns out leaves
+   * the same count as a spent budget, and there the nonlinear iteration count at the exit decides:
+   * SNESSolve_NEWTONAL consults its continuation budget only at the boundary a converged increment
+   * opens, so a budget stop leaves the count wherever that increment finished, short of the
+   * iteration cap, while a corrector stopped by the cap itself leaves it sitting exactly at the
+   * cap. Accepting a burned-out corrector would commit a state that is not an equilibrium, whose
+   * contamination the steps that follow inherit, so the corner case of an increment converging on
+   * exactly its last permitted iteration is failed toward a retry, the safe direction.
    *
    * This is where the two endings a transient step has are told apart, so it records the one it
    * reports for onTimestepEnd().
@@ -207,9 +214,8 @@ protected:
    * that one step, and its sign is what makes an increasing step local parameter mean travel in
    * the remembered direction, so a step whose predecessor was descending descends as well.
    *
-   * The load tag is reassembled here with FEProblemBase::computeResidualTags, which runs the
-   * transfers, the MultiApps and the EXEC_LINEAR objects and controls along with the assembly. All
-   * of those therefore run once more per nonlinear iteration than they do in an ordinary solve.
+   * PETSc asks for the tangent load before the residual of the iterate it hands over, so the load
+   * tag still holds the load at the previous iterate and is reassembled here.
    *
    * @param x The iterate to evaluate the load at. PETSc read locks it, so it is never written to
    * @param q The tangent load vector to fill. It arrives zeroed and this problem owns all of it
@@ -218,9 +224,8 @@ protected:
 
   /**
    * Publishes the state of a converged continuation increment: syncs the iterate into the
-   * solution, caches the load factor, records the step local parameter against the deepest one the
-   * step has reached, and executes on EXEC_ARC_LENGTH_INCREMENT, outputting there as well outside a
-   * transient run.
+   * solution, caches the load factor and the step local parameter it was reached at, and executes
+   * on EXEC_ARC_LENGTH_INCREMENT, outputting there as well outside a transient run.
    *
    * A whole continuation is traced within a single step of the solve, so every increment would be
    * output at the one time of that step and an output holding a frame per increment would keep
@@ -237,6 +242,17 @@ protected:
   void executeArcLengthIncrement(SNES snes);
 
   /**
+   * Assembles the load vector tag at the solution the system currently holds, and nothing else.
+   *
+   * PETSc asks for a load of its own before every residual, so this runs more often than an
+   * ordinary residual evaluation does. It goes to the nonlinear system rather than to
+   * FEProblemBase::computeResidualTags, which would run the transfers, the MultiApps and the
+   * EXEC_LINEAR objects along with the assembly and so execute them more than once per nonlinear
+   * iteration.
+   */
+  void assembleLoadTag();
+
+  /**
    * Errors when the assembled load residual is nonzero at a degree of freedom a nodal boundary
    * condition constrains.
    *
@@ -244,6 +260,9 @@ protected:
    * load entry landing in such a row is dropped from the residual PETSc solves with while the
    * tangent load still carries it. The continuation then traces a path against a load it never
    * applies, with nothing to report it.
+   *
+   * Which rows the load reaches is set by the objects the input adds, so the check runs once, at
+   * the first assembled load, and every call after that returns.
    */
   void checkLoadOnConstrainedDofs();
 
@@ -281,7 +300,8 @@ protected:
   const bool _end_on_max_continuation_steps;
 
   /// Whether a transient step runs a continuation, with false solving the step as an ordinary
-  /// prescribed ramp at a load factor equal to the time. Controllable, and held by reference so
+  /// prescribed ramp at the load factor the committed steps and the whole load increment of the
+  /// step add up to. Controllable, and held by reference so
   /// that a [Controls] object writing the parameter is obeyed by the next solve, which replaces
   /// the checkpoint restart between a plain ramp and a continuation started from it
   const bool & _use_continuation;
@@ -345,15 +365,18 @@ private:
   /**
    * @return Whether the solve being made is a continuation. A steady solve always is; a transient
    * step is while the controllable 'use_continuation' holds true, and otherwise it is an ordinary
-   * Newton solve at a prescribed load factor equal to the time
+   * Newton solve at the prescribed load factor the committed steps and the whole load increment of
+   * the step add up to
    */
   bool inContinuation() const;
 
   /**
    * @return Whether the step that just converged dissipated energy, measured by the increment
-   * Verhoosel and de Borst control their continuation with: dtau = (lambda_0 * f^T * du
-   * - dlambda * f^T * u_0) / 2, with f the load pattern, u_0 and lambda_0 the state and load
-   * factor the step started from, and du and dlambda the changes the step made. A descending
+   * Verhoosel and de Borst control their continuation with, carrying the work of the loads held
+   * over the step alongside it: dtau = (lambda_0 * f^T * du + f_held^T * du - dlambda * f^T * u_0)
+   * / 2, with f the load pattern, f_held the pattern of the loads routed to
+   * 'held_load_vector_tag', which is zero where no tag is given, u_0 and lambda_0 the state and
+   * load factor the step started from, and du and dlambda the changes the step made. A descending
    * stretch of the path of a damaging structure sheds load because the structure dissipates, while
    * unloading it elastically, with the damage held by its irreversibility, descends without
    * dissipating: the elastic unload of a linear structure is proportional, which cancels the two
@@ -361,7 +384,7 @@ private:
    * what tells a descent along the path from a walk back down an elastic branch, which converges
    * just as well and which the outcome of the solve alone cannot expose
    */
-  bool stepDissipated();
+  bool stepDissipated() const;
 
   /**
    * Maps the 'correction_type' parameter onto the PETSc correction type

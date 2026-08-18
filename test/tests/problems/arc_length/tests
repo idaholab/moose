@@ -139,11 +139,12 @@
     # The rising branch with the first steps solved as ordinary prescribed ramps: a
     # BoolFunctionControl writes the controllable 'use_continuation' before every step, so any
     # trigger a Control can express -- a function of time here, a postprocessor threshold in a
-    # custom control -- decides which steps are continued. The first three steps are single Newton
+    # custom control -- decides which steps are continued. The first two steps are single Newton
     # solves whose load factor equals the time, and the continuation opens at the committed factor
-    # of 0.3 and steps along the path from there, with the load factor parting from the time on
+    # of 0.2 and steps along the path from there, with the load factor parting from the time on
     # the first continued step.
     recover = false
+    restep = false
     max_parallel = 1
     requirement = 'The system shall expose whether a transient step runs an arc-length '
                   'continuation as a controllable parameter, so that a Controls object can switch '

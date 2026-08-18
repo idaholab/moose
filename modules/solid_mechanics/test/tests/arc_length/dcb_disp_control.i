@@ -1,10 +1,3 @@
-# The DCB of dcb_arclength.i under displacement control: the arm tips are
-# pushed apart at a fixed rate and the load is read back at the tips.
-# Displacement control survives the peak that kills load control, but each
-# serration of the sawtooth reverses the opening, and Newton fails on the
-# first one it cannot cross at any time step size: the run aborts there. The
-# arc-length run rides the sawtooth on.
-
 length = 100
 arm = 3
 precrack = 30
@@ -120,17 +113,10 @@ nx = 100
   [stress]
     type = ADComputeFiniteStrainElasticStress
   []
-  # strengths sized so the cohesive zone spans one or two elements, which is
-  # what makes the crack advance element by element and the curve serrated
-  # the pre-crack is carved from the cohesive properties: ahead of it the
-  # interface carries the real strengths and toughnesses, behind it next to
-  # nothing, so the first load increment fails it into free faces
   [czm_properties]
     type = GenericFunctionMaterial
     boundary = 'lower_arm_upper_arm'
     prop_names = 'N_strength S_strength GIc GIIc'
-    # the pre-crack strip fails into free faces during the first step: its
-    # softening window is thinner than any numerical opening
     prop_values = 'if(x<${precrack},1e-5,100) if(x<${precrack},1.5e-5,150)
                    if(x<${precrack},1e-12,0.28) if(x<${precrack},3e-12,0.8)'
   []

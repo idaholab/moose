@@ -1,38 +1,8 @@
-# Single-edge-notched tension strip pulled by a uniform dead traction on a
-# stiff platen that is free to rotate, with a cohesive ligament across the
-# mid-height section: the resultant of the traction stays on the specimen
-# axis while the crack growing from the notch shifts the section centroid off
-# it, so the moment grows with the crack and the platen tilts. No single
-# prescribable displacement controls this structure -- prescribing any one
-# displacement leaves the rotation free, and the rotation is what the energy
-# release drives -- while clamping the rotation is a different, stiffer
-# experiment. Load control dies at the first crack event near 67 kN, below
-# the peak near 87 kN that the continuation crosses on its way down the whole
-# softening branch. The arc-length trace is the only path through.
-#
-# The run is a single input: prescribed Newton steps ramp the traction at a
-# load factor equal to the time, a [Controls] switch hands the run to the
-# continuation below the first crack event, and every later time step
-# advances the trace by one committed continuation increment, so the cohesive
-# damage accumulates along the path and the load factor is free to fall past
-# the peak. The companion input runs the prescribed loading to its failure:
-#   sent_load_control.i  (Newton under load control: dies at the first crack
-#                         event, before the peak is even reached)
-#
-# Geometry: 60 mm x 150 mm strip (2D plane strain, unit thickness), 2 mm
-# elements, a 6 mm stiff platen bonded on top, and a cohesive interface
-# across the whole mid-height section whose first 12 mm carry near-zero
-# strength: that segment fails into free faces during the first prescribed
-# step and is the notch. lambda = 1 corresponds to a tension of 60 kN per
-# meter of thickness.
-
 width = 0.06
 height = 0.15
 platen = 0.006
 notch_depth = 0.012
 elem = 0.002
-# the ligament must lie on an element line: 0.076 is the 38th row of 2 mm
-# elements, one element above mid-height
 ligament_y = 0.076
 
 [GlobalParams]
@@ -73,8 +43,6 @@ ligament_y = 0.076
     bottom_left = '0 ${height} 0'
     top_right = '${width} ${fparse height + platen} 0'
   []
-  # the cohesive ligament: an interface between the two strip halves alone,
-  # which leaves the platen bonded to the strip
   [split]
     type = BreakMeshByBlockGenerator
     input = platen
@@ -107,9 +75,6 @@ ligament_y = 0.076
 []
 
 [Functions]
-  # the control evaluates at the end time of the step it arms; the bound sits
-  # below the first crack event so the continuation opens from a loaded,
-  # still-smooth state
   [switch_fn]
     type = ParsedFunction
     expression = 't > 0.6'
@@ -126,10 +91,6 @@ ligament_y = 0.076
 []
 
 [ICs]
-  # a nanoscopic initial opening of the interface: the mixed-mode cohesive law
-  # has a 0/0 mode mixity at a jump of exactly zero, whose derivatives poison
-  # the very first Jacobian of the run, and any nonzero jump clears it. The
-  # seed is orders below every physical scale of the problem
   [seed]
     type = FunctionIC
     variable = disp_y
@@ -150,10 +111,6 @@ ligament_y = 0.076
     boundary = bottom_center
     value = 0
   []
-  # the continuation load: a uniform dead traction on the platen top, whose
-  # resultant stays on the specimen axis while the crack shifts the section
-  # centroid, so the moment grows with the crack and the platen rotates
-  # freely. lambda = 1 is 60 kN per meter of thickness
   [tension]
     type = NeumannBC
     variable = disp_y
@@ -179,12 +136,6 @@ ligament_y = 0.076
   [stress]
     type = ADComputeLinearElasticStress
   []
-  # the notch is carved from the cohesive properties: ahead of it the
-  # interface carries the real strength and toughness, behind it next to
-  # nothing. The pre-crack strip gets a strength and a toughness so small
-  # that its softening window is thinner than any numerical opening: a face
-  # there snaps straight to full damage in the first prescribed step, with no
-  # partial-softening state to flicker in
   [czm_properties]
     type = GenericFunctionMaterial
     boundary = lower_upper
@@ -207,8 +158,6 @@ ligament_y = 0.076
 
 [Problem]
   type = ArcLengthProblem
-  # a radius that resolves the crack-front advances, kept through every
-  # cutback: a retry shrinks the load span of the step, not the radius
   step_size = 5e-6
   psi_squared = 0
   correction_type = normal
@@ -242,8 +191,6 @@ ligament_y = 0.076
     point = '0 ${fparse ligament_y - elem} 0'
     execute_on = 'ARC_LENGTH_INCREMENT TIMESTEP_END'
   []
-  # the moment signature: the platen tilt that a prescribed displacement
-  # cannot control
   [rotation]
     type = DifferencePostprocessor
     value1 = corner_right
@@ -284,12 +231,7 @@ ligament_y = 0.076
   line_search = none
   automatic_scaling = true
   dt = 0.05
-  # pseudo time: counts arc steps once the continuation owns the run
   end_time = 30
-  # dt is a pure gauge, so the ladder may go deep at the sharpest crack
-  # events, and a ladder that bottoms out ends the trace where it stands
-  # rather than erroring: the gold holds every committed row, so a trace that
-  # ends early still fails its diff
   dtmin = 1e-12
   error_on_dtmin = false
   nl_max_its = 40

@@ -243,7 +243,7 @@ itself — is rejected, the [TimeStepper](syntax/Executioner/TimeStepper/index.m
 step back, and the retry covers a smaller load span with the same turning radius. The two are
 kept apart deliberately: the solution excursion across a sharp turn is set by the shape of the
 path and does not shrink with the load span, so a retry that shrank the radius with the span
-would confine the corrector exactly when the ladder needs its reach.
+would confine the corrector exactly when the retry needs its reach.
 
 The radius sets the resolution of the trace as well as its robustness. An increment whose arc
 sphere spans a whole feature of the path — a serration of a crack advance, a small snap — converges
@@ -276,7 +276,7 @@ one-shot continuation. [!param](/Problem/ArcLengthProblem/max_continuation_steps
 [!param](/Problem/ArcLengthProblem/lambda_max) and
 [!param](/Problem/ArcLengthProblem/lambda_min) belong to a one-shot path alone, and a transient run
 errors when the input sets one: every step advances by a single increment, so the run owns the step
-budget and the load parameter clamps — the step-local parameter is capped at the step's own
+budget and the load parameter clamps. The step-local parameter is capped at the step's own
 increment of loading and floored at a fixed span of physical unloading sized from the nominal
 increment, so cutbacks shrink what a step may load without confining how deep the corrector may
 reach across a turn, and a descending stretch is traced across steps. Where the run finishes is set
@@ -297,7 +297,7 @@ Writing a file per increment is disabled, though: the increment index stands in 
 frames, and that pseudo-time interleaved with the times the steps advance through would corrupt the
 sequence of an output. An [Outputs] sub-block carrying `ARC_LENGTH_INCREMENT` therefore writes nothing
 under a transient executioner. Ordinary transient output is unaffected — each step writes a frame at
-its own time, which is the load factor it reached — and tracing the path in one shot is the way to get
+its own time — and tracing the path in one shot is the way to get
 the per-increment animation.
 
 ### Switching between plain solves and the continuation
@@ -319,16 +319,7 @@ decides step by step which regime solves: a [BoolFunctionControl.md] switches on
 time, and a custom control can read a postprocessor and hand the run to the continuation when,
 say, a nonlinear iteration count or a damage measure crosses a threshold.
 
-```
-[Controls]
-  [switch]
-    type = BoolFunctionControl
-    parameter = '*/*/use_continuation'
-    function = switch_fn
-    execute_on = 'initial timestep_begin'
-  []
-[]
-```
+!listing modules/solid_mechanics/test/tests/arc_length/sent_arclength.i block=Controls
 
 ### Choosing between the two modes
 
@@ -358,9 +349,9 @@ dissipates is what does [!citep](verhoosel2009). A descent along the path of a d
 structure sheds load because the structure dissipates; unloading it elastically, with the
 irreversible state held by its own irreversibility, descends without dissipating, and the elastic
 unload of a linear structure is proportional, which cancels the dissipation increment
-$\tfrac{1}{2}\left(\Lambda\, \hat{f}^T \Delta u - \Delta\lambda\, \hat{f}^T u\right)$ exactly. A
-converged step whose net load change runs downward without dissipating is therefore failed, its
-retry travels the other way, and the console says so:
+$\tfrac{1}{2}\left(\Lambda\, R_\mathrm{load}^T \Delta u - \Delta\lambda\, R_\mathrm{load}^T u\right)$
+exactly. A converged step whose net load change runs downward without dissipating is therefore
+failed, its retry travels the other way, and the console says so:
 
 ```
 Arc length step descended without dissipating, which is a walk back down an

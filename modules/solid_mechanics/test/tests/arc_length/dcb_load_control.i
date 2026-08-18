@@ -1,9 +1,3 @@
-# The DCB of dcb_arclength.i under plain load control: the same peel forces
-# are ramped directly with time, load factor = t, and every step is an
-# ordinary Newton solve. At the first serration of the sawtooth there is no
-# equilibrium at a higher load, so Newton diverges, the TimeStepper cuts back
-# to dtmin, and the run aborts. The arc-length run rides the sawtooth on.
-
 length = 100
 arm = 3
 precrack = 30
@@ -115,17 +109,10 @@ nx = 100
   [stress]
     type = ADComputeFiniteStrainElasticStress
   []
-  # strengths sized so the cohesive zone spans one or two elements, which is
-  # what makes the crack advance element by element and the curve serrated
-  # the pre-crack is carved from the cohesive properties: ahead of it the
-  # interface carries the real strengths and toughnesses, behind it next to
-  # nothing, so the first load increment fails it into free faces
   [czm_properties]
     type = GenericFunctionMaterial
     boundary = 'lower_arm_upper_arm'
     prop_names = 'N_strength S_strength GIc GIIc'
-    # the pre-crack strip fails into free faces during the first step: its
-    # softening window is thinner than any numerical opening
     prop_values = 'if(x<${precrack},1e-5,100) if(x<${precrack},1.5e-5,150)
                    if(x<${precrack},1e-12,0.28) if(x<${precrack},3e-12,0.8)'
   []
