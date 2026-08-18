@@ -12,65 +12,86 @@
 #include "MortarContactUtils.h"
 #include "MathUtils.h"
 
+#include "metaphysicl/raw_type.h"
+
 #include <array>
 #include <cmath>
 
 namespace ContactUtils = Moose::Mortar::Contact;
 
-TEST(FrictionProjection, StickAndSlipRoots)
+using MetaPhysicL::raw_value;
+
+template <typename T>
+class FrictionProjectionTest : public ::testing::Test
 {
-  const std::array<Real, 1> stick_pressure = {1.0};
-  const std::array<Real, 1> stick_augmented = {1.0};
+};
+
+using FrictionProjectionTypes = ::testing::Types<Real, ADReal>;
+TYPED_TEST_SUITE(FrictionProjectionTest, FrictionProjectionTypes);
+
+TYPED_TEST(FrictionProjectionTest, StickAndSlipRoots)
+{
+  using T = TypeParam;
+
+  const std::array<T, 1> stick_pressure = {1.0};
+  const std::array<T, 1> stick_augmented = {1.0};
   const auto ac_stick =
-      ContactUtils::alartCurnierFrictionResidual(stick_pressure, stick_augmented, 2.0);
+      ContactUtils::alartCurnierFrictionResidual(stick_pressure, stick_augmented, T(2.0));
   const auto hsw_stick =
-      ContactUtils::hueberStadlerWohlmuthFrictionResidual(stick_pressure, stick_augmented, 2.0);
-  EXPECT_DOUBLE_EQ(ac_stick[0], 0.0);
-  EXPECT_DOUBLE_EQ(hsw_stick[0], 0.0);
+      ContactUtils::hueberStadlerWohlmuthFrictionResidual(stick_pressure, stick_augmented, T(2.0));
+  EXPECT_DOUBLE_EQ(raw_value(ac_stick[0]), 0.0);
+  EXPECT_DOUBLE_EQ(raw_value(hsw_stick[0]), 0.0);
 
-  const std::array<Real, 1> slip_pressure = {2.0};
-  const std::array<Real, 1> slip_augmented = {4.0};
+  const std::array<T, 1> slip_pressure = {2.0};
+  const std::array<T, 1> slip_augmented = {4.0};
   const auto ac_slip =
-      ContactUtils::alartCurnierFrictionResidual(slip_pressure, slip_augmented, 2.0);
+      ContactUtils::alartCurnierFrictionResidual(slip_pressure, slip_augmented, T(2.0));
   const auto hsw_slip =
-      ContactUtils::hueberStadlerWohlmuthFrictionResidual(slip_pressure, slip_augmented, 2.0);
-  EXPECT_DOUBLE_EQ(ac_slip[0], 0.0);
-  EXPECT_DOUBLE_EQ(hsw_slip[0], 0.0);
+      ContactUtils::hueberStadlerWohlmuthFrictionResidual(slip_pressure, slip_augmented, T(2.0));
+  EXPECT_DOUBLE_EQ(raw_value(ac_slip[0]), 0.0);
+  EXPECT_DOUBLE_EQ(raw_value(hsw_slip[0]), 0.0);
 }
 
-TEST(FrictionProjection, SeparationAndAugmentedNormalSign)
+TYPED_TEST(FrictionProjectionTest, SeparationAndAugmentedNormalSign)
 {
-  const Real open_augmented_pressure = ContactUtils::augmentedNormalPressure(1.0, 2.0);
-  EXPECT_DOUBLE_EQ(open_augmented_pressure, -1.0);
-  EXPECT_DOUBLE_EQ(ContactUtils::coulombFrictionRadius(0.5, open_augmented_pressure), 0.0);
+  using T = TypeParam;
 
-  const std::array<Real, 1> pressure = {0.0};
-  const std::array<Real, 1> augmented_pressure = {3.0};
-  const auto ac = ContactUtils::alartCurnierFrictionResidual(pressure, augmented_pressure, 0.0);
+  const T open_augmented_pressure = ContactUtils::augmentedNormalPressure(T(1.0), T(2.0));
+  EXPECT_DOUBLE_EQ(raw_value(open_augmented_pressure), -1.0);
+  EXPECT_DOUBLE_EQ(raw_value(ContactUtils::coulombFrictionRadius(T(0.5), open_augmented_pressure)),
+                   0.0);
+
+  const std::array<T, 1> pressure = {0.0};
+  const std::array<T, 1> augmented_pressure = {3.0};
+  const auto ac = ContactUtils::alartCurnierFrictionResidual(pressure, augmented_pressure, T(0.0));
   const auto hsw =
-      ContactUtils::hueberStadlerWohlmuthFrictionResidual(pressure, augmented_pressure, 0.0);
-  EXPECT_DOUBLE_EQ(ac[0], 0.0);
-  EXPECT_DOUBLE_EQ(hsw[0], 0.0);
+      ContactUtils::hueberStadlerWohlmuthFrictionResidual(pressure, augmented_pressure, T(0.0));
+  EXPECT_DOUBLE_EQ(raw_value(ac[0]), 0.0);
+  EXPECT_DOUBLE_EQ(raw_value(hsw[0]), 0.0);
 }
 
-TEST(FrictionProjection, ThreeDimensionalProjection)
+TYPED_TEST(FrictionProjectionTest, ThreeDimensionalProjection)
 {
-  const std::array<Real, 2> augmented_pressure = {3.0, 4.0};
-  const auto projection = ContactUtils::projectToFrictionBall(augmented_pressure, 2.0);
-  EXPECT_DOUBLE_EQ(projection[0], 1.2);
-  EXPECT_DOUBLE_EQ(projection[1], 1.6);
-  EXPECT_DOUBLE_EQ(MathUtils::norm(projection), 2.0);
+  using T = TypeParam;
+
+  const std::array<T, 2> augmented_pressure = {3.0, 4.0};
+  const auto projection = ContactUtils::projectToFrictionBall(augmented_pressure, T(2.0));
+  EXPECT_DOUBLE_EQ(raw_value(projection[0]), 1.2);
+  EXPECT_DOUBLE_EQ(raw_value(projection[1]), 1.6);
+  EXPECT_DOUBLE_EQ(raw_value(MathUtils::norm(projection)), 2.0);
 }
 
-TEST(FrictionProjection, Homogeneity)
+TYPED_TEST(FrictionProjectionTest, Homogeneity)
 {
-  const std::array<Real, 2> pressure = {0.7, -0.2};
-  const std::array<Real, 2> augmented_pressure = {2.0, -1.0};
-  const Real radius = 0.8;
-  const Real alpha = 3.0;
-  const std::array<Real, 2> scaled_pressure = {alpha * pressure[0], alpha * pressure[1]};
-  const std::array<Real, 2> scaled_augmented = {alpha * augmented_pressure[0],
-                                                alpha * augmented_pressure[1]};
+  using T = TypeParam;
+
+  const std::array<T, 2> pressure = {0.7, -0.2};
+  const std::array<T, 2> augmented_pressure = {2.0, -1.0};
+  const T radius = 0.8;
+  const T alpha = 3.0;
+  const std::array<T, 2> scaled_pressure = {alpha * pressure[0], alpha * pressure[1]};
+  const std::array<T, 2> scaled_augmented = {alpha * augmented_pressure[0],
+                                             alpha * augmented_pressure[1]};
 
   const auto ac = ContactUtils::alartCurnierFrictionResidual(pressure, augmented_pressure, radius);
   const auto ac_scaled =
@@ -82,56 +103,41 @@ TEST(FrictionProjection, Homogeneity)
 
   for (const auto i : index_range(pressure))
   {
-    EXPECT_NEAR(ac_scaled[i], alpha * ac[i], 1e-14);
-    EXPECT_NEAR(hsw_scaled[i], alpha * alpha * hsw[i], 1e-14);
+    EXPECT_NEAR(raw_value(ac_scaled[i]), raw_value(alpha * ac[i]), 1e-14);
+    EXPECT_NEAR(raw_value(hsw_scaled[i]), raw_value(alpha * alpha * hsw[i]), 1e-14);
   }
 }
 
-TEST(FrictionProjection, PositiveWeightRelationship)
+TYPED_TEST(FrictionProjectionTest, PositiveWeightRelationship)
 {
-  const std::array<Real, 2> pressure = {0.6, -0.1};
-  const std::array<Real, 2> augmented_pressure = {1.5, -0.5};
-  const Real radius = 0.9;
-  const Real weight = std::max(radius, MathUtils::norm(augmented_pressure));
-  ASSERT_GT(weight, 0.0);
+  using T = TypeParam;
+
+  const std::array<T, 2> pressure = {0.6, -0.1};
+  const std::array<T, 2> augmented_pressure = {1.5, -0.5};
+  const T radius = 0.9;
+  const T weight = std::max(radius, MathUtils::norm(augmented_pressure));
+  ASSERT_GT(raw_value(weight), 0.0);
 
   const auto ac = ContactUtils::alartCurnierFrictionResidual(pressure, augmented_pressure, radius);
   const auto hsw =
       ContactUtils::hueberStadlerWohlmuthFrictionResidual(pressure, augmented_pressure, radius);
   for (const auto i : index_range(pressure))
-    EXPECT_NEAR(hsw[i], weight * ac[i], 1e-14);
+    EXPECT_NEAR(raw_value(hsw[i]), raw_value(weight * ac[i]), 1e-14);
 }
 
-TEST(FrictionProjection, DegreeTwoPressureScaleCompensation)
+TYPED_TEST(FrictionProjectionTest, DegreeTwoDegenerateState)
 {
-  const std::array<Real, 2> pressure = {0.6, -0.1};
-  const std::array<Real, 2> augmented_pressure = {1.5, -0.5};
-  const Real radius = 0.9;
-  const Real pressure_scale = 2.0;
-  const Real alpha = 3.0;
-  const std::array<Real, 2> scaled_pressure = {alpha * pressure[0], alpha * pressure[1]};
-  const std::array<Real, 2> scaled_augmented = {alpha * augmented_pressure[0],
-                                                alpha * augmented_pressure[1]};
+  using T = TypeParam;
 
+  const std::array<T, 2> pressure = {2.0, -3.0};
+  const std::array<T, 2> augmented_pressure = {0.0, 0.0};
+  const auto ac = ContactUtils::alartCurnierFrictionResidual(pressure, augmented_pressure, T(0.0));
   const auto hsw =
-      ContactUtils::hueberStadlerWohlmuthFrictionResidual(pressure, augmented_pressure, radius);
-  const auto hsw_scaled = ContactUtils::hueberStadlerWohlmuthFrictionResidual(
-      scaled_pressure, scaled_augmented, alpha * radius);
-  for (const auto i : index_range(pressure))
-    EXPECT_NEAR(hsw_scaled[i] / (alpha * pressure_scale), alpha * hsw[i] / pressure_scale, 1e-14);
-}
-
-TEST(FrictionProjection, DegreeTwoDegenerateState)
-{
-  const std::array<Real, 2> pressure = {2.0, -3.0};
-  const std::array<Real, 2> augmented_pressure = {0.0, 0.0};
-  const auto ac = ContactUtils::alartCurnierFrictionResidual(pressure, augmented_pressure, 0.0);
-  const auto hsw =
-      ContactUtils::hueberStadlerWohlmuthFrictionResidual(pressure, augmented_pressure, 0.0);
+      ContactUtils::hueberStadlerWohlmuthFrictionResidual(pressure, augmented_pressure, T(0.0));
 
   for (const auto i : index_range(pressure))
   {
-    EXPECT_DOUBLE_EQ(ac[i], pressure[i]);
-    EXPECT_DOUBLE_EQ(hsw[i], pressure[i]);
+    EXPECT_DOUBLE_EQ(raw_value(ac[i]), raw_value(pressure[i]));
+    EXPECT_DOUBLE_EQ(raw_value(hsw[i]), raw_value(pressure[i]));
   }
 }
