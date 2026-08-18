@@ -1,5 +1,7 @@
 # TorchScriptProfileFunctorMaterial
 
+!if! function=hasLibtorch()
+
 !syntax description /FunctorMaterials/TorchScriptProfileFunctorMaterial
 
 ## Overview
@@ -133,3 +135,11 @@ Linear interpolation therefore gives `profile_a = 11` and `profile_b = 4.5` at t
 !syntax inputs /FunctorMaterials/TorchScriptProfileFunctorMaterial
 
 !syntax children /FunctorMaterials/TorchScriptProfileFunctorMaterial
+
+!if-end!
+
+!else
+This object evaluates a TorchScript model that returns sampled one-dimensional profiles and
+publishes those profiles as interpolated functor material properties.
+
+!include libtorch/libtorch_warning.md
