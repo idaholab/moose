@@ -617,6 +617,11 @@ EOF
         apt-get install -y --no-install-recommends "${INSTALLS[@]}"
     fi
 
+    # Install bc on Ubuntu (available on rocky) for coverage
+    if is_ubuntu; then
+        apt-get install -y --no-install-recommends bc
+    fi
+
     # Clean up
     clean_system_packages
     rm -rf ${ROOT_BUILD_DIR}
