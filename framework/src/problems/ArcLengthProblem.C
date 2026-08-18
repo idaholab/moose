@@ -13,6 +13,7 @@
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "Conversion.h"
+#include "DisplacedProblem.h"
 #include "MooseEnum.h"
 #include "MooseUtils.h"
 #include "MooseVariableBase.h"
@@ -585,13 +586,23 @@ ArcLengthProblem::assembleLoadTag()
 {
   const std::set<TagID> load_tag = {_arclength_nl->loadVectorTag()};
 
-  // The system assembles the tag on its own, and what is set around it here is the state
-  // FEProblemBase::computeResidualTags sets for that assembly and clears afterward. Going through
-  // the problem instead would run the whole per-iteration orchestration, the transfers, the
-  // MultiApps and the EXEC_LINEAR objects included, once more per nonlinear iteration.
+  // The system assembles the tag on its own, and what surrounds it here is the state
+  // FEProblemBase::computeResidualTags sets for that assembly, along with the displaced mesh
+  // move it makes before it. Going through the problem instead would run the whole per-iteration
+  // orchestration, the transfers, the MultiApps and the EXEC_LINEAR objects included, once more
+  // per nonlinear iteration.
   ADReal::do_derivatives = false;
   _current_execute_on_flag = EXEC_LINEAR;
   setCurrentResidualVectorTags(load_tag);
+
+  if (_displaced_problem)
+  {
+    computeSystems(EXEC_PRE_DISPLACE);
+    _displaced_problem->updateMesh();
+    if (_mortar_data->hasDisplacedObjects())
+      updateMortarMesh();
+  }
+
   _safe_access_tagged_vectors = false;
 
   _arclength_nl->computeResidualTags(load_tag);

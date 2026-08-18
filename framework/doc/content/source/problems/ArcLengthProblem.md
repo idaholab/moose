@@ -49,7 +49,9 @@ Whether the load needs a second tag depends on how it responds to the solution:
   follows a deforming surface, or a source term that is a function of the unknown. Its derivative
   belongs in the load Jacobian, so name [!param](/Problem/ArcLengthProblem/load_matrix_tag) in
   `matrix_tags` as well. The same double-count guard applies: replace the matrix tags rather than
-  appending with `extra_matrix_tags`.
+  appending with `extra_matrix_tags`. A follower load on a displaced mesh assembles on the current
+  configuration: the displaced mesh is moved to the iterate before every assembly of the load tag,
+  the tangent-load evaluations between residuals included.
 
 !alert warning title=Strongly enforced Dirichlet conditions at loaded degrees of freedom
 A [DirichletBC.md] zeroes the residual row at each constrained degree of freedom, and it does so in
