@@ -109,6 +109,9 @@ protected:
    */
   const typename OutputTools<ComputeValueType>::VariableValue & uOlder() const;
 
+  /// Gets the current boundary ID and throws error if the variable is nodal
+  BoundaryID currentBoundaryID() const;
+
   /// This is a regular kernel so we cast to a regular MooseVariable, hides base _var
   MooseVariableField<ComputeValueType> & _var;
 
@@ -141,9 +144,6 @@ protected:
 
   /// Current node (valid only for nodal kernels)
   const Node * const & _current_node;
-
-  /// The current boundary ID
-  const BoundaryID & _current_boundary_id;
 
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
