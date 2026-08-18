@@ -1,0 +1,78 @@
+# Test specification for the Popp (2012) locally quadratic transformed dual basis
+# on higher-order (TRI6 / QUAD8) mortar contact secondary faces.
+#
+# All inputs use node-conforming BreakMeshByBlock interfaces promoted to second
+# order with ElementOrderConversionGenerator (SECOND_ORDER_NONFULL). The matching
+# HEX20 patch (single QUAD8 secondary face) runs at the default derivative
+# backing-array size. The TET10 patch splits each interface square into four TRI6
+# triangles meeting at a center node, so each secondary triangle couples to several
+# primary triangles and the mortar residual needs a larger derivative container;
+# those cases are capability-gated with ad_size>=100 (validated with a build of
+# that size) and run in the larger-AD CIVET recipe.
+#
+# The default-AD CIVET recipe therefore exercises the TRI6 transform only at the
+# coefficient level, in the TransformedDualBasisTest unit test (transformed diagonal,
+# biorthogonality, partition of unity); the end-to-end TRI6 oracle (the tet10 case
+# above) runs only in the larger-AD recipe, because its fan-split interface exceeds
+# the default 64-derivative container. No default-capacity end-to-end TRI6 case is
+# included.
+
+[Tests]
+  issues = '#33558'
+  design = 'Transformed_dual_basis_for_higher_order_mortar.md'
+  [patch]
+    requirement = 'The system shall recover a spatially uniform mortar contact pressure using the '
+                  'locally quadratic transformed dual basis on a node-conforming higher-order '
+                  'secondary contact face discretized with '
+    [hex20]
+      type = 'CSVDiff'
+      input = 'transformed-dual-patch-3d.i'
+      cli_args = 'Mesh/gen/elem_type=HEX8 '
+                 'Outputs/file_base=transformed-dual-patch-3d_hex20_out'
+      csvdiff = 'transformed-dual-patch-3d_hex20_out.csv'
+      abs_zero = 1.0e-8
+      detail = 'QUAD8 faces on a HEX20 volume mesh, and'
+    []
+    [tet10]
+      type = 'CSVDiff'
+      input = 'transformed-dual-patch-3d.i'
+      cli_args = 'Mesh/gen/elem_type=TET4 '
+                 'Outputs/file_base=transformed-dual-patch-3d_tet10_out'
+      csvdiff = 'transformed-dual-patch-3d_tet10_out.csv'
+      abs_zero = 1.0e-8
+      # The fan-split TRI6 interface couples each secondary triangle to several
+      # primary triangles, so the mortar residual needs more than the default 64
+      # AD derivatives; measured need is just above 64, and 100 is conservative
+      # headroom. The gold is solution-based, so it is valid for any build with
+      # ad_size >= this threshold.
+      capabilities = 'ad_size>=100'
+      detail = 'TRI6 faces on a TET10 volume mesh.'
+    []
+  []
+  [vcp]
+    design = 'Transformed_dual_basis_for_higher_order_mortar.md VariableCondensationPreconditioner.md'
+    requirement = 'The system shall precondition the transformed dual mortar Lagrange multiplier '
+                  'with the variable condensation preconditioner by '
+    [exact]
+      type = 'CSVDiff'
+      input = 'transformed-dual-vcp-3d.i'
+      csvdiff = 'transformed-dual-vcp-3d_out.csv'
+      abs_zero = 1.0e-8
+      detail = 'inverting the non-diagonal coupling matrix exactly to recover the uniform contact '
+               'pressure, and'
+    []
+    [diagonal_warning]
+      type = 'RunApp'
+      input = 'transformed-dual-vcp-3d.i'
+      cli_args = 'Preconditioning/vcp/is_lm_coupling_diagonal=true'
+      expect_out = 'non-diagonal coupling matrix D'
+      # The guardrail is a warning, not an error: the diagonal-only inverse only
+      # degrades the preconditioner, so the solve still converges. modules/testroot
+      # sets allow_warnings = false (promoting warnings to errors), so allow the
+      # warning here to observe it while the run succeeds.
+      allow_warnings = true
+      detail = 'warning that a diagonal-only coupling inverse degrades the preconditioner when the '
+               'transformed coupling matrix is not diagonal.'
+    []
+  []
+[]

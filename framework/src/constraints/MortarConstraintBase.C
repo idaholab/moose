@@ -11,6 +11,7 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 #include "MooseVariableFE.h"
+#include "TransformedDualBasis.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -160,6 +161,16 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   if (_use_dual)
     _assembly.activateDual();
 
+  // The Popp et al. (2012) transformed dual basis is applied automatically for dual mortar. It is
+  // mutually exclusive with the Petrov-Galerkin approach: the transform repairs the dual trace
+  // basis used for the multiplier field (Popp, Seitz, Gee & Wall, CMAME 264:67-80 (2013), Eq. 40),
+  // but Petrov-Galerkin weights the multiplier with the standard basis (Eq. 41), whose
+  // normalization on QUAD8/TRI6 faces is a separate positivity problem the transform does not
+  // touch. It is therefore not activated under Petrov-Galerkin. The transform still fires only on
+  // QUAD8/TRI6 secondary faces (gated in Assembly::reinitDual).
+  if (_use_dual && !_use_petrov_galerkin)
+    _assembly.activateTransformedDual();
+
   if (_use_petrov_galerkin && (!_use_dual))
     paramError("use_petrov_galerkin",
                "We need to set `use_dual = true` while using the Petrov-Galerkin approach");
@@ -173,6 +184,34 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     paramError("aux_lm",
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
+
+  // The transformed dual basis (see above) is not activated under Petrov-Galerkin, so a
+  // Petrov-Galerkin dual mortar problem on a QUAD8/TRI6 secondary face would silently fall back to
+  // libMesh's ill-posed standard dual (a zero or negative dual diagonal). Detect a higher-order
+  // secondary face here and error out rather than solving with an unsupported discretization. The
+  // secondary lower-dimensional subdomain is small, and the scan stops at the first match; the
+  // collective max keeps the decision consistent across ranks on a distributed mesh.
+  if (_use_petrov_galerkin && _use_dual)
+  {
+    bool higher_order_secondary = false;
+    for (const auto * const lower_elem :
+         _mci_mesh.getMesh().active_subdomain_elements_ptr_range(secondarySubdomain()))
+      if (Moose::Mortar::transformedDualBasisSupported(lower_elem->type()))
+      {
+        higher_order_secondary = true;
+        break;
+      }
+    comm().max(higher_order_secondary);
+    if (higher_order_secondary)
+      paramError(
+          "use_petrov_galerkin",
+          "The Petrov-Galerkin dual mortar approach is not supported on QUAD8/TRI6 secondary "
+          "faces. The transformed dual basis that makes the standard dual well posed on such "
+          "faces cannot be combined with Petrov-Galerkin, which weights the multiplier with a "
+          "standard (non-positive) basis. Use a first-order secondary face, or unset "
+          "`use_petrov_galerkin` to use the default transformed dual basis.");
+  }
+
   if (isParamSetByUser("quadrature") && isParamSetByUser("segment_quadrature"))
     paramError("quadrature", "Only one of 'quadrature' and 'segment_quadrature' should be set.");
 

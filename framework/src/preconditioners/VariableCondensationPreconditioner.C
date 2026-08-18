@@ -16,8 +16,10 @@
 #include "NonlinearSystem.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "MooseEnum.h"
+#include "TransformedDualBasis.h"
 
 #include "libmesh/coupling_matrix.h"
+#include "libmesh/elem.h"
 #include "libmesh/libmesh_common.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -116,6 +118,53 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
       paramError("variable ", var_name, " does not exist in the system");
     const unsigned int id = _nl.system().variable_number(var_name);
     _lm_var_ids.push_back(id);
+  }
+
+  // The transformed dual basis of Popp et al. (2012) is applied automatically for dual mortar on
+  // quadratic (QUAD8/TRI6) secondary faces. It restores a well-posed dual basis there at the cost
+  // of a non-diagonal coupling matrix D (biorthogonality holds against the transformed trace basis,
+  // not the standard one). With is_lm_coupling_diagonal = true VCP inverts only the diagonal of D,
+  // so the preconditioner is only approximate and convergence may suffer; the linear solve itself
+  // remains accurate because the Krylov method still solves the true operator. Recommend the exact
+  // LU path (is_lm_coupling_diagonal = false) in that case. Detect it by checking whether any dual
+  // LM variable lives on a lower-dimensional (mortar secondary face) subdomain carrying a
+  // transform-supported element type. The lower-dimensional test (elem->dim() < mesh dimension) is
+  // what makes QUAD8/TRI6 a mortar face here rather than a volume element: a 2D volume mesh of
+  // QUAD8 elements is transform-supported by type but never carries the transformed dual, so it
+  // must not trigger the warning.
+  if (_is_lm_coupling_diagonal)
+  {
+    const auto mesh_dim = _mesh.dimension();
+    for (const auto & var_name : _lm_var_names)
+    {
+      const auto & lm_var = _nl.getVariable(0, var_name);
+      if (!lm_var.useDual())
+        continue;
+      const auto & lm_blocks = lm_var.activeSubdomains();
+      bool transformed = false;
+      // One-time construction-cost scan: O(active elements) per dual LM variable, stopping at the
+      // first transform-supported secondary face, so O(n_lm_vars * n_elements) worst case.
+      for (const auto * const elem : _mesh.getMesh().active_element_ptr_range())
+        if (elem->dim() < mesh_dim &&
+            (lm_blocks.empty() || lm_blocks.count(elem->subdomain_id())) &&
+            Moose::Mortar::transformedDualBasisSupported(elem->type()))
+        {
+          transformed = true;
+          break;
+        }
+      if (transformed)
+      {
+        mooseWarning(
+            "The Lagrange multiplier variable '",
+            var_name,
+            "' uses a dual basis on quadratic (QUAD8/TRI6) secondary faces, where the transformed "
+            "dual basis of Popp et al. (2012) is applied and yields a non-diagonal coupling matrix "
+            "D. With 'is_lm_coupling_diagonal = true' VCP inverts only the diagonal of D, "
+            "degrading "
+            "the preconditioner. Set 'is_lm_coupling_diagonal = false' to invert D exactly.");
+        break;
+      }
+    }
   }
 
   // get coupled variable ids from the coupled variable names
