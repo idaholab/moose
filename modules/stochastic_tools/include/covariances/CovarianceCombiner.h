@@ -16,7 +16,7 @@
  * Sum or element-wise (Hadamard) Product.
  *
  *   Sum:     K(x, x') = K1(x, x') + K2(x, x')
- *   Product: K(x, x') = K1(x, x') * K2(x, x')   [element-wise]
+ *   Product: K(x, x') = K1(x, x') * K2(x, x')   (element-wise product)
  *
  * ── Hyperparameter management ─────────────────────────────────────────────
  * No new tunable hyperparameters are introduced by this class. All parameters
@@ -55,33 +55,30 @@
  *
  * Each gradient call propagates down the tree through virtual dispatch.
  */
+
 class CovarianceCombiner : public CovarianceFunctionBase
 {
 public:
   static InputParameters validParams();
   CovarianceCombiner(const InputParameters & parameters);
 
-  /// Computes the combined covariance matrix from the two child kernels
   void computeCovarianceMatrix(RealEigenMatrix & K,
                                const RealEigenMatrix & x,
                                const RealEigenMatrix & xp,
                                const bool is_self_covariance) const override;
 
-  /// Routes dK/dhp to the owning sub-kernel and applies the chain rule for
-  /// Product. Returns false if no sub-kernel owns the hyperparameter.
   bool computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
                        const std::string & hyper_param_name,
                        unsigned int ind) const override;
 
 private:
-  /// The supported combination modes
+
   enum class Operation
   {
     Sum,    ///< K = K1 + K2
-    Product ///< K = K1 .* K2   (element-wise / Hadamard)
+    Product ///< K = K1 .* K2
   };
 
-  /// Resolved operation from the 'operation' input parameter
   const Operation _operation;
 };

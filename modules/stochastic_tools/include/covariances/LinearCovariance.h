@@ -21,13 +21,6 @@
  *   sigma_b^2  -- bias variance, constant offset added to every entry
  *   sigma_n^2  -- noise variance, added to the diagonal (self-covariance only)
  *   c          -- per-dimension offset vector (pivot point of the kernel)
- *
- * Because the kernel depends on x and x' individually (not just their
- * difference), it is non-stationary: the covariance changes with the
- * absolute position in input space, not only with the distance between points.
- *
- * Setting c = 0 and sigma_b^2 = 0 reduces the kernel to a simple dot-product:
- *   K(x, x') = sigma_v^2 * x^T x'
  */
 class LinearCovariance : public CovarianceFunctionBase
 {
@@ -35,15 +28,13 @@ public:
   static InputParameters validParams();
   LinearCovariance(const InputParameters & parameters);
 
-  /// Generates the Covariance Matrix given two sets of points in the parameter space
   void computeCovarianceMatrix(RealEigenMatrix & K,
                                const RealEigenMatrix & x,
                                const RealEigenMatrix & xp,
                                const bool is_self_covariance) const override;
 
-  /// Core linear kernel computation (static so derivative routines can reuse it)
   /// Evaluates K(ii,jj) = sigma_b^2 + sigma_v^2 * sum_k (x_ik - c_k)(x'_jk - c_k)
-  /// and optionally adds sigma_n^2 to the diagonal when is_self_covariance is true.
+  /// and adds sigma_n^2 to the diagonal when is_self_covariance is true.
   static void LinearFunction(RealEigenMatrix & K,
                              const RealEigenMatrix & x,
                              const RealEigenMatrix & xp,
@@ -69,8 +60,7 @@ public:
                           const int ind);
 
 private:
-  /// Offset (c) per input dimension; the pivot point through which the linear
-  /// functions pass. One entry per input parameter dimension.
+  /// Offset (c) per input dimension
   const std::vector<Real> & _c;
 
   /// Signal variance (sigma_v^2): scales the inner product (x-c)^T(x'-c)

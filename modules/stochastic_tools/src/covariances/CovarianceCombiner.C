@@ -11,10 +11,6 @@
 
 registerMooseObject("StochasticToolsApp", CovarianceCombiner);
 
-// ---------------------------------------------------------------------------
-// validParams
-// ---------------------------------------------------------------------------
-
 InputParameters
 CovarianceCombiner::validParams()
 {
@@ -42,10 +38,6 @@ CovarianceCombiner::validParams()
   return params;
 }
 
-// ---------------------------------------------------------------------------
-// Constructor
-// ---------------------------------------------------------------------------
-
 CovarianceCombiner::CovarianceCombiner(const InputParameters & parameters)
   : CovarianceFunctionBase(parameters),
     _operation(getParam<MooseEnum>("operation") == "Sum" ? Operation::Sum : Operation::Product)
@@ -58,10 +50,6 @@ CovarianceCombiner::CovarianceCombiner(const InputParameters & parameters)
                " were provided.");
 }
 
-// ---------------------------------------------------------------------------
-// computeCovarianceMatrix
-// ---------------------------------------------------------------------------
-
 void
 CovarianceCombiner::computeCovarianceMatrix(RealEigenMatrix & K,
                                              const RealEigenMatrix & x,
@@ -70,13 +58,6 @@ CovarianceCombiner::computeCovarianceMatrix(RealEigenMatrix & K,
 {
   switch (_operation)
   {
-    // ── Sum ────────────────────────────────────────────────────────────────
-    // K = K1 + K2
-    //
-    // is_self_covariance is forwarded to each sub-kernel so that each kernel's
-    // own noise term (sigma_n_i^2 * I) is added to its diagonal, yielding a
-    // combined diagonal noise of (sigma_n1^2 + sigma_n2^2) on K.  This is the
-    // correct behaviour for an additive GP kernel mixture.
     case Operation::Sum:
     {
       _covariance_functions[0]->computeCovarianceMatrix(K, x, xp, is_self_covariance);
@@ -88,13 +69,7 @@ CovarianceCombiner::computeCovarianceMatrix(RealEigenMatrix & K,
       break;
     }
 
-    // ── Product ────────────────────────────────────────────────────────────
-    // K = K1 .* K2   (Hadamard / element-wise product)
-    //
-    // Sub-kernels are always evaluated with is_self_covariance = false because
-    // (K1_base + sigma_n1^2 * I) .* (K2_base + sigma_n2^2 * I) does not reduce
-    // to a clean additive diagonal noise; see class-level documentation for how
-    // to add noise to a product kernel via a surrounding Sum.
+
     case Operation::Product:
     {
       _covariance_functions[0]->computeCovarianceMatrix(K, x, xp, false);
@@ -108,34 +83,16 @@ CovarianceCombiner::computeCovarianceMatrix(RealEigenMatrix & K,
   }
 }
 
-// ---------------------------------------------------------------------------
-// computedKdhyper
-// ---------------------------------------------------------------------------
-
 bool
 CovarianceCombiner::computedKdhyper(RealEigenMatrix & dKdhp,
                                      const RealEigenMatrix & x,
                                      const std::string & hyper_param_name,
                                      unsigned int ind) const
 {
-  // ── Routing logic ─────────────────────────────────────────────────────────
-  // Every hyperparameter is stored as "object_name:param_name".  Each sub-kernel's
-  // computedKdhyper() first checks whether hyper_param_name begins with its own
-  // name, so calling both sub-kernels in sequence is safe: the wrong sub-kernel
-  // will always return false without modifying dKdhp.  This also supports nested
-  // CovarianceCombiner trees transparently via virtual dispatch.
 
   switch (_operation)
   {
-    // ── Sum ────────────────────────────────────────────────────────────────
-    // K = K1 + K2
-    //
-    // Derivative:
-    //   dK/dhp = dK1/dhp + dK2/dhp
-    //
-    // Because K1 and K2 own disjoint prefix-namespaced hyperparameter sets,
-    // at most one sub-kernel returns true for any given hyper_param_name.
-    // No further manipulation of dKdhp is needed.
+
     case Operation::Sum:
     {
       if (_covariance_functions[0]->computedKdhyper(dKdhp, x, hyper_param_name, ind))
@@ -145,24 +102,11 @@ CovarianceCombiner::computedKdhyper(RealEigenMatrix & dKdhp,
       return false;
     }
 
-    // ── Product ────────────────────────────────────────────────────────────
-    // K = K1 .* K2
-    //
-    // Derivative (product rule):
-    //   if hp belongs to K1:  dK/dhp1 = (dK1/dhp1) .* K2_base
-    //   if hp belongs to K2:  dK/dhp2 = K1_base .* (dK2/dhp2)
-    //
-    // K1_base / K2_base are re-evaluated here with is_self_covariance = false,
-    // consistent with computeCovarianceMatrix for Product.
-    //
-    // The intermediate dK_sub matrix is sized n x n because computedKdhyper
-    // is always invoked with the square training-data Gram matrix (x == x).
     case Operation::Product:
     {
       const unsigned int n = x.rows();
       RealEigenMatrix dK_sub(n, n);
 
-      // ── Try sub-kernel 1 ─────────────────────────────────────────────
       if (_covariance_functions[0]->computedKdhyper(dK_sub, x, hyper_param_name, ind))
       {
         // dK/dhp1 = (dK1/dhp1) .* K2_base
@@ -172,7 +116,6 @@ CovarianceCombiner::computedKdhyper(RealEigenMatrix & dKdhp,
         return true;
       }
 
-      // ── Try sub-kernel 2 ─────────────────────────────────────────────
       if (_covariance_functions[1]->computedKdhyper(dK_sub, x, hyper_param_name, ind))
       {
         // dK/dhp2 = K1_base .* (dK2/dhp2)
@@ -186,6 +129,5 @@ CovarianceCombiner::computedKdhyper(RealEigenMatrix & dKdhp,
     }
   }
 
-  // Unreachable; silences compiler warnings on enum switches without default.
   return false;
 }
