@@ -1,81 +1,81 @@
 [Mesh]
-    type = MFEMMesh
-    file = ../mesh/star.mesh
+  type = MFEMMesh
+  file = ../mesh/star.mesh
 []
 
 [Problem]
-    type = MFEMProblem
+  type = MFEMProblem
 []
 
 [FESpaces]
-    [H1FESpace]
-        type = MFEMScalarFESpace
-        fec_type = H1
-        fec_order = FIRST
-    []
+  [H1FESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
 []
 
 [Variables]
-    [u]
-        type = MFEMVariable
-        fespace = H1FESpace
-    []
+  [u]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
 []
 
 [Functions]
-    [u_exact]
-        type = ParsedFunction
-        expression = 10
-    []
+  [u_exact]
+    type = ParsedFunction
+    expression = 10
+  []
 
-    [cylindrical]
-        type = MFEMCoordinateTransformations
-        coord_type = RZ
-        inv_r_eps = 1e-100
-    []
+  [cylindrical]
+    type = MFEMCoordinateTransformations
+    coord_type = RZ
+    inv_r_eps = 1e-100
+  []
 []
 
 [FunctorMaterials]
-    [material]
-        type = MFEMGenericFunctorMaterial
-        prop_names = 'diffCoef massCoef'
-        prop_values = 'cylindrical_r cylindrical_inv_r'
-        block = 1
-    []
+  [material]
+    type = MFEMGenericFunctorMaterial
+    prop_names = 'diffCoef massCoef'
+    prop_values = 'cylindrical_r cylindrical_inv_r'
+    block = 1
+  []
 []
 
 [BCs]
-    [Dirichlet]
-        type = MFEMScalarDirichletBC
-        variable = u
-        boundary = '1'
-        coefficient = u_exact
-    []
+  [Dirichlet]
+    type = MFEMScalarDirichletBC
+    variable = u
+    boundary = '1'
+    coefficient = u_exact
+  []
 []
 
 [Kernels]
-    [diffusion]
-        type = MFEMDiffusionKernel
-        variable = u
-        coefficient = diffCoef
-    []
+  [diffusion]
+    type = MFEMDiffusionKernel
+    variable = u
+    coefficient = diffCoef
+  []
 
-    [mass]
-        type = MFEMMassKernel
-        variable = u
-        coefficient = massCoef
-    []
+  [mass]
+    type = MFEMMassKernel
+    variable = u
+    coefficient = massCoef
+  []
 []
 
 [Solvers]
-    [main]
-        type = MFEMMUMPS
-    []
+  [main]
+    type = MFEMMUMPS
+  []
 []
 
 [Executioner]
-    type = MFEMSteady
-    device = cpu
+  type = MFEMSteady
+  device = cpu
 []
 
 [Outputs]

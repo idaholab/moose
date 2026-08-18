@@ -33,7 +33,6 @@
 #include <sstream>
 
 registerMooseObject("MooseApp", MFEMProblem);
-<<<<<<< HEAD
 
 namespace
 {
@@ -57,8 +56,6 @@ getMFEMSolverDependencies(const InputParameters & parameters)
 }
 }
 
-=======
->>>>>>> 970a73538d (Registration design change. Refs #32375)
 InputParameters
 MFEMProblem::validParams()
 {
