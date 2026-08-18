@@ -137,4 +137,174 @@
                   'that neither prescribed load stepping nor prescribed displacement stepping can '
                   'trace.'
   []
+  [dcb_arclength_smoke]
+    type = CSVDiff
+    input = dcb_arclength.i
+    cli_args = 'Executioner/end_time=1.0 Outputs/exodus=false '
+               'Outputs/file_base=dcb_arclength_smoke_out'
+    csvdiff = 'dcb_arclength_smoke_out.csv dcb_arclength_smoke_out_path.csv'
+    requirement = 'The system shall fail a near-zero-strength pre-crack strip and climb the '
+                  'elastic peel of the arms under prescribed-ramp Newton steps whose load factor '
+                  'equals the time, then advance the trace by one committed continuation '
+                  'increment per step once a Controls object switches use_continuation on, all '
+                  'within a single input.'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [dcb_arclength]
+    type = CSVDiff
+    input = dcb_arclength.i
+    csvdiff = 'dcb_arclength_out.csv dcb_arclength_out_path.csv'
+    prereq = dcb_arclength_smoke
+    # The gold is the fingerprint of the whole method: without the per-increment damage commits
+    # the envelope past the peak comes out stiffer than the path, and without the dissipation
+    # guard a reflected step walks the trace back down the elastic branch to zero, either of
+    # which moves every row of this file.
+    requirement = 'The system shall step along the peel path of a double cantilever beam one '
+                  'committed continuation increment per time step, committing the cohesive '
+                  'damage of every increment, carrying the trace up to the peak of the peel '
+                  'resistance and down the descending serrated tearing branch that follows it, '
+                  'with the load factor parting from the time, failing and mirroring any step '
+                  'that descends without dissipating, and reaching states past the loads at '
+                  'which both prescribed-load and prescribed-displacement Newton solves fail.'
+    capabilities = 'petsc>=3.22.0'
+    heavy = true
+    recover = false
+    max_parallel = 1
+    # about 400 committed increments at a tooth-resolving radius
+    max_time = 1800
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [lee_frame_arclength_smoke]
+    type = CSVDiff
+    input = lee_frame_arclength.i
+    cli_args = 'Executioner/end_time=3 Outputs/exodus=false '
+               'Outputs/file_base=lee_frame_arclength_smoke_out'
+    csvdiff = 'lee_frame_arclength_smoke_out.csv lee_frame_arclength_smoke_out_path.csv'
+    requirement = 'The system shall advance an elastic finite strain frame by one committed '
+                  'continuation increment per time step on the smooth rise of its load path, '
+                  'where the committed load factor tracks the time.'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [lee_frame_arclength]
+    type = CSVDiff
+    input = lee_frame_arclength.i
+    csvdiff = 'lee_frame_arclength_out.csv lee_frame_arclength_out_path.csv'
+    prereq = lee_frame_arclength_smoke
+    # the whole path is elastic, so this gold is the pure-kinematics fingerprint of the
+    # per-timestep stepping: the limit point, the descending branch, the deflection reversal of
+    # the snap back, the negative trough, and the recovery are all committed rows
+    requirement = 'The system shall step along the post-buckling path of Lee\'s frame one '
+                  'committed continuation increment per time step, carrying the trace over the '
+                  'limit point at which prescribed load stepping fails, down the descending '
+                  'branch through the deflection reversal of the snap back that prescribed '
+                  'displacement stepping cannot follow, through a deeply negative load factor '
+                  'trough, and onto the recovering branch, with the load factor tracking the '
+                  'time on the smooth rise and parting from it at the limit point.'
+    capabilities = 'petsc>=3.22.0'
+    heavy = true
+    recover = false
+    max_parallel = 1
+    # about 800 committed increments of a smooth elastic path
+    max_time = 1800
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [sent_arclength_smoke]
+    type = CSVDiff
+    input = sent_arclength.i
+    cli_args = 'Executioner/end_time=0.8 Outputs/exodus=false '
+               'Outputs/file_base=sent_arclength_smoke_out'
+    csvdiff = 'sent_arclength_smoke_out.csv sent_arclength_smoke_out_path.csv'
+    requirement = 'The system shall ramp a dead traction on a rotating-platen notched tension '
+                  'strip with a cohesive ligament using prescribed Newton steps whose load '
+                  'factor equals the time, then advance the trace by committed continuation '
+                  'increments when a Controls object switches use_continuation on, within a '
+                  'single input.'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [sent_arclength]
+    type = CSVDiff
+    input = sent_arclength.i
+    csvdiff = 'sent_arclength_out.csv sent_arclength_out_path.csv'
+    prereq = sent_arclength_smoke
+    cli_args = 'Outputs/exodus=false'
+    requirement = 'The system shall step along the equilibrium path of a notched tension strip '
+                  'with a cohesive ligament loaded through a freely rotating platen, one '
+                  'committed continuation increment per time step with the cohesive damage of '
+                  'every increment committed, crossing the crack event at which prescribed load '
+                  'stepping fails, carrying the trace to the peak load and down the softening '
+                  'branch as the crack crosses the ligament and the platen rotation grows, on a '
+                  'structure where the free rotation leaves no single displacement to prescribe.'
+    capabilities = 'petsc>=3.22.0'
+    heavy = true
+    recover = false
+    max_parallel = 1
+    # about 600 committed increments over the climb, the peak, and the descent
+    max_time = 1800
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [sent_load_control]
+    type = RunException
+    input = sent_load_control.i
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = 'The system shall demonstrate that a dead traction ramped directly with plain '
+                  'Newton solves cannot converge across the first crack event of a cohesive '
+                  'ligament, below the peak load, so the time step is cut back to its minimum '
+                  'and the run aborts where the arc-length continuation crosses the event and '
+                  'traces the whole softening branch.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+  [lee_frame_load_control]
+    type = RunException
+    input = lee_frame_load_control.i
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = 'The system shall demonstrate that the same frame load ramped directly with '
+                  'plain Newton solves has no equilibrium to converge to above the limit point '
+                  'of the post-buckling path, so the time step is cut back to its minimum and '
+                  'the run aborts within a fraction of a percent of the load factor at which '
+                  'the arc-length continuation rounds the limit point and traces on.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+  [dcb_load_control]
+    type = RunException
+    input = dcb_load_control.i
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = 'The system shall demonstrate that a peel force ramped directly with plain '
+                  'Newton solves has no equilibrium to converge to above the first serration of '
+                  'a coarse cohesive interface, so the time step is cut back to its minimum and '
+                  'the run aborts where the arc-length continuation traces on.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+  [dcb_disp_control]
+    type = RunException
+    input = dcb_disp_control.i
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = 'The system shall demonstrate that a prescribed opening cannot follow the '
+                  'opening reversal of a cohesive serration at any time step size, so the time '
+                  'step is cut back to its minimum and the run aborts where the arc-length '
+                  'continuation traces on.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
 []
