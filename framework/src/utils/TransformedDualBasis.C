@@ -41,10 +41,10 @@ computeTransformedDualCoeffs(const Elem & elem,
 
   const unsigned int dim = elem.dim();
   const unsigned int n = FEInterface::n_shape_functions(fe_type, &elem);
-  // Requires a nodal (Lagrange) trace basis (shape index i == local node i, so n == n_nodes());
+  // Requires a nodal Lagrange basis (shape index i == local node i, so n == n_nodes());
   // Assembly::reinitDual guarantees this before calling.
 
-  // Standard trace shapes phi[i][qp]; all_shapes fills a pre-sized container, so size it first.
+  // Standard shapes phi[i][qp]; all_shapes fills a pre-sized container, so size it first.
   std::vector<std::vector<Real>> phi(n, std::vector<Real>(pts.size()));
   FEInterface::all_shapes(dim, fe_type, &elem, pts, phi);
 
@@ -60,10 +60,10 @@ computeTransformedDualCoeffs(const Elem & elem,
         A(i, j) += JxW[qp] * phi[i][qp] * phi[j][qp];
     }
 
-  // Locally-quadratic transform Ntilde = T N preserves the partition of unity, so the dual
-  // reproduces constants (patch consistency). alpha = 1/5 (Popp et al., SIAM J. Sci. Comput.
-  // 34(4):B421-B446, 2012, Sec. 4.4.1) keeps the transformed diagonal positive on a full face
-  // (QUAD8 -> 1/5, 4/5; TRI6 -> 1/15, 1/10); do not change it without re-deriving that positivity.
+  // Locally-quadratic transform Ntilde = T N; preserves the partition of unity so the dual
+  // reproduces constants. alpha = 1/5 (Popp et al., SIAM J. Sci. Comput. 34(4):B421-B446, 2012,
+  // Sec. 4.4.1) keeps the transformed diagonal positive (QUAD8 -> 1/5, 4/5; TRI6 -> 1/15, 1/10);
+  // do not change it without re-deriving that positivity.
   const Real alpha = 1.0 / 5.0;
   DenseMatrix<Real> T(n, n);
   for (const auto i : make_range(n))

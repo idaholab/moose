@@ -161,10 +161,9 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   if (_use_dual)
     _assembly.activateDual();
 
-  // The transformed dual basis is applied automatically for dual mortar (firing only on QUAD8/TRI6
-  // secondary faces, gated in Assembly::reinitDual), but not under Petrov-Galerkin: the transform
-  // repairs the dual trace basis, whereas Petrov-Galerkin weights the multiplier with the standard
-  // basis, whose QUAD8/TRI6 normalization is a separate positivity problem the transform ignores.
+  // Apply the transformed dual basis automatically for dual mortar (fires only on QUAD8/TRI6
+  // secondary faces, gated in Assembly::reinitDual), but not under Petrov-Galerkin, which weights
+  // the multiplier with the standard basis -- a separate positivity problem the transform ignores.
   if (_use_dual && !_use_petrov_galerkin)
     _assembly.activateTransformedDual();
 

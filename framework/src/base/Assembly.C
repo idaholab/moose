@@ -2281,14 +2281,12 @@ Assembly::reinitDual(const Elem * elem,
   mooseAssert(elem_dim == _mesh_dimension - 1,
               "Dual shape functions should only be computed on lower dimensional face elements");
 
-  // The transform is only needed on higher-order (TRI6/QUAD8) secondary faces, whose standard dual
-  // diagonal is non-positive: build its coefficients below and record the element so
-  // reinitLowerDElem can expand them. Everything else keeps the standard dual.
+  // The transform applies only on TRI6/QUAD8 secondary faces, whose standard dual diagonal is
+  // non-positive; all other faces keep the standard dual.
   const bool transformed =
       needTransformedDual() && Moose::Mortar::transformedDualBasisSupported(elem->type());
-  // Drop any coefficients cached for a previous face before rebuilding; the element pointer is set
-  // after the loop, only once coefficients actually exist, so a stale matrix can never be reused
-  // (e.g. under mesh adaptivity or p-refinement, where a freed element address may be reallocated).
+  // Clear any coefficients cached for a previous face. The element pointer is set only after the
+  // loop builds coefficients, so a reused element address cannot pick up a stale matrix.
   _transformed_dual_coeff.clear();
   _transformed_dual_coeff_elem = nullptr;
 
@@ -2297,25 +2295,22 @@ Assembly::reinitDual(const Elem * elem,
     FEBase & fe_lower = *it.second;
     // We use customized quadrature rule for integration along the mortar segment elements
     fe_lower.set_calculate_default_dual_coeff(false);
-    // This explicit solve always computes libMesh's standard dual coefficients. When the transform
-    // is active they are overridden in reinitLowerDElem; the standard solve still runs because a
-    // supported (QUAD8) and unsupported (QUAD9) face share the same FEType and fe_lower and cannot
-    // be suppressed per element (one small discarded dense solve per segment).
+    // Always compute libMesh's standard dual coefficients; when the transform is active they are
+    // overridden in reinitLowerDElem. (A supported QUAD8 and an unsupported QUAD9 share one FEType,
+    // so the standard solve cannot be skipped per element.)
     fe_lower.reinit_dual_shape_coeffs(elem, pts, JxW);
 
-    // Build the transformed coefficients for the trace types carrying dual shape data (the LM
-    // variable), gated on a nodal Lagrange trace basis as computeTransformedDualCoeffs requires: it
-    // assumes shape index i == local node i. The family check is necessary because non-nodal
-    // families (e.g. HIERARCHIC) can also satisfy n_shape_functions == n_nodes without that
-    // correspondence; any such basis keeps the standard dual.
+    // Build the transformed coefficients for the LM variable's shape data. Require a nodal Lagrange
+    // basis: computeTransformedDualCoeffs assumes shape index i == local node i, which non-nodal
+    // families (e.g. HIERARCHIC) can violate even when n_shape_functions == n_nodes.
     if (transformed && _fe_shape_data_dual_lower.count(it.first) && it.first.family == LAGRANGE &&
         FEInterface::n_shape_functions(it.first, elem) == elem->n_nodes())
       Moose::Mortar::computeTransformedDualCoeffs(
           *elem, it.first, pts, JxW, _transformed_dual_coeff[it.first]);
   }
 
-  // Record the element only now that its coefficients exist, so reinitLowerDElem injects them for
-  // this face and treats every reinit not preceded by a successful build as standard dual.
+  // Record the element only now that coefficients exist, so reinitLowerDElem injects them for this
+  // face and treats any reinit without a successful build as standard dual.
   if (!_transformed_dual_coeff.empty())
     _transformed_dual_coeff_elem = elem;
 }
@@ -2352,11 +2347,9 @@ Assembly::reinitLowerDElem(const Elem * elem,
     FEBase & fe_lower = *it.second;
     FEType fe_type = it.first;
 
-    // When the transform is active for this face, inject the coefficients built in reinitDual into
-    // libMesh before reinit; compute_dual_shape_functions then expands them, overriding the
-    // standard dual. reinit leaves dual_coeff untouched while calculate_default_dual_coeff is
-    // false, so the injected matrix survives. The element guard skips injection on non-mortar
-    // reinitLowerDElem calls (no preceding reinitDual), which keep the standard dual.
+    // When the transform is active for this face, inject the coefficients built in reinitDual;
+    // reinit then expands them (dual_coeff is untouched while calculate_default_dual_coeff is
+    // false, so they survive). The element guard skips non-mortar calls, keeping the standard dual.
     if (needTransformedDual() && _transformed_dual_coeff_elem == elem &&
         _transformed_dual_coeff.count(fe_type))
       const_cast<DenseMatrix<Real> &>(fe_lower.get_dual_coeff()) =
@@ -2374,9 +2367,9 @@ Assembly::reinitLowerDElem(const Elem * elem,
             const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_d2phi()));
     }
 
-    // The dual basis is get_dual_phi()/get_dual_dphi()/get_dual_d2phi(), expanded by reinit from
-    // dual_coeff: transformed coefficients when active (injected above), otherwise the standard
-    // dual -- the correct fallback for unsupported faces and non-nodal LM bases.
+    // The dual basis (get_dual_phi()/dphi/d2phi) is expanded by reinit from dual_coeff: the
+    // transformed coefficients when active, otherwise the standard dual (the fallback for
+    // unsupported faces and non-nodal LM bases).
     if (FEShapeData * fesd = _fe_shape_data_dual_lower[fe_type].get())
     {
       fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower.get_dual_phi()));
