@@ -2286,8 +2286,11 @@ Assembly::reinitDual(const Elem * elem,
   // reinitLowerDElem can expand them. Everything else keeps the standard dual.
   const bool transformed =
       needTransformedDual() && Moose::Mortar::transformedDualBasisSupported(elem->type());
-  if (transformed)
-    _transformed_dual_coeff_elem = elem;
+  // Drop any coefficients cached for a previous face before rebuilding; the element pointer is set
+  // after the loop, only once coefficients actually exist, so a stale matrix can never be reused
+  // (e.g. under mesh adaptivity or p-refinement, where a freed element address may be reallocated).
+  _transformed_dual_coeff.clear();
+  _transformed_dual_coeff_elem = nullptr;
 
   for (const auto & it : _fe_lower[elem_dim])
   {
@@ -2301,13 +2304,20 @@ Assembly::reinitDual(const Elem * elem,
     fe_lower.reinit_dual_shape_coeffs(elem, pts, JxW);
 
     // Build the transformed coefficients for the trace types carrying dual shape data (the LM
-    // variable), gated on a nodal trace basis (n_shape_functions == n_nodes) as
-    // computeTransformedDualCoeffs requires; a non-nodal LM basis keeps the standard dual.
-    if (transformed && _fe_shape_data_dual_lower.count(it.first) &&
+    // variable), gated on a nodal Lagrange trace basis as computeTransformedDualCoeffs requires: it
+    // assumes shape index i == local node i. The family check is necessary because non-nodal
+    // families (e.g. HIERARCHIC) can also satisfy n_shape_functions == n_nodes without that
+    // correspondence; any such basis keeps the standard dual.
+    if (transformed && _fe_shape_data_dual_lower.count(it.first) && it.first.family == LAGRANGE &&
         FEInterface::n_shape_functions(it.first, elem) == elem->n_nodes())
       Moose::Mortar::computeTransformedDualCoeffs(
           *elem, it.first, pts, JxW, _transformed_dual_coeff[it.first]);
   }
+
+  // Record the element only now that its coefficients exist, so reinitLowerDElem injects them for
+  // this face and treats every reinit not preceded by a successful build as standard dual.
+  if (!_transformed_dual_coeff.empty())
+    _transformed_dual_coeff_elem = elem;
 }
 
 void
