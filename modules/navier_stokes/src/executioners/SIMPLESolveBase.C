@@ -287,7 +287,7 @@ SIMPLESolveBase::validParams()
       "passive_scalar_petsc_options_value passive_scalar_petsc_options_value "
       "passive_scalar_absolute_tolerance "
       "passive_scalar_l_tol passive_scalar_l_abs_tol passive_scalar_l_max_its",
-      "passive_scalar Equation");
+      "Passive Scalars Advection Equation");
 
   /*
    * Parameters to control the solution of each participating media radiation equation
