@@ -10,6 +10,6 @@
     abs_zero = 1e-08
     requirement = 'The Kokkos system shall include ability to include reaction contributions to the residual nodes of a finite element mesh.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

@@ -10,7 +10,7 @@
       exodiff = 'kokkos_element_extreme_value_out.e'
       detail = 'the variable reaches the extreme (max/min) value and'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [proxy]
       type = 'CSVDiff'
@@ -18,7 +18,7 @@
       csvdiff = 'kokkos_element_proxy_extreme_value_out.csv'
       detail = 'the proxy variable reaches the extreme (max/min) value.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

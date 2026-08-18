@@ -9,7 +9,7 @@
       input = 'kokkos_stateful_prop_spatial_test.i'
       detail = 'writing the stateful material properties into a checkpoint file.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [load_checkpoint]
       type = Exodiff
@@ -17,7 +17,7 @@
       exodiff = 'kokkos_stateful_prop_spatial_test_restart_out.e'
       detail = 'loading the checkpoint file that contains the stateful material properties.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
       prereq = 'restart/write_checkpoint'
     []
   []
@@ -34,7 +34,7 @@
                   AuxKernels/active=\'\''
       detail = 'a restarted material declares a stateful material property that was not stored.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
       prereq = 'restart/write_checkpoint'
     []
     [state_mismatch]
@@ -44,7 +44,7 @@
       cli_args = 'Materials/stateful/declare_older=true'
       detail = 'a restarted material declares a stateful material property that has different number of states with the stored property.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
       prereq = 'restart/write_checkpoint'
     []
     [ambiguity]
@@ -54,7 +54,7 @@
       cli_args = 'Materials/active=another_stateful'
       detail = 'a new material declares a stateful property with the same name with a stored property.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
       prereq = 'restart/write_checkpoint'
     []
   []
@@ -69,7 +69,7 @@
                 AuxKernels/active=\'\''
     requirement = 'In a restarted calculation, the Kokkos system shall not error when a new material declares a new stateful property.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
     prereq = 'restart/write_checkpoint'
     recover = false
   []

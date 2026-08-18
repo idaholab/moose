@@ -8,7 +8,7 @@
     requirement = 'The Kokkos system shall provide a time derivative kernel using automatic differentation.'
     design = 'KokkosADTimeDerivative.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [test_jacobian]
     type = 'PetscJacobianTester'
@@ -20,7 +20,7 @@
     requirement = 'The Jacobian from a Kokkos-based time derivative kernel shall be perfect.'
     design = 'KokkosADTimeDerivative.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [coupled]
@@ -30,7 +30,7 @@
     requirement = 'The Kokkos system shall provide a coupled time derivative kernel using automatic differentation.'
     design = 'KokkosADCoupledTimeDerivative.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [coupled_jacobian]
     type = 'PetscJacobianTester'
@@ -42,7 +42,7 @@
     requirement = 'The Jacobian from a Kokkos-based coupled variable time derivative kernel shall be perfect.'
     design = 'KokkosADCoupledTimeDerivative.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [separate]
@@ -53,6 +53,6 @@
     requirement = 'The Kokkos system shall be able to compute residual and Jacobian separately with AD kernels.'
     design = 'Executioner.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

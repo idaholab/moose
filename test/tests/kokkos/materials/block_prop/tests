@@ -8,6 +8,6 @@
     exodiff = 'kokkos_block_prop_test_out.e'
     requirement = 'The Kokkos system shall support retrieving a material property along with the list of valid subdomains and bypass material property checks.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

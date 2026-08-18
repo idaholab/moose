@@ -10,7 +10,7 @@
       csvdiff = 'kokkos_nonlinear_variable_out.csv'
       detail = 'for a nonlinear variable,'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [nonlinear_variable_proxy]
       type = 'CSVDiff'
@@ -18,7 +18,7 @@
       csvdiff = 'kokkos_nonlinear_variable_proxy_out.csv'
       detail = 'for a nonlinear variable using a proxy variable,'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [aux_nodal]
       type = 'CSVDiff'
@@ -26,7 +26,7 @@
       csvdiff = 'kokkos_aux_nodal_out.csv'
       detail = 'for an auxiliary nodal variable,'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [aux_elemental]
       type = 'CSVDiff'
@@ -35,7 +35,7 @@
       cli_args = 'AuxVariables/aux/family=MONOMIAL Outputs/file_base=kokkos_aux_elemental_out'
       detail = 'for an auxiliary elemental variable.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []
