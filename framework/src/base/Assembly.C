@@ -2347,6 +2347,19 @@ Assembly::reinitLowerDElem(const Elem * elem,
     FEBase & fe_lower = *it.second;
     FEType fe_type = it.first;
 
+    // When the Popp (2012) transformed dual is active for this higher-order face, hand the
+    // transformed coefficients (built in reinitDual) to libMesh before reinit so its
+    // compute_dual_shape_functions expands them into the dual trace basis, overriding the
+    // non-positive-diagonal standard dual. dual_coeff is left untouched by reinit while
+    // calculate_default_dual_coeff is false (set in reinitDual), so the injected matrix survives
+    // and is expanded against the current segment shapes. The element guard ensures the
+    // coefficients belong to this same face; non-mortar reinitLowerDElem calls (no preceding
+    // reinitDual) skip the injection and keep libMesh's standard dual.
+    if (needTransformedDual() && _transformed_dual_coeff_elem == elem &&
+        _transformed_dual_coeff.count(fe_type))
+      const_cast<DenseMatrix<Real> &>(fe_lower.get_dual_coeff()) =
+          libmesh_map_find(_transformed_dual_coeff, fe_type);
+
     fe_lower.reinit(elem);
 
     if (FEShapeData * fesd = _fe_shape_data_lower[fe_type].get())
@@ -2359,88 +2372,21 @@ Assembly::reinitLowerDElem(const Elem * elem,
             const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_d2phi()));
     }
 
-    // Dual shape functions need to be computed after primal basis being initialized
+    // Dual shape functions need to be computed after primal basis being initialized. The dual trace
+    // basis is libMesh's own get_dual_phi()/get_dual_dphi()/get_dual_d2phi(), which fe_lower.reinit
+    // expanded from dual_coeff: the Popp (2012) transformed coefficients when the transform is
+    // active for this face (injected above), or the standard dual otherwise. The standard dual is
+    // the correct fallback both for faces that do not support the transform and for supported faces
+    // whose LM trace basis is not nodal (the mixed-order fallback gated in reinitDual), so no error
+    // is raised here.
     if (FEShapeData * fesd = _fe_shape_data_dual_lower[fe_type].get())
     {
-      // When the Popp (2012) transformed dual is active for this higher-order face, expand the dual
-      // trace basis from the transformed coefficients (built in reinitDual) and the standard shapes
-      // just reinit'd at the current segment points, overriding libMesh's non-positive-diagonal
-      // standard dual. The element guard ensures the coefficients belong to this same face.
-      const bool transformed = needTransformedDual() && _transformed_dual_coeff_elem == elem &&
-                               _transformed_dual_coeff.count(fe_type);
-      if (transformed)
-      {
-        const DenseMatrix<Real> & coeff = libmesh_map_find(_transformed_dual_coeff, fe_type);
-        const auto & phi = fe_lower.get_phi();
-        const auto & grad_phi = fe_lower.get_dphi();
-        const std::size_t n = phi.size();
-        const std::size_t nqp = n ? phi[0].size() : 0;
-        mooseAssert(coeff.m() == n && coeff.n() == n,
-                    "Transformed dual coefficient size must match the number of trace shapes");
-
-        // Overwrite libMesh's standard dual buffers in place with the transformed dual, reusing its
-        // own storage instead of maintaining parallel MOOSE-owned buffers. fe_lower.reinit above
-        // already sized get_dual_phi()/get_dual_dphi() (and get_dual_d2phi() when needed) to
-        // [n][nqp] and filled them with the standard (non-positive-diagonal) dual; we replace those
-        // values here and then alias them, mirroring the shallowCopy of the standard-dual else
-        // branch below. This is safe because these buffers are recomputed on every fe_lower.reinit
-        // and are not read between this overwrite and the next reinit.
-        auto & dual_phi = const_cast<std::vector<std::vector<Real>> &>(fe_lower.get_dual_phi());
-        auto & dual_grad_phi =
-            const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower.get_dual_dphi());
-        for (const auto j : make_range(n))
-        {
-          dual_phi[j].assign(nqp, 0.0);
-          dual_grad_phi[j].assign(nqp, RealGradient());
-        }
-
-        const bool need_second = _need_second_derivative_neighbor.count(fe_type);
-        const std::vector<std::vector<TensorValue<Real>>> * second_phi = nullptr;
-        std::vector<std::vector<TensorValue<Real>>> * dual_second_phi = nullptr;
-        if (need_second)
-        {
-          second_phi = &fe_lower.get_d2phi();
-          dual_second_phi =
-              &const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_dual_d2phi());
-          for (const auto j : make_range(n))
-            (*dual_second_phi)[j].assign(nqp, TensorValue<Real>());
-        }
-
-        // dual_phi_j = sum_i coeff(i, j) phi_i, applied to values, gradients and (if needed) second
-        // derivatives. This mirrors libMesh's compute_dual_shape_functions but is hand-rolled
-        // because libMesh exposes no public setter for a dual coefficient matrix (FE::_dual_coeff),
-        // which would otherwise let us hand our coefficients to libMesh and reuse its expansion.
-        for (const auto j : make_range(n))
-          for (const auto i : make_range(n))
-          {
-            const Real c = coeff(i, j);
-            for (const auto qp : make_range(nqp))
-            {
-              dual_phi[j][qp] += c * phi[i][qp];
-              dual_grad_phi[j][qp] += c * grad_phi[i][qp];
-              if (need_second)
-                (*dual_second_phi)[j][qp] += c * (*second_phi)[i][qp];
-            }
-          }
-
-        fesd->_phi.shallowCopy(dual_phi);
-        fesd->_grad_phi.shallowCopy(dual_grad_phi);
-        if (need_second)
-          fesd->_second_phi.shallowCopy(*dual_second_phi);
-      }
-      else
-      {
-        // Standard libMesh dual. This is the correct path both for faces that do not support the
-        // transform and for supported faces whose LM trace basis is not nodal (the mixed-order
-        // fallback gated in reinitDual), so no error is raised here.
-        fesd->_phi.shallowCopy(
-            const_cast<std::vector<std::vector<Real>> &>(fe_lower.get_dual_phi()));
-        fesd->_grad_phi.shallowCopy(
-            const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower.get_dual_dphi()));
-        if (_need_second_derivative_neighbor.count(fe_type))
-          fesd->_second_phi.shallowCopy(
-              const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_dual_d2phi()));
-      }
+      fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower.get_dual_phi()));
+      fesd->_grad_phi.shallowCopy(
+          const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower.get_dual_dphi()));
+      if (_need_second_derivative_neighbor.count(fe_type))
+        fesd->_second_phi.shallowCopy(
+            const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_dual_d2phi()));
     }
   }
   if (!_unique_fe_lower_helper.empty())

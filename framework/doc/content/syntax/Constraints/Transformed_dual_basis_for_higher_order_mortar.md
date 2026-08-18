@@ -101,8 +101,11 @@ variable itself; the transform is applied automatically:
 []
 ```
 
-The transform has no effect on lower-order or QUAD9 faces, and it composes with edge dropping
-(`correct_edge_dropping = true`).
+The transform has no effect on lower-order or QUAD9 faces. The regression tests run it with
+edge-dropping correction enabled (`correct_edge_dropping = true`) on fully-covered, node-conforming
+interfaces, where the mortar segments tile the entire secondary face and the positive-diagonal
+guarantee above holds. That guarantee is established only for such full-face coverage; partial or
+nonmatching coverage that genuinely drops secondary support is not validated here.
 
 !alert note title=Reported weighted gap becomes a neighbor-weighted blend
 Because the transformed trace basis mixes each vertex with its adjacent mid-edge nodes, the
