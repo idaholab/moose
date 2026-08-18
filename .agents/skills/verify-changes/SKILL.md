@@ -16,6 +16,10 @@ works. This skill owns verification execution and evidence; it does not decide
 whether a PR is ready, assess test SQA metadata, modify review conversations,
 or publish anything.
 
+Use the `run-tests` skill for `run_tests`/TestHarness mechanics - locating it,
+scoping to a subset of tests, and reading failure types (DIFF, CRASH,
+EXODIFF, CSVDIFF, etc.).
+
 ## Step 1 - Establish the verification scope
 
 1. Find the repository root and read the applicable `AGENTS.md` files for the
