@@ -36,7 +36,6 @@
     csvdiff = 'self_adjoint_amr_forward.csv self_adjoint_amr_adjoint.csv'
     cli_args = 'Mesh/refine/type=RefineSidesetGenerator Mesh/refine/input=gmg
                 Mesh/refine/boundaries=left Mesh/refine/refinement=2
-                Outputs/file_base=self_adjoint_amr
                 Outputs/forward/file_base=self_adjoint_amr_forward
                 Outputs/adjoint/file_base=self_adjoint_amr_adjoint'
     issues = '#30377'
