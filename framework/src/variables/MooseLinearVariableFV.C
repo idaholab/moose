@@ -34,40 +34,6 @@ using namespace Moose;
 
 registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
-namespace
-{
-void
-addBuiltInGradientMethodIfNeeded(FEProblemBase & fe_problem, const GradientMethodName & method_name)
-{
-  if (fe_problem.hasFVGradientMethod(method_name))
-    return;
-
-  if (method_name == "green-gauss")
-  {
-    auto params = fe_problem.getMooseApp().getFactory().getValidParams("FVGreenGaussGradient");
-    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name, params);
-  }
-  else if (method_name == "green-gauss-venkatakrishnan")
-  {
-    auto params = fe_problem.getMooseApp().getFactory().getValidParams("FVGreenGaussGradient");
-    params.set<MooseEnum>("limiter") = "venkatakrishnan";
-    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name, params);
-  }
-}
-
-const FVGradientMethod &
-getLinearFVGradientMethod(SystemBase & sys, const GradientMethodName & method_name)
-{
-  auto & fe_problem = sys.feProblem();
-  addBuiltInGradientMethodIfNeeded(fe_problem, method_name);
-
-  if (!fe_problem.hasFVGradientMethod(method_name))
-    mooseError("Unable to find FVGradientMethod with name '", method_name, "'");
-
-  return fe_problem.getFVGradientMethod(method_name);
-}
-}
-
 template <typename OutputType>
 InputParameters
 MooseLinearVariableFV<OutputType>::validParams()
@@ -126,8 +92,7 @@ template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients()
 {
-  const auto & reader =
-      requestCellGradients(getLinearFVGradientMethod(this->_sys, _default_gradient_method_name));
+  const auto & reader = requestCellGradients(_default_gradient_method_name);
 
   _gradient_reader = &reader;
   return reader;
@@ -137,19 +102,15 @@ template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name)
 {
-  return requestCellGradients(getLinearFVGradientMethod(this->_sys, method_name));
+  const auto & method = _linear_system ? _linear_system->resolveFVGradientMethod(method_name)
+                                       : _auxiliary_system->resolveFVGradientMethod(method_name);
+
+  return requestCellGradients(method);
 }
 
 template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method)
-{
-  return registerCellGradientMethod(method);
-}
-
-template <typename OutputType>
-const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::registerCellGradientMethod(const FVGradientMethod & method)
 {
   _needs_cell_gradients = true;
 
@@ -160,8 +121,10 @@ MooseLinearVariableFV<OutputType>::registerCellGradientMethod(const FVGradientMe
   auto reader = std::make_unique<LinearFVGradientReader>(
       _linear_system ? _linear_system->registerFVGradient(this->_var_num, method)
                      : _auxiliary_system->registerFVGradient(this->_var_num, method));
+
   auto & reader_ref = *reader;
   _gradient_readers_by_method.emplace(&method, std::move(reader));
+
   return reader_ref;
 }
 

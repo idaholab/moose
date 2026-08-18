@@ -112,7 +112,7 @@ time over an iteration. The setbacks of this design choice are:
   multiple times to get a converged solution.
 - It may increase the number of iterations needed to resolve nonlinearities.
 
-The algorithm used to construct a cell gradient is separated from the variable and
+The algorithm used to construct a cell gradient is specified independently from the variable and
 from the kernels that consume the gradient. Gradient algorithms are represented by
 [FVGradientMethods](FVGradientMethods/index.md) objects. These objects are runtime-selectable and may be declared
 by name in the `FVGradientMethods` block.
@@ -120,7 +120,7 @@ by name in the `FVGradientMethods` block.
 An `FVGradientMethod` is responsible for computing the cell-centered gradient
 and applying any limiter associated with that method. For example,
 [FVGreenGaussGradient.md] implements the Green–Gauss reconstruction,
-while the base FVGradientMethod applies the configured gradient limiter
+while the base `FVGradientMethod` class applies the configured gradient limiter
 after the unrestricted gradient has been computed.
 
 Gradient method names identify a complete reconstruction policy rather than only the
@@ -130,7 +130,7 @@ the Venkatakrishnan limiter. Users may also construct named `FVGradientMethod`
 objects with custom settings and share those definitions between variables
 and interpolation methods.
 
-Gradients are computed on demand. A `MooseLinearVariableFV` does not allocate
+Gradients are computed only when requested. A `MooseLinearVariableFV` does not allocate
 every possible form of its gradient. Instead, a consumer requests a gradient
 using `requestCellGradients()`, optionally specifying the gradient method that
 should produce it. The variable registers that (variable, method) combination with

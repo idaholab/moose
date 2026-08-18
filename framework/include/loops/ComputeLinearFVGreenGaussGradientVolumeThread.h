@@ -98,16 +98,15 @@ protected:
   std::vector<std::unique_ptr<NumericVector<Number>>> & _gradient;
 
   /**
-   * Writable local arrays for the component vectors.
-   * These are acquired by the root body before threaded execution. Split bodies share the
-   * pointers and write only to DOFs in their own element range.
+   * Writable local arrays, one per gradient component.
+   * _gradient_data[component][local_dof] stores that component at a local DOF.
+   *
+   * The original thread object acquires the arrays before threaded execution.
+   * Threaded copies share the pointers and write only to DOFs in their element range.
    */
   std::vector<Real *> _gradient_data;
 
-  /**
-   * Whether this body owns the writable-array access.
-   * Only the root body restores the arrays; split bodies merely share the pointers.
-   */
+  /// True only for the original thread object that acquired and must restore the arrays.
   const bool _owns_gradient_data;
 
   /// Indices of the variables this producer should compute gradients for.

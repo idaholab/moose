@@ -127,12 +127,8 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   : SIMPLESolveBase(ex),
     _pressure_sys_number(_problem.linearSysNum(getParam<SolverSystemName>("pressure_system"))),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
-<<<<<<< HEAD
     _pressure_pc_recompute_frequency(getParam<unsigned int>("pressure_pc_recompute_frequency")),
     _pressure_pc_solve_counter(0),
-    _pressure_gradient_field(nullptr),
-=======
->>>>>>> 70d1f72d45d (Clean up RC UO. (#32999))
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),

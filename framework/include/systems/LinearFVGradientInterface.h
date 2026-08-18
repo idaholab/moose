@@ -44,6 +44,13 @@ public:
   LinearFVGradientInterface(SystemBase & sys) : _sys(sys) {}
 
   /**
+   * Resolve a named gradient method, constructing a built-in method when needed.
+   * @param method_name Name of the gradient method to retrieve.
+   * @return Gradient method associated with the supplied name.
+   */
+  const FVGradientMethod & resolveFVGradientMethod(const GradientMethodName & method_name);
+
+  /**
    * Register a variable for gradient values produced by a method object.
    * @param variable_number Variable number whose gradient should be stored.
    * @param method Gradient method that computes the field values.
@@ -94,10 +101,9 @@ protected:
   /**
    * Compute replacement field values for a registered gradient method.
    * @param method Gradient method used to compute the replacement values.
-   * @param container Method container whose next values should be computed.
+   * @return Method container whose replacement values were computed.
    */
-  void computeLinearFVGradientContainer(const FVGradientMethod & method,
-                                        LinearFVGradientContainer & container);
+  LinearFVGradientContainer & computeLinearFVGradientContainer(const FVGradientMethod & method);
 
   /**
    * Replace the current gradient storage with the freshly computed new gradients.

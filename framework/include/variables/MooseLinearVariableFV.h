@@ -215,12 +215,6 @@ protected:
   [[noreturn]] void gradientStateError(const StateArg & state) const;
 
   /**
-   * Register and cache a gradient method for this variable.
-   * @param method Gradient method to register on the owning system.
-   */
-  const LinearFVGradientReader & registerCellGradientMethod(const FVGradientMethod & method);
-
-  /**
    * Setup the boundary to Dirichlet BC map
    */
   void cacheBoundaryBCMap();
