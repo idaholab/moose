@@ -12,7 +12,7 @@
 #pragma once
 
 #include "MFEMProblem.h"
-#include "ProblemComposerBase.h"
+#include "MFEMProblemComposer.h"
 #include "ProblemOperator.h"
 #include "ProblemOperatorBase.h"
 #include "CustomDummyProblemOperator.h"
@@ -23,12 +23,12 @@ namespace Moose::MFEM
  * Custom Dummy Operator builder required to build MFEM Problem Operators
  * used by the executioner
  */
-class CustomProblemComposer : public ProblemComposerBase
+class CustomProblemComposer : public MFEMProblemComposer
 {
 public:
   static InputParameters validParams();
 
-  CustomProblemComposer(const InputParameters & parameters) : ProblemComposerBase(parameters) {};
+  CustomProblemComposer(const InputParameters & parameters) : MFEMProblemComposer(parameters) {};
 
   ~CustomProblemComposer() = default;
 

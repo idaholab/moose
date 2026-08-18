@@ -11,28 +11,26 @@
 
 #pragma once
 
+#include "MFEMEigenproblem.h"
 #include "ProblemOperatorBase.h"
-#include "ProblemOperatorBase.h"
+#include "MFEMProblemComposer.h"
 
 namespace Moose::MFEM
 {
-class ProblemOperatorBase;
-
 /**
- * Interface required to build MFEM Problem Operators
- * used by the executioner
+ * Weak form composer to build MFEM Problem Operators
  */
-class ProblemComposerBase : public MFEMObject
+class MFEMWeakFormComposer : public MFEMProblemComposer
 {
 public:
   static InputParameters validParams();
 
-  ProblemComposerBase(const InputParameters & parameters);
+  MFEMWeakFormComposer(const InputParameters & parameters);
 
-  ~ProblemComposerBase() = default;
+  ~MFEMWeakFormComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
-  virtual std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem &) = 0;
+  std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;
 };
 }
 

@@ -91,7 +91,7 @@
 
 [ProblemComposer]
   [default_transient]
-    type = TransientProblemComposer
+    type = MFEMTimeDependentWeakFormComposer
   []
 []
 

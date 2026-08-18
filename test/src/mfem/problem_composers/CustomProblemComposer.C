@@ -18,7 +18,7 @@ registerMooseObject("MooseApp", CustomProblemComposer);
 InputParameters
 CustomProblemComposer::validParams()
 {
-  InputParameters params = ProblemComposerBase::validParams();
+  InputParameters params = MFEMProblemComposer::validParams();
   return params;
 }
 

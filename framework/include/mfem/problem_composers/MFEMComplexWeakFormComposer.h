@@ -13,24 +13,22 @@
 
 #include "MFEMEigenproblem.h"
 #include "ProblemOperatorBase.h"
-#include "ProblemComposerBase.h"
-
-class MFEMEigenproblem;
+#include "MFEMProblemComposer.h"
 
 namespace Moose::MFEM
 {
 /**
- * Steady builder required to build MFEM Problem Operators
- * used by the steady executioner
+ * Complex weak form composer required to build MFEM Complex
+ * Problem Operators
  */
-class SteadyProblemComposer : public ProblemComposerBase
+class MFEMComplexWeakFormComposer : public MFEMProblemComposer
 {
 public:
   static InputParameters validParams();
 
-  SteadyProblemComposer(const InputParameters & parameters);
+  MFEMComplexWeakFormComposer(const InputParameters & parameters);
 
-  ~SteadyProblemComposer() = default;
+  ~MFEMComplexWeakFormComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;

@@ -13,22 +13,22 @@
 
 #include "MFEMEigenproblem.h"
 #include "ProblemOperatorBase.h"
-#include "ProblemComposerBase.h"
+#include "MFEMProblemComposer.h"
 
 namespace Moose::MFEM
 {
 /**
- * Transient builder required to build MFEM Problem Operators
- * used by the Transient executioner
+ * Time dependant weak form composer required to build
+ * MFEM Time Dependant Problem Operators
  */
-class TransientProblemComposer : public ProblemComposerBase
+class MFEMTimeDependentWeakFormComposer : public MFEMProblemComposer
 {
 public:
   static InputParameters validParams();
 
-  TransientProblemComposer(const InputParameters & parameters);
+  MFEMTimeDependentWeakFormComposer(const InputParameters & parameters);
 
-  ~TransientProblemComposer() = default;
+  ~MFEMTimeDependentWeakFormComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;

@@ -17,14 +17,14 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
-#include "ProblemComposerBase.h"
+#include "MFEMProblemComposer.h"
 
 #include <map>
 
 namespace Moose::MFEM
 {
 struct SolutionState;
-class ProblemComposerBase;
+class MFEMProblemComposer;
 }
 
 class MFEMProblem : public ExternalProblem
@@ -288,7 +288,7 @@ public:
    * Method to get the first Problem Composer object storing the
    * method that builds the ProblemOperator in the executioner.
    */
-  std::shared_ptr<Moose::MFEM::ProblemComposerBase> & getProblemComposer()
+  std::shared_ptr<Moose::MFEM::MFEMProblemComposer> & getProblemComposer()
   {
     return _problem_composer;
   }
@@ -438,7 +438,7 @@ protected:
   /**
    * The problem operator builders for this mfem problem.
    */
-  std::shared_ptr<Moose::MFEM::ProblemComposerBase> _problem_composer;
+  std::shared_ptr<Moose::MFEM::MFEMProblemComposer> _problem_composer;
 };
 
 template <typename T>

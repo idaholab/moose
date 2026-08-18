@@ -492,7 +492,7 @@ addActionTypes(Syntax & syntax)
 
 #ifdef MOOSE_MFEM_ENABLED
   registerTask("add_mfem_problem_operator", true);
-  registerMooseObjectTask("add_mfem_problem_composer", Moose::MFEM::ProblemComposerBase, false);
+  registerMooseObjectTask("add_mfem_problem_composer", Moose::MFEM::MFEMProblemComposer, false);
   addTaskDependency("add_mfem_problem_operator", "add_mfem_problem_composer");
   addTaskDependency("add_mfem_problem_composer", "init_mesh");
   addTaskDependency("add_variable", "add_mfem_problem_composer");
