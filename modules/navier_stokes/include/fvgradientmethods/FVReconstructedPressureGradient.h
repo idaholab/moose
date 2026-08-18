@@ -30,7 +30,7 @@ public:
    */
   FVReconstructedPressureGradient(const InputParameters & params);
 
-  void setupDependencies(SystemBase & system, unsigned int variable_number) const override;
+  void setupDependencies(SystemBase & system, unsigned int variable_number) const;
 
 private:
   /**
@@ -41,10 +41,9 @@ private:
    * @param scratch_gradient Temporary component vectors available during the computation.
    * @param variable_numbers Pressure variable numbers whose gradients should be updated.
    */
-  void computeGradientWithoutLimiter(
+  virtual void computeGradientWithoutLimiter(
       SystemBase & system,
-      GradientContainer & output_gradient,
-      GradientContainer & scratch_gradient,
+      GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
   /**
