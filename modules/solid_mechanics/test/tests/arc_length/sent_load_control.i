@@ -1,11 +1,3 @@
-# The strip of sent_arclength.i under plain load control: the same dead
-# traction is ramped directly with time, load factor = t, and every step is
-# an ordinary Newton solve. The ramp dies at the first crack event of the
-# ligament, near 67 kN and below the 87 kN peak: Newton cannot converge
-# across the event, the TimeStepper cuts back to dtmin, and the run aborts.
-# The arc-length run crosses the event, finds the peak, and traces the whole
-# softening branch where this one stops.
-
 width = 0.06
 height = 0.15
 platen = 0.006
@@ -51,8 +43,6 @@ ligament_y = 0.076
     bottom_left = '0 ${height} 0'
     top_right = '${width} ${fparse height + platen} 0'
   []
-  # the cohesive ligament: an interface between the two strip halves alone,
-  # which leaves the platen bonded to the strip
   [split]
     type = BreakMeshByBlockGenerator
     input = platen
@@ -85,10 +75,6 @@ ligament_y = 0.076
 []
 
 [ICs]
-  # a nanoscopic initial opening of the interface: the mixed-mode cohesive law
-  # has a 0/0 mode mixity at a jump of exactly zero, whose derivatives poison
-  # the very first Jacobian of the run, and any nonzero jump clears it. The
-  # seed is orders below every physical scale of the problem
   [seed]
     type = FunctionIC
     variable = disp_y
@@ -109,10 +95,6 @@ ligament_y = 0.076
     boundary = bottom_center
     value = 0
   []
-  # the continuation load: a uniform dead traction on the platen top, whose
-  # resultant stays on the specimen axis while the crack shifts the section
-  # centroid, so the moment grows with the crack and the platen rotates
-  # freely. lambda = 1 is 60 kN per meter of thickness
   # the same load, ramped directly: load factor = t
   [tension]
     type = FunctionNeumannBC
@@ -138,12 +120,6 @@ ligament_y = 0.076
   [stress]
     type = ADComputeLinearElasticStress
   []
-  # the notch is carved from the cohesive properties: ahead of it the
-  # interface carries the real strength and toughness, behind it next to
-  # nothing. The pre-crack strip gets a strength and a toughness so small
-  # that its softening window is thinner than any numerical opening: a face
-  # there snaps straight to full damage in the first prescribed step, with no
-  # partial-softening state to flicker in
   [czm_properties]
     type = GenericFunctionMaterial
     boundary = lower_upper
@@ -161,10 +137,6 @@ ligament_y = 0.076
     shear_strength = S_strength
     displacements = 'disp_x disp_y'
     eta = 2.2
-    # the live law: lagging the jump under a prescribed ramp converges every
-    # step on the damage of the step before and rides through the true limit
-    # on fictitious stiffness, while plain Newton on the live law has nothing
-    # to converge to above the peak, which is the failure this input records
     lag_displacement_jump = false
   []
 []
@@ -192,8 +164,6 @@ ligament_y = 0.076
     point = '0 ${fparse ligament_y - elem} 0'
     execute_on = TIMESTEP_END
   []
-  # the moment signature: the platen tilt that a prescribed displacement
-  # cannot control
   [rotation]
     type = DifferencePostprocessor
     value1 = corner_right

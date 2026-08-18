@@ -1,46 +1,40 @@
-# The frame of lee_frame_arclength.i under plain load control: the same point
-# load is ramped directly with time, load factor = t, and every step is an
-# ordinary Newton solve. Above the limit point there is no equilibrium at a
-# higher load, so the step at the peak has nothing to converge to: Newton
-# diverges, the TimeStepper cuts back to dtmin, and the run aborts. The
-# arc-length run traces on where this one stops.
-#
-# Run from this directory:
-#   ../../../../combined/combined-opt -i lee_frame_load_control.i
-
 leg = 120
 thick = 2
-nx = 240
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
 [Mesh]
-  [square]
+  [column]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = ${nx}
-    ny = ${nx}
+    nx = 4
+    ny = 236
+    xmax = ${thick}
+    ymax = ${fparse leg - thick}
+    elem_type = QUAD4
+    boundary_name_prefix = column
+  []
+  [beam]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 240
+    ny = 4
     xmax = ${leg}
+    ymin = ${fparse leg - thick}
     ymax = ${leg}
     elem_type = QUAD4
+    boundary_name_prefix = beam
   []
-  [interior]
-    type = SubdomainBoundingBoxGenerator
-    input = square
-    block_id = 9
-    bottom_left = '${thick} 0 0'
-    top_right = '${leg} ${fparse leg - thick} 0'
-  []
-  [carve]
-    type = BlockDeletionGenerator
-    input = interior
-    block = 9
+  [frame]
+    type = StitchMeshGenerator
+    inputs = 'column beam'
+    stitch_boundaries_pairs = 'column_top beam_bottom'
   []
   [base_patch]
     type = SubdomainBoundingBoxGenerator
-    input = carve
+    input = frame
     block_id = 2
     bottom_left = '0 0 0'
     top_right = '${thick} ${thick} 0'
@@ -71,8 +65,6 @@ nx = 240
     new_boundary = beam_hinge
     coord = '${leg} ${fparse leg - thick / 2} 0'
   []
-  # the top face of the load patch, so the load enters as a traction spread
-  # over the stiff patch rather than a point source
   [load_face]
     type = ParsedGenerateSideset
     input = beam_hinge
@@ -92,7 +84,6 @@ nx = 240
 []
 
 [BCs]
-  # the same load, ramped directly: load factor = t
   [beam_load]
     type = FunctionNeumannBC
     variable = disp_y

@@ -150,7 +150,9 @@
                   'within a single input.'
     capabilities = 'petsc>=3.22.0'
     recover = false
+    restep = false
     max_parallel = 1
+    max_time = 1800
     abs_zero = 1e-8
     rel_err = 5e-4
   []
@@ -173,6 +175,7 @@
     capabilities = 'petsc>=3.22.0'
     heavy = true
     recover = false
+    restep = false
     max_parallel = 1
     # about 400 committed increments at a tooth-resolving radius
     max_time = 1800
@@ -190,6 +193,7 @@
                   'where the committed load factor tracks the time.'
     capabilities = 'petsc>=3.22.0'
     recover = false
+    restep = false
     max_parallel = 1
     abs_zero = 1e-8
     rel_err = 5e-4
@@ -202,7 +206,7 @@
     # the whole path is elastic, so this gold is the pure-kinematics fingerprint of the
     # per-timestep stepping: the limit point, the descending branch, the deflection reversal of
     # the snap back, the negative trough, and the recovery are all committed rows
-    requirement = 'The system shall step along the post-buckling path of Lee\'s frame one '
+    requirement = 'The system shall step along the post-buckling path of the Lee frame one '
                   'committed continuation increment per time step, carrying the trace over the '
                   'limit point at which prescribed load stepping fails, down the descending '
                   'branch through the deflection reversal of the snap back that prescribed '
@@ -212,6 +216,7 @@
     capabilities = 'petsc>=3.22.0'
     heavy = true
     recover = false
+    restep = false
     max_parallel = 1
     # about 800 committed increments of a smooth elastic path
     max_time = 1800
@@ -231,6 +236,7 @@
                   'single input.'
     capabilities = 'petsc>=3.22.0'
     recover = false
+    restep = false
     max_parallel = 1
     abs_zero = 1e-8
     rel_err = 5e-4
@@ -251,6 +257,7 @@
     capabilities = 'petsc>=3.22.0'
     heavy = true
     recover = false
+    restep = false
     max_parallel = 1
     # about 600 committed increments over the climb, the peak, and the descent
     max_time = 1800

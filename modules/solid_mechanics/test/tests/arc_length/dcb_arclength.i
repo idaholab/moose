@@ -1,37 +1,3 @@
-# Double cantilever beam peeled apart by per-timestep arc-length continuation,
-# with a bilinear cohesive interface ahead of a traction-free pre-crack, in a
-# single input: the controllable 'use_continuation' keeps the early steps as
-# ordinary prescribed-ramp Newton solves -- the near-zero-strength pre-crack
-# strip fails during the first of them at negligible load, and the pre-cracked
-# arms then load elastically -- and a [Controls] switch hands the run to the
-# continuation just before the crack reaches the first serration of the
-# bonded ligament.
-#
-# The interface strength puts the cohesive zone at the size of one or two
-# elements, so the crack advances element by element and every advance is a
-# snap-back serration of the load-opening curve: the load and the opening both
-# fall while the crack jumps, then the arms reload. The continuation rides the
-# whole sawtooth, committing the cohesive damage each step; the two prescribed
-# loadings fail on the first tooth:
-#   dcb_load_control.i  (Newton under load control: nothing to converge to
-#                        above the first peak)
-#   dcb_disp_control.i  (Newton under displacement control: cannot follow the
-#                        opening reversal of a serration)
-#
-# Every time step advances the trace by one continuation increment of radius
-# step_size and commits the state it reaches, so the cohesive damage
-# accumulates increment by increment and the load factor is free to fall where
-# the path descends: past the peak the trace sheds load as the crack tears
-# through the ligament. Time is a pseudo parameter that counts arc steps; the
-# load factor of the trace is the lambda postprocessor. A step that overshoots
-# a turn of the path fails and retries with the load span the TimeStepper cut
-# back while the radius stays put, and a step that walks back down an elastic
-# branch, which a fresh predictor can do at a limit point, descends without
-# dissipating and is failed and mirrored by the problem.
-#
-# Geometry: arms 100 x 3, pre-crack 30, 1 mm elements. lambda = 1 corresponds
-# to a peel force of 10 per unit thickness on each arm end.
-
 length = 100
 arm = 3
 precrack = 30
@@ -71,8 +37,6 @@ nx = 100
     type = BreakMeshByBlockGenerator
     input = upper_arm
   []
-  # the free arm ends, split into one sideset per arm so the peel tractions
-  # can pull them apart
   [left_lower]
     type = ParsedGenerateSideset
     input = split
@@ -109,9 +73,6 @@ nx = 100
 []
 
 [BCs]
-  # the continuation load: equal and opposite shear tractions on the free arm
-  # ends, an opening couple peeling the arms apart. lambda = 1 is a resultant
-  # peel force of 10 per unit thickness on each arm
   [peel_up]
     type = NeumannBC
     variable = disp_y
@@ -149,19 +110,10 @@ nx = 100
   [stress]
     type = ADComputeLinearElasticStress
   []
-  # strengths sized so the cohesive zone spans one or two elements, which is
-  # what makes the crack advance element by element and the curve serrated
-  # the pre-crack is carved from the cohesive properties: ahead of it the
-  # interface carries the real strengths and toughnesses, behind it next to
-  # nothing, so the first load increment fails it into free faces
   [czm_properties]
     type = GenericFunctionMaterial
     boundary = 'lower_arm_upper_arm'
     prop_names = 'N_strength S_strength GIc GIIc'
-    # the pre-crack strip gets a strength and a toughness so small that its
-    # softening window is thinner than any numerical opening: a face there
-    # snaps straight to full damage in the first prescribed step, with no
-    # partial-softening state to flicker in
     prop_values = 'if(x<${precrack},1e-5,100) if(x<${precrack},1.5e-5,150)
                    if(x<${precrack},1e-12,0.28) if(x<${precrack},3e-12,0.8)'
   []
@@ -175,28 +127,18 @@ nx = 100
     shear_strength = S_strength
     displacements = 'disp_x disp_y'
     eta = 2.2
-    # evolve the cohesive damage from the jump of the last committed step: the
-    # bilinear law's onset corner is a facet the corrector otherwise
-    # limit-cycles across without ever converging an increment, and the
-    # per-step commits of the continuation are what bound the lag to one
-    # committed increment
     lag_displacement_jump = true
   []
 []
 
 [Problem]
   type = ArcLengthProblem
-  # a radius that resolves the serrations element by element, kept through
-  # every cutback: a retry shrinks the load span of the step, not the radius
   step_size = 0.005
   psi_squared = 0
   correction_type = normal
 []
 
 [Functions]
-  # prescribed-ramp Newton until just before the first serration, continuation
-  # after: the first tooth of this loading sits at lambda just below 0.97, so
-  # the handoff lands at 0.9 with margin
   [switch_fn]
     type = ParsedFunction
     expression = 't > 0.899'
@@ -262,12 +204,6 @@ nx = 100
   line_search = none
   automatic_scaling = true
   dt = 0.01
-  # pseudo time: counts arc steps once the continuation owns the run. This
-  # span carries the trace over the peak and four serration teeth down the
-  # tearing descent, past the loads at which both prescribed loadings fail.
-  # Deeper teeth sharpen as the crack lengthens until the corrector cannot
-  # converge an increment across one at this radius, so the span ends while
-  # every committed step is a converged equilibrium point
   end_time = 4
   dtmin = 1e-12
   nl_max_its = 50
