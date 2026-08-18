@@ -40,11 +40,7 @@ LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & param
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure_var(getPressureVariable(NS::pressure)),
-<<<<<<< HEAD
-    _pressure_gradient_field(_pressure_var.requestCellGradients())
-=======
     _pressure_gradient_field(registerPressureGradientField())
->>>>>>> c1e05cee68c (Modify pressure momentum kernels. (#32995))
 {
 }
 
@@ -64,9 +60,9 @@ const LinearFVGradientReader &
 LinearFVMomentumPressure::registerPressureGradientField()
 {
   if (!isParamValid("gradient_method"))
-    return _pressure_var.computeCellGradients();
+    return _pressure_var.requestCellGradients();
 
-  return _pressure_var.computeCellGradients(getParam<GradientMethodName>("gradient_method"));
+  return _pressure_var.requestCellGradients(getParam<GradientMethodName>("gradient_method"));
 }
 
 Real
