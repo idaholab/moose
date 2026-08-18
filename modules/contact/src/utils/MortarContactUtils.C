@@ -323,6 +323,38 @@ firstEventGroup(const std::unordered_map<dof_id_type, Real> & predicted_alphas,
       group.members.insert(dof_id);
   return group;
 }
+
+ConstraintState
+classifyNormalState(const ADReal & lm_value, const ADReal & weighted_gap, const Real c)
+{
+  return (lm_value - c * weighted_gap) >= 0 ? ConstraintState::CONTACT_UNCLASSIFIED
+                                            : ConstraintState::OPEN;
+}
+
+ConstraintState
+classifyFrictionalState(const ADReal & augmented_tangential_pressure,
+                        const ADReal & radius,
+                        const ADReal & normal_pressure,
+                        const ADReal & epsilon)
+{
+  if (normal_pressure < epsilon)
+    return ConstraintState::OPEN;
+  return tangentialNorm(std::array<ADReal, 1>{{augmented_tangential_pressure}}) <= radius
+             ? ConstraintState::CONTACT_STICK
+             : ConstraintState::CONTACT_SLIP;
+}
+
+ConstraintState
+classifyFrictionalState3d(const std::array<ADReal, 2> & augmented_tangential_pressure,
+                          const ADReal & radius,
+                          const ADReal & normal_pressure,
+                          const ADReal & epsilon)
+{
+  if (normal_pressure < epsilon)
+    return ConstraintState::OPEN;
+  return tangentialNorm(augmented_tangential_pressure) <= radius ? ConstraintState::CONTACT_STICK
+                                                                  : ConstraintState::CONTACT_SLIP;
+}
 }
 }
 }

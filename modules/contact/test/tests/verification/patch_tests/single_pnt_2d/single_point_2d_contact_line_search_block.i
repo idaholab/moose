@@ -196,7 +196,7 @@
 
 [LineSearch]
   [./ls]
-    type = PetscContactLineSearch
+    type = NodeFaceContactLineSearch
     allowed_lambda_cuts = 0
     contact_ltol = 0.5
     affect_ltol = true

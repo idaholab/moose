@@ -595,6 +595,36 @@ struct FirstEventGroup
  */
 std::optional<FirstEventGroup>
 firstEventGroup(const std::unordered_map<dof_id_type, Real> & predicted_alphas, Real tau_event);
+
+/**
+ * Classify a mortar dof's normal contact state from the NCP min-complementarity switch value
+ * q_n = lm_value - c*weighted_gap that determines which branch of
+ * ComputeWeightedGapLMMechanicalContact's min(lm_value, weighted_gap*c) residual is active: a
+ * closed dof (q_n >= 0) is CONTACT_UNCLASSIFIED, since no tangential dof exists at this level to
+ * place it on the stick/slip axis; an open dof (q_n < 0) is OPEN.
+ */
+ConstraintState classifyNormalState(const ADReal & lm_value, const ADReal & weighted_gap, Real c);
+
+/**
+ * Classify a mortar dof's frictional state from the same tangential quantities
+ * ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof already computes: the
+ * augmented tangential pressure, the Coulomb-ball radius, the raw normal contact pressure, and
+ * the epsilon gate. Below epsilon the dof is OPEN, mirroring hueberStadlerWohlmuthFrictionResidual's
+ * identity short-circuit; otherwise it is CONTACT_STICK if the augmented tangential pressure lies
+ * within the friction ball, else CONTACT_SLIP.
+ */
+ConstraintState classifyFrictionalState(const ADReal & augmented_tangential_pressure,
+                                        const ADReal & radius,
+                                        const ADReal & normal_pressure,
+                                        const ADReal & epsilon);
+
+/// Three-dimensional counterpart of classifyFrictionalState(), taking the two-component
+/// augmented tangential pressure vector.
+ConstraintState
+classifyFrictionalState3d(const std::array<ADReal, 2> & augmented_tangential_pressure,
+                          const ADReal & radius,
+                          const ADReal & normal_pressure,
+                          const ADReal & epsilon);
 }
 }
 }

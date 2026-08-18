@@ -13,6 +13,8 @@
 #include "MooseEnum.h"
 #include "FEProblem.h"
 #include "MooseError.h"
+#include "NonlinearSystem.h"
+#include "libmesh/petsc_solver_exception.h"
 
 registerMooseObjectAliased("ContactApp", ContactLineSearchBase, "ContactLineSearch");
 
@@ -20,8 +22,6 @@ InputParameters
 ContactLineSearchBase::validParams()
 {
   InputParameters params = LineSearch::validParams();
-  params.addRequiredParam<unsigned>("allowed_lambda_cuts",
-                                    "The number of times lambda is allowed to get cut");
   params.addRequiredParam<Real>("contact_ltol",
                                 "The linear tolerance to use when the contact set is changing.");
   params.addRequiredParam<bool>("affect_ltol",
@@ -37,36 +37,42 @@ ContactLineSearchBase::validParams()
 
 ContactLineSearchBase::ContactLineSearchBase(const InputParameters & parameters)
   : LineSearch(parameters),
-    _user_ksp_rtol_set(false),
-    _allowed_lambda_cuts(getParam<unsigned>("allowed_lambda_cuts")),
+    _backing_petsc_line_search(nullptr),
     _contact_ltol(getParam<Real>("contact_ltol")),
     _affect_ltol(getParam<bool>("affect_ltol")),
     _backing_line_search(getParam<MooseEnum>("backing_line_search"))
 {
+  _solver = dynamic_cast<PetscNonlinearSolver<Real> *>(
+      _fe_problem.getNonlinearSystem(_nl_sys_num).nonlinearSolver());
+  if (!_solver)
+    mooseError(
+        "This line search operates only with Petsc, so Petsc must be your nonlinear solver.");
+}
+
+ContactLineSearchBase::~ContactLineSearchBase()
+{
+  if (_backing_petsc_line_search)
+    PetscCallAbort(comm().get(), SNESLineSearchDestroy(&_backing_petsc_line_search));
 }
 
 void
-ContactLineSearchBase::printContactInfo(const std::set<dof_id_type> & contact_set)
+ContactLineSearchBase::setupBackingLineSearch()
 {
-  if (!contact_set.empty())
-    _console << contact_set.size() << " nodes in contact" << std::endl;
-  else
-    _console << "No nodes in contact" << std::endl;
-}
+  if (!_backing_petsc_line_search)
+  {
+    LibmeshPetscCall(SNESLineSearchCreate(comm().get(), &_backing_petsc_line_search));
+    // The MooseEnum values (basic/bt/l2/cp) are exactly the PETSc SNESLineSearch type strings
+    LibmeshPetscCall(SNESLineSearchSetType(
+        _backing_petsc_line_search, static_cast<std::string>(_backing_line_search).c_str()));
+    // Distinct prefix so users can tune this object's native PETSc options (e.g.
+    // -contact_backing_snes_linesearch_damping) without MOOSE re-exposing each one
+    LibmeshPetscCall(
+        SNESLineSearchAppendOptionsPrefix(_backing_petsc_line_search, "contact_backing_"));
+    LibmeshPetscCall(SNESLineSearchSetFromOptions(_backing_petsc_line_search));
+  }
 
-void
-ContactLineSearchBase::insertSet(const std::set<dof_id_type> & mech_set)
-{
-  if (_current_contact_state.empty())
-    _current_contact_state = mech_set;
-  else
-    for (auto & node : mech_set)
-      _current_contact_state.insert(node);
-}
-
-void
-ContactLineSearchBase::reset()
-{
-  _current_contact_state.clear();
-  zeroIts();
+  // PetscNonlinearSolver::clear() destroys and recreates its SNES between solves (e.g. once per
+  // time step), so the backing line search's SNES must be rebound every time this is called, not
+  // only when the object itself is first created here.
+  LibmeshPetscCall(SNESLineSearchSetSNES(_backing_petsc_line_search, _solver->snes()));
 }
