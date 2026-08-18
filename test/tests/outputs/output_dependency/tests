@@ -1,6 +1,6 @@
 [Tests]
-  issues = ''
-  design = 'outputs/OutputWarehouse.md'
+  issues = '#33571'
+  design = 'syntax/Outputs/index.md'
   [default_execute_based_on_dependency]
     type = 'RunApp'
     input = 'simple_diffusion.i'

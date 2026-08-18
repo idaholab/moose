@@ -21,22 +21,19 @@ OutputFileCheck::validParams()
   params.addClassDescription("This object depend on other Output objects and check if the "
                              "corresponding output file was written.");
 
-  params.addRequiredParam<std::string>("output_object",
-                                       "The name of the Output object whose file will be checked.");
+  params.addRequiredParam<OutputName>("output_object",
+                                      "The name of the Output object whose file will be checked.");
 
   return params;
 }
 
 OutputFileCheck::OutputFileCheck(const InputParameters & parameters)
-  : Output(parameters), _output_object_name(getParam<std::string>("output_object"))
+  : Output(parameters), _output_object_name(getParam<OutputName>("output_object"))
 {
   // Declare dependency on the target output object.
   // OutputWarehouse::sortOutputs() reads this set to
   // ensure the target executes before this object.
-  _depend_obj.insert(_output_object_name);
-
-  // This object supplies itself
-  _supplied_obj.insert(name());
+  addOutputDependency(_output_object_name);
 }
 
 void

@@ -437,25 +437,16 @@ OutputWarehouse::sortOutputs()
   for (const auto & obj : _all_objects)
   {
     Checkpoint * cp = dynamic_cast<Checkpoint *>(obj);
-    auto * dep_obj = dynamic_cast<DependencyResolverInterface *>(obj);
 
     // Sort out the Checkpoints
     if (cp != NULL)
     {
-      if (dep_obj)
-        mooseError("Output object '",
-                   obj->name(),
-                   "' should not be Checkpoint and depended on other outputs.");
-
       cp_objects.push_back(obj);
       continue;
     }
 
+    auto * dep_obj = dynamic_cast<DependencyResolverInterface *>(obj);
     resolver.addItem(obj);
-
-    // Check and label dependencies
-    if (!dep_obj)
-      continue;
 
     for (const auto & dep_name : dep_obj->getRequestedItems())
     {
