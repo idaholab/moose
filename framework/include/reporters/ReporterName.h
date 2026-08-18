@@ -33,7 +33,7 @@ public:
   ReporterName(const std::string & object_name, const std::string & value_name);
   ReporterName(const std::string & object_and_value_name);
   ReporterName(const char * combined_name);
-  ReporterName(){}; // empty constructor for InputParameters
+  ReporterName() {} // empty constructor for InputParameters
 
   /**
    * Determines if the inputted string is convertible to a ReporterName.

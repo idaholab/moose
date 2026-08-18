@@ -269,8 +269,13 @@ enum SolutionState : int
 enum class SolutionIterationType : unsigned short
 {
   Time = 0,
-  Nonlinear = 1,
-  FixedPoint = 2
+  Nonlinear,
+  MultiAppFixedPoint,
+  MultiSystemFixedPoint,
+  // Special name for determing the total size of
+  // iteration types. If adding a new type, it should
+  // always be above this entry.
+  Count
 };
 
 // These are used by MooseVariableData and MooseVariableDataFV
@@ -1302,7 +1307,8 @@ extern const TagName SOLUTION_TAG;
 extern const TagName OLD_SOLUTION_TAG;
 extern const TagName OLDER_SOLUTION_TAG;
 extern const TagName PREVIOUS_NL_SOLUTION_TAG;
-extern const TagName PREVIOUS_FP_SOLUTION_TAG;
+extern const TagName PREVIOUS_MULTIAPP_FP_SOLUTION_TAG;
+extern const TagName PREVIOUS_MULTISYSTEM_FP_SOLUTION_TAG;
 extern const TagName SOLUTION_DOT_TAG;
 extern const TagName SOLUTION_DOTDOT_TAG;
 

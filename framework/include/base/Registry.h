@@ -324,7 +324,7 @@ private:
   ///@}
 #endif
 
-  Registry() {};
+  Registry() {}
 
   /**
    * Manually set the data file paths.

@@ -1,28 +1,21 @@
+[GlobalParams]
+  displacements = 'ux uy uz'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
   elem_type = HEX8
-  displacements = 'ux uy uz'
 []
 
-[Variables]
-  [./ux]
-    block = 0
-  [../]
-  [./uy]
-    block = 0
-  [../]
-  [./uz]
-    block = 0
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'ux uy uz'
-    use_displaced_mesh = true
-  [../]
-[]
 
 [AuxVariables]
   [./stress_zz]
@@ -122,11 +115,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'ux uy uz'
-  [../]
   [./viscop]
     type = FiniteStrainHyperElasticViscoPlastic
     block = 0

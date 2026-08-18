@@ -19,19 +19,14 @@
   zmax = 1
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = false
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-  [../]
-[]
 
 [BCs]
   [./2_x]
@@ -59,9 +54,6 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.1
     youngs_modulus = 1e6
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress

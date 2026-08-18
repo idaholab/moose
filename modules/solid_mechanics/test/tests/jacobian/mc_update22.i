@@ -1,6 +1,10 @@
 # MC update version, with only MohrCoulomb, cohesion=10, friction angle = 60, psi = 5, smoothing_tol = 1
 # Lame lambda = 0.5.  Lame mu = 1
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -15,20 +19,15 @@
   zmax = 0.5
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
+    eigenstrain_names = ini_stress
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 [UserObjects]
   [./ts]
@@ -60,11 +59,6 @@
     type = ComputeIsotropicElasticityTensor
     lambda = 0.5
     shear_modulus = 1.0
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    displacements = 'disp_x disp_y disp_z'
-    eigenstrain_names = ini_stress
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress

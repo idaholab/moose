@@ -25,9 +25,9 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void initialize(){};
+  virtual void initialize() {}
   virtual void execute();
-  virtual void finalize(){};
+  virtual void finalize() {}
 
   void checkData();
   void clearTypes();

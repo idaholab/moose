@@ -235,7 +235,7 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
     }
 
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
   }
 
   return its_normalized_residuals;

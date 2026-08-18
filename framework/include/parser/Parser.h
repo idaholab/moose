@@ -40,6 +40,13 @@ public:
   eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
 };
 
+class RepeatEvaler : public hit::Evaler
+{
+public:
+  virtual std::string
+  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+};
+
 class DupParamWalker : public hit::Walker
 {
 public:
@@ -65,7 +72,7 @@ class CompileParamWalker : public hit::Walker
 {
 public:
   typedef std::map<std::string, hit::Node *> ParamMap;
-  CompileParamWalker(ParamMap & map) : _map(map) {};
+  CompileParamWalker(ParamMap & map) : _map(map) {}
 
   virtual void
   walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override;

@@ -25,13 +25,13 @@ public:
 
   TestDiscontinuousValuePP(const InputParameters & parameters);
 
-  virtual ~TestDiscontinuousValuePP(){};
+  virtual ~TestDiscontinuousValuePP() {}
 
-  virtual void initialize() override{};
+  virtual void initialize() override {};
 
-  virtual void execute() override{};
+  virtual void execute() override {};
 
-  virtual void finalize() override{};
+  virtual void finalize() override {};
 
   /// initialSetup gets the pointer to the solution UO
   virtual void initialSetup() override;

@@ -23,9 +23,9 @@ public:
 
   TorchScriptModuleTest(const InputParameters & params);
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() {}
+  virtual void execute() {}
+  virtual void finalize() {}
 
 protected:
   // We create vectors to store our parameters (x,y,z) and NN output

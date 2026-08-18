@@ -19,7 +19,6 @@ public:
   ExponentialReaction(const InputParameters & parameters);
 
 protected:
-
   const Real & _mu1;
 
   const Real & _mu2;

@@ -26,7 +26,7 @@ namespace StochasticTools
 class MultiDimPolynomialGenerator
 {
 public:
-  MultiDimPolynomialGenerator(){};
+  MultiDimPolynomialGenerator() {}
 
   ~MultiDimPolynomialGenerator() = default;
 

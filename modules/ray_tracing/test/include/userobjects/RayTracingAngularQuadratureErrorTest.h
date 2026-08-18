@@ -18,7 +18,7 @@ public:
 
   static InputParameters validParams();
 
-  void initialize(){};
-  void finalize(){};
-  void execute(){};
+  void initialize() {}
+  void finalize() {}
+  void execute() {}
 };

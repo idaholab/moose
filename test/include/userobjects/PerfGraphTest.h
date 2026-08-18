@@ -21,7 +21,7 @@ public:
 
   PerfGraphTest(const InputParameters & params);
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() {}
+  virtual void execute() {}
+  virtual void finalize() {}
 };

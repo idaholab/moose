@@ -86,6 +86,10 @@ string-value).  MOOSE currently has five built-in brace-expression commands:
   `block0 block1 ... block10`. The last index must not be smaller than
   the first.
 
+- `${repeat <name> <count>}`: expands to the name repeated count times,
+  separated by whitespace, e.g. `${repeat foo 3}` evaluates to
+  `foo foo foo`.
+
 Examples:
 
 ```

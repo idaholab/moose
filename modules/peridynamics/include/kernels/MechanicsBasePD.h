@@ -29,7 +29,9 @@ public:
    * @param coupled_component   The coupled variable number
    */
   virtual void computeLocalOffDiagJacobian(unsigned int /* jvar_num */,
-                                           unsigned int /* coupled_component */){};
+                                           unsigned int /* coupled_component */)
+  {
+  }
 
   /**
    * Function to compute nonlocal contribution to the off-diagonal Jacobian at the current nodes
@@ -37,7 +39,9 @@ public:
    * @param coupled_component   The component number of the second coupled variable
    */
   virtual void computePDNonlocalOffDiagJacobian(unsigned int /* jvar_num */,
-                                                unsigned int /* coupled_component */){};
+                                                unsigned int /* coupled_component */)
+  {
+  }
 
   virtual void initialSetup() override;
   virtual void prepare() override;

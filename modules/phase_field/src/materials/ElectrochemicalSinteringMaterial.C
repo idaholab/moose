@@ -282,7 +282,7 @@ ElectrochemicalSinteringMaterial::computeQpProperties()
         }
       }
       break;
-    }       // case 0; // PARABOLIC
+    } // case 0; // PARABOLIC
     case 1: // DILUTE
     {
       // Calculate grand potential of solid phase and derivatives wrt chemical potentials
@@ -325,14 +325,14 @@ ElectrochemicalSinteringMaterial::computeQpProperties()
       }
 
       break;
-    }       // case 1: // DILUTE
+    } // case 1: // DILUTE
     case 2: // IDEAL
     {
       mooseError(
           "Ideal solution in solid is not yet supported in ElectrochemicalSinteringMaterial");
       break;
     } // case 2: // IDEAL
-  }   // switch (_solid_energy)
+  } // switch (_solid_energy)
 
   // thermodynamic parameters
   _mu[_qp] = _mu_gb + (_mu_s - _mu_gb) * f;

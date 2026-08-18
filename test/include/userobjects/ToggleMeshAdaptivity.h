@@ -20,9 +20,9 @@ public:
 
   virtual void initialSetup();
 
-  virtual void initialize(){};
+  virtual void initialize() {}
   virtual void execute();
-  virtual void finalize(){};
+  virtual void finalize() {}
 
 protected:
   void checkState();

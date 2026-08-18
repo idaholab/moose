@@ -27,7 +27,11 @@ NaNInterfaceTestFluidProperties::NaNInterfaceTestFluidProperties(const InputPara
 {
 }
 
-Real NaNInterfaceTestFluidProperties::p_from_v_e(Real, Real) const { return getNaN(); }
+Real
+NaNInterfaceTestFluidProperties::p_from_v_e(Real, Real) const
+{
+  return getNaN();
+}
 
 void
 NaNInterfaceTestFluidProperties::p_from_v_e(Real, Real, Real &, Real &, Real &) const

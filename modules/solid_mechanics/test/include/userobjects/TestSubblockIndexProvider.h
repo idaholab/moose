@@ -24,9 +24,9 @@ public:
 
   TestSubblockIndexProvider(const InputParameters & params);
 
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
+  virtual void initialize() override {};
+  virtual void execute() override {};
+  virtual void finalize() override {};
   /**
    * The index of subblock this element is on.
    */

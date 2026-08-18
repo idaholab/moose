@@ -23,9 +23,9 @@ public:
 
 protected:
   virtual std::vector<ADReal> computeConservativeSolution(const std::vector<ADReal> & W,
-                                                  const ADReal & A) const override;
+                                                          const ADReal & A) const override;
   virtual std::vector<ADReal> computeFluxFromPrimitive(const std::vector<ADReal> & W,
-                                               const ADReal & A) const override;
+                                                       const ADReal & A) const override;
 
   /**
    * Adds fluid properties objects needed for testing

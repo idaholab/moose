@@ -62,15 +62,15 @@ protected:
   /**
    * Insertion point for calculation before the residual contribution
    */
-  virtual void precalculateResidual(){};
+  virtual void precalculateResidual() {}
   /**
    * Insertion point for calculation before the Jacobian contribution
    */
-  virtual void precalculateJacobian(){};
+  virtual void precalculateJacobian() {}
   /**
    * Insertion point for calculation before an off-diagonal Jacobian contribution
    */
-  virtual void precalculateOffDiagJacobian(unsigned int /* jvar_num */){};
+  virtual void precalculateOffDiagJacobian(unsigned int /* jvar_num */) {}
 
   /// This is a regular kernel so we cast to a regular MooseVariable
   MooseVariableFE<T> & _var;

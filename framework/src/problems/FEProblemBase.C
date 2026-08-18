@@ -245,6 +245,11 @@ FEProblemBase::validParams()
                         "Set to false to disable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");
+  params.addParam<bool>(
+      "side_uo_interface_mat_prop_integrity_check",
+      true,
+      "Set to false to disable checking that side user objects do not consume material "
+      "properties declared by interface materials on the same boundary.");
   MooseEnum material_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
   params.addParam<MooseEnum>(
       "material_coverage_check",
@@ -373,7 +378,8 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
-      "boundary_restricted_elem_integrity_check material_coverage_check "
+      "boundary_restricted_elem_integrity_check "
+      "side_uo_interface_mat_prop_integrity_check material_coverage_check "
       "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
@@ -480,6 +486,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _previous_multiapp_fp_nl_solution_required(_num_nl_sys + _num_linear_sys, false),
     _previous_multiapp_fp_aux_solution_required(false),
+    _previous_multisystem_fp_nl_solution_required(_num_nl_sys + _num_linear_sys, false),
+    _previous_multisystem_fp_aux_solution_required(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(
@@ -489,6 +497,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
+    _side_uo_interface_mat_prop_integrity_check(
+        getParam<bool>("side_uo_interface_mat_prop_integrity_check")),
     _material_coverage_check(
         getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
     _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
@@ -9449,6 +9459,32 @@ bool
 FEProblemBase::needsPreviousMultiAppFixedPointIterationAuxiliary() const
 {
   return _previous_multiapp_fp_aux_solution_required;
+}
+
+void
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationSolution(
+    bool needed, const unsigned int solver_sys_num)
+{
+  _previous_multisystem_fp_nl_solution_required[solver_sys_num] = needed;
+}
+
+bool
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationSolution(
+    const unsigned int solver_sys_num) const
+{
+  return _previous_multisystem_fp_nl_solution_required[solver_sys_num];
+}
+
+void
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationAuxiliary(bool state)
+{
+  _previous_multisystem_fp_aux_solution_required = state;
+}
+
+bool
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationAuxiliary() const
+{
+  return _previous_multisystem_fp_aux_solution_required;
 }
 
 bool
