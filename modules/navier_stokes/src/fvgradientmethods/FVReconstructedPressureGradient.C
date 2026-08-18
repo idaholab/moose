@@ -52,7 +52,11 @@ FVReconstructedPressureGradient::resolveBaseGradientMethod(SystemBase & system) 
 
   if (_base_gradient_method_name == "green-gauss" &&
       !fe_problem.hasFVGradientMethod(_base_gradient_method_name))
-    fe_problem.addFVGradientMethod("FVGreenGaussGradient", _base_gradient_method_name);
+
+  {
+    auto params = fe_problem.getMooseApp().getFactory().getValidParams("FVGreenGaussGradient");
+    fe_problem.addFVGradientMethod("FVGreenGaussGradient", _base_gradient_method_name, params);
+  }
 
   if (!fe_problem.hasFVGradientMethod(_base_gradient_method_name))
     mooseError(
@@ -89,8 +93,7 @@ FVReconstructedPressureGradient::setupDependencies(SystemBase & system,
 void
 FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     SystemBase & system,
-    GradientContainer & output_gradient,
-    GradientContainer & scratch_gradient,
+    GradientContainer & gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
   if (!_base_gradient_method || !_rhie_chow_user_object)
@@ -113,15 +116,13 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
   // gradients from the face fluxes. Use the base method until those reconstructed gradients exist.
   if (!rc.hasReconstructedPressureGradient())
   {
-    _base_gradient_method->computeGradient(
-        system, output_gradient, scratch_gradient, variable_numbers);
+    _base_gradient_method->computeGradient(system, gradient, variable_numbers);
     return;
   }
 
   // Start from the configured base gradient. It remains the fallback value and seeds the relaxed
   // feedback state the first time reconstructed gradients become available.
-  _base_gradient_method->computeGradient(
-      system, output_gradient, scratch_gradient, variable_numbers);
+  _base_gradient_method->computeGradient(system, gradient, variable_numbers);
 
   const auto dim = system.feProblem().mesh().dimension();
   const Real alpha = rc.reconstructedPressureGradientFeedbackRelaxation();
@@ -133,7 +134,7 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
   bool reset_feedback = _reconstructed_gradient_feedback.size() != dim;
   if (!reset_feedback)
     for (const auto component : make_range(dim))
-      if (_reconstructed_gradient_feedback[component]->size() != output_gradient[component]->size())
+      if (_reconstructed_gradient_feedback[component]->size() != gradient[component]->size())
       {
         reset_feedback = true;
         break;
@@ -143,13 +144,12 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
   {
     _reconstructed_gradient_feedback.clear();
     for (const auto component : make_range(dim))
-      _reconstructed_gradient_feedback.push_back(output_gradient[component]->clone());
+      _reconstructed_gradient_feedback.push_back(gradient[component]->clone());
   }
 
   for (const auto component : make_range(dim))
   {
-    mooseAssert(reconstructed_pressure_gradient[component]->size() ==
-                    output_gradient[component]->size(),
+    mooseAssert(reconstructed_pressure_gradient[component]->size() == gradient[component]->size(),
                 "Reconstructed and published pressure gradient vectors must have the same size.");
 
     // Relax the persistent feedback state toward the newly reconstructed value:
@@ -161,7 +161,6 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
 
     // Publish the feedback state. Unlike a fresh blend with the base gradient, this accumulates the
     // reconstructed pressure-gradient update over SIMPLE iterations.
-    auto & gradient = *output_gradient[component];
-    gradient = feedback;
+    *gradient[component] = feedback;
   }
 }
