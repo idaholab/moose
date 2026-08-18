@@ -13,6 +13,7 @@
 #include "ADReal.h"
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
+#include "MathUtils.h"
 
 #include "libmesh/dof_object.h"
 
@@ -75,25 +76,12 @@ coulombFrictionRadius(const T & friction_coefficient, const T & augmented_normal
   return friction_coefficient * std::max(T(0), augmented_normal_pressure);
 }
 
-/** Return the Euclidean norm of a tangential contact vector. */
-template <typename T, std::size_t N>
-T
-tangentialNorm(const std::array<T, N> & vector)
-{
-  T norm_squared = 0;
-  for (const auto & component : vector)
-    norm_squared += component * component;
-
-  using std::sqrt;
-  return sqrt(norm_squared);
-}
-
 /** Project a tangential contact vector onto the closed ball of radius \p radius. */
 template <typename T, std::size_t N>
 std::array<T, N>
 projectToFrictionBall(const std::array<T, N> & vector, const T & radius)
 {
-  const T norm = tangentialNorm(vector);
+  const T norm = MathUtils::norm(vector);
   if (norm <= radius)
     return vector;
 
@@ -133,7 +121,7 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
                                       const std::array<T, N> & augmented_tangential_pressure,
                                       const T & radius)
 {
-  const T augmented_norm = tangentialNorm(augmented_tangential_pressure);
+  const T augmented_norm = MathUtils::norm(augmented_tangential_pressure);
   const T weight = std::max(radius, augmented_norm);
   if (weight == 0)
     return tangential_pressure;
