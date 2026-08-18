@@ -7965,6 +7965,13 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
         {
           computeSystems(EXEC_PRE_DISPLACE);
           _displaced_problem->updateMesh();
+          // A standalone scaling Jacobian is assembled without a preceding residual evaluation, so
+          // the displaced mortar segment mesh can be stale relative to the just-updated displaced
+          // parent mesh. Every other Jacobian evaluation is preceded by a residual (or combined
+          // residual/Jacobian) evaluation that already rebuilt the mortar mesh, so doing it here in
+          // the general case would be duplicative.
+          if (_current_nl_sys->computingScalingJacobian() && _mortar_data->hasDisplacedObjects())
+            updateMortarMesh();
         }
 
         for (unsigned int tid = 0; tid < n_threads; tid++)
