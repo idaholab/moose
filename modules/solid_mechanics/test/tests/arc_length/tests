@@ -137,6 +137,60 @@
                   'that neither prescribed load stepping nor prescribed displacement stepping can '
                   'trace.'
   []
+  [arch_follower_pressure]
+    type = 'CSVDiff'
+    input = 'arch_follower_pressure.i'
+    csvdiff = 'arch_follower_pressure_out_path.csv arch_follower_pressure_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # This is the FOLLOWER twin of 'arch_snapthrough' above: same clamped circular arch, same mesh
+    # and same material, and the only change is what is tagged into the load. The dead crown point
+    # force is replaced by an ADPressure patch on the outer face with use_displaced_mesh = true, so
+    # the load direction is the CURRENT normal of that face rather than a fixed direction. It is the
+    # only leaf in this directory whose load depends on the geometry the load tag is assembled on,
+    # so it is the only one that reaches the displaced mesh move inside assembleLoadTag() at all.
+    # What its golds hold is that whole follower wiring: displaced mesh assembly on the tangent
+    # path, the tagged solution dependent load, and its exact derivative. What they can NOT hold is
+    # WHICH iterate's geometry the tag is assembled on: a stale mesh there only makes the residual
+    # inexact during the iteration, the error shrinks with the Newton update, and both variants
+    # share the same fixed point, so the converged path agrees to ~1e-10 (measured) and no
+    # converged value diff can tell them apart at any tolerance.
+    #
+    # Because the load is solution dependent, its exact AD derivative is routed into the load matrix
+    # tag with matrix_tags as well; a dead load needs vector_tags alone. Both are replacements and
+    # not extra_* appends, so the pressure contributes only to the load, which is what the load
+    # parameter is then free to scale.
+    #
+    # The pressure patch is cut out of the 'rmax' face by a ParsedGenerateSideset at abs(x) < 0.45,
+    # roughly the middle fifth of the span. It is localized on purpose and must NOT be widened onto
+    # the whole outer face. A circular arch under UNIFORM radial pressure is funicular, which trades
+    # this limit point for a bifurcation, and a full face patch would also reach the clamped end
+    # faces, where the load tag would land in rows that the strong DirichletBCs zero out of the
+    # default residual only. The patch keeps the load strictly interior, the same property the point
+    # load of the clamped twin has.
+    #
+    # The crown inverts along this path: it travels about -0.59 against a rise of 0.325, so the loaded
+    # face turns through most of a half turn and the current normal ends up pointing the other way.
+    # That is what makes the follower character measurable rather than a perturbation. The measured
+    # path peaks at 1.7654 at increment 11, troughs at 0.6268 at increment 56, and climbs the inverted
+    # branch to lambda_max in 93 increments, so the 300 increment ceiling and the -4 floor, which this
+    # path never approaches, are both kept only as guards. Do not lower 'factor', 'step_size' or the
+    # patch width without re-checking that the peak and the trough are both still on the path.
+    #
+    # same tolerances and same reasoning as the two dead load arch blocks: the path is traced one
+    # increment at a time through two limit points, so this holds three digits where the path turns
+    abs_zero = 1e-6
+    rel_err = 5e-4
+    requirement = 'The system shall trace the load displacement path of a finite strain circular '
+                  'arch with clamped ends that snaps through under a follower pressure applied on '
+                  'the deformed configuration, with the exact derivative of the solution dependent '
+                  'load supplied through the load matrix tag, and record a load parameter history '
+                  'that rises to a limit point, falls to a trough as the arch snaps, and recovers '
+                  'to the target value along the inverted stiffening branch, on which the loaded '
+                  'face has turned far enough that its current normal no longer resembles its '
+                  'original one.'
+  []
   [dcb_arclength_smoke]
     type = CSVDiff
     input = dcb_arclength.i

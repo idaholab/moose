@@ -138,19 +138,19 @@ nx = 100
     type = DifferencePostprocessor
     value1 = tip_up
     value2 = tip_down
-   
+
   []
   [tip_up]
     type = PointValue
     variable = disp_y
     point = '0 ${fparse 2 * arm} 0'
-   
+
   []
   [tip_down]
     type = PointValue
     variable = disp_y
     point = '0 0 0'
-   
+
   []
 []
 

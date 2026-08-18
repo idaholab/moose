@@ -249,6 +249,12 @@ protected:
    * FEProblemBase::computeResidualTags, which would run the transfers, the MultiApps and the
    * EXEC_LINEAR objects along with the assembly and so execute them more than once per nonlinear
    * iteration.
+   *
+   * The displaced mesh is moved to the solution the system holds before the assembly, so that a
+   * load object with use_displaced_mesh = true is assembled on the current configuration. That
+   * move is made whichever call brings us here: the tangent load has just put the iterate PETSc
+   * asks about into the solution, and the prescribed step follows a residual evaluation that
+   * displaced the mesh at the same iterate, where moving it again does nothing.
    */
   void assembleLoadTag();
 
