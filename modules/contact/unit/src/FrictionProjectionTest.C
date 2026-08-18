@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "MortarContactUtils.h"
+#include "MathUtils.h"
 
 #include <array>
 #include <cmath>
@@ -58,7 +59,7 @@ TEST(FrictionProjection, ThreeDimensionalProjection)
   const auto projection = ContactUtils::projectToFrictionBall(augmented_pressure, 2.0);
   EXPECT_DOUBLE_EQ(projection[0], 1.2);
   EXPECT_DOUBLE_EQ(projection[1], 1.6);
-  EXPECT_DOUBLE_EQ(ContactUtils::tangentialNorm(projection), 2.0);
+  EXPECT_DOUBLE_EQ(MathUtils::norm(projection), 2.0);
 }
 
 TEST(FrictionProjection, Homogeneity)
@@ -91,7 +92,7 @@ TEST(FrictionProjection, PositiveWeightRelationship)
   const std::array<Real, 2> pressure = {0.6, -0.1};
   const std::array<Real, 2> augmented_pressure = {1.5, -0.5};
   const Real radius = 0.9;
-  const Real weight = std::max(radius, ContactUtils::tangentialNorm(augmented_pressure));
+  const Real weight = std::max(radius, MathUtils::norm(augmented_pressure));
   ASSERT_GT(weight, 0.0);
 
   const auto ac = ContactUtils::alartCurnierFrictionResidual(pressure, augmented_pressure, radius);
