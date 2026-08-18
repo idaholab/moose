@@ -24,6 +24,10 @@ LinearFVMomentumPressure::validParams()
                              "equations, added to the right hand side.");
   params.addParam<VariableName>(NS::pressure,
                                 "The pressure variable whose gradient should be used.");
+  params.addParam<GradientMethodName>(
+      "gradient_method",
+      "Gradient method to use for the pressure gradient in this kernel. If omitted, the pressure "
+      "variable's default gradient method is used.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -36,7 +40,11 @@ LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & param
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure_var(getPressureVariable(NS::pressure)),
+<<<<<<< HEAD
     _pressure_gradient_field(_pressure_var.requestCellGradients())
+=======
+    _pressure_gradient_field(registerPressureGradientField())
+>>>>>>> c1e05cee68c (Modify pressure momentum kernels. (#32995))
 {
 }
 
@@ -50,6 +58,15 @@ LinearFVMomentumPressure::getPressureVariable(const std::string & vname)
     paramError(NS::pressure, "The pressure variable should be of type MooseLinearVariableFVReal!");
 
   return *ptr;
+}
+
+const LinearFVGradientReader &
+LinearFVMomentumPressure::registerPressureGradientField()
+{
+  if (!isParamValid("gradient_method"))
+    return _pressure_var.computeCellGradients();
+
+  return _pressure_var.computeCellGradients(getParam<GradientMethodName>("gradient_method"));
 }
 
 Real
