@@ -1,5 +1,5 @@
 ---
-name: moose-codegraph
+name: codegraph
 description: >-
   Use CodeGraph to navigate MOOSE and avoid reinventing functionality it already has (MOOSE's
   "use existing functionality, don't reimplement it" rule - AGENTS.md, Simplicity First). Use
@@ -38,7 +38,7 @@ codegraph init      # build the index for this repo (run from the repo root; tak
 
 The index lags writes by ~1s via a file watcher, so it reflects the working tree.
 
-(The `moose-pr-review` skill *requires* CodeGraph and stops without it. General coding does not -
+(The `pr-review` skill *requires* CodeGraph and stops without it. General coding does not -
 this is the soft entry point.)
 
 ## Primary use: don't reinvent existing functionality

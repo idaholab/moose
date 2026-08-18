@@ -1,5 +1,5 @@
 ---
-name: moose-pr-address-review
+name: pr-address-review
 description: >-
   Address feedback on an existing MOOSE pull request by retrieving review
   threads and summary comments, classifying each item, applying accepted
@@ -16,9 +16,9 @@ verification to reply. Local edits are part of this workflow; commits, pushes,
 GitHub replies, and thread resolution require explicit approval after the user
 has seen their exact contents.
 
-Use `moose-codegraph` before changing MOOSE C++ or Python, and use the
-read-only Steps 0-4 of `moose-pr-review` to re-audit the revised PR. Use
-`moose-verify-changes` for build and test execution.
+Use `codegraph` before changing MOOSE C++ or Python, and use the
+read-only Steps 0-4 of `pr-review` to re-audit the revised PR. Use
+`verify-changes` for build and test execution.
 
 ## Step 1 - Identify the PR and preserve local state
 
@@ -87,7 +87,7 @@ For each file to edit:
    between the repository root and the changed file. Never search above the
    repository root. Apply all non-conflicting instructions; the closest file
    takes precedence on a conflict.
-2. Use `moose-codegraph` before changing MOOSE C++ or Python to find existing
+2. Use `codegraph` before changing MOOSE C++ or Python to find existing
    functionality, sibling patterns, callers, and blast radius.
 3. Make only changes traceable to accepted review feedback. Do not clean up
    adjacent code.
@@ -101,8 +101,8 @@ incorrect or already addressed, prepare a reply instead.
 
 ## Step 5 - Verify the revision
 
-Use `moose-verify-changes` to verify the accepted changes, then use Steps 0-4
-of `moose-pr-review` to re-audit the full PR. Check the delta from the recorded
+Use `verify-changes` to verify the accepted changes, then use Steps 0-4
+of `pr-review` to re-audit the full PR. Check the delta from the recorded
 starting SHA separately so unrelated or accidental changes are visible.
 
 If a relevant check fails or is not run, keep the thread open and report the

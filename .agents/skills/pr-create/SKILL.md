@@ -1,5 +1,5 @@
 ---
-name: moose-pr-create
+name: pr-create
 description: >-
   Audit a prepared MOOSE branch for applicable AGENTS.md instructions, MOOSE
   contribution standards, tests, documentation, and PR readiness; draft and,
@@ -15,10 +15,10 @@ Create a draft PR only after the exact candidate diff passes MOOSE's local
 instructions and contribution gates. Treat branch preparation and GitHub
 publication as separate, approval-controlled phases.
 
-Use the `moose-pr-review` skill for the MOOSE review standard and the
-`moose-codegraph` skill for its code-navigation mechanics. Use
-`moose-verify-changes` for build and test execution. Do not use the posting
-step from `moose-pr-review`.
+Use the `pr-review` skill for the MOOSE review standard and the
+`codegraph` skill for its code-navigation mechanics. Use
+`verify-changes` for build and test execution. Do not use the posting
+step from `pr-review`.
 
 ## Step 1 - Establish the candidate
 
@@ -65,7 +65,7 @@ seems self-explanatory or the diff becomes shorter.
 
 ## Step 3 - Run the MOOSE readiness gates
 
-Run Steps 0-4 of `moose-pr-review` in local-branch mode and stop before its
+Run Steps 0-4 of `pr-review` in local-branch mode and stop before its
 optional posting step. In particular:
 
 - Require CodeGraph as that skill specifies.
@@ -75,11 +75,11 @@ optional posting step. In particular:
 - Check design and scope, reuse, the MOOSE Code Standard, tests and SQA
   metadata, documentation, and new-object stub pages.
 - Treat every "required change" as a blocker. Suggestions are not blockers.
-- Use `moose-verify-changes` to verify the changed behavior. A failing relevant
+- Use `verify-changes` to verify the changed behavior. A failing relevant
   check is a blocker.
 
 If the user explicitly declines or cannot provide an environment for relevant
-verification and `moose-verify-changes` reports checks as not run, the user may
+verification and `verify-changes` reports checks as not run, the user may
 explicitly approve opening a draft with those checks outstanding. Never
 conceal the missing verification.
 

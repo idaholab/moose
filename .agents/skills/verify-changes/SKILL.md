@@ -1,5 +1,5 @@
 ---
-name: moose-verify-changes
+name: verify-changes
 description: >-
   Select and run focused builds, tests, and executable checks for MOOSE
   changes, with a mandatory environment gate, protection against stale

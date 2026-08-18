@@ -1,5 +1,5 @@
 ---
-name: moose-pr-review
+name: pr-review
 description: >-
   Review a MOOSE pull request or local branch against MOOSE's contribution standards:
   applicable AGENTS.md guidance, the MOOSE Code Standard (SCS), the SQA testing rules
@@ -26,7 +26,7 @@ security analysis - those are covered well by the built-in `/code-review` and
 `/security-review` skills. Run or recommend those for deep correctness/security; spend this
 skill's attention on what is unique to MOOSE and what CI cannot auto-check.
 
-Use `moose-verify-changes` for any build or test execution. This skill assesses
+Use `verify-changes` for any build or test execution. This skill assesses
 whether the change has appropriate tests and SQA traceability; it does not
 duplicate the verification workflow.
 
@@ -61,8 +61,8 @@ codegraph init      # build the index for this repo (run from the repo root; tak
 ```
 
 Only continue once the index is present. For how to use CodeGraph - the query patterns, the
-reuse-detection workflow, and blast-radius checks - use the `moose-codegraph` skill
-(`.claude/skills/moose-codegraph/SKILL.md`). This review layer adds the hard requirement above
+reuse-detection workflow, and blast-radius checks - use the `codegraph` skill
+(`.claude/skills/codegraph/SKILL.md`). This review layer adds the hard requirement above
 and the review-specific framing below rather than repeating those mechanics.
 
 ## Step 1 - Identify what you are reviewing
@@ -140,9 +140,9 @@ touches that area.
   expensive because users depend on them.
 - Will the code be understandable outside the PR context, from comments and docs alone?
 
-**B. Reuse and duplication (CodeGraph-driven - vital)** -> use the `moose-codegraph` skill
+**B. Reuse and duplication (CodeGraph-driven - vital)** -> use the `codegraph` skill
 - For every new function, class, or method the PR introduces, run the reuse-detection workflow
-  from the `moose-codegraph` skill to ask whether MOOSE already provides it. Reinventing an
+  from the `codegraph` skill to ask whether MOOSE already provides it. Reinventing an
   existing utility, algorithm, or object is one of the most common and most important things a
   review catches - it bloats the codebase, diverges behavior, and increases maintenance costs.
   If a near-duplicate exists, flag it as **required** and point the author to reuse or extend it.
