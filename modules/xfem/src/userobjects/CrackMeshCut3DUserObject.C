@@ -116,8 +116,9 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
     if (_growth_increment_method == GrowthRateEnum::FUNCTION && _func_v == nullptr)
-      paramError("growth_rate",
-                 "A growth_rate function must be specified for the FUNCTION growth_increment_method.");
+      paramError(
+          "growth_rate",
+          "A growth_rate function must be specified for the FUNCTION growth_increment_method.");
   }
 
   if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
