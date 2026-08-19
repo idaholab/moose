@@ -45,6 +45,12 @@ public:
   const std::vector<Abaqus::DLoad> * getBeginDLoads(Abaqus::Index elem_index) const;
   const std::vector<Abaqus::DLoad> * getEndDLoads(Abaqus::Index elem_index) const;
 
+  /// *Field getters for current step (begin/end)
+  const std::unordered_map<Abaqus::Index, Abaqus::FieldAssignment> *
+  getBeginFields(Abaqus::AbaqusID var_id) const;
+  const std::unordered_map<Abaqus::Index, Abaqus::FieldAssignment> *
+  getEndFields(Abaqus::AbaqusID var_id) const;
+
 protected:
   void initialize() override {}
   void execute() override {}
@@ -85,4 +91,9 @@ protected:
   std::pair<const std::unordered_map<Abaqus::Index, std::vector<Abaqus::DLoad>> *,
             const std::unordered_map<Abaqus::Index, std::vector<Abaqus::DLoad>> *>
       _current_step_dloads;
+
+  /// Predefined field assignments (from *Field) for the beginning and end of the current step
+  std::pair<const Abaqus::VariableValueMap<Abaqus::FieldAssignment> *,
+            const Abaqus::VariableValueMap<Abaqus::FieldAssignment> *>
+      _current_step_fields;
 };

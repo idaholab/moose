@@ -65,6 +65,7 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
 
   registerSyntax("AddUELVariables", "Variables/AddUELVariables");
+  registerSyntax("AddUELFunctions", "Functions/AddUELFunctions");
 
   registerSyntax("EmptyAction", "BCs/Pressure");
   registerSyntax("PressureAction", "BCs/Pressure/*");

@@ -16,6 +16,7 @@
 #include <vector>
 
 class AbaqusUELMesh;
+class AbaqusUELStepUserObject;
 
 /**
  * Accumulate values from one auxiliary variable into another
@@ -36,6 +37,10 @@ protected:
   AbaqusUELMesh * _uel_mesh;
 
   Abaqus::AbaqusID _var_id;
+
+  /// optional step user object providing time-varying *Field values; nullptr if the input has
+  /// no step_user_object (i.e. only static *Initial Conditions are in use)
+  const AbaqusUELStepUserObject * _step_uo;
 
   // prepare data in a map for easy retrieval
   std::unordered_map<Abaqus::Index, Real> _ic_data;

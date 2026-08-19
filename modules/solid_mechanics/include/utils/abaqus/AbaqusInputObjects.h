@@ -48,6 +48,35 @@ struct DLoad
 };
 
 /**
+ * A named time-value table (from *Amplitude). Values are linearly interpolated in
+ * total analysis time and held constant outside the [_time.front(), _time.back()] interval.
+ */
+struct Amplitude
+{
+  std::vector<Real> _time;
+  std::vector<Real> _value;
+};
+
+/// Name of the PiecewiseLinear MOOSE function created for a named *Amplitude table
+/// (shared between AddUELFunctions, which creates it, and AbaqusPredefAux, which evaluates it)
+inline std::string
+amplitudeFunctionName(const std::string & name)
+{
+  return "abaqus_amplitude_" + name;
+}
+
+/**
+ * A predefined field value assigned to a node by *Field. If _amplitude is empty, the value is
+ * linearly ramped over the step (like *Boundary); otherwise the applied value is the named
+ * amplitude table evaluated at the current time, scaled by _value.
+ */
+struct FieldAssignment
+{
+  Real _value;
+  std::string _amplitude;
+};
+
+/**
  * Store objects of type T accessible under a name and a contiguous id.
  */
 template <typename T>
@@ -235,6 +264,10 @@ struct Step
   /// distributed loads per element for this step
   std::unordered_map<Index, std::vector<DLoad>> _dloads;
 
+  /// predefined field assignments for this step
+  /// (mapping from Abaqus field variable ID to a (node index, assignment) map)
+  VariableValueMap<FieldAssignment> _field_var_node_value_map;
+
   /// Model acces to get node sets
   const Model & _model;
 
@@ -299,6 +332,9 @@ struct Model : public Part, public Step
 
   /// field initial conditions
   std::vector<FieldIC> _field_ics;
+
+  /// named amplitude tables (from *Amplitude)
+  std::map<std::string, Amplitude> _amplitudes;
 
   /// Steps
   ObjectStore<Step> _step;

@@ -434,6 +434,9 @@ Step::parse(const BlockNode & block)
                                                   : static_cast<const Step &>(_model);
   _bc_var_node_value_map = previous._bc_var_node_value_map;
   _dloads = previous._dloads;
+  // *Field values (and any amplitude table assigned to them) also persist unless a step
+  // re-assigns them - see Step::optionFunc below.
+  _field_var_node_value_map = previous._field_var_node_value_map;
 
   auto option_func = [this](const std::string & key, const OptionNode & option)
   {
@@ -613,6 +616,56 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
       // Append load to all selected elements
       for (const auto elem_index : *element_set_ptr)
         _dloads[elem_index].push_back(DLoad{jdltyp, magnitude});
+    }
+  }
+  else if (key == "field")
+  {
+    // *Field, Variable=N[, Amplitude=name] assigns a predefined field value to nodes/nodesets.
+    // Without Amplitude=, the value is linearly ramped over the step (like *Boundary); with it,
+    // the applied value is amplitude(t) scaled by the value given here.
+    const auto var_id = option._header.get<AbaqusID>("variable");
+    const auto amplitude = option._header.get<std::string>("amplitude", std::string());
+    if (!amplitude.empty() && _model._amplitudes.find(amplitude) == _model._amplitudes.end())
+      mooseError("Amplitude '", amplitude, "' referenced by *Field is not defined.");
+
+    // loop over data lines
+    for (const auto & data : option._data)
+    {
+      if (data.size() < 2)
+        mooseError("At least two fields are required in each Field data line");
+
+      // nodes this line applies to (either a nset or a single node)
+      const std::vector<Index> * node_set_ptr;
+      std::vector<Index> single_node;
+
+      if (_model._nsets.find(data[0]) != _model._nsets.end())
+        node_set_ptr = &_model._nsets.at(data[0]);
+      else
+      {
+        // If the option is instance-scoped, resolve the single node within that instance
+        const Instance * scope_instance = nullptr;
+        if (option._header.has("instance"))
+        {
+          const auto inst_name = option._header.get<std::string>("instance");
+          const auto * asmb = dynamic_cast<const AssemblyModel *>(&_model);
+          if (!asmb || !asmb->_assembly)
+            mooseError("*Field with instance= requires an Assembly context.");
+          if (!asmb->_assembly->_instance.has(inst_name))
+            mooseError("Instance '", inst_name, "' not found for *Field instance=");
+          scope_instance = &asmb->_assembly->_instance[inst_name];
+        }
+
+        single_node = {_model.getNodeIndex(data[0], scope_instance)};
+        node_set_ptr = &single_node;
+      }
+
+      // value (or amplitude scaling factor when Amplitude= is given)
+      const Real value = MooseUtils::convert<Real>(data[1]);
+
+      // last value assigned to a node wins (e.g. when a node is in multiple sets)
+      auto & node_value = _field_var_node_value_map[var_id];
+      for (const auto node_index : *node_set_ptr)
+        node_value[node_index] = FieldAssignment{value, amplitude};
     }
   }
   else if (key == "restart")
@@ -819,6 +872,36 @@ Model::optionFunc(const std::string & key, const OptionNode & option)
       _field_ics.emplace_back(option, *this);
     else
       mooseError("Unsupported IC type");
+  }
+  else if (key == "amplitude")
+  {
+    const auto name = option._header.get<std::string>("name");
+    if (_amplitudes.find(name) != _amplitudes.end())
+      mooseError("Duplicate *Amplitude name '", name, "'.");
+
+    // TIME=STEP TIME would require resolving the amplitude against each step's local clock;
+    // only TIME=TOTAL TIME (the default) is currently supported.
+    const auto time_type =
+        MooseUtils::toLower(option._header.get<std::string>("time", "total time"));
+    if (time_type != "total time")
+      mooseError("Only TIME=TOTAL TIME is currently supported for *Amplitude.");
+
+    // data is provided as time,value pairs but may be split across lines - flatten first
+    std::vector<Real> flat;
+    for (const auto & data : option._data)
+    {
+      const auto col = vecTo<Real>(data);
+      flat.insert(flat.end(), col.begin(), col.end());
+    }
+    if (flat.empty() || flat.size() % 2 != 0)
+      mooseError("*Amplitude '", name, "' must specify a non-empty list of time,value pairs.");
+
+    auto & amp = _amplitudes[name];
+    for (const auto i : make_range(flat.size() / 2))
+    {
+      amp._time.push_back(flat[2 * i]);
+      amp._value.push_back(flat[2 * i + 1]);
+    }
   }
   else if (key == "heading")
   {
