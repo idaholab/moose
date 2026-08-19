@@ -23,9 +23,8 @@ TorchScriptProfileFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
 
-  params.addClassDescription(
-      "Evaluates a TorchScript model that returns sampled one-dimensional "
-      "profiles and exposes those profiles as interpolated Real functors.");
+  params.addClassDescription("Evaluates a TorchScript model that returns sampled one-dimensional "
+                             "profiles and exposes those profiles as interpolated Real functors.");
 
   params.addRequiredParam<UserObjectName>(
       "torch_script_userobject",
