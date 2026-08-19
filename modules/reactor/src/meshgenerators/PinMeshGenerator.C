@@ -15,6 +15,7 @@
 #include "MooseMeshUtils.h"
 #include "Factory.h"
 #include "DuctedPinEngUnit.h"
+#include "CSGPlane.h"
 #include "libmesh/elem.h"
 
 registerMooseObject("ReactorApp", PinMeshGenerator);
@@ -703,10 +704,6 @@ PinMeshGenerator::generateCSG()
 
   auto csg_obj = std::make_unique<CSG::CSGBase>();
 
-  // Update list of duct apothems to include outer boundary
-  std::vector<Real> duct_apothems = _duct_halfpitch;
-  duct_apothems.push_back(_pitch / 2);
-
   // Convert region IDs to actual region names that will be stored as material fills.
   std::vector<std::vector<std::string>> region_names(_region_ids.size());
   for (const auto i : index_range(_region_ids))
@@ -716,14 +713,62 @@ PinMeshGenerator::generateCSG()
       region_names[i][j] = "rgmb_region_" + std::to_string(_region_ids[i][j]);
   }
 
-  std::vector<Real> axial_boundaries;
+  std::vector<Real> axial_plane_levels;
+  std::vector<std::string> axial_plane_names;
+  Real top_axial_level = 0.;
   if (_mesh_dimensions == 3)
-    axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+  {
+    auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+    for (const auto i : make_range(axial_boundaries.size()))
+    {
+      top_axial_level += axial_boundaries[i];
+      // Top and bottom axial planes should be removed for the construction of
+      // DuctedPinEngUnit, as this unit creates an infinite universe axially
+      if (i != axial_boundaries.size() - 1)
+      {
+        axial_plane_levels.push_back(top_axial_level);
+        axial_plane_names.push_back(RGMB::CSG_AXIAL_PLANE_PREFIX + std::to_string(i));
+      }
+    }
+  }
 
-  // Define pin engineering unit and add it to CSGBase
-  std::unique_ptr<CSG::DuctedPinEngUnit> pin_ptr = std::make_unique<CSG::DuctedPinEngUnit>(
-      name(), _mesh_geometry, _ring_radii, duct_apothems, region_names, axial_boundaries);
-  csg_obj->addEngUnit(std::move(pin_ptr));
+  // Define ducted pin engineering unit and add it to CSGBase
+  std::unique_ptr<CSG::DuctedPinEngUnit> pin_ptr =
+      std::make_unique<CSG::DuctedPinEngUnit>(name() + "_ducted_pin_unit",
+                                              _mesh_geometry,
+                                              _ring_radii,
+                                              _duct_halfpitch,
+                                              region_names,
+                                              axial_plane_levels,
+                                              axial_plane_names);
+  auto & pin_unit = csg_obj->addEngUnit(std::move(pin_ptr));
+
+  // Define radial and axial extent of pin to constrain the universe created by DuctedPinEngUnit
+  const auto unit_name = _name + "_radial_boundary";
+  const auto n_sides = (_mesh_geometry == "Hex") ? 6 : 4;
+  std::unique_ptr<CSG::CSGNPolygonUnit> radial_boundary_ptr =
+      std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, _pitch / 2.);
+  auto & radial_boundary_unit = csg_obj->addEngUnit(std::move(radial_boundary_ptr));
+  auto pin_region = -radial_boundary_unit;
+  if (_mesh_dimensions == 3)
+  {
+    const auto bottom_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "bottom_boundary";
+    std::unique_ptr<CSG::CSGSurface> bottom_surf_ptr =
+        std::make_unique<CSG::CSGPlane>(bottom_surf_name, 0, 0, 1, 0.);
+    const auto & bottom_plane_surf = csg_obj->addSurface(std::move(bottom_surf_ptr));
+
+    const auto top_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "top_boundary";
+    std::unique_ptr<CSG::CSGSurface> top_surf_ptr =
+        std::make_unique<CSG::CSGPlane>(top_surf_name, 0, 0, 1, top_axial_level);
+    const auto & top_plane_surf = csg_obj->addSurface(std::move(top_surf_ptr));
+
+    auto axial_region = +bottom_plane_surf & -top_plane_surf;
+    pin_region &= axial_region;
+  }
+
+  // Create cell that constrains DuctedPinEngUnit based on the outer boundary
+  // of the pin
+  csg_obj->createCell(_name + "_root_cell", pin_unit, pin_region);
 
   if (getReactorParam<bool>(RGMB::expand_units))
     csg_obj->expandAllEngUnits();

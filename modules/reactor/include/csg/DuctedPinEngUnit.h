@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include "CSGCellEngUnit.h"
+#include "CSGUniverseEngUnit.h"
 #include "CSGBase.h"
 
 namespace CSG
 {
 
 /**
- * DuctedPinEngUnit is a CSGCellEngUnit that represents a pin cell structure
- * (concentric cylinders surrounded by one or more ducted regions) using basic
+ * DuctedPinEngUnit is a CSGUniverseEngUnit that represents a pin cell structure
+ * (concentric cylinders surrounded by concentric ducted regions) using basic
  * engineering-scale attrbutes, including geometry type (hex or square), ring radii,
  * duct apothems, axial boundaries, and radial and axial region ID names for each region
  * of the pin structure. This engineering unit supports both 3D and 2D/infinite pin geometries.
@@ -27,7 +27,7 @@ namespace CSG
  *   - clone(): returns a deep copy of the pin engineering unit
  *   - getAttributes(): returns duct_apothems, ring_radii, region_ids, and geometry_type
  */
-class DuctedPinEngUnit : public CSGCellEngUnit
+class DuctedPinEngUnit : public CSGUniverseEngUnit
 {
 public:
   /**
@@ -41,20 +41,22 @@ public:
    *                      to be in ascending order
    * @param region_names 2-D vector of region names that represent each radial (cylindrical and
    *                     ducted) region and axial region
-   * @param axial_boundaries list of axial boundaries of extruded pin
+   * @param axial_plane_levels list of axial plane levels of extruded pin
+   * @param axial_plane_names list of axial plane names of extruded pin
    */
   DuctedPinEngUnit(const std::string & name,
                    const std::string & geometry_type,
                    const std::vector<Real> & ring_radii,
                    const std::vector<Real> & duct_apothems,
                    const std::vector<std::vector<std::string>> & region_names,
-                   const std::vector<Real> & axial_boundaries);
+                   const std::vector<Real> & axial_plane_levels,
+                   const std::vector<std::string> & axial_plane_names);
   /**
    * @brief Return the pin engeering unit attributes for this object.
    *
    * @return map containing: geometry_type (std::string), ring_radii (std::vector<Real>),
    * duct_apothems (std::vector<Real>), region_names (std::vector<std::vector<std::string>>),
-   * and axial_boundaries (std::vector<Real>)
+   * and axial_plane_levels (std::vector<Real>)
    */
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override;
 
@@ -64,7 +66,7 @@ protected:
    *
    * @return unique_ptr to a new DuctedPinEngUnit with identical parameters
    */
-  std::unique_ptr<CSGCellEngUnit> clone() const override;
+  std::unique_ptr<CSGUniverseEngUnit> clone() const override;
 
   /**
    * @brief Represent the pin cell as a single universe that contains cells that define each region
@@ -89,8 +91,11 @@ private:
   /// Region IDs of pin cell
   std::vector<std::vector<std::string>> _region_names;
 
-  /// Axial boundaries for an extruded pin cell
-  std::vector<Real> _axial_boundaries;
+  /// Axial plane levels for an extruded pin cell
+  std::vector<Real> _axial_plane_levels;
+
+  /// Axial plane names for an extruded pin cell
+  std::vector<std::string> _axial_plane_names;
 
   /// Geometry type of pin cell structure (hex or square)
   MooseEnum _geometry_type{"Hex Square"};
