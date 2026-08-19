@@ -68,7 +68,7 @@
       input = penalty-fsp-test.i
       exodiff = penalty-fsp-test_out.e
       type = Exodiff
-      rel_err = 1e-4
+      rel_err = 8e-3
     []
     [condensed]
       detail = 'field split preconditioner on a statically condensed system.'

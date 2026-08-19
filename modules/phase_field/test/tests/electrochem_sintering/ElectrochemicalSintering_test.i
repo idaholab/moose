@@ -483,12 +483,12 @@
   type = Transient
   scheme = bdf2
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -sub_ksp_type'
-  petsc_options_value = ' asm      lu           1               31                 preonly'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       mumps'
   nl_max_its = 40
   l_max_its = 30
   l_tol = 1e-4
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-12
   nl_abs_tol = 1e-13
   start_time = 0
   num_steps = 2

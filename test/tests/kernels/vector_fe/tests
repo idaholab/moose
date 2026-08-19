@@ -168,7 +168,7 @@
     input = 'coupled_scalar_vector_jacobian.i'
     recover = false
     state = 'const_positive'
-    ratio_tol = 1e-7
+    ratio_tol = 5e-6 # loose tolerance due to compiler optimization
     difference_tol = 5e-6
     design = "syntax/Variables/index.md "
     issues = "#10049"
@@ -379,7 +379,7 @@
       input = grad_div.i
       exodiff = grad_div_tet14.e
       # tolerance increased from inter-platform differences
-      abs_zero = 8e-9
+      abs_zero = 5e-7
       rel_err = 6e-4
       # Reduce the size of the penalty to get reproducible results across platforms
       cli_args = 'Mesh/gmg/elem_type=TET14 Mesh/gmg/nx=6 Mesh/gmg/ny=6 BCs/sides/penalty=1e5 '

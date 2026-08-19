@@ -986,7 +986,7 @@ ConcentricCircleMeshGenerator::generate()
 
   // Add subdomain name
   if (isParamValid("subdomain_name"))
-    mesh->subdomain_name(0) = getParam<SubdomainName>("subdomain_name");
+    mesh->set_subdomain_name(0, getParam<SubdomainName>("subdomain_name"), true);
 
   mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);

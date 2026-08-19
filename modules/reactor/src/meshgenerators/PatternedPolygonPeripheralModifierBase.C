@@ -322,7 +322,7 @@ PatternedPolygonPeripheralModifierBase::generate()
     input_mesh->stitch_meshes(*mesh, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true);
     mesh->clear();
   }
-  input_mesh->subdomain_name(_transition_layer_id) = _transition_layer_name;
+  input_mesh->set_subdomain_name(_transition_layer_id, _transition_layer_name);
   return input_mesh;
 }
 
