@@ -13,12 +13,14 @@ At crack front point $i$, the reported growth increment is
 \begin{equation}
 \Delta a_i =
 \begin{cases}
-\texttt{max\_growth\_increment}, & K_{\mathrm{eff},i} > K_{\mathrm{critical}} \text{ and } K_{I,i} > 0, \\
-0, & \text{otherwise}.
+[!param](/Reporters/CriticalCrackGrowth/max_growth_increment), & K_{\mathrm{eff},i} > K_{\mathrm{critical}} \text{ and } K_{I,i} > 0, \\
+0, & \text{otherwise},
 \end{cases}
 \end{equation}
 
-The strict toughness and positive opening-mode criteria match those used by [MeshCut2DFractureUserObject.md]. The stress intensity factors are read from the vector postprocessors selected with [!param](/Reporters/CriticalCrackGrowth/ki_vectorpostprocessor) and [!param](/Reporters/CriticalCrackGrowth/kii_vectorpostprocessor). The output vector name is controlled by [!param](/Reporters/CriticalCrackGrowth/growth_increment_name). Its default value, `growth_increment`, should be retained because [CrackMeshCut3DUserObject.md] expects that reporter value name by default.
+where $K_{\mathrm{critical}}$ is set by the required [!param](/Reporters/CriticalCrackGrowth/k_critical) parameter.
+
+The strict toughness and positive opening-mode criteria match those used by [MeshCut2DFractureUserObject.md]. The stress intensity factors are read from the vector postprocessors selected with [!param](/Reporters/CriticalCrackGrowth/ki_vectorpostprocessor) and [!param](/Reporters/CriticalCrackGrowth/kii_vectorpostprocessor). The output vector name is set by [!param](/Reporters/CriticalCrackGrowth/growth_increment_name), and that same name must be repeated in [!param](/UserObjects/CrackMeshCut3DUserObject/growth_reporter) on the [CrackMeshCut3DUserObject.md] as `<reporter_name>/<growth_increment_name>`, as the example below does.
 
 ## Example Syntax
 

@@ -5,6 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CriticalCrackGrowth.h"
 
@@ -39,7 +40,10 @@ CriticalCrackGrowth::computeGrowth(std::vector<int> & index)
 {
   _growth_increment.assign(_ki_vpp.size(), 0.0);
 
-  for (const auto i : index_range(_ki_vpp))
+  // index is sized by the active-boundary node count, which can be one or two nodes shorter than
+  // _ki_vpp (_crack_front_points) when an active tip grows outside the body and flips to an
+  // inactive endpoint. Bound the loop by index; the trailing _growth_increment entries stay 0.0.
+  for (const auto i : index_range(index))
   {
     if (index[i] == -1 || _ki_vpp[i] <= 0.0)
       continue;
