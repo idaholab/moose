@@ -28,16 +28,6 @@ public:
 protected:
   std::unique_ptr<mfem::Mesh> generateMFEMMesh() override;
 
-  /// Element type enum matching the MooseEnum parameter values
-  enum class ElemType : int
-  {
-    QUAD = 0,
-    TRI = 1,
-    HEX = 2,
-    TET = 3,
-    UNSET = -1
-  };
-
 private:
   /// Mesh dimension (1, 2, or 3)
   const unsigned int _dim;
@@ -53,8 +43,8 @@ private:
   const Real _ymax;
   /// Upper bound of the domain in the z direction (lower bound is 0)
   const Real _zmax;
-  /// Element type (resolved from user input or dimension-based default)
-  const ElemType _elem_type;
+  /// Element type (resolved from user input or dimension-based default); unused for dim == 1
+  const mfem::Element::Type _elem_type;
 };
 
 #endif

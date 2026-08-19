@@ -29,7 +29,7 @@ MFEMFileMesh::~MFEMFileMesh() {}
 mfem::Mesh
 MFEMFileMesh::buildSerialMFEMMesh()
 {
-  return mfem::Mesh(getParam<MeshFileName>("file").c_str());
+  return mfem::Mesh(getParam<MeshFileName>("file"));
 }
 
 std::unique_ptr<MooseMesh>

@@ -28,9 +28,7 @@ public:
   MFEMMesh(const InputParameters & parameters);
 
   /**
-   * Accessors for the _mfem_par_mesh object. If the mesh has
-   * not been built, the methods will call the appropriate protected methods to
-   * build them.
+   * Accessors for the _mfem_par_mesh object.
    */
   mfem::ParMesh & getMFEMParMesh() { return *_mfem_par_mesh; }
   const mfem::ParMesh & getMFEMParMesh() const;

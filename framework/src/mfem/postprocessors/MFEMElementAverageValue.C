@@ -30,29 +30,30 @@ MFEMElementAverageValue::MFEMElementAverageValue(const InputParameters & paramet
     MFEMBlockRestrictable(parameters,
                           getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _var(*getMFEMProblem().getGridFunction(getParam<VariableName>("variable"))),
-    _one(1.0),
-    _lf(_var.ParFESpace())
+    _lf(_var.ParFESpace()),
+    _volume(
+        [this]()
+        {
+          mfem::ConstantCoefficient one(1.0);
+          if (isSubdomainRestricted())
+            _lf.AddDomainIntegrator(new mfem::DomainLFIntegrator(one), getSubdomainMarkers());
+          else
+            _lf.AddDomainIntegrator(new mfem::DomainLFIntegrator(one));
+          _lf.Assemble();
+
+          // Compute the volume of the domain (or restricted subdomains) by integrating
+          // the constant 1 projected onto the variable's FE space.
+          mfem::ParGridFunction ones(_var.ParFESpace());
+          ones.ProjectCoefficient(one);
+          return _lf(ones);
+        }())
 {
-  if (isSubdomainRestricted())
-    _lf.AddDomainIntegrator(new mfem::DomainLFIntegrator(_one), getSubdomainMarkers());
-  else
-    _lf.AddDomainIntegrator(new mfem::DomainLFIntegrator(_one));
 }
 
 void
 MFEMElementAverageValue::execute()
 {
-  _lf.Assemble();
-
-  const mfem::real_t integral = _lf(_var);
-
-  // Compute the volume of the domain (or restricted subdomains) by integrating
-  // the constant 1 projected onto the variable's FE space.
-  mfem::ParGridFunction ones(_var.ParFESpace());
-  ones.ProjectCoefficient(_one);
-  const mfem::real_t volume = _lf(ones);
-
-  _value = integral / volume;
+  _value = _lf(_var) / _volume;
 }
 
 PostprocessorValue

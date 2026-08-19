@@ -9,12 +9,7 @@ as [MFEMGeneratedMeshGenerator.md], and constructs the `mfem::ParMesh` used by a
 
 MOOSE selects `MFEMMeshGeneratorMesh` automatically when the `[Mesh]` block contains an MFEM mesh
 generator and no mesh `type` is specified. Users normally do not need to select this mesh type
-directly. The final generator in the chain must be an MFEM mesh generator; libMesh and MFEM mesh
-generators cannot be mixed in the same chain.
-
-As MOOSE checks for a libMesh mesh during setup, `MFEMMeshGeneratorMesh` also builds a small
-libMesh placeholder. The placeholder is not the simulation mesh; MFEM objects access the generated
-`mfem::ParMesh` through the `getMFEMParMesh()` accessor.
+directly.
 
 ## Example Input File Syntax
 

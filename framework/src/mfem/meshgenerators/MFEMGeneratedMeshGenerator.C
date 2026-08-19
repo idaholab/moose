@@ -29,12 +29,16 @@ MFEMGeneratedMeshGenerator::validParams()
   params.addParam<Real>("ymax", 1.0, "Upper bound of the domain in the y direction.");
   params.addParam<Real>("zmax", 1.0, "Upper bound of the domain in the z direction.");
 
-  MooseEnum elem_types("QUAD=0 TRI=1 HEX=2 TET=3");
+  // POINT, WEDGE, and PYRAMID are omitted: mfem::Mesh::MakeCartesian1D/2D/3D, which this
+  // generator uses, only ever produce SEGMENT (1D), TRIANGLE/QUADRILATERAL (2D), or
+  // TETRAHEDRON/HEXAHEDRON (3D) elements.
+  MooseEnum elem_types("SEGMENT=1 TRIANGLE=2 QUADRILATERAL=3 TETRAHEDRON=4 HEXAHEDRON=5");
   params.addParam<MooseEnum>(
       "elem_type",
       elem_types,
-      "Element type. Use QUAD or TRI for 2D meshes, HEX or TET for 3D meshes. "
-      "If not specified, defaults to QUAD for 2D and HEX for 3D.");
+      "Element type. Use SEGMENT for 1D meshes, TRIANGLE or QUADRILATERAL for 2D meshes, "
+      "TETRAHEDRON or HEXAHEDRON for 3D meshes. If not specified, defaults to SEGMENT for "
+      "1D, QUADRILATERAL for 2D, and HEXAHEDRON for 3D.");
 
   params.addClassDescription("Generates a structured Cartesian MFEM mesh (line, rectangle, or box) "
                              "with uniformly spaced elements.");
@@ -57,14 +61,23 @@ MFEMGeneratedMeshGenerator::MFEMGeneratedMeshGenerator(const InputParameters & p
           // Apply dimension-dependent default for elem_type if not set by user
           if (!isParamSetByUser("elem_type"))
           {
-            if (_dim == 2)
-              return ElemType::QUAD;
-            else if (_dim == 3)
-              return ElemType::HEX;
-            // dim == 1 does not use elem_type
-            return ElemType::UNSET;
+            if (_dim == 1)
+              return mfem::Element::SEGMENT;
+            else if (_dim == 2)
+              return mfem::Element::QUADRILATERAL;
+            return mfem::Element::HEXAHEDRON;
           }
-          return getParam<MooseEnum>("elem_type").getEnum<ElemType>();
+
+          const auto elem_type = getParam<MooseEnum>("elem_type").getEnum<mfem::Element::Type>();
+          if ((_dim == 1 && elem_type != mfem::Element::SEGMENT) ||
+              (_dim == 2 && elem_type != mfem::Element::TRIANGLE &&
+               elem_type != mfem::Element::QUADRILATERAL) ||
+              (_dim == 3 && elem_type != mfem::Element::TETRAHEDRON &&
+               elem_type != mfem::Element::HEXAHEDRON))
+            paramError("elem_type",
+                       "Use SEGMENT for 1D meshes, TRIANGLE or QUADRILATERAL for 2D meshes, "
+                       "and TETRAHEDRON or HEXAHEDRON for 3D meshes.");
+          return elem_type;
         }())
 {
 }
@@ -74,9 +87,7 @@ namespace
 void
 addBdrSet(mfem::Mesh & mesh, int attr, const std::string & name)
 {
-  mfem::Array<int> a;
-  a.Append(attr);
-  mesh.bdr_attribute_sets.SetAttributeSet(name, a);
+  mesh.bdr_attribute_sets.SetAttributeSet(name, mfem::Array<int>{attr});
 }
 } // namespace
 
@@ -93,13 +104,8 @@ MFEMGeneratedMeshGenerator::generateMFEMMesh()
 
   if (_dim == 2)
   {
-    if (_elem_type == ElemType::HEX || _elem_type == ElemType::TET)
-      paramError("elem_type", "Use QUAD or TRI for 2D meshes.");
-
-    const auto elem_type =
-        (_elem_type == ElemType::TRI) ? mfem::Element::TRIANGLE : mfem::Element::QUADRILATERAL;
     auto mesh = std::make_unique<mfem::Mesh>(
-        mfem::Mesh::MakeCartesian2D(_nx, _ny, elem_type, true, _xmax, _ymax));
+        mfem::Mesh::MakeCartesian2D(_nx, _ny, _elem_type, true, _xmax, _ymax));
     addBdrSet(*mesh, 1, "bottom");
     addBdrSet(*mesh, 2, "right");
     addBdrSet(*mesh, 3, "top");
@@ -108,13 +114,8 @@ MFEMGeneratedMeshGenerator::generateMFEMMesh()
   }
 
   // dim == 3
-  if (_elem_type == ElemType::QUAD || _elem_type == ElemType::TRI)
-    paramError("elem_type", "Use HEX or TET for 3D meshes.");
-
-  const auto elem_type =
-      (_elem_type == ElemType::TET) ? mfem::Element::TETRAHEDRON : mfem::Element::HEXAHEDRON;
   auto mesh = std::make_unique<mfem::Mesh>(
-      mfem::Mesh::MakeCartesian3D(_nx, _ny, _nz, elem_type, _xmax, _ymax, _zmax));
+      mfem::Mesh::MakeCartesian3D(_nx, _ny, _nz, _elem_type, _xmax, _ymax, _zmax));
   addBdrSet(*mesh, 1, "bottom");
   addBdrSet(*mesh, 2, "front");
   addBdrSet(*mesh, 3, "right");

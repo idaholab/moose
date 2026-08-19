@@ -33,10 +33,10 @@ public:
 private:
   /// Reference to the MFEM grid function whose average is being computed
   mfem::ParGridFunction & _var;
-  /// Constant coefficient of value 1 used in integration for volume calculation
-  mfem::ConstantCoefficient _one;
-  /// Linear form used to accumulate the integral of the variable over elements
+  /// Linear form used to integrate the variable over elements
   mfem::ParLinearForm _lf;
+  /// Volume of the domain (or restricted subdomains), computed once at construction
+  const mfem::real_t _volume;
   /// Cached computed average value returned by getValue()
   mfem::real_t _value{0};
 };
