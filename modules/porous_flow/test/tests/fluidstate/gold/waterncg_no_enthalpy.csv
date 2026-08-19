@@ -1,0 +1,3 @@
+time,density_gas,density_water,enthalpy_gas,enthalpy_water,internal_energy_gas,internal_energy_water,pgas,pwater,sg,sw,viscosity_gas,viscosity_water,x0_gas,x0_water,x0mass,x1_gas,x1_water,x1mass
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,0,988.43797646115,0,0,0,0,1000000,1000000,0,1,1,0.00054670247132827,0,0.995,98.349578657885,0,0.005,0.49421898823058

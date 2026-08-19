@@ -101,6 +101,10 @@ protected:
   unsigned int _gas_fluid_component;
   /// Salt component index
   const unsigned int _salt_component;
+  /// Whether to compute the internal energy of each phase
+  const bool _compute_internal_energy;
+  /// Whether to compute the enthalpy of each phase
+  const bool _compute_enthalpy;
   /// Index of derivative wrt pressure
   const unsigned int _pidx;
   /// Index of derivative wrt total mass fraction Z
