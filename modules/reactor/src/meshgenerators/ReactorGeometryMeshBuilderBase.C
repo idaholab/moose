@@ -236,6 +236,48 @@ ReactorGeometryMeshBuilderBase::callExtrusionMeshSubgenerators(
   return output_mesh_name;
 }
 
+std::vector<std::reference_wrapper<const CSG::CSGSurface>>
+ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj)
+{
+  std::vector<std::string> axial_surf_names;
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
+
+  // Add bottom boundary surface
+  const auto bottom_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "bottom_boundary";
+  axial_surf_names.push_back(bottom_surf_name);
+
+  // Add intermediate surfaces
+  auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+  unsigned int n_intermediate_surfs = axial_boundaries.size() - 1;
+  for (const auto i : make_range(n_intermediate_surfs))
+    axial_surf_names.push_back(RGMB::CSG_AXIAL_PLANE_PREFIX + std::to_string(i));
+
+  // Add top boundary surface
+  const auto top_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "top_boundary";
+  axial_surf_names.push_back(top_surf_name);
+
+  // Check if axial planes have been defined in CSGBase and add it to surfaces_by_axial_region
+  Real axial_level = 0.;
+  for (const auto i : index_range(axial_surf_names))
+  {
+    const auto & surf_name = axial_surf_names[i];
+    axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
+    if (csg_obj.hasSurface(surf_name))
+      // Surface exists in CSGBase, retrieve from object
+      surfaces_by_axial_region.push_back(csg_obj.getSurfaceByName(surf_name));
+    else
+    {
+      // Surface has not been defined, create it and add to CSGBase
+      std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =
+          std::make_unique<CSG::CSGPlane>(surf_name, 0, 0, 1, axial_level);
+      const auto & plane_surf = csg_obj.addSurface(std::move(plane_surf_ptr));
+      surfaces_by_axial_region.push_back(plane_surf);
+    }
+  }
+
+  return surfaces_by_axial_region;
+}
+
 const CSG::CSGLattice &
 ReactorGeometryMeshBuilderBase::createRGMBLattice(
     const Real pitch,

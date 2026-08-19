@@ -286,6 +286,16 @@ protected:
                       const bool extrude);
 
   /**
+   * Get CSGSurfaces corresponding to axial planes of the extruded RGMB mesh
+   * @param csg_obj Reference to CSGBase object for retrieving axial plane surfaces
+   * @return vector of surfaces that correspond to axial planes of extruded RGMB mesh
+   * @note This method assumes axial surfaces have already been created and added to CSGBase
+   *       instance
+   */
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>>
+  getAxialPlaneSurfaces(CSG::CSGBase & csg_obj);
+
+  /**
    * Create CSG lattice for assembly and core lattices. This method does not set the outer universe
    * of the lattice
    * @param pitch lattice pitch

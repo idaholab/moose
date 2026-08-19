@@ -18,7 +18,6 @@
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
 #include "CSGUtils.h"
-#include "RGMBEngUnitUtils.h"
 
 registerMooseObject("ReactorApp", AssemblyMeshGenerator);
 
@@ -699,8 +698,7 @@ AssemblyMeshGenerator::generateCSG()
   const auto extruded_assembly = _mesh_dimensions == 3;
   if (extruded_assembly)
   {
-    surfaces_by_axial_region = RGMBEngUnitUtils::getAxialPlaneSurfaces(
-        *csg_obj, getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes));
+    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
     axial_extent = +lowest_axial_surf & -highest_axial_surf;

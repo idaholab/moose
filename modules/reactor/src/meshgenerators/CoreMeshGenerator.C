@@ -995,8 +995,7 @@ CoreMeshGenerator::generateCSG()
 
   if (_mesh_dimensions == 3)
   {
-    const auto surfaces_by_axial_region = RGMBEngUnitUtils::getAxialPlaneSurfaces(
-        *csg_obj, getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes));
+    const auto surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
     lat_cell_region = lat_cell_region & +lowest_axial_surf & -highest_axial_surf;
