@@ -58,7 +58,7 @@ MeshRepairGenerator::validParams()
       "Whether to repair sliver (near-degenerate) first-order elements. A 2D sliver (TRI3, QUAD4, "
       "polygon) is absorbed into its longest-edge neighbor: a triangle sliver against a triangle "
       "neighbor splits that neighbor into two triangles (the mesh stays all-triangle), otherwise "
-      "the neighbor absorbs the sliver's vertices and is promoted to a quadrilateral or polygon. A "
+      "the neighbor absorbs the sliver's vertices and is promoted to a polygon. A "
       "TET4 sliver is removed by edge collapse, keeping a valid all-tetrahedral conformal mesh. A "
       "flat PYRAMID5 sliver is absorbed into the element across its quad base, which becomes a "
       "polyhedron. A flat PRISM6 (wedge) sliver is collapsed onto its opposite triangular face so "
@@ -783,12 +783,9 @@ MeshRepairGenerator::repair2DSlivers(std::unique_ptr<MeshBase> & mesh) const
               new_nodes.insert(new_nodes.end(), chain.rbegin(), chain.rend());
           }
         }
-        // A quad if it now has 4 vertices, otherwise a polygon
-        std::unique_ptr<Elem> promoted;
-        if (new_nodes.size() == 4)
-          promoted = std::make_unique<Quad4>();
-        else
-          promoted = std::make_unique<libMesh::C0Polygon>(new_nodes.size());
+        // Always use polygons. A quad with colinear vertices would have a singular jacobian
+        // at the middle one
+        std::unique_ptr<Elem> promoted = std::make_unique<libMesh::C0Polygon>(new_nodes.size());
         for (const auto i : index_range(new_nodes))
           promoted->set_node(i, new_nodes[i]);
         promoted->subdomain_id() = sub;
