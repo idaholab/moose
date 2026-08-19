@@ -75,8 +75,6 @@ The test: Every changed line should trace directly to the user's request.
 
 ## 6. Tool Use
 
-- Prefer builtin tools over bash commands whenever possible in the vein of
-  reducing permission prompting.
 - Before building or performing verification, including running tests or
   invoking a pre-existing MOOSE executable, ask the user whether their MOOSE
   stack uses conda unless this has already been established in the
