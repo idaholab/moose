@@ -2021,6 +2021,10 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
     EFANode * old_emb = cut_edge->getEmbeddedNode(emb_id);
     // If the same physical edge point is rediscovered through a different face/neighbor path,
     // reuse the existing embedded node on that edge instead of treating it as a contradictory cut.
+    // Replace any references to a different caller-supplied node first, otherwise the same physical
+    // edge could carry two different EFANodes within this element (mirrors checkNeighborFaceCut).
+    if (local_embedded && local_embedded != old_emb)
+      switchEmbeddedNode(old_emb, local_embedded);
     local_embedded = old_emb;
     cut_exist = true;
   }
