@@ -246,7 +246,7 @@ class CheckResult:
     """Validation result and output strings for one precheck."""
 
     enabled: bool
-    files: list[str]
+    files: list[str]  # Files that failed this check, not all files it ran against.
     pass_msg: str
     disabled_msg: str
     error_header: str
