@@ -324,6 +324,24 @@ firstEventGroup(const std::unordered_map<dof_id_type, Real> & predicted_alphas,
   return group;
 }
 
+Real
+meritFunction(const Real fnorm)
+{
+  return 0.5 * fnorm * fnorm;
+}
+
+bool
+watchdogBoundPermits(const Real phi_candidate, const Real phi_ke, const Real gamma)
+{
+  return phi_candidate <= gamma * phi_ke;
+}
+
+bool
+watchdogRecovered(const Real phi_committed, const Real phi_ke)
+{
+  return phi_committed <= phi_ke;
+}
+
 ConstraintState
 classifyNormalState(const ADReal & lm_value, const ADReal & weighted_gap, const Real c)
 {
