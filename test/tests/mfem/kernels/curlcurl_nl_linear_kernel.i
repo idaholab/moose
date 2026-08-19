@@ -16,6 +16,8 @@
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
+    closed_basis=GaussLobatto
+    open_basis=IntegratedGLL
   []
   [HDivFESpace]
     type = MFEMVectorFESpace
@@ -112,25 +114,20 @@
   []
 []
 
-
 [Solvers]
-  active = 'gmres ams'
-  [ams]
-    type = MFEMHypreAMS
-    fespace = HCurlFESpace
-  []
   [matrix_free_ams]
     type = MFEMMatrixFreeAMS
   []
-  [gmres]
-    type = MFEMHypreGMRES
-    preconditioner = ams
-    l_tol = 1e-12
-  []
-  [cg]
-    type = MFEMCGSolver
+  [lin]
+    type = MFEMGMRESSolver
     preconditioner = matrix_free_ams
-    l_tol = 1e-12
+    l_tol = 1e-16
+  []
+  [native_mfem_nl]
+    type = MFEMNewtonNonlinearSolver
+    max_its = 10
+    abs_tol = 1.0e-15
+    rel_tol = 1.0e-15
   []
 []
 
