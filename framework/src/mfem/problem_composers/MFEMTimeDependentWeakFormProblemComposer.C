@@ -37,7 +37,8 @@ Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::MFEMTimeDependentWeakForm
 }
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
+Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(
+    MFEMProblem & mfem_problem)
 {
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 

@@ -30,7 +30,8 @@ Moose::MFEM::MFEMWeakFormProblemComposer::validParams()
   return params;
 }
 
-Moose::MFEM::MFEMWeakFormProblemComposer::MFEMWeakFormProblemComposer(const InputParameters & parameters)
+Moose::MFEM::MFEMWeakFormProblemComposer::MFEMWeakFormProblemComposer(
+    const InputParameters & parameters)
   : MFEMProblemComposer(parameters)
 {
 }
