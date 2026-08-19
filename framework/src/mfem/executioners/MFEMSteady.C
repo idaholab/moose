@@ -48,19 +48,19 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
       {
         _mfem_problem.getProblemData().eqn_system =
             std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-        type = "MFEMEigenWeakFormComposer";
+        type = "MFEMEigenWeakFormProblemComposer";
       }
       else
       {
         _mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-        type = "MFEMWeakFormComposer";
+        type = "MFEMWeakFormProblemComposer";
       }
     }
     else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
     {
       _mfem_problem.getProblemData().eqn_system =
           std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-      type = "MFEMComplexWeakFormComposer";
+      type = "MFEMComplexWeakFormProblemComposer";
     }
     else
     {

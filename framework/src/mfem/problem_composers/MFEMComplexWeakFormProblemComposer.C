@@ -9,57 +9,50 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMEigenWeakFormComposer.h"
+#include "MFEMComplexWeakFormProblemComposer.h"
 #include "MFEMProblem.h"
 #include "ProblemOperatorBase.h"
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mesh_extras.hpp"
 #include "libmesh/restore_warnings.h"
-#include "EigenproblemEquationSystem.h"
-#include "EigenproblemESProblemOperator.h"
+#include "ComplexEquationSystem.h"
+#include "ComplexEquationSystemProblemOperator.h"
 
 namespace Moose::MFEM
 {
-registerMooseObject("MooseApp", MFEMEigenWeakFormComposer);
+registerMooseObject("MooseApp", MFEMComplexWeakFormProblemComposer);
 }
 
 InputParameters
-Moose::MFEM::MFEMEigenWeakFormComposer::validParams()
+Moose::MFEM::MFEMComplexWeakFormProblemComposer::validParams()
 {
   InputParameters params = MFEMProblemComposer::validParams();
   return params;
 }
 
-Moose::MFEM::MFEMEigenWeakFormComposer::MFEMEigenWeakFormComposer(
+Moose::MFEM::MFEMComplexWeakFormProblemComposer::MFEMComplexWeakFormProblemComposer(
     const InputParameters & parameters)
   : MFEMProblemComposer(parameters)
 {
 }
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::MFEMEigenWeakFormComposer::createProblemOperator(MFEMProblem & mfem_problem)
+Moose::MFEM::MFEMComplexWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 
   // Construct a standard problem operator
-  if (mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
+  if (mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
   {
-    if (dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
-    {
-      mfem_problem.getProblemData().eqn_system =
-          std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-      _problem_operator =
-          std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
-    }
-    else
-    {
-      mooseError("Not an eigen value problem. ");
-    }
+    mfem_problem.getProblemData().eqn_system =
+        std::make_shared<Moose::MFEM::ComplexEquationSystem>();
+    _problem_operator =
+        std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
   }
   else
   {
     mooseError("Wrong numeric type. "
-               "Please set the Problem numeric type to 'real'.");
+               "Please set the Problem numeric type to 'complex'.");
   }
   return _problem_operator;
 }

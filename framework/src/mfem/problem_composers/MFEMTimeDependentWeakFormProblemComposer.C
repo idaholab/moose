@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMTimeDependentWeakFormComposer.h"
+#include "MFEMTimeDependentWeakFormProblemComposer.h"
 #include "MFEMProblem.h"
 #include "ProblemOperatorBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -20,24 +20,24 @@
 
 namespace Moose::MFEM
 {
-registerMooseObject("MooseApp", MFEMTimeDependentWeakFormComposer);
+registerMooseObject("MooseApp", MFEMTimeDependentWeakFormProblemComposer);
 }
 
 InputParameters
-Moose::MFEM::MFEMTimeDependentWeakFormComposer::validParams()
+Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::validParams()
 {
   InputParameters params = MFEMProblemComposer::validParams();
   return params;
 }
 
-Moose::MFEM::MFEMTimeDependentWeakFormComposer::MFEMTimeDependentWeakFormComposer(
+Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::MFEMTimeDependentWeakFormProblemComposer(
     const InputParameters & parameters)
   : MFEMProblemComposer(parameters)
 {
 }
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::MFEMTimeDependentWeakFormComposer::createProblemOperator(MFEMProblem & mfem_problem)
+Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 

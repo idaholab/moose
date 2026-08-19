@@ -2,6 +2,6 @@
 
 [ProblemComposer]
   [default_steady]
-    type = MFEMWeakFormComposer
+    type = MFEMWeakFormProblemComposer
   []
 []

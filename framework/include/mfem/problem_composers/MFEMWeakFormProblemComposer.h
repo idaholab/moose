@@ -18,16 +18,17 @@
 namespace Moose::MFEM
 {
 /**
- * Weak form composer to build MFEM Problem Operators
+ * Weak form problem composer to build
+ * MFEM Equation System Problem Operators
  */
-class MFEMWeakFormComposer : public MFEMProblemComposer
+class MFEMWeakFormProblemComposer : public MFEMProblemComposer
 {
 public:
   static InputParameters validParams();
 
-  MFEMWeakFormComposer(const InputParameters & parameters);
+  MFEMWeakFormProblemComposer(const InputParameters & parameters);
 
-  ~MFEMWeakFormComposer() = default;
+  ~MFEMWeakFormProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;

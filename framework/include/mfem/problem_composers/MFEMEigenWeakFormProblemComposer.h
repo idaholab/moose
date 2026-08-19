@@ -20,17 +20,17 @@ class MFEMEigenproblem;
 namespace Moose::MFEM
 {
 /**
- * Eigen Weak Form composer required to build MFEM
- * Eigen Problem Operators
+ * Eigen weak form problem composer required to build MFEM
+ * Eigen Equation System Problem Operators
  */
-class MFEMEigenWeakFormComposer : public MFEMProblemComposer
+class MFEMEigenWeakFormProblemComposer : public MFEMProblemComposer
 {
 public:
   static InputParameters validParams();
 
-  MFEMEigenWeakFormComposer(const InputParameters & parameters);
+  MFEMEigenWeakFormProblemComposer(const InputParameters & parameters);
 
-  ~MFEMEigenWeakFormComposer() = default;
+  ~MFEMEigenWeakFormProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;
