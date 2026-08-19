@@ -61,10 +61,12 @@ HeaderMap::stringify(const std::string & indent) const
  */
 const static std::set<std::string> abaqus_blocks = {"assembly", "part", "step", "instance"};
 const static std::set<std::string> abaqus_options = {
+    "amplitude",
     "boundary",
     "dload",
     "element",
     "elset",
+    "field",
     "heading",
     "initial conditions",
     "node",

@@ -24,7 +24,8 @@ namespace
 
 // Utility: find first child of a block by type string
 template <typename NodeT>
-static NodeT * find_child(Abaqus::BlockNode & node, const std::string & type)
+static NodeT *
+find_child(Abaqus::BlockNode & node, const std::string & type)
 {
   for (const auto & child : node._children)
     if (child && child->_type == type)
@@ -92,11 +93,10 @@ TEST(AbaqusInputParserTest, ContinuationEOFThrows)
 TEST(AbaqusInputParserTest, OptionDataAndContinuationJoin)
 {
   // One option with two data lines; first ends with comma (continuation)
-  std::istringstream in(
-      "*Boundary\n"
-      "XSYMM, 1, 1,\n"
-      "1.0\n"
-      "YSYMM, 2, 2\n");
+  std::istringstream in("*Boundary\n"
+                        "XSYMM, 1, 1,\n"
+                        "1.0\n"
+                        "YSYMM, 2, 2\n");
 
   InputParser parser;
   parser.parse(in);
@@ -126,10 +126,9 @@ TEST(AbaqusInputParserTest, OptionDataAndContinuationJoin)
 TEST(AbaqusInputParserTest, OptionDataMultipleLines)
 {
   // Two separate data lines under a single option (no continuation)
-  std::istringstream in(
-      "*Boundary\n"
-      "XSYMM, 1, 1, 1.0\n"
-      "YSYMM, 2, 3, -2.5\n");
+  std::istringstream in("*Boundary\n"
+                        "XSYMM, 1, 1, 1.0\n"
+                        "YSYMM, 2, 3, -2.5\n");
 
   InputParser parser;
   parser.parse(in);
@@ -157,12 +156,11 @@ TEST(AbaqusInputParserTest, OptionDataMultipleLines)
 TEST(AbaqusInputParserTest, NsetMultipleLines)
 {
   // Two data lines under an Nset option inside an Assembly block
-  std::istringstream in(
-      "*Assembly, name=A\n"
-      "*Nset, nset=ALL, instance=I\n"
-      "1, 2\n"
-      "3, 4\n"
-      "*End Assembly\n");
+  std::istringstream in("*Assembly, name=A\n"
+                        "*Nset, nset=ALL, instance=I\n"
+                        "1, 2\n"
+                        "3, 4\n"
+                        "*End Assembly\n");
 
   InputParser parser;
   parser.parse(in);
@@ -189,13 +187,12 @@ TEST(AbaqusInputParserTest, NsetMultipleLines)
 TEST(AbaqusInputParserTest, NsetContinuationAndMultipleLines)
 {
   // First logical row uses a continuation to span two physical lines
-  std::istringstream in(
-      "*Assembly, name=A\n"
-      "*Nset, nset=A, instance=I\n"
-      "1, 2,\n"
-      "3, 4\n"
-      "5, 6\n"
-      "*End Assembly\n");
+  std::istringstream in("*Assembly, name=A\n"
+                        "*Nset, nset=A, instance=I\n"
+                        "1, 2,\n"
+                        "3, 4\n"
+                        "5, 6\n"
+                        "*End Assembly\n");
 
   InputParser parser;
   parser.parse(in);
@@ -224,22 +221,21 @@ TEST(AbaqusInputParserTest, NsetContinuationAndMultipleLines)
 TEST(AbaqusInputParserTest, SquareInpTreeAndAssembly)
 {
   // Minimal assembly-style content to avoid external data dependency
-  std::istringstream in(
-      "*Part, name=Cube\n"
-      "*Node\n1, 0., 0.\n"
-      "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
-      "1\n"
-      "*Element, Type=U1, Elset=CUBE\n"
-      "1, 1\n"
-      "*UEL PROPERTY, elset=CUBE\n"
-      "1.0\n"
-      "*End Part\n"
-      "*Assembly, name=Assembly\n"
-      "*Instance, name=Cube-1, part=Cube\n"
-      "*End Instance\n"
-      "*Nset, nset=ALL, instance=Cube-1\n"
-      "1\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=Cube\n"
+                        "*Node\n1, 0., 0.\n"
+                        "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
+                        "1\n"
+                        "*Element, Type=U1, Elset=CUBE\n"
+                        "1, 1\n"
+                        "*UEL PROPERTY, elset=CUBE\n"
+                        "1.0\n"
+                        "*End Part\n"
+                        "*Assembly, name=Assembly\n"
+                        "*Instance, name=Cube-1, part=Cube\n"
+                        "*End Instance\n"
+                        "*Nset, nset=ALL, instance=Cube-1\n"
+                        "1\n"
+                        "*End Assembly\n");
 
   InputParser parser;
 
@@ -269,11 +265,10 @@ TEST(AbaqusInputParserTest, SquareInpTreeAndAssembly)
 TEST(AbaqusInputParserTest, FlatFileDetection)
 {
   // Minimal flat-style file without an Assembly block
-  std::istringstream in(
-      "*Part, name=P\n"
-      "*Node\n1, 0., 0.\n"
-      "*End Part\n"
-      "*Step\n*Static\n1., 1.\n*End Step\n");
+  std::istringstream in("*Part, name=P\n"
+                        "*Node\n1, 0., 0.\n"
+                        "*End Part\n"
+                        "*Step\n*Static\n1., 1.\n*End Step\n");
 
   InputParser parser;
   parser.parse(in);
@@ -287,26 +282,25 @@ TEST(AbaqusInputParserTest, FlatFileDetection)
 TEST(AbaqusInputParserTest, AssemblyScopedSetsAndIndices)
 {
   // Build a minimal assembly with an instance and both header- and inline-scoped sets
-  std::istringstream in(
-      "*Part, name=Cube\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "2, 1., 0.\n"
-      "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
-      "1\n"
-      "*Element, Type=U1, Elset=CUBE\n"
-      "1, 1\n"
-      "*End Part\n"
-      "*Assembly, name=Assembly\n"
-      "*Instance, name=Cube-1, part=Cube\n"
-      "*End Instance\n"
-      // Header-scoped set using clean integers
-      "*Nset, nset=ALL, instance=Cube-1\n"
-      "1, 2\n"
-      // Inline instance-qualified set
-      "*Nset, nset=INLINE\n"
-      "Cube-1.1, Cube-1.2\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=Cube\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
+                        "1\n"
+                        "*Element, Type=U1, Elset=CUBE\n"
+                        "1, 1\n"
+                        "*End Part\n"
+                        "*Assembly, name=Assembly\n"
+                        "*Instance, name=Cube-1, part=Cube\n"
+                        "*End Instance\n"
+                        // Header-scoped set using clean integers
+                        "*Nset, nset=ALL, instance=Cube-1\n"
+                        "1, 2\n"
+                        // Inline instance-qualified set
+                        "*Nset, nset=INLINE\n"
+                        "Cube-1.1, Cube-1.2\n"
+                        "*End Assembly\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -348,17 +342,16 @@ TEST(AbaqusInputParserTest, AssemblyScopedSetsAndIndices)
 TEST(AbaqusInputParserTest, AssemblyScopedSetsAmbiguityError)
 {
   // Both header instance= and inline instance-qualified tokens -> ambiguous
-  std::istringstream in(
-      "*Part, name=Cube\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "*End Part\n"
-      "*Assembly, name=Assembly\n"
-      "*Instance, name=Cube-1, part=Cube\n"
-      "*End Instance\n"
-      "*Nset, nset=BAD, instance=Cube-1\n"
-      "Cube-1.1\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=Cube\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "*End Part\n"
+                        "*Assembly, name=Assembly\n"
+                        "*Instance, name=Cube-1, part=Cube\n"
+                        "*End Instance\n"
+                        "*Nset, nset=BAD, instance=Cube-1\n"
+                        "Cube-1.1\n"
+                        "*End Assembly\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -379,22 +372,21 @@ TEST(AbaqusInputParserTest, AssemblyScopedSetsAmbiguityError)
 TEST(AbaqusInputParserTest, AssemblyElsetToNsetCopyWithInstance)
 {
   // Element set in part, assembly-level nodeset created from elset with instance scoping
-  std::istringstream in(
-      "*Part, name=Cube\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "2, 1., 0.\n"
-      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
-      "1, 2\n"
-      "*Element, Type=U1, Elset=CUBE\n"
-      "1, 1, 2\n"
-      "*End Part\n"
-      "*Assembly, name=Assembly\n"
-      "*Instance, name=Cube-1, part=Cube\n"
-      "*End Instance\n"
-      // Create a nodeset from the element set, assembly-level with instance
-      "*Nset, nset=NODES_FROM_E, elset=CUBE, instance=Cube-1\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=Cube\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+                        "1, 2\n"
+                        "*Element, Type=U1, Elset=CUBE\n"
+                        "1, 1, 2\n"
+                        "*End Part\n"
+                        "*Assembly, name=Assembly\n"
+                        "*Instance, name=Cube-1, part=Cube\n"
+                        "*End Instance\n"
+                        // Create a nodeset from the element set, assembly-level with instance
+                        "*Nset, nset=NODES_FROM_E, elset=CUBE, instance=Cube-1\n"
+                        "*End Assembly\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -416,18 +408,17 @@ TEST(AbaqusInputParserTest, AssemblyElsetToNsetCopyWithInstance)
 TEST(AbaqusInputParserTest, AssemblyNsetRequiresInstance)
 {
   // Assembly-level nodeset must specify an instance (header or inline). Numeric-only should error.
-  std::istringstream in(
-      "*Part, name=Cube\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "2, 1., 0.\n"
-      "*End Part\n"
-      "*Assembly, name=Assembly\n"
-      "*Instance, name=Cube-1, part=Cube\n"
-      "*End Instance\n"
-      "*Nset, nset=BAD\n"
-      "1, 2\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=Cube\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*End Part\n"
+                        "*Assembly, name=Assembly\n"
+                        "*Instance, name=Cube-1, part=Cube\n"
+                        "*End Instance\n"
+                        "*Nset, nset=BAD\n"
+                        "1, 2\n"
+                        "*End Assembly\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -448,33 +439,32 @@ TEST(AbaqusInputParserTest, AssemblyNsetRequiresInstance)
 TEST(AbaqusInputParserTest, MultipleInstances_AssemblyLevelSets)
 {
   // Two instances of the same part; create assembly-level sets mixing nodes from both
-  std::istringstream in(
-      "*Part, name=P\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "2, 1., 0.\n"
-      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
-      "1, 2\n"
-      "*Element, Type=U1, Elset=EALL\n"
-      "1, 1, 2\n"
-      "*End Part\n"
-      "*Assembly, name=A\n"
-      "*Instance, name=I1, part=P\n"
-      "*End Instance\n"
-      "*Instance, name=I2, part=P\n"
-      "*End Instance\n"
-      // Header-scoped nodeset for I1
-      "*Nset, nset=NS_I1, instance=I1\n"
-      "1, 2\n"
-      // Mixed inline instance-qualified nodeset
-      "*Nset, nset=NS_MIXED\n"
-      "I1.1, I2.2\n"
-      // Assembly-level elset for I2 via inline instance-qualified element id
-      "*Elset, elset=ES_I2\n"
-      "I2.1\n"
-      // Create nodeset from elset at assembly scope for I2
-      "*Nset, nset=NS_FROM_ES, elset=EALL, instance=I2\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=P\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+                        "1, 2\n"
+                        "*Element, Type=U1, Elset=EALL\n"
+                        "1, 1, 2\n"
+                        "*End Part\n"
+                        "*Assembly, name=A\n"
+                        "*Instance, name=I1, part=P\n"
+                        "*End Instance\n"
+                        "*Instance, name=I2, part=P\n"
+                        "*End Instance\n"
+                        // Header-scoped nodeset for I1
+                        "*Nset, nset=NS_I1, instance=I1\n"
+                        "1, 2\n"
+                        // Mixed inline instance-qualified nodeset
+                        "*Nset, nset=NS_MIXED\n"
+                        "I1.1, I2.2\n"
+                        // Assembly-level elset for I2 via inline instance-qualified element id
+                        "*Elset, elset=ES_I2\n"
+                        "I2.1\n"
+                        // Create nodeset from elset at assembly scope for I2
+                        "*Nset, nset=NS_FROM_ES, elset=EALL, instance=I2\n"
+                        "*End Assembly\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -520,28 +510,27 @@ TEST(AbaqusInputParserTest, MultipleInstances_AssemblyLevelSets)
 TEST(AbaqusInputParserTest, MultipleInstances_PartLevelSetsMerged)
 {
   // Part-level sets should merge across instances into model-level sets with proper offsets
-  std::istringstream in(
-      "*Part, name=P\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "2, 1., 0.\n"
-      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
-      "1, 2\n"
-      "*Element, Type=U1, Elset=EALL\n"
-      "1, 1, 2\n"
-      // Define part-level sets
-      "*Nset, nset=PN\n"
-      "1, 2\n"
-      // Define a part-level elset by referencing an existing one
-      "*Elset, elset=PE\n"
-      "EALL\n"
-      "*End Part\n"
-      "*Assembly, name=A\n"
-      "*Instance, name=I1, part=P\n"
-      "*End Instance\n"
-      "*Instance, name=I2, part=P\n"
-      "*End Instance\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=P\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+                        "1, 2\n"
+                        "*Element, Type=U1, Elset=EALL\n"
+                        "1, 1, 2\n"
+                        // Define part-level sets
+                        "*Nset, nset=PN\n"
+                        "1, 2\n"
+                        // Define a part-level elset by referencing an existing one
+                        "*Elset, elset=PE\n"
+                        "EALL\n"
+                        "*End Part\n"
+                        "*Assembly, name=A\n"
+                        "*Instance, name=I1, part=P\n"
+                        "*End Instance\n"
+                        "*Instance, name=I2, part=P\n"
+                        "*End Instance\n"
+                        "*End Assembly\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -626,23 +615,22 @@ TEST(AbaqusInputParserTest, MultipleInstances_PartLevelElsetNumericMerged)
 // yielding an empty set. This test asserts the intended behavior and will fail until fixed.
 TEST(AbaqusInputParserTest, PartLevelElsetNumericBareLine)
 {
-  std::istringstream in(
-      "*Part, name=P\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "2, 1., 0.\n"
-      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
-      "1, 2\n"
-      "*Element, Type=U1, Elset=EALL\n"
-      "1, 1, 2\n"
-      // Bare numeric element set definition (no GENERATE)
-      "*Elset, elset=PE\n"
-      "1\n"
-      "*End Part\n"
-      "*Assembly, name=A\n"
-      "*Instance, name=I1, part=P\n"
-      "*End Instance\n"
-      "*End Assembly\n");
+  std::istringstream in("*Part, name=P\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+                        "1, 2\n"
+                        "*Element, Type=U1, Elset=EALL\n"
+                        "1, 1, 2\n"
+                        // Bare numeric element set definition (no GENERATE)
+                        "*Elset, elset=PE\n"
+                        "1\n"
+                        "*End Part\n"
+                        "*Assembly, name=A\n"
+                        "*Instance, name=I1, part=P\n"
+                        "*End Instance\n"
+                        "*End Assembly\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -663,25 +651,24 @@ TEST(AbaqusInputParserTest, PartLevelElsetNumericBareLine)
 TEST(AbaqusInputParserTest, BoundaryInstanceScopedSingleNode)
 {
   // Boundary with instance-scoped single node should resolve clean integer within that instance
-  std::istringstream in(
-      "*Part, name=Cube\n"
-      "*Node\n"
-      "1, 0., 0.\n"
-      "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
-      "1\n"
-      "*Element, Type=U1, Elset=CUBE\n"
-      "1, 1\n"
-      "*End Part\n"
-      "*Assembly, name=Assembly\n"
-      "*Instance, name=Cube-1, part=Cube\n"
-      "*End Instance\n"
-      "*End Assembly\n"
-      "*Step, name=S1\n"
-      "*Static\n"
-      "1., 1.\n"
-      "*Boundary, instance=Cube-1\n"
-      "1, 1, 1, 7.5\n"
-      "*End Step\n");
+  std::istringstream in("*Part, name=Cube\n"
+                        "*Node\n"
+                        "1, 0., 0.\n"
+                        "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
+                        "1\n"
+                        "*Element, Type=U1, Elset=CUBE\n"
+                        "1, 1\n"
+                        "*End Part\n"
+                        "*Assembly, name=Assembly\n"
+                        "*Instance, name=Cube-1, part=Cube\n"
+                        "*End Instance\n"
+                        "*End Assembly\n"
+                        "*Step, name=S1\n"
+                        "*Static\n"
+                        "1., 1.\n"
+                        "*Boundary, instance=Cube-1\n"
+                        "1, 1, 1, 7.5\n"
+                        "*End Step\n");
 
   Abaqus::InputParser parser;
   parser.parse(in);
@@ -699,4 +686,159 @@ TEST(AbaqusInputParserTest, BoundaryInstanceScopedSingleNode)
   const auto & node_value = step._bc_var_node_value_map.at(1);
   ASSERT_TRUE(node_value.find(idx) != node_value.end());
   EXPECT_DOUBLE_EQ(node_value.at(idx), 7.5);
+}
+
+TEST(AbaqusInputParserTest, AmplitudeAndFieldParsing)
+{
+  // *Amplitude table (one pair split across a continuation line) plus two *Field assignments in
+  // a step: one pointing at the amplitude (single node), one plain ramp (nodeset). A second, empty
+  // step checks that both *Field assignments persist unless reassigned.
+  std::istringstream in("*Node\n"
+                        "1, 0., 0.\n"
+                        "2, 1., 0.\n"
+                        "*Nset, nset=ALL\n"
+                        "1, 2\n"
+                        "*Amplitude, name=AMP1\n"
+                        "0.0, 0.0, 0.5,\n"
+                        "10.0\n"
+                        "1.0, 20.0\n"
+                        "*Step, name=S1\n"
+                        "*Static\n"
+                        "1., 1.\n"
+                        "*Field, Variable=1, Amplitude=AMP1\n"
+                        "1, 2.0\n"
+                        "*Field, Variable=2\n"
+                        "ALL, 5.0\n"
+                        "*End Step\n"
+                        "*Step, name=S2\n"
+                        "*Static\n"
+                        "1., 1.\n"
+                        "*End Step\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+  EXPECT_TRUE(parser.isFlat());
+
+  Abaqus::FlatModel model;
+  model.parse(parser);
+
+  // Amplitude table: pairs joined despite being split across lines
+  ASSERT_TRUE(model._amplitudes.find("AMP1") != model._amplitudes.end());
+  const auto & amp = model._amplitudes.at("AMP1");
+  ASSERT_EQ(amp._time.size(), 3u);
+  EXPECT_DOUBLE_EQ(amp._time[0], 0.0);
+  EXPECT_DOUBLE_EQ(amp._value[0], 0.0);
+  EXPECT_DOUBLE_EQ(amp._time[1], 0.5);
+  EXPECT_DOUBLE_EQ(amp._value[1], 10.0);
+  EXPECT_DOUBLE_EQ(amp._time[2], 1.0);
+  EXPECT_DOUBLE_EQ(amp._value[2], 20.0);
+
+  ASSERT_EQ(model._step.size(), 2u);
+  const auto & step1 = model._step[0];
+  const auto idx1 = model.getNodeIndex("1");
+  const auto idx2 = model.getNodeIndex("2");
+
+  // Field variable 1: amplitude-scaled assignment on a single node
+  ASSERT_TRUE(step1._field_var_node_value_map.find(1) != step1._field_var_node_value_map.end());
+  const auto & field1 = step1._field_var_node_value_map.at(1);
+  ASSERT_TRUE(field1.find(idx1) != field1.end());
+  EXPECT_DOUBLE_EQ(field1.at(idx1)._value, 2.0);
+  EXPECT_EQ(field1.at(idx1)._amplitude, "AMP1");
+
+  // Field variable 2: plain ramp assignment via a nodeset (no amplitude)
+  ASSERT_TRUE(step1._field_var_node_value_map.find(2) != step1._field_var_node_value_map.end());
+  const auto & field2 = step1._field_var_node_value_map.at(2);
+  ASSERT_TRUE(field2.find(idx1) != field2.end());
+  ASSERT_TRUE(field2.find(idx2) != field2.end());
+  EXPECT_DOUBLE_EQ(field2.at(idx1)._value, 5.0);
+  EXPECT_TRUE(field2.at(idx1)._amplitude.empty());
+
+  // Step 2 does not re-specify *Field: both assignments persist unchanged
+  const auto & step2 = model._step[1];
+  ASSERT_TRUE(step2._field_var_node_value_map.find(1) != step2._field_var_node_value_map.end());
+  EXPECT_DOUBLE_EQ(step2._field_var_node_value_map.at(1).at(idx1)._value, 2.0);
+  EXPECT_EQ(step2._field_var_node_value_map.at(1).at(idx1)._amplitude, "AMP1");
+  ASSERT_TRUE(step2._field_var_node_value_map.find(2) != step2._field_var_node_value_map.end());
+  EXPECT_DOUBLE_EQ(step2._field_var_node_value_map.at(2).at(idx1)._value, 5.0);
+}
+
+TEST(AbaqusInputParserTest, FieldUndefinedAmplitudeErrors)
+{
+  // *Field referencing an amplitude table that was never defined should error at parse time
+  std::istringstream in("*Node\n"
+                        "1, 0., 0.\n"
+                        "*Step, name=S1\n"
+                        "*Static\n"
+                        "1., 1.\n"
+                        "*Field, Variable=1, Amplitude=MISSING\n"
+                        "1, 2.0\n"
+                        "*End Step\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::FlatModel model;
+  try
+  {
+    model.parse(parser);
+    FAIL() << "Expected error for undefined amplitude reference";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("is not defined"), std::string::npos) << msg;
+  }
+}
+
+TEST(AbaqusInputParserTest, DuplicateAmplitudeNameErrors)
+{
+  std::istringstream in("*Amplitude, name=AMP1\n"
+                        "0.0, 0.0, 1.0, 1.0\n"
+                        "*Amplitude, name=AMP1\n"
+                        "0.0, 0.0, 1.0, 1.0\n"
+                        "*Step, name=S1\n"
+                        "*Static\n"
+                        "1., 1.\n"
+                        "*End Step\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::FlatModel model;
+  try
+  {
+    model.parse(parser);
+    FAIL() << "Expected error for duplicate amplitude name";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("Duplicate *Amplitude name"), std::string::npos) << msg;
+  }
+}
+
+TEST(AbaqusInputParserTest, AmplitudeStepTimeUnsupported)
+{
+  // Only TIME=TOTAL TIME (the default) is currently supported
+  std::istringstream in("*Amplitude, name=AMP1, time=STEP TIME\n"
+                        "0.0, 0.0, 1.0, 1.0\n"
+                        "*Step, name=S1\n"
+                        "*Static\n"
+                        "1., 1.\n"
+                        "*End Step\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::FlatModel model;
+  try
+  {
+    model.parse(parser);
+    FAIL() << "Expected error for TIME=STEP TIME";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("TIME=TOTAL TIME"), std::string::npos) << msg;
+  }
 }

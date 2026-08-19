@@ -53,7 +53,9 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
     _current_step_fraction(0.0),
     _current_step_bcs({&_uel_mesh.getModel()._bc_var_node_value_map,
                        &_uel_mesh.getModel()._bc_var_node_value_map}),
-    _current_step_dloads({&_uel_mesh.getModel()._dloads, &_uel_mesh.getModel()._dloads})
+    _current_step_dloads({&_uel_mesh.getModel()._dloads, &_uel_mesh.getModel()._dloads}),
+    _current_step_fields({&_uel_mesh.getModel()._field_var_node_value_map,
+                          &_uel_mesh.getModel()._field_var_node_value_map})
 {
   // Fill the time interval look-up table
   _times.resize(_steps.size() + 1);
@@ -113,6 +115,9 @@ AbaqusUELStepUserObject::timestepSetup()
     _current_step_bcs = {_current_step_bcs.second, &_steps[next_step]._bc_var_node_value_map};
     // shift dload state forward
     _current_step_dloads = {_current_step_dloads.second, &_steps[next_step]._dloads};
+    // shift predefined field state forward
+    _current_step_fields = {_current_step_fields.second,
+                            &_steps[next_step]._field_var_node_value_map};
 
     // transitioning to a new step
     _current_step = next_step;
@@ -266,6 +271,24 @@ AbaqusUELStepUserObject::getEndDLoads(Abaqus::Index elem_index) const
 {
   const auto it = _current_step_dloads.second->find(elem_index);
   if (it == _current_step_dloads.second->end())
+    return nullptr;
+  return &it->second;
+}
+
+const std::unordered_map<Abaqus::Index, Abaqus::FieldAssignment> *
+AbaqusUELStepUserObject::getBeginFields(Abaqus::AbaqusID var_id) const
+{
+  const auto it = _current_step_fields.first->find(var_id);
+  if (it == _current_step_fields.first->end())
+    return nullptr;
+  return &it->second;
+}
+
+const std::unordered_map<Abaqus::Index, Abaqus::FieldAssignment> *
+AbaqusUELStepUserObject::getEndFields(Abaqus::AbaqusID var_id) const
+{
+  const auto it = _current_step_fields.second->find(var_id);
+  if (it == _current_step_fields.second->end())
     return nullptr;
   return &it->second;
 }
