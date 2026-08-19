@@ -48,6 +48,7 @@
     input = repair_slivers.i
     cli_args = '--mesh-only'
     exodiff = 'repair_slivers_in.e'
+    exodiff_opts = '-pedantic'
     recover = false
     issues = '#33566'
     requirement = "The system shall be able to repair sliver elements, flagged by the longest-edge flap test, by removing each sliver and absorbing it into its longest-edge neighbor, splitting a triangle neighbor into two triangles."
@@ -58,6 +59,7 @@
     input = repair_slivers.i
     cli_args = 'Mesh/repair/sliver_element_flap_tol=0 Mesh/repair/sliver_element_area_fraction=0.01 --mesh-only repair_slivers_area_in.e'
     exodiff = 'repair_slivers_area_in.e'
+    exodiff_opts = '-pedantic'
     recover = false
     issues = '#33566'
     requirement = "The system shall be able to repair sliver elements flagged by the relative-area test."
@@ -92,6 +94,7 @@
     input = repair_tet_sliver.i
     cli_args = '--mesh-only'
     exodiff = 'repair_tet_sliver_in.e'
+    exodiff_opts = '-pedantic'
     recover = false
     issues = '#33566'
     requirement = "The system shall be able to repair an interior sliver tetrahedron by edge collapse, producing a valid conformal mesh."

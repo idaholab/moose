@@ -9,23 +9,47 @@
     element_connectivity = '0 1 2 3 4 5'
     elem_type = PRISM6
   []
+  [add_bdies_on_wedge]
+    type = SideSetsFromNormalsGenerator
+    input = 'wedge'
+    normals = '-1 0 0
+               0 0 1
+               0 0 -1'
+    new_boundary = 'on_quad_side_should_be_lost on_tri_side_top on_tri_side_bot'
+    output = true
+  []
   [below]
     type = ElementGenerator
-    input = wedge
     nodal_positions = '0 0 0  0 1 0  1 0 0  0.25 0.25 -1'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
+  [add_bdies_on_tet_bot]
+    type = SideSetsFromNormalsGenerator
+    input = 'below'
+    normals = '0 0 1'
+    new_boundary = 'on_tri_side_bot_from_tri'
+  []
   [above]
     type = ElementGenerator
-    input = below
     nodal_positions = '0 0 0.01  1 0 0.01  0 1 0.01  0.25 0.25 1'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
+  [add_bdies_on_tet_top]
+    type = SideSetsFromNormalsGenerator
+    input = 'above'
+    normals = '0 0 -1'
+    new_boundary = 'on_tri_side_top_from_tri'
+  []
+  [combined]
+    type = CombinerGenerator
+    inputs = 'add_bdies_on_tet_bot add_bdies_on_tet_top add_bdies_on_wedge'
+    avoid_merging_boundaries = true
+  []
   [repair]
     type = MeshRepairGenerator
-    input = above
+    input = combined
     fix_node_overlap = true
     fix_sliver_elements = true
   []

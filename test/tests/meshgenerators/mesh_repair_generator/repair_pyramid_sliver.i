@@ -15,16 +15,32 @@
     element_connectivity = '0 1 2 3 4'
     elem_type = PYRAMID5
   []
+  [add_bdies_on_sliver]
+    type = SideSetsFromNormalsGenerator
+    input = 'pyr'
+    normals = '0 0 1
+               0 0 -1'
+    new_boundary = 'sliv_pointing_inside sliv_pointing_outside'
+    normal_tol = 1e-3
+  []
   [tet0]
     type = ElementGenerator
-    input = pyr
+    input = add_bdies_on_sliver
     nodal_positions = '0.5  0.5  1.01  0  0  1  1  0  1  0.5  0.5  2'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
+  [add_bdies_on_collapsed_regular]
+    type = SideSetsFromNormalsGenerator
+    input = 'tet0'
+    normals = '0 0 1
+               0 0 -1'
+    new_boundary = 'coll_pointing_inside coll_pointing_outside'
+    normal_tol = 1e-3
+  []
   [tet1]
     type = ElementGenerator
-    input = tet0
+    input = add_bdies_on_collapsed_regular
     nodal_positions = '0.5  0.5  1.01  1  0  1  1  1  1  0.5  0.5  2'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
