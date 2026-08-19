@@ -284,4 +284,14 @@
     requirement = "The system shall repair a flat-slab sliver hexahedron whose squashed faces are shared with non-hexahedral (pyramid) neighbors, keeping the mesh conformal."
     mesh_mode = 'replicated'
   []
+
+  [errors]
+    type = RunException
+    input = 'flip_element.i'
+    cli_args = 'Mesh/flip/fix_elements_orientation=false'
+    expect_err = 'No specific item to fix. Are any of the parameters misspelled'
+    issues = '#25107'
+    requirement = 'The system shall return an error if a repair generator is used but no specific repair actions have been requested.'
+    mesh_mode = 'replicated'
+  []
 []
