@@ -115,6 +115,38 @@ TEST(FirstEventGroup, TiedGroupIndependentOfInsertionOrder)
   }
 }
 
+TEST(Watchdog, BoundedExcursionPermittedThenRecovers)
+{
+  // "Bounded 1e-3 -> 1e4 excursion + recovery": an event-limited step increases the merit
+  // function by seven orders of magnitude, well beyond a strict decrease requirement, but the
+  // watchdog still permits it because gamma covers the excursion; a later step back at or below
+  // the checkpoint then counts as recovery.
+  const Real phi_ke = 1e-3;
+  const Real phi_excursion = 1e4;
+  const Real gamma = 1e8;
+
+  EXPECT_DOUBLE_EQ(ContactUtils::meritFunction(std::sqrt(2 * phi_ke)), phi_ke);
+  EXPECT_TRUE(ContactUtils::watchdogBoundPermits(phi_excursion, phi_ke, gamma));
+  EXPECT_FALSE(ContactUtils::watchdogRecovered(phi_excursion, phi_ke));
+
+  // Recovery requires falling back to at or below the checkpointed merit, not merely below the
+  // excursion peak.
+  EXPECT_TRUE(ContactUtils::watchdogRecovered(phi_ke, phi_ke));
+  EXPECT_TRUE(ContactUtils::watchdogRecovered(phi_ke / 2, phi_ke));
+  EXPECT_FALSE(ContactUtils::watchdogRecovered(phi_ke * 2, phi_ke));
+}
+
+TEST(Watchdog, ExcursionBeyondGammaIsRejected)
+{
+  // An excursion outside the gamma-scaled bound must be rejected outright, regardless of how it
+  // compares to the checkpoint on its own.
+  const Real phi_ke = 1e-3;
+  const Real gamma = 10;
+
+  EXPECT_TRUE(ContactUtils::watchdogBoundPermits(gamma * phi_ke, phi_ke, gamma));
+  EXPECT_FALSE(ContactUtils::watchdogBoundPermits(gamma * phi_ke * 1.01, phi_ke, gamma));
+}
+
 TEST(EventPrediction, PredictedCrossingIsSelfConsistent)
 {
   // "Predicted vs actual on a known crossing": for an exactly linear switching function

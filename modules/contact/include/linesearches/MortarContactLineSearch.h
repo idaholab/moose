@@ -33,17 +33,33 @@ typedef MooseVariableFE<Real> MooseVariable;
  * - If the set did not change, the backing search's own result is committed unmodified.
  * - If the set changed but the backing search still achieved a sufficient residual reduction, its
  *   result is committed directly.
- * - Otherwise, a single event-limited step is taken along the Newton direction, bounded by the
- *   predicted step length at which the first active dof's contact/friction switch value would
- *   cross zero (Moose::Mortar::Contact::firstEventGroup()). This deliberately omits the
- *   bound/recovery loop and dense-event escape hatch that a full watchdog would need; those are
- *   left to a future phase.
- * - If neither condition holds and no such event is predicted, the failure is propagated to the
- *   outer SNES unchanged.
+ * - Otherwise, a single event-limited step is taken along the Newton direction, overshooting
+ *   slightly past the predicted step length at which the first active dof's contact/friction
+ *   switch value would cross zero (Moose::Mortar::Contact::firstEventGroup()), then verified to
+ *   actually change the set. A residual decrease at that point is committed outright; a residual
+ *   increase is committed only under the bounded watchdog exception below.
+ * - If neither condition holds and no such event is predicted (even after widening the trial step
+ *   up to the full Newton step), the failure is propagated to the outer SNES unchanged.
+ *
+ * A residual increase from an event-limited step is accepted only while it stays within a factor
+ * `watchdog_gamma` of the pre-event iterate's residual, and only until recovery (a residual at or
+ * below the pre-event level) is reached within `watchdog_max_iterations` further outer Newton
+ * iterations; the watchdog checkpoint is fixed at activation and is not reset by further set
+ * changes while it remains active, so successive increases cannot ratchet the allowed excursion
+ * upward. If recovery does not happen in time, the solution is rolled back to that checkpoint and
+ * the current iteration is reported as failed.
+ *
+ * Many consecutive event-limited iterations indicate a Newton direction crossing many
+ * well-separated switching surfaces one at a time; past `dense_event_threshold` such iterations
+ * in a row, the event limit is dropped in favor of a single composite step to the full Newton
+ * step, subject to the same verification and watchdog gating.
  *
  * Event prediction only tracks each dof's normal (open/closed) switch value; it does not predict
  * stick/slip transitions for frictional dofs, since the primary failure mode this phase targets
- * is jamming across the open/closed boundary.
+ * is jamming across the open/closed boundary. Acceptance and diagnostics always classify the
+ * complete trial iterate, however, so any additional dof transitions coupling produces beyond
+ * what was predicted are still detected and, if the applicable decrease or watchdog condition
+ * passes, retained as part of the accepted step.
  *
  * The `c`/`normalize_c`/`use_derived_c_normal`/`c_t`/`mu`/`epsilon` parameters must be kept
  * consistent with the matching mortar `[Constraints]` block by the user; this class has no way to
@@ -55,11 +71,39 @@ public:
   static InputParameters validParams();
 
   MortarContactLineSearch(const InputParameters & parameters);
+  ~MortarContactLineSearch();
 
   void initialSetup() override;
   void lineSearch() override;
 
 protected:
+  /**
+   * Whether a candidate with residual norm \p fnorm_candidate may be committed given the
+   * watchdog's current state: always true while the watchdog is inactive; otherwise true only if
+   * the candidate stays within 'watchdog_gamma' times the checkpointed watchdog residual.
+   */
+  bool watchdogPermits(Real fnorm_candidate) const;
+
+  /**
+   * Activate the watchdog at the just-checkpointed pre-event iterate, caching its solution and
+   * residual so every later bound/recovery check in this watchdog episode measures against this
+   * SAME original point rather than a rolling one.
+   */
+  void activateWatchdog(Vec x_ke, Vec f_ke, Real fnorm_ke);
+
+  /**
+   * Advance an active watchdog by one outer Newton iteration after committing a candidate with
+   * residual norm \p fnorm_committed. Deactivates on recovery. If 'watchdog_max_iterations'
+   * iterations pass without recovery, rolls \p X / \p F back to the cached watchdog checkpoint,
+   * zeros \p Y, marks \p line_search failed, and deactivates. A no-op while the watchdog is
+   * inactive.
+   */
+  void advanceWatchdog(Real fnorm_committed, Vec X, Vec F, Vec Y, SNESLineSearch line_search);
+
+  /// Tear down the active watchdog's cached checkpoint vectors and reset its bookkeeping.
+  void deactivateWatchdog();
+
+
   /// Per-dof classification result of a call to classify(), plus the raw normal switch value
   /// (lm_value - c*weighted_gap) needed to predict normal open/closed events (Component B).
   struct Classification
@@ -136,4 +180,46 @@ protected:
 
   /// Whether _user_ksp_rtol has been cached yet
   bool _user_ksp_rtol_set = false;
+
+  /// Relative overshoot placing an event-limited trial step just past, rather than exactly at, a
+  /// predicted switching event (eq eq:event-step), so the trial point lands unambiguously on the
+  /// new branch instead of sitting on the switching surface itself
+  const Real _event_step_epsilon;
+
+  /// Number of consecutive outer Newton iterations that have required the event-limited fallback;
+  /// reset whenever the backing search's own result is committed (unchanged identity or direct
+  /// acceptance), since that indicates the constraint set has stopped forcing single-event steps
+  unsigned int _consecutive_event_steps = 0;
+
+  /// Consecutive event-limited iterations after which a single event-by-event step is abandoned
+  /// in favor of one composite step to the full Newton step (still subject to the same
+  /// verification and watchdog gating), approximating a pathsearch that walks many breakpoints in
+  /// one subproblem instead of reassembling once per breakpoint
+  const unsigned int _dense_event_threshold;
+
+  /// Bound on how far the residual may exceed the watchdog checkpoint's residual while the
+  /// watchdog is active (eq eq:watchdog-bound); must exceed 1
+  const Real _watchdog_gamma;
+
+  /// Number of further outer Newton iterations allowed for the residual to recover to at or below
+  /// the watchdog checkpoint's level (eq eq:watchdog-recovery) before rolling back
+  const unsigned int _watchdog_max_iterations;
+
+  /// Whether a watchdog episode is currently active
+  bool _watchdog_active = false;
+
+  /// Outer Newton iterations elapsed since the current watchdog episode was activated
+  unsigned int _watchdog_iterations = 0;
+
+  /// Phi(x_ke) = 0.5*||F(x_ke)||^2 at the watchdog checkpoint; every bound/recovery check in the
+  /// current episode measures against this fixed value
+  Real _watchdog_phi_ke = 0;
+
+  /// Cached solution at the watchdog checkpoint x_ke, restored into the solver's iterate if the
+  /// episode times out without recovery; null while no episode is active
+  Vec _watchdog_x_ke = nullptr;
+
+  /// Cached residual at the watchdog checkpoint x_ke, restored alongside _watchdog_x_ke on
+  /// timeout so the solver's (X, F) pair stays consistent
+  Vec _watchdog_f_ke = nullptr;
 };

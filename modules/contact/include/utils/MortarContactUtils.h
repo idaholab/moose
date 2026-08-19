@@ -596,6 +596,18 @@ struct FirstEventGroup
 std::optional<FirstEventGroup>
 firstEventGroup(const std::unordered_map<dof_id_type, Real> & predicted_alphas, Real tau_event);
 
+/// Merit function Phi(x) = 0.5*||F(x)||^2 the watchdog nonmonotone-acceptance bound and recovery
+/// conditions compare (eq eq:watchdog-bound, eq:watchdog-recovery).
+Real meritFunction(Real fnorm);
+
+/// Whether a candidate merit \p phi_candidate may be committed under an active watchdog episode
+/// checkpointed at merit \p phi_ke, bounded by the factor \p gamma (eq eq:watchdog-bound).
+bool watchdogBoundPermits(Real phi_candidate, Real phi_ke, Real gamma);
+
+/// Whether committing a candidate with merit \p phi_committed counts as recovery of a watchdog
+/// episode checkpointed at merit \p phi_ke (eq eq:watchdog-recovery).
+bool watchdogRecovered(Real phi_committed, Real phi_ke);
+
 /**
  * Classify a mortar dof's normal contact state from the NCP min-complementarity switch value
  * q_n = lm_value - c*weighted_gap that determines which branch of

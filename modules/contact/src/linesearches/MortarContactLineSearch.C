@@ -93,6 +93,28 @@ MortarContactLineSearch::validParams()
       "event_group_tol",
       1e-2,
       "Step-length tolerance used to group near-simultaneous predicted normal-switch events.");
+  params.addRangeCheckedParam<Real>(
+      "event_step_epsilon",
+      1e-2,
+      "event_step_epsilon > 0",
+      "Relative overshoot placing an event-limited trial step just past a predicted switching "
+      "event rather than exactly on it.");
+  params.addParam<unsigned int>(
+      "dense_event_threshold",
+      5,
+      "Consecutive outer Newton iterations requiring the event-limited fallback after which a "
+      "single composite step to the full Newton step is taken instead of one event at a time.");
+  params.addRangeCheckedParam<Real>(
+      "watchdog_gamma",
+      2,
+      "watchdog_gamma > 1",
+      "Bound on how far the residual may exceed the watchdog checkpoint's residual while a "
+      "set-changing residual increase is being tolerated.");
+  params.addParam<unsigned int>(
+      "watchdog_max_iterations",
+      5,
+      "Number of further outer Newton iterations allowed for the residual to recover to at or "
+      "below the watchdog checkpoint's level before the solution is rolled back to it.");
   return params;
 }
 
@@ -103,8 +125,20 @@ MortarContactLineSearch::MortarContactLineSearch(const InputParameters & paramet
     _use_derived_c_normal(getParam<bool>("use_derived_c_normal")),
     _c_t(getParam<Real>("c_t")),
     _direct_accept_tol(getParam<Real>("direct_accept_tol")),
-    _event_group_tol(getParam<Real>("event_group_tol"))
+    _event_group_tol(getParam<Real>("event_group_tol")),
+    _event_step_epsilon(getParam<Real>("event_step_epsilon")),
+    _dense_event_threshold(getParam<unsigned int>("dense_event_threshold")),
+    _watchdog_gamma(getParam<Real>("watchdog_gamma")),
+    _watchdog_max_iterations(getParam<unsigned int>("watchdog_max_iterations"))
 {
+}
+
+MortarContactLineSearch::~MortarContactLineSearch()
+{
+  if (_watchdog_x_ke)
+    PetscCallAbort(comm().get(), VecDestroy(&_watchdog_x_ke));
+  if (_watchdog_f_ke)
+    PetscCallAbort(comm().get(), VecDestroy(&_watchdog_f_ke));
 }
 
 void
@@ -262,6 +296,77 @@ MortarContactLineSearch::classify(const Vec & solution) const
   return result;
 }
 
+bool
+MortarContactLineSearch::watchdogPermits(const Real fnorm_candidate) const
+{
+  if (!_watchdog_active)
+    return true;
+  return Moose::Mortar::Contact::watchdogBoundPermits(
+      Moose::Mortar::Contact::meritFunction(fnorm_candidate), _watchdog_phi_ke, _watchdog_gamma);
+}
+
+void
+MortarContactLineSearch::activateWatchdog(Vec x_ke, Vec f_ke, const Real fnorm_ke)
+{
+  mooseAssert(!_watchdog_active, "A watchdog episode is already active");
+  LibmeshPetscCall(VecDuplicate(x_ke, &_watchdog_x_ke));
+  LibmeshPetscCall(VecDuplicate(f_ke, &_watchdog_f_ke));
+  LibmeshPetscCall(VecCopy(x_ke, _watchdog_x_ke));
+  LibmeshPetscCall(VecCopy(f_ke, _watchdog_f_ke));
+  _watchdog_phi_ke = Moose::Mortar::Contact::meritFunction(fnorm_ke);
+  _watchdog_iterations = 0;
+  _watchdog_active = true;
+}
+
+void
+MortarContactLineSearch::deactivateWatchdog()
+{
+  if (_watchdog_x_ke)
+    LibmeshPetscCall(VecDestroy(&_watchdog_x_ke));
+  if (_watchdog_f_ke)
+    LibmeshPetscCall(VecDestroy(&_watchdog_f_ke));
+  _watchdog_active = false;
+  _watchdog_iterations = 0;
+  _watchdog_phi_ke = 0;
+}
+
+void
+MortarContactLineSearch::advanceWatchdog(const Real fnorm_committed,
+                                          Vec X,
+                                          Vec F,
+                                          Vec Y,
+                                          SNESLineSearch line_search)
+{
+  if (!_watchdog_active)
+    return;
+
+  ++_watchdog_iterations;
+
+  if (Moose::Mortar::Contact::watchdogRecovered(
+          Moose::Mortar::Contact::meritFunction(fnorm_committed), _watchdog_phi_ke))
+  {
+    // Recovery (eq eq:watchdog-recovery): control returns to the backing search in full.
+    _console << "MortarContactLineSearch: watchdog recovered after " << _watchdog_iterations
+              << " iteration(s)." << std::endl;
+    deactivateWatchdog();
+    _consecutive_event_steps = 0;
+  }
+  else if (_watchdog_iterations >= _watchdog_max_iterations)
+  {
+    // Timed out without recovery: roll the solver's iterate back to the checkpoint rather than
+    // accepting an indefinitely growing excursion, and report this iteration as failed so the
+    // outer solve tries a different step from x_ke.
+    _console << "MortarContactLineSearch: watchdog failed to recover within "
+              << _watchdog_max_iterations << " iteration(s); rolling back to the checkpoint."
+              << std::endl;
+    LibmeshPetscCall(VecCopy(_watchdog_x_ke, X));
+    LibmeshPetscCall(VecCopy(_watchdog_f_ke, F));
+    LibmeshPetscCall(VecZeroEntries(Y));
+    LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_REDUCT));
+    deactivateWatchdog();
+  }
+}
+
 void
 MortarContactLineSearch::lineSearch()
 {
@@ -273,6 +378,16 @@ MortarContactLineSearch::lineSearch()
   SNESLineSearch line_search;
   PetscReal fnorm0, xnorm0, ynorm0;
   SNES snes = _solver->snes();
+
+  // A fresh SNESSolve() -- including a retry after a dt cut -- resets PETSc's own outer
+  // iteration counter to 0 before its first line-search call. Use that to tear down any watchdog
+  // episode left active by a prior, now-abandoned SNESSolve attempt: its cached checkpoint refers
+  // to an iterate from a solve that no longer exists, so comparing against it would produce a
+  // meaningless recovery/rollback decision.
+  PetscInt snes_iter;
+  LibmeshPetscCall(SNESGetIterationNumber(snes, &snes_iter));
+  if (snes_iter == 0)
+    deactivateWatchdog();
 
   LibmeshPetscCall(SNESGetLineSearch(snes, &line_search));
   LibmeshPetscCall(SNESLineSearchGetVecs(line_search, &X, &F, &Y, &W, &G));
@@ -335,6 +450,10 @@ MortarContactLineSearch::lineSearch()
   bool identity_changed = !diffIsEmpty(diff);
   comm().max(identity_changed);
 
+  // Residual norm of whatever this call ultimately commits into F, fed to advanceWatchdog()
+  // below regardless of which branch commits it.
+  PetscReal committed_fnorm = fnorm0;
+
   if (!identity_changed)
   {
     // Unchanged identity: nothing contact-related changed, so pass the backing search's result
@@ -345,6 +464,10 @@ MortarContactLineSearch::lineSearch()
     LibmeshPetscCall(VecCopy(Yb, Y));
     LibmeshPetscCall(SNESLineSearchSetReason(line_search, backing_reason));
     _old_state = state_backing.states;
+    committed_fnorm = fnorm_b;
+    // The backing search handled this iteration on its own; the event-limited fallback is not
+    // the thing driving progress right now.
+    _consecutive_event_steps = 0;
   }
   else if (backing_succeeded && fnorm_b < fnorm0 * (1 - _direct_accept_tol))
   {
@@ -355,6 +478,8 @@ MortarContactLineSearch::lineSearch()
     LibmeshPetscCall(VecCopy(Yb, Y));
     LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED));
     _old_state = state_backing.states;
+    committed_fnorm = fnorm_b;
+    _consecutive_event_steps = 0;
   }
   else
   {
@@ -383,35 +508,97 @@ MortarContactLineSearch::lineSearch()
     }
     const auto event_group = firstEventGroup(predicted_alphas, _event_group_tol);
 
-    if (event_group)
+    // Dense-event escape hatch: many consecutive event-limited iterations indicate the Newton
+    // direction is crossing a series of well-separated switching surfaces one at a time. Past
+    // 'dense_event_threshold' such iterations in a row, stop paying for one reassembly per
+    // breakpoint and take a single composite step to the full Newton step instead, subject to the
+    // same verification and watchdog gating below.
+    const bool dense_escape = _consecutive_event_steps >= _dense_event_threshold;
+
+    std::optional<Real> step;
+    if (dense_escape)
+      step = Real(1);
+    else if (event_group)
+      // Event-limited step (eq eq:event-step): overshoot the predicted event by a relative
+      // 'event_step_epsilon' so the trial point lands unambiguously on the new branch instead of
+      // sitting on the switching surface itself.
+      step = std::min(Real(1), (1 + _event_step_epsilon) * event_group->alpha_min);
+
+    bool committed = false;
+
+    if (step)
     {
-      // Event-limited fallback: take a single step to the first predicted normal-switch event
-      // instead of trusting the backing search's rejected iterate. X has not been touched above,
-      // so this steps from the checkpoint.
-      const Real step = std::min(Real(1), event_group->alpha_min);
-      LibmeshPetscCall(VecWAXPY(W, -step, Y, X));
-      LibmeshPetscCall(SNESComputeFunction(snes, W, F));
+      // G is PETSc's designated work vector for the trial point's function value (paired with W,
+      // the trial solution), so the checkpoint's own F is left untouched unless/until this trial
+      // is actually committed below.
+      LibmeshPetscCall(VecWAXPY(W, -*step, Y, X));
+      LibmeshPetscCall(SNESComputeFunction(snes, W, G));
+
+      bool domain_error = false;
 #if PETSC_VERSION_LESS_THAN(3, 25, 0)
-      PetscBool domainerror;
-      LibmeshPetscCall(SNESGetFunctionDomainError(snes, &domainerror));
-      if (domainerror)
-        LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN));
+      PetscBool petsc_domain_error;
+      LibmeshPetscCall(SNESGetFunctionDomainError(snes, &petsc_domain_error));
+      domain_error = petsc_domain_error;
 #else
-      SNESConvergedReason reason;
-      LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
-      if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
-        LibmeshPetscCall(
-            SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_FUNCTION_DOMAIN));
+      SNESConvergedReason snes_reason;
+      LibmeshPetscCall(SNESGetConvergedReason(snes, &snes_reason));
+      domain_error = (snes_reason == SNES_DIVERGED_FUNCTION_DOMAIN);
 #endif
-      LibmeshPetscCall(VecCopy(W, X));
-      LibmeshPetscCall(VecScale(Y, step));
-      _old_state = classify(X).states;
+
+      if (!domain_error)
+      {
+        // Verify via Component A that the trial point actually changed the set identity rather
+        // than trusting the secant-based prediction outright; coupling can make the actual
+        // transition include dofs beyond the predicted group, so the full reconciled
+        // classification is compared, not just the predicted dof.
+        const auto state_trial = classify(W);
+        const auto trial_diff = symmetricDifference(checkpoint.states, state_trial.states);
+        bool trial_identity_changed = !diffIsEmpty(trial_diff);
+        comm().max(trial_identity_changed);
+
+        if (trial_identity_changed)
+        {
+          PetscReal fnorm_trial;
+          LibmeshPetscCall(VecNorm(G, NORM_2, &fnorm_trial));
+
+          if (fnorm_trial < fnorm0)
+            committed = true;
+          else
+          {
+            // Watchdog exception (eq eq:watchdog-bound): a set-changing residual increase may
+            // still be committed while bounded relative to the pre-event checkpoint, pending
+            // recovery within 'watchdog_max_iterations' further outer Newton iterations.
+            if (!_watchdog_active)
+              activateWatchdog(X, F, fnorm0);
+            committed = watchdogPermits(fnorm_trial);
+          }
+
+          if (committed)
+          {
+            LibmeshPetscCall(VecCopy(W, X));
+            LibmeshPetscCall(VecCopy(G, F));
+            LibmeshPetscCall(VecScale(Y, *step));
+            LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED));
+            _old_state = state_trial.states;
+            committed_fnorm = fnorm_trial;
+            if (dense_escape)
+              _console << "MortarContactLineSearch: dense-event escape hatch triggered after "
+                        << _consecutive_event_steps << " consecutive event-limited iteration(s); "
+                        << "taking a composite step to the full Newton step." << std::endl;
+            // A composite dense-escape step resolves the whole backlog of pending events at
+            // once; an ordinary event-limited step extends the current run by one.
+            _consecutive_event_steps = dense_escape ? 0 : _consecutive_event_steps + 1;
+          }
+        }
+      }
     }
-    else
+
+    if (!committed)
     {
-      // Propagate failure: the contact set changed, direct acceptance failed, and no event is
-      // predicted to bound a fallback step. Report the backing search's failure (or a generic
-      // insufficient-reduction reason if it nominally succeeded) and leave X/F/Y untouched.
+      // Propagate failure: the contact set changed, direct acceptance failed, and neither an
+      // event-limited nor (once triggered) a dense-escape composite step produced a verified,
+      // acceptable transition. Report the backing search's failure (or a generic insufficient-
+      // reduction reason if it nominally succeeded) and leave X/F/Y untouched.
       LibmeshPetscCall(SNESLineSearchSetReason(
           line_search, backing_succeeded ? SNES_LINESEARCH_FAILED_REDUCT : backing_reason));
       _old_state = checkpoint.states;
@@ -421,6 +608,10 @@ MortarContactLineSearch::lineSearch()
   LibmeshPetscCall(VecDestroy(&Xb));
   LibmeshPetscCall(VecDestroy(&Fb));
   LibmeshPetscCall(VecDestroy(&Yb));
+
+  // Runs regardless of which branch above committed: a no-op while the watchdog is inactive,
+  // otherwise checks this iteration's committed residual against the bound/recovery conditions.
+  advanceWatchdog(committed_fnorm, X, F, Y, line_search);
 
   LibmeshPetscCall(SNESLineSearchComputeNorms(line_search));
 }
