@@ -78,7 +78,7 @@ transform. Restoring Petrov-Galerkin positivity on quadratic faces needs a separ
 of scope here, so `use_petrov_galerkin = true` for dual mortar on a QUAD8 or TRI6 secondary face is
 rejected with an error rather than silently using the ill-posed standard dual.
 
-In the [Contact](Contact/index.md) action, request the dual basis with `use_dual = true`; the
+In the [Contact](Contact/index.md optional=True) action, request the dual basis with `use_dual = true`; the
 transform is then applied automatically on quadratic secondary faces:
 
 ```
