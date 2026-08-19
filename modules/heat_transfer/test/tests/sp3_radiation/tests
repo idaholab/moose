@@ -1,0 +1,61 @@
+[Tests]
+  design = 'FVSP3ThermalRadiationBC.md FVSP3TemperatureBC.md FVSP3ThermalRadiationDiffusion.md FVSP3ThermalRadiationSourceSink.md FVSP3TemperatureSourceSink.md'
+  issues = '#31346'
+
+  [glass_1D_thick]
+    type = CSVDiff
+    input = 'adaptive1D_e1.i'
+    csvdiff = 'adaptive1D_e1_csv_y0_0005.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thick cooling'
+  []
+
+  [glass_1D_thin]
+    type = CSVDiff
+    input = 'adaptive1D_e10.i'
+    csvdiff = 'adaptive1D_e10_csv_y0_0005.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thin cooling'
+  []
+
+  [single_frequency]
+    type = CSVDiff
+    input = 'single_frequency.i'
+    csvdiff = 'single_frequency_csv_y0_0002.csv'
+    requirement = 'The system shall a short run simulation with SP3 kernels and BCs with single frequency value'
+  []
+
+  [coupled_solve]
+    type = CSVDiff
+    input = 'adaptive1D_e1_coupled.i'
+    csvdiff = 'adaptive1D_e1_coupled_csv_y0_0005.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thick cooling with fully coupled system'
+  []
+
+  [with_dirichlet_BC]
+    type = CSVDiff
+    input = 'adaptive1D_e1_dirichletBC.i'
+    csvdiff = 'adaptive1D_e1_dirichletBC_csv_y0_0006.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels with Dirichlet BCs in 1D optically thick cooling'
+  []
+
+  [mms_simple_band_spatial]
+    type = CSVDiff
+    command = mms_simple_band_spatial.py
+    csvdiff = 'mms_simple_band_spatial.csv'
+    requirement = 'The system shall create spatial converge data using the method of manufactured solutions with a frequency band.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    capabilities = 'method!=dbg'
+    recover = false
+  []
+
+  [mms_simple_band_temporal]
+    type = CSVDiff
+    command = mms_simple_band_temporal.py
+    csvdiff = 'mms_simple_band_temporal.csv'
+    requirement = 'The system shall create temporal converge data using the method of manufactured solutions with a frequency band.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    capabilities = 'method!=dbg'
+    recover = false
+  []
+[]
