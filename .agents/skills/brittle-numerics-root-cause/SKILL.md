@@ -86,8 +86,8 @@ release/growth quantity still ramping up from zero in the first few steps. There
 floating-point rounding noise — from any source: compiler codegen, FMA/vectorization, thread or
 MPI reduction order — dominates the *relative* error simply because the true value is tiny, while
 every other reported quantity in the file stays tight. That's a legitimate case for widening only
-that column's tolerance (e.g. MOOSE's `override_columns`/`override_rel_err`, see run-tests),
-with a comment recording the physical
+that column's tolerance (e.g. MOOSE's `override_columns`/`override_rel_err` for CSVDiff, or
+`custom_cmp` for Exodiff — see below, and run-tests), with a comment recording the physical
 reason and the measured noise floor — not for a blanket `rel_err` bump on the whole test. Confirm
 before doing this that the affected column is (a) not what the test is actually validating, and (b)
 near-zero for a documented physical/test-setup reason rather than because an upstream calculation
@@ -97,6 +97,38 @@ A blanket file-wide `rel_err` bump introduced alongside an unrelated fix is a re
 git-archaeology (`git log`/`git show` on the test spec) even when it isn't currently failing: it
 often means this exact situation was mishandled by loosening everything instead of the one or two
 affected columns.
+
+### Exodiff: per-variable floor via `custom_cmp`
+
+MOOSE's `Exodiff` tester has no `override_columns` equivalent; instead point `custom_cmp` at a
+command file passed to `exodiff -f`. Build it, don't hand-write it:
+
+- `exodiff -summary gold/<file>.e` prints every variable with its file-wide peak magnitude,
+  already formatted as `NODAL VARIABLES`/`ELEMENT VARIABLES` blocks — use this as the starting
+  template (it also tells you each column's peak, which the sizing rule below needs).
+- Give the unaffected variable-type blocks `(all)` with **no** explicit `relative`/`floor` on the
+  header line (e.g. `NODAL VARIABLES (all)`, then list the variable names). With no tolerance of
+  its own, that block falls through to the `-F <abs_zero> -t <rel_err>` the tester already passes
+  on the command line from the test spec — so the rest of the file's comparison stays exactly as
+  strict as before, and it stays correct if the spec's `abs_zero`/`rel_err` change later. `(all)`
+  also avoids re-enumerating variable names by hand and keeps the file resilient to new output
+  variables being added later.
+- Only add an explicit `floor` on the specific affected variable line(s), with a comment stating
+  the physical reason it's negligible. Keep `-summary`'s auto-generated trailing
+  `# min: ... max: ...` comment on that line (and on every other line, for consistency) rather
+  than dropping it — it's tool-sourced evidence backing the floor, not hand-typed, so it
+  corroborates the hand-written physical-reason comment instead of just asserting it.
+- Size that floor as roughly `1e-8 × that variable's own peak magnitude` (from the retained
+  `-summary` comment) — a principled, reproducible "many orders of magnitude below the values that
+  matter" rule, rather than hand-tuning to the exact noise observed on one build. Then sanity-check
+  it against the actually-measured noise from step 2's instrumentation: it should clear the worst
+  observed noise by at least ~10x, and dumping the raw variable's full time/node distribution (e.g.
+  via `scipy.io.netcdf_file`, since Exodus is classic netCDF) to confirm there's no *real*,
+  physically-meaningful value of that same variable sitting just below the chosen floor.
+- Look for a sibling `.cmp` file already in the test suite before inventing the format — e.g. a
+  neighboring test's `custom_cmp` file that already floors a different near-zero column is the
+  precedent to extend (per the Procedure's "look for precedent in sibling code" step above), not a
+  new convention to invent.
 
 ## Worked example
 
@@ -109,3 +141,19 @@ polynomial terms, became the answer. Fix: close the tail analytically
 results for every test exercising the algorithm (28 of 192 in the suite), requiring bulk
 regolding — only done after sampling a much-smaller-cap variant of the same algorithm to confirm
 the fix degraded gracefully there instead of blowing up.
+
+Debugging a blackbear `Exodiff` test (`EqualValueEmbeddedConstraintAction`) that failed only under
+new `-march` flags. Root cause: `resid_x/y/z` are raw per-node force residuals saved from the
+solid/truss kernels; at nodes away from the load and the penalty-constrained interface these are a
+genuine but physically tiny structural-coupling force (many orders of magnitude below the
+~1e5-1e6 reaction forces at the loaded/constrained nodes), computed as the residual of much larger
+cancelling terms in the stress-divergence integral — so its last few digits are sensitive to
+summation/FMA order and differ slightly between builds. Confirmed via `scipy.io.netcdf_file` that
+every other field (`disp_*`, `stress_*`, `strain_*`) was bit-identical between builds, and that the
+flagged nodes' own values formed a smooth, deterministic, monotonically-growing-with-load sequence
+(not patternless noise) — this was a legitimate near-zero value, not an ill-conditioned production
+calculation. Fix: a `custom_cmp` file giving only `resid_x/y/z` a `floor` of ~1e-8 of each
+variable's own peak magnitude (from `exodiff -summary`), leaving every other variable on the
+tester's existing `abs_zero`/`rel_err`, following the `(all)`-block pattern above. A sibling test
+in the same suite already used a hand-tuned `custom_cmp` file for an analogous near-zero-stress
+column, confirming this was the established pattern to extend rather than a new mechanism to add.
