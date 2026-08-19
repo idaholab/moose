@@ -11,7 +11,7 @@
       exodiff = 'kokkos_2d_diffusion_tag_vector_out.e'
       detail = 'tagged vectors and PJFNK,'
       capabilities = 'kokkos'
-      compute_devices = 'cuda'
+      compute_devices = 'cuda xpu'
       abs_zero = 1e-8
     []
     [tag_vector_newton]
@@ -20,7 +20,7 @@
       exodiff = 'kokkos_2d_diffusion_tag_vector_out.e'
       detail = 'tagged vectors and Newton.'
       capabilities = 'kokkos'
-      compute_devices = 'cuda'
+      compute_devices = 'cuda xpu'
       prereq = 'petsc_gpu/tag_vector_pjfnk'
     []
   []

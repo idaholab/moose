@@ -11,7 +11,7 @@
       difference_tol = 1E-10
       detail = 'subdomain and'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [bc_jacobian_test]
       type = 'PetscJacobianTester'
@@ -20,7 +20,7 @@
       difference_tol = 1E-10
       detail = 'boundary restricted terms.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

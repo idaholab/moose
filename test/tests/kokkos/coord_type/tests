@@ -10,7 +10,7 @@
       exodiff = 'kokkos_diffusion_rz_out.e'
       detail = 'R-Z,'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [rspherical]
       type = 'Exodiff'
@@ -18,7 +18,7 @@
       exodiff = 'kokkos_diffusion_rspherical_out.e'
       detail = 'R-Spherical.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

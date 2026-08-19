@@ -8,6 +8,6 @@
     csvdiff = 'kokkos_eigenvalue_test_out_eigenvalues_0001.csv'
     requirement = 'The Kokkos system shall support eigenvalue calculations.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

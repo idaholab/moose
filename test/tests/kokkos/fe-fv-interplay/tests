@@ -7,7 +7,7 @@
     input = aux-read-from-fv.i
     csvdiff = aux-read-from-fv_csv.csv
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
     max_threads = 1 # linear FV doesn't support threading
   []
   [mixing_fe_fv]
@@ -16,7 +16,7 @@
     input = multisystem.i
     csvdiff = multisystem_csv.csv
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
     max_threads = 1 # linear FV doesn't support threading
   []
 []
