@@ -24,7 +24,6 @@ import pre_check
 ALL_CHECKS_OFF = {
     "CHECK_TICKET_REFERENCE": "0",
     "CHECK_KEYWORDS": "0",
-    "CHECK_STYLE": "0",
     "CHECK_EOF": "0",
     "CHECK_EXECUTABLES": "0",
     "CHECK_WHITESPACE": "0",
@@ -72,63 +71,6 @@ class TestHelpers(unittest.TestCase):
             text=True,
             check=True,
         )
-
-    @patch("pre_check.subprocess.run")
-    def test_git_files(self, mock_run):
-        """Test git_files() function"""
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=["git", "ls-files"],
-            returncode=0,
-            stdout=(
-                "100644 abc123 0\tfile1.py\x00"
-                "100755 abc123 0\tfile2.C\x00"
-                "100644 abc123 0\tcontrib/skip.py\x00"
-                "100644 abc123 0\tdir/contrib/skip.C\x00"
-                "100644 abc123 0\tfile3.h\x00"
-                "120000 abc123 0\tlink.py\x00"
-                "160000 abc123 0\tsubmodule\x00"
-            ),
-        )
-        files = pre_check.git_files("*.py", "*.[Ch]")
-        self.assertIn("file1.py", files)
-        self.assertIn("file2.C", files)
-        self.assertIn("file3.h", files)
-        self.assertNotIn("contrib/skip.py", files)
-        self.assertNotIn("dir/contrib/skip.C", files)
-        self.assertNotIn("link.py", files)
-        self.assertNotIn("submodule", files)
-        mock_run.assert_called_once_with(
-            [
-                "git",
-                "ls-files",
-                "-z",
-                "--stage",
-                "--cached",
-                "--",
-                "*.py",
-                "*.[Ch]",
-            ],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-
-    @patch("pre_check.subprocess.run")
-    def test_git_files_filters_touched_files(self, mock_run):
-        """Test git_files() only returns requested touched files"""
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=["git", "ls-files"],
-            returncode=0,
-            stdout=(
-                "100644 abc123 0\tfile1.py\x00"
-                "100644 abc123 0\tfile2.C\x00"
-                "120000 abc123 0\tlink.py\x00"
-            ),
-        )
-        files = pre_check.git_files(
-            "*.py", "*.[Ch]", touched_files={"file2.C", "link.py"}
-        )
-        self.assertEqual(files, ["file2.C"])
 
     @patch("pre_check.subprocess.run")
     def test_precheck_files_uses_cached_entries(self, mock_run):
@@ -315,22 +257,6 @@ class TestIndividualChecks(unittest.TestCase):
         self.assertNotIn("README.md", result)
         mock_stat.assert_not_called()
         mock_access.assert_not_called()
-
-    @patch("pre_check.read_text")
-    def test_style_files_bad(self, mock_read_text):
-        """Test style_files() detects control keywords without a space"""
-        check = make_precheck([("100644", "file1.C")])
-        mock_read_text.return_value = "if(x) { return 1; }"
-        result = check.style_files()
-        self.assertEqual(result, ["file1.C"])
-
-    @patch("pre_check.read_text")
-    def test_style_files_ok(self, mock_read_text):
-        """Test style_files() passes when keywords have proper spacing"""
-        check = make_precheck([("100644", "file1.C")])
-        mock_read_text.return_value = "if (x) { return 1; }"
-        result = check.style_files()
-        self.assertEqual(result, [])
 
     @patch("pre_check.read_text")
     def test_include_guard_files(self, mock_read_text):
