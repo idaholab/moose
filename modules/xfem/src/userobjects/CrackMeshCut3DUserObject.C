@@ -58,7 +58,10 @@ CrackMeshCut3DUserObject::validParams()
       "size_control", 0, "Criterion for refining elements while growing the crack");
   params.addParam<unsigned int>("n_step_growth", 0, "Number of steps for crack growth");
   params.addParam<Real>(
-      "min_elem_area", 1e-6, "Growth elements smaller than min_elem_area will not be added.");
+      "min_elem_area",
+      "Growth elements smaller than min_elem_area will not be added. If unset, defaults to "
+      "1e-4*size_control^2 so the threshold scales with the model length scale instead of "
+      "assuming a fixed one.");
   params.addClassDescription("Creates a UserObject for a mesh cutter in 3D problems");
   return params;
 }
@@ -71,7 +74,13 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
         getParam<MooseEnum>("growth_increment_method").getEnum<GrowthRateEnum>()),
     _size_control(getParam<Real>("size_control")),
     _n_step_growth(getParam<unsigned int>("n_step_growth")),
-    _min_elem_area(getParam<Real>("min_elem_area")),
+    // min_elem_area is an absolute area, so a fixed default would only be meaningful at one model
+    // length scale. Scale it off size_control (the target front-element spacing the user must set
+    // for growth): a front triangle at target spacing has area ~ size_control^2, and 1e-4 of that
+    // rejects only nearly degenerate triangles regardless of the model's length units.
+    _min_elem_area(isParamValid("min_elem_area")
+                       ? getParam<Real>("min_elem_area")
+                       : 1e-4 * getParam<Real>("size_control") * getParam<Real>("size_control")),
     _is_mesh_modified(false),
     _func_x(parameters.isParamValid("growth_direction_x") ? &getFunction("growth_direction_x")
                                                           : nullptr),
@@ -106,6 +115,9 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
+    if (_growth_increment_method == GrowthRateEnum::FUNCTION && _func_v == nullptr)
+      paramError("growth_rate",
+                 "A growth_rate function must be specified for the FUNCTION growth_increment_method.");
   }
 
   if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
@@ -921,7 +933,7 @@ CrackMeshCut3DUserObject::computeGrowthIncrement(unsigned int front_node_index,
 
       if (isInactiveEndpoint(front_node_index, front_size))
       {
-        const bool has_adjacent_front_point = front_point_index.size() > 1;
+        const bool has_adjacent_front_point = front_size > 1;
         const bool is_first_inactive_endpoint =
             front_node_index == 0 && has_adjacent_front_point && front_point_index[1] != -1;
         const bool is_last_inactive_endpoint = front_node_index + 1 == front_size &&

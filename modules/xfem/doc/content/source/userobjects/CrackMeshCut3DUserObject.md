@@ -6,7 +6,7 @@
 
 This class: (1) reads in a mesh describing the crack surface, (2) uses the mesh to do initial cutting of 3D elements, and (3) grows the mesh incrementally based on prescribed growth functions. The code is interfaced with domain integral methods to allow nonplanar crack growth based on empirical propagation direction and speed laws.
 
-For crack-growth problems, [!param](/UserObjects/CrackMeshCut3DUserObject/size_control) sets the target spacing used when advancing and refining the cutter front, while [!param](/UserObjects/CrackMeshCut3DUserObject/min_elem_area) prevents the growth algorithm from adding very small or nearly degenerate triangles to the cutter mesh. The number of growth advances performed in one update is controlled by [!param](/UserObjects/CrackMeshCut3DUserObject/n_step_growth).
+For crack-growth problems, [!param](/UserObjects/CrackMeshCut3DUserObject/size_control) sets the target spacing used when advancing and refining the cutter front, while [!param](/UserObjects/CrackMeshCut3DUserObject/min_elem_area) prevents the growth algorithm from adding very small or nearly degenerate triangles to the cutter mesh. The number of growth advances performed in one update is controlled by [!param](/UserObjects/CrackMeshCut3DUserObject/n_step_growth); when it is nonzero, [!param](/UserObjects/CrackMeshCut3DUserObject/size_control) must be set to a positive value.
 
 ## Active and Inactive Cutter-Boundary Nodes
 
@@ -50,7 +50,7 @@ After the projection step, the inactive endpoint's actual displacement from its 
 
 \begin{equation}
 \left\lVert \boldsymbol{x}_{\mathrm{new}} - \boldsymbol{x}_{\mathrm{previous}} \right\rVert
-< 0.5 \Delta a_{\mathrm{active}}.
+< 0.5 \Delta a_{\mathrm{active}},
 \end{equation}
 
 the inactive node is left at its current location and the existing node is reused for the new crack-front element. This avoids producing degenerate sliver triangles when projection clips the inactive motion almost back to where it started (for example, when an inactive endpoint is pressed against a wall and growth would only push it deeper). When this rule fires, the connection between the old front and the new front shares a node at that endpoint, and the zero-area sliver triangle that would otherwise be generated is dropped by the existing minimum-area filter.
@@ -65,7 +65,7 @@ This active/inactive logic governs only the cutter-mesh growth algorithm — tha
 
 This example shows the `Mesh` block in [list:mesh] needed for creating the cutter mesh along with the `CrackMeshCut3DUserObject` block in [list:cutobject].  The mesh block in [list:mesh] defines two separate meshes.  The cutter mesh is created in the `read_in_cutter_mesh` block and must have [!param](/Mesh/FileMeshGenerator/save_with_name) set in order to specify this mesh in `CrackMeshCut3DUserObject` shown in [list:cutobject] using [!param](/UserObjects/CrackMeshCut3DUserObject/mesh_generator_name).  The mesh used by the FEM simulation is specifed in the `FEM_mesh` block in this example and [!param](/Mesh/MeshGeneratorMesh/final_generator)`=FEM_mesh` must be set because only the `FEM_mesh` will be used for the finite-element solution and the mesh created by `read_in_cutter_mesh` will be ignored by the solution.
 
-The surface-growth regression inputs prescribe compatible stress and strain material properties without solving for equilibrium so that [DomainIntegralAction.md] can drive cutter growth directly.
+The surface-growth tests built on `face_crack_3d_domain.i` prescribe compatible stress and strain material properties and set `solve = false`, so that [DomainIntegralAction.md] can drive cutter growth directly.
 
 !listing test/tests/solid_mechanics_basic/edge_crack_3d_domain.i id=list:mesh block=Mesh caption=Setting up the mesh block contain simulation and cutter meshes.
 
