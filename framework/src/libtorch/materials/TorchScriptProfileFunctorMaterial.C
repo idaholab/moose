@@ -25,7 +25,7 @@ TorchScriptProfileFunctorMaterial::validParams()
 
   params.addClassDescription(
       "Evaluates a TorchScript model that returns sampled one-dimensional "
-      "profiles and exposes those profiles as interpolated ADReal functors.");
+      "profiles and exposes those profiles as interpolated Real functors.");
 
   params.addRequiredParam<UserObjectName>(
       "torch_script_userobject",
@@ -130,9 +130,9 @@ TorchScriptProfileFunctorMaterial::TorchScriptProfileFunctorMaterial(
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
 
   for (const auto profile_index : index_range(_profile_names))
-    addFunctorProperty<ADReal>(
+    addFunctorProperty<Real>(
         _profile_names[profile_index],
-        [this, profile_index](const auto & spatial_arg, const auto &) -> ADReal
+        [this, profile_index](const auto & spatial_arg, const auto &) -> Real
         { return sampleProfile(profile_index, spatial_arg.getPoint()); },
         clearance_schedule);
 }
@@ -294,7 +294,7 @@ TorchScriptProfileFunctorMaterial::initialSetup()
   }
 }
 
-ADReal
+Real
 TorchScriptProfileFunctorMaterial::sampleProfile(const unsigned int profile_index,
                                                  const Point & point) const
 {

@@ -21,7 +21,7 @@
 /**
  * Evaluates a TorchScript model once during initialSetup(), interprets its output
  * as one or more sampled one-dimensional profiles, and publishes those profiles
- * as ADReal functors.
+ * as Real functors.
  *
  * Supported TorchScript output shapes:
  *
@@ -56,7 +56,7 @@ protected:
   /**
    * Evaluate a cached profile at a physical point.
    */
-  ADReal sampleProfile(unsigned int profile_index, const Point & point) const;
+  Real sampleProfile(unsigned int profile_index, const Point & point) const;
 
   /// Existing MOOSE object that owns and evaluates the TorchScript module
   const TorchScriptUserObject & _torch_script_userobject;

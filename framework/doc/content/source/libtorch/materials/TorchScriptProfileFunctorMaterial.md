@@ -2,8 +2,6 @@
 
 !if! function=hasLibtorch()
 
-!syntax description /FunctorMaterials/TorchScriptProfileFunctorMaterial
-
 ## Overview
 
 `TorchScriptProfileFunctorMaterial` evaluates a TorchScript model and converts its output into one
@@ -15,36 +13,43 @@ functor interface.
 
 The TorchScript module is loaded and evaluated through a
 [TorchScriptUserObject.md]. Unlike
-[`TorchScriptMaterial`](TorchScriptMaterial.md), which creates conventional quadrature-point
-material properties, this object creates `ADReal` functors that can be evaluated using the spatial
+[TorchScriptMaterial.md], which creates conventional quadrature-point
+material properties, this object creates `Real` functors that can be evaluated using the spatial
 arguments supplied by a consuming MOOSE object.
 
 ## Model inputs and outputs
 
 Model inputs are supplied using exactly one of the following parameters:
 
-- `input_names`, which obtains the model inputs from scalar postprocessors; or
-- `input_values`, which supplies constant model inputs directly in the input file.
+- [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_names), which obtains the
+  model inputs from scalar postprocessors; or
+- [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_values), which supplies
+  constant model inputs directly in the input file.
 
 For $M$ inputs, the material constructs a tensor of shape `[1, M]`. The tensor scalar type is
-selected with `tensor_dtype`.
+selected with [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/tensor_dtype).
 
 The TorchScript model may return any of the following shapes:
 
-- `[N]` for one profile containing $N$ stations;
-- `[C, N]` for $C$ profiles containing $N$ stations each; or
+- `[N]` for one profile containing $N$ stations along a line;
+- `[C, N]` for $C$ profiles containing $N$ stations along the line each; or
 - `[1, C, N]` with a leading unit batch dimension.
 
-The number of output profiles $C$ must equal the number of entries in `profile_names`, and the
-number of stations $N$ must equal the number of entries in `profile_coordinates`. The coordinates
+The number of output profiles $C$ must equal the number of entries in
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_names), and the number of
+stations $N$ must equal the number of entries in
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_coordinates). The coordinates
 must be finite and strictly increasing. Each row of the normalized `[C, N]` output tensor is paired
-with `profile_coordinates` to construct one linearly interpolated functor.
+with [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_coordinates) to construct
+one linearly interpolated functor.
 
 !alert warning title=Profile update and automatic differentiation
 The TorchScript model is evaluated once during initial setup. Consequently, the generated profiles
-remain fixed during the simulation. Values referenced by `input_names` must be available when
-initial setup occurs. The published functors have type `ADReal` for compatibility with AD consumers,
-but TorchScript inference itself is not part of the MOOSE automatic-differentiation graph.
+remain fixed during the simulation. Values referenced by
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_names) must be available when
+initial setup occurs. The published functors have type `Real`; they are compatible with
+non-AD consumers, and TorchScript inference itself is not part of the MOOSE
+automatic-differentiation graph.
 
 ## Spatial coordinate mapping
 
@@ -54,13 +59,18 @@ At a physical point $\boldsymbol{x}$, the scalar coordinate used to evaluate the
 s(\boldsymbol{x}) =
 \frac{(\boldsymbol{x}-\boldsymbol{x}_0)\mathbin{\cdot}\widehat{\boldsymbol{d}}}{L_s},
 
-where $\boldsymbol{x}_0$ is `profile_origin`, $\widehat{\boldsymbol{d}}$ is the normalized
-`profile_direction`, and $L_s$ is `coordinate_scale`. The supplied direction therefore does not
-need to have unit length, but it must be finite and nonzero. `coordinate_scale` converts mesh
-distance along the selected direction into the coordinate system used by `profile_coordinates`.
+where $\boldsymbol{x}_0$ is
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_origin),
+$\widehat{\boldsymbol{d}}$ is the normalized
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_direction), and $L_s$ is
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/coordinate_scale). The supplied
+direction therefore does not need to have unit length, but it must be finite and nonzero.
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/coordinate_scale) converts mesh
+distance along the selected direction into the coordinate system used by
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_coordinates).
 
-The `out_of_range_behavior` parameter determines how $s$ values outside the tabulated coordinate
-range are handled:
+The [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/out_of_range_behavior) parameter
+determines how $s$ values outside the tabulated coordinate range are handled:
 
 - `error` reports an error;
 - `clamp` returns the value at the nearest endpoint; and
