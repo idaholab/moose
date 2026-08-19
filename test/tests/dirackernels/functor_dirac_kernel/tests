@@ -15,4 +15,14 @@
     requirement = "The system shall compute the correct Jacobian for the functor dirac kernel."
     capabilities = 'method=opt'
   []
+  [resid_and_jac_together]
+    type = CSVDiff
+    input = 'functor_dirac_kernel.i'
+    csvdiff = 'functor_dirac_kernel_out.csv'
+    cli_args = 'Executioner/residual_and_jacobian_together=true'
+    prereq = 'test'
+    issues = '#26938'
+    requirement = "The system shall produce the same result for a dirac kernel specified using a "
+                  "functor when computing the residual and Jacobian together."
+  []
 []

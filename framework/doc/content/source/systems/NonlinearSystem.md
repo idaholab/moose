@@ -427,6 +427,11 @@ cost of an additional Jacobian evaluation during the final residual evaluation
 is amortized. Also, simulations in which material property calculations are very
 expensive may be good candidates for computing the residual and Jacobian together.
 
+Not all residual objects are supported when computing the residual and Jacobian
+together. Simulations containing `ScalarKernels`, `NodalKernels`, or nodal
+constraints will error, since their contributions are not yet computed in the
+combined evaluation path.
+
 ## Reusing preconditioners id=reuse_preconditioners
 
 The simple version of GMRES and other iterative methods converge only very
