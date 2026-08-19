@@ -597,8 +597,8 @@ GaussianProcess::getGradient(torch::Tensor & inputs) const
   }
 
   // Penalty gradient contribution (approximate: only the dK_star/dtheta term)
-  // d(penalty)/d(theta_i) ≈ sum_c [violation_c * (-d(mu_c)/d(theta_i))]
-  // where d(mu_c)/d(theta_i) ≈ (dK_star/d(theta_i))^T * alpha_solve
+  // d(penalty)/d(theta_i) ~= sum_c [violation_c * (-d(mu_c)/d(theta_i))]
+  // where d(mu_c)/d(theta_i) ~= (dK_star/d(theta_i))^T * alpha_solve
   const unsigned int n_penalty = _penalty_points_std.size(0);
   if (n_penalty > 0 && _penalty_weight > 0.0)
   {
@@ -618,12 +618,12 @@ GaussianProcess::getGradient(torch::Tensor & inputs) const
       if (lb > -std::numeric_limits<Real>::max() && mu_c < lb)
       {
         slack = lb - mu_c;
-        sign = -1; // penalty increases when mu_c decreases → gradient pushes mu_c up
+        sign = -1; // penalty increases when mu_c decreases -> gradient pushes mu_c up
       }
       else if (ub < std::numeric_limits<Real>::max() && mu_c > ub)
       {
         slack = mu_c - ub;
-        sign = 1; // penalty increases when mu_c increases → gradient pushes mu_c down
+        sign = 1; // penalty increases when mu_c increases -> gradient pushes mu_c down
       }
 
       if (sign == 0)

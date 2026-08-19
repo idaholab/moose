@@ -18,18 +18,18 @@
  *   Sum:     K(x, x') = K1(x, x') + K2(x, x')
  *   Product: K(x, x') = K1(x, x') * K2(x, x')   (element-wise product)
  *
- * ── Hyperparameter management ─────────────────────────────────────────────
+ * -- Hyperparameter management ---------------------------------------------
  * No new tunable hyperparameters are introduced by this class. All parameters
  * of K1 and K2 are surfaced through the base-class infrastructure:
- *   • buildHyperParamMap / loadHyperParamMap  – recursively collect/restore both
+ *   * buildHyperParamMap / loadHyperParamMap  - recursively collect/restore both
  *     sub-kernel parameter maps, so the GP optimizer sees one flat set.
- *   • isTunable / getTuningData              – delegate to sub-kernels first.
+ *   * isTunable / getTuningData              - delegate to sub-kernels first.
  *
  * Parameters are stored with their owning object's name as a prefix
  * ("kernel_name:param_name"), guaranteeing uniqueness even when both
  * sub-kernels share a parameter name (e.g. both have "signal_variance").
  *
- * ── Gradient derivations ──────────────────────────────────────────────────
+ * -- Gradient derivations --------------------------------------------------
  * Sum:
  *   dK/dhp  = dK1/dhp + dK2/dhp
  *   Because K1 and K2 own disjoint prefix-namespaced sets, only one term
@@ -39,14 +39,14 @@
  *   dK/dhp1 = (dK1/dhp1) .* K2_base        (product rule, no noise in K2)
  *   dK/dhp2 = K1_base .* (dK2/dhp2)        (product rule, no noise in K1)
  *
- * ── Note on noise in Product kernels ──────────────────────────────────────
+ * -- Note on noise in Product kernels --------------------------------------
  * K = K1 .* K2 does not yield a clean additive diagonal noise structure.
  * Sub-kernels used with 'Product' should therefore have noise_variance = 0.
  * If observation noise is required, add a Sum of this Product kernel with a
  * LinearCovariance whose signal_variance and bias_variance are both zero
  * (functioning as a pure noise kernel).
  *
- * ── Recursive composition ─────────────────────────────────────────────────
+ * -- Recursive composition -------------------------------------------------
  * Either child kernel may itself be a CovarianceCombiner, enabling arbitrary
  * kernel trees. For example:
  *

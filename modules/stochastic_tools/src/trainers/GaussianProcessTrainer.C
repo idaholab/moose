@@ -27,7 +27,7 @@ InputParameters
 GaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params.addClassDescription("Provides data preperation and training for a single- or multi-output "
+  params.addClassDescription("Provides data preparation and training for a single- or multi-output "
                              "Gaussian Process surrogate model.");
 
   params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
@@ -78,7 +78,7 @@ GaussianProcessTrainer::validParams()
   params.addParam<MooseEnum>(
       "monotone_constraint_type",
       constraint_type_options,
-      "Target derivative type: 'zero' (df/dx_k ≈ 0), 'increasing' (df/dx_k > 0), "
+      "Target derivative type: 'zero' (df/dx_k ~= 0), 'increasing' (df/dx_k > 0), "
       "or 'decreasing' (df/dx_k < 0).");
   params.addParam<Real>("derivative_target_value",
                         0.0,

@@ -132,7 +132,7 @@ CovarianceFunctionBase::computedKdhyper_cross(torch::Tensor & dKdhp,
                                               const std::string & /*hp_name*/,
                                               unsigned int /*ind*/) const
 {
-  // Default: zero matrix — penalty gradient is not added for this kernel type
+  // Default: zero matrix - penalty gradient is not added for this kernel type
   dKdhp = torch::zeros({x.size(0), xc.size(0)}, x.options().dtype(at::kDouble));
 }
 

@@ -40,7 +40,7 @@ enum class GPLinkFunctionType : int
  * alter the hyperparameter gradient computation.
  *
  * Prediction uncertainty propagation uses the delta method:
- *   sigma_y ≈ |g^{-1}'(mu_z)| * sigma_z
+ *   sigma_y ~= |g^{-1}'(mu_z)| * sigma_z
  */
 class GPLinkFunction
 {

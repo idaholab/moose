@@ -42,7 +42,7 @@ GaussianProcessSurrogate::setupCovariance(UserObjectName covar_name)
 Real
 GaussianProcessSurrogate::evaluate(const std::vector<Real> & x) const
 {
-  // Overlaod for evaluate to maintain general compatibility. Only returns mean
+  // Overload for evaluate to maintain general compatibility. Only returns mean
   Real dummy = 0;
   return this->evaluate(x, dummy);
 }
@@ -60,7 +60,7 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x, Real & std_dev) 
 void
 GaussianProcessSurrogate::evaluate(const std::vector<Real> & x, std::vector<Real> & y) const
 {
-  // Overlaod for evaluate to maintain general compatibility. Only returns mean
+  // Overload for evaluate to maintain general compatibility. Only returns mean
   std::vector<Real> std_dummy;
   this->evaluate(x, y, std_dummy);
 }
@@ -93,7 +93,7 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
 
   _gp.getParamStandardizer().getStandardized(test_points);
 
-  // Build K_train_test: (n_total x n_outputs) — extended with derivative rows if needed
+  // Build K_train_test: (n_total x n_outputs) - extended with derivative rows if needed
   torch::Tensor K_train_test =
       torch::empty({(long)(n_total * n_outputs), (long)n_outputs}, options);
 
@@ -102,7 +102,7 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   _gp.getCovarFunction().computeCovarianceMatrix(K_ff_test, _training_params, test_points, false);
   K_train_test.narrow(0, 0, n_train * n_outputs).copy_(K_ff_test);
 
-  // Derivative rows: Cov[df(x_d^j)/dx_{k_j}, f(x*)] — only for single-output GP
+  // Derivative rows: Cov[df(x_d^j)/dx_{k_j}, f(x*)] - only for single-output GP
   if (n_virt > 0)
   {
     const auto virtual_params = _gp.virtualParams();
