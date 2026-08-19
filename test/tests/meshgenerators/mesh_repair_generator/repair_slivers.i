@@ -19,9 +19,16 @@
     element_connectivity = '0 1 2'
     elem_type = TRI3
   []
+  # add a boundary to test 2D boundary conservation
+  [add_bdy]
+    type = SideSetsFromNormalsGenerator
+    input = 'sliver'
+    normals = '0.01 -1 0'
+    new_boundary = 'slanted_pre_fix'
+  []
   [repair]
     type = MeshRepairGenerator
-    input = sliver
+    input = add_bdy
     fix_node_overlap = true
     fix_sliver_elements = true
   []

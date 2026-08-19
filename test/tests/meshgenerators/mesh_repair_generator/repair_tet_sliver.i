@@ -11,16 +11,39 @@
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
+  [add_bdies_on_sliver]
+    type = SideSetsFromNormalsGenerator
+    input = 'tet0'
+    normals = '0 0 1
+               0 0 -1'
+    new_boundary = 'sliv_pointing_inside sliv_pointing_outside'
+    normal_tol = 1e-3
+  []
   [tet1]
     type = ElementGenerator
-    input = tet0
     nodal_positions = '0 0 0   1 0 0   0.5 0.289 0.01   0.5 0.289 1'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
   []
+  [add_bdies_on_collapsed_regular]
+    type = SideSetsFromNormalsGenerator
+    input = 'tet1'
+    normals = '0 0 -1'
+    new_boundary = 'coll_pointing_outside'
+    normal_tol = 1e-2
+  []
+  [add_nodeset]
+    type = NodeSetsFromSideSetsGenerator
+    input = 'add_bdies_on_collapsed_regular'
+  []
+  [combined]
+    type = CombinerGenerator
+    inputs = 'add_nodeset add_bdies_on_sliver'
+    avoid_merging_boundaries = true
+  []
   [tet2]
     type = ElementGenerator
-    input = tet1
+    input = combined
     nodal_positions = '1 0 0   0.5 0.866 0   0.5 0.289 0.01   0.5 0.289 1'
     element_connectivity = '0 1 2 3'
     elem_type = TET4
@@ -34,7 +57,7 @@
   []
   [repair]
     type = MeshRepairGenerator
-    input = tet3
+    input = 'tet3'
     fix_node_overlap = true
     fix_sliver_elements = true
   []
