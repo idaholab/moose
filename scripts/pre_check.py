@@ -109,16 +109,6 @@ def git_file_entries(
     return entries
 
 
-def git_files(
-    *patterns: str,
-    touched_files: set[str] | None = None,
-) -> list[str]:
-    """Return tracked regular files matching glob patterns, excluding contrib/."""
-    return [
-        path for _, path in git_file_entries(*patterns, touched_files=touched_files)
-    ]
-
-
 def read_text(path: str) -> str:
     """Read file as UTF-8 text, replacing invalid byte sequences."""
     with open(path, "r", encoding="utf-8", errors="replace") as f:
@@ -302,7 +292,6 @@ class PreCheck:
         self.check_cpp_whitespace = os.environ.get("CHECK_CPP_WHITESPACE", "0") == "1"
         self.check_f_whitespace = os.environ.get("CHECK_F_WHITESPACE", "0") == "1"
         self.check_banned_funcs = os.environ.get("CHECK_BANNED_FUNCS", "0") == "1"
-        self.check_style = os.environ.get("CHECK_STYLE", "1") == "1"
         self.file_checks_enabled = self._file_checks_enabled()
 
         if not self.file_checks_enabled:
@@ -336,7 +325,6 @@ class PreCheck:
                 self.check_include_guards,
                 self.check_windows,
                 self.check_banned_funcs,
-                self.check_style,
             ]
         )
 
@@ -445,11 +433,6 @@ class PreCheck:
                 bad.append(f)
         return bad
 
-    def style_files(self) -> list[str]:
-        r"""Return C/C++ files containing control keywords without a space before '('."""
-        pat = re.compile(r"\b(if|for|while|switch)\(")
-        return [f for f in self.files("*.[Ch]") if pat.search(read_text(f))]
-
     def include_guard_files(self) -> list[str]:
         """Return header files using old-style #ifndef/#define include guards."""
         pat = re.compile(r"^#ifndef\s+(\S+_H_?)\s*\n#define\s+\1", re.M)
@@ -488,7 +471,6 @@ class PreCheck:
         tab_bad: list[str] = []
         classified_bad: list[str] = []
         keyword_bad: list[str] = []
-        style_bad: list[str] = []
         eof_bad: list[str] = []
         exe_bad: list[str] = []
         banned_func_bad: list[str] = []
@@ -514,8 +496,6 @@ class PreCheck:
             classified_bad = self.classified_keywords()
         if self.check_keywords:
             keyword_bad = self.banned_keywords()
-        if self.check_style:
-            style_bad = self.style_files()
         if self.check_eof:
             eof_bad = self.no_newline_at_eof_files()
         if self.check_exes:
@@ -586,14 +566,6 @@ class PreCheck:
                 pass_msg="Your patch contains no banned keywords.",
                 disabled_msg="Keywords check disabled",
                 error_header="ERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):",
-            ),
-            CheckResult(
-                enabled=self.check_style,
-                files=style_bad,
-                pass_msg="Your patch contains proper spacing after control keywords.",
-                disabled_msg="Style check disabled",
-                error_header="ERROR: The following files contain control keywords without proper spacing"
-                " (if, for, while, or switch):",
             ),
             CheckResult(
                 enabled=self.check_unicode,
