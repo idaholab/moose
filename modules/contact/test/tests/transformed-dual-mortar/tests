@@ -6,6 +6,10 @@
 # interface square into four TRI6 triangles, so its mortar residual needs a larger
 # derivative container and is gated ad_size>=100 (larger-AD recipe only); at default AD the
 # TRI6 transform is covered at the coefficient level by the TransformedDualBasisTest unit test.
+#
+# Every test uses the VariableCondensationPreconditioner, which requires a replicated mesh, so
+# each sets mesh_mode = REPLICATED. The shared base's Outputs execute_on = FINAL writes no
+# half-transient checkpoint, so the CSVDiff tests additionally set recover = false.
 
 [Tests]
   issues = '#33558'
@@ -25,6 +29,8 @@
       # triangles, so the mortar residual needs >64 AD derivatives; 100 is safe headroom.
       # The gold is solution-based, so it holds for any build meeting this threshold.
       capabilities = 'ad_size>=100'
+      mesh_mode = REPLICATED
+      recover = false
       detail = 'TRI6 faces on a TET10 volume mesh.'
     []
   []
@@ -37,6 +43,8 @@
       input = 'transformed-dual-vcp-3d.i'
       csvdiff = 'transformed-dual-vcp-3d_out.csv'
       abs_zero = 1.0e-8
+      mesh_mode = REPLICATED
+      recover = false
       detail = 'inverting the non-diagonal coupling matrix exactly to recover the uniform contact '
                'pressure, and'
     []
@@ -48,6 +56,7 @@
       # The guardrail only warns (the diagonal inverse degrades the preconditioner but the
       # solve still converges); allow_warnings lets it through testroot's allow_warnings = false.
       allow_warnings = true
+      mesh_mode = REPLICATED
       detail = 'warning that a diagonal-only coupling inverse degrades the preconditioner when the '
                'transformed coupling matrix is not diagonal.'
     []
