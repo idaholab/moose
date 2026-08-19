@@ -1,0 +1,116 @@
+{
+  "cells": {
+    "amg_lattice_cell": {
+      "fill": "amg_lattice",
+      "filltype": "LATTICE",
+      "region_infix": [],
+      "region_postfix": []
+    },
+    "amg_root_cell": {
+      "fill": "amg_univ",
+      "filltype": "UNIVERSE",
+      "region_infix": [
+        "-amg_radial_boundary"
+      ],
+      "region_postfix": [
+        "amg_radial_boundary",
+        "-"
+      ]
+    }
+  },
+  "lattices": {
+    "amg_lattice": {
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 1.25
+      },
+      "outer": "rgmb_region_6",
+      "outertype": "CSG_MATERIAL",
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "pin1_ducted_pin_unit",
+          "pin1_ducted_pin_unit"
+        ],
+        [
+          "pin1_ducted_pin_unit",
+          "pin2_ducted_pin_unit"
+        ]
+      ]
+    }
+  },
+  "units": {
+    "amg_radial_boundary": {
+      "attributes": {
+        "apothem": 1.42063,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    },
+    "pin1_ducted_pin_unit": {
+      "attributes": {
+        "duct_apothems": [
+          0.58
+        ],
+        "geometry_type": "Square",
+        "region_names": [
+          [
+            "rgmb_region_1",
+            "rgmb_region_2",
+            "rgmb_region_5"
+          ]
+        ],
+        "ring_radii": [
+          0.2
+        ]
+      },
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::DuctedPinEngUnit"
+    },
+    "pin1_radial_boundary": {
+      "attributes": {
+        "apothem": 0.625,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    },
+    "pin2_ducted_pin_unit": {
+      "attributes": {
+        "duct_apothems": [],
+        "geometry_type": "Square",
+        "region_names": [
+          [
+            "rgmb_region_3"
+          ]
+        ],
+        "ring_radii": []
+      },
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::DuctedPinEngUnit"
+    },
+    "pin2_radial_boundary": {
+      "attributes": {
+        "apothem": 0.625,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "amg_root_cell"
+      ],
+      "root": true
+    },
+    "amg_univ": {
+      "cells": [
+        "amg_lattice_cell"
+      ]
+    }
+  }
+}

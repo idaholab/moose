@@ -645,11 +645,6 @@ AssemblyMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 AssemblyMeshGenerator::generateCSG()
 {
-  // Note: this check can be removed once engineering units are supported for AssemblyMeshGenerator
-  if (!getReactorParam<bool>(RGMB::expand_units))
-    mooseError("AssemblyMeshGenerator does not currently support engineering unit representation "
-               "in --csg-only");
-
   // Must be called to free the ReactorMeshParams CSGBase object
   freeReactorParamsCSG();
 
@@ -659,24 +654,24 @@ AssemblyMeshGenerator::generateCSG()
   // inputs are renamed to a new universe name. These universes and their
   // cells will be discarded, so that only the infinite pin universe is retained
   std::unordered_map<unsigned int, std::string> univ_id_names;
-  std::vector<std::string> univs_to_discard;
   for (const auto i : index_range(_inputs))
   {
     const auto input_univ_name_discard = _inputs[i] + "_root_univ";
-    const auto input_univ_name = _inputs[i] + "_univ";
     csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name_discard);
-    univs_to_discard.push_back(input_univ_name_discard);
-    univ_id_names[i] = input_univ_name;
-  }
 
-  // Discard root universes of the input pins and their cells
-  for (const auto & univ_name : univs_to_discard)
-  {
-    const auto & universe_to_delete = csg_obj->getUniverseByName(univ_name);
+    const auto & universe_to_delete = csg_obj->getUniverseByName(input_univ_name_discard);
     const auto cells_to_delete = universe_to_delete.getAllCells();
     csg_obj->deleteUniverse(universe_to_delete);
+
+    // Store universe fill of cell that will be deleted. This will be the universe
+    // that gets populated into the assembly lattice
     for (const auto & cell : cells_to_delete)
-      csg_obj->deleteCell(cell.get());
+    {
+      const auto & cell_to_delete = cell.get();
+      const auto & fill_univ_name = cell_to_delete.getFillUniverse().getName();
+      csg_obj->deleteCell(cell_to_delete);
+      univ_id_names[i] = fill_univ_name;
+    }
   }
 
   // Build the universe pattern for the assembly lattice from the input pattern
@@ -692,7 +687,7 @@ AssemblyMeshGenerator::generateCSG()
     universe_pattern.push_back(universe_row);
   }
 
-  // Define axial boundaries for problem
+  // Get axial boundaries for problem
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
   CSG::CSGRegion axial_extent;
   const auto extruded_assembly = _mesh_dimensions == 3;
@@ -777,7 +772,7 @@ AssemblyMeshGenerator::generateCSG()
 
   // Create new cell to bound universe based on assembly outer boundaries, and add this cell
   // to the root universe
-  const auto unit_name = name() + "_radial_duct_" + std::to_string(duct_boundaries.size() - 1);
+  const auto unit_name = name() + "_radial_boundary";
   std::unique_ptr<CSG::CSGNPolygonUnit> duct_ptr =
       std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, duct_boundaries.back());
   auto & duct_unit = csg_obj->addEngUnit(std::move(duct_ptr));

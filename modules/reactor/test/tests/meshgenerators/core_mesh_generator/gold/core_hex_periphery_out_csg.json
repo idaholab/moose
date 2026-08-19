@@ -28,159 +28,159 @@
       "fill": "cmg_lattice",
       "filltype": "LATTICE",
       "region_infix": [
-        "-cmg_radial_ring",
+        "-cmg_radial_boundary",
         "&",
-        "+rgmb_axial_plane_0",
+        "+rgmb_axial_plane_bottom_boundary",
         "&",
-        "-rgmb_axial_plane_1"
+        "-rgmb_axial_plane_top_boundary"
       ],
       "region_postfix": [
-        "cmg_radial_ring",
+        "cmg_radial_boundary",
         "-",
-        "rgmb_axial_plane_0",
+        "rgmb_axial_plane_bottom_boundary",
         "+",
         "&",
-        "rgmb_axial_plane_1",
+        "rgmb_axial_plane_top_boundary",
         "-",
         "&"
       ]
     },
-    "pin1_cell_radial_0_axial_0": {
-      "fill": "pin1_pin_unit_axial_0_expanded_root",
+    "pin1_ducted_pin_unit_cell_radial_0": {
+      "fill": "pin1_ducted_pin_unit_pin_unit_expanded_root",
       "filltype": "UNIVERSE",
       "region_infix": [
-        "-pin1_radial_duct_0_expanded_surf_0",
+        "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_0",
         "&",
-        "-pin1_radial_duct_0_expanded_surf_1",
+        "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_1",
         "&",
-        "-pin1_radial_duct_0_expanded_surf_2",
+        "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_2",
         "&",
-        "-pin1_radial_duct_0_expanded_surf_3",
+        "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_3",
         "&",
-        "-pin1_radial_duct_0_expanded_surf_4",
+        "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_4",
         "&",
-        "-pin1_radial_duct_0_expanded_surf_5"
+        "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_5"
       ],
       "region_postfix": [
-        "pin1_radial_duct_0_expanded_surf_0",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_0",
         "-",
-        "pin1_radial_duct_0_expanded_surf_1",
-        "-",
-        "&",
-        "pin1_radial_duct_0_expanded_surf_2",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_1",
         "-",
         "&",
-        "pin1_radial_duct_0_expanded_surf_3",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_2",
         "-",
         "&",
-        "pin1_radial_duct_0_expanded_surf_4",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_3",
         "-",
         "&",
-        "pin1_radial_duct_0_expanded_surf_5",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_4",
+        "-",
+        "&",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_5",
         "-",
         "&"
       ]
     },
-    "pin1_cell_radial_1_axial_0": {
+    "pin1_ducted_pin_unit_cell_radial_1": {
       "fill": "rgmb_region_5",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
         "~",
         [
-          "-pin1_radial_duct_0_expanded_surf_0",
+          "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_0",
           "&",
-          "-pin1_radial_duct_0_expanded_surf_1",
+          "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_1",
           "&",
-          "-pin1_radial_duct_0_expanded_surf_2",
+          "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_2",
           "&",
-          "-pin1_radial_duct_0_expanded_surf_3",
+          "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_3",
           "&",
-          "-pin1_radial_duct_0_expanded_surf_4",
+          "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_4",
           "&",
-          "-pin1_radial_duct_0_expanded_surf_5"
+          "-pin1_ducted_pin_unit_radial_duct_0_expanded_surf_5"
         ]
       ],
       "region_postfix": [
-        "pin1_radial_duct_0_expanded_surf_0",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_0",
         "-",
-        "pin1_radial_duct_0_expanded_surf_1",
-        "-",
-        "&",
-        "pin1_radial_duct_0_expanded_surf_2",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_1",
         "-",
         "&",
-        "pin1_radial_duct_0_expanded_surf_3",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_2",
         "-",
         "&",
-        "pin1_radial_duct_0_expanded_surf_4",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_3",
         "-",
         "&",
-        "pin1_radial_duct_0_expanded_surf_5",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_4",
+        "-",
+        "&",
+        "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_5",
         "-",
         "&",
         "~"
       ]
     },
-    "pin1_pin_unit_axial_0_cell_radial_0": {
+    "pin1_ducted_pin_unit_pin_unit_cell_radial_0": {
       "fill": "rgmb_region_1",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "-pin1_pin_unit_axial_0_radial_ring_0"
+        "-pin1_ducted_pin_unit_pin_unit_radial_ring_0"
       ],
       "region_postfix": [
-        "pin1_pin_unit_axial_0_radial_ring_0",
+        "pin1_ducted_pin_unit_pin_unit_radial_ring_0",
         "-"
       ]
     },
-    "pin1_pin_unit_axial_0_cell_radial_1": {
+    "pin1_ducted_pin_unit_pin_unit_cell_radial_1": {
       "fill": "rgmb_region_2",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
         "~",
         [
-          "-pin1_pin_unit_axial_0_radial_ring_0"
+          "-pin1_ducted_pin_unit_pin_unit_radial_ring_0"
         ]
       ],
       "region_postfix": [
-        "pin1_pin_unit_axial_0_radial_ring_0",
+        "pin1_ducted_pin_unit_pin_unit_radial_ring_0",
         "-",
         "~"
       ]
     },
-    "pin2_cell_radial_0_axial_0": {
+    "pin2_ducted_pin_unit_cell_radial_0": {
       "fill": "rgmb_region_2",
       "filltype": "CSG_MATERIAL",
       "region_infix": [],
       "region_postfix": []
     },
-    "pin3_cell_radial_0_axial_0": {
-      "fill": "pin3_pin_unit_axial_0_expanded_root",
+    "pin3_ducted_pin_unit_cell_radial_0": {
+      "fill": "pin3_ducted_pin_unit_pin_unit_expanded_root",
       "filltype": "UNIVERSE",
       "region_infix": [],
       "region_postfix": []
     },
-    "pin3_pin_unit_axial_0_cell_radial_0": {
+    "pin3_ducted_pin_unit_pin_unit_cell_radial_0": {
       "fill": "rgmb_region_3",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "-pin3_pin_unit_axial_0_radial_ring_0"
+        "-pin3_ducted_pin_unit_pin_unit_radial_ring_0"
       ],
       "region_postfix": [
-        "pin3_pin_unit_axial_0_radial_ring_0",
+        "pin3_ducted_pin_unit_pin_unit_radial_ring_0",
         "-"
       ]
     },
-    "pin3_pin_unit_axial_0_cell_radial_1": {
+    "pin3_ducted_pin_unit_pin_unit_cell_radial_1": {
       "fill": "rgmb_region_4",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
         "~",
         [
-          "-pin3_pin_unit_axial_0_radial_ring_0"
+          "-pin3_ducted_pin_unit_pin_unit_radial_ring_0"
         ]
       ],
       "region_postfix": [
-        "pin3_pin_unit_axial_0_radial_ring_0",
+        "pin3_ducted_pin_unit_pin_unit_radial_ring_0",
         "-",
         "~"
       ]
@@ -208,17 +208,17 @@
       "type": "CSG::CSGHexagonalLattice",
       "universes": [
         [
-          "pin2_univ",
-          "pin2_univ"
+          "pin2_ducted_pin_unit_expanded_root",
+          "pin2_ducted_pin_unit_expanded_root"
         ],
         [
-          "pin2_univ",
-          "pin2_univ",
-          "pin2_univ"
+          "pin2_ducted_pin_unit_expanded_root",
+          "pin2_ducted_pin_unit_expanded_root",
+          "pin2_ducted_pin_unit_expanded_root"
         ],
         [
-          "pin2_univ",
-          "pin2_univ"
+          "pin2_ducted_pin_unit_expanded_root",
+          "pin2_ducted_pin_unit_expanded_root"
         ]
       ]
     },
@@ -243,17 +243,17 @@
       "type": "CSG::CSGHexagonalLattice",
       "universes": [
         [
-          "pin1_univ",
-          "pin1_univ"
+          "pin1_ducted_pin_unit_expanded_root",
+          "pin1_ducted_pin_unit_expanded_root"
         ],
         [
-          "pin1_univ",
-          "pin3_univ",
-          "pin1_univ"
+          "pin1_ducted_pin_unit_expanded_root",
+          "pin3_ducted_pin_unit_expanded_root",
+          "pin1_ducted_pin_unit_expanded_root"
         ],
         [
-          "pin3_univ",
-          "pin1_univ"
+          "pin3_ducted_pin_unit_expanded_root",
+          "pin1_ducted_pin_unit_expanded_root"
         ]
       ]
     },
@@ -284,7 +284,7 @@
     }
   },
   "surfaces": {
-    "amg1_radial_duct_0_expanded_surf_0": {
+    "amg1_radial_boundary_expanded_surf_0": {
       "coefficients": {
         "a": 1.0,
         "b": 0.0,
@@ -293,7 +293,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg1_radial_duct_0_expanded_surf_1": {
+    "amg1_radial_boundary_expanded_surf_1": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": 0.8660254037844386,
@@ -302,7 +302,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg1_radial_duct_0_expanded_surf_2": {
+    "amg1_radial_boundary_expanded_surf_2": {
       "coefficients": {
         "a": -0.49999999999999983,
         "b": 0.8660254037844387,
@@ -311,7 +311,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg1_radial_duct_0_expanded_surf_3": {
+    "amg1_radial_boundary_expanded_surf_3": {
       "coefficients": {
         "a": -1.0,
         "b": 1.2246467991473532e-16,
@@ -320,7 +320,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg1_radial_duct_0_expanded_surf_4": {
+    "amg1_radial_boundary_expanded_surf_4": {
       "coefficients": {
         "a": -0.5000000000000004,
         "b": -0.8660254037844384,
@@ -329,7 +329,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg1_radial_duct_0_expanded_surf_5": {
+    "amg1_radial_boundary_expanded_surf_5": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": -0.8660254037844386,
@@ -338,7 +338,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg2_radial_duct_0_expanded_surf_0": {
+    "amg2_radial_boundary_expanded_surf_0": {
       "coefficients": {
         "a": 1.0,
         "b": 0.0,
@@ -347,7 +347,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg2_radial_duct_0_expanded_surf_1": {
+    "amg2_radial_boundary_expanded_surf_1": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": 0.8660254037844386,
@@ -356,7 +356,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg2_radial_duct_0_expanded_surf_2": {
+    "amg2_radial_boundary_expanded_surf_2": {
       "coefficients": {
         "a": -0.49999999999999983,
         "b": 0.8660254037844387,
@@ -365,7 +365,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg2_radial_duct_0_expanded_surf_3": {
+    "amg2_radial_boundary_expanded_surf_3": {
       "coefficients": {
         "a": -1.0,
         "b": 1.2246467991473532e-16,
@@ -374,7 +374,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg2_radial_duct_0_expanded_surf_4": {
+    "amg2_radial_boundary_expanded_surf_4": {
       "coefficients": {
         "a": -0.5000000000000004,
         "b": -0.8660254037844384,
@@ -383,7 +383,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "amg2_radial_duct_0_expanded_surf_5": {
+    "amg2_radial_boundary_expanded_surf_5": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": -0.8660254037844386,
@@ -392,7 +392,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "cmg_radial_ring": {
+    "cmg_radial_boundary": {
       "coefficients": {
         "r": 15.0,
         "x0": 0.0,
@@ -400,7 +400,7 @@
       },
       "type": "CSG::CSGZCylinder"
     },
-    "pin1_pin_unit_axial_0_radial_ring_0": {
+    "pin1_ducted_pin_unit_pin_unit_radial_ring_0": {
       "coefficients": {
         "r": 0.2,
         "x0": 0.0,
@@ -408,7 +408,7 @@
       },
       "type": "CSG::CSGZCylinder"
     },
-    "pin1_radial_duct_0_expanded_surf_0": {
+    "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_0": {
       "coefficients": {
         "a": 1.0,
         "b": 0.0,
@@ -417,7 +417,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_0_expanded_surf_1": {
+    "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_1": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": 0.8660254037844386,
@@ -426,7 +426,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_0_expanded_surf_2": {
+    "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_2": {
       "coefficients": {
         "a": -0.49999999999999983,
         "b": 0.8660254037844387,
@@ -435,7 +435,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_0_expanded_surf_3": {
+    "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_3": {
       "coefficients": {
         "a": -1.0,
         "b": 1.2246467991473532e-16,
@@ -444,7 +444,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_0_expanded_surf_4": {
+    "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_4": {
       "coefficients": {
         "a": -0.5000000000000004,
         "b": -0.8660254037844384,
@@ -453,7 +453,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_0_expanded_surf_5": {
+    "pin1_ducted_pin_unit_radial_duct_0_expanded_surf_5": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": -0.8660254037844386,
@@ -462,7 +462,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_1_expanded_surf_0": {
+    "pin1_radial_boundary_expanded_surf_0": {
       "coefficients": {
         "a": 1.0,
         "b": 0.0,
@@ -471,7 +471,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_1_expanded_surf_1": {
+    "pin1_radial_boundary_expanded_surf_1": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": 0.8660254037844386,
@@ -480,7 +480,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_1_expanded_surf_2": {
+    "pin1_radial_boundary_expanded_surf_2": {
       "coefficients": {
         "a": -0.49999999999999983,
         "b": 0.8660254037844387,
@@ -489,7 +489,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_1_expanded_surf_3": {
+    "pin1_radial_boundary_expanded_surf_3": {
       "coefficients": {
         "a": -1.0,
         "b": 1.2246467991473532e-16,
@@ -498,7 +498,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_1_expanded_surf_4": {
+    "pin1_radial_boundary_expanded_surf_4": {
       "coefficients": {
         "a": -0.5000000000000004,
         "b": -0.8660254037844384,
@@ -507,7 +507,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin1_radial_duct_1_expanded_surf_5": {
+    "pin1_radial_boundary_expanded_surf_5": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": -0.8660254037844386,
@@ -516,7 +516,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin2_radial_duct_0_expanded_surf_0": {
+    "pin2_radial_boundary_expanded_surf_0": {
       "coefficients": {
         "a": 1.0,
         "b": 0.0,
@@ -525,7 +525,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin2_radial_duct_0_expanded_surf_1": {
+    "pin2_radial_boundary_expanded_surf_1": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": 0.8660254037844386,
@@ -534,7 +534,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin2_radial_duct_0_expanded_surf_2": {
+    "pin2_radial_boundary_expanded_surf_2": {
       "coefficients": {
         "a": -0.49999999999999983,
         "b": 0.8660254037844387,
@@ -543,7 +543,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin2_radial_duct_0_expanded_surf_3": {
+    "pin2_radial_boundary_expanded_surf_3": {
       "coefficients": {
         "a": -1.0,
         "b": 1.2246467991473532e-16,
@@ -552,7 +552,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin2_radial_duct_0_expanded_surf_4": {
+    "pin2_radial_boundary_expanded_surf_4": {
       "coefficients": {
         "a": -0.5000000000000004,
         "b": -0.8660254037844384,
@@ -561,7 +561,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin2_radial_duct_0_expanded_surf_5": {
+    "pin2_radial_boundary_expanded_surf_5": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": -0.8660254037844386,
@@ -570,7 +570,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin3_pin_unit_axial_0_radial_ring_0": {
+    "pin3_ducted_pin_unit_pin_unit_radial_ring_0": {
       "coefficients": {
         "r": 0.3818,
         "x0": 0.0,
@@ -578,7 +578,7 @@
       },
       "type": "CSG::CSGZCylinder"
     },
-    "pin3_radial_duct_0_expanded_surf_0": {
+    "pin3_radial_boundary_expanded_surf_0": {
       "coefficients": {
         "a": 1.0,
         "b": 0.0,
@@ -587,7 +587,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin3_radial_duct_0_expanded_surf_1": {
+    "pin3_radial_boundary_expanded_surf_1": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": 0.8660254037844386,
@@ -596,7 +596,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin3_radial_duct_0_expanded_surf_2": {
+    "pin3_radial_boundary_expanded_surf_2": {
       "coefficients": {
         "a": -0.49999999999999983,
         "b": 0.8660254037844387,
@@ -605,7 +605,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin3_radial_duct_0_expanded_surf_3": {
+    "pin3_radial_boundary_expanded_surf_3": {
       "coefficients": {
         "a": -1.0,
         "b": 1.2246467991473532e-16,
@@ -614,7 +614,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin3_radial_duct_0_expanded_surf_4": {
+    "pin3_radial_boundary_expanded_surf_4": {
       "coefficients": {
         "a": -0.5000000000000004,
         "b": -0.8660254037844384,
@@ -623,7 +623,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "pin3_radial_duct_0_expanded_surf_5": {
+    "pin3_radial_boundary_expanded_surf_5": {
       "coefficients": {
         "a": 0.5000000000000001,
         "b": -0.8660254037844386,
@@ -632,7 +632,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "rgmb_axial_plane_0": {
+    "rgmb_axial_plane_bottom_boundary": {
       "coefficients": {
         "a": 0.0,
         "b": 0.0,
@@ -641,7 +641,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "rgmb_axial_plane_1": {
+    "rgmb_axial_plane_top_boundary": {
       "coefficients": {
         "a": 0.0,
         "b": 0.0,
@@ -678,32 +678,32 @@
         "amg2_lattice_cell"
       ]
     },
-    "pin1_pin_unit_axial_0_expanded_root": {
+    "pin1_ducted_pin_unit_expanded_root": {
       "cells": [
-        "pin1_pin_unit_axial_0_cell_radial_0",
-        "pin1_pin_unit_axial_0_cell_radial_1"
+        "pin1_ducted_pin_unit_cell_radial_0",
+        "pin1_ducted_pin_unit_cell_radial_1"
       ]
     },
-    "pin1_univ": {
+    "pin1_ducted_pin_unit_pin_unit_expanded_root": {
       "cells": [
-        "pin1_cell_radial_0_axial_0",
-        "pin1_cell_radial_1_axial_0"
+        "pin1_ducted_pin_unit_pin_unit_cell_radial_0",
+        "pin1_ducted_pin_unit_pin_unit_cell_radial_1"
       ]
     },
-    "pin2_univ": {
+    "pin2_ducted_pin_unit_expanded_root": {
       "cells": [
-        "pin2_cell_radial_0_axial_0"
+        "pin2_ducted_pin_unit_cell_radial_0"
       ]
     },
-    "pin3_pin_unit_axial_0_expanded_root": {
+    "pin3_ducted_pin_unit_expanded_root": {
       "cells": [
-        "pin3_pin_unit_axial_0_cell_radial_0",
-        "pin3_pin_unit_axial_0_cell_radial_1"
+        "pin3_ducted_pin_unit_cell_radial_0"
       ]
     },
-    "pin3_univ": {
+    "pin3_ducted_pin_unit_pin_unit_expanded_root": {
       "cells": [
-        "pin3_cell_radial_0_axial_0"
+        "pin3_ducted_pin_unit_pin_unit_cell_radial_0",
+        "pin3_ducted_pin_unit_pin_unit_cell_radial_1"
       ]
     }
   }

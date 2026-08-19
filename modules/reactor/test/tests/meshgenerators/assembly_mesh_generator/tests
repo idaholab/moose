@@ -104,6 +104,7 @@
     recover = false
   []
   [csg]
+    design = 'CSGBase.md'
     requirement = 'The system shall generate the Constructive Solid Geometry (CSG) representation of a '
     [2d_hex]
       detail = '2D hexagonal assembly'
@@ -170,6 +171,88 @@
                   Outputs/file_base=assembly_square_background
                   --csg-only"
       jsondiff = 'assembly_square_background_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+  []
+  [csg_eng_unit]
+    design = 'CSGBase.md CSGEngUnit.md'
+    requirement = 'The system shall generate the Monte Carlo engineering unit-based representation of a '
+    [2d_hex]
+      detail = '2D hexagonal assembly'
+      type = JSONDiff
+      input = 'assembly_hex_2d.i'
+      cli_args = "Mesh/rmp/expand_units=false
+                  Outputs/file_base=assembly_hex_2d_engunit
+                  --csg-only"
+      jsondiff = 'assembly_hex_2d_engunit_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [3d_hex]
+      detail = '3D hexagonal assembly'
+      type = JSONDiff
+      input = 'assembly_hex.i'
+      cli_args = "Mesh/rmp/expand_units=false
+                  Outputs/file_base=assembly_hex_engunit
+                  --csg-only"
+      jsondiff = 'assembly_hex_engunit_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [2d_cartesian]
+      detail = '2D Cartesian assembly mesh with no background/duct region'
+      type = JSONDiff
+      input = 'assembly_square_2d.i'
+      cli_args = "Mesh/rmp/expand_units=false
+                  Outputs/file_base=assembly_square_2d_engunit
+                  --csg-only"
+      jsondiff = 'assembly_square_2d_engunit_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [3d_cartesian]
+      detail = '3D Cartesian assembly mesh with no background/duct region'
+      type = JSONDiff
+      input = 'assembly_square.i'
+      cli_args = "Mesh/rmp/expand_units=false
+                  Outputs/file_base=assembly_square_engunit
+                  Mesh/inactive=translate
+                  --csg-only"
+      jsondiff = 'assembly_square_engunit_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [2d_cartesian_with_background]
+      detail = '2D Cartesian assembly mesh with a background and duct region'
+      type = JSONDiff
+      input = 'assembly_square_2d.i'
+      cli_args = "Mesh/pin1/pitch=1.25
+                  Mesh/pin1/duct_halfpitch=0.58
+                  Mesh/pin2/pitch=1.25
+                  Mesh/amg/background_region_id='6'
+                  Mesh/amg/background_intervals=1
+                  Mesh/rmp/expand_units=false
+                  Outputs/file_base=assembly_square_2d_background_engunit
+                  --csg-only"
+      jsondiff = 'assembly_square_2d_background_engunit_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [3d_cartesian_with_background]
+      detail = '3D Cartesian assembly mesh with a background and duct region'
+      type = JSONDiff
+      input = 'assembly_square.i'
+      cli_args = "Mesh/pin1/pitch=1.25
+                  Mesh/pin1/duct_halfpitch=0.58
+                  Mesh/pin2/pitch=1.25
+                  Mesh/amg/background_region_id='6 16'
+                  Mesh/amg/background_intervals=1
+                  Mesh/inactive='translate'
+                  Mesh/rmp/expand_units=false
+                  Outputs/file_base=assembly_square_background_engunit
+                  --csg-only"
+      jsondiff = 'assembly_square_background_engunit_csg.json'
       recover = false
       mesh_mode = REPLICATED
     []
