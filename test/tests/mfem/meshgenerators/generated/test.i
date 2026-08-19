@@ -75,6 +75,7 @@
 [Outputs]
   [out]
     type = CSV
+    file_base = average
     execute_on = 'TIMESTEP_END'
   []
 []

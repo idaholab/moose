@@ -4,13 +4,8 @@
 
 ## Overview
 
-`MFEMFileMesh` reads an `mfem::ParMesh` from file for use in an `MFEMProblem`. Exodus files are
+`MFEMFileMesh` reads an `mfem::ParMesh` from file for use in an [MFEMProblem.md]. Exodus files are
 supported, along with other mesh formats listed [here](https://mfem.org/mesh-formats/).
-
-As MOOSE checks for the existence of a `libMesh` MOOSE mesh at various points during setup,
-`MFEMFileMesh` builds a dummy MOOSE mesh alongside the MFEM mesh. This dummy mesh should not be
-used in an `MFEMProblem`; all MFEM objects should access the `mfem::ParMesh` via the
-`getMFEMParMesh()` accessor as needed.
 
 ## Example Input File Syntax
 

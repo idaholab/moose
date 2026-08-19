@@ -11,7 +11,6 @@
 
 #include "MFEMMeshGenerator.h"
 #include "MFEMMeshCarrier.h"
-#include "libmesh/mesh_generation.h"
 
 InputParameters
 MFEMMeshGenerator::validParams()
@@ -32,9 +31,6 @@ MFEMMeshGenerator::generate()
 {
   auto carrier = std::make_unique<MFEMMeshCarrier>(comm());
   carrier->setMFEMMesh(generateMFEMMesh());
-  // Give the libMesh side a valid dummy so Assembly can read a sane mesh dimension
-  // regardless of which MooseMesh type consumes the pipeline output.
-  MeshTools::Generation::build_point(*carrier);
   return carrier;
 }
 
