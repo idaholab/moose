@@ -33,7 +33,7 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
   height = op.Height();
   width = op.Width();
 
-  mfem::OperatorJacobiSmoother* smoother = new mfem::OperatorJacobiSmoother(0.25);
+  mfem::OperatorJacobiSmoother * smoother = new mfem::OperatorJacobiSmoother(0.25);
   smoother->SetOperator(op);
 
   // The constructor of mfem::MatrixFreeAMS requires the target operator to be known, so this

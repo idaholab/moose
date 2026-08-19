@@ -292,27 +292,26 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
 
   // do the same with the nonlinear operator as well. This should
   // add in the contributions to the RHS we were previously missing
-  if (_non_linear and _nlfs.Has(test_var_name)) {
+  if (_non_linear and _nlfs.Has(test_var_name))
+  {
     // i think we can get away with sending a dummy op down into
     // mfem::Operator::FormLinearSystem, since we want op/aux_a to
     // represent the linear portion.
-    mfem::Operator* oper; // dummy operator to pass downwards
-    mfem::Operator* nlf = _nlfs.Get(test_var_name); // implicit cast
+    mfem::Operator * oper;                           // dummy operator to pass downwards
+    mfem::Operator * nlf = _nlfs.Get(test_var_name); // implicit cast
 
     // I note that this doesn't overwrite aux_rhs that we have from before,
     // since we ultimately end up at ConstrainedOperator::EliminateRHS (at
     // least in the PA route). This does aux_rhs -= z (z being a temp vector)
     // in operator.cpp:575. So hopefully, we don't need another aux_rhs to
     // make sure this is correct
-    nlf->FormLinearSystem(
-      _ess_tdof_lists.at(0),
-      *_var_ess_constraints.at(0),
-      *_lfs.Get(test_var_name),
-      oper,
-      aux_x,
-      aux_rhs,
-      true
-    );
+    nlf->FormLinearSystem(_ess_tdof_lists.at(0),
+                          *_var_ess_constraints.at(0),
+                          *_lfs.Get(test_var_name),
+                          oper,
+                          aux_x,
+                          aux_rhs,
+                          true);
 
     // Delete oper in case of memory leaks
     delete oper;
@@ -385,20 +384,18 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
           mfem::Vector nlf_x;
 
           // see comments in formsystemoperator
-          mfem::Operator* oper; // dummy operator to pass downwards
-          mfem::Operator* nlf = _nlfs.Get(test_var_name); // implicit cast
-          nlf->FormLinearSystem(
-            _ess_tdof_lists.at(j),
-            *_var_ess_constraints.at(j),
-            aux_rhs_copy,
-            oper,
-            nlf_x,
-            nlf_rhs,
-            true
-          );
+          mfem::Operator * oper;                           // dummy operator to pass downwards
+          mfem::Operator * nlf = _nlfs.Get(test_var_name); // implicit cast
+          nlf->FormLinearSystem(_ess_tdof_lists.at(j),
+                                *_var_ess_constraints.at(j),
+                                aux_rhs_copy,
+                                oper,
+                                nlf_x,
+                                nlf_rhs,
+                                true);
 
           aux_rhs = nlf_rhs; // += messed everything up
-          aux_x   = nlf_x;   // I think all the contributions are in now. Again, += was wrong
+          aux_x = nlf_x;     // I think all the contributions are in now. Again, += was wrong
 
           delete oper;
         }
@@ -478,13 +475,14 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
     auto nlf = _nlfs.GetShared(test_var_name);
 
     // if (_assembly_level == mfem::AssemblyLevel::PARTIAL) {
-    if (true) {
+    if (true)
+    {
       // perform some elimination
-      mfem::Operator* A;
+      mfem::Operator * A;
       nlf->FormSystemOperator(_ess_tdof_lists.at(i), A);
 
       // I think we have to cast to ConstrainedOperator here
-      mfem::ConstrainedOperator* cA = dynamic_cast<mfem::ConstrainedOperator*>(A);
+      mfem::ConstrainedOperator * cA = dynamic_cast<mfem::ConstrainedOperator *>(A);
       if (cA)
         cA->SetDiagonalPolicy(DIAG_ZERO); // Let the linear part handle this
 
@@ -550,15 +548,16 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
     const auto & test_var_name = _test_var_names.at(0);
     auto nlf = _nlfs.Get(test_var_name);
 
-    mfem::Operator* nlf_grad = &nlf->GetGradient(u);
+    mfem::Operator * nlf_grad = &nlf->GetGradient(u);
 
     // does it cast into constrained operator?
-    mfem::ConstrainedOperator* c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator*>( nlf_grad );
-    if (c_nlf_grad) c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+    mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
+    if (c_nlf_grad)
+      c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
 
     // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
-    _sumOperator = std::make_unique<SumOperatorExtension>(
-        nlf_grad, 1.0, _system_operator->Ptr(), 1.0, nlf);
+    _sumOperator =
+        std::make_unique<SumOperatorExtension>(nlf_grad, 1.0, _system_operator->Ptr(), 1.0, nlf);
 
     return *_sumOperator;
   }

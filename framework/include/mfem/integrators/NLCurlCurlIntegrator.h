@@ -64,16 +64,16 @@ public:
                                    const mfem::Vector & elfun,
                                    mfem::DenseMatrix & elmat) override;
 
-  virtual void AssemblePA(const mfem::FiniteElementSpace& fes) override;
-  virtual void AssembleGradPA(const mfem::Vector &x, const mfem::FiniteElementSpace& fes) override;
-  virtual void AddMultPA(const mfem::Vector &x, mfem::Vector &y) const override;
-  virtual void AddMultGradPA(const mfem::Vector &x, mfem::Vector &y) const override;
-  virtual void AssembleGradDiagonalPA(mfem::Vector &diag) const override;
+  virtual void AssemblePA(const mfem::FiniteElementSpace & fes) override;
+  virtual void AssembleGradPA(const mfem::Vector & x,
+                              const mfem::FiniteElementSpace & fes) override;
+  virtual void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  virtual void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  virtual void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
 
   // pass in pointer to a quadrature space, so that the assembly method
   // can fetch what it needs
-  void PreAssemblySetup(const mfem::FiniteElementSpace& fes, mfem::QuadratureSpace*& qs);
-
+  void PreAssemblySetup(const mfem::FiniteElementSpace & fes, mfem::QuadratureSpace *& qs);
 
 protected:
   mfem::CurlCurlIntegrator _curlcurl_res_integ; // (k(|curl u|) curl u, curl phi_j)
@@ -82,12 +82,12 @@ protected:
 
   // Extra stuff we need for the PA extension
   mfem::Vector pa_res_data, pa_grad_data;
-  const mfem::DofToQuad *mapsO;         ///< Not owned. DOF-to-quad map, open.
-  const mfem::DofToQuad *mapsC;         ///< Not owned. DOF-to-quad map, closed.
-  const mfem::GeometricFactors *geom;   ///< Not owned
-  const mfem::IntegrationRule *ir;
+  const mfem::DofToQuad * mapsO;       ///< Not owned. DOF-to-quad map, open.
+  const mfem::DofToQuad * mapsC;       ///< Not owned. DOF-to-quad map, closed.
+  const mfem::GeometricFactors * geom; ///< Not owned
+  const mfem::IntegrationRule * ir;
   int dim, ne, nq, dofs1D, quad1D;
-  int ndata; // number of matrix elements to store per qpoint
+  int ndata;             // number of matrix elements to store per qpoint
   bool symmetric = true; ///< False if using a nonsymmetric matrix coefficient
 
   // we also need to capture the coefficient for the k function and its derivative

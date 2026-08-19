@@ -29,8 +29,14 @@ namespace Moose::MFEM
 //    one per quadpoint per element
 // Vector & dk_coeff - ditto for the k'(s) / s
 // Vector & op - most important part!! this is the diagonal operator
-static void NLCurlCurlGradPASetup(const int Q1D, const int ne, const mfem::Array<mfem::real_t> & w,
-  const mfem::Vector &j, const mfem::Vector& c, mfem::Vector & k_coeff, mfem::Vector & dk_coeff, mfem::Vector & op);
+static void NLCurlCurlGradPASetup(const int Q1D,
+                                  const int ne,
+                                  const mfem::Array<mfem::real_t> & w,
+                                  const mfem::Vector & j,
+                                  const mfem::Vector & c,
+                                  mfem::Vector & k_coeff,
+                                  mfem::Vector & dk_coeff,
+                                  mfem::Vector & op);
 
 // Same, but creates the op used for AddMultPA
 // const int Q1D - the number of quadpoints in each dimension
@@ -44,8 +50,12 @@ static void NLCurlCurlGradPASetup(const int Q1D, const int ne, const mfem::Array
 // Vector & k_coeff  - reference to the vector of k(s) evaluated at each quadpoint. length is
 //    one per quadpoint per element
 // Vector & op - most important part!! this is the diagonal operator
-static void NLCurlCurlPASetup(const int Q1D, const int ne, const mfem::Array<mfem::real_t> & w,
-  const mfem::Vector &j, mfem::Vector & k_coeff, mfem::Vector & op);
+static void NLCurlCurlPASetup(const int Q1D,
+                              const int ne,
+                              const mfem::Array<mfem::real_t> & w,
+                              const mfem::Vector & j,
+                              mfem::Vector & k_coeff,
+                              mfem::Vector & op);
 
 NLCurlCurlJacMatrixCoefficient::NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
                                                                mfem::Coefficient & curlu_dk_dcurlu,
@@ -99,7 +109,8 @@ NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
     // it during AssembleGradPA. We also add a new coeff reference called _dk_du_u_coef
     // where we hold k'(s) / s, which should be written into the input file to
     // avoid post-hoc calculations there
-    _k_coef(k), _dk_du_u_coef(dk_dcurlu),
+    _k_coef(k),
+    _dk_du_u_coef(dk_dcurlu),
     _curlu_vec(curlu_vec)
 {
 }
@@ -125,18 +136,25 @@ NLCurlCurlIntegrator::AssembleElementGrad(const mfem::FiniteElement & el,
 // the first argument is the current state vector, which we actually don't need, since u appears
 // only embedded in the function of k and as a curl. We keep other stuff for that already, i.e.
 // we can totally ignore the x argument here
-void NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector &/*x*/, const mfem::FiniteElementSpace& fes) {
-  mfem::QuadratureSpace* qs;
+void
+NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector & /*x*/,
+                                     const mfem::FiniteElementSpace & fes)
+{
+  mfem::QuadratureSpace * qs;
   PreAssemblySetup(fes, qs);
 
-  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);  k_coeff.Project(_k_coef);
-  mfem::CoefficientVector dk_coeff(*qs, mfem::CoefficientStorage::FULL); dk_coeff.Project(_dk_du_u_coef);
-  mfem::CoefficientVector curl_coeff(*qs, mfem::CoefficientStorage::FULL); curl_coeff.Project(_curlu_vec);
+  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);
+  k_coeff.Project(_k_coef);
+  mfem::CoefficientVector dk_coeff(*qs, mfem::CoefficientStorage::FULL);
+  dk_coeff.Project(_dk_du_u_coef);
+  mfem::CoefficientVector curl_coeff(*qs, mfem::CoefficientStorage::FULL);
+  curl_coeff.Project(_curlu_vec);
 
   // todo - check if this clears out what's in the array
   pa_grad_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
 
-  NLCurlCurlGradPASetup(quad1D, ne, ir->GetWeights(), geom->J, curl_coeff, k_coeff, dk_coeff, pa_grad_data);
+  NLCurlCurlGradPASetup(
+      quad1D, ne, ir->GetWeights(), geom->J, curl_coeff, k_coeff, dk_coeff, pa_grad_data);
 
   // todo: make this a member variable (and a unique ptr)
   delete qs;
@@ -144,13 +162,16 @@ void NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector &/*x*/, const mfem:
 
 // here, we redundantly re-do everything that AssembleGradPA also has.
 // When everything is correct, then we can make it nicer.
-void NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace& fes) {
+void
+NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
+{
   // pass in pointer to a QS, so we can use to to project our coefficients
-  mfem::QuadratureSpace* qs;
+  mfem::QuadratureSpace * qs;
   PreAssemblySetup(fes, qs);
 
   // now the qs has been allocated, we can project. Here we only need the k function
-  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);  k_coeff.Project(_k_coef);
+  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);
+  k_coeff.Project(_k_coef);
 
   pa_res_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
   NLCurlCurlPASetup(quad1D, ne, ir->GetWeights(), geom->J, k_coeff, pa_res_data);
@@ -159,20 +180,54 @@ void NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace& fes) {
   delete qs;
 }
 
-void NLCurlCurlIntegrator::AddMultGradPA(const mfem::Vector &x, mfem::Vector &y) const {
+void
+NLCurlCurlIntegrator::AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const
+{
   // hardcoding the symmetric argument to be true
-  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(dim, dofs1D, quad1D, dofs1D, quad1D, true, ne,
-                      mapsO->B, mapsC->B, mapsO->Bt, mapsC->Bt, mapsC->G,
-                      mapsC->Gt, pa_grad_data, x, y, false);
+  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(dim,
+                                                dofs1D,
+                                                quad1D,
+                                                dofs1D,
+                                                quad1D,
+                                                true,
+                                                ne,
+                                                mapsO->B,
+                                                mapsC->B,
+                                                mapsO->Bt,
+                                                mapsC->Bt,
+                                                mapsC->G,
+                                                mapsC->Gt,
+                                                pa_grad_data,
+                                                x,
+                                                y,
+                                                false);
 }
 
-void NLCurlCurlIntegrator::AddMultPA(const mfem::Vector &x, mfem::Vector &y) const {
-  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(dim, dofs1D, quad1D, dofs1D, quad1D, true, ne,
-                      mapsO->B, mapsC->B, mapsO->Bt, mapsC->Bt, mapsC->G,
-                      mapsC->Gt, pa_res_data, x, y, false);
+void
+NLCurlCurlIntegrator::AddMultPA(const mfem::Vector & x, mfem::Vector & y) const
+{
+  mfem::CurlCurlIntegrator::ApplyPAKernels::Run(dim,
+                                                dofs1D,
+                                                quad1D,
+                                                dofs1D,
+                                                quad1D,
+                                                true,
+                                                ne,
+                                                mapsO->B,
+                                                mapsC->B,
+                                                mapsO->Bt,
+                                                mapsC->Bt,
+                                                mapsC->G,
+                                                mapsC->Gt,
+                                                pa_res_data,
+                                                x,
+                                                y,
+                                                false);
 }
 
-void NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector &diag) const {
+void
+NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector & diag) const
+{
   mfem::CurlCurlIntegrator::DiagonalPAKernels::Run(dim,
                                                    dofs1D,
                                                    quad1D,
@@ -189,21 +244,24 @@ void NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector &diag) const {
 }
 
 // For now, we call this from AssemblePA and AssembleGradPA
-void NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace& fes, mfem::QuadratureSpace*& qs) {
+void
+NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace & fes,
+                                       mfem::QuadratureSpace *& qs)
+{
   // start with some basic stuff
-  const mfem::FiniteElement* fel = fes.GetTypicalFE();
-  mfem::Mesh* mesh = fes.GetMesh(); // should this be parmesh?
+  const mfem::FiniteElement * fel = fes.GetTypicalFE();
+  mfem::Mesh * mesh = fes.GetMesh(); // should this be parmesh?
 
   // crucial check to see if it casts into VTFE
-  const mfem::VectorTensorFiniteElement* el =
-    dynamic_cast<const mfem::VectorTensorFiniteElement*>(fel);
+  const mfem::VectorTensorFiniteElement * el =
+      dynamic_cast<const mfem::VectorTensorFiniteElement *>(fel);
 
   mooseAssert(el, "Only VectorTensorFiniteElement is supported!");
   mooseAssert(el->GetDerivType() == mfem::FiniteElement::CURL, "Unknown kernel type");
 
   // we use the mass integrator to fetch the integration rule, much like
   // with the AssembleGradPA from the normal curl curl class
-  ir = &mfem::MassIntegrator::GetRule(*el, *el,*mesh->GetTypicalElementTransformation());
+  ir = &mfem::MassIntegrator::GetRule(*el, *el, *mesh->GetTypicalElementTransformation());
 
   const int dims = el->GetDim();
   mooseAssert(dims == 3, "");
@@ -226,30 +284,38 @@ void NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace& fes,
   // Should be deleted after use.
   qs = new mfem::QuadratureSpace(*mesh, *ir);
 
-  symmetric = true; // we can hardcode this
+  symmetric = true;                             // we can hardcode this
   const int sym_dims = (dims * (dims + 1)) / 2; // 1x1: 1, 2x2: 3, 3x3: 6
-  ndata = (dim == 2) ? 1 : (symmetric ? sym_dims : dim*dim); // symmetric => only store 6 things instead of 9
+  ndata = (dim == 2)
+              ? 1
+              : (symmetric ? sym_dims : dim * dim); // symmetric => only store 6 things instead of 9
 }
 
-
 // For now, no multithreading. this will be very slow
-void NLCurlCurlGradPASetup(const int Q1D, const int NE, const mfem::Array<mfem::real_t> & w,
-  const mfem::Vector &j, const mfem::Vector& c, mfem::Vector & k_coeff, mfem::Vector & dk_coeff,
-  mfem::Vector & op) {
+void
+NLCurlCurlGradPASetup(const int Q1D,
+                      const int NE,
+                      const mfem::Array<mfem::real_t> & w,
+                      const mfem::Vector & j,
+                      const mfem::Vector & c,
+                      mfem::Vector & k_coeff,
+                      mfem::Vector & dk_coeff,
+                      mfem::Vector & op)
+{
 
   // number of quadpoints per element total
-  const int NQ = Q1D*Q1D*Q1D;
-  
+  const int NQ = Q1D * Q1D * Q1D;
+
   // next, turn all the important stuff into tensors
-  auto W  = w.Read();
-  auto J  = mfem::Reshape(j.Read(), NQ, 3, 3, NE);
+  auto W = w.Read();
+  auto J = mfem::Reshape(j.Read(), NQ, 3, 3, NE);
   // hardcoding 1 here, since k expected to be scalar function
-  auto K  = mfem::Reshape(k_coeff.Read(), 1, NQ, NE);
+  auto K = mfem::Reshape(k_coeff.Read(), 1, NQ, NE);
   auto DK = mfem::Reshape(dk_coeff.Read(), 1, NQ, NE);
 
   // the Curl gridfunction
   auto C = mfem::Reshape(c.Read(), 3, NQ, NE);
-  
+
   // finally, our operator
   auto Diag = mfem::Reshape(op.Write(), NQ, 6, NE);
 
@@ -257,20 +323,21 @@ void NLCurlCurlGradPASetup(const int Q1D, const int NE, const mfem::Array<mfem::
   // use shared memory)
 
   // for each element
-  for (int e=0; e<NE; e++) {
+  for (int e = 0; e < NE; e++)
+  {
     // for each qpoint
-    for (int q=0; q<NQ; q++) {
-      const mfem::real_t J11 = J(q,0,0,e);
-      const mfem::real_t J21 = J(q,1,0,e);
-      const mfem::real_t J31 = J(q,2,0,e);
-      const mfem::real_t J12 = J(q,0,1,e);
-      const mfem::real_t J22 = J(q,1,1,e);
-      const mfem::real_t J32 = J(q,2,1,e);
-      const mfem::real_t J13 = J(q,0,2,e);
-      const mfem::real_t J23 = J(q,1,2,e);
-      const mfem::real_t J33 = J(q,2,2,e);
-      const mfem::real_t detJ = J11 * (J22 * J33 - J32 * J23) -
-                                J21 * (J12 * J33 - J32 * J13) +
+    for (int q = 0; q < NQ; q++)
+    {
+      const mfem::real_t J11 = J(q, 0, 0, e);
+      const mfem::real_t J21 = J(q, 1, 0, e);
+      const mfem::real_t J31 = J(q, 2, 0, e);
+      const mfem::real_t J12 = J(q, 0, 1, e);
+      const mfem::real_t J22 = J(q, 1, 1, e);
+      const mfem::real_t J32 = J(q, 2, 1, e);
+      const mfem::real_t J13 = J(q, 0, 2, e);
+      const mfem::real_t J23 = J(q, 1, 2, e);
+      const mfem::real_t J33 = J(q, 2, 2, e);
+      const mfem::real_t detJ = J11 * (J22 * J33 - J32 * J23) - J21 * (J12 * J33 - J32 * J13) +
                                 J31 * (J12 * J23 - J22 * J13);
       const mfem::real_t beta = W[q] / detJ;
 
@@ -287,85 +354,89 @@ void NLCurlCurlGradPASetup(const int Q1D, const int NE, const mfem::Array<mfem::
       const mfem::real_t c3 = C(2, q, e);
 
       // next compute the g_i
-      const mfem::real_t g1 = J11*c1 + J21*c2 + J31*c3;
-      const mfem::real_t g2 = J12*c1 + J22*c2 + J32*c3;
-      const mfem::real_t g3 = J13*c1 + J23*c2 + J33*c3;
+      const mfem::real_t g1 = J11 * c1 + J21 * c2 + J31 * c3;
+      const mfem::real_t g2 = J12 * c1 + J22 * c2 + J32 * c3;
+      const mfem::real_t g3 = J13 * c1 + J23 * c2 + J33 * c3;
 
       // next the M_i. TODO - we can read these off the AddMultPA array
-      const mfem::real_t M11 = J11*J11 + J21*J21 + J31*J31;
-      const mfem::real_t M22 = J12*J12 + J22*J22 + J32*J32;
-      const mfem::real_t M33 = J13*J13 + J23*J23 + J33*J33;
-      const mfem::real_t M12 = J11*J12 + J21*J22 + J31*J32;
-      const mfem::real_t M13 = J11*J13 + J21*J23 + J31*J33;
-      const mfem::real_t M23 = J12*J13 + J22*J23 + J32*J33;
+      const mfem::real_t M11 = J11 * J11 + J21 * J21 + J31 * J31;
+      const mfem::real_t M22 = J12 * J12 + J22 * J22 + J32 * J32;
+      const mfem::real_t M33 = J13 * J13 + J23 * J23 + J33 * J33;
+      const mfem::real_t M12 = J11 * J12 + J21 * J22 + J31 * J32;
+      const mfem::real_t M13 = J11 * J13 + J21 * J23 + J31 * J33;
+      const mfem::real_t M23 = J12 * J13 + J22 * J23 + J32 * J33;
 
       // Finally, let's write the 6 elements to the Diag tensor
       // Do the upper triangle, in row major order
-      Diag(q,0,e) = beta * ( k*M11 + alpha*g1*g1 ); // D11
-      Diag(q,1,e) = beta * ( k*M12 + alpha*g1*g2 ); // D12
-      Diag(q,2,e) = beta * ( k*M13 + alpha*g1*g3 ); // D13
-      Diag(q,3,e) = beta * ( k*M22 + alpha*g2*g2 ); // D22
-      Diag(q,4,e) = beta * ( k*M23 + alpha*g2*g3 ); // D23
-      Diag(q,5,e) = beta * ( k*M33 + alpha*g3*g3 ); // D33
-
+      Diag(q, 0, e) = beta * (k * M11 + alpha * g1 * g1); // D11
+      Diag(q, 1, e) = beta * (k * M12 + alpha * g1 * g2); // D12
+      Diag(q, 2, e) = beta * (k * M13 + alpha * g1 * g3); // D13
+      Diag(q, 3, e) = beta * (k * M22 + alpha * g2 * g2); // D22
+      Diag(q, 4, e) = beta * (k * M23 + alpha * g2 * g3); // D23
+      Diag(q, 5, e) = beta * (k * M33 + alpha * g3 * g3); // D33
     }
   }
 }
 
 // For now, no multithreading. this will be very slow
-void NLCurlCurlPASetup(const int Q1D, const int NE, const mfem::Array<mfem::real_t> & w,
-  const mfem::Vector &j, mfem::Vector & k_coeff, mfem::Vector & op) {
+void
+NLCurlCurlPASetup(const int Q1D,
+                  const int NE,
+                  const mfem::Array<mfem::real_t> & w,
+                  const mfem::Vector & j,
+                  mfem::Vector & k_coeff,
+                  mfem::Vector & op)
+{
   // number of quadpoints per element total
-  const int NQ = Q1D*Q1D*Q1D;
-  
+  const int NQ = Q1D * Q1D * Q1D;
+
   // next, turn all the important stuff into tensors
-  auto W  = w.Read();
-  auto J  = mfem::Reshape(j.Read(), NQ, 3, 3, NE);
+  auto W = w.Read();
+  auto J = mfem::Reshape(j.Read(), NQ, 3, 3, NE);
   // hardcoding 1 here, since k expected to be scalar function
-  auto K  = mfem::Reshape(k_coeff.Read(), 1, NQ, NE);
+  auto K = mfem::Reshape(k_coeff.Read(), 1, NQ, NE);
 
   // finally, our operator
   auto Diag = mfem::Reshape(op.Write(), NQ, 6, NE);
 
   // for each element
-  for (int e=0; e<NE; e++) {
+  for (int e = 0; e < NE; e++)
+  {
     // for each qpoint
-    for (int q=0; q<NQ; q++) {
-      const mfem::real_t J11 = J(q,0,0,e);
-      const mfem::real_t J21 = J(q,1,0,e);
-      const mfem::real_t J31 = J(q,2,0,e);
-      const mfem::real_t J12 = J(q,0,1,e);
-      const mfem::real_t J22 = J(q,1,1,e);
-      const mfem::real_t J32 = J(q,2,1,e);
-      const mfem::real_t J13 = J(q,0,2,e);
-      const mfem::real_t J23 = J(q,1,2,e);
-      const mfem::real_t J33 = J(q,2,2,e);
-      const mfem::real_t detJ = J11 * (J22 * J33 - J32 * J23) -
-                                J21 * (J12 * J33 - J32 * J13) +
+    for (int q = 0; q < NQ; q++)
+    {
+      const mfem::real_t J11 = J(q, 0, 0, e);
+      const mfem::real_t J21 = J(q, 1, 0, e);
+      const mfem::real_t J31 = J(q, 2, 0, e);
+      const mfem::real_t J12 = J(q, 0, 1, e);
+      const mfem::real_t J22 = J(q, 1, 1, e);
+      const mfem::real_t J32 = J(q, 2, 1, e);
+      const mfem::real_t J13 = J(q, 0, 2, e);
+      const mfem::real_t J23 = J(q, 1, 2, e);
+      const mfem::real_t J33 = J(q, 2, 2, e);
+      const mfem::real_t detJ = J11 * (J22 * J33 - J32 * J23) - J21 * (J12 * J33 - J32 * J13) +
                                 J31 * (J12 * J23 - J22 * J13);
       const mfem::real_t beta = W[q] / detJ;
 
-      const mfem::real_t M11 = J11*J11 + J21*J21 + J31*J31;
-      const mfem::real_t M22 = J12*J12 + J22*J22 + J32*J32;
-      const mfem::real_t M33 = J13*J13 + J23*J23 + J33*J33;
-      const mfem::real_t M12 = J11*J12 + J21*J22 + J31*J32;
-      const mfem::real_t M13 = J11*J13 + J21*J23 + J31*J33;
-      const mfem::real_t M23 = J12*J13 + J22*J23 + J32*J33;
+      const mfem::real_t M11 = J11 * J11 + J21 * J21 + J31 * J31;
+      const mfem::real_t M22 = J12 * J12 + J22 * J22 + J32 * J32;
+      const mfem::real_t M33 = J13 * J13 + J23 * J23 + J33 * J33;
+      const mfem::real_t M12 = J11 * J12 + J21 * J22 + J31 * J32;
+      const mfem::real_t M13 = J11 * J13 + J21 * J23 + J31 * J33;
+      const mfem::real_t M23 = J12 * J13 + J22 * J23 + J32 * J33;
 
       const mfem::real_t k = K(0, q, e);
 
       // finally, write into the diagonal operator
-      Diag(q,0,e) = beta * k*M11; // D11
-      Diag(q,1,e) = beta * k*M12; // D12
-      Diag(q,2,e) = beta * k*M13; // D13
-      Diag(q,3,e) = beta * k*M22; // D22
-      Diag(q,4,e) = beta * k*M23; // D23
-      Diag(q,5,e) = beta * k*M33; // D33
+      Diag(q, 0, e) = beta * k * M11; // D11
+      Diag(q, 1, e) = beta * k * M12; // D12
+      Diag(q, 2, e) = beta * k * M13; // D13
+      Diag(q, 3, e) = beta * k * M22; // D22
+      Diag(q, 4, e) = beta * k * M23; // D23
+      Diag(q, 5, e) = beta * k * M33; // D33
     }
   }
 }
-
-
 }
 
 #endif

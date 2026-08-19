@@ -431,10 +431,15 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
 //
 // So, inherit from ConstrainedOperator, and add a method that exposes the constraint_list
 // array.
-class ConstrainedOperatorExtension : public mfem::ConstrainedOperator {
+class ConstrainedOperatorExtension : public mfem::ConstrainedOperator
+{
 public:
-  void FinishAssembleDiagonal(mfem::Vector& diag) const {
-    if (diag_policy == DIAG_KEEP) { return; }
+  void FinishAssembleDiagonal(mfem::Vector & diag) const
+  {
+    if (diag_policy == DIAG_KEEP)
+    {
+      return;
+    }
 
     const int csz = constraint_list.Size();
     auto d_diag = diag.ReadWrite();
@@ -443,13 +448,12 @@ public:
     // just do simple for loop
     mooseAssert(diag_policy == DIAG_ONE or diag_policy == DIAG_ZERO, "");
 
-    for (int i=0; i<csz; i++) {
+    for (int i = 0; i < csz; i++)
+    {
       const int id = idx[i];
       d_diag[id] = (diag_policy == DIAG_ONE) ? 1.0 : 0.0;
     }
-
   }
-
 };
 
 // Since the member variables of SumOperator are private, we have
@@ -459,12 +463,20 @@ class SumOperatorExtension : public mfem::Operator
   const mfem::Operator *A, *B;
   const mfem::real_t _alpha, _beta;
   mutable mfem::Vector z;
-  mfem::ParNonlinearForm* _nlf; // not owned
+  mfem::ParNonlinearForm * _nlf; // not owned
 public:
-  SumOperatorExtension(const mfem::Operator *A, const mfem::real_t alpha, const mfem::Operator *B, const mfem::real_t beta,
-    mfem::ParNonlinearForm* nlf
-  )
-    : Operator(A->Height(), A->Width()), A(A), B(B), _alpha(alpha), _beta(beta), z(A->Height()), _nlf(nlf)
+  SumOperatorExtension(const mfem::Operator * A,
+                       const mfem::real_t alpha,
+                       const mfem::Operator * B,
+                       const mfem::real_t beta,
+                       mfem::ParNonlinearForm * nlf)
+    : Operator(A->Height(), A->Width()),
+      A(A),
+      B(B),
+      _alpha(alpha),
+      _beta(beta),
+      z(A->Height()),
+      _nlf(nlf)
   {
     mooseAssert(A->Width() == B->Width(), "Operator Widths must match");
     mooseAssert(A->Height() == B->Height(), "Operator Heights must match");
@@ -475,61 +487,75 @@ public:
 
   virtual ~SumOperatorExtension() {}
 
-  void Mult(const mfem::Vector &x, mfem::Vector &y) const override
+  void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
-    z.SetSize(A->Height()); A->Mult(x, z); B->Mult(x, y); add(_alpha, z, _beta, y, y);
+    z.SetSize(A->Height());
+    A->Mult(x, z);
+    B->Mult(x, y);
+    add(_alpha, z, _beta, y, y);
   }
 
-  void MultTranspose(const mfem::Vector &x, mfem::Vector &y) const override
+  void MultTranspose(const mfem::Vector & x, mfem::Vector & y) const override
   {
-    z.SetSize(A->Width()); A->Mult(x, z); B->Mult(x, y); add(_alpha, z, _beta, y, y);
+    z.SetSize(A->Width());
+    A->Mult(x, z);
+    B->Mult(x, y);
+    add(_alpha, z, _beta, y, y);
   }
 
-  void AssembleDiagOnNonlinearForm(mfem::Vector& diag) const {
+  void AssembleDiagOnNonlinearForm(mfem::Vector & diag) const
+  {
     // the nlf will hold most things
     // firstly, the dnfi
-    mfem::Array<mfem::NonlinearFormIntegrator*>& dnfi = *_nlf->GetDNFI();
+    mfem::Array<mfem::NonlinearFormIntegrator *> & dnfi = *_nlf->GetDNFI();
 
     // next, the elemR. this should also unlock the size we need for ye
-    mfem::FiniteElementSpace* fes = _nlf->FESpace();
+    mfem::FiniteElementSpace * fes = _nlf->FESpace();
 
     // this LEXICOGRAPHIC is correct. i check in gdb
-    const mfem::Operator* elemR = fes->GetElementRestriction(mfem::ElementDofOrdering::LEXICOGRAPHIC);
+    const mfem::Operator * elemR =
+        fes->GetElementRestriction(mfem::ElementDofOrdering::LEXICOGRAPHIC);
 
     const int ye_size = elemR->Height(); // check this
 
     mfem::Vector ye(ye_size);
     ye = 0.0;
 
-    for (int i=0; i<dnfi.Size(); i++) {
+    for (int i = 0; i < dnfi.Size(); i++)
+    {
       dnfi[i]->AssembleGradDiagonalPA(ye);
     }
 
     // finally, let's do it the way that the blf path does it
-    const mfem::ElementRestriction* H1elem_restrict =
-      dynamic_cast<const mfem::ElementRestriction*>(elemR);
+    const mfem::ElementRestriction * H1elem_restrict =
+        dynamic_cast<const mfem::ElementRestriction *>(elemR);
 
-    if (H1elem_restrict) H1elem_restrict->AbsMultTranspose(ye, diag);
-    else                 elemR->MultTranspose(ye, diag);
+    if (H1elem_restrict)
+      H1elem_restrict->AbsMultTranspose(ye, diag);
+    else
+      elemR->MultTranspose(ye, diag);
   }
 
-  void AssembleDiagonalOnConstrainedOperatorExtn(mfem::Vector& diag) const {
+  void AssembleDiagonalOnConstrainedOperatorExtn(mfem::Vector & diag) const
+  {
     // first, call AssembleDiagOnNonlinearForm
     AssembleDiagOnNonlinearForm(diag);
 
     // does A cast into ConstrainedOperator?
-    const mfem::ConstrainedOperator* cA = dynamic_cast<const mfem::ConstrainedOperator*>(A);
+    const mfem::ConstrainedOperator * cA = dynamic_cast<const mfem::ConstrainedOperator *>(A);
     mooseAssert(cA, "");
 
     // Now, do all the rest of the stuff that happens in ConstrainedOperator::AssembleDiagonal
     // cast A into constrained operator
-    const ConstrainedOperatorExtension* cA_extn = reinterpret_cast<const ConstrainedOperatorExtension*>(cA);
+    const ConstrainedOperatorExtension * cA_extn =
+        reinterpret_cast<const ConstrainedOperatorExtension *>(cA);
     mooseAssert(cA_extn, "");
-    
+
     cA_extn->FinishAssembleDiagonal(diag);
   }
 
-  void AssembleDiagonal(mfem::Vector &diag) const override {
+  void AssembleDiagonal(mfem::Vector & diag) const override
+  {
     // slow and steady. Yes we could reuse the z vector here...
     mfem::Vector tempA(diag.Size());
     mfem::Vector tempB(diag.Size());
@@ -544,9 +570,7 @@ public:
     // mix them together
     add(_alpha, tempA, _beta, tempB, diag);
   }
-
 };
-
 
 } // namespace Moose::MFEM
 
