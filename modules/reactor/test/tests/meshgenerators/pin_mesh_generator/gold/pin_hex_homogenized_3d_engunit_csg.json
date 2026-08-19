@@ -1,13 +1,51 @@
 {
+  "cells": {
+    "pin1_root_cell": {
+      "fill": "pin1_ducted_pin_unit",
+      "filltype": "UNIVERSE",
+      "region_infix": [
+        "-pin1_radial_boundary",
+        "&",
+        "+rgmb_axial_plane_bottom_boundary",
+        "&",
+        "-rgmb_axial_plane_top_boundary"
+      ],
+      "region_postfix": [
+        "pin1_radial_boundary",
+        "-",
+        "rgmb_axial_plane_bottom_boundary",
+        "+",
+        "rgmb_axial_plane_top_boundary",
+        "-",
+        "&",
+        "&"
+      ]
+    }
+  },
+  "surfaces": {
+    "rgmb_axial_plane_bottom_boundary": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 0.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "rgmb_axial_plane_top_boundary": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 1.0
+      },
+      "type": "CSG::CSGPlane"
+    }
+  },
   "units": {
-    "pin1": {
+    "pin1_ducted_pin_unit": {
       "attributes": {
-        "axial_boundaries": [
-          1.0
-        ],
-        "duct_apothems": [
-          0.710315
-        ],
+        "duct_apothems": [],
         "geometry_type": "Hex",
         "region_names": [
           [
@@ -16,14 +54,22 @@
         ],
         "ring_radii": []
       },
-      "behavior": "CELL",
+      "behavior": "UNIVERSE",
       "unit_type": "CSG::DuctedPinEngUnit"
+    },
+    "pin1_radial_boundary": {
+      "attributes": {
+        "apothem": 0.710315,
+        "num_sides": 6
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
     }
   },
   "universes": {
     "ROOT_UNIVERSE": {
       "cells": [
-        "pin1"
+        "pin1_root_cell"
       ],
       "root": true
     }
