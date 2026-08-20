@@ -1,6 +1,7 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Mesh]
   [mesh]
@@ -44,6 +45,13 @@ advected_interp_method = 'average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+    gradient_method = ${pressure_gradient_method}
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
   []
 []
 

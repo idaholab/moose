@@ -106,6 +106,9 @@ protected:
   /// Solve an equation which contains the solid energy conservation.
   std::pair<unsigned int, Real> solveSolidEnergy();
 
+  /// Explicitly update all registered pressure gradient fields.
+  void updatePressureGradient();
+
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;
 

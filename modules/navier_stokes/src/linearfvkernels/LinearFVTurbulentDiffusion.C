@@ -38,7 +38,7 @@ LinearFVTurbulentDiffusion::LinearFVTurbulentDiffusion(const InputParameters & p
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
   if (_use_nonorthogonal_correction)
-    _var.computeCellGradients();
+    _var.requestCellGradients();
 }
 
 void

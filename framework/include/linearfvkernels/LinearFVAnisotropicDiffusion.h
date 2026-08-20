@@ -13,6 +13,8 @@
 #include "FVFaceInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
 
+class LinearFVGradientReader;
+
 /**
  * Kernel that adds contributions from an anisotropic diffusion term discretized using the finite
  * volume method to a linear system.
@@ -42,6 +44,9 @@ public:
   virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc) override;
 
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) override;
+
+  /// If nonorthogona lcorrection was requested on this kernel
+  bool useNonorthogonalCorrection() const { return _use_nonorthogonal_correction; }
 
 protected:
   /**
@@ -77,6 +82,9 @@ protected:
   /// Switch to enable/disable nonorthogonal correction on boundary, this is mostly used
   /// to disable boundary contributions to the right hand side.
   const bool _use_nonorthogonal_correction_on_boundary;
+
+  /// Gradient field used for internal and boundary anisotropic diffusion corrections.
+  const LinearFVGradientReader & _gradient_field;
 
   /// The cached matrix contribution
   Real _flux_matrix_contribution;
