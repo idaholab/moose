@@ -12,7 +12,7 @@ Similarly as showed in [ArrayDiffusion.md], we can rearrange it into
 \begin{equation}
 (\vec{u}^\ast, \mathbf{T} \dot{\vec{u}}) = \sum_{e} \sum_{i=1}^{N_{\text{dof}}} \sum_{\text{qp}=1}^{N_{qp}} (|J|w)_{\text{qp}} \vec{w}_p\vec{u}_i^\ast \underline{\mathbf{T}_{\text{qp}} \dot{\vec{u}}_{\text{qp}} b_{i,\text{qp}}},
 \end{equation}
-where the underlined term is the vector provided by [ArrayTimeDerivative::computeQpResidual](ArrayTimeDerivative.C).
+where the underlined term is the vector provided by [!file text=ArrayTimeDerivative::computeQpResidual](ArrayTimeDerivative.C).
 Detailed explanations on the notations can be found in [ArrayDiffusion.md].
 
 In general, the reaction coefficient $\mathbf{T}$ is a square matrix with the size of the number of components.
@@ -25,7 +25,7 @@ The local Jacobian can be found in the following equation:
 \begin{equation}
 J_{n,m,i,j} = \sum_{e} \sum_{i=1}^{N_{\text{dof}}} \sum_{j=1}^{N_{\text{dof}}} \sum_{\text{qp}=1}^{N_{qp}} (|J|w)_{\text{qp}} \vec{w}_p u_{n,i}^\ast \underline{T_{n,m,\text{qp}} b_{j,\text{qp}} b_{i,\text{qp}} \frac{\partial \dot{u}_{m,j}}{\partial u_{m,j}}},
 \end{equation}
-where $n$ and $m$ are the component row and column, respectively. The underlined part is the local Jacobian evaluated by [ArrayTimeDerivative::computeQpJacobian](ArrayTimeDerivative.C) and [ArrayTimeDerivative::computeQpOffDiagJacobian](ArrayTimeDerivative.C).
+where $n$ and $m$ are the component row and column, respectively. The underlined part is the local Jacobian evaluated by [!file text=ArrayTimeDerivative::computeQpJacobian](ArrayTimeDerivative.C) and [!file text=ArrayTimeDerivative::computeQpOffDiagJacobian](ArrayTimeDerivative.C).
 
 ## Example Input Syntax
 

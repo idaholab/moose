@@ -86,7 +86,7 @@ commonly used in the action syntax is presented below:
 
   !listing include/base/NS.h line=pressure
 
-For the default names of other variables used in this action, visit [this site](include/base/NS.h).
+For the default names of other variables used in this action, visit [!file text=this site](include/base/NS.h).
 
 
 ## Coupling with other Physics

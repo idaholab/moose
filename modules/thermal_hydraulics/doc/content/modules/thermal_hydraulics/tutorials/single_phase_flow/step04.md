@@ -1,6 +1,6 @@
 # Step 4: Primary Loop
 
-+Complete input file for this step:+ [04_loop.i](thermal_hydraulics/tutorials/single_phase_flow/04_loop.i)
++Complete input file for this step:+ [!file text=04_loop.i](thermal_hydraulics/tutorials/single_phase_flow/04_loop.i)
 
 !media thermal_hydraulics/tutorials/single_phase_flow/step-04.png
        style=width:33%;float:right;margin-left:40px

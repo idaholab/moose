@@ -117,13 +117,13 @@ mesh via the `block = '...'` lines. These objects will provide the "diffused" an
 
 ## Complete Source Files
 
-- [examples/ex08_materials/ex08.i]
-- [examples/ex08_materials/include/materials/ExampleMaterial.h]
-- [examples/ex08_materials/src/materials/ExampleMaterial.C]
-- [examples/ex08_materials/include/kernels/ExampleDiffusion.h]
-- [examples/ex08_materials/src/kernels/ExampleDiffusion.C]
-- [examples/ex08_materials/include/kernels/ExampleConvection.h]
-- [examples/ex08_materials/src/kernels/ExampleConvection.C]
+- [!file](examples/ex08_materials/ex08.i)
+- [!file](examples/ex08_materials/include/materials/ExampleMaterial.h)
+- [!file](examples/ex08_materials/src/materials/ExampleMaterial.C)
+- [!file](examples/ex08_materials/include/kernels/ExampleDiffusion.h)
+- [!file](examples/ex08_materials/src/kernels/ExampleDiffusion.C)
+- [!file](examples/ex08_materials/include/kernels/ExampleConvection.h)
+- [!file](examples/ex08_materials/src/kernels/ExampleConvection.C)
 
 !content pagination use_title=True
                     previous=examples/ex07_ics.md
