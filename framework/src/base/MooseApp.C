@@ -460,6 +460,9 @@ MooseApp::validParams()
                                    false,
                                    "Disables the output of the application header.");
   params.setGlobalCommandLineParam("suppress_header");
+  params.addCommandLineParam<bool>(
+      "suppress_info", "--suppress-info", false, "Disables informational messages.");
+  params.setGlobalCommandLineParam("suppress_info");
 
   params.addCommandLineParam<bool>(
       "test_checkpoint_half_transient",
@@ -1054,6 +1057,9 @@ MooseApp::setupOptions()
   // Deprecated messages can be toggled to errors independently from everything else.
   Moose::_deprecated_is_error = getParam<bool>("error_deprecated");
 
+  // Informational messages can be suppressed independently from warnings and errors.
+  Moose::_suppress_info = getParam<bool>("suppress_info");
+
   if (isUltimateMaster()) // makes sure coloring isn't reset incorrectly in multi-app settings
   {
     // Set from command line
@@ -1512,6 +1518,12 @@ MooseApp::setupOptions()
   }
 
   Moose::out << std::flush;
+}
+
+bool
+MooseApp::suppressInfo() const
+{
+  return getParam<bool>("suppress_info");
 }
 
 const std::vector<std::string> &

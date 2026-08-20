@@ -231,6 +231,9 @@ template <typename S, typename... Args>
 void
 mooseInfoStreamRepeated(S & oss, Args &&... args)
 {
+  if (Moose::_suppress_info)
+    return;
+
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
   std::string msg = mooseMsgFmt(ss.str(), "*** Info ***", COLOR_CYAN);
@@ -244,6 +247,9 @@ template <typename S, typename... Args>
 void
 mooseInfoStream(S & oss, Args &&... args)
 {
+  if (Moose::_suppress_info)
+    return;
+
   mooseDoOnce(mooseInfoStreamRepeated(oss, args...););
 }
 
