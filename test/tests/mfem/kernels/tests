@@ -26,6 +26,64 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
+  [MFEMCurlCurlPartialNL_LinearKernel]
+    type = XMLDiff
+    input = curlcurl_nl_linear_kernel.i
+    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
+                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    cli_args = 'Executioner/assembly_level=partial'
+    recover = false
+  []
+  [MFEMCurlCurlNL]
+    type = XMLDiff
+    input = curlcurl_nl.i
+    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
+                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner AND the nonlinear kernel'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMCurlCurlNLPartial]
+    type = XMLDiff
+    input = curlcurl_nl.i
+    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
+                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'Same as above, with partial assembly'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    cli_args = 'Executioner/assembly_level=partial'
+    recover = false
+  []
+  [MFEMNLCurlCurlMMS]
+    type = XMLDiff
+    input = nl_curlcurl_MMS.i
+    xmldiff = 'OutputData/NLCurlCurlMMS/Run0/Run0.pvd
+                OutputData/NLCurlCurlMMS/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to...'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMNLCurlCurlMMSPartial]
+    type = XMLDiff
+    input = nl_curlcurl_MMS.i
+    xmldiff = 'OutputData/NLCurlCurlMMS/Run0/Run0.pvd
+                OutputData/NLCurlCurlMMS/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to...'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    cli_args = 'Executioner/assembly_level=partial'
+    recover = false
+  []
   [MFEMDiffusion]
     type = XMLDiff
     input = diffusion.i

@@ -290,12 +290,43 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                         aux_rhs,
                         /*copy_interior=*/true);
 
+  // do the same with the nonlinear operator as well. This should
+  // add in the contributions to the RHS we were previously missing
+  if (_non_linear and _nlfs.Has(test_var_name))
+  {
+    // i think we can get away with sending a dummy op down into
+    // mfem::Operator::FormLinearSystem, since we want op/aux_a to
+    // represent the linear portion.
+    mfem::Operator * oper;                           // dummy operator to pass downwards
+    mfem::Operator * nlf = _nlfs.Get(test_var_name); // implicit cast
+
+    // I note that this doesn't overwrite aux_rhs that we have from before,
+    // since we ultimately end up at ConstrainedOperator::EliminateRHS (at
+    // least in the PA route). This does aux_rhs -= z (z being a temp vector)
+    // in operator.cpp:575. So hopefully, we don't need another aux_rhs to
+    // make sure this is correct
+    nlf->FormLinearSystem(_ess_tdof_lists.at(0),
+                          *_var_ess_constraints.at(0),
+                          *_lfs.Get(test_var_name),
+                          oper,
+                          aux_x,
+                          aux_rhs,
+                          true);
+
+    // Delete oper in case of memory leaks
+    delete oper;
+  }
+
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
 
   op.Reset(aux_a.Ptr());
+
+  // hold a reference to op
+  _system_operator = &op;
+
   aux_a.SetOperatorOwner(false);
 }
 
@@ -327,6 +358,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       if (test_var_name == trial_var_name)
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+
         auto blf = _blfs.Get(test_var_name);
         blf->FormLinearSystem(_ess_tdof_lists.at(j),
                               *_var_ess_constraints.at(j),
@@ -336,6 +368,37 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                               aux_rhs,
                               /*copy_interior=*/true);
         trueX.GetBlock(j) = aux_x;
+
+        // Do the same with the nlf
+        // By the time we get to here, the linear form has been modified, and it's
+        // the same as aux_rhs. It correctly holds the contributions from the linear
+        // kernels. Now we just need to add in the nonlinear stuff.
+        if (_non_linear and _nlfs.Has(test_var_name))
+        {
+          // make a copy of aux_rhs, since this has all the values
+          // we'd like to see in our lf
+          mfem::Vector aux_rhs_copy(aux_rhs);
+
+          // give them separate aux vectors
+          mfem::Vector nlf_rhs;
+          mfem::Vector nlf_x;
+
+          // see comments in formsystemoperator
+          mfem::Operator * oper;                           // dummy operator to pass downwards
+          mfem::Operator * nlf = _nlfs.Get(test_var_name); // implicit cast
+          nlf->FormLinearSystem(_ess_tdof_lists.at(j),
+                                *_var_ess_constraints.at(j),
+                                aux_rhs_copy,
+                                oper,
+                                nlf_x,
+                                nlf_rhs,
+                                true);
+
+          aux_rhs = nlf_rhs; // += messed everything up
+          aux_x = nlf_x;     // I think all the contributions are in now. Again, += was wrong
+
+          delete oper;
+        }
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
@@ -410,7 +473,22 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
   {
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
-    nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+
+    // if (_assembly_level == mfem::AssemblyLevel::PARTIAL) {
+    if (true)
+    {
+      // perform some elimination
+      mfem::Operator * A;
+      nlf->FormSystemOperator(_ess_tdof_lists.at(i), A);
+
+      // I think we have to cast to ConstrainedOperator here
+      mfem::ConstrainedOperator * cA = dynamic_cast<mfem::ConstrainedOperator *>(A);
+      if (cA)
+        cA->SetDiagonalPolicy(DIAG_ZERO); // Let the linear part handle this
+
+      A->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+    }
+
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
 }
@@ -431,6 +509,16 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
       auto nlf = _nlfs.Get(test_var_name);
       mfem::HypreParMatrix * nlf_jac =
           dynamic_cast<mfem::HypreParMatrix *>(&nlf->GetGradient(update_vector.GetBlock(i)));
+
+      // I admit, this isn't nice. The issue we are trying to address here is the _jacobian_blocks
+      // operator erroneously having 2s on the diagonal, when it should be 1s. The source of the
+      // problem is a particular block having a blf and an nlf. This means both will contribute
+      // 1s to diagonal entries that are marked by ess_tdofs. When we do the ParAdd below, this
+      // means that the essential dofs have the wrong values, causing a subtle error in the final
+      // jacobian operator returned. The bool check determines if this variable has a blf and nlf
+      if (_blfs.Has(test_var_name))
+        nlf_jac->EliminateBC(_ess_tdof_lists.at(i), DIAG_ZERO);
+
       mooseAssert(nlf_jac,
                   "Jacobian contribution of nonlinear form associated with " + test_var_name +
                       " is not castable into a HypreParMatrix");
@@ -450,6 +538,29 @@ mfem::Operator &
 EquationSystem::GetGradient(const mfem::Vector & u) const
 {
   _linearization_point = &u;
+  if (_assembly_level == mfem::AssemblyLevel::PARTIAL && _test_var_names.size() == 1 &&
+      _nlfs.Has(_test_var_names.at(0)) && _blfs.Has(_test_var_names.at(0)) and _non_linear)
+  {
+    // Keep GridFunctions in sync for coefficients used by nonlinear integrators.
+    const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(u), _block_true_offsets);
+    SetTrialVariablesFromTrueVectors(block_solution);
+
+    const auto & test_var_name = _test_var_names.at(0);
+    auto nlf = _nlfs.Get(test_var_name);
+
+    mfem::Operator * nlf_grad = &nlf->GetGradient(u);
+
+    // does it cast into constrained operator?
+    mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
+    if (c_nlf_grad)
+      c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+
+    // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
+    _sumOperator =
+        std::make_unique<SumOperatorExtension>(nlf_grad, 1.0, _system_operator->Ptr(), 1.0, nlf);
+
+    return *_sumOperator;
+  }
 
   if (_non_linear)
   {
@@ -515,9 +626,12 @@ EquationSystem::BuildNonlinearForms()
     _nlfs.Register(test_var_name, std::make_shared<mfem::ParNonlinearForm>(_test_pfespaces.at(i)));
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
+    nlf->SetAssemblyLevel(_assembly_level);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
+
+    nlf->Setup();
   }
 }
 
