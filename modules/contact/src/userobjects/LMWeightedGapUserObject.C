@@ -46,6 +46,12 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
   checkInput(_lm_var, "lm_variable");
   verifyLagrange(*_lm_var, "lm_variable");
 
+  // Node-based scaling needs a first-order multiplier; the second-order dual basis has a
+  // non-positive per-node normalization (needs the transformed dual basis, out of scope).
+  if (_use_nodal_scaling && _lm_var->feType().order != FIRST)
+    paramError("use_nodal_scaling",
+               "Node-based scaling is only implemented for a first-order Lagrange multiplier.");
+
   if (_use_petrov_galerkin && ((!isParamValid("aux_lm")) || _aux_lm_var == nullptr))
     paramError("use_petrov_galerkin",
                "We need to specify an auxiliary variable `aux_lm` while using the Petrov-Galerkin "
@@ -86,7 +92,41 @@ LMWeightedGapUserObject::test() const
 const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
-  return _lm_var->adSlnLower();
+  // Without scaling, hand back the native dual interpolation of the stored Lagrange multiplier.
+  // With scaling, return the physical contact pressure recomputed once per segment in reinit().
+  return _use_nodal_scaling ? _scaled_contact_pressure : _lm_var->adSlnLower();
+}
+
+void
+LMWeightedGapUserObject::reinit()
+{
+  if (!_use_nodal_scaling)
+    return;
+
+  // The stored multiplier is scaled (zhat_j = kappa_j lambda_j); interpolate the physical pressure
+  // sum_j Phi_j (zhat_j/kappa_j) for the coupling (Popp 2013 eq. 39), cached once per segment.
+  // Phi_j is Real, so the multiplier derivatives are seeded exactly.
+  const auto & phi = _lm_var->phiLower();
+  const Elem * const lower_elem = _assembly.lowerDElem();
+  const auto sys_num = _lm_var->sys().number();
+  const auto var_num = _lm_var->number();
+  const auto & current_solution = *_lm_var->sys().currentSolution();
+
+  const std::size_t n_qp = phi.size() == 0 ? 0 : phi[0].size();
+  _scaled_contact_pressure.resize(n_qp);
+  for (const auto qp : make_range(n_qp))
+    _scaled_contact_pressure[qp] = 0;
+
+  for (const auto j : make_range(lower_elem->n_nodes()))
+  {
+    const Node * const node = lower_elem->node_ptr(j);
+    const auto dof_index = node->dof_number(sys_num, var_num, /*component=*/0);
+    ADReal lm_value = current_solution(dof_index);
+    Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
+    const ADReal physical_pressure = lm_value / nodalScale(node);
+    for (const auto qp : make_range(n_qp))
+      _scaled_contact_pressure[qp] += phi[j][qp] * physical_pressure;
+  }
 }
 
 Real
@@ -100,5 +140,11 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
                "your Lagrange multiplier");
 
   const auto dof_number = node->dof_number(sys_num, var_num, /*component=*/0);
-  return (*_lm_var->sys().currentSolution())(dof_number);
+  // Recover the physical contact pressure lambda_j = zhat_j / kappa_j (nodalScale() is 1 when
+  // scaling is disabled), so reported/consumed contact pressures are physical (Popp 2013, eq. 39).
+  // nodalScale() is keyed by the displaced-mesh node pointer populated during assembly; callers
+  // (e.g. an undisplaced aux kernel) may pass a different pointer of the same id, so map through
+  // the mesh to match -- exactly as getNormalGap() does above.
+  return (*_lm_var->sys().currentSolution())(dof_number) /
+         nodalScale(_subproblem.mesh().nodePtr(node->id()));
 }

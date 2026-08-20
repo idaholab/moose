@@ -11,6 +11,8 @@
 
 #include "MortarUserObject.h"
 
+#include <unordered_map>
+
 /**
  * Creates dof object to weighted gap map
  */
@@ -55,6 +57,28 @@ public:
   {
     return MetaPhysicL::raw_value(gap.first) / gap.second;
   }
+
+  /**
+   * Node-based scaling factor kappa_j (Popp et al. 2013, eq. 36): the mean over node j's adjacent
+   * secondary elements of its covered shape-function-integral fraction; 1 at full coverage, -> 0 as
+   * node j drops. Rescales the multiplier (zhat_j = kappa_j lambda_j) for conditioning; 1 if
+   * absent. Non-AD, so its linearization (eq. 38) is omitted, affecting only the near-drop Newton
+   * rate.
+   * @return kappa_j at the node (1 if absent)
+   */
+  Real nodalScale(const DofObject * const dof) const
+  {
+    return findValue(_dof_to_nodal_scale, dof, Real(1));
+  }
+
+  /// @return Whether node-based Lagrange-multiplier scaling was requested on this user object.
+  /// Consumed by mortar constraints that do not (yet) support the scaling so they can error out.
+  bool usesNodalScaling() const { return _use_nodal_scaling; }
+
+  /// @return Whether this user object actually applies the node-based scaling. Only the Lagrange
+  /// multiplier formulation (LMWeightedGapUserObject) does; other formulations (penalty, plain
+  /// weighted velocities) would silently ignore the option, so they reject it (see initialSetup()).
+  virtual bool nodalScalingApplied() const { return false; }
 
   ADReal adPhysicalGap(const std::pair<ADReal, Real> & gap) const { return gap.first / gap.second; }
 
@@ -102,6 +126,15 @@ protected:
    * Computes properties that are functions both of \p _qp and \p _i, for example the weighted gap
    */
   virtual void computeQpIProperties();
+
+  /**
+   * Full coordinate-weighted integral int_e N_j per local node on the secondary lower-d element
+   * (exact in RZ/spherical and on warped elements), via a temporary FE and cached: the denominator
+   * of kappa_j (Popp 2013 eq. 36).
+   * @param elem The secondary lower-dimensional element
+   * @return Per-local-node full shape-function integrals
+   */
+  const std::vector<Real> & fullNodalIntegrals(const Elem * elem);
 
   /**
    * @return The test function associated with the weighted gap
@@ -170,8 +203,24 @@ protected:
   /// Vector for computation of relative displacement (determines mixity ratio in interface problems)
   ADRealVectorValue _qp_displacement_nodal;
 
+  /// Whether to apply the Popp et al. (2013) node-based Lagrange-multiplier scaling (kappa_j) for
+  /// improved conditioning of partially covered (edge-dropping) secondary elements
+  const bool _use_nodal_scaling;
+
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
+
+  /// Per-node numerator of kappa_j (Popp 2013 eq. 36), summed over adjacent secondary elements;
+  /// finalize() divides by the adjacency count. Only when _use_nodal_scaling.
+  std::unordered_map<const DofObject *, Real> _dof_to_covered_fraction_sum;
+
+  /// A map from node to its node-based scaling factor kappa_j (see nodalScale()). Only populated
+  /// when _use_nodal_scaling is true.
+  std::unordered_map<const DofObject *, Real> _dof_to_nodal_scale;
+
+  /// Cache of the per-node full integrals int_e N_j (see fullNodalIntegrals()), keyed by element id;
+  /// cleared each evaluation in initialize() since the displaced geometry changes.
+  std::unordered_map<dof_id_type, std::vector<Real>> _elem_to_full_nodal_integral;
 
   /// A map from node to weighted displacements
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_weighted_displacements;

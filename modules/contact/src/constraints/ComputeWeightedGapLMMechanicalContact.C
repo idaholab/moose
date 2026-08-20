@@ -95,6 +95,13 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
   if (!_var->isNodal())
     if (_var->feType().order != static_cast<Order>(0))
       mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
+
+  // 'normalize_c' and node-based scaling both divide by the node's covered measure, so combining
+  // them double-counts coverage; Popp's scaling assumes the raw weighted gap.
+  if (_normalize_c && _weighted_gap_uo.usesNodalScaling())
+    paramError("normalize_c",
+               "'normalize_c = true' cannot be combined with node-based scaling "
+               "('use_nodal_scaling = true' on the weighted gap user object).");
 }
 
 ADReal
@@ -187,11 +194,16 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
 
+  // Scaling factor kappa_j (Popp 2013 eq. 34; 1 when disabled/fully covered): dividing the gap by
+  // kappa_j gives g_bar/kappa_j, preserving the complementarity root with zhat_j = kappa_j
+  // lambda_j.
+  const Real kappa = _weighted_gap_uo.nodalScale(dof);
+
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
-  const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
+  const ADReal dof_residual = std::min(lm_value, weighted_gap * c / kappa);
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

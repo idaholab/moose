@@ -30,8 +30,11 @@ public:
   LMWeightedGapUserObject(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactPressure() const override;
-  virtual void reinit() override {}
+  virtual void reinit() override;
   virtual Real getNormalContactPressure(const Node * const /*node*/) const override;
+
+  /// The Lagrange multiplier formulation is the one that actually applies the node-based scaling.
+  virtual bool nodalScalingApplied() const override { return true; }
 
 protected:
   virtual const VariableTestValue & test() const override;
@@ -55,4 +58,8 @@ protected:
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;
+
+  /// Physical contact pressure sum_j Phi_j (zhat_j / kappa_j) at the segment quadrature points when
+  /// node-based scaling is active; recomputed once per segment in reinit() (see contactPressure()).
+  mutable ADVariableValue _scaled_contact_pressure;
 };

@@ -44,6 +44,40 @@ gap is of order .01, then `c` should be set to 1e6 in order to bring
 components of the NCP function onto the same level and achieve optimal
 convergence in the non-linear solve.
 
+## Node-based scaling for edge dropping
+
+When a secondary element is only partially covered by the primary surface (so-called "edge
+dropping", for example when one body slides off another at a sharp edge), the discrete weighted gap
+and the corresponding entries of the mortar coupling matrices for the affected nodes become small,
+which can severely ill-condition the linear system. Setting
+[!param](/UserObjects/LMWeightedGapUserObject/use_nodal_scaling) to `true` applies the node-based
+scaling of [!citep](popp2013improved) (Sec. 4.2): the discrete Lagrange multiplier solved for is the
+scaled quantity $\hat{z}_j = \kappa_j (\lambda_n)_j$, where $\kappa_j \in (0, 1]$ is the mean, over
+the secondary elements adjacent to node $j$, of the covered fraction of that node's shape-function
+integral. This rescales the constraint row and coupling column of partially covered nodes back to
+$O(1)$, improving conditioning, while the physical contact pressure
+$(\lambda_n)_j = \hat{z}_j / \kappa_j$ is recovered for the mortar coupling and for reported
+pressures. It requires `correct_edge_dropping = true`.
+
+The Lagrange multiplier stored in the solution vector is the scaled multiplier $\hat{z}_j$, not the
+physical pressure. The physical pressure is recovered internally for the mortar force coupling and
+is reported through the user object's `getNormalContactPressure` (used by the contact auxiliary
+kernels). Because the stored quantity depends on whether scaling is enabled, do not restart a
+simulation with a different `use_nodal_scaling` setting than the one that wrote the restart data.
+
+!alert warning title=Limited support
+Node-based scaling is implemented for frictionless normal Lagrange multiplier contact
+([LMWeightedGapUserObject](/LMWeightedGapUserObject.md) with
+`ComputeWeightedGapLMMechanicalContact`) using a first-order Lagrange multiplier on a replicated
+mesh, in Cartesian, RZ, or spherical coordinates, and it runs in parallel across multiple processes.
+An error is reported for a distributed mesh, a second-order Lagrange multiplier, frictional contact
+(`ComputeFrictionalForceLMMechanicalContact`), `correct_edge_dropping = false`, or
+`normalize_c = true`. Second-order multipliers require the transformed dual basis (a separate
+development). The consistent linearization of $\kappa_j$ (its
+dependence on displacement) is omitted because the mortar segment geometry is carried non-AD
+throughout the framework, so Newton convergence near a dropping edge may be less than quadratic;
+the converged solution is unaffected.
+
 !syntax description /Constraints/ComputeWeightedGapLMMechanicalContact
 
 !syntax parameters /Constraints/ComputeWeightedGapLMMechanicalContact

@@ -49,5 +49,131 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
   []
+  [frictionless-slide-2d-nodal-scaling]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_slide_2d.i'
+    csvdiff = 'two_equal_blocks_slide_2d_nodal_scaling_out.csv'
+    mesh_mode = 'REPLICATED'
+    max_parallel = 1
+    cli_args = 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
+               'Outputs/file_base="two_equal_blocks_slide_2d_nodal_scaling_out"'
+    requirement = 'The system shall apply the node-based Lagrange multiplier scaling of Popp et al. '
+                  '(2013) to a partially covered (edge-dropping) mortar contact interface, storing '
+                  'the scaled multiplier while recovering the same displacements as the unscaled '
+                  'formulation in 2D'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+    capabilities = 'ad_size>=100'
+  []
+  [frictionless-slide-2d-nodal-scaling-parallel]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_slide_2d.i'
+    csvdiff = 'two_equal_blocks_slide_2d_nodal_scaling_out.csv'
+    mesh_mode = 'REPLICATED'
+    min_parallel = 2
+    max_parallel = 2
+    cli_args = 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
+               'Outputs/file_base="two_equal_blocks_slide_2d_nodal_scaling_out"'
+    prereq = 'frictionless-slide-2d-nodal-scaling'
+    requirement = 'The system shall produce, on two processes, the same node-based-scaled mortar '
+                  'contact solution as in serial, confirming the parallel reduction of the scaling '
+                  'factor across processes that share a secondary node'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+    capabilities = 'ad_size>=100'
+  []
+  [frictionless-rz]
+    type = 'CSVDiff'
+    input = 'nodal_scaling_rz.i'
+    csvdiff = 'nodal_scaling_rz_out.csv'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'Variables/normal_lm/use_dual=false'
+    requirement = 'The system shall solve axisymmetric (RZ) mortar normal contact with full '
+                  'coverage as a baseline for the node-based scaling consistency check'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+    capabilities = 'ad_size>=100'
+  []
+  [frictionless-rz-nodal-scaling]
+    type = 'CSVDiff'
+    input = 'nodal_scaling_rz.i'
+    csvdiff = 'nodal_scaling_rz_out.csv'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'Variables/normal_lm/use_dual=false '
+               'UserObjects/weighted_gap_uo/use_nodal_scaling=true'
+    prereq = 'frictionless-rz'
+    requirement = 'The system shall, in axisymmetric (RZ) coordinates with a fully covered mortar '
+                  'interface, reproduce the unscaled contact solution when node-based scaling is '
+                  'enabled, confirming that the scaling factor is one at full coverage in RZ (the '
+                  'RZ per-node shape-function integral, not the Cartesian |e|/n, is used)'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+    capabilities = 'ad_size>=100'
+  []
+
+  [nodal-scaling-requires-correct-edge-dropping]
+    type = 'RunException'
+    input = 'two_equal_blocks_slide_2d.i'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
+               'UserObjects/weighted_gap_uo/correct_edge_dropping=false'
+    expect_err = "Node-based scaling requires 'correct_edge_dropping = true'"
+    requirement = 'The system shall report an error when node-based mortar scaling is requested '
+                  'without the correct edge-dropping treatment'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+  []
+  [nodal-scaling-rejects-normalize-c]
+    type = 'RunException'
+    input = 'two_equal_blocks_slide_2d.i'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
+               'Constraints/normal_lm/normalize_c=true'
+    expect_err = 'cannot be combined with node-based scaling'
+    requirement = 'The system shall report an error when node-based mortar scaling is combined with '
+                  'normalization of the constraint coefficient'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+  []
+  [nodal-scaling-rejects-distributed-mesh]
+    type = 'RunException'
+    input = 'two_equal_blocks_slide_2d.i'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
+               'Mesh/parallel_type=DISTRIBUTED'
+    expect_err = 'not supported on a distributed mesh'
+    requirement = 'The system shall report an error when node-based mortar scaling is requested on '
+                  'a distributed mesh'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+  []
+  [nodal-scaling-requires-first-order]
+    type = 'RunException'
+    input = 'two_equal_blocks_slide_2d.i'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'Mesh/second_order=true Variables/normal_lm/order=SECOND '
+               'UserObjects/weighted_gap_uo/use_nodal_scaling=true'
+    expect_err = 'only implemented for a first-order Lagrange multiplier'
+    requirement = 'The system shall report an error when node-based mortar scaling is requested for '
+                  'a second-order Lagrange multiplier'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
+             'userobjects/LMWeightedGapUserObject.md'
+    issues = '#18853'
+    allow_test_objects = true
+  []
 
 []
