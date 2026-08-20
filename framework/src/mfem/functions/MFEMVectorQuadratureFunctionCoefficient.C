@@ -13,13 +13,10 @@
 #include "libmesh/int_range.h"
 
 MFEMVectorQuadratureFunctionCoefficient::MFEMVectorQuadratureFunctionCoefficient(
-    mfem::VectorCoefficient & source,
-    mfem::QuadratureFunction & qf,
-    UpdatePolicy update_policy,
-    const std::string & name)
+    mfem::QuadratureFunction & qf, UpdatePolicy update_policy, const std::string & name)
   : mfem::VectorQuadratureFunctionCoefficient(qf),
     MFEMQuadratureFunctionCoefficientBase(update_policy, name),
-    _source(source),
+    _source(nullptr),
     _qf(qf)
 {
 }
@@ -73,7 +70,7 @@ MFEMVectorQuadratureFunctionCoefficient::Refresh()
       const mfem::IntegrationPoint & ip = ir[iq];
       T.SetIntPoint(&ip);
       values.GetColumnReference(iq, col);
-      _source.Eval(col, T, ip);
+      _source->Eval(col, T, ip);
     }
   }
   _dirty = false;

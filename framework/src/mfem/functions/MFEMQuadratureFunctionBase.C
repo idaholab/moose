@@ -10,14 +10,11 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMQuadratureFunctionBase.h"
-#include "MFEMProblem.h"
 
 InputParameters
 MFEMQuadratureFunctionBase::validParams()
 {
-  InputParameters params = MFEMObject::validParams();
-  params.registerBase("MFEMQuadratureFunction");
-  params.registerSystemAttributeName("MFEMQuadratureFunction");
+  InputParameters params = Function::validParams();
   params.addRequiredRangeCheckedParam<int>(
       "order",
       "order>=0",
@@ -34,8 +31,10 @@ MFEMQuadratureFunctionBase::validParams()
 }
 
 MFEMQuadratureFunctionBase::MFEMQuadratureFunctionBase(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    _qspace(&getMFEMProblem().mesh().getMFEMParMesh(), getParam<int>("order"))
+  : Function(parameters),
+    _mfem_problem(static_cast<MFEMProblem &>(
+        *parameters.getCheckedPointerParam<SubProblem *>("_subproblem"))),
+    _qspace(&_mfem_problem.mesh().getMFEMParMesh(), getParam<int>("order"))
 {
 }
 

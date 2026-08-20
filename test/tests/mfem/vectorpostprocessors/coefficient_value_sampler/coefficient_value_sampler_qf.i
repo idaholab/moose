@@ -1,6 +1,6 @@
 !include coefficient_value_sampler.i
 
-[QuadratureFunctions]
+[Functions]
   [quadrature_coefficient]
     type = MFEMScalarQuadratureFunction
     coefficient = linear_coefficient
