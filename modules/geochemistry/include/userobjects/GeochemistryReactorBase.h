@@ -73,7 +73,20 @@ public:
   const PertinentGeochemicalSystem & getPertinentGeochemicalSystem() const { return _pgs; };
 
 protected:
-  /// Number of nodes handled by this processor (will need to be made un-const when mesh adaptivity is handled)
+  /**
+   * @param node a node of the mesh
+   * @return whether this object acts on the given node, that is, whether the node belongs to an
+   * element in the blocks this object is restricted to.  Always true if there is no block
+   * restriction
+   */
+  bool actsOnNode(const Node & node) const;
+
+  /// @return the number of local nodes that this object acts on
+  unsigned countMyNodes() const;
+
+  /// Number of nodes handled by this processor that this object acts on.  If the object is block
+  /// restricted this counts only the nodes in those blocks (will need to be made un-const when mesh
+  /// adaptivity is handled)
   const unsigned _num_my_nodes;
   /// my copy of the underlying ModelGeochemicalDatabase
   ModelGeochemicalDatabase _mgd;
