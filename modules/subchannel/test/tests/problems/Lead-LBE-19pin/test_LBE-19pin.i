@@ -31,7 +31,6 @@ P_out = 1.0e5 # Pa
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = LBE
-  n_blocks = 1
   P_out = 1.0e5
   compute_density = true
   compute_viscosity = true
