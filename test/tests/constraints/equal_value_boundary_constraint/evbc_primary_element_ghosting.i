@@ -1,8 +1,5 @@
 [Mesh]
-  # Renumbering reorders the nodes of a distributed mesh, which makes the Exodus output incomparable
-  # to the replicated one even though the solution is identical. Disable it so that a single gold
-  # file covers both mesh modes and any processor count.
-  allow_renumbering = false
+  # Alex: Exodus uses geometric mapping for comparisons by default. Renumbering should not affect that comparison
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -64,9 +61,9 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  # This problem is linear, so the tolerances below only control how far the linear solve is driven.
-  # They are tightened well past the exodiff comparison tolerance so that the converged solution is
-  # independent of the processor count and of the mesh mode.
+  # Even though this problem is linear, the tolerances below control how far both the linear and
+  # nonlinear solves proceed. They are tightened well past the exodiff comparison tolerance so
+  # that the converged solution is independent of the processor count and of the mesh mode.
   l_tol = 1e-10
   nl_rel_tol = 1e-12
 []

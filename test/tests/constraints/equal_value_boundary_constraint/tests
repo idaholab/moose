@@ -27,10 +27,10 @@
     requirement = "The system shall be able to enforce the equal value boundary constraint in parallel "
                   "with adaptivity."
   []
-  [evbc_parallel_test]
+  [evbc_primary_element_ghosting]
     type = Exodiff
-    input = 'evbc_parallel_test.i'
-    exodiff = 'evbc_parallel_test_out.e'
+    input = 'evbc_primary_element_ghosting.i'
+    exodiff = 'evbc_primary_element_ghosting_out.e'
     abs_zero = 1e-9
     requirement = "The system shall obtain the same equal value boundary constraint solution, with "
                   "the primary node located by its coordinates, for any number of processors and on "

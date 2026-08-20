@@ -280,8 +280,8 @@ EqualValueBoundaryConstraint::ghostPrimary()
 
   Elem * const primary_elem = _mesh.elemPtr(elems[0]);
 
-  // Keep the gathered element through remote-element deletion; addGhostedElem separately ghosts
-  // its DoFs.
+  // Keep the gathered element through remote-element deletion; _subproblem.addGhostedElem
+  // separately ghosts
   if (auto * const distributed_mesh = dynamic_cast<DistributedMesh *>(&_mesh.getMesh()))
     distributed_mesh->add_extra_ghost_elem(primary_elem);
 
