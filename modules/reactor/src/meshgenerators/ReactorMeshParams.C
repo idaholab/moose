@@ -136,9 +136,13 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
       (_bottom_boundary == _top_boundary))
     mooseError("top_boundary_id and bottom_boundary_id must be unique values");
 
-  if (isParamSetByUser("expand_units") && !_app.getMeshGeneratorSystem().getCSGOnly())
-    paramWarning("expand_units", "This parameter is only active in --csg-only mode");
-  this->declareMeshProperty(RGMB::expand_units, getParam<bool>(RGMB::expand_units));
+  if (!_app.getMeshGeneratorSystem().getCSGOnly())
+  {
+    if (isParamSetByUser("expand_units"))
+      paramWarning("expand_units", "This parameter is only active in --csg-only mode");
+  }
+  else
+    this->declareMeshProperty(RGMB::expand_units, getParam<bool>(RGMB::expand_units));
 }
 
 std::unique_ptr<MeshBase>

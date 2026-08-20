@@ -14,6 +14,7 @@
 #include "MooseApp.h"
 #include "MooseMeshUtils.h"
 #include "Factory.h"
+#include "CSGNPolygonUnit.h"
 #include "DuctedPinEngUnit.h"
 #include "CSGPlane.h"
 #include "libmesh/elem.h"
