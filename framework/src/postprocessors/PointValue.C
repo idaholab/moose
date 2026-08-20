@@ -50,7 +50,6 @@ void
 PointValue::execute()
 {
   _value = _system.point_value(_var_number, _point, false);
-
   /**
    * If we get exactly zero, we don't know if the locator couldn't find an element, or
    * if the solution is truly zero, more checking is needed.

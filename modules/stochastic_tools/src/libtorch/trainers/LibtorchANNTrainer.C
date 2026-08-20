@@ -128,7 +128,7 @@ LibtorchANNTrainer::postTrain()
   if (_read_from_file)
     try
     {
-      torch::load(_nn, _nn_filename);
+      Moose::loadLibtorchArtificialNeuralNetState(*_nn, _nn_filename);
       _console << "Loaded requested .pt file." << std::endl;
     }
     catch (const c10::Error & e)
