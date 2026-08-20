@@ -704,6 +704,34 @@ class TestResultsCache(unittest.TestCase):
         runner.configCache(0, 1e-3)
         self.assertIsNone(runner._result_cache)
 
+    def testParallelWorkerWithGenerator(self):
+        """Test StochasticRunner.parallelWorker with one-shot iterables."""
+
+        class mockStochasticControl:
+            def __init__(self):
+                self.num_params = 2
+                self.num_qois = 1
+                self._x = None
+                self.run_calls = 0
+
+            def setInput(self, x):
+                self._x = x
+
+            def run(self):
+                self.run_calls += 1
+
+            def getOutput(self):
+                return np.sum(self._x, axis=1).reshape((-1, 1))
+
+        control = mockStochasticControl()
+        runner = StochasticRunner(control)
+        samples = (np.array([i, i + 1], dtype=np.float64) for i in range(3))
+
+        values = list(runner.parallelWorker(lambda x: runner(x), samples))
+
+        self.assertEqual(control.run_calls, 1)
+        self.assertTrue(np.allclose(values, [1.0, 3.0, 5.0]))
+
 
 if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2)
