@@ -62,7 +62,7 @@ class ApptainerGenerator:
         if self.args.tag is not None:
             tag = self.args.tag
         if self.args.tag_prefix is not None:
-            tag = f"{self.args.tag_prefix}-{self.tag}"
+            tag = f"{self.args.tag_prefix}-{tag}"
         self.tag = tag
 
         if hasattr(self.args, "dir"):
