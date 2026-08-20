@@ -71,6 +71,9 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
+  // Limit the Reynolds number used in the friction-factor correlation to avoid
+  // singular behavior at zero flow.
+  const Real Re_eff = std::max(Re, 1.0);
   const auto i_ch = friction_args.i_ch;
   const auto S = friction_args.S;
   const auto w_perim = friction_args.w_perim;
@@ -94,7 +97,8 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
 
   const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-  const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+  const auto bulk_Re = _scm_problem.getBulkReynoldsNumber();
+  const auto psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
 
   // Find the coefficients of bare Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
@@ -188,7 +192,7 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
                        303.47 * Utility::pow<2>((wire_diameter / pin_diameter))) *
                       std::pow((wire_lead_length / pin_diameter), -0.541);
     const auto wd_l = 1.4 * wd_t;
-    const auto ws_t = -11.0 * std::log(wire_lead_length / pin_diameter) + 19.0;
+    const auto ws_t = -11.0 * std::log10(wire_lead_length / pin_diameter) + 19.0;
     const auto ws_l = ws_t;
     Real ar = 0.0;
     Real a_p = 0.0;
@@ -249,22 +253,22 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   // laminar friction factor and turbulent friction factor coefficients
   const Real bL = -1.0;
   const Real bT = -0.18;
-  auto fL = cL * std::pow(Re, bL);
-  auto fT = cT * std::pow(Re, bT);
+  auto fL = cL * std::pow(Re_eff, bL);
+  auto fT = cT * std::pow(Re_eff, bT);
 
-  if (Re < ReL)
+  if (bulk_Re < ReL)
   {
     // laminar flow
     return fL;
   }
-  else if (Re > ReT)
+  else if (bulk_Re > ReT)
   {
     // turbulent flow
     return fT;
   }
   else
   {
-    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
+    // Transition regime is selected by bulk Reynolds number, same for all channels.
     return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, 7)) +
            fT * std::pow(psi, 1.0 / 3.0);
   }
@@ -275,6 +279,9 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
+  // Limit the Reynolds number used in the friction-factor correlation to avoid
+  // singular behavior at zero flow.
+  const Real Re_eff = std::max(Re, 1.0);
   const auto i_ch = friction_args.i_ch;
   /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
   Real aL, b1L, b2L, cL;
@@ -289,7 +296,8 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
   const auto w_over_d = w / pin_diameter;
   const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-  const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+  const auto bulk_Re = _scm_problem.getBulkReynoldsNumber();
+  const auto psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
   const auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
 
   // Find the coefficients of bare Pin bundle friction factor
@@ -373,22 +381,22 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
   // laminar friction factor and turbulent friction factor coefficients
   const Real bL = -1.0;
   const Real bT = -0.18;
-  auto fL = cL * std::pow(Re, bL);
-  auto fT = cT * std::pow(Re, bT);
+  auto fL = cL * std::pow(Re_eff, bL);
+  auto fT = cT * std::pow(Re_eff, bT);
 
-  if (Re < ReL)
+  if (bulk_Re < ReL)
   {
     // laminar flow
     return fL;
   }
-  else if (Re > ReT)
+  else if (bulk_Re > ReT)
   {
     // turbulent flow
     return fT;
   }
   else
   {
-    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
+    // Transition regime is selected by bulk Reynolds number, same for all channels.
     return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, 7)) +
            fT * std::pow(psi, 1.0 / 3.0);
   }
