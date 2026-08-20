@@ -95,10 +95,10 @@ MortarContactLineSearch::validParams()
       "Step-length tolerance used to group near-simultaneous predicted normal-switch events.");
   params.addRangeCheckedParam<Real>(
       "event_step_epsilon",
-      1e-2,
+      1e-3,
       "event_step_epsilon > 0",
-      "Relative overshoot placing an event-limited trial step just past a predicted switching "
-      "event rather than exactly on it.");
+      "Overshoot, as an absolute fraction of the full Newton step, placing an event-limited "
+      "trial step just past a predicted switching event rather than exactly on it.");
   params.addParam<unsigned int>(
       "dense_event_threshold",
       5,
@@ -506,8 +506,6 @@ MortarContactLineSearch::lineSearch()
       if (const auto alpha = eventStepLength(q0_raw, qdot_secant))
         predicted_alphas.emplace(dof_id, *alpha);
     }
-    const auto event_group = firstEventGroup(predicted_alphas, _event_group_tol);
-
     // Dense-event escape hatch: many consecutive event-limited iterations indicate the Newton
     // direction is crossing a series of well-separated switching surfaces one at a time. Past
     // 'dense_event_threshold' such iterations in a row, stop paying for one reassembly per
@@ -515,19 +513,44 @@ MortarContactLineSearch::lineSearch()
     // same verification and watchdog gating below.
     const bool dense_escape = _consecutive_event_steps >= _dense_event_threshold;
 
-    std::optional<Real> step;
-    if (dense_escape)
-      step = Real(1);
-    else if (event_group)
-      // Event-limited step (eq eq:event-step): overshoot the predicted event by a relative
-      // 'event_step_epsilon' so the trial point lands unambiguously on the new branch instead of
-      // sitting on the switching surface itself.
-      step = std::min(Real(1), (1 + _event_step_epsilon) * event_group->alpha_min);
-
     bool committed = false;
 
-    if (step)
+    // Candidate predicted alphas remaining to try, smallest first. A predicted crossing whose
+    // trial point turns out not to actually change the constraint set identity is numerically
+    // degenerate -- e.g. a switch value already at roundoff-level zero at the checkpoint predicts
+    // a near-zero step that leaves the discrete state unchanged -- so that group is dropped and
+    // the next-smallest remaining predicted alpha is tried instead of giving up outright. A
+    // dense-escape step has no smaller candidates to fall back on, so it is only ever tried once.
+    auto remaining_alphas = predicted_alphas;
+    bool dense_escape_tried = false;
+
+    for (;;)
     {
+      std::optional<Real> step;
+      std::optional<FirstEventGroup> event_group;
+      if (dense_escape)
+      {
+        if (!dense_escape_tried)
+          step = Real(1);
+        dense_escape_tried = true;
+      }
+      else
+      {
+        event_group = firstEventGroup(remaining_alphas, _event_group_tol);
+        if (event_group)
+          // Event-limited step (eq eq:event-step): overshoot the predicted event by an absolute
+          // 'event_step_epsilon' fraction of the full Newton step so the trial point lands
+          // unambiguously on the new branch instead of sitting on the switching surface itself.
+          // The overshoot must be absolute rather than scaled by alpha_min: alpha_min can itself
+          // be driven to roundoff (e.g. when the checkpoint's switch value is already ~0), and a
+          // margin scaled by an already-negligible alpha_min would stay negligible, leaving the
+          // trial point numerically indistinguishable from the checkpoint.
+          step = std::min(Real(1), event_group->alpha_min + _event_step_epsilon);
+      }
+
+      if (!step)
+        break;
+
       // G is PETSc's designated work vector for the trial point's function value (paired with W,
       // the trial solution), so the checkpoint's own F is left untouched unless/until this trial
       // is actually committed below.
@@ -545,52 +568,63 @@ MortarContactLineSearch::lineSearch()
       domain_error = (snes_reason == SNES_DIVERGED_FUNCTION_DOMAIN);
 #endif
 
-      if (!domain_error)
+      if (domain_error)
+        break;
+
+      // Verify via Component A that the trial point actually changed the set identity rather
+      // than trusting the secant-based prediction outright; coupling can make the actual
+      // transition include dofs beyond the predicted group, so the full reconciled
+      // classification is compared, not just the predicted dof.
+      const auto state_trial = classify(W);
+      const auto trial_diff = symmetricDifference(checkpoint.states, state_trial.states);
+      bool trial_identity_changed = !diffIsEmpty(trial_diff);
+      comm().max(trial_identity_changed);
+
+      if (!trial_identity_changed)
       {
-        // Verify via Component A that the trial point actually changed the set identity rather
-        // than trusting the secant-based prediction outright; coupling can make the actual
-        // transition include dofs beyond the predicted group, so the full reconciled
-        // classification is compared, not just the predicted dof.
-        const auto state_trial = classify(W);
-        const auto trial_diff = symmetricDifference(checkpoint.states, state_trial.states);
-        bool trial_identity_changed = !diffIsEmpty(trial_diff);
-        comm().max(trial_identity_changed);
-
-        if (trial_identity_changed)
-        {
-          PetscReal fnorm_trial;
-          LibmeshPetscCall(VecNorm(G, NORM_2, &fnorm_trial));
-
-          if (fnorm_trial < fnorm0)
-            committed = true;
-          else
-          {
-            // Watchdog exception (eq eq:watchdog-bound): a set-changing residual increase may
-            // still be committed while bounded relative to the pre-event checkpoint, pending
-            // recovery within 'watchdog_max_iterations' further outer Newton iterations.
-            if (!_watchdog_active)
-              activateWatchdog(X, F, fnorm0);
-            committed = watchdogPermits(fnorm_trial);
-          }
-
-          if (committed)
-          {
-            LibmeshPetscCall(VecCopy(W, X));
-            LibmeshPetscCall(VecCopy(G, F));
-            LibmeshPetscCall(VecScale(Y, *step));
-            LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED));
-            _old_state = state_trial.states;
-            committed_fnorm = fnorm_trial;
-            if (dense_escape)
-              _console << "MortarContactLineSearch: dense-event escape hatch triggered after "
-                        << _consecutive_event_steps << " consecutive event-limited iteration(s); "
-                        << "taking a composite step to the full Newton step." << std::endl;
-            // A composite dense-escape step resolves the whole backlog of pending events at
-            // once; an ordinary event-limited step extends the current run by one.
-            _consecutive_event_steps = dense_escape ? 0 : _consecutive_event_steps + 1;
-          }
-        }
+        if (dense_escape || !event_group)
+          break;
+        for (const auto dof_id : event_group->members)
+          remaining_alphas.erase(dof_id);
+        continue;
       }
+
+      PetscReal fnorm_trial;
+      LibmeshPetscCall(VecNorm(G, NORM_2, &fnorm_trial));
+
+      if (fnorm_trial < fnorm0)
+        committed = true;
+      else
+      {
+        // Watchdog exception (eq eq:watchdog-bound): a set-changing residual increase may
+        // still be committed while bounded relative to the pre-event checkpoint, pending
+        // recovery within 'watchdog_max_iterations' further outer Newton iterations.
+        if (!_watchdog_active)
+          activateWatchdog(X, F, fnorm0);
+        committed = watchdogPermits(fnorm_trial);
+      }
+
+      if (committed)
+      {
+        LibmeshPetscCall(VecCopy(W, X));
+        LibmeshPetscCall(VecCopy(G, F));
+        LibmeshPetscCall(VecScale(Y, *step));
+        LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED));
+        _old_state = state_trial.states;
+        committed_fnorm = fnorm_trial;
+        if (dense_escape)
+          _console << "MortarContactLineSearch: dense-event escape hatch triggered after "
+                    << _consecutive_event_steps << " consecutive event-limited iteration(s); "
+                    << "taking a composite step to the full Newton step." << std::endl;
+        // A composite dense-escape step resolves the whole backlog of pending events at
+        // once; an ordinary event-limited step extends the current run by one.
+        _consecutive_event_steps = dense_escape ? 0 : _consecutive_event_steps + 1;
+      }
+
+      // The identity changed here whether or not this actually got committed: a bounded-
+      // residual-increase denial from the watchdog is a legitimate rejection of this transition,
+      // not a degenerate prediction, so it is not worth retrying with a different candidate.
+      break;
     }
 
     if (!committed)
