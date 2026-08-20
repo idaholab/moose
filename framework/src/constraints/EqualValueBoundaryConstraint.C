@@ -11,7 +11,6 @@
 #include "EqualValueBoundaryConstraint.h"
 #include "MooseMesh.h"
 
-#include "libmesh/distributed_mesh.h"
 #include "libmesh/null_output_iterator.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_elem.h"
@@ -278,14 +277,7 @@ EqualValueBoundaryConstraint::ghostPrimary()
   if (elems.size() == 0)
     mooseError("Couldn't find any elements connected to primary node");
 
-  Elem * const primary_elem = _mesh.elemPtr(elems[0]);
-
-  // Keep the gathered element through remote-element deletion; _subproblem.addGhostedElem
-  // separately ghosts
-  if (auto * const distributed_mesh = dynamic_cast<DistributedMesh *>(&_mesh.getMesh()))
-    distributed_mesh->add_extra_ghost_elem(primary_elem);
-
-  _subproblem.addGhostedElem(elems[0]);
+  addRetainedGhostedElem(elems[0]);
 }
 
 Real

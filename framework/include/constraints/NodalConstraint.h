@@ -64,6 +64,11 @@ public:
 
 protected:
   /**
+   * Retain an element on a distributed mesh and add its DoFs to the ghosting list.
+   */
+  void addRetainedGhostedElem(dof_id_type elem_id);
+
+  /**
    * This is the virtual that derived classes should override for computing the residual on
    * neighboring element.
    */
