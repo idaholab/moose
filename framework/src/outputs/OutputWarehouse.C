@@ -421,8 +421,10 @@ OutputWarehouse::resetFileBase()
         else
           file_base = _app.getOutputFileBase();
       }
-      else
+      else if (obj->getParam<bool>("append_object_name"))
         file_base = _app.getOutputFileBase(true) + "_" + obj->name();
+      else
+        file_base = _app.getOutputFileBase();
 
       file_output->setFileBase(file_base);
       addOutputFilename(obj->name(), file_output->filename());
