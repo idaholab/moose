@@ -7,6 +7,18 @@
 namespace Moose::MFEM
 {
 
+namespace
+{
+
+bool
+HasIntegrators(mfem::ParMixedBilinearForm & form)
+{
+  return form.GetDBFI()->Size() + form.GetBBFI()->Size() + form.GetFBFI()->Size() +
+             form.GetBFBFI()->Size() + form.GetTFBFI()->Size() + form.GetBTFBFI()->Size() !=
+         0;
+}
+}
+
 void
 ComplexEquationSystem::Init(GridFunctions & gridfunctions,
                             ComplexGridFunctions & cmplx_gridfunctions,
@@ -118,12 +130,13 @@ ComplexEquationSystem::BuildMixedBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    auto test_mslfs = std::make_shared<Moose::MFEM::NamedFieldsMap<ParMixedSesquilinearForm>>();
+    auto test_mslfs =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedSesquilinearForm>>();
     for (const auto j : index_range(_coupled_var_names))
     {
       const auto & coupled_var_name = _coupled_var_names.at(j);
-      auto mslf = std::make_shared<ParMixedSesquilinearForm>(_coupled_pfespaces.at(j),
-                                                             _test_pfespaces.at(i));
+      auto mslf = std::make_shared<mfem::ParMixedSesquilinearForm>(_coupled_pfespaces.at(j),
+                                                                   _test_pfespaces.at(i));
       // Register MixedSesquilinearForm if kernels exist for it, and assemble
       // kernels
       if (_cmplx_kernels_map.Has(test_var_name) &&
@@ -132,7 +145,7 @@ ComplexEquationSystem::BuildMixedBilinearForms()
       {
         mslf->SetAssemblyLevel(_assembly_level);
         // Apply all mixed kernels with this test/trial pair
-        ApplyDomainBLFIntegrators<ParMixedSesquilinearForm>(
+        ApplyDomainBLFIntegrators<mfem::ParMixedSesquilinearForm>(
             coupled_var_name, test_var_name, mslf, _cmplx_kernels_map);
         // Assemble mixed bilinear forms
         mslf->Assemble();
@@ -259,7 +272,24 @@ ComplexEquationSystem::EliminateCoupledVariables()
       {
         auto & mslf = *_mslfs.Get(test_var_name)->Get(eliminated_var_name);
         auto & clf = *_clfs.Get(test_var_name);
-        mslf.AddMult(*_cmplx_eliminated_variables.Get(eliminated_var_name), clf, -1);
+        const mfem::real_t a = -1.0;
+        const mfem::real_t s =
+            (mslf.GetConvention() == mfem::ComplexOperator::HERMITIAN) ? 1.0 : -1.0;
+        // y += a * (A_r + i A_i) * (x_r + i x_i)
+        if (HasIntegrators(mslf.real()))
+        {
+          mslf.real().AddMult(
+              _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.real(), a);
+          mslf.real().AddMult(
+              _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.imag(), s * a);
+        }
+        if (HasIntegrators(mslf.imag()))
+        {
+          mslf.imag().AddMult(
+              _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.real(), -a);
+          mslf.imag().AddMult(
+              _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.imag(), s * a);
+        }
         clf.SyncAlias();
       }
 }
