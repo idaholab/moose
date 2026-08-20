@@ -22,29 +22,29 @@
 class FuncParseEvaler : public hit::Evaler
 {
 public:
-  virtual std::string
-  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+  virtual hit::EvalResult
+  eval(hit::Field * n, const std::vector<std::string> & args, hit::BraceExpander & exp);
 };
 
 class UnitsConversionEvaler : public hit::Evaler
 {
 public:
-  virtual std::string
-  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+  virtual hit::EvalResult
+  eval(hit::Field * n, const std::vector<std::string> & args, hit::BraceExpander & exp);
 };
 
 class EnumerateEvaler : public hit::Evaler
 {
 public:
-  virtual std::string
-  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+  virtual hit::EvalResult
+  eval(hit::Field * n, const std::vector<std::string> & args, hit::BraceExpander & exp);
 };
 
 class RepeatEvaler : public hit::Evaler
 {
 public:
-  virtual std::string
-  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+  virtual hit::EvalResult
+  eval(hit::Field * n, const std::vector<std::string> & args, hit::BraceExpander & exp);
 };
 
 class DupParamWalker : public hit::Walker
