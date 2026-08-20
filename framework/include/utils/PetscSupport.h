@@ -21,6 +21,9 @@
 
 #include <petscksp.h>
 
+#include <optional>
+#include <string>
+
 // Forward declarations
 class FEProblemBase;
 class NonlinearSystemBase;
@@ -290,6 +293,13 @@ void registerPetscCitation(const std::string & bibtex);
  * bookkeeping for command-line '-vec_type' and '*mat_type' options.
  */
 void addPetscOptionsFromCommandline(FEProblemBase * const problem = nullptr);
+
+/**
+ * Returns the command-line value for PETSc option \p option with solver prefix \p prefix if it was
+ * supplied.
+ */
+std::optional<std::string> commandLinePetscOptionValue(const std::string & prefix,
+                                                       const std::string & option);
 
 /**
  * Setup which side we want to apply preconditioner
