@@ -51,6 +51,8 @@ OutputWarehouse::initialSetup()
   TIME_SECTION("initialSetup", 5, "Setting Up Outputs");
 
   resetFileBase();
+  // NOTE: Is this the best place to sort all the Outputs based on dependencies?
+  sortOutputs();
 
   for (const auto & obj : _all_objects)
     obj->initialSetup();
@@ -103,12 +105,7 @@ OutputWarehouse::addOutput(std::shared_ptr<Output> const output)
 {
   _all_ptrs.push_back(output);
 
-  // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
-  Checkpoint * cp = dynamic_cast<Checkpoint *>(output.get());
-  if (cp != NULL)
-    _all_objects.push_back(output.get());
-  else
-    _all_objects.insert(_all_objects.begin(), output.get());
+  _all_objects.insert(_all_objects.begin(), output.get());
 
   // Store the name and pointer
   _object_map[output->name()] = output.get();
@@ -427,4 +424,45 @@ OutputWarehouse::resetFileBase()
       file_output->setFileBase(file_base);
       addOutputFilename(obj->name(), file_output->filename());
     }
+}
+
+void
+OutputWarehouse::sortOutputs()
+{
+
+  DependencyResolver<Output *> resolver;
+  std::vector<Output *> cp_objects;
+
+  // Register all objects by dependencies, non-dependencies, and Checkpoints
+  for (const auto & obj : _all_objects)
+  {
+    Checkpoint * cp = dynamic_cast<Checkpoint *>(obj);
+
+    // Sort out the Checkpoints
+    if (cp != NULL)
+    {
+      cp_objects.push_back(obj);
+      continue;
+    }
+
+    auto * dep_obj = dynamic_cast<DependencyResolverInterface *>(obj);
+    resolver.addItem(obj);
+
+    for (const auto & dep_name : dep_obj->getRequestedItems())
+    {
+      auto it = _object_map.find(dep_name);
+      if (it == _object_map.end())
+        mooseError("Output object '",
+                   obj->name(),
+                   "' declares a dependency on '",
+                   dep_name,
+                   "' but no output object with that name exists in [Outputs].");
+      resolver.addEdge(it->second, obj);
+    }
+  }
+
+  // Sort based on dependencies
+  _all_objects = resolver.getSortedValues();
+  // Add the Checkpoint objects at the end
+  _all_objects.insert(_all_objects.end(), cp_objects.begin(), cp_objects.end());
 }
