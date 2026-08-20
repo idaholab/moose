@@ -172,7 +172,7 @@ TorchScriptProfileFunctorMaterial::buildInputTensor() const
 }
 
 void
-TorchScriptProfileFunctorMaterial::initialSetup()
+TorchScriptProfileFunctorMaterial::updateProfiles()
 {
   torch::Tensor output;
 
@@ -291,6 +291,12 @@ TorchScriptProfileFunctorMaterial::initialSetup()
                  error.what());
     }
   }
+}
+
+void
+TorchScriptProfileFunctorMaterial::initialSetup()
+{
+  updateProfiles();
 }
 
 Real

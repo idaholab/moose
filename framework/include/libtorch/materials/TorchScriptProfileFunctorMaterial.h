@@ -49,6 +49,13 @@ public:
 
 protected:
   /**
+   * Evaluate the TorchScript model once and (re)build every profile
+   * interpolator in _profiles. Safe to call repeatedly; each call fully
+   * replaces the cached interpolators.
+   */
+  void updateProfiles();
+
+  /**
    * Construct the model input tensor.
    */
   torch::Tensor buildInputTensor() const;
