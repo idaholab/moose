@@ -136,8 +136,8 @@ public:
   virtual libMesh::System & system() override { return _sys; }
   virtual const libMesh::System & system() const override { return _sys; }
 
-  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
-  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
+  using LinearFVGradientInterface::registerFVGradient;
+  using LinearFVGradientInterface::updateFVGradient;
 
   /// Copies the current solution into the previous nonlinear iteration solution
   virtual void copyCurrentIntoPreviousNL();
