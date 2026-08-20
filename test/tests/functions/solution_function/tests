@@ -70,6 +70,22 @@
     exodiff = 'solution_function_scale_mult.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and scaled by a factor of two in the x and y directions."
   []
+  [weighting_source]
+    type = RunApp
+    input = solution_function_weighting_source.i
+    issues = '#31766'
+    requirement = "The system shall write continuous and discontinuous source fields for testing multivalued SolutionFunction evaluation."
+  []
+
+  [weighting]
+    type = CSVDiff
+    input = solution_function_weighting.i
+    csvdiff = solution_function_weighting_out.csv
+    prereq = weighting_source
+    issues = '#31766'
+    requirement = "The SolutionFunction shall reduce multivalued imported values and gradients using the selected weighting policy."
+  []
+
   [nonexistent_var_err]
     type = 'RunException'
     input = 'solution_function_rot1.i'

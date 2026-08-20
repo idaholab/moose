@@ -35,6 +35,10 @@ public:
 
   SolutionUserObjectBase(const InputParameters & parameters);
 
+  /// Policies for reducing multiple imported solution values at the same point
+  CreateMooseEnumClass(
+      WeightingType, FOUND_FIRST = 1, AVERAGE = 2, SMALLEST_ELEMENT_ID = 4, LARGEST_ELEMENT_ID = 8);
+
   /**
    * Get the time at which to sample the solution
    */
@@ -66,7 +70,7 @@ public:
   Real pointValueWrapper(Real t,
                          const Point & p,
                          const std::string & var_name,
-                         const MooseEnum & weighting_type = weightingType(),
+                         WeightingType weighting_type = WeightingType::FOUND_FIRST,
                          const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
@@ -148,7 +152,7 @@ public:
   pointValueGradientWrapper(Real t,
                             const Point & p,
                             const std::string & var_name,
-                            const MooseEnum & weighting_type = weightingType(),
+                            WeightingType weighting_type = WeightingType::FOUND_FIRST,
                             const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
@@ -258,11 +262,7 @@ public:
 
   bool isVariableNodal(const std::string & var_name) const;
 
-  static MooseEnum weightingType()
-  {
-    return MooseEnum("found_first=1 average=2 smallest_element_id=4 largest_element_id=8",
-                     "found_first");
-  }
+  static MooseEnum weightingType() { return MooseEnum(getWeightingTypeOptions(), "found_first"); }
 
   /**
    * Return the spatial dimension of the mesh file

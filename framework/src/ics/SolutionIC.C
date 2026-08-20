@@ -23,6 +23,10 @@ SolutionIC::validParams()
                                           "The SolutionUserObject to extract data from.");
   params.addRequiredParam<VariableName>(
       "from_variable", "The name of the variable in the file that is to be extracted");
+  params.addParam<MooseEnum>(
+      "weighting_type",
+      SolutionUserObjectBase::weightingType(),
+      "The policy used to select a unique value when the imported solution is multivalued.");
   params.addParam<std::vector<SubdomainName>>(
       "from_subdomains",
       "The name(s) of the subdomain(s) in the solution file providing the data. If not specified, "
@@ -36,7 +40,9 @@ SolutionIC::validParams()
 SolutionIC::SolutionIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _solution_object(getUserObject<SolutionUserObjectBase>("solution_uo")),
-    _solution_object_var_name(getParam<VariableName>("from_variable"))
+    _solution_object_var_name(getParam<VariableName>("from_variable")),
+    _weighting_type(
+        getParam<MooseEnum>("weighting_type").getEnum<SolutionUserObjectBase::WeightingType>())
 {
 }
 
@@ -89,5 +95,6 @@ SolutionIC::initialSetup()
 Real
 SolutionIC::value(const Point & p)
 {
-  return _solution_object.pointValue(0., p, _solution_object_var_name, &_exo_block_ids);
+  return _solution_object.pointValueWrapper(
+      0., p, _solution_object_var_name, _weighting_type, &_exo_block_ids);
 }

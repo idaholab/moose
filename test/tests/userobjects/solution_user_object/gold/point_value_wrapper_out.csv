@@ -1,0 +1,2 @@
+time,gradient_average_face,gradient_largest_elem_zero,gradient_largest_face,gradient_smallest_face,scalar_average_face,scalar_largest_elem_zero,scalar_largest_face,scalar_smallest_face
+0,1.5,1,2,1,4,3,5,3
