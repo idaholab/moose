@@ -59,7 +59,7 @@ argument, the `replace` command is dispatched implicitly (`${foo}` is shorthand 
 `${replace foo}`); otherwise the first argument names the command and is looked up
 among the evalers registered with `BraceExpander::registerEvaler`. The built-in
 commands (`replace`, `raw`, `env`) are defined in `braceexpr.cc`; MOOSE registers its
-own commands (`fparse`, `units`, `enumerate`, `repeat`) in `Parser.C`.
+own commands (`fparse`, `units`, `enumerate`, `range`, `repeat`) in `Parser.C`.
 
 ### Field resolution
 
