@@ -232,12 +232,19 @@ class TestIndividualChecks(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_no_newline_at_eof_files(self):
-        """Test no_newline_at_eof_files() detects missing newline"""
-        check = make_precheck([("100644", "file1.py"), ("100644", "file2.py")])
+        """Test no_newline_at_eof_files() distinguishes files with and without a trailing newline"""
+        check = make_precheck(
+            [("100644", "with_newline.py"), ("100644", "without_newline.py")]
+        )
+        contents = {
+            "with_newline.py": b"content\n",
+            "without_newline.py": b"content",
+        }
 
-        with patch("builtins.open", mock_open(read_data=b"content")):
+        with patch("builtins.open", side_effect=lambda f, mode: io.BytesIO(contents[f])):
             result = check.no_newline_at_eof_files()
-            self.assertEqual(result, ["file1.py", "file2.py"])
+
+        self.assertEqual(result, ["without_newline.py"])
 
     @patch("os.stat")
     @patch("os.access")
