@@ -14,6 +14,7 @@
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
+#include "libmesh/distributed_mesh.h"
 #include "libmesh/sparse_matrix.h"
 
 InputParameters
@@ -54,6 +55,16 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     _formulation = Moose::Kinematic;
   else
     mooseError("Formulation must be either Penalty or Kinematic");
+}
+
+void
+NodalConstraint::addRetainedGhostedElem(const dof_id_type elem_id)
+{
+  Elem * const elem = _mesh.elemPtr(elem_id);
+  if (auto * const distributed_mesh = dynamic_cast<libMesh::DistributedMesh *>(&_mesh.getMesh()))
+    distributed_mesh->add_extra_ghost_elem(elem);
+
+  _subproblem.addGhostedElem(elem_id);
 }
 
 void

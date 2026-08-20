@@ -22,4 +22,26 @@
     requirement = "The mechanics system shall accurately predict the displacement"
                   " of a beam element with a frictional contact constraint."
   [../]
+  [stick_constraint_ghosting]
+    type = Exodiff
+    input = 'glued_constraint.i'
+    exodiff = 'stick_constraint_ghosting_out.e'
+    cli_args = "Constraints/active='tie_y_fuel' UserObjects/late_geometric_ghosting/type=TestSolidMechanicsGhostBoundarySideUserObject UserObjects/late_geometric_ghosting/boundary=1001 Mesh/construct_side_list_from_node_list=true Postprocessors/active='' Outputs/csv=false Outputs/exodus=true Outputs/file_base=stick_constraint_ghosting_out"
+    allow_test_objects = true
+    design = 'source/constraints/NodalStickConstraint.md'
+    issues = '#33564'
+    requirement = "The mechanics system shall retain elements needed by a nodal stick constraint "
+                  "when remote elements are deleted from a distributed mesh."
+  []
+  [frictional_constraint_ghosting]
+    type = Exodiff
+    input = 'frictional_constraint.i'
+    exodiff = 'frictional_constraint_ghosting_out.e'
+    cli_args = "Constraints/active='tie_y_fuel' UserObjects/late_geometric_ghosting/type=TestSolidMechanicsGhostBoundarySideUserObject UserObjects/late_geometric_ghosting/boundary=1001 Mesh/construct_side_list_from_node_list=true Postprocessors/active='' Outputs/csv=false Outputs/exodus=true Outputs/file_base=frictional_constraint_ghosting_out"
+    allow_test_objects = true
+    design = 'source/constraints/NodalFrictionalConstraint.md'
+    issues = '#33564'
+    requirement = "The mechanics system shall retain elements needed by a nodal frictional "
+                  "constraint when remote elements are deleted from a distributed mesh."
+  []
 []
