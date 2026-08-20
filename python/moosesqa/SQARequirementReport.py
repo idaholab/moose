@@ -40,7 +40,7 @@ class SQARequirementReport(SQAReport):
         """
 
         # Extract configuration parameters
-        specs = self.specs or "tests"
+        specs = self.specs or ["tests", "*.unit_tests"]
 
         # Get complete directory paths
         root_dir = mooseutils.git_root_dir()

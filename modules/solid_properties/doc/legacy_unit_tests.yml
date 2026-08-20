@@ -1,0 +1,26 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - ThermalCompositeSiCPropertiesTest.cp
+  - ThermalCompositeSiCPropertiesTest.e
+  - ThermalCompositeSiCPropertiesTest.k
+  - ThermalCompositeSiCPropertiesTest.rho
+  - ThermalFunctionSolidPropertiesTest.cp
+  - ThermalFunctionSolidPropertiesTest.e
+  - ThermalFunctionSolidPropertiesTest.k
+  - ThermalFunctionSolidPropertiesTest.rho
+  - ThermalGraphitePropertiesTest.cp
+  - ThermalGraphitePropertiesTest.e
+  - ThermalGraphitePropertiesTest.k
+  - ThermalGraphitePropertiesTest.rho
+  - ThermalMonolithicSiCPropertiesTest.cp
+  - ThermalMonolithicSiCPropertiesTest.e
+  - ThermalMonolithicSiCPropertiesTest.k
+  - ThermalMonolithicSiCPropertiesTest.rho
+  - ThermalSS316PropertiesTest.cp
+  - ThermalSS316PropertiesTest.e
+  - ThermalSS316PropertiesTest.k
+  - ThermalSS316PropertiesTest.rho
+  - ThermalUCPropertiesTest.cp
+  - ThermalUCPropertiesTest.e
+  - ThermalUCPropertiesTest.k
+  - ThermalUCPropertiesTest.rho

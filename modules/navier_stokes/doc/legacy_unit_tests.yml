@@ -1,0 +1,9 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - FaceCenteredMapFunctorTest.testArgs
+  - INSFVVariableTest.INSFVVariableDefaultNoQpData
+  - INSFVVariableTest.INSFVVariableGeometricInfoLoopSupportUnaffectedByRequireQp
+  - INSFVVariableTest.INSFVVariableOptsInViaRequireQpComputations
+  - INSFVVariableTest.INSFVVariableSupportsGeometricInfoLoops
+  - TestReconstruction.Cartesian
+  - TestReconstruction.Cylindrical

@@ -1,0 +1,13 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - SBMBndElementTest.BaseDynamicDispatcherIntersectAndBoundingBall
+  - SBMBndElementTest.ConstructionRejectsUnsupportedSideType
+  - SBMBndElementTest.Edge2DistanceNodeFallback
+  - SBMBndElementTest.Edge2Normal
+  - SBMBndElementTest.Edge2NormalTilted
+  - SBMBndElementTest.ProjectedBoundingBoxDiagonal
+  - SBMBndElementTest.Tri3Normal
+  - SBMBndElementTest.Tri3NormalTilted
+  - SBMBndElementTest.UnsupportedGeometryDispatchersThrow
+  - WaterTightTest.ThreeDGeoOpenAndClose
+  - WaterTightTest.TwoDGeoOpenAndClose
