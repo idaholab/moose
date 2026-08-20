@@ -13,7 +13,8 @@
   [split-mesh]
     type = 'Exodiff'
     prereq = prereq
-    input = 'split_mesh.i diffusion.i'
+    input = 'mesh.i diffusion.i'
+    cli_args = '--use-split --split-file foo.cpr'
     exodiff = 'diffusion_out.e'
     requirement = "The system shall be able to read a split mesh for finite volume problems with the correct ghosting setup."
     min_parallel = 2
