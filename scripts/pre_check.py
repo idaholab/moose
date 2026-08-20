@@ -294,9 +294,9 @@ class PreCheck:
         # Modifiers for check_whitespace, not standalone checks of their own.
         self.check_cpp_whitespace = os.environ.get("CHECK_CPP_WHITESPACE", "0") == "1"
         self.check_f_whitespace = os.environ.get("CHECK_F_WHITESPACE", "0") == "1"
-        assert not (self.check_f_whitespace and not self.check_whitespace), (
-            "CHECK_F_WHITESPACE has no effect when CHECK_WHITESPACE is disabled"
-        )
+        assert not (
+            self.check_f_whitespace and not self.check_whitespace
+        ), "CHECK_F_WHITESPACE has no effect when CHECK_WHITESPACE is disabled"
 
         self.file_checks_enabled = self._file_checks_enabled()
 

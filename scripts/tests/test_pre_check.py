@@ -241,7 +241,9 @@ class TestIndividualChecks(unittest.TestCase):
             "without_newline.py": b"content",
         }
 
-        with patch("builtins.open", side_effect=lambda f, mode: io.BytesIO(contents[f])):
+        with patch(
+            "builtins.open", side_effect=lambda f, mode: io.BytesIO(contents[f])
+        ):
             result = check.no_newline_at_eof_files()
 
         self.assertEqual(result, ["without_newline.py"])
