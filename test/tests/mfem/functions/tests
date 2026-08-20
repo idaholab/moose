@@ -13,7 +13,7 @@
   [MFEMScalarQuadratureFunction]
     type = CSVDiff
     input = quadrature_function_source.i
-    csvdiff = OutputData/QuadratureFunctionSource.csv
+    csvdiff = OutputData/ParsedFunctionSource.csv
     design = 'MFEMScalarQuadratureFunction.md'
     issues = '#33291'
     requirement = 'The system shall have the ability to precompute a coefficient at quadrature '
