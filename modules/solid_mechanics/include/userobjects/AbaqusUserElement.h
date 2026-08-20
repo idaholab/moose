@@ -17,7 +17,6 @@
 class MooseMesh;
 namespace libMesh
 {
-class Elem;
 class MeshBase;
 }
 
@@ -85,9 +84,9 @@ public:
   static InputParameters validParams();
   AbaqusUserElement(const InputParameters & params);
 
+  virtual void timestepSetup() override;
   virtual void initialSetup() override;
   virtual void meshChanged() override;
-  virtual void timestepSetup() override;
 
   virtual void initialize() override final;
   virtual void execute() override;
@@ -101,6 +100,9 @@ public:
   }
 
   const uel_t & getPlugin() const { return _uel; }
+
+  const std::array<Real, 8> * getUELEnergy(dof_id_type element_id) const;
+  const Real & getPNewDt() const { return _pnewdt; }
 
 protected:
   /// setup the range of elements this object operates on
@@ -153,8 +155,16 @@ protected:
   std::size_t _statev_index_old;
   int & _t_step_old;
 
+  /// energy data
+  const bool _use_energy;
+  std::map<dof_id_type, std::array<Real, 8>> _energy;
+  std::map<dof_id_type, std::array<Real, 8>> _energy_old;
+
   /// Abaqus element type
   const int _jtype;
+
+  /// timestep scaling factor
+  Real _pnewdt;
 
   friend class UELThread;
 };

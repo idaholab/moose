@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-
 /**
  * Accumulate values from one auxiliary variable into another
  */
