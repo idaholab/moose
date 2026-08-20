@@ -73,10 +73,8 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
     _coeff(isParamValid("biot_coefficient_prime") ? (getParam<Real>("biot_coefficient_prime") - 1.0)
                                                   : (_biot - 1.0)),
 
-    _t_reference(_nodal_material ? coupledDofValues("reference_temperature")
-                                 : coupledValue("reference_temperature")),
-    _p_reference(_nodal_material ? coupledDofValues("reference_porepressure")
-                                 : coupledValue("reference_porepressure")),
+    _t_reference(nodalOrQpValue("reference_temperature")),
+    _p_reference(nodalOrQpValue("reference_porepressure")),
     _num_c_ref(coupledComponents("reference_chemistry")),
     _c_reference(_num_c_ref),
     _num_initial_c(coupledComponents("initial_mineral_concentrations")),
@@ -168,10 +166,8 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
 
   for (unsigned i = 0; i < _num_c_ref; ++i)
   {
-    _c_reference[i] = (_nodal_material ? &coupledDofValues("reference_chemistry", i)
-                                       : &coupledValue("reference_chemistry", i));
-    _initial_c[i] = (_nodal_material ? &coupledDofValues("initial_mineral_concentrations", i)
-                                     : &coupledValue("initial_mineral_concentrations", i));
+    _c_reference[i] = &nodalOrQpValue("reference_chemistry", i);
+    _initial_c[i] = &nodalOrQpValue("initial_mineral_concentrations", i);
   }
 }
 

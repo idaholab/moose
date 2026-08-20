@@ -70,6 +70,8 @@ PorousFlowFluidStateSingleComponentTempl<is_ad>::PorousFlowFluidStateSingleCompo
     _pidx(_fs.getPressureIndex()),
     _hidx(_fs.getEnthalpyIndex())
 {
+  this->checkNodalVariables({"porepressure", "enthalpy"});
+
   // Check that the number of phases in the fluidstate class is also provided in the Dictator
   if (_fs.numPhases() != _num_phases)
     mooseError(name(),

@@ -100,4 +100,27 @@ In this case, the porosity at node $a$ is assumed to be dependent on the volumet
 at the closest quadpoint to the node.
 
 
+## Which nodes are evaluated id=which_nodes
+
+The nodal quantities are evaluated at those nodes that carry a degree of freedom of the
+PorousFlow variables, which is not necessarily every node of the element.  The two coincide for
+a consistent Lagrange discretisation, and differ when a first-order variable is used on a
+second-order mesh: a first-order porepressure on a TET10 element has 4 degrees of freedom against
+the element's 10 nodes, and only those 4 vertices are evaluated.
+
+It follows that every variable a nodal `Material` reads at the nodes must share an FE type, since
+the single node counter used to index the nodal `Material` properties has to be a valid
+degree-of-freedom index for all of them at once.  The [PorousFlowDictator](dictator.md) resolves
+that type from the variables the `Materials` actually read, and produces an error if they disagree.
+
+The displacements are not subject to this, because no `Material` reads them at the nodes:
+`PorousFlowVolumetricStrain` is evaluated at the quadpoints only.  Second-order displacements may
+therefore be used alongside a first-order porepressure.
+
+A variable that is *elemental* (a `MONOMIAL` `AuxVariable`, say) has no nodal degrees of freedom at
+all, so a nodal `Material` reads it at the quadpoints instead.  This is how a spatially varying
+reference temperature or mineral concentration may be supplied to
+[PorousFlowPorosity](PorousFlowPorosity.md) as a constant monomial.
+
+
 !bibtex bibliography

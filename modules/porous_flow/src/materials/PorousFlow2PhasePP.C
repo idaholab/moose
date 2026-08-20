@@ -55,6 +55,10 @@ PorousFlow2PhasePPTempl<is_ad>::PorousFlow2PhasePPTempl(const InputParameters & 
                : 0),
     _pc_uo(this->template getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
 {
+  // These are read with coupledGenericDofValue when at_nodes = true, so they must be
+  // nodal (Lagrange) variables.  See #33370.
+  if (this->_nodal_material)
+    this->checkNodalVariables({"phase0_porepressure", "phase1_porepressure"});
   if (_num_phases != 2)
     mooseError("The Dictator announces that the number of phases is ",
                _dictator.numPhases(),
