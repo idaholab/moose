@@ -31,6 +31,9 @@ AddMeshGeneratorAction::AddMeshGeneratorAction(const InputParameters & params)
 void
 AddMeshGeneratorAction::act()
 {
+  if (_app.isRestarting() && !_app.useMasterMesh() && !_app.getRestartRecoverFileBase().empty())
+    return;
+
   if (!_mesh)
     mooseError("No mesh file was supplied and no generation block was provided");
 
