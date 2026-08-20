@@ -2,7 +2,7 @@
 
 !syntax description /Physics/SolidMechanics/GlobalStrain/GlobalStrainAction
 
-This action simplifies the input file syntax for global strain calculation required for maintaining strain periodicity. It also generates the auxiliary displacement field created by the global strain. It creates following MOOSE objects,
+This system with the associated [GlobalStrain action](/GlobalStrain/index.md) simplifies the input file syntax for global strain calculation required for maintaining strain periodicity. It also generates the auxiliary displacement field created by the global strain. It creates following MOOSE objects,
 
 ### UserObject
 
