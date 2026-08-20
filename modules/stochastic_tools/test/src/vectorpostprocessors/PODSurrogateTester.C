@@ -83,6 +83,10 @@ PODSurrogateTester::execute()
   unsigned int n_models = _model.size();
   unsigned int n_pp = _to_compute.size();
 
+  for (const auto model : _model)
+    if (!model->isReady())
+      return;
+
   // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
