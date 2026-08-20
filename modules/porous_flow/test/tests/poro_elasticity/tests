@@ -144,6 +144,14 @@
     requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate Terzaghi consolidation of a drained medium, using a constant Biot modulus'
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
+  [../]  
+  [./terzaghi_constM_mixed_order_elements]
+    type = CSVDiff
+    input = terzaghi_constM_mixed_order_elements.i
+    csvdiff = terzaghi_constM_mixed_order_elements.csv
+    requirement = 'PorousFlow shall correctly simulate Terzaghi consolidation using mixed-order elements and a constant Biot modulus'
+    issues = '#33502'
+    design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   [../]
   [./terzaghi_fully_saturated_volume]
     type = CSVDiff

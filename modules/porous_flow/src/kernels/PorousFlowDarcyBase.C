@@ -507,11 +507,14 @@ PorousFlowDarcyBaseTempl<is_ad>::fullyUpwind(JacRes res_or_jac, unsigned int ph,
   // The following holds derivatives of these (non-AD path only)
   std::vector<Real> dtotal_mass_out;
   std::vector<Real> dtotal_in;
+
+  // These accumulate Jacobian columns, so they must be sized by the column variable's
+  // DOF count (_phi.size(), not by num_nodes = _test.size() (which is the row variable's)
   if constexpr (!is_ad)
     if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
     {
-      dtotal_mass_out.assign(num_nodes, 0.0);
-      dtotal_in.assign(num_nodes, 0.0);
+      dtotal_mass_out.assign(_phi.size(), 0.0);
+      dtotal_in.assign(_phi.size(), 0.0);
     }
 
   // Perform the upwinding using the mobility
