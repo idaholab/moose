@@ -73,6 +73,23 @@ objects. Information to get started follows in the next section of this document
 applications mimic the MOOSE process, so it is best to also refer to the MOOSE instructions for
 documentation (see [framework/documenting.md]).
 
+## Disabling the large_media Submodule
+
+By default, MooseDocs initializes and indexes the [large_media](https://github.com/idaholab/large_media)
+submodule, which contains the large image and video assets used by the MOOSE documentation. Applications
+that do not reference any `large_media` content can opt out of this by passing `large_media=False` to
+`main.run()` in the application's `moosedocs.py` script:
+
+```python
+sys.exit(main.run(large_media=False))
+```
+
+!alert note title=Only disable if unused
+If any page references content from `large_media` (for example through the
+[media](MooseDocs/extensions/media.md) or [gallery](MooseDocs/extensions/gallery.md) extensions), the
+build will report missing files. Only disable the submodule for applications that do not use any of
+its content.
+
 ## Generating Object Documentation Files
 
 During the course of development, especially during the creation of new application objects (e.g., kernels,
