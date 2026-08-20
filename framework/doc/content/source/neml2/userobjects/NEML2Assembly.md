@@ -7,17 +7,29 @@ This userobject loops through elements to cache common assembly information incl
 - Number of elements
 - Number of quadrature points per element
 - The product of $\det(J)$, quadrature weight, and coordinate transformation factor
+- Quadrature point coordinates
 
 ## Implementation details
 
-Once the caching is done, this object does not actively update the assembly information unless the `invalidate()` method is called. The `upToDate()` method can be used to check if the current cache is up-to-date.
+After the cache has been populated, this object does not update the assembly
+information until `invalidate()` is called. The `upToDate()` method reports
+whether the current cache is current.
 
-The method `JxWxT()` returns a NEML2 tensor with batch shape $(n_e, n_q)$, where $n_e$ is the number of elements, and $n_q$ is the number of quadrature points per element. A constant reference is returned by this method, and the tensor value is only "ready" after the `finalize()` is called for the first time.
+The method `JxWxT()` returns a NEML2 tensor with batch shape $(n_e,n_q)$,
+where $n_e$ is the number of elements and $n_q$ is the number of quadrature
+points per element. The method `qPoints()` returns the corresponding
+coordinates with batch shape $(n_e,n_q)$ and base shape $(3)$. Both methods
+return constant references, and their tensor values are available only after
+`finalize()` has been called.
 
 ### Limitations
 
-- All elements processed by a single `NEML2Assembly` must have the same number of quadrature points; mixed quadrature rules or mixed element orders within one user object will throw.
-- For mixed meshes, you can work around this by defining separate block-restricted `NEML2Assembly` objects, one per element type/order, and pairing each with its own `NEML2FEInterpolation`.
+- All elements processed by a single `NEML2Assembly` must have the same number
+  of quadrature points; mixed quadrature rules or mixed element orders within
+  one user object result in an error.
+- For mixed meshes, define separate block-restricted `NEML2Assembly` objects,
+  one per element type/order, and pair each with its own
+  `NEML2FEInterpolation`.
 
 ## Syntax
 
