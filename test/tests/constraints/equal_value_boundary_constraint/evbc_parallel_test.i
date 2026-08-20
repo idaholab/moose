@@ -39,7 +39,10 @@
 []
 
 [UserObjects]
-  # This relationship manager triggers remote element deletion after the constraint is added.
+  # This UserObject introduces late geometric ghosting, which defers remote-element
+  # deletion to the delete_remote_elements_after_late_geometric_ghosting task (run after
+  # the constraint is added). That deletion is what removes the EVBC primary element unless
+  # it is explicitly kept, so it is required to reproduce the bug.
   [late_geometric_ghosting]
     type = TestGhostBoundarySideUserObject
     boundary = left
