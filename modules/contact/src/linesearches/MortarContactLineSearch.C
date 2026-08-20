@@ -236,7 +236,8 @@ MortarContactLineSearch::classify(const Vec & solution) const
                               : _c;
     const Real c =
         (_use_derived_c_normal || _normalize_c) ? normal_scale / normalization : normal_scale;
-    result.normal_switch_values.emplace(dof_id, lm_value - c * weighted_gap);
+    result.normal_switch_values.emplace(dof_id,
+                                         MetaPhysicL::raw_value(lm_value - c * weighted_gap));
 
     ConstraintState state;
     if (_weighted_velocities_uo)
@@ -267,12 +268,19 @@ MortarContactLineSearch::classify(const Vec & solution) const
           dof_object->dof_number(_nl.number(), _friction_lm_vars[0]->number(), 0);
       const ADReal friction_lm_value = solutionValue(friction_dof_index);
 
+      // Tangential switch value for Component B's frictional event prediction: positive means
+      // STICK, negative means SLIP, mirroring the sign convention classifyFrictionalState(3d)
+      // already implement on ||augmented_tangential_pressure|| vs. radius.
       if (_friction_lm_vars.size() == 1)
       {
         const ADReal augmented_tangential_pressure =
             friction_lm_value + c_t_use * weighted_velocities[0] * dt;
         state =
             classifyFrictionalState(augmented_tangential_pressure, radius, lm_value, epsilon_ad);
+        result.tangential_switch_values.emplace(
+            dof_id,
+            MetaPhysicL::raw_value(
+                radius - tangentialNorm(std::array<ADReal, 1>{{augmented_tangential_pressure}})));
       }
       else
       {
@@ -284,6 +292,9 @@ MortarContactLineSearch::classify(const Vec & solution) const
              friction_lm_dir_value + c_t_use * weighted_velocities[1] * dt}};
         state =
             classifyFrictionalState3d(augmented_tangential_pressure, radius, lm_value, epsilon_ad);
+        result.tangential_switch_values.emplace(
+            dof_id,
+            MetaPhysicL::raw_value(radius - tangentialNorm(augmented_tangential_pressure)));
       }
     }
     else
@@ -499,12 +510,31 @@ MortarContactLineSearch::lineSearch()
     std::unordered_map<dof_id_type, Real> predicted_alphas;
     for (const auto & [dof_id, q0] : checkpoint.normal_switch_values)
     {
-      const Real q0_raw = MetaPhysicL::raw_value(q0);
-      const Real qb_raw =
-          MetaPhysicL::raw_value(libmesh_map_find(state_backing.normal_switch_values, dof_id));
-      const Real qdot_secant = (qb_raw - q0_raw) / lambda_b;
-      if (const auto alpha = eventStepLength(q0_raw, qdot_secant))
+      const Real qb = libmesh_map_find(state_backing.normal_switch_values, dof_id);
+      const Real qdot_secant = (qb - q0) / lambda_b;
+      if (const auto alpha = eventStepLength(q0, qdot_secant))
         predicted_alphas.emplace(dof_id, *alpha);
+    }
+    // Tangential switch events (CONTACT_STICK <-> CONTACT_SLIP): only meaningful for dofs the
+    // checkpoint already classifies as in contact with friction active -- for a still-OPEN dof
+    // the tangential switch value's sign is irrelevant to its classification (classifyFrictionalState(3d)
+    // short-circuit to OPEN regardless), so predicting a crossing for it would be spurious.
+    for (const auto & [dof_id, qt0] : checkpoint.tangential_switch_values)
+    {
+      const auto dof_state = libmesh_map_find(checkpoint.states, dof_id);
+      if (dof_state != ConstraintState::CONTACT_STICK && dof_state != ConstraintState::CONTACT_SLIP)
+        continue;
+
+      const Real qtb = libmesh_map_find(state_backing.tangential_switch_values, dof_id);
+      const Real qtdot_secant = (qtb - qt0) / lambda_b;
+      if (const auto alpha = eventStepLength(qt0, qtdot_secant))
+      {
+        // A dof can have both a normal-switch and a tangential-switch prediction in the same
+        // step; keep whichever event is predicted to occur first for that dof.
+        const auto [it, inserted] = predicted_alphas.emplace(dof_id, *alpha);
+        if (!inserted)
+          it->second = std::min(it->second, *alpha);
+      }
     }
     // Dense-event escape hatch: many consecutive event-limited iterations indicate the Newton
     // direction is crossing a series of well-separated switching surfaces one at a time. Past

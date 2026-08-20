@@ -104,12 +104,18 @@ protected:
   void deactivateWatchdog();
 
 
-  /// Per-dof classification result of a call to classify(), plus the raw normal switch value
-  /// (lm_value - c*weighted_gap) needed to predict normal open/closed events (Component B).
+  /// Per-dof classification result of a call to classify(), plus the raw switch values
+  /// Component B predicts events from: the normal switch value (lm_value - c*weighted_gap,
+  /// for OPEN <-> CONTACT events) and, when friction is enabled, the tangential switch value
+  /// (radius - ||augmented_tangential_pressure||, for CONTACT_STICK <-> CONTACT_SLIP events).
+  /// Stored as plain Real rather than ADReal: this line search only ever evaluates residuals
+  /// with AD derivative tracking disabled, so these values carry no usable sensitivities, and
+  /// every consumer immediately discards them.
   struct Classification
   {
     std::unordered_map<dof_id_type, Moose::Mortar::Contact::ConstraintState> states;
-    std::unordered_map<dof_id_type, ADReal> normal_switch_values;
+    std::unordered_map<dof_id_type, Real> normal_switch_values;
+    std::unordered_map<dof_id_type, Real> tangential_switch_values;
   };
 
   /**
