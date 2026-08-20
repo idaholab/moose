@@ -48,7 +48,8 @@ protected:
   {
   }
 
-  void updateIntermediatePorosity(const GenericRankTwoTensor<is_ad> & elastic_strain_increment);
+  virtual void
+  updateIntermediatePorosity(const GenericRankTwoTensor<is_ad> & elastic_strain_increment);
 
   /// String designating the base name of the total strain
   const std::string _total_strain_base_name;

@@ -137,7 +137,7 @@
     outputs = 'all'
   [../]
   [./gtn]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 1 # arbitrary
     viscoplasticity_model = GTN
@@ -146,7 +146,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_ten]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 10
     base_name = ten
@@ -154,7 +154,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_five]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 5
     base_name = five
@@ -162,7 +162,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_three]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 3
     base_name = three
@@ -170,7 +170,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_two]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 2
     base_name = two
@@ -178,7 +178,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_onepointfive]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 1.5
     base_name = onepointfive
@@ -186,7 +186,7 @@
     relative_tolerance = 1e-30
   [../]
   [./lps_one]
-    type = ADViscoplasticityStressUpdate
+    type = ADPorousViscoplasticityStressUpdate
     coefficient = 0
     power = 1
     base_name = one

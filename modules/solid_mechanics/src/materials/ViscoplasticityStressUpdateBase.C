@@ -16,9 +16,11 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::validParams()
   InputParameters params = StressUpdateBaseTempl<is_ad>::validParams();
   params.addClassDescription("Base class used to calculate viscoplastic responses to be used in "
                              "ComputeMultiplePorousInelasticStress");
-  params.addParam<Real>("max_inelastic_increment",
-                        1.0e-4,
-                        "The maximum inelastic strain increment allowed in a time step");
+  params.addRangeCheckedParam<Real>(
+      "max_inelastic_increment",
+      1.0e-4,
+      "max_inelastic_increment>0.0",
+      "The maximum inelastic strain increment allowed in a time step");
   params.addParam<std::string>(
       "inelastic_strain_name",
       "viscoplasticity",
@@ -28,8 +30,8 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::validParams()
       "porosity_name", "porosity", "Name of porosity material property");
   params.addParam<std::string>("total_strain_base_name", "Base name for the total strain");
   params.addRangeCheckedParam<Real>(
-      "initial_porosity", 0.0, "initial_porosity>=0.0 & initial_porosity<1.0", "Initial porosity");
-  MooseEnum negative_behavior("ZERO INITIAL_CONDITION EXCEPTION", "INITIAL_CONDITION");
+      "initial_porosity", "initial_porosity>=0.0 & initial_porosity<1.0", "Initial porosity");
+  MooseEnum negative_behavior("ZERO INITIAL_CONDITION EXCEPTION", "EXCEPTION");
   params.addParam<MooseEnum>(
       "negative_behavior", negative_behavior, "Enum how to handle negative porosities");
 
@@ -59,10 +61,16 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::ViscoplasticityStressUpdateBaseTemp
     _intermediate_porosity(0.0),
     _porosity_old(this->template getMaterialPropertyOld<Real>("porosity_name")),
     _verbose(this->template getParam<bool>("verbose")),
-    _initial_porosity(this->template getParam<Real>("initial_porosity")),
+    _initial_porosity(this->isParamValid("initial_porosity")
+                          ? this->template getParam<Real>("initial_porosity")
+                          : 0.0),
     _negative_behavior(this->template getParam<MooseEnum>("negative_behavior")
                            .template getEnum<NegativeBehavior>())
 {
+  if (parameters.isParamValid("initial_porosity") ||
+      _negative_behavior == NegativeBehavior::INITIAL_CONDITION)
+    mooseDeprecated("initial_porosity, and it's assoclated negative_behavior=INITIAL_CONDITION "
+                    "enum is deprecated and will be removed 06/01/2027.");
 }
 
 template <bool is_ad>
