@@ -143,76 +143,74 @@ UnitsConversionEvaler::eval(hit::Field * n,
   return result;
 }
 
-std::string
-EnumerateEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+hit::EvalResult
+EnumerateEvaler::eval(hit::Field * n,
+                      const std::vector<std::string> & args,
+                      hit::BraceExpander & exp)
 {
-  std::vector<std::string> argv;
-  argv.insert(argv.begin(), args.begin(), args.end());
+  hit::EvalResult result;
+  result.kind = hit::Field::Kind::String;
 
-  if (argv.size() != 3)
+  auto fail = [&](const std::string & message) -> hit::EvalResult
   {
-    exp.errors.emplace_back(
-        "enumerate error: Expected 3 arguments ${enumerate prefix first_index last_index} in '" +
-            n->fullpath() + "'",
-        n);
-    return n->val();
-  }
+    exp.errors.push_back(exp.currentExpressionErrorMessage(n, message));
+    result.value = n->val();
+    return result;
+  };
 
-  const auto & prefix = argv[0];
+  if (args.size() != 3)
+    return fail(
+        "enumerate error: Expected 3 arguments ${enumerate prefix first_index last_index} in '" +
+        n->fullpath() + "'");
+
+  const auto & prefix = args[0];
   std::array<int, 2> index;
   for (const auto i : make_range(2))
   {
-    const auto & arg = argv[i + 1];
-    if (arg.empty() || arg.find_first_not_of("0123456789") != std::string::npos)
-    {
-      exp.errors.emplace_back("enumerate error: index '" + arg +
-                                  "' is not a non-negative integer in '" + n->fullpath() + "'",
-                              n);
-      return n->val();
-    }
+    const auto & arg = args[i + 1];
+    if (arg.empty() || !MooseUtils::isDigits(arg))
+      return fail("enumerate error: index '" + arg + "' is not a non-negative integer in '" +
+                  n->fullpath() + "'");
     index[i] = MooseUtils::convert<int>(arg);
   }
 
   if (index[1] < index[0])
-  {
-    exp.errors.emplace_back("enumerate error: last index " + argv[2] +
-                                " is smaller than first index " + argv[1] + " in '" +
-                                n->fullpath() + "'",
-                            n);
-    return n->val();
-  }
+    return fail("enumerate error: last index " + args[2] + " is smaller than first index " +
+                args[1] + " in '" + n->fullpath() + "'");
 
   std::vector<std::string> names;
   for (const auto i : make_range(index[0], index[1] + 1))
     names.push_back(prefix + std::to_string(i));
 
-  return MooseUtils::stringJoin(names);
+  result.value = MooseUtils::stringJoin(names);
+  return result;
 }
 
-std::string
-RepeatEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+hit::EvalResult
+RepeatEvaler::eval(hit::Field * n, const std::vector<std::string> & args, hit::BraceExpander & exp)
 {
-  std::vector<std::string> argv;
-  argv.insert(argv.begin(), args.begin(), args.end());
+  hit::EvalResult result;
+  result.kind = hit::Field::Kind::String;
 
-  if (argv.size() != 2)
+  auto fail = [&](const std::string & message) -> hit::EvalResult
   {
-    exp.errors.emplace_back(
-        "repeat error: Expected 2 arguments ${repeat name count} in '" + n->fullpath() + "'", n);
-    return n->val();
-  }
+    exp.errors.push_back(exp.currentExpressionErrorMessage(n, message));
+    result.value = n->val();
+    return result;
+  };
 
-  const auto & count_arg = argv[1];
-  if (count_arg.empty() || count_arg.find_first_not_of("0123456789") != std::string::npos)
-  {
-    exp.errors.emplace_back("repeat error: count '" + count_arg +
-                                "' is not a non-negative integer in '" + n->fullpath() + "'",
-                            n);
-    return n->val();
-  }
+  if (args.size() != 2)
+    return fail("repeat error: Expected 2 arguments ${repeat name count} in '" + n->fullpath() +
+                "'");
 
-  const std::vector<std::string> values(MooseUtils::convert<int>(count_arg), argv[0]);
-  return MooseUtils::stringJoin(values);
+  const auto & count_arg = args[1];
+  if (count_arg.empty() || !MooseUtils::isDigits(count_arg))
+    return fail("repeat error: count '" + count_arg + "' is not a non-negative integer in '" +
+                n->fullpath() + "'");
+
+  const std::vector<std::string> values(MooseUtils::convert<int>(count_arg), args[0]);
+  result.value = MooseUtils::stringJoin(values);
+  return result;
 }
 
 Parser::Parser(const std::vector<std::string> & input_filenames,
