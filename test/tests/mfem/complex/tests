@@ -61,4 +61,33 @@
     compute_devices = 'cpu'
     recover = false
   []
+  [MFEMPML]
+    type = CSVDiff
+    input = pml.i
+    csvdiff = 'OutputData/PML.csv'
+    requirement = 'The system shall have the ability to absorb an outgoing wave using a perfectly matched layer whose coordinate stretch is directed along the gradient of a harmonic coordinate solved for inside the layer.'
+    capabilities = 'mfem'
+    recover = false
+    max_parallel = 1
+  []
+  [MFEMPML3D]
+    type = CSVDiff
+    input = pml.i
+    csvdiff = 'OutputData/PML3D.csv'
+    cli_args = 'Mesh/file=../mesh/inline-hex.mesh '
+               'Mesh/uniform_refine=1 '
+               'freq=1.25 '
+               'z_center=0.5 '
+               'Functions/source_field/expression_z=0 '
+               'SubMeshes/pml/boundary="1 2 3 4 5 6" '
+               'SubMeshes/pml/num_layers_positive=2 '
+               'BCs/tangential_E/boundary="1 2 3 4 5 6" '
+               'BCs/tangential_E/vector_coefficient_real="0. 0. 0." '
+               'BCs/tangential_E/vector_coefficient_imag="0. 0. 0." '
+               'Outputs/ReportedPostprocessors/file_base=OutputData/PML3D'
+    requirement = 'The system shall have the ability to absorb an outgoing wave using a harmonic coordinate perfectly matched layer on a three dimensional mesh, where the stretch tensor is a full matrix.'
+    capabilities = 'mfem'
+    recover = false
+    max_parallel = 1
+  []
 []

@@ -34,8 +34,8 @@ coil_conductivity = 1.0
 
 [SubMeshes]
   [cut]
-    type = MFEMCutTransitionSubMesh
-    cut_boundary = ${coil_cut_surface}
+    type = MFEMTransitionSubMesh
+    boundary = ${coil_cut_surface}
     block = ${initial_coil_domains}
     transition_subdomain = transition_dom
     transition_subdomain_boundary = transition_bdr
