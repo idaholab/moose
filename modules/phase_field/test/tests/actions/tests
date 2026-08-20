@@ -158,4 +158,49 @@
     design = 'actions/GrandPotentialKernelAction.md'
     requirement = 'The GrandPotentialAction shall have the ability to generate kernels'
   [../]
+  [kks_3phase_ternary]
+    issues = '#13981'
+    design = 'actions/KKSAction.md'
+    requirement = 'The KKS action shall produce the expected common-variable evolution for a three-phase, three-component system using the default Lagrange phase constraint and'
+    [global]
+      type = CSVDiff
+      input = kks_3phase_ternary_global.i
+      csvdiff = kks_3phase_ternary.csv
+      detail = 'globally solved phase concentrations.'
+    []
+    [nested]
+      type = CSVDiff
+      input = kks_3phase_ternary_nested.i
+      csvdiff = kks_3phase_ternary.csv
+      prereq = 'kks_3phase_ternary/global'
+      detail = 'nested phase concentrations initialized from spatially varying auxiliary variables.'
+    []
+    [nested_literals]
+      type = CSVDiff
+      input = kks_3phase_ternary_nested.i
+      cli_args = "Modules/PhaseField/KKS/phase_concentration_initial_values='0.1 0.5 0.8 0.2 0.3 0.6'"
+      csvdiff = kks_3phase_ternary.csv
+      prereq = 'kks_3phase_ternary/nested'
+      detail = 'nested phase concentrations initialized from literal values.'
+    []
+  []
+
+  [kks_nested_initialization]
+    issues = '#13981'
+    design = 'actions/KKSAction.md'
+    requirement = 'The KKS action shall report an error when nested phase-concentration initialization'
+    [missing]
+      type = RunException
+      input = kks_nested_invalid_initialization.i
+      expect_err = 'This parameter is required for a nested phase concentration solve'
+      detail = 'is omitted.'
+    []
+    [wrong_size]
+      type = RunException
+      input = kks_nested_invalid_initialization.i
+      cli_args = "Modules/PhaseField/KKS/phase_concentration_initial_values='0.1 0.5'"
+      expect_err = 'Expected 6 entries with phase varying fastest'
+      detail = 'does not contain one value for every phase and independent concentration.'
+    []
+  []
 []
