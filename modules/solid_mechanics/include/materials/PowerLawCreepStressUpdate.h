@@ -51,6 +51,8 @@ public:
   computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
 
 protected:
+  virtual GenericReal<is_ad> computeCreepStrainRate(const GenericReal<is_ad> & stress_eq) override;
+
   virtual GenericChainedReal<is_ad>
   computeResidualAndDerivative(const GenericReal<is_ad> & effective_trial_stress,
                                const GenericChainedReal<is_ad> & scalar) override
