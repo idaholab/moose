@@ -20,6 +20,7 @@
 #include "XFEMInterface.h"
 #include "DisplacedSystem.h"
 #include "MooseMeshUtils.h"
+#include "TransformedDualBasis.h"
 
 // libMesh
 #include "libmesh/coupling_matrix.h"
@@ -129,6 +130,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _need_lower_d_elem_volume(false),
     _need_neighbor_lower_d_elem_volume(false),
     _need_dual(false),
+    _need_transformed_dual(false),
 
     _residual_vector_tags(_subproblem.getVectorTags(Moose::VECTOR_TAG_RESIDUAL)),
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
@@ -2279,13 +2281,38 @@ Assembly::reinitDual(const Elem * elem,
   mooseAssert(elem_dim == _mesh_dimension - 1,
               "Dual shape functions should only be computed on lower dimensional face elements");
 
+  // The transform applies only on TRI6/QUAD8 secondary faces, whose standard dual diagonal is
+  // non-positive; all other faces keep the standard dual.
+  const bool transformed =
+      needTransformedDual() && Moose::Mortar::transformedDualBasisSupported(elem->type());
+  // Clear any coefficients cached for a previous face. The element pointer is set only after the
+  // loop builds coefficients, so a reused element address cannot pick up a stale matrix.
+  _transformed_dual_coeff.clear();
+  _transformed_dual_coeff_elem = nullptr;
+
   for (const auto & it : _fe_lower[elem_dim])
   {
     FEBase & fe_lower = *it.second;
     // We use customized quadrature rule for integration along the mortar segment elements
     fe_lower.set_calculate_default_dual_coeff(false);
+    // Always compute libMesh's standard dual coefficients; when the transform is active they are
+    // overridden in reinitLowerDElem. (A supported QUAD8 and an unsupported QUAD9 share one FEType,
+    // so the standard solve cannot be skipped per element.)
     fe_lower.reinit_dual_shape_coeffs(elem, pts, JxW);
+
+    // Build the transformed coefficients for the LM variable's shape data. Require a nodal Lagrange
+    // basis: computeTransformedDualCoeffs assumes shape index i == local node i, which non-nodal
+    // families (e.g. HIERARCHIC) can violate even when n_shape_functions == n_nodes.
+    if (transformed && _fe_shape_data_dual_lower.count(it.first) && it.first.family == LAGRANGE &&
+        FEInterface::n_shape_functions(it.first, elem) == elem->n_nodes())
+      Moose::Mortar::computeTransformedDualCoeffs(
+          *elem, it.first, pts, JxW, _transformed_dual_coeff[it.first]);
   }
+
+  // Record the element only now that coefficients exist, so reinitLowerDElem injects them for this
+  // face and treats any reinit without a successful build as standard dual.
+  if (!_transformed_dual_coeff.empty())
+    _transformed_dual_coeff_elem = elem;
 }
 
 void
@@ -2320,6 +2347,14 @@ Assembly::reinitLowerDElem(const Elem * elem,
     FEBase & fe_lower = *it.second;
     FEType fe_type = it.first;
 
+    // When the transform is active for this face, inject the coefficients built in reinitDual;
+    // reinit then expands them (dual_coeff is untouched while calculate_default_dual_coeff is
+    // false, so they survive). The element guard skips non-mortar calls, keeping the standard dual.
+    if (needTransformedDual() && _transformed_dual_coeff_elem == elem &&
+        _transformed_dual_coeff.count(fe_type))
+      const_cast<DenseMatrix<Real> &>(fe_lower.get_dual_coeff()) =
+          libmesh_map_find(_transformed_dual_coeff, fe_type);
+
     fe_lower.reinit(elem);
 
     if (FEShapeData * fesd = _fe_shape_data_lower[fe_type].get())
@@ -2332,7 +2367,9 @@ Assembly::reinitLowerDElem(const Elem * elem,
             const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_d2phi()));
     }
 
-    // Dual shape functions need to be computed after primal basis being initialized
+    // The dual basis (get_dual_phi()/dphi/d2phi) is expanded by reinit from dual_coeff: the
+    // transformed coefficients when active, otherwise the standard dual (the fallback for
+    // unsupported faces and non-nodal LM bases).
     if (FEShapeData * fesd = _fe_shape_data_dual_lower[fe_type].get())
     {
       fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower.get_dual_phi()));
