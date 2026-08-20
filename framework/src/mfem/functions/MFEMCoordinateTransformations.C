@@ -28,15 +28,13 @@ MFEMCoordinateTransformations::validParams()
 
 MFEMCoordinateTransformations::MFEMCoordinateTransformations(const InputParameters & parameters)
   : Function(parameters),
-    _mfem_problem(dynamic_cast<MFEMProblem &>(
+    _mfem_problem(static_cast<MFEMProblem &>(
         *parameters.getCheckedPointerParam<SubProblem *>("_subproblem"))),
     _coord_type(getParam<MooseEnum>("coord_type")),
     _inv_r_eps(getParam<mfem::real_t>("inv_r_eps"))
 {
   if (_coord_type == "RZ")
     declareRZCoefficients();
-  else
-    mooseError("MFEMCoordinateTransformations currently supports only coord_type = RZ.");
 }
 
 void
