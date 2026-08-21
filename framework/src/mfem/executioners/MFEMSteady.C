@@ -46,8 +46,6 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     {
       if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
       {
-        _mfem_problem.getProblemData().eqn_system =
-            std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
         type = "MFEMEigenWeakFormProblemComposer";
       }
       else
