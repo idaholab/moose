@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "ProblemOperatorBase.h"
+#include "MFEMObject.h"
 
 namespace Moose::MFEM
 {
