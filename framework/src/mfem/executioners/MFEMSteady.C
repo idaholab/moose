@@ -39,7 +39,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _last_solve_converged(false)
 {
   // If no ProblemOperators have been added by the user, add a default
-  if (_mfem_problem.problemComposerIsEmpty())
+  if (!_mfem_problem.getProblemComposer())
   {
     std::string type;
     if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)

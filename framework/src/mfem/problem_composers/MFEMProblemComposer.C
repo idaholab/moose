@@ -22,7 +22,6 @@ Moose::MFEM::MFEMProblemComposer::validParams()
   InputParameters params = MFEMObject::validParams();
   params.registerBase("Moose::MFEM::MFEMProblemComposer");
   params.registerSystemAttributeName("Moose::MFEM::MFEMProblemComposer");
-  params.addParam<VariableName>("variable", "Variable labelling the problem operator builder");
   return params;
 }
 

@@ -11,15 +11,13 @@
 
 #pragma once
 
-#include "MFEMEigenproblem.h"
 #include "ProblemOperatorBase.h"
 #include "MFEMProblemComposer.h"
 
 namespace Moose::MFEM
 {
 /**
- * Complex weak form problem composer required to build MFEM Complex
- * Equation System Problem Operators
+ * Complex weak form problem composer to build an instance of ComplexEquationSystemProblemOperator
  */
 class MFEMComplexWeakFormProblemComposer : public MFEMProblemComposer
 {

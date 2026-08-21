@@ -235,7 +235,7 @@ public:
                  InputParameters & parameters) override;
 
   /**
-   * Method called in AddMFEMProblemComposerAction which will create the ProblemComposer.
+   * Method called in AddMFEMProblemComposerAction which will create the problem composer.
    */
   void addMFEMProblemComposer(const std::string & user_object_name,
                               const std::string & name,
@@ -292,11 +292,6 @@ public:
   {
     return _problem_composer;
   }
-
-  /**
-   * Checks whether problem composer interface is empty.
-   */
-  bool problemComposerIsEmpty() { return _problem_composer == nullptr; };
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.

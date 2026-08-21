@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MFEMEigenproblem.h"
 #include "ProblemOperatorBase.h"
 #include "MFEMProblemComposer.h"
 

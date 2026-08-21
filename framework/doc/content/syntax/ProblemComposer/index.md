@@ -1,4 +1,4 @@
-# MFEMProblemComposer System
+# ProblemComposers System
 
 The `ProblemComposer` system allows the user to construct
 problem operators with custom inputs. This class is specifically intended for composing
