@@ -39,16 +39,6 @@ MFEMComplexVectorL2Error::MFEMComplexVectorL2Error(const InputParameters & param
 {
 }
 
-void
-MFEMComplexVectorL2Error::initialize()
-{
-}
-
-void
-MFEMComplexVectorL2Error::execute()
-{
-}
-
 PostprocessorValue
 MFEMComplexVectorL2Error::getValue() const
 {
