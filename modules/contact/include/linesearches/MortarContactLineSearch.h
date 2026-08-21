@@ -61,9 +61,19 @@ typedef MooseVariableFE<Real> MooseVariable;
  * what was predicted are still detected and, if the applicable decrease or watchdog condition
  * passes, retained as part of the accepted step.
  *
- * The `c`/`normalize_c`/`use_derived_c_normal`/`c_t`/`mu`/`epsilon` parameters must be kept
- * consistent with the matching mortar `[Constraints]` block by the user; this class has no way to
- * automatically cross-check them against the constraints actually assembling the residual.
+ * A tangential dof repeatedly flipping between CONTACT_STICK and CONTACT_SLIP right at the
+ * Coulomb-cone boundary can keep forcing the event-limited/dense-escape machinery above without
+ * settling. The optional 'hysteresis_tau0' parameter (0, the default, disables this feature)
+ * damps that chatter: while a dof's raw switch value stays within a shrinking band of the
+ * switching surface, its previously-committed stick/slip classification is retained instead of
+ * following the raw flip (Moose::Mortar::Contact::applyTangentialHysteresis()). The band's
+ * half-width shrinks with the residual norm over the course of each SNES solve so it cannot mask
+ * a genuine transition once the solve is close to converged.
+ *
+ * The `c`/`normalize_c`/`use_derived_c_normal`/`c_t`/`dynamic_c_t`/`mu`/`epsilon` parameters must
+ * be kept consistent with the matching mortar `[Constraints]` block by the user; this class has
+ * no way to automatically cross-check them against the constraints actually assembling the
+ * residual.
  */
 class MortarContactLineSearch : public ContactLineSearchBase
 {
@@ -122,9 +132,11 @@ protected:
    * Classify every dof this rank owns in \p _weighted_gap_uo's weighted-gap map, reading
    * Lagrange multiplier and friction Lagrange multiplier values directly from \p solution (via
    * PETSc, not through the system's current solution) so that working-copy vectors never wired
-   * into the actual system solution can be classified.
+   * into the actual system solution can be classified. \p hysteresis_tau is the current
+   * shrinking hysteresis half-width (see _hysteresis_tau0) applied to frictional dofs' stick/slip
+   * classification; 0 disables it.
    */
-  Classification classify(const Vec & solution) const;
+  Classification classify(const Vec & solution, Real hysteresis_tau) const;
 
   /// The weighted gap user object providing dofToWeightedGap()
   const WeightedGapUserObject * _weighted_gap_uo = nullptr;
@@ -156,8 +168,12 @@ protected:
   const bool _use_derived_c_normal;
 
   /// Tangential stiffness scale; must match the corresponding [Constraints] block's 'c_t'
-  /// parameter. Only used when friction is enabled
+  /// parameter. Only used when friction is enabled. Ignored when '_dynamic_c_t' is true
   const Real _c_t;
+
+  /// Whether the tangential stiffness scale equals the normal one instead of '_c_t'; must match
+  /// the corresponding [Constraints] block's 'dynamic_c_t' parameter
+  const bool _dynamic_c_t;
 
   /// Constant Coulomb friction coefficient; must match the corresponding [Constraints] block.
   /// Required when 'weighted_velocities_uo' is given
@@ -179,6 +195,16 @@ protected:
   /// The canonical constraint-state map committed at the end of the previous lineSearch() call,
   /// used only to detect whether the contact set changed since then for ltol loosening
   std::unordered_map<dof_id_type, Moose::Mortar::Contact::ConstraintState> _old_state;
+
+  /// Initial half-width of the shrinking hysteresis band (eq eq:hysteresis) applied to
+  /// tangential stick/slip classification; scaled each outer iteration by the ratio of the
+  /// current residual norm to '_hysteresis_fnorm0' so the band vanishes as the solve converges.
+  /// 0 (the default) disables the feature entirely.
+  const Real _hysteresis_tau0;
+
+  /// Residual norm at the start of the current SNES solve, cached in lineSearch() and used to
+  /// scale '_hysteresis_tau0'; reset every new solve. Unused when '_hysteresis_tau0' is 0.
+  Real _hysteresis_fnorm0 = 0;
 
   /// The linear tolerance in effect before this object started loosening it; cached on first use
   /// so it can be restored once the contact set stops changing

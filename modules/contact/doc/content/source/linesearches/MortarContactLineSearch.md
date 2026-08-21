@@ -19,7 +19,7 @@ search's proposed iterate:
 Event prediction only tracks each dof's normal (open/closed) switch value; it does not
 predict stick/slip transitions for frictional dofs.
 
-The `c`, `normalize_c`, `use_derived_c_normal`, `c_t`, `mu`, and `epsilon` parameters must
-be kept consistent with the matching mortar `[Constraints]` block by the user; this class
-has no way to automatically cross-check them against the constraints actually assembling
-the residual.
+The `c`, `normalize_c`, `use_derived_c_normal`, `c_t`, `dynamic_c_t`, `mu`, and `epsilon`
+parameters must be kept consistent with the matching mortar `[Constraints]` block by the
+user; this class has no way to automatically cross-check them against the constraints
+actually assembling the residual.

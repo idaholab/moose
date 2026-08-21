@@ -373,6 +373,23 @@ classifyFrictionalState3d(const std::array<ADReal, 2> & augmented_tangential_pre
   return tangentialNorm(augmented_tangential_pressure) <= radius ? ConstraintState::CONTACT_STICK
                                                                   : ConstraintState::CONTACT_SLIP;
 }
+
+ConstraintState
+applyTangentialHysteresis(const ConstraintState raw,
+                          const ConstraintState previous,
+                          const Real switch_value,
+                          const Real tau)
+{
+  if (tau <= 0)
+    return raw;
+
+  const auto is_stick_or_slip = [](const ConstraintState state)
+  { return state == ConstraintState::CONTACT_STICK || state == ConstraintState::CONTACT_SLIP; };
+
+  if (is_stick_or_slip(raw) && is_stick_or_slip(previous) && std::abs(switch_value) <= tau)
+    return previous;
+  return raw;
+}
 }
 }
 }

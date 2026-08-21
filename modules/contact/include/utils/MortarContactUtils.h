@@ -637,6 +637,19 @@ classifyFrictionalState3d(const std::array<ADReal, 2> & augmented_tangential_pre
                           const ADReal & radius,
                           const ADReal & normal_pressure,
                           const ADReal & epsilon);
+
+/**
+ * Apply a shrinking hysteresis band (eq eq:hysteresis) to a tangential stick/slip
+ * classification: when both \p raw and \p previous are CONTACT_STICK or CONTACT_SLIP and
+ * \p switch_value falls within \p tau of the switching surface, \p previous is retained instead
+ * of \p raw, damping repeated flips right at the Coulomb-cone boundary. Returns \p raw
+ * unchanged whenever \p tau <= 0 (band disabled), \p previous is not a stick/slip state (nothing
+ * to retain), or \p raw is not a stick/slip state (the dof is genuinely OPEN, not chattering).
+ */
+ConstraintState applyTangentialHysteresis(ConstraintState raw,
+                                          ConstraintState previous,
+                                          Real switch_value,
+                                          Real tau);
 }
 }
 }

@@ -70,9 +70,13 @@ MortarContactLineSearch::validParams()
                         1e0,
                         "Numerical parameter for the tangential constraint; must match the "
                         "corresponding [Constraints] block's 'c_t' parameter. Only used when "
-                        "'weighted_velocities_uo' is given. The corresponding [Constraints] "
-                        "block must leave 'dynamic_c_t' at its default (false); that option is "
-                        "not supported by this class.");
+                        "'weighted_velocities_uo' is given. Ignored when 'dynamic_c_t' is true.");
+  params.addParam<bool>(
+      "dynamic_c_t",
+      false,
+      "Whether the tangential stiffness scale equals the normal one ('c', or its per-dof "
+      "'use_derived_c_normal' value) instead of the constant 'c_t'; must match the corresponding "
+      "[Constraints] block's 'dynamic_c_t' parameter.");
   params.addParam<Real>("mu",
                         "The constant Coulomb friction coefficient. Required when "
                         "'weighted_velocities_uo' is given. Must match the corresponding "
@@ -115,6 +119,14 @@ MortarContactLineSearch::validParams()
       5,
       "Number of further outer Newton iterations allowed for the residual to recover to at or "
       "below the watchdog checkpoint's level before the solution is rolled back to it.");
+  params.addRangeCheckedParam<Real>(
+      "hysteresis_tau0",
+      0,
+      "hysteresis_tau0 >= 0",
+      "Initial half-width of a shrinking hysteresis band on the tangential stick/slip switch "
+      "value, damping repeated flips at the Coulomb-cone boundary; scaled down over the course "
+      "of each SNES solve by the ratio of the current residual norm to the norm at the start of "
+      "that solve. 0 (the default) disables this feature.");
   return params;
 }
 
@@ -124,8 +136,10 @@ MortarContactLineSearch::MortarContactLineSearch(const InputParameters & paramet
     _normalize_c(getParam<bool>("normalize_c")),
     _use_derived_c_normal(getParam<bool>("use_derived_c_normal")),
     _c_t(getParam<Real>("c_t")),
+    _dynamic_c_t(getParam<bool>("dynamic_c_t")),
     _direct_accept_tol(getParam<Real>("direct_accept_tol")),
     _event_group_tol(getParam<Real>("event_group_tol")),
+    _hysteresis_tau0(getParam<Real>("hysteresis_tau0")),
     _event_step_epsilon(getParam<Real>("event_step_epsilon")),
     _dense_event_threshold(getParam<unsigned int>("dense_event_threshold")),
     _watchdog_gamma(getParam<Real>("watchdog_gamma")),
@@ -194,7 +208,7 @@ MortarContactLineSearch::initialSetup()
 }
 
 MortarContactLineSearch::Classification
-MortarContactLineSearch::classify(const Vec & solution) const
+MortarContactLineSearch::classify(const Vec & solution, const Real hysteresis_tau) const
 {
   using namespace Moose::Mortar::Contact;
 
@@ -254,7 +268,9 @@ MortarContactLineSearch::classify(const Vec & solution) const
       }
       else
         c_use = _normalize_c ? _c / normalization : _c;
-      const Real c_t_use = _normalize_c ? _c_t / normalization : _c_t;
+      // Mirrors ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(3d)'s
+      // 'dynamic_c_t' handling: the tangential stiffness scale equals the normal one.
+      const Real c_t_use = _dynamic_c_t ? c_use : (_normalize_c ? _c_t / normalization : _c_t);
 
       const auto & weighted_velocities =
           libmesh_map_find(_weighted_velocities_uo->dofToWeightedVelocities(), dof_object);
@@ -271,16 +287,15 @@ MortarContactLineSearch::classify(const Vec & solution) const
       // Tangential switch value for Component B's frictional event prediction: positive means
       // STICK, negative means SLIP, mirroring the sign convention classifyFrictionalState(3d)
       // already implement on ||augmented_tangential_pressure|| vs. radius.
+      Real q_t;
       if (_friction_lm_vars.size() == 1)
       {
         const ADReal augmented_tangential_pressure =
             friction_lm_value + c_t_use * weighted_velocities[0] * dt;
         state =
             classifyFrictionalState(augmented_tangential_pressure, radius, lm_value, epsilon_ad);
-        result.tangential_switch_values.emplace(
-            dof_id,
-            MetaPhysicL::raw_value(
-                radius - tangentialNorm(std::array<ADReal, 1>{{augmented_tangential_pressure}})));
+        q_t = MetaPhysicL::raw_value(
+            radius - tangentialNorm(std::array<ADReal, 1>{{augmented_tangential_pressure}}));
       }
       else
       {
@@ -292,10 +307,19 @@ MortarContactLineSearch::classify(const Vec & solution) const
              friction_lm_dir_value + c_t_use * weighted_velocities[1] * dt}};
         state =
             classifyFrictionalState3d(augmented_tangential_pressure, radius, lm_value, epsilon_ad);
-        result.tangential_switch_values.emplace(
-            dof_id,
-            MetaPhysicL::raw_value(radius - tangentialNorm(augmented_tangential_pressure)));
+        q_t = MetaPhysicL::raw_value(radius - tangentialNorm(augmented_tangential_pressure));
       }
+      result.tangential_switch_values.emplace(dof_id, q_t);
+
+      // Component E (shrinking hysteresis band): retain the previously-committed stick/slip
+      // classification instead of following a raw flip while q_t stays within 'hysteresis_tau'
+      // of the switching surface. '_old_state' is the canonical state committed at the end of
+      // the previous lineSearch() call, so it is stable as the "previous" reference across the
+      // checkpoint/backing/trial classifications within the current outer iteration.
+      const auto previous_it = _old_state.find(dof_id);
+      const ConstraintState previous_state =
+          previous_it != _old_state.end() ? previous_it->second : ConstraintState::OPEN;
+      state = applyTangentialHysteresis(state, previous_state, q_t, hysteresis_tau);
     }
     else
       state = classifyNormalState(lm_value, weighted_gap, c);
@@ -390,25 +414,37 @@ MortarContactLineSearch::lineSearch()
   PetscReal fnorm0, xnorm0, ynorm0;
   SNES snes = _solver->snes();
 
-  // A fresh SNESSolve() -- including a retry after a dt cut -- resets PETSc's own outer
-  // iteration counter to 0 before its first line-search call. Use that to tear down any watchdog
-  // episode left active by a prior, now-abandoned SNESSolve attempt: its cached checkpoint refers
-  // to an iterate from a solve that no longer exists, so comparing against it would produce a
-  // meaningless recovery/rollback decision.
-  PetscInt snes_iter;
-  LibmeshPetscCall(SNESGetIterationNumber(snes, &snes_iter));
-  if (snes_iter == 0)
-    deactivateWatchdog();
-
   LibmeshPetscCall(SNESGetLineSearch(snes, &line_search));
   LibmeshPetscCall(SNESLineSearchGetVecs(line_search, &X, &F, &Y, &W, &G));
   LibmeshPetscCall(SNESLineSearchGetNorms(line_search, &xnorm0, &fnorm0, &ynorm0));
   LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED));
 
+  // A fresh SNESSolve() -- including a retry after a dt cut -- resets PETSc's own outer
+  // iteration counter to 0 before its first line-search call. Use that to tear down any watchdog
+  // episode left active by a prior, now-abandoned SNESSolve attempt: its cached checkpoint refers
+  // to an iterate from a solve that no longer exists, so comparing against it would produce a
+  // meaningless recovery/rollback decision. The hysteresis band's reference residual norm is
+  // reset here too, so it shrinks over each new solve rather than only once ever.
+  PetscInt snes_iter;
+  LibmeshPetscCall(SNESGetIterationNumber(snes, &snes_iter));
+  if (snes_iter == 0)
+  {
+    deactivateWatchdog();
+    _hysteresis_fnorm0 = fnorm0;
+  }
+
   ++_nl_its;
 
+  // Shrinking hysteresis band (eq eq:hysteresis): scaled by the ratio of the current residual
+  // norm to the norm at the start of this SNES solve so the band vanishes as the solve
+  // converges. Computed once per outer iteration so the checkpoint/backing/trial
+  // classifications below stay self-consistent.
+  const Real hysteresis_tau = (_hysteresis_tau0 > 0 && _hysteresis_fnorm0 > 0)
+                                  ? _hysteresis_tau0 * fnorm0 / _hysteresis_fnorm0
+                                  : 0;
+
   // Checkpoint: classify the incoming iterate before the backing search perturbs anything.
-  const auto checkpoint = classify(X);
+  const auto checkpoint = classify(X, hysteresis_tau);
 
   if (_affect_ltol)
   {
@@ -456,7 +492,7 @@ MortarContactLineSearch::lineSearch()
   // Trust the backing search's own Xb/Fb/fnorm_b directly; SNESLineSearchApply already refreshed
   // them via its own internal residual evaluations, so no further SNESComputeFunction call is
   // needed here.
-  const auto state_backing = classify(Xb);
+  const auto state_backing = classify(Xb, hysteresis_tau);
   const auto diff = symmetricDifference(checkpoint.states, state_backing.states);
   bool identity_changed = !diffIsEmpty(diff);
   comm().max(identity_changed);
@@ -605,7 +641,7 @@ MortarContactLineSearch::lineSearch()
       // than trusting the secant-based prediction outright; coupling can make the actual
       // transition include dofs beyond the predicted group, so the full reconciled
       // classification is compared, not just the predicted dof.
-      const auto state_trial = classify(W);
+      const auto state_trial = classify(W, hysteresis_tau);
       const auto trial_diff = symmetricDifference(checkpoint.states, state_trial.states);
       bool trial_identity_changed = !diffIsEmpty(trial_diff);
       comm().max(trial_identity_changed);
