@@ -1,0 +1,18 @@
+In this example, we will test the MOOSE framework. You should run this example if you are using this development environment to develop MOOSE itself. Here, we assume that a MOOSE repository is available within `~/projects/moose`. If you have cloned MOOSE in a different location, you should replace the directory in the first command that follows with the directory in which MOOSE is cloned.
+
+```bash
+cd ~/projects/moose
+cd test
+make -j {{moose_jobs}}
+./run_tests -j {{moose_jobs}}
+```
+
+The above will compile the MOOSE test application and run the tests.
+
+You can also build and test the MOOSE combined application (which contains all of the physics modules) if you wish with the following:
+
+```bash
+cd ~/projects/moose/modules
+make -j {{moose_jobs}}
+./run_tests -j {{moose_jobs}}
+```
