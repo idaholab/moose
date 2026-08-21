@@ -9,6 +9,7 @@
 
 #include "MooseError.h"
 #include "Axisymmetric2D3DSolutionFunction.h"
+#include "RankTwoTensor.h"
 #include "SolutionUserObjectBase.h"
 
 registerMooseObject("MooseApp", Axisymmetric2D3DSolutionFunction);
@@ -24,8 +25,9 @@ Axisymmetric2D3DSolutionFunction::validParams()
                                           "The SolutionUserObject to extract data from.");
   params.addParam<std::vector<std::string>>(
       "from_variables",
-      "The names of the variables in the file that are to be extracted, in x, y "
-      "order if they are vector components");
+      "The names of the variables in the file that are to be extracted. Supply 1 name for a "
+      "scalar field, 2 names in (x, y) order for a 2D vector field, or 4 names in (rr, yy, ry, "
+      "tt) order for a rank-two tensor field saved in cylindrical components.");
 
   params.addParam<Real>(
       "scale_factor",
@@ -56,9 +58,17 @@ Axisymmetric2D3DSolutionFunction::validParams()
 
   params.addParam<unsigned int>("component",
                                 "Component of the variable to be computed if it is a vector");
+  params.addParam<unsigned int>(
+      "component_i",
+      "Cartesian row index (0, 1, or 2) of the rank-two tensor component to return. Tensor mode "
+      "only; required when 'from_variables' has 4 entries.");
+  params.addParam<unsigned int>(
+      "component_j",
+      "Cartesian column index (0, 1, or 2) of the rank-two tensor component to return. Tensor "
+      "mode only; required when 'from_variables' has 4 entries.");
 
-  params.addClassDescription("Function for reading a 2D axisymmetric solution from file and "
-                             "mapping it to a 3D Cartesian model");
+  params.addClassDescription("Function for reading a 2D axisymmetric scalar, vector, or rank-two "
+                             "tensor solution from file and mapping it to a 3D Cartesian model");
 
   return params;
 }
@@ -76,15 +86,39 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(
     _3d_axis_point2(getParam<RealVectorValue>("3d_axis_point2")),
     _has_component(isParamValid("component")),
     _component(_has_component ? getParam<unsigned int>("component") : 99999),
+    _has_component_i(isParamValid("component_i")),
+    _component_i(_has_component_i ? getParam<unsigned int>("component_i") : 99999),
+    _has_component_j(isParamValid("component_j")),
+    _component_j(_has_component_j ? getParam<unsigned int>("component_j") : 99999),
     _var_names(getParam<std::vector<std::string>>("from_variables"))
 {
+  const bool tensor_mode = _var_names.size() == 4;
+
+  if (_has_component && _has_component_i)
+    mooseError("'component' and 'component_i' are mutually exclusive: 'component' selects a vector "
+               "component (2 'from_variables') and 'component_i'/'component_j' select a tensor "
+               "component (4 'from_variables')");
+
+  // Size 0 is allowed: 'from_variables' is optional and is populated in initialSetup() from the
+  // SolutionUserObject when it contains a single variable.
+  if (_var_names.size() != 0 && _var_names.size() != 1 && _var_names.size() != 2 &&
+      _var_names.size() != 4)
+    mooseError("'from_variables' length must be 1, 2, or 4: 1 for a scalar field, 2 for a 2D "
+               "vector field (x, y), or 4 for a rank-two tensor field (rr, yy, ry, tt)");
+
   if (_has_component && _var_names.size() != 2)
     mooseError("Must supply names of 2 variables in 'from_variables' if 'component' is specified");
-  else if (!_has_component && _var_names.size() == 2)
+  if (!_has_component && _var_names.size() == 2)
     mooseError("Must supply 'component' if 2 variables specified in 'from_variables'");
-  else if (_var_names.size() > 2)
-    mooseError("If 'from_variables' is specified, it must have either 1 (scalar) or 2 (vector "
-               "components) variables");
+
+  if ((_has_component_i || _has_component_j) && !tensor_mode)
+    mooseError("'component_i'/'component_j' is tensor mode only: requires 4 entries in "
+               "'from_variables' (rr, yy, ry, tt)");
+  if (tensor_mode && (!_has_component_i || !_has_component_j))
+    mooseError("Tensor mode (4 entries in 'from_variables') requires both 'component_i' and "
+               "'component_j' to be specified");
+  if (tensor_mode && (_component_i > 2 || _component_j > 2))
+    mooseError("'component_i'/'component_j' out of range: must be 0, 1, or 2");
 
   Point zero;
   Point unit_vec_y;
@@ -185,7 +219,54 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p) const
   }
 
   Real val;
-  if (_has_component)
+  if (_var_names.size() == 4)
+  {
+    const Real T_rr = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[0]);
+    const Real T_yy = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[1]);
+    const Real T_ry = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[2]);
+    const Real T_tt = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[3]);
+
+    if (!r_gt_zero)
+    {
+      if (!MooseUtils::absoluteFuzzyEqual(T_ry, 0.0))
+        mooseError("In Axisymmetric2D3DSolutionFunction r=0 and T_ry != 0; the rotation is "
+                   "indeterminate on the axis and the input tensor is not axisymmetric there");
+      if (!MooseUtils::absoluteFuzzyEqual(T_rr, T_tt))
+        mooseError("In Axisymmetric2D3DSolutionFunction r=0 and T_rr != T_tt; the rotation is "
+                   "indeterminate on the axis and the input tensor is not axisymmetric there");
+
+      // On the axis the cylindrical-frame tensor reduces to diag(T_rr, T_yy, T_rr) and
+      // produces the same Cartesian tensor for any choice of r_hat orthogonal to z_hat. Pick any
+      // unit vector orthogonal to z_dir_3d to build a valid rotation.
+      Point arbitrary(1, 0, 0);
+      if (std::abs(z_dir_3d * arbitrary) > 0.9)
+        arbitrary = Point(0, 1, 0);
+      r_dir_3d = arbitrary - (arbitrary * z_dir_3d) * z_dir_3d;
+      r_dir_3d /= r_dir_3d.norm();
+    }
+
+    const Point t_dir_3d = z_dir_3d.cross(r_dir_3d);
+
+    // R has the cylindrical basis vectors (r_hat, axial_hat, t_hat) as its columns, expressed in
+    // the standard Cartesian basis, so T_cart = R T_cyl R^T maps cylindrical components to
+    // Cartesian.
+    const RankTwoTensor R =
+        RankTwoTensor::initializeFromRows(RealVectorValue(r_dir_3d(0), z_dir_3d(0), t_dir_3d(0)),
+                                          RealVectorValue(r_dir_3d(1), z_dir_3d(1), t_dir_3d(1)),
+                                          RealVectorValue(r_dir_3d(2), z_dir_3d(2), t_dir_3d(2)));
+
+    // T_cyl in basis order (r, y, t): off-axis shears T_rt and T_yt are zero by
+    // axisymmetry.
+    const RankTwoTensor T_cyl = RankTwoTensor::initializeFromRows(RealVectorValue(T_rr, T_ry, 0),
+                                                                  RealVectorValue(T_ry, T_yy, 0),
+                                                                  RealVectorValue(0, 0, T_tt));
+
+    // Rotate cylindrical components into Cartesian: T_cart = R T_cyl R^T.
+    const RankTwoTensor T_cart = T_cyl.rotated(R);
+
+    val = T_cart(_component_i, _component_j);
+  }
+  else if (_has_component)
   {
     Real val_x = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[0]);
     Real val_y = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[1]);
