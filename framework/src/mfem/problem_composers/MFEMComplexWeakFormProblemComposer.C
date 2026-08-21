@@ -34,22 +34,11 @@ Moose::MFEM::MFEMComplexWeakFormProblemComposer::MFEMComplexWeakFormProblemCompo
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::MFEMComplexWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
+  if (mfem_problem.getNumericType() != MFEMProblem::NumericType::COMPLEX)
+    mooseError("Wrong numeric type. Please set the Problem numeric type to 'complex'.");
 
-  // Construct a standard problem operator
-  if (mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
-  {
-    mfem_problem.getProblemData().eqn_system =
-        std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-    _problem_operator =
-        std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
-  }
-  else
-  {
-    mooseError("Wrong numeric type. "
-               "Please set the Problem numeric type to 'complex'.");
-  }
-  return _problem_operator;
+  mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
+  return std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
 }
 
 #endif
