@@ -10,6 +10,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_parallel = 1
   []
   [MFEMComplex2DTri]
     type = XMLDiff
@@ -27,6 +28,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    max_parallel = 1
   []
   [MFEMComplexWaveguide]
     type = CSVDiff
