@@ -276,7 +276,8 @@ EqualValueBoundaryConstraint::ghostPrimary()
 
   if (elems.size() == 0)
     mooseError("Couldn't find any elements connected to primary node");
-  _subproblem.addGhostedElem(elems[0]);
+
+  addRetainedGhostedElem(elems[0]);
 }
 
 Real

@@ -184,7 +184,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
       mooseError("Couldn't find any elements connected to primary node");
 
     for (unsigned int j = 0; j < elems[i].size(); ++j)
-      _subproblem.addGhostedElem(elems[i][j]);
+      addRetainedGhostedElem(elems[i][j]);
   }
 
   // Cache map between secondary node and primary node
