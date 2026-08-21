@@ -23,36 +23,16 @@ namespace Moose::MFEM
 registerMooseObject("MooseApp", MFEMWeakFormProblemComposer);
 }
 
-InputParameters
-Moose::MFEM::MFEMWeakFormProblemComposer::validParams()
-{
-  InputParameters params = MFEMProblemComposer::validParams();
-  return params;
-}
-
-Moose::MFEM::MFEMWeakFormProblemComposer::MFEMWeakFormProblemComposer(
-    const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
-{
-}
-
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::MFEMWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
-
   // Construct a standard problem operator
-  if (mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
-  {
-    mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-    _problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem);
-  }
-  else
-  {
-    mooseError("Wrong numeric type. "
-               "Please set the Problem numeric type to 'real'.");
-  }
-  return _problem_operator;
+  if (mfem_problem.getNumericType() != MFEMProblem::NumericType::REAL)
+    mooseError("Wrong numeric type. Please set the Problem numeric type to 'real'.");
+
+  mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+
+  return std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem);
 }
 
 #endif

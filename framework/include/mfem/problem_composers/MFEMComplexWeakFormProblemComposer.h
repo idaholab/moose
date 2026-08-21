@@ -22,9 +22,15 @@ namespace Moose::MFEM
 class MFEMComplexWeakFormProblemComposer : public MFEMProblemComposer
 {
 public:
-  static InputParameters validParams();
+  static InputParameters validParams()
+  {
+    return MFEMProblemComposer::validParams();
+  }
 
-  MFEMComplexWeakFormProblemComposer(const InputParameters & parameters);
+  MFEMComplexWeakFormProblemComposer(const InputParameters & parameters)
+    : MFEMProblemComposer(parameters)
+  {
+  }
 
   ~MFEMComplexWeakFormProblemComposer() = default;
 

@@ -23,19 +23,6 @@ namespace Moose::MFEM
 registerMooseObject("MooseApp", MFEMTimeDependentWeakFormProblemComposer);
 }
 
-InputParameters
-Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::validParams()
-{
-  InputParameters params = MFEMProblemComposer::validParams();
-  return params;
-}
-
-Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::MFEMTimeDependentWeakFormProblemComposer(
-    const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
-{
-}
-
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(
     MFEMProblem & mfem_problem)

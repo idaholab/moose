@@ -23,45 +23,20 @@ namespace Moose::MFEM
 registerMooseObject("MooseApp", MFEMEigenWeakFormProblemComposer);
 }
 
-InputParameters
-Moose::MFEM::MFEMEigenWeakFormProblemComposer::validParams()
-{
-  InputParameters params = MFEMProblemComposer::validParams();
-  return params;
-}
-
-Moose::MFEM::MFEMEigenWeakFormProblemComposer::MFEMEigenWeakFormProblemComposer(
-    const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
-{
-}
-
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::MFEMEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
-
   // Construct a standard problem operator
-  if (mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
-  {
-    if (dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
-    {
-      mfem_problem.getProblemData().eqn_system =
-          std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-      _problem_operator =
-          std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
-    }
-    else
-    {
-      mooseError("Not an eigen value problem. ");
-    }
-  }
-  else
-  {
-    mooseError("Wrong numeric type. "
-               "Please set the Problem numeric type to 'real'.");
-  }
-  return _problem_operator;
+  if (mfem_problem.getNumericType() != MFEMProblem::NumericType::REAL)
+    mooseError("Wrong numeric type. Please set the Problem numeric type to 'real'.");
+
+  if (!dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
+    mooseError("Not an eigen value problem. ");
+
+  mfem_problem.getProblemData().eqn_system =
+      std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
+
+  return std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
 }
 
 #endif
