@@ -21,12 +21,13 @@ FunctorSmootherTempl<T>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Creates smoother functor(s) using various averaging techniques");
-  params.addParam<std::vector<MooseFunctorName>>("functors_in",
-                                                 "The name(s) of the functors to smooth");
-  params.addParam<std::vector<MooseFunctorName>>("functors_out",
-                                                 "The name(s) of the smooth output functors");
-  MooseEnum smoothing_techniques("face_average layered_elem_average remove_checkerboard");
-  params.addParam<MooseEnum>(
+  params.addRequiredParam<std::vector<MooseFunctorName>>("functors_in",
+                                                         "The name(s) of the functors to smooth");
+  params.addRequiredParam<std::vector<MooseFunctorName>>(
+      "functors_out", "The name(s) of the smooth output functors");
+  MooseEnum smoothing_techniques(
+      "face_average node_average layered_elem_average remove_checkerboard");
+  params.addRequiredParam<MooseEnum>(
       "smoothing_technique", smoothing_techniques, "How to smooth the functor");
 
   return params;
@@ -64,12 +65,23 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
       factory.releaseSharedObjects(*rm_obj);
   }
 
+  // Request the node to elem map so we don't build it in a threaded region
+  if (isNodal())
+    _mesh.nodeToElemMap();
+
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
 
   for (const auto i : index_range(_functors_in))
   {
     // This potentially upcasts functors from non-AD to AD
     const auto & functor_in = getFunctor<typename Moose::ADType<T>::type>(_functors_in[i]);
+
+    // Check the block restriction of the incoming functor
+    for (const auto bid : blockIDs())
+      if (!functor_in.hasBlocks(bid))
+        paramError("block",
+                   "Input functor '" + functor_in.functorName() +
+                       "' is not defined in subdomain: " + Moose::stringify(bid));
 
     // We always add the AD type
     addFunctorProperty<typename Moose::ADType<T>::type>(
@@ -114,10 +126,48 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
             }
             else
               // a conceptually simple option here would be to use the smoothed version of the
-              // ElemArg to compute all the other functor arguments. Maybe with the same smoothing
-              // on the gradient calls
+              // ElemArg to compute all the other functor arguments. Maybe with the same
+              // smoothing on the gradient calls
               mooseError("Face averaging smoothing has only been defined for the ElemArg functor "
                          "argument, not for ",
+                         MooseUtils::prettyCppType(&r),
+                         ". Please contact a MOOSE developer or implement it yourself.");
+          }
+          else if (_smoothing_technique == NODE_AVERAGE)
+          {
+            if constexpr (std::is_same_v<const Moose::NodeArg &, decltype(r)>)
+            {
+              const Node * r_node = nullptr;
+              if constexpr (std::is_same_v<const Moose::NodeArg &, decltype(r)>)
+                r_node = r.node;
+
+              unsigned int n_nodes = 0;
+              const auto & node_to_elem_map = _mesh.nodeToElemMap();
+              for (const auto & shared_elem_id : libmesh_map_find(node_to_elem_map, r_node->id()))
+              {
+                const auto & shared_elem = _mesh.elemPtr(shared_elem_id);
+                const auto node_index = shared_elem->get_node_index(r_node);
+                // Limit the stencil to edge-connected nodes to limit ghosting needs
+                for (const auto edge_index : shared_elem->edges_adjacent_to_node(node_index))
+                {
+                  for (const auto n : shared_elem->nodes_on_edge(edge_index))
+                  {
+                    // we don't consider the previous nodal value
+                    // maybe we should, use will determine that
+                    if (n == node_index)
+                      continue;
+                    const Moose::NodeArg node_arg = {
+                        shared_elem->node_ptr(n), &Moose::NodeArg::undefined_subdomain_connection};
+                    average += functor_in(node_arg, t);
+                    n_nodes++;
+                  }
+                }
+              }
+              average /= n_nodes;
+            }
+            else
+              mooseError("Node averaging smoothing has only been defined for the "
+                         "NodeArg functor argument at this time, not for ",
                          MooseUtils::prettyCppType(&r),
                          ". Please contact a MOOSE developer or implement it yourself.");
           }
@@ -140,13 +190,13 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                          MooseUtils::prettyCppType(&r),
                          ". Please contact a MOOSE developer or implement it yourself.");
           }
-          else
+          else // Checkerboard removing
           {
             if constexpr (std::is_same_v<const Moose::ElemArg &, decltype(r)>)
             {
               // We average the local value with the average of the two values furthest away
-              // among the neighbors. For a checkerboarding but overall linear evolution, this will
-              // compute the average of the "high" and "low" profiles
+              // among the neighbors. For a checkerboarding but overall linear evolution, this
+              // will compute the average of the "high" and "low" profiles
               average += base_value / 2;
 
               // Find the neighbor with the furthest value

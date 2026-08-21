@@ -9,38 +9,44 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "NodalUserObject.h"
 #include "MooseMesh.h"
 
 class NonlinearSystemBase;
 
 /**
- * Renormalization of a vector variable (i.e. a set of variables comprising a vector)
+ * Set (all or some) values of (one or more) nonlinear variable(s) using functor evaluations
  */
-class PointwiseRenormalizeVector : public GeneralUserObject
+class FunctorNodalCorrector : public NodalUserObject, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
 
-  PointwiseRenormalizeVector(const InputParameters & parameters);
+  FunctorNodalCorrector(const InputParameters & parameters);
 
   void initialize() override;
   void execute() override;
   void finalize() override;
-
-  // only needed for ElementUserObjects and NodalUseroObjects
   void threadJoin(const UserObject &) override {}
 
 protected:
   /// reference to the mesh
   MooseMesh & _mesh;
 
-  /// names of the variables to renormalize
+  /// names of the variables to set using functors
   const std::vector<VariableName> & _var_names;
-
   /// internal ID numbers of the variables to renormalize
   std::vector<unsigned int> _var_numbers;
 
-  /// desired norm
-  const Real _target_norm;
+  /// Name of the functors
+  const std::vector<MooseFunctorName> & _functor_names;
+
+  /// Evaluation method (argument)
+  const MooseEnum _functor_evaluation_technique;
+
+  /// Pointers to the functors
+  std::vector<const Moose::Functor<Real> *> _functors;
+
+  /// Vector of boundaries to not execute on
+  std::vector<BoundaryID> _excluded_nodeset_ids;
 };
