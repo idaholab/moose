@@ -56,6 +56,10 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
                         1e-10,
                         "Tangential velocity magnitude below which dynamic c_t falls back to "
                         "c_normal_eff (stick regime guard).");
+  params.addParam<bool>("degree_one_friction_residual",
+                        false,
+                        "Use the degree-one Alart-Curnier friction residual instead of the "
+                        "degree-two Hueber-Stadler-Wohlmuth friction residual (the default).");
 
   return params;
 }
@@ -70,6 +74,7 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _c_t(getParam<Real>("c_t")),
     _dynamic_c_t(getParam<bool>("dynamic_c_t")),
     _vel_floor(getParam<Real>("vel_floor")),
+    _degree_one_friction_residual(getParam<bool>("degree_one_friction_residual")),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -255,12 +260,24 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
       {friction_lm_values[0] + c_t * *tangential_vel[0] * _dt,
        friction_lm_values[1] + c_t * *tangential_vel[1] * _dt}};
 
-  // Degree-two Hueber-Stadler-Wohlmuth friction residual (see MortarContactUtils.h), gated by
-  // the raw, unaugmented contact_pressure via epsilon so dofs transitioning between contact and
-  // separation fall back to the trivial identity residual rather than the full weight/radius
-  // expression.
-  const auto residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-      friction_lm_values, augmented_tangential_pressure, radius, contact_pressure, ADReal(_epsilon));
+  // Friction residual (see MortarContactUtils.h): degree-one Alart-Curnier or degree-two
+  // Hueber-Stadler-Wohlmuth (the default), selected by 'degree_one_friction_residual'. Both are
+  // gated by the raw, unaugmented contact_pressure via epsilon so dofs transitioning between
+  // contact and separation fall back to the trivial identity residual rather than the full
+  // formulation-specific expression.
+  const auto residual =
+      _degree_one_friction_residual
+          ? Moose::Mortar::Contact::alartCurnierFrictionResidual(friction_lm_values,
+                                                                 augmented_tangential_pressure,
+                                                                 radius,
+                                                                 contact_pressure,
+                                                                 ADReal(_epsilon))
+          : Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+                friction_lm_values,
+                augmented_tangential_pressure,
+                radius,
+                contact_pressure,
+                ADReal(_epsilon));
   const ADReal dof_residual = residual[0];
   const ADReal dof_residual_dir = residual[1];
 
@@ -321,9 +338,20 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const std::array<ADReal, 1> augmented_tangential_pressure{
       {friction_lm_value + c_t * tangential_vel * _dt}};
 
-  // Degree-two Hueber-Stadler-Wohlmuth friction residual; see 3D path above for rationale.
-  const ADReal dof_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-      tangential_pressure, augmented_tangential_pressure, radius, contact_pressure, ADReal(_epsilon))[0];
+  // Friction residual; see 3D path above for rationale.
+  const ADReal dof_residual =
+      (_degree_one_friction_residual
+           ? Moose::Mortar::Contact::alartCurnierFrictionResidual(tangential_pressure,
+                                                                  augmented_tangential_pressure,
+                                                                  radius,
+                                                                  contact_pressure,
+                                                                  ADReal(_epsilon))
+           : Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+                 tangential_pressure,
+                 augmented_tangential_pressure,
+                 radius,
+                 contact_pressure,
+                 ADReal(_epsilon)))[0];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

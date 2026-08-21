@@ -100,6 +100,10 @@ protected:
   /// Tangential velocity magnitude below which c_t falls back to c_normal_eff (stick regime)
   const Real _vel_floor;
 
+  /// When true, use the degree-one Alart-Curnier friction residual instead of the degree-two
+  /// Hueber-Stadler-Wohlmuth friction residual (the default); see MortarContactUtils.h
+  const bool _degree_one_friction_residual;
+
   /// Frictional Lagrange's multiplier variable pointers
   std::vector<MooseVariable *> _friction_vars;
 

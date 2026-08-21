@@ -223,6 +223,11 @@ ContactAction::validParams()
   params.addParam<MooseEnum>("c_tangential_strategy",
                              c_tangential_strategy,
                              "Strategy for setting the tangential contact scaling.");
+  params.addParam<bool>("degree_one_friction_residual",
+                        false,
+                        "Use the degree-one Alart-Curnier friction residual instead of the "
+                        "degree-two Hueber-Stadler-Wohlmuth friction residual (the default). Only "
+                        "valid for Coulomb friction mortar contact.");
   params.addParam<std::string>(
       "secondary_elasticity_tensor_base_name",
       "",
@@ -357,7 +362,8 @@ ContactAction::validParams()
       "adaptivity_penalty_normal adaptivity_penalty_friction",
       "Augmented Lagrange");
   // Friction
-  params.addParamNamesToGroup("friction_coefficient tension_release", "Friction");
+  params.addParamNamesToGroup("friction_coefficient tension_release degree_one_friction_residual",
+                              "Friction");
   // Mortar-specific parameters
   params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
@@ -491,6 +497,11 @@ ContactAction::ContactAction(const InputParameters & params)
         _model != ContactModel::COULOMB)
       paramError("c_tangential_strategy",
                  "'c_tangential_strategy = physical' is only valid for Coulomb friction mortar "
+                 "contact.");
+
+    if (isParamSetByUser("degree_one_friction_residual") && _model != ContactModel::COULOMB)
+      paramError("degree_one_friction_residual",
+                 "'degree_one_friction_residual' is only valid for Coulomb friction mortar "
                  "contact.");
   }
   else
@@ -1399,6 +1410,9 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
+      if (!_mortar_dynamics)
+        params.set<bool>("degree_one_friction_residual") =
+            getParam<bool>("degree_one_friction_residual");
       params.applySpecificParameters(parameters(),
                                      {"triangulation",
                                       "triangulate_triangles",

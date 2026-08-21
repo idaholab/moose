@@ -123,6 +123,27 @@ alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
 }
 
 /**
+ * Same as the three-argument \p alartCurnierFrictionResidual, but additionally short-circuits to
+ * the trivial identity residual whenever the raw, unaugmented normal contact pressure
+ * \p normal_pressure falls below \p epsilon, mirroring the epsilon-gated
+ * \p hueberStadlerWohlmuthFrictionResidual overload below so both friction-residual degrees
+ * apply the same active-set transition guard.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
+                             const std::array<T, N> & augmented_tangential_pressure,
+                             const T & radius,
+                             const T & normal_pressure,
+                             const T & epsilon)
+{
+  if (normal_pressure < epsilon)
+    return tangential_pressure;
+
+  return alartCurnierFrictionResidual(tangential_pressure, augmented_tangential_pressure, radius);
+}
+
+/**
  * Return the degree-two Hueber-Stadler-Wohlmuth friction residual
  * max(radius, ||q_t||) p_t - radius q_t.
  *
