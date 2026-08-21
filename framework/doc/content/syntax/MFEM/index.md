@@ -69,7 +69,7 @@ Now we set up boundary conditions. Here, we choose scalar Dirichlet boundary con
 
 ### Problem Operators and Composers
 
-The problem operator applies an action on a vector this can be a solve of an equation system,
+The problem operator applies an action on a vector: this can be a solve of an equation system,
 application of a preconditioner or any other custom operator the user may have. The problem
 composer is the systematic logical object that builds the problem operator. By default, a composer
 will be instantiated based on the type of executioner (steady or transient), numerical type (real or 
