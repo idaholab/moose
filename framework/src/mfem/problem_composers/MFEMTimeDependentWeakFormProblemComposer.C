@@ -27,15 +27,12 @@ std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(
     MFEMProblem & mfem_problem)
 {
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
-
   // Construct the problem operator
   mfem_problem.getProblemData().eqn_system =
       std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
           mfem_problem.getProblemData().time_derivative_map);
-  _problem_operator =
-      std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfem_problem);
-  return _problem_operator;
+
+  return std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfem_problem);
 }
 
 #endif
