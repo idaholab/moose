@@ -30,6 +30,16 @@ public:
   virtual void addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & parameters) override;
+
+  /**
+   * Add default weak form if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm() override;
+
+  /**
+   * Add an MFEM problem operator. Takes ownership.
+   */
+  virtual void setMFEMProblemOperators() override;
 };
 
 #endif

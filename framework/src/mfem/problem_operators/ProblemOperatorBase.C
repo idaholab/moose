@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ProblemOperatorBase.h"
+#include "MFEMProblem.h"
 
 class MFEMProblem;
 
@@ -48,6 +49,7 @@ ProblemOperatorBase::SetGridFunctions()
 void
 ProblemOperatorBase::Init(mfem::BlockVector & X)
 {
+  SetGridFunctions();
   X.Update(_block_true_offsets_trial);
   for (const auto i : index_range(_trial_variables))
     X.GetBlock(i) = _trial_variables[i]->GetTrueVector();

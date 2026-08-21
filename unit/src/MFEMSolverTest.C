@@ -40,7 +40,7 @@ public:
     const VariableName var_name("test_variable_name");
     _mfem_problem->getProblemData().gridfunctions.Register(var_name, _x);
     _equation_system = std::make_shared<Moose::MFEM::EquationSystem>();
-    _mfem_problem->getProblemData().eqn_system = _equation_system;
+    _mfem_problem->getProblemData().eqn_systems.Register("_default_eq_sys", _equation_system);
   }
 
   static mfem::real_t uexact(const mfem::Vector & x)
