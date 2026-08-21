@@ -264,7 +264,9 @@ MoveNodesByParsedExpression::prepare()
     auto & vec = _localized_solution[sys_num];
     if (!vec)
       vec = libMesh::NumericVector<libMesh::Number>::build(comm());
-    if (vec->size() != n_dofs)
+    // size() asserts on an uninitialized vector, so check initialized() first: the
+    // vector is uninitialized on the first pass, and n_dofs can change under adaptivity.
+    if (!vec->initialized() || vec->size() != n_dofs)
       vec->init(n_dofs, false, libMesh::SERIAL);
     sys.currentSolution()->localize(*vec);
   }
