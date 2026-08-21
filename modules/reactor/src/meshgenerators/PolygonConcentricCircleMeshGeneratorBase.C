@@ -1018,7 +1018,12 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     if (_tri_elem_type == TRI_ELEM_TYPE::TRI6)
       poly2tri.elem_type() = libMesh::ElemType::TRI6;
     else if (_tri_elem_type == TRI_ELEM_TYPE::TRI7)
+    {
       poly2tri.elem_type() = libMesh::ElemType::TRI7;
+      // Move the TRI7 interior node to the curved-mapping centroid after the
+      // boundary mid-edge nodes are snapped; see MeshTriangulationUtils.C.
+      poly2tri.set_fixup_tri7_center_nodes(true);
+    }
     // let us keep the center point
     poly_mesh->add_point(libMesh::Point());
     poly2tri.triangulate();

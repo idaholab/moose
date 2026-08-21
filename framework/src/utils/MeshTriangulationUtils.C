@@ -156,7 +156,14 @@ triangulateWithDelaunay(MeshGenerator & mg,
   if (xyd_opts.tri_elem_type == "TRI6")
     poly2tri.elem_type() = libMesh::ElemType::TRI6;
   else if (xyd_opts.tri_elem_type == "TRI7")
+  {
     poly2tri.elem_type() = libMesh::ElemType::TRI7;
+    // Snapping boundary mid-edge nodes onto a curved input boundary leaves the
+    // TRI7 interior node at the stale straight-edge centroid. Ask libMesh to
+    // move it to the curved-mapping centroid; this is also what makes
+    // libMesh's Tri6-based tangling check valid for TRI7.
+    poly2tri.set_fixup_tri7_center_nodes(true);
+  }
   // Add interior points before triangulating. Only points inside the boundaries
   // will be meshed.
   for (const auto & point : xyd_opts.interior_points)
