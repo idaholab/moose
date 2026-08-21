@@ -77,7 +77,8 @@ MoveNodesByParsedExpression::validParams()
       "displacement_variables",
       {},
       "If set, the current node displacement (current minus original position) is written to these "
-      "three nodal auxiliary variables, given in x, y, z order, which must be created by the user.");
+      "three nodal auxiliary variables, given in x, y, z order, which must be created by the "
+      "user.");
   params.addParam<AuxVariableName>(
       "density_factor_variable",
       "",
@@ -105,7 +106,8 @@ MoveNodesByParsedExpression::MoveNodesByParsedExpression(const InputParameters &
     _subdomain_ids(_mesh.getSubdomainIDs(getParam<std::vector<SubdomainName>>("block"))),
     _output_coordinates(
         !getParam<std::vector<AuxVariableName>>("original_coordinate_variables").empty()),
-    _output_displacements(!getParam<std::vector<AuxVariableName>>("displacement_variables").empty()),
+    _output_displacements(
+        !getParam<std::vector<AuxVariableName>>("displacement_variables").empty()),
     _output_density_factor(!getParam<AuxVariableName>("density_factor_variable").empty()),
     _aux_sys_num(0),
     _density_factor_var(0),
@@ -385,7 +387,7 @@ MoveNodesByParsedExpression::writeOutputs()
           aux_solution.set(node->dof_number(_aux_sys_num, _coordinate_var[i], 0), original(i));
         if (_output_displacements)
           aux_solution.set(node->dof_number(_aux_sys_num, _displacement_var[i], 0),
-                           (*node)(i) - original(i));
+                           (*node)(i)-original(i));
       }
     }
 
