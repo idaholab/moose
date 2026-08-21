@@ -17,15 +17,15 @@
 []
 
 [ChemicalComposition]
-  tunit = K
-  punit = atm
-  munit = moles
-  output_species_unit = moles
+  temperature_unit = K
+  pressure_unit = atm
+  composition_unit = moles
+  species_output_unit = moles
   [thermo]
-    thermofile = Kaye_NobleMetals.dat
-    initial_values = ic_all.csv
+    thermodynamic_database = Kaye_NobleMetals.dat
+    initial_composition_file = ic_all.csv
     temperature = 2250
-    reinitialization_type = nodal
+    warm_start = previous_solve
   []
 []
 

@@ -3,7 +3,7 @@
     type = Exodiff
     input = MoRu.i
     exodiff = MoRu_out.e
-    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#22711'
     requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
 
@@ -15,10 +15,10 @@
     type = Exodiff
     input = MoRu.i
     exodiff = MoRu_out.e
-    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#22711'
     requirement = 'The system shall be able to use reinitialization to speed up a nodal thermochimica solve'
-    cli_args = 'ChemicalComposition/thermo/reinitialization_type=time'
+    cli_args = 'ChemicalComposition/thermo/warm_start=previous_timestep'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     capabilities = 'thermochimica'
   []
@@ -27,10 +27,10 @@
     type = Exodiff
     input = MoRu.i
     exodiff = MoRu_FV_out.e
-    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#25877'
     requirement = 'The system shall be able to set up an elemental thermochemistry solve using an action'
-    cli_args = 'ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
+    cli_args = 'ChemicalComposition/thermo/evaluation_location=elemental Outputs/file_base=MoRu_FV_out'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     capabilities = 'thermochimica'
   []
@@ -39,10 +39,10 @@
     type = Exodiff
     input = MoRu.i
     exodiff = MoRu_FV_out.e
-    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#25877'
     requirement = 'The system shall be able to use reinitialization to speed up an elemental thermochimica solve'
-    cli_args = 'ChemicalComposition/thermo/reinitialization_type=time ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
+    cli_args = 'ChemicalComposition/thermo/warm_start=previous_timestep ChemicalComposition/thermo/evaluation_location=elemental Outputs/file_base=MoRu_FV_out'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     capabilities = 'thermochimica'
   []
@@ -62,7 +62,7 @@
     type = Exodiff
     input = MoRuPd.i
     exodiff = MoRuPd_out.e
-    design = 'ThermochimicaNodalData.md'
+    design = 'ThermochimicaData.md'
     issues = '#25661'
     requirement = 'The system shall be able to use graciously handle a missing element in Thermochimica'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
@@ -73,10 +73,10 @@
     type = Exodiff
     input = csv_ic.i
     exodiff = csv_ic_out.e
-    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#22711'
     requirement = 'The system shall be able to set up constant initial conditions from a CSV file'
-    cli_args = 'ChemicalComposition/tunit=K ChemicalComposition/punit=atm ChemicalComposition/munit=moles ChemicalComposition/output_species_unit=moles'
+    cli_args = 'ChemicalComposition/temperature_unit=K ChemicalComposition/pressure_unit=atm ChemicalComposition/composition_unit=moles ChemicalComposition/species_output_unit=moles'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     capabilities = 'thermochimica'
   []
@@ -85,10 +85,10 @@
     type = Exodiff
     input = FeTiVO.i
     exodiff = FeTiVO_out.e
-    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#24552'
     requirement = 'The system shall be able to use pairs as MQMQA phase species'
-    cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/exodus=true'
+    cli_args = 'ChemicalComposition/thermo/species_output_unit=moles Outputs/exodus=true'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     capabilities = 'thermochimica'
@@ -99,10 +99,10 @@
     input = FeTiVO.i
     csvdiff = FeTiVO_out_Fe2O3_0001.csv
     ignore_columns = 'id'
-    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#24552'
     requirement = 'The system shall be able to output moles of pairs for MQMQA phase species'
-    cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/csv=true'
+    cli_args = 'ChemicalComposition/thermo/species_output_unit=moles Outputs/csv=true'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     capabilities = 'thermochimica'
@@ -111,9 +111,9 @@
   [tunit_error]
     type = RunException
     input = csv_ic.i
-    expect_err = "The temperature unit must be specified for Thermochimica objects to be constructed"
-    cli_args = "ChemicalComposition/punit=atm ChemicalComposition/munit=moles "
-               "ChemicalComposition/output_species_unit=moles"
+    expect_err = "temperature_unit: This parameter is required after applying common parameters."
+    cli_args = "ChemicalComposition/pressure_unit=atm ChemicalComposition/composition_unit=moles "
+               "ChemicalComposition/species_output_unit=moles"
     issues = '#26376'
     requirement = 'The system shall throw an error if the temperature unit is not specified'
     design = ChemicalCompositionAction.md
@@ -123,9 +123,9 @@
   [punit_error]
     type = RunException
     input = csv_ic.i
-    expect_err = "The pressure unit must be specified for Thermochimica objects to be constructed"
-    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/munit=moles "
-               "ChemicalComposition/output_species_unit=moles"
+    expect_err = "pressure_unit: This parameter is required after applying common parameters."
+    cli_args = "ChemicalComposition/temperature_unit=K ChemicalComposition/composition_unit=moles "
+               "ChemicalComposition/species_output_unit=moles"
     issues = '#26376'
     requirement = 'The system shall throw an error if the pressure unit is not specified'
     design = ChemicalCompositionAction.md
@@ -135,32 +135,19 @@
   [munit_error]
     type = RunException
     input = csv_ic.i
-    expect_err = "The mass unit must be specified for Thermochimica objects to be constructed"
-    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/punit=atm "
-               "ChemicalComposition/output_species_unit=moles"
+    expect_err = "composition_unit: This parameter is required after applying common parameters."
+    cli_args = "ChemicalComposition/temperature_unit=K ChemicalComposition/pressure_unit=atm "
+               "ChemicalComposition/species_output_unit=moles"
     issues = '#26376'
     requirement = 'The system shall throw an error if the mass unit is not specified'
     design = ChemicalCompositionAction.md
 
     capabilities = 'thermochimica'
   []
-  [op_munit_error]
-    type = RunException
-    input = csv_ic.i
-    expect_err = "Output mass unit must be specified for Thermochimica user object to be constructed"
-    cli_args = "ChemicalComposition/tunit=K ChemicalComposition/punit=atm "
-               "ChemicalComposition/munit=moles"
-    issues = '#26376'
-    requirement = 'The system shall throw an error if the output mass unit is not specified when species amount or amount of element in phase is requested'
-    design = ChemicalCompositionAction.md
-
-    capabilities = 'thermochimica'
-  []
-
   [separator_error1]
     type = RunException
     input = MoRu.i
-    expect_err = "No ':' separator found in variable 'HCPN_Mo'"
+    expect_err = "Expected 'phase:species', received 'HCPN_Mo'."
     cli_args = "GlobalParams/output_species='BCCN:Mo HCPN_Mo BCCN:Ru HCPN:Ru'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an invalid output species format is detected'
@@ -171,10 +158,10 @@
   [separator_error2]
     type = RunException
     input = MoRu.i
-    expect_err = "No ':' separator found in variable 'mu_Ru'"
-    cli_args = "GlobalParams/output_element_potentials='mu:Mo mu_Ru'"
+    expect_err = "Element 'mu_Ru' is not configured."
+    cli_args = "GlobalParams/output_element_potentials='Mo mu_Ru'"
     issues = '#23865'
-    requirement = 'The system shall throw an error if an invalid element potential format is detected'
+    requirement = 'The system shall throw an error if an unknown element potential is requested'
     design = ChemicalCompositionAction.md
 
     capabilities = 'thermochimica'
@@ -195,7 +182,7 @@
   [wrong_species1]
     type = RunException
     input = MoRu.i
-    expect_err = "Species 'Xe' was not found in the simulation."
+    expect_err = "Species 'Xe' was not found in phase 'HCPN'."
     cli_args = "GlobalParams/output_species='BCCN:Mo HCPN:Xe BCCN:Ru HCPN:Ru'"
     issues = '#23865 #24269'
     requirement = 'The system shall throw an error if a species absent from the database is specified for species output'
@@ -206,7 +193,7 @@
   [wrong_species2]
     type = RunException
     input = MoRu.i
-    expect_err = "Phase 'HCCN' of output species 'HCCN:Mo' not found in the simulation."
+    expect_err = "Phase 'HCCN' was not found in the configured system."
     cli_args = "GlobalParams/output_species='BCCN:Mo HCCN:Mo BCCN:Ru HCPN:Ru'"
     issues = '#23865 #24269'
     requirement = 'The system shall throw an error if a wrong phase name of a species is specified for species output'
@@ -215,11 +202,22 @@
     capabilities = 'thermochimica'
   []
 
+  [duplicate_output]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Duplicate generated variable name 'BCCN:Mo'."
+    cli_args = "GlobalParams/output_species='BCCN:Mo BCCN:Mo'"
+    issues = '#23865'
+    requirement = 'The system shall reject duplicate generated thermochemistry output names'
+    design = ChemicalCompositionAction.md
+    capabilities = 'thermochimica'
+  []
+
   [wrong_element1]
     type = RunException
     input = MoRu.i
-    expect_err = "Element 'W' was not found in the simulation."
-    cli_args = "GlobalParams/output_element_potentials='mu:Mo mu:W'"
+    expect_err = "Element 'W' is not configured."
+    cli_args = "GlobalParams/output_element_potentials='Mo W'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an element absent from the simulation is specified for chemical potential output'
     design = ChemicalCompositionAction.md
@@ -230,9 +228,8 @@
   [wrong_phase]
     type = RunException
     input = MoRu.i
-    expect_err = "Phase 'RandomPhase' was not found in the simulation."
-    cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase' "
-               "UserObjects/data/output_phases='BCCN HCPN RandomPhase'"
+    expect_err = "Phase 'RandomPhase' was not found in the configured system."
+    cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase'"
     issues = '#24269'
     requirement = 'The system shall throw an error if a phase absent from the simulation is specified for phase output'
     design = ChemicalCompositionAction.md
@@ -243,7 +240,7 @@
   [wrong_vapor_pressure1]
     type = RunException
     input = MoRu.i
-    expect_err = "No ':' separator found in variable 'vp/HCPN/Mo'"
+    expect_err = "Expected 'gas_phase:species', received 'vp/HCPN/Mo'."
     cli_args = "GlobalParams/output_vapor_pressures='vp/HCPN/Mo'"
     issues = '#24269 #24552'
     requirement = 'The system shall throw an error if a gas phase species name is not in correct format'
@@ -255,9 +252,8 @@
   [wrong_vapor_pressure2]
     type = RunException
     input = MoRu.i
-    expect_err = "Phase 'HCPN' of vapor species 'vp:HCPN:Mo' is not a gas phase. Cannot calculate "
-                 "vapor pressure."
-    cli_args = "GlobalParams/output_vapor_pressures='vp:HCPN:Mo'"
+    expect_err = "Phase 'HCPN' is not a gas phase."
+    cli_args = "GlobalParams/output_vapor_pressures='HCPN:Mo'"
     issues = '#24269'
     requirement = 'The system shall throw an error if a species in a phase other than the gas phase is specified for vapor pressure output'
     design = ChemicalCompositionAction.md
@@ -268,8 +264,8 @@
   [wrong_vapor_pressure3]
     type = RunException
     input = MoRu.i
-    expect_err = "Species 'Xe' was not found in the gas phase."
-    cli_args = "GlobalParams/output_vapor_pressures='vp:gas_ideal:Xe'"
+    expect_err = "Species 'Xe' was not found in gas phase 'gas_ideal'."
+    cli_args = "GlobalParams/output_vapor_pressures='gas_ideal:Xe'"
     issues = '#24269'
     requirement = 'The system shall throw an error if a species not present in gas phase is specified for vapor pressure output'
     design = ChemicalCompositionAction.md
@@ -281,7 +277,7 @@
     type = RunException
     input = MoRu.i
     expect_err = "Thermochimica data file cannot be parsed. 6"
-    cli_args = "ChemicalComposition/thermo/thermofile='SomeRandomFile.dat'"
+    cli_args = "ChemicalComposition/thermo/thermodynamic_database='SomeRandomFile.dat'"
     issues = '#24552'
     requirement = 'The system shall throw an error if the wrong datafile is specified'
     design = ChemicalCompositionAction.md
@@ -304,8 +300,8 @@
   [wrong_element_phase1]
     type = RunException
     input = MoRu.i
-    expect_err = "Phase 'Rand' of 'ep:Rand:Mo' not found in the simulation."
-    cli_args = "GlobalParams/output_element_phases='ep:Rand:Mo'"
+    expect_err = "Phase 'Rand' was not found in the configured system."
+    cli_args = "GlobalParams/output_element_phases='Rand:Mo'"
     issues = '#24552'
     requirement = 'The system shall throw an error if a wrong phase name is specified'
     design = ChemicalCompositionAction.md
@@ -316,8 +312,8 @@
   [wrong_element_phase2]
     type = RunException
     input = MoRu.i
-    expect_err = "Element 'W' was not found in the simulation."
-    cli_args = "GlobalParams/output_element_phases='ep:BCCN:W'"
+    expect_err = "Element 'W' is not configured."
+    cli_args = "GlobalParams/output_element_phases='BCCN:W'"
     issues = '#24552'
     requirement = 'The system shall throw an error if a wrong element name is specified'
     design = ChemicalCompositionAction.md
@@ -328,12 +324,295 @@
   [wrong_element_phase3]
     type = RunException
     input = MoRu.i
-    expect_err = "No ':' separator found in variable 'vpgas_idealXe'"
+    expect_err = "Expected 'phase:element', received 'vpgas_idealXe'."
     cli_args = "GlobalParams/output_element_phases='vpgas_idealXe'"
     issues = '#24552'
     requirement = 'The system shall throw an error if the output elements in phase do not have enough tokens'
     design = ChemicalCompositionAction.md
 
+    capabilities = 'thermochimica'
+  []
+
+  [batch_one]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_out.e
+    cli_args = 'ChemicalComposition/thermo/batch_size=1'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The exact batched Thermochimica executor shall support single-state requests'
+    rel_err = 1e-3
+    capabilities = 'thermochimica'
+  []
+
+  [warm_start_none]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_out.e
+    cli_args = 'ChemicalComposition/thermo/warm_start=none'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The exact Thermochimica executor shall support solving without warm-start storage'
+    rel_err = 1e-3
+    capabilities = 'thermochimica'
+  []
+
+  [batch_threads]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_out.e
+    cli_args = '--n-threads=4 ChemicalComposition/thermo/batch_size=32'
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The exact batched Thermochimica executor shall preserve results with multiple threads'
+    rel_err = 1e-3
+    capabilities = 'thermochimica'
+  []
+
+  [performance_counters]
+    type = RunApp
+    input = MoRu.i
+    cli_args = 'Outputs/exodus=false ChemicalComposition/thermo/report_performance=true'
+    expect_out = 'states=22, batches=1, exact_solves=22, warm_starts=21'
+    design = 'ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The batched Thermochimica executor shall report solve, batch, and warm-start counters'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_outputs]
+    type = CSVDiff
+    input = typed_outputs.i
+    csvdiff = typed_outputs_out.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed ChemicalComposition output blocks shall select all supported output families using safe variable names'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_outputs_subblocks]
+    type = CSVDiff
+    input = typed_outputs_subblocks.i
+    csvdiff = typed_outputs_subblocks_out.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Named ChemicalComposition subblocks shall define independent typed output sets on different mesh blocks.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_outputs_batch_one]
+    type = CSVDiff
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/batch_size=1'
+    csvdiff = typed_outputs_out.csv
+    rel_err = 1e-8
+    prereq = typed_outputs
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed thermodynamic property outputs shall be independent of the configured batch size.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_output_invalid_phase]
+    type = RunException
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/Species/hcp_mo_fraction/phase=invalid'
+    expect_err = "phase: Phase 'invalid' was not found in the configured system."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed ChemicalComposition output blocks shall report invalid selections against the originating parameter'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_output_duplicate]
+    type = RunException
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/Species/hcp_mo_fraction/variable=hcp_amount'
+    expect_err = "Duplicate generated variable name 'hcp_amount'."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed ChemicalComposition output blocks shall reject duplicate variable names'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_output_non_gas_phase]
+    type = RunException
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/VaporPressures/mo_vapor_pressure/phase=BCCN'
+    expect_err = "phase: Phase 'BCCN' is not a gas phase."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed vapor-pressure output blocks shall reject non-gas phases'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_mqm_species]
+    type = CSVDiff
+    input = typed_mqm.i
+    csvdiff = typed_mqm_out.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed output blocks shall support modified quasichemical model species, thermodynamic component potentials, and constituent fractions for MQM and sublattice phases.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_batch_one]
+    type = CSVDiff
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/batch_size=1'
+    csvdiff = typed_mqm_out.csv
+    rel_err = 1e-8
+    prereq = typed_mqm_species
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction outputs shall be independent of the configured batch size.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_invalid_sublattice]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ConstituentFractions/slag_fe3_fraction/sublattice=3'
+    expect_err = "sublattice: Phase 'SlagBsoln' has 2 constituent sublattice\(s\)\."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction output blocks shall reject an invalid phase sublattice.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_invalid_name]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ConstituentFractions/slag_fe3_fraction/constituent=invalid'
+    expect_err = "constituent: Constituent 'invalid' was not found on sublattice 1 of phase 'SlagBsoln'."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction output blocks shall reject constituents absent from the selected sublattice.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_unsupported_phase]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ConstituentFractions/slag_fe3_fraction/phase=gas_ideal'
+    expect_err = "phase: Phase 'gas_ideal' does not provide constituent sublattice data."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction output blocks shall reject phase models without constituent sublattices.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_chemical_potential_multiple_components]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ChemicalPotentials/slag_endmember_potential/species=Fe2O3'
+    expect_err = 'Exactly one of species, quadruplet, endmember, or pair must be specified.'
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed chemical-potential output blocks shall require exactly one thermodynamic component selector'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_chemical_potential_wrong_phase_model]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ChemicalPotentials/slag_quadruplet_potential/phase=gas_ideal'
+    expect_err = "quadruplet: The 'quadruplet' selector is only valid for an MQM phase."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed chemical-potential output blocks shall reject MQM component selectors on conventional solution phases'
+    capabilities = 'thermochimica'
+  []
+
+  [mixed_output_syntax]
+    type = RunApp
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/output_phases=HCPN Outputs/csv=false'
+    expect_out = 'flat ChemicalComposition output parameters are deprecated'
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Legacy and typed ChemicalComposition outputs shall support incremental migration with a deprecation warning'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_exclusion]
+    type = CSVDiff
+    input = phase_exclusion.i
+    csvdiff = phase_exclusion_out.csv
+    rel_err = 1e-8
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall omit configured phases from every equilibrium calculation.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_inclusion]
+    type = CSVDiff
+    input = phase_exclusion.i
+    cli_args = "ChemicalComposition/thermo/excluded_phases='' ChemicalComposition/thermo/included_phases=BCCN"
+    csvdiff = phase_exclusion_out.csv
+    rel_err = 1e-8
+    prereq = phase_exclusion
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall support retaining only named thermodynamic phases.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_exclusion_batch_one]
+    type = CSVDiff
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/batch_size=1'
+    csvdiff = phase_exclusion_out.csv
+    rel_err = 1e-8
+    prereq = phase_inclusion
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Phase-selected equilibrium results shall be independent of the configured batch size.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_mutually_exclusive]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/included_phases=BCCN'
+    expect_err = 'excluded_phases and included_phases are mutually exclusive.'
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall reject simultaneous phase inclusion and exclusion lists.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_invalid]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/excluded_phases=invalid'
+    expect_err = "Phase 'invalid' was not found in the database."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall validate phase-selection names against the database.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_duplicate]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = "ChemicalComposition/thermo/excluded_phases='HCPN HCPN'"
+    expect_err = "Phase 'HCPN' is listed more than once."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall reject duplicate phase selections.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_excluded_output]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/Phases/bcc_amount/phase=HCPN'
+    expect_err = "Phase 'HCPN' was not found in the configured system."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall reject output requests for excluded phases.'
     capabilities = 'thermochimica'
   []
 []
