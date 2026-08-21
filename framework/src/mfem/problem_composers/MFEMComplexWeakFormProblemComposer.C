@@ -11,11 +11,6 @@
 
 #include "MFEMComplexWeakFormProblemComposer.h"
 #include "MFEMProblem.h"
-#include "ProblemOperatorBase.h"
-#include "libmesh/ignore_warnings.h"
-#include "mfem/miniapps/common/mesh_extras.hpp"
-#include "libmesh/restore_warnings.h"
-#include "ComplexEquationSystem.h"
 #include "ComplexEquationSystemProblemOperator.h"
 
 namespace Moose::MFEM
