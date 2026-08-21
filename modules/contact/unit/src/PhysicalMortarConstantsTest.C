@@ -67,19 +67,18 @@ TEST(PhysicalMortarConstants, FrictionlessBeatsDefault)
       << " cumulative NL iters) should beat default c_normal=1e6 (" << default_its << " iters)";
 }
 
-// Verify that c_normal_strategy=physical + c_tangential_strategy=physical reduces
-// cumulative nonlinear iterations compared to default c_normal=1e6/c_tangential=1
-// for frictional (Coulomb) mortar contact with sliding.
+// Verify that c_normal_strategy=physical + c_tangential_strategy=physical (this fixture's
+// default) reduces cumulative nonlinear iterations compared to fixed c_normal=1e6/c_tangential=1
+// under MortarContactLineSearch for frictional (Coulomb) mortar contact with sliding.
 TEST(PhysicalMortarConstants, FrictionalBeatsDefault)
 {
   Real contact_dofs = 0;
-  const Real default_its = runCumulativeNL("frictional_physical.i", {}, &contact_dofs);
+  const Real physical_its = runCumulativeNL("frictional_physical.i", {}, &contact_dofs);
   EXPECT_GT(contact_dofs, 0) << "no contact DOFs active - test is not exercising contact";
-  const Real physical_its = runCumulativeNL(
+  const Real default_its = runCumulativeNL(
       "frictional_physical.i",
-      {"Contact/mortar/c_normal_strategy=physical", "Contact/mortar/c_tangential_strategy=physical",
-       "LineSearch/ls/normalize_c=true", "LineSearch/ls/use_derived_c_normal=true",
-       "LineSearch/ls/dynamic_c_t=true"});
+      {"LineSearch/active=ls", "Contact/mortar/c_normal_strategy=user",
+       "Contact/mortar/c_tangential_strategy=user"});
   EXPECT_LT(physical_its, default_its)
       << "physical c_normal+c_tangential (" << physical_its
       << " cumulative NL iters) should beat defaults c_normal=1e6/c_tangential=1 (" << default_its
