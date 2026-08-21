@@ -11,6 +11,7 @@
 
 #include "EigenproblemEquationSystem.h"
 #include "MFEMEigensolverBase.h"
+#include "MFEMEigenproblem.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -43,14 +44,24 @@ EigenproblemEquationSystem::FormEigenproblemMatrix()
 void
 EigenproblemEquationSystem::FormMassMatrix()
 {
-  mfem::ConstantCoefficient one(1.0);
   mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
   std::unique_ptr<mfem::ParBilinearForm> m = std::make_unique<mfem::ParBilinearForm>(fespace);
 
+  const bool use_matrix = _eigen_problem.isParamSetByUser("rhs_matrix_coefficient");
+  if (use_matrix && _eigen_problem.isParamSetByUser("rhs_coefficient"))
+    mooseError("Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
+               "non-default value.");
+
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
-    m->AddDomainIntegrator(new mfem::MassIntegrator(one));
+  {
+    if (use_matrix)
+      mooseError("A matrix rhs_coefficient cannot be used with a scalar finite element space.");
+    m->AddDomainIntegrator(new mfem::MassIntegrator(_eigen_problem.getRHSCoefficient()));
+  }
   else
-    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
+    m->AddDomainIntegrator(
+        use_matrix ? new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSMatrixCoefficient())
+                   : new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSCoefficient()));
 
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
