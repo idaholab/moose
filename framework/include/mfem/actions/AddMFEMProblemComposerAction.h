@@ -17,7 +17,7 @@
  * This class allows us to have a section of the input file like the following
  * specifying the problem composer to use and its options.
  *
- * [ProblemComposer]
+ * [ProblemComposers]
  * []
  */
 class AddMFEMProblemComposerAction : public MooseObjectAction

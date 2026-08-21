@@ -4,17 +4,17 @@
 
 ## Summary
 
-`MFEMTimeDependentWeakFormProblemComposer` is the builder class for `TimeDependentEquationSystemProblemOperator` when called by an [MFEMTransient.md] executioner object.
+`MFEMTimeDependentWeakFormProblemComposer` is the builder class for `TimeDependentEquationSystemProblemOperator`.
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=Problem ProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=Problem ProblemComposers
 
-!listing test/tests/mfem/problemcomposers/prob_op_mfem_multiple_timesequences.i block=Problem ProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_mfem_multiple_timesequences.i block=Problem ProblemComposers
 
-!syntax parameters /ProblemComposer/MFEMTimeDependentWeakFormProblemComposer
+!syntax parameters /ProblemComposers/MFEMTimeDependentWeakFormProblemComposer
 
-!syntax inputs /ProblemComposer/MFEMTimeDependentWeakFormProblemComposer
+!syntax inputs /ProblemComposers/MFEMTimeDependentWeakFormProblemComposer
 
-!syntax children /ProblemComposer/MFEMTimeDependentWeakFormProblemComposer
+!syntax children /ProblemComposers/MFEMTimeDependentWeakFormProblemComposer
 
 !if-end!
 

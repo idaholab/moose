@@ -29,7 +29,7 @@
   []
 []
 
-[ProblemComposer]
+[ProblemComposers]
   [default_steady]
     type = CustomProblemComposer
   []

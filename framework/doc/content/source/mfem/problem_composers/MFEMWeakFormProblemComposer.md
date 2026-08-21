@@ -5,15 +5,14 @@
 ## Summary
 
 `MFEMWeakFormProblemComposer` is the builder class for `EquationSystemProblemOperator`.
-when called by an [MFEMSteady.md] executioner object.
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=Problem ProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=Problem ProblemComposers
 
-!syntax parameters /ProblemComposer/MFEMWeakFormProblemComposer
+!syntax parameters /ProblemComposers/MFEMWeakFormProblemComposer
 
-!syntax inputs /ProblemComposer/MFEMWeakFormProblemComposer
+!syntax inputs /ProblemComposers/MFEMWeakFormProblemComposer
 
-!syntax children /ProblemComposer/MFEMWeakFormProblemComposer
+!syntax children /ProblemComposers/MFEMWeakFormProblemComposer
 
 !if-end!
 

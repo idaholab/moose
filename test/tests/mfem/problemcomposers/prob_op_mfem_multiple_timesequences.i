@@ -1,6 +1,6 @@
 !include ../timesteppers/mfem_multiple_timesequences.i
 
-[ProblemComposer]
+[ProblemComposers]
   [default_transient]
     type = MFEMTimeDependentWeakFormProblemComposer
   []

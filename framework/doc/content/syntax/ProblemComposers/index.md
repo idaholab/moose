@@ -1,6 +1,6 @@
 # ProblemComposers System
 
-The `ProblemComposer` system allows the user to construct
+The `ProblemComposers` system allows the user to construct
 problem operators with custom inputs. This class is specifically intended for composing
 user defined custom operators which may be raw `mfem::Operator`'s optimised for specific
 purposes e.g. MHD with customised inputs. The operators may need thin layer access to the MOOSE

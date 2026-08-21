@@ -5,13 +5,12 @@
 ## Summary
 
 `MFEMEigenWeakFormProblemComposer` is the builder class for `EigenproblemESProblemOperator`.
-when called by an [MFEMSteady.md] executioner object.
 
-!syntax parameters /ProblemComposer/MFEMEigenWeakFormProblemComposer
+!syntax parameters /ProblemComposers/MFEMEigenWeakFormProblemComposer
 
-!syntax inputs /ProblemComposer/MFEMEigenWeakFormProblemComposer
+!syntax inputs /ProblemComposers/MFEMEigenWeakFormProblemComposer
 
-!syntax children /ProblemComposer/MFEMEigenWeakFormProblemComposer
+!syntax children /ProblemComposers/MFEMEigenWeakFormProblemComposer
 
 !if-end!
 

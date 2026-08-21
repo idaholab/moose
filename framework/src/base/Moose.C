@@ -843,7 +843,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
   registerSyntaxTask(
-      "AddMFEMProblemComposerAction", "ProblemComposer/*", "add_mfem_problem_composer");
+      "AddMFEMProblemComposerAction", "ProblemComposers/*", "add_mfem_problem_composer");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");

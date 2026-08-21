@@ -2,17 +2,17 @@
 
 !if! function=hasCapability('mfem')
 
-## Overview
+## Summary
 
 `MFEMComplexWeakFormProblemComposer` is the builder class for `ComplexEquationSystemProblemOperator`.
 
 ## Input File Syntax
 
-!syntax parameters /ProblemComposer/MFEMComplexWeakFormProblemComposer
+!syntax parameters /ProblemComposers/MFEMComplexWeakFormProblemComposer
 
-!syntax inputs /ProblemComposer/MFEMComplexWeakFormProblemComposer
+!syntax inputs /ProblemComposers/MFEMComplexWeakFormProblemComposer
 
-!syntax children /ProblemComposer/MFEMComplexWeakFormProblemComposer
+!syntax children /ProblemComposers/MFEMComplexWeakFormProblemComposer
 
 !if-end!
 

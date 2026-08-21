@@ -76,9 +76,9 @@ will be instantiated based on the type of executioner (steady or transient), num
 complex) and other factors, e.g., is it an eigen problem. However, problem composers can also be
 explicitly built like in the following examples:
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=/ProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=/ProblemComposers
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=/ProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=/ProblemComposers
 
 ### Solver and Executioner
 

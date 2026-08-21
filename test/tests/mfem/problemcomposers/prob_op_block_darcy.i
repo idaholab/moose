@@ -1,6 +1,6 @@
 !include ../kernels/darcy.i
 
-[ProblemComposer]
+[ProblemComposers]
   [default_steady]
     type = MFEMWeakFormProblemComposer
   []

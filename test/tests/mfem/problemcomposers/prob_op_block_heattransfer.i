@@ -1,6 +1,6 @@
 !include ../kernels/heattransfer.i
 
-[ProblemComposer]
+[ProblemComposers]
   [default_transient]
     type = MFEMTimeDependentWeakFormProblemComposer
   []
