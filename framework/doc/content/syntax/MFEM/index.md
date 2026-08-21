@@ -73,7 +73,7 @@ The problem operator applies an action on a vector: this can be a solve of an eq
 application of a preconditioner or any other custom operator the user may have. The problem
 composer is the systematic logical object that builds the problem operator. By default, a composer
 will be instantiated based on the type of executioner (steady or transient), numerical type (real or 
-complex) and other factors e.g. is it an eigen problem. However, problem composers can also be
+complex) and other factors, e.g., is it an eigen problem. However, problem composers can also be
 explicitly built like in the following examples:
 
 !listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=/ProblemComposer
