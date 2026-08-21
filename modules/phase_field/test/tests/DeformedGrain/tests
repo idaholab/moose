@@ -1,8 +1,30 @@
 [Tests]
-  [./DeformedGrain]
+ [GTDislocations]
+    type = 'Exodiff'
+    input = 'grain_tracker_dislocations.i'
+    exodiff = 'grain_tracker_dislocations_out.e'
+    issues = '#32766'
+    design = 'GrainTrackerDislocations.md'
+    requirement = 'MOOSE shall supply grain-based dislocation density values'
+  []
+
+  [GTDislocations_error]
+    type = 'RunException'
+    input = 'grain_tracker_dislocations.i'
+    cli_args = 'UserObjects/dislocation_density_file/lines_to_skip=2'
+    expect_err = 'GrainTrackerDislocations has run out of dislocation densities for grains'
+    issues = '#32766'
+    design = 'GrainTrackerDislocations.md'
+    requirement = 'MOOSE shall check for error while supplying grain-based dislocation density values'
+  []
+
+  [DeformedGrain]
     capabilities = 'method!=dbg'
     type = 'Exodiff'
     input = 'DeformedGrain.i'
     exodiff = 'DeformedGrain_out.e'
-  [../]
+    issues = '#7499'
+    design = 'DeformedGrainMaterial.md '
+    requirement = 'MOOSE shall provide kernels and materials for deformed grain evolution'
+  []
 []
