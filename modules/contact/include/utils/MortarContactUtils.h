@@ -59,6 +59,11 @@ namespace Mortar
 {
 namespace Contact
 {
+enum class FrictionProjectionDegree
+{
+  ONE,
+  TWO
+};
 
 /** Return the augmented normal pressure p_n - C_n g_bar. */
 template <typename T>
@@ -106,6 +111,27 @@ alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
   for (const auto i : index_range(residual))
     residual[i] = tangential_pressure[i] - projection[i];
   return residual;
+}
+
+/**
+ * Same as the three-argument \p alartCurnierFrictionResidual, but additionally short-circuits to
+ * the trivial identity residual whenever the raw, unaugmented normal contact pressure
+ * \p normal_pressure falls below \p epsilon, mirroring the epsilon-gated
+ * \p hueberStadlerWohlmuthFrictionResidual overload below so both friction-residual degrees
+ * apply the same active-set transition guard.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
+                             const std::array<T, N> & augmented_tangential_pressure,
+                             const T & radius,
+                             const T & normal_pressure,
+                             const T & epsilon)
+{
+  if (normal_pressure < epsilon)
+    return tangential_pressure;
+
+  return alartCurnierFrictionResidual(tangential_pressure, augmented_tangential_pressure, radius);
 }
 
 /**
@@ -166,11 +192,13 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
 }
 
 /**
- * Compute the epsilon-gated degree-two Hueber-Stadler-Wohlmuth frictional residual for a mortar
- * contact dof. This composes the tangential pressure augmentation
- * \p tangential_pressure + c_t * tangential_velocity * dt with \p augmentedNormalPressure,
- * \p coulombFrictionRadius, and the epsilon-gated \p hueberStadlerWohlmuthFrictionResidual, the
- * composition shared by the normal, dynamic, and Cartesian mortar frictional contact constraints.
+ * Compute the epsilon-gated frictional residual for a mortar contact dof. This composes the
+ * tangential pressure augmentation \p tangential_pressure + c_t * tangential_velocity * dt with
+ * \p augmentedNormalPressure, \p coulombFrictionRadius, and the epsilon-gated, degree-selected
+ * (\p projection_degree) friction residual (\p alartCurnierFrictionResidual for
+ * FrictionProjectionDegree::ONE, \p hueberStadlerWohlmuthFrictionResidual for
+ * FrictionProjectionDegree::TWO), the composition shared by the normal, dynamic, and Cartesian
+ * mortar frictional contact constraints.
  */
 template <typename T, std::size_t N>
 std::array<T, N>
@@ -181,7 +209,8 @@ frictionalContactResidual(const std::array<T, N> & tangential_pressure,
                           const T & normal_pressure,
                           const T & scaled_normal_gap,
                           const T & friction_coefficient,
-                          const T & epsilon)
+                          const T & epsilon,
+                          const FrictionProjectionDegree projection_degree)
 {
   std::array<T, N> augmented_tangential_pressure;
   for (const auto i : index_range(augmented_tangential_pressure))
@@ -190,8 +219,17 @@ frictionalContactResidual(const std::array<T, N> & tangential_pressure,
   const auto radius = coulombFrictionRadius(
       friction_coefficient, augmentedNormalPressure(normal_pressure, scaled_normal_gap));
 
-  return hueberStadlerWohlmuthFrictionResidual(
-      tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon);
+  switch (projection_degree)
+  {
+    case FrictionProjectionDegree::ONE:
+      return alartCurnierFrictionResidual(
+          tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon);
+    case FrictionProjectionDegree::TWO:
+      return hueberStadlerWohlmuthFrictionResidual(
+          tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon);
+    default:
+      mooseError("Unhandled projection degree");
+  }
 }
 
 /**

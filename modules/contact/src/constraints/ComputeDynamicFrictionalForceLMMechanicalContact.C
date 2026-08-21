@@ -47,6 +47,15 @@ ComputeDynamicFrictionalForceLMMechanicalContact::validParams()
       1.0e-7,
       "Minimum value of contact pressure that will trigger frictional enforcement");
   params.addParam<Real>("mu", "The friction coefficient for the Coulomb friction law");
+  MooseEnum friction_projection_degree("ONE TWO", "TWO");
+  friction_projection_degree.addDocumentation(
+      "ONE", "Use the degree-one Alart-Curnier friction residual.");
+  friction_projection_degree.addDocumentation(
+      "TWO", "Use the degree-two Hueber-Stadler-Wohlmuth friction residual.");
+  params.addParam<MooseEnum>(
+      "friction_projection_degree",
+      friction_projection_degree,
+      "Degree of the friction-residual projection; see MortarContactUtils.h.");
   return params;
 }
 
@@ -54,6 +63,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
     const InputParameters & parameters)
   : ComputeDynamicWeightedGapLMMechanicalContact(parameters),
     _c_t(getParam<Real>("c_t")),
+    _friction_projection_degree(getParam<MooseEnum>("friction_projection_degree")
+                                    .getEnum<Moose::Mortar::Contact::FrictionProjectionDegree>()),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -279,14 +290,16 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
 
   const std::array<ADReal, 2> tangential_velocity{{*tangential_vel[0], *tangential_vel[1]}};
 
-  const auto residual = Moose::Mortar::Contact::frictionalContactResidual(friction_lm_values,
-                                                                          tangential_velocity,
-                                                                          ADReal(c_t),
-                                                                          ADReal(_dt),
-                                                                          contact_pressure,
-                                                                          c * weighted_gap,
-                                                                          mu_ad,
-                                                                          ADReal(_epsilon));
+  const auto residual =
+      Moose::Mortar::Contact::frictionalContactResidual(friction_lm_values,
+                                                        tangential_velocity,
+                                                        ADReal(c_t),
+                                                        ADReal(_dt),
+                                                        contact_pressure,
+                                                        c * weighted_gap,
+                                                        mu_ad,
+                                                        ADReal(_epsilon),
+                                                        _friction_projection_degree);
   const ADReal dof_residual = residual[0];
   const ADReal dof_residual_dir = residual[1];
 
@@ -337,7 +350,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
                                                         contact_pressure,
                                                         c * weighted_gap,
                                                         mu_ad,
-                                                        ADReal(_epsilon))[0];
+                                                        ADReal(_epsilon),
+                                                        _friction_projection_degree)[0];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

@@ -205,6 +205,16 @@ ContactAction::validParams()
       "parameter if the default value generates poor contact convergence.");
   params.addParam<Real>(
       "c_tangential", 1, "Numerical parameter for nonlinear mortar frictional constraints");
+  MooseEnum friction_projection_degree("ONE TWO", "TWO");
+  friction_projection_degree.addDocumentation(
+      "ONE", "Use the degree-one Alart-Curnier friction residual.");
+  friction_projection_degree.addDocumentation(
+      "TWO", "Use the degree-two Hueber-Stadler-Wohlmuth friction residual.");
+  params.addParam<MooseEnum>("friction_projection_degree",
+                             friction_projection_degree,
+                             "Degree of the friction-residual projection; see "
+                             "MortarContactUtils.h. Only valid for Coulomb friction mortar "
+                             "contact.");
   params.addParam<bool>("ping_pong_protection",
                         false,
                         "Whether to protect against ping-ponging, e.g. the oscillation of the "
@@ -324,7 +334,8 @@ ContactAction::validParams()
       "adaptivity_penalty_normal adaptivity_penalty_friction",
       "Augmented Lagrange");
   // Friction
-  params.addParamNamesToGroup("friction_coefficient tension_release", "Friction");
+  params.addParamNamesToGroup("friction_coefficient tension_release friction_projection_degree",
+                              "Friction");
   // Mortar-specific parameters
   params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
@@ -448,6 +459,11 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("penalty",
                  "The 'penalty' parameter is not used for the 'mortar' formulation which instead "
                  "uses Lagrange multipliers");
+
+    if (isParamSetByUser("friction_projection_degree") && _model != ContactModel::COULOMB)
+      paramError("friction_projection_degree",
+                 "'friction_projection_degree' is only valid for Coulomb friction mortar "
+                 "contact.");
   }
   else
   {
@@ -1305,6 +1321,8 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
+      params.set<MooseEnum>("friction_projection_degree") =
+          getParam<MooseEnum>("friction_projection_degree");
       params.applySpecificParameters(parameters(),
                                      {"triangulation",
                                       "triangulate_triangles",

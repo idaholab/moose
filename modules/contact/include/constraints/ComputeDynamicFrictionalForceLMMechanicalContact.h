@@ -11,6 +11,17 @@
 
 #include "ComputeDynamicWeightedGapLMMechanicalContact.h"
 
+namespace Moose
+{
+namespace Mortar
+{
+namespace Contact
+{
+enum class FrictionProjectionDegree;
+}
+}
+}
+
 /**
  * Computes the mortar tangential frictional forces for dynamic simulations.
  */
@@ -87,6 +98,11 @@ protected:
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
+
+  /// Degree of the friction-residual projection used by frictionalContactResidual (see
+  /// MortarContactUtils.h): ONE selects Alart-Curnier, TWO (the default) selects
+  /// Hueber-Stadler-Wohlmuth.
+  const Moose::Mortar::Contact::FrictionProjectionDegree _friction_projection_degree;
 
   /// Frictional Lagrange's multiplier variable pointers
   std::vector<MooseVariable *> _friction_vars;

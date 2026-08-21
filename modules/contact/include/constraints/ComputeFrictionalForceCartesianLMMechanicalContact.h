@@ -13,6 +13,17 @@
 
 #include <unordered_map>
 
+namespace Moose
+{
+namespace Mortar
+{
+namespace Contact
+{
+enum class FrictionProjectionDegree;
+}
+}
+}
+
 /**
  * Computes the weighted gap that will later be used to enforce the
  * zero-penetration mechanical contact conditions
@@ -65,6 +76,11 @@ protected:
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
+
+  /// Degree of the friction-residual projection used by frictionalContactResidual (see
+  /// MortarContactUtils.h): ONE selects Alart-Curnier, TWO (the default) selects
+  /// Hueber-Stadler-Wohlmuth.
+  const Moose::Mortar::Contact::FrictionProjectionDegree _friction_projection_degree;
 
   /// x-velocity on the secondary face
   const ADVariableValue & _secondary_x_dot;
