@@ -15,11 +15,9 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  recv
-                  OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
-                  send
-                  OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
+        command = '../check_csv.sh
+                  OutputData/DiffusionRecvApp/recv_line_sample_0001.csv
+                  OutputData/DiffusionSendApp/send_line_sample_0001.csv'
         prereq = MFEMCopyTransfer/test/run
         capabilities = 'mfem'
         recover = false
