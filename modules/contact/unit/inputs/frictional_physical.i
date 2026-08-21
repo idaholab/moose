@@ -212,14 +212,32 @@ offset = 0.00
   end_time = .025
   dt = .025
   dtmin = .001
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-14                  1e-5'
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       mumps                      NONZERO'
   l_max_its = 100
   nl_max_its = 100
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-10
-  line_search = 'basic'
+  abort_on_solve_fail = true
+[]
+
+[LineSearch]
+  [ls]
+    type = MortarContactLineSearch
+    contact_ltol = 0.5
+    affect_ltol = true
+    backing_line_search = 'basic'
+    weighted_gap_uo = 'lm_weightedvelocities_object_mortar'
+    weighted_velocities_uo = 'lm_weightedvelocities_object_mortar'
+    lm_variable = mortar_normal_lm
+    friction_lm_variable = mortar_tangential_lm
+    friction_lm_dir_variable = mortar_tangential_3d_lm
+    c = 1e6
+    c_t = 1
+    mu = 0.4
+    epsilon = 1e-7
+  []
 []
 
 [Preconditioning]

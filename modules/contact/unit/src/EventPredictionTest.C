@@ -147,6 +147,48 @@ TEST(Watchdog, ExcursionBeyondGammaIsRejected)
   EXPECT_FALSE(ContactUtils::watchdogBoundPermits(gamma * phi_ke * 1.01, phi_ke, gamma));
 }
 
+TEST(TangentialHysteresis, RetainsPreviousInsideBand)
+{
+  // raw flipped to SLIP but the switch value is still within tau of the switching surface, and
+  // the dof was previously STICK: retain STICK.
+  EXPECT_EQ(ContactUtils::applyTangentialHysteresis(ContactUtils::ConstraintState::CONTACT_SLIP,
+                                                    ContactUtils::ConstraintState::CONTACT_STICK,
+                                                    0.5,
+                                                    1.0),
+           ContactUtils::ConstraintState::CONTACT_STICK);
+}
+
+TEST(TangentialHysteresis, NoRetentionOutsideBand)
+{
+  // Same raw/previous pair as above, but the switch value is beyond tau: this is a genuine
+  // transition, not chatter, so the raw classification passes through.
+  EXPECT_EQ(ContactUtils::applyTangentialHysteresis(ContactUtils::ConstraintState::CONTACT_SLIP,
+                                                    ContactUtils::ConstraintState::CONTACT_STICK,
+                                                    5.0,
+                                                    1.0),
+           ContactUtils::ConstraintState::CONTACT_SLIP);
+}
+
+TEST(TangentialHysteresis, NoRetentionWhenPreviousHasNothingToRetain)
+{
+  // previous is OPEN (not a stick/slip state), so there is no prior stick/slip classification
+  // to hold onto even though the switch value is within the band.
+  EXPECT_EQ(ContactUtils::applyTangentialHysteresis(
+                ContactUtils::ConstraintState::CONTACT_SLIP, ContactUtils::ConstraintState::OPEN, 0.5, 1.0),
+           ContactUtils::ConstraintState::CONTACT_SLIP);
+}
+
+TEST(TangentialHysteresis, DisabledWhenTauIsNonPositive)
+{
+  // tau <= 0 disables the band unconditionally, regardless of how close the switch value is to
+  // the switching surface.
+  EXPECT_EQ(ContactUtils::applyTangentialHysteresis(ContactUtils::ConstraintState::CONTACT_SLIP,
+                                                    ContactUtils::ConstraintState::CONTACT_STICK,
+                                                    0.0,
+                                                    0.0),
+           ContactUtils::ConstraintState::CONTACT_SLIP);
+}
+
 TEST(EventPrediction, PredictedCrossingIsSelfConsistent)
 {
   // "Predicted vs actual on a known crossing": for an exactly linear switching function
