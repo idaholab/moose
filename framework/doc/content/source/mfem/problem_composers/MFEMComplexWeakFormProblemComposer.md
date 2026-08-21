@@ -5,7 +5,6 @@
 ## Overview
 
 `MFEMComplexWeakFormProblemComposer` is the builder class for `ComplexEquationSystemProblemOperator`.
-when called by an [MFEMSteady.md] executioner object.
 
 !syntax parameters /ProblemComposer/MFEMComplexWeakFormProblemComposer
 
