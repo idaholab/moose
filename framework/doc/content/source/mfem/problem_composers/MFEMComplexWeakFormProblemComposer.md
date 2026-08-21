@@ -6,6 +6,8 @@
 
 `MFEMComplexWeakFormProblemComposer` is the builder class for `ComplexEquationSystemProblemOperator`.
 
+## Input File Syntax
+
 !syntax parameters /ProblemComposer/MFEMComplexWeakFormProblemComposer
 
 !syntax inputs /ProblemComposer/MFEMComplexWeakFormProblemComposer
