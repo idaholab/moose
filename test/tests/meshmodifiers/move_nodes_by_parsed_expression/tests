@@ -1,0 +1,166 @@
+[Tests]
+  design = 'MoveNodesByParsedExpression.md'
+  issues = '#33587'
+  [displace]
+    type = 'Exodiff'
+    input = 'displace.i'
+    exodiff = 'displace_out.e'
+    requirement = "The system shall support displacing mesh nodes in a block by parsed expressions "
+                  "for the x, y, and z displacement components."
+  []
+  [time]
+    type = 'Exodiff'
+    input = 'time.i'
+    exodiff = 'time_out.e'
+    requirement = "The system shall evaluate parsed nodal displacements relative to each node's "
+                  "original position so that repeated execution does not accumulate drift."
+  []
+  [coupled_variable]
+    type = 'Exodiff'
+    input = 'coupled.i'
+    exodiff = 'coupled_out.e'
+    requirement = "The system shall support nodal variables as symbols in parsed nodal displacement "
+                  "expressions."
+  []
+  [nonnodal_variable_error]
+    type = 'RunException'
+    input = 'coupled.i'
+    cli_args = "AuxVariables/d/family=MONOMIAL AuxVariables/d/order=CONSTANT"
+    expect_err = "is not nodal"
+    requirement = "The system shall report an error when a non-nodal variable is supplied to a "
+                  "parsed nodal displacement modifier."
+  []
+  [symbols]
+    type = 'Exodiff'
+    input = 'symbols.i'
+    exodiff = 'symbols_out.e'
+    requirement = "The system shall support functions, postprocessors, and a z-direction expression "
+                  "in parsed nodal displacements."
+  []
+  [displace_parallel]
+    type = 'Exodiff'
+    input = 'displace.i'
+    exodiff = 'displace_out.e'
+    min_parallel = 2
+    prereq = 'displace'
+    requirement = "The system shall apply parsed nodal displacements identically when run on "
+                  "multiple processors."
+  []
+  [coupled_variable_parallel]
+    type = 'Exodiff'
+    input = 'coupled.i'
+    exodiff = 'coupled_out.e'
+    min_parallel = 2
+    prereq = 'coupled_variable'
+    requirement = "The system shall evaluate coupled variable values in parsed nodal displacements "
+                  "correctly when run on multiple processors."
+  []
+  [displace_distributed]
+    type = 'Exodiff'
+    input = 'displace.i'
+    exodiff = 'displace_out.e'
+    min_parallel = 2
+    cli_args = 'Mesh/parallel_type=distributed'
+    prereq = 'displace_parallel'
+    requirement = "The system shall apply parsed nodal displacements in a block correctly on a "
+                  "distributed mesh."
+  []
+  [coupled_variable_distributed]
+    type = 'Exodiff'
+    input = 'coupled.i'
+    exodiff = 'coupled_out.e'
+    min_parallel = 2
+    cli_args = 'Mesh/parallel_type=distributed'
+    prereq = 'coupled_variable_parallel'
+    requirement = "The system shall evaluate coupled variable values in parsed nodal displacements "
+                  "correctly on a distributed mesh."
+  []
+  [twoblock]
+    type = 'Exodiff'
+    input = 'twoblock.i'
+    exodiff = 'twoblock_out.e'
+    requirement = "The system shall restrict parsed nodal displacements to a single block of a "
+                  "multi-block mesh."
+  []
+  [twoblock_distributed]
+    type = 'Exodiff'
+    input = 'twoblock.i'
+    exodiff = 'twoblock_out.e'
+    min_parallel = 2
+    cli_args = 'Mesh/parallel_type=distributed'
+    prereq = 'twoblock'
+    requirement = "The system shall synchronize node positions so that block-restricted parsed "
+                  "nodal displacements on a multi-block distributed mesh match the serial result."
+  []
+  [all_blocks]
+    type = 'Exodiff'
+    input = 'all_blocks.i'
+    exodiff = 'all_blocks_out.e'
+    requirement = "The system shall apply parsed nodal displacements to all blocks when neither "
+                  "block nor boundary is specified."
+  []
+  [block_empty_noop]
+    type = 'Exodiff'
+    input = 'displace.i'
+    cli_args = 'UserObjects/move/block= Outputs/file_base=block_empty_noop_out'
+    exodiff = 'block_empty_noop_out.e'
+    requirement = "The system shall not move any nodes when the user explicitly sets an empty block "
+                  "restriction."
+  []
+  [notify_mesh_changed]
+    type = 'Exodiff'
+    input = 'notify_mesh_changed.i'
+    exodiff = 'notify_mesh_changed_out.e-s003'
+    requirement = "The system shall optionally notify the problem that the mesh has changed after "
+                  "moving nodes, without recursion, so that the moved mesh is reflected in "
+                  "mesh-dependent systems and output."
+  []
+  [outputs]
+    type = 'Exodiff'
+    input = 'outputs.i'
+    exodiff = 'outputs_out.e'
+    requirement = "The system shall optionally output the original node coordinates, the node "
+                  "displacements, and a per-element density adjustment factor as auto-created "
+                  "auxiliary variables."
+  []
+  [outputs_rz]
+    type = 'Exodiff'
+    input = 'outputs.i'
+    cli_args = 'Mesh/coord_type=RZ Outputs/out/file_base=outputs_rz_out'
+    exodiff = 'outputs_rz_out.e'
+    requirement = "The system shall compute the density adjustment factor using coordinate-aware "
+                  "element volumes for RZ geometries."
+  []
+  [density_factor]
+    type = 'Exodiff'
+    input = 'density_factor.i'
+    exodiff = 'density_factor_out.e'
+    requirement = "The system shall write only the outputs whose parameter is supplied."
+  []
+  [missing_output_variable_error]
+    type = 'RunException'
+    input = 'density_factor.i'
+    cli_args = "UserObjects/move/original_coordinate_variables='missing_x missing_y missing_z'"
+    expect_err = "No auxiliary variable named 'missing_x' was found"
+    requirement = "The system shall report an error when a named output auxiliary variable has not "
+                  "been created."
+  []
+  [output_variable_count_error]
+    type = 'RunException'
+    input = 'density_factor.i'
+    cli_args = "UserObjects/move/original_coordinate_variables='a b'"
+    expect_err = "Exactly three variable names must be provided"
+    requirement = "The system shall require exactly three variable names for the original "
+                  "coordinate and displacement outputs."
+  []
+  [outputs_distributed]
+    type = 'Exodiff'
+    input = 'outputs.i'
+    exodiff = 'outputs_out.e'
+    min_parallel = 2
+    cli_args = 'Mesh/parallel_type=distributed'
+    prereq = 'outputs'
+    requirement = "The system shall write the optional coordinate, displacement, and density-factor "
+                  "outputs correctly on a distributed mesh."
+  []
+[]
