@@ -56,6 +56,17 @@ public:
   const neml2::Tensor & getOutputParameterDerivative(const neml2::VariableName & output_name,
                                                      const std::string & parameter_name) const;
 
+  /**
+   * Get a reference(!) to the requested output parameter derivative vector-Jacobian product view,
+   * i.e. the contraction of the gathered cotangent of \p output_name with the derivative of
+   * \p output_name with respect to the model parameter \p parameter_name. The contraction is
+   * evaluated by a single reverse pass seeded with the cotangent, so the full derivative is never
+   * materialized. The result carries the shape of the model parameter, i.e. one scalar per
+   * quadrature point for a scalar-valued model parameter.
+   */
+  const neml2::Tensor & getOutputParameterVJP(const neml2::VariableName & output_name,
+                                              const std::string & parameter_name) const;
+
   /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
 
@@ -66,6 +77,12 @@ protected:
   /// Register a NEML2 model parameter gathered by a gatherer
   virtual void addGatheredParameter(const UserObjectName &, const std::string &);
 
+  /**
+   * Register a reverse-mode cotangent gathered by a gatherer. The NEML2 name of the gatherer
+   * identifies the NEML2 output variable the cotangent is paired with.
+   */
+  virtual void addGatheredCotangent(const UserObjectName &, const MOOSEToNEML2 &);
+
   /// Prevent output and derivative retrieval after construction
   virtual void checkExecutionStage() const final;
 
@@ -75,7 +92,10 @@ protected:
   /// Perform the material update
   virtual bool solve();
 
-  /// Extract output derivatives with respect to input variables and model parameters
+  /**
+   * Extract output derivatives with respect to input variables and model parameters, as well as
+   * the vector-Jacobian products between the gathered cotangents and the parameter derivatives
+   */
   virtual void extractOutputs();
 
   /// Expand tensor shapes if necessary to conformal sizes
@@ -121,6 +141,14 @@ protected:
   std::vector<const MOOSEToNEML2 *> _gatherers;
   std::vector<const MOOSEToNEML2 *> _param_gatherers;
 
+  /**
+   * MOOSE data gathering user objects supplying reverse-mode cotangents, keyed by the NEML2 output
+   * variable each cotangent is paired with. A cotangent is neither a model input variable nor a
+   * model parameter, so it is never inserted into the model. It is read directly through
+   * MOOSEToNEML2::gatheredData().
+   */
+  std::map<neml2::VariableName, const MOOSEToNEML2 *> _cotangent_gatherers;
+
   /// set of output variables that were retrieved (by other objects)
   mutable neml2::ValueMap _retrieved_outputs;
 
@@ -130,6 +158,10 @@ protected:
   /// set of parameter derivatives that were retrieved (by other objects)
   mutable std::map<neml2::VariableName, std::map<std::string, neml2::Tensor>>
       _retrieved_parameter_derivatives;
+
+  /// set of parameter derivative vector-Jacobian products that were retrieved (by other objects)
+  mutable std::map<neml2::VariableName, std::map<std::string, neml2::Tensor>>
+      _retrieved_parameter_vjps;
 
 private:
   /// Whether an error was encountered
