@@ -40,6 +40,14 @@ protected:
 
   /// Number of eigenmodes to compute
   int _num_modes;
+
+  /// Number of modes the underlying solver computes per distinct physical mode. The monolithic real
+  /// form of a complex (Hermitian) eigenproblem doubles every eigenvalue, so this is 2 for complex
+  /// eigenproblems and 1 otherwise.
+  int _mode_stride;
+
+  /// Total number of modes the underlying solver must compute.
+  int numComputedModes() const { return _num_modes * _mode_stride; }
 };
 }
 
