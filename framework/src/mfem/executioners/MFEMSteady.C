@@ -41,6 +41,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (!_mfem_problem.getProblemComposer())
   {
+    std::string name = "default_steady";
     std::string type;
     if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
     {
@@ -50,14 +51,11 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
       }
       else
       {
-        _mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
         type = "MFEMWeakFormProblemComposer";
       }
     }
     else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
     {
-      _mfem_problem.getProblemData().eqn_system =
-          std::make_shared<Moose::MFEM::ComplexEquationSystem>();
       type = "MFEMComplexWeakFormProblemComposer";
     }
     else
@@ -66,7 +64,6 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
                  "Please set the Problem numeric type to either 'real' or 'complex'.");
     }
     InputParameters default_params = _factory.getValidParams(type);
-    std::string name = "default_steady";
     _mfem_problem.addMFEMProblemComposer(type, name, default_params);
   }
   addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
