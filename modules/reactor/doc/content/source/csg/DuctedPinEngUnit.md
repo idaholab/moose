@@ -17,13 +17,13 @@ The duct apothems and ring radii should be provided in ascending order. For a pi
 
 The `getAttributes()` method returns a map containing the parameters of the ducted pin cell:
 
-| Attribute            | Type                                    | Description                                   |
-|----------------------|-----------------------------------------|-----------------------------------------------|
-| `duct_apothems`      | `std::vector<Real>`                     | List of duct apothems of ducted pin cell      |
-| `ring_radii`         | `std::vector<Real>`                     | List of ring radii of ducted pin cell         |
-| `region_names`       | `std::vector<std::vector<std::string>>` | Radial and axial region names                 |
-| `geometry_type`      | `std::string`                           | Geometry type ("Hex" or "Square") of pin cell |
-| `axial_plane_levels` | `std::vector<Real>`                     | List of axial plane levels for 3-D pin cell   |
+| Attribute            | Type                                    | Description                                                     |
+|----------------------|-----------------------------------------|-----------------------------------------------------------------|
+| `duct_apothems`      | `std::vector<Real>`                     | List of duct apothems of ducted pin cell                        |
+| `ring_radii`         | `std::vector<Real>`                     | List of ring radii of ducted pin cell                           |
+| `region_names`       | `std::vector<std::vector<std::string>>` | Radial (inner indexing) and axial (outer indexing) region names |
+| `geometry_type`      | `std::string`                           | Geometry type ("Hex" or "Square") of pin cell                   |
+| `axial_plane_levels` | `std::vector<Real>`                     | List of axial plane levels for 3-D pin cell                     |
 
 Note: `axial_plane_levels` will exist in the map only if axial geometry information was provided to the `DuctedPinEngUnit` constructor.
 

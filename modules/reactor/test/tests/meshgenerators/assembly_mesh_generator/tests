@@ -177,7 +177,7 @@
   []
   [csg_eng_unit]
     design = 'CSGBase.md CSGEngUnit.md'
-    requirement = 'The system shall generate the Monte Carlo engineering unit-based representation of a '
+    requirement = 'The system shall generate an engineering unit-based CSG representation of a '
     [2d_hex]
       detail = '2D hexagonal assembly'
       type = JSONDiff

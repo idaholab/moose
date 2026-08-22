@@ -505,7 +505,7 @@
     []
   []
   [csg_eng_unit]
-    requirement = 'The system shall generate the Monte Carlo engineering unit-based representation of a '
+    requirement = 'The system shall generate an engineering unit-based CSG representation of a '
     [core_hex]
       detail = '3D hexagonal core'
       type = JSONDiff
