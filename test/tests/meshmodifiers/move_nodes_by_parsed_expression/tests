@@ -126,7 +126,7 @@
   [outputs_rz]
     type = 'Exodiff'
     input = 'outputs.i'
-    cli_args = 'Mesh/coord_type=RZ Outputs/out/file_base=outputs_rz_out'
+    cli_args = 'Mesh/coord_type=RZ Outputs/file_base=outputs_rz_out'
     exodiff = 'outputs_rz_out.e'
     requirement = "The system shall compute the density adjustment factor using coordinate-aware "
                   "element volumes for RZ geometries."
