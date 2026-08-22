@@ -194,8 +194,18 @@ class Runner(OutputInterface):
         try:
             stream.seek(0)
             output = stream.read().decode("utf-8")
-        except UnicodeDecodeError:
-            self.job.setStatus(self.job.error, "non-unicode characters in output")
+        except UnicodeDecodeError as err:
+            raw = err.object
+            begin = max(0, err.start - 64)
+            end = min(len(raw), err.end + 64)
+
+            self.job.setStatus(
+                self.job.error,
+                f"invalid UTF-8: {err.reason}; "
+                f"offset={err.start}; "
+                f"bad={raw[err.start:err.end].hex(' ')}; "
+                f"context={raw[begin:end]!r}",
+            )
         except:
             self.job.setStatus(self.job.error, "error reading output")
         if output and output[-1] != "\n":
