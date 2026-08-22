@@ -1,7 +1,7 @@
 # ContactLineSearch
 
 This class implements the infrastructure shared by the contact-aware line searches
-([NodeFaceContactLineSearch.md] and `MortarContactLineSearch`): creation and
+([NodeFaceContactLineSearch.md]): creation and
 configuration of a secondary, standalone PETSc `SNESLineSearch` of the type given by the
 `backing_line_search` parameter (`basic`, `bt`, `l2`, or `cp`), under the
 `contact_backing_` PETSc options prefix, and the optional linear-tolerance loosening

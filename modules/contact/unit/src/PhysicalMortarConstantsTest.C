@@ -68,8 +68,8 @@ TEST(PhysicalMortarConstants, FrictionlessBeatsDefault)
 }
 
 // Verify that c_normal_strategy=physical + c_tangential_strategy=physical (this fixture's
-// default) reduces cumulative nonlinear iterations compared to fixed c_normal=1e6/c_tangential=1
-// under MortarContactLineSearch for frictional (Coulomb) mortar contact with sliding.
+// default) reduces cumulative nonlinear iterations compared to fixed
+// c_normal=1e6/c_tangential=1 for frictional (Coulomb) mortar contact with sliding.
 TEST(PhysicalMortarConstants, FrictionalBeatsDefault)
 {
   Real contact_dofs = 0;
