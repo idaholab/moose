@@ -217,14 +217,11 @@ offset = 0.00
 
 [Executioner]
   type = Transient
-  end_time = .025
+  end_time = .125
   dt = .025
-  dtmin = .001
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
   petsc_options_value = 'lu       mumps                      NONZERO'
-  l_max_its = 100
-  nl_max_its = 100
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-10
   abort_on_solve_fail = true

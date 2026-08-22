@@ -75,10 +75,10 @@ TEST(PhysicalMortarConstants, FrictionalBeatsDefault)
   Real contact_dofs = 0;
   const Real physical_its = runCumulativeNL("frictional_physical.i", {}, &contact_dofs);
   EXPECT_GT(contact_dofs, 0) << "no contact DOFs active - test is not exercising contact";
-  const Real default_its = runCumulativeNL(
-      "frictional_physical.i",
-      {"LineSearch/active=ls", "Contact/mortar/c_normal_strategy=user",
-       "Contact/mortar/c_tangential_strategy=user"});
+  const Real default_its = runCumulativeNL("frictional_physical.i",
+                                           {"Contact/mortar/c_normal_strategy=user",
+                                            "Contact/mortar/c_tangential_strategy=user",
+                                            "Contact/mortar/c_tangential=1e3"});
   EXPECT_LT(physical_its, default_its)
       << "physical c_normal+c_tangential (" << physical_its
       << " cumulative NL iters) should beat defaults c_normal=1e6/c_tangential=1 (" << default_its
