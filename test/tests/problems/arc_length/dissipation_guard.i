@@ -11,6 +11,13 @@
   []
 []
 
+[Functions]
+  [secant_stiffness]
+    type = ParsedFunction
+    expression = 'if(t < 0.45, 1.0, 0.45)'
+  []
+[]
+
 [Kernels]
   [diff]
     type = Diffusion
@@ -20,6 +27,7 @@
     type = ADMatBodyForce
     variable = u
     material_property = restoring_force
+    function = secant_stiffness
     value = -1
   []
   [load]
@@ -32,19 +40,17 @@
 []
 
 [Materials]
-  [cubic]
+  [linear]
     type = ADParsedMaterial
     property_name = restoring_force
     coupled_variables = 'u'
-    expression = 'u * (u - 1) * (u - 2)'
+    expression = 'u'
   []
 []
 
 [Problem]
   type = ArcLengthProblem
-  step_size = 0.25
-  lambda_min = -1
-  lambda_max = 1
+  step_size = 0.6
 []
 
 [Postprocessors]
@@ -67,10 +73,13 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  dt = 0.1
+  num_steps = 10
+  dtmin = 1e-3
 []
 
 [Outputs]

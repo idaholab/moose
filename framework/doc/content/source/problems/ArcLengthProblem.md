@@ -40,26 +40,29 @@ would count its contribution once in $F_\mathrm{int}$ and again in $\lambda R_\m
 problem errors rather than let that happen. At least one object has to carry the load tag, otherwise
 there is no load to continue in and the solve errors during setup.
 
-Whether the load needs a second tag depends on how it responds to the solution:
+A load object carries a second tag as well: [!param](/Problem/ArcLengthProblem/load_matrix_tag) in
+`matrix_tags`, which holds the derivative of the load with respect to the solution. The pairing is
+enforced in both directions at setup, so either tag carried without the other is an error.
 
-- A *dead* load does not change with the solution — a fixed point force, or a pressure applied on the
-  undeformed configuration. Its derivative with respect to the solution is zero, so `vector_tags`
-  alone is enough.
-- A *follower* or otherwise solution-dependent load does change with the solution — a pressure that
-  follows a deforming surface, or a source term that is a function of the unknown. Its derivative
-  belongs in the load Jacobian, so name [!param](/Problem/ArcLengthProblem/load_matrix_tag) in
-  `matrix_tags` as well. The same double-count guard applies: replace the matrix tags rather than
-  appending with `extra_matrix_tags`. A follower load on a displaced mesh assembles on the current
-  configuration: the displaced mesh is moved to the iterate before every assembly of the load tag,
-  the tangent-load evaluations between residuals included.
+That derivative is what a *follower* or otherwise solution-dependent load has — a pressure that
+follows a deforming surface, or a source term that is a function of the unknown. A *dead* load — a
+fixed point force, or a pressure applied on the undeformed configuration — has none, so it
+contributes nothing to the load matrix tag and carrying that tag costs it nothing. The double-count
+guard applies to the matrix tags too: replace them rather than appending with `extra_matrix_tags`.
+
+A follower load on a displaced mesh assembles on the current configuration: the displaced mesh is
+moved to the iterate before every assembly of the load tag, the tangent-load evaluations between
+residuals included.
 
 !alert warning title=Strongly enforced Dirichlet conditions at loaded degrees of freedom
-A [DirichletBC.md] zeroes the residual row at each constrained degree of freedom, and it does so in
-the default residual only. A load-tagged object that contributes at a constrained degree of freedom
-leaves its contribution standing in the load tag, where $\lambda$ scales it back into the residual
-after the row has been cleared. Either keep the load away from the constrained degrees of freedom —
-an interior point load has this property — or enforce the constraint weakly with a
-[PenaltyDirichletBC.md], which is the supported pattern when the load is nonzero there.
+A [DirichletBC.md] zeroes the residual row at each constrained degree of freedom in the default
+residual only, and it does so after the load tag has been assembled. A load-tagged object at a
+constrained degree of freedom therefore has its load dropped from the residual while the tangent
+load still carries it, and the problem errors, naming the offending boundary conditions. Keep the
+load off those degrees of freedom — an interior point load has this property — or enforce the
+constraint weakly with a [PenaltyDirichletBC.md], which is the supported pattern when the load is
+nonzero there. The load matrix needs no such care: its rows at nodally constrained degrees of
+freedom are zeroed before the tangent load is added, so the constraint rows stay intact.
 
 !alert warning title=Constant loads have to start in equilibrium
 A load left in the default tags is carried at full strength from the first increment, while the
@@ -68,43 +71,51 @@ A constant load applied to a state that is not already in equilibrium with it pu
 reach, and the corrector settles on the nearest state it can find instead — characteristically a
 negative load factor that cancels the constant load back out. It converges, and it means nothing.
 Equilibrate the constant loads with an ordinary solve first and start the continuation from that
-state.
+state. A transient trace carrying a constant load through the whole run names the tag that load is
+routed to in [!param](/Problem/ArcLengthProblem/held_load_vector_tag) as well: route the load with
+`extra_vector_tags` into a tag created with `extra_tag_vectors`, which leaves it in the residual it
+already contributes to and fills the tag with a copy. Naming the tag changes nothing about how the
+load is applied; the descent guard of [#softening-transient] is what reads it.
 
 ## Where the continuation stops
 
-[!param](/Problem/ArcLengthProblem/lambda_max) is by default the only criterion that ends a path
-successfully: the continuation runs until the load parameter reaches it.
+[!param](/Problem/ArcLengthProblem/lambda_max) is one of two criteria that end a path successfully:
+the continuation runs until the load parameter reaches it, or until it spends the whole of
+[!param](/Problem/ArcLengthProblem/max_continuation_steps).
 [!param](/Problem/ArcLengthProblem/lambda_min) is a clamp rather than an exit — an increment that
 would carry the load parameter below it is truncated back to it, and the path then sits at that value
 until the increment budget runs out.
 
 Both bounds consequently have to bracket the range of $\lambda$ the path actually travels through. A
 [!param](/Problem/ArcLengthProblem/lambda_max) the path never reaches and a
-[!param](/Problem/ArcLengthProblem/lambda_min) placed part-way into a descending branch fail the same
-way: [!param](/Problem/ArcLengthProblem/max_continuation_steps) increments are spent and the solve
-gives up. The two are distinguishable while they happen — a path pinned at the floor reflects off it
+[!param](/Problem/ArcLengthProblem/lambda_min) placed part-way into a descending branch end the same
+way: the whole [!param](/Problem/ArcLengthProblem/max_continuation_steps) budget is spent on a path
+that arrived nowhere, and by default that ending is reported as a converged solve. The two are
+distinguishable while they happen — a path pinned at the floor reflects off it
 and ping-pongs, while a path whose ceiling sits above the top of a closed loop cycles around that loop
 indefinitely — so a run that never terminates is worth plotting before the step size is blamed.
 
-[!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps) makes a spent increment budget the
-successful end of a path rather than a failed solve. Past the peak of a strain-softening material — a
-damage model such as Mazars — the load parameter falls monotonically and never climbs back, so a
-[!param](/Problem/ArcLengthProblem/lambda_max) beyond the peak is unreachable on that branch and no
-stopping criterion is left for the path to meet. Tracing a softening response consequently ends as a
-diverged solve however faithfully the trace followed the branch. Setting this parameter makes the
-budget the designed end of the path instead: a continuation that runs its entire
+[!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps) decides whether a spent increment
+budget is an ending at all. It defaults to true, so a continuation that runs its entire
 [!param](/Problem/ArcLengthProblem/max_continuation_steps) budget through converged increments is
-reported converged, and a path whose corrector fails inside any increment — the last permitted one
-included — still fails. The two endings share the solver's exit reason and are told apart by the
-nonlinear iteration count at the exit: a spent budget is only reached through a converged
+reported converged. That default is what traces a strain-softening branch: past the peak of a damage
+model such as Mazars the load parameter falls monotonically and never climbs back, so a
+[!param](/Problem/ArcLengthProblem/lambda_max) beyond the peak is unreachable there and the budget is
+the only ending the branch offers. Setting the parameter to false gives that ending up — a spent
+budget fails the solve, and [!param](/Problem/ArcLengthProblem/lambda_max) is left as the only
+criterion a completed path can meet, which a softening trace never reaches.
+
+A path whose corrector fails inside any increment — the last permitted one included — fails under
+either setting. That failure and a spent budget share the solver's exit reason and are told apart by
+the nonlinear iteration count at the exit: a spent budget is only reached through a converged
 increment, which leaves the count short of the iteration cap, while a corrector stopped by the cap
 sits exactly at it.
 
 The exit is read off the number of increments a continuation traced, so it needs a single solve per
 path: a setup that solves the same path more than once carries the count past the budget and reports
-the solve as failed. The setting belongs to a one-shot path alone — a transient run advances by a
-single increment per step, whose internal budget is always a designed ending, and errors when the
-input sets this; [#per-timestep] describes that mode.
+the solve as failed. The setting belongs to a one-shot path alone. A transient run advances by a
+single increment per step, whose internal budget is always a designed ending, so it errors when the
+input sets that parameter; [#per-timestep] describes that mode.
 
 This exit rests on PETSc's convergence reason alone, so the MOOSE-level checks that otherwise veto a
 converged solve stop applying once the budget is spent: a [Terminator.md] with `fail_mode = SOFT`, an
@@ -181,7 +192,8 @@ mesh and warp in the viewer: `use_displaced = true` fragments the output into on
 transient run does not write these frames; see [#per-timestep].
 
 An [AuxKernels] object takes the flag as well, which is what a material field animated this way
-needs: left off it, the frames still render, carrying values from before the increment.
+needs: an aux kernel left off `ARC_LENGTH_INCREMENT` still renders its frames, but they carry
+values from before the increment.
 
 Objects scheduled on `LINEAR` run once per tangent-load assembly in addition to the ordinary residual
 evaluations, because the load tag is reassembled every time PETSc asks for the tangent load.
@@ -252,8 +264,8 @@ sphere spans a whole feature of the path — a serration of a crack advance, a s
 past it in one committed jump: the state it lands on is an equilibrium and the history committed is
 the history of that jump, so a coarse radius surveys the path quickly at the cost of resolving its
 finest excursions, and a fine radius resolves them at the cost of more steps. The margin is real: a
-radius a factor of two above the one that threads a serration field can fail its first tooth at
-every load span, so size the radius on the finest feature of the path rather than on the smooth
+radius a factor of two above the one that threads a field of serrations can fail at the first of
+them at every load span, so size the radius on the finest feature of the path rather than the smooth
 stretches.
 
 ### Non-smooth material events and lagged updates
@@ -265,7 +277,7 @@ iteration itself, so nothing the stepping does removes it. Pair the continuation
 update the material offers — `use_old_damage` on a damage model, `lag_displacement_jump` on a
 cohesive law — so every increment linearizes a smooth problem with the evolution frozen at the last
 committed state. The per-step commits are what bound the lag: the history runs at most one
-committed increment behind the path, a distance the radius sizes, where the same lag under a
+committed increment behind the path, a distance the radius sizes, whereas the same lag under a
 prescribed ramp trails by a whole ramp increment.
 
 ### Settings a transient run owns
@@ -273,7 +285,10 @@ prescribed ramp trails by a whole ramp increment.
 [!param](/Problem/ArcLengthProblem/step_size),
 [!param](/Problem/ArcLengthProblem/psi_squared) and
 [!param](/Problem/ArcLengthProblem/correction_type) govern every increment as they govern a
-one-shot continuation. [!param](/Problem/ArcLengthProblem/max_continuation_steps),
+one-shot continuation. [!param](/Problem/ArcLengthProblem/held_load_vector_tag) joins them. It names
+the tag carrying the loads held constant through the run, such as a preload held while the tagged
+load is continued, and the descent guard of [#softening-transient] reads it at the end of every step.
+[!param](/Problem/ArcLengthProblem/max_continuation_steps),
 [!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps),
 [!param](/Problem/ArcLengthProblem/lambda_max) and
 [!param](/Problem/ArcLengthProblem/lambda_min) belong to a one-shot path alone, and a transient run
@@ -351,9 +366,22 @@ dissipates is what does [!citep](verhoosel2009). A descent along the path of a d
 structure sheds load because the structure dissipates; unloading it elastically, with the
 irreversible state held by its own irreversibility, descends without dissipating, and the elastic
 unload of a linear structure is proportional, which cancels the dissipation increment
-$\tfrac{1}{2}\left(\Lambda\, R_\mathrm{load}^T \Delta u - \Delta\lambda\, R_\mathrm{load}^T u\right)$
-exactly. A converged step whose net load change runs downward without dissipating is therefore
-failed, its retry travels the other way, and the console says so:
+
+\begin{equation}
+\Delta D = \tfrac{1}{2}\left(\Lambda\, R_\mathrm{load}^T \Delta u + R_\mathrm{held}^T \Delta u
+- \Delta\lambda\, R_\mathrm{load}^T u_0\right)
+\end{equation}
+
+exactly, where $\Lambda$ is the committed load factor the step starts from, $u_0$ the state it
+starts from, $\Delta u$ the change of the solution across it, $\Delta\lambda$ the change of the load
+factor it commits, and $R_\mathrm{held}$ the residual of the loads held constant through the run,
+which [!param](/Problem/ArcLengthProblem/held_load_vector_tag) names. The held term is what makes
+the cancellation exact under a preload: elastic unloading under a held load follows an affine line
+rather than the proportional ray it follows without one. Leave the parameter unset with a held load
+in the run and that work is missing from $\Delta D$, so elastic unloading reads as dissipative and a
+walk back down an elastic branch is accepted as a descent along the path. A converged step whose net
+load change runs downward without dissipating is therefore failed, its retry travels the other way,
+and the console says so:
 
 ```
 Arc length step descended without dissipating, which is a walk back down an
@@ -381,10 +409,10 @@ committed along the way.
 ## Example Input File Syntax id=example
 
 A shallow circular arch loaded at its apex snaps through: the load rises to a limit point, falls while
-the arch inverts, then rises again on the inverted branch. The load here is a point source, routed to
-the load tag and carrying no matrix tag because a constant point force does not vary with the
-deformation. It acts at an interior node, away from the clamped ends, so the strongly enforced
-[DirichletBC.md] conditions on those ends do not overlap it.
+the arch inverts, then rises again on the inverted branch. The load here is a point source carrying
+both load tags, and its contribution to the load matrix tag is empty because a constant point force
+does not vary with the deformation. It acts at an interior node, away from the clamped ends, so the
+strongly enforced [DirichletBC.md] conditions on those ends do not overlap it.
 
 !listing modules/solid_mechanics/test/tests/arc_length/arch_snapthrough.i block=DiracKernels
 
@@ -400,8 +428,7 @@ supports, whose path snaps back — displacement as well as load decreases along
 neither load control nor displacement control can trace.
 
 A volumetric source becomes a continuation load the same way. The Bratu source below is a function of
-the unknown, so it is solution-dependent and carries the load matrix tag as well as the load vector
-tag:
+the unknown, so the load matrix tag it carries is the one that receives a nonzero load Jacobian:
 
 !listing test/tests/problems/arc_length/bratu_source.i block=Kernels
 

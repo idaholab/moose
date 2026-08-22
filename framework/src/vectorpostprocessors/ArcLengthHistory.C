@@ -34,6 +34,10 @@ ArcLengthHistory::validParams()
   params.set<bool>("contains_complete_history") = true;
   params.suppressParameter<bool>("contains_complete_history");
 
+  // The load parameter and the sampled postprocessor values are already replicated, so the growing
+  // history never has to be broadcast
+  params.set<bool>("_auto_broadcast") = false;
+
   return params;
 }
 

@@ -35,6 +35,7 @@ angle_max = ${fparse 90 + half_angle}
     point = '0 ${radius} 0'
     value = -60
     vector_tags = 'arc_length_load'
+    matrix_tags = 'arc_length_load_jac'
   []
 []
 
@@ -101,6 +102,4 @@ angle_max = ${fparse 90 + half_angle}
 
 [Outputs]
   csv = true
-  # visualization of the deformed arch for the user, deliberately not asserted by any exodiff
-  exodus = true
 []

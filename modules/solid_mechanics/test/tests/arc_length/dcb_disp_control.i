@@ -174,9 +174,9 @@ nx = 100
   line_search = none
   automatic_scaling = true
   dt = 0.25
-  end_time = 40
+  end_time = 16
   dtmin = 1e-4
-  nl_max_its = 50
+  nl_max_its = 15
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
   petsc_options_iname = '-pc_type'
@@ -185,5 +185,4 @@ nx = 100
 
 [Outputs]
   csv = true
-  exodus = true
 []

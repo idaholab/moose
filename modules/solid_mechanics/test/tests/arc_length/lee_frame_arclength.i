@@ -90,6 +90,7 @@ thick = 2
     boundary = load_face
     value = ${fparse -5 / 2}
     vector_tags = 'arc_length_load'
+    matrix_tags = 'arc_length_load_jac'
   []
   [column_hinge_x]
     type = DirichletBC
@@ -197,5 +198,4 @@ thick = 2
 
 [Outputs]
   csv = true
-  exodus = true
 []

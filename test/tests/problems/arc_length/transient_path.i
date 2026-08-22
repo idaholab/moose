@@ -27,6 +27,7 @@
     variable = u
     value = 1
     vector_tags = 'arc_length_load'
+    matrix_tags = 'arc_length_load_jac'
   []
 []
 

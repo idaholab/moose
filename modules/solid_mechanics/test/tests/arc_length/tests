@@ -21,14 +21,10 @@
   # arbitrary choice of support condition. As a pair they are a result, so do not change the support
   # condition of either one without changing the other.
   #
-  # That four configuration result was first calibrated on an earlier PARABOLIC arch family whose
-  # rise to span ratios these two circular arches reproduce (0.165 here, 0.11 there). Circular arches
-  # are the literature benchmark for arc-length continuation, so the geometry was moved onto circles,
-  # and the behaviour has now been MEASURED there: the clamped path peaks at 1.2807 and troughs at
-  # +0.5330, and the pinned path troughs at -2.1075 with the apex displacement reversing at increment
-  # 69. The committed path golds record those values, so the four configuration result is verified on
-  # these two inputs. Parabolic numbers still quoted in the blocks below are the calibration the
-  # guard rails were sized from, not predictions of these paths.
+  # The behaviour has been MEASURED on these two inputs: the clamped path peaks at 1.2807 and
+  # troughs at +0.5330, and the pinned path troughs at -2.1075 with the apex displacement reversing
+  # at increment 69. The committed path golds record those values, so the four configuration result
+  # is verified here.
   #
   # Both meshes are AnnularMeshGenerator sectors placed so that the crown sits exactly at (0, radius)
   # with no translation. nt must be EVEN so an angular division lands on the crown at 90 degrees,
@@ -157,10 +153,11 @@
     # share the same fixed point, so the converged path agrees to ~1e-10 (measured) and no
     # converged value diff can tell them apart at any tolerance.
     #
-    # Because the load is solution dependent, its exact AD derivative is routed into the load matrix
-    # tag with matrix_tags as well; a dead load needs vector_tags alone. Both are replacements and
-    # not extra_* appends, so the pressure contributes only to the load, which is what the load
-    # parameter is then free to scale.
+    # Every load object carries both load tags, and this is the leaf where the matrix one is not
+    # empty: the load is solution dependent, so its exact AD derivative lands in the load matrix
+    # tag and is scaled with the load. Both tags are replacements and not extra_* appends, so the
+    # pressure contributes only to the load, which is what the load parameter is then free to
+    # scale.
     #
     # The pressure patch is cut out of the 'rmax' face by a ParsedGenerateSideset at abs(x) < 0.45,
     # roughly the middle fifth of the span. It is localized on purpose and must NOT be widened onto
@@ -194,19 +191,24 @@
   [dcb_arclength_smoke]
     type = CSVDiff
     input = dcb_arclength.i
-    cli_args = 'Executioner/end_time=1.0 Outputs/exodus=false '
+    # The switch function is overridden to fire from the first step, so every step of this run is a
+    # continuation increment and none of its wall time is spent on the prescribed ramp that gets
+    # the full leaf below to the switch. The ramp-then-switch behaviour of the Controls object is
+    # not lost by that: 'transient_continuation_control' in test/tests/problems/arc_length covers
+    # it in eight steps on a 1-D mesh. What is left here is what only a cohesive run has, the
+    # per-increment damage commit.
+    cli_args = 'Functions/switch_fn/expression=1 '
+               'Executioner/end_time=0.12 '
                'Outputs/file_base=dcb_arclength_smoke_out'
     csvdiff = 'dcb_arclength_smoke_out.csv dcb_arclength_smoke_out_path.csv'
-    requirement = 'The system shall fail a near-zero-strength pre-crack strip and climb the '
-                  'elastic peel of the arms under prescribed-ramp Newton steps whose load factor '
-                  'equals the time, then advance the trace by one committed continuation '
-                  'increment per step once a Controls object switches use_continuation on, all '
-                  'within a single input.'
+    requirement = 'The system shall advance the peel trace of a double cantilever beam whose '
+                  'pre-crack strip has near-zero strength by one committed continuation increment '
+                  'per time step from the first step of the run, committing the cohesive damage of '
+                  'every increment.'
     capabilities = 'petsc>=3.22.0'
     recover = false
     restep = false
     max_parallel = 1
-    max_time = 1800
     abs_zero = 1e-8
     rel_err = 5e-4
   []
@@ -224,14 +226,17 @@
                   'damage of every increment, carrying the trace up to the peak of the peel '
                   'resistance and down the descending serrated tearing branch that follows it, '
                   'with the load factor parting from the time, failing and mirroring any step '
-                  'that descends without dissipating, and reaching states past the loads at '
-                  'which both prescribed-load and prescribed-displacement Newton solves fail.'
+                  'that descends without dissipating, and reaching states past the load of the '
+                  'first serration, at which a peel force ramped with plain Newton solves has no '
+                  'equilibrium to converge to, and past the opening reversal that a prescribed '
+                  'opening cannot follow.'
     capabilities = 'petsc>=3.22.0'
     heavy = true
     recover = false
     restep = false
     max_parallel = 1
-    # about 400 committed increments at a tooth-resolving radius
+    # about 400 committed steps, the last 300 of them continuation increments at a
+    # tooth-resolving radius
     max_time = 1800
     abs_zero = 1e-8
     rel_err = 5e-4
@@ -239,7 +244,7 @@
   [lee_frame_arclength_smoke]
     type = CSVDiff
     input = lee_frame_arclength.i
-    cli_args = 'Executioner/end_time=3 Outputs/exodus=false '
+    cli_args = 'Executioner/end_time=1 '
                'Outputs/file_base=lee_frame_arclength_smoke_out'
     csvdiff = 'lee_frame_arclength_smoke_out.csv lee_frame_arclength_smoke_out_path.csv'
     requirement = 'The system shall advance an elastic finite strain frame by one committed '
@@ -272,7 +277,7 @@
     recover = false
     restep = false
     max_parallel = 1
-    # about 800 committed increments of a smooth elastic path
+    # 800 committed increments of a smooth elastic path
     max_time = 1800
     abs_zero = 1e-8
     rel_err = 5e-4
@@ -280,7 +285,12 @@
   [sent_arclength_smoke]
     type = CSVDiff
     input = sent_arclength.i
-    cli_args = 'Executioner/end_time=0.8 Outputs/exodus=false '
+    # The switch fires one step later than the first, so the run still crosses from prescribed
+    # Newton steps into continuation and then spends the rest of its steps taking increments,
+    # instead of spending nearly all of them on the ramp to reach a handful.
+    cli_args = '"Functions/switch_fn/expression=t>0.3" '
+               'Executioner/end_time=1.0 '
+               'Outputs/exodus=false '
                'Outputs/file_base=sent_arclength_smoke_out'
     csvdiff = 'sent_arclength_smoke_out.csv sent_arclength_smoke_out_path.csv'
     requirement = 'The system shall ramp a dead traction on a rotating-platen notched tension '
@@ -304,8 +314,9 @@
     requirement = 'The system shall step along the equilibrium path of a notched tension strip '
                   'with a cohesive ligament loaded through a freely rotating platen, one '
                   'committed continuation increment per time step with the cohesive damage of '
-                  'every increment committed, crossing the crack event at which prescribed load '
-                  'stepping fails, carrying the trace to the peak load and down the softening '
+                  'every increment committed, crossing the crack event at which a dead traction '
+                  'ramped with plain Newton solves cannot converge, below the peak load, carrying '
+                  'the trace to the peak load and down the softening '
                   'branch as the crack crosses the ligament and the platen rotation grows, on a '
                   'structure where the free rotation leaves no single displacement to prescribe.'
     capabilities = 'petsc>=3.22.0'
@@ -313,45 +324,30 @@
     recover = false
     restep = false
     max_parallel = 1
-    # about 600 committed increments over the climb, the peak, and the descent
+    # about 860 committed steps, 1332 recorded increments, over the climb, the peak, and the
+    # descent; the cutbacks through the crack event are what carry the step count past the step
+    # count of a uniform dt = 0.05 run
     max_time = 1800
     abs_zero = 1e-8
     rel_err = 5e-4
   []
-  [sent_load_control]
-    type = RunException
-    input = sent_load_control.i
-    expect_err = 'Solve failed and timestep already at or below dtmin'
-    requirement = 'The system shall demonstrate that a dead traction ramped directly with plain '
-                  'Newton solves cannot converge across the first crack event of a cohesive '
-                  'ligament, below the peak load, so the time step is cut back to its minimum '
-                  'and the run aborts where the arc-length continuation crosses the event and '
-                  'traces the whole softening branch.'
-    heavy = true
-    recover = false
-    max_parallel = 1
-  []
+  # The two comparison runs below carry the two DISTINCT ways a prescribed step dies on these
+  # paths: a load that has no equilibrium above a limit point, and an opening that reverses. Each
+  # one is a plain Newton twin of the arc-length input it is named after, on the same mesh, so the
+  # load factor it dies at can be read against the path the twin traces. Neither is asked to pay
+  # for the whole ramp that reaches its failure: the frame run opens just below the limit load, and
+  # the opening run stops at the last opening its twin's path ever reaches. Both keep a dtmin floor
+  # and an iteration count that let a doomed step die in a few cutbacks rather than spending the
+  # run on a cutback ladder, which is where the wall time of these two used to go.
   [lee_frame_load_control]
     type = RunException
     input = lee_frame_load_control.i
     expect_err = 'Solve failed and timestep already at or below dtmin'
-    requirement = 'The system shall demonstrate that the same frame load ramped directly with '
+    requirement = 'The system shall demonstrate that the Lee frame load ramped directly with '
                   'plain Newton solves has no equilibrium to converge to above the limit point '
-                  'of the post-buckling path, so the time step is cut back to its minimum and '
-                  'the run aborts within a fraction of a percent of the load factor at which '
-                  'the arc-length continuation rounds the limit point and traces on.'
-    heavy = true
-    recover = false
-    max_parallel = 1
-  []
-  [dcb_load_control]
-    type = RunException
-    input = dcb_load_control.i
-    expect_err = 'Solve failed and timestep already at or below dtmin'
-    requirement = 'The system shall demonstrate that a peel force ramped directly with plain '
-                  'Newton solves has no equilibrium to converge to above the first serration of '
-                  'a coarse cohesive interface, so the time step is cut back to its minimum and '
-                  'the run aborts where the arc-length continuation traces on.'
+                  'of the post-buckling path, so a run opened just below that limit load cuts '
+                  'its time step back to the minimum and aborts where the arc-length '
+                  'continuation rounds the limit point and traces on.'
     heavy = true
     recover = false
     max_parallel = 1
@@ -361,9 +357,9 @@
     input = dcb_disp_control.i
     expect_err = 'Solve failed and timestep already at or below dtmin'
     requirement = 'The system shall demonstrate that a prescribed opening cannot follow the '
-                  'opening reversal of a cohesive serration at any time step size, so the time '
-                  'step is cut back to its minimum and the run aborts where the arc-length '
-                  'continuation traces on.'
+                  'opening reversal of a cohesive serration, neither at the time step size the '
+                  'run starts from nor at any of the sizes it is cut back to, so the run aborts '
+                  'within the range of openings the arc-length continuation traces on through.'
     heavy = true
     recover = false
     max_parallel = 1

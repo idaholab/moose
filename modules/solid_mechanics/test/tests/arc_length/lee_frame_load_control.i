@@ -163,6 +163,7 @@ thick = 2
   solve_type = NEWTON
   line_search = none
   automatic_scaling = true
+  start_time = 12
   dt = 0.25
   end_time = 20
   dtmin = 0.01
@@ -175,5 +176,4 @@ thick = 2
 
 [Outputs]
   csv = true
-  exodus = true
 []

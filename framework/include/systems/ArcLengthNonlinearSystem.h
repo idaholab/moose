@@ -18,9 +18,9 @@ class ResidualObject;
  *
  * Arc-length continuation splits the residual into a standard part and a load part that the solver
  * scales by the load parameter lambda. Users designate a load object with the replacing parameters
- * vector_tags and matrix_tags. This system creates the two tags that name that load, holds the
- * ghosted vector the load residual is assembled into, and checks that every residual object added
- * to it is routed to exactly one side of the split.
+ * vector_tags and matrix_tags, both of which a load object carries. This system creates the two
+ * tags that name that load, holds the ghosted vector the load residual is assembled into, and
+ * checks that every residual object added to it is routed to exactly one side of the split.
  */
 class ArcLengthNonlinearSystem : public NonlinearSystem
 {
@@ -60,12 +60,17 @@ public:
 
 private:
   /**
-   * Checks that a load object replaced its default tags instead of appending to them, and records
-   * that the system has a load. A load object that also carries one of the default residual vector
-   * tags, the nontime tag or the time tag, or that carries the default system matrix tag alongside
-   * the load matrix tag, is counted on both sides of the split. No tag is ever added or removed
-   * here: TaggingInterface can only insert tags, so such an object is an error the user has to fix
-   * in the input.
+   * Checks that a load object replaced its default tags instead of appending to them, that it
+   * carries both load tags rather than one of them, and records that the system has a load.
+   *
+   * An object that also carries a default residual vector tag, or the default system matrix tag
+   * alongside the load matrix tag, is counted on both sides of the split. An object that carries
+   * one load tag alone is split between the two sides: the load parameter lambda scales what goes
+   * into the load tags and nothing else, so a residual scaled by it whose derivative is not, or
+   * the other way round, leaves the linearization no longer matching the residual. A load with no
+   * deformation dependence assembles nothing into the load matrix tag, so carrying it costs
+   * nothing. No tag is ever added or removed here: TaggingInterface can only insert tags, so such
+   * an object is an error the user has to fix in the input.
    */
   virtual void postAddResidualObject(ResidualObject & object) override;
 

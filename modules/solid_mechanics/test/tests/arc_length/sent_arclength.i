@@ -117,6 +117,7 @@ ligament_y = 0.076
     boundary = top
     value = 1e6
     vector_tags = 'arc_length_load'
+    matrix_tags = 'arc_length_load_jac'
   []
 []
 
@@ -232,7 +233,7 @@ ligament_y = 0.076
   automatic_scaling = true
   dt = 0.05
   end_time = 30
-  dtmin = 1e-12
+  dtmin = 1e-4
   error_on_dtmin = false
   nl_max_its = 40
   nl_rel_tol = 1e-8

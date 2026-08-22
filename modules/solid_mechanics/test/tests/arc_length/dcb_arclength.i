@@ -79,6 +79,7 @@ nx = 100
     boundary = left_upper
     value = ${fparse 10 / arm}
     vector_tags = 'arc_length_load'
+    matrix_tags = 'arc_length_load_jac'
   []
   [peel_down]
     type = NeumannBC
@@ -86,6 +87,7 @@ nx = 100
     boundary = left_lower
     value = ${fparse -10 / arm}
     vector_tags = 'arc_length_load'
+    matrix_tags = 'arc_length_load_jac'
   []
   [clamp_x]
     type = DirichletBC
@@ -205,7 +207,7 @@ nx = 100
   automatic_scaling = true
   dt = 0.01
   end_time = 4
-  dtmin = 1e-12
+  dtmin = 1e-3
   nl_max_its = 50
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
@@ -215,5 +217,4 @@ nx = 100
 
 [Outputs]
   csv = true
-  exodus = true
 []

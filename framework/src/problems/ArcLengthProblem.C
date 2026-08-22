@@ -51,7 +51,10 @@ ArcLengthProblem::validParams()
                            "arc_length_load_jac",
                            "Name of the matrix tag that holds the derivative of the load with "
                            "respect to the solution. Put this name in the replacing parameter "
-                           "'matrix_tags' of a deformation dependent, or follower, load object.");
+                           "'matrix_tags' of every load object, which keeps the derivative of the "
+                           "load scaled by the load parameter along with the load itself. A load "
+                           "that does not depend on the solution, which is every load that is not "
+                           "a deformation dependent or follower one, assembles nothing into it.");
   params.addRequiredRangeCheckedParam<Real>(
       "step_size",
       "step_size > 0",
@@ -197,6 +200,20 @@ ArcLengthProblem::ArcLengthProblem(const InputParameters & parameters)
   // the system holds a matrix for. Whether any follower load exists is not known until the
   // objects have been added, so the matrix is always allocated.
   _arclength_nl->addMatrix(_arclength_nl->loadMatrixTag());
+
+  // createTagVectors() above has made the 'extra_tag_vectors' tags, so the held load tag is
+  // resolved here rather than on the first descending step that reads it
+  if (isParamValid("held_load_vector_tag"))
+  {
+    const auto & held_tag_name = getParam<TagName>("held_load_vector_tag");
+    if (!vectorTagExists(held_tag_name) || !_arclength_nl->hasVector(getVectorTagID(held_tag_name)))
+      paramError("held_load_vector_tag",
+                 "The nonlinear system holds no vector tag named '",
+                 held_tag_name,
+                 "'. Create it with 'extra_tag_vectors' in this block, and route each held load to "
+                 "it with 'extra_vector_tags'.");
+    _held_load_vector_tag = getVectorTagID(held_tag_name);
+  }
 #else
   mooseError("Arc-length continuation requires PETSc 3.22.0 or newer. It is done by PETSc's "
              "SNESNEWTONAL solver, which PETSc added in that release.");
@@ -268,6 +285,16 @@ ArcLengthProblem::checkProblemIntegrity()
                getParam<TagName>("load_vector_tag"),
                "' on the residual object that carries the load.");
 
+  // A steady solve is one whole continuation, so the prescribed phase this parameter asks for has
+  // nowhere to happen and the value would be silently ignored
+  if (!_transient && isParamSetByUser("use_continuation") && !_use_continuation)
+    paramError("use_continuation",
+               "'use_continuation' is only meaningful for a transient run, where setting it false "
+               "solves a step as an ordinary Newton solve at the load factor the committed steps "
+               "and the whole load increment of the step add up to. A steady run traces the whole "
+               "path within a single solve and has no such phase. Remove the parameter, or drive "
+               "this problem with a Transient executioner.");
+
   // A transient run owns the budget and the clamps of its per-step increments, so a value from
   // the input would be silently ignored and is refused instead
   if (_transient)
@@ -322,6 +349,12 @@ ArcLengthProblem::initPetscOutputAndSomeSolverSettings()
   // on it
   FEProblemBase::initPetscOutputAndSomeSolverSettings();
 
+  // Every solve traces a path of its own, and a fixed point iteration runs more than one of them
+  // per time step, so what a traced path records is cleared here rather than when a step is armed
+  _increment = 0;
+  _ended_on_spent_budget = false;
+  _retrace_handled = false;
+
   // A prescribed step keeps the solver MOOSE set up: an ordinary Newton solve, judged by the
   // ordinary convergence test, at the load factor updateLoadParameter() prescribes
   if (!inContinuation())
@@ -359,32 +392,22 @@ ArcLengthProblem::onTimestepBegin()
   if (!_transient)
     return;
 
-  // The ceiling of the step local load parameter is the anchor of a step: 1, the end of the load
-  // increment, however far the step was cut back. The floor is a fixed span of physical load
-  // factor, sized against the nominal load increment scale of the input, which is the time step
-  // size of the first step: a floor fixed in step local units would shrink the physical span with
-  // every cutback, and the load drop of a sharp turn, which the shape of the path sets, would
-  // stop fitting inside a step exactly when the retry ladder needs it to, while no floor at all
-  // lets a corrector oscillation at such a turn run away by orders of magnitude. A thousand
-  // nominal increments of unloading span clears the transient dips a corrector makes rounding
-  // the sharpest turns, which reach far below what the step commits, and still catches an
-  // observed runaway dozens of times over. SNESNEWTONAL reads its settings from the options
-  // database, and the stored pairs reach that database once rather than once per solve, so the
-  // per-attempt value is written to the database directly.
+  // How far a step may unload is a fixed span of physical load factor, so the floor of the step
+  // local load parameter is sized against the nominal load increment scale, the time step size of
+  // the first step, and a TimeStepper cutback narrows the step local range rather than the span.
+  // SNESNEWTONAL reads its settings from the options database, which the stored pairs reach once
+  // rather than once per solve, so the per-attempt value is written to the database directly.
+  constexpr Real unloading_span_in_nominal_increments = 1000.0;
   if (_nominal_dt == 0.0)
     _nominal_dt = _dt;
-  const Real floor = -std::max(1.0, 1000.0 * _nominal_dt / _dt);
+  const Real floor = -std::max(1.0, unloading_span_in_nominal_increments * _nominal_dt / _dt);
   Moose::PetscSupport::setSinglePetscOption(
       "-snes_newtonal_lambda_min", Moose::stringifyExact(floor), this);
 
-  // The time step size is the scale of the load increment: the step local load parameter spans it
-  // over a range of 0 to 1, and the part of it the increment traverses is what the step commits.
-  // The sign carries the direction of travel across the step boundary, which is where PETSc's own
-  // predictor, whose memory of it ends with the solve, does not reach.
+  // The magnitude is the load span the step covers, which the step local load parameter spans over
+  // a range of 0 to 1, and the sign carries the direction of travel across the step boundary,
+  // where PETSc's own predictor, whose memory of it ends with the solve, does not reach.
   _step_load_increment = _path_direction * _dt;
-  _increment = 0;
-  _ended_on_spent_budget = false;
-  _retrace_handled = false;
 }
 
 void
@@ -397,6 +420,9 @@ ArcLengthProblem::onTimestepEnd()
 
   if (!_ended_on_spent_budget)
     return;
+  // A fixed point iteration reaches this once per iteration while the verdict below belongs to one
+  // solve, so the record of that solve is consumed where it is applied
+  _ended_on_spent_budget = false;
 
   // _step_lambda is the step local parameter the load factor reported from here on is composed
   // with, so narrowing the increment by it keeps the load committed and the load reported equal.
@@ -442,12 +468,9 @@ ArcLengthProblem::continuationConverged(const unsigned int sys_num)
   // increment every step advances by, and of a one-shot path while the input says so
   if (!converged && (_transient || _end_on_max_continuation_steps))
   {
-    // One publication happens at the top of every increment the path starts, so a budget spent in
-    // full leaves _increment at exactly the budget, and a corrector that fails earlier stops the
-    // count short of it.
-    //
-    // libMesh destroys the SNES at the end of a solve and asking for it again would build a new
-    // one, so the reason comes from the cache libMesh keeps of it.
+    // _increment counts the increments the path started, so a budget spent in full leaves it at
+    // exactly the budget. libMesh has destroyed the SNES by now, so the reason of the solve comes
+    // from the cache libMesh keeps of it rather than from the solver.
     auto & solver = static_cast<PetscNonlinearSolver<Number> &>(*_arclength_nl->nonlinearSolver());
     const unsigned int budget = _transient ? 1 : getParam<unsigned int>("max_continuation_steps");
     if (_increment == budget && solver.get_converged_reason() == SNES_DIVERGED_MAX_IT)
@@ -523,19 +546,16 @@ ArcLengthProblem::stepDissipated() const
   // the work of the held load, and a walk back down an elastic branch would read as dissipative.
   // Its work restores the cancellation, taken from the tag the input routes the held loads to.
   Real term_held = 0.0;
-  if (isParamValid("held_load_vector_tag"))
-    term_held = libmesh_real(
-        _arclength_nl->getVector(getVectorTagID(getParam<TagName>("held_load_vector_tag")))
-            .dot(*change));
+  if (_held_load_vector_tag)
+    term_held = libmesh_real(_arclength_nl->getVector(*_held_load_vector_tag).dot(*change));
 
   const Real dissipation = 0.5 * (term_start + term_held - term_change);
   const Real scale = 0.5 * (std::abs(term_start) + std::abs(term_held) + std::abs(term_change));
 
-  // The cancellation of a dissipation-free descent is imperfect, holding to about a part in a
-  // thousand of the terms in practice, while a descent along the path leaves a remainder on the
-  // order of the terms themselves, so the threshold sits between the two with an order of
-  // magnitude of room on both sides
-  return std::abs(dissipation) > 1e-2 * scale;
+  // The threshold sits between the residue a dissipation-free descent leaves, about a part in a
+  // thousand of the terms, and a descent along the path, whose remainder is of order the terms
+  constexpr Real dissipation_tolerance = 1e-2;
+  return std::abs(dissipation) > dissipation_tolerance * scale;
 }
 
 void
@@ -577,6 +597,18 @@ ArcLengthProblem::computeJacobianSys(NonlinearImplicitSystem & sys,
   auto & load_jacobian = _arclength_nl->getMatrix(_arclength_nl->loadMatrixTag());
   // The matrix being added from has to be assembled
   load_jacobian.close();
+
+  // The evaluation above has already reduced the rows the nodal boundary conditions constrain to
+  // the constraints themselves, and no nodal boundary condition caches into the load matrix tag,
+  // so what a follower load left in one of those rows would be added on top of the constraint
+  if (_arclength_nl->getNodalBCWarehouse().hasActiveObjects())
+  {
+    std::vector<numeric_index_type> constrained_rows;
+    for (const auto & [dof, _] : constrainedNodalDofs())
+      constrained_rows.push_back(dof);
+    load_jacobian.zero_rows(constrained_rows, 0.0);
+  }
+
   jacobian.add(updateLoadParameter(), load_jacobian);
   jacobian.close();
 }
@@ -586,31 +618,50 @@ ArcLengthProblem::assembleLoadTag()
 {
   const std::set<TagID> load_tag = {_arclength_nl->loadVectorTag()};
 
-  // The system assembles the tag on its own, and what surrounds it here is the state
-  // FEProblemBase::computeResidualTags sets for that assembly, along with the displaced mesh
-  // move it makes before it. Going through the problem instead would run the whole per-iteration
-  // orchestration, the transfers, the MultiApps and the EXEC_LINEAR objects included, once more
-  // per nonlinear iteration.
-  ADReal::do_derivatives = false;
-  _current_execute_on_flag = EXEC_LINEAR;
-  setCurrentResidualVectorTags(load_tag);
+  // The state and the exception handling around the assembly are those of
+  // FEProblemBase::computeResidualTags; going through the problem itself would run the transfers,
+  // the MultiApps and the EXEC_LINEAR objects once more per nonlinear iteration. resetState()
+  // restores the default of computing derivatives, so the state on entry is put back after it.
+  const auto old_do_derivatives = ADReal::do_derivatives;
 
-  if (_displaced_problem)
+  try
   {
-    computeSystems(EXEC_PRE_DISPLACE);
-    _displaced_problem->updateMesh();
-    if (_mortar_data->hasDisplacedObjects())
-      updateMortarMesh();
+    try
+    {
+      ADReal::do_derivatives = false;
+      _current_execute_on_flag = EXEC_LINEAR;
+      setCurrentResidualVectorTags(load_tag);
+
+      if (_displaced_problem)
+      {
+        computeSystems(EXEC_PRE_DISPLACE);
+        _displaced_problem->updateMesh();
+        if (_mortar_data->hasDisplacedObjects())
+          updateMortarMesh();
+      }
+
+      _safe_access_tagged_vectors = false;
+
+      _arclength_nl->computeResidualTags(load_tag);
+    }
+    catch (...)
+    {
+      handleException("assembleLoadTag");
+    }
+  }
+  catch (const MooseException &)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling the system's stopSolve() method, it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
+  catch (...)
+  {
+    mooseError("Unexpected exception type");
   }
 
-  _safe_access_tagged_vectors = false;
-
-  _arclength_nl->computeResidualTags(load_tag);
-
-  _safe_access_tagged_vectors = true;
-  clearCurrentResidualVectorTags();
-  _current_execute_on_flag = EXEC_NONE;
-  ADReal::do_derivatives = true;
+  resetState();
+  ADReal::do_derivatives = old_do_derivatives;
 }
 
 void
@@ -631,23 +682,13 @@ ArcLengthProblem::computeTangentLoad(Vec x, Vec q)
   tangent_load.add(_transient ? -_step_load_increment : -1.0, load);
 }
 
-void
-ArcLengthProblem::checkLoadOnConstrainedDofs()
+std::vector<std::pair<dof_id_type, const NodalBCBase *>>
+ArcLengthProblem::constrainedNodalDofs()
 {
-  // The load pattern a nodal BC row holds is a property of the objects the input adds, so the
-  // first assembled load answers this for the whole run
-  if (_checked_load_on_constrained_dofs)
-    return;
-  _checked_load_on_constrained_dofs = true;
-
   const auto & nodal_bcs = _arclength_nl->getNodalBCWarehouse();
-  if (!nodal_bcs.hasActiveObjects())
-    return;
-
-  const auto & load = _arclength_nl->getVector(_arclength_nl->loadVectorTag());
   const auto system_number = _arclength_nl->number();
 
-  std::set<std::string> offenders;
+  std::vector<std::pair<dof_id_type, const NodalBCBase *>> constrained;
   for (const auto & bnode : getCurrentAlgebraicBndNodeRange())
   {
     const Node & node = *bnode->_node;
@@ -659,10 +700,42 @@ ArcLengthProblem::checkLoadOnConstrainedDofs()
     {
       const auto & variable = bc->variable();
       for (const auto component : make_range(node.n_comp(system_number, variable.number())))
-        if (load(node.dof_number(system_number, variable.number(), component)) != 0)
-          offenders.insert("'" + bc->name() + "' on variable '" + variable.name() + "'");
+        constrained.emplace_back(node.dof_number(system_number, variable.number(), component),
+                                 bc.get());
     }
   }
+
+  return constrained;
+}
+
+void
+ArcLengthProblem::checkLoadOnConstrainedDofs()
+{
+  // The load pattern a nodal BC row holds is a property of the objects the input adds, so one
+  // assembled load answers this for the whole run
+  if (_checked_load_on_constrained_dofs)
+    return;
+
+  if (!_arclength_nl->getNodalBCWarehouse().hasActiveObjects())
+  {
+    _checked_load_on_constrained_dofs = true;
+    return;
+  }
+
+  // The tag can be left half-assembled by an interrupted assembly, and the norm below is collective
+  auto & load = _arclength_nl->getVector(_arclength_nl->loadVectorTag());
+  load.close();
+
+  // A load that is identically zero, which is what a load ramped from a function of time or driven
+  // by a variable that starts at zero assembles first, carries no pattern to examine
+  if (load.l2_norm() == 0)
+    return;
+  _checked_load_on_constrained_dofs = true;
+
+  std::set<std::string> offenders;
+  for (const auto & [dof, bc] : constrainedNodalDofs())
+    if (load(dof) != 0)
+      offenders.insert("'" + bc->name() + "' on variable '" + bc->variable().name() + "'");
   _communicator.set_union(offenders);
 
   if (offenders.size())

@@ -23,7 +23,7 @@ writes it as one file for the run rather than one file per step.
 !alert note title=The final equilibrium is not in the table
 PETSc calls the hook this object records on at the top of each corrector iteration, so the row for a
 converged increment is written once the next increment starts. The equilibrium that ends the
-continuation, at [!param](/Problem/ArcLengthProblem/lambda_max), has no increment after it and so does
+continuation, whichever criterion ends it, has no increment after it and so does
 not reach the table — the last row stops short of it. [ArcLengthLoadParameter.md] executing on
 `TIMESTEP_END` reports that final value.
 
