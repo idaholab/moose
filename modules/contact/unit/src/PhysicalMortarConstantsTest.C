@@ -14,20 +14,11 @@
 #include "FEProblemBase.h"
 #include "MooseConfig.h"
 #include "MooseMain.h"
+#include "MortarTestUtils.h"
 
 // 3-D mortar contact requires enough AD derivative slots for the coupled
 // displacement and LM DOFs on each element.
 #if MOOSE_AD_MAX_DOFS_PER_ELEM >= 250
-
-// Compute the absolute path to an input file stored alongside this source file in
-// ../inputs/ by navigating from __FILE__ (the absolute path to this .C file).
-static std::string
-inputPath(const std::string & name)
-{
-  const std::string src = __FILE__;
-  const auto pos = src.rfind("/src/");
-  return src.substr(0, pos + 1) + "inputs/" + name;
-}
 
 // Run the given input file with additional CLI args and return the cumulative
 // nonlinear iteration count accumulated by the "cumulative" postprocessor.
@@ -37,7 +28,7 @@ runCumulativeNL(const std::string & input,
                 Real * contact_dofs = nullptr)
 {
   // Build an argv suitable for Moose::createMooseApp
-  std::vector<std::string> str_args = {"contact-unit", "-i", inputPath(input)};
+  std::vector<std::string> str_args = {"contact-unit", "-i", inputPath(__FILE__, input)};
   str_args.insert(str_args.end(), extra_args.begin(), extra_args.end());
 
   std::vector<char *> argv_vec;
