@@ -212,24 +212,16 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
                                       _dof_to_real_tangential_velocity[dof][0],
                                       _dof_to_real_tangential_velocity[dof][1]);
 
-  const auto augmented_normal_pressure = contact_pressure + c * weighted_gap;
-  const auto radius =
-      Moose::Mortar::Contact::coulombFrictionRadius(mu_ad, augmented_normal_pressure);
+  const std::array<ADReal, 2> tangential_velocity{{*tangential_vel[0], *tangential_vel[1]}};
 
-  const std::array<ADReal, 2> augmented_tangential_pressure{
-      {friction_lm_values[0] + c_t * *tangential_vel[0] * _dt,
-       friction_lm_values[1] + c_t * *tangential_vel[1] * _dt}};
-
-  // Degree-two Hueber-Stadler-Wohlmuth friction residual (see MortarContactUtils.h), gated by
-  // the raw, unaugmented contact_pressure via epsilon so dofs transitioning between contact and
-  // separation fall back to the trivial identity residual rather than the full weight/radius
-  // expression.
-  const auto residual =
-      Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(friction_lm_values,
-                                                                    augmented_tangential_pressure,
-                                                                    radius,
-                                                                    contact_pressure,
-                                                                    ADReal(_epsilon));
+  const auto residual = Moose::Mortar::Contact::frictionalContactResidual(friction_lm_values,
+                                                                          tangential_velocity,
+                                                                          ADReal(c_t),
+                                                                          ADReal(_dt),
+                                                                          contact_pressure,
+                                                                          c * weighted_gap,
+                                                                          mu_ad,
+                                                                          ADReal(_epsilon));
   const ADReal dof_residual = residual[0];
   const ADReal dof_residual_dir = residual[1];
 
@@ -268,21 +260,18 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   ADReal mu_ad =
       computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);
 
-  const auto augmented_normal_pressure = contact_pressure + c * weighted_gap;
-  const auto radius =
-      Moose::Mortar::Contact::coulombFrictionRadius(mu_ad, augmented_normal_pressure);
-
   const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
-  const std::array<ADReal, 1> augmented_tangential_pressure{
-      {friction_lm_value + c_t * tangential_vel * _dt}};
+  const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};
 
-  // Degree-two Hueber-Stadler-Wohlmuth friction residual; see 3D path above for rationale.
   const ADReal dof_residual =
-      Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(tangential_pressure,
-                                                                    augmented_tangential_pressure,
-                                                                    radius,
-                                                                    contact_pressure,
-                                                                    ADReal(_epsilon))[0];
+      Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
+                                                        tangential_velocity,
+                                                        ADReal(c_t),
+                                                        ADReal(_dt),
+                                                        contact_pressure,
+                                                        c * weighted_gap,
+                                                        mu_ad,
+                                                        ADReal(_epsilon))[0];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

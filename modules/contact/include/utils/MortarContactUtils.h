@@ -166,6 +166,35 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
 }
 
 /**
+ * Compute the epsilon-gated degree-two Hueber-Stadler-Wohlmuth frictional residual for a mortar
+ * contact dof. This composes the tangential pressure augmentation
+ * \p tangential_pressure + c_t * tangential_velocity * dt with \p augmentedNormalPressure,
+ * \p coulombFrictionRadius, and the epsilon-gated \p hueberStadlerWohlmuthFrictionResidual, the
+ * composition shared by the normal, dynamic, and Cartesian mortar frictional contact constraints.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+frictionalContactResidual(const std::array<T, N> & tangential_pressure,
+                          const std::array<T, N> & tangential_velocity,
+                          const T & c_t,
+                          const T & dt,
+                          const T & normal_pressure,
+                          const T & scaled_normal_gap,
+                          const T & friction_coefficient,
+                          const T & epsilon)
+{
+  std::array<T, N> augmented_tangential_pressure;
+  for (const auto i : index_range(augmented_tangential_pressure))
+    augmented_tangential_pressure[i] = tangential_pressure[i] + c_t * tangential_velocity[i] * dt;
+
+  const auto radius = coulombFrictionRadius(
+      friction_coefficient, augmentedNormalPressure(normal_pressure, scaled_normal_gap));
+
+  return hueberStadlerWohlmuthFrictionResidual(
+      tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon);
+}
+
+/**
  * This function is used to communicate velocities across processes
  * @param dof_to_weighted_gap Map from degree of freedom to weighted (weak) gap
  * @param mesh Mesh used to locate nodes or elements
