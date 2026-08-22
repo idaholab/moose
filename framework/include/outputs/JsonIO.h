@@ -36,7 +36,8 @@ typedef std::variant<int,
                      std::vector<unsigned int>,
                      std::vector<std::string>,
                      std::vector<Real>,
-                     std::vector<bool>>
+                     std::vector<bool>,
+                     std::vector<std::vector<std::string>>>
     AttributeVariant;
 
 namespace libMesh

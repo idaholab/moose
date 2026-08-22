@@ -1,0 +1,247 @@
+{
+  "cells": {
+    "amg1_lattice_cell": {
+      "fill": "amg1_lattice",
+      "filltype": "LATTICE",
+      "region_infix": [],
+      "region_postfix": []
+    },
+    "amg2_lattice_cell": {
+      "fill": "amg2_lattice",
+      "filltype": "LATTICE",
+      "region_infix": [],
+      "region_postfix": []
+    },
+    "cmg_lattice_cell": {
+      "fill": "cmg_lattice",
+      "filltype": "LATTICE",
+      "region_infix": [
+        "-cmg_radial_boundary",
+        "&",
+        "+rgmb_axial_plane_bottom_boundary",
+        "&",
+        "-rgmb_axial_plane_top_boundary"
+      ],
+      "region_postfix": [
+        "cmg_radial_boundary",
+        "-",
+        "rgmb_axial_plane_bottom_boundary",
+        "+",
+        "&",
+        "rgmb_axial_plane_top_boundary",
+        "-",
+        "&"
+      ]
+    },
+    "empty_cell": {
+      "fill": "",
+      "filltype": "VOID",
+      "region_infix": [],
+      "region_postfix": []
+    }
+  },
+  "lattices": {
+    "amg1_lattice": {
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 1.42063
+      },
+      "outertype": "VOID",
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "pin2_ducted_pin_unit",
+          "pin2_ducted_pin_unit"
+        ],
+        [
+          "pin2_ducted_pin_unit",
+          "pin2_ducted_pin_unit"
+        ]
+      ]
+    },
+    "amg2_lattice": {
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 1.42063
+      },
+      "outertype": "VOID",
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "pin3_ducted_pin_unit",
+          "pin1_ducted_pin_unit"
+        ],
+        [
+          "pin1_ducted_pin_unit",
+          "pin2_ducted_pin_unit"
+        ]
+      ]
+    },
+    "cmg_lattice": {
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 2.84126
+      },
+      "outer": "empty_univ",
+      "outertype": "UNIVERSE",
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "amg1_univ",
+          "amg2_univ"
+        ],
+        [
+          "amg2_univ",
+          "amg1_univ"
+        ]
+      ]
+    }
+  },
+  "surfaces": {
+    "cmg_radial_boundary": {
+      "coefficients": {
+        "r": 4.018148426228181,
+        "x0": 0.0,
+        "y0": 0.0
+      },
+      "type": "CSG::CSGZCylinder"
+    },
+    "rgmb_axial_plane_bottom_boundary": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 0.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "rgmb_axial_plane_top_boundary": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 1.0
+      },
+      "type": "CSG::CSGPlane"
+    }
+  },
+  "units": {
+    "amg1_radial_boundary": {
+      "attributes": {
+        "apothem": 1.42063,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    },
+    "amg2_radial_boundary": {
+      "attributes": {
+        "apothem": 1.42063,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    },
+    "pin1_ducted_pin_unit": {
+      "attributes": {
+        "duct_apothems": [
+          0.68
+        ],
+        "geometry_type": "Square",
+        "region_names": [
+          [
+            "rgmb_region_1",
+            "rgmb_region_2",
+            "rgmb_region_5"
+          ]
+        ],
+        "ring_radii": [
+          0.2
+        ]
+      },
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::DuctedPinEngUnit"
+    },
+    "pin1_radial_boundary": {
+      "attributes": {
+        "apothem": 0.710315,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    },
+    "pin2_ducted_pin_unit": {
+      "attributes": {
+        "duct_apothems": [],
+        "geometry_type": "Square",
+        "region_names": [
+          [
+            "rgmb_region_2"
+          ]
+        ],
+        "ring_radii": []
+      },
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::DuctedPinEngUnit"
+    },
+    "pin2_radial_boundary": {
+      "attributes": {
+        "apothem": 0.710315,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    },
+    "pin3_ducted_pin_unit": {
+      "attributes": {
+        "duct_apothems": [],
+        "geometry_type": "Square",
+        "region_names": [
+          [
+            "rgmb_region_3",
+            "rgmb_region_4"
+          ]
+        ],
+        "ring_radii": [
+          0.3818
+        ]
+      },
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::DuctedPinEngUnit"
+    },
+    "pin3_radial_boundary": {
+      "attributes": {
+        "apothem": 0.710315,
+        "num_sides": 4
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "cmg_lattice_cell"
+      ],
+      "root": true
+    },
+    "amg1_univ": {
+      "cells": [
+        "amg1_lattice_cell"
+      ]
+    },
+    "amg2_univ": {
+      "cells": [
+        "amg2_lattice_cell"
+      ]
+    },
+    "empty_univ": {
+      "cells": [
+        "empty_cell"
+      ]
+    }
+  }
+}

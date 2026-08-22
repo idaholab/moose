@@ -65,6 +65,10 @@ static const std::string region_id_as_block_name = "region_id_as_block_name";
 // only generating the mesh metadata
 static const std::string bypass_meshgen = "bypass_meshgen";
 
+// Name of a boolean metadata that controls whether CSG components or engineering units are used in
+// --csg-only mode
+static const std::string expand_units = "expand_units";
+
 // Default values for setting block IDs and region IDs of RGMB regions
 const subdomain_id_type PIN_BLOCK_ID_TRI_FLEXIBLE = 9998;
 const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;
@@ -282,20 +286,11 @@ protected:
                       const bool extrude);
 
   /**
-   * Get CSGSurfaces corresponding to hexagonal or square region with given halfpitch and centered
-   * around (0, 0, 0)
-   * @param radial_index Radial index of hex / square region, for surface naming
-   * @param halfpitch Halfpitch of square or hexagon
-   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
-   * @return vector of surfaces that correspond to hexagonal or square region
-   */
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>> getOuterRadialSurfacesForUnitCell(
-      unsigned int radial_index, Real halfpitch, CSG::CSGBase & csg_obj);
-
-  /**
    * Get CSGSurfaces corresponding to axial planes of the extruded RGMB mesh
-   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
+   * @param csg_obj Reference to CSGBase object for retrieving axial plane surfaces
    * @return vector of surfaces that correspond to axial planes of extruded RGMB mesh
+   * @note This method assumes axial surfaces have already been created and added to CSGBase
+   *       instance
    */
   std::vector<std::reference_wrapper<const CSG::CSGSurface>>
   getAxialPlaneSurfaces(CSG::CSGBase & csg_obj);

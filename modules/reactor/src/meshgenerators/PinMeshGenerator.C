@@ -14,10 +14,9 @@
 #include "MooseApp.h"
 #include "MooseMeshUtils.h"
 #include "Factory.h"
-#include "CSGZCylinder.h"
+#include "CSGNPolygonUnit.h"
+#include "DuctedPinEngUnit.h"
 #include "CSGPlane.h"
-#include "CSGRegion.h"
-#include "CSGUtils.h"
 #include "libmesh/elem.h"
 
 registerMooseObject("ReactorApp", PinMeshGenerator);
@@ -706,126 +705,74 @@ PinMeshGenerator::generateCSG()
 
   auto csg_obj = std::make_unique<CSG::CSGBase>();
 
-  unsigned int radial_index = 0;
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGSurface>>> surfaces_by_radial_region;
-
-  // Add surfaces corresponding to pin rings
-  for (const auto & radius : _ring_radii)
+  // Convert region IDs to actual region names that will be stored as material fills.
+  std::vector<std::vector<std::string>> region_names(_region_ids.size());
+  for (const auto i : index_range(_region_ids))
   {
-    const auto surf_name = name() + "_radial_ring_" + std::to_string(radial_index);
-    std::unique_ptr<CSG::CSGSurface> ring_surf_ptr =
-        std::make_unique<CSG::CSGZCylinder>(surf_name, 0, 0, radius);
-    const auto & ring_surf = csg_obj->addSurface(std::move(ring_surf_ptr));
-    surfaces_by_radial_region.push_back({ring_surf});
-    ++radial_index;
+    region_names[i].resize(_region_ids[i].size());
+    for (const auto j : index_range(_region_ids[i]))
+      region_names[i][j] = "rgmb_region_" + std::to_string(_region_ids[i][j]);
   }
 
-  // Add surfaces corresponding to pin ducts
-  for (const auto & duct_halfpitch : _duct_halfpitch)
+  std::vector<Real> axial_plane_levels;
+  std::vector<std::string> axial_plane_names;
+  Real top_axial_level = 0.;
+  if (_mesh_dimensions == 3)
   {
-    const auto & duct_surfaces =
-        getOuterRadialSurfacesForUnitCell(radial_index, duct_halfpitch, *csg_obj);
-    surfaces_by_radial_region.push_back(duct_surfaces);
-    ++radial_index;
-  }
-
-  // Add surfaces corresponding to outer pin boundary
-  const auto & duct_surfaces =
-      getOuterRadialSurfacesForUnitCell(radial_index, _pitch / 2., *csg_obj);
-  surfaces_by_radial_region.push_back(duct_surfaces);
-
-  // Define all radial regions
-  std::vector<CSG::CSGRegion> radial_regions;
-  CSG::CSGRegion inner_region, outer_region;
-  for (const auto i : index_range(surfaces_by_radial_region))
-  {
-    const auto & radial_surfaces = surfaces_by_radial_region[i];
-    CSG::CSGRegion radial_region;
-    bool is_last_radial_region = i == surfaces_by_radial_region.size() - 1;
-    if (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+    auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+    for (const auto i : make_range(axial_boundaries.size()))
     {
-      if (!is_last_radial_region)
+      top_axial_level += axial_boundaries[i];
+      // Top and bottom axial planes should be removed for the construction of
+      // DuctedPinEngUnit, as this unit creates an infinite universe axially
+      if (i != axial_boundaries.size() - 1)
       {
-        // We are in the innermost radial region, the radial region is inner_region
-        inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
-        radial_region = inner_region;
+        axial_plane_levels.push_back(top_axial_level);
+        axial_plane_names.push_back(RGMB::CSG_AXIAL_PLANE_PREFIX + std::to_string(i));
       }
     }
-    else
-    {
-      // For all other regions, the radial region is the intersection of inner_region and
-      // outer_region
-      outer_region = ~inner_region;
-      inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
-      radial_region = is_last_radial_region ? outer_region : (inner_region & outer_region);
-    }
-    radial_regions.push_back(radial_region);
   }
 
-  // Define all axial surfaces and regions
-  std::vector<CSG::CSGRegion> axial_regions;
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
-  const auto extruded_pin = _mesh_dimensions == 3;
-  if (extruded_pin)
-  {
-    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
-    for (const auto i : make_range(surfaces_by_axial_region.size()))
-      if (i != 0)
-      {
-        CSG::CSGRegion axial_region;
-        const auto & lower_surf = surfaces_by_axial_region[i - 1].get();
-        if (lower_surf != surfaces_by_axial_region.front())
-          axial_region = +lower_surf;
-        const auto & upper_surf = surfaces_by_axial_region[i].get();
-        if (upper_surf != surfaces_by_axial_region.back())
-        {
-          if (axial_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
-            axial_region = -upper_surf;
-          else
-            axial_region &= -upper_surf;
-        }
-        axial_regions.push_back(axial_region);
-      }
-  }
+  // Define ducted pin engineering unit and add it to CSGBase
+  std::unique_ptr<CSG::DuctedPinEngUnit> pin_ptr =
+      std::make_unique<CSG::DuctedPinEngUnit>(name() + "_ducted_pin_unit",
+                                              _mesh_geometry,
+                                              _ring_radii,
+                                              _duct_halfpitch,
+                                              region_names,
+                                              axial_plane_levels,
+                                              axial_plane_names);
+  auto & pin_unit = csg_obj->addEngUnit(std::move(pin_ptr));
 
-  // Define all cells within pin domain and add to separate universe
-  const auto & pin_univ = csg_obj->createUniverse(name() + "_univ");
-  for (const auto i : index_range(radial_regions))
+  // Define radial and axial extent of pin to constrain the universe created by DuctedPinEngUnit
+  const auto unit_name = _name + "_radial_boundary";
+  const auto n_sides = (_mesh_geometry == "Hex") ? 6 : 4;
+  std::unique_ptr<CSG::CSGNPolygonUnit> radial_boundary_ptr =
+      std::make_unique<CSG::CSGNPolygonUnit>(unit_name, n_sides, _pitch / 2.);
+  auto & radial_boundary_unit = csg_obj->addEngUnit(std::move(radial_boundary_ptr));
+  auto pin_region = -radial_boundary_unit;
+  if (_mesh_dimensions == 3)
   {
-    for (const auto j : make_range(extruded_pin ? axial_regions.size() : 1))
-    {
-      auto cell_region = radial_regions[i];
-      auto cell_name = name() + "_cell_radial_" + std::to_string(i);
-      const auto region_id = _region_ids[j][i];
-      const auto mat_name = "rgmb_region_" + std::to_string(region_id);
-      if (extruded_pin)
-      {
-        // update name and region with axial info only if extruded
-        const auto axial_region = axial_regions[j];
-        if (axial_region.getRegionType() != CSG::CSGRegion::RegionType::EMPTY)
-        {
-          if (cell_region.getRegionType() != CSG::CSGRegion::RegionType::EMPTY)
-            cell_region &= axial_region;
-          else
-            cell_region = axial_region;
-        }
-        cell_name += "_axial_" + std::to_string(j);
-      }
-      csg_obj->createCell(cell_name, mat_name, cell_region, &pin_univ);
-    }
-  }
+    const auto bottom_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "bottom_boundary";
+    std::unique_ptr<CSG::CSGSurface> bottom_surf_ptr =
+        std::make_unique<CSG::CSGPlane>(bottom_surf_name, 0, 0, 1, 0.);
+    const auto & bottom_plane_surf = csg_obj->addSurface(std::move(bottom_surf_ptr));
 
-  // Create new cell to bound universe based on pin outer boundaries and add this cell to the root
-  // universe
-  auto pin_region = CSGUtils::getInnerRegion(surfaces_by_radial_region.back(), Point(0, 0, 0));
-  if (extruded_pin)
-  {
-    const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
-    const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
-    auto axial_region = +lowest_axial_surf & -highest_axial_surf;
+    const auto top_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "top_boundary";
+    std::unique_ptr<CSG::CSGSurface> top_surf_ptr =
+        std::make_unique<CSG::CSGPlane>(top_surf_name, 0, 0, 1, top_axial_level);
+    const auto & top_plane_surf = csg_obj->addSurface(std::move(top_surf_ptr));
+
+    auto axial_region = +bottom_plane_surf & -top_plane_surf;
     pin_region &= axial_region;
   }
-  csg_obj->createCell(name() + "_root_cell", pin_univ, pin_region);
+
+  // Create cell that constrains DuctedPinEngUnit based on the outer boundary
+  // of the pin
+  csg_obj->createCell(_name + "_root_cell", pin_unit, pin_region);
+
+  if (getReactorParam<bool>(RGMB::expand_units))
+    csg_obj->expandAllEngUnits();
 
   return csg_obj;
 }
