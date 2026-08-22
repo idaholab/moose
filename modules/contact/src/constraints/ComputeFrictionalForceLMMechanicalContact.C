@@ -265,7 +265,7 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const auto residual =
       Moose::Mortar::Contact::frictionalContactResidual(friction_lm_values,
                                                         tangential_velocity,
-                                                        ADReal(c_t),
+                                                        c_t,
                                                         ADReal(_dt),
                                                         contact_pressure,
                                                         c * weighted_gap,
@@ -332,7 +332,7 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const ADReal dof_residual =
       Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
                                                         tangential_velocity,
-                                                        ADReal(c_t),
+                                                        c_t,
                                                         ADReal(_dt),
                                                         contact_pressure,
                                                         c * weighted_gap,
