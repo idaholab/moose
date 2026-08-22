@@ -104,6 +104,8 @@ MoveNodesByParsedExpression::MoveNodesByParsedExpression(const InputParameters &
     _mesh(_subproblem.mesh()),
     _boundary_ids(_mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("boundary"))),
     _subdomain_ids(_mesh.getSubdomainIDs(getParam<std::vector<SubdomainName>>("block"))),
+    _original_position(
+        declareRestartableData<std::unordered_map<dof_id_type, Point>>("original_position")),
     _output_coordinates(
         !getParam<std::vector<AuxVariableName>>("original_coordinate_variables").empty()),
     _output_displacements(
@@ -112,7 +114,9 @@ MoveNodesByParsedExpression::MoveNodesByParsedExpression(const InputParameters &
     _aux_sys_num(0),
     _density_factor_var(0),
     _assembly(nullptr),
-    _original_volume_recorded(false),
+    _original_volume(
+        declareRestartableData<std::unordered_map<dof_id_type, Real>>("original_volume")),
+    _original_volume_recorded(declareRestartableData<bool>("original_volume_recorded", false)),
     _notify_mesh_changed(getParam<bool>("notify_mesh_changed"))
 {
   const auto & var_names = getParam<std::vector<VariableName>>("coupled_variables");
