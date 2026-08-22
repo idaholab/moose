@@ -5,7 +5,6 @@
   # far smaller than the defaults (c_normal=1e6, c_tangential=1), making the
   # convergence gap between physical and default clearly observable.
   scaling := 1e-4
-  degree_one_friction_residual = true
 []
 
 [Materials]

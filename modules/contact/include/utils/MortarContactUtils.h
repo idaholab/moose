@@ -13,6 +13,7 @@
 #include "ADReal.h"
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
+#include "MathUtils.h"
 
 #include "libmesh/dof_object.h"
 
@@ -77,25 +78,12 @@ coulombFrictionRadius(const T & friction_coefficient, const T & augmented_normal
   return friction_coefficient * std::max(T(0), augmented_normal_pressure);
 }
 
-/** Return the Euclidean norm of a tangential contact vector. */
-template <typename T, std::size_t N>
-T
-tangentialNorm(const std::array<T, N> & vector)
-{
-  T norm_squared = 0;
-  for (const auto & component : vector)
-    norm_squared += component * component;
-
-  using std::sqrt;
-  return sqrt(norm_squared);
-}
-
 /** Project a tangential contact vector onto the closed ball of radius \p radius. */
 template <typename T, std::size_t N>
 std::array<T, N>
 projectToFrictionBall(const std::array<T, N> & vector, const T & radius)
 {
-  const T norm = tangentialNorm(vector);
+  const T norm = MathUtils::norm(vector);
   if (norm <= radius)
     return vector;
 
@@ -156,7 +144,7 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
                                       const std::array<T, N> & augmented_tangential_pressure,
                                       const T & radius)
 {
-  const T augmented_norm = tangentialNorm(augmented_tangential_pressure);
+  const T augmented_norm = MathUtils::norm(augmented_tangential_pressure);
   const T weight = std::max(radius, augmented_norm);
   if (weight == 0)
     return tangential_pressure;
@@ -198,6 +186,41 @@ hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressu
 
   return hueberStadlerWohlmuthFrictionResidual(
       tangential_pressure, augmented_tangential_pressure, radius);
+}
+
+/**
+ * Compute the epsilon-gated frictional residual for a mortar contact dof. This composes the
+ * tangential pressure augmentation
+ * \p tangential_pressure + c_t * tangential_velocity * dt with \p augmentedNormalPressure,
+ * \p coulombFrictionRadius, and the epsilon-gated friction residual (degree-two
+ * Hueber-Stadler-Wohlmuth by default, or degree-one Alart-Curnier when
+ * \p degree_one_friction_residual is true) -- the composition shared by the normal, dynamic, and
+ * Cartesian mortar frictional contact constraints.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+frictionalContactResidual(const std::array<T, N> & tangential_pressure,
+                          const std::array<T, N> & tangential_velocity,
+                          const T & c_t,
+                          const T & dt,
+                          const T & normal_pressure,
+                          const T & scaled_normal_gap,
+                          const T & friction_coefficient,
+                          const T & epsilon,
+                          const bool degree_one_friction_residual = false)
+{
+  std::array<T, N> augmented_tangential_pressure;
+  for (const auto i : index_range(augmented_tangential_pressure))
+    augmented_tangential_pressure[i] = tangential_pressure[i] + c_t * tangential_velocity[i] * dt;
+
+  const auto radius = coulombFrictionRadius(
+      friction_coefficient, augmentedNormalPressure(normal_pressure, scaled_normal_gap));
+
+  return degree_one_friction_residual
+             ? alartCurnierFrictionResidual(
+                   tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon)
+             : hueberStadlerWohlmuthFrictionResidual(
+                   tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon);
 }
 
 /**

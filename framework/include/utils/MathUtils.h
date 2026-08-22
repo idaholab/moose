@@ -469,6 +469,61 @@ timeDerivName(const T & base_prop_name)
 void kron(RealEigenMatrix & product, const RealEigenMatrix & mat_A, const RealEigenMatrix & mat_B);
 
 /**
+ * Return the square of the Euclidean (L2) norm of \p value. Recurses into containers using the
+ * same \p MooseUtils::Has_size trait as \p MooseUtils::isZero, and into rank 1 and rank 2 tensors
+ * component by component. Composed entirely of sums and products, this is safe to call
+ * unconditionally on dual number types, including at zero.
+ */
+template <typename T>
+auto
+normSquared(const T & value)
+{
+  if constexpr (MooseUtils::Has_size<T>::value)
+  {
+    decltype(normSquared(*value.begin())) sum{};
+    for (const auto & component : value)
+      sum += normSquared(component);
+    return sum;
+  }
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
+    return value * value;
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 1)
+  {
+    auto sum = value(0) * value(0);
+    for (const auto i : make_range(std::size_t(1), Moose::dim))
+      sum += value(i) * value(i);
+    return sum;
+  }
+  else
+  {
+    auto sum = value(0, 0) * value(0, 0);
+    for (const auto j : make_range(std::size_t(1), Moose::dim))
+      sum += value(0, j) * value(0, j);
+    for (const auto i : make_range(std::size_t(1), Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+        sum += value(i, j) * value(i, j);
+    return sum;
+  }
+}
+
+/**
+ * Return the Euclidean (L2) norm of \p value.
+ *
+ * For dual number types, differentiating \p std::sqrt at a zero argument produces a NaN
+ * derivative (d(sqrt(x))/dx = 1 / (2 * sqrt(x))), so this short-circuits to a literal zero
+ * whenever \p value is (fuzzy) zero.
+ */
+template <typename T>
+auto
+norm(const T & value)
+{
+  using std::sqrt;
+  if (MooseUtils::isZero(value))
+    return decltype(normSquared(value)){};
+  return sqrt(normSquared(value));
+}
+
+/**
  * Computes the norm of \p value, with \p epsilon added under the square root so that the result
  * and its derivative remain smooth (and finite) as \p value approaches the zero vector. This is
  * needed because AD types fail to compute a derivative through sqrt() at zero:
