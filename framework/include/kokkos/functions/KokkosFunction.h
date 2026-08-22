@@ -148,6 +148,10 @@ class Function final
 {
 public:
   /**
+   * Default constructor
+   */
+  Function() = default;
+  /**
    * Constructor
    * @param wrapper The host function wrapper
    */
@@ -161,24 +165,71 @@ public:
    */
   ~Function();
 
-  KOKKOS_FUNCTION Real value(Real t, Real3 p) const { return _wrapper_device->value(t, p); }
+  /**
+   * Get whether the function wrapper is valid
+   * @returns Whether the function wrapper is valid
+   */
+  KOKKOS_FUNCTION operator bool() const
+  {
+    KOKKOS_IF_ON_HOST(return static_cast<bool>(_wrapper_host);)
+
+    return _wrapper_device != nullptr;
+  }
+
+  KOKKOS_FUNCTION Real value(Real t, Real3 p) const
+  {
+    KOKKOS_ASSERT(_wrapper_device);
+
+    return _wrapper_device->value(t, p);
+  }
   KOKKOS_FUNCTION Real3 vectorValue(Real t, Real3 p) const
   {
+    KOKKOS_ASSERT(_wrapper_device);
+
     return _wrapper_device->vectorValue(t, p);
   }
-  KOKKOS_FUNCTION Real3 gradient(Real t, Real3 p) const { return _wrapper_device->gradient(t, p); }
-  KOKKOS_FUNCTION Real3 curl(Real t, Real3 p) const { return _wrapper_device->curl(t, p); }
-  KOKKOS_FUNCTION Real div(Real t, Real3 p) const { return _wrapper_device->div(t, p); }
+  KOKKOS_FUNCTION Real3 gradient(Real t, Real3 p) const
+  {
+    KOKKOS_ASSERT(_wrapper_device);
+
+    return _wrapper_device->gradient(t, p);
+  }
+  KOKKOS_FUNCTION Real3 curl(Real t, Real3 p) const
+  {
+    KOKKOS_ASSERT(_wrapper_device);
+
+    return _wrapper_device->curl(t, p);
+  }
+  KOKKOS_FUNCTION Real div(Real t, Real3 p) const
+  {
+    KOKKOS_ASSERT(_wrapper_device);
+
+    return _wrapper_device->div(t, p);
+  }
   KOKKOS_FUNCTION Real timeDerivative(Real t, Real3 p) const
   {
+    KOKKOS_ASSERT(_wrapper_device);
+
     return _wrapper_device->timeDerivative(t, p);
   }
   KOKKOS_FUNCTION Real timeIntegral(Real t1, Real t2, Real3 p) const
   {
+    KOKKOS_ASSERT(_wrapper_device);
+
     return _wrapper_device->timeIntegral(t1, t2, p);
   }
-  KOKKOS_FUNCTION Real integral() const { return _wrapper_device->integral(); }
-  KOKKOS_FUNCTION Real average() const { return _wrapper_device->average(); }
+  KOKKOS_FUNCTION Real integral() const
+  {
+    KOKKOS_ASSERT(_wrapper_device);
+
+    return _wrapper_device->integral();
+  }
+  KOKKOS_FUNCTION Real average() const
+  {
+    KOKKOS_ASSERT(_wrapper_device);
+
+    return _wrapper_device->average();
+  }
 
 private:
   /**

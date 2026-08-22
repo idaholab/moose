@@ -56,11 +56,6 @@ Because this data can be of different types, this method must be explicitly defi
 In order to make sure that clones of `CSGBase` objects are created properly, each derived `CSGLattice` type must implement a `clone()` method, which returns a `std::unique_ptr<CSGLattice>` from the given lattice instance.
 This can typically be done by calling `std::make_unique` on the constructor for the derived lattice type.
 
-### Setting the Lattice Type
-
-The type of lattice must be set for `_lattice_type` in the lattice constructor.
-It is recommended that this be done based on the class name using `MooseUtils::prettyCppType<LatticeClassName>()` so that the lattice type automatically matches the class that created it.
-
 ## Example
 
 Below shows how `CSGCartesianLattice` is implemented as an example.

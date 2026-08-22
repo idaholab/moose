@@ -122,7 +122,7 @@ Assembly::initQuadrature()
       _q_points(sid, elem_type_id).create(qrule->n_points());
       _weights(sid, elem_type_id).create(qrule->n_points());
 
-      for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
+      for (const auto qp : make_range(qrule->n_points()))
       {
         _q_points(sid, elem_type_id)[qp] = qrule->qp(qp);
         _weights(sid, elem_type_id)[qp] = qrule->w(qp);
@@ -130,7 +130,7 @@ Assembly::initQuadrature()
 
       // Cache face quadrature of each reference element
 
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      for (const auto side : elem->side_index_range())
       {
         qrule_face->init(*elem->side_ptr(side), /* p-level */ 0);
         n_qps_face[subdomain][elem_type].push_back(qrule_face->n_points());
@@ -138,7 +138,7 @@ Assembly::initQuadrature()
         _q_points_face(sid, elem_type_id)[side].create(qrule_face->n_points());
         _weights_face(sid, elem_type_id)[side].create(qrule_face->n_points());
 
-        for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto qp : make_range(qrule_face->n_points()))
         {
           _q_points_face(sid, elem_type_id)[side][qp] = qrule_face->qp(qp);
           _weights_face(sid, elem_type_id)[side][qp] = qrule_face->w(qp);
@@ -179,7 +179,7 @@ Assembly::initQuadrature()
     _qp_offset[eid] = _n_subdomain_qps[sid];
     _n_subdomain_qps[sid] += _n_qps[eid];
 
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : elem->side_index_range())
       _n_qps_face(side, eid) = n_qps_face[elem->subdomain_id()][elem->type()][side];
   }
 
@@ -227,14 +227,32 @@ Assembly::initShape()
 
   auto getFETypes = [&](::System & system)
   {
-    for (unsigned int var = 0; var < system.n_vars(); var++)
-      fe_types.insert(system.variable_type(var));
+    for (const auto var : make_range(system.n_vars()))
+    {
+      const auto fe_type = system.variable_type(var);
+      const auto field_type = FEInterface::field_type(fe_type);
+
+      if (field_type == libMesh::TYPE_VECTOR)
+      {
+        if (fe_type.family != libMesh::LAGRANGE_VEC)
+          mooseError("Kokkos currently only supports LAGRANGE_VEC for vector FE families.");
+      }
+      else
+      {
+        if (fe_type.family != libMesh::LAGRANGE && fe_type.family != libMesh::L2_LAGRANGE &&
+            fe_type.family != libMesh::MONOMIAL && fe_type.family != libMesh::SCALAR)
+          mooseError("Kokkos currently only supports LAGRANGE, L2_LAGRNAGE, MONOMIAL, SCALAR for "
+                     "scalar FE families.");
+      }
+
+      fe_types.insert(fe_type);
+    }
   };
 
-  for (unsigned int nl = 0; nl < _problem.numNonlinearSystems(); ++nl)
+  for (const auto nl : make_range(_problem.numNonlinearSystems()))
     getFETypes(_problem.getNonlinearSystemBase(nl).system());
 
-  for (unsigned int linear = 0; linear < _problem.numLinearSystems(); ++linear)
+  for (const auto linear : make_range(_problem.numLinearSystems()))
     getFETypes(_problem.getLinearSystem(linear).system());
 
   getFETypes(_problem.getAuxiliarySystem().system());
@@ -253,6 +271,11 @@ Assembly::initShape()
   _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _is_vector_fe_type.create(_fe_type_map.size());
 
   _map_phi.create(num_subdomains, num_elem_types);
   _map_phi_face.create(num_subdomains, num_elem_types);
@@ -267,6 +290,9 @@ Assembly::initShape()
   _n_dofs.create(num_elem_types, _fe_type_map.size());
   _n_dofs = 0;
 
+  for (auto & [fe_type, fe_type_id] : _fe_type_map)
+    _is_vector_fe_type[fe_type_id] = FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR;
+
   for (auto subdomain : _mesh.meshSubdomains())
   {
     auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
@@ -277,53 +303,117 @@ Assembly::initShape()
 
     for (auto & [fe_type, fe_type_id] : _fe_type_map)
     {
-      std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
-      std::unique_ptr<FEBase> fe_face(FEBase::build(_dimension, fe_type));
+      const bool is_vector_fe = FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR;
 
-      fe->attach_quadrature_rule(qrule);
-      fe_face->attach_quadrature_rule(qrule_face);
+      std::unique_ptr<FEBase> fe;
+      std::unique_ptr<FEBase> fe_face;
+      std::unique_ptr<FEVectorBase> vector_fe;
+      std::unique_ptr<FEVectorBase> vector_fe_face;
+
+      if (is_vector_fe)
+      {
+        vector_fe = FEVectorBase::build(_dimension, fe_type);
+        vector_fe_face = FEVectorBase::build(_dimension, fe_type);
+
+        vector_fe->attach_quadrature_rule(qrule);
+        vector_fe_face->attach_quadrature_rule(qrule_face);
+      }
+      else
+      {
+        fe = FEBase::build(_dimension, fe_type);
+        fe_face = FEBase::build(_dimension, fe_type);
+
+        fe->attach_quadrature_rule(qrule);
+        fe_face->attach_quadrature_rule(qrule_face);
+      }
 
       for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
       {
         auto elem = &libMesh::ReferenceElem::get(elem_type);
 
-        auto & phi = fe->get_phi();
-        auto & grad_phi = fe->get_dphi();
-
-        fe->reinit(elem);
-
-        _n_dofs(elem_type_id, fe_type_id) = phi.size();
-
-        _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-        _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-
-        for (unsigned int i = 0; i < phi.size(); ++i)
-          for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
-          {
-            _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-            _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
-          }
-
-        _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-        _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-
-        for (unsigned int side = 0; side < elem->n_sides(); ++side)
+        if (is_vector_fe)
         {
-          auto & phi = fe_face->get_phi();
-          auto & grad_phi = fe_face->get_dphi();
+          auto & phi = vector_fe->get_phi();
+          auto & grad_phi = vector_fe->get_dphi();
 
-          fe_face->reinit(elem, side);
+          vector_fe->reinit(elem);
 
-          _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(), qrule_face->n_points());
-          _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                     qrule_face->n_points());
+          _n_dofs(elem_type_id, fe_type_id) = phi.size();
 
-          for (unsigned int i = 0; i < phi.size(); ++i)
-            for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+          _vector_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+          _vector_grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+
+          for (const auto i : index_range(phi))
+            for (const auto qp : make_range(qrule->n_points()))
             {
-              _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-              _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              _vector_phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
+              _vector_grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
             }
+
+          _vector_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+          _vector_grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+
+          for (const auto side : elem->side_index_range())
+          {
+            auto & phi = vector_fe_face->get_phi();
+            auto & grad_phi = vector_fe_face->get_dphi();
+
+            vector_fe_face->reinit(elem, side);
+
+            _vector_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                         qrule_face->n_points());
+            _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(
+                phi.size(), qrule_face->n_points());
+
+            for (const auto i : index_range(phi))
+              for (const auto qp : make_range(qrule_face->n_points()))
+              {
+                _vector_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
+                _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              }
+          }
+        }
+        else
+        {
+          auto & phi = fe->get_phi();
+          auto & grad_phi = fe->get_dphi();
+
+          fe->reinit(elem);
+
+          _n_dofs(elem_type_id, fe_type_id) = phi.size();
+
+          _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+          _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+
+          for (const auto i : index_range(phi))
+            for (const auto qp : make_range(qrule->n_points()))
+            {
+              _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
+              _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
+            }
+
+          _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+          _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+
+          for (const auto side : elem->side_index_range())
+          {
+            auto & phi = fe_face->get_phi();
+            auto & grad_phi = fe_face->get_dphi();
+
+            fe_face->reinit(elem, side);
+
+            _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                  qrule_face->n_points());
+            _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                       qrule_face->n_points());
+
+            for (const auto i : index_range(phi))
+              for (const auto qp : make_range(qrule_face->n_points()))
+              {
+                _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
+                _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              }
+          }
         }
       }
     }
@@ -348,8 +438,8 @@ Assembly::initShape()
       _map_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
       _map_grad_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
 
-      for (unsigned int i = 0; i < phi.size(); ++i)
-        for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
+      for (const auto i : index_range(phi))
+        for (const auto qp : make_range(qrule->n_points()))
         {
           _map_phi(sid, elem_type_id)(i, qp) = phi[i][qp];
           _map_grad_phi(sid, elem_type_id)(i, qp) = grad_phi[i][qp];
@@ -363,7 +453,7 @@ Assembly::initShape()
       _normal_dx_dxi(sid, elem_type_id).create(elem->n_sides());
       _normal_dx_deta(sid, elem_type_id).create(elem->n_sides());
 
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      for (const auto side : elem->side_index_range())
       {
         auto side_ptr = elem->build_side_ptr(side);
 
@@ -375,8 +465,8 @@ Assembly::initShape()
         _map_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
         _map_grad_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
 
-        for (unsigned int i = 0; i < phi.size(); ++i)
-          for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto i : index_range(phi))
+          for (const auto qp : make_range(qrule_face->n_points()))
           {
             _map_phi_face(sid, elem_type_id)(side)(i, qp) = phi[i][qp];
             _map_grad_phi_face(sid, elem_type_id)(side)(i, qp) = grad_phi[i][qp];
@@ -389,8 +479,8 @@ Assembly::initShape()
         _map_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
         _map_grad_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
 
-        for (unsigned int i = 0; i < psi.size(); ++i)
-          for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto i : index_range(psi))
+          for (const auto qp : make_range(qrule_face->n_points()))
           {
             _map_psi_face(sid, elem_type_id)(side)(i, qp) = psi[i][qp];
             if (elem->dim() > 1)
@@ -402,17 +492,17 @@ Assembly::initShape()
         _normal_dx_dxi(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
         _normal_dx_deta(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
 
-        for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto qp : make_range(qrule_face->n_points()))
         {
           Point reference_point;
 
           if (_dimension == 1)
             reference_point = side ? Point(1) : Point(-1);
           else if (_dimension == 2)
-            for (unsigned int i = 0; i < psi.size(); ++i)
+            for (const auto i : index_range(psi))
               reference_point.add_scaled(side_ptr->point(i), psi[i][qp]);
 
-          for (unsigned int i = 0; i < phi.size(); ++i)
+          for (const auto i : index_range(phi))
           {
             if (_dimension < 3)
               _normal_dx_dxi(sid, elem_type_id)(side)(i, qp) =
@@ -430,6 +520,11 @@ Assembly::initShape()
   _phi_face.copyToDeviceNested();
   _grad_phi.copyToDeviceNested();
   _grad_phi_face.copyToDeviceNested();
+  _vector_phi.copyToDeviceNested();
+  _vector_phi_face.copyToDeviceNested();
+  _vector_grad_phi.copyToDeviceNested();
+  _vector_grad_phi_face.copyToDeviceNested();
+  _is_vector_fe_type.copyToDevice();
 
   _map_phi.copyToDeviceNested();
   _map_phi_face.copyToDeviceNested();

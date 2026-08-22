@@ -22,8 +22,8 @@ public:
 
   DiscreteNucleationData(const InputParameters & parameters);
 
-  virtual void execute() override{};
-  virtual void initialize() override{};
+  virtual void execute() override {};
+  virtual void initialize() override {};
 
   virtual Real getValue() const override;
 

@@ -130,7 +130,8 @@ JSONOutput::outputReporters()
   _has_distributed = getParam<bool>("distributed") &&
                      std::any_of(r_names.begin(),
                                  r_names.end(),
-                                 [this](const ReporterName & n) {
+                                 [this](const ReporterName & n)
+                                 {
                                    return _reporter_data.hasReporterWithMode(
                                        n.getObjectName(), REPORTER_MODE_DISTRIBUTED);
                                  });

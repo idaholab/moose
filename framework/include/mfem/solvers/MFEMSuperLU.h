@@ -23,7 +23,9 @@ class SuperLUSolver : public mfem::SuperLUSolver
 {
 public:
   SuperLUSolver(MPI_Comm comm, int npdep = 1)
-    : mfem::SuperLUSolver(comm), _s_superlu(std::make_unique<mfem::SuperLUSolver>(comm, npdep)) {};
+    : mfem::SuperLUSolver(comm), _s_superlu(std::make_unique<mfem::SuperLUSolver>(comm, npdep))
+  {
+  }
   void SetOperator(const mfem::Operator & op) override
   {
     _a_superlu = std::make_unique<mfem::SuperLURowLocMatrix>(op);
@@ -47,11 +49,7 @@ public:
 
   MFEMSuperLU(const InputParameters & parameters);
 
-protected:
   void ConstructSolver() override;
-
-  /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
 };
 
 #endif

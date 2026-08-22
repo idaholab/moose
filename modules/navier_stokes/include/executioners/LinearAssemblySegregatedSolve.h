@@ -118,6 +118,17 @@ protected:
   /// Reference to the linear system corresponding to the pressure equation
   LinearSystem & _pressure_system;
 
+  /// How often (in pressure corrector solves) to recompute the pressure preconditioner. The
+  /// pressure (Poisson-like) operator changes slowly between SIMPLE iterations, so reusing the
+  /// preconditioner - whose setup is often the dominant cost of the pressure solve - for several
+  /// iterations can substantially reduce the solve time. A value of 1 (the default) rebuilds it on
+  /// every solve; a value of N rebuilds it once every N solves and reuses it in between.
+  const unsigned int _pressure_pc_recompute_frequency;
+
+  /// Number of pressure corrector solves performed since the start of the current SIMPLE solve,
+  /// used together with _pressure_pc_recompute_frequency to decide when to reuse the preconditioner.
+  unsigned int _pressure_pc_solve_counter;
+
   /// The number of the system corresponding to the energy equation
   const unsigned int _energy_sys_number;
 

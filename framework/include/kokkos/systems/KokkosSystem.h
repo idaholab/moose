@@ -134,7 +134,7 @@ public:
    * Get the libMesh DOF map
    * @returns The libMesh DOF map
    */
-  const libMesh::DofMap & getDofMap() const;
+  const libMesh::DofMap & getDofMap() const { return _dof_map; }
 
   /**
    * Get the libMesh communicator

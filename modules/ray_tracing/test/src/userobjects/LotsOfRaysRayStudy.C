@@ -188,8 +188,11 @@ LotsOfRaysRayStudy::defineRays()
           const Point edge_centroid = elem->build_edge_ptr(edge)->vertex_average();
           for (const auto edge_to : elem->edge_index_range())
             if (edge != edge_to)
-              defineRay(
-                  elem, side, edge_centroid, elem->build_edge_ptr(edge_to)->vertex_average(), false);
+              defineRay(elem,
+                        side,
+                        edge_centroid,
+                        elem->build_edge_ptr(edge_to)->vertex_average(),
+                        false);
         }
 
     if (_side_aq)

@@ -1,0 +1,5 @@
+time,dirichlet_bc_custom,dirichlet_bc_initial,dirichlet_bc_timestep,elemental_custom,elemental_initial,elemental_timestep,flux_bc_custom,flux_bc_initial,flux_bc_timestep,flux_kernel_custom,flux_kernel_initial,flux_kernel_timestep,interface_kernel_custom,interface_kernel_initial,interface_kernel_timestep
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+2,2,1,2,2,1,2,2,1,2,2,1,2,2,1,2
+3,3,1,3,3,1,3,3,1,3,3,1,3,3,1,3

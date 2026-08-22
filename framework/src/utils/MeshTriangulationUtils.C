@@ -227,7 +227,7 @@ finalizeTriangulation(MeshGenerator & mg,
     }
     // We do not want to set an empty subdomain name
     if (opts.output_subdomain_name.size())
-      mesh.subdomain_name(output_subdomain_id) = opts.output_subdomain_name;
+      mesh.set_subdomain_name(output_subdomain_id, opts.output_subdomain_name);
   }
 
   if (opts.smooth_tri || output_subdomain_id)

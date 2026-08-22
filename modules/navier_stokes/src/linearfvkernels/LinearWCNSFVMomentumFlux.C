@@ -321,7 +321,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction && bc->useBoundaryGradientExtrapolation())
+  if (_use_nonorthogonal_correction && bc->needsBoundaryNonorthogonalCorrection())
   {
     // We support internal boundaries as well. In that case we have to decide on which side
     // of the boundary we are on.
@@ -340,7 +340,8 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
                     _boundary_normal_factor * correction_vector;
   }
 
-  if (_use_deviatoric_terms && bc->useBoundaryGradientExtrapolation())
+  // Complete prescribed fluxes already include all applicable stress contributions.
+  if (_use_deviatoric_terms && !bc->providesCompleteBoundaryFlux())
   {
     // We might be on a face which is an internal boundary so we want to make sure we
     // get the gradient from the right side.

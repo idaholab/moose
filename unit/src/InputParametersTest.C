@@ -520,6 +520,69 @@ TEST(InputParametersTest, transferParameters)
   EXPECT_EQ(p1.getDocString("od3b"), p2.getDocString("od3b"));
 }
 
+TEST(InputParametersTest, checkForRename)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("new_param", 1.5, "Documentation");
+  params.renameParam("new_param", "renamed_param", "Updated documentation");
+
+  const std::string old_name = "new_param";
+  const std::string current_name = "renamed_param";
+  const std::string unknown = "does_not_exist";
+
+  // Renamed name resolves to the current name; address must be stable rename metadata
+  const auto & resolved_old = params.checkForRename(old_name);
+  EXPECT_EQ(resolved_old, current_name);
+  EXPECT_EQ(std::addressof(resolved_old), std::addressof(params.checkForRename(old_name)));
+
+  // Current / unknown names return a reference to the input argument (no allocation)
+  const auto & resolved_current = params.checkForRename(current_name);
+  EXPECT_EQ(resolved_current, current_name);
+  EXPECT_EQ(std::addressof(resolved_current), std::addressof(current_name));
+
+  const auto & resolved_unknown = params.checkForRename(unknown);
+  EXPECT_EQ(resolved_unknown, unknown);
+  EXPECT_EQ(std::addressof(resolved_unknown), std::addressof(unknown));
+
+  // Access through the old name still works after rename
+  EXPECT_TRUE(params.have_parameter<Real>(old_name));
+  EXPECT_TRUE(params.have_parameter<Real>(current_name));
+  EXPECT_EQ(params.get<Real>(old_name), 1.5);
+  EXPECT_EQ(params.get<Real>(current_name), 1.5);
+  EXPECT_EQ(params.getDocString(old_name), "Updated documentation");
+  EXPECT_EQ(params.getDocString(current_name), "Updated documentation");
+
+  // Aliases include both the current name and the old name
+  const auto aliases = params.paramAliases(current_name);
+  ASSERT_EQ(aliases.size(), 2);
+  EXPECT_EQ(aliases[0], current_name);
+  EXPECT_EQ(aliases[1], old_name);
+}
+
+TEST(InputParametersTest, deprecateCoupledVar)
+{
+  InputParameters params = emptyInputParameters();
+  params.addCoupledVar("old_var", "An old coupled variable");
+  params.deprecateCoupledVar("old_var", "new_var", "01/01/2099");
+
+  // The coupled-var set stores only the current name; the old name resolves via checkForRename
+  EXPECT_TRUE(params.hasCoupledVar("new_var"));
+  EXPECT_FALSE(params.hasCoupledVar("old_var"));
+  EXPECT_EQ(params.checkForRename("old_var"), "new_var");
+  EXPECT_EQ(params.checkForRename("new_var"), "new_var");
+
+  // Setting / reading through the deprecated name uses the new name under the hood
+  params.setCoupledVar("old_var", NonlinearVariableName("u"));
+  EXPECT_EQ(params.getCoupledVar("new_var"), std::vector<VariableName>{"u"});
+  EXPECT_EQ(params.getCoupledVar("old_var"), std::vector<VariableName>{"u"});
+
+  const auto message = params.queryDeprecatedParamMessage("old_var");
+  ASSERT_TRUE(message.has_value());
+  EXPECT_NE(message->find("old_var"), std::string::npos);
+  EXPECT_NE(message->find("new_var"), std::string::npos);
+  EXPECT_NE(message->find("01/01/2099"), std::string::npos);
+}
+
 TEST(InputParametersTest, noDefaultValueError)
 {
   InputParameters params = emptyInputParameters();

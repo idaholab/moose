@@ -26,7 +26,7 @@ public:
 
   std::unique_ptr<CSG::CSGBase> generateCSG() override;
 
-  void generateData() override{};
+  void generateData() override {};
 
 protected:
   /// The number of dimension in the mesh

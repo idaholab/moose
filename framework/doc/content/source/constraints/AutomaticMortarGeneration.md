@@ -18,7 +18,21 @@ elements.
 
 ## 2D
 
-Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630). In short, a nodal-normal projection is used to map points from the primary interface to the secondary interface; secondary interface elements are then split by the projected nodes to form mortar segment mesh elements.
+Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630) and follows the
+nodal-normal projection construction of [!cite](yang2005two). Yang et al. define a continuous
+secondary normal field by cross-weighting the normals of the adjacent edges. Specifically, their
+unnormalized normal at node $A$ is $\hat{\boldsymbol{n}}_A =
+l_2\boldsymbol{n}_{A1} + l_1\boldsymbol{n}_{A2}$: the normal of each edge is weighted by the
+length of the other edge. They use this field both to project secondary nodes onto the primary
+interface and to project primary nodes onto the secondary interface. The secondary interface
+elements are split at the projected primary nodes to form the mortar segment mesh elements.
+
+MOOSE deviates from the nodal-normal weighting in [!cite](yang2005two): rather than explicitly
+cross-weighting adjacent normals, MOOSE weights each normal by the nodal `JxW` contribution from
+that same edge, obtained with a `QNodal` quadrature rule. For straight first-order edges this `JxW`
+is proportional to the length of the same edge, so the two definitions differ when adjacent edge
+lengths differ. For curved or higher-order edges the MOOSE weight is additionally a local nodal
+quadrature/Jacobian contribution rather than a complete-edge length.
 
 ## 3D
 
@@ -43,5 +57,108 @@ Elements defined on second order geometries are curvilinear so to simplify the '
        alt=A second order quad element is converted to 4 first-order elements, which are then linearized and "clipped".
 
 Quadrature points defined on mortar segments (which live on linearized elements) are mapped back to second order elements following an analogous but reverse procedure to the one illustrated above; points are mapped from linearized elements to first order sub-elements then subsequently transformed to the original second order elements.
+
+### Quadrature Point Mapping
+
+The [!param](/Constraints/EqualValueConstraint/mortar_3d_qp_mapping) parameter on a directly
+specified mortar consumer selects how a quadrature point on a 3D mortar segment is mapped to
+reference coordinates on the primary and secondary parent faces. This selection has no effect on 2D
+mortar interfaces. Every mortar consumer on the same primary-secondary boundary pair must select
+the same mode; MOOSE reports an input error when the selections differ.
+
+Let $\boldsymbol{\eta}_q$ be a quadrature point in the reference triangle of a mortar segment,
+$N_a^m$ the three linear mortar-segment shape functions, and $\boldsymbol{x}_a^m$ the physical
+mortar-segment vertices. The corresponding physical point on the planar mortar segment is
+
+!equation id=mortar-segment-quadrature-point
+\boldsymbol{x}_m(\boldsymbol{\eta}_q) =
+\sum_{a=1}^{3} N_a^m(\boldsymbol{\eta}_q)\boldsymbol{x}_a^m.
+
+Let $i \in \{p,s\}$ denote the primary or secondary parent face. With `normal_projection`, MOOSE
+finds the local sub-face coordinate $\hat{\boldsymbol{\xi}}_{i,q}$ on each parent-face linearization
+by solving
+
+!equation id=normal-projection-quadrature-mapping
+\left[\boldsymbol{x}_{i,\mathrm{lin}}(\hat{\boldsymbol{\xi}}_{i,q}) -
+\boldsymbol{x}_m(\boldsymbol{\eta}_q)\right] \times \boldsymbol{n}_m = \boldsymbol{0},
+\qquad i \in \{p,s\},
+
+where $\boldsymbol{n}_m$ is the mortar-segment normal. Before clipping, MOOSE verifies that each
+projected QUAD4 sub-element has an invertible bilinear map. TRI3 sub-elements use a direct affine
+inverse. For QUAD4 sub-elements, MOOSE first solves the projection with Newton's method and keeps
+the Newton coordinate when it lies inside the sub-element without a relaxed bounds tolerance.
+Otherwise, MOOSE solves the bilinear map
+
+!equation
+\boldsymbol{x}(\xi,\eta)=\boldsymbol{a}+\boldsymbol{b}\xi+\boldsymbol{c}\eta+
+\boldsymbol{d}\xi\eta
+
+analytically and requires one valid root in the sub-element reference domain. A root no more than
+the clipping tolerance outside the domain may be snapped to the boundary only when its physical
+round-trip remains consistent. This fallback avoids accepting an exterior root when a distorted
+bilinear QUAD4 also has an in-domain inverse. MOOSE then transforms
+$\hat{\boldsymbol{\xi}}_{i,q}$ to the parent-face reference coordinate
+$\boldsymbol{\xi}_{i,q}$ used to evaluate the finite element fields. This procedure projects onto
+the same faceted sub-elements used for clipping; it is not an exact normal projection onto the full
+curved parent face.
+
+With `reference_interpolation`, each retained mortar-segment vertex $a$ stores its primary and
+secondary parent-face reference coordinates $\boldsymbol{\xi}_{i,a}$ recovered during clipping.
+MOOSE interpolates those coordinates directly:
+
+!equation id=reference-interpolation-quadrature-mapping
+\boldsymbol{\xi}_{i,q} =
+\sum_{a=1}^{3} N_a^m(\boldsymbol{\eta}_q)\boldsymbol{\xi}_{i,a},
+\qquad
+\boldsymbol{x}_{i,q} = \boldsymbol{x}_i(\boldsymbol{\xi}_{i,q}),
+\qquad i \in \{p,s\}.
+
+This mode preserves the barycentric correspondence established at the clipped mortar-segment
+vertices; it does not project the physical quadrature point again. On curved parent faces, the two
+evaluation points lie on their respective finite element faces but need not align along
+$\boldsymbol{n}_m$. MOOSE reports an error if a retained mortar segment cannot build a complete
+reference map; it does not fall back to `normal_projection`.
+
+### Subpatch plane normal
+
+The construction of the smoothed secondary nodal normals and the selection of a local subpatch
+projection plane are separate operations. MOOSE first accumulates face-normal contributions at the
+secondary nodes using the nodal `JxW` weights described above and normalizes the resulting nodal
+vectors. Changing that weighting or smoothing procedure is outside the scope of the
+[!param](/Constraints/EqualValueConstraint/mortar_3d_subpatch_plane) parameter. The parameter only
+controls how MOOSE converts the stored nodal normals or the subpatch geometry into the plane used
+for 3D projection and polygon clipping.
+
+The two available modes use the same linearized subpatch topology and center:
+
+- `GEOMETRIC_NORMAL` is the default. For a triangular subpatch, MOOSE computes an edge cross
+  product; for a quadrilateral subpatch, it computes the cross product of the bilinear center
+  tangents so that the normal represents the full bilinear patch rather than one selected
+  diagonal. The averaged nodal normal is used only to choose the sign of the geometric normal and
+  preserve MOOSE's primary-to-secondary orientation convention; it does not determine the plane
+  direction.
+- `AVERAGED_NODAL_NORMAL` evaluates the interpolated, smoothed secondary nodal-normal field at the
+  subpatch center by summing the stored normals at the subpatch vertices and normalizing the
+  result. This is the averaged-normal plane construction described in the mortar framework of
+  [!cite](popp2010dual).
+
+Thus, omitting `mortar_3d_subpatch_plane` selects the geometric construction. Select the
+averaged-normal construction with
+
+```
+mortar_3d_subpatch_plane = AVERAGED_NODAL_NORMAL
+```
+
+For both modes, overlap polygons below the mortar-segment area tolerance are discarded, do not seed
+the breadth-first primary-element search, and do not leave orphan nodes in the mortar segment mesh.
+
+Sharp 3D corners need an additional admissibility check when geometric subpatch planes are used.
+In `GEOMETRIC_NORMAL` mode,
+[!param](/Constraints/EqualValueConstraint/minimum_projection_angle) rejects primary and secondary
+subpatch pairings whose geometric normals are too close to orthogonal before polygon clipping. This
+avoids cross-corner mortar segments while preserving opposing or nearly opposing face-to-face
+coupling. Geometric mode therefore requires `minimum_projection_angle` to lie between zero and
+ninety degrees. In `AVERAGED_NODAL_NORMAL` mode, the parameter retains its existing MOOSE input
+range and projection checks and does not apply this additional geometric normal-pair filter.
 
 !bibtex bibliography

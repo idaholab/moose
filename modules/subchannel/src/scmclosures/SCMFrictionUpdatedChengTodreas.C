@@ -30,8 +30,7 @@ SCMFrictionUpdatedChengTodreas::SCMFrictionUpdatedChengTodreas(const InputParame
 {
   if (_is_tri_lattice &&
       ((_tri_sch_mesh->getWireDiameter() != 0.0) != (_tri_sch_mesh->getWireLeadLength() != 0.0)))
-    mooseError(name(),
-               ": wire-wrapped bundle friction requires both wire diameter and wire lead length. "
+    mooseError("Wire-wrapped bundle friction requires both wire diameter and wire lead length. "
                "Set both to zero for a bare pin bundle.");
 
   if (_is_tri_lattice)
@@ -217,7 +216,14 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
       // bare Pin bundle edge subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * Utility::pow<2>(wire_diameter) / 8.0 / std::cos(theta);
       // turbulent friction factor equation constant - Edge subchannel
-      cT *= std::pow((1 + ws_t * (ar / a_p) * Utility::pow<2>(std::tan(theta))), 1.41);
+      const Real turbulent_wire_correction =
+          1 + ws_t * (ar / a_p) * Utility::pow<2>(std::tan(theta));
+      if (!std::isfinite(turbulent_wire_correction) || turbulent_wire_correction < 0.0)
+        mooseError("The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
+                   "non-negative and finite for an edge subchannel. Computed ",
+                   turbulent_wire_correction,
+                   ".");
+      cT *= std::pow(turbulent_wire_correction, 1.41);
       // laminar friction factor equation constant - Edge subchannel
       cL *= (1 + ws_l * (ar / a_p) * Utility::pow<2>(std::tan(theta)));
     }
@@ -228,7 +234,14 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
       // bare Pin bundle corner subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * Utility::pow<2>(wire_diameter) / 24.0 / std::cos(theta);
       // turbulent friction factor equation constant - Corner subchannel
-      cT *= std::pow((1 + ws_t * (ar / a_p) * Utility::pow<2>(std::tan(theta))), 1.41);
+      const Real turbulent_wire_correction =
+          1 + ws_t * (ar / a_p) * Utility::pow<2>(std::tan(theta));
+      if (!std::isfinite(turbulent_wire_correction) || turbulent_wire_correction < 0.0)
+        mooseError("The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
+                   "non-negative and finite for a corner subchannel. Computed ",
+                   turbulent_wire_correction,
+                   ".");
+      cT *= std::pow(turbulent_wire_correction, 1.41);
       // laminar friction factor equation constant - Corner subchannel
       cL *= (1 + ws_l * (ar / a_p) * Utility::pow<2>(std::tan(theta)));
     }

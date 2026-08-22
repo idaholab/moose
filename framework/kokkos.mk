@@ -110,12 +110,13 @@ else ifneq ($(PETSC_HAVE_SYCL),)
   KOKKOS_ARCH       := $(KOKKOS_SYCL_ARCH_$(SYCL_ARCH))
   KOKKOS_COMPILER   := ICPX
   KOKKOS_CXX         = $(SYCL_COMPILER)
-  KOKKOS_CXXFLAGS    = -fsycl -fsycl-targets=spir64_gen -x c++ $(CXXFLAGS) $(libmesh_CXXFLAGS)
+  KOKKOS_CXXFLAGS    = -fsycl -fno-sycl-rdc -x c++ $(CXXFLAGS) $(libmesh_CXXFLAGS)
   KOKKOS_CXXFLAGS   += -Wno-deprecated-declarations -Wno-macro-redefined
   KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
   KOKKOS_LDFLAGS     = -fsycl
   ifneq ($(SYCL_ARCH),)
-    KOKKOS_LDFLAGS  += -Xsycl-target-backend "-device $(SYCL_ARCH)"
+    KOKKOS_CXXLFAGS += -fsycl-targets=spir64_gen
+    KOKKOS_LDFLAGS  += -fsycl-targets=spir64_gen -Xsycl-target-backend "-device $(SYCL_ARCH)"
   endif
 else
   KOKKOS_COMPILER   := CPU

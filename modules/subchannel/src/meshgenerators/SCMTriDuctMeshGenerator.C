@@ -66,7 +66,7 @@ SCMTriDuctMeshGenerator::generate()
   ductElems(elem_point_indices, _z_grid.size(), cross_sec.size());
   std::vector<Node *> duct_nodes;
   buildDuct(mesh_base, duct_nodes, points, elem_point_indices, _block_id);
-  mesh_base->subdomain_name(_block_id) = name();
+  mesh_base->set_subdomain_name(_block_id, name(), true);
 
   mesh_base->prepare_for_use();
 

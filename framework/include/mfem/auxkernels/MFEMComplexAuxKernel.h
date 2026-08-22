@@ -26,7 +26,7 @@ public:
   virtual ~MFEMComplexAuxKernel() = default;
 
   /// Method called to update any owned objects upon an FE space update
-  virtual void update() {};
+  virtual void update() {}
 
   virtual std::optional<std::string> suppliedVariableName() const override;
 

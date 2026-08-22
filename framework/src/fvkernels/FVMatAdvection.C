@@ -70,5 +70,4 @@ FVMatAdvection::computeQpResidual()
                  determineState());
 
   return _normal * v * adv_quant_interface;
-  ;
 }

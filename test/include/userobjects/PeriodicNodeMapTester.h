@@ -32,7 +32,7 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
-  virtual void threadJoin(const UserObject &) override{};
+  virtual void threadJoin(const UserObject &) override {};
 
 protected:
   /// Coupled variable id

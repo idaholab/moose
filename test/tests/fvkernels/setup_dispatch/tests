@@ -1,0 +1,26 @@
+# The counts are asserted rather than merely the presence of a call, so that a setup method
+# dispatched more than once fails as loudly as one never dispatched at all. Threading is disabled
+# because each thread holds its own copy of the objects, and restep is disabled because it
+# deliberately repeats a timestep, which inflates the per-step counts.
+#
+# Recover is disabled because the counters are plain members that start from zero in the recovered
+# run, so the per-step counts come out short. Holding them in restartable data the way
+# SetupInterfaceCount does is not available here: FVBoundaryCondition and FVInterfaceKernel are not
+# Restartable, and adding that to them is a framework change well beyond what this test needs. What
+# is under test is setup dispatch, not restart behaviour.
+[Tests]
+  issues = '#33335'
+  design = '/SetupInterface.md'
+  [setup_dispatch]
+    type = CSVDiff
+    input = setup_dispatch.i
+    csvdiff = setup_dispatch_out.csv
+    max_threads = 1
+    restep = false
+    recover = false
+    requirement = "The system shall dispatch the initial setup method once per run, and the "
+                  "timestep and custom setup methods once per step, to every family of finite "
+                  "volume object, namely elemental kernels, flux kernels, Dirichlet boundary "
+                  "conditions, flux boundary conditions and interface kernels."
+  []
+[]

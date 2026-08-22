@@ -161,6 +161,44 @@ The value of $C$ is simply $1/L$ if `use_mobility = true` and `use_relperm = tru
 
 !listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i start=[BCs] end=[Postprocessors]
 
+## Class 1: Aquifer (Robin) boundary condition
+
+[`PorousFlowAquiferBC`](PorousFlowAquiferBC.md) applies a Robin boundary condition that
+couples the model boundary to a far-field aquifer.  The mass flux leaving the domain is
+\begin{equation}
+  \label{eq:aquifer_bc}
+  s = C \left( P_{\mathrm{model}} - P_{\mathrm{aq}}(z) \right) ,
+\end{equation}
+where $C$ is the conductance (kg.m$^{-2}$.Pa$^{-1}$.s$^{-1}$) and $P_{\mathrm{aq}}(z)$ is
+the far-field aquifer pressure at elevation $z$.  For finite-volume models,
+[`FVPorousFlowAquiferBC`](FVPorousFlowAquiferBC.md) provides the same boundary condition.
+
+The advantage over a `PorousFlowPiecewiseLinearSink` is that $P_{\mathrm{aq}}$ carries the
+hydrostatic gradient of the aquifer instead of being a single scalar `PT_shift`.  A scalar
+`PT_shift` can match the aquifer pressure at one elevation only, so on a vertical or inclined
+boundary it gives the wrong flux everywhere else.  `PorousFlowAquiferBC` evaluates
+$P_{\mathrm{aq}}(z)$ at every quadrature point (and `FVPorousFlowAquiferBC` at the
+boundary-cell centroid, where the cell pressure lives), so a boundary that is in hydrostatic
+equilibrium with the aquifer carries identically zero flux whatever its orientation.  The
+density used in [eq:aquifer_bc] is PorousFlow's own nodal density, so the aquifer pressure
+also stays consistent with the equation of state used in the rest of the model.  On a
+horizontal boundary with a nearly incompressible fluid the two objects are equivalent.
+
+The aquifer pressure is specified either as a hydraulic head (`aquifer_head`, with the
+conductance supplied directly through `aquifer_conductance`) or as a pressure at a datum
+elevation (`aquifer_pressure_at_datum`, with the conductance computed from the permeability,
+the viscosity and the aquifer distance `aquifer_distance`).  Both formulations, the
+conductance expression and the effect of the aquifer distance on the strength of the coupling
+are described on the [`PorousFlowAquiferBC`](PorousFlowAquiferBC.md) page.
+
+An example input using the head formulation:
+
+!listing modules/porous_flow/test/tests/sinks/aquiferBC04.i start=[BCs] end=[Postprocessors]
+
+An example using the pressure-at-datum formulation with computed conductance:
+
+!listing modules/porous_flow/test/tests/sinks/aquiferBC02.i start=[BCs] end=[Postprocessors]
+
 ## Class 1: Injection of fluid at a fixed temperature
 
 A boundary condition corresponding to injection of fluid at a fixed temperature

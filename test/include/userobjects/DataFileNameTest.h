@@ -21,9 +21,9 @@ public:
 
   DataFileNameTest(const InputParameters & params);
 
-  virtual void initialSetup(){};
+  virtual void initialSetup() {}
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() {}
+  virtual void execute() {}
+  virtual void finalize() {}
 };

@@ -1,23 +1,14 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
   elem_type = HEX8
-  displacements = 'disp_x disp_y disp_z'
   nx = 30
   ny = 30
   nz = 30
-[]
-
-[Variables]
-  [./disp_x]
-    block = 0
-  [../]
-  [./disp_y]
-    block = 0
-  [../]
-  [./disp_z]
-    block = 0
-  [../]
 []
 
 [AuxVariables]
@@ -106,11 +97,6 @@
     fill_method = symmetric9
     read_prop_user_object = prop_read
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
@@ -161,9 +147,11 @@
   exodus = true
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
+

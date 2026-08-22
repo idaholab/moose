@@ -52,6 +52,9 @@ $\mathbb{D}\vec{n}\cdot \vec{n}$ replacing the diffusion coefficient. The
 second term ($\int\limits_{S_f} (\mathbb{D}\vec{n} - \mathbb{D}\vec{n}\cdot \vec{n} \vec{n}) \cdot \nabla u dS dS$) can be treated explicitly, similarly to the nonorthogonal correction in
 [LinearFVDiffusion.md].
 
+Prescribed anisotropic boundary fluxes can be applied with
+[LinearFVAnisotropicDiffusionFunctorNeumannBC.md].
+
 !syntax parameters /LinearFVKernels/LinearFVAnisotropicDiffusion
 
 !syntax inputs /LinearFVKernels/LinearFVAnisotropicDiffusion

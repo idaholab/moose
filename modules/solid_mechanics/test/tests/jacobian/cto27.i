@@ -16,24 +16,19 @@
 []
 
 [GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
   block = 0
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
+    eigenstrain_names = ini_stress
   [../]
 []
 
-
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 
 [UserObjects]
@@ -114,11 +109,6 @@
     block = 0
     lambda = 0.1
     shear_modulus = 1.0
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    displacements = 'disp_x disp_y disp_z'
-    eigenstrain_names = ini_stress
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress

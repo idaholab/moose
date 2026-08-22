@@ -150,7 +150,7 @@ private:
   // MooseObjects and Actions (MooseParameterInterface-derived classes)
   /// Forwards parameter check to the class using this utility
   template <typename T>
-  T forwardGetParam(const std::string & param_name) const
+  const T & forwardGetParam(const std::string & param_name) const
   {
     return _customer_class->template getParam<T>(param_name);
   }

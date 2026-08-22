@@ -16,6 +16,10 @@ the current finest level.
 The resulting hierarchy can be assigned to an `MFEMVariable` and used by
 [MFEMGeometricMultigridSolver.md].
 
+## Example Input File Syntax
+
+!listing test/tests/mfem/solvers/pmg_diffusion.i block=Problem FESpaces FESpaceHierarchies
+
 !syntax parameters /FESpaceHierarchies/MFEMFESpaceHierarchy
 
 !syntax inputs /FESpaceHierarchies/MFEMFESpaceHierarchy

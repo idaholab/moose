@@ -29,13 +29,13 @@ public:
 
   /// Compute the residual of the Heat Equation time derivative.
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
 
   /// Compute the jacobian of the Heat Equation time derivative.
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
+                                            const unsigned int qp,
+                                            AssemblyDatum & datum) const;
 
 protected:
   Moose::Kokkos::MaterialProperty<Real> _specific_heat;
@@ -46,30 +46,30 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosHeatConductionTimeDerivative::computeQpResidual(const unsigned int qp,
-                                                      AssemblyDatum & datum) const
+KokkosHeatConductionTimeDerivative::precomputeQpResidual(const unsigned int qp,
+                                                         AssemblyDatum & datum) const
 {
   return _specific_heat(datum, qp) * _density(datum, qp) *
-         KokkosTimeDerivative::computeQpResidual<Derived>(qp, datum);
+         KokkosTimeDerivative::precomputeQpResidual<Derived>(qp, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosHeatConductionTimeDerivative::computeQpJacobian(const unsigned int j,
-                                                      const unsigned int qp,
-                                                      AssemblyDatum & datum) const
+KokkosHeatConductionTimeDerivative::precomputeQpJacobian(const unsigned int j,
+                                                         const unsigned int qp,
+                                                         AssemblyDatum & datum) const
 {
   const Real cp = _specific_heat(datum, qp);
   const Real rho = _density(datum, qp);
 
-  auto jac = cp * rho * KokkosTimeDerivative::computeQpJacobian<Derived>(j, qp, datum);
+  auto jac = cp * rho * KokkosTimeDerivative::precomputeQpJacobian<Derived>(j, qp, datum);
 
   if (_d_specific_heat_dT)
     jac += _d_specific_heat_dT(datum, qp) * rho * _phi(datum, j, qp) *
-           KokkosTimeDerivative::computeQpResidual<Derived>(qp, datum);
+           KokkosTimeDerivative::precomputeQpResidual<Derived>(qp, datum);
   if (_d_density_dT)
     jac += cp * _d_density_dT(datum, qp) * _phi(datum, j, qp) *
-           KokkosTimeDerivative::computeQpResidual<Derived>(qp, datum);
+           KokkosTimeDerivative::precomputeQpResidual<Derived>(qp, datum);
 
   return jac;
 }

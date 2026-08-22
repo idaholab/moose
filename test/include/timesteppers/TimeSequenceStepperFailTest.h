@@ -25,6 +25,6 @@ public:
   virtual void step() override;
 
 protected:
-  /// stores a copy of the original sequence of time points, is not updated due to failures.
+  /// Stores a copy of the input sequence for selecting the time at which to fail
   std::vector<Real> _original_time_sequence;
 };

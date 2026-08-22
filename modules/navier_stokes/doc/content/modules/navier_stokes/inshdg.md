@@ -29,3 +29,22 @@ converges with optimal order whereas for other methods, the velocity
 gradient convergence is suboptimal. Additionally, with postprocessing
 the velocity converges with an additional order, e.g. it is superconvergent. Additional
 information may be found at the [core HDG kernel page](NavierStokesLHDGKernel.md).
+
+## Flow-transport compatibility
+
+For the finite element spaces used here, the IP-HDG discretization is exactly mass
+conserving: its cell velocity is divergence-free and its normal component is continuous
+across element faces. Therefore, users may choose the scalar transport space independently
+of the pressure space while retaining the compatibility properties discussed in
+[compatible flow and scalar transport](dgfe.md#compatible-flow-and-scalar-transport).
+
+The L-HDG discretization is locally conservative through its single-valued hybrid
+velocity flux, but its cell velocity is neither divergence-free nor
+$H(\mathrm{div})$-conforming.
+In this formulation, scalar advection uses the cell velocity in element volume terms
+and the hybrid velocity in face terms. Consequently, a transport discretization coupled
+to the unpostprocessed L-HDG velocity preserves a uniform scalar only when its test space
+$W_h$ is a subspace of the pressure space $Q_h$. The L-HDG compatibility test uses
+matching first-order temperature and pressure spaces, so $W_h = Q_h$. The postprocessed
+L-HDG velocity is divergence-free and $H(\mathrm{div})$-conforming, but MOOSE scalar
+transport does not currently use that velocity reconstruction.

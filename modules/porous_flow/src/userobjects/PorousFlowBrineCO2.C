@@ -992,7 +992,8 @@ PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(
   else
   {
     // Residual function for Newton-Raphson
-    auto fy = [mnacl, this](Real y, Real A, Real B) {
+    auto fy = [mnacl, this](Real y, Real A, Real B)
+    {
       return y -
              (1.0 - B) * _invMh2o / ((1.0 / A - B) * (2.0 * mnacl + _invMh2o) + 2.0 * mnacl * B);
     };

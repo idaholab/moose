@@ -23,7 +23,7 @@ public:
   GeneralizedPlaneStrainOffDiagOSPD(const InputParameters & parameters);
 
 protected:
-  virtual void computeLocalResidual() override{};
+  virtual void computeLocalResidual() override {};
   virtual void computeOffDiagJacobianScalar(unsigned int jvar_num) override;
 
   /**

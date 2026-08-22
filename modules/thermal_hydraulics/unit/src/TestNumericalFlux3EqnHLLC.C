@@ -14,9 +14,7 @@
 TEST_F(TestNumericalFlux3EqnHLLC, testSymmetry) { testSymmetry(); }
 TEST_F(TestNumericalFlux3EqnHLLC, testConsistency) { testConsistency(); }
 
-TestNumericalFlux3EqnHLLC::TestNumericalFlux3EqnHLLC() : TestNumericalFlux3EqnBase()
-{
-}
+TestNumericalFlux3EqnHLLC::TestNumericalFlux3EqnHLLC() : TestNumericalFlux3EqnBase() {}
 
 const NumericalFlux1D &
 TestNumericalFlux3EqnHLLC::createFluxObject()

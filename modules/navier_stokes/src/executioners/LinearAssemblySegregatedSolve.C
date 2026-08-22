@@ -98,6 +98,24 @@ LinearAssemblySegregatedSolve::validParams()
                               "Solve control");
 
   /*
+   * Parameter to amortize the (often dominant) pressure preconditioner setup cost. The pressure
+   * operator changes slowly between SIMPLE iterations, so its preconditioner can be reused for
+   * several iterations rather than rebuilt every solve.
+   */
+  params.addRangeCheckedParam<unsigned int>(
+      "pressure_pc_recompute_frequency",
+      1,
+      "pressure_pc_recompute_frequency >= 1",
+      "How often (in pressure corrector solves) to recompute the pressure preconditioner. The "
+      "default of 1 rebuilds it on every solve. A value of N rebuilds it once every N solves and "
+      "reuses it in between, which can substantially reduce the pressure solve cost when the "
+      "preconditioner setup dominates (e.g. algebraic multigrid). Larger values trade more reuse "
+      "for a possibly staler preconditioner (more Krylov iterations); for solves where the "
+      "pressure "
+      "operator changes significantly, prefer a smaller value.");
+  params.addParamNamesToGroup("pressure_pc_recompute_frequency", "Pressure Equation");
+
+  /*
    * Parameters to control the conjugate heat transfer
    */
   params += NS::FV::CHTHandler::validParams();
@@ -109,6 +127,8 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   : SIMPLESolveBase(ex),
     _pressure_sys_number(_problem.linearSysNum(getParam<SolverSystemName>("pressure_system"))),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+    _pressure_pc_recompute_frequency(getParam<unsigned int>("pressure_pc_recompute_frequency")),
+    _pressure_pc_solve_counter(0),
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
@@ -358,7 +378,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     LinearImplicitSystem & momentum_system =
         libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
   }
 
   // We reset this to ensure the preconditioner is recomputed new time we go to the momentum
@@ -418,6 +438,13 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   if (_pin_pressure)
     NS::FV::constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
   pressure_system.update();
+
+  // Optionally reuse the pressure preconditioner across SIMPLE iterations to amortize its setup
+  // cost. We rebuild it on the first solve and then once every _pressure_pc_recompute_frequency
+  // solves, reusing it in between. With the default frequency of 1 this rebuilds on every solve.
+  pressure_solver.reuse_preconditioner(
+      (_pressure_pc_solve_counter % _pressure_pc_recompute_frequency) != 0);
+  ++_pressure_pc_solve_counter;
 
   auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
@@ -638,6 +665,8 @@ LinearAssemblySegregatedSolve::solve()
   if (!_problem.shouldSolve())
     return true;
 
+  Moose::PetscSupport::PetscOptionsScope petsc_options_scope(_problem);
+
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;
   solver_params._type = Moose::SolveType::ST_LINEAR;
@@ -645,6 +674,10 @@ LinearAssemblySegregatedSolve::solve()
 
   // Initialize the SIMPLE iteration counter
   unsigned int simple_iteration_counter = 0;
+
+  // Rebuild the pressure preconditioner on the first solve of this (e.g. time) step before reusing
+  // it according to _pressure_pc_recompute_frequency.
+  _pressure_pc_solve_counter = 0;
 
   // We set up the residual storage and the corresponding tolerances.
   ResidualStorage residual_storage = setupResidualStorage();

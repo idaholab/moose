@@ -35,7 +35,7 @@
     type = MFEMFESpaceHierarchy
     fespace = H1FESpace
     # One refinement entry adds the fine p=2 level, giving two total levels.
-    refinements = '2'
+    refinements = 2
   []
 []
 
@@ -57,11 +57,11 @@
 [Functions]
   [u_exact]
     type = ParsedFunction
-    expression = 'sin(pi*x)*sin(pi*y)'
+    expression = sin(pi*x)*sin(pi*y)
   []
   [forcing]
     type = ParsedFunction
-    expression = '2*pi^2*sin(pi*x)*sin(pi*y)'
+    expression = 2*pi^2*sin(pi*x)*sin(pi*y)
   []
 []
 
@@ -96,10 +96,8 @@
   [pmg]
     type = MFEMGeometricMultigridSolver
     variable = concentration
-    fespace_hierarchy = h1_hierarchy
-    smoothers = 'chebyshev'
+    smoothers = chebyshev
     coarse_solver = coarse
-    assembly_levels = 'legacy'
   []
   [main]
     type = MFEMCGSolver

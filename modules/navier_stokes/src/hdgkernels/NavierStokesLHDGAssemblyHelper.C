@@ -108,7 +108,7 @@ NavierStokesLHDGAssemblyHelper::NavierStokesLHDGAssemblyHelper(
     if (vel_type != var.feType())
       mooseError(
           var.name(),
-          "does not have the same finite element type as the x-component velocity. All scalar "
+          " does not have the same finite element type as the x-component velocity. All scalar "
           "field finite element types must be the same for the Navier-Stokes L-HDG implementation");
   };
   check_type(_v_var);

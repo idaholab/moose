@@ -14,7 +14,9 @@
 /**
  * Class implementing a flux boundary condition for linear finite
  * volume pressure variables used in the pressure corrector equation which is consistent with the
- * H/A flux. This is only applicable for advection-diffusion problems.
+ * H/A flux and a prescribed boundary velocity. This allows the pressure boundary flux to be
+ * consistent with a non-zero boundary mass flux and the boundary pressure to be reconstructed for
+ * a diagonal anisotropic inverse momentum tensor.
  */
 class LinearFVPressureFluxBC : public LinearFVAdvectionDiffusionBC
 {
@@ -41,10 +43,32 @@ public:
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
+
 protected:
+  /// Compute the required boundary pressure flux contribution
+  Real computeRequiredPressureFlux() const;
+
+  /// Compute the scalar A^{-1} coefficient, which is zero before the first momentum assembly
+  Real computeBoundaryAinv() const;
+
   /// The H/A flux functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _HbyA_flux;
 
   /// The functor for the 1/A tensor serving as a diffusion coefficient
   const Moose::Functor<RealVectorValue> & _Ainv;
+
+  /// Spatial dimension of the mesh
+  const unsigned short _dim;
+
+  /// Whether to reconstruct the boundary pressure with the pressure flux and cell gradient
+  const bool _two_term_expansion;
+
+  /// Velocity functors used to prescribe a boundary mass flux
+  const Moose::Functor<Real> & _u;
+  const Moose::Functor<Real> * const _v;
+  const Moose::Functor<Real> * const _w;
+
+  /// Density functor used with the prescribed boundary velocity
+  const Moose::Functor<Real> & _rho;
 };

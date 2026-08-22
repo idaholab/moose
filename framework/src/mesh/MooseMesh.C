@@ -51,6 +51,7 @@
 #include "libmesh/hilbert_sfc_partitioner.h"
 #include "libmesh/morton_sfc_partitioner.h"
 #include "libmesh/edge_edge2.h"
+#include "libmesh/checkpoint_io.h"
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/boundary_info.h"
@@ -722,7 +723,8 @@ MooseMesh::buildLowerDMesh()
   for (const auto & tpid : interior_side_types)
   {
     const auto type = ElemType(tpid);
-    mesh.subdomain_name(id) = "INTERNAL_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    mesh.set_subdomain_name(
+        id, "INTERNAL_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type), true);
     interior_block_ids[type] = id;
     _lower_d_interior_blocks.insert(id);
     if (_mesh_subdomains.count(id) > 0)
@@ -733,7 +735,8 @@ MooseMesh::buildLowerDMesh()
   for (const auto & tpid : boundary_side_types)
   {
     const auto type = ElemType(tpid);
-    mesh.subdomain_name(id) = "BOUNDARY_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    mesh.set_subdomain_name(
+        id, "BOUNDARY_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type), true);
     boundary_block_ids[type] = id;
     _lower_d_boundary_blocks.insert(id);
     if (_mesh_subdomains.count(id) > 0)
@@ -890,7 +893,6 @@ MooseMesh::meshChanged()
   update();
 
   // Delete all of the cached ranges
-  _active_local_elem_range.reset();
   _active_node_range.reset();
   _active_semilocal_node_range.reset();
   _local_node_range.reset();
@@ -959,7 +961,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
   _semilocal_node_list.clear();
 
   // First add the nodes connected to local elems
-  ConstElemRange * active_local_elems = getActiveLocalElementRange();
+  const ConstElemRange * active_local_elems = getActiveLocalElementRange();
   for (const auto & elem : *active_local_elems)
   {
     for (unsigned int n = 0; n < elem->n_nodes(); ++n)
@@ -1236,18 +1238,10 @@ MooseMesh::nodeToElemMap()
   return internalNodeToElemMap();
 }
 
-ConstElemRange *
+const ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
-  if (!_active_local_elem_range)
-  {
-    TIME_SECTION("getActiveLocalElementRange", 5);
-
-    _active_local_elem_range = std::make_unique<ConstElemRange>(
-        getMesh().active_local_elements_begin(), getMesh().active_local_elements_end());
-  }
-
-  return _active_local_elem_range.get();
+  return &getMesh().active_local_element_stored_range();
 }
 
 NodeRange *
@@ -1743,15 +1737,14 @@ MooseMesh::getSubdomainIDs(const std::set<SubdomainName> & subdomain_name) const
 void
 MooseMesh::setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name)
 {
-  mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
-  getMesh().subdomain_name(subdomain_id) = name;
+  setSubdomainName(getMesh(), subdomain_id, name);
 }
 
 void
 MooseMesh::setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name)
 {
   mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
-  mesh.subdomain_name(subdomain_id) = name;
+  mesh.set_subdomain_name(subdomain_id, name);
 }
 
 const std::string &
@@ -2979,6 +2972,14 @@ MooseMesh::init()
     if (getParam<bool>("build_all_side_lowerd_mesh"))
       buildLowerDMesh();
   }
+}
+
+std::vector<std::filesystem::path>
+MooseMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
+{
+  CheckpointIO io(getMesh(), false);
+  io.write(file_base);
+  return {};
 }
 
 unsigned int

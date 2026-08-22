@@ -37,7 +37,6 @@
 []
 
 [Problem]
-  kernel_coverage_check = false
   error_on_jacobian_nonzero_reallocation = true
 []
 

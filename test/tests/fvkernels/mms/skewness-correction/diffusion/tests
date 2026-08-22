@@ -12,5 +12,6 @@
     input = 'test.py'
     test_case = TestSkewnessCorrectedStencil
     requirement = 'The system shall display second order convergence, when skewness-corrected averaging to compute face midpoint values during gradient reconstruction.'
+    min_slots = '2'
   []
 []

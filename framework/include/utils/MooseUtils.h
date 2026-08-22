@@ -351,6 +351,11 @@ prettyCppType(const T * obj = nullptr)
 }
 
 /**
+ * Returns whether every coordinate of a point is finite.
+ */
+bool isFinitePoint(const Point & point);
+
+/**
  * This routine is a simple helper function for searching a map by values instead of keys
  */
 template <typename T1, typename T2>
@@ -378,7 +383,7 @@ absoluteFuzzyEqual(const Point & v1,
                    const Point & v2,
                    const Real tol = libMesh::TOLERANCE * libMesh::TOLERANCE)
 {
-  for (const auto i : make_range(LIBMESH_DIM))
+  for (const auto i : make_range(Moose::dim))
     if (std::abs(v1(i) - v2(i)) > tol)
       return false;
   return true;
@@ -1050,12 +1055,11 @@ template <typename C, typename It, typename M1, typename M2>
 auto
 findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(start_iterator,
-                      container.end(),
-                      [&](auto & item) {
-                        return wildcardEqual(first, item.first) &&
-                               wildcardEqual(second, item.second);
-                      });
+  return std::find_if(
+      start_iterator,
+      container.end(),
+      [&](auto & item)
+      { return wildcardEqual(first, item.first) && wildcardEqual(second, item.second); });
 }
 
 /**

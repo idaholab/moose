@@ -83,7 +83,6 @@ offset = 1.0
     newmark_gamma = 0.5
     mass_damping_coefficient = 0.0
     stiffness_damping_coefficient = 0.0
-    displacements = 'disp_x disp_y'
     accelerations = 'accel_x accel_y'
     generate_output = 'stress_xx stress_yy'
     block = '1 2'

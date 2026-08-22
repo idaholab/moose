@@ -52,17 +52,15 @@ public:
    */
   virtual Real computeBoundaryGradientRHSContribution() const = 0;
 
-  /**
-   * Check if the contributions to the right hand side and matrix already include the material
-   * property multiplier. For dirichlet boundary conditions this is false, but for flux boundary
-   * conditions this can be true (like Neumann BC for diffusion problems).
-   */
+  /// Whether the boundary gradient contributions already include the material property multiplier
   virtual bool includesMaterialPropertyMultiplier() const { return false; }
 
   /**
-   * Define if the value of the gradient of the field to compute fluxes at boundaries is
-   * prescribed by the BC or if it is extrapolated/derived from the BC. For Neumann BC this
-   # is false as the flux is prescribed, whereas for Dirichlet BC this is true.
+   * Whether the boundary gradient contributions provide the complete physical boundary flux,
+   * including applicable tangential terms.
    */
-  virtual bool useBoundaryGradientExtrapolation() const { return false; }
+  virtual bool providesCompleteBoundaryFlux() const { return false; }
+
+  /// Whether the kernel should add a geometric nonorthogonal boundary correction
+  virtual bool needsBoundaryNonorthogonalCorrection() const { return false; }
 };

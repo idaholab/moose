@@ -19,7 +19,7 @@
   [res_norm]
     type = Residual
     residual_type = COMPUTE
-    execute_on = 'MULTISYSTEM_FIXED_POINT_CONVERGENCE'
+    execute_on = 'MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
 []
 

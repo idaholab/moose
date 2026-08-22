@@ -56,48 +56,21 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  beta = 0.25 # Newmark time integration
-  gamma = 0.5 # Newmark time integration
-  eta = 1E3 #0.3E4 # higher values mean more damping via density
 []
 
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
-  [disp_z]
-  []
-[]
-
-[Kernels]
-  [DynamicSolidMechanics] # zeta*K*vel + K * disp
-    displacements = 'disp_x disp_y disp_z'
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    newmark_beta = 0.25 # Newmark time integration
+    newmark_gamma = 0.5 # Newmark time integration
+    mass_damping_coefficient = 1E3 #0.3E4 # higher values mean more damping via density
+    strain = SMALL
+    incremental = true
     stiffness_damping_coefficient = 1E-2 # higher values mean more damping via stiffness
     hht_alpha = 0 # better nonlinear convergence than for alpha>0
-  []
-  [inertia_x] # M*accel + eta*M*vel
-    type = InertialForce
-    use_displaced_mesh = false
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-  []
-  [inertia_y]
-    type = InertialForce
-    use_displaced_mesh = false
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-  []
-  [inertia_z]
-    type = InertialForce
-    use_displaced_mesh = false
-    variable = disp_z
-    velocity = vel_z
-    acceleration = accel_z
-  []
+  [../]
 []
+
 
 [BCs]
   [no_x2]
@@ -147,18 +120,6 @@
 []
 
 [AuxVariables]
-  [accel_x]
-  []
-  [vel_x]
-  []
-  [accel_y]
-  []
-  [vel_y]
-  []
-  [accel_z]
-  []
-  [vel_z]
-  []
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -262,45 +223,6 @@
 []
 
 [AuxKernels]
-  [accel_x] # Calculates and stores acceleration at the end of time step
-    type = NewmarkAccelAux
-    variable = accel_x
-    displacement = disp_x
-    velocity = vel_x
-    execute_on = timestep_end
-  []
-  [vel_x] # Calculates and stores velocity at the end of the time step
-    type = NewmarkVelAux
-    variable = vel_x
-    acceleration = accel_x
-    execute_on = timestep_end
-  []
-  [accel_y]
-    type = NewmarkAccelAux
-    variable = accel_y
-    displacement = disp_y
-    velocity = vel_y
-    execute_on = timestep_end
-  []
-  [vel_y]
-    type = NewmarkVelAux
-    variable = vel_y
-    acceleration = accel_y
-    execute_on = timestep_end
-  []
-  [accel_z]
-    type = NewmarkAccelAux
-    variable = accel_z
-    displacement = disp_z
-    velocity = vel_z
-    execute_on = timestep_end
-  []
-  [vel_z]
-    type = NewmarkVelAux
-    variable = vel_z
-    acceleration = accel_z
-    execute_on = timestep_end
-  []
   [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -497,9 +419,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '6.4E9 6.4E9' # young 16MPa, Poisson 0.25
-  []
-  [strain]
-    type = ComputeIncrementalStrain
   []
   [admissible]
     type = ComputeMultipleInelasticStress

@@ -66,6 +66,26 @@ public:
 };
 
 /**
+ * Activates a problem's PETSc options database for the lifetime of this scope.
+ */
+class PetscOptionsScope
+{
+public:
+  explicit PetscOptionsScope(FEProblemBase & problem);
+  ~PetscOptionsScope();
+
+  PetscOptionsScope(const PetscOptionsScope &) = delete;
+  PetscOptionsScope & operator=(const PetscOptionsScope &) = delete;
+
+private:
+  /// Problem whose PETSc options database is activated
+  FEProblemBase & _problem;
+
+  /// Whether a database was pushed and therefore needs to be popped
+  bool _pushed;
+};
+
+/**
  * A function for setting the PETSc options in PETSc from the options supplied to MOOSE. This
  * interface function should be used when setting options on a per-system basis
  */

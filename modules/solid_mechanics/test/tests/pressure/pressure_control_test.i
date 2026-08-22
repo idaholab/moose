@@ -1,6 +1,9 @@
 [Mesh]
   type = FileMesh
   file = pressure_test.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -13,24 +16,11 @@
   []
 []
 
-[Variables]
-  [disp_x]
-    order = FIRST
-    family = LAGRANGE
-  []
-  [disp_y]
-    order = FIRST
-    family = LAGRANGE
-  []
-  [disp_z]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Physics/SolidMechanics/QuasiStatic]
+  [all]
+    add_variables = true
+    incremental = false
+    strain = small
   []
 []
 
@@ -83,10 +73,6 @@
     # To facilitate examining results:
     # deformation only shows in one direction
     poissons_ratio = 0
-  []
-  [strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
   []
   [stress]
     type = ComputeLinearElasticStress

@@ -22,4 +22,26 @@
     requirement = 'The system shall display second-order convergence for anisotropic diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [anisotropic-neumann-rotated]
+    type = CSVDiff
+    input = anisotropic-diffusion-2d-neumann.i
+    csvdiff = anisotropic-diffusion-2d-neumann_out.csv
+    requirement = 'The system shall apply prescribed complete anisotropic diffusive fluxes and tensor-consistently reconstruct the boundary solution on rotated boundaries.'
+    design = 'LinearFVAnisotropicDiffusion.md LinearFVAnisotropicDiffusionFunctorNeumannBC.md'
+    issues = '#32719'
+    # The exact linear solution has an L2 error near 5e-11 with the configured solver tolerances.
+    abs_zero = 1e-9
+    max_threads = 1
+  []
+  [anisotropic-neumann-one-term-zero-coefficient]
+    type = CSVDiff
+    input = anisotropic-diffusion-1d-zero-boundary-coefficient.i
+    csvdiff = anisotropic-diffusion-1d-zero-boundary-coefficient_out.csv
+    requirement = 'The system shall apply a prescribed complete anisotropic diffusive flux with a zero boundary-normal diffusion coefficient using a one-term boundary reconstruction.'
+    design = 'LinearFVAnisotropicDiffusion.md LinearFVAnisotropicDiffusionFunctorNeumannBC.md'
+    issues = '#32719'
+    # The constant solution is exact to roundoff with the configured direct solver.
+    abs_zero = 1e-12
+    max_threads = 1
+  []
 []

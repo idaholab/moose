@@ -6,9 +6,9 @@
     type = 'Exodiff'
     input = 'kokkos_coupled_time_derivative_test.i'
     exodiff = 'kokkos_coupled_time_derivative_test_out.e'
-    requirement = 'A coupled time derivative Kokkos kernel shall be provided'
+    requirement = 'A coupled time derivative Kokkos kernel shall be provided.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [jac_test]
     type = 'PetscJacobianTester'
@@ -17,8 +17,8 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The Jacobian from KokkosCoupledTimeDerivative shall be perfect'
+    requirement = 'The Jacobian from coupled time derivative Kokkos kernel shall be perfect.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

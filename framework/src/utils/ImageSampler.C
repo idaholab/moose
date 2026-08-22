@@ -311,13 +311,13 @@ ImageSampler::vtkThreshold()
                "be set");
 
   // Create the thresholding object
-  _image_threshold = vtkSmartPointer<vtkImageThreshold>::New();
+  _image_threshold = vtkSmartPointer<vtkImageBinaryThreshold>::New();
 
   // Set the data source
   _image_threshold->SetInputConnection(_algorithm);
 
   // Setup the thresholding options
-  _image_threshold->ThresholdByUpper(_is_pars.get<Real>("threshold"));
+  _image_threshold->SetLowerThreshold(_is_pars.get<Real>("threshold"));
   _image_threshold->ReplaceInOn();
   _image_threshold->SetInValue(_is_pars.get<Real>("upper_value"));
   _image_threshold->ReplaceOutOn();

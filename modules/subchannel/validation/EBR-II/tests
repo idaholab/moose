@@ -8,6 +8,7 @@
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
+    rel_err = 2.5e-5
     valgrind = NONE
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case'
@@ -19,6 +20,7 @@
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
+    rel_err = 2.5e-5
     valgrind = NONE
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-45R case'

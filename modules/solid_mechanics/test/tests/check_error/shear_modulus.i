@@ -6,17 +6,11 @@
   file = cube.e
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[Kernels]
-  [SolidMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = false
+    strain = small
   [../]
 []
 
@@ -46,9 +40,6 @@
     type = ComputeIsotropicElasticityTensor
     shear_modulus = -10.0
     poissons_ratio = 0.0
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress

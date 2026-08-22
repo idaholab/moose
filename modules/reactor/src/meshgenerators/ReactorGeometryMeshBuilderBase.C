@@ -113,7 +113,7 @@ ReactorGeometryMeshBuilderBase::updateElementBlockNameId(
     // Block name does not exist in mesh yet, assign new block id and name
     elem_block_id = next_free_id++;
     elem->subdomain_id() = elem_block_id;
-    input_mesh.subdomain_name(elem_block_id) = elem_block_name;
+    input_mesh.set_subdomain_name(elem_block_id, elem_block_name);
     name_id_map[elem_block_name] = elem_block_id;
   }
   else

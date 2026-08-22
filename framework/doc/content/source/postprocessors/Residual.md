@@ -26,7 +26,7 @@ convergence check. See [SetupInterface.md] for details on different execution po
 | MultiApp fixed point, executing MultiApps only on `TIMESTEP_BEGIN` | `COMPUTE` | `TIMESTEP_BEGIN` |
 | MultiApp fixed point, executing MultiApps only on `TIMESTEP_END` | `COMPUTE` | `MULTIAPP_FIXED_POINT_CONVERGENCE` |
 | MultiApp fixed point, executing MultiApps only on both `TIMESTEP_BEGIN` and `TIMESTEP_END` | `COMPUTE` | Use two `Residual` objects, one with `execute_on = MULTIAPP_FIXED_POINT_CONVERGENCE` for the `TIMESTEP_END` MultiApps and one with `execute_on = TIMESTEP_BEGIN` for the `TIMESTEP_BEGIN` MultiApps. Then combine both with the `&` operator in [ParsedConvergence.md] |
-| Multi-system fixed point | `COMPUTE` | `MULTISYSTEM_FIXED_POINT_CONVERGENCE` |
+| Multi-system fixed point | `COMPUTE` | `MULTISYSTEM_FIXED_POINT_ITERATION_END` |
 
 More information about residuals and their use in Newton's method may be found
 in [NonlinearSystem.md].

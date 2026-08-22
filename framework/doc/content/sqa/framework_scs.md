@@ -15,7 +15,8 @@ git clang-format [<branch>]
 ```
 
 The automated testing that occurs on all Pull Requests will produce a "diff" of changes needed to
-conform with the standard.
+conform with the standard. Alternatively, installing the [pre-commit](https://pre-commit.com) hooks
+(see [framework/contributing.md]) applies this formatting to staged files automatically at commit time.
 
 General style guidelines include:
 
@@ -38,6 +39,9 @@ from the root of the [!ac](MOOSE) repository:
 ```
 black .
 ```
+
+Alternatively, installing the [pre-commit](https://pre-commit.com) hooks (see
+[framework/contributing.md]) formats staged Python files automatically at commit time.
 
 ## File Layout
 

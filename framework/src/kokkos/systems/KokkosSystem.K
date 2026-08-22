@@ -385,10 +385,4 @@ System::setActiveMatrixTags(const std::set<TagID> & tags)
   _matrix_tag_active.copyToDevice();
 }
 
-const libMesh::DofMap &
-System::getDofMap() const
-{
-  return _system.dofMap();
-}
-
 } // namespace Moose::Kokkos

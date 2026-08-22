@@ -253,7 +253,7 @@ protected:
   /**
    * Entrypoint for controls derived from this one to add additional actions
    */
-  virtual void addServerActions() {};
+  virtual void addServerActions() {}
 
   /**
    * Helper for converting a value to JSON for the given key

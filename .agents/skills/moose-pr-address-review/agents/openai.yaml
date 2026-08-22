@@ -1,0 +1,4 @@
+interface:
+  display_name: "Address MOOSE PR Review"
+  short_description: "Apply MOOSE review feedback safely"
+  default_prompt: "Use $moose-pr-address-review to address the outstanding feedback on this MOOSE pull request."

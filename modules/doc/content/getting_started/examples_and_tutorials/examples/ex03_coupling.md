@@ -12,7 +12,7 @@ such that
 \end{aligned}
 \end{equation}
 
-where $u=v=0$ on the top boundary and $u=2$ and $v=1$ on the bottom boundary. The remaining
+where $u=v=0$ on the top boundary and $u=1$ and $v=2$ on the bottom boundary. The remaining
 boundaries are natural boundaries:
 
 \begin{equation}
@@ -56,7 +56,7 @@ First, the mesh is defined by loading a file "mug.e".
 
 !listing examples/ex03_coupling/ex03.i block=Mesh
 
-Then, the two variables are defined: "diffused" and "convected", which refer to $u$ and $v$
+Then, the two variables are defined: "convected" and "diffused", which refer to $u$ and $v$
 from the problem statement, respectively. Both variables in this case are assigned to utilize
 linear Lagrange shape functions, but they could each use different shape functions and/or orders.
 
@@ -104,7 +104,7 @@ using Peacock or an external application that supports the Exodus format (e.g., 
 
 # 1D exact solution
 
- A simplified 1D analog of this problem is given as follows, where $u(0)=0$ and $u(1)=1$:
+A simplified 1D analog of this problem is given as follows, where $u(0)=0$ and $u(1)=1$:
 
 \begin{equation}
 -\epsilon \frac{d^2 u}{d x^2} + \frac{d u}{d x} = 0

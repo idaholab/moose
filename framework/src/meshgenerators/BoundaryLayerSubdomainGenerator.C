@@ -93,7 +93,7 @@ BoundaryLayerSubdomainGenerator::generate()
   }
 
   // Assign block name
-  mesh->subdomain_name(_new_block_id) = _new_block_name;
+  mesh->set_subdomain_name(_new_block_id, _new_block_name, true);
 
   mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);

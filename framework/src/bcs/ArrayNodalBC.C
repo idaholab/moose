@@ -97,7 +97,6 @@ RealEigenVector
 ArrayNodalBC::computeQpJacobian()
 {
   return RealEigenVector::Ones(_var.count());
-  ;
 }
 
 RealEigenMatrix

@@ -13,7 +13,9 @@
 InputParameters
 MooseUnitApp::validParams()
 {
-  return MooseApp::validParams();
+  InputParameters params = MooseApp::validParams();
+  params.addClassDescription("Main MooseUnitApp description for testing.");
+  return params;
 }
 
 MooseUnitApp::MooseUnitApp(const InputParameters & parameters) : MooseApp(parameters)
@@ -39,7 +41,9 @@ MooseUnitApp::~MooseUnitApp() {}
 InputParameters
 OtherMooseUnitApp::validParams()
 {
-  return MooseApp::validParams();
+  InputParameters params = MooseApp::validParams();
+  params.addClassDescription("OtherMooseUnitApp description for testing.");
+  return params;
 }
 
 OtherMooseUnitApp::OtherMooseUnitApp(const InputParameters & parameters) : MooseApp(parameters)

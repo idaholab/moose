@@ -4,8 +4,7 @@
 
 The EquationSystem is responsible for defining and assembling the weak form of the PDE into an
 [`mfem::Operator`](https://docs.mfem.org/html/classmfem_1_1Operator.html) used to solve an iteration
-of the FE problem. This operator is passed to an
-[`mfem::NewtonSolver`](https://docs.mfem.org/html/classmfem_1_1NewtonSolver.html) in a
+of the FE problem. This operator is passed to a linear or nonlinear solver as appropriate in a
 [ProblemOperator.md], which handles the update of the
 state of all variables (including any required nonlinear iterations).
 

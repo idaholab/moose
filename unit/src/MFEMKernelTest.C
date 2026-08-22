@@ -365,7 +365,7 @@ TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSyst
   TestEquationSystem eqn_system;
   eqn_system.AddKernel(diag_test);
   eqn_system.AddKernel(nonlinear);
-  eqn_system.SetSolverRequiresGradient(true);
+  eqn_system.SetGradientRequired(true);
 
   try
   {
@@ -430,7 +430,7 @@ TEST_F(MFEMKernelTest, RejectsGetGradientForModernAssemblyWhenGradientIsRequired
   TestEquationSystem eqn_system;
   eqn_system.AddKernel(linear);
   eqn_system.AddKernel(nonlinear);
-  eqn_system.SetSolverRequiresGradient(true);
+  eqn_system.SetGradientRequired(true);
   eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
                           _mfem_problem->getProblemData().cmplx_gridfunctions,
                           mfem::AssemblyLevel::LEGACY);

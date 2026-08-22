@@ -19,7 +19,7 @@ public:
   static InputParameters validParams();
 
   RandomHitMarker(const InputParameters & parameters);
-  virtual ~RandomHitMarker(){};
+  virtual ~RandomHitMarker() {}
 
 protected:
   virtual MarkerValue computeElementMarker();
