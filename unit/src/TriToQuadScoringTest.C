@@ -9,7 +9,7 @@
 
 #include "gtest_include.h"
 #include "PolygonAreaTestUtils.h"
-#include "TriToQuadGenerator.h"
+#include "TriToQuadConverter.h"
 
 #include "libmesh/int_range.h"
 #include "libmesh/point.h"
@@ -19,7 +19,7 @@
 #include <set>
 #include <vector>
 
-using RecombineCandidate = TriToQuadGenerator::RecombineCandidate;
+using RecombineCandidate = TriToQuadConverter::RecombineCandidate;
 
 namespace
 {
@@ -79,12 +79,12 @@ TEST(TriToQuadScoringTest, rectangleScoresOne)
   const std::array<Point, 4> unit_square = {
       Point(0.0, 0.0), Point(1.0, 0.0), Point(1.0, 1.0), Point(0.0, 1.0)};
   ASSERT_GT(twiceSignedArea(unit_square), 0.0);
-  EXPECT_NEAR(1.0, TriToQuadGenerator::quadQuality(unit_square), tol);
+  EXPECT_NEAR(1.0, TriToQuadConverter::quadQuality(unit_square), tol);
 
   const std::array<Point, 4> stretched = {
       Point(0.0, 0.0), Point(3.0, 0.0), Point(3.0, 1.0), Point(0.0, 1.0)};
   ASSERT_GT(twiceSignedArea(stretched), 0.0);
-  EXPECT_NEAR(1.0, TriToQuadGenerator::quadQuality(stretched), tol);
+  EXPECT_NEAR(1.0, TriToQuadConverter::quadQuality(stretched), tol);
 }
 
 /**
@@ -102,7 +102,7 @@ TEST(TriToQuadScoringTest, nonConvexScoresZero)
       Point(0.0, 0.0), Point(2.0, 1.0), Point(4.0, 0.0), Point(2.0, 3.0)};
   ASSERT_GT(twiceSignedArea(dart), 0.0);
 
-  EXPECT_DOUBLE_EQ(0.0, TriToQuadGenerator::quadQuality(dart));
+  EXPECT_DOUBLE_EQ(0.0, TriToQuadConverter::quadQuality(dart));
 }
 
 /**
@@ -117,7 +117,7 @@ TEST(TriToQuadScoringTest, rhombusScoresTwoThirds)
       Point(0.0, 0.0), Point(1.0, 0.0), Point(1.5, half_root_three), Point(0.5, half_root_three)};
   ASSERT_GT(twiceSignedArea(rhombus), 0.0);
 
-  EXPECT_NEAR(2.0 / 3.0, TriToQuadGenerator::quadQuality(rhombus), tol);
+  EXPECT_NEAR(2.0 / 3.0, TriToQuadConverter::quadQuality(rhombus), tol);
 }
 
 /**
@@ -134,7 +134,7 @@ TEST(TriToQuadScoringTest, matchingRejectsBelowEtaMin)
                                                 makeCandidate(0.5, 8, 9),
                                                 makeCandidate(0.6, 4, 5)};
 
-  const auto selected = TriToQuadGenerator::greedyMatching(candidates, eta_min);
+  const auto selected = TriToQuadConverter::greedyMatching(candidates, eta_min);
 
   ASSERT_EQ(3u, selected.size());
   for (const auto & candidate : selected)
@@ -158,7 +158,7 @@ TEST(TriToQuadScoringTest, matchingConsumesEachTriangleOnce)
       makeCandidate(0.85, 1, 2), makeCandidate(0.9, 0, 1), makeCandidate(0.8, 2, 3)};
 
   // An eta_min of 0 leaves the consumption rule as the only reason a pair can be left out
-  const auto selected = TriToQuadGenerator::greedyMatching(candidates, 0.0);
+  const auto selected = TriToQuadConverter::greedyMatching(candidates, 0.0);
 
   ASSERT_EQ(2u, selected.size());
   EXPECT_TRUE(elementsAreDisjoint(selected));
@@ -187,7 +187,7 @@ TEST(TriToQuadScoringTest, matchingBreaksTiesByElementId)
                                                 makeCandidate(eta, 2, 3),
                                                 makeCandidate(eta, 0, 9)};
 
-  const auto selected = TriToQuadGenerator::greedyMatching(candidates, eta_min);
+  const auto selected = TriToQuadConverter::greedyMatching(candidates, eta_min);
 
   // greedyMatching() sorts its argument in place, by decreasing score with ties broken by
   // increasing element id
@@ -216,7 +216,7 @@ TEST(TriToQuadScoringTest, matchingBreaksTiesByElementId)
                                               makeCandidate(eta, 4, 5),
                                               makeCandidate(eta, 2, 7)};
 
-  const auto shuffled_selected = TriToQuadGenerator::greedyMatching(shuffled, eta_min);
+  const auto shuffled_selected = TriToQuadConverter::greedyMatching(shuffled, eta_min);
 
   ASSERT_EQ(selected.size(), shuffled_selected.size());
   for (const auto k : index_range(selected))

@@ -28,7 +28,7 @@ edge and inserting it with the Bowyer-Watson algorithm. Placing points at the si
 meant to have, instead of subdividing until that size is reached, gives a triangulation whose
 element shapes are chosen rather than inherited.
 
-The purpose of that control here is to feed [TriToQuadGenerator.md]. Recombination merges pairs
+The purpose of that control here is to feed [TriToQuadConverter.md]. Recombination merges pairs
 of adjacent triangles and scores the merge on how close the resulting internal angles are to
 $\pi/2$ [!citep](remacle2012blossomquad), so a triangulation biased toward right angles yields
 far more merges than an equilateral one.
@@ -49,7 +49,7 @@ choice when the triangles are the final mesh.
 Because the unit ball of that norm is a square rather than a circle, the placement favors
 triangles that are right isosceles in the frame, and two such triangles sharing their hypotenuse
 recombine into a near-square quadrilateral. This is the metric to use when
-[TriToQuadGenerator.md] follows.
+[TriToQuadConverter.md] follows.
 
 ## Local Frame Orientation
 
@@ -108,7 +108,7 @@ could not be merged into their own subdomain so the yield can be measured:
 
 !listing test/tests/meshgenerators/mbb_pipeline/mbb_pipeline.i block=Mesh
 
-!media media/mesh/mbb_all_quad_mesh.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:mbb_all_quad caption=The MBB-beam domain meshed by this pipeline with [!param](/Mesh/TriToQuadGenerator/all_quad), recombined into quadrilaterals and smoothed.
+!media media/mesh/mbb_all_quad_mesh.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:mbb_all_quad caption=The MBB-beam domain meshed by this pipeline with [!param](/Mesh/TriToQuadConverter/all_quad), recombined into quadrilaterals and smoothed.
 
 !bibtex bibliography
 

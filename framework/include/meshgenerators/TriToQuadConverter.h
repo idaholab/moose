@@ -16,16 +16,16 @@
 #include <vector>
 
 /**
- * This TriToQuadGenerator object converts a mesh made of TRI3 elements into a mesh made of QUAD4
+ * This TriToQuadConverter object converts a mesh made of TRI3 elements into a mesh made of QUAD4
  * elements, either by splitting every triangle into three quadrilaterals or by merging pairs of
  * adjacent triangles into quadrilaterals.
  */
-class TriToQuadGenerator : public MeshGenerator
+class TriToQuadConverter : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TriToQuadGenerator(const InputParameters & parameters);
+  TriToQuadConverter(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

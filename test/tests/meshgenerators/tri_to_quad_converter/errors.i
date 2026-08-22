@@ -7,7 +7,7 @@
     elem_type = TRI3
   []
   [to_quad]
-    type = TriToQuadGenerator
+    type = TriToQuadConverter
     input = gmg
   []
 []

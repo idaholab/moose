@@ -52,7 +52,7 @@
     output_subdomain_name = 'mbb'
   []
   [to_quad]
-    type = TriToQuadGenerator
+    type = TriToQuadConverter
     input = triang
     algorithm = RECOMBINE
     eta_min = 0.3

@@ -1,6 +1,6 @@
-# TriToQuadGenerator
+# TriToQuadConverter
 
-!syntax description /Mesh/TriToQuadGenerator
+!syntax description /Mesh/TriToQuadConverter
 
 ## Overview
 
@@ -9,7 +9,7 @@ replicated. Meshes of higher-order triangles, and meshes that mix triangles with
 types, are rejected.
 
 Two conversion algorithms are available through
-[!param](/Mesh/TriToQuadGenerator/algorithm), and they trade a guaranteed pure-quadrilateral
+[!param](/Mesh/TriToQuadConverter/algorithm), and they trade a guaranteed pure-quadrilateral
 result against element quality.
 
 !media media/mesh/tri_to_quad_algorithms.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:tri_to_quad_algorithms caption=The two algorithms applied to the same frontal triangulation of a disk. `SUBDIVISION` splits every triangle into three quadrilaterals. `RECOMBINE` merges pairs of adjacent triangles and leaves the triangles that found no partner, shown in orange.
@@ -36,7 +36,7 @@ internal angles $\alpha_k$ of the quadrilateral the merge would produce:
 \end{equation}
 
 A rectangle scores $\eta = 1$, and a pair whose merged shape is not convex scores $\eta = 0$.
-Only pairs reaching [!param](/Mesh/TriToQuadGenerator/eta_min) are merged. Raising the threshold
+Only pairs reaching [!param](/Mesh/TriToQuadConverter/eta_min) are merged. Raising the threshold
 buys quality at the cost of yield; lowering it leaves fewer triangles behind but admits
 flatter quadrilaterals.
 
@@ -64,11 +64,12 @@ reproducible from one run to the next; it does not attempt to reconcile the two 
 The triangles that recombination could not merge can be handled in either of two ways, which are
 mutually exclusive.
 
-[!param](/Mesh/TriToQuadGenerator/tri_subdomain_name) moves them into a subdomain of their own,
-leaving a mixed TRI3/QUAD4 mesh. Isolating them makes the recombination yield measurable, and
-lets downstream physics be block-restricted away from them.
+[!param](/Mesh/TriToQuadConverter/tri_subdomain_name) moves them into a subdomain of their own,
+leaving a mixed TRI3/QUAD4 mesh. Isolating them makes the recombination yield measurable, allows
+[Exodus.md] output, which requires a single element type per subdomain, and lets downstream
+physics be block-restricted away from them.
 
-[!param](/Mesh/TriToQuadGenerator/all_quad) instead eliminates them, so that the output consists
+[!param](/Mesh/TriToQuadConverter/all_quad) instead eliminates them, so that the output consists
 exclusively of QUAD4 elements. After the merges are made, +every+ element of the mesh is
 subdivided once: each merged quadrilateral into four, each leftover triangle into three. A mesh
 whose recombination produced $n$ quadrilaterals and left $m$ triangles therefore ends with
@@ -78,13 +79,17 @@ Subdividing only the leftover triangles would be cheaper, but it would leave eac
 unsplit neighbors with a hanging node in the middle of a side. Splitting everything is what keeps
 the mesh conformal, and it is why the two algorithms cannot be mixed element by element.
 
+On a curved boundary, the nodes this subdivision creates are the midpoints of the existing
+chords, so they sit strictly inside the curve. [MoveNodesToCurveGenerator.md] moves them back
+onto the curve.
+
 ## Preserved Mesh Data
 
 The conversion carries the following through, under both algorithms:
 
 - subdomain ids and names;
 - sideset ids and names. Where a boundary edge is split, under `SUBDIVISION` or under
-  [!param](/Mesh/TriToQuadGenerator/all_quad), both halves inherit the ids of the original edge;
+  [!param](/Mesh/TriToQuadConverter/all_quad), both halves inherit the ids of the original edge;
 - nodesets, rebuilt on the converted mesh;
 - extra element integers.
 
@@ -93,19 +98,19 @@ The conversion carries the following through, under both algorithms:
 Splitting every triangle of a 32-triangle mesh into three quadrilaterals gives 96 QUAD4 elements
 and no leftover triangle:
 
-!listing test/tests/meshgenerators/tri_to_quad_generator/subdivision_all_quad.i block=Mesh
+!listing test/tests/meshgenerators/tri_to_quad_converter/subdivision_all_quad.i block=Mesh
 
 Recombining the same kind of mesh, with the leftover triangles collected into their own
 subdomain. The mesh reaching the conversion carries two subdomains, a sideset on their interface,
 a second sideset on an interior edge, a nodeset, and an extra element integer, none of which the
 conversion discards:
 
-!listing test/tests/meshgenerators/tri_to_quad_generator/recombine_ids.i block=Mesh
+!listing test/tests/meshgenerators/tri_to_quad_converter/recombine_ids.i block=Mesh
 
 Running the same mesh through the same merges with
-[!param](/Mesh/TriToQuadGenerator/all_quad) instead removes every remaining triangle:
+[!param](/Mesh/TriToQuadConverter/all_quad) instead removes every remaining triangle:
 
-!listing test/tests/meshgenerators/tri_to_quad_generator/all_quad_ids.i block=Mesh/to_quad
+!listing test/tests/meshgenerators/tri_to_quad_converter/all_quad_ids.i block=Mesh/to_quad
 
 All three examples disable renumbering. The triangulation, the subdivision and the merges all
 break ties by element id, so their results are reproducible only while the element numbering is
@@ -113,14 +118,14 @@ stable.
 
 Triangulations intended for recombination are best produced by
 [XYFrontalDelaunayGenerator.md], which biases the triangles toward right angles so that more
-pairs clear [!param](/Mesh/TriToQuadGenerator/eta_min). When the boundary of the input is a
-parametric curve, [ParsedCurveNodeSnapGenerator.md] can move the boundary nodes that
-[!param](/Mesh/TriToQuadGenerator/all_quad) created back onto that curve.
+pairs clear [!param](/Mesh/TriToQuadConverter/eta_min). When the boundary of the input is a
+parametric curve, [MoveNodesToCurveGenerator.md] can move the boundary nodes that
+[!param](/Mesh/TriToQuadConverter/all_quad) created back onto that curve.
 
 !bibtex bibliography
 
-!syntax parameters /Mesh/TriToQuadGenerator
+!syntax parameters /Mesh/TriToQuadConverter
 
-!syntax inputs /Mesh/TriToQuadGenerator
+!syntax inputs /Mesh/TriToQuadConverter
 
-!syntax children /Mesh/TriToQuadGenerator
+!syntax children /Mesh/TriToQuadConverter

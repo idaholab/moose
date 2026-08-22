@@ -41,7 +41,7 @@
  * comes either from a cross field solved over the domain or from the nearest boundary segment.
  *
  * The result is a TRI3 mesh. Chain SmoothMeshGenerator after this generator to smooth it, and
- * TriToQuadGenerator to recombine it into quadrilaterals.
+ * TriToQuadConverter to recombine it into quadrilaterals.
  */
 class XYFrontalDelaunayGenerator : public SurfaceDelaunayGeneratorBase
 {

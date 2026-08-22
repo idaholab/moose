@@ -56,10 +56,10 @@
     extra_elem_integer_name = tri_id
   []
   [to_quad]
-    type = TriToQuadGenerator
+    type = TriToQuadConverter
     input = eeid
     algorithm = RECOMBINE
-    all_quad = true
+    tri_subdomain_name = leftover_tris
   []
 
   # Both the triangulation and the recombination depend on element id numbering

@@ -9,7 +9,7 @@
 
 #include "gtest_include.h"
 #include "PolygonAreaTestUtils.h"
-#include "TriToQuadGenerator.h"
+#include "TriToQuadConverter.h"
 
 #include "libmesh/int_range.h"
 #include "libmesh/point.h"
@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-using QuadCorners = TriToQuadGenerator::QuadCorners;
+using QuadCorners = TriToQuadConverter::QuadCorners;
 
 namespace
 {
@@ -232,8 +232,8 @@ subdivideElement(const std::vector<unsigned int> & corner_ids,
   points.push_back(centroid / Real(n_corners));
   patch_indices.push_back(cast_int<unsigned int>(points.size() - 1));
 
-  const auto quad_template = n_corners == 3 ? TriToQuadGenerator::triSubdivisionTemplate()
-                                            : TriToQuadGenerator::quadSubdivisionTemplate();
+  const auto quad_template = n_corners == 3 ? TriToQuadConverter::triSubdivisionTemplate()
+                                            : TriToQuadConverter::quadSubdivisionTemplate();
 
   std::vector<QuadCorners> quads;
   for (const auto & quad : quad_template)
@@ -254,7 +254,7 @@ subdivideElement(const std::vector<unsigned int> & corner_ids,
  */
 TEST(TriToQuadCleanupTest, triTemplateIsOneQuadPerCorner)
 {
-  const auto quads = TriToQuadGenerator::triSubdivisionTemplate();
+  const auto quads = TriToQuadConverter::triSubdivisionTemplate();
 
   // The point list holds the three corners at 0 to 2, the midpoint of the side running from corner
   // s to corner s + 1 at 3 + s, and the centroid at 6
@@ -270,7 +270,7 @@ TEST(TriToQuadCleanupTest, triTemplateIsOneQuadPerCorner)
  */
 TEST(TriToQuadCleanupTest, quadTemplateIsOneQuadPerCorner)
 {
-  const auto quads = TriToQuadGenerator::quadSubdivisionTemplate();
+  const auto quads = TriToQuadConverter::quadSubdivisionTemplate();
 
   // The point list holds the four corners at 0 to 3, the midpoint of the side running from corner
   // s to corner s + 1 at 4 + s, and the centroid at 8
@@ -293,12 +293,12 @@ TEST(TriToQuadCleanupTest, templatesTileTheirElement)
 {
   const std::vector<Point> triangle = {Point(0.0, 0.0), Point(2.0, 0.0), Point(0.5, 1.5)};
   ASSERT_GT(twiceSignedArea(triangle), 0.0);
-  checkTiling(triangle, TriToQuadGenerator::triSubdivisionTemplate());
+  checkTiling(triangle, TriToQuadConverter::triSubdivisionTemplate());
 
   const std::vector<Point> quadrilateral = {
       Point(0.0, 0.0), Point(3.0, 0.0), Point(2.0, 2.0), Point(0.0, 1.0)};
   ASSERT_GT(twiceSignedArea(quadrilateral), 0.0);
-  checkTiling(quadrilateral, TriToQuadGenerator::quadSubdivisionTemplate());
+  checkTiling(quadrilateral, TriToQuadConverter::quadSubdivisionTemplate());
 }
 
 /**
@@ -308,13 +308,13 @@ TEST(TriToQuadCleanupTest, templatesTileTheirElement)
  */
 TEST(TriToQuadCleanupTest, templatesAreDeterministic)
 {
-  const auto tri_quads = TriToQuadGenerator::triSubdivisionTemplate();
-  const auto quad_quads = TriToQuadGenerator::quadSubdivisionTemplate();
+  const auto tri_quads = TriToQuadConverter::triSubdivisionTemplate();
+  const auto quad_quads = TriToQuadConverter::quadSubdivisionTemplate();
 
   for (const auto call : make_range(4u))
   {
-    EXPECT_EQ(tri_quads, TriToQuadGenerator::triSubdivisionTemplate()) << "call " << call;
-    EXPECT_EQ(quad_quads, TriToQuadGenerator::quadSubdivisionTemplate()) << "call " << call;
+    EXPECT_EQ(tri_quads, TriToQuadConverter::triSubdivisionTemplate()) << "call " << call;
+    EXPECT_EQ(quad_quads, TriToQuadConverter::quadSubdivisionTemplate()) << "call " << call;
   }
 }
 

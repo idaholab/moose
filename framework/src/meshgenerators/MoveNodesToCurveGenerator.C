@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ParsedCurveNodeSnapGenerator.h"
+#include "MoveNodesToCurveGenerator.h"
 #include "ParsedCurveGenerator.h"
 #include "MooseMeshUtils.h"
 
@@ -22,10 +22,10 @@
 #include <limits>
 #include <set>
 
-registerMooseObject("MooseApp", ParsedCurveNodeSnapGenerator);
+registerMooseObject("MooseApp", MoveNodesToCurveGenerator);
 
 InputParameters
-ParsedCurveNodeSnapGenerator::validParams()
+MoveNodesToCurveGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -34,7 +34,8 @@ ParsedCurveNodeSnapGenerator::validParams()
   params.addRequiredParam<BoundaryName>(
       "boundary", "The name of the boundary whose nodes are snapped onto the curve.");
   params.addRequiredParam<MeshGeneratorName>(
-      "curve_generator", "The ParsedCurveGenerator that defines the curve to snap the nodes onto.");
+      "parsed_curve_generator",
+      "The ParsedCurveGenerator that defines the curve to snap the nodes onto.");
   params.addRangeCheckedParam<unsigned int>(
       "samples_per_section",
       50,
@@ -49,24 +50,23 @@ ParsedCurveNodeSnapGenerator::validParams()
   return params;
 }
 
-ParsedCurveNodeSnapGenerator::ParsedCurveNodeSnapGenerator(const InputParameters & parameters)
+MoveNodesToCurveGenerator::MoveNodesToCurveGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     // The mesh of the curve is not used by this generator. It is requested so that the mesh
     // generator system builds the ParsedCurveGenerator before this generator, which reads the
-    // parameters of that generator below and evaluates its curve.
-    _curve_mesh(getMesh("curve_generator")),
+    // curve definition from that generator below and evaluates its curve.
+    _curve_mesh(getMesh("parsed_curve_generator")),
     _curve_generator(curveGenerator()),
-    _curve_params(_curve_generator.parameters()),
     _boundary_name(getParam<BoundaryName>("boundary")),
     _samples_per_section(getParam<unsigned int>("samples_per_section")),
-    _section_bounding_t_values(_curve_params.get<std::vector<Real>>("section_bounding_t_values")),
-    _is_closed_loop(_curve_params.get<bool>("is_closed_loop"))
+    _section_bounding_t_values(_curve_generator.sectionBoundingTValues()),
+    _is_closed_loop(_curve_generator.isClosedLoop())
 {
   if (_section_bounding_t_values.size() < 2)
-    paramError("curve_generator",
+    paramError("parsed_curve_generator",
                "The ParsedCurveGenerator '",
-               getParam<MeshGeneratorName>("curve_generator"),
+               getParam<MeshGeneratorName>("parsed_curve_generator"),
                "' must have at least two 'section_bounding_t_values' to define a curve.");
 
   // Sample each section of the curve uniformly, leaving out the end of the section as it is the
@@ -86,7 +86,7 @@ ParsedCurveNodeSnapGenerator::ParsedCurveNodeSnapGenerator(const InputParameters
 }
 
 std::unique_ptr<MeshBase>
-ParsedCurveNodeSnapGenerator::generate()
+MoveNodesToCurveGenerator::generate()
 {
   // The mesh generator system requires that every requested mesh is released here, and the mesh of
   // the curve is only requested for the dependency it creates
@@ -139,14 +139,14 @@ ParsedCurveNodeSnapGenerator::generate()
 }
 
 ParsedCurveGenerator &
-ParsedCurveNodeSnapGenerator::curveGenerator() const
+MoveNodesToCurveGenerator::curveGenerator() const
 {
   const MeshGenerator & curve_generator =
-      _app.getMeshGenerator(getParam<MeshGeneratorName>("curve_generator"));
+      _app.getMeshGenerator(getParam<MeshGeneratorName>("parsed_curve_generator"));
 
   const auto parsed_curve_generator = dynamic_cast<const ParsedCurveGenerator *>(&curve_generator);
   if (!parsed_curve_generator)
-    paramError("curve_generator",
+    paramError("parsed_curve_generator",
                "The mesh generator '",
                curve_generator.name(),
                "' is of type '",
@@ -160,19 +160,19 @@ ParsedCurveNodeSnapGenerator::curveGenerator() const
 }
 
 Point
-ParsedCurveNodeSnapGenerator::curvePoint(const Real t_param)
+MoveNodesToCurveGenerator::curvePoint(const Real t_param)
 {
   return _curve_generator.pointCalculator(_is_closed_loop ? wrappedParameter(t_param) : t_param);
 }
 
 Real
-ParsedCurveNodeSnapGenerator::squaredDistance(const Real t_param, const Point & point)
+MoveNodesToCurveGenerator::squaredDistance(const Real t_param, const Point & point)
 {
   return squaredDistance(curvePoint(t_param), point);
 }
 
 Real
-ParsedCurveNodeSnapGenerator::squaredDistance(const Point & curve_point, const Point & point) const
+MoveNodesToCurveGenerator::squaredDistance(const Point & curve_point, const Point & point) const
 {
   const Real dx = curve_point(0) - point(0);
   const Real dy = curve_point(1) - point(1);
@@ -180,7 +180,7 @@ ParsedCurveNodeSnapGenerator::squaredDistance(const Point & curve_point, const P
 }
 
 Real
-ParsedCurveNodeSnapGenerator::closestParameter(const Point & point)
+MoveNodesToCurveGenerator::closestParameter(const Point & point)
 {
   // Sampling the whole curve brackets the closest point globally, so that the refinement below
   // does not converge onto a closest point of another part of the curve
@@ -215,9 +215,9 @@ ParsedCurveNodeSnapGenerator::closestParameter(const Point & point)
 }
 
 Real
-ParsedCurveNodeSnapGenerator::goldenSectionSearch(const Real t_lower,
-                                                  const Real t_upper,
-                                                  const Point & point)
+MoveNodesToCurveGenerator::goldenSectionSearch(const Real t_lower,
+                                               const Real t_upper,
+                                               const Point & point)
 {
   // Inverse of the golden ratio, which is the factor the bracket shrinks by in each iteration
   const Real inv_golden_ratio = (std::sqrt(5.0) - 1.0) / 2.0;
@@ -256,7 +256,7 @@ ParsedCurveNodeSnapGenerator::goldenSectionSearch(const Real t_lower,
 }
 
 Real
-ParsedCurveNodeSnapGenerator::wrappedParameter(const Real t_param) const
+MoveNodesToCurveGenerator::wrappedParameter(const Real t_param) const
 {
   const Real t_min =
       std::min(_section_bounding_t_values.front(), _section_bounding_t_values.back());

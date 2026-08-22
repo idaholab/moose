@@ -1,5 +1,5 @@
 [Tests]
-  design = '/TriToQuadGenerator.md'
+  design = '/TriToQuadConverter.md'
   issues = '#27545'
   [subdivision_all_quad]
     type = Exodiff

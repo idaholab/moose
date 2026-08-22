@@ -55,6 +55,12 @@ public:
    */
   Point pointCalculator(const Real t_param);
 
+  /// @return the critical t values that bound the sections of the curve
+  const std::vector<Real> & sectionBoundingTValues() const { return _section_bounding_t_values; }
+
+  /// @return whether the curve is a closed loop
+  bool isClosedLoop() const { return _is_closed_loop; }
+
 protected:
   /// function expression for x(t)
   const std::string _function_x;

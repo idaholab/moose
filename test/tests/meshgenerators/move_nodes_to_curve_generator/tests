@@ -1,5 +1,5 @@
 [Tests]
-  design = '/ParsedCurveNodeSnapGenerator.md'
+  design = '/MoveNodesToCurveGenerator.md'
   issues = '#27545'
   [snap_circle]
     type = 'CSVDiff'
@@ -24,7 +24,7 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = '--mesh-only snap_err.e
-                  Mesh/snap/curve_generator=triang'
+                  Mesh/snap/parsed_curve_generator=triang'
       expect_err = "The mesh generator 'triang' is of type 'XYFrontalDelaunayGenerator', but a ParsedCurveGenerator is required to define the curve\."
       mesh_mode = REPLICATED
       detail = 'if the mesh generator named to define that curve is not a parsed curve generator, '

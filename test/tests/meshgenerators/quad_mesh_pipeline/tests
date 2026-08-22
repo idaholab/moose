@@ -1,0 +1,16 @@
+[Tests]
+  design = '/QuadMeshPipelineGenerator.md'
+  issues = '#27545'
+  [gear]
+    type = 'CSVDiff'
+    input = 'gear.i'
+    csvdiff = 'gear_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+    requirement = 'The system shall mesh a gear profile containing a rotated gear-profile bore '
+                  'with quadrilaterals through a single mesh generator that chains a frontal '
+                  'Delaunay triangulation, the triangle-to-quadrilateral conversion, the snapping '
+                  'of both boundaries onto their parametric curves, and a Laplace smoothing pass, '
+                  'and shall report the meshed area.'
+  []
+[]

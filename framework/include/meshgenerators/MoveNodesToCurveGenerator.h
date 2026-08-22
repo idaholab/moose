@@ -21,12 +21,12 @@ class ParsedCurveGenerator;
  * point of the curve recovers the geometry that those chords approximate. The curve is used in
  * the XY plane, so only the x and y coordinates of the nodes are snapped.
  */
-class ParsedCurveNodeSnapGenerator : public MeshGenerator
+class MoveNodesToCurveGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  ParsedCurveNodeSnapGenerator(const InputParameters & parameters);
+  MoveNodesToCurveGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -37,8 +37,6 @@ protected:
   std::unique_ptr<MeshBase> & _curve_mesh;
   /// The ParsedCurveGenerator that defines the curve to snap the nodes onto, and evaluates it
   ParsedCurveGenerator & _curve_generator;
-  /// Parameters of the ParsedCurveGenerator that define the curve to snap the nodes onto
-  const InputParameters & _curve_params;
   /// Name of the boundary whose nodes are snapped onto the curve
   const BoundaryName _boundary_name;
   /// Number of uniform samples of each curve section used to bracket the closest curve point

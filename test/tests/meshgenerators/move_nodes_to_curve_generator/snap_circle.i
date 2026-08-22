@@ -19,15 +19,15 @@
     output_subdomain_name = 'disk'
   []
   [to_quad]
-    type = TriToQuadGenerator
+    type = TriToQuadConverter
     input = triang
     all_quad = true
   []
   [snap]
-    type = ParsedCurveNodeSnapGenerator
+    type = MoveNodesToCurveGenerator
     input = to_quad
     boundary = 'circumference'
-    curve_generator = circle
+    parsed_curve_generator = circle
   []
   [smooth]
     type = SmoothMeshGenerator

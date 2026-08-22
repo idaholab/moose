@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TriToQuadGenerator.h"
+#include "TriToQuadConverter.h"
 
 #include "GeometryUtils.h"
 #include "MooseMeshElementConversionUtils.h"
@@ -31,7 +31,7 @@
 #include <set>
 #include <unordered_set>
 
-registerMooseObject("MooseApp", TriToQuadGenerator);
+registerMooseObject("MooseApp", TriToQuadConverter);
 
 // The mesh generator sources are compiled as one unity translation unit, which puts this file scope
 // and that of every sibling generator together, so no name here may collide with a sibling's
@@ -90,10 +90,10 @@ edgeMidpointNode(MeshBase & mesh,
  * @return the quadrilaterals, as indices into a point list holding the corners first, then the
  * midpoint of the side running from corner s to corner s + 1, then the centroid
  */
-std::vector<TriToQuadGenerator::QuadCorners>
+std::vector<TriToQuadConverter::QuadCorners>
 subdivisionTemplate(const unsigned int n_corners)
 {
-  std::vector<TriToQuadGenerator::QuadCorners> quads;
+  std::vector<TriToQuadConverter::QuadCorners> quads;
   for (const auto k : make_range(n_corners))
     quads.push_back({k, n_corners + k, 2 * n_corners, n_corners + (k + n_corners - 1) % n_corners});
 
@@ -147,7 +147,7 @@ removeScratchElements(MeshBase & mesh, const subdomain_id_type scratch_subdomain
 }
 
 InputParameters
-TriToQuadGenerator::validParams()
+TriToQuadConverter::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -189,7 +189,7 @@ TriToQuadGenerator::validParams()
   return params;
 }
 
-TriToQuadGenerator::TriToQuadGenerator(const InputParameters & parameters)
+TriToQuadConverter::TriToQuadConverter(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _algorithm(getParam<MooseEnum>("algorithm")),
@@ -209,7 +209,7 @@ TriToQuadGenerator::TriToQuadGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-TriToQuadGenerator::generate()
+TriToQuadConverter::generate()
 {
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!replicated_mesh_ptr)
@@ -252,7 +252,7 @@ TriToQuadGenerator::generate()
 }
 
 Real
-TriToQuadGenerator::quadQuality(const std::array<Point, 4> & quad_points)
+TriToQuadConverter::quadQuality(const std::array<Point, 4> & quad_points)
 {
   Real max_deviation = 0.0;
   for (const auto k : index_range(quad_points))
@@ -274,8 +274,8 @@ TriToQuadGenerator::quadQuality(const std::array<Point, 4> & quad_points)
   return std::max(0.0, 1.0 - 2.0 / libMesh::pi * max_deviation);
 }
 
-std::vector<TriToQuadGenerator::RecombineCandidate>
-TriToQuadGenerator::greedyMatching(std::vector<RecombineCandidate> & candidates, const Real eta_min)
+std::vector<TriToQuadConverter::RecombineCandidate>
+TriToQuadConverter::greedyMatching(std::vector<RecombineCandidate> & candidates, const Real eta_min)
 {
   // Ties are broken by element id so that the same pairs are merged from one run to the next
   std::sort(candidates.begin(),
@@ -309,20 +309,20 @@ TriToQuadGenerator::greedyMatching(std::vector<RecombineCandidate> & candidates,
   return selected;
 }
 
-std::vector<TriToQuadGenerator::QuadCorners>
-TriToQuadGenerator::triSubdivisionTemplate()
+std::vector<TriToQuadConverter::QuadCorners>
+TriToQuadConverter::triSubdivisionTemplate()
 {
   return subdivisionTemplate(n_tri_sides);
 }
 
-std::vector<TriToQuadGenerator::QuadCorners>
-TriToQuadGenerator::quadSubdivisionTemplate()
+std::vector<TriToQuadConverter::QuadCorners>
+TriToQuadConverter::quadSubdivisionTemplate()
 {
   return subdivisionTemplate(n_quad_sides);
 }
 
-TriToQuadGenerator::RecombineCandidate
-TriToQuadGenerator::buildCandidate(const Elem & elem,
+TriToQuadConverter::RecombineCandidate
+TriToQuadConverter::buildCandidate(const Elem & elem,
                                    const unsigned int side,
                                    const Elem & neighbor)
 {
@@ -353,7 +353,7 @@ TriToQuadGenerator::buildCandidate(const Elem & elem,
 }
 
 void
-TriToQuadGenerator::subdivide(ReplicatedMesh & mesh) const
+TriToQuadConverter::subdivide(ReplicatedMesh & mesh) const
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   const auto bdry_side_list = boundary_info.build_side_list();
@@ -458,7 +458,7 @@ TriToQuadGenerator::subdivide(ReplicatedMesh & mesh) const
 }
 
 void
-TriToQuadGenerator::recombine(ReplicatedMesh & mesh) const
+TriToQuadConverter::recombine(ReplicatedMesh & mesh) const
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   const auto bdry_side_list = boundary_info.build_side_list();
@@ -550,7 +550,7 @@ TriToQuadGenerator::recombine(ReplicatedMesh & mesh) const
 }
 
 void
-TriToQuadGenerator::moveSurvivingTriangles(ReplicatedMesh & mesh,
+TriToQuadConverter::moveSurvivingTriangles(ReplicatedMesh & mesh,
                                            const subdomain_id_type scratch_subdomain_id) const
 {
   // A name the input mesh already uses for a block would leave two subdomain ids sharing that

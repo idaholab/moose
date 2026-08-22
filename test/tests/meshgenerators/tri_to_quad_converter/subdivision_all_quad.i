@@ -10,7 +10,7 @@
     input = gmg
   []
   [to_quad]
-    type = TriToQuadGenerator
+    type = TriToQuadConverter
     input = tri
     algorithm = SUBDIVISION
   []

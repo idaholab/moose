@@ -1,5 +1,5 @@
 [Tests]
-  design = '/XYFrontalDelaunayGenerator.md /TriToQuadGenerator.md'
+  design = '/XYFrontalDelaunayGenerator.md /TriToQuadConverter.md'
   issues = '#27545'
   [mbb_quads_yield_baseline]
     type = 'CSVDiff'
