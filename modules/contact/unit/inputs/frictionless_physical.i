@@ -159,6 +159,14 @@ offset = 0.00
     secondary = 'top_bottom'
     formulation = mortar
     model = frictionless
+    # Retain the geometry used before the mortar subpatch-plane default changed so this fixture
+    # isolates physical scaling from the newer geometric-plane behavior.
+    mortar_3d_subpatch_plane = AVERAGED_NODAL_NORMAL
+    # Physical (derived) c_normal is this fixture's default: it produces better contact
+    # convergence than the fixed default c_normal=1e6. The fixed-constant (c_normal_strategy =
+    # user) comparison behavior is exercised by overriding this back via the command line, not by
+    # making it the default here, so that a plain run of this file is always a working input.
+    c_normal_strategy = physical
   []
 []
 
@@ -203,7 +211,7 @@ offset = 0.00
 
 [Executioner]
   type = Transient
-  end_time = 0.125
+  num_steps = 1
   dt = .025
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'

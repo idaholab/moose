@@ -53,15 +53,15 @@ runCumulativeNL(const std::string & input,
   return problem.getPostprocessorValueByName("cumulative");
 }
 
-// Verify that c_normal_strategy=physical reduces cumulative nonlinear iterations
-// compared to the default c_normal=1e6 for frictionless mortar contact.
+// Verify that c_normal_strategy=physical (this fixture's default) reduces cumulative nonlinear
+// iterations compared to the fixed c_normal=1e6 for frictionless mortar contact.
 TEST(PhysicalMortarConstants, FrictionlessBeatsDefault)
 {
   Real contact_dofs = 0;
-  const Real default_its = runCumulativeNL("frictionless_physical.i", {}, &contact_dofs);
+  const Real physical_its = runCumulativeNL("frictionless_physical.i", {}, &contact_dofs);
   EXPECT_GT(contact_dofs, 0) << "no contact DOFs active - test is not exercising contact";
-  const Real physical_its =
-      runCumulativeNL("frictionless_physical.i", {"Contact/mortar/c_normal_strategy=physical"});
+  const Real default_its =
+      runCumulativeNL("frictionless_physical.i", {"Contact/mortar/c_normal_strategy=user"});
   EXPECT_LT(physical_its, default_its)
       << "physical c_normal (" << physical_its
       << " cumulative NL iters) should beat default c_normal=1e6 (" << default_its << " iters)";

@@ -21,15 +21,11 @@
   [mortar]
     model := coulomb
     friction_coefficient = 0.4
-    # Retain the geometry used before the mortar subpatch-plane default changed so this test
-    # isolates physical scaling from the newer geometric-plane behavior.
-    mortar_3d_subpatch_plane = AVERAGED_NODAL_NORMAL
-    # Physical (derived) constants are this fixture's default: they are the configuration that
-    # actually converges (CONSTRAINT_SET_STRATEGY_PLAN.md Section 17). The fixed-constant
-    # (c_normal_strategy/c_tangential_strategy = user) comparison behavior is exercised by
-    # overriding these back via the command line, not by making it the default here, so that a
-    # plain run of this file is always a working input.
-    c_normal_strategy = physical
+    # Physical (derived) c_tangential is this fixture's default, on top of the inherited physical
+    # c_normal default: together they are the configuration that actually converges. The
+    # fixed-constant (c_tangential_strategy = user) comparison behavior is exercised by overriding
+    # this back via the command line, not by making it the default here, so that a plain run of
+    # this file is always a working input.
     c_tangential_strategy = physical
   []
 []
