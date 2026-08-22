@@ -492,12 +492,16 @@ addActionTypes(Syntax & syntax)
 
 #ifdef MOOSE_MFEM_ENABLED
   registerTask("add_mfem_problem_operator", true);
-  addTaskDependency("add_mfem_problem_operator", "init_mesh");
   addTaskDependency("add_variable", "add_mfem_problem_operator");
   addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
   addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
   addTaskDependency("add_bc", "add_mfem_problem_operator");
   addTaskDependency("add_kernel", "add_mfem_problem_operator");
+
+  // add problem composers (and operators)
+  registerMooseObjectTask("add_mfem_problem_composer", Moose::MFEM::MFEMProblemComposer, false);
+  addTaskDependency("add_mfem_problem_operator", "add_mfem_problem_composer");
+  addTaskDependency("setup_executioner", "add_mfem_problem_composer");
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
@@ -838,6 +842,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
+  registerSyntaxTask(
+      "AddMFEMProblemComposerAction", "ProblemComposers/*", "add_mfem_problem_composer");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");

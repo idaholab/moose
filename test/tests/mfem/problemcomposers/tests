@@ -1,0 +1,52 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  issues = '#33021'
+  [MFEMSteadyProblemComposer]
+    type = CSVDiff
+    input = prob_op_block_darcy.i
+    csvdiff = 'OutputData/Darcy.csv'
+    requirement = 'The system shall be able to declare a SteadyProblemComposer while using the MFEM block without changing the results of the MFEM Darcy problem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMTransientProblemComposerTSequence]
+    type = CSVDiff
+    input = 'prob_op_mfem_multiple_timesequences.i'
+    csvdiff = 'mfem_multiple_timesequences.csv'
+    requirement = 'The system shall be able to declare a TransientProblemComposer while using the MFEM block without changing the results of the MFEM HeatTransfer problem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+  []
+  [MFEMTransientProblemComposerConduction]
+    type = CSVDiff
+    input = prob_op_block_heattransfer.i
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
+    cli_args = 'BCs/active="bottom top_dirichlet" '
+               'Executioner/dt=0.25 Executioner/end_time=1.0 '
+               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
+    requirement = 'The system shall have the ability to solve a transient heat conduction using the problem composer block using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+  []
+  [MFEMSteadyCustomComposer]
+    type = XMLDiff
+    input = prob_op_custom_operator.i
+    xmldiff = 'OutputData/prob_op_custom_operator/Run0/Run0.pvd '
+              'OutputData/prob_op_custom_operator/Run0/Cycle000000/proc000000.vtu '
+              'OutputData/prob_op_custom_operator/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to use a custom operator based on ex0p'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    restep = false
+  []
+[]
