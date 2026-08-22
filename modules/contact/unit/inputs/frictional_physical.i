@@ -1,166 +1,25 @@
-starting_point = 0.04
-offset = 0.00
+!include frictionless_physical.i
 
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-  volumetric_locking_correction = true
   # scaling=1/E so physical c constants (scaled by scalingFactor ~ 1/E) are
   # far smaller than the defaults (c_normal=1e6, c_tangential=1), making the
   # convergence gap between physical and default clearly observable.
-  scaling = 1e-4
+  scaling := 1e-4
   degree_one_friction_residual = true
-[]
-
-[Mesh]
-  [top_block]
-    type = GeneratedMeshGenerator
-    dim = 3
-    nx = 3
-    ny = 3
-    nz = 3
-    xmin = -0.25
-    xmax = 0.25
-    ymin = -0.25
-    ymax = 0.25
-    zmin = -0.25
-    zmax = 0.25
-    elem_type = HEX8
-  []
-  [rotate_top_block]
-    type = TransformGenerator
-    input = top_block
-    transform = ROTATE
-    vector_value = '0 0 0'
-  []
-  [top_block_sidesets]
-    type = RenameBoundaryGenerator
-    input = rotate_top_block
-    old_boundary = '0 1 2 3 4 5'
-    new_boundary = 'top_bottom top_back top_right top_front top_left top_top'
-  []
-  [top_block_id]
-    type = SubdomainIDGenerator
-    input = top_block_sidesets
-    subdomain_id = 1
-  []
-  [bottom_block]
-    type = GeneratedMeshGenerator
-    dim = 3
-    nx = 10
-    ny = 10
-    nz = 2
-    xmin = -.5
-    xmax = .5
-    ymin = -.5
-    ymax = .5
-    zmin = -.3
-    zmax = -.25
-    elem_type = HEX8
-  []
-  [bottom_block_id]
-    type = SubdomainIDGenerator
-    input = bottom_block
-    subdomain_id = 2
-  []
-  [bottom_block_change_boundary_id]
-    type = RenameBoundaryGenerator
-    input = bottom_block_id
-    old_boundary = '0 1 2 3 4 5'
-    new_boundary = '100 101 102 103 104 105'
-  []
-  [combined]
-    type = MeshCollectionGenerator
-    inputs = 'top_block_id bottom_block_change_boundary_id'
-  []
-  [block_rename]
-    type = RenameBlockGenerator
-    input = combined
-    old_block = '1 2'
-    new_block = 'top_block bottom_block'
-  []
-  [bottom_right_sideset]
-    type = SideSetsAroundSubdomainGenerator
-    input = block_rename
-    new_boundary = bottom_right
-    block = bottom_block
-    normal = '1 0 0'
-  []
-  [bottom_left_sideset]
-    type = SideSetsAroundSubdomainGenerator
-    input = bottom_right_sideset
-    new_boundary = bottom_left
-    block = bottom_block
-    normal = '-1 0 0'
-  []
-  [bottom_top_sideset]
-    type = SideSetsAroundSubdomainGenerator
-    input = bottom_left_sideset
-    new_boundary = bottom_top
-    block = bottom_block
-    normal = '0 0 1'
-  []
-  [bottom_bottom_sideset]
-    type = SideSetsAroundSubdomainGenerator
-    input = bottom_top_sideset
-    new_boundary = bottom_bottom
-    block = bottom_block
-    normal = '0  0 -1'
-  []
-  [bottom_front_sideset]
-    type = SideSetsAroundSubdomainGenerator
-    input = bottom_bottom_sideset
-    new_boundary = bottom_front
-    block = bottom_block
-    normal = '0 1 0'
-  []
-  [bottom_back_sideset]
-    type = SideSetsAroundSubdomainGenerator
-    input = bottom_front_sideset
-    new_boundary = bottom_back
-    block = bottom_block
-    normal = '0 -1 0'
-  []
-  allow_renumbering = false
-[]
-
-[Physics/SolidMechanics/QuasiStatic]
-  [all]
-    add_variables = true
-    strain = FINITE
-    block = '1 2'
-    use_automatic_differentiation = false
-  []
 []
 
 [Materials]
   [tensor]
-    type = ComputeIsotropicElasticityTensor
-    block = '1'
-    youngs_modulus = 1.0e4
-    poissons_ratio = 0.0
-  []
-  [stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1'
+    youngs_modulus := 1.0e4
   []
   [tensor_1000]
-    type = ComputeIsotropicElasticityTensor
-    block = '2'
-    youngs_modulus = 1e5
-    poissons_ratio = 0.0
-  []
-  [stress_1000]
-    type = ComputeFiniteStrainElasticStress
-    block = '2'
+    youngs_modulus := 1e5
   []
 []
 
 [Contact]
   [mortar]
-    primary = 'bottom_top'
-    secondary = 'top_bottom'
-    formulation = mortar
-    model = coulomb
+    model := coulomb
     friction_coefficient = 0.4
     # Retain the geometry used before the mortar subpatch-plane default changed so this test
     # isolates physical scaling from the newer geometric-plane behavior.
@@ -176,67 +35,19 @@ offset = 0.00
 []
 
 [BCs]
-  [botx]
-    type = DirichletBC
-    variable = disp_x
-    boundary = 'bottom_left bottom_right bottom_front bottom_back'
-    value = 0.0
-  []
-  [boty]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 'bottom_left bottom_right bottom_front bottom_back'
-    value = 0.0
-  []
-  [botz]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 'bottom_left bottom_right bottom_front bottom_back'
-    value = 0.0
-  []
   # Small tangential sliding to activate c_tangential
   [topx]
-    type = FunctionDirichletBC
-    variable = disp_x
-    boundary = 'top_top'
-    function = '0.05 * t'
+    function := '0.05 * t'
   []
-  [topy]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 'top_top'
-    value = 0.0
-  []
-  [topz]
-    type = FunctionDirichletBC
-    variable = disp_z
-    boundary = 'top_top'
-    function = '-${starting_point} * t / 0.125 + ${offset}'
-  []
-[]
-
-[Executioner]
-  type = Transient
-  end_time = .125
-  dt = .025
-  solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       mumps                      NONZERO'
-  nl_rel_tol = 1e-9
-  nl_abs_tol = 1e-10
-  abort_on_solve_fail = true
-  # Plain PETSc backtracking line search is this fixture's default, matching the physical
-  # constants above - together they are a known-converging configuration
-  # (CONSTRAINT_SET_STRATEGY_PLAN.md Section 17). Ignored whenever the [LineSearch][ls] block
-  # below is activated (a MOOSE LineSearch object, not a PETSc-native one, supersedes this).
-  line_search = 'basic'
 []
 
 [LineSearch]
-  # MortarContactLineSearch is inactive by default so a plain run of this file uses the
-  # known-converging basic-line-search/physical-constants configuration above. Reactivate it
-  # (active = 'ls') to exercise MortarContactLineSearch, e.g. to compare against fixed
-  # (c_normal_strategy/c_tangential_strategy = user) constants.
+  # Plain PETSc backtracking line search (line_search='basic', inherited from the Executioner
+  # block above) is this fixture's default, matching the physical constants above - together
+  # they are a known-converging configuration (CONSTRAINT_SET_STRATEGY_PLAN.md Section 17).
+  # MortarContactLineSearch is inactive by default so a plain run of this file uses that
+  # configuration. Reactivate it (active = 'ls') to exercise MortarContactLineSearch, e.g. to
+  # compare against fixed (c_normal_strategy/c_tangential_strategy = user) constants.
   active = ''
   [ls]
     type = MortarContactLineSearch
@@ -278,31 +89,4 @@ offset = 0.00
     # window under investigation; widen it enough to observe that window without an early rollback.
     watchdog_max_iterations = 30
   []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
-[]
-
-[Postprocessors]
-  active = 'num_nl cumulative contact'
-  [num_nl]
-    type = NumNonlinearIterations
-  []
-  [cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  []
-  [contact]
-    type = ContactDOFSetSize
-    variable = mortar_normal_lm
-    subdomain = 'mortar_secondary_subdomain'
-    execute_on = 'nonlinear timestep_end'
-  []
-[]
-
-[Outputs]
 []
