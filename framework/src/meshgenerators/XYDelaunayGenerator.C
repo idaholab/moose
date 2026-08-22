@@ -27,60 +27,16 @@ InputParameters
 XYDelaunayGenerator::validParams()
 {
   InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
+  params += SurfaceDelaunayGeneratorBase::boundaryAndHolesParams();
 
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
 
-  params.addRequiredParam<MeshGeneratorName>(
-      "boundary",
-      "The input MeshGenerator defining the output outer boundary and required Steiner points.");
-  params.addParam<std::vector<BoundaryName>>(
-      "input_boundary_names", "2D-input-mesh boundaries defining the output mesh outer boundary");
-  params.addParam<std::vector<SubdomainName>>(
-      "input_subdomain_names", "1D-input-mesh subdomains defining the output mesh outer boundary");
-  params.addParam<unsigned int>("add_nodes_per_boundary_segment",
-                                0,
-                                "How many more nodes to add in each outer boundary segment.");
-  params.addParam<bool>(
-      "refine_boundary", true, "Whether to allow automatically refining the outer boundary.");
-
-  params.addParam<SubdomainName>("output_subdomain_name",
-                                 "Subdomain name to set on new triangles.");
   params.addParam<SubdomainID>("output_subdomain_id", "Subdomain id to set on new triangles.");
-
-  params.addParam<BoundaryName>(
-      "output_boundary",
-      "Boundary name to set on new outer boundary.  Default ID: 0 if no hole meshes are stitched; "
-      "or maximum boundary ID of all the stitched hole meshes + 1.");
-  params.addParam<std::vector<BoundaryName>>(
-      "hole_boundaries",
-      "Boundary names to set on holes.  Default IDs are numbered up from 1 if no hole meshes are "
-      "stitched; or from maximum boundary ID of all the stitched hole meshes + 2.");
-
-  params.addParam<bool>(
-      "verify_holes",
-      true,
-      "Verify holes do not intersect boundary or each other.  Asymptotically costly.");
 
   params.addParam<bool>("smooth_triangulation",
                         false,
                         "Whether to do Laplacian mesh smoothing on the generated triangles.");
-  params.addParam<std::vector<MeshGeneratorName>>(
-      "holes", std::vector<MeshGeneratorName>(), "The MeshGenerators that define mesh holes.");
-  params.addParam<std::vector<bool>>(
-      "stitch_holes", std::vector<bool>(), "Whether to stitch to the mesh defining each hole.");
-  params.addParam<std::vector<bool>>("refine_holes",
-                                     std::vector<bool>(),
-                                     "Whether to allow automatically refining each hole boundary.");
-  params.addRangeCheckedParam<Real>(
-      "desired_area",
-      0,
-      "desired_area>=0",
-      "Desired (maximum) triangle area, or 0 to skip uniform refinement");
-  params.addParam<std::string>(
-      "desired_area_func",
-      std::string(),
-      "Desired area as a function of x,y; omit to skip non-uniform refinement");
 
   params.addParam<MooseEnum>(
       "algorithm",
@@ -139,12 +95,9 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _refine_bdy(getParam<bool>("refine_boundary")),
     _output_subdomain_id(0),
     _smooth_tri(getParam<bool>("smooth_triangulation")),
-    _verify_holes(getParam<bool>("verify_holes")),
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
-    _desired_area(getParam<Real>("desired_area")),
-    _desired_area_func(getParam<std::string>("desired_area_func")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _tri_elem_type(parameters.get<MooseEnum>("tri_element_type")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching")),
@@ -163,36 +116,8 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
                                    ? getParam<std::vector<Real>>("holes_boundary_layer_bias")
                                    : std::vector<Real>())
 {
-  if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
-      (_desired_area > 0.0 && _use_auto_area_func) ||
-      (!_desired_area_func.empty() && _use_auto_area_func))
-    paramError("desired_area_func",
-               "Only one of the three methods ('desired_area', 'desired_area_func', and "
-               "'_use_auto_area_func') to set element area limit should be used.");
+  checkBoundaryAndHolesParams(_hole_ptrs);
 
-  if (!_use_auto_area_func)
-    if (isParamSetByUser("auto_area_func_default_size") ||
-        isParamSetByUser("auto_area_func_default_size_dist") ||
-        isParamSetByUser("auto_area_function_num_points") ||
-        isParamSetByUser("auto_area_function_power"))
-      paramError("use_auto_area_func",
-                 "If this parameter is set to false, the following parameters should not be set: "
-                 "'auto_area_func_default_size', 'auto_area_func_default_size_dist', "
-                 "'auto_area_function_num_points', 'auto_area_function_power'.");
-
-  if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
-    paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
-
-  for (auto hole_i : index_range(_stitch_holes))
-    if (_stitch_holes[hole_i] && (hole_i >= _refine_holes.size() || _refine_holes[hole_i]))
-      paramError("refine_holes", "Disable auto refine of any hole boundary to be stitched.");
-
-  if (isParamValid("hole_boundaries"))
-  {
-    auto & hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
-    if (hole_boundaries.size() != _hole_ptrs.size())
-      paramError("hole_boundaries", "Need one hole_boundaries entry per hole, if specified.");
-  }
   // Copied from MultiApp.C
   const auto & positions_files = getParam<std::vector<FileName>>("interior_point_files");
   for (const auto p_file_it : index_range(positions_files))
@@ -206,13 +131,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     for (const auto & d : data)
       _interior_points.push_back(d);
   }
-  bool has_duplicates =
-      std::any_of(_interior_points.begin(),
-                  _interior_points.end(),
-                  [&](const Point & p)
-                  { return std::count(_interior_points.begin(), _interior_points.end(), p) > 1; });
-  if (has_duplicates)
-    paramError("interior_points", "Duplicate points were found in the provided interior points.");
+  checkInteriorPoints(_interior_points);
 
   if ((_outer_boundary_layer_thickness > 0 && _outer_boundary_layer_num == 0) ||
       (_outer_boundary_layer_thickness == 0 && _outer_boundary_layer_num > 0))
@@ -266,25 +185,10 @@ std::unique_ptr<MeshBase>
 XYDelaunayGenerator::generate()
 {
   MeshTriangulationUtils::XYDelaunayOptions xyd_opts;
-  if (isParamValid("input_boundary_names"))
-    xyd_opts.input_boundary_names = getParam<std::vector<BoundaryName>>("input_boundary_names");
-  if (isParamValid("input_subdomain_names"))
-    xyd_opts.input_subdomain_names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
-  xyd_opts.add_nodes_per_boundary_segment = _add_nodes_per_boundary_segment;
-  xyd_opts.refine_bdy = _refine_bdy;
-  xyd_opts.verify_holes = _verify_holes;
+  fillDelaunayOptions(xyd_opts);
   xyd_opts.smooth_tri = _smooth_tri;
-  xyd_opts.desired_area = _desired_area;
-  xyd_opts.desired_area_func = _desired_area_func;
-  xyd_opts.use_auto_area_func = _use_auto_area_func;
-  xyd_opts.auto_area_func_default_size = _auto_area_func_default_size;
-  xyd_opts.auto_area_func_default_size_dist = _auto_area_func_default_size_dist;
-  xyd_opts.auto_area_function_num_points = _auto_area_function_num_points;
-  xyd_opts.auto_area_function_power = _auto_area_function_power;
   xyd_opts.interior_points = _interior_points;
   xyd_opts.tri_elem_type = std::string(_tri_elem_type);
-  xyd_opts.stitch_holes = _stitch_holes;
-  xyd_opts.refine_holes = _refine_holes;
   xyd_opts.use_binary_search = (_algorithm == "BINARY");
   xyd_opts.verbose_stitching = _verbose_stitching;
   if (isParamValid("output_subdomain_id"))
@@ -292,18 +196,6 @@ XYDelaunayGenerator::generate()
     xyd_opts.has_output_subdomain_id = true;
     xyd_opts.output_subdomain_id = getParam<SubdomainID>("output_subdomain_id");
   }
-  if (isParamValid("output_subdomain_name"))
-  {
-    xyd_opts.has_output_subdomain_name = true;
-    xyd_opts.output_subdomain_name = getParam<SubdomainName>("output_subdomain_name");
-  }
-  if (isParamValid("output_boundary"))
-  {
-    xyd_opts.has_output_boundary = true;
-    xyd_opts.output_boundary = getParam<BoundaryName>("output_boundary");
-  }
-  if (isParamValid("hole_boundaries"))
-    xyd_opts.hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
 
   std::vector<std::unique_ptr<MeshBase>> hole_meshes(_hole_ptrs.size());
   for (auto hole_i : index_range(_hole_ptrs))

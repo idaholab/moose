@@ -1,37 +1,37 @@
 {
-    "reporters": {
-        "mesh": {
-            "type": "MeshInfo",
-            "values": {
-                "subdomains": {
-                    "type": "MeshInfo::DomainInfoMap<unsigned short, MeshInfo::SubdomainInfo>"
-                }
-            }
+  "reporters": {
+    "mesh": {
+      "type": "MeshInfo",
+      "values": {
+        "subdomains": {
+          "type": "MeshInfo::DomainInfoMap<unsigned short, MeshInfo::SubdomainInfo>"
         }
+      }
+    }
+  },
+  "time_steps": [
+    {
+      "mesh": {
+        "subdomains": null
+      },
+      "time": 0.0,
+      "time_step": 0
     },
-    "time_steps": [
-        {
-            "mesh": {
-                "subdomains": null
-            },
-            "time": 0.0,
-            "time_step": 0
-        },
-        {
-            "mesh": {
-                "subdomains": [
-                    {
-                        "id": 1,
-                        "name": "_TRI3"
-                    },
-                    {
-                        "id": 2,
-                        "name": "_QUAD4"
-                    }
-                ]
-            },
-            "time": 1.0,
-            "time_step": 1
-        }
-    ]
+    {
+      "mesh": {
+        "subdomains": [
+          {
+            "id": 1,
+            "name": "_TRI3"
+          },
+          {
+            "id": 2,
+            "name": "_QUAD4"
+          }
+        ]
+      },
+      "time": 1.0,
+      "time_step": 1
+    }
+  ]
 }

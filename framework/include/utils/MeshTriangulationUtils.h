@@ -59,6 +59,19 @@ struct XYDelaunayOptions
 };
 
 /**
+ * Resolves the outer-boundary selection of the options into the set of ids that define it: the ids
+ * of 'input_boundary_names' or of 'input_subdomain_names' in the boundary mesh. This is shared by
+ * the Triangle-backed and the frontal triangulators, so that both select the outer boundary the
+ * same way.
+ * @param mg The calling mesh generator (used for paramError reporting)
+ * @param boundary_mesh The mesh the names are resolved against
+ * @param opts Triangulation options carrying the names (see XYDelaunayOptions)
+ * @return The resolved ids, empty when neither parameter selects a boundary
+ */
+std::set<std::size_t>
+outerBoundaryIds(MeshGenerator & mg, MeshBase & boundary_mesh, const XYDelaunayOptions & opts);
+
+/**
  * Performs a 2D Delaunay triangulation (via libMesh::Poly2TriTriangulator) inside a closed boundary
  * mesh with optional holes, optionally stitches the resulting triangulation to each hole mesh that
  * requests it, and applies subdomain / boundary renumbering. This is the core algorithm shared by
@@ -74,4 +87,21 @@ triangulateWithDelaunay(MeshGenerator & mg,
                         std::unique_ptr<MeshBase> boundary_mesh,
                         std::vector<std::unique_ptr<MeshBase>> hole_meshes,
                         const XYDelaunayOptions & xyd_opts);
+
+/**
+ * Performs the subdomain and boundary naming, the boundary id remapping (outer boundary to 0 and
+ * hole i to i + 1), and the hole stitching on a mesh that has already been triangulated. This is
+ * shared by the Triangle-backed and the frontal triangulators.
+ * @param mg The calling mesh generator (used for paramError reporting)
+ * @param mesh The triangulated mesh, modified in place
+ * @param holes The hole meshes used by the triangulation (empty vector if no holes)
+ * @param holes_with_midpoints Whether the boundary of each hole carries midpoints, as reported by
+ * the libMesh MeshedHole built from that hole before the triangulation
+ * @param opts Triangulation options (see XYDelaunayOptions)
+ */
+void finalizeTriangulation(MeshGenerator & mg,
+                           UnstructuredMesh & mesh,
+                           std::vector<std::unique_ptr<MeshBase>> & holes,
+                           const std::vector<bool> & holes_with_midpoints,
+                           const XYDelaunayOptions & opts);
 }

@@ -1,57 +1,57 @@
 {
-    "reporters": {
-        "mesh_info": {
-            "type": "MeshInfo",
-            "values": {
-                "subdomains": {
-                    "type": "MeshInfo::DomainInfoMap<unsigned short, MeshInfo::SubdomainInfo>"
-                }
-            }
+  "reporters": {
+    "mesh_info": {
+      "type": "MeshInfo",
+      "values": {
+        "subdomains": {
+          "type": "MeshInfo::DomainInfoMap<unsigned short, MeshInfo::SubdomainInfo>"
         }
+      }
+    }
+  },
+  "time_steps": [
+    {
+      "mesh_info": {
+        "subdomains": null
+      },
+      "time": 0.0,
+      "time_step": 0
     },
-    "time_steps": [
-        {
-            "mesh_info": {
-                "subdomains": null
-            },
-            "time": 0.0,
-            "time_step": 0
-        },
-        {
-            "mesh_info": {
-                "subdomains": [
-                    {
-                        "elems": [
-                            0,
-                            1,
-                            4,
-                            5,
-                            10,
-                            11,
-                            14,
-                            15
-                        ],
-                        "id": 0,
-                        "name": "block0_and_block3"
-                    },
-                    {
-                        "elems": [
-                            2,
-                            3,
-                            6,
-                            7,
-                            8,
-                            9,
-                            12,
-                            13
-                        ],
-                        "id": 2,
-                        "name": "block1"
-                    }
-                ]
-            },
-            "time": 1.0,
-            "time_step": 1
-        }
-    ]
+    {
+      "mesh_info": {
+        "subdomains": [
+          {
+            "elems": [
+              0,
+              1,
+              4,
+              5,
+              10,
+              11,
+              14,
+              15
+            ],
+            "id": 0,
+            "name": "block0_and_block3"
+          },
+          {
+            "elems": [
+              2,
+              3,
+              6,
+              7,
+              8,
+              9,
+              12,
+              13
+            ],
+            "id": 2,
+            "name": "block1"
+          }
+        ]
+      },
+      "time": 1.0,
+      "time_step": 1
+    }
+  ]
 }

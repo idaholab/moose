@@ -1,57 +1,57 @@
 {
-    "reporters": {
-        "mesh_info": {
-            "type": "MeshInfo",
-            "values": {
-                "sidesets": {
-                    "type": "MeshInfo::DomainInfoMap<short, MeshInfo::SidesetInfo>"
-                }
-            }
+  "reporters": {
+    "mesh_info": {
+      "type": "MeshInfo",
+      "values": {
+        "sidesets": {
+          "type": "MeshInfo::DomainInfoMap<short, MeshInfo::SidesetInfo>"
         }
+      }
+    }
+  },
+  "time_steps": [
+    {
+      "mesh_info": {
+        "sidesets": null
+      },
+      "time": 0.0,
+      "time_step": 0
     },
-    "time_steps": [
-        {
-            "mesh_info": {
-                "sidesets": null
-            },
-            "time": 0.0,
-            "time_step": 0
-        },
-        {
-            "mesh_info": {
-                "sidesets": [
-                    {
-                        "elems": [
-                            {
-                                "elem_id": 0,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 1,
-                                "side": 0
-                            }
-                        ],
-                        "id": 0,
-                        "name": "bottom"
-                    },
-                    {
-                        "elems": [
-                            {
-                                "elem_id": 0,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 2,
-                                "side": 3
-                            }
-                        ],
-                        "id": 3,
-                        "name": "left"
-                    }
-                ]
-            },
-            "time": 1.0,
-            "time_step": 1
-        }
-    ]
+    {
+      "mesh_info": {
+        "sidesets": [
+          {
+            "elems": [
+              {
+                "elem_id": 0,
+                "side": 0
+              },
+              {
+                "elem_id": 1,
+                "side": 0
+              }
+            ],
+            "id": 0,
+            "name": "bottom"
+          },
+          {
+            "elems": [
+              {
+                "elem_id": 0,
+                "side": 3
+              },
+              {
+                "elem_id": 2,
+                "side": 3
+              }
+            ],
+            "id": 3,
+            "name": "left"
+          }
+        ]
+      },
+      "time": 1.0,
+      "time_step": 1
+    }
+  ]
 }

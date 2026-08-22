@@ -78,6 +78,24 @@ projectedLineHalfSpace(Point pt1, Point pt2, Point pt3, const unsigned int axis)
          (pt2(i.first) - pt3(i.first)) * (pt1(i.second) - pt3(i.second));
 }
 
+Real
+signedArea2D(const Point & pt1, const Point & pt2, const Point & pt3)
+{
+  // The shoelace determinant of the three corners is the half space of the line through the second
+  // and the third that the first lies in, taken in the plane perpendicular to z
+  return projectedLineHalfSpace(pt2, pt3, pt1, 2);
+}
+
+Real
+signedArea2D(const std::vector<Point> & polygon)
+{
+  Real twice_area = 0.0;
+  for (const auto i : index_range(polygon))
+    twice_area += signedArea2D(Point(), polygon[i], polygon[(i + 1) % polygon.size()]);
+
+  return twice_area;
+}
+
 bool
 pointInPolygon(const Point & point, const std::vector<Point> & corners, const unsigned int axis)
 {
