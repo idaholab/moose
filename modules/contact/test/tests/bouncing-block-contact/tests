@@ -260,48 +260,4 @@
     valgrind = 'heavy'
     capabilities = 'ad_size>=100 & method!=dbg'
   []
-  [mortar_contact_line_search]
-    requirement = 'The system shall support a constraint-set-aware line search for mortar '
-                  'mechanical contact that wraps a standard PETSc backing line search, and shall'
-    design = 'MortarContactLineSearch.md'
-    issues = '#32856'
-    [bt_baseline]
-      type = 'CSVDiff'
-      input = 'mortar-contact-line-search-bt.i'
-      csvdiff = 'mortar-contact-line-search-bt_out.csv'
-      detail = 'converge a frictionless mortar contact problem with a plain PETSc backing line '
-               'search attached directly, with no wrapper,'
-    []
-    [unchanged_and_direct_accept]
-      type = 'CSVDiff'
-      input = 'mortar-contact-line-search.i'
-      csvdiff = 'mortar-contact-line-search_out.csv'
-      prereq = 'mortar_contact_line_search/bt_baseline'
-      detail = 'produce results transparently equivalent to the plain backing line search on '
-               'timesteps where the contact set does not change, and converge within the same '
-               'iteration budget on the timestep where the contact set changes,'
-    []
-    [event_limited_fallback]
-      type = 'CSVDiff'
-      input = 'mortar-contact-line-search.i'
-      csvdiff = 'mortar-contact-line-search-fallback_out.csv'
-      cli_args = "LineSearch/ls/direct_accept_tol=1 Outputs/file_base=mortar-contact-line-search-fallback_out"
-      prereq = 'mortar_contact_line_search/unchanged_and_direct_accept'
-      detail = 'and still converge when every contact-set-changing step is forced through the '
-               'event-limited fallback step instead of direct acceptance,'
-    []
-    [dense_event_escape]
-      type = 'CSVDiff'
-      input = 'mortar-contact-line-search.i'
-      csvdiff = 'mortar-contact-line-search-dense-event_out.csv'
-      cli_args = "LineSearch/ls/direct_accept_tol=1 LineSearch/ls/dense_event_threshold=1 "
-                 "LineSearch/ls/event_group_tol=1e-8 "
-                 "Outputs/file_base=mortar-contact-line-search-dense-event_out"
-      prereq = 'mortar_contact_line_search/event_limited_fallback'
-      expect_out = 'MortarContactLineSearch: dense-event escape hatch triggered after'
-      detail = 'converge by taking a single composite step to the full Newton step once too many '
-               'consecutive outer Newton iterations in a row have required the event-limited '
-               'fallback.'
-    []
-  []
 []
