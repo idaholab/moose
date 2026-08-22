@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create a MOOSE Pull Request"
+  short_description: "Audit and open a compliant draft MOOSE PR"
+  default_prompt: "Use $moose-pr-create to audit my current branch and create a compliant draft MOOSE pull request."

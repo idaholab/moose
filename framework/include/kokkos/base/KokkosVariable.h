@@ -117,10 +117,15 @@ public:
             const TagName & tag_name = Moose::SOLUTION_TAG);
   ///@}
   /**
-   * Initialize the variable with coupled default values
+   * Initialize the variable with default coupled values
    * @param values The default coupled values
    */
   void init(const std::vector<Real> & values, CoupleableKey);
+  /**
+   * Initialize the variable with default coupled vector values
+   * @param values The default coupled vector values
+   */
+  void init(const std::vector<Real3> & values, CoupleableKey);
 
   /**
    * Get the MOOSE variable of a component
@@ -158,6 +163,11 @@ public:
    */
   KOKKOS_FUNCTION bool old() const { return _old; }
   /**
+   * Get whether the variable is vector variable
+   * @returns Whether the variable is vector variable
+   */
+  KOKKOS_FUNCTION bool vector() const { return _vector; }
+  /**
    * Get the number of components
    * @returns The number of components
    */
@@ -186,9 +196,20 @@ public:
    */
   KOKKOS_FUNCTION Real value(unsigned int comp = 0) const
   {
-    KOKKOS_ASSERT(!_coupled);
+    KOKKOS_ASSERT(!_coupled && !_vector);
 
     return _default_value[comp];
+  }
+  /**
+   * Get the default vector value of a component
+   * @param comp The variable component
+   * @returns The default vector value
+   */
+  KOKKOS_FUNCTION Real3 vectorValue(unsigned int comp = 0) const
+  {
+    KOKKOS_ASSERT(!_coupled && _vector);
+
+    return _default_vector_value[comp];
   }
 
 private:
@@ -213,6 +234,10 @@ private:
    */
   bool _old = false;
   /**
+   * Whether the variable is vector variable
+   */
+  bool _vector = false;
+  /**
    * Number of components
    */
   unsigned int _components = 1;
@@ -236,6 +261,10 @@ private:
    * Default value of each component when the variable is not coupled
    */
   Array<Real> _default_value;
+  /**
+   * Default vector value of each component when the variable is not coupled
+   */
+  Array<Real3> _default_vector_value;
 };
 
 } // namespace Moose::Kokkos

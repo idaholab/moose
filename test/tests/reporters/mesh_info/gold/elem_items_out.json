@@ -1,0 +1,271 @@
+{
+    "number_of_parts": 2,
+    "part": 0,
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "local_elems": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::ElemInfo, MeshInfo::ElemInfoItems>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "local_elems": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "local_elems": [
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 0,
+                        "subdomain_id": 1,
+                        "volume": 0.00963355103616486
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 1,
+                        "subdomain_id": 1,
+                        "volume": 0.008670195932548374
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 2,
+                        "subdomain_id": 1,
+                        "volume": 0.007803176339293533
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 3,
+                        "subdomain_id": 1,
+                        "volume": 0.007022858705364182
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 4,
+                        "subdomain_id": 1,
+                        "volume": 0.010596906139781346
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 5,
+                        "subdomain_id": 1,
+                        "volume": 0.009537215525803212
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 6,
+                        "subdomain_id": 1,
+                        "volume": 0.008583493973222885
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 7,
+                        "subdomain_id": 1,
+                        "volume": 0.0077251445759006
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 8,
+                        "subdomain_id": 1,
+                        "volume": 0.01165659675375949
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 9,
+                        "subdomain_id": 1,
+                        "volume": 0.010490937078383542
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 10,
+                        "subdomain_id": 1,
+                        "volume": 0.009441843370545183
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 11,
+                        "subdomain_id": 1,
+                        "volume": 0.008497659033490668
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 12,
+                        "subdomain_id": 1,
+                        "volume": 0.01282225642913544
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 13,
+                        "subdomain_id": 1,
+                        "volume": 0.011540030786221896
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 14,
+                        "subdomain_id": 1,
+                        "volume": 0.010386027707599702
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 15,
+                        "subdomain_id": 1,
+                        "volume": 0.009347424936839734
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 16,
+                        "subdomain_id": 1,
+                        "volume": 0.014104482072048972
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 17,
+                        "subdomain_id": 1,
+                        "volume": 0.012694033864844075
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 18,
+                        "subdomain_id": 1,
+                        "volume": 0.011424630478359662
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 19,
+                        "subdomain_id": 1,
+                        "volume": 0.0102821674305237
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 20,
+                        "subdomain_id": 1,
+                        "volume": 0.015514930279253882
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 21,
+                        "subdomain_id": 1,
+                        "volume": 0.013963437251328493
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 22,
+                        "subdomain_id": 1,
+                        "volume": 0.012567093526195637
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 23,
+                        "subdomain_id": 1,
+                        "volume": 0.011310384173576079
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 24,
+                        "subdomain_id": 0,
+                        "volume": 0.01706642330717927
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 25,
+                        "subdomain_id": 0,
+                        "volume": 0.015359780976461342
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 26,
+                        "subdomain_id": 0,
+                        "volume": 0.0138238028788152
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 27,
+                        "subdomain_id": 0,
+                        "volume": 0.012441422590933686
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 28,
+                        "subdomain_id": 0,
+                        "volume": 0.01877306563789718
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 29,
+                        "subdomain_id": 0,
+                        "volume": 0.016895759074107463
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 30,
+                        "subdomain_id": 0,
+                        "volume": 0.015206183166696708
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 31,
+                        "subdomain_id": 0,
+                        "volume": 0.013685564850027043
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 32,
+                        "subdomain_id": 0,
+                        "volume": 0.020650372201686917
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 33,
+                        "subdomain_id": 0,
+                        "volume": 0.018585334981518223
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 34,
+                        "subdomain_id": 0,
+                        "volume": 0.01672680148336639
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 35,
+                        "subdomain_id": 0,
+                        "volume": 0.01505412133502976
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 36,
+                        "subdomain_id": 0,
+                        "volume": 0.0227154094218556
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 37,
+                        "subdomain_id": 0,
+                        "volume": 0.020443868479670044
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 38,
+                        "subdomain_id": 0,
+                        "volume": 0.01839948163170303
+                    },
+                    {
+                        "elem_type": "QUAD4",
+                        "id": 39,
+                        "subdomain_id": 0,
+                        "volume": 0.01655953346853273
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

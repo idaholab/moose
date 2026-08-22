@@ -572,5 +572,5 @@ TriToQuadGenerator::moveSurvivingTriangles(ReplicatedMesh & mesh,
   // Naming a subdomain that holds no element would leave the mesh with a block name that matches
   // nothing
   if (has_surviving_tri && existing_id == Moose::INVALID_BLOCK_ID)
-    mesh.subdomain_name(tri_subdomain_id) = _tri_subdomain_name;
+    mesh.set_subdomain_name(tri_subdomain_id, _tri_subdomain_name);
 }

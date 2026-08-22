@@ -1186,7 +1186,7 @@ FeatureFloodCount::mergeSets()
         ++it1;
 
     } // it1 loop
-  }   // map loop
+  } // map loop
 }
 
 void
@@ -1437,12 +1437,14 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
   return return_value;
 }
 
-Real FeatureFloodCount::getThreshold(std::size_t /*current_index*/) const
+Real
+FeatureFloodCount::getThreshold(std::size_t /*current_index*/) const
 {
   return _step_threshold;
 }
 
-Real FeatureFloodCount::getConnectingThreshold(std::size_t /*current_index*/) const
+Real
+FeatureFloodCount::getConnectingThreshold(std::size_t /*current_index*/) const
 {
   return _step_connecting_threshold;
 }

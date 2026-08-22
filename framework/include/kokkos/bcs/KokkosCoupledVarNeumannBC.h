@@ -23,12 +23,12 @@ public:
   KokkosCoupledVarNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int j,
-                                                const unsigned int jvar,
-                                                const unsigned int qp,
-                                                AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
+                                                   const unsigned int jvar,
+                                                   const unsigned int qp,
+                                                   AssemblyDatum & datum) const;
 
 protected:
   /// Variable providing the value of grad(u) on the boundary.
@@ -46,17 +46,17 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledVarNeumannBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosCoupledVarNeumannBC::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return -_scale_factor(datum, qp) * _coef * _coupled_var(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int j,
-                                                    const unsigned int jvar,
-                                                    const unsigned int qp,
-                                                    AssemblyDatum & datum) const
+KokkosCoupledVarNeumannBC::precomputeQpOffDiagJacobian(const unsigned int j,
+                                                       const unsigned int jvar,
+                                                       const unsigned int qp,
+                                                       AssemblyDatum & datum) const
 {
   if (jvar == _coupled_num)
     return -_scale_factor(datum, qp) * _coef * _phi(datum, j, qp);

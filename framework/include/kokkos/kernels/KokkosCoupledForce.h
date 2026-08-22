@@ -23,7 +23,7 @@ public:
   KokkosCoupledForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
 
 private:
   /// Coupled variable number
@@ -36,7 +36,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledForce::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosCoupledForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return -_coef * _v(datum, qp);
 }

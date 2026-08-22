@@ -292,7 +292,7 @@ RenameBlockGenerator::generate()
       mesh->set_subdomain_name_map().erase(old_block_ids[i]);
   // With the old names removed, add the new names if there are any to add
   for (const auto & pair : new_names)
-    mesh->subdomain_name(pair.first) = pair.second;
+    mesh->set_subdomain_name(pair.first, pair.second);
 
   mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);

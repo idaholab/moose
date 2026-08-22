@@ -48,7 +48,7 @@ public:
   virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
 protected:
-  virtual void internalInitWithMesh(const MeshBase &) override{};
+  virtual void internalInitWithMesh(const MeshBase &) override {};
 
   libMesh::System * _other_system;
 };

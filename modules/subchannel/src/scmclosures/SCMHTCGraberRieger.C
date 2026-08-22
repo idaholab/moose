@@ -35,6 +35,7 @@ SCMHTCGraberRieger::computeNusseltNumber(const FrictionStruct & /*friction_args*
 {
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
   const auto Pe = pre.Re * pre.Pr;
+  const auto turbulent_Pe = turbulentReynoldsNumber(pre) * pre.Pr;
 
   if (Pe < 110 || Pe > 4300)
     flagSolutionWarning("Pe number out of range for the Graber-Rieger correlation.");
@@ -43,7 +44,7 @@ SCMHTCGraberRieger::computeNusseltNumber(const FrictionStruct & /*friction_args*
     flagSolutionWarning(
         "Pitch over pin diameter ratio out of range for the Graber-Rieger correlation.");
 
-  const auto NuT =
-      0.25 + 6.2 * pre.poD + (-0.007 + 0.032 * pre.poD) * std::pow(Pe, 0.8 - 0.024 * pre.poD);
+  const auto NuT = 0.25 + 6.2 * pre.poD +
+                   (-0.007 + 0.032 * pre.poD) * std::pow(turbulent_Pe, 0.8 - 0.024 * pre.poD);
   return blendTurbulentNusseltNumber(pre, NuT);
 }

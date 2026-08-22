@@ -39,10 +39,10 @@ protected:
   virtual void computeNodeNormal();
 
   /// Updates the vectors required for shear locking computation for finite rotations
-  virtual void updateGVectors(){};
+  virtual void updateGVectors() {}
 
   /// Updates covariant vectors at each qp for finite rotations
-  virtual void updatedxyz(){};
+  virtual void updatedxyz() {}
 
   /// Computes the transformation matrix from natural coordinates to local cartesian coordinates for elasticity tensor transformation
   virtual void computeGMatrix();

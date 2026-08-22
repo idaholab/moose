@@ -453,7 +453,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
                     ridgeSetDataVec[i]._distance = contact_point_vec.norm();
                   }
                 }
-                else // several ridges join at common node to make peak.  The common node is the
+                else // several ridges join at common node to make a peak.  The common node is the
                      // contact point
                 {
                   ridgeSetDataVec[i]._closest_coor = *ridgeSetDataVec[i]._closest_node;
@@ -488,6 +488,11 @@ PenetrationThread::operator()(const NodeIdRange & range)
             {
               // find the face in the ridge set with the smallest index, assign that one to the
               // interaction
+              // TODO: We may need to select the face with the largest projected distance
+              // rather than the smallest index, similar to what is done when picking the
+              // face in findRidgeContactPoint() to better condition corner-case checks for
+              // sign changes. That's less likely to be a problem here, though, and the
+              // code to do that would be messier.
               unsigned int face_index(std::numeric_limits<unsigned int>::max());
               for (unsigned int i = 0;
                    i < ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size();
@@ -516,9 +521,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
                 }
                 const Real dot(normal * p_info[face_index]->_normal);
                 if (dot < 0)
-                {
                   normal *= -1;
-                }
                 p_info[face_index]->_normal = normal;
               }
               p_info[face_index]->_tangential_distance = 0.0;
@@ -885,9 +888,15 @@ PenetrationThread::findRidgeContactPoint(Point & contact_point,
   FEBase * fe = NULL;
   std::vector<Point> points(1);
 
-  // We have to pick one of the two faces to own the contact point.  It doesn't really matter
-  // which one we pick.  For repeatibility, pick the face with the lowest index.
-  if (index1 < index2)
+  // We have to pick one of the two faces to own the contact point.  Either one would
+  // generally work, but to avoid some corner-case numerical roundoff issues when
+  // determining signs of the normal and displacement, pick the one that the point is
+  // closer to projecting onto, which is the one with the larger projected distance.
+  // If that distance is the same for both faces (within numerical precision), pick the
+  // face with the lowest index for repeatability.
+  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(pi1->_distance), std::abs(pi2->_distance)) ||
+      (MooseUtils::absoluteFuzzyEqual(std::abs(pi1->_distance), std::abs(pi2->_distance)) &&
+       index1 < index2))
   {
     fe = _fes[_tid][pi1->_side->dim()];
     contact_point_ref = closest_coor_ref1;

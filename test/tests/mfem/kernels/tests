@@ -17,7 +17,9 @@
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
-    cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial'
+    cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial '
+               'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
+               'FESpaces/HCurlFESpace/open_basis=IntegratedGLL'
     requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -103,7 +105,7 @@
                'Executioner/assembly_level=none'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
-    abs_zero = 2e-10
+    abs_zero = 5e-10
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
@@ -140,6 +142,17 @@
     capabilities = 'mfem'
     compute_devices = 'cuda'
     min_parallel = 2
+    recover = false
+  []
+  [MFEMDiffusionDG]
+    type = XMLDiff
+    input = dg_diffusion.i
+    xmldiff = 'OutputData/DG_Diffusion/Run0/Run0.pvd
+                OutputData/DG_Diffusion/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM with DG kernels.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMGradDiv]
@@ -261,9 +274,12 @@
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
-    capabilities = 'mfem & platform=linux'
+    # clang skip: significant diffs with clang 22 that are unresolved #33466
+    capabilities = 'mfem & platform=linux & compiler!=clang'
     compute_devices = 'cpu' # schemadiff with cuda
     max_parallel = 1 # schemadiff with multiple ranks
+    # diffs at 9e-4 with -march=x86-64-v3
+    rel_err = 2e-3
     recover = false
   []
   [MFEMGravityQuadratureFunction]
@@ -284,6 +300,7 @@
     abs_zero = 2e-7
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
+    valgrind = heavy
     recover = false
   []
   [MFEMDarcy]

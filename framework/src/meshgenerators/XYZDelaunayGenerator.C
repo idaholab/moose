@@ -286,7 +286,7 @@ XYZDelaunayGenerator::generate()
             std::max(_output_subdomain_id, MooseMeshUtils::getNextFreeSubdomainID(**hole_ptr));
       }
 
-      mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
+      mesh->set_subdomain_name(_output_subdomain_id, output_subdomain_name);
     }
   }
 

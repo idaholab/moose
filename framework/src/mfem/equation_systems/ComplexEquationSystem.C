@@ -109,25 +109,23 @@ ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
                                                mfem::Array<int> & global_ess_markers)
 {
   if (_cmplx_essential_bc_map.Has(var_name))
-  {
-    auto & bcs = _cmplx_essential_bc_map.GetRef(var_name);
-    for (auto & bc : bcs)
+    for (auto & bc : _cmplx_essential_bc_map.GetRef(var_name))
     {
       // Set constrained DoFs values on essential boundaries
       bc->ApplyBC(trial_gf);
       // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
-      for (const auto i : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
-        global_ess_markers[i] = std::max(global_ess_markers[i], ess_bdrs[i]);
+      for (const auto i : make_range(ess_bdrs.Size()))
+        global_ess_markers[i] |= ess_bdrs[i];
     }
-  }
 }
 
 void
 ComplexEquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
+  _ess_markers.resize(_trial_var_names.size());
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
@@ -139,12 +137,11 @@ ComplexEquationSystem::ApplyEssentialBCs()
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
     static_cast<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
+    _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the global_ess_markers array
-    ApplyComplexEssentialBC(trial_var_name, trial_gf, global_ess_markers);
-    trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+    // essential boundaries to the _ess_markers array
+    ApplyComplexEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(_ess_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 

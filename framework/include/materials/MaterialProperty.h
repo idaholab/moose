@@ -42,7 +42,7 @@ public:
 
   PropertyValue(const id_type id) : _id(id) {}
 
-  virtual ~PropertyValue(){};
+  virtual ~PropertyValue() {}
 
   /// The material property ID for an invalid property
   /// We only have this because there are a few cases where folks want to instantiate their

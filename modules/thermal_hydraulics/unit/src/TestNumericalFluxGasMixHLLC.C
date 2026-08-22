@@ -11,19 +11,11 @@
 #include "NumericalFluxGasMixHLLC.h"
 #include "THMIndicesGasMix.h"
 
-TEST_F(TestNumericalFluxGasMixHLLC, testSymmetry)
-{
-  testSymmetry();
-}
+TEST_F(TestNumericalFluxGasMixHLLC, testSymmetry) { testSymmetry(); }
 
-TEST_F(TestNumericalFluxGasMixHLLC, testConsistency)
-{
-  testConsistency();
-}
+TEST_F(TestNumericalFluxGasMixHLLC, testConsistency) { testConsistency(); }
 
-TestNumericalFluxGasMixHLLC::TestNumericalFluxGasMixHLLC() : TestNumericalFluxGasMixBase()
-{
-}
+TestNumericalFluxGasMixHLLC::TestNumericalFluxGasMixHLLC() : TestNumericalFluxGasMixBase() {}
 
 const NumericalFlux1D &
 TestNumericalFluxGasMixHLLC::createFluxObject()

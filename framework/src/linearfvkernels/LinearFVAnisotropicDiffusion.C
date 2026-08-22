@@ -237,23 +237,22 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
 
   auto boundary_grad = _var.gradSln(*elem_info, state_arg);
 
-  // If the boundary condition does not include the diffusivity contribution then
-  // add it here.
+  // Apply the boundary-normal diffusivity when it is not already included by the BC.
   if (!diff_bc->includesMaterialPropertyMultiplier())
     grad_contrib *= normal_scaled_diff_tensor;
 
   // We allow internal boundaries as well, in that case we have to make sure the normals point in
-  // the right direction
+  // the right direction.
   const Real boundary_normal_multiplier =
       (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
-                                            _current_face_info->normal()) *
-                  boundary_grad;
+  // A complete prescribed flux already includes the anisotropic tangential contribution.
+  if (!diff_bc->providesCompleteBoundaryFlux())
+    grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
+                                              _current_face_info->normal()) *
+                    boundary_grad;
 
-  // We add the nonorthogonal corrector for the face here. Potential idea: we could do
-  // this in the boundary condition too. For now, however, we keep it like this.
-  if (diff_bc->useBoundaryGradientExtrapolation() && _use_nonorthogonal_correction_on_boundary)
+  if (diff_bc->needsBoundaryNonorthogonalCorrection() && _use_nonorthogonal_correction_on_boundary)
   {
     const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
     const auto correction_vector =

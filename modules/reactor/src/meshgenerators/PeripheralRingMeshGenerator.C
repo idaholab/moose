@@ -467,7 +467,7 @@ PeripheralRingMeshGenerator::generate()
 
   // Assign subdomain name to the new block if applicable
   if (isParamValid("peripheral_ring_block_name"))
-    input_mesh->subdomain_name(_peripheral_ring_block_id) = _peripheral_ring_block_name;
+    input_mesh->set_subdomain_name(_peripheral_ring_block_id, _peripheral_ring_block_name, true);
   // Assign customized external boundary id
   if (_external_boundary_id > 0)
     MooseMesh::changeBoundaryId(*input_mesh, OUTER_SIDESET_ID, _external_boundary_id, false);

@@ -9,6 +9,6 @@
     requirement = 'The Kokkos system shall have the capability of visualizing element integers in an auxiliary variable.'
     recover = false
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

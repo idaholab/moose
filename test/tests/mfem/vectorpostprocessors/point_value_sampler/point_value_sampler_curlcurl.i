@@ -1,13 +1,13 @@
 # Definite Maxwell problem solved with Nedelec elements of the first kind
-# based on MFEM Example 3. Sampled with MFEMPointValueSampler.
+# based on MFEM Example 3. Sampled with MFEMVariablePointValueSampler.
 
 !include ../../kernels/curlcurl.i
 
 [VectorPostprocessors]
   [point_sample]
-    type = MFEMPointValueSampler
+    type = MFEMVariablePointValueSampler
     variable = 'e_field'
-    points = '1 1 -0.5  1 1 0.5'
+    points = '0.99 0.99 -0.49  0.99 0.99 0.49'
   []
 []
 

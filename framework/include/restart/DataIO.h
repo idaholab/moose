@@ -55,7 +55,17 @@ class TensorValue;
 class Elem;
 class FEType;
 class Point;
+class BoundingBox;
 }
+
+#ifdef MOOSE_MFEM_ENABLED
+namespace Moose::MFEM
+{
+struct SolutionState
+{
+};
+}
+#endif
 
 /**
  * Scalar helper routine
@@ -200,6 +210,16 @@ dataStore(std::ostream & stream, T & v, void * /*context*/)
   mooseAssert(!stream.bad(), "Failed to store");
 }
 
+// clang-format off
+#define dataStoreEnum(EnumType, IntType) \
+template <> \
+inline void dataStore(std::ostream & stream, EnumType & enum_type, void * ctx) \
+{ \
+  auto stored = static_cast<IntType>(enum_type); \
+  dataStore(stream, stored, ctx); \
+}
+// clang-format on
+
 template <typename T>
 inline void
 dataStore(std::ostream & /*stream*/, T *& /*v*/, void * /*context*/)
@@ -210,6 +230,8 @@ dataStore(std::ostream & /*stream*/, T *& /*v*/, void * /*context*/)
 }
 
 void dataStore(std::ostream & stream, Point & p, void * context);
+
+void dataStore(std::ostream & stream, libMesh::BoundingBox & p, void * context);
 
 template <typename T, typename U>
 inline void
@@ -447,8 +469,11 @@ void dataStore(std::ostream & stream, torch::Tensor & t, void * context);
 #endif
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
-
+#ifdef MOOSE_MFEM_ENABLED
 template <>
+void dataStore(std::ostream & stream, Moose::MFEM::SolutionState & state, void * context);
+#endif
+
 /**
  * Stores an owned numeric vector.
  *
@@ -459,6 +484,7 @@ template <>
  * Requirements: the unique_ptr must exist (cannot be null), the vector
  * cannot be ghosted, and the provided context must be the Communicator.
  */
+template <>
 void dataStore(std::ostream & stream,
                std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
                void * context);
@@ -570,6 +596,17 @@ dataLoad(std::istream & stream, T & v, void * /*context*/)
   stream.read((char *)&v, sizeof(v));
   mooseAssert(!stream.bad(), "Failed to load");
 }
+
+// clang-format off
+#define dataLoadEnum(EnumType, IntType) \
+template <> \
+inline void dataLoad(std::istream & stream, EnumType & enum_type, void * ctx) \
+{ \
+  IntType loaded; \
+  dataLoad(stream, loaded, ctx); \
+  enum_type = static_cast<EnumType>(loaded); \
+}
+// clang-format on
 
 template <typename T>
 void
@@ -821,7 +858,10 @@ void dataLoad(std::istream & stream, torch::Tensor & t, void * context);
 #endif
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
+#ifdef MOOSE_MFEM_ENABLED
 template <>
+void dataLoad(std::istream & stream, Moose::MFEM::SolutionState & state, void * context);
+#endif
 /**
  * Loads an owned numeric vector.
  *
@@ -839,6 +879,7 @@ template <>
  * the Communicator, and if \p v is initialized, it must have the same global
  * and local sizes that the vector was stored with.
  */
+template <>
 void dataLoad(std::istream & stream,
               std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
               void * context);
@@ -1126,6 +1167,8 @@ loadHelper(std::istream & stream, UniqueStorage<T> & data, void * context)
 }
 
 void dataLoad(std::istream & stream, Point & p, void * context);
+
+void dataLoad(std::istream & stream, libMesh::BoundingBox & p, void * context);
 
 #ifndef TIMPI_HAVE_STRING_PACKING
 /**

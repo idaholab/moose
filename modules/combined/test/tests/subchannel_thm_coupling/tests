@@ -6,6 +6,7 @@
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
+    heavy = true
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
@@ -17,6 +18,7 @@
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
+    heavy = true
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
@@ -29,6 +31,7 @@
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
+    heavy = true
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1

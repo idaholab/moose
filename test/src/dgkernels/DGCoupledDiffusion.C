@@ -54,7 +54,11 @@ DGCoupledDiffusion::computeQpResidual(Moose::DGResidualType type)
   return r;
 }
 
-Real DGCoupledDiffusion::computeQpJacobian(Moose::DGJacobianType /*type*/) { return 0; }
+Real
+DGCoupledDiffusion::computeQpJacobian(Moose::DGJacobianType /*type*/)
+{
+  return 0;
+}
 
 Real
 DGCoupledDiffusion::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)

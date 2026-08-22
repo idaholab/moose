@@ -33,7 +33,7 @@ protected:
    * @param[in] A   Cross-sectional area
    */
   virtual std::vector<ADReal> computeConservativeSolution(const std::vector<ADReal> & W,
-                                                  const ADReal & A) const = 0;
+                                                          const ADReal & A) const = 0;
 
   /**
    * Computes the 1D flux vector from the primitive solution
@@ -42,7 +42,7 @@ protected:
    * @param[in] A   Cross-sectional area
    */
   virtual std::vector<ADReal> computeFluxFromPrimitive(const std::vector<ADReal> & W,
-                                               const ADReal & A) const = 0;
+                                                       const ADReal & A) const = 0;
 
   /**
    * Gets a vector of pairs of primitive solution vectors to use for symmetry test

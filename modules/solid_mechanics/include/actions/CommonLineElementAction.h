@@ -21,5 +21,5 @@ public:
 
   CommonLineElementAction(const InputParameters & parameters);
 
-  virtual void act() override{};
+  virtual void act() override {};
 };

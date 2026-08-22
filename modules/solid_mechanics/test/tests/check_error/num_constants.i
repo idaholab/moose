@@ -4,20 +4,13 @@
 
 [Mesh]
   file = cube.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[Kernels]
-  [SolidMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = false
+    strain = small
   [../]
 []
 
@@ -48,9 +41,6 @@
     bulk_modulus = 1e6
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress

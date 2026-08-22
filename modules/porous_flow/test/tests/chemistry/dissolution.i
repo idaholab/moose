@@ -189,7 +189,10 @@
   []
 []
 [Outputs]
-  time_step_interval = 10
-  csv = true
+  [csv]
+    type = CSV
+    file_base = dissolution_out
+    time_step_interval = 10
+  []
   perf_graph = true
 []

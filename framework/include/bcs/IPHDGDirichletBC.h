@@ -9,27 +9,24 @@
 
 #pragma once
 
-#include "IPHDGBC.h"
-
-class IPHDGAssemblyHelper;
+#include "ElementAndTraceScalarHDGBC.h"
 
 /**
  * Base class for imposing Dirichlet boundary conditions for interior penalty hybridizable
  * discontinuous Galerkin methods
  */
-class IPHDGDirichletBC : public IPHDGBC
+class IPHDGDirichletBC : public ElementAndTraceScalarHDGBC
 {
 public:
   static InputParameters validParams();
   IPHDGDirichletBC(const InputParameters & parameters);
 
-protected:
+private:
   /**
    * compute the AD residuals
    */
-  virtual void compute() override;
+  virtual void compute(ElementAndTraceScalarHDGAssemblyHelper & helper) override;
 
-private:
   /// Functor computing the Dirichlet boundary value
   const Moose::Functor<Real> & _dirichlet_val;
 };

@@ -12,9 +12,6 @@ import signal
 from RunApp import RunApp
 
 
-# Classes that derive from this class are expected to write
-# output files. The Tester::getOutputFiles() method should
-# be implemented for all derived classes.
 class SignalTester(RunApp):
 
     # Not supported because sending the signal will kill
@@ -26,6 +23,10 @@ class SignalTester(RunApp):
         params = RunApp.validParams()
         params.addParam(
             "signal", "SIGUSR1", "The signal to send to the app. Defaults to SIGUSR1"
+        )
+        params.addRequiredParam(
+            "signal_ready",
+            "The application output to wait for before sending the signal",
         )
         return params
 
@@ -59,4 +60,4 @@ class SignalTester(RunApp):
         return super().checkRunnable(options)
 
     def postSpawn(self, runner):
-        runner.sendSignal(self.signal)
+        runner.sendSignal(self.signal, self.specs["signal_ready"])

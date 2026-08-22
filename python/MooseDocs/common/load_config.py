@@ -72,6 +72,18 @@ def load_config(filename, **kwargs):
     """
     Read the config.yml file and create the Translator object.
     """
+    # Log entries can be emitted by the external mooseutils.yaml_load logger used by 'yaml_load'
+    # below, which lives outside the 'MooseDocs' logger hierarchy and so bypasses the MooseDocs
+    # handler (which leaves it uncolored, unprefixed, and uncounted). Here, before calling
+    # 'yaml_load', we lend the custom handling to the "external" logger to achieve proper formatting
+    # and expected handling.
+    ext_log = logging.getLogger("mooseutils.yaml_load")
+    md_log = logging.getLogger("MooseDocs")
+    if md_log.handlers and not ext_log.handlers:
+        for handler in md_log.handlers:
+            ext_log.addHandler(handler)
+        ext_log.setLevel(md_log.level)
+        ext_log.propagate = False
     config = yaml_load(filename, root=MooseDocs.ROOT_DIR)
 
     # Drop any configuration that referenced an optional include ('!include?') whose file was

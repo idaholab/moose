@@ -376,7 +376,7 @@ CohesiveZoneModelBase::reinit()
     // End of CZM bilinear computations
     auto it = _dof_to_czm_traction.find(node);
     if (it == _dof_to_czm_traction.end())
-      return;
+      continue;
 
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
@@ -395,9 +395,9 @@ CohesiveZoneModelBase::prepareJumpKinematicQuantities()
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
     // First call does not have maps available
-    const bool return_boolean = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
-    if (return_boolean)
-      return;
+    const bool skip_node = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
+    if (skip_node)
+      continue;
 
     _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotation<true>(
         _normals[i], _subproblem.mesh().dimension());

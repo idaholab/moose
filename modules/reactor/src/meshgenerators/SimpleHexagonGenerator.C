@@ -201,7 +201,7 @@ SimpleHexagonGenerator::generate()
     }
   if (!_block_name.empty())
     for (unsigned int i = 0; i < _block_name.size(); i++)
-      mesh->subdomain_name(_block_id[i]) = _block_name[i];
+      mesh->set_subdomain_name(_block_id[i], _block_name[i], true);
 
   if (_boundary_id_valid)
     MooseMesh::changeBoundaryId(*mesh, OUTER_SIDESET_ID, _external_boundary_id, false);

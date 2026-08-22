@@ -14,6 +14,10 @@ Specifically, the specified functor defines the following boundary flux for vari
 
 where the $\vec{n}_b$ is the boundary normal unit vector and $D_b$ is the diffusion coefficient at the boundary.
 
+For a diagonal anisotropic diffusion tensor, use
+[LinearFVAnisotropicDiffusionFunctorNeumannBC.md] so the boundary value is reconstructed using the
+normal and tangential tensor contributions.
+
 !alert note
 This boundary condition should only be used for problems which involve advection and/or diffusion
 problems.

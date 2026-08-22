@@ -152,7 +152,7 @@
 - Multiply by the test function $\psi$:
   \begin{equation}
   - \psi \left(\nabla\cdot k\nabla u\right) +
-  \psi\left(\vec{\beta} \cdot=\nabla u\right) - \psi f = 0 \phantom{\displaystyle \int}
+  \psi\left(\vec{\beta} \cdot \nabla u\right) - \psi f = 0 \phantom{\displaystyle \int}
   \end{equation}
 
 - Integrate over the domain $\Omega$:

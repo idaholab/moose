@@ -92,7 +92,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
       NS::computeSpeed<ADReal>(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Computing friction velocity and y+
-  ADReal u_tau, y_plus;
+  ADReal u_tau = 0, y_plus = 0;
 
   if (_wall_treatment == "eq_newton")
   {

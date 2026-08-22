@@ -34,7 +34,6 @@ mfem::BilinearFormIntegrator *
 MFEMVectorFEMassIntegratedBC::createBFIntegrator()
 {
   return new mfem::VectorFEMassIntegrator(_coef);
-  ;
 }
 
 #endif

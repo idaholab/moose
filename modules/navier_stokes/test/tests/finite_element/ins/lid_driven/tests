@@ -35,10 +35,11 @@ finite elements for velocity and pressure.'
     issues = '#24548'
     requirement = 'Least Squares Commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of 500, performing a transient march to steady-state.'
     cli_args = "n=8 -fieldsplit_others_fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_transient_high_Re"
-    absent_out = '30 iterations'
+    absent_out = 'iterations\s*([4-9]\d|[1-9]\d{2,})(?!\d)'
     exodiff = 'fsp_transient_high_Re.e'
     recover = false # executes on final
     capabilities = 'petsc>=3.20.0'
+    custom_cmp = fsp_transient_high_Re.cmp
   []
   [lid_driven_md]
     type = 'Exodiff'

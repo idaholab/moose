@@ -76,6 +76,7 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
   {
     const int nqpt = fespace.GetFE(el)->GetNodes().GetNPoints();
     mfem::Vector dof_vals(nqpt * gf_ncomp);
+    nodal_vals.HostRead();
     fespace.GetElementVDofs(el, vdofs); // Returned vdofs always indexed with ordering byNODES
     for (const auto qp : make_range(nqpt))
       for (const auto d : make_range(gf_ncomp))

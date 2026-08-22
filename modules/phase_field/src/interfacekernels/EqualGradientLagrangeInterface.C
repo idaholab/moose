@@ -49,7 +49,8 @@ EqualGradientLagrangeInterface::computeQpResidual(Moose::DGResidualType type)
   mooseError("Internal error.");
 }
 
-Real EqualGradientLagrangeInterface::computeQpJacobian(Moose::DGJacobianType /*type*/)
+Real
+EqualGradientLagrangeInterface::computeQpJacobian(Moose::DGJacobianType /*type*/)
 {
   return 0.0;
 }

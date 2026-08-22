@@ -121,6 +121,7 @@ power = 2
     full = true
   []
 []
+
 [UserObjects]
   [rad_avg]
     type = RadialAverage
@@ -147,6 +148,11 @@ power = 2
   []
 []
 
+[Postprocessors/compliance_obj]
+  type = ElementIntegralMaterialProperty
+  mat_prop = strain_energy_density
+[]
+
 [Executioner]
   type = Transient
   solve_type = NEWTON
@@ -160,9 +166,6 @@ power = 2
 []
 
 [Outputs]
-  [out]
-    type = Exodus
-    time_step_interval = 10
-  []
+  csv = True
 []
 

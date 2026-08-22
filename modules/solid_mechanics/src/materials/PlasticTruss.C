@@ -93,7 +93,7 @@ PlasticTruss::computeQpStress()
     Real reference_residual =
         std::abs(trial_stress) - _youngs_modulus[_qp] * plastic_strain_increment;
 
-    while (std::abs(residual) > _absolute_tolerance ||
+    while (std::abs(residual) > _absolute_tolerance &&
            std::abs(residual / reference_residual) > _relative_tolerance)
     {
       _hardening_variable[_qp] = computeHardeningValue(plastic_strain_increment);
