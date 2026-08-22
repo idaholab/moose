@@ -231,9 +231,9 @@ normSquared(const T & value)
 {
   if constexpr (MooseUtils::Has_size<T>::value)
   {
-    auto sum = normSquared(value[0]);
-    for (const auto i : make_range(std::size_t(1), value.size()))
-      sum += normSquared(value[i]);
+    decltype(normSquared(*value.begin())) sum{};
+    for (const auto & component : value)
+      sum += normSquared(component);
     return sum;
   }
   else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
