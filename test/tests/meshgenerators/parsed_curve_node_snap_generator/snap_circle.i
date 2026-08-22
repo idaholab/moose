@@ -14,7 +14,7 @@
     boundary = 'circle'
     refine_boundary = false
     add_nodes_per_boundary_segment = 2
-    desired_area = 0.004
+    desired_area = 0.02
     output_boundary = 'circumference'
     output_subdomain_name = 'disk'
   []

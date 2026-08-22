@@ -27,6 +27,55 @@ using namespace libMesh;
 namespace MeshTriangulationUtils
 {
 
+std::set<std::size_t>
+outerBoundaryIds(MeshGenerator & mg, MeshBase & boundary_mesh, const XYDelaunayOptions & opts)
+{
+  std::set<std::size_t> bdy_ids;
+
+  if (!opts.input_boundary_names.empty())
+  {
+    if (!opts.input_subdomain_names.empty())
+      mg.paramError(
+          "input_subdomain_names",
+          "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
+
+    for (const auto & name : opts.input_boundary_names)
+    {
+      auto bcid = MooseMeshUtils::getBoundaryID(name, boundary_mesh);
+      if (bcid == BoundaryInfo::invalid_id)
+        mg.paramError("input_boundary_names", name, " is not a boundary name in the input mesh");
+
+      bdy_ids.insert(bcid);
+    }
+  }
+
+  if (!opts.input_subdomain_names.empty())
+  {
+    // Make sure subdomain info caches are up to date
+    if (!boundary_mesh.preparation().has_cached_elem_data)
+      boundary_mesh.cache_elem_data();
+
+    const auto subdomain_ids =
+        MooseMeshUtils::getSubdomainIDs(boundary_mesh, opts.input_subdomain_names);
+
+    // Check that the requested subdomains exist in the mesh
+    std::set<SubdomainID> subdomains;
+    boundary_mesh.subdomain_ids(subdomains);
+
+    for (auto i : index_range(subdomain_ids))
+    {
+      if (subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(subdomain_ids[i]))
+        mg.paramError("input_subdomain_names",
+                      opts.input_subdomain_names[i],
+                      " was not found in the boundary mesh");
+
+      bdy_ids.insert(subdomain_ids[i]);
+    }
+  }
+
+  return bdy_ids;
+}
+
 std::unique_ptr<MeshBase>
 triangulateWithDelaunay(MeshGenerator & mg,
                         std::unique_ptr<MeshBase> boundary_mesh,
@@ -43,48 +92,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
 
   // If we're using a user-requested subset of boundaries on that
   // mesh, get their ids.
-  std::set<std::size_t> bdy_ids;
-
-  if (!xyd_opts.input_boundary_names.empty())
-  {
-    if (!xyd_opts.input_subdomain_names.empty())
-      mg.paramError(
-          "input_subdomain_names",
-          "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
-
-    for (const auto & name : xyd_opts.input_boundary_names)
-    {
-      auto bcid = MooseMeshUtils::getBoundaryID(name, *mesh);
-      if (bcid == BoundaryInfo::invalid_id)
-        mg.paramError("input_boundary_names", name, " is not a boundary name in the input mesh");
-
-      bdy_ids.insert(bcid);
-    }
-  }
-
-  if (!xyd_opts.input_subdomain_names.empty())
-  {
-    // Make sure subdomain info caches are up to date
-    if (!mesh->preparation().has_cached_elem_data)
-      mesh->cache_elem_data();
-
-    const auto subdomain_ids =
-        MooseMeshUtils::getSubdomainIDs(*mesh, xyd_opts.input_subdomain_names);
-
-    // Check that the requested subdomains exist in the mesh
-    std::set<SubdomainID> subdomains;
-    mesh->subdomain_ids(subdomains);
-
-    for (auto i : index_range(subdomain_ids))
-    {
-      if (subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(subdomain_ids[i]))
-        mg.paramError("input_subdomain_names",
-                      xyd_opts.input_subdomain_names[i],
-                      " was not found in the boundary mesh");
-
-      bdy_ids.insert(subdomain_ids[i]);
-    }
-  }
+  const std::set<std::size_t> bdy_ids = outerBoundaryIds(mg, *mesh, xyd_opts);
 
   if (!bdy_ids.empty())
     poly2tri.set_outer_boundary_ids(bdy_ids);

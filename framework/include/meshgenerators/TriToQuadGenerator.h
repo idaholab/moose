@@ -90,8 +90,6 @@ protected:
   std::unique_ptr<MeshBase> & _input;
   /// Algorithm used to build the quadrilaterals
   const MooseEnum _algorithm;
-  /// Algorithm used to pair adjacent triangles during recombination
-  const MooseEnum _matching;
   /// Score below which a pair of adjacent triangles is not recombined
   const Real _eta_min;
   /// Whether the triangles that survive recombination are moved into their own subdomain

@@ -5,8 +5,8 @@
 ## Overview
 
 `XYFrontalDelaunayGenerator` triangulates the planar region enclosed by an input boundary mesh,
-optionally around holes, in the same way and with the same parameters as
-[XYDelaunayGenerator.md]. It defines the region with
+optionally around holes. It shares the boundary, hole and sizing parameters of
+[XYDelaunayGenerator.md], but not that generator's own parameters. It defines the region with
 [!param](/Mesh/XYFrontalDelaunayGenerator/boundary) and
 [!param](/Mesh/XYFrontalDelaunayGenerator/holes), limits the element size with
 [!param](/Mesh/XYFrontalDelaunayGenerator/desired_area),
@@ -16,6 +16,8 @@ optionally around holes, in the same way and with the same parameters as
 [!param](/Mesh/XYFrontalDelaunayGenerator/output_boundary) and
 [!param](/Mesh/XYFrontalDelaunayGenerator/hole_boundaries). Consult that page for the meaning of
 those parameters, for how a boundary ring is read out of an input mesh, and for hole stitching.
+[!param](/Mesh/XYFrontalDelaunayGenerator/interior_points) forces nodes at given interior
+locations; points outside the region are ignored.
 
 What differs is how the interior points are chosen. Rather than refining a triangulation until
 every element meets the area limit, this generator advances a front
@@ -87,6 +89,8 @@ in the frame of a cross field solved over the disk:
 
 !listing test/tests/meshgenerators/xy_frontal_delaunay_generator/frontal_circle.i block=Mesh
 
+!media media/mesh/frontal_circle_mesh.png style=width:60%;margin-left:auto;margin-right:auto; id=fig:frontal_circle caption=The disk triangulation of the input above. The advance places the points, so the triangles lean toward right isosceles shapes aligned with the cross field.
+
 A domain containing a hole. The front advances from the hole boundary as well as from the outer
 boundary, and the name given in
 [!param](/Mesh/XYFrontalDelaunayGenerator/hole_boundaries) is carried onto the sideset that the
@@ -103,6 +107,8 @@ circular holes and then recombines the result into quadrilaterals, collecting th
 could not be merged into their own subdomain so the yield can be measured:
 
 !listing test/tests/meshgenerators/mbb_pipeline/mbb_pipeline.i block=Mesh
+
+!media media/mesh/mbb_all_quad_mesh.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:mbb_all_quad caption=The MBB-beam domain meshed by this pipeline with [!param](/Mesh/TriToQuadGenerator/all_quad), recombined into quadrilaterals and smoothed.
 
 !bibtex bibliography
 

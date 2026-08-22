@@ -330,7 +330,7 @@ void
 IncrementalDelaunay::initialize(const std::vector<Point2D> & points,
                                 const std::vector<Segment> & segments)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   if (points.empty())
     mooseError("IncrementalDelaunay: initialize() needs at least one point.");
@@ -387,7 +387,7 @@ IncrementalDelaunay::initialize(const std::vector<Point2D> & points,
 std::size_t
 IncrementalDelaunay::insertPoint(const Point2D & p)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   if (_triangles.empty())
     mooseError("IncrementalDelaunay: initialize() has to run before a point can be inserted.");
@@ -466,7 +466,7 @@ IncrementalDelaunay::insertPoint(const Point2D & p)
 void
 IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   if (v0 == v1)
     mooseError("IncrementalDelaunay: a constrained segment needs two different vertices, but both "
@@ -622,7 +622,7 @@ IncrementalDelaunay::getTriangles() const
 std::vector<std::string>
 IncrementalDelaunay::checkInvariants() const
 {
-  initPredicates();
+  Moose::initPredicates();
 
   std::vector<std::string> violations;
   std::set<Segment> edges;
@@ -689,7 +689,7 @@ IncrementalDelaunay::checkInvariants() const
 std::vector<std::string>
 IncrementalDelaunay::checkEmptyCircumcircle() const
 {
-  initPredicates();
+  Moose::initPredicates();
 
   std::vector<std::string> violations;
   for (const auto t : index_range(_triangles))

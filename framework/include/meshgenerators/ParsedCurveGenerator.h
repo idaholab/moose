@@ -47,9 +47,9 @@ public:
                             const Real oversample_factor);
 
   /**
-   * Calculates the point coordinates {x(t), y(t), z(t)} based on parameter t. This is the one
-   * evaluator of the curve, so that whatever else works on the same curve evaluates the formulas
-   * this generator parsed rather than parsing them again.
+   * Calculates the point coordinates {x(t), y(t), z(t)} based on parameter t. This is the single
+   * evaluator of the curve: another object working on the same curve calls this instead of
+   * parsing the formulas again.
    * @param t_param parameter t that is used to determine the coordinates of the point
    * @return the point coordinates
    */

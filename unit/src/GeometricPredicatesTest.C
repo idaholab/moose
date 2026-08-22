@@ -42,7 +42,7 @@ predicateSign(const double value)
  */
 TEST(GeometricPredicatesTest, collinearIsExactlyZero)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   // The volatile intermediates force each operation to round to double exactly once, no matter
   // how this test file itself is compiled: a compiler defaulting to fast math (Intel's icx) or
@@ -86,7 +86,7 @@ TEST(GeometricPredicatesTest, collinearIsExactlyZero)
  */
 TEST(GeometricPredicatesTest, orientationSign)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const double pa[2] = {-0.75, 0.25};
   const double pb[2] = {2.5, -1.0};
@@ -104,7 +104,7 @@ TEST(GeometricPredicatesTest, orientationSign)
  */
 TEST(GeometricPredicatesTest, cocircularIsExactlyZero)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   // The four axis crossings of the circle of radius 4 centered at the origin.
   const double radius = 4.0;
@@ -143,7 +143,7 @@ TEST(GeometricPredicatesTest, cocircularIsExactlyZero)
  */
 TEST(GeometricPredicatesTest, orient2dPermutationAntisymmetry)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const double pa[2] = {-0.75, 0.25};
   const double pb[2] = {2.5, -1.0};
@@ -166,7 +166,7 @@ TEST(GeometricPredicatesTest, orient2dPermutationAntisymmetry)
  */
 TEST(GeometricPredicatesTest, incirclePermutationAntisymmetry)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const double pa[2] = {0.0, 0.0};
   const double pb[2] = {1.0, 0.0};

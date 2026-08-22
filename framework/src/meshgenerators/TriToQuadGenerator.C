@@ -12,6 +12,7 @@
 #include "GeometryUtils.h"
 #include "MooseMeshElementConversionUtils.h"
 #include "MooseMeshUtils.h"
+#include "MooseUtils.h"
 
 #include "libmesh/boundary_info.h"
 #include "libmesh/elem.h"
@@ -160,12 +161,6 @@ TriToQuadGenerator::validParams()
                              "every triangle into three quadrilaterals. 'RECOMBINE' merges pairs "
                              "of adjacent triangles into quadrilaterals.");
 
-  MooseEnum matching("GREEDY", "GREEDY");
-  params.addParam<MooseEnum>(
-      "matching",
-      matching,
-      "The algorithm used to pair adjacent triangles with the 'RECOMBINE' algorithm.");
-
   params.addRangeCheckedParam<Real>(
       "eta_min",
       0.3,
@@ -185,7 +180,7 @@ TriToQuadGenerator::validParams()
                         "merged are eliminated so that the converted mesh consists exclusively of "
                         "quadrilaterals.");
 
-  params.addParamNamesToGroup("matching eta_min tri_subdomain_name all_quad", "Recombination");
+  params.addParamNamesToGroup("eta_min tri_subdomain_name all_quad", "Recombination");
 
   params.addClassDescription("Converts a mesh consisting of TRI3 elements into a mesh consisting "
                              "of QUAD4 elements, either by splitting every triangle into three "
@@ -198,7 +193,6 @@ TriToQuadGenerator::TriToQuadGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _algorithm(getParam<MooseEnum>("algorithm")),
-    _matching(getParam<MooseEnum>("matching")),
     _eta_min(getParam<Real>("eta_min")),
     _has_tri_subdomain(isParamValid("tri_subdomain_name")),
     _tri_subdomain_name(_has_tri_subdomain ? getParam<SubdomainName>("tri_subdomain_name")
@@ -237,9 +231,11 @@ TriToQuadGenerator::generate()
                  libMesh::Utility::enum_to_string(elem->type()),
                  " element. Only meshes consisting exclusively of TRI3 elements are supported.");
 
-  // Both algorithms measure the areas and the angles that decide the conversion in the XY plane
+  // Both algorithms measure the areas and the angles that decide the conversion in the XY plane.
+  // The comparison is fuzzy so that z coordinates carrying round-off, for instance from a
+  // TransformGenerator rotation into the plane, are not rejected
   for (const auto & node : mesh.node_ptr_range())
-    if ((*node)(2) != 0.0)
+    if (!MooseUtils::absoluteFuzzyEqual((*node)(2), 0.0))
       paramError("input",
                  "Node ",
                  node->id(),
@@ -362,7 +358,6 @@ TriToQuadGenerator::subdivide(ReplicatedMesh & mesh) const
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   const auto bdry_side_list = boundary_info.build_side_list();
 
-  const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   const auto scratch_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(mesh);
 
   // Keying the midpoints on the sorted node id pair of their edge makes the two elements sharing
@@ -442,8 +437,7 @@ TriToQuadGenerator::subdivide(ReplicatedMesh & mesh) const
       for (const auto k : index_range(quad_corners))
         quad->set_node(k, points[quad_corners[k]]);
       quad->subdomain_id() = parent->subdomain_id();
-      for (const auto j : make_range(n_elem_extra_ids))
-        quad->set_extra_integer(j, parent->get_extra_integer(j));
+      MooseMeshElementConversionUtils::retainEEID(mesh, parent->id(), quad);
 
       quads.push_back(quad);
     }
@@ -498,10 +492,8 @@ TriToQuadGenerator::recombine(ReplicatedMesh & mesh) const
       candidates.push_back(buildCandidate(*elem, s, *neighbor));
     }
 
-  mooseAssert(_matching == "GREEDY", "GREEDY is the only option of the matching parameter.");
   const auto merges = greedyMatching(candidates, _eta_min);
 
-  const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   const auto scratch_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(mesh);
 
   for (const auto & merge : merges)
@@ -516,8 +508,7 @@ TriToQuadGenerator::recombine(ReplicatedMesh & mesh) const
 
     // The two triangles may carry different extra integers, so they always come from the lower
     // numbered one to keep the result reproducible
-    for (const auto j : make_range(n_elem_extra_ids))
-      quad->set_extra_integer(j, first->get_extra_integer(j));
+    MooseMeshElementConversionUtils::retainEEID(mesh, first->id(), quad);
 
     for (const Elem * const parent : {first, second})
     {
@@ -562,9 +553,13 @@ void
 TriToQuadGenerator::moveSurvivingTriangles(ReplicatedMesh & mesh,
                                            const subdomain_id_type scratch_subdomain_id) const
 {
-  // The scratch subdomain is empty when nothing was merged, so its id is taken as the reference
+  // A name the input mesh already uses for a block would leave two subdomain ids sharing that
+  // name, so the surviving triangles join the existing subdomain instead of a new one. Otherwise
+  // the scratch subdomain is empty when nothing was merged, so its id is taken as the reference
   // rather than asking the mesh for its highest subdomain id again
-  const subdomain_id_type tri_subdomain_id = scratch_subdomain_id + 1;
+  const auto existing_id = MooseMeshUtils::getSubdomainID(_tri_subdomain_name, mesh);
+  const subdomain_id_type tri_subdomain_id =
+      (existing_id != Moose::INVALID_BLOCK_ID) ? existing_id : scratch_subdomain_id + 1;
 
   bool has_surviving_tri = false;
   for (const auto & elem : mesh.active_element_ptr_range())
@@ -576,6 +571,6 @@ TriToQuadGenerator::moveSurvivingTriangles(ReplicatedMesh & mesh,
 
   // Naming a subdomain that holds no element would leave the mesh with a block name that matches
   // nothing
-  if (has_surviving_tri)
+  if (has_surviving_tri && existing_id == Moose::INVALID_BLOCK_ID)
     mesh.subdomain_name(tri_subdomain_id) = _tri_subdomain_name;
 }

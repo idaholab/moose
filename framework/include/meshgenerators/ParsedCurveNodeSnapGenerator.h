@@ -49,6 +49,8 @@ protected:
   const bool _is_closed_loop;
   /// Sampled t values used to bracket the closest curve point
   std::vector<Real> _t_samples;
+  /// Curve points at the sampled t values, evaluated once in generate() and reused for every node
+  std::vector<Point> _sample_points;
 
   /**
    * Gets the generator that defines the curve, after checking that it is a ParsedCurveGenerator
@@ -72,6 +74,15 @@ protected:
    * @return The squared distance in the XY plane
    */
   Real squaredDistance(const Real t_param, const Point & point);
+
+  /**
+   * Calculates the squared in-plane distance between a given point and an already evaluated point
+   * of the curve
+   * @param curve_point The point of the curve
+   * @param point The point to measure the distance from
+   * @return The squared distance in the XY plane
+   */
+  Real squaredDistance(const Point & curve_point, const Point & point) const;
 
   /**
    * Finds the parameter t of the curve point that is the closest to a given point. The sampled t

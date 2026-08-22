@@ -55,7 +55,6 @@
     type = TriToQuadGenerator
     input = triang
     algorithm = RECOMBINE
-    matching = GREEDY
     eta_min = 0.3
     all_quad = true
   []

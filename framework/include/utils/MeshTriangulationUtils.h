@@ -59,6 +59,19 @@ struct XYDelaunayOptions
 };
 
 /**
+ * Resolves the outer-boundary selection of the options into the set of ids that define it: the ids
+ * of 'input_boundary_names' or of 'input_subdomain_names' in the boundary mesh. This is shared by
+ * the Triangle-backed and the frontal triangulators, so that both select the outer boundary the
+ * same way.
+ * @param mg The calling mesh generator (used for paramError reporting)
+ * @param boundary_mesh The mesh the names are resolved against
+ * @param opts Triangulation options carrying the names (see XYDelaunayOptions)
+ * @return The resolved ids, empty when neither parameter selects a boundary
+ */
+std::set<std::size_t>
+outerBoundaryIds(MeshGenerator & mg, MeshBase & boundary_mesh, const XYDelaunayOptions & opts);
+
+/**
  * Performs a 2D Delaunay triangulation (via libMesh::Poly2TriTriangulator) inside a closed boundary
  * mesh with optional holes, optionally stitches the resulting triangulation to each hole mesh that
  * requests it, and applies subdomain / boundary renumbering. This is the core algorithm shared by

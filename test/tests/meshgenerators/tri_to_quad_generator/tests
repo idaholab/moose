@@ -5,11 +5,12 @@
     type = Exodiff
     input = 'subdivision_all_quad.i'
     exodiff = 'subdivision_all_quad_in.e'
-    cli_args = '--mesh-only'
+    cli_args = '--mesh-only Mesh/to_quad/show_info=true'
     recover = false
     mesh_mode = REPLICATED
     # The mesh-only console output pins the element count and the absence of any leftover triangle
-    expect_out = 'n_elem\(\)=96.*Mesh Element Type\(s\):\s+QUAD4\n'
+    expect_out = 'n_elem\(\)=96.*Mesh Element Type\(s\):.*QUAD4'
+    absent_out = 'TRI3'
     requirement = 'The system shall convert a mesh of 32 triangles into a conformal mesh of 96 '
                   'quadrilaterals with no inverted elements by splitting every triangle into three '
                   'quadrilaterals built on its centroid and its edge midpoints.'
@@ -18,13 +19,13 @@
     type = Exodiff
     input = 'recombine_ids.i'
     exodiff = 'recombine_ids_in.e'
-    cli_args = '--mesh-only'
+    cli_args = '--mesh-only Mesh/to_quad/show_info=true'
     recover = false
     mesh_mode = REPLICATED
     # The tri_id extra element integer is distinct for every triangle of the input mesh, so the
     # gold records which of the two parents each merged quadrilateral inherited it from, and the
     # mixed element type pins the presence of the triangles that recombination could not merge
-    expect_out = 'Mesh Element Type\(s\):\s+TRI3, QUAD4\n'
+    expect_out = 'Mesh Element Type\(s\):.*TRI3, QUAD4'
     requirement = 'The system shall convert a mesh of triangles into quadrilaterals by merging '
                   'adjacent pairs without merging across a subdomain interface or across an edge '
                   'carrying a sideset, shall preserve the subdomain names, sidesets, nodesets and '
@@ -35,13 +36,14 @@
     type = Exodiff
     input = 'all_quad_ids.i'
     exodiff = 'all_quad_ids_in.e'
-    cli_args = '--mesh-only'
+    cli_args = '--mesh-only Mesh/to_quad/show_info=true'
     recover = false
     mesh_mode = REPLICATED
     # This is the contrasting case to recombine_ids, which runs the same mesh through the same
     # merges and asserts that triangles are left over, so the absent TRI3 is what the elimination
     # is worth and the binary gold alone would not state it
-    expect_out = 'Mesh Element Type\(s\):\s+QUAD4\n'
+    expect_out = 'Mesh Element Type\(s\):.*QUAD4'
+    absent_out = 'TRI3'
     requirement = 'The system shall convert a mesh of triangles into a mesh consisting exclusively '
                   'of quadrilaterals by merging adjacent pairs and then eliminating every triangle '
                   'that could not be merged, and shall carry the subdomain names, sidesets, '
