@@ -97,9 +97,9 @@ TEST(PhysicalMortarConstants, CNormalSetWithPhysicalThrows)
 // Verify that c_tangential_strategy=physical is rejected on a frictionless contact pair.
 TEST(PhysicalMortarConstants, CTangentialPhysicalOnFrictionlessThrows)
 {
-  EXPECT_THROW(runCumulativeNL("frictionless_physical.i",
-                               {"Contact/mortar/c_tangential_strategy=physical"}),
-               std::exception);
+  EXPECT_THROW(
+      runCumulativeNL("frictionless_physical.i", {"Contact/mortar/c_tangential_strategy=physical"}),
+      std::exception);
 }
 
 #endif // MOOSE_AD_MAX_DOFS_PER_ELEM >= 250
