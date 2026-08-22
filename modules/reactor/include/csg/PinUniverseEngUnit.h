@@ -46,7 +46,7 @@ public:
                      const std::vector<Real> & ring_radii,
                      const std::vector<std::string> & fill_mats);
   /**
-   * @brief Return the pin engeering unit attributes for this object.
+   * @brief Return the pin engineering unit attributes for this object.
    *
    * @return map containing: ring_radii (std::vector<Real>) and fill_mats (std::vector<std::string>)
    */

@@ -25,7 +25,8 @@
 class MooseApp;
 
 /**
- * Type definition for a variant that can hold all the supported types for lattice attributes
+ * Type definition for a variant that can hold all the supported types for lattice and CSG
+ * engineering unit attributes
  */
 typedef std::variant<int,
                      unsigned int,

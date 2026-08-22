@@ -18,7 +18,7 @@ namespace CSG
 /**
  * DuctedPinEngUnit is a CSGUniverseEngUnit that represents a pin cell structure
  * (concentric cylinders surrounded by concentric ducted regions) using basic
- * engineering-scale attrbutes, including geometry type (hex or square), ring radii,
+ * engineering-scale attributes, including geometry type (hex or square), ring radii,
  * duct apothems, axial boundaries, and radial and axial region ID names for each region
  * of the pin structure. This engineering unit supports both 3D and 2D/infinite pin geometries.
  *
