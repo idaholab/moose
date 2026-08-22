@@ -182,10 +182,10 @@ offset = 0.00
     value = 0.0
   []
   [topx]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = 'top_top'
-    value = 0.0
+    function = '0'
   []
   [topy]
     type = DirichletBC
