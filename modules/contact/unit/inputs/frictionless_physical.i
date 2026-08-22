@@ -205,15 +205,13 @@ offset = 0.00
   type = Transient
   end_time = 0.125
   dt = .025
-  dtmin = .001
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-14                  1e-5'
-  l_max_its = 100
-  nl_max_its = 100
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       mumps                      NONZERO'
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-10
   line_search = 'basic'
+  abort_on_solve_fail = true
 []
 
 [Preconditioning]
