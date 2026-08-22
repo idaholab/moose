@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYZDelaunayGenerator.md'
-  issues = '#28297 #29718 #30154 #31759'
+  issues = '#28297 #29718 #30154 #31759 #33589'
   [xyzdelaunay]
     requirement = "The system shall have the capability of tetrahedralizing a triangulated boundary"
     [basic_3d]
@@ -145,6 +145,41 @@
       valgrind = none # see #31360
       capabilities = 'netgen'
     []
+    [quadratic_tet10]
+      type = 'JSONDiff'
+      input = 'xyzdelaunay_quadratic.i'
+      jsondiff = 'xyzdelaunay_quadratic_tet10_out.json'
+      # The JSON output adds these keys when run on multiple ranks.
+      ignored_items = 'part number_of_parts'
+      recover = false
+      detail = "producing second-order TET10 elements with curved mid-edge nodes inherited from a second-order boundary surface."
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
+    [quadratic_tet14]
+      type = 'JSONDiff'
+      input = 'xyzdelaunay_quadratic.i'
+      cli_args = 'Mesh/triang/tet_element_type=TET14
+                  Outputs/file_base=xyzdelaunay_quadratic_tet14_out'
+      jsondiff = 'xyzdelaunay_quadratic_tet14_out.json'
+      ignored_items = 'part number_of_parts'
+      recover = false
+      detail = "producing complete-order TET14 elements."
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
+    [quadratic_tet10_raise_hole]
+      type = 'JSONDiff'
+      input = 'xyzdelaunay_quadratic.i'
+      cli_args = 'Mesh/hole_second/conversion_type=FIRST_ORDER
+                  Outputs/file_base=xyzdelaunay_quadratic_tet10_raise_out'
+      jsondiff = 'xyzdelaunay_quadratic_tet10_raise_out.json'
+      ignored_items = 'part number_of_parts'
+      recover = false
+      detail = "stitching a first-order hole mesh into a second-order tetrahedralization after raising the hole mesh element order to match."
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
   []
   [errors]
     requirement = "The system shall throw an error when tetrahedralizing a triangulated boundary"
@@ -214,6 +249,17 @@
                   Mesh/final_generator=triang'
       expect_err = "3D hole meshes with non-TRI3 surface elements cannot be stitched"
       detail = "if a hole mesh to be stitched contains non-TRI3 surface elements but is not allowed to be converted"
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
+    [first_order_with_quadratic_stitched_hole]
+      type = RunException
+      input = 'xyzdelaunay_quadratic.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/bdy_second/conversion_type=FIRST_ORDER
+                  Mesh/triang/tet_element_type=TET4'
+      expect_err = "Cannot use first order elements with stitched quadratic element holes"
+      detail = "if a quadratic hole mesh is stitched into a requested first-order tetrahedralization"
       valgrind = none # see #31360
       capabilities = 'netgen'
     []
