@@ -27,7 +27,6 @@
       type = 'CSVDiff'
       input = 'frontal_circle.i'
       cli_args = 'Mesh/triang/metric=L2
-                  Mesh/triang/orientation=BOUNDARY
                   Outputs/file_base=frontal_circle_l2_ab'
       csvdiff = 'frontal_circle_l2_ab.csv'
       override_columns = 'avg_quality elem_size'

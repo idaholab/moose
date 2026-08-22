@@ -13,13 +13,14 @@ chord and the curve is real geometry that the mesh has lost.
 [!param](/Mesh/ParsedCurveNodeSnapGenerator/boundary) and moves each of its nodes to the closest
 point of the curve defined by the [ParsedCurveGenerator.md] named in
 [!param](/Mesh/ParsedCurveNodeSnapGenerator/curve_generator). The curve is not re-entered here:
-`section_bounding_t_values` and `is_closed_loop` are read from the parameters of that generator,
+[!param](/Mesh/ParsedCurveGenerator/section_bounding_t_values) and
+[!param](/Mesh/ParsedCurveGenerator/is_closed_loop) are read from the parameters of that generator,
 and the curve itself is evaluated by that generator, so the nodes are snapped onto the same curve
 they were meshed from, and there is no second definition to keep in step.
 
-The boundary may be given as a sideset or as a nodeset; the nodes of both are collected. Since
-the curve is defined in the XY-plane, only the in-plane coordinates of a node are changed. The
-input mesh must be replicated.
+The boundary may be given as a sideset, as a nodeset, or as both; the nodes of its sides and of
+its nodeset entries are all collected. Since the curve is defined in the XY-plane, only the
+in-plane coordinates of a node are changed. The input mesh must be replicated.
 
 This is worth doing after any step that adds nodes to a curved boundary, and
 [!param](/Mesh/TriToQuadGenerator/all_quad) is the case that motivates it: eliminating the
@@ -30,10 +31,13 @@ In the circle example below, the boundary mesh approximates a unit circle by the
 32-sided polygon and so encloses an area of $3.121445$, in error by $0.64\%$. Snapping brings the
 enclosed area to $3.141032$, in error by $0.018\%$.
 
+!media media/mesh/parsed_curve_node_snap.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:parsed_curve_node_snap caption=A quadrant of that circle boundary, with the curve drawn in red. Before the snap, the boundary nodes the conversion added lie on the chords, inside the curve; the snap moves every boundary node onto the curve and the smoothing relaxes the elements behind it.
+
 ## Finding the Closest Point
 
 The closest point is found in the curve parameter $t$, not in space. Each section of the curve
-delimited by `section_bounding_t_values` is first sampled uniformly at
+delimited by [!param](/Mesh/ParsedCurveGenerator/section_bounding_t_values) is first sampled
+uniformly at
 [!param](/Mesh/ParsedCurveNodeSnapGenerator/samples_per_section) values of $t$, and the sample
 nearest the node brackets the minimum between its two neighbors. A golden-section search then
 refines $t$ within that bracket.

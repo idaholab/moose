@@ -302,7 +302,7 @@ insertOneAtATime(const std::vector<Point2D> & points, IncrementalDelaunay & tri)
  */
 TEST(IncrementalDelaunayTest, duplicatePointReturnsExistingVertex)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const auto points = collinearPoints();
 
@@ -336,7 +336,7 @@ TEST(IncrementalDelaunayTest, duplicatePointReturnsExistingVertex)
  */
 TEST(IncrementalDelaunayTest, regularGridStaysDelaunayAfterEveryInsertion)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const auto points = gridPoints();
 
@@ -360,7 +360,7 @@ TEST(IncrementalDelaunayTest, regularGridStaysDelaunayAfterEveryInsertion)
  */
 TEST(IncrementalDelaunayTest, collinearPointsStayDelaunayAfterEveryInsertion)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const auto points = collinearPoints();
 
@@ -388,7 +388,7 @@ TEST(IncrementalDelaunayTest, collinearPointsStayDelaunayAfterEveryInsertion)
  */
 TEST(IncrementalDelaunayTest, constrainedSegmentSurvivesInsertions)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const auto points = flatQuadPoints();
 
@@ -435,7 +435,7 @@ TEST(IncrementalDelaunayTest, constrainedSegmentSurvivesInsertions)
  */
 TEST(IncrementalDelaunayTest, pointOnConstrainedSegmentSplitsIt)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   const auto points = flatQuadPoints();
 
@@ -466,7 +466,7 @@ TEST(IncrementalDelaunayTest, pointOnConstrainedSegmentSplitsIt)
  */
 TEST(IncrementalDelaunayTest, triangleCountMatchesEulerFormula)
 {
-  initPredicates();
+  Moose::initPredicates();
 
   // The 4 x 4 grid: its hull is the square from (0, 0) to (3, 3), whose boundary carries the twelve
   // points of the perimeter, leaving the four in the middle inside. 2 * 16 - 12 - 2 = 18, which is

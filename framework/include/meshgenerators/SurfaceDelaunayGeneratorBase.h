@@ -10,7 +10,11 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "MeshTriangulationUtils.h"
+
+namespace MeshTriangulationUtils
+{
+struct XYDelaunayOptions;
+}
 
 /**
  * Base class for Delaunay mesh generators applied to a surface.

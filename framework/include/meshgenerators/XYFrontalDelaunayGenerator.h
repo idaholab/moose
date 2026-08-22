@@ -68,14 +68,6 @@ protected:
   };
 
   /**
-   * Resolves the boundary and subdomain names that select the outer boundary into the ids that
-   * define it, the same ids that XYDelaunayGenerator hands the Delaunay triangulator.
-   * @param boundary_mesh The input mesh holding the outer boundary
-   * @return The ids selecting the outer boundary, empty when the whole input mesh defines it
-   */
-  std::set<std::size_t> outerBoundaryIds(MeshBase & boundary_mesh) const;
-
-  /**
    * Triangulates the domain with the existing Delaunay triangulator at _background_area_factor
    * times the requested area. The result carries the cross field and, where no area limit is given,
    * the target area itself, so it only has to cover the domain and be coarse.
@@ -123,9 +115,6 @@ protected:
   /// @return The circumradius of the target triangle of the given edge length
   Real targetCircumradius(Real size) const;
 
-  /// @return The bucket of the boundary segment grid a point falls in
-  std::pair<long, long> boundaryGridKey(const Point & point) const;
-
   /**
    * Sorts the boundary segments into the buckets the BOUNDARY frame searches, so that a search only
    * has to reach out until it has covered the distance to the nearest segment rather than measure
@@ -145,8 +134,8 @@ protected:
   /// @return Whether a point lies inside the outer boundary and outside every hole
   bool insideDomain(const Point & point) const;
 
-  /// @return The bucket of the vertex grid a point falls in
-  std::pair<long, long> gridKey(const Point & point) const;
+  /// @return The bucket a point falls in on a grid of the given cell size
+  std::pair<long, long> gridKey(const Point & point, Real cell) const;
 
   /**
    * Records a vertex in the grid the rejection rule searches.

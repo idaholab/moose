@@ -117,6 +117,12 @@ ParsedCurveNodeSnapGenerator::generate()
     if (node_boundary_id == boundary_id)
       boundary_node_ids.insert(node_id);
 
+  // The sampled curve points do not depend on the node being snapped, so they are evaluated once
+  // here instead of once per node
+  _sample_points.reserve(_t_samples.size());
+  for (const auto t_sample : _t_samples)
+    _sample_points.push_back(curvePoint(t_sample));
+
   for (const auto node_id : boundary_node_ids)
   {
     Node & node = mesh->node_ref(node_id);
@@ -162,7 +168,12 @@ ParsedCurveNodeSnapGenerator::curvePoint(const Real t_param)
 Real
 ParsedCurveNodeSnapGenerator::squaredDistance(const Real t_param, const Point & point)
 {
-  const Point curve_point = curvePoint(t_param);
+  return squaredDistance(curvePoint(t_param), point);
+}
+
+Real
+ParsedCurveNodeSnapGenerator::squaredDistance(const Point & curve_point, const Point & point) const
+{
   const Real dx = curve_point(0) - point(0);
   const Real dy = curve_point(1) - point(1);
   return dx * dx + dy * dy;
@@ -177,7 +188,7 @@ ParsedCurveNodeSnapGenerator::closestParameter(const Point & point)
   Real closest_squared_distance = std::numeric_limits<Real>::max();
   for (const auto i : index_range(_t_samples))
   {
-    const Real sample_squared_distance = squaredDistance(_t_samples[i], point);
+    const Real sample_squared_distance = squaredDistance(_sample_points[i], point);
     if (sample_squared_distance < closest_squared_distance)
     {
       closest_squared_distance = sample_squared_distance;

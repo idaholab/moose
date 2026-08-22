@@ -10,7 +10,6 @@
 #include "XYFrontalDelaunayGenerator.h"
 
 #include "GeometryUtils.h"
-#include "MooseMeshUtils.h"
 
 #include "libmesh/boundary_info.h"
 #include "libmesh/elem.h"
@@ -264,52 +263,10 @@ XYFrontalDelaunayGenerator::XYFrontalDelaunayGenerator(const InputParameters & p
 {
   checkBoundaryAndHolesParams(_hole_ptrs);
   checkInteriorPoints(_interior_points);
-}
 
-std::set<std::size_t>
-XYFrontalDelaunayGenerator::outerBoundaryIds(MeshBase & boundary_mesh) const
-{
-  std::set<std::size_t> ids;
-
-  if (isParamValid("input_boundary_names"))
-  {
-    if (isParamValid("input_subdomain_names"))
-      paramError(
-          "input_subdomain_names",
-          "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
-
-    for (const auto & name : getParam<std::vector<BoundaryName>>("input_boundary_names"))
-    {
-      const auto bcid = MooseMeshUtils::getBoundaryID(name, boundary_mesh);
-      if (bcid == libMesh::BoundaryInfo::invalid_id)
-        paramError("input_boundary_names", name, " is not a boundary name in the input mesh");
-
-      ids.insert(bcid);
-    }
-  }
-
-  if (isParamValid("input_subdomain_names"))
-  {
-    // Make sure subdomain info caches are up to date
-    if (!boundary_mesh.preparation().has_cached_elem_data)
-      boundary_mesh.cache_elem_data();
-
-    const auto & names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
-    const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(boundary_mesh, names);
-
-    std::set<SubdomainID> subdomains;
-    boundary_mesh.subdomain_ids(subdomains);
-
-    for (const auto i : index_range(subdomain_ids))
-    {
-      if (subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(subdomain_ids[i]))
-        paramError("input_subdomain_names", names[i], " was not found in the boundary mesh");
-
-      ids.insert(subdomain_ids[i]);
-    }
-  }
-
-  return ids;
+  // The frame the orientation selects only enters the LINF metric, so it does nothing under L2
+  if (_metric == "L2" && isParamSetByUser("orientation"))
+    paramError("orientation", "This parameter only applies to the 'LINF' metric.");
 }
 
 std::unique_ptr<MeshBase>
@@ -450,10 +407,10 @@ XYFrontalDelaunayGenerator::targetCircumradius(const Real size) const
 }
 
 std::pair<long, long>
-XYFrontalDelaunayGenerator::boundaryGridKey(const Point & point) const
+XYFrontalDelaunayGenerator::gridKey(const Point & point, const Real cell) const
 {
-  return {static_cast<long>(std::floor(point(0) / _boundary_cell)),
-          static_cast<long>(std::floor(point(1) / _boundary_cell))};
+  return {static_cast<long>(std::floor(point(0) / cell)),
+          static_cast<long>(std::floor(point(1) / cell))};
 }
 
 void
@@ -493,8 +450,8 @@ XYFrontalDelaunayGenerator::buildBoundarySegmentGrid()
                  static_cast<std::size_t>(std::ceil(2.0 * (end - start).norm() / _boundary_cell)));
     for (const auto step : make_range(steps + 1))
     {
-      auto & bucket =
-          _boundary_segment_grid[boundaryGridKey(start + (Real(step) / steps) * (end - start))];
+      auto & bucket = _boundary_segment_grid[gridKey(start + (Real(step) / steps) * (end - start),
+                                                     _boundary_cell)];
       // The steps of a straight segment reach a bucket in one run, so the last entry is the only
       // one that can already be this segment
       if (bucket.empty() || bucket.back() != segment)
@@ -512,7 +469,7 @@ XYFrontalDelaunayGenerator::localFrame(const Point & point) const
   mooseAssert(_boundary_cell > 0.0,
               "The grid over the boundary segments is built before any frame is taken from them.");
 
-  const auto [center_i, center_j] = boundaryGridKey(point);
+  const auto [center_i, center_j] = gridKey(point, _boundary_cell);
 
   // The nearest segment is the one of the lowest index at the smallest distance, whichever buckets
   // it is found in, so that the frame follows from the geometry and not from the order of the
@@ -594,17 +551,10 @@ XYFrontalDelaunayGenerator::insideDomain(const Point & point) const
   return true;
 }
 
-std::pair<long, long>
-XYFrontalDelaunayGenerator::gridKey(const Point & point) const
-{
-  return {static_cast<long>(std::floor(point(0) / _grid_cell)),
-          static_cast<long>(std::floor(point(1) / _grid_cell))};
-}
-
 void
 XYFrontalDelaunayGenerator::addToGrid(const std::size_t vertex, const Point & point)
 {
-  _vertex_grid[gridKey(point)].push_back(vertex);
+  _vertex_grid[gridKey(point, _grid_cell)].push_back(vertex);
 }
 
 bool
@@ -617,7 +567,7 @@ XYFrontalDelaunayGenerator::hasVertexWithin(const IncrementalDelaunay & delaunay
   // so that is how far the buckets have to be searched for the vertices the metric then judges
   const Real reach = (_metric == "L2") ? distance : distance * std::sqrt(2.0);
   const long span = static_cast<long>(std::ceil(reach / _grid_cell));
-  const auto [center_i, center_j] = gridKey(point);
+  const auto [center_i, center_j] = gridKey(point, _grid_cell);
 
   // The buckets are sized on the smallest triangle the advance is asked for, so where the target is
   // coarser the reach spans many of them and all but a few are empty. Walking each row of the
@@ -658,8 +608,8 @@ XYFrontalDelaunayGenerator::placePoint(const IncrementalDelaunay & delaunay,
 
   if (_metric == "L2")
   {
-    // The apex of the equilateral triangle on the edge, or of the right isosceles one where the
-    // edge is already longer than twice the target size
+    // The apex at the target distance from both ends of the edge, or of the right isosceles
+    // triangle on the edge once that edge is longer than sqrt(2) times the target size
     const Real half_length = 0.5 * length;
     point = midpoint + std::sqrt(std::max(size * size - half_length * half_length,
                                           half_length * half_length)) *
@@ -891,8 +841,11 @@ XYFrontalDelaunayGenerator::generate()
                  " element. Only first order boundary elements are supported, because this mesh "
                  "generator produces TRI3 elements.");
 
+  MeshTriangulationUtils::XYDelaunayOptions opts;
+  fillDelaunayOptions(opts);
+
   _outer_outline = std::make_unique<libMesh::TriangulatorInterface::MeshedHole>(
-      *boundary_mesh, outerBoundaryIds(*boundary_mesh));
+      *boundary_mesh, MeshTriangulationUtils::outerBoundaryIds(*this, *boundary_mesh, opts));
 
   std::vector<bool> holes_with_midpoints(hole_meshes.size());
   _hole_outlines.reserve(hole_meshes.size());
@@ -910,9 +863,6 @@ XYFrontalDelaunayGenerator::generate()
                  "Cannot stitch a quadratic element hole to the first order triangles this mesh "
                  "generator produces. Please reduce the order of the hole inputs.");
   }
-
-  MeshTriangulationUtils::XYDelaunayOptions opts;
-  fillDelaunayOptions(opts);
 
   _background_mesh = buildBackgroundMesh(*boundary_mesh, hole_meshes, opts);
   _background_mesh->prepare_for_use();

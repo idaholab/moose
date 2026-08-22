@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SurfaceDelaunayGeneratorBase.h"
+#include "MeshTriangulationUtils.h"
 #include "libmesh/int_range.h"
 #include "libmesh/parallel_implementation.h"
 #include "libmesh/parallel_algebra.h"
@@ -167,11 +168,10 @@ SurfaceDelaunayGeneratorBase::checkBoundaryAndHolesParams(
 void
 SurfaceDelaunayGeneratorBase::checkInteriorPoints(const std::vector<Point> & interior_points) const
 {
-  const bool has_duplicates = std::any_of(
-      interior_points.begin(),
-      interior_points.end(),
-      [&interior_points](const Point & point)
-      { return std::count(interior_points.begin(), interior_points.end(), point) > 1; });
+  std::vector<Point> sorted_points(interior_points);
+  std::sort(sorted_points.begin(), sorted_points.end());
+  const bool has_duplicates =
+      std::adjacent_find(sorted_points.begin(), sorted_points.end()) != sorted_points.end();
   if (has_duplicates)
     paramError("interior_points", "Duplicate points were found in the provided interior points.");
 }

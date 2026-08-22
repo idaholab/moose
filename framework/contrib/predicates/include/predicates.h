@@ -14,8 +14,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef PREDICATES_H
-#define PREDICATES_H
+#ifndef MOOSE_PREDICATES_H
+#define MOOSE_PREDICATES_H
 
 #ifdef __cplusplus
 extern "C"
@@ -31,7 +31,7 @@ extern "C"
 
   /* Initialize the shared roundoff constants and error bounds.  This must run
      exactly once before any predicate below is called.  C++ callers should use
-     initPredicates() rather than calling this directly. */
+     Moose::initPredicates() rather than calling this directly. */
   void moose_exactinit(void);
 
   /* Exact sign of (pb[0] - pa[0]) * (pc[1] - pa[1]) - (pb[1] - pa[1]) *
@@ -44,14 +44,15 @@ extern "C"
      circle through pa, pb and pc, negative if it lies outside, and zero if the
      four points are cocircular.  pa, pb and pc must be in counterclockwise
      order, or the sign is reversed. */
-  double
-  moose_incircle(const double * pa, const double * pb, const double * pc, const double * pd);
+  double moose_incircle(const double * pa, const double * pb, const double * pc, const double * pd);
 
 #ifdef __cplusplus
 }
 
 #include <mutex>
 
+namespace Moose
+{
 /**
  * Runs moose_exactinit() the first time it is called, and never again. Every caller of
  * moose_orient2d() or moose_incircle() must call this first; the predicates read shared constants
@@ -62,6 +63,7 @@ initPredicates()
 {
   static std::once_flag flag;
   std::call_once(flag, []() { moose_exactinit(); });
+}
 }
 
 #endif

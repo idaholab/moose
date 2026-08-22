@@ -46,11 +46,12 @@
     [all_quad]
       type = 'RunApp'
       input = 'mbb_all_quad.i'
-      cli_args = '--mesh-only mbb_all_quad_in.e'
+      cli_args = '--mesh-only mbb_all_quad_in.e Mesh/smooth/show_info=true'
       # The mesh-only console output is the only place the element types of the finished mesh are
       # stated, and the absent TRI3 is the contrast against the mixed mesh the same domain yields
       # when the elimination is not requested
-      expect_out = 'Mesh Element Type\(s\):\s+QUAD4\n'
+      expect_out = 'Mesh Element Type\(s\):.*QUAD4'
+      absent_out = 'TRI3'
       recover = false
       mesh_mode = REPLICATED
       detail = 'produce a mesh consisting exclusively of quadrilaterals.'
