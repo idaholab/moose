@@ -89,8 +89,10 @@ protected:
   /// Postprocessor values referenced in the expressions, in symbol order
   std::vector<const PostprocessorValue *> _postprocessors;
 
-  /// Original (reference) position of each node, captured on first touch
-  std::unordered_map<dof_id_type, Point> _original_position;
+  /// Original (reference) position of each node, captured on first touch. Restartable so
+  /// that a recovered run keeps the undisplaced reference; the checkpointed mesh is already
+  /// displaced, so re-capturing it here would compound the displacement.
+  std::unordered_map<dof_id_type, Point> & _original_position;
 
   /// Serialized (all-rank) copy of each coupled-variable system's solution, keyed
   /// by system number; refreshed every pass so nodal values can be read at any
@@ -115,10 +117,11 @@ protected:
 
   /// Assembly used to compute coordinate-aware element volumes (density factor)
   Assembly * _assembly;
-  /// Original (undisplaced) coordinate-aware element volumes, captured once
-  std::unordered_map<dof_id_type, Real> _original_volume;
+  /// Original (undisplaced) coordinate-aware element volumes, captured once. Restartable
+  /// for the same reason as _original_position.
+  std::unordered_map<dof_id_type, Real> & _original_volume;
   /// Whether the original element volumes have been recorded yet
-  bool _original_volume_recorded;
+  bool & _original_volume_recorded;
 
   /// Whether to notify the problem that the mesh changed after moving nodes
   const bool _notify_mesh_changed;
