@@ -309,6 +309,17 @@ XYZDelaunayGenerator::generate()
     // libMesh?
     const UnstructuredMesh & hole = dynamic_cast<UnstructuredMesh &>(**hole_ptr);
     ngholes->push_back(std::make_unique<ReplicatedMesh>(hole));
+
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+    // That constructor inherits the source mesh's next-unique-id counter, and a
+    // DistributedMesh deliberately keeps a different counter on every rank.  A
+    // ReplicatedMesh has to agree on it (see MeshBase::set_next_unique_id), or the
+    // elements libMesh's Netgen interface adds to this copy when it converts the hole
+    // to a surface mesh get different unique ids on different ranks -- which makes the
+    // Hilbert sort keys used by the partitioner's global-index lookup disagree.
+    UnstructuredMesh & hole_copy = *ngholes->back();
+    hole_copy.set_next_unique_id(hole_copy.parallel_max_unique_id());
+#endif
   }
 
   if (!_hole_ptrs.empty())
