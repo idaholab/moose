@@ -293,7 +293,15 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
         .setKSPRightDiagonalScale(dof_index, normal_scale);
 
   const ADReal min_term = std::min(lm_value, weighted_gap * c);
-  const ADReal dof_residual = _use_derived_c_normal ? equationCompensation(*_var) * min_term : min_term;
+  // With c_normal_strategy = physical, c divides the derived per-normal-length stiffness by the
+  // nodal mortar weight (contactNormalization()) so the pressure-scale complementarity condition
+  // is well posed independent of mortar segment size. Re-multiplying the residual by that same
+  // weight converts the LM row from a pressure-scale equation into a force-scale one, matching
+  // the order of the coupled displacement (elasticity) equations, without moving the root of
+  // min(lm_value, weighted_gap * c) = 0 since contactNormalization() is a positive nodal constant.
+  const ADReal dof_residual = _use_derived_c_normal
+                                   ? equationCompensation(*_var) * contactNormalization() * min_term
+                                   : min_term;
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
