@@ -115,6 +115,12 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
                "Three-dimensional mortar frictional contact simulations require an additional "
                "frictional Lagrange's multiplier to enforce a second tangential pressure");
 
+  // Mirrors ComputeWeightedGapLMMechanicalContact's constructor: that request is otherwise gated
+  // only on _use_derived_c_normal, which a user could leave false while still setting
+  // 'c_tangential_strategy = physical' (_dynamic_c_t true).
+  if (_dynamic_c_t)
+    _fe_problem.getNonlinearSystemBase(_sys.number()).requestKSPRightDiagonalScale();
+
   _friction_vars.push_back(getVar("friction_lm", 0));
 
   if (_3d)
@@ -235,14 +241,15 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   }
 
   // Resolve normal reference stiffness (physical or user mode)
-  ADReal c;
+  ADReal c_raw;
   if (_use_derived_c_normal)
   {
     const auto & [c_nn, ignored] = libmesh_map_find(_weighted_velocities_uo.dofToDerivedC(), dof);
-    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
+    c_raw = c_nn;
   }
   else
-    c = _normalize_c ? _c / *_normalization_ptr : _c;
+    c_raw = _c;
+  const ADReal c = _normalize_c ? c_raw / *_normalization_ptr : c_raw;
 
   // Resolve tangential scaling
   ADReal c_t;
@@ -254,6 +261,13 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     c_t = c;
   else
     c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+
+  if (_dynamic_c_t)
+    // Mirrors ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof's use of the raw
+    // (un-normalized) normal_scale, not its own normalized 'c', for the normal LM's column scale.
+    for (const auto i : make_range(num_tangents))
+      _fe_problem.getNonlinearSystemBase(_sys.number())
+          .setKSPRightDiagonalScale(friction_dof_indices[i], MetaPhysicL::raw_value(c_raw));
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad = computeFrictionValue(contact_pressure,
@@ -272,8 +286,17 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
                                                         mu_ad,
                                                         ADReal(_epsilon),
                                                         _friction_projection_degree);
-  const ADReal dof_residual = residual[0];
-  const ADReal dof_residual_dir = residual[1];
+  // With c_tangential_strategy = physical, this rescales the friction row the same way
+  // ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof rescales the normal LM row: from
+  // a pressure-scale equation to a force-scale one matching the coupled displacement (elasticity)
+  // equations, without moving the residual's root since equationCompensation()*contactNormalization()
+  // is a positive constant.
+  const ADReal dof_residual =
+      _dynamic_c_t ? equationCompensation(*_friction_vars[0]) * contactNormalization() * residual[0]
+                   : residual[0];
+  const ADReal dof_residual_dir =
+      _dynamic_c_t ? equationCompensation(*_friction_vars[1]) * contactNormalization() * residual[1]
+                   : residual[1];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
@@ -305,14 +328,15 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
   // Resolve normal reference stiffness (physical or user mode)
-  ADReal c;
+  ADReal c_raw;
   if (_use_derived_c_normal)
   {
     const auto & [c_nn, ignored] = libmesh_map_find(_weighted_velocities_uo.dofToDerivedC(), dof);
-    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
+    c_raw = c_nn;
   }
   else
-    c = _normalize_c ? _c / *_normalization_ptr : _c;
+    c_raw = _c;
+  const ADReal c = _normalize_c ? c_raw / *_normalization_ptr : c_raw;
 
   // Resolve tangential scaling
   ADReal c_t;
@@ -322,6 +346,11 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   else
     c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
+  if (_dynamic_c_t)
+    // See 3D path above: use the raw (un-normalized) stiffness for the column scale.
+    _fe_problem.getNonlinearSystemBase(_sys.number())
+        .setKSPRightDiagonalScale(friction_dof_index, MetaPhysicL::raw_value(c_raw));
+
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad =
       computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);
@@ -329,7 +358,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
   const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};
 
-  const ADReal dof_residual =
+  // Friction residual; see 3D path above for rationale.
+  const ADReal raw_residual =
       Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
                                                         tangential_velocity,
                                                         c_t,
@@ -339,6 +369,11 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
                                                         mu_ad,
                                                         ADReal(_epsilon),
                                                         _friction_projection_degree)[0];
+
+  // See 3D path above for rationale.
+  const ADReal dof_residual =
+      _dynamic_c_t ? equationCompensation(*_friction_vars[0]) * contactNormalization() * raw_residual
+                   : raw_residual;
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
