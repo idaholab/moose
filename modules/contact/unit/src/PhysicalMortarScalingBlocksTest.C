@@ -64,15 +64,15 @@ effectiveEntry(FEProblemBase & fe_problem,
   return rawEntry(fe_problem, mat, row, col) * nl.getVector("ksp_right_diagonal_scale")(col);
 }
 
-// Assert that a/b are within two decades of each other, i.e. the same order of magnitude.
+// Assert that a/b are within one decade of each other, i.e. the same order of magnitude.
 void
 expectSameOrder(Real a, Real b, const std::string & label)
 {
   ASSERT_NE(a, 0.0) << label << ": expected a nonzero entry";
   ASSERT_NE(b, 0.0) << label << ": expected a nonzero entry";
   const Real ratio = std::abs(a / b);
-  EXPECT_GT(ratio, 1e-2) << label << ": ratio = " << ratio;
-  EXPECT_LT(ratio, 1e2) << label << ": ratio = " << ratio;
+  EXPECT_GT(ratio, 1e-1) << label << ": ratio = " << ratio;
+  EXPECT_LT(ratio, 1e1) << label << ": ratio = " << ratio;
 }
 
 struct Blocks
