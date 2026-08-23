@@ -493,6 +493,20 @@ ContactAction::ContactAction(const InputParameters & params)
                  "Cannot set 'c_normal' when 'c_normal_strategy = physical'; "
                  "the value is derived from the material elasticity tensor.");
 
+    if (getParam<MooseEnum>("c_normal_strategy") == "physical" &&
+        isParamSetByUser("normal_lm_scaling"))
+      paramError("normal_lm_scaling",
+                 "Cannot set 'normal_lm_scaling' when 'c_normal_strategy = physical'; the normal "
+                 "LM's scaling is intrinsically tied to the displacement variables' scaling and is "
+                 "not independently configurable.");
+
+    if (getParam<MooseEnum>("c_tangential_strategy") == "physical" &&
+        isParamSetByUser("tangential_lm_scaling"))
+      paramError("tangential_lm_scaling",
+                 "Cannot set 'tangential_lm_scaling' when 'c_tangential_strategy = physical'; the "
+                 "tangential LM's scaling is intrinsically tied to the displacement variables' "
+                 "scaling and is not independently configurable.");
+
     if (getParam<MooseEnum>("c_tangential_strategy") == "physical" &&
         _model != ContactModel::COULOMB)
       paramError("c_tangential_strategy",
