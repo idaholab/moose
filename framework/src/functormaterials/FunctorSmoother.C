@@ -137,9 +137,7 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
           {
             if constexpr (std::is_same_v<const Moose::NodeArg &, decltype(r)>)
             {
-              const Node * r_node = nullptr;
-              if constexpr (std::is_same_v<const Moose::NodeArg &, decltype(r)>)
-                r_node = r.node;
+              const Node * r_node = r.node;
 
               unsigned int n_nodes = 0;
               const auto & node_to_elem_map = _mesh.nodeToElemMap();

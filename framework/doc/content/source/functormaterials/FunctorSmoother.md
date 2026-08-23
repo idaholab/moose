@@ -13,7 +13,7 @@ functor on the faces of the element.
 
 - node averaging
 
-The nodal value of the smoothed functor is equal to the arithmetic average of the values of the previous functor
+The nodal value of the smoothed functor is equal to the arithmetic average of the values of the input functor
 on the nodes at the other end of the edges connected to this node.
 
 - neighbor averaging

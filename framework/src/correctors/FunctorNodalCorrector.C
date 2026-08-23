@@ -20,6 +20,7 @@ InputParameters
 FunctorNodalCorrector::validParams()
 {
   InputParameters params = NodalUserObject::validParams();
+  params += NonADFunctorInterface::validParams();
   params.addClassDescription(
       "Set (all or some) values of (one or more) nonlinear variable(s) using functor evaluations");
   params.addRequiredCoupledVar("variables_to_correct", "Variables to change the value of.");
@@ -58,7 +59,7 @@ FunctorNodalCorrector::FunctorNodalCorrector(const InputParameters & parameters)
     if (_sys.number() != var.sys().system().number())
       paramError("variables_to_correct", "Variables must be all in the non-linear system.");
 
-    _var_numbers.push_back(_sys.system().variable_number(var_name));
+    _var_numbers.push_back(_var.number());
   }
 
   if (_functor_names.size() != _var_names.size())
@@ -110,7 +111,7 @@ FunctorNodalCorrector::execute()
   for (const auto i : index_range(_var_numbers))
   {
     dof_map.dof_indices(_current_node, dof_indices[i], _var_numbers[i]);
-    mooseAssert(dof_indices[i].size() <= 2,
+    mooseAssert(dof_indices[i].size() <= 1,
                 "Corrector has not been implemented for this variable type");
   }
 
@@ -130,7 +131,7 @@ FunctorNodalCorrector::execute()
     for (const auto i : index_range(_var_numbers))
       functor_values[i] = (*_functors[i])(node_arg, state_arg);
 
-    // renormalize
+    // replace the variable DOF value
     for (const auto i : index_range(_var_numbers))
       solution.set(dof_indices[i][j], functor_values[i]);
   }

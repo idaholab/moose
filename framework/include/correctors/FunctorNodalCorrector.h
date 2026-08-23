@@ -35,7 +35,7 @@ protected:
 
   /// names of the variables to set using functors
   const std::vector<VariableName> & _var_names;
-  /// internal ID numbers of the variables to renormalize
+  /// internal ID numbers of the variables to smooth
   std::vector<unsigned int> _var_numbers;
 
   /// Name of the functors
