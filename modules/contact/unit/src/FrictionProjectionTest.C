@@ -121,6 +121,46 @@ TEST(FrictionProjection, DegreeTwoPressureScaleCompensation)
     EXPECT_NEAR(hsw_scaled[i] / (alpha * pressure_scale), alpha * hsw[i] / pressure_scale, 1e-14);
 }
 
+TEST(FrictionProjection, PenetrationSignConvention)
+{
+  // Deep penetration: a negative weighted_gap scaled by a positive c gives a negative
+  // scaled_normal_gap, which frictionalContactResidual() must grow into a larger friction cone
+  // via augmentedNormalPressure() = normal_pressure - scaled_normal_gap.
+  const Real normal_pressure = 1.0;
+  const Real c = 0.5;
+  const Real weighted_gap = -6.0;
+  const Real scaled_normal_gap = c * weighted_gap;
+
+  // A known stick root: zero tangential velocity leaves the augmented tangential pressure equal
+  // to the tangential pressure itself, and that value lies inside the (correctly) enlarged cone.
+  const std::array<Real, 1> tangential_pressure = {1.0};
+  const std::array<Real, 1> tangential_velocity = {0.0};
+  const Real c_t = 1.0e3;
+  const Real dt = 1.0;
+  const Real mu = 0.5;
+  const Real epsilon = 1e-7;
+
+  const auto residual = ContactUtils::frictionalContactResidual(tangential_pressure,
+                                                                 tangential_velocity,
+                                                                 c_t,
+                                                                 dt,
+                                                                 normal_pressure,
+                                                                 scaled_normal_gap,
+                                                                 mu,
+                                                                 epsilon);
+  EXPECT_DOUBLE_EQ(residual[0], 0.0);
+
+  // Reversing the sign in the augmentation (the historical bug: normal_pressure +
+  // scaled_normal_gap) shrinks the cone under penetration instead of growing it, and wrongly
+  // turns this same stick state into a nonzero (slip) residual.
+  const Real buggy_augmented_normal_pressure = normal_pressure + scaled_normal_gap;
+  const Real buggy_radius =
+      ContactUtils::coulombFrictionRadius(mu, buggy_augmented_normal_pressure);
+  const auto buggy_residual = ContactUtils::hueberStadlerWohlmuthFrictionResidual(
+      tangential_pressure, tangential_pressure, buggy_radius);
+  EXPECT_NE(buggy_residual[0], 0.0);
+}
+
 TEST(FrictionProjection, DegreeTwoDegenerateState)
 {
   const std::array<Real, 2> pressure = {2.0, -3.0};
