@@ -81,6 +81,28 @@ The default
 when the supplied switching functions are normalized by construction, such as
 [SwitchingFunctionMultiPhaseMaterial.md].
 
+## Switching Function Coupling
+
+The bulk Allen-Cahn residual generated for order parameter $\eta_p$ sums the
+switching function derivative of every phase,
+$\sum_q \frac{\partial h_q}{\partial \eta_p} F_q$, because
+[KKSMultiACBulkF.md] and [KKSMultiACBulkC.md] (and their nested counterparts)
+are built to support switching functions that couple all order parameters,
+such as [SwitchingFunctionMultiPhaseMaterial.md]. Consequently
+`KKSAction` couples every order parameter to every phase's Allen-Cahn and
+[SwitchingFunctionConstraintEta.md] kernels, and these kernels' `initialSetup`
+requires that coupling to be present regardless of which switching function is
+used.
+
+When the switching functions instead depend on only their own order parameter,
+as with [SwitchingFunctionMaterial.md], the order-parameter cross derivatives
+$\frac{\partial^2 h_q}{\partial \eta_p \partial \eta_r}$ ($q \neq r$) are
+zero, so the resulting off-diagonal Jacobian blocks are exact but empty. They
+are still allocated and assembled: the sparsity pattern and Jacobian
+evaluation cost scale with $P^2$ in the number of phases $P$ even though only
+$P$ of those blocks are nonzero. This is inherent to the shared multiphase KKS
+kernels and cannot be avoided through `KKSAction`'s parameters.
+
 ## Example Input Syntax
 
 The following block configures a three-phase ternary system with globally
