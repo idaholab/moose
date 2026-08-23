@@ -24,7 +24,7 @@ public:
 
   FunctorNodalCorrector(const InputParameters & parameters);
 
-  void initialize() override;
+  void initialize() override {}
   void execute() override;
   void finalize() override;
   void threadJoin(const UserObject &) override {}
@@ -43,6 +43,12 @@ protected:
 
   /// Evaluation method (argument)
   const MooseEnum _functor_evaluation_technique;
+
+  /// This enum must match the enum in the input parameters
+  enum FunctorEvalType
+  {
+    NODE_ARG
+  };
 
   /// Pointers to the functors
   std::vector<const Moose::Functor<Real> *> _functors;

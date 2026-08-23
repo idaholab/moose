@@ -59,7 +59,7 @@ FunctorNodalCorrector::FunctorNodalCorrector(const InputParameters & parameters)
     if (_sys.number() != var.sys().system().number())
       paramError("variables_to_correct", "Variables must be all in the non-linear system.");
 
-    _var_numbers.push_back(_var.number());
+    _var_numbers.push_back(var.number());
   }
 
   if (_functor_names.size() != _var_names.size())
@@ -75,13 +75,6 @@ FunctorNodalCorrector::FunctorNodalCorrector(const InputParameters & parameters)
 
   const auto & excluded_nodesets = getParam<std::vector<BoundaryName>>("excluded_nodesets");
   _excluded_nodeset_ids = MooseMeshUtils::getBoundaryIDs(_mesh.getMesh(), excluded_nodesets, false);
-}
-
-void
-FunctorNodalCorrector::initialize()
-{
-  // do one solution.close to get updated
-  _sys.system().solution->close();
 }
 
 void
@@ -104,7 +97,7 @@ FunctorNodalCorrector::execute()
   const auto state_arg = Moose::currentState();
   const Moose::NodeArg node_arg = {_current_node, &Moose::NodeArg::undefined_subdomain_connection};
 
-  if (_functor_evaluation_technique != "node_arg")
+  if (_functor_evaluation_technique != NODE_ARG)
     paramError("Only nodal evaluation of functors has been implemented at this time");
 
   // prepare variable dofs
