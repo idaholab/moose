@@ -67,7 +67,7 @@ From: {{ FROM_IMAGES.get(VARIANT, FROM_IMAGES.get("ubuntu24_gcc")) }}
     INSTALLS=(
         "autoconf" "automake" "bash-completion" "bison" "cmake" "diffutils"
         "doxygen" "emacs" "flex" "lcov" "libtool" "ninja-build" "patch" "patchelf"
-        "patchutils" "valgrind"
+        "patchutils"
     )
     ROCKY_INSTALLS=(
         "cppunit" "cppunit-devel" "fftw-devel" "glpk-devel" "gsl-devel" "libpng"
@@ -77,10 +77,11 @@ From: {{ FROM_IMAGES.get(VARIANT, FROM_IMAGES.get("ubuntu24_gcc")) }}
     UBUNTU_INSTALLS=(
         "libcppunit-dev" "libfftw3-dev" "libglpk-dev" "libgsl-dev" "libio-compress-perl"
         "libjson-perl" "libjson-pp-perl" "libpng-dev" "libtirpc3" "libtirpc-dev"
-        "zlib1g-dev"
+        "zlib1g-dev" "libc6-dbg"
     )
     if is_rocky; then
         dnf install -y "${INSTALLS[@]}" "${ROCKY_INSTALLS[@]}"
+        dnf debuginfo-install -y glibc
     elif is_ubuntu; then
         apt-get install -y --no-install-recommends "${INSTALLS[@]}" "${UBUNTU_INSTALLS[@]}"
     fi
