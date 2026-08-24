@@ -56,7 +56,7 @@ SCMFrictionUpgradedChengTodreas::SCMFrictionUpgradedChengTodreas(const InputPara
       flagSolutionWarning("Number of pins outside the upgraded Cheng-Todreas friction correlation "
                           "data range.");
     if (Reb < 50.0 || Reb > 1.0e6)
-      flagSolutionWarning("Bulk Reynolds number (Re) outside the upgraded Cheng-Todreas friction "
+      flagSolutionWarning("Bulk Reynolds number (Reb) outside the upgraded Cheng-Todreas friction "
                           "correlation data range.");
   }
 }
@@ -76,7 +76,7 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
 {
   const auto Re = friction_args.Re;
   // Limit the Reynolds number used in the friction-factor correlation to avoid
-  // singular behavior k1T zero flow.
+  // singular behavior at zero flow.
   const Real Re_eff = std::max(Re, 1.0);
   const auto i_ch = friction_args.i_ch;
   const auto S = friction_args.S;
