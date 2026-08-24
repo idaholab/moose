@@ -227,7 +227,8 @@ BSplineCurveGenerator::generate()
 
   // Add subdomain name if needed
   if (isParamValid("new_subdomain_name"))
-    mesh->subdomain_name(_new_subdomain_id) = getParam<SubdomainName>("new_subdomain_name");
+    mesh->set_subdomain_name(
+        _new_subdomain_id, getParam<SubdomainName>("new_subdomain_name"), true);
 
   if (_node_set_boundaries.size())
   {

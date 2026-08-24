@@ -1,0 +1,9 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS ignore
+
+NODAL VARIABLES relative 1e-5 floor 1e-10
+	p      # min:   0.00024781876 @ t1,n259	max:      0.29558757 @ t1,n286
+	vel_x  # min:               0 @ t1,n1	max:               1 @ t1,n270
+	vel_y  # min:               0 @ t1,n1	max:      0.49836526 @ t1,n220
+

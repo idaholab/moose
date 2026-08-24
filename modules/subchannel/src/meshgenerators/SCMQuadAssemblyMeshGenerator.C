@@ -466,7 +466,7 @@ SCMQuadAssemblyMeshGenerator::buildSubchannelMesh(MeshBase & mesh_base,
           boundary_info.add_side(elem, 1, 1);
       }
 
-  mesh_base.subdomain_name(_subchannel_block_id) = "subchannel";
+  mesh_base.set_subdomain_name(_subchannel_block_id, "subchannel", true);
 }
 
 void
@@ -510,7 +510,7 @@ SCMQuadAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
         elem->set_node(1, _pin_nodes[i_pin][iz + 1]);
       }
 
-  mesh_base.subdomain_name(_pin_block_id) = "fuel_pins";
+  mesh_base.set_subdomain_name(_pin_block_id, "fuel_pins", true);
 }
 
 void

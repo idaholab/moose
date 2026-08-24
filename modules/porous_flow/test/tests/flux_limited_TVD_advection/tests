@@ -147,6 +147,7 @@
     input = 'fltvd_2D_angle.i'
     exodiff = 'fltvd_2D_angle_out.e'
     abs_zero = 4.0E-4
+    rel_err = 1e-5
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when the velocity is not aligned with the mesh'

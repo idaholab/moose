@@ -205,7 +205,8 @@ PatchSidesetGenerator::generate()
   // the _original_ element to the new sideset
   for (const auto & elem : boundary_mesh->active_element_ptr_range())
   {
-    if (boundary_elem_to_mesh_elem.find(elem->id()) == boundary_elem_to_mesh_elem.end())
+    const auto it = boundary_elem_to_mesh_elem.find(elem->id());
+    if (it == boundary_elem_to_mesh_elem.end())
       mooseError("Element in the boundary mesh with id ",
                  elem->id(),
                  " not found in boundary_elem_to_mesh_elem.");
@@ -280,7 +281,7 @@ PatchSidesetGenerator::partition(MeshBase & mesh)
       nelems[smallest_id] = 1;
       nelems[id1] = std::round(std::sqrt(delta(id1) / delta(id2) * _n_patches));
       nelems[id2] = std::round(std::sqrt(delta(id2) / delta(id1) * _n_patches));
-      unsigned int final_n_patches = nelems[id1] * nelems[id2];
+      const std::size_t final_n_patches = nelems[id1] * nelems[id2];
       // We need to check if the number of requested patches and the number of
       // actually created patches matches. If the two do not match, then a warning
       // is printed.
@@ -293,18 +294,20 @@ PatchSidesetGenerator::partition(MeshBase & mesh)
       }
     }
 
-    const Real dx = delta(0) / nelems[0];
-    const Real dy = delta(1) / nelems[1];
-    const Real dz = delta(2) / nelems[2];
+    const Point delem(delta(0) / nelems[0], delta(1) / nelems[1], delta(2) / nelems[2]);
     for (auto & elem_ptr : mesh.active_element_ptr_range())
     {
       const Point centroid = elem_ptr->vertex_average();
-      processor_id_type proc_id;
-      const unsigned int ix = std::floor((centroid(0) - min(0)) / dx);
-      const unsigned int iy = std::floor((centroid(1) - min(1)) / dy);
-      const unsigned int iz = std::floor((centroid(2) - min(2)) / dz);
-      proc_id = ix + iy * nelems[0] + iz * nelems[0] * nelems[1];
-      elem_ptr->processor_id() = proc_id;
+      std::array<unsigned int, 3> ielem;
+      for (const auto i : make_range(LIBMESH_DIM))
+      {
+        const auto dist = centroid(i) - min(i);
+        ielem[i] = (std::abs(dist) < (libMesh::TOLERANCE * libMesh::TOLERANCE))
+                       ? 0
+                       : std::floor(dist / delem(i));
+      }
+      elem_ptr->processor_id() = ielem[0] + nelems[0] * (ielem[1] + ielem[2] * nelems[1]);
+      mooseAssert(elem_ptr->processor_id() < _n_patches, "Invalid processor id");
     }
   }
   else

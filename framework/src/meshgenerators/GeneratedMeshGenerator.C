@@ -225,10 +225,10 @@ GeneratedMeshGenerator::generate()
             "subdomain_ids",
             "Specifying a subdomain_name is only supported for a single entry in subdomain_ids");
       else
-        mesh->subdomain_name(bids[0]) = subdomain_name;
+        mesh->set_subdomain_name(bids[0], subdomain_name, true);
     }
     else
-      mesh->subdomain_name(0) = subdomain_name;
+      mesh->set_subdomain_name(0, subdomain_name, true);
   }
 
   // rename and shift boundaries

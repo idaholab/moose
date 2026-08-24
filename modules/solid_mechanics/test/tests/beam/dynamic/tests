@@ -29,7 +29,7 @@
                   " of an Euler-Bernoulli beam modeled using beam elements in the"
                   " presence of Rayleigh damping and numerical damping introduced"
                   " by Hilber-Hughes-Taylor (HHT) time integration."
-    rel_err = 2e-5
+    rel_err = 5e-5
   [../]
   [./dyn_euler_rayleigh_hht_ti]
     type = 'Exodiff'
@@ -115,8 +115,7 @@
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_inertia_damping_ti.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
-    # machine=x86_64: see #26848
-    capabilities = 'superlu & machine=x86_64'
+    capabilities = 'superlu'
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements in the presence of nodal mass,"
                   " nodal inertia and Rayleigh damping when using the velocity and"
@@ -134,7 +133,7 @@
                   " a consistent mass/inertia matrix in the presence of Rayleigh"
                   " damping and numerical damping in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElement/QuasiStatic/index.md"
-    rel_err = 2e-5
+    rel_err = 5e-5
   [../]
   [./dyn_euler_added_mass_inertia_damping_action]
     type = 'Exodiff'

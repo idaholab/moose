@@ -723,7 +723,8 @@ MooseMesh::buildLowerDMesh()
   for (const auto & tpid : interior_side_types)
   {
     const auto type = ElemType(tpid);
-    mesh.subdomain_name(id) = "INTERNAL_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    mesh.set_subdomain_name(
+        id, "INTERNAL_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type), true);
     interior_block_ids[type] = id;
     _lower_d_interior_blocks.insert(id);
     if (_mesh_subdomains.count(id) > 0)
@@ -734,7 +735,8 @@ MooseMesh::buildLowerDMesh()
   for (const auto & tpid : boundary_side_types)
   {
     const auto type = ElemType(tpid);
-    mesh.subdomain_name(id) = "BOUNDARY_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    mesh.set_subdomain_name(
+        id, "BOUNDARY_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type), true);
     boundary_block_ids[type] = id;
     _lower_d_boundary_blocks.insert(id);
     if (_mesh_subdomains.count(id) > 0)
@@ -1735,15 +1737,14 @@ MooseMesh::getSubdomainIDs(const std::set<SubdomainName> & subdomain_name) const
 void
 MooseMesh::setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name)
 {
-  mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
-  getMesh().subdomain_name(subdomain_id) = name;
+  setSubdomainName(getMesh(), subdomain_id, name);
 }
 
 void
 MooseMesh::setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name)
 {
   mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
-  mesh.subdomain_name(subdomain_id) = name;
+  mesh.set_subdomain_name(subdomain_id, name);
 }
 
 const std::string &

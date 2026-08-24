@@ -208,7 +208,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
     }
     // We do not want to set an empty subdomain name
     if (xyd_opts.output_subdomain_name.size())
-      mesh->subdomain_name(output_subdomain_id) = xyd_opts.output_subdomain_name;
+      mesh->set_subdomain_name(output_subdomain_id, xyd_opts.output_subdomain_name);
   }
 
   if (xyd_opts.smooth_tri || output_subdomain_id)

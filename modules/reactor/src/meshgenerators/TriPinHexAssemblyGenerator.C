@@ -307,7 +307,7 @@ TriPinHexAssemblyGenerator::generate()
     MeshTools::Modification::rotate(*meshes[0], 270, 0, 0);
   /* Add subdomain names */
   for (const auto & block_info_pair : block_info)
-    meshes[0]->subdomain_name(block_info_pair.first) = block_info_pair.second;
+    meshes[0]->set_subdomain_name(block_info_pair.first, block_info_pair.second);
   if (_external_boundary_id > 0)
     MooseMesh::changeBoundaryId(*meshes[0], OUTER_SIDESET_ID, _external_boundary_id, false);
   if (!_external_boundary_name.empty())

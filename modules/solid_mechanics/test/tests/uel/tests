@@ -6,6 +6,7 @@
     type = RunCommand
     command = "cd ../../../examples/uel_tri_tests; make"
     use_shell = True
+    min_slots = 2 # memory heavy
     requirement = "The UEL tri tests example shall be built."
     # installation_type=in_tree: see #25279
     capabilities = 'method=opt & installation_type=in_tree'
@@ -14,6 +15,7 @@
     type = RunCommand
     command = "cd ../../../examples/uel_tri_states_tests; make"
     use_shell = True
+    min_slots = 2 # memory heavy
     requirement = "The UEL tri states tests example shall be built."
     # installation_type=in_tree: see #25279
     capabilities = 'method=opt & installation_type=in_tree'
@@ -22,6 +24,7 @@
     type = RunCommand
     command = "cd ../../../examples/uel_build_tests; make"
     use_shell = True
+    min_slots = 2 # memory heavy
     requirement = "The UEL build tests example shall be built."
     # installation_type=in_tree: see #25279
     capabilities = 'method=opt & installation_type=in_tree'
@@ -29,6 +32,7 @@
   [build_uel_tri_tests_dbg]
     type = RunCommand
     command = "cd ../../../examples/uel_tri_tests; METHOD=dbg make"
+    min_slots = 2 # memory heavy
     use_shell = True
     requirement = "The UEL tri tests example shall be built in dbg mode."
     # installation_type=in_tree: see #25279
@@ -37,6 +41,7 @@
   [build_uel_tri_states_tests_dbg]
     type = RunCommand
     command = "cd ../../../examples/uel_tri_states_tests; METHOD=dbg make"
+    min_slots = 2 # memory heavy
     use_shell = True
     requirement = "The UEL tri states tests example shall be built in dbg mode."
     # installation_type=in_tree: see #25279
@@ -45,6 +50,7 @@
   [build_uel_build_tests_dbg]
     type = RunCommand
     command = "cd ../../../examples/uel_build_tests; METHOD=dbg make"
+    min_slots = 2 # memory heavy
     use_shell = True
     requirement = "The UEL build tests example shall be built in dbg mode."
     # installation_type=in_tree: see #25279

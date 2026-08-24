@@ -419,10 +419,11 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
                 "_" + tri_elem_subdomain_name_suffix,
             mesh) != Moose::INVALID_BLOCK_ID)
       throw MooseException("The new subdomain name already exists in the mesh.");
-    mesh.subdomain_name(nid) =
-        (old_name.empty() ? (SubdomainName)(std::to_string(nid - tri_subdomain_id_shift))
-                          : old_name) +
-        "_" + tri_elem_subdomain_name_suffix;
+    mesh.set_subdomain_name(nid,
+                            (old_name.empty()
+                                 ? (SubdomainName)(std::to_string(nid - tri_subdomain_id_shift))
+                                 : old_name) +
+                                "_" + tri_elem_subdomain_name_suffix);
     mooseWarning("Degenerate QUAD elements have been converted into TRI elements with a new "
                  "subdomain name: " +
                  mesh.subdomain_name(nid) + ".");
@@ -759,10 +760,11 @@ quadToTriOnLine(ReplicatedMesh & mesh,
                 "_" + tri_elem_subdomain_name_suffix,
             mesh) != Moose::INVALID_BLOCK_ID)
       throw MooseException("The new subdomain name already exists in the mesh.");
-    mesh.subdomain_name(nid) =
-        (old_name.empty() ? (SubdomainName)(std::to_string(nid - tri_subdomain_id_shift))
-                          : old_name) +
-        "_" + tri_elem_subdomain_name_suffix;
+    mesh.set_subdomain_name(nid,
+                            (old_name.empty()
+                                 ? (SubdomainName)(std::to_string(nid - tri_subdomain_id_shift))
+                                 : old_name) +
+                                "_" + tri_elem_subdomain_name_suffix);
     mooseWarning("QUAD elements have been converted into TRI elements with a new "
                  "subdomain name: " +
                  mesh.subdomain_name(nid) + ".");
