@@ -18,6 +18,9 @@
     mesh = point_value_wrapper_xyz_source_0001_mesh.xda
     es = point_value_wrapper_xyz_source_0001.xda
     system_variables = source_xyz
+    # Multivalued point evaluation requires the discontinuous source mesh
+    # to be available on every processor.
+    force_replicated_source_mesh = true
   []
 []
 
