@@ -18,7 +18,6 @@
     compute_devices = 'cpu cuda'
     valgrind = heavy
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     min_slots = 2 # memory heavy
     abs_zero = 5e-7
   []
@@ -36,7 +35,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     abs_zero = 2e-9
   []
   [MFEMGradDivLOR]
@@ -54,7 +52,6 @@
     compute_devices = 'cpu cuda'
     valgrind = heavy
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     abs_zero = 8e-10
   []
   [MFEMHeatConductionLOR]
@@ -74,7 +71,6 @@
     capabilities = 'mfem & method!=dbg'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     restep = false
   []
 []

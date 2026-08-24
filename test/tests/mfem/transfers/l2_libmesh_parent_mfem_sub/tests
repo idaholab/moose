@@ -9,7 +9,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_quads.csv'
       detail = 'constant elemental variables defined on quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
     []
     [L2Tri]
@@ -18,7 +17,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tris.csv'
       detail = 'constant elemental variables defined on tris,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris '
@@ -30,7 +28,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tri_to_quad.csv'
       detail = 'constant elemental variables from tris to quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
@@ -42,7 +39,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_hexes.csv'
       detail = 'constant elemental variables defined on hexes,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_hexes '
@@ -54,7 +50,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tets.csv'
       detail = 'constant elemental variables defined on tetrahedra,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets '
@@ -66,7 +61,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tet_to_hex.csv'
       detail = 'and constant elemental variables from tets to hexes.'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex '

@@ -10,7 +10,6 @@
     requirement = 'The system shall evaluate real scalar MFEM function and material coefficients '
                   'at arbitrary points.'
     capabilities = 'mfem'
-    recover = false
   []
 
   [coefficient_boundary_sampling]
@@ -31,6 +30,5 @@
     requirement = 'The system shall reject arbitrary-point sampling of an MFEM coefficient backed '
                   'by values defined only at configured quadrature points.'
     capabilities = 'mfem'
-    recover = false
   []
 []

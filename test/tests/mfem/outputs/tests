@@ -18,6 +18,5 @@
                   'ParaView, VisIt and Conduit data collections.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
 []

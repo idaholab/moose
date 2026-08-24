@@ -54,7 +54,6 @@
                   Transfers/active='mfem_to_libmesh_nodal_nodal'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
       # however we know these element boundaries are not shared so this should not cause problems.
@@ -84,7 +83,6 @@
                   MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/elem_elem_mfem_sub0'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
       # however we know these element boundaries are not shared so this should not cause problems.
@@ -99,7 +97,6 @@
                   MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/nodal_elem_mfem_sub0'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
       # however we know these element boundaries are not shared so this should not cause problems.
@@ -131,7 +128,6 @@
                   MultiApps/mfem_sub/cli_args=VectorPostprocessors/active=nodal_sample"
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
     []
@@ -145,7 +141,6 @@
       cli_args = "Outputs/file_base=OutputData/nodal_nodal"
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
       # however we know these element boundaries are not shared so this should not cause problems.
@@ -165,7 +160,6 @@
       capabilities = 'mfem'
       compute_devices = 'cpu'
       max_parallel = 1 # XML schemadiff with multiple ranks
-      recover = false
       restep = false
       # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
       # however we know these element boundaries are not shared so this should not cause problems.
@@ -179,7 +173,6 @@
       cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
       # however we know these element boundaries are not shared so this should not cause problems.
@@ -195,7 +188,6 @@
                    MultiApps/mfem_send/cli_args='Mesh/file=../../mesh/square_mixed.e'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
       # however we know these element boundaries are not shared so this should not cause problems.

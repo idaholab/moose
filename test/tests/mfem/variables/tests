@@ -10,7 +10,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     restep = false
   []
   [MFEMComplexAuxVariableRecovery]
@@ -56,6 +55,5 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
   []
 []

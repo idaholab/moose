@@ -10,7 +10,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1
-    recover = false
   []
   [MFEMComplex2DTri]
     type = XMLDiff
@@ -28,7 +27,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1
-    recover = false
   []
   [MFEMComplexWaveguide]
     type = CSVDiff
@@ -37,7 +35,6 @@
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with vector Robin boundary conditions applied.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
     max_parallel = 1 # idaholab/moose#32250
     min_slots = 2 # memory heavy
   []
@@ -49,7 +46,6 @@
     requirement = 'The system shall reject a complex-valued primary MFEM variable when the problem uses a real-valued equation system.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    recover = false
   []
   [MFEMRealVariableRequiresRealNumericType]
     type = RunException
@@ -59,6 +55,5 @@
     requirement = 'The system shall reject a real-valued primary MFEM variable when the problem uses a complex-valued equation system.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    recover = false
   []
 []

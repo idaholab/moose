@@ -9,7 +9,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_quads.csv'
       detail = 'first order scalar Lagrange variables defined on quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
     []
     [H1QuadSecondOrder]
@@ -19,7 +18,6 @@
       detail = 'second order scalar Lagrange variables defined on quads,'
       abs_zero = 4e-10
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Variables/libmesh_scalar_var/order=SECOND '
                 'AuxVariables/mfem_scalar_var/order=SECOND '
@@ -32,7 +30,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tris.csv'
       detail = 'first order scalar Lagrange variables defined on tris,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
@@ -45,7 +42,6 @@
       detail = 'second order scalar Lagrange variables defined on tris,'
       abs_zero = 9e-10
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris_order_2 '
@@ -60,7 +56,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tri_to_quad.csv'
       detail = 'first order scalar Lagrange variables from tris to quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
@@ -72,7 +67,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tri_to_quad_order_2.csv'
       detail = 'second order scalar Lagrange variables from tris to quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad_order_2 '
@@ -87,7 +81,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_hexes.csv'
       detail = 'first order scalar Lagrange variables defined on hexes,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'BCs/sides/boundary=Sides '
@@ -100,7 +93,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_hexes_order_2.csv'
       detail = 'second order scalar Lagrange variables defined on hexes,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'BCs/sides/boundary=Sides '
@@ -116,7 +108,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tets.csv'
       detail = 'first order scalar Lagrange variables defined on tetrahedra,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'BCs/sides/boundary=Sides '
@@ -130,7 +121,6 @@
       detail = 'second order scalar Lagrange variables defined on tetrahedra,'
       abs_zero = 2e-10
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'BCs/sides/boundary=Sides '
@@ -146,7 +136,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tet_to_hex.csv'
       detail = 'first order scalar Lagrange variables from tets to hexes,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'BCs/sides/boundary=Sides '
@@ -159,7 +148,6 @@
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tet_to_hex_order_2.csv'
       detail = 'and second order scalar Lagrange variables from tets to hexes.'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'BCs/sides/boundary=Sides '
