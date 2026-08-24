@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrossFieldSolver.h"
+#include "XYCrossFieldSolver.h"
 
 #include "MooseError.h"
 
@@ -53,18 +53,18 @@ constexpr Real singular_magnitude = 0.1;
 /// Magnitude of z below which normalization is abandoned rather than dividing by zero.
 constexpr Real minimum_magnitude = 1.0e-12;
 
-CrossFieldSolver::NodalCrossField
+XYCrossFieldSolver::NodalCrossField
 boundaryCrossField(const std::map<dof_id_type, Real> & boundary_tangent_angles)
 {
-  CrossFieldSolver::NodalCrossField boundary_cross_field;
+  XYCrossFieldSolver::NodalCrossField boundary_cross_field;
   for (const auto & [node_id, tangent_angle] : boundary_tangent_angles)
     boundary_cross_field.emplace(node_id, std::polar(1.0, 4.0 * tangent_angle));
   return boundary_cross_field;
 }
 }
 
-CrossFieldSolver::CrossFieldSolver(const MeshBase & background_mesh,
-                                   const std::map<dof_id_type, Real> & boundary_tangent_angles)
+XYCrossFieldSolver::XYCrossFieldSolver(const MeshBase & background_mesh,
+                                       const std::map<dof_id_type, Real> & boundary_tangent_angles)
   : _communicator(MPI_COMM_SELF),
     _mesh(_communicator),
     _boundary_cross_field(boundaryCrossField(boundary_tangent_angles)),
@@ -77,7 +77,7 @@ CrossFieldSolver::CrossFieldSolver(const MeshBase & background_mesh,
   // Only the local portion of a distributed mesh would be copied, which would silently solve on a
   // fragment of the domain.
   if (!background_mesh.is_replicated())
-    mooseError("CrossFieldSolver: The cross field background mesh must be replicated.");
+    mooseError("XYCrossFieldSolver: The cross field background mesh must be replicated.");
 
   // Node ids key the boundary data and every reported result, so they have to survive the copy onto
   // the serial communicator.
@@ -87,14 +87,14 @@ CrossFieldSolver::CrossFieldSolver(const MeshBase & background_mesh,
 
   for (const auto & elem : _mesh.element_ptr_range())
     if (elem->type() != TRI3)
-      mooseError("CrossFieldSolver: The cross field background mesh must contain only TRI3 "
+      mooseError("XYCrossFieldSolver: The cross field background mesh must contain only TRI3 "
                  "elements, but it contains an element of type ",
                  Utility::enum_to_string(elem->type()),
                  ".");
 
   for (const auto & [node_id, _] : _boundary_cross_field)
     if (!_mesh.query_node_ptr(node_id))
-      mooseError("CrossFieldSolver: A boundary tangent angle was supplied for node ",
+      mooseError("XYCrossFieldSolver: A boundary tangent angle was supplied for node ",
                  node_id,
                  ", which is not a node of the cross field background mesh.");
 
@@ -103,7 +103,7 @@ CrossFieldSolver::CrossFieldSolver(const MeshBase & background_mesh,
   _real_variable = _system->add_variable("z_real", _fe_type);
   _imaginary_variable = _system->add_variable("z_imaginary", _fe_type);
   _system->attach_assemble_function(assembleSystem);
-  _equation_systems->parameters.set<CrossFieldSolver *>("cross_field_solver") = this;
+  _equation_systems->parameters.set<XYCrossFieldSolver *>("cross_field_solver") = this;
   _equation_systems->init();
 
   _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, _mesh);
@@ -111,14 +111,14 @@ CrossFieldSolver::CrossFieldSolver(const MeshBase & background_mesh,
 }
 
 void
-CrossFieldSolver::solve()
+XYCrossFieldSolver::solve()
 {
   _equation_systems->parameters.set<Real>("linear solver tolerance") = linear_solver_tolerance;
   _system->solve();
 
   const auto reason = _system->get_linear_solver()->get_converged_reason();
   if (reason < 0)
-    mooseError("CrossFieldSolver: The cross field solve failed to converge with reason: ",
+    mooseError("XYCrossFieldSolver: The cross field solve failed to converge with reason: ",
                Utility::enum_to_string(reason));
 
   extractNodalCrossField();
@@ -126,13 +126,13 @@ CrossFieldSolver::solve()
 }
 
 void
-CrossFieldSolver::assembleSystem(EquationSystems & es, const std::string & /*system_name*/)
+XYCrossFieldSolver::assembleSystem(EquationSystems & es, const std::string & /*system_name*/)
 {
-  es.parameters.get<CrossFieldSolver *>("cross_field_solver")->assembleLaplace();
+  es.parameters.get<XYCrossFieldSolver *>("cross_field_solver")->assembleLaplace();
 }
 
 void
-CrossFieldSolver::assembleLaplace()
+XYCrossFieldSolver::assembleLaplace()
 {
   const DofMap & dof_map = _system->get_dof_map();
   std::unique_ptr<FEBase> fe(FEBase::build(_mesh.mesh_dimension(), _fe_type));
@@ -194,7 +194,7 @@ CrossFieldSolver::assembleLaplace()
 }
 
 void
-CrossFieldSolver::extractNodalCrossField()
+XYCrossFieldSolver::extractNodalCrossField()
 {
   const auto system_number = _system->number();
   const auto & solution = *_system->solution;
@@ -223,13 +223,13 @@ CrossFieldSolver::extractNodalCrossField()
 }
 
 std::complex<Real>
-CrossFieldSolver::interpolatedCrossField(const Point & point) const
+XYCrossFieldSolver::interpolatedCrossField(const Point & point) const
 {
   mooseAssert(_solved, "solve() must be called before the cross field can be queried.");
 
   const Elem * elem = (*_point_locator)(point);
   if (!elem)
-    mooseError("CrossFieldSolver: No element was found to contain point ", point);
+    mooseError("XYCrossFieldSolver: No element was found to contain point ", point);
 
   const Point reference_point = FEMap::inverse_map(elem->dim(), elem, point);
   FEComputeData fe_data(*_equation_systems, reference_point);
@@ -251,13 +251,13 @@ CrossFieldSolver::interpolatedCrossField(const Point & point) const
 }
 
 Real
-CrossFieldSolver::theta(const Point & point) const
+XYCrossFieldSolver::theta(const Point & point) const
 {
   return std::arg(interpolatedCrossField(point)) / 4.0;
 }
 
 std::pair<Point, Point>
-CrossFieldSolver::crossFrame(const Point & point) const
+XYCrossFieldSolver::crossFrame(const Point & point) const
 {
   const Real angle = theta(point);
   const Point u(std::cos(angle), std::sin(angle), 0.0);

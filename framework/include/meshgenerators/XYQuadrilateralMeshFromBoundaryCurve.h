@@ -16,14 +16,14 @@
  * generators of the all-quad pipeline as sub-generators: XYFrontalDelaunayGenerator triangulates
  * the region, TriToQuadConverter recombines the triangles into quadrilaterals,
  * MoveNodesToCurveGenerator moves the boundary nodes the conversion added back onto each
- * parametric boundary curve, and SmoothMeshGenerator relaxes the result.
+ * parametric boundary curve, and SmoothMeshGenerator optionally relaxes the result.
  */
-class QuadMeshPipelineGenerator : public MeshGenerator
+class XYQuadrilateralMeshFromBoundaryCurve : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  QuadMeshPipelineGenerator(const InputParameters & parameters);
+  XYQuadrilateralMeshFromBoundaryCurve(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

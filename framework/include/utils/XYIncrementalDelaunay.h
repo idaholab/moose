@@ -42,7 +42,7 @@
  * vertex ids used here run from 0 to numPoints() - 1 in the order the points were added, and
  * getTriangles() drops the triangles that touch the bounding triangle.
  */
-class IncrementalDelaunay
+class XYIncrementalDelaunay
 {
 public:
   /// Sentinel for a vertex, triangle or neighbor that does not exist
@@ -130,8 +130,7 @@ public:
    * Checks everything this class promises: that every triangle is counter-clockwise, that the
    * neighbor entries agree with each other, that every constrained segment is an edge, and that
    * every edge that is not constrained is locally Delaunay. A triangulation whose unconstrained
-   * edges are all locally Delaunay is a constrained Delaunay triangulation, so an empty result is
-   * the whole contract and not a sample of it.
+   * edges are all locally Delaunay is a constrained Delaunay triangulation.
    * @return One entry describing each violation found, empty if there are none
    */
   std::vector<std::string> checkInvariants() const;

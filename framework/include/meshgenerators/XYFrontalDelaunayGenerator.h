@@ -11,8 +11,8 @@
 
 #include "SurfaceDelaunayGeneratorBase.h"
 
-#include "CrossFieldSolver.h"
-#include "IncrementalDelaunay.h"
+#include "XYCrossFieldSolver.h"
+#include "XYIncrementalDelaunay.h"
 #include "MeshTriangulationUtils.h"
 
 #include "libmesh/mesh_triangle_holes.h"
@@ -32,9 +32,12 @@
  * Where XYDelaunayGenerator refines a triangulation until every triangle is small enough, this
  * generator grows one: the triangles that already meet the target size are separated from those
  * that do not by a front, and a point is placed a target size ahead of the worst front edge until
- * nothing is left to place. The triangulation itself is maintained by IncrementalDelaunay, which
- * keeps the outer boundary and the hole boundaries as constrained segments, so the front never
- * crosses them.
+ * nothing is left to place. At the start only the boundary points exist, so the front is the
+ * boundary itself, the outer boundary and every hole boundary at once, and it advances inward
+ * from all of them simultaneously, worst edge first, until the fronts meet and no triangle misses
+ * the target. The triangulation itself is maintained by XYIncrementalDelaunay, which keeps the
+ * outer boundary and the hole boundaries as constrained segments, so the front never crosses
+ * them.
  *
  * Points placed under the LINF metric form right isosceles triangles in a local frame rather than
  * equilateral ones, which is what lets pairs of them recombine into good quadrilaterals; the frame
@@ -104,7 +107,7 @@ protected:
                   unsigned int extra_nodes,
                   boundary_id_type bcid,
                   std::vector<Point> & points,
-                  std::vector<IncrementalDelaunay::Segment> & segments);
+                  std::vector<XYIncrementalDelaunay::Segment> & segments);
 
   /// @return The target triangle area at a point, from whichever area limit the user set
   Real targetArea(const Point & point) const;
@@ -151,7 +154,7 @@ protected:
    * @param frame The frame the LINF metric measures in
    * @return Whether a vertex of the triangulation lies within distance of the point
    */
-  bool hasVertexWithin(const IncrementalDelaunay & delaunay,
+  bool hasVertexWithin(const XYIncrementalDelaunay & delaunay,
                        const Point & point,
                        Real distance,
                        const std::pair<Point, Point> & frame) const;
@@ -165,7 +168,7 @@ protected:
    * @return Whether that point is to be inserted
    */
   bool
-  placePoint(const IncrementalDelaunay & delaunay, const FrontEdge & edge, Point & point) const;
+  placePoint(const XYIncrementalDelaunay & delaunay, const FrontEdge & edge, Point & point) const;
 
   /**
    * @param delaunay The triangulation the front belongs to
@@ -173,9 +176,10 @@ protected:
    * @param inside Whether each of those triangles lies in the domain
    * @return The front edges, worst first
    */
-  std::vector<FrontEdge> collectFront(const IncrementalDelaunay & delaunay,
-                                      const std::vector<IncrementalDelaunay::Triangle> & triangles,
-                                      const std::vector<bool> & inside) const;
+  std::vector<FrontEdge>
+  collectFront(const XYIncrementalDelaunay & delaunay,
+               const std::vector<XYIncrementalDelaunay::Triangle> & triangles,
+               const std::vector<bool> & inside) const;
 
   /**
    * Moves the boundary id recorded for the constrained segment an insertion split onto the two
@@ -183,13 +187,13 @@ protected:
    * @param delaunay The triangulation, whose constrained segments already hold the two halves
    * @param vertex The vertex the insertion placed on the segment
    */
-  void recordSplitBoundaryIds(const IncrementalDelaunay & delaunay, std::size_t vertex);
+  void recordSplitBoundaryIds(const XYIncrementalDelaunay & delaunay, std::size_t vertex);
 
   /// Advances the front over the whole domain, inserting points into the triangulation
-  void advanceFront(IncrementalDelaunay & delaunay);
+  void advanceFront(XYIncrementalDelaunay & delaunay);
 
   /// @return A TRI3 mesh of the triangles of the triangulation that lie in the domain
-  std::unique_ptr<MeshBase> buildTriangleMesh(const IncrementalDelaunay & delaunay);
+  std::unique_ptr<MeshBase> buildTriangleMesh(const XYIncrementalDelaunay & delaunay);
 
   /// Input mesh defining the boundary to triangulate within
   std::unique_ptr<MeshBase> & _bdy_ptr;
@@ -243,7 +247,7 @@ protected:
   std::unique_ptr<libMesh::ParsedFunction<Real>> _area_function;
 
   /// Cross field over the domain, built only when the LINF metric asks for the CROSS_FIELD frame
-  std::unique_ptr<CrossFieldSolver> _cross_field;
+  std::unique_ptr<XYCrossFieldSolver> _cross_field;
 
   /// Segments of the outer boundary and of the holes, whose tangents give the BOUNDARY frame
   std::vector<std::pair<Point, Point>> _boundary_segments;
@@ -261,7 +265,7 @@ protected:
   std::map<std::pair<long, long>, std::vector<std::size_t>> _vertex_grid;
 
   /// Boundary id of each seed segment, keyed on its two vertices with the smaller id first
-  std::map<IncrementalDelaunay::Segment, boundary_id_type> _segment_boundary_ids;
+  std::map<XYIncrementalDelaunay::Segment, boundary_id_type> _segment_boundary_ids;
 
   /// How much coarser in area the background triangulation is than the mesh being generated
   static constexpr Real _background_area_factor = 16.0;

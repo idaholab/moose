@@ -9,7 +9,7 @@
 
 #include "gtest_include.h"
 
-#include "CrossFieldSolver.h"
+#include "XYCrossFieldSolver.h"
 #include "MooseObjectUnitTest.h"
 
 #include "libmesh/elem.h"
@@ -38,10 +38,10 @@
  * needs from an application are a communicator to build background meshes on and the libMesh and
  * PETSc initialization that constructing the application performs.
  */
-class CrossFieldSolverTest : public MooseObjectUnitTest
+class XYCrossFieldSolverTest : public MooseObjectUnitTest
 {
 public:
-  CrossFieldSolverTest() : MooseObjectUnitTest("MooseUnitApp") {}
+  XYCrossFieldSolverTest() : MooseObjectUnitTest("MooseUnitApp") {}
 };
 
 namespace
@@ -327,7 +327,7 @@ makeEquilateralTriangleMesh(const libMesh::Parallel::Communicator & comm, const 
  * @return one entry per element the field winds around, empty when the field has no singularity
  */
 std::vector<WindingSite>
-windingSites(const libMesh::MeshBase & mesh, const CrossFieldSolver & solver)
+windingSites(const libMesh::MeshBase & mesh, const XYCrossFieldSolver & solver)
 {
   const auto & nodal_cross_field = solver.nodalCrossField();
   const std::set<dof_id_type> singular_nodes(solver.singularNodes().begin(),
@@ -362,10 +362,10 @@ windingSites(const libMesh::MeshBase & mesh, const CrossFieldSolver & solver)
 
 } // namespace
 
-TEST_F(CrossFieldSolverTest, diskBoundaryTangentAngle)
+TEST_F(XYCrossFieldSolverTest, diskBoundaryTangentAngle)
 {
   const auto background = makeDiskMesh(_app->comm(), 64, 16);
-  CrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
+  XYCrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
   solver.solve();
 
   for (const auto & [node_id, tangent_angle] : background.boundary_tangent_angles)
@@ -400,10 +400,10 @@ TEST_F(CrossFieldSolverTest, diskBoundaryTangentAngle)
   EXPECT_NEAR(second_direction.norm(), 1.0, algebraic_tol);
 }
 
-TEST_F(CrossFieldSolverTest, diskSingularityIndexSum)
+TEST_F(XYCrossFieldSolverTest, diskSingularityIndexSum)
 {
   const auto background = makeDiskMesh(_app->comm(), 64, 16);
-  CrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
+  XYCrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
   solver.solve();
 
   int total_winding = 0;
@@ -437,10 +437,10 @@ TEST_F(CrossFieldSolverTest, diskSingularityIndexSum)
   EXPECT_LT(closest_singular_node, 0.1 * disk_radius);
 }
 
-TEST_F(CrossFieldSolverTest, lShapeHasNoInteriorSingularity)
+TEST_F(XYCrossFieldSolverTest, lShapeHasNoInteriorSingularity)
 {
   const auto background = makeLShapeMesh(_app->comm(), 8);
-  CrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
+  XYCrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
   solver.solve();
 
   // Every edge of the L shape is axis aligned, so every boundary tangent angle is a multiple of a
@@ -462,10 +462,10 @@ TEST_F(CrossFieldSolverTest, lShapeHasNoInteriorSingularity)
         << "the cross at (" << probe(0) << ", " << probe(1) << ") is not the axis aligned one";
 }
 
-TEST_F(CrossFieldSolverTest, equilateralTriangleSingularityAtCentroid)
+TEST_F(XYCrossFieldSolverTest, equilateralTriangleSingularityAtCentroid)
 {
   const auto background = makeEquilateralTriangleMesh(_app->comm(), 18);
-  CrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
+  XYCrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
   solver.solve();
 
   // Distance from the centroid to the closest side, which is the length the assertions below

@@ -23,7 +23,7 @@
     is_closed_loop = true
   []
   [gear]
-    type = QuadMeshPipelineGenerator
+    type = XYQuadrilateralMeshFromBoundaryCurve
     boundary = 'outer_curve'
     holes = 'inner_curve'
     desired_area = 0.004

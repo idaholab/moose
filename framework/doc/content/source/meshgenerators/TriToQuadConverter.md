@@ -12,7 +12,7 @@ Two conversion algorithms are available through
 [!param](/Mesh/TriToQuadConverter/algorithm), and they trade a guaranteed pure-quadrilateral
 result against element quality.
 
-!media media/mesh/tri_to_quad_algorithms.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:tri_to_quad_algorithms caption=The two algorithms applied to the same frontal triangulation of a disk. `SUBDIVISION` splits every triangle into three quadrilaterals. `RECOMBINE` merges pairs of adjacent triangles and leaves the triangles that found no partner, shown in orange.
+!media large_media/framework/meshgenerators/tri_to_quad_algorithms.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:tri_to_quad_algorithms caption=The two algorithms applied to the same frontal triangulation of a disk. `SUBDIVISION` splits every triangle into three quadrilaterals. `RECOMBINE` merges pairs of adjacent triangles and leaves the triangles that found no partner, shown in orange.
 
 ### Subdivision
 
@@ -65,9 +65,8 @@ The triangles that recombination could not merge can be handled in either of two
 mutually exclusive.
 
 [!param](/Mesh/TriToQuadConverter/tri_subdomain_name) moves them into a subdomain of their own,
-leaving a mixed TRI3/QUAD4 mesh. Isolating them makes the recombination yield measurable, allows
-[Exodus.md] output, which requires a single element type per subdomain, and lets downstream
-physics be block-restricted away from them.
+leaving a mixed TRI3/QUAD4 mesh. Isolating them makes the recombination yield measurable, and allows
+[Exodus.md] output, which requires a single element type per subdomain.
 
 [!param](/Mesh/TriToQuadConverter/all_quad) instead eliminates them, so that the output consists
 exclusively of QUAD4 elements. After the merges are made, +every+ element of the mesh is

@@ -162,7 +162,7 @@ MoveNodesToCurveGenerator::curveGenerator() const
 Point
 MoveNodesToCurveGenerator::curvePoint(const Real t_param)
 {
-  return _curve_generator.pointCalculator(_is_closed_loop ? wrappedParameter(t_param) : t_param);
+  return _curve_generator.pointCalculator(_is_closed_loop ? boundedParameter(t_param) : t_param);
 }
 
 Real
@@ -256,7 +256,7 @@ MoveNodesToCurveGenerator::goldenSectionSearch(const Real t_lower,
 }
 
 Real
-MoveNodesToCurveGenerator::wrappedParameter(const Real t_param) const
+MoveNodesToCurveGenerator::boundedParameter(const Real t_param) const
 {
   const Real t_min =
       std::min(_section_bounding_t_values.front(), _section_bounding_t_values.back());

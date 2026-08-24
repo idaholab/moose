@@ -59,7 +59,7 @@ protected:
   /**
    * Evaluates the curve through the generator that defines it. The nodes are only snapped in the
    * XY plane, so a z coordinate of the curve is left out of everything done with the point here.
-   * @param t_param Parameter t of the curve, which is wrapped into the bounding t values if the
+   * @param t_param Parameter t of the curve, which is bounded into the bounding t values if the
    * curve is a closed loop
    * @return The point coordinates on the curve
    */
@@ -100,10 +100,10 @@ protected:
   Real goldenSectionSearch(const Real t_lower, const Real t_upper, const Point & point);
 
   /**
-   * Wraps a parameter t into the bounding t values of a closed loop, which is where the formulas
+   * Bounds a parameter t into the bounding t values of a closed loop, which is where the formulas
    * of the curve define it
    * @param t_param Parameter t of the curve
    * @return The equivalent parameter t within the bounding t values
    */
-  Real wrappedParameter(const Real t_param) const;
+  Real boundedParameter(const Real t_param) const;
 };

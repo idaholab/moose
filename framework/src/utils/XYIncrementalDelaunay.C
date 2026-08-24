@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IncrementalDelaunay.h"
+#include "XYIncrementalDelaunay.h"
 
 #include "MooseError.h"
 #include "predicates.h"
@@ -19,28 +19,28 @@
 
 namespace
 {
-static_assert(sizeof(IncrementalDelaunay::Point2D) == 2 * sizeof(double),
+static_assert(sizeof(XYIncrementalDelaunay::Point2D) == 2 * sizeof(double),
               "The exact predicates read a point as two adjacent doubles.");
 
 /// @return the two coordinates of a point, in the layout the exact predicates take
 const double *
-coords(const IncrementalDelaunay::Point2D & p)
+coords(const XYIncrementalDelaunay::Point2D & p)
 {
   return &p.x;
 }
 }
 
 std::size_t
-IncrementalDelaunay::numPoints() const
+XYIncrementalDelaunay::numPoints() const
 {
   return _vertices.empty() ? 0 : _vertices.size() - _num_bounding;
 }
 
 std::size_t
-IncrementalDelaunay::toInternal(const std::size_t id) const
+XYIncrementalDelaunay::toInternal(const std::size_t id) const
 {
   if (id >= numPoints())
-    mooseError("IncrementalDelaunay: vertex id ",
+    mooseError("XYIncrementalDelaunay: vertex id ",
                id,
                " does not exist; the triangulation has ",
                numPoints(),
@@ -49,32 +49,32 @@ IncrementalDelaunay::toInternal(const std::size_t id) const
 }
 
 std::size_t
-IncrementalDelaunay::toCaller(const std::size_t v) const
+XYIncrementalDelaunay::toCaller(const std::size_t v) const
 {
   mooseAssert(!isBounding(v), "A bounding triangle vertex has no caller vertex id");
   return v - _num_bounding;
 }
 
-const IncrementalDelaunay::Point2D &
-IncrementalDelaunay::point(const std::size_t id) const
+const XYIncrementalDelaunay::Point2D &
+XYIncrementalDelaunay::point(const std::size_t id) const
 {
   return _vertices[toInternal(id)];
 }
 
-IncrementalDelaunay::Segment
-IncrementalDelaunay::makeSegment(const std::size_t v0, const std::size_t v1)
+XYIncrementalDelaunay::Segment
+XYIncrementalDelaunay::makeSegment(const std::size_t v0, const std::size_t v1)
 {
   return {std::min(v0, v1), std::max(v0, v1)};
 }
 
 bool
-IncrementalDelaunay::isConstrainedSegment(const std::size_t v0, const std::size_t v1) const
+XYIncrementalDelaunay::isConstrainedSegment(const std::size_t v0, const std::size_t v1) const
 {
   return _constraints.count(makeSegment(v0, v1)) > 0;
 }
 
 bool
-IncrementalDelaunay::isConstrainedEdge(const std::size_t v0, const std::size_t v1) const
+XYIncrementalDelaunay::isConstrainedEdge(const std::size_t v0, const std::size_t v1) const
 {
   if (isBounding(v0) || isBounding(v1))
     return false;
@@ -82,22 +82,22 @@ IncrementalDelaunay::isConstrainedEdge(const std::size_t v0, const std::size_t v
 }
 
 unsigned int
-IncrementalDelaunay::localVertexIndex(const std::size_t t, const std::size_t v) const
+XYIncrementalDelaunay::localVertexIndex(const std::size_t t, const std::size_t v) const
 {
   for (const auto i : make_range(3u))
     if (_triangles[t].vertices[i] == v)
       return i;
-  mooseError("IncrementalDelaunay: triangle ", t, " does not have vertex ", v, ".");
+  mooseError("XYIncrementalDelaunay: triangle ", t, " does not have vertex ", v, ".");
 }
 
 unsigned int
-IncrementalDelaunay::localEdgeIndex(const std::size_t t, const Segment & edge) const
+XYIncrementalDelaunay::localEdgeIndex(const std::size_t t, const Segment & edge) const
 {
   for (const auto i : make_range(3u))
     if (makeSegment(_triangles[t].vertices[(i + 1) % 3], _triangles[t].vertices[(i + 2) % 3]) ==
         edge)
       return i;
-  mooseError("IncrementalDelaunay: triangle ",
+  mooseError("XYIncrementalDelaunay: triangle ",
              t,
              " does not have an edge between vertices ",
              edge.first,
@@ -107,7 +107,7 @@ IncrementalDelaunay::localEdgeIndex(const std::size_t t, const Segment & edge) c
 }
 
 bool
-IncrementalDelaunay::containsPoint(const std::size_t t, const Point2D & p) const
+XYIncrementalDelaunay::containsPoint(const std::size_t t, const Point2D & p) const
 {
   for (const auto i : make_range(3u))
     if (moose_orient2d(xy(_triangles[t].vertices[(i + 1) % 3]),
@@ -118,9 +118,9 @@ IncrementalDelaunay::containsPoint(const std::size_t t, const Point2D & p) const
 }
 
 bool
-IncrementalDelaunay::isStrictlyBetween(const std::size_t v_first,
-                                       const std::size_t v_mid,
-                                       const std::size_t v_last) const
+XYIncrementalDelaunay::isStrictlyBetween(const std::size_t v_first,
+                                         const std::size_t v_mid,
+                                         const std::size_t v_last) const
 {
   // The three are collinear, so whichever coordinate separates the two ends orders all three.
   const auto & first = _vertices[v_first];
@@ -132,7 +132,7 @@ IncrementalDelaunay::isStrictlyBetween(const std::size_t v_first,
 }
 
 std::string
-IncrementalDelaunay::vertexName(const std::size_t v) const
+XYIncrementalDelaunay::vertexName(const std::size_t v) const
 {
   if (isBounding(v))
     return "bounding vertex " + std::to_string(v);
@@ -140,7 +140,7 @@ IncrementalDelaunay::vertexName(const std::size_t v) const
 }
 
 std::size_t
-IncrementalDelaunay::locate(const Point2D & p) const
+XYIncrementalDelaunay::locate(const Point2D & p) const
 {
   auto current = _last_triangle < _triangles.size() ? _last_triangle : std::size_t(0);
 
@@ -177,9 +177,9 @@ IncrementalDelaunay::locate(const Point2D & p) const
 }
 
 void
-IncrementalDelaunay::growCavity(const std::size_t seed,
-                                const std::size_t v_new,
-                                std::set<std::size_t> & cavity) const
+XYIncrementalDelaunay::growCavity(const std::size_t seed,
+                                  const std::size_t v_new,
+                                  std::set<std::size_t> & cavity) const
 {
   cavity.insert(seed);
   std::vector<std::size_t> pending{seed};
@@ -198,7 +198,7 @@ IncrementalDelaunay::growCavity(const std::size_t seed,
       if (isConstrainedEdge(v0, v1))
       {
         if (side <= 0.0)
-          mooseError("IncrementalDelaunay: the point (",
+          mooseError("XYIncrementalDelaunay: the point (",
                      _vertices[v_new].x,
                      ", ",
                      _vertices[v_new].y,
@@ -230,8 +230,8 @@ IncrementalDelaunay::growCavity(const std::size_t seed,
 }
 
 std::vector<std::size_t>
-IncrementalDelaunay::retriangulate(const std::vector<std::size_t> & removed,
-                                   const std::vector<std::array<std::size_t, 3>> & added)
+XYIncrementalDelaunay::retriangulate(const std::vector<std::size_t> & removed,
+                                     const std::vector<std::array<std::size_t, 3>> & added)
 {
   mooseAssert(added.size() >= removed.size(),
               "A region takes at least as many triangles to cover as it is emptied of");
@@ -305,7 +305,7 @@ IncrementalDelaunay::retriangulate(const std::vector<std::size_t> & removed,
 }
 
 void
-IncrementalDelaunay::triangulatePseudopolygon(
+XYIncrementalDelaunay::triangulatePseudopolygon(
     const std::size_t v_start,
     const std::size_t v_end,
     const std::vector<std::size_t> & chain,
@@ -327,13 +327,13 @@ IncrementalDelaunay::triangulatePseudopolygon(
 }
 
 void
-IncrementalDelaunay::initialize(const std::vector<Point2D> & points,
-                                const std::vector<Segment> & segments)
+XYIncrementalDelaunay::initialize(const std::vector<Point2D> & points,
+                                  const std::vector<Segment> & segments)
 {
   Moose::initPredicates();
 
   if (points.empty())
-    mooseError("IncrementalDelaunay: initialize() needs at least one point.");
+    mooseError("XYIncrementalDelaunay: initialize() needs at least one point.");
 
   _vertices.clear();
   _triangles.clear();
@@ -372,7 +372,7 @@ IncrementalDelaunay::initialize(const std::vector<Point2D> & points,
   {
     const auto id = insertPoint(points[i]);
     if (id != i)
-      mooseError("IncrementalDelaunay: points ",
+      mooseError("XYIncrementalDelaunay: points ",
                  id,
                  " and ",
                  i,
@@ -385,16 +385,16 @@ IncrementalDelaunay::initialize(const std::vector<Point2D> & points,
 }
 
 std::size_t
-IncrementalDelaunay::insertPoint(const Point2D & p)
+XYIncrementalDelaunay::insertPoint(const Point2D & p)
 {
   Moose::initPredicates();
 
   if (_triangles.empty())
-    mooseError("IncrementalDelaunay: initialize() has to run before a point can be inserted.");
+    mooseError("XYIncrementalDelaunay: initialize() has to run before a point can be inserted.");
 
   const auto seed = locate(p);
   if (seed == invalid_index)
-    mooseError("IncrementalDelaunay: the point (",
+    mooseError("XYIncrementalDelaunay: the point (",
                p.x,
                ", ",
                p.y,
@@ -406,7 +406,7 @@ IncrementalDelaunay::insertPoint(const Point2D & p)
     if (_vertices[v].x == p.x && _vertices[v].y == p.y)
     {
       if (isBounding(v))
-        mooseError("IncrementalDelaunay: the point (",
+        mooseError("XYIncrementalDelaunay: the point (",
                    p.x,
                    ", ",
                    p.y,
@@ -464,15 +464,16 @@ IncrementalDelaunay::insertPoint(const Point2D & p)
 }
 
 void
-IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
+XYIncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
 {
   Moose::initPredicates();
 
   if (v0 == v1)
-    mooseError("IncrementalDelaunay: a constrained segment needs two different vertices, but both "
-               "ends of this one are vertex ",
-               v0,
-               ".");
+    mooseError(
+        "XYIncrementalDelaunay: a constrained segment needs two different vertices, but both "
+        "ends of this one are vertex ",
+        v0,
+        ".");
 
   const auto v_from = toInternal(v0);
   const auto v_to = toInternal(v1);
@@ -520,7 +521,7 @@ IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
   } while (current != start && current != invalid_index);
 
   if (entered == invalid_index)
-    mooseError("IncrementalDelaunay: no triangle around vertex ",
+    mooseError("XYIncrementalDelaunay: no triangle around vertex ",
                v0,
                " is entered by the segment to vertex ",
                v1,
@@ -534,7 +535,7 @@ IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
   while (true)
   {
     if (isConstrainedEdge(right, left))
-      mooseError("IncrementalDelaunay: the segment from vertex ",
+      mooseError("XYIncrementalDelaunay: the segment from vertex ",
                  v0,
                  " to vertex ",
                  v1,
@@ -547,7 +548,7 @@ IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
     const auto edge = makeSegment(right, left);
     const auto next_t = _triangles[crossed.back()].neighbors[localEdgeIndex(crossed.back(), edge)];
     if (next_t == invalid_index)
-      mooseError("IncrementalDelaunay: the segment from vertex ",
+      mooseError("XYIncrementalDelaunay: the segment from vertex ",
                  v0,
                  " to vertex ",
                  v1,
@@ -592,8 +593,8 @@ IncrementalDelaunay::insertSegment(const std::size_t v0, const std::size_t v1)
   _constraints.insert(makeSegment(v0, v1));
 }
 
-std::vector<IncrementalDelaunay::Triangle>
-IncrementalDelaunay::getTriangles() const
+std::vector<XYIncrementalDelaunay::Triangle>
+XYIncrementalDelaunay::getTriangles() const
 {
   std::vector<std::size_t> position(_triangles.size(), invalid_index);
   std::size_t count = 0;
@@ -620,7 +621,7 @@ IncrementalDelaunay::getTriangles() const
 }
 
 std::vector<std::string>
-IncrementalDelaunay::checkInvariants() const
+XYIncrementalDelaunay::checkInvariants() const
 {
   Moose::initPredicates();
 
@@ -687,7 +688,7 @@ IncrementalDelaunay::checkInvariants() const
 }
 
 std::vector<std::string>
-IncrementalDelaunay::checkEmptyCircumcircle() const
+XYIncrementalDelaunay::checkEmptyCircumcircle() const
 {
   Moose::initPredicates();
 

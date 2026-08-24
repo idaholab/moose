@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest_include.h"
-#include "IncrementalDelaunay.h"
+#include "XYIncrementalDelaunay.h"
 #include "predicates.h"
 
 #include "libmesh/int_range.h"
@@ -18,13 +18,13 @@
 #include <string>
 #include <vector>
 
-// IncrementalDelaunay carries no libMesh types; this is only for make_range() and index_range(),
+// XYIncrementalDelaunay carries no libMesh types; this is only for make_range() and index_range(),
 // which no other header of this file brings in.
 using namespace libMesh;
 
-using Point2D = IncrementalDelaunay::Point2D;
-using Segment = IncrementalDelaunay::Segment;
-using Triangle = IncrementalDelaunay::Triangle;
+using Point2D = XYIncrementalDelaunay::Point2D;
+using Segment = XYIncrementalDelaunay::Segment;
+using Triangle = XYIncrementalDelaunay::Triangle;
 
 namespace
 {
@@ -62,7 +62,7 @@ noViolations(const std::string & what, const std::vector<std::string> & violatio
  * @return the sign of the determinant
  */
 int
-orientationSign(const IncrementalDelaunay & tri,
+orientationSign(const XYIncrementalDelaunay & tri,
                 const std::size_t v0,
                 const std::size_t v1,
                 const std::size_t v2)
@@ -92,7 +92,7 @@ orientationSign(const IncrementalDelaunay & tri,
  * @return whether the two segments properly cross
  */
 bool
-properlyCrosses(const IncrementalDelaunay & tri,
+properlyCrosses(const XYIncrementalDelaunay & tri,
                 const std::size_t a0,
                 const std::size_t a1,
                 const std::size_t b0,
@@ -134,7 +134,7 @@ hasEdge(const std::vector<Triangle> & triangles, const std::size_t v0, const std
  * @return one entry describing each such triangle, empty if there are none
  */
 std::vector<std::string>
-nonCounterClockwiseTriangles(const IncrementalDelaunay & tri)
+nonCounterClockwiseTriangles(const XYIncrementalDelaunay & tri)
 {
   std::vector<std::string> violations;
 
@@ -162,7 +162,7 @@ nonCounterClockwiseTriangles(const IncrementalDelaunay & tri)
  * @return one entry describing each violation found, empty if there are none
  */
 std::vector<std::string>
-constraintViolations(const IncrementalDelaunay & tri)
+constraintViolations(const XYIncrementalDelaunay & tri)
 {
   std::vector<std::string> violations;
 
@@ -274,7 +274,7 @@ flatQuadPoints()
  * @param tri filled with the triangulation of the points
  */
 void
-insertOneAtATime(const std::vector<Point2D> & points, IncrementalDelaunay & tri)
+insertOneAtATime(const std::vector<Point2D> & points, XYIncrementalDelaunay & tri)
 {
   // Starting from the first point on its own is what puts every one of the others in through
   // insertPoint(), where it can be checked by itself.
@@ -300,13 +300,13 @@ insertOneAtATime(const std::vector<Point2D> & points, IncrementalDelaunay & tri)
  * vertex it already is, the point set does not grow, and the triangulation is left as it was. The
  * coordinates every vertex reports are the ones it went in with.
  */
-TEST(IncrementalDelaunayTest, duplicatePointReturnsExistingVertex)
+TEST(XYIncrementalDelaunayTest, duplicatePointReturnsExistingVertex)
 {
   Moose::initPredicates();
 
   const auto points = collinearPoints();
 
-  IncrementalDelaunay tri;
+  XYIncrementalDelaunay tri;
   tri.initialize(points, {});
   ASSERT_EQ(points.size(), tri.numPoints());
 
@@ -334,13 +334,13 @@ TEST(IncrementalDelaunayTest, duplicatePointReturnsExistingVertex)
  * every cell of it is a square whose four corners are exactly cocircular. The triangulation stays
  * Delaunay through every one of the fifteen insertions and not only at the end of them.
  */
-TEST(IncrementalDelaunayTest, regularGridStaysDelaunayAfterEveryInsertion)
+TEST(XYIncrementalDelaunayTest, regularGridStaysDelaunayAfterEveryInsertion)
 {
   Moose::initPredicates();
 
   const auto points = gridPoints();
 
-  IncrementalDelaunay tri;
+  XYIncrementalDelaunay tri;
   insertOneAtATime(points, tri);
   ASSERT_EQ(points.size(), tri.numPoints());
 
@@ -358,13 +358,13 @@ TEST(IncrementalDelaunayTest, regularGridStaysDelaunayAfterEveryInsertion)
  * hull without being corners of it, so the base of the hull has to come out as the three short
  * edges between consecutive points rather than as the one long edge between its ends.
  */
-TEST(IncrementalDelaunayTest, collinearPointsStayDelaunayAfterEveryInsertion)
+TEST(XYIncrementalDelaunayTest, collinearPointsStayDelaunayAfterEveryInsertion)
 {
   Moose::initPredicates();
 
   const auto points = collinearPoints();
 
-  IncrementalDelaunay tri;
+  XYIncrementalDelaunay tri;
   insertOneAtATime(points, tri);
   ASSERT_EQ(points.size(), tri.numPoints());
 
@@ -386,13 +386,13 @@ TEST(IncrementalDelaunayTest, collinearPointsStayDelaunayAfterEveryInsertion)
  * flip (0, 1) to (2, 3) instead. checkEmptyCircumcircle() therefore has to report a violation here,
  * while checkInvariants(), which exempts constrained edges from that test, must not.
  */
-TEST(IncrementalDelaunayTest, constrainedSegmentSurvivesInsertions)
+TEST(XYIncrementalDelaunayTest, constrainedSegmentSurvivesInsertions)
 {
   Moose::initPredicates();
 
   const auto points = flatQuadPoints();
 
-  IncrementalDelaunay tri;
+  XYIncrementalDelaunay tri;
   tri.initialize(points, {Segment(0, 1)});
 
   EXPECT_TRUE(tri.isConstrainedSegment(0, 1));
@@ -433,13 +433,13 @@ TEST(IncrementalDelaunayTest, constrainedSegmentSurvivesInsertions)
  * in the middle of it can no longer be a single edge. The two halves are constrained in its place,
  * each recorded with the smaller vertex id first.
  */
-TEST(IncrementalDelaunayTest, pointOnConstrainedSegmentSplitsIt)
+TEST(XYIncrementalDelaunayTest, pointOnConstrainedSegmentSplitsIt)
 {
   Moose::initPredicates();
 
   const auto points = flatQuadPoints();
 
-  IncrementalDelaunay tri;
+  XYIncrementalDelaunay tri;
   tri.initialize(points, {Segment(0, 1)});
   ASSERT_TRUE(tri.isConstrainedSegment(0, 1));
 
@@ -464,14 +464,14 @@ TEST(IncrementalDelaunayTest, pointOnConstrainedSegmentSplitsIt)
  * exactly the convex hull of the points and Euler's formula fixes how many of them there are. Every
  * count below is the formula and a second, independent reading of the same configuration.
  */
-TEST(IncrementalDelaunayTest, triangleCountMatchesEulerFormula)
+TEST(XYIncrementalDelaunayTest, triangleCountMatchesEulerFormula)
 {
   Moose::initPredicates();
 
   // The 4 x 4 grid: its hull is the square from (0, 0) to (3, 3), whose boundary carries the twelve
   // points of the perimeter, leaving the four in the middle inside. 2 * 16 - 12 - 2 = 18, which is
   // also the nine cells of the grid cut into two triangles each.
-  IncrementalDelaunay grid;
+  XYIncrementalDelaunay grid;
   grid.initialize(gridPoints(), {});
   EXPECT_EQ(eulerTriangleCount(16, 12), grid.getTriangles().size());
 
@@ -479,19 +479,19 @@ TEST(IncrementalDelaunayTest, triangleCountMatchesEulerFormula)
   // towards h even though they are not corners of it, because they are on its boundary. So h is 5
   // rather than 3, and 2 * 6 - 5 - 2 = 5. Reading it the other way, a region with 5 boundary
   // vertices and 1 point inside takes 5 + 2 * 1 - 2 = 5 triangles.
-  IncrementalDelaunay collinear;
+  XYIncrementalDelaunay collinear;
   collinear.initialize(collinearPoints(), {});
   EXPECT_EQ(eulerTriangleCount(6, 5), collinear.getTriangles().size());
 
   // A square with its center: the four corners are the hull and the center is inside, so
   // 2 * 5 - 4 - 2 = 4, the fan of four triangles around the center.
-  IncrementalDelaunay fan;
+  XYIncrementalDelaunay fan;
   fan.initialize({{0.0, 0.0}, {4.0, 0.0}, {4.0, 4.0}, {0.0, 4.0}, {2.0, 2.0}}, {});
   EXPECT_EQ(eulerTriangleCount(5, 4), fan.getTriangles().size());
 
   // A constrained segment changes which triangles cover the hull but not how many, so the count is
   // the same 2 * 4 - 4 - 2 = 2 either diagonal splits the quadrilateral into.
-  IncrementalDelaunay constrained;
+  XYIncrementalDelaunay constrained;
   constrained.initialize(flatQuadPoints(), {Segment(0, 1)});
   EXPECT_EQ(eulerTriangleCount(4, 4), constrained.getTriangles().size());
 }

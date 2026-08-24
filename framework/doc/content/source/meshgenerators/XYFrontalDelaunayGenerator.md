@@ -89,7 +89,7 @@ in the frame of a cross field solved over the disk:
 
 !listing test/tests/meshgenerators/xy_frontal_delaunay_generator/frontal_circle.i block=Mesh
 
-!media media/mesh/frontal_circle_mesh.png style=width:60%;margin-left:auto;margin-right:auto; id=fig:frontal_circle caption=The disk triangulation of the input above. The advance places the points, so the triangles lean toward right isosceles shapes aligned with the cross field.
+!media large_media/framework/meshgenerators/frontal_circle_mesh.png style=width:60%;margin-left:auto;margin-right:auto; id=fig:frontal_circle caption=The disk triangulation of the input above. The advance places the points, so the triangles lean toward right isosceles shapes aligned with the cross field.
 
 A domain containing a hole. The front advances from the hole boundary as well as from the outer
 boundary, and the name given in
@@ -108,7 +108,7 @@ could not be merged into their own subdomain so the yield can be measured:
 
 !listing test/tests/meshgenerators/mbb_pipeline/mbb_pipeline.i block=Mesh
 
-!media media/mesh/mbb_all_quad_mesh.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:mbb_all_quad caption=The MBB-beam domain meshed by this pipeline with [!param](/Mesh/TriToQuadConverter/all_quad), recombined into quadrilaterals and smoothed.
+!media large_media/framework/meshgenerators/mbb_all_quad_mesh.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:mbb_all_quad caption=The MBB-beam domain meshed by this pipeline with [!param](/Mesh/TriToQuadConverter/all_quad), recombined into quadrilaterals and smoothed.
 
 !bibtex bibliography
 

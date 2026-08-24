@@ -44,10 +44,10 @@ class LinearImplicitSystem;
  *
  * The solve is a pair of real Laplace problems (one for the real part of z, one for the imaginary
  * part) discretized with linear Lagrange finite elements on the background triangulation. It runs
- * on a private serial communicator so that the field, and therefore the mesh generated from it, is
- * identical on every process and for every process count.
+ * on a private serial communicator so that the field is identical on every process and for every
+ * process count.
  */
-class CrossFieldSolver
+class XYCrossFieldSolver
 {
 public:
   /// Values of the complex cross field z at the nodes of the background mesh, keyed by node id.
@@ -64,8 +64,8 @@ public:
    * node of @p background_mesh, keyed by node id. Every node on the domain boundary must appear;
    * nodes absent from this map are treated as interior.
    */
-  CrossFieldSolver(const libMesh::MeshBase & background_mesh,
-                   const std::map<dof_id_type, Real> & boundary_tangent_angles);
+  XYCrossFieldSolver(const libMesh::MeshBase & background_mesh,
+                     const std::map<dof_id_type, Real> & boundary_tangent_angles);
 
   /**
    * Assemble and solve the two Laplace problems, then normalize the nodal field and collect the

@@ -23,7 +23,7 @@ The boundary may be given as a sideset, as a nodeset, or as both; the nodes of i
 its nodeset entries are all collected. Since the curve is defined in the XY-plane, only the
 in-plane coordinates of a node are changed. The input mesh must be replicated.
 
-!media media/mesh/parsed_curve_node_snap.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:parsed_curve_node_snap caption=A quadrant of the circle boundary of the example below, with the curve drawn in red. Before the snap, the boundary nodes the conversion added lie on the chords, inside the curve; the snap moves every boundary node onto the curve and the smoothing relaxes the elements behind it.
+!media large_media/framework/meshgenerators/parsed_curve_node_snap.png style=width:90%;margin-left:auto;margin-right:auto; id=fig:parsed_curve_node_snap caption=A quadrant of the circle boundary of the example below, with the curve drawn in red. Before the snap, the boundary nodes the conversion added lie on the chords, inside the curve; the snap moves every boundary node onto the curve and the smoothing relaxes the elements behind it.
 
 ## Finding the Closest Point
 

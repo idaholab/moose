@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "QuadMeshPipelineGenerator.h"
+#include "XYQuadrilateralMeshFromBoundaryCurve.h"
 
 #include "Factory.h"
 #include "MooseApp.h"
 
-registerMooseObject("MooseApp", QuadMeshPipelineGenerator);
+registerMooseObject("MooseApp", XYQuadrilateralMeshFromBoundaryCurve);
 
 InputParameters
-QuadMeshPipelineGenerator::validParams()
+XYQuadrilateralMeshFromBoundaryCurve::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -64,8 +64,10 @@ QuadMeshPipelineGenerator::validParams()
       "per entry of that parameter. Use the names given in 'output_boundary' and "
       "'hole_boundaries'.");
 
-  params.addParam<unsigned int>(
-      "smooth_iterations", 1, "Number of Laplace smoothing iterations applied to the final mesh.");
+  params.addParam<bool>("smooth",
+                        true,
+                        "Whether to finish the pipeline with a variational smoothing pass, which "
+                        "relaxes the elements without moving the boundary.");
 
   params.addParamNamesToGroup("boundary holes desired_area", "Region");
   params.addParamNamesToGroup("eta_min all_quad", "Recombination");
@@ -74,12 +76,13 @@ QuadMeshPipelineGenerator::validParams()
   params.addClassDescription(
       "Meshes a region bounded by input curves with quadrilaterals in one step, by chaining a "
       "frontal Delaunay triangulation, the triangle-to-quadrilateral conversion, the snapping of "
-      "boundary nodes onto parametric curves, and a Laplace smoothing pass.");
+      "boundary nodes onto parametric curves, and an optional variational smoothing pass.");
 
   return params;
 }
 
-QuadMeshPipelineGenerator::QuadMeshPipelineGenerator(const InputParameters & parameters)
+XYQuadrilateralMeshFromBoundaryCurve::XYQuadrilateralMeshFromBoundaryCurve(
+    const InputParameters & parameters)
   : MeshGenerator(parameters)
 {
   const auto & parsed_curve_generators =
@@ -141,22 +144,24 @@ QuadMeshPipelineGenerator::QuadMeshPipelineGenerator(const InputParameters & par
     addMeshSubgenerator("MoveNodesToCurveGenerator", previous, params);
   }
 
+  if (getParam<bool>("smooth"))
   {
     auto params = _app.getFactory().getValidParams("SmoothMeshGenerator");
 
     params.set<MeshGeneratorName>("input") = previous;
-    params.set<MooseEnum>("algorithm") = "laplace";
-    params.set<unsigned int>("iterations") = getParam<unsigned int>("smooth_iterations");
+    // The variational algorithm cannot tangle the mesh and only allows node movement that leaves
+    // the domain unchanged, so the snapped geometry survives the smoothing
+    params.set<MooseEnum>("algorithm") = "variational";
 
-    // The Laplace algorithm holds boundary nodes fixed, so the snapped geometry survives the
-    // smoothing
-    addMeshSubgenerator("SmoothMeshGenerator", name() + "_smooth", params);
-    _build_mesh = &getMeshByName(name() + "_smooth");
+    previous = name() + "_smooth";
+    addMeshSubgenerator("SmoothMeshGenerator", previous, params);
   }
+
+  _build_mesh = &getMeshByName(previous);
 }
 
 std::unique_ptr<MeshBase>
-QuadMeshPipelineGenerator::generate()
+XYQuadrilateralMeshFromBoundaryCurve::generate()
 {
   return std::move(*_build_mesh);
 }

@@ -61,7 +61,7 @@ struct XYDelaunayOptions
 /**
  * Resolves the outer-boundary selection of the options into the set of ids that define it: the ids
  * of 'input_boundary_names' or of 'input_subdomain_names' in the boundary mesh. This is shared by
- * the Triangle-backed and the frontal triangulators, so that both select the outer boundary the
+ * the Poly2Tri-backed and the frontal triangulators, so that both select the outer boundary the
  * same way.
  * @param mg The calling mesh generator (used for paramError reporting)
  * @param boundary_mesh The mesh the names are resolved against

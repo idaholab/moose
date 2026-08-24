@@ -39,7 +39,7 @@ constexpr unsigned int n_frontal_tri_sides = 3;
 
 /// @return The plain coordinates of a point of the triangulation as a mesh point
 Point
-frontalToPoint(const IncrementalDelaunay::Point2D & point)
+frontalToPoint(const XYIncrementalDelaunay::Point2D & point)
 {
   return Point(point.x, point.y, 0.0);
 }
@@ -155,21 +155,21 @@ frontalLinfCorner(const Point & start,
  * @return Whether each triangle lies in the domain
  */
 std::vector<bool>
-frontalInsideTriangles(const IncrementalDelaunay & delaunay,
-                       const std::vector<IncrementalDelaunay::Triangle> & triangles,
+frontalInsideTriangles(const XYIncrementalDelaunay & delaunay,
+                       const std::vector<XYIncrementalDelaunay::Triangle> & triangles,
                        const std::size_t seed_start,
                        const std::size_t seed_end)
 {
   // The triangles are counter-clockwise, so the one that holds the segment in the order that puts
   // the domain on its left is the one on the domain side of it
-  std::size_t seed = IncrementalDelaunay::invalid_index;
+  std::size_t seed = XYIncrementalDelaunay::invalid_index;
   for (const auto t : index_range(triangles))
     for (const auto k : make_range(n_frontal_tri_sides))
       if (triangles[t].vertices[k] == seed_start &&
           triangles[t].vertices[(k + 1) % n_frontal_tri_sides] == seed_end)
         seed = t;
 
-  if (seed == IncrementalDelaunay::invalid_index)
+  if (seed == XYIncrementalDelaunay::invalid_index)
     mooseError("The segment from vertex ",
                seed_start,
                " to vertex ",
@@ -192,7 +192,7 @@ frontalInsideTriangles(const IncrementalDelaunay & delaunay,
     for (const auto i : make_range(n_frontal_tri_sides))
     {
       const auto neighbor = triangle.neighbors[i];
-      if (neighbor == IncrementalDelaunay::invalid_index || inside[neighbor])
+      if (neighbor == XYIncrementalDelaunay::invalid_index || inside[neighbor])
         continue;
       if (delaunay.isConstrainedSegment(triangle.vertices[(i + 1) % n_frontal_tri_sides],
                                         triangle.vertices[(i + 2) % n_frontal_tri_sides]))
@@ -332,7 +332,7 @@ XYFrontalDelaunayGenerator::appendLoop(const std::vector<Point> & loop,
                                        const unsigned int extra_nodes,
                                        const boundary_id_type bcid,
                                        std::vector<Point> & points,
-                                       std::vector<IncrementalDelaunay::Segment> & segments)
+                                       std::vector<XYIncrementalDelaunay::Segment> & segments)
 {
   const std::size_t loop_start = points.size();
 
@@ -360,7 +360,7 @@ XYFrontalDelaunayGenerator::appendLoop(const std::vector<Point> & loop,
   {
     const std::size_t next = (vertex + 1 < points.size()) ? vertex + 1 : loop_start;
     segments.emplace_back(vertex, next);
-    _segment_boundary_ids[IncrementalDelaunay::makeSegment(vertex, next)] = bcid;
+    _segment_boundary_ids[XYIncrementalDelaunay::makeSegment(vertex, next)] = bcid;
   }
 }
 
@@ -558,7 +558,7 @@ XYFrontalDelaunayGenerator::addToGrid(const std::size_t vertex, const Point & po
 }
 
 bool
-XYFrontalDelaunayGenerator::hasVertexWithin(const IncrementalDelaunay & delaunay,
+XYFrontalDelaunayGenerator::hasVertexWithin(const XYIncrementalDelaunay & delaunay,
                                             const Point & point,
                                             const Real distance,
                                             const std::pair<Point, Point> & frame) const
@@ -586,7 +586,7 @@ XYFrontalDelaunayGenerator::hasVertexWithin(const IncrementalDelaunay & delaunay
 }
 
 bool
-XYFrontalDelaunayGenerator::placePoint(const IncrementalDelaunay & delaunay,
+XYFrontalDelaunayGenerator::placePoint(const XYIncrementalDelaunay & delaunay,
                                        const FrontEdge & edge,
                                        Point & point) const
 {
@@ -628,8 +628,8 @@ XYFrontalDelaunayGenerator::placePoint(const IncrementalDelaunay & delaunay,
 
 std::vector<XYFrontalDelaunayGenerator::FrontEdge>
 XYFrontalDelaunayGenerator::collectFront(
-    const IncrementalDelaunay & delaunay,
-    const std::vector<IncrementalDelaunay::Triangle> & triangles,
+    const XYIncrementalDelaunay & delaunay,
+    const std::vector<XYIncrementalDelaunay::Triangle> & triangles,
     const std::vector<bool> & inside) const
 {
   // The circumradius answers for both the size and the shape of a triangle: it grows with the
@@ -660,7 +660,7 @@ XYFrontalDelaunayGenerator::collectFront(
     {
       // An edge between two triangles that both miss the target is behind the front, not on it
       const auto neighbor = triangle.neighbors[i];
-      if (neighbor != IncrementalDelaunay::invalid_index && inside[neighbor] &&
+      if (neighbor != XYIncrementalDelaunay::invalid_index && inside[neighbor] &&
           excess[neighbor] > _size_tolerance)
         continue;
 
@@ -681,15 +681,15 @@ XYFrontalDelaunayGenerator::collectFront(
               if (b.excess > a.excess)
                 return false;
 
-              return IncrementalDelaunay::makeSegment(a.start, a.end) <
-                     IncrementalDelaunay::makeSegment(b.start, b.end);
+              return XYIncrementalDelaunay::makeSegment(a.start, a.end) <
+                     XYIncrementalDelaunay::makeSegment(b.start, b.end);
             });
 
   return front;
 }
 
 void
-XYFrontalDelaunayGenerator::recordSplitBoundaryIds(const IncrementalDelaunay & delaunay,
+XYFrontalDelaunayGenerator::recordSplitBoundaryIds(const XYIncrementalDelaunay & delaunay,
                                                    const std::size_t vertex)
 {
   // The vertex the insertion placed is the newest one, so it is the larger id of every segment it
@@ -703,7 +703,7 @@ XYFrontalDelaunayGenerator::recordSplitBoundaryIds(const IncrementalDelaunay & d
               "A split replaces the segment the new vertex landed on by the two halves that vertex "
               "divides it into");
 
-  const auto split = IncrementalDelaunay::makeSegment(ends.front(), ends.back());
+  const auto split = XYIncrementalDelaunay::makeSegment(ends.front(), ends.back());
   const auto recorded = _segment_boundary_ids.find(split);
   // A constrained segment carrying no boundary id belongs to no input boundary, which
   // buildTriangleMesh() reports; leaving the halves without one as well keeps that report
@@ -712,12 +712,12 @@ XYFrontalDelaunayGenerator::recordSplitBoundaryIds(const IncrementalDelaunay & d
 
   const boundary_id_type bcid = recorded->second;
   _segment_boundary_ids.erase(recorded);
-  _segment_boundary_ids[IncrementalDelaunay::makeSegment(ends.front(), vertex)] = bcid;
-  _segment_boundary_ids[IncrementalDelaunay::makeSegment(ends.back(), vertex)] = bcid;
+  _segment_boundary_ids[XYIncrementalDelaunay::makeSegment(ends.front(), vertex)] = bcid;
+  _segment_boundary_ids[XYIncrementalDelaunay::makeSegment(ends.back(), vertex)] = bcid;
 }
 
 void
-XYFrontalDelaunayGenerator::advanceFront(IncrementalDelaunay & delaunay)
+XYFrontalDelaunayGenerator::advanceFront(XYIncrementalDelaunay & delaunay)
 {
   // The front is walked over and over rather than rebuilt after every point, which is what keeps
   // the cost of the advance down. A pass that places nothing has nothing left to place: every
@@ -756,7 +756,7 @@ XYFrontalDelaunayGenerator::advanceFront(IncrementalDelaunay & delaunay)
 }
 
 std::unique_ptr<MeshBase>
-XYFrontalDelaunayGenerator::buildTriangleMesh(const IncrementalDelaunay & delaunay)
+XYFrontalDelaunayGenerator::buildTriangleMesh(const XYIncrementalDelaunay & delaunay)
 {
   const auto triangles = delaunay.getTriangles();
   // The outer boundary was seeded first and counter-clockwise, so the domain is on the left of the
@@ -793,12 +793,13 @@ XYFrontalDelaunayGenerator::buildTriangleMesh(const IncrementalDelaunay & delaun
       // Side s of a triangle runs from vertex s to vertex s + 1, which is the edge the
       // triangulation holds opposite vertex s + 2
       const auto neighbor = triangle.neighbors[(side + 2) % n_frontal_tri_sides];
-      if (neighbor != IncrementalDelaunay::invalid_index && inside[neighbor])
+      if (neighbor != XYIncrementalDelaunay::invalid_index && inside[neighbor])
         continue;
 
       const auto first = triangle.vertices[side];
       const auto second = triangle.vertices[(side + 1) % n_frontal_tri_sides];
-      const auto bcid = _segment_boundary_ids.find(IncrementalDelaunay::makeSegment(first, second));
+      const auto bcid =
+          _segment_boundary_ids.find(XYIncrementalDelaunay::makeSegment(first, second));
       if (bcid == _segment_boundary_ids.end())
         mooseError("A side of the triangulation lies on the boundary of the domain without lying "
                    "on any of the input boundaries, which happens when a point of "
@@ -885,8 +886,8 @@ XYFrontalDelaunayGenerator::generate()
 
   if (_metric == "LINF" && _orientation == "CROSS_FIELD")
   {
-    _cross_field = std::make_unique<CrossFieldSolver>(*_background_mesh,
-                                                      boundaryTangentAngles(*_background_mesh));
+    _cross_field = std::make_unique<XYCrossFieldSolver>(*_background_mesh,
+                                                        boundaryTangentAngles(*_background_mesh));
     _cross_field->solve();
   }
 
@@ -898,7 +899,7 @@ XYFrontalDelaunayGenerator::generate()
   frontalCanonicalizeLoop(outer_loop);
 
   std::vector<Point> points;
-  std::vector<IncrementalDelaunay::Segment> segments;
+  std::vector<XYIncrementalDelaunay::Segment> segments;
   appendLoop(outer_loop, _refine_bdy, _add_nodes_per_boundary_segment, 0, points, segments);
 
   for (const auto hole_i : index_range(_hole_outlines))
@@ -923,12 +924,12 @@ XYFrontalDelaunayGenerator::generate()
     if (insideDomain(interior_point))
       points.push_back(interior_point);
 
-  std::vector<IncrementalDelaunay::Point2D> plane_points;
+  std::vector<XYIncrementalDelaunay::Point2D> plane_points;
   plane_points.reserve(points.size());
   for (const auto & point : points)
     plane_points.push_back({point(0), point(1)});
 
-  IncrementalDelaunay delaunay;
+  XYIncrementalDelaunay delaunay;
   delaunay.initialize(plane_points, segments);
 
   for (const auto vertex : make_range(delaunay.numPoints()))
