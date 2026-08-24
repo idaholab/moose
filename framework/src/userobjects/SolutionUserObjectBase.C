@@ -32,6 +32,7 @@
 #include "libmesh/nemesis_io_helper.h"
 #include "libmesh/enum_xdr_mode.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/fe_interface.h"
 
 InputParameters
 SolutionUserObjectBase::validParams()
@@ -734,14 +735,14 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
                                           WeightingType weighting_type,
                                           const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  // first check if the FE type is continuous because in that case the value is
-  // unique and we can take a short cut, the default weighting_type found_first also
-  // shortcuts out
-  const auto family = _system->variable_type(var_name).family;
+  // Use multivalued evaluation only for spatial discontinuous scalar fields.
+  // The default found_first policy also shortcuts out.
+  const auto & fe_type = _system->variable_type(var_name);
+  const auto continuity = FEInterface::get_continuity(fe_type);
+  const auto field_type = FEInterface::field_type(fe_type);
 
-  if (weighting_type == WeightingType::FOUND_FIRST ||
-      (family != L2_LAGRANGE && family != MONOMIAL && family != L2_HIERARCHIC &&
-       family != libMesh::XYZ))
+  if (weighting_type == WeightingType::FOUND_FIRST || field_type != libMesh::TYPE_SCALAR ||
+      continuity != libMesh::DISCONTINUOUS || fe_type.family == libMesh::SCALAR)
     return pointValue(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
