@@ -15,11 +15,13 @@
    - MTUNE: Tuning to use for --mtune (default: generic)
    - OPTFLAGS: Optional optimization flags to override (overrides -march and -mtune)
    - PETSC_OPTIONS: Options to pass to the PETSc build script
+   - ASAN: Whether or not to build with AddressSanitizer (truthy, default: false)
    - PROFILING: Whether or not to build with gperftools (truthy, default: false)
    - SKIP_FINGERPRINTS: Set to skip fingerprint verification (truthy, default: false)
 -#}
 
 {#- Set defaults for any variables not provided                -#}
+{%- set ASAN              = ASAN | default(false)              -%}
 {%- set PROFILING         = PROFILING | default(false)         -%}
 {%- set MPI_FLAVOUR       = MPI_FLAVOUR | default('mpich')     -%}
 {%- set MTUNE             = MTUNE | default('generic')         -%}
@@ -86,6 +88,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
 {%- else %}
     OPTFLAGS=("-O2" "-march={{ MARCH }}" "-mtune={{ MTUNE }}")
+{%- endif %}
+{% if ASAN | to_bool %}
+    OPTFLAGS+=("-fsanitize=address" "-fno-omit-frame-pointer")
 {%- endif %}
 
     # Clone PETSc
