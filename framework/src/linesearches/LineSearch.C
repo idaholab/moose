@@ -25,9 +25,8 @@ LineSearch::LineSearch(const InputParameters & parameters)
   : MooseObject(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblem *>("_fe_problem", "Must be using FEProblem.")),
     _nl_its(0),
-    _nl_sys_num(isParamValid("nl_sys")
-                    ? _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nl_sys"))
-                    : 0),
+    _nl_sys_num(
+        isParamValid("nl_sys") ? _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nl_sys")) : 0),
     _nl(_fe_problem.getNonlinearSystemBase(_nl_sys_num))
 {
 }

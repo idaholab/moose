@@ -29,8 +29,8 @@ using namespace libMesh;
  * expense is avoided. Then when the contact set is resolved late in the Newton solve, the linear
  * tolerance will return to the finer tolerance set through the traditional `l_tol` parameter.
  *
- * The number of allowed lambda cuts is controlled through the `contact_line_search_allowed_lambda_cuts`
- * Executioner parameter.
+ * The number of allowed lambda cuts is controlled through the
+ * `contact_line_search_allowed_lambda_cuts` Executioner parameter.
  */
 class NodeFaceContactLineSearch : public ContactLineSearchBase
 {

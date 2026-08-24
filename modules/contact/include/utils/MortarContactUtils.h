@@ -217,10 +217,16 @@ frictionalContactResidual(const std::array<T, N> & tangential_pressure,
       friction_coefficient, augmentedNormalPressure(normal_pressure, scaled_normal_gap));
 
   return degree_one_friction_residual
-             ? alartCurnierFrictionResidual(
-                   tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon)
-             : hueberStadlerWohlmuthFrictionResidual(
-                   tangential_pressure, augmented_tangential_pressure, radius, normal_pressure, epsilon);
+             ? alartCurnierFrictionResidual(tangential_pressure,
+                                            augmented_tangential_pressure,
+                                            radius,
+                                            normal_pressure,
+                                            epsilon)
+             : hueberStadlerWohlmuthFrictionResidual(tangential_pressure,
+                                                     augmented_tangential_pressure,
+                                                     radius,
+                                                     normal_pressure,
+                                                     epsilon);
 }
 
 /**
@@ -538,7 +544,6 @@ void communicateGaps(
     bool normalize_c,
     const Parallel::Communicator & communicator,
     bool send_data_back);
-
 }
 }
 }

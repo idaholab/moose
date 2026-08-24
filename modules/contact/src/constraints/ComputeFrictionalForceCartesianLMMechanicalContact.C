@@ -266,13 +266,13 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
 
     tangential_dof_residual =
         Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
-                                                           tangential_velocity,
-                                                           ADReal(c_t),
-                                                           ADReal(_dt),
-                                                           normal_pressure_value,
-                                                           c * weighted_gap,
-                                                           ADReal(_mu),
-                                                           ADReal(_epsilon))[0];
+                                                          tangential_velocity,
+                                                          ADReal(c_t),
+                                                          ADReal(_dt),
+                                                          normal_pressure_value,
+                                                          c * weighted_gap,
+                                                          ADReal(_mu),
+                                                          ADReal(_epsilon))[0];
   }
   else
   {
@@ -281,15 +281,14 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     const std::array<ADReal, 2> tangential_velocity{
         {*_tangential_vel_ptr[0], *_tangential_vel_ptr[1]}};
 
-    const auto residual =
-        Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
-                                                           tangential_velocity,
-                                                           ADReal(c_t),
-                                                           ADReal(_dt),
-                                                           normal_pressure_value,
-                                                           c * weighted_gap,
-                                                           ADReal(_mu),
-                                                           ADReal(_epsilon));
+    const auto residual = Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
+                                                                            tangential_velocity,
+                                                                            ADReal(c_t),
+                                                                            ADReal(_dt),
+                                                                            normal_pressure_value,
+                                                                            c * weighted_gap,
+                                                                            ADReal(_mu),
+                                                                            ADReal(_epsilon));
     tangential_dof_residual = residual[0];
     tangential_dof_residual_dir = residual[1];
   }

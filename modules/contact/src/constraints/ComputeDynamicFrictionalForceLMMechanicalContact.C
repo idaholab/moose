@@ -334,14 +334,15 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};
 
   // Degree-two Hueber-Stadler-Wohlmuth friction residual; see 3D path above for rationale.
-  const ADReal dof_residual = Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
-                                                                                tangential_velocity,
-                                                                                ADReal(c_t),
-                                                                                ADReal(_dt),
-                                                                                contact_pressure,
-                                                                                c * weighted_gap,
-                                                                                mu_ad,
-                                                                                ADReal(_epsilon))[0];
+  const ADReal dof_residual =
+      Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
+                                                        tangential_velocity,
+                                                        ADReal(c_t),
+                                                        ADReal(_dt),
+                                                        contact_pressure,
+                                                        c * weighted_gap,
+                                                        mu_ad,
+                                                        ADReal(_epsilon))[0];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

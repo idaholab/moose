@@ -141,13 +141,13 @@ TEST(FrictionProjection, PenetrationSignConvention)
   const Real epsilon = 1e-7;
 
   const auto residual = ContactUtils::frictionalContactResidual(tangential_pressure,
-                                                                 tangential_velocity,
-                                                                 c_t,
-                                                                 dt,
-                                                                 normal_pressure,
-                                                                 scaled_normal_gap,
-                                                                 mu,
-                                                                 epsilon);
+                                                                tangential_velocity,
+                                                                c_t,
+                                                                dt,
+                                                                normal_pressure,
+                                                                scaled_normal_gap,
+                                                                mu,
+                                                                epsilon);
   EXPECT_DOUBLE_EQ(residual[0], 0.0);
 
   // Reversing the sign in the augmentation (the historical bug: normal_pressure +

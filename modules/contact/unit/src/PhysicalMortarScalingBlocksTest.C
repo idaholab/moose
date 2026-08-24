@@ -89,7 +89,7 @@ dispCouplingNorm(FEProblemBase & fe_problem,
   for (const auto & disp_dof : disp_dofs)
   {
     const Real value = disp_is_row ? rawEntry(fe_problem, mat, disp_dof, other_dof)
-                                    : rawEntry(fe_problem, mat, other_dof, disp_dof);
+                                   : rawEntry(fe_problem, mat, other_dof, disp_dof);
     sum_sq += value * value;
   }
   return std::sqrt(sum_sq);
@@ -201,8 +201,8 @@ expectFrictionlessBlocksSameOrder(const std::string & input_file, bool want_clos
 
   const auto blocks = computeBlocks(problem, want_closed);
 
-  ASSERT_TRUE(blocks.found) << "no boundary node found in the "
-                             << (want_closed ? "closed" : "open") << " NCP branch";
+  ASSERT_TRUE(blocks.found) << "no boundary node found in the " << (want_closed ? "closed" : "open")
+                            << " NCP branch";
 
   const Real off_diag = want_closed ? blocks.Jld : blocks.Jll;
   const std::string off_diag_label = want_closed ? "Jld" : "Jll";

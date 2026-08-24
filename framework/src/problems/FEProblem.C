@@ -98,4 +98,3 @@ FEProblem::setInputParametersFEProblem(InputParameters & parameters)
   // set _fe_problem
   parameters.set<FEProblem *>("_fe_problem") = this;
 }
-

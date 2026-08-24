@@ -269,19 +269,19 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   // formulation-specific expression.
   const auto residual =
       Moose::Mortar::Contact::frictionalContactResidual(friction_lm_values,
-                                                         tangential_velocity,
-                                                         c_t,
-                                                         ADReal(_dt),
-                                                         contact_pressure,
-                                                         c * weighted_gap,
-                                                         mu_ad,
-                                                         ADReal(_epsilon),
-                                                         _degree_one_friction_residual);
+                                                        tangential_velocity,
+                                                        c_t,
+                                                        ADReal(_dt),
+                                                        contact_pressure,
+                                                        c * weighted_gap,
+                                                        mu_ad,
+                                                        ADReal(_epsilon),
+                                                        _degree_one_friction_residual);
   // With c_tangential_strategy = physical, this rescales the friction row the same way
   // ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof rescales the normal LM row: from
   // a pressure-scale equation to a force-scale one matching the coupled displacement (elasticity)
-  // equations, without moving the residual's root since equationCompensation()*contactNormalization()
-  // is a positive constant.
+  // equations, without moving the residual's root since
+  // equationCompensation()*contactNormalization() is a positive constant.
   const ADReal dof_residual =
       _dynamic_c_t ? equationCompensation(*_friction_vars[0]) * contactNormalization() * residual[0]
                    : residual[0];
@@ -351,19 +351,19 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   // Friction residual; see 3D path above for rationale.
   const ADReal raw_residual =
       Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
-                                                         tangential_velocity,
-                                                         c_t,
-                                                         ADReal(_dt),
-                                                         contact_pressure,
-                                                         c * weighted_gap,
-                                                         mu_ad,
-                                                         ADReal(_epsilon),
-                                                         _degree_one_friction_residual)[0];
+                                                        tangential_velocity,
+                                                        c_t,
+                                                        ADReal(_dt),
+                                                        contact_pressure,
+                                                        c * weighted_gap,
+                                                        mu_ad,
+                                                        ADReal(_epsilon),
+                                                        _degree_one_friction_residual)[0];
 
   // See 3D path above for rationale.
-  const ADReal dof_residual =
-      _dynamic_c_t ? equationCompensation(*_friction_vars[0]) * contactNormalization() * raw_residual
-                   : raw_residual;
+  const ADReal dof_residual = _dynamic_c_t ? equationCompensation(*_friction_vars[0]) *
+                                                 contactNormalization() * raw_residual
+                                           : raw_residual;
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

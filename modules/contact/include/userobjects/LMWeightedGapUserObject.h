@@ -83,7 +83,7 @@ protected:
    * single scalar multiplying the unscaled interpolated field.
    */
   const ADVariableValue & scaledLowerSln(const MooseVariableFE<Real> & lm_var,
-                                          ADVariableValue & cache) const;
+                                         ADVariableValue & cache) const;
 
   /// Whether to derive the physical normal stiffness from elasticity tensor material properties
   const bool _derive_c_from_elasticity;

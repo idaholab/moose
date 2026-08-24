@@ -13,7 +13,7 @@
 #include "LineSearch.h"
 
 ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem,
-                                                                unsigned int nl_sys_num)
+                                                               unsigned int nl_sys_num)
   : _fe_problem(fe_problem), _nl_sys_num(nl_sys_num)
 {
 }

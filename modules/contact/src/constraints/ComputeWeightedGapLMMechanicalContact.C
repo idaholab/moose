@@ -261,9 +261,8 @@ ComputeWeightedGapLMMechanicalContact::contactNormalization() const
 Real
 ComputeWeightedGapLMMechanicalContact::normalContactScale(const DofObject * const dof) const
 {
-  const Real scale = _use_derived_c_normal
-                         ? libmesh_map_find(_lm_weighted_gap_uo->dofToDerivedC(), dof)[0]
-                         : _c;
+  const Real scale =
+      _use_derived_c_normal ? libmesh_map_find(_lm_weighted_gap_uo->dofToDerivedC(), dof)[0] : _c;
   if (!std::isfinite(scale) || scale <= 0.0)
     mooseError("Mortar contact requires positive, finite nodal normal pressure scales.");
   return scale;
@@ -276,7 +275,7 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
 
   const Real normal_scale = normalContactScale(dof);
   const Real c = (_use_derived_c_normal || _normalize_c) ? normal_scale / contactNormalization()
-                                                          : normal_scale;
+                                                         : normal_scale;
 
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
@@ -296,8 +295,8 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   // the order of the coupled displacement (elasticity) equations, without moving the root of
   // min(lm_value, weighted_gap * c) = 0 since contactNormalization() is a positive nodal constant.
   const ADReal dof_residual = _use_derived_c_normal
-                                   ? equationCompensation(*_var) * contactNormalization() * min_term
-                                   : min_term;
+                                  ? equationCompensation(*_var) * contactNormalization() * min_term
+                                  : min_term;
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
