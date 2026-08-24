@@ -121,7 +121,7 @@ protected:
    * single scalar multiplying the unscaled interpolated field.
    */
   const ADVariableValue & scaledLowerSln(const MooseVariableFE<Real> & lm_var,
-                                          ADVariableValue & cache) const;
+                                         ADVariableValue & cache) const;
 
   /// The derived physical stiffness scale D_j relating the stored LM value y_j to the multiplier
   /// D_j y_j; 1 unless derive_c_from_elasticity = true

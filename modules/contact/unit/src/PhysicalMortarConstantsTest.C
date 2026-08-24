@@ -119,8 +119,9 @@ TEST(PhysicalMortarConstants, CTangentialPhysicalWithAutomaticScalingThrows)
 {
   try
   {
-    runCumulativeNL("frictional_physical.i",
-                    {"Contact/mortar/c_normal_strategy=user", "Executioner/automatic_scaling=true"});
+    runCumulativeNL(
+        "frictional_physical.i",
+        {"Contact/mortar/c_normal_strategy=user", "Executioner/automatic_scaling=true"});
     FAIL() << "missing expected exception";
   }
   catch (const std::exception & e)

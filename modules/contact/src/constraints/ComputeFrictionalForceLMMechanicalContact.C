@@ -283,8 +283,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   // With c_tangential_strategy = physical, this rescales the friction row the same way
   // ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof rescales the normal LM row: from
   // a pressure-scale equation to a force-scale one matching the coupled displacement (elasticity)
-  // equations, without moving the residual's root since equationCompensation()*contactNormalization()
-  // is a positive constant.
+  // equations, without moving the residual's root since
+  // equationCompensation()*contactNormalization() is a positive constant.
   const ADReal dof_residual =
       _dynamic_c_t ? equationCompensation(*_friction_vars[0]) * contactNormalization() * residual[0]
                    : residual[0];
@@ -366,9 +366,9 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
                                                         _friction_projection_degree)[0];
 
   // See 3D path above for rationale.
-  const ADReal dof_residual =
-      _dynamic_c_t ? equationCompensation(*_friction_vars[0]) * contactNormalization() * raw_residual
-                   : raw_residual;
+  const ADReal dof_residual = _dynamic_c_t ? equationCompensation(*_friction_vars[0]) *
+                                                 contactNormalization() * raw_residual
+                                           : raw_residual;
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

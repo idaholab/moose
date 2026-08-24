@@ -62,8 +62,8 @@ ContactLineSearchBase::setupBackingLineSearch()
   {
     LibmeshPetscCall(SNESLineSearchCreate(comm().get(), &_backing_petsc_line_search));
     // The MooseEnum values (basic/bt/l2/cp) are exactly the PETSc SNESLineSearch type strings
-    LibmeshPetscCall(SNESLineSearchSetType(
-        _backing_petsc_line_search, static_cast<std::string>(_backing_line_search).c_str()));
+    LibmeshPetscCall(SNESLineSearchSetType(_backing_petsc_line_search,
+                                           static_cast<std::string>(_backing_line_search).c_str()));
     // Distinct prefix so users can tune this object's native PETSc options (e.g.
     // -contact_backing_snes_linesearch_damping) without MOOSE re-exposing each one
     LibmeshPetscCall(

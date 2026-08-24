@@ -162,7 +162,7 @@ const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
   return (_use_nodal_scaling || _derive_c_from_elasticity) ? _scaled_contact_pressure
-                                                            : _lm_var->adSlnLower();
+                                                           : _lm_var->adSlnLower();
 }
 
 void
@@ -331,8 +331,8 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
   // displaced-mesh node pointer, and callers may pass a different pointer of the same id, so map
   // through the mesh to match -- exactly as getNormalGap() does above.
   const auto * const dof = _subproblem.mesh().nodePtr(node->id());
-  return (*_lm_var->sys().currentSolution())(dof_number) * derivedPressureScale(dof) /
-         nodalScale(dof);
+  const Real raw_value = (*_lm_var->sys().currentSolution())(dof_number);
+  return raw_value * derivedPressureScale(dof) / nodalScale(dof);
 }
 
 const ADVariableValue &

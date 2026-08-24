@@ -116,7 +116,6 @@ communicateGaps(
   };
   TIMPI::push_parallel_vector_data(communicator, push_back_data, sent_back_action_functor);
 }
-
 }
 }
 }

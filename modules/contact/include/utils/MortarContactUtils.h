@@ -596,7 +596,6 @@ void communicateGaps(
     bool normalize_c,
     const Parallel::Communicator & communicator,
     bool send_data_back);
-
 }
 }
 }
