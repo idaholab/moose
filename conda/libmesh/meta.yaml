@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
+{% set build = 2 %}
 {% set version = "2026.08.18_0772c3d" %}
 
 package:
@@ -30,7 +30,7 @@ build:
     # things that depend on this moose-libmesh must use the
     # exact moose-petsc and moose-libmesh-vtk that this was
     # built with
-    - moose-petsc 3.25.4 {{ mpi }}_1
+    - moose-petsc 3.25.4 {{ mpi }}_2
     - moose-libmesh-vtk 9.7.0 {{ mpi }}_1
 
 requirements:
@@ -45,7 +45,7 @@ requirements:
     - pkg-config
   host:
     - {{ mpi }} {{ mpi_version }}
-    - moose-petsc 3.25.4 {{ mpi }}_1
+    - moose-petsc 3.25.4 {{ mpi }}_2
     - moose-libmesh-vtk 9.7.0 {{ mpi }}_1
     - _openmp_mutex # [linux]
     - hdf5 {{ hdf5 }}
@@ -58,7 +58,7 @@ requirements:
     - llvm-openmp # [osx]
     - zlib
   run:
-    - moose-petsc 3.25.4 {{ mpi }}_1
+    - moose-petsc 3.25.4 {{ mpi }}_2
     - moose-libmesh-vtk 9.7.0 {{ mpi }}_1
 
 test:
