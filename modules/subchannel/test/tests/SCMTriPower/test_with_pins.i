@@ -63,7 +63,7 @@ num_cells = 40
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski

@@ -70,7 +70,7 @@ axial_shape_scale = 1.33449883449883
 
 [SCMClosures]
   [uctd_friction]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [kim_chung_mixing]
     type = SCMMixingKimAndChung

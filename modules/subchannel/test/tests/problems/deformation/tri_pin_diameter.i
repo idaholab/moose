@@ -42,7 +42,7 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
