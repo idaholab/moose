@@ -10,7 +10,6 @@
       detail = "with a time step governed by the MFEM parent application,"
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
-      recover = false
       restep = false
     []
     [MFEM_sub_cycling]
@@ -20,7 +19,6 @@
       detail = "and with the sub-app running multiple timesteps for each timestep of the parent app."
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
-      recover = false
       restep = false
     []
   []
@@ -33,7 +31,6 @@
       detail = "with a transient problem running in the parent app."
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
-      recover = false
       restep = false
     []
   []

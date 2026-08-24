@@ -8,7 +8,6 @@
     requirement = 'The system shall have the ability to parse non-linear functions of problem variables'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
   [MFEMScalarQuadratureFunction]
     type = CSVDiff
@@ -20,7 +19,6 @@
                   'points and reuse the stored values in place of the original coefficient.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
   [MFEMScalarQuadratureFunctionOrderMismatch]
     type = RunException

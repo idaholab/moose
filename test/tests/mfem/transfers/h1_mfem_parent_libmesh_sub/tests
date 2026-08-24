@@ -9,7 +9,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_quads.csv'
       detail = 'first order scalar Lagrange variables defined on quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
     []
     [H1QuadSecondOrder]
@@ -19,7 +18,6 @@
       detail = 'second order scalar Lagrange variables defined on quads,'
       abs_zero = 4e-10
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'FESpaces/H1FESpace/fec_order=SECOND '
                 'libmesh_app0:Variables/libmesh_scalar_var/order=SECOND '
@@ -31,7 +29,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_tris.csv'
       detail = 'first order scalar Lagrange variables defined on tris,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'libmesh_app0:Mesh/file=../../mesh/square_tri6.e '
@@ -44,7 +41,6 @@
       detail = 'second order Lagrange variables defined on tris,'
       abs_zero = 9e-10
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'FESpaces/H1FESpace/fec_order=SECOND '
@@ -58,7 +54,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_tri_to_quad.csv'
       detail = 'first order scalar Lagrange variables from tris to quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'libmesh_app0:Mesh/file=../../mesh/square_tri6.e '
@@ -70,7 +65,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_tri_to_quad_order_2.csv'
       detail = 'second order Lagrange variables from tris to quads,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'FESpaces/H1FESpace/fec_order=SECOND '
@@ -84,7 +78,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_hexes.csv'
       detail = 'first order scalar Lagrange variables defined on hexes,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_hexes '
@@ -97,7 +90,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_hexes_order_2.csv'
       detail = 'second order scalar Lagrange variables defined on hexes,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'FESpaces/H1FESpace/fec_order=SECOND '
@@ -112,7 +104,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_tets.csv'
       detail = 'first order scalar Lagrange variables defined on tetrahedra,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_tets '
@@ -126,7 +117,6 @@
       detail = 'second order scalar Lagrange variables defined on tetrahedra,'
       abs_zero = 2e-10
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'FESpaces/H1FESpace/fec_order=SECOND '
@@ -141,7 +131,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_tet_to_hex.csv'
       detail = 'first order scalar Lagrange variables from tets to hexes,'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_tet_to_hex '
@@ -154,7 +143,6 @@
       csvdiff = 'mfem_parent_libmesh_sub_scalar_tet_to_hex_order_2.csv'
       detail = 'and second order scalar Lagrange variables from tets to hexes.'
       capabilities = 'mfem'
-      recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'FESpaces/H1FESpace/fec_order=SECOND '

@@ -11,7 +11,6 @@
       detail = 'MFEM PETSc nonlinear solver, and the'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       max_parallel = 15 # mfem/mfem#5375
     []
     [MFEMNewtonNonLinearDiffusion]
@@ -22,7 +21,6 @@
       detail = 'native MFEM Newton solver. Additionally the system shall support nesting both nonlinear and linear solvers under a common solvers syntax block.'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
     []
   []
   [MFEMNonLinearDiffusionNonZeroRHS]
@@ -37,7 +35,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
   []
   [MFEMNonLinearHeatTransfer]
     design = 'EquationSystem.md'
@@ -94,7 +91,6 @@
                 NLHeatConductionQF_centre_temperature_0050.csv'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    recover = false
     restep = false
   []
 []

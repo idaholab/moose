@@ -10,7 +10,6 @@
         input = parent.i
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
-        recover = false
         detail = 'running the inputs, and'
       []
       [verify]
@@ -22,7 +21,6 @@
                   OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
         prereq = MFEMCopyTransfer/test/run
         capabilities = 'mfem'
-        recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
       []
     []

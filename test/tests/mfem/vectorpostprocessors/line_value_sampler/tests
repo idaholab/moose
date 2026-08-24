@@ -8,7 +8,6 @@
     csvdiff = 'line_value_sampler_diffusion_out_line_sample_0001.csv'
     requirement = 'The system shall have the ability to interpolate scalars at points along a line using MFEM.'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMLineVariableValueSamplerCurlCurl]
@@ -18,7 +17,6 @@
     csvdiff = 'line_value_sampler_curlcurl_out_line_sample_0001.csv'
     requirement = 'The system shall have the ability to interpolate vectors at points along a line using MFEM.'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
     # The sampled line includes element interfaces in an H(curl) space.
     allow_warnings = true
@@ -31,7 +29,6 @@
     requirement = 'The system shall identify the input block when a line variable sampler is '
                   'configured with fewer than two points.'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
 []

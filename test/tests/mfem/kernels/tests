@@ -10,7 +10,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
   []
   [MFEMCurlCurlPartial]
     type = XMLDiff
@@ -24,7 +23,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
   []
   [MFEMDiffusion]
     type = XMLDiff
@@ -35,7 +33,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []
   [MFEMDiffusion1D]
@@ -51,7 +48,6 @@
     requirement = 'The system shall have the ability to solve a 1D diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*1.*Spatial Dimension.*1.*Elems.*32.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []
   [MFEMDiffusionAMR]
@@ -64,7 +60,6 @@
       csvdiff = 'OutputData/DiffusionHRefinement.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
-      recover = false
       detail = 'h-refinement, '
     []
     [pRefinement]
@@ -92,7 +87,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
   []
   [MFEMDiffusionMatFree]
     type = XMLDiff
@@ -108,7 +102,6 @@
     abs_zero = 5e-10
     capabilities = 'mfem'
     max_parallel = 1
-    recover = false
   []
   [MFEMDiffusionPartialMultiGPUAwareMPI]
     type = CSVDiff
@@ -125,7 +118,6 @@
     capabilities = 'mfem'
     compute_devices = 'cuda'
     min_parallel = 2
-    recover = false
   []
   [MFEMDiffusionPartialMultiGPUNoAwareMPI]
     type = CSVDiff
@@ -142,7 +134,6 @@
     capabilities = 'mfem'
     compute_devices = 'cuda'
     min_parallel = 2
-    recover = false
   []
   [MFEMDiffusionDG]
     type = XMLDiff
@@ -153,7 +144,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
   []
   [MFEMGradDiv]
     type = XMLDiff
@@ -164,7 +154,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     errors = 'foobarbaz' # allow cuda errors I guess?
   []
   [MFEMHeatConduction]
@@ -180,7 +169,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     restep = false
   []
   [MFEMHeatConductionElement]
@@ -200,7 +188,6 @@
     compute_devices = 'cpu cuda'
     valgrind = none
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     restep = false
   []
   [MFEMHeatConductionMatFree]
@@ -221,7 +208,6 @@
     capabilities = 'mfem'
     valgrind = none
     max_parallel = 1
-    recover = false
     restep = false
   []
   [MFEMHeatTransfer]
@@ -233,7 +219,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     restep = false
   []
   [MFEMTransientScheme]
@@ -254,7 +239,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
     restep = false
   []
   [MFEMLinearElasticity]
@@ -266,7 +250,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
   []
   [MFEMGravity]
     type = XMLDiff
@@ -280,7 +263,6 @@
     max_parallel = 1 # schemadiff with multiple ranks
     # diffs at 9e-4 with -march=x86-64-v3
     rel_err = 2e-3
-    recover = false
   []
   [MFEMGravityQuadratureFunction]
     type = CSVDiff
@@ -290,7 +272,6 @@
     requirement = 'The system shall have the ability to precompute a vector coefficient at quadrature points and reuse the stored values in place of the original coefficient.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
   [MFEMIrrotational]
     type = CSVDiff
@@ -301,7 +282,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     valgrind = heavy
-    recover = false
   []
   [MFEMDarcy]
     type = CSVDiff
@@ -310,7 +290,6 @@
     requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
   [MFEMDiffusionEigenproblem]
     type = CSVDiff
@@ -319,7 +298,6 @@
     requirement = 'The system shall have the ability to solve a scalar eigenproblem with Dirichlet BCs using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
   [MFEMMaxwellEigenproblem]
     type = CSVDiff
@@ -328,6 +306,5 @@
     requirement = 'The system shall have the ability to solve a vector-valued eigenproblem with Dirichlet BCs using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
 []

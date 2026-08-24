@@ -8,7 +8,6 @@
     csvdiff = 'point_value_sampler_diffusion_out_point_sample_0001.csv'
     requirement = 'The system shall have the ability to interpolate scalars at arbitrary points using MFEM.'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMPointVariableValueSamplerCurlCurl]
@@ -18,7 +17,6 @@
     csvdiff = 'point_value_sampler_curlcurl_out_point_sample_0001.csv'
     requirement = 'The system shall have the ability to interpolate vectors at arbitrary points using MFEM.'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
     # The sampled points include element interfaces in an H(curl) space.
     allow_warnings = true
@@ -29,7 +27,6 @@
     expect_err = 'MFEMVariablePointValueSampler "point_sample" could not find point at'
     requirement = "The system shall issue an error if an attempt is made to sample at a point that is not inside the mesh."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMValueSamplerBoundaryDiscontinuousWarningRT]
@@ -42,7 +39,6 @@
     issues = '#32988'
     requirement = "The system shall issue a warning if an attempt is made to sample an RT variable near an element boundary."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMValueSamplerBoundaryDiscontinuousWarningND]
@@ -55,7 +51,6 @@
     issues = '#32988'
     requirement = "The system shall issue a warning if an attempt is made to sample an ND variable near an element boundary."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMValueSamplerBoundaryDiscontinuousWarningL2]
@@ -65,7 +60,6 @@
     issues = '#32988'
     requirement = "The system shall issue a warning if an attempt is made to sample an L2 variable near an element boundary."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMComplexVariableValueSamplerPointNotFoundError]
@@ -79,7 +73,6 @@
     issues = '#30076'
     requirement = "The system shall issue an error if a complex variable is sampled at a point that is not inside the mesh."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMComplexVariableValueSamplerBoundaryDiscontinuousWarning]
@@ -92,7 +85,6 @@
     issues = '#30076 #32988'
     requirement = "The system shall issue a warning if a complex variable is sampled near a boundary where it is discontinuous."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMVariableValueSamplerBoundaryTolNotOnBoundary]
@@ -100,7 +92,6 @@
     input = point_value_sampler_boundary_tol.i
     requirement = "The system shall not issue an error for a point near but outside a boundary when the tolerance is loose."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMVariableValueSamplerBoundaryTolOnBoundary]
@@ -110,7 +101,6 @@
     cli_args = 'VectorPostprocessors/point_sample/mesh_boundary_tolerance=1e-10'
     requirement = "The system shall issue an error for a point near but outside a boundary when the tolerance is tight."
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
   []
   [MFEMPointVariableValueSamplerAvgTypeNone]
@@ -122,7 +112,6 @@
                'Outputs/file_base=OutputData/point_value_sampler_avgtype_none'
     requirement = 'The system has the ability to use no average near non-continuous boundaries'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
     # we will get a warning for being near the boundary
     allow_warnings = 'true'
@@ -136,7 +125,6 @@
                'Outputs/file_base=OutputData/point_value_sampler_avgtype_arithmetic'
     requirement = 'The system has the ability to use arithmetic average near non-continuous boundaries'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
     # we will get a warning for being near the boundary
     allow_warnings = 'true'
@@ -150,7 +138,6 @@
                'Outputs/file_base=OutputData/point_value_sampler_avgtype_harmonic'
     requirement = 'The system has the ability to use harmonic average near non-continuous boundaries'
     capabilities = 'mfem'
-    recover = false
     compute_devices = 'cpu cuda'
     # we will get a warning for being near the boundary
     allow_warnings = 'true'
@@ -163,6 +150,5 @@
     requirement = 'The system shall sample the prescribed value of an MFEM variable using the '
                   'mesh belonging to its submesh finite element space.'
     capabilities = 'mfem'
-    recover = false
   []
 []
