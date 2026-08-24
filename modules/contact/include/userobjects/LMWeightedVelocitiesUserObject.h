@@ -39,4 +39,10 @@ protected:
   /// The Lagrange multiplier variables representing the tangential contact pressure
   const MooseVariableFE<Real> * const _lm_variable_tangential_one;
   const MooseVariableFE<Real> * const _lm_variable_tangential_two;
+
+private:
+  /// Caches for the D-scaled tangential contact pressures returned by
+  /// contactTangentialPressureDirOne()/DirTwo()
+  mutable ADVariableValue _scaled_tangential_pressure_one;
+  mutable ADVariableValue _scaled_tangential_pressure_two;
 };

@@ -127,6 +127,8 @@ LMWeightedGapUserObject::test() const
 const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
+  if (_derive_c_from_elasticity)
+    return scaledLowerSln(*_lm_var, _scaled_contact_pressure);
   return _lm_var->adSlnLower();
 }
 
@@ -141,7 +143,38 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
                "your Lagrange multiplier");
 
   const auto dof_number = node->dof_number(sys_num, var_num, /*component=*/0);
-  return (*_lm_var->sys().currentSolution())(dof_number);
+  const Real raw_value = (*_lm_var->sys().currentSolution())(dof_number);
+  if (!_derive_c_from_elasticity)
+    return raw_value;
+
+  const auto * const dof = static_cast<const DofObject *>(node);
+  return libmesh_map_find(_dof_to_derived_c, dof)[0] * raw_value;
+}
+
+const ADVariableValue &
+LMWeightedGapUserObject::scaledLowerSln(const MooseVariableFE<Real> & lm_var,
+                                        ADVariableValue & cache) const
+{
+  const auto & phi = lm_var.phiLower();
+  const auto & dof_indices = lm_var.dofIndicesLower();
+  const auto & solution = *lm_var.sys().currentSolution();
+  const auto n_qp = phi.size() == 0 ? 0 : phi[0].size();
+  cache.resize(n_qp);
+  for (const auto qp : make_range(n_qp))
+  {
+    ADReal value = 0;
+    for (const auto i : index_range(dof_indices))
+    {
+      const auto dof_index = dof_indices[i];
+      ADReal dof_value = solution(dof_index);
+      Moose::derivInsert(dof_value.derivatives(), dof_index, 1.);
+      const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(i));
+      const Real scale = libmesh_map_find(_dof_to_derived_c, dof)[0];
+      value += phi[i][qp] * scale * dof_value;
+    }
+    cache[qp] = value;
+  }
+  return cache;
 }
 
 void

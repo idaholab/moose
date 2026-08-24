@@ -167,8 +167,6 @@ NonlinearSystem::solve()
   if (!presolve_succeeded)
     return;
 
-  resetKSPRightDiagonalScale();
-
   potentiallySetupFiniteDifferencing();
 
   const bool time_integrator_solve = std::any_of(_time_integrators.begin(),

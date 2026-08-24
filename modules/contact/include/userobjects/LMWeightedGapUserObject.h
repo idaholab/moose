@@ -69,6 +69,17 @@ protected:
   void finalizeDerivedC();
   void accumulateDerivedCIfNeeded();
 
+  /**
+   * Interpolate a lower-dimensional Lagrange multiplier variable's nodal values onto the current
+   * quadrature points, scaling each node's contribution by its derived physical stiffness
+   * (dofToDerivedC()) before interpolating. This implements the x = D*y change of variables for a
+   * physical LM variable whose raw (persistently stored) dof value is the non-physical y; the
+   * per-node scale D can vary across a mortar segment element, so this cannot be expressed as a
+   * single scalar multiplying the unscaled interpolated field.
+   */
+  const ADVariableValue & scaledLowerSln(const MooseVariableFE<Real> & lm_var,
+                                          ADVariableValue & cache) const;
+
   /// Whether to derive the physical normal stiffness from elasticity tensor material properties
   const bool _derive_c_from_elasticity;
 
@@ -105,6 +116,9 @@ private:
   const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_secondary_ad = nullptr;
   /// AD elasticity tensor on primary side
   const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_primary_ad = nullptr;
+
+  /// Cache for the D-scaled normal contact pressure returned by contactPressure()
+  mutable ADVariableValue _scaled_contact_pressure;
 };
 
 inline const std::unordered_map<const DofObject *, std::array<Real, 2>> &

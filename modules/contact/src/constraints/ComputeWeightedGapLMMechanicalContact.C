@@ -11,7 +11,6 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "MortarContactUtils.h"
-#include "NonlinearSystemBase.h"
 #include "LMWeightedGapUserObject.h"
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
@@ -128,7 +127,6 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
       paramError("weighted_gap_uo",
                  "'use_derived_c_normal' requires a weighted gap user object derived from "
                  "LMWeightedGapUserObject.");
-    _fe_problem.getNonlinearSystemBase(_sys.number()).requestKSPRightDiagonalScale();
   }
 }
 
@@ -193,8 +191,6 @@ ComputeWeightedGapLMMechanicalContact::post()
 
     enforceConstraintOnDof(dof_object);
   }
-
-  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void
@@ -216,8 +212,6 @@ ComputeWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
 
     enforceConstraintOnDof(dof_object);
   }
-
-  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 Real
@@ -288,11 +282,13 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
-  if (_use_derived_c_normal)
-    _fe_problem.getNonlinearSystemBase(_sys.number())
-        .setKSPRightDiagonalScale(dof_index, normal_scale);
+  // With c_normal_strategy = physical, the LM dof's stored solution value is a scaled quantity;
+  // the physical contact pressure it represents is recovered by multiplying by the per-node
+  // derived stiffness scale (the x = D*y change of variables that replaces column-scaling the
+  // assembled Jacobian).
+  const ADReal physical_lm_value = _use_derived_c_normal ? normal_scale * lm_value : lm_value;
 
-  const ADReal min_term = std::min(lm_value, weighted_gap * c);
+  const ADReal min_term = std::min(physical_lm_value, weighted_gap * c);
   // With c_normal_strategy = physical, c divides the derived per-normal-length stiffness by the
   // nodal mortar weight (contactNormalization()) so the pressure-scale complementarity condition
   // is well posed independent of mortar segment size. Re-multiplying the residual by that same

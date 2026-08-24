@@ -109,12 +109,6 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
                "Three-dimensional mortar frictional contact simulations require an additional "
                "frictional Lagrange's multiplier to enforce a second tangential pressure");
 
-  // Mirrors ComputeWeightedGapLMMechanicalContact's constructor: that request is otherwise gated
-  // only on _use_derived_c_normal, which a user could leave false while still setting
-  // 'c_tangential_strategy = physical' (_dynamic_c_t true).
-  if (_dynamic_c_t)
-    _fe_problem.getNonlinearSystemBase(_sys.number()).requestKSPRightDiagonalScale();
-
   _friction_vars.push_back(getVar("friction_lm", 0));
 
   if (_3d)
@@ -172,8 +166,6 @@ ComputeFrictionalForceLMMechanicalContact::post()
     else
       enforceConstraintOnDof(dof_object);
   }
-
-  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void
@@ -204,8 +196,6 @@ ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     else
       enforceConstraintOnDof(dof_object);
   }
-
-  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void
@@ -213,11 +203,15 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 {
   ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(dof);
 
-  // Get normal LM
+  // Get normal LM. Its raw dof value is a scaled quantity when c_normal_strategy = physical; the
+  // physical contact pressure is recovered by multiplying by the per-node derived stiffness scale
+  // (the x = D*y change of variables that replaces column-scaling the assembled Jacobian).
   const auto normal_dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  if (_use_derived_c_normal)
+    contact_pressure *= normalContactScale(dof);
 
   // Get friction LMs
   std::array<const ADReal *, 2> & tangential_vel = _tangential_vel_ptr;
@@ -256,10 +250,10 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 
   if (_dynamic_c_t)
     // Mirrors ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof's use of the raw
-    // (un-normalized) normal_scale, not its own normalized 'c', for the normal LM's column scale.
+    // (un-normalized) normal_scale, not its own normalized 'c', for the friction LMs' physical
+    // scale (the x = D*y change of variables replacing column-scaling the assembled Jacobian).
     for (const auto i : make_range(num_tangents))
-      _fe_problem.getNonlinearSystemBase(_sys.number())
-          .setKSPRightDiagonalScale(friction_dof_indices[i], MetaPhysicL::raw_value(c_raw));
+      friction_lm_values[i] *= c_raw;
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad = computeFrictionValue(contact_pressure,
@@ -316,11 +310,13 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   ADReal friction_lm_value = (*_sys.currentSolution())(friction_dof_index);
   Moose::derivInsert(friction_lm_value.derivatives(), friction_dof_index, 1.);
 
-  // Get normal LM
+  // Get normal LM; see 3D path above for the physical-scale rationale.
   const auto normal_dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  if (_use_derived_c_normal)
+    contact_pressure *= normalContactScale(dof);
 
   // Resolve normal reference stiffness (physical or user mode)
   ADReal c_raw;
@@ -342,9 +338,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
     c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   if (_dynamic_c_t)
-    // See 3D path above: use the raw (un-normalized) stiffness for the column scale.
-    _fe_problem.getNonlinearSystemBase(_sys.number())
-        .setKSPRightDiagonalScale(friction_dof_index, MetaPhysicL::raw_value(c_raw));
+    // See 3D path above: recover the friction LM's physical value from its raw (scaled) dof value.
+    friction_lm_value *= c_raw;
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad =

@@ -55,12 +55,16 @@ LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParame
 const ADVariableValue &
 LMWeightedVelocitiesUserObject::contactTangentialPressureDirOne() const
 {
+  if (_derive_c_from_elasticity)
+    return scaledLowerSln(*_lm_variable_tangential_one, _scaled_tangential_pressure_one);
   return _lm_variable_tangential_one->adSlnLower();
 }
 
 const ADVariableValue &
 LMWeightedVelocitiesUserObject::contactTangentialPressureDirTwo() const
 {
+  if (_derive_c_from_elasticity)
+    return scaledLowerSln(*_lm_variable_tangential_two, _scaled_tangential_pressure_two);
   return _lm_variable_tangential_two->adSlnLower();
 }
 
