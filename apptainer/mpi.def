@@ -12,22 +12,22 @@
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
 
 {#- Image variant definitions
-    rocky8_gcc:        moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260816
-    rocky8_oneapi:     moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.1.1-mpich4.3.2-20260816
-    rocky9_gcc:        moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260816
-    ubuntu24_clang:    moose-mpi-ubuntu24-clang:24.04-clang22.1.8-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260816
-    ubuntu24_cuda_gcc: moose-mpi-ubuntu24-cuda-gcc:24.04-cuda13.3.1-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260816
-    ubuntu24_gcc:      moose-mpi-ubuntu24-gcc:24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260816
-    ubuntu24_gccmin:   moose-mpi-ubuntu24-gccmin:24.04-gcc9.5.0-mpich5.0.1-20260816
+    rocky8_gcc:        moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260822
+    rocky8_oneapi:     moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.1.1-mpich4.3.2-20260822
+    rocky9_gcc:        moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260822
+    ubuntu24_clang:    moose-mpi-ubuntu24-clang:24.04-clang22.1.8-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260823
+    ubuntu24_cuda_gcc: moose-mpi-ubuntu24-cuda-gcc:24.04-cuda13.3.1-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260823
+    ubuntu24_gcc:      moose-mpi-ubuntu24-gcc:24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260823
+    ubuntu24_gccmin:   moose-mpi-ubuntu24-gccmin:24.04-gcc9.5.0-mpich5.0.1-20260823
 -#}
 {%- set FROM_IMAGES = {
-  "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc@sha256:2acf202db6a4cb4134b3bcc9e3dd2d7a0eaf580a8952cdfdc4d8005f3531e862",
-  "rocky8_oneapi":     "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi@sha256:b39debf42c662abfab8c2e78749a80839e5cb340c67c07534fad192759ec923b",
-  "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc@sha256:7793a16f7a060aa81127e02c184d8e150eb67f722b614c2b5e493efb3d26269b",
-  "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-clang@sha256:ccb18d6e869b4215df94d34db6e0eb4222d9a87f083e378ebd6088ec38f7bc6e",
-  "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-cuda-gcc@sha256:a73ea9d79e7a632a365e0386b01672e3833621627cc577a353599242c12a3511",
-  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gcc@sha256:5c9d891583ac96fbd7ac062d325a15f56e1a49061cccea8db21ab007a44ba5c0",
-  "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gccmin@sha256:997ce51ef4f38e5480f22a8c35d20d9a6aff6a998bb3e84d6189102d559c2211"
+  "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc@sha256:01c4a2165728aa841f14f801cf811dcfe2fd6e5cbfb844de67563c0710e7ef1c",
+  "rocky8_oneapi":     "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi@sha256:c8d64a4ccb9a32dc4061ce48b55fbb60e689afe2b47c9d617a35b6f48e15de80",
+  "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc@sha256:04e82ba22859fe86552f7edbe54b0f5f85bc0a95b79846ee03d7ff2f641588f2",
+  "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-clang@sha256:54b368cfefa325a7fed53bf7b4c01fa217c85301d1e449d76aa1195165954776",
+  "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-cuda-gcc@sha256:db1a9740fdfce9a0378e6b451bf03967d62e3df09d29a2a4e6d5a4963378f943",
+  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gcc@sha256:01b6fcadea485db93f6d265d960f6688e6bd3e5913f014c35e68ac6816946650",
+  "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gccmin@sha256:7153a3528ec3925015d818b276c4a5b760d9f00b9ce0b712780df33c764354ad"
 } -%}
 
 Bootstrap: docker
@@ -67,7 +67,7 @@ From: {{ FROM_IMAGES.get(VARIANT, FROM_IMAGES.get("ubuntu24_gcc")) }}
     INSTALLS=(
         "autoconf" "automake" "bash-completion" "bison" "cmake" "diffutils"
         "doxygen" "emacs" "flex" "lcov" "libtool" "ninja-build" "patch" "patchelf"
-        "patchutils" "valgrind"
+        "patchutils"
     )
     ROCKY_INSTALLS=(
         "cppunit" "cppunit-devel" "fftw-devel" "glpk-devel" "gsl-devel" "libpng"
@@ -77,10 +77,11 @@ From: {{ FROM_IMAGES.get(VARIANT, FROM_IMAGES.get("ubuntu24_gcc")) }}
     UBUNTU_INSTALLS=(
         "libcppunit-dev" "libfftw3-dev" "libglpk-dev" "libgsl-dev" "libio-compress-perl"
         "libjson-perl" "libjson-pp-perl" "libpng-dev" "libtirpc3" "libtirpc-dev"
-        "zlib1g-dev"
+        "zlib1g-dev" "libc6-dbg"
     )
     if is_rocky; then
         dnf install -y "${INSTALLS[@]}" "${ROCKY_INSTALLS[@]}"
+        dnf debuginfo-install -y glibc
     elif is_ubuntu; then
         apt-get install -y --no-install-recommends "${INSTALLS[@]}" "${UBUNTU_INSTALLS[@]}"
     fi

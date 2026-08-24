@@ -13,6 +13,7 @@
    - MOOSE_JOBS: Number of jobs to pass to the PETSc build script
    - MPI_FLAVOUR: The flavour of MPI to use (options: mpich, openmpi; default: mpich)
    - MTUNE: Tuning to use for --mtune (default: generic)
+   - OPTFLAGS: Optional optimization flags to override (overrides -march and -mtune)
    - PETSC_OPTIONS: Options to pass to the PETSc build script
    - PROFILING: Whether or not to build with gperftools (truthy, default: false)
    - SKIP_FINGERPRINTS: Set to skip fingerprint verification (truthy, default: false)
@@ -81,7 +82,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     fi
 
     # Optimization flags
+{% if OPTFLAGS is defined %}
+    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
+{%- else %}
     OPTFLAGS=("-O2" "-march={{ MARCH }}" "-mtune={{ MTUNE }}")
+{%- endif %}
 
     # Clone PETSc
     cd ${ROOT_BUILD_DIR}
