@@ -11,6 +11,8 @@
   []
 []
 
+# Use the element ID itself as the source value so the expected weighting results
+# are independent of element ordering when a distributed mesh is serialized to Exodus.
 [AuxVariables]
   [source_value]
     family = MONOMIAL
@@ -20,10 +22,8 @@
 
 [AuxKernels]
   [set_source_value]
-    type = ParsedAux
+    type = ElementIDAux
     variable = source_value
-    expression = 'if(x < 0.5, 3, 5)'
-    use_xyzt = true
     execute_on = INITIAL
   []
 []
