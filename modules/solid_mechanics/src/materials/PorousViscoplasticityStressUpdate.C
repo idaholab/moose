@@ -178,6 +178,17 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::resetIncrementalMaterialPropertie
 
 template <bool is_ad>
 GenericReal<is_ad>
+PorousViscoplasticityStressUpdateTempl<is_ad>::matrixHydroStress(
+    const GenericRankTwoTensor<is_ad> & stress) const
+{
+  if (_pore_shape == PoreShapeModel::CYLINDRICAL)
+    return (stress(0, 0) + stress(1, 1)) / 2.0;
+
+  return stress.trace() / 3.0;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
 PorousViscoplasticityStressUpdateTempl<is_ad>::effectiveHydroStress(
     const GenericReal<is_ad> & matrix_hydro_stress) const
 {
@@ -264,10 +275,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
     GenericReal<is_ad> & effective_inelastic_strain_increment)
 {
   // Compute the matrix hydrostatic stress. Positive hydrostatic stress is tension.
-  if (_pore_shape == PoreShapeModel::CYLINDRICAL)
-    _hydro_stress = (stress(0, 0) + stress(1, 1)) / 2.0;
-  else
-    _hydro_stress = stress.trace() / 3.0;
+  _hydro_stress = matrixHydroStress(stress);
 
   // Compute intermediate equivalent stress
   const auto dev_stress = stress.deviatoric();
@@ -309,6 +317,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
     elastic_strain_increment -= inelastic_strain_increment;
     // Update stress due to new strain
     stress = elasticity_tensor * (elastic_strain_old + elastic_strain_increment);
+    _hydro_stress = matrixHydroStress(stress);
 
     effective_inelastic_strain_increment = dpsi_dgauge * _dt;
   }
@@ -319,13 +328,10 @@ unsigned int
 PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubsteps(
     const GenericRankTwoTensor<is_ad> & stress)
 {
-  if (_pore_shape == PoreShapeModel::CYLINDRICAL)
-    _hydro_stress = (stress(0, 0) + stress(1, 1)) / 2.0;
-  else
-    _hydro_stress = stress.trace() / 3.0;
+  const auto matrix_hydro_stress = matrixHydroStress(stress);
 
   return estimateNumberSubstepsFromState(
-      stress, effectiveHydroStress(_hydro_stress), _intermediate_porosity);
+      stress, effectiveHydroStress(matrix_hydro_stress), _intermediate_porosity);
 }
 
 template <bool is_ad>
@@ -615,8 +621,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeResidual(
 
   if (_model == ViscoplasticityModel::GTN)
   {
-    residual += 2.0 * porosity * cosh(_pore_shape_factor * M) - 1.0 -
-                Utility::pow<2>(porosity);
+    residual += 2.0 * porosity * cosh(_pore_shape_factor * M) - 1.0 - Utility::pow<2>(porosity);
     derivative +=
         2.0 * porosity * sinh(_pore_shape_factor * M) * _pore_shape_factor * dM_dtrial_gauge;
   }
@@ -625,8 +630,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeResidual(
     const auto h = computeH(_power, M);
     const auto dh_dM = computeH(_power, M, true);
 
-    residual += porosity * (h + _power_factor / h) - 1.0 -
-                _power_factor * Utility::pow<2>(porosity);
+    residual +=
+        porosity * (h + _power_factor / h) - 1.0 - _power_factor * Utility::pow<2>(porosity);
     const auto dresidual_dh = porosity * (1.0 - _power_factor / Utility::pow<2>(h));
     derivative += dresidual_dh * dh_dM * dM_dtrial_gauge;
   }
@@ -726,9 +731,8 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeDGaugeDSigma(
   if (_pore_shape == PoreShapeModel::SPHERICAL)
     dresidual_dequiv_stress_dequiv_stress_dsigma *= 1.0 + porosity / 1.5;
 
-  const auto dresidual_dsigma =
-      dresidual_deffective_hydro_stress * _dhydro_stress_dsigma +
-      dresidual_dequiv_stress_dequiv_stress_dsigma;
+  const auto dresidual_dsigma = dresidual_deffective_hydro_stress * _dhydro_stress_dsigma +
+                                dresidual_dequiv_stress_dequiv_stress_dsigma;
 
   /* Re-evaluate the residual at the converged gauge stress to obtain dF/dLambda.
    * This is required for branches in computeGaugeStress() that obtain Lambda
@@ -752,9 +756,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeGaugeStress(
   if (porosity == 0.0)
     gauge_stress = equiv_stress;
   else if (effective_hydro_stress == 0.0)
-    gauge_stress = equiv_stress * sqrt(1.0 + 2.0 * porosity / 3.0) /
-                   sqrt(1.0 - (1.0 + _power_factor) * porosity +
-                        _power_factor * Utility::pow<2>(porosity));
+    gauge_stress =
+        equiv_stress * sqrt(1.0 + 2.0 * porosity / 3.0) /
+        sqrt(1.0 - (1.0 + _power_factor) * porosity + _power_factor * Utility::pow<2>(porosity));
   else
   {
     _gauge_solve_state.effective_hydro_stress = effective_hydro_stress;
@@ -781,12 +785,9 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeInelasticStrainIncrement(
 
   dpsi_dgauge = _coefficient[_qp] * pow(gauge_stress, _power);
 
-  inelastic_strain_increment = _dt * dpsi_dgauge *
-                               computeDGaugeDSigma(gauge_stress,
-                                                  equiv_stress,
-                                                  dev_stress,
-                                                  effective_hydro_stress,
-                                                  porosity);
+  inelastic_strain_increment =
+      _dt * dpsi_dgauge *
+      computeDGaugeDSigma(gauge_stress, equiv_stress, dev_stress, effective_hydro_stress, porosity);
 }
 
 template <bool is_ad>
