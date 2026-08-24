@@ -656,6 +656,19 @@ ContactAction::act()
     // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3.
     if (!_problem->isSNESMFReuseBaseSetbyUser())
       _problem->setSNESMFReuseBase(false, false);
+
+    // The 'physical' strategies bake an analytically-derived scaling directly into the mortar
+    // Lagrange multiplier variables. Automatic scaling would additionally rescale those same
+    // equations based on the assembled Jacobian, double-scaling them.
+    if (getParam<MooseEnum>("c_normal_strategy") == "physical" && _problem->automaticScaling())
+      paramError("c_normal_strategy",
+                 "'c_normal_strategy = physical' cannot be used with automatic scaling; disable "
+                 "the 'automatic_scaling' executioner parameter.");
+
+    if (getParam<MooseEnum>("c_tangential_strategy") == "physical" && _problem->automaticScaling())
+      paramError("c_tangential_strategy",
+                 "'c_tangential_strategy = physical' cannot be used with automatic scaling; "
+                 "disable the 'automatic_scaling' executioner parameter.");
   }
 
   if (_formulation == ContactFormulation::MORTAR ||

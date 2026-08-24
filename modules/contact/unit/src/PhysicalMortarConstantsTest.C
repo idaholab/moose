@@ -93,4 +93,44 @@ TEST(PhysicalMortarConstants, CTangentialPhysicalOnFrictionlessThrows)
       std::exception);
 }
 
+// Verify that c_normal_strategy=physical (this fixture's default) combined with automatic
+// scaling is an error, since automatic scaling would rescale the already physically-scaled
+// Lagrange multiplier equations a second time.
+TEST(PhysicalMortarConstants, CNormalPhysicalWithAutomaticScalingThrows)
+{
+  try
+  {
+    runCumulativeNL("frictionless_physical.i", {"Executioner/automatic_scaling=true"});
+    FAIL() << "missing expected exception";
+  }
+  catch (const std::exception & e)
+  {
+    const std::string msg(e.what());
+    ASSERT_TRUE(msg.find("'c_normal_strategy = physical' cannot be used with automatic scaling") !=
+                std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}
+
+// Verify that c_tangential_strategy=physical (this fixture's default, with c_normal_strategy
+// reset to 'user' so only the tangential strategy is physical) combined with automatic scaling
+// is an error, for the same reason as the c_normal_strategy case above.
+TEST(PhysicalMortarConstants, CTangentialPhysicalWithAutomaticScalingThrows)
+{
+  try
+  {
+    runCumulativeNL("frictional_physical.i",
+                    {"Contact/mortar/c_normal_strategy=user", "Executioner/automatic_scaling=true"});
+    FAIL() << "missing expected exception";
+  }
+  catch (const std::exception & e)
+  {
+    const std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("'c_tangential_strategy = physical' cannot be used with automatic scaling") !=
+        std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}
+
 #endif // MOOSE_AD_MAX_DOFS_PER_ELEM >= 250
