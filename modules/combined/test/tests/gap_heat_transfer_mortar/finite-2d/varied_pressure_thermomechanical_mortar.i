@@ -172,6 +172,8 @@
     model = frictionless
     formulation = mortar
     correct_edge_dropping = true
+    c_normal_strategy = physical
+    use_automatic_differentiation = true
   []
 []
 
@@ -283,11 +285,9 @@
   line_search = 'none'
 
   # mortar contact solver options
-  # Apply MUMPS directly to avoid a platform-sensitive Krylov path without changing the converged
-  # solution.
   petsc_options = '-snes_converged_reason'
-  petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'preonly    lu       mumps'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       mumps'
 
   nl_rel_tol = 1e-7
   nl_max_its = 20
