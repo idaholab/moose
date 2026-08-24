@@ -49,6 +49,11 @@ public:
    */
   const std::unordered_map<const DofObject *, std::array<Real, 2>> & dofToDerivedC() const;
 
+  /// Whether 'derive_c_from_elasticity = true' (c_normal_strategy = physical), i.e. whether
+  /// contactPressure()/getNormalContactPressure() apply the dofToDerivedC() scale to raw LM dof
+  /// values rather than returning them unscaled.
+  bool deriveCFromElasticity() const { return _derive_c_from_elasticity; }
+
 protected:
   virtual void computeQpIProperties() override;
   virtual const VariableTestValue & test() const override;

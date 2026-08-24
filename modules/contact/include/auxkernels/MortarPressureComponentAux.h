@@ -11,6 +11,8 @@
 
 #include "AuxKernel.h"
 
+class LMWeightedGapUserObject;
+
 /**
  * Transforms a Cartesian Lagrange multiplier vector, typically employed for mortar mechanical
  * contact,  to local coordinates and outputs each individual component along the normal or
@@ -35,6 +37,10 @@ private:
 
   /// Lagrange multiplier variable along the z direction (3D)
   const MooseArray<Real> * const _lm_var_z;
+
+  /// Weighted gap user object providing the physical stiffness scale for lm_var_x/y/z, or
+  /// nullptr if those Lagrange multipliers are not physically-scaled
+  const LMWeightedGapUserObject * const _weighted_gap_uo;
 
   /// Fe problem to obtain primary/secondary ids
   const FEProblemBase & _fe_problem;
