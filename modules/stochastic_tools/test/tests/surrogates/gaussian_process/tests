@@ -1,6 +1,6 @@
 [Tests]
   issues = "#15482"
-  design = "GaussianProcessTrainer.md GaussianProcess.md"
+  design = "GaussianProcessTrainer.md GaussianProcess.md GPLinkFunction.md"
 
   [store_load]
     requirement = 'The system shall demonstrate a gaussian process surrogate by '
@@ -117,6 +117,45 @@
       min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
+  [constraints]
+    requirement = 'The system shall support inequality constraints on Gaussian process predictions via'
+    [GP_log_link]
+      type = RunApp
+      input = GP_log_link.i
+      allow_test_objects = true
+      detail = 'a log link function enforcing strict positivity (y > lower_bound);'
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
+    []
+    [GP_logit_link]
+      type = RunApp
+      input = GP_logit_link.i
+      allow_test_objects = true
+      detail = 'a logit link function enforcing bounded outputs (lower_bound < y < upper_bound);'
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
+    []
+    [GP_derivative_obs]
+      type = RunApp
+      input = GP_derivative_obs.i
+      allow_test_objects = true
+      detail = 'virtual derivative observations that enforce monotonicity constraints;'
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
+    []
+    [GP_penalty_constraint]
+      type = RunApp
+      input = GP_penalty_constraint.i
+      allow_test_objects = true
+      detail = 'penalty augmented NLML that steers hyperparameter tuning toward feasible predictions.'
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
+    []
+  []
   [errors]
     requirement = 'The system shall throw an error when '
     [optimization_adam_batch_size]
@@ -125,6 +164,16 @@
       cli_args = "Trainers/GP_avg_trainer/batch_size='100'"
       detail = 'the batch size is greater than the training data set size for Adam optimization. '
       expect_err = "Batch size cannot be greater than the training data set size."
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
+    []
+    [logit_invalid_bounds]
+      type = RunException
+      input = GP_logit_link.i
+      cli_args = "Trainers/GP_avg_trainer/link_upper_bound=250.0"
+      detail = 'the logit link upper bound is not greater than the lower bound. '
+      expect_err = "link_upper_bound must be strictly greater than link_lower_bound"
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
       min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
