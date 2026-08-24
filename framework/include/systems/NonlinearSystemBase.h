@@ -95,7 +95,8 @@ public:
   /** Request the parallel per-DOF vector used for PETSc KSP right diagonal scaling. */
   void requestKSPRightDiagonalScale();
 
-  /** Reset the requested KSP right diagonal scale to one and attach it to the PETSc KSP. */
+  /** Reset the requested KSP right diagonal scale to one and register the KSP pre/post-solve
+   * callbacks that apply it. */
   void resetKSPRightDiagonalScale();
 
   /** Set an owned entry of the KSP right diagonal scale, checking repeated writes. */
