@@ -506,7 +506,7 @@ class RunApp(Tester):
                     "errors.supp",
                 )
                 + " --leak-check=full --tool=memcheck --dsymutil=yes --demangle=yes --enable-debuginfod=no -v "
-                + f"--track-origins={"yes" if options.valgrind_track_origins else "no"} "
+                + f"--track-origins={'yes' if options.valgrind_track_origins else 'no'} "
                 + command
             )
         elif nthreads > 1:
