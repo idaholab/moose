@@ -1,0 +1,13 @@
+[Tests]
+  [parent]
+    prereq = pre
+    [pre]
+      type = RunCommand
+      command = 'true'
+    []
+    [child]
+      type = RunCommand
+      command = 'true'
+    []
+  []
+[]

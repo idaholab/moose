@@ -1,0 +1,7 @@
+[Tests]
+  capabilities = 'foo'
+  [./always_ok]
+    type = RunApp
+    input = good.i
+  [../]
+[]

@@ -41,22 +41,23 @@ ADFParser::JITCompile()
 #endif
 
   const auto include_path_env = std::getenv("MOOSE_ADFPARSER_JIT_INCLUDE");
+  const std::string uns = "using namespace libMesh;\n";
   if (include_path_env)
     result = JITCompileHelper(
-        "ADReal", fopenmp, "#include \"" + std::string(include_path_env) + "\"\n", type_hash);
+        "ADReal", fopenmp, "#include \"" + std::string(include_path_env) + "\"\n" + uns, type_hash);
   else
   {
     // check if we can find an installed version of the monolithic include
     const std::string include_path =
         MooseUtils::pathjoin(Moose::getExecutablePath(), "../include/moose/ADRealMonolithic.h");
     if (MooseUtils::checkFileReadable(include_path, false, false, false))
-      result =
-          JITCompileHelper("ADReal", fopenmp, "#include \"" + include_path + "\"\n", type_hash);
+      result = JITCompileHelper(
+          "ADReal", fopenmp, "#include \"" + include_path + "\"\n" + uns, type_hash);
     else
       // otherwise use the compiled in location from the source tree
       result = JITCompileHelper("ADReal",
                                 fopenmp + " " + ADFPARSER_INCLUDES,
-                                "#include \"MooseConfig.h\"\n#include \"ADReal.h\"\n",
+                                "#include \"MooseConfig.h\"\n#include \"ADReal.h\"\n" + uns,
                                 type_hash);
   }
 

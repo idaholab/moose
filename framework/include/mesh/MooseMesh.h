@@ -564,7 +564,7 @@ public:
    * complete_preparation() called on two previously identical meshes can result in two different
    * meshes even with Metis partitioning
    */
-  bool prepare(const MeshBase * mesh_to_clone);
+  virtual bool prepare(const MeshBase * mesh_to_clone);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().

@@ -385,4 +385,10 @@
     requirement = 'The system shall correctly construct TAO/PETSc CLI options and parse gradient test output to determine pass or fail.'
     issues = '#32496'
   []
+  [parameter_propagation]
+    type = PythonUnitTest
+    input = test_ParameterPropagation.py
+    requirement = 'The system shall propagate parameters specified at higher levels as default into lower level blocks.'
+    issues = '#31322'
+  []
 []
