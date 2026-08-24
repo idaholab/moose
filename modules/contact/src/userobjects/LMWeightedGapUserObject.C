@@ -161,7 +161,8 @@ LMWeightedGapUserObject::test() const
 const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
-  return _use_nodal_scaling ? _scaled_contact_pressure : _lm_var->adSlnLower();
+  return (_use_nodal_scaling || _derive_c_from_elasticity) ? _scaled_contact_pressure
+                                                            : _lm_var->adSlnLower();
 }
 
 void
@@ -281,11 +282,12 @@ LMWeightedGapUserObject::fullNodalIntegrals(const Elem * const elem)
 void
 LMWeightedGapUserObject::reinit()
 {
-  if (!_use_nodal_scaling)
+  if (!_use_nodal_scaling && !_derive_c_from_elasticity)
     return;
 
-  // The stored multiplier is scaled (zhat_j = kappa_j lambda_j); interpolate the physical pressure
-  // sum_j Phi_j (zhat_j/kappa_j) for the coupling (Popp 2013 eq. 39), cached once per segment.
+  // The stored multiplier is scaled (zhat_j = kappa_j lambda_j, and with derived physical scaling
+  // zhat_j = D_j y_j for the stored y_j); interpolate the physical pressure
+  // sum_j Phi_j (D_j y_j/kappa_j) for the coupling (Popp 2013 eq. 39), cached once per segment.
   // Phi_j is Real, so the multiplier derivatives are seeded exactly.
   const auto & phi = _lm_var->phiLower();
   const Elem * const lower_elem = _assembly.lowerDElem();
@@ -307,7 +309,7 @@ LMWeightedGapUserObject::reinit()
     const auto dof_index = node->dof_number(sys_num, var_num, /*component=*/0);
     ADReal lm_value = current_solution(dof_index);
     Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
-    const ADReal physical_pressure = lm_value / nodalScale(node);
+    const ADReal physical_pressure = lm_value * derivedPressureScale(node) / nodalScale(node);
     for (const auto qp : make_range(n_qp))
       _scaled_contact_pressure[qp] += phi[j][qp] * physical_pressure;
   }
@@ -324,11 +326,39 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
                "your Lagrange multiplier");
 
   const auto dof_number = node->dof_number(sys_num, var_num, /*component=*/0);
-  // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
-  // keyed by the displaced-mesh node pointer, and callers may pass a different pointer of the same
-  // id, so map through the mesh to match -- exactly as getNormalGap() does above.
-  return (*_lm_var->sys().currentSolution())(dof_number) /
-         nodalScale(_subproblem.mesh().nodePtr(node->id()));
+  // Recover the physical pressure lambda_j = D_j y_j / kappa_j (Popp 2013 eq. 39 for kappa_j;
+  // D_j is 1 unless the physical stiffness scale is derived). nodalScale() is keyed by the
+  // displaced-mesh node pointer, and callers may pass a different pointer of the same id, so map
+  // through the mesh to match -- exactly as getNormalGap() does above.
+  const auto * const dof = _subproblem.mesh().nodePtr(node->id());
+  return (*_lm_var->sys().currentSolution())(dof_number) * derivedPressureScale(dof) /
+         nodalScale(dof);
+}
+
+const ADVariableValue &
+LMWeightedGapUserObject::scaledLowerSln(const MooseVariableFE<Real> & lm_var,
+                                        ADVariableValue & cache) const
+{
+  const auto & phi = lm_var.phiLower();
+  const auto & dof_indices = lm_var.dofIndicesLower();
+  const auto & solution = *lm_var.sys().currentSolution();
+  const auto n_qp = phi.size() == 0 ? 0 : phi[0].size();
+  cache.resize(n_qp);
+  for (const auto qp : make_range(n_qp))
+  {
+    ADReal value = 0;
+    for (const auto i : index_range(dof_indices))
+    {
+      const auto dof_index = dof_indices[i];
+      ADReal dof_value = solution(dof_index);
+      Moose::derivInsert(dof_value.derivatives(), dof_index, 1.);
+      const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(i));
+      const Real scale = derivedPressureScale(dof);
+      value += phi[i][qp] * scale * dof_value;
+    }
+    cache[qp] = value;
+  }
+  return cache;
 }
 
 void

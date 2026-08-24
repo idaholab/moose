@@ -52,21 +52,6 @@ rawEntry(FEProblemBase & fe_problem, Mat mat, dof_id_type row, dof_id_type col)
   return value;
 }
 
-// The raw entry scaled by the column dof's PETSc right-diagonal-scale value: the magnitude that
-// column actually contributes to the linear system KSPSolve() sees, since
-// ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof sets that per-LM-dof scale to the
-// derived physical stiffness via setKSPRightDiagonalScale, and KSPSetRightDiagonalScale applies it
-// as a solve-time-only column change of variables rather than mutating the stored matrix.
-Real
-effectiveEntry(FEProblemBase & fe_problem,
-               NonlinearSystemBase & nl,
-               Mat mat,
-               dof_id_type row,
-               dof_id_type col)
-{
-  return rawEntry(fe_problem, mat, row, col) * nl.getVector("ksp_right_diagonal_scale")(col);
-}
-
 // Assert that a/b are within one decade of each other, i.e. the same order of magnitude.
 void
 expectSameOrder(Real a, Real b, const std::string & label)
@@ -85,7 +70,6 @@ struct Blocks
   Real Jdl;
   Real Jll;
   Real Jld;
-  Real disp_scale;
 };
 
 // A mortar LM's coupling into the displacement (elasticity) equations is a residual term of the
@@ -96,7 +80,6 @@ struct Blocks
 // (scalar) * |unit vector| = (scalar) regardless of that orientation.
 Real
 dispCouplingNorm(FEProblemBase & fe_problem,
-                 NonlinearSystemBase & nl,
                  Mat mat,
                  const std::array<dof_id_type, 3> & disp_dofs,
                  dof_id_type other_dof,
@@ -105,8 +88,8 @@ dispCouplingNorm(FEProblemBase & fe_problem,
   Real sum_sq = 0.0;
   for (const auto & disp_dof : disp_dofs)
   {
-    const Real value = disp_is_row ? effectiveEntry(fe_problem, nl, mat, disp_dof, other_dof)
-                                    : effectiveEntry(fe_problem, nl, mat, other_dof, disp_dof);
+    const Real value = disp_is_row ? rawEntry(fe_problem, mat, disp_dof, other_dof)
+                                    : rawEntry(fe_problem, mat, other_dof, disp_dof);
     sum_sq += value * value;
   }
   return std::sqrt(sum_sq);
@@ -116,15 +99,12 @@ dispCouplingNorm(FEProblemBase & fe_problem,
 // direction, but norming it the same way as dispCouplingNorm keeps the comparison self-consistent
 // without hardcoding a single displacement component here either.
 Real
-dispDiagonalNorm(FEProblemBase & fe_problem,
-                 NonlinearSystemBase & nl,
-                 Mat mat,
-                 const std::array<dof_id_type, 3> & disp_dofs)
+dispDiagonalNorm(FEProblemBase & fe_problem, Mat mat, const std::array<dof_id_type, 3> & disp_dofs)
 {
   Real sum_sq = 0.0;
   for (const auto & disp_dof : disp_dofs)
   {
-    const Real value = effectiveEntry(fe_problem, nl, mat, disp_dof, disp_dof);
+    const Real value = rawEntry(fe_problem, mat, disp_dof, disp_dof);
     sum_sq += value * value;
   }
   return std::sqrt(sum_sq);
@@ -134,9 +114,9 @@ dispDiagonalNorm(FEProblemBase & fe_problem,
 // ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof, so a fixture nominally in one
 // state can still have a handful of nodes (e.g. face-edge nodes with partial mortar coverage) in
 // the other. Scan the contact face for a node actually in the requested state, then read the
-// displacement/LM Jacobian blocks at that node's disp_x/y/z and mortar_normal_lm dofs, all through
-// effectiveEntry -- including Jdd and Jld, whose columns are a displacement dof, so that the
-// unity right-diagonal-scale assumption for displacement dofs is verified rather than assumed.
+// displacement/LM Jacobian blocks at that node's disp_x/y/z and mortar_normal_lm dofs -- including
+// Jdd and Jld, whose columns are a displacement dof, so the elasticity block itself is read the
+// same way as the mortar-coupling blocks it is compared against.
 Blocks
 computeBlocks(FEProblemBase & problem, bool want_closed)
 {
@@ -171,11 +151,10 @@ computeBlocks(FEProblemBase & problem, bool want_closed)
       continue;
 
     blocks.found = true;
-    blocks.Jdd = dispDiagonalNorm(problem, nl, mat->mat(), disp_dofs);
-    blocks.Jdl = dispCouplingNorm(problem, nl, mat->mat(), disp_dofs, lm_dof, /*disp_is_row=*/true);
-    blocks.Jll = effectiveEntry(problem, nl, mat->mat(), lm_dof, lm_dof);
-    blocks.Jld = dispCouplingNorm(problem, nl, mat->mat(), disp_dofs, lm_dof, /*disp_is_row=*/false);
-    blocks.disp_scale = nl.getVector("ksp_right_diagonal_scale")(disp_dofs[0]);
+    blocks.Jdd = dispDiagonalNorm(problem, mat->mat(), disp_dofs);
+    blocks.Jdl = dispCouplingNorm(problem, mat->mat(), disp_dofs, lm_dof, /*disp_is_row=*/true);
+    blocks.Jll = rawEntry(problem, mat->mat(), lm_dof, lm_dof);
+    blocks.Jld = dispCouplingNorm(problem, mat->mat(), disp_dofs, lm_dof, /*disp_is_row=*/false);
     break;
   }
   return blocks;
@@ -201,12 +180,12 @@ runApp(const std::string & input_file)
 
 // Verify that the LM equation's own Jacobian diagonal (Jll in the open state, Jld in the closed
 // state) and the reverse displacement-vs-LM coupling (Jdl, from NormalMortarMechanicalContact)
-// both land at the same order of magnitude as the displacement (elasticity) block (Jdd) once the
-// PETSc right-diagonal scale is applied -- and that displacement dofs carry unity right-diagonal
-// scale, so effectiveEntry leaves Jdd itself unaffected. Run against both a fixture with no
-// scaling anywhere and one with scaling applied only to the displacement variables, to verify the
-// compensation mechanism is robust to the displacement-scaling choice rather than correct for one
-// hardcoded value.
+// both land at the same order of magnitude as the displacement (elasticity) block (Jdd). The
+// physical LM value is baked into the contact residuals via the derived stiffness scale, so this
+// checks the assembled Jacobian directly rather than a solve-time column scale. Run against both
+// a fixture with no scaling anywhere and one with scaling applied only to the displacement
+// variables, to verify the compensation mechanism is robust to the displacement-scaling choice
+// rather than correct for one hardcoded value.
 void
 expectFrictionlessBlocksSameOrder(const std::string & input_file, bool want_closed)
 {
@@ -224,8 +203,6 @@ expectFrictionlessBlocksSameOrder(const std::string & input_file, bool want_clos
 
   ASSERT_TRUE(blocks.found) << "no boundary node found in the "
                              << (want_closed ? "closed" : "open") << " NCP branch";
-  EXPECT_DOUBLE_EQ(blocks.disp_scale, 1.0)
-      << "displacement dofs should carry unity right-diagonal scale";
 
   const Real off_diag = want_closed ? blocks.Jld : blocks.Jll;
   const std::string off_diag_label = want_closed ? "Jld" : "Jll";
@@ -292,11 +269,10 @@ enum class FrictionBranch
 };
 
 // Scan for a node in the requested friction branch and read the friction-row/displacement-column
-// Jacobian blocks at that node's mortar_tangential_lm and disp_x/y/z dofs, all through
-// effectiveEntry, mirroring computeBlocks's normal-LM scan. Jtd and Jdt are norms across all three
-// displacement components for the same reason computeBlocks norms Jdl/Jld: the friction residual
-// couples to displacement through the mesh's tangent direction, which need not align with any
-// single global axis.
+// Jacobian blocks at that node's mortar_tangential_lm and disp_x/y/z dofs, mirroring
+// computeBlocks's normal-LM scan. Jtd and Jdt are norms across all three displacement components
+// for the same reason computeBlocks norms Jdl/Jld: the friction residual couples to displacement
+// through the mesh's tangent direction, which need not align with any single global axis.
 FrictionBlocks
 computeFrictionBlocks(FEProblemBase & problem, FrictionBranch branch)
 {
@@ -348,10 +324,10 @@ computeFrictionBlocks(FEProblemBase & problem, FrictionBranch branch)
       continue;
 
     blocks.found = true;
-    blocks.Jtt = effectiveEntry(problem, nl, mat->mat(), t_dof, t_dof);
-    blocks.Jtd = dispCouplingNorm(problem, nl, mat->mat(), disp_dofs, t_dof, /*disp_is_row=*/false);
-    blocks.Jdt = dispCouplingNorm(problem, nl, mat->mat(), disp_dofs, t_dof, /*disp_is_row=*/true);
-    blocks.Jdd = dispDiagonalNorm(problem, nl, mat->mat(), disp_dofs);
+    blocks.Jtt = rawEntry(problem, mat->mat(), t_dof, t_dof);
+    blocks.Jtd = dispCouplingNorm(problem, mat->mat(), disp_dofs, t_dof, /*disp_is_row=*/false);
+    blocks.Jdt = dispCouplingNorm(problem, mat->mat(), disp_dofs, t_dof, /*disp_is_row=*/true);
+    blocks.Jdd = dispDiagonalNorm(problem, mat->mat(), disp_dofs);
   }
   return blocks;
 }

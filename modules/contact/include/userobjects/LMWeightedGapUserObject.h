@@ -107,6 +107,24 @@ protected:
   void finalizeDerivedC();
   void accumulateDerivedCIfNeeded();
 
+  /**
+   * Interpolate a lower-dimensional Lagrange multiplier variable's nodal values onto the current
+   * quadrature points, scaling each node's contribution by its derived physical stiffness
+   * (dofToDerivedC()) before interpolating. This implements the x = D*y change of variables for a
+   * physical LM variable whose raw (persistently stored) dof value is the non-physical y; the
+   * per-node scale D can vary across a mortar segment element, so this cannot be expressed as a
+   * single scalar multiplying the unscaled interpolated field.
+   */
+  const ADVariableValue & scaledLowerSln(const MooseVariableFE<Real> & lm_var,
+                                          ADVariableValue & cache) const;
+
+  /// The derived physical stiffness scale D_j relating the stored LM value y_j to the multiplier
+  /// D_j y_j; 1 unless derive_c_from_elasticity = true
+  Real derivedPressureScale(const DofObject * dof) const
+  {
+    return _derive_c_from_elasticity ? libmesh_map_find(_dof_to_derived_c, dof)[0] : 1;
+  }
+
   /// Whether to derive the physical normal stiffness from elasticity tensor material properties
   const bool _derive_c_from_elasticity;
 
@@ -128,8 +146,9 @@ protected:
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;
 
-  /// Physical contact pressure sum_j Phi_j (zhat_j / kappa_j) at the segment quadrature points when
-  /// node-based scaling is active; recomputed once per segment in reinit() (see contactPressure()).
+  /// Physical contact pressure sum_j Phi_j (D_j y_j / kappa_j) at the segment quadrature points when
+  /// node-based or derived physical scaling is active; recomputed once per segment in reinit() (see
+  /// contactPressure()).
   ADVariableValue _scaled_contact_pressure;
 
   /// Whether to apply the Popp et al. (2013) node-based Lagrange-multiplier scaling (kappa_j) for
