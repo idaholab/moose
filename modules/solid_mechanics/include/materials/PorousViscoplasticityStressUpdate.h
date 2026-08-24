@@ -95,30 +95,46 @@ protected:
   GenericReal<is_ad>
   computeH(const Real n, const GenericReal<is_ad> & gauge_stress, const bool derivative = false);
 
-  GenericRankTwoTensor<is_ad> computeDGaugeDSigma(const GenericReal<is_ad> & gauge_stress,
-                                                  const GenericReal<is_ad> & equiv_stress,
-                                                  const GenericRankTwoTensor<is_ad> & dev_stress,
-                                                  const GenericRankTwoTensor<is_ad> & stress);
+  GenericReal<is_ad> computeGaugeResidual(
+      const GenericReal<is_ad> & equiv_stress,
+      const GenericReal<is_ad> & trial_gauge,
+      const GenericReal<is_ad> & effective_hydro_stress,
+      const GenericReal<is_ad> & porosity,
+      GenericReal<is_ad> & derivative);
+
+  GenericRankTwoTensor<is_ad> computeDGaugeDSigma(
+      const GenericReal<is_ad> & gauge_stress,
+      const GenericReal<is_ad> & equiv_stress,
+      const GenericRankTwoTensor<is_ad> & dev_stress,
+      const GenericReal<is_ad> & effective_hydro_stress,
+      const GenericReal<is_ad> & porosity);
 
   void computeInelasticStrainIncrement(GenericReal<is_ad> & gauge_stress,
                                        GenericReal<is_ad> & dpsi_dgauge,
                                        GenericRankTwoTensor<is_ad> & creep_strain_increment,
                                        const GenericReal<is_ad> & equiv_stress,
                                        const GenericRankTwoTensor<is_ad> & dev_stress,
-                                       const GenericRankTwoTensor<is_ad> & stress);
+                                       const GenericReal<is_ad> & effective_hydro_stress,
+                                       const GenericReal<is_ad> & porosity);
 
-  /// Compute the gauge stress for the current stress invariants and porosity.
+  /// Compute the gauge stress from explicitly supplied stress invariants and porosity.
   void computeGaugeStress(GenericReal<is_ad> & gauge_stress,
-                          const GenericReal<is_ad> & equiv_stress);
+                          const GenericReal<is_ad> & equiv_stress,
+                          const GenericReal<is_ad> & effective_hydro_stress,
+                          const GenericReal<is_ad> & porosity);
 
-  /// Hydrostatic stress driving the pore: matrix hydrostatic stress plus bubble pressure.
-  virtual GenericReal<is_ad> effectiveHydroStress() const;
+  /// Apply the optional porosity pressure to an explicitly supplied matrix hydrostatic stress.
+  GenericReal<is_ad>
+  effectiveHydroStress(const GenericReal<is_ad> & matrix_hydro_stress) const;
 
-  /// True when either deviatoric stress or gas/pore hydrostatic stress can drive viscoplasticity.
-  bool hasViscoplasticDrive(const GenericReal<is_ad> & equiv_stress) const;
+  /// True when either deviatoric or hydrostatic stress can drive the porous viscoplastic response.
+  bool hasViscoplasticDrive(const GenericReal<is_ad> & equiv_stress,
+                            const GenericReal<is_ad> & effective_hydro_stress,
+                            const GenericReal<is_ad> & porosity) const;
 
   /// Positive stress scale used to initialize and bound the gauge-stress Newton solve.
-  GenericReal<is_ad> gaugeStressScale(const GenericReal<is_ad> & equiv_stress) const;
+  GenericReal<is_ad> gaugeStressScale(const GenericReal<is_ad> & equiv_stress,
+                                      const GenericReal<is_ad> & effective_hydro_stress) const;
 
   /// Perform one explicit viscoplastic update over the current local value of _dt.
   virtual void updateStateOneStep(GenericRankTwoTensor<is_ad> & elastic_strain_increment,
@@ -129,7 +145,13 @@ protected:
                                   GenericReal<is_ad> & effective_inelastic_strain_increment);
 
   /// Estimate the number of local constitutive substeps from the full-step trial stress.
-  unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
+  virtual unsigned int estimateNumberSubsteps(const GenericRankTwoTensor<is_ad> & stress);
+
+  /// Estimate local substeps from an explicitly supplied hydrostatic driving stress and porosity.
+  unsigned int estimateNumberSubstepsFromState(
+      const GenericRankTwoTensor<is_ad> & stress,
+      const GenericReal<is_ad> & effective_hydro_stress,
+      const GenericReal<is_ad> & porosity);
 
   /// Integrate a prescribed number of explicit local constitutive substeps.
   void updateStateSubstepInternal(
@@ -194,6 +216,17 @@ protected:
 
   /// Container for matrix hydrostatic stress
   GenericReal<is_ad> _hydro_stress;
+
+  /**
+   * State used by SingleVariableReturnMappingSolution while solving for gauge stress. The generic
+   * return-mapping callback only passes the equivalent stress and scalar unknown, so the explicitly
+   * supplied hydrostatic stress and porosity are stored here for the duration of the solve.
+   */
+  struct GaugeSolveState
+  {
+    GenericReal<is_ad> effective_hydro_stress = 0.0;
+    GenericReal<is_ad> porosity = 0.0;
+  } _gauge_solve_state;
 
   /// Rank two identity tensor
   const RankTwoTensor _identity_two;
