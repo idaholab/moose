@@ -102,19 +102,19 @@ LinearAssemblySegregatedSolve::validParams()
    * operator changes slowly between SIMPLE iterations, so its preconditioner can be reused for
    * several iterations rather than rebuilt every solve.
    */
-  const std::string explanation =
+  const std::string recompute_frequency_explanation =
       "The default of 1 rebuilds it on every solve. A value of N rebuilds it once every N solves "
       "and "
       "reuses it in between, which can substantially reduce the solve cost when the "
       "preconditioner setup dominates (e.g. algebraic multigrid). Larger values trade more reuse "
       "for a possibly staler preconditioner (more Krylov iterations); for solves where the "
-      "operator operator changes significantly, prefer a smaller value.";
+      "operator changes significantly between linear solves, prefer a smaller value.";
   params.addRangeCheckedParam<unsigned int>(
       "pressure_pc_recompute_frequency",
       1,
       "pressure_pc_recompute_frequency >= 1",
       "How often (in pressure corrector solves) to recompute the pressure preconditioner. " +
-          explanation);
+          recompute_frequency_explanation);
   params.addParamNamesToGroup("pressure_pc_recompute_frequency", "Pressure Equation");
   // Other preconditioner reuse
   params.addRangeCheckedParam<unsigned int>(
@@ -122,40 +122,43 @@ LinearAssemblySegregatedSolve::validParams()
       1,
       "momentum_pc_recompute_frequency >= 1",
       "How often (in SIMPLE iteration solves) to recompute the momentum preconditioner. " +
-          explanation);
+          recompute_frequency_explanation);
   params.addParamNamesToGroup("momentum_pc_recompute_frequency", "Momentum Equations");
-  params.addRangeCheckedParam<unsigned int>("energy_pc_recompute_frequency",
-                                            1,
-                                            "energy_pc_recompute_frequency >= 1",
-                                            "How often (in terms of CHT solves nested within "
-                                            "SIMPLE solves) to recompute the preconditioner. " +
-                                                explanation);
+  params.addRangeCheckedParam<unsigned int>(
+      "energy_pc_recompute_frequency",
+      1,
+      "energy_pc_recompute_frequency >= 1",
+      "How often (in terms of CHT and SIMPLE iterations) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
   params.addParamNamesToGroup("energy_pc_recompute_frequency", "Energy Equation");
   params.addRangeCheckedParam<unsigned int>("solid_energy_pc_recompute_frequency",
                                             1,
                                             "solid_energy_pc_recompute_frequency >= 1",
                                             "How often (in terms of CHT solves nested within "
                                             "SIMPLE solves) to recompute the preconditioner. " +
-                                                explanation);
+                                                recompute_frequency_explanation);
   params.addParamNamesToGroup("solid_energy_pc_recompute_frequency", "Solid Energy Equation");
   params.addRangeCheckedParam<unsigned int>(
       "passive_scalar_pc_recompute_frequency",
       1,
       "passive_scalar_pc_recompute_frequency >= 1",
-      "How often (in advection solves) to recompute the preconditioner. " + explanation);
+      "How often (in advection solves) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
   params.addParamNamesToGroup("passive_scalar_pc_recompute_frequency",
                               "Passive Scalars Advection Equation");
   params.addRangeCheckedParam<unsigned int>(
       "turbulence_pc_recompute_frequency",
       1,
       "turbulence_pc_recompute_frequency >= 1",
-      "How often (in advection solves) to recompute the preconditioner. " + explanation);
+      "How often (in advection solves) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
   params.addParamNamesToGroup("turbulence_pc_recompute_frequency", "Turbulence Equation");
   params.addRangeCheckedParam<unsigned int>(
       "active_scalar_pc_recompute_frequency",
       1,
       "active_scalar_pc_recompute_frequency >= 1",
-      "How often (in advection solves) to recompute the preconditioner. " + explanation);
+      "How often (in advection solves) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
   params.addParamNamesToGroup("active_scalar_pc_recompute_frequency", "Active Scalars Equation");
 
   /*
