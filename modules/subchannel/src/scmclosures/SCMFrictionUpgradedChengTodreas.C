@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMFrictionUpdatedChengTodreas.h"
+#include "SCMFrictionUpgradedChengTodreas.h"
 
-registerMooseObject("SubChannelApp", SCMFrictionUpdatedChengTodreas);
+registerMooseObject("SubChannelApp", SCMFrictionUpgradedChengTodreas);
 
 InputParameters
-SCMFrictionUpdatedChengTodreas::validParams()
+SCMFrictionUpgradedChengTodreas::validParams()
 {
   InputParameters params = SCMFrictionClosureBase::validParams();
-  params.addClassDescription("Class that computes the axial friction factor using the updated "
+  params.addClassDescription("Class that computes the axial friction factor using the upgraded "
                              "Cheng Todreas correlations.");
   return params;
 }
 
-SCMFrictionUpdatedChengTodreas::SCMFrictionUpdatedChengTodreas(const InputParameters & parameters)
+SCMFrictionUpgradedChengTodreas::SCMFrictionUpgradedChengTodreas(const InputParameters & parameters)
   : SCMFrictionClosureBase(parameters),
     _is_tri_lattice(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh) != nullptr),
     _tri_sch_mesh(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh)),
@@ -42,23 +42,23 @@ SCMFrictionUpdatedChengTodreas::SCMFrictionUpdatedChengTodreas(const InputParame
     const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
     const unsigned int num_pins = 1 + 3 * Nr * (Nr - 1);
 
-    // The updated Cheng-Todreas detailed triangular friction factor correlation is based on
+    // The upgraded Cheng-Todreas detailed triangular friction factor correlation is based on
     // data spanning 1.0 <= P/D <= 1.42, 4 <= H/D <= 52, 7 <= Npin <= 271,
     // and 50 <= Re <= 1e6.
     if (p_over_d < 1.0 || p_over_d > 1.42)
-      flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the updated "
+      flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the upgraded "
                           "Cheng-Todreas friction correlation data range.");
     if (_has_wire_wrap && (wire_lead_to_diameter < 8.0 || wire_lead_to_diameter > 52.0))
-      flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the updated "
+      flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the upgraded "
                           "Cheng-Todreas friction correlation data range.");
     if (num_pins < 7 || num_pins > 271)
-      flagSolutionWarning("Number of pins outside the updated Cheng-Todreas friction correlation "
+      flagSolutionWarning("Number of pins outside the upgraded Cheng-Todreas friction correlation "
                           "data range.");
   }
 }
 
 Real
-SCMFrictionUpdatedChengTodreas::computeFrictionFactor(const FrictionStruct & friction_args) const
+SCMFrictionUpgradedChengTodreas::computeFrictionFactor(const FrictionStruct & friction_args) const
 {
   if (_is_tri_lattice)
     return computeTriLatticeFrictionFactor(friction_args);
@@ -67,7 +67,7 @@ SCMFrictionUpdatedChengTodreas::computeFrictionFactor(const FrictionStruct & fri
 }
 
 Real
-SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
+SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
@@ -92,7 +92,7 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   const auto w_over_d = (pin_diameter + gap) / pin_diameter;
 
   if (Re < 50.0 || Re > 1.0e6)
-    flagSolutionWarning("Reynolds number (Re) outside the updated Cheng-Todreas friction "
+    flagSolutionWarning("Reynolds number (Re) outside the upgraded Cheng-Todreas friction "
                         "correlation data range.");
 
   const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
@@ -275,7 +275,7 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
 }
 
 Real
-SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
+SCMFrictionUpgradedChengTodreas::computeQuadLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
