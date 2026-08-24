@@ -336,6 +336,13 @@ private:
    */
   void resetFileBase();
 
+  /**
+   * Sorts output objects based on dependencies and Checkpoints.
+   * For dependencies, DependencyResolver determines the ordering and afterwards
+   * all Checkpoint objects are attached to the end.
+   */
+  void sortOutputs();
+
   /// MooseApp
   MooseApp & _app;
 
