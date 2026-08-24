@@ -4292,63 +4292,6 @@ NonlinearSystemBase::preSolve()
   return true;
 }
 
-namespace
-{
-// Right-scale the assembled system Jacobian's columns by the per-dof scale vector held in the
-// NonlinearSystemBase (passed as ctx) before each KSPSolve(), mirroring the change of variables
-// x = diag(scale) * y that PETSc's own diagonal-scaling KSP options perform, but built out of
-// public KSPSetPreSolve()/KSPSetPostSolve() plus MatDiagonalScale() rather than a PETSc-internal
-// mechanism.
-PetscErrorCode
-kspRightDiagonalScalePreSolve(KSP ksp, Vec /*rhs*/, Vec /*x*/, void * ctx)
-{
-  PetscFunctionBegin;
-  auto * const nl = static_cast<NonlinearSystemBase *>(ctx);
-  auto & petsc_scale =
-      libMesh::cast_ref<libMesh::PetscVector<Number> &>(nl->getVector("ksp_right_diagonal_scale"));
-
-  Mat amat;
-  LibmeshPetscCallQ(KSPGetOperators(ksp, &amat, nullptr));
-
-  // A matrix-free system Jacobian (-snes_mf/-snes_mf_operator) computes matrix-vector products by
-  // finite-differencing the residual and knows nothing about this scale, so scaling it here would
-  // silently produce an incorrect linear system rather than the intended change of variables.
-  PetscBool is_mffd;
-  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)amat, MATMFFD, &is_mffd));
-  if (is_mffd)
-    mooseError("The KSP right diagonal scale used by physical mortar contact scaling is not "
-               "compatible with a matrix-free (-snes_mf/-snes_mf_operator) system Jacobian.");
-
-  LibmeshPetscCallQ(MatDiagonalScale(amat, nullptr, petsc_scale.vec()));
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
-PetscErrorCode
-kspRightDiagonalScalePostSolve(KSP ksp, Vec /*rhs*/, Vec x, void * ctx)
-{
-  PetscFunctionBegin;
-  auto * const nl = static_cast<NonlinearSystemBase *>(ctx);
-  auto & petsc_scale =
-      libMesh::cast_ref<libMesh::PetscVector<Number> &>(nl->getVector("ksp_right_diagonal_scale"));
-
-  // Undo the change of variables: the KSP solved for y, and the actual correction is x = D * y.
-  LibmeshPetscCallQ(VecPointwiseMult(x, x, petsc_scale.vec()));
-
-  // Restore the Jacobian to physical units since SNES reuses the same Mat after the linear solve
-  // (e.g. for line search directional evaluations).
-  Mat amat;
-  LibmeshPetscCallQ(KSPGetOperators(ksp, &amat, nullptr));
-  Vec inverse_scale;
-  LibmeshPetscCallQ(VecDuplicate(petsc_scale.vec(), &inverse_scale));
-  LibmeshPetscCallQ(VecCopy(petsc_scale.vec(), inverse_scale));
-  LibmeshPetscCallQ(VecReciprocal(inverse_scale));
-  LibmeshPetscCallQ(MatDiagonalScale(amat, nullptr, inverse_scale));
-  LibmeshPetscCallQ(VecDestroy(&inverse_scale));
-
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-}
-
 void
 NonlinearSystemBase::requestKSPRightDiagonalScale()
 {
@@ -4378,10 +4321,10 @@ NonlinearSystemBase::resetKSPRightDiagonalScale()
     mooseError(
         "KSP right diagonal scaling requires a PETSc nonlinear solver for system '", name(), "'.");
 
+  auto & petsc_scale = libMesh::cast_ref<libMesh::PetscVector<Number> &>(scale);
   KSP ksp;
   LibmeshPetscCall(SNESGetKSP(getSNES(), &ksp));
-  LibmeshPetscCall(KSPSetPreSolve(ksp, kspRightDiagonalScalePreSolve, this));
-  LibmeshPetscCall(KSPSetPostSolve(ksp, kspRightDiagonalScalePostSolve, this));
+  LibmeshPetscCall(KSPSetRightDiagonalScale(ksp, petsc_scale.vec()));
 }
 
 void
