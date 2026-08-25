@@ -49,7 +49,7 @@ CustomDummyProblemOperator::Solve()
   _problem_data.jacobian_solver->GetSolver().Mult(_B, _X);
 
   // Set the data in the grid function
-  auto grid_function = _problem_data.getGridFunction("prob_ex0p_var0");
+  auto grid_function = _problem.getGridFunction("prob_ex0p_var0");
   grid_function->SetFromTrueDofs(_X);
 }
 
