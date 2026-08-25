@@ -1750,12 +1750,9 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
   std::ostringstream locations_actual;
   format_locations(locations_array, locations_actual);
   std::string locations_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/test.i"    location_start: [6.3]    location_end: [6.4]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [12.15]    location_end: [12.18]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [19.15]    location_end: [19.16]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.21]    location_end: [26.22]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.25]    location_end: [26.26]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.29]    location_end: [26.30]
+document_uri: "file://...absolute.../test.i"    location_start: [6.3]    location_end: [6.4]
+document_uri: "file://...absolute.../test.i"    location_start: [12.15]    location_end: [12.18]
+document_uri: "file://...absolute.../test.i"    location_start: [19.15]    location_end: [19.16]
 )INPUT";
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
@@ -3011,8 +3008,8 @@ document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_sta
   // check for location of variable declaration and its kernel use in input
   std::size_t references_size_expect = 2;
   std::string references_list_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/test.i"    location_start: [21.3]    location_end: [21.4]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [27.15]    location_end: [27.16]
+document_uri: "file://...absolute.../test.i"    location_start: [21.3]    location_end: [21.4]
+document_uri: "file://...absolute.../test.i"    location_start: [27.15]    location_end: [27.16]
 )INPUT";
   EXPECT_EQ(references_size_expect, references_array.size());
   EXPECT_EQ(references_list_expect, "\n" + references_list_actual.str());
