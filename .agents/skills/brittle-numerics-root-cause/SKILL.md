@@ -127,7 +127,7 @@ git-archaeology (`git log`/`git show` on the test spec) even when it isn't curre
 often means this exact situation was mishandled by loosening everything instead of the one or two
 affected columns.
 
-### Exodiff: per-variable floor via `custom_cmp`
+### Exodiff: per-variable floor/relative error via `custom_cmp`
 
 MOOSE's `Exodiff` tester has no `override_columns` equivalent; instead point `custom_cmp` at a
 command file passed to `exodiff -f`. Build it, don't hand-write it:
