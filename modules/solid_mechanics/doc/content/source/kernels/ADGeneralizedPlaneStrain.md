@@ -42,7 +42,7 @@ The [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) normally
 creates this kernel. The following action block causes the action to create an
 `ADGeneralizedPlaneStrain` kernel:
 
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_auto_scalar.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_auto_scalar.i block=Physics/SolidMechanics/QuasiStatic
 
 !syntax parameters /Kernels/ADGeneralizedPlaneStrain
 
