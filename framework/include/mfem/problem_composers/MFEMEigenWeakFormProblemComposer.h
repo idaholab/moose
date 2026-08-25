@@ -15,8 +15,8 @@
 #include "MFEMProblemComposer.h"
 
 /**
- * Eigen weak form problem composer required to build MFEM
- * Eigen Equation System Problem Operators
+ * MFEMEigenWeakFormProblemComposer required to build an
+ * instance of EigenproblemESProblemOperator
  */
 class MFEMEigenWeakFormProblemComposer : public MFEMProblemComposer
 {

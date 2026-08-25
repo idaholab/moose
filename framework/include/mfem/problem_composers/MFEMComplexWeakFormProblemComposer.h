@@ -14,7 +14,8 @@
 #include "MFEMProblemComposer.h"
 
 /**
- * Complex weak form problem composer to build an instance of ComplexEquationSystemProblemOperator
+ * MFEMComplexWeakFormProblemComposer required to build an instance of
+ * ComplexEquationSystemProblemOperator
  */
 class MFEMComplexWeakFormProblemComposer : public MFEMProblemComposer
 {

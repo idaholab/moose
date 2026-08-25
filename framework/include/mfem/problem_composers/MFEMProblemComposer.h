@@ -19,7 +19,7 @@ class ProblemOperatorBase;
 }
 
 /**
- * Interface required for all problem composers
+ * Interface required for all MFEMProblemComposers
  */
 class MFEMProblemComposer : public MFEMObject
 {

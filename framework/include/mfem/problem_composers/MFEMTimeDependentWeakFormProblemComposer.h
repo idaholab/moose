@@ -14,8 +14,8 @@
 #include "MFEMProblemComposer.h"
 
 /**
- * Time dependant weak form problem composer required to build
- * MFEM Time Dependant Equation System Problem Operators
+ * MFEMTimeDependentWeakFormProblemComposer required to build an instance
+ * of TimeDependentEquationSystemProblemOperator
  */
 class MFEMTimeDependentWeakFormProblemComposer : public MFEMProblemComposer
 {
