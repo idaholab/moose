@@ -13,7 +13,7 @@ For triangular lattices, the closure flags a solution warning when $P/D$, wire-w
 In the intermittent regime between the laminar and turbulent friction factor limits, the original Cheng-Todreas treatment has been simplified in this implementation. The interpolation factor is evaluated as
 
 !equation
-\psi = \frac{\ln(Re/Re_L)}{\ln(Re_T/Re_L)}
+\psi = \frac{\ln(Reb/Re_L)}{\ln(Re_T/Re_L)}
 
 using the bulk transition limits
 
