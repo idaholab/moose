@@ -21,12 +21,14 @@
 #include "libmesh/threads.h"
 
 ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem,
-                                       const std::set<TagID> & tags,
-                                       bool is_jacobian)
+                                       const std::set<TagID> & vector_tags,
+                                       const std::set<TagID> & matrix_tags,
+                                       Moose::ComputeType compute_type)
   : ThreadedElementLoop<DistElemRange>(feproblem),
-    _is_jacobian(is_jacobian),
+    _compute_type(compute_type),
     _nl(feproblem.currentNonlinearSystem()),
-    _tags(tags),
+    _vector_tags(vector_tags),
+    _matrix_tags(matrix_tags),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
 {
 }
@@ -34,9 +36,10 @@ ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem,
 // Splitting Constructor
 ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split)
   : ThreadedElementLoop<DistElemRange>(x, split),
-    _is_jacobian(x._is_jacobian),
+    _compute_type(x._compute_type),
     _nl(x._nl),
-    _tags(x._tags),
+    _vector_tags(x._vector_tags),
+    _matrix_tags(x._matrix_tags),
     _dirac_kernels(x._dirac_kernels)
 {
 }
@@ -66,19 +69,30 @@ ComputeDiracThread::subdomainChanged()
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
+  // The combined path always operates on the full suite of residual and Jacobian tags, so there's
+  // no need for (and no single tag set to do) tag-based warehouse selection
+  if (_compute_type == Moose::ComputeType::ResidualAndJacobian)
+  {
+    _dirac_warehouse = &_dirac_kernels;
+    return;
+  }
+
+  const bool is_jacobian = _compute_type == Moose::ComputeType::Jacobian;
+  const std::set<TagID> & tags = is_jacobian ? _matrix_tags : _vector_tags;
+
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
-  if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
+  if (!tags.size() || tags.size() == _fe_problem.numMatrixTags())
     _dirac_warehouse = &_dirac_kernels;
   // If we have one tag only,  We call tag based storage
-  else if (_tags.size() == 1)
-    _dirac_warehouse = _is_jacobian
-                           ? &(_dirac_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid))
-                           : &(_dirac_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+  else if (tags.size() == 1)
+    _dirac_warehouse = is_jacobian
+                           ? &(_dirac_kernels.getMatrixTagObjectWarehouse(*(tags.begin()), _tid))
+                           : &(_dirac_kernels.getVectorTagObjectWarehouse(*(tags.begin()), _tid));
   // This one may be expensive, and hopefully we do not use it so often
   else
-    _dirac_warehouse = _is_jacobian ? &(_dirac_kernels.getMatrixTagsObjectWarehouse(_tags, _tid))
-                                    : &(_dirac_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _dirac_warehouse = is_jacobian ? &(_dirac_kernels.getMatrixTagsObjectWarehouse(tags, _tid))
+                                   : &(_dirac_kernels.getVectorTagsObjectWarehouse(tags, _tid));
 }
 
 void
@@ -109,9 +123,15 @@ ComputeDiracThread::onElement(const Elem * elem)
   {
     if (!dirac_kernel->hasPointsOnElem(elem))
       continue;
-    else if (!_is_jacobian)
+
+    if (_compute_type == Moose::ComputeType::Residual)
     {
       dirac_kernel->computeResidual();
+      continue;
+    }
+    else if (_compute_type == Moose::ComputeType::ResidualAndJacobian)
+    {
+      dirac_kernel->computeResidualAndJacobian();
       continue;
     }
 
@@ -148,9 +168,9 @@ ComputeDiracThread::onElement(const Elem * elem)
 void
 ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
-  if (!_is_jacobian)
+  if (_compute_type != Moose::ComputeType::Jacobian)
     _fe_problem.addResidual(_tid);
-  else
+  if (_compute_type != Moose::ComputeType::Residual)
     _fe_problem.addJacobian(_tid);
 }
 
