@@ -37,7 +37,6 @@
         recover = false
         cli_args = 'Transfers/active=general_transfer_from_sub'
         detail = 'running the inputs, and '
-        max_parallel = 1 # idaholab/moose#32250
       []
       [verify]
         type = RunCommand
@@ -163,7 +162,6 @@
         compute_devices = 'cpu cuda'
         recover = false
         detail = 'running the inputs, and'
-        max_parallel = 1 # idaholab/moose#32250
       []
       [verify]
         type = RunCommand
@@ -189,7 +187,6 @@
         cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                   'subapp:MultiApps/active="" subapp:Transfers/active=""'
         detail = 'running the inputs, and'
-        max_parallel = 1 # idaholab/moose#32250
       []
       [verify]
         type = RunCommand
