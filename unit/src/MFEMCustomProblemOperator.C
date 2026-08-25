@@ -108,7 +108,6 @@ CustomDummyProblemOperator::Init(mfem::BlockVector &)
   _a->FormLinearSystem(_boundary_dofs, *_grid_function, *_b, _problem_operator, _X, _B);
 };
 
-
 /**
  * Custom Dummy Operator builder required to build MFEM Problem Operators
  * used by the executioner
@@ -136,7 +135,6 @@ public:
 };
 
 registerMooseObject("MooseApp", CustomDummyProblemComposer);
-
 
 /*****************************************************************
  * User does not have to specify the things beyond this point the

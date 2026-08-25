@@ -28,7 +28,8 @@ public:
   ~CustomProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted operator.
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> createProblemOperator(MFEMProblem & _mfem_problem) override;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
+  createProblemOperator(MFEMProblem & _mfem_problem) override;
 };
 
 #endif
