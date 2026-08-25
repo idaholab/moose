@@ -107,8 +107,9 @@ unstable — otherwise you're just relocating where the instability bites next t
 Not every diff that varies with build/flags/hardware/thread count is an algorithmic conditioning
 bug. A quantity computed as the residual of two much larger, comparable-magnitude terms can be
 genuinely near a physical zero for reasons unrelated to any conditioning problem in the production
-code — e.g. a test deliberately suppresses the process that quantity measures, or it's a
-release/growth quantity still ramping up from zero in the first few steps. There, ordinary
+code — e.g. a test deliberately suppresses the process that quantity measures, a physics residual
+that's genuinely near zero at a converged/equilibrium state, or it's a release/growth quantity
+still ramping up from zero in the first few steps. There, ordinary
 floating-point rounding noise — from any source: compiler codegen, FMA/vectorization, thread or
 MPI reduction order — dominates the *relative* error simply because the true value is tiny, while
 every other reported quantity in the file stays tight. That's a legitimate case for widening only
