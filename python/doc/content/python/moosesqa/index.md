@@ -50,6 +50,13 @@ contact MOOSE developers via the [Discussions forum](https://github.com/idaholab
 
 !listing stochastic_tools/doc/sqa_reports.yml id=example-config caption=Example SQA report configuration file.
 
+Entries in `working_dirs` (`SQADocumentReport`/`SQARequirementReport`) and
+`directories` (`SQARequirementReport`) that do not exist on disk are skipped
+with a logged warning rather than raising an error. This allows a
+`sqa_reports.yml` to reference content from an optional dependency (e.g., a
+submodule that may not be checked out) without breaking report generation
+when that dependency is absent.
+
 It is possible to generate the reports manually by running the following commands, but in general
 it is recommended that the SQA "check" command be used from the application doc directory.
 
