@@ -56,13 +56,24 @@ unstable — otherwise you're just relocating where the instability bites next t
    truncated series' terms empirically rather than assuming it's exponential; check whether a
    "near-singular" determinant is really near zero or just the result of large-magnitude
    cancellation. The specific check depends on the algorithm — the point is to derive it from what
-   the numbers actually do, not from what's typical. For a linear/nonlinear solve where different
-   builds or PCs converge to different answers, check whether the discrepancy is within roughly
-   `condition number x solver tolerance` — if so, the fix is tightening the Executioner's
-   `l_tol`/`nl_rel_tol` (and `l_abs_tol`/`nl_abs_tol` as needed) so the solve actually resolves the
-   answer to the precision the test compares at, not pinning a specific solver configuration to
-   freeze in one of several equally-arbitrary converged answers. Only fall back to the tolerance-widening path below if the near-singularity
-   itself is physically expected and tightening the solve isn't warranted.
+   the numbers actually do, not from what's typical. For a linear or nonlinear solve where
+   different builds or PCs converge to different answers, check whether the discrepancy is within
+   roughly `condition number x solver tolerance` — if so, the fix is tightening a tolerance,
+   prioritized by problem type. For a nonlinear problem, the Executioner's `nl_rel_tol`/
+   `nl_abs_tol` is the tolerance that ultimately governs the final answer's robustness: because
+   Newton re-linearizes and self-corrects every iteration, a sufficiently tight nonlinear tolerance
+   drives the accepted answer to that residual regardless of which PC/linear-solver path got there,
+   as long as the linear solves converge well enough for Newton to keep making progress. `l_tol`/
+   `l_abs_tol` mainly governs whether Newton converges at all, since a too-loose linear tolerance
+   can stall it before it reaches a tight `nl_rel_tol`. Tightening `l_tol` directly, or replacing
+   the linear solve with a direct factorization (e.g. `-pc_type lu -pc_factor_mat_solver_type
+   mumps`), are equally effective, fast ways to remove that risk — the direct factorization just
+   avoids having to search for a tolerance value that's tight enough. If the divergence persists
+   under a tight
+   `nl_rel_tol` and a direct linear factorization, that's a sign the matrix is severely enough
+   conditioned that roundoff itself is the exposed mechanism — the main procedure's case. Only
+   fall back to the tolerance-widening path below if the near-singularity itself is physically
+   expected and tightening the solve isn't warranted.
 4. **Look for precedent in sibling code.** If a related algorithm/branch in the same codebase
    already handles this class of problem (e.g., a fallback for non-convergence), extend that
    pattern rather than inventing a new one.
