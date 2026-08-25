@@ -59,9 +59,6 @@
     capabilities = 'ad_size>=50'
     mesh_mode = 'REPLICATED'
     requirement = 'The contact module shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers using VCP.'
-    # This test is causing sporadic test failures (see issue #24986)
-    # Limit the parallel test as a temporary solution here
-    max_parallel = 1
   []
   [cylinder_friction_cartesian_vcp]
     type = 'Exodiff'
