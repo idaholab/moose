@@ -116,7 +116,9 @@ every other reported quantity in the file stays tight. That's a legitimate case 
 that column's tolerance (e.g. MOOSE's `override_columns`/`override_rel_err` for CSVDiff, or
 `custom_cmp` for Exodiff — see below, and run-tests), with a comment recording the physical
 reason and the measured noise floor — not for a blanket `rel_err` bump on the whole test. Confirm
-before doing this that the affected column is (a) not what the test is actually validating, and (b)
+before doing this that (a) the widened floor stays far enough below any physically meaningful
+violation that the test would still catch one — even when the near-zero column is itself what the
+test is validating (e.g. a mass-balance residual asserted to be ~0) — and (b) the column is
 near-zero for a documented physical/test-setup reason rather than because an upstream calculation
 is ill-conditioned — otherwise you're back in this skill's main case.
 
