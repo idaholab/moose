@@ -118,17 +118,7 @@ Every new logical GoogleTest in a MOOSE-owned `unit/src` directory must have req
 and issue metadata. Place the metadata in a sibling [!ac](HIT) file whose name matches the source:
 `Foo.C` or `Foo.K` uses `Foo.unit_tests`. For example:
 
-```
-[Tests]
-  [camel_case_to_underscore]
-    type = GoogleTest
-    unit_test = MooseUtils.camelCaseToUnderscore
-    requirement = 'The system shall convert camel-case identifiers to lower-case, underscore-separated identifiers.'
-    design = 'MooseUtils.md'
-    issues = '#33325'
-  []
-[]
-```
+!listing unit/src/MooseUtilsTest.unit_tests
 
 The `unit_test` value is the `Suite.Case` pair declared by `TEST`, `TEST_F`, `TEST_P`,
 `TYPED_TEST`, or `TYPED_TEST_P`. Parameterized instantiations share the declaration's record and
