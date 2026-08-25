@@ -54,6 +54,7 @@
   []
 
   [weighting]
+    issues = '#31766'
     requirement = "The SolutionAux object shall be capable of importing a multivalued solution "
 
     [source]
@@ -68,7 +69,6 @@
       input = 'solution_aux_weighting.i'
       csvdiff = 'solution_aux_weighting_out.csv'
       prereq = weighting/source
-      issues = '#31766'
 
       detail = "reducing point values using selectable weighting policies."
     []
