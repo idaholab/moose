@@ -120,35 +120,33 @@ getBoundaryIDs(const MeshBase & mesh,
                bool generate_unknown,
                const std::set<BoundaryID> & mesh_boundary_ids)
 {
-  libmesh_parallel_only(mesh.comm());
-
   const BoundaryInfo & boundary_info = mesh.get_boundary_info();
   const std::map<BoundaryID, std::string> & sideset_map = boundary_info.get_sideset_name_map();
   const std::map<BoundaryID, std::string> & nodeset_map = boundary_info.get_nodeset_name_map();
 
-  BoundaryID current_max_boundary_id = 0;
   /* It is required to generate a new ID for a given name. It is used often in mesh modifiers such
    * as SideSetsBetweenSubdomains. Then we need to check the current boundary ids since they are
    * changing during "mesh modify()", and figure out the right max boundary ID. Most of mesh
    * modifiers are running in serial, and we won't involve a global communication.
    */
+  BoundaryID max_boundary_id = 0;
   if (generate_unknown)
   {
     bool has_boundary_id_sets = mesh.preparation().has_boundary_id_sets;
-    mesh.comm().min(has_boundary_id_sets);
+
+    // Ideally, this requirement should be able to be enforced earlier when we
+    // get the name maps. However, that preparedness check on sideset and
+    // nodeset maps doesn't exist yet.
+    if (!has_boundary_id_sets)
+      libmesh_parallel_only(mesh.comm());
 
     const auto & bids = has_boundary_id_sets ? boundary_info.get_global_boundary_ids()
                                              : boundary_info.get_boundary_ids();
-    current_max_boundary_id = bids.empty() ? 0 : *(bids.rbegin());
-
+    if (bids.size())
+      max_boundary_id = *(bids.rbegin());
     if (!has_boundary_id_sets)
-      mesh.comm().max(current_max_boundary_id);
+      mesh.comm().max(max_boundary_id);
   }
-
-  BoundaryID max_boundary_id = mesh_boundary_ids.empty() ? 0 : *(mesh_boundary_ids.rbegin());
-
-  max_boundary_id =
-      max_boundary_id > current_max_boundary_id ? max_boundary_id : current_max_boundary_id;
 
   std::vector<BoundaryID> ids(boundary_name.size());
   for (const auto i : index_range(boundary_name))

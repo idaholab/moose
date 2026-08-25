@@ -69,9 +69,13 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
  *
  * The ordering of the returned boundary ID vector matches the vector of the boundary
  * names in \p boundary_name.
+ *
  * When a boundary name is not available in the mesh, if \p generate_unknown is true
  * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
  * will be returned.
+ *
+ * If generate_unknown is true and !mesh.preparation().has_boundary_id_sets, this
+ * must be called across all ranks for synchronization.
  */
 std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
                                        const std::vector<BoundaryName> & boundary_name,
@@ -83,9 +87,13 @@ std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
  *
  * The ordering of the returned boundary ID vector matches the vector of the boundary
  * names in \p boundary_name.
+ *
  * When a boundary name is not available in the mesh, if \p generate_unknown is true
  * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
  * will be returned.
+ *
+ * If generate_unknown is true and !mesh.preparation().has_boundary_id_sets, this
+ * must be called across all ranks for synchronization.
  */
 std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
                                        const std::vector<BoundaryName> & boundary_name,
@@ -97,9 +105,13 @@ std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
  * Because libMesh allows the same boundary to have multiple different boundary names,
  * the size of the returned boundary ID set may be smaller than the size of the boundary
  * name vector.
+ *
  * When a boundary name is not available in the mesh, if \p generate_unknown is true
  * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
  * will be returned.
+ *
+ * If generate_unknown is true and !mesh.preparation().has_boundary_id_sets, this
+ * must be called across all ranks for synchronization.
  */
 std::set<BoundaryID> getBoundaryIDSet(const libMesh::MeshBase & mesh,
                                       const std::vector<BoundaryName> & boundary_name,
