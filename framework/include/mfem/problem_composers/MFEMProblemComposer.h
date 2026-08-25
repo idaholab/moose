@@ -16,6 +16,7 @@
 namespace Moose::MFEM
 {
 class ProblemOperatorBase;
+}
 
 /**
  * Interface required for all problem composers
@@ -30,8 +31,8 @@ public:
   ~MFEMProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
-  virtual std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem &) = 0;
+  virtual std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
+  createProblemOperator(MFEMProblem &) = 0;
 };
-}
 
 #endif

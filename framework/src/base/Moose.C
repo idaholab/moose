@@ -502,7 +502,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_kernel", "add_mfem_problem_operator");
 
   // add problem composers (and operators)
-  registerMooseObjectTask("add_mfem_problem_composer", Moose::MFEM::MFEMProblemComposer, false);
+  registerMooseObjectTask("add_mfem_problem_composer", MFEMProblemComposer, false);
   addTaskDependency("add_mfem_problem_operator", "add_mfem_problem_composer");
   addTaskDependency("setup_executioner", "add_mfem_problem_composer");
 

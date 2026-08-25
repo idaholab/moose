@@ -12,13 +12,10 @@
 #include "MFEMWeakFormProblemComposer.h"
 #include "EquationSystemProblemOperator.h"
 
-namespace Moose::MFEM
-{
 registerMooseObject("MooseApp", MFEMWeakFormProblemComposer);
-}
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::MFEMWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
+MFEMWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
   if (mfem_problem.getNumericType() != MFEMProblem::NumericType::REAL)
     mooseError("Wrong numeric type. Please set the Problem numeric type to 'real'.");

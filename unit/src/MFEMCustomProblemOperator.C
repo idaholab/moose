@@ -108,8 +108,7 @@ CustomDummyProblemOperator::Init(mfem::BlockVector &)
   _a->FormLinearSystem(_boundary_dofs, *_grid_function, *_b, _problem_operator, _X, _B);
 };
 
-namespace Moose::MFEM
-{
+
 /**
  * Custom Dummy Operator builder required to build MFEM Problem Operators
  * used by the executioner
@@ -137,7 +136,7 @@ public:
 };
 
 registerMooseObject("MooseApp", CustomDummyProblemComposer);
-};
+
 
 /*****************************************************************
  * User does not have to specify the things beyond this point the
@@ -150,7 +149,7 @@ class MFEMCustomProbOperatorTest : public MFEMObjectUnitTest
 {
 public:
   // The test data
-  std::shared_ptr<Moose::MFEM::MFEMProblemComposer> _problem_composer;
+  std::shared_ptr<MFEMProblemComposer> _problem_composer;
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 
   // The test constructor
@@ -178,7 +177,7 @@ public:
         _factory.getValidParams("CustomDummyProblemComposer");
     _mfem_problem->addMFEMProblemComposer(
         "CustomDummyProblemComposer", "custom_problem_operator", _problem_operator_params);
-    _problem_composer = _mfem_problem->getProblemComposer();
+    _problem_composer = _mfem_problem->getProblemComposers();
     _problem_operator = _problem_composer->createProblemOperator(*_mfem_problem);
     mfem::BlockVector dummy_vec;
     _problem_operator->Init(dummy_vec);

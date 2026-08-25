@@ -284,10 +284,9 @@ public:
   const MFEMProblemData & getProblemData() const { return _problem_data; }
 
   /**
-   * Method to get the first Problem Composer object storing the
-   * method that builds the ProblemOperator in the executioner.
+   * Method to get the Problem Composer(s).
    */
-  std::shared_ptr<Moose::MFEM::MFEMProblemComposer> & getProblemComposer()
+  std::shared_ptr<MFEMProblemComposer> & getProblemComposers()
   {
     return _problem_composer;
   }
@@ -432,7 +431,7 @@ protected:
   /**
    * The problem operator builders for this mfem problem.
    */
-  std::shared_ptr<Moose::MFEM::MFEMProblemComposer> _problem_composer;
+  std::shared_ptr<MFEMProblemComposer> _problem_composer;
 };
 
 template <typename T>

@@ -151,7 +151,7 @@ MFEMProblem::addMFEMProblemComposer(const std::string & type,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  _problem_composer = addObject<Moose::MFEM::MFEMProblemComposer>(type, name, parameters).front();
+  _problem_composer = addObject<MFEMProblemComposer>(type, name, parameters).front();
 }
 
 void

@@ -12,13 +12,10 @@
 #include "MFEMEigenWeakFormProblemComposer.h"
 #include "EigenproblemESProblemOperator.h"
 
-namespace Moose::MFEM
-{
 registerMooseObject("MooseApp", MFEMEigenWeakFormProblemComposer);
-}
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::MFEMEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
+MFEMEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
   if (!dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
     mooseError("Not an eigenvalue problem. ");

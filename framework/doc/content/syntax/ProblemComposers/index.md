@@ -155,8 +155,7 @@ CustomDummyProblemOperator::Init(mfem::BlockVector &)
 The solve method solves the linear/non-linear system that has been setup and passes the
 data to the mfem `GridFunctions` so that the post-processors can view the results.
 During construction as the `Moose::MFEM::ProblemOperator` class was constructed as well,
-the class inherits a reference to the `MFEMProblem` namely `_problem_data` it can be used
-to access `MFEMProblem` members.
+the class inherits a reference to the `MFEMProblem` and `MFEMProblemData`.
 
 ```cpp
 void CustomDummyProblemOperator::Solve() override
@@ -177,12 +176,9 @@ Once the `ProblemOperator` has been written, an `MFEMProblemComposer` class is n
 this class is constructed by `MFEMProblem` and called by the executioner. The composer class
 must inherit from `MFEMProblemComposer` making it an `MFEMObject` and by proxy a 
 `MooseObject` thus it has a fixed signature constructor and destructor, it has one method
-that has a fixed signature that is called by the executioner. All of the code must
-be within the `Moose::MFEM` namespace for simplicity. An example minimal class looks like:
+that has a fixed signature that is called by the executioner. An example minimal class looks like:
 
 ```cpp
-namespace Moose::MFEM
-{
 class CustomDummyProblemComposer : public MFEMProblemComposer
 {
 private:
@@ -202,15 +198,12 @@ public:
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem & mfem_problem) override;
 };
-}
 ```
 
 The `validParams()` method can be used to generate custom inputs for the problem operator,
 the inputs can be then put in the `ProblemComposers` block of the input files.
 
 ```cpp
-namespace Moose::MFEM
-{
 InputParameters CustomDummyProblemComposer::validParams()
 {
   InputParameters params = MFEMProblemComposer::validParams();
@@ -220,7 +213,6 @@ InputParameters CustomDummyProblemComposer::validParams()
   .
   return params;
 }
-};
 ```
 
 The constructor can be left more or less empty if the operator being built has no custom
@@ -229,8 +221,6 @@ class), but in the case there are custom inputs it can be used to retrieve the i
 and store them.
 
 ```cpp
-namespace Moose::MFEM
-{
 CustomDummyProblemComposer::CustomDummyProblemComposer(
   const InputParameters & parameters)
   : MFEMProblemComposer(parameters) 
@@ -240,7 +230,6 @@ CustomDummyProblemComposer::CustomDummyProblemComposer(
   .
   .
 }
-};
 ```
 
 The last method to be built is the `createProblemOperator` it simply returns a shared pointer
@@ -248,29 +237,21 @@ to the `ProblemOperator` that was defined earlier, this method is called by the 
 and the resulting object is owned by the executioner.
 
 ```cpp
-namespace Moose::MFEM
-{
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 CustomDummyProblemComposer::createProblemOperator(MFEMProblem & mfemProb) override
 {
   return std::make_shared<CustomDummyProblemOperator>(mfemProb, param1, ...);
 }
-};
 ```
 
-Once the object has been defined, the new `ProblemOperatorComposer` object must be registered
+Once the object has been defined, the new `MFEMProblemComposer` object must be registered
 to the MooseApp system:
 
 ```cpp
-namespace Moose::MFEM
-{
-  registerMooseObject("MooseApp", CustomDummyProblemComposer);
-};
+registerMooseObject("MooseApp", CustomDummyProblemComposer);
 ```
 In the unit test example the complete code looks like this:
 ```cpp
-namespace Moose::MFEM
-{
 class CustomDummyProblemComposer : public MFEMProblemComposer
 {
 public:
@@ -294,7 +275,6 @@ public:
 };
 
 registerMooseObject("MooseApp", CustomDummyProblemComposer);
-};
 ```
 !if-end!
 

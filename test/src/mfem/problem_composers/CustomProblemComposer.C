@@ -11,8 +11,6 @@
 
 #include "CustomProblemComposer.h"
 
-namespace Moose::MFEM
-{
 registerMooseObject("MooseApp", CustomProblemComposer);
 
 InputParameters
@@ -22,11 +20,10 @@ CustomProblemComposer::validParams()
   return params;
 }
 
-std::shared_ptr<ProblemOperatorBase>
+std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 CustomProblemComposer::createProblemOperator(MFEMProblem & _mfem_problem)
 {
   return std::make_shared<CustomDummyProblemOperator>(_mfem_problem);
-}
 }
 
 #endif

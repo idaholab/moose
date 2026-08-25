@@ -14,8 +14,6 @@
 #include "MFEMProblemComposer.h"
 #include "CustomDummyProblemOperator.h"
 
-namespace Moose::MFEM
-{
 /**
  * Custom Dummy Operator builder required to build MFEM Problem Operators
  * used by the executioner
@@ -30,8 +28,7 @@ public:
   ~CustomProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted operator.
-  std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & _mfem_problem) override;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> createProblemOperator(MFEMProblem & _mfem_problem) override;
 };
-}
 
 #endif

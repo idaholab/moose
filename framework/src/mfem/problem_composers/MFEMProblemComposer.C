@@ -12,15 +12,15 @@
 #include "MFEMProblemComposer.h"
 
 InputParameters
-Moose::MFEM::MFEMProblemComposer::validParams()
+MFEMProblemComposer::validParams()
 {
   InputParameters params = MFEMObject::validParams();
-  params.registerBase("Moose::MFEM::MFEMProblemComposer");
-  params.registerSystemAttributeName("Moose::MFEM::MFEMProblemComposer");
+  params.registerBase("MFEMProblemComposer");
+  params.registerSystemAttributeName("MFEMProblemComposer");
   return params;
 }
 
-Moose::MFEM::MFEMProblemComposer::MFEMProblemComposer(const InputParameters & parameters)
+MFEMProblemComposer::MFEMProblemComposer(const InputParameters & parameters)
   : MFEMObject(parameters)
 {
 }

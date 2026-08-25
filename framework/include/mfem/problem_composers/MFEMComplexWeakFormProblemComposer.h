@@ -13,8 +13,6 @@
 
 #include "MFEMProblemComposer.h"
 
-namespace Moose::MFEM
-{
 /**
  * Complex weak form problem composer to build an instance of ComplexEquationSystemProblemOperator
  */
@@ -29,8 +27,8 @@ public:
   ~MFEMComplexWeakFormProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
-  std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
+  createProblemOperator(MFEMProblem & mfem_problem) override;
 };
-}
 
 #endif

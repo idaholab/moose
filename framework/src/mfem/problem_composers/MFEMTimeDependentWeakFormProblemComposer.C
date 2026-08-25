@@ -12,14 +12,10 @@
 #include "MFEMTimeDependentWeakFormProblemComposer.h"
 #include "TimeDependentEquationSystemProblemOperator.h"
 
-namespace Moose::MFEM
-{
 registerMooseObject("MooseApp", MFEMTimeDependentWeakFormProblemComposer);
-}
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(
-    MFEMProblem & mfem_problem)
+MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
   mfem_problem.getProblemData().eqn_system =
       std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(

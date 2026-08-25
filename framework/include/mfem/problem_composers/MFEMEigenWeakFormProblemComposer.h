@@ -14,8 +14,6 @@
 #include "MFEMEigenproblem.h"
 #include "MFEMProblemComposer.h"
 
-namespace Moose::MFEM
-{
 /**
  * Eigen weak form problem composer required to build MFEM
  * Eigen Equation System Problem Operators
@@ -31,8 +29,8 @@ public:
   ~MFEMEigenWeakFormProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
-  std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
+  createProblemOperator(MFEMProblem & mfem_problem) override;
 };
-}
 
 #endif
