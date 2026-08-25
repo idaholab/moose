@@ -26,6 +26,9 @@ AddMFEMComplexBCComponentAction::validParams()
 AddMFEMComplexBCComponentAction::AddMFEMComplexBCComponentAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
+  // Boundary restriction is taken from the parent MFEMComplexIntegratedBC.
+  if (_moose_object_pars.have_parameter<std::vector<BoundaryName>>("boundary"))
+    _moose_object_pars.suppressParameter<std::vector<BoundaryName>>("boundary");
 }
 
 void
