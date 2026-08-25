@@ -99,8 +99,11 @@ FaceArgProducerInterface::makeFace(const FunctorType & functor,
   const bool defined_on_neighbor_side = functor.hasFaceSide(fi, false);
 
   if (!defined_on_elem_side && !defined_on_neighbor_side)
-    mooseError(
-        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
+    mooseError("The functor '",
+               functor.functorName(),
+               "' is not defined on either side of the face with centroid ",
+               fi.faceCentroid(),
+               ".");
 
   const Elem * const face_side = defined_on_elem_side && defined_on_neighbor_side
                                      ? nullptr
