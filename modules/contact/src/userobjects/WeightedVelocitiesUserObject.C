@@ -32,7 +32,9 @@ WeightedVelocitiesUserObject::validParams()
 
 WeightedVelocitiesUserObject::WeightedVelocitiesUserObject(const InputParameters & parameters)
   : WeightedGapUserObject(parameters),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
+    // Must explicitly call this method on parameters due to GCC 14 bug
+    // in mail-archive.com/gcc-bugs@gcc.gnu.org/msg878282.html
+    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _secondary_var(
         isParamValid("secondary_variable")
             ? _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("secondary_variable"))
