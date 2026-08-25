@@ -10,8 +10,7 @@
 #pragma once
 
 #include "AuxKernel.h"
-
-class SolutionUserObjectBase;
+#include "SolutionUserObjectBase.h"
 
 /**
  * AuxKernel for reading a solution from file.
@@ -45,6 +44,9 @@ protected:
 
   /// The variable name of interest
   std::string _var_name;
+
+  /// Policy for selecting a unique value when the source solution is multivalued
+  const SolutionUserObjectBase::WeightingType _weighting_type;
 
   /// Flag for directly grabbing the data based on the dof
   bool _direct;

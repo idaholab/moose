@@ -21,7 +21,11 @@ SolutionAux::validParams()
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");
   params.addParam<std::string>("from_variable",
                                "The name of the variable to extract from the file");
-
+  params.addParam<MooseEnum>(
+      "weighting_type",
+      SolutionUserObjectBase::weightingType(),
+      "The policy used to select a unique value when the imported solution is multivalued and "
+      "direct is false.");
   params.addParam<bool>(
       "direct",
       false,
@@ -40,6 +44,8 @@ SolutionAux::validParams()
 SolutionAux::SolutionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _solution_object(getUserObject<SolutionUserObjectBase>("solution")),
+    _weighting_type(
+        getParam<MooseEnum>("weighting_type").getEnum<SolutionUserObjectBase::WeightingType>()),
     _direct(getParam<bool>("direct")),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
@@ -91,10 +97,11 @@ SolutionAux::computeValue()
   else
   {
     if (isNodal())
-      output = _solution_object.pointValue(_t, *_current_node, _var_name);
+      output = _solution_object.pointValueWrapper(_t, *_current_node, _var_name, _weighting_type);
 
     else
-      output = _solution_object.pointValue(_t, _current_elem->vertex_average(), _var_name);
+      output = _solution_object.pointValueWrapper(
+          _t, _current_elem->vertex_average(), _var_name, _weighting_type);
   }
 
   // Apply factors and return the value

@@ -52,6 +52,28 @@
       detail = "and that errors if data for the supplied variable is not found."
     []
   []
+
+  [weighting]
+    requirement = "The SolutionAux object shall be capable of importing a multivalued solution "
+
+    [source]
+      type = RunApp
+      input = 'solution_aux_weighting_source.i'
+
+      detail = "from a discontinuous elemental source field and "
+    []
+
+    [reader]
+      type = CSVDiff
+      input = 'solution_aux_weighting.i'
+      csvdiff = 'solution_aux_weighting_out.csv'
+      prereq = weighting/source
+      issues = '#31766'
+
+      detail = "reducing point values using selectable weighting policies."
+    []
+  []
+
   [exodus]
     type = 'Exodiff'
     input = 'solution_aux_exodus.i'
