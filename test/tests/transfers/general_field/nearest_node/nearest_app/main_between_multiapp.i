@@ -52,6 +52,10 @@
 # slight inflation to avoid floating point issues on borders
 bbox_factor_tr = 1.0001
 
+[GlobalParams]
+  # the test relies on the child apps output, but the multiapps cannot both execute before transfers
+  execute_after_from_multiapp = false
+[]
 
 [Transfers]
   # Nodal to nodal variables
