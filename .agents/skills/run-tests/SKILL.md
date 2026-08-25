@@ -34,11 +34,22 @@ only collects tests at/below the current working directory:
 cd test/tests/<some>/<dir> && ../../../../run_tests -j<N>
 ```
 
-## Always confirm flags before relying on them
-Flag names/behavior drift slightly across MOOSE versions. `-j` and `--re` above are stable; for
-anything else (`--heavy`, `-i` for an alternate spec filename, `--verbose`, `--update-gold`,
-`--recover`, etc.) run `./run_tests -h` in that repo and confirm against its actual output rather
+## Stable flags
+Flag names/behavior can drift slightly across MOOSE versions, but these, along with aforementioned `-j` and `--re` are stable:
+- `--heavy`: run tests marked with `heavy` (skipped by default)
+- `-v`, `--verbose`: show the output of every test
+- `--recover`: run tests in recover mode
+- `-p <N>`, `--parallel <N>`: number of MPI processes to use for each job
+- `--distributed-mesh`: run tests that support distributed mesh (passes `--distributed-mesh` to
+  the executable)
+- `--n-threads <N>`: number of threads to use when running mpiexec
+
+For anything else, run `./run_tests -h` in that repo and confirm against its actual output rather
 than assuming.
+
+Each test consumes `-p` x `--n-threads` slots, and `-j` is a hard cap on total slots in use at
+once. If `-j` is less than a test's `-p` x `--n-threads`, that test is skipped with an
+"insufficient slots" caveat instead of running.
 
 ## Reading failures
 - Output names the test and the failure reason: DIFF, ERROR, CRASH, TIMEOUT, EXODIFF, CSVDIFF...
