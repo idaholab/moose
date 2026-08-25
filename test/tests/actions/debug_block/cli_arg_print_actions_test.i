@@ -1,42 +1,41 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
-  nz = 0
-  zmin = 0
-  zmax = 0
-  elem_type = QUAD4
+  dim = 1
+  nx = 1
+  elem_type = EDGE2
+[]
+
+[Problem]
+  solve = false
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 0
-  [../]
-
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
