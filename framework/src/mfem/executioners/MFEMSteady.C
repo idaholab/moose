@@ -39,15 +39,34 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _last_solve_converged(false)
 {
   // If no ProblemOperators have been added by the user, add a default
-  if (_mfem_problem.problemOperatorBuilderIsEmpty() == true)
+  if (!_mfem_problem.getProblemComposer())
   {
-    InputParameters def_params = _factory.getValidParams("ProblemOperatorBuilderSteady");
-    std::string Name = "default_steady";
-    std::string Type = "ProblemOperatorBuilderSteady";
-    _mfem_problem.addMFEMProblemOperator(Type, Name, def_params);
+    std::string name = "default_steady";
+    std::string type;
+    if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
+    {
+      if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
+      {
+        type = "MFEMEigenWeakFormProblemComposer";
+      }
+      else
+      {
+        type = "MFEMWeakFormProblemComposer";
+      }
+    }
+    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    {
+      type = "MFEMComplexWeakFormProblemComposer";
+    }
+    else
+    {
+      mooseError("Unknown numeric type. "
+                 "Please set the Problem numeric type to either 'real' or 'complex'.");
+    }
+    InputParameters default_params = _factory.getValidParams(type);
+    _mfem_problem.addMFEMProblemComposer(type, name, default_params);
   }
-  addProblemOperator(
-      _mfem_problem.getProblemOperatorBuilder()->createProblemOperator(_mfem_problem));
+  addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
 }
 
 void
@@ -56,17 +75,20 @@ MFEMSteady::init()
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 
-  if (_mfem_problem_data.nonlinear_solver)
-    _mfem_problem_data.eqn_system->SetGradientRequired(
-        _mfem_problem_data.nonlinear_solver->RequiresGradient());
+  if (_mfem_problem_data.eqn_system)
+  {
+    if (_mfem_problem_data.nonlinear_solver)
+      _mfem_problem_data.eqn_system->SetGradientRequired(
+          _mfem_problem_data.nonlinear_solver->RequiresGradient());
 
-  _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
+    _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
 
-  // Set up initial conditions
-  _mfem_problem_data.eqn_system->Init(
-      _mfem_problem_data.gridfunctions,
-      _mfem_problem_data.cmplx_gridfunctions,
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
+    // Set up initial conditions
+    _mfem_problem_data.eqn_system->Init(
+        _mfem_problem_data.gridfunctions,
+        _mfem_problem_data.cmplx_gridfunctions,
+        getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
+  }
 
   for (const auto & problem_operator : getProblemOperators())
   {

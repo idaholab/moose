@@ -15,17 +15,17 @@
 
 /**
  * This class allows us to have a section of the input file like the following
- * specifying the problem operator builder to use and its options.
+ * specifying the problem composer to use and its options.
  *
- * [ProblemOperatorBuilder]
+ * [ProblemComposers]
  * []
  */
-class AddMFEMProblemOperatorAction : public MooseObjectAction
+class AddMFEMProblemComposerAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddMFEMProblemOperatorAction(const InputParameters & parameters);
+  AddMFEMProblemComposerAction(const InputParameters & parameters);
 
   void act() override;
 };

@@ -11,27 +11,25 @@
 
 #pragma once
 
-#include "ProblemOperatorBase.h"
-#include "ProblemOperatorBase.h"
+#include "MFEMObject.h"
 
 namespace Moose::MFEM
 {
 class ProblemOperatorBase;
 
 /**
- * Interface required to build MFEM Problem Operators
- * used by the executioner
+ * Interface required for all problem composers
  */
-class ProblemOperatorBuilderBase : public MFEMObject
+class MFEMProblemComposer : public MFEMObject
 {
 public:
   static InputParameters validParams();
 
-  ProblemOperatorBuilderBase(const InputParameters & parameters);
+  MFEMProblemComposer(const InputParameters & parameters);
 
-  ~ProblemOperatorBuilderBase() = default;
+  ~MFEMProblemComposer() = default;
 
-  /// Returns a pointer to the operator's equation system.
+  /// Returns a pointer to a freshly minted problem operator.
   virtual std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem &) = 0;
 };
 }

@@ -17,23 +17,14 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
-#include "ProblemOperatorBuilderBase.h"
+#include "MFEMProblemComposer.h"
 
 #include <map>
 
 namespace Moose::MFEM
 {
-<<<<<<< HEAD
 struct SolutionState;
 }
-=======
-class ProblemOperatorBuilderBase;
-<<<<<<< HEAD
-};
->>>>>>> dd515131cb (Adding forward declarations of classes and adding necessary headers that are needed in non-unity files)
-=======
-}
->>>>>>> b234291b95 (removing a ;)
 
 class MFEMProblem : public ExternalProblem
 {
@@ -243,9 +234,9 @@ public:
                  InputParameters & parameters) override;
 
   /**
-   * Method called in AddMFEMProblemOperatorAction which will create the ProblemOperator builder.
+   * Method called in AddMFEMProblemComposerAction which will create the problem composer.
    */
-  void addMFEMProblemOperator(const std::string & user_object_name,
+  void addMFEMProblemComposer(const std::string & user_object_name,
                               const std::string & name,
                               InputParameters & parameters);
 
@@ -293,18 +284,13 @@ public:
   const MFEMProblemData & getProblemData() const { return _problem_data; }
 
   /**
-   * Method to get the first Problem Operator Builder object storing the
+   * Method to get the first Problem Composer object storing the
    * method that builds the ProblemOperator in the executioner.
    */
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> getProblemOperatorBuilder()
+  std::shared_ptr<Moose::MFEM::MFEMProblemComposer> & getProblemComposer()
   {
-    return probOpBuilder[0];
+    return _problem_composer;
   }
-
-  /**
-   * Checks whether problem Operator builder interface is empty.
-   */
-  bool problemOperatorBuilderIsEmpty() { return probOpBuilder.size() == 0; };
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
@@ -440,15 +426,13 @@ protected:
    */
   std::map<std::string, MFEMSolverDefinition> _mfem_solver_definitions;
 
-<<<<<<< HEAD
   /// Restartable MFEM solution state associated with this problem.
   Moose::MFEM::SolutionState & _solution_state_data;
-=======
+
   /**
    * The problem operator builders for this mfem problem.
    */
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> probOpBuilder;
->>>>>>> 56a2ff8acf (Hot fixes, rebuilding the ProblemOperator base class, the missing files and changes to MFEM problem)
+  std::shared_ptr<Moose::MFEM::MFEMProblemComposer> _problem_composer;
 };
 
 template <typename T>

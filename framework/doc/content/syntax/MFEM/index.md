@@ -72,25 +72,18 @@ Now we set up boundary conditions. Here, we choose scalar Dirichlet boundary con
 
 !listing test/tests/mfem/kernels/diffusion.i block=/BCs
 
-### Problem Operators and Builders
+### Problem Operators and Composers
 
-The problem operator block is a custom block that allows for an abstract operator action on a
+The problem operator applies an action on a vector: this can be a solve of an equation system,
+application of a preconditioner or any other custom operator the user may have. The problem
+composer is the systematic logical object that builds the problem operator. By default, a composer
+will be instantiated based on the type of executioner (steady or transient), numerical type (real or 
+complex) and other factors, e.g., is it an eigen problem. However, problem composers can also be
+explicitly built like in the following examples:
 
-solution vector, this can be a solve of an equation system, application of a preconditioner or
+!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=/ProblemComposers
 
-any other custom operator the user may have. The problem operator builder is the systematic
-
-logical object that builds the problem operator by default there are two problem operator
-
-builder classes that are made automatically by inference of the executioners and equation system,
-
-however they can be explicitly input with the following examples for steady:
-
-!listing test/tests/mfem/kernels/prob_op_block_darcy.i block=/ProblemOperatorBuilder
-
-and similarly for transient problems:
-
-!listing test/tests/mfem/kernels/prob_op_block_heattransfer.i block=/ProblemOperatorBuilder
+!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=/ProblemComposers
 
 ### Solver and Executioner
 

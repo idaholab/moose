@@ -32,15 +32,14 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem_solve(*this, getProblemOperators())
 {
   // If no ProblemOperators have been added by the user, add a default
-  if (_mfem_problem.problemOperatorBuilderIsEmpty() == true)
+  if (!_mfem_problem.getProblemComposer())
   {
-    InputParameters def_params = _factory.getValidParams("ProblemOperatorBuilderTransient");
-    std::string Name = "default_transient";
-    std::string Type = "ProblemOperatorBuilderTransient";
-    _mfem_problem.addMFEMProblemOperator(Type, Name, def_params);
+    std::string type = "MFEMTimeDependentWeakFormProblemComposer";
+    std::string name = "default_transient";
+    InputParameters default_params = _factory.getValidParams(type);
+    _mfem_problem.addMFEMProblemComposer(type, name, default_params);
   }
-  addProblemOperator(
-      _mfem_problem.getProblemOperatorBuilder()->createProblemOperator(_mfem_problem));
+  addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
 }
 
 void
@@ -54,17 +53,20 @@ MFEMTransient::init()
                "Time Integration scheme \"" + stringify(getTimeScheme()) +
                    "\" is not supported by MFEMTransient Executioner.");
 
-  if (_mfem_problem_data.nonlinear_solver)
-    _mfem_problem_data.eqn_system->SetGradientRequired(
-        _mfem_problem_data.nonlinear_solver->RequiresGradient());
+  if (_mfem_problem_data.eqn_system)
+  {
+    if (_mfem_problem_data.nonlinear_solver)
+      _mfem_problem_data.eqn_system->SetGradientRequired(
+          _mfem_problem_data.nonlinear_solver->RequiresGradient());
 
-  _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
+    _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
 
-  // Set up initial conditions
-  _mfem_problem_data.eqn_system->Init(
-      _mfem_problem_data.gridfunctions,
-      _mfem_problem_data.cmplx_gridfunctions,
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
+    // Set up initial conditions
+    _mfem_problem_data.eqn_system->Init(
+        _mfem_problem_data.gridfunctions,
+        _mfem_problem_data.cmplx_gridfunctions,
+        getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
+  }
 
   for (const auto & problem_operator : getProblemOperators())
   {

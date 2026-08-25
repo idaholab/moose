@@ -147,12 +147,11 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
 }
 
 void
-MFEMProblem::addMFEMProblemOperator(const std::string & user_object_name,
+MFEMProblem::addMFEMProblemComposer(const std::string & type,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  probOpBuilder =
-      addObject<Moose::MFEM::ProblemOperatorBuilderBase>(user_object_name, name, parameters);
+  _problem_composer = addObject<Moose::MFEM::MFEMProblemComposer>(type, name, parameters).front();
 }
 
 void
