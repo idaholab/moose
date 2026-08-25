@@ -8,7 +8,7 @@ that you have a compiled and working level set module executable and is based on
 ## Create Input File
 
 This example begins by defining a minimal input file for solving the level set equation. The input
-file that is used initially is [circle_16.i].
+file that is used initially is [!file](circle_16.i).
 
 ### Mesh
 
@@ -84,10 +84,10 @@ contains the mesh and field data for the simulation.
 !media level_set/example_circle_16.mp4
        style=width:40%;margin-left:10px;float:right;
        id=example_circle_16
-       caption=Results of executing [circle_16.i] showing the "phi" field variable and the 0.5
+       caption=Results of executing [!file](circle_16.i) showing the "phi" field variable and the 0.5
                contour initially (black) and as the solution progresses (green).
 
-[example_circle_16] show the results of the simulation defined by executing the [circle_16.i] input
+[example_circle_16] show the results of the simulation defined by executing the [!file](circle_16.i) input
 file, which can be done using the following commands.
 
 ```bash
@@ -120,9 +120,9 @@ run time.
 !media level_set/example_circle_64.mp4
        style=width:40%;margin-left:10px;float:right;
        id=example_circle_64
-       caption=Results of executing [circle_16.i], with two uniform refinement levels, showing the
+       caption=Results of executing [!file](circle_16.i), with two uniform refinement levels, showing the
                "phi" field variable and the  0.5 contour initially (black) and as the solution
                progresses (green).
 
-[example_circle_64] shows the results from running [circle_16.i] with two uniform refinements
+[example_circle_64] shows the results from running [!file](circle_16.i) with two uniform refinements
 applied, the improvement in the solution is drastic and for this simple example may be adequate.

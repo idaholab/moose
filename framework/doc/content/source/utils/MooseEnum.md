@@ -49,7 +49,7 @@ The selected values can then be queried with methods such as `contains()` or ite
 ## `CreateMooseEnumClass`
 
 When code needs both a C++ `enum class` and a matching `MooseEnum` option string, the
-`CreateMooseEnumClass` macro in [`framework/include/utils/MooseEnum.h`](/framework/include/utils/MooseEnum.h)
+`CreateMooseEnumClass` macro in [!file text=`framework/include/utils/MooseEnum.h`](/framework/include/utils/MooseEnum.h)
 keeps those declarations in one place.
 
 For example:
