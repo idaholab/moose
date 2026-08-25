@@ -122,6 +122,22 @@ test is validating (e.g. a mass-balance residual asserted to be ~0) — and (b) 
 near-zero for a documented physical/test-setup reason rather than because an upstream calculation
 is ill-conditioned — otherwise you're back in this skill's main case.
 
+A related but distinct sub-case is a solver-telemetry column — a linear/nonlinear iteration count
+(and any cumulative postprocessor built on one), or a Picard iteration count — rather than a
+physical quantity. A non-smooth solve (e.g. frictional/complementarity contact) can take one more
+or fewer Newton or linear iterations on a different platform/build without the converged solution
+changing at all. Before reaching for a tolerance, though, ask whether the column belongs in the
+comparison at all: unless the test's own purpose is to validate solver performance (e.g. a
+dedicated iteration-count regression test), the telemetry postprocessor usually shouldn't be
+gold-compared in the first place, and dropping it from the comparison — rather than widening a
+tolerance to tolerate a quantity the test was never meant to pin down — is the simpler, more
+robust fix. Reserve the rest of this sub-case for tests that do intend to track solver performance.
+There, this isn't the "near-zero" case above — the count itself is O(10-100), not tiny — so a
+`floor` doesn't fit; widen that column's *relative* tolerance instead. Before doing so, confirm
+the actual solution variables (nodal variables, and any other global postprocessors) show zero or
+negligible diff on the same comparison — that's what tells you the extra iteration changed only the
+solver's path, not the answer.
+
 A blanket file-wide `rel_err` bump introduced alongside an unrelated fix is a red flag worth
 git-archaeology (`git log`/`git show` on the test spec) even when it isn't currently failing: it
 often means this exact situation was mishandled by loosening everything instead of the one or two
@@ -135,18 +151,26 @@ command file passed to `exodiff -f`. Build it, don't hand-write it:
 - `exodiff -summary gold/<file>.e` prints every variable with its file-wide peak magnitude,
   already formatted as `NODAL VARIABLES`/`ELEMENT VARIABLES` blocks — use this as the starting
   template (it also tells you each column's peak, which the sizing rule below needs).
-- Give the unaffected variable-type blocks `(all)` with **no** explicit `relative`/`floor` on the
-  header line (e.g. `NODAL VARIABLES (all)`, then list the variable names). With no tolerance of
-  its own, that block falls through to the `-F <abs_zero> -t <rel_err>` the tester already passes
-  on the command line from the test spec — so the rest of the file's comparison stays exactly as
-  strict as before, and it stays correct if the spec's `abs_zero`/`rel_err` change later. `(all)`
-  also avoids re-enumerating variable names by hand and keeps the file resilient to new output
-  variables being added later.
-- Only add an explicit `floor` on the specific affected variable line(s), with a comment stating
-  the physical reason it's negligible. Keep `-summary`'s auto-generated trailing
-  `# min: ... max: ...` comment on that line (and on every other line, for consistency) rather
-  than dropping it — it's tool-sourced evidence backing the floor, not hand-typed, so it
-  corroborates the hand-written physical-reason comment instead of just asserting it.
+- Give every variable-type block `(all)` (`GLOBAL VARIABLES`, `NODAL VARIABLES`, `ELEMENT
+  VARIABLES` alike — exodiff's `Parse_Variables` in `ED_SystemInterface.C` parses the `(all)` flag
+  and the indented per-variable override list independently of each other and of block type) with
+  **no** explicit `relative`/`floor` on the header line. With no tolerance of its own, `(all)`
+  falls through to the `-F <abs_zero> -t <rel_err>` the tester already passes on the command line
+  from the test spec — so the rest of the file's comparison stays exactly as strict as before, and
+  it stays correct if the spec's `abs_zero`/`rel_err` change later. Because the two are independent,
+  this holds even for a block containing some affected variables: list only the affected
+  variable's override line(s) under `(all)` and leave every unaffected variable out entirely,
+  rather than enumerating them by hand just because they share a block with an affected one. `(all)`
+  also keeps the file resilient to new output variables being added later.
+- Only add an explicit `floor` (near-zero-residual case) or `relative` (solver-telemetry case, and
+  only when the test's purpose is to track solver performance — otherwise omit the telemetry
+  postprocessor from the compared variables instead) on the specific affected variable line(s),
+  with a comment stating the physical reason. For a floor, keep `-summary`'s auto-generated
+  trailing `# min: ... max: ...` comment on that line (and on every other line, for consistency)
+  rather than dropping it — it's tool-sourced evidence backing the floor, not hand-typed, so it
+  corroborates the hand-written physical-reason comment instead of just asserting it. For a
+  solver-telemetry `relative` override, look for an existing precedent value in a sibling `.cmp`
+  before picking a number.
 - Size that floor as roughly `1e-8 × that variable's own peak magnitude` (from the retained
   `-summary` comment) — a principled, reproducible "many orders of magnitude below the values that
   matter" rule, rather than hand-tuning to the exact noise observed on one build. Then sanity-check
