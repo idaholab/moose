@@ -1,5 +1,7 @@
 # ProblemComposers System
 
+!if! function=hasCapability('mfem')
+
 The `ProblemComposers` system allows the user to construct
 problem operators with custom inputs. This class is specifically intended for composing
 user defined custom operators which may be raw `mfem::Operator`'s optimised for specific
@@ -294,3 +296,7 @@ public:
 registerMooseObject("MooseApp", CustomDummyProblemComposer);
 };
 ```
+!if-end!
+
+!else
+!include mfem/mfem_warning.md
