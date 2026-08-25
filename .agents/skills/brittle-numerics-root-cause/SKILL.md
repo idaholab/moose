@@ -21,6 +21,15 @@ converging series truncated at an arbitrary cutoff, or a subtraction of two larg
 numbers — where the compiler's FP rounding choices tip the balance. Genuinely fixing it means
 finding and repairing that ill-conditioned spot, not suppressing where it happens to surface.
 
+The near-singular-solve case also surfaces through solver internals, not just compiler/hardware
+choices: PETSc can select a different default preconditioner depending on run configuration (e.g.
+ILU in serial vs. block-Jacobi-with-ILU-on-the-blocks once the run spans more than one rank), and
+if the linear system is ill-conditioned enough, different PCs that each satisfy the same
+convergence tolerance can still land on distinguishably different solutions — because a converged
+residual only bounds the solution error by roughly `condition number x solver tolerance`. `-ksp_view`
+(or `-snes_view`) on the passing and failing runs confirms whether a PC/solver-type change is what's
+different before chasing per-iteration instrumentation.
+
 ## Anti-patterns (don't reach for these first)
 
 - Pinning or loosening compiler flags to make the test pass again.
@@ -47,7 +56,13 @@ unstable — otherwise you're just relocating where the instability bites next t
    truncated series' terms empirically rather than assuming it's exponential; check whether a
    "near-singular" determinant is really near zero or just the result of large-magnitude
    cancellation. The specific check depends on the algorithm — the point is to derive it from what
-   the numbers actually do, not from what's typical.
+   the numbers actually do, not from what's typical. For a linear/nonlinear solve where different
+   builds or PCs converge to different answers, check whether the discrepancy is within roughly
+   `condition number x solver tolerance` — if so, the fix is tightening the Executioner's
+   `l_tol`/`nl_rel_tol` (and `l_abs_tol`/`nl_abs_tol` as needed) so the solve actually resolves the
+   answer to the precision the test compares at, not pinning a specific solver configuration to
+   freeze in one of several equally-arbitrary converged answers. Only fall back to the tolerance-widening path below if the near-singularity
+   itself is physically expected and tightening the solve isn't warranted.
 4. **Look for precedent in sibling code.** If a related algorithm/branch in the same codebase
    already handles this class of problem (e.g., a fallback for non-convergence), extend that
    pattern rather than inventing a new one.
@@ -129,31 +144,3 @@ command file passed to `exodiff -f`. Build it, don't hand-write it:
   neighboring test's `custom_cmp` file that already floors a different near-zero column is the
   precedent to extend (per the Procedure's "look for precedent in sibling code" step above), not a
   new convention to invent.
-
-## Worked example
-
-Debugging a MOOSE/BISON CSVDiff test (`PolyPole2` fission-gas diffusion mode series) that failed
-only under `-march`/`-mtune` flags. Root cause: the series decays only algebraically (~C/n²) in a
-slow-diffusion regime, needing ~143,000 terms to converge under the test's D'Alembert tolerance but
-capped at 2000 — the arbitrary truncated partial sum, sensitive to FP rounding in large cancelling
-polynomial terms, became the answer. Fix: close the tail analytically
-(`tail ≈ contrib(n_last) · n_last`) instead of accepting the raw truncated sum. This shifted
-results for every test exercising the algorithm (28 of 192 in the suite), requiring bulk
-regolding — only done after sampling a much-smaller-cap variant of the same algorithm to confirm
-the fix degraded gracefully there instead of blowing up.
-
-Debugging a blackbear `Exodiff` test (`EqualValueEmbeddedConstraintAction`) that failed only under
-new `-march` flags. Root cause: `resid_x/y/z` are raw per-node force residuals saved from the
-solid/truss kernels; at nodes away from the load and the penalty-constrained interface these are a
-genuine but physically tiny structural-coupling force (many orders of magnitude below the
-~1e5-1e6 reaction forces at the loaded/constrained nodes), computed as the residual of much larger
-cancelling terms in the stress-divergence integral — so its last few digits are sensitive to
-summation/FMA order and differ slightly between builds. Confirmed via `scipy.io.netcdf_file` that
-every other field (`disp_*`, `stress_*`, `strain_*`) was bit-identical between builds, and that the
-flagged nodes' own values formed a smooth, deterministic, monotonically-growing-with-load sequence
-(not patternless noise) — this was a legitimate near-zero value, not an ill-conditioned production
-calculation. Fix: a `custom_cmp` file giving only `resid_x/y/z` a `floor` of ~1e-8 of each
-variable's own peak magnitude (from `exodiff -summary`), leaving every other variable on the
-tester's existing `abs_zero`/`rel_err`, following the `(all)`-block pattern above. A sibling test
-in the same suite already used a hand-tuned `custom_cmp` file for an analogous near-zero-stress
-column, confirming this was the established pattern to extend rather than a new mechanism to add.
