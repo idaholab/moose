@@ -43,11 +43,33 @@ must be finite and strictly increasing. Each row of the normalized `[C, N]` outp
 with [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/profile_coordinates) to construct
 one linearly interpolated functor.
 
-!alert warning title=Profile update and automatic differentiation
-The TorchScript model is evaluated once during initial setup. Consequently, the generated profiles
-remain fixed during the simulation. Values referenced by
+## Update schedule
+
+The TorchScript model is evaluated according to
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/execute_on), which accepts two
+flags:
+
+- `INITIAL` (default) evaluates the model once during initial setup, so the generated profiles
+  remain fixed for the entire simulation.
+- `TIMESTEP_BEGIN` additionally re-runs inference at the start of every time step, so the
+  profiles can follow time-varying inputs.
+
+Only these two flags are offered because the model consumes solely the scalar values supplied
+through [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_names) or
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_values).
+[!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/execute_on) therefore controls
+*when* inference re-runs, not what it depends on: the profiles never depend on the solution at
+the point where a functor is evaluated.
+
+With `TIMESTEP_BEGIN`, the material rebuilds its profiles at the start of the step, before the
+step's other time-step-begin objects (such as postprocessors) are recomputed. A re-evaluation
+therefore reads its inputs as they stood at the end of the previous step; an input postprocessor
+that is itself updated at `TIMESTEP_BEGIN` is thus seen with a one-step lag.
+
+!alert warning title=Profile availability and automatic differentiation
+Values referenced by
 [!param](/FunctorMaterials/TorchScriptProfileFunctorMaterial/input_names) must be available when
-initial setup occurs. The published functors have type `Real`; they are compatible with
+the first evaluation occurs. The published functors have type `Real`; they are compatible with
 non-AD consumers, and TorchScript inference itself is not part of the MOOSE
 automatic-differentiation graph.
 

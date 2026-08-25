@@ -11,10 +11,11 @@
 
 #ifdef MOOSE_LIBTORCH_ENABLED
 
+#include "ExecFlagEnum.h"
+
 #include <cmath>
 #include <cstdint>
 #include <exception>
-#include <set>
 
 registerMooseObject("MooseApp", TorchScriptProfileFunctorMaterial);
 
@@ -72,6 +73,19 @@ TorchScriptProfileFunctorMaterial::validParams()
                              MooseEnum("float32 float64", "float64"),
                              "Floating-point type expected by the TorchScript model.");
 
+  // The model consumes only scalar inputs (constants or postprocessor values),
+  // so re-evaluation is meaningful at most once per step. Offer only the flags
+  // whose material setup hooks re-run inference: INITIAL -> initialSetup(),
+  // TIMESTEP_BEGIN -> timestepSetup().
+  ExecFlagEnum execute_options;
+  execute_options.addAvailableFlags(EXEC_INITIAL, EXEC_TIMESTEP_BEGIN);
+  execute_options = EXEC_INITIAL;
+  params.addParam<ExecFlagEnum>(
+      "execute_on",
+      execute_options,
+      "When the TorchScript model is (re-)evaluated to rebuild the profiles. " +
+          execute_options.getDocString());
+
   return params;
 }
 
@@ -87,7 +101,8 @@ TorchScriptProfileFunctorMaterial::TorchScriptProfileFunctorMaterial(
     _profile_direction(getParam<RealVectorValue>("profile_direction")),
     _coordinate_scale(getParam<Real>("coordinate_scale")),
     _out_of_range_behavior(getParam<MooseEnum>("out_of_range_behavior")),
-    _tensor_dtype(getParam<MooseEnum>("tensor_dtype"))
+    _tensor_dtype(getParam<MooseEnum>("tensor_dtype")),
+    _profile_update_schedule(_execute_enum.begin(), _execute_enum.end())
 {
   const bool using_postprocessors = !_input_names.empty();
   const bool using_constants = !_input_values.empty();
@@ -126,14 +141,12 @@ TorchScriptProfileFunctorMaterial::TorchScriptProfileFunctorMaterial(
 
   _profiles.resize(_profile_names.size());
 
-  const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
-
   for (const auto profile_index : index_range(_profile_names))
     addFunctorProperty<Real>(
         _profile_names[profile_index],
         [this, profile_index](const auto & spatial_arg, const auto &) -> Real
         { return sampleProfile(profile_index, spatial_arg.getPoint()); },
-        clearance_schedule);
+        _profile_update_schedule);
 }
 
 torch::Tensor
@@ -297,6 +310,13 @@ void
 TorchScriptProfileFunctorMaterial::initialSetup()
 {
   updateProfiles();
+}
+
+void
+TorchScriptProfileFunctorMaterial::timestepSetup()
+{
+  if (_profile_update_schedule.count(EXEC_TIMESTEP_BEGIN))
+    updateProfiles();
 }
 
 Real

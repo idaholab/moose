@@ -16,10 +16,12 @@
 #include "TorchScriptUserObject.h"
 
 #include <memory>
+#include <set>
 #include <vector>
 
 /**
- * Evaluates a TorchScript model once during initialSetup(), interprets its output
+ * Evaluates a TorchScript model on the schedule given by the execute_on
+ * parameter (default: once, at initialSetup()), interprets its output
  * as one or more sampled one-dimensional profiles, and publishes those profiles
  * as Real functors.
  *
@@ -46,6 +48,7 @@ public:
   TorchScriptProfileFunctorMaterial(const InputParameters & parameters);
 
   virtual void initialSetup() override;
+  virtual void timestepSetup() override;
 
 protected:
   /**
@@ -97,6 +100,11 @@ protected:
 
   /// float32 or float64
   const MooseEnum _tensor_dtype;
+
+  /// Execute flags on which updateProfiles() re-runs inference. Also passed as
+  /// the functor cache clearance schedule so cached values are dropped whenever
+  /// the profiles are rebuilt.
+  const std::set<ExecFlagType> _profile_update_schedule;
 
   /// Cached interpolator for each model output channel
   std::vector<std::unique_ptr<LinearInterpolation>> _profiles;

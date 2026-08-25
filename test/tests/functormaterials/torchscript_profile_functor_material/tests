@@ -77,4 +77,12 @@
     capabilities = 'libtorch'
     max_parallel = 1
   []
+
+  [transient_reevaluation]
+    type = CSVDiff
+    input = transient.i
+    csvdiff = transient_out.csv
+    requirement = 'The system shall re-evaluate a TorchScript profile functor material on its execute_on schedule so that time-varying inputs update the published profiles.'
+    capabilities = 'libtorch'
+  []
 []
