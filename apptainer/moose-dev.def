@@ -20,6 +20,7 @@
    - MFEM_OPTIONS: Options to pass to mfem build
    - MOOSE_JOBS: Number of jobs to pass to the builds
    - MTUNE: Tuning to use for --mtune (default: generic)
+   - OPTFLAGS: Optional optimization flags to override (overrides -march and -mtune)
    - PROFILING: Whether or not to build with gperftools (truthy, default: false)
    - PYTORCH_GIT_SHA: The git SHA to use for pytorch
    - PYTORCH_GIT_REMOTE: The git remote to use to get pytorch
@@ -118,7 +119,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
     # Optimization flags
+{% if OPTFLAGS is defined %}
+    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
+{%- else %}
     OPTFLAGS=("-march={{ MARCH }}" "-mtune={{ MTUNE }}")
+{%- endif %}
 
     # Special setup for OpenMPI
     if [ -n "${MOOSE_OPENMPI_DIR:-}" ]; then

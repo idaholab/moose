@@ -7,7 +7,7 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2026.08.19
+    version: 2026.08.23
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
@@ -16,7 +16,7 @@ packages:
       - conda/tools
   # dependers: moose-dev
   build:
-    version: 2026.08.19
+    version: 2026.08.23
     conda: conda/build
     templates:
       conda/build/meta.yaml.template: conda/build/meta.yaml
@@ -25,7 +25,7 @@ packages:
       - conda/build
   # dependers: moose-dev
   mpi:
-    version: 2026.08.19
+    version: 2026.08.23
     influential:
       - apptainer/mpi.def
       - apptainer/files/mpi
@@ -33,7 +33,7 @@ packages:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
     version: 9.7.0
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/meta.yaml.template: conda/libmesh-vtk/meta.yaml
@@ -44,7 +44,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.25.4
-    build_number: 0
+    build_number: 1
     conda: conda/petsc
     templates:
       conda/petsc/meta.yaml.template: conda/petsc/meta.yaml
@@ -63,7 +63,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2026.08.18_0772c3d
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh
     templates:
       conda/libmesh/meta.yaml.template: conda/libmesh/meta.yaml
@@ -83,7 +83,7 @@ packages:
   # dependers: pyhit, moose-dev
   wasp:
     version: 2026.08.13_ce25dcd
-    build_number: 0
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -96,7 +96,7 @@ packages:
       - scripts/update_and_rebuild_wasp.sh
   # dependers: none
   pyhit:
-    version: 2026.08.19
+    version: 2026.08.23
     conda: conda/pyhit
     dependencies:
       - wasp
@@ -112,7 +112,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.08.19
+    version: 2026.08.23
     conda: conda/moose-dev
     templates:
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml
