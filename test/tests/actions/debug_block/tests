@@ -15,4 +15,12 @@
     match_literal = true
     requirement = "The system shall be capable of reporting `Action` object task information."
   [../]
+  [./test_show_actions_cli]
+    type = RunApp
+    input = 'cli_arg_print_actions_test.i'
+    cli_args = '--show-actions'
+    expect_out = '[DBG][ACT] TASK'
+    match_literal = true
+    requirement = "The system shall be capable of reporting `Action` object task information."
+  [../]
 []
