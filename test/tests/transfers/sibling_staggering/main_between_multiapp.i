@@ -4,8 +4,6 @@
 [Problem]
   solve = false
   verbose_multiapps = true
-
-  execute_siblings_transfer_after_source_multiapp_execution = true
 []
 
 [Mesh]

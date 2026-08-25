@@ -155,6 +155,24 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
     _current_direction = _directions[0];
   }
 
+  // Check the parameter for sibling transfers being nested within multiapp execution loop
+  const auto & exec_on = getExecuteOnEnum();
+  if (isParamValid("execute_after_from_multiapp") && _from_multi_app &&
+      ((_from_multi_app->getExecuteOnEnum() != exec_on) &&
+       !(exec_on.size() == 1 && int(exec_on.get(0)) == EXEC_SAME_AS_MULTIAPP)))
+    paramWarning("execute_after_from_multiapp",
+                 "This parameter is only obeyed when the from_multi_app and the transfer are "
+                 "executing on the same execute_on flag.\nfrom_multi_app execution schedule: ",
+                 Moose::stringify(_from_multi_app->getExecuteOnEnum()),
+                 "\nTransfer execution schedule: ",
+                 Moose::stringify(exec_on));
+  // This parameter is only obeyed for BETWEEN_MULTIAPP
+  if (!(_directions.size() == 1 && _directions.get(0) == BETWEEN_MULTIAPP) &&
+      isParamValid("execute_after_from_multiapp"))
+    paramError("execute_after_from_multiapp",
+               "This parameter is only intended for modifying the execution schedule of "
+               "BETWEEN_MULTIAPPS transfers");
+
   // Handle deprecated parameters
   if (parameters.isParamSetByUser("direction"))
   {

@@ -276,10 +276,6 @@ FEProblemBase::validParams()
                         "barrier notifications when executing "
                         "or transferring to/from Multiapps "
                         "(default: false)");
-  params.addParam<bool>("execute_siblings_transfer_after_source_multiapp_execution",
-                        false,
-                        "Whether to execute the siblings transfer staggered with the multiapp "
-                        "execution, after the 'from_multiapp' of the transfer executes");
 
   MooseEnum verbosity("false true extra", "false");
   params.addParam<MooseEnum>("verbose_setup",
@@ -468,8 +464,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _to_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _from_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _between_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _execute_siblings_transfer_after_source_multiapp_execution(
-        getParam<bool>("execute_siblings_transfer_after_source_multiapp_execution")),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
     _cycles_completed(0),
@@ -5882,8 +5876,7 @@ FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 void
 FEProblemBase::execMultiAppTransfers(ExecFlagType type,
                                      Transfer::DIRECTION direction,
-                                     const MultiAppName & source_app,
-                                     bool skip_transfers_with_source_app_executing_on_type)
+                                     const MultiAppName & source_app)
 {
   // Keep track of whether a transfer is actually executed to avoid extraneous console output
   bool is_executing_a_transfer = false;
@@ -5903,17 +5896,25 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
     additional_source_info = " from app. '" + source_app + "'";
 
   // This lambda only checks the source app, since the exec_type selection is done in the warehouse
-  auto executeThisTransfer =
-      [&source_app, &type, &skip_transfers_with_source_app_executing_on_type](auto & transfer)
+  auto executeThisTransfer = [this, &direction, &source_app, &type](auto & transfer)
   {
     mooseAssert(transfer->getExecuteOnEnum().contains(type), "Should execute on this schedule");
-    if (!transfer->hasFromMultiApp())
+    // no restriction / ordering groups on transfers from parent to child at this time
+    if (direction != MultiAppTransfer::BETWEEN_MULTIAPP)
       return true;
-    if (skip_transfers_with_source_app_executing_on_type &&
-        (transfer->getFromMultiApp()->getExecuteOnEnum().contains(type) ||
-         !transfer->getFromMultiApp()->enabled()))
-      return false;
-    if (source_app.empty() || transfer->getFromName() == source_app)
+    // on sibling transfers, we can delay until the app has been executed if the transfer is set
+    // that way.
+    if (transfer->getFromName() == source_app && transfer->executeAfterSourceApp())
+    {
+      libmesh_ignore(this);
+      mooseAssert(
+          this->getMultiApp(transfer->parameters().template get<MultiAppName>("from_multi_app"))
+              ->getExecuteOnEnum()
+              .contains(type),
+          "from_multiapp should also execute on this schedule");
+    }
+    if ((source_app.empty() && !transfer->executeAfterSourceApp()) ||
+        (transfer->getFromName() == source_app && transfer->executeAfterSourceApp()))
       return true;
     return false;
   };
@@ -5930,9 +5931,6 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
 
     if (_verbose_multiapps)
     {
-      _console << COLOR_CYAN << "\nTransfers on " << Moose::stringify(type) << string_direction
-               << "MultiApps" << additional_source_info << COLOR_DEFAULT << ":" << std::endl;
-
       VariadicTable<std::string, std::string, std::string, std::string> table(
           {"Name", "Type", "From", "To"});
 
@@ -5954,7 +5952,12 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
 
       // Print it
       if (is_executing_a_transfer)
+      {
+        _console << COLOR_CYAN << "\nTransfers on " << Moose::stringify(type) << string_direction
+                 << "MultiApps" << additional_source_info << COLOR_DEFAULT << ":" << std::endl;
+
         table.print(_console);
+      }
     }
 
     for (const auto & transfer : transfers)
@@ -5975,9 +5978,8 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
   }
 
   if (_multi_apps[type].getActiveObjects().size() && !is_executing_a_transfer && _verbose_multiapps)
-    _console << COLOR_CYAN << "\nNo "
-             << (skip_transfers_with_source_app_executing_on_type ? "early " : "")
-             << "Transfers on " << Moose::stringify(type) << string_direction << "MultiApps\n"
+    _console << COLOR_CYAN << "\nNo Transfers on " << Moose::stringify(type) << string_direction
+             << "MultiApps\n"
              << COLOR_DEFAULT << std::endl;
 }
 
@@ -6032,10 +6034,7 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
   // NOTE: these is usually no need to execute a transfer unless the multiapp providing its
   // data also executed. But we need to obey what the user requested for the execution schedule,
   // hence the two executions
-  if (_execute_siblings_transfer_after_source_multiapp_execution)
-    execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, "", true);
-  else
-    execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP);
+  execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP);
 
   // Order the multiapps based on their execution group
   // Build the ordered multiapp groups
