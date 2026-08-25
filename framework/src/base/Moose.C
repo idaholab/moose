@@ -553,6 +553,9 @@ addActionTypes(Syntax & syntax)
   registerTask("resolve_mfem_solvers", true);
   addTaskDependency("resolve_mfem_solvers", "add_mfem_solver");
   addTaskDependency("init_problem", "resolve_mfem_solvers");
+
+  // indicators/estimators before markers
+  addTaskDependency("add_marker", "add_indicator");
 #endif
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics
