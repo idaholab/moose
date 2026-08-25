@@ -87,6 +87,7 @@ unit:
   - PorousFlowVanGenuchtenTest.drelpermNW
   - PorousFlowVanGenuchtenTest.dsat
   - PorousFlowVanGenuchtenTest.dsathys
+  - PorousFlowVanGenuchtenTest.extensionsDataIO
   - PorousFlowVanGenuchtenTest.relativePermeabilityHys
   - PorousFlowVanGenuchtenTest.relativePermeabilityNWHys
   - PorousFlowVanGenuchtenTest.relperm

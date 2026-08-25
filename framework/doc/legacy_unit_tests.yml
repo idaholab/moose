@@ -19,22 +19,37 @@ unit:
   - BilinearInterpolationTest.sample
   - BilinearInterpolationTest.unimplemented_errors
   - BuildMeshTest.theTest
+  - CSGBaseTest.addEngUnitError
   - CSGBaseTest.joinOtherBaseIgnoreIdenticalCellsLatticeFill
   - CSGBaseTest.joinOtherBaseIgnoreIdenticalCellsUniverseFill
   - CSGBaseTest.joinOtherBaseIgnoreIdenticalSurface
   - CSGBaseTest.joinOtherBaseIgnoreIdenticalUniverses
   - CSGBaseTest.joinOtherBaseJoinRoot
+  - CSGBaseTest.joinOtherBaseJoinRootEngUnit
   - CSGBaseTest.joinOtherBaseOneNewRoot
+  - CSGBaseTest.joinOtherBaseOneNewRootEngUnit
   - CSGBaseTest.joinOtherBaseTwoNewRoot
+  - CSGBaseTest.joinOtherBaseTwoNewRootEngUnit
   - CSGBaseTest.renameUniverse
   - CSGBaseTest.testAddCellToUniverse
   - CSGBaseTest.testAddGetSurface
   - CSGBaseTest.testAddLattice
+  - CSGBaseTest.testAddLatticeEngUnitError
+  - CSGBaseTest.testAddObjUnitErrors
   - CSGBaseTest.testAddTransformationErrors
   - CSGBaseTest.testApplyRotation
   - CSGBaseTest.testApplyScaling
   - CSGBaseTest.testApplyTranslation
   - CSGBaseTest.testCSGBaseClone
+  - CSGBaseTest.testCellBadExpansionMulti
+  - CSGBaseTest.testCellBadExpansionUnlinked
+  - CSGBaseTest.testCellEngUnitAdd
+  - CSGBaseTest.testCellEngUnitAddErrors
+  - CSGBaseTest.testCellEngUnitAddToUniv
+  - CSGBaseTest.testCellEngUnitDelete
+  - CSGBaseTest.testCellEngUnitExpand
+  - CSGBaseTest.testCellEngUnitRename
+  - CSGBaseTest.testCellEngUnitRenameErrors
   - CSGBaseTest.testCheckRegionSurfaces
   - CSGBaseTest.testCreateCell
   - CSGBaseTest.testCreateUniverse
@@ -42,9 +57,15 @@ unit:
   - CSGBaseTest.testDeleteLattice
   - CSGBaseTest.testDeleteSurface
   - CSGBaseTest.testDeleteUniverse
+  - CSGBaseTest.testEngUnitLinking
+  - CSGBaseTest.testExpandAllCyclicError
+  - CSGBaseTest.testExpandAllMulti
+  - CSGBaseTest.testExpandAllRecursive
+  - CSGBaseTest.testExpandAllUnits
   - CSGBaseTest.testGetAllCells
   - CSGBaseTest.testGetAllSurfaces
   - CSGBaseTest.testGetCellByName
+  - CSGBaseTest.testGetEngUnit
   - CSGBaseTest.testGetLatticeMethods
   - CSGBaseTest.testGetUniverse
   - CSGBaseTest.testLatticeOuter
@@ -54,9 +75,27 @@ unit:
   - CSGBaseTest.testRenameSurface
   - CSGBaseTest.testSetLatticeUniverses
   - CSGBaseTest.testSetUniverseAtLatticeIndex
+  - CSGBaseTest.testSurfBadExpansion
+  - CSGBaseTest.testSurfEngUnitAdd
+  - CSGBaseTest.testSurfEngUnitAddErrors
+  - CSGBaseTest.testSurfEngUnitDelete
+  - CSGBaseTest.testSurfEngUnitExpand
+  - CSGBaseTest.testSurfEngUnitRename
+  - CSGBaseTest.testSurfEngUnitRenameErrors
+  - CSGBaseTest.testUnivBadExpansion
+  - CSGBaseTest.testUnivEngUnitAddErrors
+  - CSGBaseTest.testUnivEngUnitDelete
+  - CSGBaseTest.testUnivEngUnitExpand
+  - CSGBaseTest.testUnivEngUnitExpandLattice
+  - CSGBaseTest.testUnivEngUnitRenameErrors
+  - CSGBaseTest.testUniverseEngUnitAdd
+  - CSGBaseTest.testUniverseEngUnitRename
   - CSGBaseTest.testUniverseLinking
   - CSGBaseTest.testUpdateCellFill
   - CSGBaseTest.testUpdateCellRegion
+  - CSGBaseTest.testUseSurfEngUnit
+  - CSGBaseTest.testUseSurfEngUnitAsPos
+  - CSGBaseTest.testUseSurfEngUnitComplex
   - CSGCellTest.testCellEquality
   - CSGCellTest.testGetFill
   - CSGCellTest.testMaterialCell
@@ -65,6 +104,16 @@ unit:
   - CSGCellTest.testUpdateFill
   - CSGCellTest.testUpdateRegion
   - CSGCellTest.testVoidCell
+  - CSGEngUnitTest.testCellUnit
+  - CSGEngUnitTest.testEngUnitEqual
+  - CSGEngUnitTest.testPolygonUnitClone
+  - CSGEngUnitTest.testPolygonUnitErrors
+  - CSGEngUnitTest.testPolygonUnitExpansion
+  - CSGEngUnitTest.testPolygonUnitProperties
+  - CSGEngUnitTest.testPolygonUnitSurfaceEval
+  - CSGEngUnitTest.testSurfUnit
+  - CSGEngUnitTest.testTypeThroughBase
+  - CSGEngUnitTest.testUnivUnit
   - CSGLatticeTest.testCartIsValidIndex
   - CSGLatticeTest.testCartLatticeEquality
   - CSGLatticeTest.testCartSetUniverseAtIndex
@@ -76,6 +125,7 @@ unit:
   - CSGLatticeTest.testEmptyToFilled
   - CSGLatticeTest.testGetAttributes
   - CSGLatticeTest.testGetMethods
+  - CSGLatticeTest.testGetTypeThroughBase
   - CSGLatticeTest.testGetUniqueUniverses
   - CSGLatticeTest.testGetUniverseNameMap
   - CSGLatticeTest.testHasUniverse
@@ -93,6 +143,7 @@ unit:
   - CSGSurfaceTest.testCylNegativeRadius
   - CSGSurfaceTest.testGetHalfspaceFromPoint
   - CSGSurfaceTest.testGetName
+  - CSGSurfaceTest.testGetSurfaceTypeThroughBase
   - CSGSurfaceTest.testHalfspaceWithNullTransform
   - CSGSurfaceTest.testHalfspaceWithTransform
   - CSGSurfaceTest.testPlaneCollinearPoints
@@ -354,6 +405,8 @@ unit:
   - DataFileUtilsTest.getPathUnique
   - DataIOTest.emptyTorchTensor
   - DataIOTest.enumClass
+  - DataIOTest.nestedVectorBool
+  - DataIOTest.signedChar
   - DataIOTest.torchTensor
   - DataIOTest.uniquePtrNumericVector
   - DataIOTest.uniqueStorage
@@ -538,6 +591,7 @@ unit:
   - JSONIOTest.uniquePtrSerializer
   - JSONReaderTest.errors
   - JSONReaderTest.getters
+  - JsonInputFileFormatterTest.enumOptions
   - JsonSyntaxTreeTest.basicCppTypeRecognizesReal
   - JsonSyntaxTreeTest.documentationCppTypeUsesReal
   - KDTree.radiusSearch
@@ -681,8 +735,12 @@ unit:
   - MFEMKernelTest.MFEMDiffusionKernel
   - MFEMKernelTest.MFEMDivDivKernel
   - MFEMKernelTest.MFEMLinearElasticityKernel
+  - MFEMKernelTest.MFEMMixedGradGradKernel
   - MFEMKernelTest.MFEMMixedScalarCurlKernel
+  - MFEMKernelTest.MFEMMixedScalarWeakCurlKernel
   - MFEMKernelTest.MFEMMixedVectorGradientKernel
+  - MFEMKernelTest.MFEMMixedVectorMassKernel
+  - MFEMKernelTest.MFEMMixedVectorWeakDivergenceKernel
   - MFEMKernelTest.MFEMVectorDomainLFKernel
   - MFEMKernelTest.MFEMVectorFEDomainLFKernel
   - MFEMKernelTest.MFEMVectorFEMassKernel
@@ -1045,6 +1103,9 @@ unit:
   - RegistryTest.getDataPath
   - RegistryTest.getDataPathUnregistered
   - RegistryTest.repositoryURL
+  - RepeatEvalerTest.expansion
+  - RepeatEvalerTest.nonIntegerCount
+  - RepeatEvalerTest.wrongArgCount
   - RestartAdaptivityBackupTest.restoresAdaptedSubAppMeshAndSystemData
   - RestartableDataIOTest.readWrite
   - RestartableDataIOTest.readerErrors
