@@ -54,7 +54,7 @@
 [Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-  []  
+  []
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg

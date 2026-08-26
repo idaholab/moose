@@ -37,7 +37,7 @@ class TranslationalSymmetry : public DiscreteSymmetry
 {
 public:
   TranslationalSymmetry(const mfem::Vector & lattice_vector)
-    : DiscreteSymmetry(), _lattice_vector(lattice_vector){};
+    : DiscreteSymmetry(), _lattice_vector(lattice_vector) {};
 
   virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override;
 
@@ -48,7 +48,8 @@ private:
 class RotationalSymmetry : public DiscreteSymmetry
 {
 public:
-  RotationalSymmetry(const unsigned int rotational_symmetry_order);
+  RotationalSymmetry(const unsigned int rotational_symmetry_order,
+                     const mfem::Vector & rotation_axis);
 
   virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override;
 

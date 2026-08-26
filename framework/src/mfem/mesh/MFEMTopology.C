@@ -29,11 +29,14 @@ MFEMTopology::validParams()
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::vector<mfem::real_t>>>(
       "lattice_vectors", {}, "Translation vectors matching pairs of equivalent vertices.");
-  params.addParam<unsigned int>(
-      "rotational_symmetry_order",
-      1,
-      "Order of rotational symmetry around z axis. Number of whole copies of mesh in 2 pi rotation "
-      "about axis of rotational symmetry.");
+  params.addParam<std::vector<std::vector<mfem::real_t>>>(
+      "rotational_symmetry_axes", {}, "Axes of rotational symmetry.");
+  params.addParam<std::vector<unsigned int>>(
+      "rotational_symmetry_orders",
+      {},
+      "Orders of rotational symmetry about each of the rotational_symmetry_axes. Number of whole "
+      "copies of mesh in 2 pi rotation "
+      "about each axis of rotational symmetry.");
   params.addParam<mfem::real_t>(
       "coincidence_tolerance",
       1e-8,
@@ -45,14 +48,25 @@ MFEMTopology::validParams()
 MFEMTopology::MFEMTopology(const InputParameters & parameters)
   : _lattice_vectors(ConvertVectorOfVectorsToMFEM(
         parameters.get<std::vector<std::vector<mfem::real_t>>>("lattice_vectors"))),
-    _rotational_symmetry_order(parameters.get<unsigned int>("rotational_symmetry_order")),
+    _rotational_symmetry_axes(ConvertVectorOfVectorsToMFEM(
+        parameters.get<std::vector<std::vector<mfem::real_t>>>("rotational_symmetry_axes"))),
+    _rotational_symmetry_orders(
+        parameters.get<std::vector<unsigned int>>("rotational_symmetry_orders")),
     _coincidence_tolerance(parameters.get<mfem::real_t>("coincidence_tolerance"))
 {
   for (const auto & lattice_vector : _lattice_vectors)
     DeclareTranslationalSymmetry(lattice_vector);
 
-  if (_rotational_symmetry_order > 1)
-    DeclareRotationalSymmetry(_rotational_symmetry_order);
+  mooseAssert(_rotational_symmetry_axes.size() == _rotational_symmetry_orders.size(),
+              "Each provided rotational symmetry axis must have a corresponding order of "
+              "rotational symmetry specified");
+  for (const auto axis_id : index_range(_rotational_symmetry_axes))
+  {
+    const auto & rotational_symmetry_axis = _rotational_symmetry_axes[axis_id];
+    const auto & rotational_symmetry_order = _rotational_symmetry_orders[axis_id];
+    if (rotational_symmetry_order > 1)
+      DeclareRotationalSymmetry(rotational_symmetry_order, rotational_symmetry_axis);
+  }
 }
 
 void
@@ -64,11 +78,12 @@ MFEMTopology::DeclareTranslationalSymmetry(const mfem::Vector & translation)
 }
 
 void
-MFEMTopology::DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order)
+MFEMTopology::DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order,
+                                        const mfem::Vector & rotation_axis)
 {
   _periodic = true;
   auto rotational_symmetry =
-      std::make_shared<Moose::MFEM::RotationalSymmetry>(rotational_symmetry_order);
+      std::make_shared<Moose::MFEM::RotationalSymmetry>(rotational_symmetry_order, rotation_axis);
   _symmetry_transforms.push_back(rotational_symmetry);
 }
 
@@ -120,7 +135,7 @@ MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) co
   else if (sdim == 3)
     kdtree.reset(new mfem::KDTree3D);
   else
-    MFEM_ABORT("Invalid space dimension.");
+    mooseError("Invalid space dimension.");
 
   // We begin with the assumption that all vertices are primary, and that there
   // are no replicas.

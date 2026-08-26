@@ -10,7 +10,8 @@ coil_conductivity = 1.0
 [Mesh]
   type = MFEMMesh
   file = ../mesh/meshed_wedge_test.e
-  rotational_symmetry_order = 12
+  rotational_symmetry_axes = '0.0 0.0 1.0'
+  rotational_symmetry_orders = '12'
 []
 
 [FunctorMaterials]
@@ -79,7 +80,7 @@ coil_conductivity = 1.0
     fec_type = ND
     fec_order = FIRST
     submesh = cut
-  []  
+  []
 []
 
 [Variables]
@@ -147,7 +148,7 @@ coil_conductivity = 1.0
   [diff]
     type = MFEMDiffusionKernel
     variable = coil_induced_potential
-    coefficient = conductivity  
+    coefficient = conductivity
   []
   [source]
     type = MFEMMixedGradGradKernel
@@ -202,5 +203,5 @@ coil_conductivity = 1.0
     file_base = OutputData/Coil
     vtk_format = ASCII
     submesh = coil_submesh
-  []  
+  []
 []
