@@ -46,7 +46,7 @@ protected:
   /// Coordinate system type
   const MooseEnum _coord_type;
 
-  ///inv_r = 1 / sqrt(r^2 + eps^2)
+  ///Regularization parameter for inv_r = 1 / sqrt(r^2 + eps^2)
   const Real _inv_r_eps;
 };
 

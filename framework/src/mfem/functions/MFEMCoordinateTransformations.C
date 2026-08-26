@@ -27,6 +27,7 @@ MFEMCoordinateTransformations::validParams()
       "inv_r_eps", 1e-12, "Regularization parameter used in inv_r = 1/sqrt(r^2 + eps^2).");
 
   params.set<std::string>("expression") = "0";
+  params.suppressParameter<std::string>("expression");
 
   return params;
 }
