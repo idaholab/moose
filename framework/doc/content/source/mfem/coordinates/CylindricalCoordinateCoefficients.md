@@ -4,7 +4,7 @@
 
 ## Overview
 
-Cylindrical coordinate MFEM coefficients provider, used to formulate reduced 2D axisymmetric weak forms.
+Cylindrical coordinate scalar coefficients provider, for MFEM type cylindrical or 2D axisymmetric weak form formulations.
 
 `Cylindrical` derived from [MFEMCoordinateCoefficients](MFEMCoordinateCoefficients.md). It constructs and 
 exposes the following built in scalar cylindrical coefficients
