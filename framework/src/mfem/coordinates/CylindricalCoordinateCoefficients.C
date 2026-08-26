@@ -1,6 +1,17 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMCoordinateCoefficients.h"
+#include "CylindricalCoordinateCoefficients.h"
+
+registerMooseObject("MooseApp", CylindricalCoordinateCoefficients);
 
 namespace
 {
@@ -10,7 +21,8 @@ class InvShiftedCoefficient : public mfem::Coefficient
 public:
   InvShiftedCoefficient(mfem::Coefficient & base, mfem::real_t eps) : _base(base), _eps(eps) {}
 
-  mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override
+  virtual mfem::real_t Eval(mfem::ElementTransformation & T,
+                            const mfem::IntegrationPoint & ip) override
   {
     const mfem::real_t r = _base.Eval(T, ip);
     return 1.0 / (r + _eps);
@@ -21,22 +33,26 @@ private:
   const mfem::real_t _eps;
 };
 
-} // namespace
+} // anonymous namespace
 
-namespace Moose::MFEM
+InputParameters
+CylindricalCoordinateCoefficients::validParams()
 {
+  InputParameters params = MFEMCoordinateCoefficients::validParams();
+  params.addClassDescription(
+      "Cylindrical coordinate coefficients with built-in MFEM coefficients.");
+  return params;
+}
 
-MFEMCoordinateCoefficients::MFEMCoordinateCoefficients(CoordinateSystem coord, Real inv_r_eps)
-  : _coord(coord), _inv_r_eps(inv_r_eps)
+CylindricalCoordinateCoefficients::CylindricalCoordinateCoefficients(
+    const InputParameters & parameters)
+  : MFEMCoordinateCoefficients(parameters)
 {
 }
 
 void
-MFEMCoordinateCoefficients::build()
+CylindricalCoordinateCoefficients::build()
 {
-  if (_coord != CoordinateSystem::Cylindrical)
-    return;
-
   if (_r_coeff)
     return;
 
@@ -55,11 +71,8 @@ MFEMCoordinateCoefficients::build()
 }
 
 const mfem::Coefficient *
-MFEMCoordinateCoefficients::getBuiltinCoefficient(const std::string & name) const
+CylindricalCoordinateCoefficients::getBuiltinCoefficient(const std::string & name) const
 {
-  if (_coord != CoordinateSystem::Cylindrical)
-    return nullptr;
-
   if (name == "r")
     return _r_coeff.get();
   if (name == "inv_r")
@@ -70,8 +83,6 @@ MFEMCoordinateCoefficients::getBuiltinCoefficient(const std::string & name) cons
     return _measure_weight.get();
 
   return nullptr;
-}
-
 }
 
 #endif
