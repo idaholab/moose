@@ -172,6 +172,25 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
     paramError("execute_after_from_multiapp",
                "This parameter is only intended for modifying the execution schedule of "
                "BETWEEN_MULTIAPPS transfers");
+  // The default isn't enough to achieve staggering unless users staggered the multiapps.
+  // This is effectively a warning by default for siblings transfers BUT:
+  // - the order of execution is actually important here. you don't want to make things explicit by
+  // accident
+  // - we would need dependency resolution between multiapps to set the order group to get
+  // staggering
+  //   by default.
+  if (_directions.contains("between_multiapp") && _exec_after_source_app_exec &&
+      _from_multi_app->getParam<unsigned int>("execution_order_group") >=
+          _to_multi_app->getParam<unsigned int>("execution_order_group") &&
+      _from_multi_app->getExecuteOnEnum() == _to_multi_app->getExecuteOnEnum())
+    paramWarning("execute_after_from_multiapp",
+                 "Transfer is set to execute after the 'from_multi_app' but the 'to_multi_app' is "
+                 "executing before or in the same 'execution_order_group' as the 'from_multi_app'. "
+                 "Thus the transfer is not actually executing in between the 'from_' and "
+                 "'to_multi_app', but after both.\nfrom_multi_app execution order group: ",
+                 Moose::stringify(_from_multi_app->getParam<unsigned int>("execution_order_group")),
+                 "\nto_multi_app execution order group: ",
+                 Moose::stringify(_to_multi_app->getParam<unsigned int>("execution_order_group")));
 
   // Handle deprecated parameters
   if (parameters.isParamSetByUser("direction"))
