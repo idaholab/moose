@@ -25,7 +25,6 @@
 #include "DataIO.h"
 
 #include "libmesh/string_to_enum.h"
-#include "MFEMCoordinateTransformations.h"
 
 #include <vector>
 #include <algorithm>
