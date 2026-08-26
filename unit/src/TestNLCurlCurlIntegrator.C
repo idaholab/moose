@@ -30,11 +30,13 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
   mfem::TransformedCoefficient k_coeff(&curl_u_norm_coeff, [](double u) { return u * u; });
   mfem::TransformedCoefficient curlu_dk_dcurlu_coeff(&curl_u_norm_coeff,
                                                      [](double u) { return 2.0 * u * u; });
+  // TODO: fill this in with the correct coeff to get the PA version of this test working!
+  mfem::TransformedCoefficient dk_ds_coeff(&curl_u_norm_coeff, [](double /*u*/) { return 1; });
 
   const auto & ir = mfem::IntRules.Get(fespace.GetFE(0)->GetGeomType(), 2);
 
   Moose::MFEM::NLCurlCurlIntegrator integ(
-      k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, 1e-32, &ir);
+      k_coeff, curlu_dk_dcurlu_coeff, dk_ds_coeff, curl_gf_coeff, 1e-32, &ir);
 
   const auto & el = *fespace.GetFE(0);
   auto & T = *mesh.GetElementTransformation(0);
