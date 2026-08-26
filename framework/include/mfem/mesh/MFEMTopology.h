@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
@@ -78,24 +77,37 @@ public:
 
   MFEMTopology(const InputParameters & parameters);
 
-  /// Return the map between pairs of topologically equivalent vertices in the mesh,
-  /// each replicated vertex @a i is paired with a primary vertex @a vertex_map[i].
-  /// Largely copies mfem::Mesh::CreatePeriodicVertexMapping but supports a broader class of
-  /// symmetry maps between equivalent vertices.
+  /**
+   * Return the map between pairs of topologically equivalent vertices in the mesh,
+   * each replicated vertex @a i is paired with a primary vertex @a vertex_map[i].
+   * Largely copies mfem::Mesh::CreatePeriodicVertexMapping but supports a broader class of
+   * symmetry maps between equivalent vertices.
+   */
   std::vector<int> CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mfem_mesh) const;
 
-  // Make `r` and all of `r`'s replicas be replicas of `p`. Delete `r` from the
-  // list of primary vertices.
+  /**
+   * Declare a translational symmetry via a translation vector between pairs of equivalent vertices
+   */
   void DeclareTranslationalSymmetry(const mfem::Vector & translation);
 
+  /**
+   * Declare a rotational symmetry via the order of rotational symmetry about the z axis
+   */
   void DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order);
 
-protected:
-  bool _periodic{false};
+  /**
+   * Return whether the mesh has periodicity applited
+   */
+  bool isPeriodic() { return _periodic; }
 
 private:
+  // Stores whether any periodicity has been applied to the mesh
+  bool _periodic{false};
+  // Vector of translation vectors that pair periodically equivalent vertices
   std::vector<mfem::Vector> _lattice_vectors;
+  // Order of rotational symmetry exhibited by the mesh about the z direction
   const unsigned int _rotational_symmetry_order;
+  // Container to store set of discrete symmetries added to this object
   std::vector<std::shared_ptr<DiscreteSymmetry>> _symmetry_transforms;
 };
 
