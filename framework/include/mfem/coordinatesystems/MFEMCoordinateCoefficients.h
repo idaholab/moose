@@ -15,8 +15,8 @@
 #include "MooseTypes.h"
 #include "CoefficientManager.h"
 #include "mfem.hpp"
-
 #include <string>
+
 /**
  * Abstract base class for all coordinate system scalar coefficient
  * built ins for MFEM formulations.Implemented as a MOOSE GeneralUserObject.
