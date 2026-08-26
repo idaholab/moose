@@ -1483,8 +1483,7 @@ FEProblemBase::initialSetup()
               node->n_dofs(nl->number(), bnd_variable.number()))
           {
             std::set<MooseVariableFieldBase *> vars_to_omit = {
-                &static_cast<MooseVariableFieldBase &>(
-                    const_cast<MooseVariableBase &>(bnd_variable))};
+                &cast_ref<MooseVariableFieldBase &>(const_cast<MooseVariableBase &>(bnd_variable))};
 
             boundaryIntegrityCheckError(
                 *bnd_object, bnd_object->checkAllVariables(*node, vars_to_omit), bnd_name);

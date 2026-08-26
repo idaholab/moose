@@ -144,7 +144,7 @@ MFEMMesh::buildDummyMooseMesh()
 {
   // The libMesh placeholder is always replicated, independently of the distributed MFEM mesh.
   setParallelType(ParallelType::REPLICATED);
-  auto & dummy = static_cast<UnstructuredMesh &>(getMesh());
+  auto & dummy = cast_ref<UnstructuredMesh &>(getMesh());
   MeshTools::Generation::build_point(dummy);
   if (dimension() >= 2)
     MeshTools::Generation::build_square(dummy, 1, 1, 0., 1., 0., 1., ElemType::QUAD9);

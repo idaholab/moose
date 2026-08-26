@@ -30,7 +30,7 @@ void
 ResolveMFEMSolversAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).resolveMFEMSolvers();
+    cast_ref<MFEMProblem &>(*_problem).resolveMFEMSolvers();
 }
 
 #endif

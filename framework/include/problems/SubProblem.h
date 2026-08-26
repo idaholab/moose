@@ -1310,9 +1310,9 @@ SubProblem::getFunctor(const std::string & name,
                                          std::make_unique<Moose::Functor<ADType>>(
                                              std::make_unique<Moose::NullFunctor<ADType>>())));
 
-    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
-                                                  ? std::get<2>(emplace_ret->second)
-                                                  : std::get<1>(emplace_ret->second)));
+    return cast_ref<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                               ? std::get<2>(emplace_ret->second)
+                                               : std::get<1>(emplace_ret->second)));
   }
   else
   {
@@ -1327,9 +1327,9 @@ SubProblem::getFunctor(const std::string & name,
                                          std::make_unique<Moose::Functor<ADType>>(
                                              std::make_unique<Moose::NullFunctor<ADType>>())));
 
-    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
-                                                  ? std::get<2>(emplace_ret->second)
-                                                  : std::get<1>(emplace_ret->second)));
+    return cast_ref<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                               ? std::get<2>(emplace_ret->second)
+                                               : std::get<1>(emplace_ret->second)));
   }
 }
 

@@ -131,7 +131,7 @@ NonlinearSystem::potentiallySetupFiniteDifferencing()
   }
 
   PetscNonlinearSolver<Real> & solver =
-      static_cast<PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
+      cast_ref<PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
   solver.mffd_residual_object = &_fd_residual_functor;
 
   solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
@@ -214,7 +214,7 @@ NonlinearSystem::stopSolve(const ExecFlagType & exec_flag,
                            const std::set<TagID> & vector_tags_to_close)
 {
   PetscNonlinearSolver<Real> & solver =
-      static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
+      cast_ref<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
 
   if (exec_flag == EXEC_LINEAR || exec_flag == EXEC_POSTCHECK)
   {

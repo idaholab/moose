@@ -216,7 +216,7 @@ NEML2FEInterpolation::syncWithMainThread()
 void
 NEML2FEInterpolation::threadJoin(const UserObject & y)
 {
-  const auto & other = static_cast<const NEML2FEInterpolation &>(y);
+  const auto & other = cast_ref<const NEML2FEInterpolation &>(y);
   mooseAssert(_fem_context_up_to_date == other._fem_context_up_to_date,
               "NEML2FEInterpolation becomes out of sync with other thread");
 

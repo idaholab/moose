@@ -41,7 +41,7 @@ using namespace libMesh;
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
   : SystemBase(subproblem, subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
-    LinearFVGradientInterface(static_cast<SystemBase &>(*this)),
+    LinearFVGradientInterface(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
     _aux_scalar_storage(_app.getExecuteOnEnum()),

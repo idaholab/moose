@@ -30,7 +30,7 @@ void
 AddMFEMQuadratureFunctionAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).addQuadratureFunction(_type, _name, _moose_object_pars);
+    cast_ref<MFEMProblem &>(*_problem).addQuadratureFunction(_type, _name, _moose_object_pars);
 }
 
 #endif

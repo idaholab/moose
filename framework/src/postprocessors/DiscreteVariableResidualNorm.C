@@ -84,7 +84,7 @@ DiscreteVariableResidualNorm::execute()
 void
 DiscreteVariableResidualNorm::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const DiscreteVariableResidualNorm &>(y);
+  const auto & pps = cast_ref<const DiscreteVariableResidualNorm &>(y);
   _local_dof_indices.insert(pps._local_dof_indices.begin(), pps._local_dof_indices.end());
 }
 

@@ -337,7 +337,7 @@ Factory::clone(const T & object)
     cloned_params.setHitNode(*hit_node, {});
 
   // Fill the new parameters in the warehouse
-  const auto type = static_cast<const MooseBase &>(object).type();
+  const auto type = cast_ref<const MooseBase &>(object).type();
   const auto clone_count = _clone_counter[&object]++;
   const auto name = object.name() + "_clone" + std::to_string(clone_count);
   const auto & params = initialize(type, name, cloned_params, 0);
@@ -359,7 +359,7 @@ Factory::copyConstruct(const T & object)
 {
   static_assert(std::is_base_of_v<MooseObject, T>, "Not a MooseObject");
 
-  const auto type = static_cast<const MooseBase &>(object).type();
+  const auto type = cast_ref<const MooseBase &>(object).type();
   if (object.hasBase())
   {
     const auto & base = object.getBase();

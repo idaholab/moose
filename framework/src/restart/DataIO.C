@@ -52,7 +52,7 @@ template <>
 void
 dataStore(std::ostream & stream, VariableName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataStore(stream, name, context);
 }
 
@@ -60,7 +60,7 @@ template <>
 void
 dataStore(std::ostream & stream, UserObjectName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataStore(stream, name, context);
 }
 
@@ -297,7 +297,7 @@ dataStore(std::ostream & stream, const Point & p, void * context)
 void
 dataStore(std::ostream & stream, libMesh::BoundingBox & bbox, void * context)
 {
-  dataStore(stream, static_cast<std::pair<Point, Point> &>(bbox), context);
+  dataStore(stream, cast_ref<std::pair<Point, Point> &>(bbox), context);
 }
 
 template <>
@@ -420,7 +420,7 @@ template <>
 void
 dataLoad(std::istream & stream, VariableName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataLoad(stream, name, context);
 }
 
@@ -428,7 +428,7 @@ template <>
 void
 dataLoad(std::istream & stream, UserObjectName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataLoad(stream, name, context);
 }
 
@@ -664,7 +664,7 @@ dataLoad(std::istream & stream, Point & p, void * context)
 void
 dataLoad(std::istream & stream, libMesh::BoundingBox & bbox, void * context)
 {
-  dataLoad(stream, static_cast<std::pair<Point, Point> &>(bbox), context);
+  dataLoad(stream, cast_ref<std::pair<Point, Point> &>(bbox), context);
 }
 
 template <>

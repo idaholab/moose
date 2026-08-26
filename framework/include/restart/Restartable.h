@@ -319,7 +319,7 @@ Restartable::declareRestartableDataHelper(const std::string & data_name,
   // at a later date.
   auto data_ptr =
       std::make_unique<RestartableData<T>>(full_name, context, std::forward<Args>(args)...);
-  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+  auto & restartable_data_ref = cast_ref<RestartableData<T> &>(
       registerRestartableDataOnApp(std::move(data_ptr), _restartable_tid));
 
   return restartable_data_ref;

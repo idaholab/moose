@@ -457,7 +457,7 @@ template <typename T>
 void
 dataStore(std::ostream & stream, GenericTwoVector<T> & v, void * context)
 {
-  dataStore(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
+  dataStore(stream, libMesh::cast_ref<Eigen::Matrix<T, 2, 1> &>(v), context);
 }
 
 // Specializations (defined in .C)
@@ -1020,7 +1020,7 @@ template <typename T>
 void
 dataLoad(std::istream & stream, GenericTwoVector<T> & v, void * context)
 {
-  dataLoad(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
+  dataLoad(stream, libMesh::cast_ref<Eigen::Matrix<T, 2, 1> &>(v), context);
 }
 
 // Specializations (defined in .C)

@@ -29,7 +29,7 @@ ElementalVariableValue::validParams()
 ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
-    _var(libMesh::cast_ref<MooseVariableField<Real> &>(
+    _var(cast_ref<MooseVariableField<Real> &>(
         _subproblem.getActualFieldVariable(_tid, getParam<VariableName>("variable")))),
     _var_sln(_var.sln()),
     _value(0)

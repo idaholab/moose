@@ -43,6 +43,6 @@ MFEMNewtonNonlinearSolver::ConstructSolver()
 void
 MFEMNewtonNonlinearSolver::SetLinearSolver(mfem::Solver & solver)
 {
-  static_cast<mfem::NewtonSolver &>(GetSolver()).SetSolver(solver);
+  cast_ref<mfem::NewtonSolver &>(GetSolver()).SetSolver(solver);
 }
 #endif

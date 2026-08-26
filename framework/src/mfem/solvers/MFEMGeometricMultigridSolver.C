@@ -161,7 +161,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   mfem::Array<int> & ess_bdr = eq_sys->GetEssentialBoundaryMarkers(_var_name);
 
   auto & finest_fespace =
-      static_cast<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(finest_level));
+      cast_ref<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(finest_level));
   const int finest_size = finest_fespace.GetTrueVSize();
   if (op.Height() != finest_size || op.Width() != finest_size)
     mooseError("GeometricMultigridSolver '",
@@ -185,7 +185,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   for (const auto level : make_range(N))
   {
     auto & level_fespace =
-        static_cast<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(level));
+        cast_ref<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(level));
 
     // Compute essential true DoFs for this level.
     mfem::Array<int> level_tdofs;

@@ -50,7 +50,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     TaggingInterface(this),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
+    _linear_system(cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _mesh(_subproblem.mesh())
 {

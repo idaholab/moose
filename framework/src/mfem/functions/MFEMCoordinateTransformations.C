@@ -28,8 +28,8 @@ MFEMCoordinateTransformations::validParams()
 
 MFEMCoordinateTransformations::MFEMCoordinateTransformations(const InputParameters & parameters)
   : Function(parameters),
-    _mfem_problem(static_cast<MFEMProblem &>(
-        *parameters.getCheckedPointerParam<SubProblem *>("_subproblem"))),
+    _mfem_problem(
+        cast_ref<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"))),
     _coord_type(getParam<MooseEnum>("coord_type")),
     _inv_r_eps(getParam<mfem::real_t>("inv_r_eps"))
 {
