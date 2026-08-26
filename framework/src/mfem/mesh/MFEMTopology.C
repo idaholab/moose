@@ -53,7 +53,7 @@ void
 MFEMTopology::DeclareTranslationalSymmetry(const mfem::Vector & translation)
 {
   _periodic = true;
-  auto translational_symmetry = std::make_shared<TranslationalSymmetry>(translation);
+  auto translational_symmetry = std::make_shared<Moose::MFEM::TranslationalSymmetry>(translation);
   _symmetry_transforms.push_back(translational_symmetry);
 }
 
@@ -61,7 +61,8 @@ void
 MFEMTopology::DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order)
 {
   _periodic = true;
-  auto rotational_symmetry = std::make_shared<RotationalSymmetry>(rotational_symmetry_order);
+  auto rotational_symmetry =
+      std::make_shared<Moose::MFEM::RotationalSymmetry>(rotational_symmetry_order);
   _symmetry_transforms.push_back(rotational_symmetry);
 }
 
