@@ -56,6 +56,8 @@ private:
   const unsigned int _rotational_symmetry_order;
   // Container to store set of discrete symmetries added to this object
   std::vector<std::shared_ptr<Moose::MFEM::DiscreteSymmetry>> _symmetry_transforms;
+  // Maximum distance between two coordinates allowed for points to be considered to be co-incident
+  const mfem::real_t _coincidence_tolerance;
 };
 
 #endif

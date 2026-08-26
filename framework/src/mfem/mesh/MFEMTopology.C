@@ -34,13 +34,19 @@ MFEMTopology::validParams()
       1,
       "Order of rotational symmetry around z axis. Number of whole copies of mesh in 2 pi rotation "
       "about axis of rotational symmetry.");
+  params.addParam<mfem::real_t>(
+      "coincidence_tolerance",
+      1e-8,
+      "Maximum distance between two coordinates allowed for points to be considered to be "
+      "co-incident, as a fraction of the diameter of the enclosing geometry's bounding sphere.");
   return params;
 }
 
 MFEMTopology::MFEMTopology(const InputParameters & parameters)
   : _lattice_vectors(ConvertVectorOfVectorsToMFEM(
         parameters.get<std::vector<std::vector<mfem::real_t>>>("lattice_vectors"))),
-    _rotational_symmetry_order(parameters.get<unsigned int>("rotational_symmetry_order"))
+    _rotational_symmetry_order(parameters.get<unsigned int>("rotational_symmetry_order")),
+    _coincidence_tolerance(parameters.get<mfem::real_t>("coincidence_tolerance"))
 {
   for (const auto & lattice_vector : _lattice_vectors)
     DeclareTranslationalSymmetry(lattice_vector);
@@ -70,7 +76,6 @@ std::vector<int>
 MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) const
 {
   const int sdim = mesh.SpaceDimension();
-
   mfem::Vector coord(sdim), at(sdim), dx(sdim);
   mfem::Vector xMax(sdim), xMin(sdim), xDiff(sdim);
   xMax = xMin = xDiff = 0.0;
@@ -85,7 +90,6 @@ MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) co
     for (int i = 0; i < dofs.Size(); i++)
     {
       bdr_v.insert(dofs[i]);
-
       coord = mesh.GetVertex(dofs[i]);
       for (int j = 0; j < sdim; j++)
       {
@@ -110,21 +114,13 @@ MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) co
   // Create a KD-tree containing all the boundary vertices
   std::unique_ptr<mfem::KDTreeBase<int, mfem::real_t>> kdtree;
   if (sdim == 1)
-  {
     kdtree.reset(new mfem::KDTree1D);
-  }
   else if (sdim == 2)
-  {
     kdtree.reset(new mfem::KDTree2D);
-  }
   else if (sdim == 3)
-  {
     kdtree.reset(new mfem::KDTree3D);
-  }
   else
-  {
     MFEM_ABORT("Invalid space dimension.");
-  }
 
   // We begin with the assumption that all vertices are primary, and that there
   // are no replicas.
@@ -163,8 +159,7 @@ MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) co
       const int vj = kdtree->FindClosestPoint(at.GetData());
       coord = mesh.GetVertex(vj);
       add(at, -1.0, coord, dx);
-      mfem::real_t tol = 1e-8;
-      if (dx.Norml2() > dia * tol)
+      if (dx.Norml2() > dia * _coincidence_tolerance)
         continue;
 
       // The two vertices vi and vj are coincident.
