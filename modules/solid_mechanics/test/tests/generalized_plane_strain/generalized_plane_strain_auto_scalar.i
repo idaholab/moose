@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
@@ -5,23 +9,12 @@
     nx = 2
     ny = 2
   []
-  displacements = 'disp_x disp_y'
-[]
-
-[Problem]
-  nl_sys_names = 'unused mechanics'
 []
 
 [Variables]
-  [unused]
-    solver_sys = unused
-    outputs = none
-  []
   [disp_x]
-    solver_sys = mechanics
   []
   [disp_y]
-    solver_sys = mechanics
   []
 []
 
@@ -34,45 +27,11 @@
     order = FIRST
     family = LAGRANGE
   []
-
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-
-  [strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
 []
 
 [Postprocessors]
   [react_z]
-    type = ADMaterialTensorIntegral
+    type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
@@ -81,89 +40,17 @@
 
 [Physics]
   [SolidMechanics]
-    [GeneralizedPlaneStrain]
+    [QuasiStatic]
       [gps]
-        use_automatic_differentiation = true
-        use_displaced_mesh = true
-        displacements = 'disp_x disp_y'
+        planar_formulation = GENERALIZED_PLANE_STRAIN
+        strain = SMALL
         scalar_out_of_plane_strain = scalar_strain_zz
         out_of_plane_pressure_function = traction_function
         pressure_factor = 1e5
+        generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
+        save_in = 'saved_x saved_y'
       []
     []
-  []
-[]
-
-[Kernels]
-  [unused]
-    type = ADReaction
-    variable = unused
-  []
-  [SolidMechanics]
-    use_automatic_differentiation = true
-    use_displaced_mesh = false
-    displacements = 'disp_x disp_y'
-    save_in = 'saved_x saved_y'
-  []
-[]
-
-[AuxKernels]
-  [stress_xx]
-    type = ADRankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  []
-  [stress_xy]
-    type = ADRankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  []
-  [stress_yy]
-    type = ADRankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  []
-  [stress_zz]
-    type = ADRankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  []
-
-  [strain_xx]
-    type = ADRankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-  []
-  [strain_xy]
-    type = ADRankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xy
-    index_i = 0
-    index_j = 1
-  []
-  [strain_yy]
-    type = ADRankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
-  []
-  [strain_zz]
-    type = ADRankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_zz
-    index_i = 2
-    index_j = 2
   []
 []
 
@@ -192,20 +79,15 @@
 
 [Materials]
   [elastic_tensor]
-    type = ADComputeIsotropicElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
   []
-  [strain]
-    type = ADComputePlaneSmallStrain
-    displacements = 'disp_x disp_y'
-    scalar_out_of_plane_strain = scalar_strain_zz
-  []
   [stress]
-    type = ADComputeLinearElasticStress
+    type = ComputeLinearElasticStress
   []
   [traction_material]
-    type = ADGenericFunctionMaterial
+    type = GenericFunctionMaterial
     prop_names = traction_material
     prop_values = traction_function
   []

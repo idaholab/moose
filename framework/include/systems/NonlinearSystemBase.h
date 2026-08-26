@@ -830,7 +830,9 @@ protected:
   void computeKokkosJacobian(const std::set<TagID> & tags);
 #endif
 
-  void computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian);
+  void computeDiracContributions(const std::set<TagID> & vector_tags,
+                                 const std::set<TagID> & matrix_tags,
+                                 Moose::ComputeType compute_type);
 
   void computeScalarKernelsJacobians(const std::set<TagID> & tags);
 

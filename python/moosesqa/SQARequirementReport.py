@@ -19,6 +19,8 @@ from .check_requirements import check_requirements, RequirementLogHelper
 from .SQAReport import SQAReport
 from .LogHelper import LogHelper
 
+LOG = logging.getLogger(__name__)
+
 
 class SQARequirementReport(SQAReport):
     """
@@ -42,18 +44,20 @@ class SQARequirementReport(SQAReport):
         # Extract configuration parameters
         specs = self.specs or "tests"
 
-        # Get complete directory paths
+        # Get complete directory paths, skipping any that do not exist (e.g. an
+        # optional submodule dependency that has not been checked out)
         root_dir = mooseutils.git_root_dir()
-        directories = [
-            mooseutils.eval_path(d) for d in (self.directories or [root_dir])
-        ]
-        for i, d in enumerate(directories):
-            if not os.path.isdir(d):
-                directories[i] = os.path.join(root_dir, d)
-            if not os.path.isdir(directories[i]):
-                raise NotADirectoryError(
-                    "Supplied directory does not exist: {}".format(d)
+        directories = []
+        for d in self.directories or [root_dir]:
+            path = mooseutils.eval_path(d)
+            if not os.path.isdir(path):
+                path = os.path.join(root_dir, d)
+            if not os.path.isdir(path):
+                LOG.warning(
+                    "Supplied directory does not exist and will be skipped: %s", path
                 )
+                continue
+            directories.append(path)
 
         # Build Requirement objects and remove directory based dict
         requirements = []

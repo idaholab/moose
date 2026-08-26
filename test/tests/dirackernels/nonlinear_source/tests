@@ -7,4 +7,13 @@
     exodiff = 'nonlinear_source_out.e'
     requirement = "The system shall support the computation of off diagonal Jacobian terms for residual terms defined with a Dirac delta function."
   [../]
+  [./resid_and_jac_together]
+    type = 'Exodiff'
+    input = 'nonlinear_source.i'
+    exodiff = 'nonlinear_source_out.e'
+    cli_args = 'Executioner/residual_and_jacobian_together=true'
+    prereq = 'nonlinear_source'
+    issues = '#26938'
+    requirement = "The system shall produce the same result for the off diagonal Jacobian terms of a Dirac delta function residual when computing the residual and Jacobian together."
+  [../]
 []

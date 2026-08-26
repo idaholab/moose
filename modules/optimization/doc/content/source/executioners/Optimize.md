@@ -26,7 +26,7 @@ This is executioner performs optimization using the [TAO](https://petsc.org/rele
 This executioner relies on a
 [OptimizationReporter](OptimizationReporter/index.md) to define the constraints,
 bounds, objective, and gradient of the form function. The objective is defined by the
-`computeObjective` member in the [OptimizationReporter](OptimizationReporter.h)
+`computeObjective` member in the [!file text=OptimizationReporter](OptimizationReporter.h)
 class. The gradient is defined by `computeGradient` and the bounds are defined
 by `getUpperBounds` and `getLowerBounds`. Whether it is necessary to define each
 of these members is based on whether the selected algorithm needs it, see

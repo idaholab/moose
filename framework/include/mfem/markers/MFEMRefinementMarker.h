@@ -26,9 +26,6 @@ public:
 
   virtual ~MFEMRefinementMarker() = default;
 
-  /// Constructs associated mfem::ThresholdRefiner once mfem::ErrorEstimator is guaranteed to exist
-  void initialSetup();
-
   /// Applies p-refinement wherever the refiner sees fit
   bool pRefine();
 

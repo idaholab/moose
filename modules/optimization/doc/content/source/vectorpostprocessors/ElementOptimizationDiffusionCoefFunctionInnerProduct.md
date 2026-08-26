@@ -13,7 +13,7 @@ which uses a quadrature rule to perform the integration. $u$ and $v$ are the var
 
 ## Example Input File Syntax
 
-This function is primarily used for computing the gradient in an optimization routine where the value of a diffusion coefficient is being optimized. See [bimaterial/grad.i] as an example.
+This function is primarily used for computing the gradient in an optimization routine where the value of a diffusion coefficient is being optimized. See [!file](bimaterial/grad.i) as an example.
 
 !syntax parameters /VectorPostprocessors/ElementOptimizationDiffusionCoefFunctionInnerProduct
 
