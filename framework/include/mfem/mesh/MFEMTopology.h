@@ -45,7 +45,7 @@ public:
   /**
    * Return whether the mesh has periodicity applited
    */
-  bool isPeriodic() { return _periodic; }
+  bool isPeriodic() const { return _periodic; }
 
 private:
   // Stores whether any periodicity has been applied to the mesh
