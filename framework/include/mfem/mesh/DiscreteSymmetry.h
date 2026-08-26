@@ -48,16 +48,19 @@ private:
 class RotationalSymmetry : public DiscreteSymmetry
 {
 public:
-  RotationalSymmetry(const unsigned int rotational_symmetry_order)
-    : DiscreteSymmetry(),
-      _rotational_symmetry_order(rotational_symmetry_order),
-      _rotation_angle(2 * pi / rotational_symmetry_order){};
+  RotationalSymmetry(const unsigned int rotational_symmetry_order);
 
   virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override;
+
+  // Build the rotation matrix to use in the transform
+  mfem::DenseMatrix BuildRotationMatrix(const mfem::Vector & rotation_axis,
+                                        const mfem::real_t & rotation_angle);
 
 private:
   const unsigned int _rotational_symmetry_order;
   const mfem::real_t _rotation_angle; // radians
+  const mfem::Vector _rotation_axis;
+  const mfem::DenseMatrix _rotation_matrix;
 };
 
 }
