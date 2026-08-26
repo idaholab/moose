@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-##Summary 
-
-Function object for declaring coordinate dependent MFEM scalar coefficients. 
-
 ## Overview
 
 `MFEMCoordinateTransformations` is a function object created under the
@@ -26,7 +22,7 @@ coordinate type
 ## Built-in Coefficients for `coord_type = RZ`
 
 - `r`, the radial coefficient, built from MFEM’s
-  [`mfem::CylindricalRadialCoefficient`](https://docs.mfem.org/html/coefficient_8hpp_source.html)
+  [`mfem::CylindricalRadialCoefficient`](https://docs.mfem.org/html/classmfem_1_1CylindricalRadialCoefficient.html)
 - `inv_r`, the regularized inverse radial coefficient
 - `two_pi_r` the full cylindrical measure factor {2\pi\text{r}}
 

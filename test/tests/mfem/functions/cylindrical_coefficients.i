@@ -23,15 +23,10 @@
 []
 
 [Functions]
-  [u_exact]
-    type = ParsedFunction
-    expression = 10
-  []
-
   [cylindrical]
     type = MFEMCoordinateTransformations
     coord_type = RZ
-    inv_r_eps = 1e-100
+    inv_r_eps = 0
   []
 []
 
@@ -40,7 +35,6 @@
     type = MFEMGenericFunctorMaterial
     prop_names = 'diffCoef massCoef'
     prop_values = 'cylindrical_r cylindrical_inv_r'
-    block = 1
   []
 []
 
@@ -48,8 +42,7 @@
   [Dirichlet]
     type = MFEMScalarDirichletBC
     variable = u
-    boundary = '1'
-    coefficient = u_exact
+    coefficient = 10
   []
 []
 
