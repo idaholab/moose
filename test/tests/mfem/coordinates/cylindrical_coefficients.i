@@ -10,7 +10,7 @@
 
 [Coordinates]
     [cylindrical]
-        type = Cylindrical
+        type = MFEMCylindrical
         inv_r_eps = 1e-100
     []
 []

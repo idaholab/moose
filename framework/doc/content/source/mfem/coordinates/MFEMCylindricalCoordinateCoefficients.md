@@ -1,4 +1,4 @@
-# Cylindrical
+# MFEMCylindrical
 
 !if! function=hasCapability('mfem')
 
@@ -6,7 +6,7 @@
 
 Cylindrical coordinate scalar coefficients provider, for MFEM type cylindrical or 2D axisymmetric weak form formulations.
 
-`Cylindrical` derived from [MFEMCoordinateCoefficients](MFEMCoordinateCoefficients.md). It constructs and 
+`MFEMCylindrical` derived from [MFEMCoordinateCoefficients](MFEMCoordinateCoefficients.md). It constructs and 
 exposes the following built in scalar cylindrical coefficients
 
 - `r` the radial component built from MFEM's [`mfem::CylindricalRadialCoefficient`](https://docs.mfem.org/html/coefficient_8hpp_source.html).
@@ -27,11 +27,11 @@ where $\varepsilon$ is specified by the `inv_r_eps` input parameter.
 
 !listing test/tests/mfem/coordinates/cylindrical_coefficients.i block=Coordinates
 
-!syntax parameters /Coordinates/Cylindrical
+!syntax parameters /Coordinates/MFEMCylindrical
 
-!syntax inputs /Coordinates/Cylindrical
+!syntax inputs /Coordinates/MFEMCylindrical
 
-!syntax children /Coordinates/Cylindrical
+!syntax children /Coordinates/MFEMCylindrical
 
 !if-end!
 
