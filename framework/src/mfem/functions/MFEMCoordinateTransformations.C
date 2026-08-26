@@ -27,6 +27,7 @@ MFEMCoordinateTransformations::validParams()
       "inv_r_eps", 1e-12, "Regularization parameter used in inv_r = 1/sqrt(r^2 + eps^2).");
 
   params.set<std::string>("expression") = "0";
+
   return params;
 }
 
@@ -36,27 +37,40 @@ MFEMCoordinateTransformations::MFEMCoordinateTransformations(const InputParamete
     _coord_type(getParam<MooseEnum>("coord_type")),
     _inv_r_eps(getParam<Real>("inv_r_eps"))
 {
-  if (_coord_type != "RZ")
+  if (_coord_type == "RZ")
+    declareRZCoefficients();
+  else
     mooseError("MFEMCoordinateTransformations currently supports only coord_type = RZ.");
+}
 
-  const std::string r_name = name() + "_r";
-  const std::string inv_r_name = name() + "_inv_r";
-  const std::string two_pi_r_name = name() + "_two_pi_r";
+void
+MFEMCoordinateTransformations::declareRZCoefficients()
+{
+  declareRZRadialCoefficient();
+  declareRZInverseRadialCoefficient();
+  declareRZTwoPiRCoefficient();
+}
 
-  const mfem::real_t eps = static_cast<mfem::real_t>(_inv_r_eps);
-  constexpr mfem::real_t two_pi = 6.283185307179586476925286766559;
-
+void
+MFEMCoordinateTransformations::declareRZRadialCoefficient()
+{
   _mfem_problem.getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-      r_name,
+      name() + "_r",
       [](const mfem::Vector & p, mfem::real_t /*t*/) -> mfem::real_t
       {
         const mfem::real_t x = p.Size() > 0 ? p[0] : 0.0;
         const mfem::real_t y = p.Size() > 1 ? p[1] : 0.0;
         return std::sqrt(x * x + y * y);
       });
+}
+
+void
+MFEMCoordinateTransformations::declareRZInverseRadialCoefficient()
+{
+  const mfem::real_t eps = static_cast<mfem::real_t>(_inv_r_eps);
 
   _mfem_problem.getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-      inv_r_name,
+      name() + "_inv_r",
       [eps](const mfem::Vector & p, mfem::real_t /*t*/) -> mfem::real_t
       {
         const mfem::real_t x = p.Size() > 0 ? p[0] : 0.0;
@@ -64,9 +78,15 @@ MFEMCoordinateTransformations::MFEMCoordinateTransformations(const InputParamete
         const mfem::real_t r = std::sqrt(x * x + y * y);
         return 1.0 / std::sqrt(r * r + eps * eps);
       });
+}
+
+void
+MFEMCoordinateTransformations::declareRZTwoPiRCoefficient()
+{
+  constexpr mfem::real_t two_pi = 6.283185307179586476925286766559;
 
   _mfem_problem.getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-      two_pi_r_name,
+      name() + "_two_pi_r",
       [](const mfem::Vector & p, mfem::real_t /*t*/) -> mfem::real_t
       {
         const mfem::real_t x = p.Size() > 0 ? p[0] : 0.0;

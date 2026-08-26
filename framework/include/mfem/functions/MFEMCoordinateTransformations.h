@@ -35,13 +35,18 @@ public:
   Real invREps() const { return _inv_r_eps; }
 
 protected:
-  /// reference to the MFEMProblem instance
+  void declareRZCoefficients();
+  void declareRZRadialCoefficient();
+  void declareRZInverseRadialCoefficient();
+  void declareRZTwoPiRCoefficient();
+
+  /// Reference to the MFEMProblem instance
   MFEMProblem & _mfem_problem;
 
   /// Coordinate system type
   const MooseEnum _coord_type;
 
-  /// Regularization used in inv_r = 1 / sqrt(r^2 + eps^2)
+  ///inv_r = 1 / sqrt(r^2 + eps^2)
   const Real _inv_r_eps;
 };
 
