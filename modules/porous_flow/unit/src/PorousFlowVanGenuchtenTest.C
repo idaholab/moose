@@ -9,6 +9,7 @@
 
 #include "gtest/gtest.h"
 
+#include "DataIO.h"
 #include "PorousFlowVanGenuchten.h"
 
 const double eps = 1.0E-8;
@@ -53,6 +54,31 @@ const PorousFlowVanGenuchten::HighCapillaryPressureExtension
                    high_ext_S,
                    high_ext_Pc,
                    high_ext_dPc);
+
+TEST(PorousFlowVanGenuchtenTest, extensionsDataIO)
+{
+  std::array<PorousFlowVanGenuchten::LowCapillaryPressureExtension, 1> stored_low = {low_ext_exp};
+  std::array<PorousFlowVanGenuchten::HighCapillaryPressureExtension, 1> stored_high = {
+      high_ext_power};
+  std::stringstream stream;
+  dataStore(stream, stored_low, nullptr);
+  dataStore(stream, stored_high, nullptr);
+
+  stream.seekg(0, std::ios::beg);
+  std::array<PorousFlowVanGenuchten::LowCapillaryPressureExtension, 1> loaded_low;
+  std::array<PorousFlowVanGenuchten::HighCapillaryPressureExtension, 1> loaded_high;
+  dataLoad(stream, loaded_low, nullptr);
+  dataLoad(stream, loaded_high, nullptr);
+
+  EXPECT_EQ(stored_low[0].strategy, loaded_low[0].strategy);
+  EXPECT_EQ(stored_low[0].S, loaded_low[0].S);
+  EXPECT_EQ(stored_low[0].Pc, loaded_low[0].Pc);
+  EXPECT_EQ(stored_low[0].dPc, loaded_low[0].dPc);
+  EXPECT_EQ(stored_high[0].strategy, loaded_high[0].strategy);
+  EXPECT_EQ(stored_high[0].S, loaded_high[0].S);
+  EXPECT_EQ(stored_high[0].Pc, loaded_high[0].Pc);
+  EXPECT_EQ(stored_high[0].dPc, loaded_high[0].dPc);
+}
 
 TEST(PorousFlowVanGenuchtenTest, sat)
 {
