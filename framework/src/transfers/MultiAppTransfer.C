@@ -182,7 +182,11 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   if (_directions.contains("between_multiapp") && _exec_after_source_app_exec &&
       _from_multi_app->getParam<unsigned int>("execution_order_group") >=
           _to_multi_app->getParam<unsigned int>("execution_order_group") &&
-      _from_multi_app->getExecuteOnEnum() == _to_multi_app->getExecuteOnEnum())
+      // no need to check ordering groups if executing apps on different schedules
+      _from_multi_app->getExecuteOnEnum() == _to_multi_app->getExecuteOnEnum() &&
+      // no need to check ordering groups if transfer is executed on a different schedule
+      ((_from_multi_app->getExecuteOnEnum() == exec_on) ||
+       (exec_on.size() == 1 && int(exec_on.get(0)) == EXEC_SAME_AS_MULTIAPP)))
     paramWarning("execute_after_from_multiapp",
                  "Transfer is set to execute after the 'from_multi_app' but the 'to_multi_app' is "
                  "executing before or in the same 'execution_order_group' as the 'from_multi_app'. "
