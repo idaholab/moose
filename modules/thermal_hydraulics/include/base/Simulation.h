@@ -240,11 +240,6 @@ public:
   virtual void setupMesh();
 
   /**
-   * Get the ThermalHydraulicsApp
-   */
-  ThermalHydraulicsApp & getApp() { return _thm_app; }
-
-  /**
    * Check the integrity of the simulation
    */
   virtual void integrityCheck() const;
@@ -391,7 +386,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// The application this is associated with
-  ThermalHydraulicsApp & _thm_app;
+  MooseApp & _thm_app;
 
   /// The Factory associated with the MooseApp
   Factory & _thm_factory;

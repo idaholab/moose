@@ -47,8 +47,7 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
     LoggingInterface(_log),
     _thm_mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
-    _thm_app(
-        cast_ref<ThermalHydraulicsApp &>(*pars.get<MooseApp *>(MooseBase::app_param))),
+    _thm_app(*pars.get<MooseApp *>(MooseBase::app_param)),
     _thm_factory(_thm_app.getFactory()),
     _thm_pars(pars),
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
@@ -634,7 +633,7 @@ Simulation::sortAddedComponentVariables() const
 void
 Simulation::addVariables()
 {
-  TransientBase * trex = dynamic_cast<TransientBase *>(getApp().getExecutioner());
+  TransientBase * trex = dynamic_cast<TransientBase *>(_thm_app.getExecutioner());
   if (trex)
   {
     Moose::TimeIntegratorType ti_type = trex->getTimeScheme();
