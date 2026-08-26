@@ -95,7 +95,7 @@ unheated_length_exit = 0.855 #m
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpgradedChengTodreas
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski

@@ -55,7 +55,7 @@ P_out = 1.0e5 # Pa
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpgradedChengTodreas
+    type = SCMFrictionChenTodreas
   []
   [Kim_and_Chung]
     type = SCMMixingKimAndChung

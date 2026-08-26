@@ -7,26 +7,36 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMFrictionUpgradedChengTodreas.h"
+#include "SCMFrictionChenTodreas.h"
 
-registerMooseObject("SubChannelApp", SCMFrictionUpgradedChengTodreas);
+registerMooseObject("SubChannelApp", SCMFrictionChenTodreas);
 
 InputParameters
-SCMFrictionUpgradedChengTodreas::validParams()
+SCMFrictionChenTodreas::validParams()
 {
   InputParameters params = SCMFrictionClosureBase::validParams();
-  params.addClassDescription("Class that computes the axial friction factor using the upgraded "
-                             "Cheng Todreas correlations.");
+
+  params.addClassDescription(
+      "Class that computes the axial friction factor using the Cheng-Todreas correlations.");
+
+  MooseEnum friction_model("upgraded Pacio", "upgraded");
+
+  params.addParam<MooseEnum>(
+      "friction_model",
+      friction_model,
+      "Friction-factor parameterization for triangular wire-wrapped Cheng-Todreas correlations.");
+
   return params;
 }
 
-SCMFrictionUpgradedChengTodreas::SCMFrictionUpgradedChengTodreas(const InputParameters & parameters)
+SCMFrictionChenTodreas::SCMFrictionChenTodreas(const InputParameters & parameters)
   : SCMFrictionClosureBase(parameters),
     _is_tri_lattice(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh) != nullptr),
     _tri_sch_mesh(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh)),
     _quad_sch_mesh(dynamic_cast<const QuadSubChannelMesh *>(&_subchannel_mesh)),
     _has_wire_wrap(_is_tri_lattice && _tri_sch_mesh->getWireDiameter() != 0.0 &&
-                   _tri_sch_mesh->getWireLeadLength() != 0.0)
+                   _tri_sch_mesh->getWireLeadLength() != 0.0),
+    _friction_model(getParam<MooseEnum>("friction_model"))
 {
   if (_is_tri_lattice &&
       ((_tri_sch_mesh->getWireDiameter() != 0.0) != (_tri_sch_mesh->getWireLeadLength() != 0.0)))
@@ -62,7 +72,7 @@ SCMFrictionUpgradedChengTodreas::SCMFrictionUpgradedChengTodreas(const InputPara
 }
 
 Real
-SCMFrictionUpgradedChengTodreas::computeFrictionFactor(const FrictionStruct & friction_args) const
+SCMFrictionChenTodreas::computeFrictionFactor(const FrictionStruct & friction_args) const
 {
   if (_is_tri_lattice)
     return computeTriLatticeFrictionFactor(friction_args);
@@ -71,8 +81,7 @@ SCMFrictionUpgradedChengTodreas::computeFrictionFactor(const FrictionStruct & fr
 }
 
 Real
-SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
-    const FrictionStruct & friction_args) const
+SCMFrictionChenTodreas::computeTriLatticeFrictionFactor(const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
   // Limit the Reynolds number used in the friction-factor correlation to avoid
@@ -97,6 +106,49 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
   Real lambda;
   // transition smoothing coefficient
   Real gamma;
+  if (_friction_model == "upgraded")
+  {
+    CbL1 = 320.0;
+    CbL2 = 1.0;
+    CbT1 = 10000.0;
+    CbT2 = 0.7;
+
+    a = -11.0;
+    b = 19.0;
+
+    CwT1 = 19.56;
+    CwT2 = -98.71;
+    CwT3 = 303.47;
+    CwT4 = -0.541;
+
+    CwL1 = 1.4;
+    CwL2 = 1.0;
+
+    lambda = 7.0;
+    gamma = 1.0 / 3.0;
+  }
+  else
+  {
+    CbL1 = 700.0;
+    CbL2 = 0.0;
+    CbT1 = 10000.0;
+    CbT2 = 0.0;
+
+    a = -6.9;
+    b = 12.0;
+
+    CwT1 = 15.2;
+    CwT2 = -48.0;
+    CwT3 = 148.6;
+    CwT4 = -0.547;
+
+    CwL1 = 0.8;
+    CwL2 = 1.2;
+
+    lambda = 6.7;
+    gamma = 0.362;
+  }
+
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
   const Real & wire_lead_length = _tri_sch_mesh->getWireLeadLength();
@@ -105,10 +157,6 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
   const auto p_over_d = pitch / pin_diameter;
   const auto w_over_d = (pin_diameter + gap) / pin_diameter;
   const auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-  CbL1 = 320;
-  CbL2 = 1.0;
-  CbT1 = 10000;
-  CbT2 = 0.7;
   const auto ReL = std::pow(10, CbL2 * (p_over_d - 1)) * CbL1;
   const auto ReT = std::pow(10, CbT2 * (p_over_d - 1)) * CbT1;
   const auto Reb = _scm_problem.getBulkReynoldsNumber();
@@ -202,19 +250,11 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
         std::acos(wire_lead_length /
                   std::sqrt(Utility::pow<2>(wire_lead_length) +
                             Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
-    CwT1 = 19.56;
-    CwT2 = -98.71;
-    CwT3 = 303.47;
-    CwT4 = -0.541;
-    CwL1 = 1.4;
-    CwL2 = 1.0;
     // Drag coefficient
     const auto WdT = (CwT1 + CwT2 * (wire_diameter / pin_diameter) +
                       CwT3 * Utility::pow<2>((wire_diameter / pin_diameter))) *
                      std::pow((wire_lead_length / pin_diameter), CwT4);
     const auto WdL = CwL1 * WdT;
-    a = -11;
-    b = 19;
     // Sweep coefficient
     const auto WsT = a * std::log10(wire_lead_length / pin_diameter) + b;
     const auto WsL = CwL2 * WsT;
@@ -279,8 +319,6 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
   const Real mT = -0.18;
   auto fL = CfL * std::pow(Re_eff, mL);
   auto fT = CfT * std::pow(Re_eff, mT);
-  gamma = 1.0 / 3.0;
-  lambda = 7.0;
   if (Reb < ReL)
   {
     // laminar flow
@@ -300,8 +338,7 @@ SCMFrictionUpgradedChengTodreas::computeTriLatticeFrictionFactor(
 }
 
 Real
-SCMFrictionUpgradedChengTodreas::computeQuadLatticeFrictionFactor(
-    const FrictionStruct & friction_args) const
+SCMFrictionChenTodreas::computeQuadLatticeFrictionFactor(const FrictionStruct & friction_args) const
 {
   const auto Re = friction_args.Re;
   // Limit the Reynolds number used in the friction-factor correlation to avoid

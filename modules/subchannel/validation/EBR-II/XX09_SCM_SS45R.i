@@ -99,7 +99,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpgradedChengTodreas
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
