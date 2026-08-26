@@ -30,12 +30,8 @@ MFEMComplexScalarBoundaryIC::validParams()
 
 MFEMComplexScalarBoundaryIC::MFEMComplexScalarBoundaryIC(const InputParameters & params)
   : MFEMInitialCondition(params),
-    MFEMBoundaryRestrictable(params,
-                             *getMFEMProblem()
-                                  .getProblemData()
-                                  .cmplx_gridfunctions.GetRef(getParam<VariableName>("variable"))
-                                  .ParFESpace()
-                                  ->GetParMesh())
+    MFEMBoundaryRestrictable(
+        params, getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable")))
 {
 }
 

@@ -25,8 +25,8 @@ MFEMComplexL2Error::validParams()
       "function_real", "The real part of the analytic solution to compare against.");
   params.addParam<MFEMScalarCoefficientName>(
       "function_imag", "The imaginary part of the analytic solution to compare against.");
-  params.addParam<VariableName>("variable",
-                                "Name of the variable of which to find the norm of the error.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "variable", "Name of the variable of which to find the norm of the error.");
   return params;
 }
 
@@ -34,8 +34,7 @@ MFEMComplexL2Error::MFEMComplexL2Error(const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
     _coeff_real(getScalarCoefficient("function_real")),
     _coeff_imag(getScalarCoefficient("function_imag")),
-    _var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
-        getParam<VariableName>("variable")))
+    _var(*getMFEMProblem().getComplexGridFunction(getParam<VariableName>("variable")))
 {
 }
 
