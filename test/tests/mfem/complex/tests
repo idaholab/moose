@@ -9,8 +9,8 @@
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM on a 2D mesh with quadrilateral elements. This test is equivalent to MFEM Example 22.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
     max_parallel = 1
+    recover = false
   []
   [MFEMComplex2DTri]
     type = XMLDiff
@@ -27,8 +27,8 @@
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM on a 2D mesh with triangular elements.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
     max_parallel = 1
+    recover = false
   []
   [MFEMComplexWaveguide]
     type = CSVDiff
