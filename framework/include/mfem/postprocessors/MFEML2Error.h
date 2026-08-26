@@ -23,9 +23,6 @@ public:
 
   MFEML2Error(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-
   /**
    * Get the L2 Error.
    */
