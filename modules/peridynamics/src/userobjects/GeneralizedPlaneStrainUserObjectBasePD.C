@@ -49,7 +49,7 @@ GeneralizedPlaneStrainUserObjectBasePD::initialize()
 void
 GeneralizedPlaneStrainUserObjectBasePD::threadJoin(const UserObject & uo)
 {
-  const auto & gpsuo = static_cast<const GeneralizedPlaneStrainUserObjectBasePD &>(uo);
+  const auto & gpsuo = cast_ref<const GeneralizedPlaneStrainUserObjectBasePD &>(uo);
   _residual += gpsuo._residual;
   _jacobian += gpsuo._jacobian;
 }

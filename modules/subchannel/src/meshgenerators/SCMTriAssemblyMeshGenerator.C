@@ -892,7 +892,7 @@ SCMTriAssemblyMeshGenerator::generate()
   mesh_base->prepare_for_use();
 
   // move the meta data into TriSubChannelMesh
-  auto & sch_mesh = static_cast<TriSubChannelMesh &>(*_mesh);
+  auto & sch_mesh = cast_ref<TriSubChannelMesh &>(*_mesh);
   sch_mesh._unheated_length_entry = _unheated_length_entry;
   sch_mesh._heated_length = _heated_length;
   sch_mesh._unheated_length_exit = _unheated_length_exit;

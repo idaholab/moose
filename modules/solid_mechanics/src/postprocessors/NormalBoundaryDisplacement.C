@@ -86,7 +86,7 @@ NormalBoundaryDisplacement::getValue() const
 void
 NormalBoundaryDisplacement::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const NormalBoundaryDisplacement &>(y);
+  const auto & pps = cast_ref<const NormalBoundaryDisplacement &>(y);
 
   switch (_value_type)
   {

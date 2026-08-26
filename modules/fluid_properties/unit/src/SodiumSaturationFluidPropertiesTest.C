@@ -261,7 +261,7 @@ TEST_F(SodiumSaturationFluidPropertiesTest, volumeEnergyAutomaticDifferentiation
   const Real T = 800.0;
   const Real v = _fp->v_from_p_T(p, T);
   const Real e = _fp->e_from_p_T(p, T);
-  const auto & fp = static_cast<const SinglePhaseFluidProperties &>(*_fp);
+  const auto & fp = cast_ref<const SinglePhaseFluidProperties &>(*_fp);
 
   DNDerivativeType dv;
   DNDerivativeType de;

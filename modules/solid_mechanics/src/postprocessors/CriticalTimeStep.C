@@ -81,6 +81,6 @@ CriticalTimeStep::getValue() const
 void
 CriticalTimeStep::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const CriticalTimeStep &>(y);
+  const auto & pps = cast_ref<const CriticalTimeStep &>(y);
   _critical_time = std::min(pps._critical_time, _critical_time);
 }

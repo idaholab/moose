@@ -110,7 +110,7 @@ ADJunctionParallelChannels1PhaseUserObject::threadJoin(const UserObject & uo)
 {
   ADVolumeJunction1PhaseUserObject::threadJoin(uo);
 
-  const auto & jpc_uo = static_cast<const ADJunctionParallelChannels1PhaseUserObject &>(uo);
+  const auto & jpc_uo = cast_ref<const ADJunctionParallelChannels1PhaseUserObject &>(uo);
 
   // Store the data computed/retrieved in the other threads
   for (unsigned int i = 0; i < jpc_uo._connection_indices.size(); i++)

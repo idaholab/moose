@@ -110,7 +110,7 @@ AdjointTransientSolve::evaluateTimeResidual(const NumericVector<Number> & soluti
   // This tag should exist, but the matrix might not necessarily be added
   auto time_matrix_tag = _problem.getMatrixTagID("TIME");
   // Use the adjoint system matrix to hold the time Jacobian
-  auto & time_matrix = static_cast<ImplicitSystem &>(_nl_adjoint.system()).get_system_matrix();
+  auto & time_matrix = cast_ref<ImplicitSystem &>(_nl_adjoint.system()).get_system_matrix();
 
   // Make sure we tell the problem which system we are evaluating
   _problem.setCurrentNonlinearSystem(_forward_sys_num);

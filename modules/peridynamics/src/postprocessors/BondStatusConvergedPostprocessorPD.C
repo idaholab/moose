@@ -59,6 +59,6 @@ BondStatusConvergedPostprocessorPD::finalize()
 void
 BondStatusConvergedPostprocessorPD::threadJoin(const UserObject & uo)
 {
-  const auto & pps = static_cast<const BondStatusConvergedPostprocessorPD &>(uo);
+  const auto & pps = cast_ref<const BondStatusConvergedPostprocessorPD &>(uo);
   _num_bond_status_updated += pps._num_bond_status_updated;
 }

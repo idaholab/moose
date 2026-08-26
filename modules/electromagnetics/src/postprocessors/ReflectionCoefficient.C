@@ -67,7 +67,7 @@ ReflectionCoefficient::getValue() const
 void
 ReflectionCoefficient::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const ReflectionCoefficient &>(y);
+  const auto & pps = cast_ref<const ReflectionCoefficient &>(y);
   Real temp_rc = _reflection_coefficient;
   _reflection_coefficient = std::max(temp_rc, pps._reflection_coefficient);
 }

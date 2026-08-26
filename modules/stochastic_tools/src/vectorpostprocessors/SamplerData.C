@@ -110,7 +110,7 @@ SamplerData::threadJoin(const UserObject & /*uo*/)
   /*
   if (_use_local_samples)
   {
-    const SamplerData & obj = static_cast<const SamplerData &>(uo);
+    const SamplerData & obj = cast_ref<const SamplerData &>(uo);
     for (std::size_t i = 0; i < _sample_vectors.size(); ++i)
       (*_sample_vectors[i]).insert(_sample_vectors[i]->end(), obj._sample_vectors[i]->begin(),
                                    obj._sample_vectors[i]->end());
