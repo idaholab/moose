@@ -68,8 +68,10 @@
     []
 []
 
-[Solver]
-    type = MFEMMUMPS
+[Solvers]
+    [main]
+        type = MFEMMUMPS
+    []
 []
 
 [Executioner]
