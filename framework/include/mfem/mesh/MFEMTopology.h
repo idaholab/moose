@@ -11,60 +11,7 @@
 
 #pragma once
 
-#include "libmesh/ignore_warnings.h"
-#include "mfem/miniapps/common/mfem-common.hpp"
-#include "libmesh/restore_warnings.h"
-
-/**
- Virtual base class for representing discrete symmetry transforms between equivalent vertices in a
- mesh
- */
-class DiscreteSymmetry
-{
-public:
-  DiscreteSymmetry() = default;
-  virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) = 0;
-};
-
-class TranslationalSymmetry : public DiscreteSymmetry
-{
-public:
-  TranslationalSymmetry(const mfem::Vector & lattice_vector)
-    : DiscreteSymmetry(), _lattice_vector(lattice_vector){};
-
-  virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override
-  {
-    mooseAssert((coord_in.Size() == _lattice_vector.Size()),
-                "Size of lattice vector doesn't match the space dimension");
-    add(coord_in, _lattice_vector, coord_out);
-  };
-
-private:
-  const mfem::Vector & _lattice_vector;
-};
-
-class RotationalSymmetry : public DiscreteSymmetry
-{
-public:
-  RotationalSymmetry(const unsigned int rotational_symmetry_order)
-    : DiscreteSymmetry(),
-      _rotational_symmetry_order(rotational_symmetry_order),
-      _rotation_angle(2 * pi / rotational_symmetry_order){};
-
-  virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override
-  {
-    // x' =  x cos phi + y sin phi
-    // y' = -x sin phi + y cos phi
-    // z' = z
-    coord_out[0] = coord_in[0] * cos(_rotation_angle) + coord_in[1] * sin(_rotation_angle);
-    coord_out[1] = -coord_in[0] * sin(_rotation_angle) + coord_in[1] * cos(_rotation_angle);
-    coord_out[2] = coord_in[2];
-  };
-
-private:
-  const unsigned int _rotational_symmetry_order;
-  const mfem::real_t _rotation_angle; // radians
-};
+#include "DiscreteSymmetry.h"
 
 /**
  Interface for MFEM mesh objects providing methods querying topological information about an
@@ -108,7 +55,7 @@ private:
   // Order of rotational symmetry exhibited by the mesh about the z direction
   const unsigned int _rotational_symmetry_order;
   // Container to store set of discrete symmetries added to this object
-  std::vector<std::shared_ptr<DiscreteSymmetry>> _symmetry_transforms;
+  std::vector<std::shared_ptr<Moose::MFEM::DiscreteSymmetry>> _symmetry_transforms;
 };
 
 #endif
