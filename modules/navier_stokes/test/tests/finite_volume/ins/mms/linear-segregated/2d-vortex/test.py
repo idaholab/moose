@@ -17,6 +17,7 @@ def run_spatial(*args, **kwargs):
 def check_vortex_convergence(
     cli_args,
     file_base,
+    num_refinements=5,
     velocity_order=2.0,
     velocity_tol=0.3,
     pressure_order=2.0,
@@ -27,7 +28,7 @@ def check_vortex_convergence(
     pressure_labels = ["L2p"]
     labels = velocity_labels + pressure_labels
     df1 = run_spatial(
-        "2d-vortex.i", 5, cli_args, y_pp=labels, mpi=2, file_base=file_base
+        "2d-vortex.i", num_refinements, cli_args, y_pp=labels, mpi=4, file_base=file_base
     )
 
     fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
@@ -147,7 +148,7 @@ class TestVortexOrthogonalReconstructed(unittest.TestCase):
             "vortex-orthogonal-reconstructed",
             velocity_order=2.0,
             velocity_tol=0.5,
-            pressure_order=1.0,
+            pressure_order=1.3,
             pressure_tol=0.3,
             plot_base="vortex-reconstructed",
         )

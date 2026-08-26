@@ -26,6 +26,8 @@ pressure_gradient_method = 'green-gauss'
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
     pressure_projection_method = CONSISTENT
+    reconstructed_pressure_gradient_feedback_relaxation = 0.2
+    momentum_pressure_kernel = u_pressure
   []
 []
 
@@ -191,9 +193,9 @@ pressure_gradient_method = 'green-gauss'
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  momentum_equation_relaxation = 0.8
+  momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 1.0
-  num_iterations = 2000
+  num_iterations = 20000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'

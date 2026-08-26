@@ -209,6 +209,11 @@ RhieChowMassFlux::linkMomentumPressureSystems(
     _pressure_gradient_field = &pressure_kernel->pressureGradientField();
   }
 
+  if (const auto * const reconstructed_method =
+          dynamic_cast<const FVReconstructedPressureGradient *>(
+              &_pressure_gradient_field->method()))
+    reconstructed_method->setupDependencies(*_pressure_system, 0);
+
   _momentum_implicit_systems.clear();
   for (auto & system : _momentum_systems)
   {
