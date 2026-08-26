@@ -54,6 +54,10 @@ MultiAppVariableValueSamplePostprocessorTransfer::validParams()
       "supplied array variable in 'source_variable'. For instance, if there are 9 sub-applications "
       "and 3 components in the variable, sub-apps 0-2 will go to component 0, 3-5 will go to 1, "
       "and 6-8 will go to 2.");
+
+  // Sibling transfers not supported
+  params.suppressParameter<bool>("execute_after_from_multiapp");
+
   return params;
 }
 
