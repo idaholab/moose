@@ -25,7 +25,10 @@
 class MFEMMeshCarrier : public libMesh::ReplicatedMesh
 {
 public:
-  explicit MFEMMeshCarrier(const libMesh::Parallel::Communicator & comm);
+  explicit MFEMMeshCarrier(const libMesh::Parallel::Communicator & comm)
+    : libMesh::ReplicatedMesh(comm)
+  {
+  }
 
   void setMFEMMesh(std::unique_ptr<mfem::Mesh> mesh) { _mfem_mesh = std::move(mesh); }
 

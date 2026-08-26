@@ -29,16 +29,17 @@ MFEMGeneratedMeshGenerator::validParams()
   params.addParam<Real>("ymax", 1.0, "Upper bound of the domain in the y direction.");
   params.addParam<Real>("zmax", 1.0, "Upper bound of the domain in the z direction.");
 
-  // POINT, WEDGE, and PYRAMID are omitted: mfem::Mesh::MakeCartesian1D/2D/3D, which this
-  // generator uses, only ever produce SEGMENT (1D), TRIANGLE/QUADRILATERAL (2D), or
-  // TETRAHEDRON/HEXAHEDRON (3D) elements.
-  MooseEnum elem_types("SEGMENT=1 TRIANGLE=2 QUADRILATERAL=3 TETRAHEDRON=4 HEXAHEDRON=5");
-  params.addParam<MooseEnum>(
-      "elem_type",
-      elem_types,
-      "Element type. Use SEGMENT for 1D meshes, TRIANGLE or QUADRILATERAL for 2D meshes, "
-      "TETRAHEDRON or HEXAHEDRON for 3D meshes. If not specified, defaults to SEGMENT for "
-      "1D, QUADRILATERAL for 2D, and HEXAHEDRON for 3D.");
+  // The MooseEnum values are set to match mfem::Element::Type so that
+  // getEnum<mfem::Element::Type>() can be used directly below, while the names correspond to the
+  // form MOOSE users of libMesh-based meshes are already familiar with. POINT, WEDGE, and PYRAMID
+  // are omitted: mfem::Mesh::MakeCartesian1D/2D/3D, which this generator uses, only ever produce an
+  // edge/segment (1D), a triangle/quadrilateral (2D), or a tetrahedron/hexahedron (3D).
+  MooseEnum elem_types("EDGE=1 TRI=2 QUAD=3 TET=4 HEX=5");
+  params.addParam<MooseEnum>("elem_type",
+                             elem_types,
+                             "Element type. Use EDGE for 1D meshes, TRI or QUAD for 2D meshes, "
+                             "TET or HEX for 3D meshes. If not specified, defaults to EDGE for "
+                             "1D, QUAD for 2D, and HEX for 3D.");
 
   params.addClassDescription("Generates a structured Cartesian MFEM mesh (line, rectangle, or box) "
                              "with uniformly spaced elements.");
@@ -75,8 +76,8 @@ MFEMGeneratedMeshGenerator::MFEMGeneratedMeshGenerator(const InputParameters & p
               (_dim == 3 && elem_type != mfem::Element::TETRAHEDRON &&
                elem_type != mfem::Element::HEXAHEDRON))
             paramError("elem_type",
-                       "Use SEGMENT for 1D meshes, TRIANGLE or QUADRILATERAL for 2D meshes, "
-                       "and TETRAHEDRON or HEXAHEDRON for 3D meshes.");
+                       "Use EDGE for 1D meshes, TRI or QUAD for 2D meshes, "
+                       "and TET or HEX for 3D meshes.");
           return elem_type;
         }())
 {

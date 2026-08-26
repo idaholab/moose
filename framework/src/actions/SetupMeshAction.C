@@ -272,18 +272,14 @@ SetupMeshAction::act()
           // Guarded at compile time so non-MFEM builds incur zero overhead.
           bool has_mfem_generator = false;
 #ifdef MOOSE_MFEM_ENABLED
-          for (const auto & gen_action_ptr : generator_actions)
-          {
-            const auto * gen_action = dynamic_cast<const AddMeshGeneratorAction *>(gen_action_ptr);
-            const auto * is_mfem =
-                gen_action ? gen_action->getObjectParams().queryParam<bool>("_mfem_mesh_generator")
-                           : nullptr;
-            if (is_mfem && *is_mfem)
-            {
-              has_mfem_generator = true;
-              break;
-            }
-          }
+          for (auto * action : generator_actions)
+            if (auto * cast = dynamic_cast<AddMeshGeneratorAction *>(action))
+              if (auto * is_mfem = cast->getObjectParams().queryParam<bool>("_mfem_mesh_generator");
+                  is_mfem && *is_mfem)
+              {
+                has_mfem_generator = true;
+                break;
+              }
 #endif
 
           _type = has_mfem_generator ? "MFEMMeshGeneratorMesh" : "MeshGeneratorMesh";

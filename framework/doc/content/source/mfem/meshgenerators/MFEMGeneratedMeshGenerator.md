@@ -9,8 +9,8 @@
 elements, and is the MFEM analog of [GeneratedMeshGenerator.md].
 
 The [!param](/Mesh/MFEMGeneratedMeshGenerator/dim) parameter is required and selects the spatial
-dimension. `SEGMENT` is the only element type for 1D meshes. Element type defaults to
-`QUADRILATERAL` for 2D and `HEXAHEDRON` for 3D; `TRIANGLE` and `TETRAHEDRON` are also supported
+dimension. `EDGE` is the only element type for 1D meshes. Element type defaults to
+`QUAD` for 2D and `HEX` for 3D; `TRI` and `TET` are also supported
 via [!param](/Mesh/MFEMGeneratedMeshGenerator/elem_type).
 
 Named boundary sets are assigned automatically so boundaries can be referenced by name in

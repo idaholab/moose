@@ -26,7 +26,7 @@
       csvdiff = 'average.csv'
       input = 'test.i'
       detail = 'three dimensional box.'
-      cli_args = 'Mesh/gen/dim=3 Mesh/gen/nx=2 Mesh/gen/ny=2 Mesh/gen/nz=2 Mesh/gen/elem_type=HEXAHEDRON'
+      cli_args = 'Mesh/gen/dim=3 Mesh/gen/nx=2 Mesh/gen/ny=2 Mesh/gen/nz=2'
       capabilities = 'mfem'
       recover = false
       prereq = 'test/2d'
