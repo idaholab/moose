@@ -142,10 +142,10 @@ The first row defines `profile_a`, and the second row defines `profile_b`.
 
 The material is configured in the test input as follows:
 
-!listing test/tests/functormaterials/torchscript_profile_functor_material/profile.i
+!listing modules/navier_stokes/test/tests/functormaterials/torchscript_profile_functor_material/profile.i
          block=UserObjects
 
-!listing test/tests/functormaterials/torchscript_profile_functor_material/profile.i
+!listing modules/navier_stokes/test/tests/functormaterials/torchscript_profile_functor_material/profile.i
          block=FunctorMaterials
 
 With `profile_origin = '2 0 0'`, `profile_direction = '2 0 0'`, and

@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <exception>
 
-registerMooseObject("MooseApp", TorchScriptProfileFunctorMaterial);
+registerMooseObject("NavierStokesApp", TorchScriptProfileFunctorMaterial);
 
 InputParameters
 TorchScriptProfileFunctorMaterial::validParams()
