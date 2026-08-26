@@ -99,7 +99,7 @@ MFEMMesh::buildMesh()
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh = buildSerialMFEMMesh();
 
-  if (_periodic)
+  if (isPeriodic())
     mfem_ser_mesh = mfem::Mesh::MakePeriodic(mfem_ser_mesh,
                                              CreateTopologicallyEquivalentVertexMap(mfem_ser_mesh));
 
