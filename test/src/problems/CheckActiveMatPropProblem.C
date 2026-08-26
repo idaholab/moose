@@ -32,19 +32,19 @@ CheckActiveMatPropProblem::getActiveMaterialProperties(const THREAD_ID tid) cons
   // get active properties for materials
   for (auto & mat : _all_materials.getObjects(tid))
   {
-    auto & check_mat = static_cast<ActiveGenericConstantMaterial &>(*mat);
+    auto & check_mat = cast_ref<ActiveGenericConstantMaterial &>(*mat);
     const auto & active_props = check_mat.getActivePropIDs();
     ret.insert(active_props.begin(), active_props.end());
   }
   for (auto & mat : _all_materials[Moose::FACE_MATERIAL_DATA].getObjects(tid))
   {
-    auto & check_mat = static_cast<ActiveGenericConstantMaterial &>(*mat);
+    auto & check_mat = cast_ref<ActiveGenericConstantMaterial &>(*mat);
     const auto & active_props = check_mat.getActivePropIDs();
     ret.insert(active_props.begin(), active_props.end());
   }
   for (auto & mat : _all_materials[Moose::NEIGHBOR_MATERIAL_DATA].getObjects(tid))
   {
-    auto & check_mat = static_cast<ActiveGenericConstantMaterial &>(*mat);
+    auto & check_mat = cast_ref<ActiveGenericConstantMaterial &>(*mat);
     const auto & active_props = check_mat.getActivePropIDs();
     ret.insert(active_props.begin(), active_props.end());
   }

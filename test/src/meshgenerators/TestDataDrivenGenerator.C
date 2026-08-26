@@ -94,7 +94,7 @@ TestDataDrivenGenerator::generate()
         getMeshProperty<unsigned int>("ny", getParam<MeshGeneratorName>("ny_generator"));
 
     auto mesh = buildMeshBaseObject();
-    MeshTools::Generation::build_square(static_cast<UnstructuredMesh &>(*mesh), nx, ny);
+    MeshTools::Generation::build_square(cast_ref<UnstructuredMesh &>(*mesh), nx, ny);
     return mesh;
   }
   else if (_subgenerator_no_data_only_mesh && _subgenerator_no_data_only_submesh)
