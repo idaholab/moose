@@ -15,12 +15,12 @@
 
 #include <memory>
 
-class CylindricalCoordinateCoefficients : public MFEMCoordinateCoefficients
+class Cylindrical : public MFEMCoordinateCoefficients
 {
 public:
   static InputParameters validParams();
 
-  CylindricalCoordinateCoefficients(const InputParameters & parameters);
+  Cylindrical(const InputParameters & parameters);
 
   virtual void build() override;
 
