@@ -506,12 +506,6 @@ addActionTypes(Syntax & syntax)
   // add SubMesh transfers
   appendMooseObjectTask("add_transfer", MFEMSubMeshTransfer);
 
-  // add coordinate coefficients
-  registerMooseObjectTask("add_mfem_coordinate_coefficients", UserObject, false);
-  addTaskDependency("add_mfem_coordinate_coefficients", "create_problem_complete");
-  addTaskDependency("add_material", "add_mfem_coordinate_coefficients");
-  addTaskDependency("add_user_object", "add_mfem_coordinate_coefficients");
-
   // add FESpaces
   registerMooseObjectTask("add_mfem_fespaces", MFEMFESpace, false);
   appendMooseObjectTask("add_mfem_fespaces", MFEMFECollection);
@@ -832,9 +826,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CreateApplicationBlockAction", "Application");
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerSyntaxTask("AddMFEMCoordinateCoefficientsAction",
-                     "CoordinateSystem/*",
-                     "add_mfem_coordinate_coefficients");
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   registerSyntaxTask(
