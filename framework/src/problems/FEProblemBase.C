@@ -5904,7 +5904,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
       return true;
     // on sibling transfers, we can delay until the app has been executed if the transfer is set
     // that way.
-    if (transfer->getFromName() == source_app && transfer->executeAfterSourceApp())
+    if (transfer->getFromName() == source_app && transfer->executeAfterSiblingSourceApp())
     {
       libmesh_ignore(this);
       mooseAssert(
@@ -5913,8 +5913,13 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
               .contains(type),
           "from_multiapp should also execute on this schedule");
     }
-    if ((source_app.empty() && !transfer->executeAfterSourceApp()) ||
-        (transfer->getFromName() == source_app && transfer->executeAfterSourceApp()))
+    // Execute if:
+    // - transfer is set execute before from_multiapp, and we are calling this before source apps
+    // - from_multiapp app is not executing on this execute_on
+    // - from_multiapp just executed (set to source app)
+    if ((source_app.empty() && (!transfer->executeAfterSiblingSourceApp() ||
+                                !transfer->getFromMultiApp()->getExecuteOnEnum().contains(type))) ||
+        (transfer->getFromName() == source_app && transfer->executeAfterSiblingSourceApp()))
       return true;
     return false;
   };

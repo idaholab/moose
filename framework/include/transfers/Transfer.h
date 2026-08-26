@@ -93,7 +93,7 @@ public:
   }
 
   /// Whether the transfer should be executed after its source application
-  bool executeAfterSourceApp() const { return _exec_after_source_app_exec; }
+  bool executeAfterSiblingSourceApp() const { return _exec_after_source_app_exec; }
 
 protected:
   SubProblem & _subproblem;
