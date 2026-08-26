@@ -147,7 +147,7 @@ initial_coil_domains = 'coil'
   [solution_l2_norm]
     type = MFEMVectorL2Error
     variable = b_field
-    function = 0
+    function = '0 0 0'
   []
 []
 
