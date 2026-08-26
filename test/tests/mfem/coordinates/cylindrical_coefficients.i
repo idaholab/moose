@@ -41,7 +41,7 @@
     [material]
         type = MFEMGenericFunctorMaterial
         prop_names = 'radialCoef diffCoef massCoef'
-        prop_values = 'r measure_weight inv_r' 
+        prop_values = 'r measure_weight inv_r'
         block =  1
     []
 []
@@ -51,7 +51,7 @@
         type = MFEMScalarDirichletBC
         variable = u
         boundary = '1'
-        coefficient = u_exact
+        coefficient =u_exact
     []
 []
 
