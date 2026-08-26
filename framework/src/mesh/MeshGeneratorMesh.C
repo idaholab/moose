@@ -15,6 +15,10 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
 
+#ifdef MOOSE_MFEM_ENABLED
+#include "MFEMMeshCarrier.h"
+#endif
+
 registerMooseObject("MooseApp", MeshGeneratorMesh);
 
 InputParameters
@@ -46,4 +50,10 @@ MeshGeneratorMesh::buildMesh()
 {
   if (!hasMeshBase())
     mooseError("The mesh base has not been set");
+
+#ifdef MOOSE_MFEM_ENABLED
+  if (dynamic_cast<MFEMMeshCarrier *>(&getMesh()))
+    mooseError("MeshGeneratorMesh requires the final mesh generator to produce a libMesh mesh. "
+               "If you are using MFEM mesh generators, use MFEMMeshGeneratorMesh instead.");
+#endif
 }

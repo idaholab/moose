@@ -268,18 +268,19 @@ SetupMeshAction::act()
         // been provided
         if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
         {
-          // Auto-select MFEMMeshGeneratorMesh when any generator carries the MFEM flag.
+          // Auto-select MFEMMeshGeneratorMesh when a generator carries the MFEM flag.
           // Guarded at compile time so non-MFEM builds incur zero overhead.
           bool has_mfem_generator = false;
 #ifdef MOOSE_MFEM_ENABLED
-          for (auto * action : generator_actions)
-            if (auto * cast = dynamic_cast<AddMeshGeneratorAction *>(action))
-              if (auto * is_mfem = cast->getObjectParams().queryParam<bool>("_mfem_mesh_generator");
-                  is_mfem && *is_mfem)
-              {
-                has_mfem_generator = true;
-                break;
-              }
+          // We'll have to do something smarter when people add actions other than
+          // AddMeshGeneratorAction that add MFEM mesh generators
+          if (const auto * const mesh_generator_action =
+                  dynamic_cast<AddMeshGeneratorAction *>(generator_actions.front()))
+            if (const auto * const is_mfem =
+                    mesh_generator_action->getObjectParams().queryParam<bool>(
+                        "_mfem_mesh_generator");
+                is_mfem && *is_mfem)
+              has_mfem_generator = true;
 #endif
 
           _type = has_mfem_generator ? "MFEMMeshGeneratorMesh" : "MeshGeneratorMesh";
