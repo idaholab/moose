@@ -18,4 +18,13 @@
     # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
     max_threads = 1 # see libmesh issue #3808
   []
+  [vortex-orthogonal-reconstructed-pressure-flux]
+    type = MMSTest
+    input = test.py
+    test_case = TestSymmetricVortexOrthogonalReconstructed
+    min_parallel = 2
+    requirement = 'The system shall be able to generate MMS convergence data with pressure flux boundary conditions for the reconstructed pressure-gradient formulation on an orthogonal grid.'
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
 []

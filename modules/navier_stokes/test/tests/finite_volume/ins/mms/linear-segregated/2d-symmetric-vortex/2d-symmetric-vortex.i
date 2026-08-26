@@ -1,6 +1,7 @@
 mu = 1.2
 rho = 1.5
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
@@ -24,6 +25,8 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    momentum_pressure_kernel = u_pressure
+    body_force_kernel_names = "u_forcing; v_forcing"
   []
 []
 
@@ -45,9 +48,10 @@ advected_interp_method = 'average'
   []
 []
 
-[FVInterpolationMethods]
-  [average]
-    type = FVGeometricAverage
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    rhie_chow_user_object = rc
   []
 []
 
@@ -79,12 +83,14 @@ advected_interp_method = 'average'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [u_forcing]
     type = LinearFVSource
@@ -97,7 +103,7 @@ advected_interp_method = 'average'
     source_density = forcing_v
   []
   [p_diffusion]
-    type = LinearFVPressureCorrectionDiffusion
+    type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = 'Ainv' # Functor created in the RhieChowMassFlux UO
     use_nonorthogonal_correction = false
@@ -146,9 +152,6 @@ advected_interp_method = 'average'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
-    u = vel_x
-    v = vel_y
-    rho = ${rho}
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC

@@ -2,6 +2,8 @@ import mms
 import unittest
 from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
 
+RECONSTRUCTED_GRADIENT_ARGS = ("pressure_gradient_method=reconstructed",)
+
 
 def run_spatial(*args, **kwargs):
     try:
@@ -135,6 +137,19 @@ class TestVortexNonorthogonalVenkatakrishnan(unittest.TestCase):
         check_vortex_nonorthogonal_convergence(
             "advected_interp_method=venkatakrishnan",
             "vortex-nonorthogonal-venkatakrishnan",
+        )
+
+
+class TestVortexOrthogonalReconstructed(unittest.TestCase):
+    def test(self):
+        check_vortex_convergence(
+            " ".join(RECONSTRUCTED_GRADIENT_ARGS),
+            "vortex-orthogonal-reconstructed",
+            velocity_order=2.0,
+            velocity_tol=0.5,
+            pressure_order=1.0,
+            pressure_tol=0.3,
+            plot_base="vortex-reconstructed",
         )
 
 
