@@ -157,10 +157,6 @@ MFEMMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
   return {checkpoint_file};
 }
 
-/*
-  This function is very ugly - its intention is to read all the vertices
-  on the boundaries you wanna pin together and create the v2v mapping manually
-*/
 void
 MFEMMesh::displace(mfem::GridFunction const & displacement)
 {
