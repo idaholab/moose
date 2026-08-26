@@ -1,6 +1,6 @@
 [Tests]
   issues = '#31573'
-  design = 'MultiAppTransfer.md'
+  design = 'Transfers/index.md'
 
   [staggered]
     type = CSVDiff
