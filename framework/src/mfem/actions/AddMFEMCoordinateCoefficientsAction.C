@@ -35,7 +35,6 @@ AddMFEMCoordinateCoefficientsAction::act()
   _problem->addUserObject(_type, _name, _moose_object_pars);
 
   auto & coord = _problem->getUserObject<MFEMCoordinateCoefficients>(_name);
-  coord.build();
 
   if (auto * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get()))
     coord.declareCoefficients(mfem_problem->getCoefficients());

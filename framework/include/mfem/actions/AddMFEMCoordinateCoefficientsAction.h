@@ -16,7 +16,7 @@
 /**
  * This action allow to introduce MFEM Coordinate coefficient
  * objects, that construct and expose built-in scalar coefficients
- * providers through the '[Coordinates]' block.
+ * providers through the '[CoordinateSystem]' block.
  */
 
 class AddMFEMCoordinateCoefficientsAction : public MooseObjectAction

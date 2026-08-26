@@ -11,8 +11,8 @@ exposes the following built in scalar cylindrical coefficients
 
 - `r` the radial component built from MFEM's [`mfem::CylindricalRadialCoefficient`](https://docs.mfem.org/html/coefficient_8hpp_source.html).
 - `inv_r` the inverse radial coefficient 
-- `two_pi_r`
-- `measure_weight`
+- `two_pi_r` the full cylindrical measure factor {2\pi\text{r}}
+- `measure_weight` the reduced measure weight `r`, used when the costant factor {2\pi} is ommitted from the weak form 
 
 The `two_pi_r` and `measure_weight` are constructed using [`mfem::TransformedCoefficient`](https://docs.mfem.org/html/classmfem_1_1TransformedCoefficient.html).
 

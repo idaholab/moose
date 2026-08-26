@@ -8,7 +8,7 @@
     type = MFEMProblem
 []
 
-[Coordinates]
+[CoordinateSystem]
     [cylindrical]
         type = MFEMCylindrical
         inv_r_eps = 1e-100
@@ -40,8 +40,8 @@
 [FunctorMaterials]
     [material]
         type = MFEMGenericFunctorMaterial
-        prop_names = 'radialCoef diffCoef massCoef'
-        prop_values = 'cylindrical_r cylindrical_measure_weight cylindrical_inv_r'
+        prop_names = 'diffCoef massCoef'
+        prop_values = 'cylindrical_r cylindrical_inv_r'
         block =  1
     []
 []
@@ -83,6 +83,7 @@
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/CylindricalCoefficients
+    scalar_coefficients = 'cylindrical_inv_r cylindrical_two_pi_r'
     vtk_format = ASCII
   []
 []

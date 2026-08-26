@@ -11,6 +11,8 @@
 </PCells>
 <PPointData>
 <PDataArray type="Float64" Name="u" NumberOfComponents="1"  format="ascii" />
+<PDataArray type="Float64" Name="cylindrical_inv_r_coef" NumberOfComponents="1" format="ascii" />
+<PDataArray type="Float64" Name="cylindrical_two_pi_r_coef" NumberOfComponents="1" format="ascii" />
 </PPointData>
 <PCellData>
 	<PDataArray type="Int32" Name="attribute" NumberOfComponents="1" format="ascii"/>
