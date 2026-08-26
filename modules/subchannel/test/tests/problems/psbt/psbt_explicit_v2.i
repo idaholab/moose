@@ -42,7 +42,7 @@ pin_diameter = 0.00950
 
 [SCMClosures]
   [Cheng]
-    type = SCMFrictionUpgradedChengTodreas
+    type = SCMFrictionChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter

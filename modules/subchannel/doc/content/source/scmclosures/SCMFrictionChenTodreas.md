@@ -1,6 +1,6 @@
-# SCMFrictionUpgradedChengTodreas
+# SCMFrictionChenTodreas
 
-!syntax description /SCMClosures/SCMFrictionUpgradedChengTodreas
+!syntax description /SCMClosures/SCMFrictionChenTodreas
 
 ## Overview
 
@@ -22,8 +22,8 @@ Re_L = 320 \, 10^{P/D - 1}, \qquad Re_T = 10^4 \, 10^{0.7(P/D - 1)} .
 
 These bulk $Re_L$ and $Re_T$ values are used for both triangular and quadrilateral lattice friction factor calculations.
 
-!syntax parameters /SCMClosures/SCMFrictionUpgradedChengTodreas
+!syntax parameters /SCMClosures/SCMFrictionChenTodreas
 
-!syntax inputs /SCMClosures/SCMFrictionUpgradedChengTodreas
+!syntax inputs /SCMClosures/SCMFrictionChenTodreas
 
-!syntax children /SCMClosures/SCMFrictionUpgradedChengTodreas
+!syntax children /SCMClosures/SCMFrictionChenTodreas
