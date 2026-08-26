@@ -11,7 +11,8 @@ initial_coil_domains = 'coil'
 [Mesh]
   type = MFEMMesh
   file = ../mesh/meshed_wedge_test.e
-  rotational_symmetry_order = 12
+  rotational_symmetry_axes = '0.0 0.0 1.0'
+  rotational_symmetry_orders = '12'
 []
 
 [FESpaces]
@@ -111,7 +112,7 @@ initial_coil_domains = 'coil'
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
-  []  
+  []
   [main]
     type = MFEMHyprePCG
     preconditioner = ams

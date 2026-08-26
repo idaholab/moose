@@ -38,9 +38,10 @@ public:
   void DeclareTranslationalSymmetry(const mfem::Vector & translation);
 
   /**
-   * Declare a rotational symmetry via the order of rotational symmetry about the z axis
+   * Declare a rotational symmetry via the order of rotational symmetry about a specified axis
    */
-  void DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order);
+  void DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order,
+                                 const mfem::Vector & rotation_axis);
 
   /**
    * Return whether the mesh has periodicity applited
@@ -52,8 +53,10 @@ private:
   bool _periodic{false};
   // Vector of translation vectors that pair periodically equivalent vertices
   std::vector<mfem::Vector> _lattice_vectors;
-  // Order of rotational symmetry exhibited by the mesh about the z direction
-  const unsigned int _rotational_symmetry_order;
+  // Axis of rotational symmetry exhibited by the mesh
+  std::vector<mfem::Vector> _rotational_symmetry_axes;
+  // Orders of rotational symmetry exhibited by the mesh about each of the rotational symmetry axes
+  std::vector<unsigned int> _rotational_symmetry_orders;
   // Container to store set of discrete symmetries added to this object
   std::vector<std::shared_ptr<Moose::MFEM::DiscreteSymmetry>> _symmetry_transforms;
   // Maximum distance between two coordinates allowed for points to be considered to be co-incident
