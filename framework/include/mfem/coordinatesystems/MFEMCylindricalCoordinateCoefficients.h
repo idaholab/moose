@@ -16,7 +16,7 @@
 
 /**
  * Class that constructs and owns the scalar cylindrical built-in MFEM coefficients
- * (r, 1/r, 2*pi*r, and measure weight) for cylindrical and axisymmetric MFEM formulations
+ * (r, 1/r, 2*pi*r) for cylindrical and axisymmetric MFEM formulations
  */
 class MFEMCylindrical : public MFEMCoordinateCoefficients
 {
