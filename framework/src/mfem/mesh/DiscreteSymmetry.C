@@ -27,7 +27,6 @@ TranslationalSymmetry::ApplyTransform(const mfem::Vector & coord_in, mfem::Vecto
 RotationalSymmetry::RotationalSymmetry(const unsigned int rotational_symmetry_order,
                                        const mfem::Vector & rotation_axis)
   : DiscreteSymmetry(),
-    _rotational_symmetry_order(rotational_symmetry_order),
     _rotation_angle(2 * pi / rotational_symmetry_order),
     _rotation_axis(rotation_axis),
     _rotation_matrix(BuildRotationMatrix(_rotation_axis, _rotation_angle))

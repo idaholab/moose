@@ -26,6 +26,8 @@ class DiscreteSymmetry
 {
 public:
   DiscreteSymmetry() = default;
+  virtual ~DiscreteSymmetry() = default;
+
   /**
    * Apply a symmetry transform from one boundary coordinate to another coordinate equivalent
    * through symmetry constraints
@@ -33,6 +35,10 @@ public:
   virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) = 0;
 };
 
+/**
+ Class for representing discrete translational symmetry transforms between equivalent vertices in a
+ mesh
+ */
 class TranslationalSymmetry : public DiscreteSymmetry
 {
 public:
@@ -45,6 +51,10 @@ private:
   const mfem::Vector & _lattice_vector;
 };
 
+/**
+ Class for representing discrete rotational symmetry transforms between equivalent vertices in a
+ mesh
+ */
 class RotationalSymmetry : public DiscreteSymmetry
 {
 public:
@@ -58,7 +68,6 @@ public:
                                         const mfem::real_t & rotation_angle);
 
 private:
-  const unsigned int _rotational_symmetry_order;
   const mfem::real_t _rotation_angle; // radians
   const mfem::Vector _rotation_axis;
   const mfem::DenseMatrix _rotation_matrix;
