@@ -11,10 +11,9 @@
     recover = false
   []
   [CylindricalCoefficients]
-    type = XMLDiff
+    type = CSVDiff
     input = cylindrical_coefficients.i
-    xmldiff = 'OutputData/CylindricalCoefficients/Run0/Run0.pvd
-           OutputData/CylindricalCoefficients/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = OutputData/CylindricalCoefficients_line_sample_0001.csv
     design = 'MFEMCoordinateTransformations.md'
     issues = '#32375'
     requirement = 'The system shall have the ability to parse the cylindrical coefficients to functor materials'

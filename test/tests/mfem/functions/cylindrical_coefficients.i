@@ -66,16 +66,23 @@
   []
 []
 
+
 [Executioner]
   type = MFEMSteady
   device = cpu
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/CylindricalCoefficients
-    scalar_coefficients = 'cylindrical_inv_r cylindrical_two_pi_r'
-    vtk_format = ASCII
+[VectorPostprocessors]
+  [LineSampler]
+    type = MFEMVariableLineValueSampler
+    variable = 'u'
+    start_point = '-1 0 0'
+    end_point = '1 0 0'
+    num_points = 10
   []
+[]
+
+[Outputs]
+  csv = true
+  file_base = OutputData/CylindricalCoefficients
 []

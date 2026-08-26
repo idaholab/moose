@@ -21,6 +21,8 @@
  *   <name>_r
  *   <name>_inv_r
  *   <name>_two_pi_r
+ *   <name>_p
+ *   <name>_z
  */
 class MFEMCoordinateTransformations : public Function
 {

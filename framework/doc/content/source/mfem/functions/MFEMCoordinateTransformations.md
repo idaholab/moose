@@ -19,21 +19,21 @@ coordinate type
 
 - `coord_type = RZ`
 
-## Built-in Coefficients for `coord_type = RZ`
+## Built-in Coefficients 
 
-- `r`, the radial coefficient, built from MFEM’s
+`coord_type = RZ`
+
+- `r`, the radial coefficient, built from MFEM's
   [`mfem::CylindricalRadialCoefficient`](https://docs.mfem.org/html/classmfem_1_1CylindricalRadialCoefficient.html)
-- `inv_r`, the regularized inverse radial coefficient
-- `two_pi_r` the full cylindrical measure factor {2\pi\text{r}}
 
-The `two_pi_r` coefficient is constructed using [`mfem::TransformedCoefficient`](https://docs.mfem.org/html/classmfem_1_1TransformedCoefficient.html).
+- `inv_r`, the inverse radial coefficient, regularized as $\text{inv\_r} = \sqrt{\frac{1}{r^2 + \varepsilon^2}}$ , where $\varepsilon$ is specified by the `inv_r_eps` input parameter.
 
-The `inv_r` coefficient is regularized as
-!equation
-{\text{inv\_r} = \sqrt\frac{1}{r^2 + \varepsilon^2}}
+- `two_pi_r`, the full cylindrical measure factor $2 \pi r$, constructed using
+  [`mfem::TransformedCoefficient`](https://docs.mfem.org/html/classmfem_1_1TransformedCoefficient.html).
 
-where $\varepsilon$ is specified by the `inv_r_eps` input parameter.
-
+- `p`, the azimuthal angle, built from MFEM's 
+  [`mfem::CylindricalAzimuthalCoefficient`](https://docs.mfem.org/4.6/classmfem_1_1CylindricalAzimuthalCoefficient.html)
+- `z`, the axial coordinate, equal to the cartesian $z$ coordinate
 
 ## Example Input File Syntax
 

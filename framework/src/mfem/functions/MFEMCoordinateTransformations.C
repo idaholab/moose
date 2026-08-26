@@ -22,7 +22,7 @@ MFEMCoordinateTransformations::validParams()
   params.addRequiredParam<MooseEnum>(
       "coord_type", MooseEnum("RZ"), "Coordinate system type. Currently only RZ is supported.");
   params.addParam<mfem::real_t>(
-      "inv_r_eps", 1e-12, "Regularization parameter used in inv_r = 1/sqrt(r^2 + eps^2).");
+      "inv_r_eps", 1e-12, "Regularization parameter for the inverse radial coefficient.");
   return params;
 }
 
