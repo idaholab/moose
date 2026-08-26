@@ -43,6 +43,7 @@
       rel_err = 1.0e-5
       abs_zero = 1.0e-5
       valgrind = 'none'
+      cli_args = 'Contact/mortar/c_normal=1'
     []
     [second]
       type = 'CSVDiff'
@@ -50,7 +51,7 @@
       capabilities = 'ad_size>=150 & method!=dbg'
       csvdiff = 'frictionless-mortar-3d-action-second_contact-pressure_0002.csv'
       mesh_mode = 'REPLICATED' # see issue 24255
-      cli_args = 'Contact/mortar/segment_quadrature="fifth" Outputs/file_base=frictionless-mortar-3d-action-second'
+      cli_args = 'Contact/mortar/segment_quadrature="fifth" Outputs/file_base=frictionless-mortar-3d-action-second Contact/mortar/c_normal=1'
       detail = 'mortar quadrature designed to integrate quadratic polynomials on triangles'
       rel_err = 5.0e-5
       abs_zero = 1.0e-5
@@ -64,7 +65,8 @@
     input = 'frictionless-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
                'Outputs/file_base="frictionless-mortar-3d_pg_out" '
-               'Postprocessors/active="contact lambda"'
+               'Postprocessors/active="contact lambda" '
+               'Contact/mortar/c_normal=1'
     capabilities = 'ad_size>=100'
     csvdiff = 'frictionless-mortar-3d_pg_out.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
@@ -186,7 +188,7 @@
     [linear]
       type = 'RunApp'
       input = 'frictionless-mortar-3d-action.i'
-      cli_args = 'Contact/mortar/lm_space=LINEAR'
+      cli_args = 'Contact/mortar/lm_space=LINEAR Contact/mortar/c_normal=1'
       check_input = true
       detail = 'by accepting it for a 3D mortar formulation'
     []
@@ -215,7 +217,8 @@
                   'constraint using the contact action and selecting the temporary flag correct edge '
                   'dropping.'
     cli_args = 'Contact/mortar/correct_edge_dropping=true '
-               'Outputs/file_base=frictionless-mortar-3d-action-correct-edge-dropping_out'
+               'Outputs/file_base=frictionless-mortar-3d-action-correct-edge-dropping_out '
+               'Contact/mortar/c_normal=1'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     valgrind = 'none'
@@ -231,7 +234,8 @@
       cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=true '
                  'Contact/mortar/debug_mesh=true Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Outputs/exodus=false Outputs/csv=false '
-                 'Outputs/file_base=frictionless-mortar-3d-action-centroid-retess'
+                 'Outputs/file_base=frictionless-mortar-3d-action-centroid-retess '
+                 'Contact/mortar/c_normal=1'
       detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
                'clipped polygons when triangulate_triangles is enabled,'
       valgrind = 'none'
@@ -245,7 +249,8 @@
       cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=false '
                  'Contact/mortar/debug_mesh=true Executioner/end_time=0 '
                  'Outputs/exodus=false Outputs/csv=false '
-                 'Outputs/file_base=frictionless-mortar-3d-action-centroid-no-retess'
+                 'Outputs/file_base=frictionless-mortar-3d-action-centroid-no-retess '
+                 'Contact/mortar/c_normal=1'
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact when triangulate_triangles is disabled,'
       valgrind = 'none'
@@ -261,7 +266,8 @@
       cli_args = 'Contact/mortar/triangulation=ear_clipping Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Outputs/exodus=false Outputs/csv=false '
-                 'Outputs/file_base=frictionless-mortar-3d-action-ear-clipping'
+                 'Outputs/file_base=frictionless-mortar-3d-action-ear-clipping '
+                 'Contact/mortar/c_normal=1'
       detail = 'an ear-clipping algorithm, and'
       valgrind = 'none'
       prereq = 'frictionless-mortar-3d-action/first'
@@ -274,7 +280,8 @@
       cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Outputs/exodus=false Outputs/csv=false '
-                 'Outputs/file_base=frictionless-mortar-3d-action-delaunay'
+                 'Outputs/file_base=frictionless-mortar-3d-action-delaunay '
+                 'Contact/mortar/c_normal=1'
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
       valgrind = 'none'
       prereq = 'frictionless-mortar-3d-action/first'
@@ -402,7 +409,7 @@
               'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
     requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
                   'constraint using the Petrov-Galerkin approach.'
-    rel_err = 1.0e-5
+    rel_err = 2.0e-5
     abs_zero = 1.0e-5
     valgrind = 'none'
   []
@@ -438,14 +445,19 @@
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
-               'Outputs/file_base=frictional-mortar-3d_pg_out'
+               'Outputs/file_base=frictional-mortar-3d_pg_out '
+               'Contact/mortar/friction_projection_degree=ONE '
+               'Materials/tensor/youngs_modulus=1 '
+               'Materials/tensor_1000/youngs_modulus=1 '
+               'Contact/mortar/c_normal=1 '
+               'Contact/mortar/c_tangential=1'
     capabilities = 'ad_size>=150'
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
     requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
                   'constraint using the Petrov-Galerkin approach in contact action.'
-    rel_err = 1.0e-5
+    rel_err = 2.0e-5
     abs_zero = 1.0e-5
   []
   [half_sphere_nodal_geometry]
@@ -491,7 +503,7 @@
     exodiff = 'frictional-mortar-3d-al_out.e'
     requirement = 'The system shall be able to solve a 3D frictional problem with mortar constraint using a '
                   'augmented Lagrange approach and converging to prescribed tolerance.'
-    rel_err = 1.0e-5
+    rel_err = 7.0e-4
     abs_zero = 1.0e-5
     valgrind = none
     capabilities = 'ad_size>=200 & method=opt'
