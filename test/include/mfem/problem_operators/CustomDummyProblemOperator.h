@@ -37,7 +37,7 @@ private:
 
 public:
   // The constructor
-  CustomDummyProblemOperator(MFEMProblem & problem);
+  CustomDummyProblemOperator(MFEMProblem & prob_ex0p);
 
   // The destructor
   ~CustomDummyProblemOperator() = default;

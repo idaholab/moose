@@ -12,8 +12,8 @@
 #include "CustomDummyProblemOperator.h"
 
 // The custom operator constructor
-CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
-  : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
+CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob_ex0p)
+  : Moose::MFEM::ProblemOperator(prob_ex0p), _one(1.000)
 {
 }
 
