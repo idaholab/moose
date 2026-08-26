@@ -23,7 +23,7 @@ class TestSymmetricVortexOrthogonal(unittest.TestCase):
             "2d-symmetric-vortex.i",
             4,
             y_pp=labels,
-            mpi=2,
+            mpi=4,
             file_base="2d-symmetric-vortex",
         )
 
@@ -59,7 +59,7 @@ class TestSymmetricVortexNonorthogonal(unittest.TestCase):
             "LinearFVKernels/p_diffusion/use_nonorthogonal_correction=true",
             "LinearFVKernels/p_diffusion/use_nonorthogonal_correction_on_boundary=true",
             y_pp=labels,
-            mpi=2,
+            mpi=4,
             file_base="2d-symmetric-vortex-nonorthogonal",
         )
 
@@ -90,10 +90,10 @@ class TestSymmetricVortexOrthogonalReconstructed(unittest.TestCase):
         labels = velocity_labels + pressure_labels
         df1 = run_spatial(
             "2d-symmetric-vortex.i",
-            4,
+            5,
             *RECONSTRUCTED_GRADIENT_ARGS,
             y_pp=labels,
-            mpi=2,
+            mpi=4,
             file_base="2d-symmetric-vortex-reconstructed",
         )
 
