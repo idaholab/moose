@@ -26,7 +26,12 @@ pressure_gradient_method = 'green-gauss'
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
     momentum_pressure_kernel = u_pressure
-    body_force_kernel_names = "u_forcing; v_forcing"
+  []
+[]
+
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
   []
 []
 
@@ -103,7 +108,7 @@ pressure_gradient_method = 'green-gauss'
     source_density = forcing_v
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = 'Ainv' # Functor created in the RhieChowMassFlux UO
     use_nonorthogonal_correction = false
@@ -152,6 +157,9 @@ pressure_gradient_method = 'green-gauss'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    rho = ${rho}
+    u = vel_x
+    v = vel_y
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
