@@ -43,7 +43,6 @@
     requirement = 'The system shall have the ability to parse the cylindrical coefficients to functor materials'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
 []
