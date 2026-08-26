@@ -38,7 +38,7 @@ AddMFEMCoordinateCoefficientsAction::act()
   coord.build();
 
   if (auto * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get()))
-    mfem_problem->getCoefficients().setBuiltinProvider(&coord);
+    coord.declareCoefficients(mfem_problem->getCoefficients());
   else
     mooseError("Coordinates block requires MFEMProblem.");
 }
