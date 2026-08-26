@@ -171,7 +171,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
       isParamValid("execute_after_from_multiapp"))
     paramError("execute_after_from_multiapp",
                "This parameter is only intended for modifying the execution schedule of "
-               "BETWEEN_MULTIAPPS transfers");
+               "siblings transfers, e.g. transfers from a from_multi_app to a to_multi_app");
   // The default isn't enough to achieve staggering unless users staggered the multiapps.
   // This is effectively a warning by default for siblings transfers BUT:
   // - the order of execution is actually important here. you don't want to make things explicit by

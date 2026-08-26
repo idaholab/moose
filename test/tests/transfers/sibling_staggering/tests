@@ -43,7 +43,7 @@
                   Transfers/pp_1_to_2b/from_postprocessor='time_app1'
                   Transfers/pp_1_to_2b/to_postprocessor='dummy'
                   Transfers/pp_1_to_2b/execute_after_from_multiapp=false"
-      expect_err = 'This parameter is only intended for modifying the execution schedule of BETWEEN_MULTIAPPS transfers'
+      expect_err = 'This parameter is only intended for modifying the execution schedule of siblings transfers, e.g. transfers from a from_multi_app to a to_multi_app'
       detail = 'a transfer is set to execute after its source application but this option is not currently implemented for child to parent and parent to child transfer.'
     []
   []
