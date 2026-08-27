@@ -43,14 +43,10 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 
 ```
 
-A custom operator builder function should be added in the case of non-linear problems where the
-operator is rebuilt. In the non-linear case the user would have to override and populate the
-`Mult` and the `GetGradient` functions to rebuild, fetch and apply the operators for the residual
-and Jacobian. The self pointer would have be passed to the non-linear solver via the
-`SetOperator(mfem::Operator &)` method in the non-linear case. The case in this example is linear
-and the Operator is only built once in `Init` function or in the class constructor. Firstly the 
-class needs `Form`'s, `Coefficient`'s, BC `Array`s, `Operator`s and solution/forcing `Vector`s, 
-an equation system can also be used instead of or along side the previous objects.
+The case in this example is linear and the Operator is only built once in the `Init` function or 
+in the class constructor. Firstly the class needs `Form`'s, `Coefficient`'s, BC `Array`s,
+`Operator`s and solution/forcing `Vector`s, an equation system can also be used instead of or
+along side the previous objects.
 
 ```cpp
 class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
