@@ -10,6 +10,7 @@
 #include "CutMeshByLevelSetGeneratorBase.h"
 #include "MooseMeshElementConversionUtils.h"
 #include "MooseMeshUtils.h"
+#include "PolyhedraUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
@@ -700,12 +701,13 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
                elem_id,
                " has fewer than 4 faces; the cut geometry is degenerate.");
 
-  // Build the polyhedron. The C0Polyhedron constructor may need a mid-element node if it
-  // can't tetrahedralize from the boundary alone; if so, we have to add that node to the mesh.
-  // The constructor will throw libMesh::NotImplemented (in debug) when the retained region is
-  // fundamentally non-convex (e.g. a cell whose retained side carries a spherical dimple),
-  // since libMesh's polyhedron representation requires convex polyhedra. Translate that into a
-  // MOOSE-level error that points the user at the actual cause.
+  // Attempt to build a single convex polyhedron first. The C0Polyhedron constructor may
+  // need a mid-element node if it can't tetrahedralize from the boundary alone; if so, we
+  // have to add that node to the mesh. The constructor will throw libMesh::NotImplemented
+  // (in debug) when the retained region is fundamentally non-convex (e.g. a cell whose
+  // retained side carries a spherical dimple), since libMesh's polyhedron representation
+  // requires convex polyhedra. In that case we fall back to a geometric convex
+  // decomposition implemented in PolyhedraUtils.
   std::unique_ptr<Node> mid_elem_node;
   std::unique_ptr<libMesh::C0Polyhedron> polyhedron;
   try
@@ -714,15 +716,53 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
   }
   catch (const libMesh::NotImplemented &)
   {
-    mooseError(
-        "Element ",
-        elem_id,
-        " produces a non-convex polyhedron after cutting. C0POLYHEDRON elements must be convex, "
-        "so this cut cannot be represented with cut_interface = polyhedra. This typically "
-        "happens when the retained side of the level set has concave geometry within an element "
-        "(e.g. retaining the outside of a sphere). Either retain the convex side of the level "
-        "set, refine the mesh enough that each cell's retained geometry is convex, or switch to "
-        "cut_interface = tetrahedra.");
+    // Build a compact vertex list and face descriptors for splitting.
+    std::vector<const Node *> existing_nodes;
+    std::unordered_map<const Node *, unsigned int> vertex_index;
+
+    for (const auto & poly : new_polygons)
+      for (const auto i : make_range(poly->n_nodes()))
+      {
+        const Node * n = poly->node_ptr(i);
+        if (!vertex_index.count(n))
+        {
+          vertex_index[n] = existing_nodes.size();
+          existing_nodes.push_back(n);
+        }
+      }
+
+    std::vector<PolyhedraUtils::FaceDescriptor> faces_for_split;
+    faces_for_split.reserve(new_polygons.size());
+    for (const auto p_i : index_range(new_polygons))
+    {
+      PolyhedraUtils::FaceDescriptor f;
+      f.orig_side = new_polygon_to_orig_side[p_i];
+
+      const auto & poly = new_polygons[p_i];
+      f.vertices.reserve(poly->n_nodes());
+      for (const auto i : make_range(poly->n_nodes()))
+        f.vertices.push_back(vertex_index[poly->node_ptr(i)]);
+      faces_for_split.push_back(std::move(f));
+    }
+
+    if (!PolyhedraUtils::splitNonConvexPolyhedron(
+            mesh, orig_elem, existing_nodes, faces_for_split, elem_side_list, sid_shift_base, _cut_face_id))
+    {
+      mooseError(
+          "Element ",
+          elem_id,
+          " produces a non-convex polyhedron after cutting. C0POLYHEDRON elements must be convex, "
+          "and an internal convex decomposition could not be constructed. This typically "
+          "happens when the retained side of the level set has strongly concave geometry within "
+          "an element (e.g. retaining the outside of a sphere). Either retain the convex side of "
+          "the level set, refine the mesh enough that each cell's retained geometry is convex, "
+          "or switch to cut_interface = tetrahedra.");
+    }
+
+    // The convex decomposition has created new polyhedra and attached boundary ids.
+    // Mark the original element for deletion in the cleanup pass and return.
+    orig_elem->subdomain_id() = _block_id_to_remove;
+    return;
   }
   polyhedron->subdomain_id() = orig_elem->subdomain_id() + sid_shift_base;
   Elem * new_elem = mesh.add_elem(std::move(polyhedron));
