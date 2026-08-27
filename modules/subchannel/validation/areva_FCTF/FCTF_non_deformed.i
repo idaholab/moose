@@ -87,20 +87,20 @@ unheated_length_exit = 0.855 #m
   # Heat Transfer Correlations
   pin_HTC_closure = 'gnielinski'
   # friction model
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
   full_output = true
   # Turbulent mixing Correlation
-  mixing_closure = 'cheng_todreas'
+  mixing_closure = 'Chen_Todreas'
 []
 
 [SCMClosures]
-  [cheng]
+  [Chen]
     type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
+  [Chen_Todreas]
     type = SCMMixingChenTodreas
     CT = 2.6
   []

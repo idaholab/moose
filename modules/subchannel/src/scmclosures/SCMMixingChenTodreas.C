@@ -16,12 +16,12 @@ SCMMixingChenTodreas::validParams()
 {
   InputParameters params = SCMMixingClosureBase::validParams();
   params.addClassDescription("Class that models the turbulent mixing coefficient for wire-wrapped "
-                             "triangular assemblies using the Cheng Todreas correlations.");
+                             "triangular assemblies using the Chen Todreas correlations.");
   MooseEnum mixing_model("1986 Pacio", "1986");
   params.addParam<MooseEnum>(
       "mixing_model",
       mixing_model,
-      "Mixing-model parameterization for triangular wire-wrapped Cheng-Todreas correlations.");
+      "Mixing-model parameterization for triangular wire-wrapped Chen-Todreas correlations.");
   return params;
 }
 
@@ -52,15 +52,15 @@ SCMMixingChenTodreas::SCMMixingChenTodreas(const InputParameters & parameters)
   {
     if (p_over_d < 1.07 || p_over_d > 1.30)
       flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the 1986 "
-                          "Cheng-Todreas friction correlation data range.");
+                          "Chen-Todreas friction correlation data range.");
     if (wire_lead_to_diameter < 4.0 || wire_lead_to_diameter > 52.0)
       flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the 1986 "
-                          "Cheng-Todreas friction correlation data range.");
+                          "Chen-Todreas friction correlation data range.");
     if (num_pins < 7 || num_pins > 217)
-      flagSolutionWarning("Number of pins outside the 1986 Cheng-Todreas friction correlation "
+      flagSolutionWarning("Number of pins outside the 1986 Chen-Todreas friction correlation "
                           "data range.");
     if (Reb < 400.0 || Reb > 1.0e6)
-      flagSolutionWarning("Bulk Reynolds number (Reb) outside the 1986 Cheng-Todreas friction "
+      flagSolutionWarning("Bulk Reynolds number (Reb) outside the 1986 Chen-Todreas friction "
                           "correlation data range.");
   }
   else
@@ -72,10 +72,10 @@ SCMMixingChenTodreas::SCMMixingChenTodreas(const InputParameters & parameters)
       flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the "
                           "Pacio-Chen-Todreas friction correlation data range.");
     if (num_pins < 19 || num_pins > 217)
-      flagSolutionWarning("Number of pins outside the Pacio-Cheng-Todreas friction correlation "
+      flagSolutionWarning("Number of pins outside the Pacio-Chen-Todreas friction correlation "
                           "data range.");
     if (Reb < 10.0 || Reb > 3.0e5)
-      flagSolutionWarning("Bulk Reynolds number (Reb) outside the Pacio-Cheng-Todreas friction "
+      flagSolutionWarning("Bulk Reynolds number (Reb) outside the Pacio-Chen-Todreas friction "
                           "correlation data range.");
   }
 }
@@ -169,7 +169,7 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
 
     if (_mixing_model == "1986")
     {
-      // Preserve the original Cheng-Todreas (1986) path.
+      // Preserve the original Chen-Todreas (1986) path.
       if (bulk_Re < ReL)
         Cm = CmL;
       else if (bulk_Re > ReT)
@@ -345,7 +345,7 @@ SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
 
     if (_mixing_model == "1986")
     {
-      // Preserve the original Cheng-Todreas (1986) path.
+      // Preserve the original Chen-Todreas (1986) path.
       if (bulk_Re < ReL)
         Cs = CsL;
       else if (bulk_Re > ReT)

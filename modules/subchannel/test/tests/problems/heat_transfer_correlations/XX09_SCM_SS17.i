@@ -79,14 +79,14 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   segregated = false
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
   full_output = true
-  mixing_closure = 'cheng_todreas'
+  mixing_closure = 'Chen_Todreas'
 
 []
 
 [SCMClosures]
-  [cheng]
+  [Chen]
     type = SCMFrictionChenTodreas
   []
   [dittus-boelter]
@@ -110,7 +110,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [borishanskii]
     type = SCMHTCBorishanskii
   []
-  [cheng_todreas]
+  [Chen_Todreas]
     type = SCMMixingChenTodreas
     CT = 2.6
   []

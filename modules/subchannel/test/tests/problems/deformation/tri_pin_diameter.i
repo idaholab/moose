@@ -34,20 +34,20 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
   implicit = true
   segregated = false
   interpolation_scheme = upwind
-  friction_closure = 'cheng'
-  mixing_closure = 'cheng_todreas'
+  friction_closure = 'Chen'
+  mixing_closure = 'Chen_Todreas'
   pin_HTC_closure = 'gnielinski'
   full_output = true
 []
 
 [SCMClosures]
-  [cheng]
+  [Chen]
     type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
+  [Chen_Todreas]
     type = SCMMixingChenTodreas
     CT = 2.6
   []

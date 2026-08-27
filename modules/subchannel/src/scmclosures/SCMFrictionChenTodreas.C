@@ -17,14 +17,14 @@ SCMFrictionChenTodreas::validParams()
   InputParameters params = SCMFrictionClosureBase::validParams();
 
   params.addClassDescription(
-      "Class that computes the axial friction factor using the Cheng-Todreas correlations.");
+      "Class that computes the axial friction factor using the Chen-Todreas correlations.");
 
   MooseEnum friction_model("Upgraded Pacio", "Upgraded");
 
   params.addParam<MooseEnum>(
       "friction_model",
       friction_model,
-      "Friction-factor parameterization for triangular wire-wrapped Cheng-Todreas correlations.");
+      "Friction-factor parameterization for triangular wire-wrapped Chen-Todreas correlations.");
 
   return params;
 }
@@ -57,18 +57,16 @@ SCMFrictionChenTodreas::SCMFrictionChenTodreas(const InputParameters & parameter
     {
       if (p_over_d < 1.0 || p_over_d > 1.42)
         flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the Upgraded "
-                            "Cheng-Todreas friction correlation data range.");
+                            "Chen-Todreas friction correlation data range.");
       if (_has_wire_wrap && (wire_lead_to_diameter < 8.0 || wire_lead_to_diameter > 52.0))
         flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the Upgraded "
-                            "Cheng-Todreas friction correlation data range.");
+                            "Chen-Todreas friction correlation data range.");
       if (num_pins < 7 || num_pins > 217)
-        flagSolutionWarning(
-            "Number of pins outside the Upgraded Cheng-Todreas friction correlation "
-            "data range.");
+        flagSolutionWarning("Number of pins outside the Upgraded Chen-Todreas friction correlation "
+                            "data range.");
       if (Reb < 50.0 || Reb > 1.0e6)
-        flagSolutionWarning(
-            "Bulk Reynolds number (Reb) outside the Upgraded Cheng-Todreas friction "
-            "correlation data range.");
+        flagSolutionWarning("Bulk Reynolds number (Reb) outside the Upgraded Chen-Todreas friction "
+                            "correlation data range.");
     }
     else
     {
@@ -304,7 +302,7 @@ SCMFrictionChenTodreas::computeTriLatticeFrictionFactor(const FrictionStruct & f
       const Real turbulent_wire_correction =
           1 + WsT * (ar / a_p) * Utility::pow<2>(std::tan(theta));
       if (!std::isfinite(turbulent_wire_correction) || turbulent_wire_correction < 0.0)
-        mooseError("The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
+        mooseError("The exponentiated term in the Chen-Todreas turbulent wire correction must be "
                    "non-negative and finite for an edge subchannel. Computed ",
                    turbulent_wire_correction,
                    ".");
@@ -322,7 +320,7 @@ SCMFrictionChenTodreas::computeTriLatticeFrictionFactor(const FrictionStruct & f
       const Real turbulent_wire_correction =
           1 + WsT * (ar / a_p) * Utility::pow<2>(std::tan(theta));
       if (!std::isfinite(turbulent_wire_correction) || turbulent_wire_correction < 0.0)
-        mooseError("The exponentiated term in the Cheng-Todreas turbulent wire correction must be "
+        mooseError("The exponentiated term in the Chen-Todreas turbulent wire correction must be "
                    "non-negative and finite for a corner subchannel. Computed ",
                    turbulent_wire_correction,
                    ".");

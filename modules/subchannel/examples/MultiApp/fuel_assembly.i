@@ -88,9 +88,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   pin_HTC_closure = 'gnielinski'
   duct_HTC_closure = 'gnielinski'
   # Friction Correlation
-  friction_closure = 'Cheng'
+  friction_closure = 'Chen'
   # Turbulent mixing Correlation
-  mixing_closure = 'cheng_todreas'
+  mixing_closure = 'Chen_Todreas'
 
   # Output
   compute_density = true
@@ -103,13 +103,13 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 []
 
 [SCMClosures]
-  [Cheng]
+  [Chen]
     type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
+  [Chen_Todreas]
     type = SCMMixingChenTodreas
   []
 []

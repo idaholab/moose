@@ -14,7 +14,7 @@
 
 /**
  * Class that calculates turbulent mixing and sweep-flow coefficients for wire-wrapped
- * triangular lattices. The user may select either the Cheng-Todreas (1986) or Pacio
+ * triangular lattices. The user may select either the Chen-Todreas (1986) or Pacio
  * parameterization.
  */
 class SCMMixingChenTodreas : public SCMMixingClosureBase
@@ -36,7 +36,7 @@ protected:
   /// Pointer to the triangular lattice mesh
   const TriSubChannelMesh * const _tri_sch_mesh;
 
-  /// Cheng-Todreas mixing-model parameterization
+  /// Chen-Todreas mixing-model parameterization
   const MooseEnum & _mixing_model;
 
   SolutionHandle _S_soln;
