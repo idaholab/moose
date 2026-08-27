@@ -101,7 +101,7 @@ unheated_length_exit = 0.855 #m
     type = SCMHTCGnielinski
   []
   [cheng_todreas]
-    type = SCMMixingChengTodreas
+    type = SCMMixingChenTodreas
     CT = 2.6
   []
 []

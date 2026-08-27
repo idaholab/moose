@@ -94,7 +94,7 @@ P_out = 2.0e5 # Pa
     type = SCMFrictionChenTodreas
   []
   [cheng_todreas]
-    type = SCMMixingChengTodreas
+    type = SCMMixingChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter

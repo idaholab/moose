@@ -96,7 +96,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     type = SCMHTCGnielinski
   []
   [cheng_todreas]
-    type = SCMMixingChengTodreas
+    type = SCMMixingChenTodreas
     CT = 2.6
   []
 []

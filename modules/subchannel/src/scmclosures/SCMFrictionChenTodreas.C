@@ -19,7 +19,7 @@ SCMFrictionChenTodreas::validParams()
   params.addClassDescription(
       "Class that computes the axial friction factor using the Cheng-Todreas correlations.");
 
-  MooseEnum friction_model("upgraded Pacio", "upgraded");
+  MooseEnum friction_model("Upgraded Pacio", "Upgraded");
 
   params.addParam<MooseEnum>(
       "friction_model",
@@ -53,21 +53,38 @@ SCMFrictionChenTodreas::SCMFrictionChenTodreas(const InputParameters & parameter
     const unsigned int num_pins = 1 + 3 * Nr * (Nr - 1);
     const auto Reb = _scm_problem.getBulkReynoldsNumber();
 
-    // The upgraded Cheng-Todreas detailed triangular friction factor correlation is based on
-    // data spanning 1.0 <= P/D <= 1.42, 4 <= H/D <= 52, 7 <= Npin <= 217,
-    // and 50 <= Re <= 1e6.
-    if (p_over_d < 1.0 || p_over_d > 1.42)
-      flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the upgraded "
-                          "Cheng-Todreas friction correlation data range.");
-    if (_has_wire_wrap && (wire_lead_to_diameter < 8.0 || wire_lead_to_diameter > 52.0))
-      flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the upgraded "
-                          "Cheng-Todreas friction correlation data range.");
-    if (num_pins < 7 || num_pins > 271)
-      flagSolutionWarning("Number of pins outside the upgraded Cheng-Todreas friction correlation "
-                          "data range.");
-    if (Reb < 50.0 || Reb > 1.0e6)
-      flagSolutionWarning("Bulk Reynolds number (Reb) outside the upgraded Cheng-Todreas friction "
-                          "correlation data range.");
+    if (_friction_model == "Upgraded")
+    {
+      if (p_over_d < 1.0 || p_over_d > 1.42)
+        flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the Upgraded "
+                            "Cheng-Todreas friction correlation data range.");
+      if (_has_wire_wrap && (wire_lead_to_diameter < 8.0 || wire_lead_to_diameter > 52.0))
+        flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the Upgraded "
+                            "Cheng-Todreas friction correlation data range.");
+      if (num_pins < 7 || num_pins > 217)
+        flagSolutionWarning(
+            "Number of pins outside the Upgraded Cheng-Todreas friction correlation "
+            "data range.");
+      if (Reb < 50.0 || Reb > 1.0e6)
+        flagSolutionWarning(
+            "Bulk Reynolds number (Reb) outside the Upgraded Cheng-Todreas friction "
+            "correlation data range.");
+    }
+    else
+    {
+      if (p_over_d < 1.02 || p_over_d > 1.42)
+        flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the "
+                            "Pacio-Chen-Todreas friction correlation data range.");
+      if (_has_wire_wrap && (wire_lead_to_diameter < 7.5 || wire_lead_to_diameter > 54.0))
+        flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the "
+                            "Pacio-Chen-Todreas friction correlation data range.");
+      if (num_pins < 19 || num_pins > 217)
+        flagSolutionWarning("Number of pins outside the Pacio-Chen-Todreas friction correlation "
+                            "data range.");
+      if (Reb < 10.0 || Reb > 3.0e5)
+        flagSolutionWarning("Bulk Reynolds number (Reb) outside the Pacio-Chen-Todreas friction "
+                            "correlation data range.");
+    }
   }
 }
 
@@ -106,7 +123,7 @@ SCMFrictionChenTodreas::computeTriLatticeFrictionFactor(const FrictionStruct & f
   Real lambda;
   // transition smoothing coefficient
   Real gamma;
-  if (_friction_model == "upgraded")
+  if (_friction_model == "Upgraded")
   {
     CbL1 = 320.0;
     CbL2 = 1.0;

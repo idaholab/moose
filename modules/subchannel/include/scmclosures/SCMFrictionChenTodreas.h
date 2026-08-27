@@ -15,7 +15,7 @@
 
 /**
  * Class that calculates the friction factor using the Cheng-Todreas correlations.
- * For triangular wire-wrapped lattices, the user may select either the upgraded
+ * For triangular wire-wrapped lattices, the user may select either the Upgraded
  * Cheng-Todreas or Pacio-Cheng-Todreas parameterization. It is used for both quad and tri lattices.
  */
 class SCMFrictionChenTodreas : public SCMFrictionClosureBase

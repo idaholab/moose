@@ -419,20 +419,23 @@ SubChannel1PhaseProblem::computeBulkReynoldsNumber()
 {
   if (processor_id() != 0)
     return;
-
   Real viscosity_in = 0.0;
+  Real volumetric_flow_in = 0.0;
   Real mass_flow_in = 0.0;
   for (const auto i_ch : make_range(_n_channels))
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
     const Real mdot_in = (*_mdot_soln)(node_in);
+    const Real rho_in = (*_rho_soln)(node_in);
     viscosity_in += mdot_in * (*_mu_soln)(node_in);
+    volumetric_flow_in += mdot_in / rho_in;
     mass_flow_in += mdot_in;
   }
-
   const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
+  const Real flow_area = _subchannel_mesh.getAssemblyFlowArea();
   const Real inlet_mu = viscosity_in / mass_flow_in;
-  _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * _subchannel_mesh.getAssemblyFlowArea());
+  _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * flow_area);
+  _bulk_V = volumetric_flow_in / flow_area;
 }
 
 void

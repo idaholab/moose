@@ -69,7 +69,7 @@ num_cells = 40
     type = SCMHTCGnielinski
   []
   [cheng_todreas]
-    type = SCMMixingChengTodreas
+    type = SCMMixingChenTodreas
     CT = 2.6
   []
 []
