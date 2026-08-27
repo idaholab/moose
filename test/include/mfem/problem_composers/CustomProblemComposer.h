@@ -12,7 +12,7 @@
 #pragma once
 
 #include "MFEMProblemComposer.h"
-#include "CustomDummyProblemOperator.h"
+#include "CustomProblemOperator.h"
 
 /**
  * Custom Dummy Operator builder required to build MFEM Problem Operators

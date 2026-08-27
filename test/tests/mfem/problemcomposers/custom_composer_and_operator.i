@@ -9,7 +9,7 @@
 []
 
 [FESpaces]
-  [prob_ex0p_h1]
+  [H1]
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = SECOND
@@ -17,9 +17,9 @@
 []
 
 [Variables]
-  [prob_ex0p_var0]
+  [u]
     type = MFEMVariable
-    fespace = prob_ex0p_h1
+    fespace = H1
   []
 []
 

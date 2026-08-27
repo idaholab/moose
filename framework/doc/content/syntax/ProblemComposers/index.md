@@ -21,7 +21,7 @@ the class must inherit from `Moose::MFEM::TimeDependentProblemOperator`. For thi
 is steady and an example class may look as follows:
 
 ```cpp
-class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
+class CustomProblemOperator : public Moose::MFEM::ProblemOperator
 {
   private:
   .
@@ -29,7 +29,7 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
   .
   public:
     // Constructor
-    CustomDummyProblemOperator(MFEMProblem & prob, ...);
+    CustomProblemOperator(MFEMProblem & prob, ...);
 
     // Set up the problem
     virtual void Init(mfem::BlockVector) override;
@@ -49,7 +49,7 @@ in the class constructor. Firstly the class needs `Form`'s, `Coefficient`'s, BC 
 along side the previous objects.
 
 ```cpp
-class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
+class CustomProblemOperator : public Moose::MFEM::ProblemOperator
 {
   private:
     int _dumm_var = 0;
@@ -70,7 +70,7 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 
   public:
     // Constructor
-    CustomDummyProblemOperator(MFEMProblem & prob0);
+    CustomProblemOperator(MFEMProblem & prob0);
 
     // Set up the problem
     virtual void Init(mfem::BlockVector) override;
@@ -92,11 +92,11 @@ that we are interested in have an expected name. The constructor should only be 
 input parameters, retrieveing FE-Spaces and GridFunctions has to be done in the `Init`.
 
 ```cpp
-CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0):
+CustomProblemOperator::CustomProblemOperator(MFEMProblem & prob0):
   : Moose::MFEM::ProblemOperator(prob0), ...
 {}
 
-CustomDummyProblemOperator::Init(mfem::BlockVector &)
+CustomProblemOperator::Init(mfem::BlockVector &)
 {
   // Retrieve the FE-space and gridFunction
   const std::string fe_space_name = "h1";
@@ -113,11 +113,11 @@ The rest of the `Init` function mirrors the MFEM ex0p example, i.e. build the fo
 integrators, assemble the forms and form the linear system:
 
 ```cpp
-CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
+CustomProblemOperator::CustomProblemOperator(MFEMProblem & prob0)
   : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
 {}
 
-CustomDummyProblemOperator::Init(mfem::BlockVector &)
+CustomProblemOperator::Init(mfem::BlockVector &)
 {
   // Retrieve the FE-space and gridFunction
   const std::string fe_space_name = "h1";
@@ -151,7 +151,7 @@ The class inherits a reference to the `MFEMProblem` and `MFEMProblemData` from
 and solvers.
 
 ```cpp
-void CustomDummyProblemOperator::Solve() override
+void CustomProblemOperator::Solve() override
 {
   // Set the operator and solve the equation
   _problem_data.jacobian_solver->SetOperator(*_problem_operator);
@@ -232,7 +232,7 @@ to the `ProblemOperator` that was defined earlier.
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 CustomDummyProblemComposer::createProblemOperator(MFEMProblem & mfemProb) override
 {
-  return std::make_shared<CustomDummyProblemOperator>(mfemProb, param1, ...);
+  return std::make_shared<CustomProblemOperator>(mfemProb, param1, ...);
 }
 ```
 
@@ -262,7 +262,7 @@ public:
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem & mfem_problem) override
   {
-    return std::make_shared<CustomDummyProblemOperator>(mfem_problem);
+    return std::make_shared<CustomProblemOperator>(mfem_problem);
   };
 };
 

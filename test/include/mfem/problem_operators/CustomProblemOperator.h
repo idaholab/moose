@@ -17,7 +17,7 @@
  * Custom Dummy Operator with a basic solve
  * uses same problem as mfem ex0p
  */
-class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
+class CustomProblemOperator : public Moose::MFEM::ProblemOperator
 {
 private:
   // The linear and bilinear forms
@@ -37,19 +37,16 @@ private:
 
 public:
   // The constructor
-  CustomDummyProblemOperator(MFEMProblem & prob_ex0p);
+  CustomProblemOperator(MFEMProblem & mfem_problem);
 
   // The destructor
-  ~CustomDummyProblemOperator() = default;
+  ~CustomProblemOperator() = default;
 
   // The initialisation function
-  virtual void Init(mfem::BlockVector &) override;
+  void Init(mfem::BlockVector &) override;
 
   // Solve the equation
-  virtual void Solve() override;
-
-  // Apply the operator
-  void Mult(const mfem::Vector &, mfem::Vector &) const override;
+  void Solve() override;
 };
 
 #endif

@@ -23,7 +23,7 @@ CustomProblemComposer::validParams()
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 CustomProblemComposer::createProblemOperator(MFEMProblem & _mfem_problem)
 {
-  return std::make_shared<CustomDummyProblemOperator>(_mfem_problem);
+  return std::make_shared<CustomProblemOperator>(_mfem_problem);
 }
 
 #endif

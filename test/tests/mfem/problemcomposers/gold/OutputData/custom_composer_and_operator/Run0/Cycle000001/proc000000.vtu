@@ -2578,7 +2578,7 @@
 </DataArray>
 </CellData>
 <PointData >
-<DataArray type="Float64" Name="prob_ex0p_var0" NumberOfComponents="1"  format="ascii" >
+<DataArray type="Float64" Name="u" NumberOfComponents="1"  format="ascii" >
 0.322525042
 0.318617479
 0.318617428
