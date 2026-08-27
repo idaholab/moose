@@ -12,10 +12,11 @@
 #pragma once
 
 #include "DiscreteSymmetry.h"
+#include "InputParameters.h"
 
 /**
  Interface for MFEM mesh objects providing methods querying topological information about an
- mfem::ParMesh
+ mfem::Mesh
  */
 class MFEMTopology
 {
