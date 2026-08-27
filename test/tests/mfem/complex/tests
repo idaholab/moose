@@ -60,4 +60,31 @@
     compute_devices = 'cpu'
     recover = false
   []
+  [MFEMComplexDiffusionEigenproblem]
+    type = CSVDiff
+    input = complex_diffusion_eigenproblem.i
+    csvdiff = 'OutputData/ComplexDiffusionEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve a complex-valued eigenproblem with Dirichlet BCs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMComplexEigenproblemInhomogeneousBC]
+    type = RunException
+    input = complex_diffusion_eigenproblem.i
+    cli_args = 'BCs/all/coefficient_imag=1.0'
+    expect_err = 'An eigenproblem is homogeneous so only zero-valued essential boundary conditions are meaningful'
+    requirement = 'The system shall report an error if an inhomogeneous essential boundary condition is applied to a complex-valued MFEM eigenproblem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+  []
+  [MFEMComplexMagneticEigenproblem]
+    type = CSVDiff
+    input = complex_magnetic_eigenproblem.i
+    csvdiff = 'OutputData/ComplexMagneticEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve a complex-valued eigenproblem with a genuinely complex (coupled real and imaginary) Hermitian operator using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
 []

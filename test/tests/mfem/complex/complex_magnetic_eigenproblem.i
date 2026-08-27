@@ -1,11 +1,13 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/star.mesh
-  serial_refine = 1
+  file = ../mesh/inline-quad.mesh
+  dim = 2
+  serial_refine = 2
 []
 
 [Problem]
   type = MFEMEigenproblem
+  numeric_type = complex
   num_modes = 5
 []
 
@@ -19,26 +21,31 @@
 
 [Variables]
   [u]
-    type = MFEMVariable
+    type = MFEMComplexVariable
     fespace = H1FESpace
   []
 []
 
 [BCs]
   [all]
-    type = MFEMScalarDirichletBC
+    type = MFEMComplexScalarDirichletBC
     variable = u
-    coefficient = 0.0
   []
 []
 
 [Kernels]
-  [diff]
-    type = MFEMDiffusionKernel
+  [magnetic]
+    type = MFEMComplexKernel
     variable = u
+    [RealComponent]
+      type = MFEMDiffusionKernel
+    []
+    [ImagComponent]
+      type = MFEMConvectionKernel
+      vector_coefficient = '-2 0'
+    []
   []
 []
-
 
 [Solvers]
   [boomeramg]
@@ -69,6 +76,6 @@
 [Outputs]
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/DiffusionEigenproblem
+    file_base = OutputData/ComplexMagneticEigenproblem
   []
 []

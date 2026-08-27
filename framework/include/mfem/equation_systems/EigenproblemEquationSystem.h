@@ -33,7 +33,7 @@ public:
   bool IsEigen() const override { return true; }
 
 protected:
-  /// Mark external boundaries as essential for eigenproblem BC elimination
+  /// Mark user-declared essential boundaries for eigenproblem BC elimination
   virtual void ApplyEssentialBCs() override;
 
   /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.

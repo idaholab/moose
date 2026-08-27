@@ -1,11 +1,13 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/star.mesh
+  dim = 2
   serial_refine = 1
 []
 
 [Problem]
   type = MFEMEigenproblem
+  numeric_type = complex
   num_modes = 5
 []
 
@@ -19,26 +21,27 @@
 
 [Variables]
   [u]
-    type = MFEMVariable
+    type = MFEMComplexVariable
     fespace = H1FESpace
   []
 []
 
 [BCs]
   [all]
-    type = MFEMScalarDirichletBC
+    type = MFEMComplexScalarDirichletBC
     variable = u
-    coefficient = 0.0
   []
 []
 
 [Kernels]
   [diff]
-    type = MFEMDiffusionKernel
+    type = MFEMComplexKernel
     variable = u
+    [RealComponent]
+      type = MFEMDiffusionKernel
+    []
   []
 []
-
 
 [Solvers]
   [boomeramg]
@@ -51,7 +54,7 @@
     print_level = 0
     l_tol = 1e-10
     l_max_its = 300
-    random_seed = 75
+    random_seed = 123
   []
 []
 
@@ -69,6 +72,6 @@
 [Outputs]
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/DiffusionEigenproblem
+    file_base = OutputData/ComplexDiffusionEigenproblem
   []
 []

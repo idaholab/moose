@@ -15,6 +15,7 @@
 #include "EigenproblemEquationSystem.h"
 #include "EquationSystemProblemOperator.h"
 #include "EigenproblemESProblemOperator.h"
+#include "ComplexEigenproblemESProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 
@@ -60,10 +61,21 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     }
     else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
     {
-      _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
-      addProblemOperator(std::move(problem_operator));
+      if (auto * eigen_problem = dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
+      {
+        _mfem_problem_data.eqn_system =
+            std::make_shared<Moose::MFEM::ComplexEigenproblemEquationSystem>(*eigen_problem);
+        auto problem_operator =
+            std::make_shared<Moose::MFEM::ComplexEigenproblemESProblemOperator>(_mfem_problem);
+        addProblemOperator(std::move(problem_operator));
+      }
+      else
+      {
+        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
+        auto problem_operator =
+            std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
+        addProblemOperator(std::move(problem_operator));
+      }
     }
     else
       mooseError("Unknown numeric type. "
