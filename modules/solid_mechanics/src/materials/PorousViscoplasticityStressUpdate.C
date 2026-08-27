@@ -243,7 +243,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateState(
     bool /*compute_full_tangent_operator*/,
     RankFourTensor & /*tangent_operator*/)
 {
-  updateIntermediatePorosity(elastic_strain_increment);
+  this->updateIntermediatePorosity(elastic_strain_increment);
   resetIncrementalMaterialProperties();
   inelastic_strain_increment.zero();
 
@@ -261,7 +261,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateState(
       _effective_inelastic_strain_old[_qp] + effective_inelastic_strain_increment;
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp] + inelastic_strain_increment;
 
-  computeStressFinalize(inelastic_strain_increment);
+  this->computeStressFinalize(inelastic_strain_increment);
 }
 
 template <bool is_ad>
@@ -282,7 +282,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateOneStep(
   const auto dev_stress_squared = dev_stress.doubleContraction(dev_stress);
   const auto equiv_stress = dev_stress_squared == 0.0 ? 0.0 : sqrt(1.5 * dev_stress_squared);
 
-  computeStressInitialize(equiv_stress, elasticity_tensor);
+  this->computeStressInitialize(equiv_stress, elasticity_tensor);
 
   // Prepare values
   inelastic_strain_increment.zero();
@@ -457,7 +457,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
       _effective_inelastic_strain_old[_qp] + accumulated_effective_inelastic_strain_increment;
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp] + inelastic_strain_increment;
 
-  computeStressFinalize(inelastic_strain_increment);
+  this->computeStressFinalize(inelastic_strain_increment);
 }
 
 template <bool is_ad>
@@ -481,7 +481,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
 
   // Keep this model's intermediate porosity fixed during the local substeps. It still includes
   // porosity associated with inelastic increments already computed by the other inelastic models.
-  updateIntermediatePorosity(original_strain_increment);
+  this->updateIntermediatePorosity(original_strain_increment);
 
   unsigned int number_substeps = 1;
   try
@@ -515,7 +515,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     stress_new = original_stress_new;
     _gauge_stress[_qp] = original_gauge_stress;
     resetIncrementalMaterialProperties();
-    updateIntermediatePorosity(original_strain_increment);
+    this->updateIntermediatePorosity(original_strain_increment);
 
     try
     {
