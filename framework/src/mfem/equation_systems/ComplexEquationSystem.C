@@ -7,18 +7,6 @@
 namespace Moose::MFEM
 {
 
-namespace
-{
-
-bool
-HasIntegrators(mfem::ParMixedBilinearForm & form)
-{
-  return form.GetDBFI()->Size() + form.GetBBFI()->Size() + form.GetFBFI()->Size() +
-             form.GetBFBFI()->Size() + form.GetTFBFI()->Size() + form.GetBTFBFI()->Size() !=
-         0;
-}
-}
-
 void
 ComplexEquationSystem::Init(GridFunctions & gridfunctions,
                             ComplexGridFunctions & cmplx_gridfunctions,
@@ -76,17 +64,11 @@ ComplexEquationSystem::BuildLinearForms()
 
   for (auto & test_var_name : _test_var_names)
   {
-    if ((_cmplx_kernels_map.Has(test_var_name) &&
-         _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
-        (_cmplx_integrated_bc_map.Has(test_var_name) &&
-         _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
-    {
-      // Apply kernels
-      auto clf = _clfs.GetShared(test_var_name);
-      ApplyDomainLFIntegrators(test_var_name, clf, _cmplx_kernels_map);
-      ApplyBoundaryLFIntegrators(test_var_name, clf, _cmplx_integrated_bc_map);
-      clf->Assemble();
-    }
+    // Apply kernels
+    auto clf = _clfs.GetShared(test_var_name);
+    ApplyDomainLFIntegrators(test_var_name, clf, _cmplx_kernels_map);
+    ApplyBoundaryLFIntegrators(test_var_name, clf, _cmplx_integrated_bc_map);
+    clf->Assemble();
   }
 
   // Apply boundary conditions
@@ -275,9 +257,14 @@ ComplexEquationSystem::EliminateCoupledVariables()
         const mfem::real_t scale = -1.0;
         const mfem::real_t conv =
             (mslf.GetConvention() == mfem::ComplexOperator::HERMITIAN) ? 1.0 : -1.0;
+        const int real_integs = mslf.real().GetDBFI()->Size() + mslf.real().GetBBFI()->Size() + mslf.real().GetFBFI()->Size() +
+             mslf.real().GetBFBFI()->Size() + mslf.real().GetTFBFI()->Size() + mslf.real().GetBTFBFI()->Size();
+        const int imag_integs = mslf.imag().GetDBFI()->Size() + mslf.imag().GetBBFI()->Size() + mslf.imag().GetFBFI()->Size() +
+             mslf.imag().GetBFBFI()->Size() + mslf.imag().GetTFBFI()->Size() + mslf.imag().GetBTFBFI()->Size();
+
         // y += scale * (A_r + i * A_i) * (x_r + i * x_i)
         // and take the complex conjugate of the result if convention is BLOCK_SYMMETRIC
-        if (HasIntegrators(mslf.real()))
+        if (real_integs)
         {
           mslf.real().AddMult(
               _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.real(), scale);
@@ -285,7 +272,7 @@ ComplexEquationSystem::EliminateCoupledVariables()
                               clf.imag(),
                               conv * scale);
         }
-        if (HasIntegrators(mslf.imag()))
+        if (imag_integs)
         {
           mslf.imag().AddMult(
               _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.real(), -scale);
