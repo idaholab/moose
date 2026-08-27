@@ -150,7 +150,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   verbose_subchannel = false
 
   # friction model
-  friction_closure = 'cheng'
+  friction_closure = 'Cheng'
 
   # HTC
   pin_HTC_closure = Dittus-Boelter
@@ -168,13 +168,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     type = SCMHTCDittusBoelter
   []
   [cheng_todreas]
-    type = SCMMixingChengTodreas
-  []
-[]
-
-[SCMClosures]
-  [cheng]
-    type = SCMFrictionChenTodreas
+    type = SCMMixingChenTodreas
   []
 []
 

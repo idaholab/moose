@@ -1,6 +1,6 @@
-# SCMMixingChengTodreas
+# SCMFrictionChenTodreas
 
-!syntax description /SCMClosures/SCMMixingChengTodreas
+!syntax description /SCMClosures/SCMFrictionChenTodreas
 
 ## Overview
 
@@ -32,8 +32,8 @@ These bulk $Re_L$ and $Re_T$ values are used for both the base turbulent mixing 
 Information about the use of $\beta$ can be found in [Turbulent crossflow](subchannel_theory.md#turbulent-crossflow).
 Additionally, the user may opt to provide the turbulent momentum mixing parameter `CT`. Information about the use of this parameter can be found in [Turbulent momentum transfer](subchannel_theory.md#turbulent-momentum-transfer).
 
-!syntax parameters /SCMClosures/SCMMixingChengTodreas
+!syntax parameters /SCMClosures/SCMFrictionChenTodreas
 
-!syntax inputs /SCMClosures/SCMMixingChengTodreas
+!syntax inputs /SCMClosures/SCMFrictionChenTodreas
 
-!syntax children /SCMClosures/SCMMixingChengTodreas
+!syntax children /SCMClosures/SCMFrictionChenTodreas

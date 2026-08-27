@@ -48,7 +48,7 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
     type = SCMHTCGnielinski
   []
   [cheng_todreas]
-    type = SCMMixingChengTodreas
+    type = SCMMixingChenTodreas
     CT = 2.6
   []
 []
