@@ -29,15 +29,32 @@ RotationalSymmetry::RotationalSymmetry(const unsigned int rotational_symmetry_or
   : DiscreteSymmetry(),
     _rotation_angle(2 * pi / rotational_symmetry_order),
     _rotation_axis(rotation_axis),
-    _rotation_matrix(BuildRotationMatrix(_rotation_axis, _rotation_angle))
+    _2d_rotation_matrix(Build2DRotationMatrix(_rotation_angle)),
+    _3d_rotation_matrix(Build3DRotationMatrix(_rotation_axis, _rotation_angle))
 {
 }
 
 mfem::DenseMatrix
-RotationalSymmetry::BuildRotationMatrix(const mfem::Vector & rotation_axis,
-                                        const mfem::real_t & rotation_angle)
+RotationalSymmetry::Build2DRotationMatrix(const mfem::real_t & rotation_angle)
 {
-  mfem::DenseMatrix rotation_matrix(rotation_axis.Size());
+  mfem::DenseMatrix rotation_matrix(2);
+
+  const mfem::real_t cos_a = cos(rotation_angle);
+  const mfem::real_t sin_a = sin(rotation_angle);
+
+  rotation_matrix(0, 0) = cos_a;
+  rotation_matrix(0, 1) = -sin_a;
+  rotation_matrix(1, 0) = sin_a;
+  rotation_matrix(1, 1) = cos_a;
+
+  return rotation_matrix;
+}
+
+mfem::DenseMatrix
+RotationalSymmetry::Build3DRotationMatrix(const mfem::Vector & rotation_axis,
+                                          const mfem::real_t & rotation_angle)
+{
+  mfem::DenseMatrix rotation_matrix(3);
 
   mfem::Vector unit_rot_axis = rotation_axis;
   unit_rot_axis /= rotation_axis.Norml2();
@@ -75,7 +92,13 @@ RotationalSymmetry::BuildRotationMatrix(const mfem::Vector & rotation_axis,
 void
 RotationalSymmetry::ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out)
 {
-  _rotation_matrix.Mult(coord_in, coord_out);
+  if (coord_in.Size() == 2)
+    _2d_rotation_matrix.Mult(coord_in, coord_out);
+  else if (coord_in.Size() == 3)
+    _3d_rotation_matrix.Mult(coord_in, coord_out);
+  else
+    mooseError("Provided coordinate has an incompatible spatial dimension with available rotation "
+               "matrices");
 }
 
 }
