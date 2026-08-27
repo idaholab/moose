@@ -746,7 +746,8 @@ MeshDiagnosticsGenerator::checkNonConformingFaces(const std::unique_ptr<MeshBase
       if (material_outside)
       {
         if (num_nonconforming_faces < _num_outputs)
-          _console << "Non-conforming face (borders material but matches no neighbor face) on "
+          _console << "Non-conforming element face (borders another cell but matches no neighbor "
+                      "element across the face) on "
                       "element "
                    << elem->id() << " side " << s << " near " << side_center << std::endl;
         num_nonconforming_faces++;
