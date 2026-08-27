@@ -167,7 +167,6 @@ coil_conductivity = 1.0
 
 [Executioner]
   type = MFEMSteady
-  device = cpu
 []
 
 [Transfers]
