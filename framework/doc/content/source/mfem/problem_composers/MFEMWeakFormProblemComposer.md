@@ -10,8 +10,6 @@
 
 !listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=Problem ProblemComposers
 
-## Input File Syntax
-
 !syntax parameters /ProblemComposers/MFEMWeakFormProblemComposer
 
 !syntax inputs /ProblemComposers/MFEMWeakFormProblemComposer

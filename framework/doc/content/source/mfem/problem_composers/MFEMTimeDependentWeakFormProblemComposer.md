@@ -12,8 +12,6 @@
 
 !listing test/tests/mfem/problemcomposers/prob_op_mfem_multiple_timesequences.i block=Problem ProblemComposers
 
-## Input File Syntax
-
 !syntax parameters /ProblemComposers/MFEMTimeDependentWeakFormProblemComposer
 
 !syntax inputs /ProblemComposers/MFEMTimeDependentWeakFormProblemComposer

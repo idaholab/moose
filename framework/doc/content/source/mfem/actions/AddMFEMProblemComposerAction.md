@@ -2,7 +2,7 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
+## Overview
 
 Action called to add a problem composer, an object that builds [ProblemOperator.md]s,
 parsing content inside a [`ProblemComposers`](syntax/ProblemComposers/index.md) block in the user

@@ -90,14 +90,18 @@ Finally, we can choose a data collection type for our result outputs.
 
 !listing test/tests/mfem/kernels/diffusion.i block=/Outputs remove=VisItDataCollection ConduitDataCollection Outputs/active
 
-### Advanced features (problem operators and composers)
+### Advanced features
+
+#### Problem Operators and Problem Composers
 
 The problem operator applies an action on a vector: this can be a solve of an equation system,
 application of a preconditioner or any other custom operator the user may have. The problem
 composer is the systematic logical object that builds the problem operator. By default, a composer
 will be instantiated based on the type of executioner (steady or transient), numerical type (real or
-complex) and other factors, e.g., is it an eigen problem. However, problem composers can also be
-explicitly built. A walk through can be found on [this page](syntax/ProblemComposers/index.md optional=True).
+complex) and other factors, e.g., is it an eigenvalue problem. However, problem composers can also be
+explicitly built, enabling users to plug in their own existing MFEM application code or to leverage
+MFEM functionality not yet exposed in MFEM-MOOSE. A walkthrough can be found on
+[this page](syntax/ProblemComposers/index.md optional=True).
 
 !if-end!
 
