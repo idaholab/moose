@@ -23,13 +23,13 @@ class CustomProblemComposer : public MFEMProblemComposer
 public:
   static InputParameters validParams();
 
-  CustomProblemComposer(const InputParameters & parameters) : MFEMProblemComposer(parameters) {};
+  CustomProblemComposer(const InputParameters & parameters);
 
   ~CustomProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted operator.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-  createProblemOperator(MFEMProblem & _mfem_problem) override;
+  createProblemOperator(MFEMProblem & mfem_problem) override;
 };
 
 #endif

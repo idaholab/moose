@@ -20,10 +20,15 @@ CustomProblemComposer::validParams()
   return params;
 }
 
-std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-CustomProblemComposer::createProblemOperator(MFEMProblem & _mfem_problem)
+CustomProblemComposer::CustomProblemComposer(const InputParameters & parameters)
+  : MFEMProblemComposer(parameters)
 {
-  return std::make_shared<CustomProblemOperator>(_mfem_problem);
+}
+
+std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
+CustomProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
+{
+  return std::make_shared<CustomProblemOperator>(mfem_problem);
 }
 
 #endif
