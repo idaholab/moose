@@ -94,18 +94,18 @@ P_out = 2.0e5 # Pa
   verbose_multiapps = true
   verbose_subchannel = false
   duct_HTC_closure = 'gnielinski'
-  friction_closure = 'cheng'
-  mixing_closure = 'cheng_todreas'
+  friction_closure = 'Chen'
+  mixing_closure = 'Chen_Todreas'
 []
 
 [SCMClosures]
-  [cheng]
+  [Chen]
     type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
+  [Chen_Todreas]
     type = SCMMixingChenTodreas
     CT = 1.0
   []

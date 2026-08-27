@@ -14,9 +14,9 @@
 #include "QuadSubChannelMesh.h"
 
 /**
- * Class that calculates the friction factor using the Cheng-Todreas correlations.
+ * Class that calculates the friction factor using the Chen-Todreas correlations.
  * For triangular wire-wrapped lattices, the user may select either the Upgraded
- * Cheng-Todreas or Pacio-Cheng-Todreas parameterization. It is used for both quad and tri lattices.
+ * Chen-Todreas or Pacio-Chen-Todreas parameterization. It is used for both quad and tri lattices.
  */
 class SCMFrictionChenTodreas : public SCMFrictionClosureBase
 {
@@ -39,6 +39,6 @@ protected:
   const QuadSubChannelMesh * const _quad_sch_mesh;
   /// Whether the triangular assembly has wire-wrap geometry
   const bool _has_wire_wrap;
-  /// Cheng-Todreas correlation version
+  /// Chen-Todreas correlation version
   const MooseEnum & _friction_model;
 };

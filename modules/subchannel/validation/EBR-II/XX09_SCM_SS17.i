@@ -82,20 +82,20 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   verbose_subchannel = true
   pin_HTC_closure = 'gnielinski'
   duct_HTC_closure = 'gnielinski'
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
   full_output = true
-  mixing_closure = 'cheng_todreas'
+  mixing_closure = 'Chen_Todreas'
 
 []
 
 [SCMClosures]
-  [cheng]
+  [Chen]
     type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
+  [Chen_Todreas]
     type = SCMMixingChenTodreas
     CT = 2.6
   []
