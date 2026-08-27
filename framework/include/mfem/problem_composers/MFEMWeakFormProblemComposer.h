@@ -20,9 +20,7 @@
 class MFEMWeakFormProblemComposer : public MFEMProblemComposer
 {
 public:
-  MFEMWeakFormProblemComposer(const InputParameters & parameters) : MFEMProblemComposer(parameters)
-  {
-  }
+  MFEMWeakFormProblemComposer(const InputParameters & parameters);
 
   ~MFEMWeakFormProblemComposer() = default;
 

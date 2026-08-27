@@ -14,6 +14,11 @@
 
 registerMooseObject("MooseApp", MFEMWeakFormProblemComposer);
 
+MFEMWeakFormProblemComposer::MFEMWeakFormProblemComposer(const InputParameters & parameters)
+  : MFEMProblemComposer(parameters)
+{
+}
+
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 MFEMWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {

@@ -20,10 +20,7 @@
 class MFEMTimeDependentWeakFormProblemComposer : public MFEMProblemComposer
 {
 public:
-  MFEMTimeDependentWeakFormProblemComposer(const InputParameters & parameters)
-    : MFEMProblemComposer(parameters)
-  {
-  }
+  MFEMTimeDependentWeakFormProblemComposer(const InputParameters & parameters);
 
   ~MFEMTimeDependentWeakFormProblemComposer() = default;
 
