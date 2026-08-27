@@ -24,13 +24,13 @@
     recover = false
     restep = false
   []
-  [MFEMSteadyCustomComposer]
+  [CustomProblemComposer]
     type = XMLDiff
-    input = prob_op_custom_operator.i
-    xmldiff = 'OutputData/prob_op_custom_operator/Run0/Run0.pvd '
-              'OutputData/prob_op_custom_operator/Run0/Cycle000000/proc000000.vtu '
-              'OutputData/prob_op_custom_operator/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'The system shall have the ability to use a custom operator based on ex0p'
+    input = custom_composer_and_operator.i
+    xmldiff = 'OutputData/custom_composer_and_operator/Run0/Run0.pvd '
+              'OutputData/custom_composer_and_operator/Run0/Cycle000000/proc000000.vtu '
+              'OutputData/custom_composer_and_operator/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to use a custom operator based on MFEM ex0p'
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
