@@ -21,15 +21,14 @@
     restep = false
   []
   [MFEMTransientProblemComposerConduction]
-    type = CSVDiff
+    type = XMLDiff
     input = prob_op_block_heattransfer.i
-    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
-              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
+    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
+              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
+              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
     requirement = 'The system shall have the ability to solve a transient heat conduction using the problem composer block using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
