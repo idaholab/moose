@@ -65,6 +65,27 @@ to a given uniform element volume specified as
 This refinement is currently controlled by the third-party Netgen
 code.
 
+## Second-order elements
+
+By default `XYZDelaunayGenerator` produces first-order `TET4` elements.  Setting
+[!param](/Mesh/XYZDelaunayGenerator/tet_element_type) to `TET10` or `TET14`
+instead produces second-order or complete-order tetrahedra.  The mid-edge (and,
+for `TET14`, face-center) nodes are added by libMesh after the tetrahedralization.
+
+Curvature is *inherited* from the input surfaces: if the
+[!param](/Mesh/XYZDelaunayGenerator/boundary) (or a
+[!param](/Mesh/XYZDelaunayGenerator/holes) mesh) is itself a second-order
+(`TRI6`/`TRI7` surface) mesh whose mid-edge nodes lie on the true geometry, those
+curved positions are transferred onto the corresponding faces of the generated
+mesh.  A first-order input surface yields straight-edged (geometric) mid-edge
+nodes.  No analytic surface projection is performed.
+
+When a hole is stitched (see [!param](/Mesh/XYZDelaunayGenerator/stitch_holes))
+into a second-order output, its element order is automatically raised to match so
+that the stitched faces conform.  Conversely, requesting a first-order
+[!param](/Mesh/XYZDelaunayGenerator/tet_element_type) while stitching a
+second-order hole is an error.
+
 !syntax parameters /Mesh/XYZDelaunayGenerator
 
 !syntax inputs /Mesh/XYZDelaunayGenerator
