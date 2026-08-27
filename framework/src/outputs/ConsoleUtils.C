@@ -116,9 +116,10 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
           << (forced || pre_split ? ")" : "");
     }
     oss << '\n';
-    oss << std::setw(console_field_width) << "  Mesh Dimension: " << mesh.dimension() << '\n'
-        << std::setw(console_field_width) << "  Spatial Dimension: " << mesh.spatialDimension()
-        << '\n';
+    oss << std::setw(console_field_width) << "  Mesh Dimension: " << mesh.dimension() << '\n';
+    if (mesh.getMesh().preparation().has_cached_elem_data)
+      oss << std::setw(console_field_width) << "  Spatial Dimension: " << mesh.spatialDimension()
+          << '\n';
   }
 
   // Nodes, only associated with the mesh in libMesh
