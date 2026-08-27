@@ -150,8 +150,9 @@ CustomDummyProblemOperator::Init(mfem::BlockVector &)
 
 The solve method solves the linear/non-linear system that has been setup and passes the
 data to the mfem `GridFunctions` so that the post-processors can view the results.
-During construction as the `Moose::MFEM::ProblemOperator` class was constructed as well,
-the class inherits a reference to the `MFEMProblem` and `MFEMProblemData`.
+The class inherits a reference to the `MFEMProblem` and `MFEMProblemData` from
+`Moose::MFEM::ProblemOperator` meaning the they can be used to access the grid-functions
+and solvers.
 
 ```cpp
 void CustomDummyProblemOperator::Solve() override
