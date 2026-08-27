@@ -34,4 +34,15 @@
                   'integration rule.'
     capabilities = 'mfem'
   []
+  [CylindricalCoefficients]
+    type = CSVDiff
+    input = cylindrical_coefficients.i
+    csvdiff = OutputData/CylindricalCoefficients_LineSampler_0001.csv
+    design = 'MFEMCoordinateTransformations.md'
+    issues = '#32375'
+    requirement = 'The system shall have the ability to parse the cylindrical coefficients to functor materials'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
