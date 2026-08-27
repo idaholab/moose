@@ -29,7 +29,9 @@
   [wrong_subdomain_pair]
     type = RunException
     input = test.i
-    cli_args = "FVInterfaceKernels/interface/subdomain1=1 FVInterfaceKernels/interface/subdomain2=1"
+    # disabled renumbering to keep face infos the same the message says 0 and 1 not 1 and 0
+    cli_args = "FVInterfaceKernels/interface/subdomain1=1 FVInterfaceKernels/interface/subdomain2=1
+                Mesh/allow_renumbering=false"
     expect_err = "FVInterfaceKernel 'interface' .* connecting subdomains 0 and 1, but this face does not connect the subdomains specified by 'subdomain1' and 'subdomain2'\."
     design = 'FVInterfaceKernels/index.md'
     issues = '#33435'
