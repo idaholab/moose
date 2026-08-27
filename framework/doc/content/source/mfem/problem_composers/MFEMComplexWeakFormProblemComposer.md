@@ -8,8 +8,6 @@
 
 ## Input File Syntax
 
-## Input File Syntax
-
 !syntax parameters /ProblemComposers/MFEMComplexWeakFormProblemComposer
 
 !syntax inputs /ProblemComposers/MFEMComplexWeakFormProblemComposer

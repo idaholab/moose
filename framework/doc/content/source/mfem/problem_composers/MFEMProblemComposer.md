@@ -2,7 +2,7 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
+## Overview
 
 `MFEMProblemComposer` is the base class of those classes that build [ProblemOperator.md]
 objects, through the method `createProblemOperator()`. The composer itself is created by

@@ -2,9 +2,11 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
+## Overview
 
 `MFEMEigenWeakFormProblemComposer` is the builder class for `EigenproblemESProblemOperator`.
+
+## Input File Syntax
 
 !syntax parameters /ProblemComposers/MFEMEigenWeakFormProblemComposer
 

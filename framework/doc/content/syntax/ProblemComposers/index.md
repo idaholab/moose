@@ -233,8 +233,7 @@ CustomDummyProblemComposer::CustomDummyProblemComposer(
 ```
 
 The last method to be built is the `createProblemOperator` it simply returns a shared pointer
-to the `ProblemOperator` that was defined earlier, this method is called by the executioner,
-and the resulting object is owned by the executioner.
+to the `ProblemOperator` that was defined earlier.
 
 ```cpp
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>

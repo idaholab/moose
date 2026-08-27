@@ -2,11 +2,15 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
+## Overview
 
 `MFEMWeakFormProblemComposer` is the builder class for `EquationSystemProblemOperator`.
 
+## Example Input File Syntax
+
 !listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=Problem ProblemComposers
+
+## Input File Syntax
 
 !syntax parameters /ProblemComposers/MFEMWeakFormProblemComposer
 
