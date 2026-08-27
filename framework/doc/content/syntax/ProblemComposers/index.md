@@ -43,16 +43,14 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 
 ```
 
-As the problem operator is built by the MFEM executioners all registered entities in
-[`MFEMProblem`](mfem/problem/MFEMProblem.md) have been built e.g. the `ParGridFunctions`.
 A custom operator builder function should be added in the case of non-linear problems where the
 operator is rebuilt. In the non-linear case the user would have to override and populate the
 `Mult` and the `GetGradient` functions to rebuild, fetch and apply the operators for the residual
 and Jacobian. The self pointer would have be passed to the non-linear solver via the
 `SetOperator(mfem::Operator &)` method in the non-linear case. The case in this example is linear
-and the Operator is simply built in the constructor. Firstly the class needs `Form`'s,
-`Coefficient`'s, BC `Array`s, `Operator`s and solution/forcing `Vector`s, an equation
-system can also be used instead of or along side the previous objects.
+and the Operator is only built once in `Init` function or in the class constructor. Firstly the 
+class needs `Form`'s, `Coefficient`'s, BC `Array`s, `Operator`s and solution/forcing `Vector`s, 
+an equation system can also be used instead of or along side the previous objects.
 
 ```cpp
 class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
@@ -94,10 +92,8 @@ Once the member variables are declared, the next thing is to set-up the problem.
 `Forms` need access to the FE-Spaces and the post processors need access to the `GridFunction`s.
 Both the FE-Spaces and `GridFunction`s are owned by the `MFEMProblem` and need to be retrieved
 for usage in the `ProblemOperator`, assuming for this example that the FE-Space and `GridFunction`s
-that we are interested in have an expected name. The constructor can only be used to retrieve custom
-input parameters, retrieveing FE-Spaces and GridFunctions has to be done in the `Init` function
-this is because the executioner is on of the first things that is built, before even the variables
-and FE-spaces so they cannot be accessed upon construction of the operator.
+that we are interested in have an expected name. The constructor should only be used to retrieve custom
+input parameters, retrieveing FE-Spaces and GridFunctions has to be done in the `Init`.
 
 ```cpp
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0):
@@ -176,7 +172,7 @@ Once the `ProblemOperator` has been written, an `MFEMProblemComposer` class is n
 this class is constructed by `MFEMProblem` and called by the executioner. The composer class
 must inherit from `MFEMProblemComposer` making it an `MFEMObject` and by proxy a 
 `MooseObject` thus it has a fixed signature constructor and destructor, it has one method
-that has a fixed signature that is called by the executioner. An example minimal class looks like:
+that has a fixed signature. An example minimal class looks like:
 
 ```cpp
 class CustomDummyProblemComposer : public MFEMProblemComposer
@@ -200,8 +196,9 @@ public:
 };
 ```
 
-The `validParams()` method can be used to generate custom inputs for the problem operator,
-the inputs can be then put in the `ProblemComposers` block of the input files.
+The `validParams()` method can be used to generate custom inputs for the problem composer,
+the inputs can be then put in the `ProblemComposers` block of the input files. The custom inputs
+in problem composer can then be passed to the problem operator in the `createProblemOperator` method.
 
 ```cpp
 InputParameters CustomDummyProblemComposer::validParams()
