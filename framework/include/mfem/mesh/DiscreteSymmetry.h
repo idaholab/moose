@@ -63,14 +63,19 @@ public:
 
   virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override;
 
-  // Build the rotation matrix to use in the transform
-  mfem::DenseMatrix BuildRotationMatrix(const mfem::Vector & rotation_axis,
-                                        const mfem::real_t & rotation_angle);
+  // Build the 2D rotation matrix to use in the transform, when all provided points lie in a plane
+  // normal to the rotation axis
+  mfem::DenseMatrix Build2DRotationMatrix(const mfem::real_t & rotation_angle);
+
+  // Build the 3D rotation matrix to use in the transform
+  mfem::DenseMatrix Build3DRotationMatrix(const mfem::Vector & rotation_axis,
+                                          const mfem::real_t & rotation_angle);
 
 private:
   const mfem::real_t _rotation_angle; // radians
   const mfem::Vector _rotation_axis;
-  const mfem::DenseMatrix _rotation_matrix;
+  const mfem::DenseMatrix _2d_rotation_matrix;
+  const mfem::DenseMatrix _3d_rotation_matrix;
 };
 
 }
