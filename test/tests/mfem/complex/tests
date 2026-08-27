@@ -60,4 +60,31 @@
     compute_devices = 'cpu'
     recover = false
   []
+  [MFEMMixedSesquilinear]
+    type = CSVDiff
+    input = mixed_sesquilinear.i
+    csvdiff = 'OutputData/MixedSesquilinear.csv'
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with mixed sesquilinear form kernels.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMMixedSesquilinearIC]
+    type = CSVDiff
+    input = mixed_sesquilinear_ic.i
+    csvdiff = 'OutputData/MixedSesquilinearIC.csv'
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with mixed sesquilinear form kernels and complex initial conditions on an eliminated variable.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMMixedSesquilinearRealImag]
+    type = CSVDiff
+    input = mixed_sesquilinear_real_imag.i
+    csvdiff = 'OutputData/MixedSesquilinearRealImag.csv'
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with a mixed sesquilinear form kernel carrying both real and imaginary integrators on a trial variable with essential degrees of freedom.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
