@@ -39,27 +39,19 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _last_solve_converged(false)
 {
   // If no ProblemOperators have been added by the user, add a default
-  if (!_mfem_problem.getProblemComposers())
+  if (!_mfem_problem.getProblemComposer())
   {
-    std::string name = "default_steady";
-    InputParameters default_params = _factory.getValidParams("MFEMWeakFormProblemComposer");
+    std::string name = "__DefaultWeakFormProblemComposer";
+    InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
 
     if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
-    {
-      _mfem_problem.addMFEMProblemComposer(
-          "MFEMEigenWeakFormProblemComposer", name, default_params);
-    }
+      _mfem_problem.addMFEMProblemComposer("MFEMEigenWeakFormProblemComposer", name, params);
     else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
-    {
-      _mfem_problem.addMFEMProblemComposer(
-          "MFEMComplexWeakFormProblemComposer", name, default_params);
-    }
+      _mfem_problem.addMFEMProblemComposer("MFEMComplexWeakFormProblemComposer", name, params);
     else
-    {
-      _mfem_problem.addMFEMProblemComposer("MFEMWeakFormProblemComposer", name, default_params);
-    }
+      _mfem_problem.addMFEMProblemComposer("MFEMWeakFormProblemComposer", name, params);
   }
-  addProblemOperator(_mfem_problem.getProblemComposers()->createProblemOperator(_mfem_problem));
+  addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
 }
 
 void

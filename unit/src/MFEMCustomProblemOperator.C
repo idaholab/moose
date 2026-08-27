@@ -175,7 +175,7 @@ public:
         _factory.getValidParams("CustomDummyProblemComposer");
     _mfem_problem->addMFEMProblemComposer(
         "CustomDummyProblemComposer", "custom_problem_operator", _problem_operator_params);
-    _problem_composer = _mfem_problem->getProblemComposers();
+    _problem_composer = _mfem_problem->getProblemComposer();
     _problem_operator = _problem_composer->createProblemOperator(*_mfem_problem);
     mfem::BlockVector dummy_vec;
     _problem_operator->Init(dummy_vec);

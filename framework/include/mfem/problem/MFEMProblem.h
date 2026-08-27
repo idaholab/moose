@@ -286,7 +286,7 @@ public:
   /**
    * Method to get the Problem Composer(s).
    */
-  std::shared_ptr<MFEMProblemComposer> & getProblemComposers() { return _problem_composer; }
+  std::shared_ptr<MFEMProblemComposer> & getProblemComposer() { return _problem_composer; }
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
