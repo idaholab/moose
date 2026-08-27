@@ -92,7 +92,7 @@ public:
 
   // This mostly copies the method taken by a BilinearForm/PABilinearFormExtension.
   // The only reason we need to do everything ourselves is because we need to call
-  // _nlf->GetDNFI() instead of what usually happens (calling GetDBFI() on the 
+  // _nlf->GetDNFI() instead of what usually happens (calling GetDBFI() on the
   // underlying bilinearform instead)
   void AssembleDiagOnNonlinearForm(mfem::Vector & diag) const
   {
