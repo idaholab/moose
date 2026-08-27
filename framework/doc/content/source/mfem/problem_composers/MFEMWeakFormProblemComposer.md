@@ -8,7 +8,7 @@
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=Problem ProblemComposers
+!listing test/tests/mfem/problemcomposers/explicit_composer_darcy.i block=Problem ProblemComposers
 
 !syntax parameters /ProblemComposers/MFEMWeakFormProblemComposer
 

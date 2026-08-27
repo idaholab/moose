@@ -8,9 +8,7 @@
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=Problem ProblemComposers
-
-!listing test/tests/mfem/problemcomposers/prob_op_mfem_multiple_timesequences.i block=Problem ProblemComposers
+!listing test/tests/mfem/problemcomposers/explicit_composer_heat_transfer.i block=Problem ProblemComposers
 
 !syntax parameters /ProblemComposers/MFEMTimeDependentWeakFormProblemComposer
 

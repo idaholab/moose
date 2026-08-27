@@ -1,37 +1,26 @@
 [Tests]
-  design = 'syntax/Problem/index.md'
+  design = 'MFEMProblemComposer.md'
   issues = '#33021'
-  [MFEMSteadyProblemComposer]
+  [WeakFormProblemComposer]
     type = CSVDiff
-    input = prob_op_block_darcy.i
+    input = explicit_composer_darcy.i
     csvdiff = 'OutputData/Darcy.csv'
-    requirement = 'The system shall be able to declare a SteadyProblemComposer while using the MFEM block without changing the results of the MFEM Darcy problem.'
+    requirement = 'The system shall allow the user to explicitly build an MFEMWeakFormProblemComposer '
+                  'while still getting the same results for, e.g., a Darcy problem.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
   []
-  [MFEMTransientProblemComposerTSequence]
-    type = CSVDiff
-    input = 'prob_op_mfem_multiple_timesequences.i'
-    csvdiff = 'mfem_multiple_timesequences.csv'
-    requirement = 'The system shall be able to declare a TransientProblemComposer while using the MFEM block without changing the results of the MFEM HeatTransfer problem.'
-    capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
-    recover = false
-    restep = false
-  []
-  [MFEMTransientProblemComposerConduction]
+  [TimeDependentWeakFormProblemComposer]
     type = XMLDiff
-    input = prob_op_block_heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
-    cli_args = 'BCs/active="bottom top_dirichlet" '
-               'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
-    requirement = 'The system shall have the ability to solve a transient heat conduction using the problem composer block using MFEM.'
+    input = explicit_composer_heat_transfer.i
+    xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
+                OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    requirement = 'The system shall allow the user to explicitly build an MFEMTimeDependentWeakFormProblemComposer '
+                  'while still getting the same results for, e.g., a heat transfer problem.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
