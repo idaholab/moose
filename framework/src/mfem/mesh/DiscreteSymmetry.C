@@ -9,9 +9,8 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#pragma once
-
 #include "DiscreteSymmetry.h"
+#include "MooseError.h"
 
 namespace Moose::MFEM
 {
@@ -27,7 +26,7 @@ TranslationalSymmetry::ApplyTransform(const mfem::Vector & coord_in, mfem::Vecto
 RotationalSymmetry::RotationalSymmetry(const unsigned int rotational_symmetry_order,
                                        const mfem::Vector & rotation_axis)
   : DiscreteSymmetry(),
-    _rotation_angle(2 * pi / rotational_symmetry_order),
+    _rotation_angle(2 * M_PI / rotational_symmetry_order),
     _rotation_axis(rotation_axis),
     _2d_rotation_matrix(Build2DRotationMatrix(_rotation_angle)),
     _3d_rotation_matrix(Build3DRotationMatrix(_rotation_axis, _rotation_angle))

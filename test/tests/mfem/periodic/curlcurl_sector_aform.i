@@ -123,7 +123,6 @@ initial_coil_domains = 'coil'
 
 [Executioner]
   type = MFEMSteady
-  device = cpu
 []
 
 [MultiApps]
