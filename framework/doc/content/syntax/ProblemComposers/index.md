@@ -169,9 +169,8 @@ void CustomDummyProblemOperator::Solve() override
 
 ```
 
-Once the `ProblemOperator` has been written, an `MFEMProblemComposer` class is needed,
-this class is constructed by `MFEMProblem` and called by the executioner. The composer class
-must inherit from `MFEMProblemComposer` making it an `MFEMObject` and by proxy a 
+Once the `ProblemOperator` has been written, an `MFEMProblemComposer` class is needed. The
+composer class must inherit from `MFEMProblemComposer` making it an `MFEMObject` and by proxy a
 `MooseObject` thus it has a fixed signature constructor and destructor, it has one method
 that has a fixed signature. An example minimal class looks like:
 
