@@ -257,29 +257,17 @@ ComplexEquationSystem::EliminateCoupledVariables()
         const mfem::real_t scale = -1.0;
         const mfem::real_t conv =
             (mslf.GetConvention() == mfem::ComplexOperator::HERMITIAN) ? 1.0 : -1.0;
-        const int real_integs = mslf.real().GetDBFI()->Size() + mslf.real().GetBBFI()->Size() + mslf.real().GetFBFI()->Size() +
-             mslf.real().GetBFBFI()->Size() + mslf.real().GetTFBFI()->Size() + mslf.real().GetBTFBFI()->Size();
-        const int imag_integs = mslf.imag().GetDBFI()->Size() + mslf.imag().GetBBFI()->Size() + mslf.imag().GetFBFI()->Size() +
-             mslf.imag().GetBFBFI()->Size() + mslf.imag().GetTFBFI()->Size() + mslf.imag().GetBTFBFI()->Size();
 
         // y += scale * (A_r + i * A_i) * (x_r + i * x_i)
         // and take the complex conjugate of the result if convention is BLOCK_SYMMETRIC
-        if (real_integs)
-        {
-          mslf.real().AddMult(
-              _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.real(), scale);
-          mslf.real().AddMult(_cmplx_eliminated_variables.Get(eliminated_var_name)->imag(),
-                              clf.imag(),
-                              conv * scale);
-        }
-        if (imag_integs)
-        {
-          mslf.imag().AddMult(
-              _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.real(), -scale);
-          mslf.imag().AddMult(_cmplx_eliminated_variables.Get(eliminated_var_name)->real(),
-                              clf.imag(),
-                              conv * scale);
-        }
+        mslf.real().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.real(), scale);
+        mslf.real().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.imag(), conv * scale);
+        mslf.imag().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.real(), -scale);
+        mslf.imag().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.imag(), conv * scale);
         clf.SyncAlias();
       }
 }
@@ -346,7 +334,8 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                               *clf,
                               *aux_a,
                               aux_x,
-                              aux_rhs);
+                              aux_rhs,
+                              /*copy_interior=*/true);
         trueX.GetBlock(i) = aux_x;
       }
       else if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(trial_var_name))
