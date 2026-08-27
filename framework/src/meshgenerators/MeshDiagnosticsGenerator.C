@@ -74,7 +74,9 @@ MeshDiagnosticsGenerator::validParams()
       "examine_nonplanar_sides", chk_option, "whether to check element sides are planar");
   params.addParam<MooseEnum>("examine_non_conformality",
                              chk_option,
-                             "whether to examine the conformality of elements in the mesh.");
+                             "whether to examine the conformality of elements in the mesh. "
+                             "Automatically turns on 'examine_nonconforming_faces' as well,"
+                             " unless specified otherwise.");
   params.addParam<MooseEnum>(
       "examine_nonconforming_faces",
       chk_option,
@@ -191,7 +193,8 @@ MeshDiagnosticsGenerator::generate()
   if (_check_non_conformal_mesh != "NO_CHECK")
     checkNonConformalMesh(mesh);
 
-  if (_check_nonconforming_faces != "NO_CHECK")
+  if (_check_nonconforming_faces != "NO_CHECK" ||
+      (_check_non_conformal_mesh != "NO_CHECK" && !isParamSetByUser("examine_nonconforming_faces")))
     checkNonConformingFaces(mesh);
 
   if (_check_adaptivity_non_conformality != "NO_CHECK")
@@ -751,11 +754,13 @@ MeshDiagnosticsGenerator::checkNonConformingFaces(const std::unique_ptr<MeshBase
     }
   }
   pl->disable_out_of_mesh_mode();
-  diagnosticsLog("Number of non-conforming element faces (border another cell but match no neighbor "
-                 "element across the face): " +
-                     std::to_string(num_nonconforming_faces),
-                 _check_nonconforming_faces,
-                 num_nonconforming_faces);
+  diagnosticsLog(
+      "Number of non-conforming element faces (border another cell but match no neighbor "
+      "element across the face): " +
+          std::to_string(num_nonconforming_faces),
+      _check_nonconforming_faces != "NO_CHECK" ? _check_nonconforming_faces
+                                               : _check_non_conformal_mesh,
+      num_nonconforming_faces);
 }
 
 void
