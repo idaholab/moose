@@ -11,6 +11,7 @@
 
 #include "GeneralUserObject.h"
 #include "FunctionParserUtils.h"
+#include "NonADFunctorInterface.h"
 #include "MooseTypes.h"
 
 #include "libmesh/numeric_vector.h"
@@ -37,7 +38,8 @@ typedef MooseVariableFE<Real> MooseVariable;
  * after moving the nodes.
  */
 class MoveNodesByParsedExpressionModifier : public GeneralUserObject,
-                                            public FunctionParserUtils<false>
+                                            public FunctionParserUtils<false>,
+                                            public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -89,6 +91,10 @@ protected:
 
   /// Postprocessor values referenced in the expressions, in symbol order
   std::vector<const PostprocessorValue *> _postprocessors;
+
+  /// Functors referenced in the expressions, in symbol order. Evaluated at the node in its
+  /// reference (undisplaced) configuration
+  std::vector<const Moose::Functor<Real> *> _functors;
 
   /// Original (reference) position of each node, captured on first touch. Restartable so
   /// that a recovered run keeps the undisplaced reference; the checkpointed mesh is already

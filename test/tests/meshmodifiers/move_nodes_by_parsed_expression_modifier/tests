@@ -37,6 +37,31 @@
     requirement = "The system shall support functions, postprocessors, and a z-direction expression "
                   "in parsed nodal displacements."
   []
+  [functors]
+    type = 'Exodiff'
+    input = 'functors.i'
+    exodiff = 'functors_out.e'
+    requirement = "The system shall support functors, optionally renamed by a symbol, as symbols in "
+                  "parsed nodal displacement expressions, evaluated at each node's original "
+                  "position."
+  []
+  [functor_variable_error]
+    type = 'RunException'
+    input = 'functors.i'
+    cli_args = "UserObjects/move/functor_names='swelling u'"
+    expect_err = "'u' is a variable. Use 'coupled_variables' instead"
+    requirement = "The system shall report an error when a variable is supplied as a functor to a "
+                  "parsed nodal displacement modifier, because its nodal values are not available "
+                  "on every processor."
+  []
+  [functor_symbol_count_error]
+    type = 'RunException'
+    input = 'functors.i'
+    cli_args = "UserObjects/move/functor_symbols='swelling'"
+    expect_err = "functor_symbols must be the same length as functor_names"
+    requirement = "The system shall require one symbol per functor when functor symbols are "
+                  "supplied to a parsed nodal displacement modifier."
+  []
   [displace_parallel]
     type = 'Exodiff'
     input = 'displace.i'
@@ -152,6 +177,16 @@
     expect_err = "Exactly three variable names must be provided"
     requirement = "The system shall require exactly three variable names for the original "
                   "coordinate and displacement outputs."
+  []
+  [functors_distributed]
+    type = 'Exodiff'
+    input = 'functors.i'
+    exodiff = 'functors_out.e'
+    min_parallel = 2
+    cli_args = 'Mesh/parallel_type=distributed'
+    prereq = 'functors'
+    requirement = "The system shall evaluate functors in parsed nodal displacements correctly on a "
+                  "distributed mesh."
   []
   [outputs_distributed]
     type = 'Exodiff'

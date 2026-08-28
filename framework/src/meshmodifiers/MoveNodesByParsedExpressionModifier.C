@@ -33,6 +33,7 @@ MoveNodesByParsedExpressionModifier::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params += FunctionParserUtils<false>::validParams();
+  params += NonADFunctorInterface::validParams();
   params.addClassDescription(
       "Actively displaces the selected mesh nodes by parsed expressions for the x, y, and z "
       "displacement components, evaluated relative to each node's original position.");
@@ -58,6 +59,16 @@ MoveNodesByParsedExpressionModifier::validParams()
       "functions", {}, "Functions usable as symbols in the displacement expressions");
   params.addParam<std::vector<PostprocessorName>>(
       "postprocessors", {}, "Postprocessors usable as symbols in the displacement expressions");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "functor_names",
+      {},
+      "Functors (e.g. functor material properties) usable as symbols in the displacement "
+      "expressions. They are evaluated at each node in its original (undisplaced) position.");
+  params.addParam<std::vector<std::string>>(
+      "functor_symbols",
+      {},
+      "Symbolic name to use for each functor in 'functor_names' in the displacement expressions. "
+      "If not provided, then the actual functor names will be used.");
 
   params.addParam<std::vector<std::string>>(
       "constant_names", {}, "Vector of constants used in the parsed function");
@@ -102,6 +113,7 @@ MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
     const InputParameters & parameters)
   : GeneralUserObject(parameters),
     FunctionParserUtils<false>(parameters),
+    NonADFunctorInterface(this),
     _mesh(_subproblem.mesh()),
     _boundary_ids(_mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("boundary"))),
     _subdomain_ids(_mesh.getSubdomainIDs(getParam<std::vector<SubdomainName>>("block"))),
@@ -123,9 +135,20 @@ MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
   const auto & var_names = getParam<std::vector<VariableName>>("coupled_variables");
   const auto & func_names = getParam<std::vector<FunctionName>>("functions");
   const auto & pp_names = getParam<std::vector<PostprocessorName>>("postprocessors");
+  const auto & functor_names = getParam<std::vector<MooseFunctorName>>("functor_names");
+  const auto & functor_symbols = getParam<std::vector<std::string>>("functor_symbols");
+
+  if (!functor_symbols.empty() && functor_symbols.size() != functor_names.size())
+    paramError("functor_symbols", "functor_symbols must be the same length as functor_names.");
+
+  // The symbol each functor is referred to by: the user-provided one if given, else its name.
+  std::vector<std::string> functor_syms;
+  for (const auto i : index_range(functor_names))
+    functor_syms.push_back(functor_symbols.empty() ? std::string(functor_names[i])
+                                                   : functor_symbols[i]);
 
   // Build the comma-separated symbol list in evaluation order:
-  // coupled variables, functions, postprocessors, then x, y, z, t.
+  // coupled variables, functions, postprocessors, functors, then x, y, z, t.
   std::string symbols;
   auto add_symbol = [&symbols](const std::string & s)
   { symbols += (symbols.empty() ? "" : ",") + s; };
@@ -152,17 +175,32 @@ MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
     _postprocessors.push_back(&getPostprocessorValueByName(name));
     add_symbol(name);
   }
+  for (const auto i : index_range(functor_names))
+  {
+    // A variable functor reads the variable's own partitioned solution vector, which cannot be
+    // indexed at a node owned by another processor. 'coupled_variables' gathers those values
+    // onto every rank, so variables must go through that parameter instead.
+    if (_subproblem.hasVariable(functor_names[i]))
+      paramError("functor_names",
+                 "'",
+                 functor_names[i],
+                 "' is a variable. Use 'coupled_variables' instead, which gathers the nodal "
+                 "values needed to displace nodes owned by other processors.");
+    _functors.push_back(&getFunctor<Real>(functor_names[i]));
+    add_symbol(functor_syms[i]);
+  }
 
   // x, y, z, t are always available; guard against name collisions.
   for (const auto & reserved : {"x", "y", "z", "t"})
   {
     if (std::find(var_names.begin(), var_names.end(), reserved) != var_names.end() ||
         std::find(func_names.begin(), func_names.end(), reserved) != func_names.end() ||
-        std::find(pp_names.begin(), pp_names.end(), reserved) != pp_names.end())
+        std::find(pp_names.begin(), pp_names.end(), reserved) != pp_names.end() ||
+        std::find(functor_syms.begin(), functor_syms.end(), reserved) != functor_syms.end())
       mooseError("The symbol '",
                  reserved,
                  "' is reserved for coordinates/time and cannot be used as a coupled variable, "
-                 "function, or postprocessor name.");
+                 "function, postprocessor, or functor name.");
     add_symbol(reserved);
   }
 
@@ -179,7 +217,8 @@ MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
                         comm());
   }
 
-  _func_params.resize(_coupled_vars.size() + _functions.size() + _postprocessors.size() + 4);
+  _func_params.resize(_coupled_vars.size() + _functions.size() + _postprocessors.size() +
+                      _functors.size() + 4);
 
   // Set up the optional output aux variables (created by the user in the input).
   if (_output_coordinates || _output_displacements || _output_density_factor)
@@ -362,6 +401,18 @@ MoveNodesByParsedExpressionModifier::displaceNode(Node & node)
     _func_params[k++] = func->value(_t, ref);
   for (const auto * const pp : _postprocessors)
     _func_params[k++] = *pp;
+  if (!_functors.empty())
+  {
+    // Functors are sampled at the node itself, so put it back in its reference position before
+    // evaluating them. Otherwise a second execution would sample them at the already displaced
+    // location, inconsistent with the 'functions' and 'x', 'y', 'z' symbols.
+    for (const auto i : make_range(Moose::dim))
+      node(i) = ref(i);
+    const Moose::NodeArg node_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+    const auto state = determineState();
+    for (const auto * const functor : _functors)
+      _func_params[k++] = (*functor)(node_arg, state);
+  }
   _func_params[k++] = ref(0);
   _func_params[k++] = ref(1);
   _func_params[k++] = ref(2);

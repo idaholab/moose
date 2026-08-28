@@ -17,10 +17,12 @@ does not accumulate drift. The expressions may reference the node's original coo
 `z` and the time `t`, as well as nodal variables listed in
 [!param](/UserObjects/MoveNodesByParsedExpressionModifier/coupled_variables) (an error is raised for
 non-nodal variables), [!param](/UserObjects/MoveNodesByParsedExpressionModifier/functions),
-[!param](/UserObjects/MoveNodesByParsedExpressionModifier/postprocessors), and constants defined through
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/postprocessors),
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_names), and constants defined through
 [!param](/UserObjects/MoveNodesByParsedExpressionModifier/constant_names) and
 [!param](/UserObjects/MoveNodesByParsedExpressionModifier/constant_expressions).
-Coordinates and any referenced functions are evaluated at each node's original (undisplaced) position.
+Coordinates and any referenced functions or functors are evaluated at each node's original
+(undisplaced) position.
 
 The modifier displaces the mesh actively on its own execution schedule, set by the
 [!param](/UserObjects/MoveNodesByParsedExpressionModifier/execute_on) parameter (it does not respond to the
@@ -33,6 +35,25 @@ When [!param](/UserObjects/MoveNodesByParsedExpressionModifier/coupled_variables
 referenced variable values are gathered onto all ranks each time the modifier runs so that nodal
 values can be read at any moved node. This serialized copy uses memory proportional to the number of
 degrees of freedom per rank.
+
+## Functors
+
+Any [functor](Functors/index.md), such as a functor material property, can be made available to the
+displacement expressions by listing it in
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_names). By default a functor is
+referred to in the expressions by its own name; supply
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_symbols) to give each functor a
+different symbol instead (one symbol per functor). Functors are evaluated at the node without a
+block connection, as elsewhere in MOOSE's nodal functor evaluations, so a functor material property
+must be defined on every block of the mesh to be usable here.
+
+Variables cannot be passed through
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_names); use
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/coupled_variables) instead, which gathers the
+nodal values needed to displace nodes owned by other processors (see above). An error is raised if a
+variable name is given as a functor.
+
+!listing test/tests/meshmodifiers/move_nodes_by_parsed_expression_modifier/functors.i block=UserObjects
 
 ## Optional outputs
 
@@ -50,9 +71,9 @@ names below); the modifier writes into them.
   per-element density adjustment factor to the named elemental (`MONOMIAL`, `CONSTANT`) aux
   variable. The factor is the original element volume divided by the current element volume
   (equivalently `1/det(F)`); multiplying a strain-free density by it conserves mass, analogous
-  to the `StrainAdjustedDensity` material. Element volumes are coordinate-aware (XYZ, RZ, and
-  RSPHERICAL). The original volumes are captured at the modifier's first execution, which must
-  precede any displacement of these nodes.
+  to the [`StrainAdjustedDensity`](StrainAdjustedDensity.md optional=True) material. Element
+  volumes are coordinate-aware (XYZ, RZ, and RSPHERICAL). The original volumes are captured at
+  the modifier's first execution, which must precede any displacement of these nodes.
 
 !syntax parameters /UserObjects/MoveNodesByParsedExpressionModifier
 
