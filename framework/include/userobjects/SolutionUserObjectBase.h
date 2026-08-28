@@ -36,8 +36,7 @@ public:
   SolutionUserObjectBase(const InputParameters & parameters);
 
   /// Policies for reducing multiple imported solution values at the same point
-  CreateMooseEnumClass(
-      WeightingType, FOUND_FIRST = 1, AVERAGE = 2, SMALLEST_ELEMENT_ID = 4, LARGEST_ELEMENT_ID = 8);
+  CreateMooseEnumClass(WeightingType, AVERAGE = 2, SMALLEST_ELEMENT_ID = 4, LARGEST_ELEMENT_ID = 8);
 
   /**
    * Get the time at which to sample the solution
@@ -70,7 +69,7 @@ public:
   Real pointValueWrapper(Real t,
                          const Point & p,
                          const std::string & var_name,
-                         WeightingType weighting_type = WeightingType::FOUND_FIRST,
+                         WeightingType weighting_type,
                          const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
@@ -152,7 +151,7 @@ public:
   pointValueGradientWrapper(Real t,
                             const Point & p,
                             const std::string & var_name,
-                            WeightingType weighting_type = WeightingType::FOUND_FIRST,
+                            WeightingType weighting_type,
                             const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
@@ -262,7 +261,12 @@ public:
 
   bool isVariableNodal(const std::string & var_name) const;
 
-  static MooseEnum weightingType() { return MooseEnum(getWeightingTypeOptions(), "found_first"); }
+  static MooseEnum weightingType() { return MooseEnum(getWeightingTypeOptions()); }
+
+  /**
+   * Returns whether the imported variable is a spatially discontinuous finite element field.
+   */
+  bool isVariableSpatiallyDiscontinuous(const std::string & var_name) const;
 
   /**
    * Return the spatial dimension of the mesh file

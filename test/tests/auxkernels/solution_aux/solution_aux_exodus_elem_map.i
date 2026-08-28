@@ -36,6 +36,7 @@
     solution = soln
     variable = matid
     scale_factor = 1.0
+    weighting_type = smallest_element_id
   [../]
 []
 

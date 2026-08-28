@@ -48,8 +48,10 @@ SolutionFunction::validParams()
 SolutionFunction::SolutionFunction(const InputParameters & parameters)
   : Function(parameters),
     _solution_object_ptr(nullptr),
-    _weighting_type(
-        getParam<MooseEnum>("weighting_type").getEnum<SolutionUserObjectBase::WeightingType>()),
+    _weighting_type(isParamSetByUser("weighting_type")
+                        ? std::make_optional(getParam<MooseEnum>("weighting_type")
+                                                 .getEnum<SolutionUserObjectBase::WeightingType>())
+                        : std::nullopt),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
 {
@@ -91,20 +93,36 @@ SolutionFunction::initialSetup()
 
   // Validate the imported variable name during setup rather than waiting for the first evaluation.
   _solution_object_ptr->getLocalVarIndex(_solution_object_var_name);
+
+  // Require an explicit weighting policy for spatially discontinuous imported variables
+  if (_solution_object_ptr->isVariableSpatiallyDiscontinuous(_solution_object_var_name) &&
+      !_weighting_type)
+    paramError("weighting_type",
+               "A weighting policy must be specified when the imported variable '",
+               _solution_object_var_name,
+               "' is spatially discontinuous.");
 }
 
 Real
 SolutionFunction::value(Real t, const Point & p) const
 {
-  return _scale_factor * _solution_object_ptr->pointValueWrapper(
-                             t, p, _solution_object_var_name, _weighting_type) +
+  if (_weighting_type)
+    return _scale_factor * _solution_object_ptr->pointValueWrapper(
+                               t, p, _solution_object_var_name, *_weighting_type) +
+           _add_factor;
+
+  return _scale_factor * _solution_object_ptr->pointValue(t, p, _solution_object_var_name) +
          _add_factor;
 }
 
 RealGradient
 SolutionFunction::gradient(Real t, const Point & p) const
 {
-  return _scale_factor * _solution_object_ptr->pointValueGradientWrapper(
-                             t, p, _solution_object_var_name, _weighting_type) +
+  if (_weighting_type)
+    return _scale_factor * _solution_object_ptr->pointValueGradientWrapper(
+                               t, p, _solution_object_var_name, *_weighting_type) +
+           _add_grad;
+
+  return _scale_factor * _solution_object_ptr->pointValueGradient(t, p, _solution_object_var_name) +
          _add_grad;
 }

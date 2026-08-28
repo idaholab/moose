@@ -41,8 +41,10 @@ SolutionIC::SolutionIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _solution_object(getUserObject<SolutionUserObjectBase>("solution_uo")),
     _solution_object_var_name(getParam<VariableName>("from_variable")),
-    _weighting_type(
-        getParam<MooseEnum>("weighting_type").getEnum<SolutionUserObjectBase::WeightingType>())
+    _weighting_type(isParamSetByUser("weighting_type")
+                        ? std::make_optional(getParam<MooseEnum>("weighting_type")
+                                                 .getEnum<SolutionUserObjectBase::WeightingType>())
+                        : std::nullopt)
 {
 }
 
@@ -90,11 +92,25 @@ SolutionIC::initialSetup()
                "Source subdomain block restriction is not supported if the solution file type is "
                "not Exodus. Current file type: " +
                    std::string(_solution_object.getSolutionFileType()));
+
+  // Validate the imported variable name during setup rather than waiting for the first evaluation.
+  _solution_object.getLocalVarIndex(_solution_object_var_name);
+
+  // Require an explicit weighting policy for spatially discontinuous imported variables
+  if (_solution_object.isVariableSpatiallyDiscontinuous(_solution_object_var_name) &&
+      !_weighting_type)
+    paramError("weighting_type",
+               "A weighting policy must be specified when the imported variable '",
+               _solution_object_var_name,
+               "' is spatially discontinuous.");
 }
 
 Real
 SolutionIC::value(const Point & p)
 {
-  return _solution_object.pointValueWrapper(
-      0., p, _solution_object_var_name, _weighting_type, &_exo_block_ids);
+  if (_weighting_type)
+    return _solution_object.pointValueWrapper(
+        0., p, _solution_object_var_name, *_weighting_type, &_exo_block_ids);
+
+  return _solution_object.pointValue(0., p, _solution_object_var_name, &_exo_block_ids);
 }

@@ -19,19 +19,34 @@
     exodiff = 'solution_ic_block_restricted_out.e'
     requirement = "The system shall be able to initialize a variable from an ExodusII file and specify the block restriction of the source blocks in that file independently of the block restriction of the initial condition."
   []
-  [weighting_source]
-    type = RunApp
-    input = 'solution_ic_weighting_source.i'
-    issues = '#31766'
-    requirement = "The system shall write a discontinuous source field for testing multivalued SolutionIC evaluation."
-  []
   [weighting]
-    type = CSVDiff
-    input = 'solution_ic_weighting.i'
-    csvdiff = 'solution_ic_weighting_out.csv'
-    prereq = 'weighting_source'
     issues = '#31766'
-    requirement = "The SolutionIC shall reduce multivalued imported values using the selected weighting policy."
+    requirement = "The system shall handle multivalued imported initial-condition data by "
+
+    [source]
+      type = RunApp
+      input = 'solution_ic_weighting_source.i'
+
+      detail = "supporting a discontinuous elemental source field,"
+    []
+
+    [reader]
+      type = CSVDiff
+      input = 'solution_ic_weighting.i'
+      csvdiff = 'solution_ic_weighting_out.csv'
+      prereq = weighting/source
+
+      detail = "reducing point values using selectable weighting policies, and"
+    []
+
+    [missing_weighting]
+      type = RunException
+      input = 'solution_ic_weighting_no_weight.i'
+      expect_err = "A weighting policy must be specified when the imported variable 'source_value' is spatially discontinuous"
+      prereq = weighting/source
+
+      detail = "requiring an explicit weighting policy for spatially discontinuous point lookup."
+    []
   []
   [errors]
     requirement = "The system shall report an error if"

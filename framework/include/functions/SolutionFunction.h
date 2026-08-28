@@ -11,6 +11,7 @@
 
 #include "Function.h"
 #include "SolutionUserObjectBase.h"
+#include <optional>
 
 /** Function for reading a solution from file
  * Creates a function that extracts values from a solution read from a file,
@@ -60,7 +61,7 @@ protected:
   std::string _solution_object_var_name;
 
   /// Policy used when the imported solution is multivalued at the query point
-  const SolutionUserObjectBase::WeightingType _weighting_type;
+  const std::optional<SolutionUserObjectBase::WeightingType> _weighting_type;
 
   /// Factor to scale the solution by (default = 1)
   const Real _scale_factor;

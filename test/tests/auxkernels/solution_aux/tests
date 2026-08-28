@@ -55,13 +55,13 @@
 
   [weighting]
     issues = '#31766'
-    requirement = "The SolutionAux object shall be capable of importing a multivalued solution "
+    requirement = "The system shall handle multivalued imported solution data by "
 
     [source]
       type = RunApp
       input = 'solution_aux_weighting_source.i'
 
-      detail = "from a discontinuous elemental source field and "
+      detail = "supporting a discontinuous elemental source field,"
     []
 
     [reader]
@@ -70,7 +70,16 @@
       csvdiff = 'solution_aux_weighting_out.csv'
       prereq = weighting/source
 
-      detail = "reducing point values using selectable weighting policies."
+      detail = "reducing point values using selectable weighting policies, and"
+    []
+
+    [missing_weighting]
+      type = RunException
+      input = 'solution_aux_no_weighting.i'
+      expect_err = "A weighting policy must be specified when the imported variable 'source_value' is spatially discontinuous"
+      prereq = weighting/source
+
+      detail = "requiring an explicit weighting policy for spatially discontinuous point lookup."
     []
   []
 

@@ -616,6 +616,16 @@ SolutionUserObjectBase::initialSetup()
   _initialized = true;
 }
 
+bool
+SolutionUserObjectBase::isVariableSpatiallyDiscontinuous(const std::string & var_name) const
+{
+  const auto & fe_type = _system->variable_type(var_name);
+
+  return FEInterface::field_type(fe_type) == libMesh::TYPE_SCALAR &&
+         fe_type.family != libMesh::SCALAR &&
+         FEInterface::get_continuity(fe_type) == libMesh::DISCONTINUOUS;
+}
+
 MooseEnum
 SolutionUserObjectBase::getSolutionFileType() const
 {
@@ -736,21 +746,18 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
                                           const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // Use multivalued evaluation only for spatial discontinuous scalar fields.
-  // The default found_first policy also shortcuts out.
   const auto & fe_type = _system->variable_type(var_name);
   const auto continuity = FEInterface::get_continuity(fe_type);
   const auto field_type = FEInterface::field_type(fe_type);
 
-  if (weighting_type == WeightingType::FOUND_FIRST || field_type != libMesh::TYPE_SCALAR ||
-      continuity != libMesh::DISCONTINUOUS || fe_type.family == libMesh::SCALAR)
+  if (field_type != libMesh::TYPE_SCALAR || continuity != libMesh::DISCONTINUOUS ||
+      fe_type.family == libMesh::SCALAR)
     return pointValue(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
   std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name, subdomain_ids);
   switch (weighting_type)
   {
-    case WeightingType::FOUND_FIRST:
-      break;
     case WeightingType::AVERAGE:
     {
       Real average = 0.0;
@@ -916,17 +923,12 @@ SolutionUserObjectBase::pointValueGradientWrapper(
     WeightingType weighting_type,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  // the default weighting_type found_first shortcuts out
-  if (weighting_type == WeightingType::FOUND_FIRST)
-    return pointValueGradient(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
   std::map<const Elem *, RealGradient> values =
       discontinuousPointValueGradient(t, p, var_name, subdomain_ids);
   switch (weighting_type)
   {
-    case WeightingType::FOUND_FIRST:
-      break;
     case WeightingType::AVERAGE:
     {
       RealGradient average = RealGradient(0.0, 0.0, 0.0);
