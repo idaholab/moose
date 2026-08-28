@@ -42,7 +42,7 @@ class SQARequirementReport(SQAReport):
         """
 
         # Extract configuration parameters
-        specs = self.specs or "tests"
+        specs = self.specs or ["tests", "*.unit_tests"]
 
         # Get complete directory paths, skipping any that do not exist (e.g. an
         # optional submodule dependency that has not been checked out)
