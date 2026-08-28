@@ -36,12 +36,13 @@ typedef MooseVariableFE<Real> MooseVariable;
  * meshChanged() event. It can optionally notify the problem that the mesh changed
  * after moving the nodes.
  */
-class MoveNodesByParsedExpression : public GeneralUserObject, public FunctionParserUtils<false>
+class MoveNodesByParsedExpressionModifier : public GeneralUserObject,
+                                            public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
 
-  MoveNodesByParsedExpression(const InputParameters & parameters);
+  MoveNodesByParsedExpressionModifier(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override;

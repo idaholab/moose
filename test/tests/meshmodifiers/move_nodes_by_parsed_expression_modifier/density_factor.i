@@ -28,7 +28,7 @@
 
 [UserObjects]
   [move]
-    type = MoveNodesByParsedExpression
+    type = MoveNodesByParsedExpressionModifier
     block = 0
     displacement_x = '0.1*x'
     density_factor_variable = 'jratio'

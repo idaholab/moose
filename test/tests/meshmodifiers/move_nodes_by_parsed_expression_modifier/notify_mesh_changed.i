@@ -31,7 +31,7 @@
 
 [UserObjects]
   [move]
-    type = MoveNodesByParsedExpression
+    type = MoveNodesByParsedExpressionModifier
     block = 0
     displacement_x = '0.05*t'
     notify_mesh_changed = true

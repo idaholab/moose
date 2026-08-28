@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MoveNodesByParsedExpression.h"
+#include "MoveNodesByParsedExpressionModifier.h"
 #include "Function.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
@@ -23,13 +23,13 @@
 #include <algorithm>
 #include <set>
 
-registerMooseObject("MooseApp", MoveNodesByParsedExpression);
+registerMooseObject("MooseApp", MoveNodesByParsedExpressionModifier);
 
-const std::string MoveNodesByParsedExpression::_disp_name[3] = {
+const std::string MoveNodesByParsedExpressionModifier::_disp_name[3] = {
     "displacement_x", "displacement_y", "displacement_z"};
 
 InputParameters
-MoveNodesByParsedExpression::validParams()
+MoveNodesByParsedExpressionModifier::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params += FunctionParserUtils<false>::validParams();
@@ -98,7 +98,8 @@ MoveNodesByParsedExpression::validParams()
   return params;
 }
 
-MoveNodesByParsedExpression::MoveNodesByParsedExpression(const InputParameters & parameters)
+MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
+    const InputParameters & parameters)
   : GeneralUserObject(parameters),
     FunctionParserUtils<false>(parameters),
     _mesh(_subproblem.mesh()),
@@ -216,9 +217,10 @@ MoveNodesByParsedExpression::MoveNodesByParsedExpression(const InputParameters &
 }
 
 void
-MoveNodesByParsedExpression::setupNodalOutputVariables(const std::string & param_name,
-                                                       const std::vector<AuxVariableName> & names,
-                                                       std::vector<unsigned int> & var_numbers)
+MoveNodesByParsedExpressionModifier::setupNodalOutputVariables(
+    const std::string & param_name,
+    const std::vector<AuxVariableName> & names,
+    std::vector<unsigned int> & var_numbers)
 {
   if (names.size() != 3)
     paramError(param_name,
@@ -239,7 +241,7 @@ MoveNodesByParsedExpression::setupNodalOutputVariables(const std::string & param
 }
 
 void
-MoveNodesByParsedExpression::execute()
+MoveNodesByParsedExpressionModifier::execute()
 {
   moveNodes();
 
@@ -252,7 +254,7 @@ MoveNodesByParsedExpression::execute()
 }
 
 void
-MoveNodesByParsedExpression::prepare()
+MoveNodesByParsedExpressionModifier::prepare()
 {
   // Gather each coupled-variable system's solution onto all ranks so that nodal
   // values can be read at any moved node (including non-semilocal nodes on a
@@ -287,7 +289,7 @@ MoveNodesByParsedExpression::prepare()
 }
 
 void
-MoveNodesByParsedExpression::moveNodes()
+MoveNodesByParsedExpressionModifier::moveNodes()
 {
   prepare();
 
@@ -335,7 +337,7 @@ MoveNodesByParsedExpression::moveNodes()
 }
 
 void
-MoveNodesByParsedExpression::displaceNode(Node & node)
+MoveNodesByParsedExpressionModifier::displaceNode(Node & node)
 {
   // Capture the original position on first touch (covers nodes created by adaptivity).
   auto [it, inserted] = _original_position.try_emplace(node.id(), Point(node));
@@ -370,7 +372,7 @@ MoveNodesByParsedExpression::displaceNode(Node & node)
 }
 
 void
-MoveNodesByParsedExpression::writeOutputs()
+MoveNodesByParsedExpressionModifier::writeOutputs()
 {
   if (!_output_coordinates && !_output_displacements && !_output_density_factor)
     return;

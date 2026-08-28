@@ -35,7 +35,7 @@
 
 [UserObjects]
   [move]
-    type = MoveNodesByParsedExpression
+    type = MoveNodesByParsedExpressionModifier
     block = 1
     displacement_y = '0.1*sin(pi*x)'
     constant_names = 'pi'

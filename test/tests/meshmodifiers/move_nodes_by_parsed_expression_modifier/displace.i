@@ -1,6 +1,3 @@
-# Neither 'block' nor 'boundary' is specified, so the modifier applies to all
-# blocks in the mesh. On this single-block mesh the result matches an explicit
-# block restriction.
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -27,7 +24,8 @@
 
 [UserObjects]
   [move]
-    type = MoveNodesByParsedExpression
+    type = MoveNodesByParsedExpressionModifier
+    block = 0
     displacement_x = '0.1*sin(pi*y)'
     displacement_y = '0'
     constant_names = 'pi'

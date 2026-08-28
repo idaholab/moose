@@ -1,4 +1,4 @@
-# Exercises the optional outputs of MoveNodesByParsedExpression: original node
+# Exercises the optional outputs of MoveNodesByParsedExpressionModifier: original node
 # coordinates (ref_coord_*), displacement (mv_disp_*), and the per-element density
 # adjustment factor (jratio). With displacement_x = 0.1*x the deformation gradient
 # is F = diag(1.1, 1, 1), so det(F) = 1.1 and jratio = V_orig/V_new = 1/1.1.
@@ -43,7 +43,7 @@
 
 [UserObjects]
   [move]
-    type = MoveNodesByParsedExpression
+    type = MoveNodesByParsedExpressionModifier
     block = 0
     displacement_x = '0.1*x'
     original_coordinate_variables = 'ref_coord_x ref_coord_y ref_coord_z'

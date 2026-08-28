@@ -1,5 +1,5 @@
 [Tests]
-  design = 'MoveNodesByParsedExpression.md'
+  design = 'MoveNodesByParsedExpressionModifier.md'
   issues = '#33587'
   [displace]
     type = 'Exodiff'

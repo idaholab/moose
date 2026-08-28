@@ -43,7 +43,7 @@
 
 [UserObjects]
   [move]
-    type = MoveNodesByParsedExpression
+    type = MoveNodesByParsedExpressionModifier
     block = 0
     displacement_x = '0.2*d'
     coupled_variables = 'd'

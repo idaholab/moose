@@ -44,7 +44,7 @@
 
 [UserObjects]
   [move]
-    type = MoveNodesByParsedExpression
+    type = MoveNodesByParsedExpressionModifier
     block = 0
     displacement_x = '0.1*gfun'
     displacement_z = '0.3*pp'
