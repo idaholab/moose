@@ -116,6 +116,26 @@ element, it will not be detected.
 This check may report false positives on some immersed meshes and slit meshes because it will detect non-conformal nodes
 and will try to examine if the elements next to these nodes can be grouped to form coarser elements.
 
+## Non-conforming faces check
+
+Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/examine_nonconforming_faces) parameter.
+
+This check detects element faces that border another element but do not match a neighbor face. A
+common example is a HEX8 quad face abutting two TET4 triangle faces over the same four corner nodes
+(for instance at the interface between a hexahedral region and a tetrahedral boundary layer). Because
+all four corner nodes are shared, no node lies on another element's face, so the
+[!param](/Mesh/MeshDiagnosticsGenerator/examine_non_conformality) (hanging-node) check does not report
+this situation; this check is complementary to it.
+
+The check looks at every face that has no neighbor (i.e. that the mesh library treats as external)
+and probes a point just outside it. If another element is found there, the face borders material but
+matched no neighbor face, so the interface is non-conforming.
+
+!alert note
+The probe relies on the element's outward face direction, so this check is intended for meshes of
+standard elements (such as HEX, TET, PYRAMID, PRISM). It is the right tool to verify that a cut or
+converted mesh did not leave quad-versus-two-triangle interfaces behind.
+
 ## Elements and sides local Jacobian check
 
 The local Jacobian is checked for positivity for every element and sides. Negative Jacobians are a common issue
