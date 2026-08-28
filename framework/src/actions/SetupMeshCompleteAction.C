@@ -123,9 +123,11 @@ SetupMeshCompleteAction::act()
     if (_displaced_mesh)
     {
       TIME_SECTION("completeSetupDisplaced", 2, "Setting Up Displaced Mesh");
-      // If the reference mesh was prepared, then we must prepare also
+      // If the reference mesh was prepared and remains prepared, then we must prepare also
       _displaced_mesh->prepare(
-          /*mesh_to_clone=*/prepare_for_use_called_on_undisplaced ? &_mesh->getMesh() : nullptr);
+          /*mesh_to_clone=*/prepare_for_use_called_on_undisplaced && _mesh->getMesh().is_prepared()
+              ? &_mesh->getMesh()
+              : nullptr);
     }
   }
 }
