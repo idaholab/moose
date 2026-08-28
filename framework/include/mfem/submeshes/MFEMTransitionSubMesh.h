@@ -13,6 +13,7 @@
 
 #include "MFEMSubMesh.h"
 #include "MFEMBlockRestrictable.h"
+#include "MFEMBoundaryRestrictable.h"
 
 /**
  * Modifies the MFEM Mesh to label a subdomain consisting of the one-element-wide layer of
@@ -21,13 +22,19 @@
  * one side are taken) or an exterior boundary of the mesh (in which case the single interior
  * side is taken). Access using the getSubMesh() accessor.
  */
-class MFEMTransitionSubMesh : public MFEMSubMesh, public MFEMBlockRestrictable
+class MFEMTransitionSubMesh : public MFEMSubMesh,
+                              public MFEMBlockRestrictable,
+                              public MFEMBoundaryRestrictable
 {
 public:
   static InputParameters validParams();
   MFEMTransitionSubMesh(const InputParameters & parameters);
 
 protected:
+  /// Both restrictable interfaces hold a reference to the same parent mesh, so pick one of the
+  /// two accessors to resolve the ambiguity.
+  using MFEMBlockRestrictable::getMesh;
+
   virtual void buildSubMesh() override;
 
   /// Add attributes to the parent mesh representing the transition region
@@ -67,10 +74,6 @@ protected:
                   std::set<int> & transition_set,
                   mfem::Array<int> & transition_els);
 
-  /// Resolve the 'boundary' parameter (numeric attributes and/or named attribute sets) into the
-  /// set of boundary attribute IDs the transition region is built from.
-  mfem::Array<int> boundaryAttributes();
-
   std::shared_ptr<mfem::ParSubMesh> _boundary_submesh{nullptr};
   const BoundaryName & _transition_subdomain_boundary;
   const SubdomainName & _transition_subdomain;
@@ -78,7 +81,7 @@ protected:
 
   /// True if the supplied boundary lies on the exterior of the mesh (only one side has
   /// elements), in which case no side selection is performed.
-  bool _exterior_boundary{false};
+  bool _is_exterior_boundary{false};
 
   /// Number of element-thick layers grown on the positive side of the boundary, and inwards for
   /// an exterior boundary.

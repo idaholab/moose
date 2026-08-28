@@ -38,29 +38,25 @@ MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & param
 mfem::Array<int>
 MFEMBoundaryRestrictable::boundariesToAttributes()
 {
-  mfem::Array<int> attributes(_boundary_names.size());
+  mfem::Array<int> attributes;
   auto & mesh = getMesh();
-  std::transform(
-      _boundary_names.begin(),
-      _boundary_names.end(),
-      attributes.begin(),
-      [&mesh](const BoundaryName & boundary) -> int
-      {
-        try
-        {
-          // Is this a sideset ID?
-          return std::stoi(boundary);
-        }
-        catch (...)
-        {
-          // It was not
-          auto & boundary_ids = mesh.bdr_attribute_sets.GetAttributeSet(boundary);
-          if (boundary_ids.Size() != 1)
-            mooseError(
-                "There should be a 1-to-1 correspondence between boundary name and boundary ID");
-          return boundary_ids[0];
-        }
-      });
+
+  for (const BoundaryName & boundary_name : _boundary_names)
+  {
+    try
+    {
+      // Is this a sideset ID?
+      const int attribute_id = std::stoi(boundary_name);
+      attributes.Append(attribute_id);
+    }
+    catch (...)
+    {
+      // It was not
+      auto & boundary_ids = mesh.bdr_attribute_sets.GetAttributeSet(boundary_name);
+      for (const auto & boundary_id : boundary_ids)
+        attributes.Append(boundary_id);
+    }
+  }
   return attributes;
 }
 

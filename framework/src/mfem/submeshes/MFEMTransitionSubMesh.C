@@ -23,16 +23,19 @@ MFEMTransitionSubMesh::validParams()
 {
   InputParameters params = MFEMSubMesh::validParams();
   params += MFEMBlockRestrictable::validParams();
+  params += MFEMBoundaryRestrictable::validParams();
   params.addClassDescription(
       "Class to construct an MFEMSubMesh formed from the set of elements that have at least one "
       "vertex on the specified boundary, that lie on one side of it (the single interior side "
       "for an exterior boundary), and that are restricted to the set of user-specified "
       "subdomains.");
-  params.addRequiredParam<std::vector<BoundaryName>>(
-      "cut_boundary",
+  // A transition region must be seeded from a boundary, so the interface's default of applying to
+  // all boundaries is not meaningful here.
+  params.makeParamRequired<std::vector<BoundaryName>>("boundary");
+  params.setDocString(
+      "boundary",
       "The boundary or boundaries from which the transition region is constructed. Accepts a "
       "space-separated list of numeric boundary attributes and/or named boundary attribute sets.");
-  params.deprecateParam("cut_boundary", "boundary", "07/23/2027");
   params.addRequiredParam<BoundaryName>(
       "transition_subdomain_boundary",
       "Name to assign boundary of transition subdomain not shared with the boundary surface.");
@@ -63,34 +66,15 @@ MFEMTransitionSubMesh::validParams()
 MFEMTransitionSubMesh::MFEMTransitionSubMesh(const InputParameters & parameters)
   : MFEMSubMesh(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _boundary_submesh(std::make_shared<mfem::ParSubMesh>(
-        mfem::ParSubMesh::CreateFromBoundary(getMesh(), boundaryAttributes()))),
+        mfem::ParSubMesh::CreateFromBoundary(getMesh(), getBoundaryAttributes()))),
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
     _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
     _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
     _num_layers_positive(getParam<unsigned int>("num_layers_positive")),
     _num_layers_negative(getParam<unsigned int>("num_layers_negative"))
 {
-}
-
-mfem::Array<int>
-MFEMTransitionSubMesh::boundaryAttributes()
-{
-  mfem::Array<int> attributes;
-  for (const auto & name : getParam<std::vector<BoundaryName>>("boundary"))
-  {
-    try
-    {
-      // Numeric boundary attribute.
-      attributes.Append(std::stoi(name));
-    }
-    catch (const std::invalid_argument &)
-    {
-      // Named boundary attribute set.
-      attributes.Append(getMesh().bdr_attribute_sets.GetAttributeSet(name));
-    }
-  }
-  return attributes;
 }
 
 void
@@ -129,9 +113,9 @@ MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   }
   MPI_Allreduce(
       MPI_IN_PLACE, &local_interior_face_found, 1, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
-  _exterior_boundary = (local_interior_face_found == 0);
+  _is_exterior_boundary = (local_interior_face_found == 0);
 
-  if (_exterior_boundary && _num_layers_negative > 0)
+  if (_is_exterior_boundary && _num_layers_negative > 0)
     mooseError("MFEMTransitionSubMesh: num_layers_negative must be zero for an exterior boundary, "
                "which has elements on one side only.");
 
@@ -143,7 +127,7 @@ MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   // themselves and the side each neighbouring element lies on. An exterior boundary has elements
   // on one side only, so there only the set of boundary vertices is needed.
   std::map<HYPRE_BigInt, mfem::Vector> vertex_normals;
-  if (_exterior_boundary)
+  if (_is_exterior_boundary)
   {
     const mfem::Array<int> & vertex_id_map = _boundary_submesh->GetParentVertexIDMap();
     std::vector<HYPRE_BigInt> ids_local;
@@ -186,7 +170,7 @@ MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
       const int el = els[i];
       if (el < 0 || !isInDomain(el, getSubdomainAttributes(), parent_mesh))
         continue;
-      if (_exterior_boundary || isPositiveSide(el, v, it->second, parent_mesh))
+      if (_is_exterior_boundary || isPositiveSide(el, v, it->second, parent_mesh))
         positive_seed.Append(el);
       else
         negative_seed.Append(el);
@@ -409,7 +393,7 @@ MFEMTransitionSubMesh::growLayers(mfem::ParMesh & parent_mesh,
         const int el = els[i];
         if (el < 0 || !isInDomain(el, getSubdomainAttributes(), parent_mesh))
           continue;
-        if (on_boundary && !_exterior_boundary &&
+        if (on_boundary && !_is_exterior_boundary &&
             isPositiveSide(el, v, it->second, parent_mesh) != positive_side)
           continue;
         if (transition_set.insert(el).second)
