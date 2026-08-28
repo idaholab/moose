@@ -98,10 +98,10 @@ namespace
   }
 
   void
-  buildFaceData(const std::vector<Point> & coords,
-                std::vector<Face> & faces,
-                std::map<EdgeKey, EdgeFaces> & edges,
-                std::vector<Point> & fnormal)
+  buildAdjacencyAndNormals(const std::vector<Point> & coords,
+                           std::vector<Face> & faces,
+                           std::map<EdgeKey, EdgeFaces> & edges,
+                           std::vector<Point> & fnormal)
   {
     Point c(0, 0, 0);
     if (!coords.empty())
@@ -145,11 +145,8 @@ namespace
         auto it = edges.find(key);
         if (it == edges.end())
           edges.emplace(key, EdgeFaces{fi, invalid_uint});
-        else
-        {
-          if (it->second.f1 == invalid_uint)
-            it->second.f1 = fi;
-        }
+        else if (it->second.f1 == invalid_uint)
+          it->second.f1 = fi;
       }
     }
   }
@@ -170,9 +167,9 @@ namespace
 
       const Point & n0 = fnormal[ef.f0];
       const Point & n1 = fnormal[ef.f1];
-      libmesh_assert_msg(!MooseUtils::absoluteFuzzyEqual(n0.norm(), 0.0) &&
-                             !MooseUtils::absoluteFuzzyEqual(n1.norm(), 0.0),
-                         "Normals are degenerate");
+      if (MooseUtils::absoluteFuzzyEqual(n0.norm(), 0.0) ||
+          MooseUtils::absoluteFuzzyEqual(n1.norm(), 0.0))
+        continue;
 
       const Real dot = n0 * n1;
       if (dot < 0.0)
@@ -303,14 +300,143 @@ namespace
       return nullptr;
 
     std::unique_ptr<Node> mid_elem_node;
-    auto poly = std::make_unique<C0Polyhedron>(sides, mid_elem_node);
+    std::unique_ptr<C0Polyhedron> polyhedron;
+    try
+    {
+      polyhedron = std::make_unique<C0Polyhedron>(sides, mid_elem_node);
+    }
+    catch (const libMesh::NotImplemented &)
+    {
+      return nullptr;
+    }
 
-    poly->subdomain_id() = new_subdomain_id;
-    Elem * new_elem = mesh.add_elem(std::move(poly));
+    polyhedron->subdomain_id() = new_subdomain_id;
+    Elem * new_elem = mesh.add_elem(std::move(polyhedron));
     if (mid_elem_node)
       mesh.add_node(std::move(mid_elem_node));
 
     return new_elem;
+  }
+
+  void
+  reattachBoundaries(ReplicatedMesh & mesh,
+                     Elem * new_elem,
+                     const std::vector<Face> & faces,
+                     const std::vector<std::vector<boundary_id_type>> & elem_side_list,
+                     const boundary_id_type cut_face_id)
+  {
+    auto & boundary_info = mesh.get_boundary_info();
+
+    for (unsigned int new_side_i = 0; new_side_i < faces.size(); ++new_side_i)
+    {
+      const auto & f = faces[new_side_i];
+      const int orig_side = f.orig_side;
+
+      if (orig_side < 0)
+      {
+        if (orig_side == -1)
+          boundary_info.add_side(new_elem, new_side_i, cut_face_id);
+      }
+      else
+      {
+        if (static_cast<unsigned int>(orig_side) >= elem_side_list.size())
+          continue;
+        const auto & bdrys = elem_side_list[orig_side];
+        for (const auto bid : bdrys)
+          boundary_info.add_side(new_elem, new_side_i, bid);
+      }
+    }
+  }
+
+  bool
+  convexifyRecursive(ReplicatedMesh & mesh,
+                     Elem * orig_elem,
+                     std::vector<Point> & coords,
+                     std::vector<const Node *> & nodes,
+                     const std::vector<std::vector<boundary_id_type>> & elem_side_list,
+                     const subdomain_id_type sid_shift_base,
+                     const boundary_id_type cut_face_id,
+                     const std::vector<Face> & faces_in,
+                     std::vector<Elem *> & out_elems)
+  {
+    if (faces_in.size() < 4)
+      return false;
+
+    // First, try to build a single convex polyhedron from these faces.
+    std::vector<Face> faces = faces_in;
+    const auto new_sid = orig_elem->subdomain_id() + sid_shift_base;
+    Elem * elem = buildPolyhedronFromFaces(mesh, coords, nodes, faces, new_sid);
+    if (elem)
+    {
+      reattachBoundaries(mesh, elem, faces, elem_side_list, cut_face_id);
+      out_elems.push_back(elem);
+      return true;
+    }
+
+    // If that failed, attempt a geometric split along one concave edge.
+    std::map<EdgeKey, EdgeFaces> edges;
+    std::vector<Point> fnormal;
+    buildAdjacencyAndNormals(coords, faces, edges, fnormal);
+
+    EdgeKey ce{0u, 0u};
+    unsigned int f0 = invalid_uint, f1 = invalid_uint;
+    if (!findConcaveEdge(edges, fnormal, ce, f0, f1))
+      return false;
+
+    Point n_split = fnormal[f0] + fnormal[f1];
+    const Real n_norm = n_split.norm();
+    if (MooseUtils::absoluteFuzzyEqual(n_norm, 0.0))
+      n_split = fnormal[f0];
+    else
+      n_split /= n_norm;
+
+    const Point p0 = coords[ce.a];
+    const Point p1 = coords[ce.b];
+    const Point p_mid = 0.5 * (p0 + p1);
+    const Real d_split = n_split * p_mid;
+
+    std::map<EdgeKey, unsigned int> edge_split_vertex;
+    computeEdgeIntersections(edges, coords, edge_split_vertex, n_split, d_split);
+
+    std::vector<Face> faces_pos, faces_neg;
+    faces_pos.reserve(faces.size());
+    faces_neg.reserve(faces.size());
+
+    Face tmp_pos, tmp_neg;
+    for (const auto & f : faces)
+    {
+      clipFaceByPlane(f, coords, n_split, d_split, edge_split_vertex, tmp_pos, tmp_neg);
+
+      if (tmp_pos.vertices.size() >= 3)
+        faces_pos.push_back(tmp_pos);
+      if (tmp_neg.vertices.size() >= 3)
+        faces_neg.push_back(tmp_neg);
+    }
+
+    if (faces_pos.empty() || faces_neg.empty())
+      return false;
+
+    // Recursively convexify each half.
+    bool ok_pos = convexifyRecursive(mesh,
+                                     orig_elem,
+                                     coords,
+                                     nodes,
+                                     elem_side_list,
+                                     sid_shift_base,
+                                     cut_face_id,
+                                     faces_pos,
+                                     out_elems);
+    bool ok_neg = convexifyRecursive(mesh,
+                                     orig_elem,
+                                     coords,
+                                     nodes,
+                                     elem_side_list,
+                                     sid_shift_base,
+                                     cut_face_id,
+                                     faces_neg,
+                                     out_elems);
+
+    return ok_pos && ok_neg;
   }
 
 } // anonymous namespace
@@ -341,89 +467,19 @@ splitNonConvexPolyhedron(ReplicatedMesh & mesh,
     nodes.push_back(n);
   }
 
-  std::vector<Face> faces = faces_in;
-
-  std::map<EdgeKey, EdgeFaces> edges;
-  std::vector<Point> fnormal;
-  buildFaceData(coords, faces, edges, fnormal);
-
-  EdgeKey ce{0u, 0u};
-  unsigned int f0 = invalid_uint, f1 = invalid_uint;
-  if (!findConcaveEdge(edges, fnormal, ce, f0, f1))
+  std::vector<Elem *> new_elems;
+  if (!convexifyRecursive(mesh,
+                          orig_elem,
+                          coords,
+                          nodes,
+                          elem_side_list,
+                          sid_shift_base,
+                          cut_face_id,
+                          faces_in,
+                          new_elems))
     return false;
 
-  Point n_split = fnormal[f0] + fnormal[f1];
-  const Real n_norm = n_split.norm();
-  if (MooseUtils::absoluteFuzzyEqual(n_norm, 0.0))
-    n_split = fnormal[f0];
-  else
-    n_split /= n_norm;
-
-  const Point p0 = coords[ce.a];
-  const Point p1 = coords[ce.b];
-  const Point p_mid = 0.5 * (p0 + p1);
-  const Real d_split = n_split * p_mid;
-
-  std::map<EdgeKey, unsigned int> edge_split_vertex;
-  computeEdgeIntersections(edges, coords, edge_split_vertex, n_split, d_split);
-
-  std::vector<Face> faces_pos, faces_neg;
-  faces_pos.reserve(faces.size());
-  faces_neg.reserve(faces.size());
-
-  Face tmp_pos, tmp_neg;
-  for (const auto & f : faces)
-  {
-    clipFaceByPlane(f, coords, n_split, d_split, edge_split_vertex, tmp_pos, tmp_neg);
-
-    if (tmp_pos.vertices.size() >= 3)
-      faces_pos.push_back(tmp_pos);
-    if (tmp_neg.vertices.size() >= 3)
-      faces_neg.push_back(tmp_neg);
-  }
-
-  if (faces_pos.empty() || faces_neg.empty())
-    return false;
-
-  const auto new_sid = orig_elem->subdomain_id() + sid_shift_base;
-  Elem * pos_elem = buildPolyhedronFromFaces(mesh, coords, nodes, faces_pos, new_sid);
-  Elem * neg_elem = buildPolyhedronFromFaces(mesh, coords, nodes, faces_neg, new_sid);
-
-  if (!pos_elem || !neg_elem)
-    return false;
-
-  auto & boundary_info = mesh.get_boundary_info();
-
-  auto reattach_boundaries = [&](Elem * new_elem, const std::vector<Face> & child_faces)
-  {
-    for (unsigned int new_side_i = 0; new_side_i < child_faces.size(); ++new_side_i)
-    {
-      const auto & f = child_faces[new_side_i];
-      const int orig_side = f.orig_side;
-
-      if (orig_side < 0)
-      {
-        // Faces lying on the original cut interface have orig_side == -1.
-        // Internal split faces use other negative values (currently none),
-        // so we only attach cut_face_id for orig_side == -1.
-        if (orig_side == -1)
-          boundary_info.add_side(new_elem, new_side_i, cut_face_id);
-      }
-      else
-      {
-        if (static_cast<unsigned int>(orig_side) >= elem_side_list.size())
-          continue;
-        const auto & bdrys = elem_side_list[orig_side];
-        for (const auto bid : bdrys)
-          boundary_info.add_side(new_elem, new_side_i, bid);
-      }
-    }
-  };
-
-  reattach_boundaries(pos_elem, faces_pos);
-  reattach_boundaries(neg_elem, faces_neg);
-
-  return true;
+  return !new_elems.empty();
 }
 
 } // namespace PolyhedraUtils
