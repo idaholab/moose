@@ -8,8 +8,8 @@ or [!param](/UserObjects/MoveNodesByParsedExpression/block) by the parsed expres
 [!param](/UserObjects/MoveNodesByParsedExpression/displacement_y), and
 [!param](/UserObjects/MoveNodesByParsedExpression/displacement_z). If neither
 [!param](/UserObjects/MoveNodesByParsedExpression/boundary) nor
-[!param](/UserObjects/MoveNodesByParsedExpression/block) is specified, all blocks in the mesh are
-used.
+[!param](/UserObjects/MoveNodesByParsedExpression/block) is specified, all nodes in the mesh are
+transformed.
 
 The displacement of each node is evaluated relative to that node's original (undisplaced)
 position, so executing the modifier repeatedly (e.g. on a regular schedule or after adaptivity)
