@@ -1,28 +1,37 @@
-# MFEMPMLCurlCurlKernel
+# MFEMPerfectlyMatchedLayerFunction
 
 !if! function=hasCapability('mfem')
 
 ## Overview
 
-Adds a perfectly matched layer (PML) stretched curl-curl domain integrator for the bilinear form
+Declares an MFEM coefficient that applies the complex coordinate stretch of a perfectly matched
+layer (PML) to the base scalar `coefficient` $a$ of a bilinear form. The resulting coefficient is
+passed to [MFEMCurlCurlKernel.md] or [MFEMVectorFEMassKernel.md] acting on the layer, in place of
+the plain coefficient of that form.
+
+Which stretch tensor applies is set by the quantity the bilinear form integrates rather than by the
+operator using it. Pulling the weak form back from stretched to physical coordinates gives one
+factor for an integrand holding the curl of the field and another for one holding the field itself,
+selected by `tensor`:
 
 !equation
-(\mathbf{c}_{\mathrm{curl}} \vec\nabla \times \vec u, \vec\nabla \times \vec v)_\Omega \,\,\, \forall \vec v \in V
+\mathbf{c}_{\mathrm{curl}} = a\, \det(J)^{-1} J^T J, \qquad
+\mathbf{c}_{\mathrm{field}} = a\, \det(J) (J^T J)^{-1}
 
-where $\vec u, \vec v \in H(\mathrm{curl})$ and
+with $J$ the Jacobian of the stretch. In two dimensions the curl of a vector field is a scalar, so
+$\mathbf{c}_{\mathrm{curl}}$ reduces to the scalar $a \det(J)^{-1}$; set
+`coefficient_type = scalar` there, and `coefficient_type = matrix` in every other case.
 
-!equation
-\mathbf{c}_{\mathrm{curl}} = a\, \det(J)^{-1} J^T J
-
-is the base scalar `coefficient` $a$ scaled by the complex tensor arising from the PML coordinate
-stretch, with $J$ the Jacobian of the stretch (see below). In two dimensions the curl of a vector
-field is a scalar, so $\det(J)^{-1} J^T J$ reduces to the scalar $\det(J)^{-1}$.
+The stretch is complex symmetric rather than Hermitian, and the complex system is assembled from two
+real bilinear forms, so `component` selects the real or the imaginary part. One function is declared
+for each combination of `coefficient_type`, `tensor` and `component` that the problem needs; those
+sharing a layer and a profile solve for the harmonic coordinate below only once between them.
 
 ## PML coordinate stretch
 
 Inside the layer the coordinates are analytically continued into the complex plane. The direction of
 that continuation, and the depth into the layer, both come from a harmonic coordinate $\psi$ solved
-for once when the kernel is set up:
+for once when the function is set up:
 
 !equation
 \nabla^2 \psi = 0 \,\, \mathrm{in} \,\, \Omega_{\mathrm{PML}}, \qquad
@@ -44,8 +53,7 @@ normal,
 \vec W = \alpha\, \psi^{\,n}\, \hat n, \qquad
 J = I + \mathrm{i} \nabla \vec W
 
-Outside the layer $\psi = 0$,
-giving $J = I$ and no stretch.
+Outside the layer $\psi = 0$, giving $J = I$ and no stretch.
 
 The two profile parameters control the absorption:
 
@@ -55,24 +63,25 @@ The two profile parameters control the absorption:
 - `decay_polynomial` $n$ sets how the absorption grows with depth. It must exceed one, so that both
   $\vec W$ and its derivative vanish at the inner surface and the layer starts smoothly.
 
-The geometry of the layer is taken entirely from the mesh: the layer is this kernel's `block`, its
+The geometry of the layer is taken entirely from the mesh: the layer is this function's `block`, its
 inner surface is the set of faces separating that block from the rest of the domain, and its outer
 surface is the exterior boundary of the mesh, excluding any boundary that also borders the rest of
 the domain and therefore runs alongside the layer rather than capping it. The layer need not be
 Cartesian, planar, star shaped or of uniform thickness. Its inner and outer surfaces should be
 convex, which guarantees that $\psi$ has no stagnation point at which the stretch direction would be
-undefined; a coarse check for this runs when the kernel is set up.
-
+undefined; a coarse check for this runs when the function is set up.
 
 ## Example Input File Syntax
 
+!listing mfem/complex/pml.i block=/Functions
+
 !listing mfem/complex/pml.i block=/Kernels
 
-!syntax parameters /Kernels/MFEMPMLCurlCurlKernel
+!syntax parameters /Functions/MFEMPerfectlyMatchedLayerFunction
 
-!syntax inputs /Kernels/MFEMPMLCurlCurlKernel
+!syntax inputs /Functions/MFEMPerfectlyMatchedLayerFunction
 
-!syntax children /Kernels/MFEMPMLCurlCurlKernel
+!syntax children /Functions/MFEMPerfectlyMatchedLayerFunction
 
 !if-end!
 

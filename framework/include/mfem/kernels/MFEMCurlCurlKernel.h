@@ -29,6 +29,8 @@ public:
 
 protected:
   mfem::Coefficient & _coef;
+  /// Matrix coefficient to use in place of the scalar one, if the user gave one.
+  mfem::MatrixCoefficient * const _matrix_coef;
 };
 
 #endif

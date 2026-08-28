@@ -16,7 +16,8 @@ These elements are collectively referred
 to as a 'transition' subdomain of the parent mesh, due to their role in defining minimal domains of
 support for scalar 'transition' variables used in some methods to enforce global topological
 constraints on domains with non-trivial topologies. A layer several elements thick also serves as
-the absorbing region of a perfectly matched layer, as used by [MFEMPMLCurlCurlKernel.md].
+the absorbing region of a perfectly matched layer, as used by
+[MFEMPerfectlyMatchedLayerFunction.md].
 
 ## Sides and layer thickness
 
