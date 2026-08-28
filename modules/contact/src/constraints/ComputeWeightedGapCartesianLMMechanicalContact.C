@@ -173,8 +173,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeQpIProperties()
 
   // Get the _dof_to_weighted_gap map
   const DofObject * dof = _lm_vars[0]->isNodal()
-                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                              : static_cast<const DofObject *>(_lower_secondary_elem);
+                              ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                              : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
   _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
 
@@ -225,10 +225,9 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeResidual(const Moose::Mor
       computeQpIProperties();
 
       // Get the _dof_to_weighted_gap map
-      const DofObject * dof =
-          _lm_vars[0]->isNodal()
-              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-              : static_cast<const DofObject *>(_lower_secondary_elem);
+      const DofObject * dof = _lm_vars[0]->isNodal()
+                                  ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                                  : cast_ptr<const DofObject *>(_lower_secondary_elem);
       // We do not interpolate geometry, so just match the local node _i with the corresponding _i
       _dof_to_normal_vector[dof] = _normals[_i];
       const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);

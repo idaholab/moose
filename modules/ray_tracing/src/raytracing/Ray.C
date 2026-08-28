@@ -589,7 +589,7 @@ Packing<std::shared_ptr<Ray>>::unpack(std::vector<buffer_type>::const_iterator i
                                       ParallelStudy<std::shared_ptr<Ray>, Ray> * study)
 {
   mooseAssert(dynamic_cast<ParallelRayStudy *>(study), "Not a ParallelRayStudy");
-  RayTracingStudy & ray_tracing_study = static_cast<ParallelRayStudy *>(study)->rayTracingStudy();
+  RayTracingStudy & ray_tracing_study = cast_ptr<ParallelRayStudy *>(study)->rayTracingStudy();
 
   // Grab the data size
   const std::size_t data_size = static_cast<std::size_t>(*in++);
@@ -657,7 +657,7 @@ Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
 {
   mooseAssert(dynamic_cast<const ParallelRayStudy *>(study), "Not a ParallelRayStudy");
   const RayTracingStudy & ray_tracing_study =
-      static_cast<const ParallelRayStudy *>(study)->rayTracingStudy();
+      cast_ptr<const ParallelRayStudy *>(study)->rayTracingStudy();
   mooseAssert(&ray->study() == &ray_tracing_study, "Packing Ray for different study");
 
   // Storing the data size first makes it easy to verify and reserve space

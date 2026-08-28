@@ -235,7 +235,7 @@ PenaltyFrictionUserObject::reinit()
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
     const auto penalty_friction = findValue(
-        _dof_to_local_penalty_friction, static_cast<const DofObject *>(node), _penalty_friction);
+        _dof_to_local_penalty_friction, cast_ptr<const DofObject *>(node), _penalty_friction);
 
     // utilized quantities
     const auto & normal_pressure = _dof_to_normal_pressure[node];

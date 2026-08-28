@@ -45,7 +45,7 @@ Simulation::setComponentVariableOrder(const VariableName & var, int index)
 Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   : ParallelObject(fe_problem.comm()),
     LoggingInterface(_log),
-    _thm_mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
+    _thm_mesh(*cast_ptr<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
     _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>(MooseBase::app_param))),
     _thm_factory(_thm_app.getFactory()),

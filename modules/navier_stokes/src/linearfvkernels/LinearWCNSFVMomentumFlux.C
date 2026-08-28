@@ -152,7 +152,7 @@ LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 Real
 LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
 
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
   return (computeStressBoundaryMatrixContribution(adv_diff_bc) +
@@ -163,7 +163,7 @@ LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBounda
 Real
 LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
   return (computeStressBoundaryRHSContribution(adv_diff_bc) +
           computeAdvectionBoundaryRHSContribution(adv_diff_bc)) *
