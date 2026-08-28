@@ -22,6 +22,9 @@ public:
 
   void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list) override;
 
+  void
+  GetSubdomainTrueDofs(const mfem::ParGridFunction & gf, int attr, mfem::Array<int> & ess_tdofs);
+
 protected:
   mfem::Coefficient & _coef;
 };
