@@ -648,7 +648,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   _rc_uo->computeCellVelocity();
 
   for (const auto system_i : index_range(_momentum_systems))
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
 
   return residuals;
 }

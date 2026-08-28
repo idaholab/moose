@@ -42,4 +42,6 @@ private:
   const bool _porosity_outside_divergence;
   /// Whether to force a one-sided velocity break in the advection term on internal baffle faces
   const bool _use_baffle_velocity_break;
+
+  std::pair<Real, Real> _advected_interp_coeffs;
 };

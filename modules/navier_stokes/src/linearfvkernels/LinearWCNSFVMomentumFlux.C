@@ -9,17 +9,14 @@
 
 #include "LinearWCNSFVMomentumFlux.h"
 #include "MooseLinearVariableFV.h"
-<<<<<<< HEAD
-=======
 #include "NSFVUtils.h"
 #include "MathFVUtils.h"
-    >>>>>>> b27993bdb21 (Add option for momentum flux to compute mu with harmonic averaging. (#31995))
 #include "NS.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionBC.h"
 
-    registerMooseObject("NavierStokesApp", LinearWCNSFVMomentumFlux);
+registerMooseObject("NavierStokesApp", LinearWCNSFVMomentumFlux);
 
 InputParameters
 LinearWCNSFVMomentumFlux::validParams()

@@ -44,11 +44,40 @@ PorousLinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
 {
   LinearWCNSFVMomentumFlux::setupFaceData(face_info);
 
-  _advected_interp_coeffs = _mass_flux_provider.getAdvectedInterpolationCoeffs(
-      *_current_face_info,
-      _advected_interp_method,
-      _face_mass_flux,
-      /*apply_porosity_scaling=*/!_porosity_outside_divergence);
+  // Start from the advected interpolation weights computed by the base class and
+  // optionally apply porosity scaling to recover coefficients for the interstitial
+  // velocity when porosity is inside the divergence.
+  _advected_interp_coeffs = std::make_pair(0.0, 0.0);
+
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    _advected_interp_coeffs = _adv_interp_result.weights_matrix;
+
+    if (!_porosity_outside_divergence)
+    {
+      const auto state_arg = determineState();
+      const Real eps_elem = _mass_flux_provider.getFaceSidePorosity(
+          *_current_face_info, /*elem_side=*/true, state_arg);
+      const Real eps_neighbor = _mass_flux_provider.getFaceSidePorosity(
+          *_current_face_info, /*elem_side=*/false, state_arg);
+
+      if (eps_elem != 0.0 && eps_neighbor != 0.0)
+      {
+        _advected_interp_coeffs.first /= eps_elem;
+        _advected_interp_coeffs.second /= eps_neighbor;
+      }
+      else if (eps_elem != 0.0)
+      {
+        _advected_interp_coeffs.first /= eps_elem;
+        _advected_interp_coeffs.second = 0.0;
+      }
+      else
+      {
+        _advected_interp_coeffs.first = 0.0;
+        _advected_interp_coeffs.second = 0.0;
+      }
+    }
+  }
 }
 
 void

@@ -101,7 +101,8 @@ LinearFVMomentumPorousFriction::computeDarcyCoefficient(const Moose::ElemArg & e
     return 0.0;
 
   const Real eps = _eps(elem_arg, state);
-  mooseAssert(eps > 0.0, "Epsilon must be greater than 0!");
+  if (eps <= 0.0)
+    mooseError("Epsilon must be greater than 0!");
 
   return (*_mu)(elem_arg, state) * (*_darcy)(elem_arg, state)(_index);
 }
