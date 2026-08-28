@@ -16,8 +16,12 @@
     cut_interface = polyhedra
     # Retain the OUTSIDE of the sphere: each cell crossing the sphere has a non-convex
     # retained region (cube minus a spherical dimple), which a single convex C0Polyhedron
-    # cannot represent. The generator should detect this and emit a clear error.
+    # cannot represent.
     level_set = '0.6 - x*x - y*y - z*z'
     cut_face_name = sph
+  []
+  [to_tet]
+    type = ElementsToTetrahedronsConverter
+    input = lsc
   []
 []
