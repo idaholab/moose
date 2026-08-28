@@ -10,6 +10,9 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMPMLStretchVector.h"
+#include "MooseError.h"
+
+#include "libmesh/int_range.h"
 
 MFEMPMLStretchVector::MFEMPMLStretchVector(mfem::ParMesh & mesh,
                                            const mfem::Array<int> & pml_attributes,
@@ -48,6 +51,20 @@ MFEMPMLStretchVector::Eval(mfem::Vector & W,
     W = 0.0;
   else
     W *= _decay_coefficient * std::pow(depth, _decay_polynomial) / slope;
+}
+
+MFEMPMLStretchVector::ComplexMatrix
+MFEMPMLStretchVector::jacobian(mfem::ElementTransformation & transformation) const
+{
+  mfem::DenseMatrix stretch_gradient;
+  _W_h1.GetVectorGradient(transformation, stretch_gradient);
+
+  ComplexMatrix jacobian = ComplexMatrix::Identity(_dim, _dim);
+  for (const auto a : make_range(_dim))
+    for (const auto b : make_range(_dim))
+      jacobian(a, b) += std::complex<mfem::real_t>(0.0, stretch_gradient(a, b));
+
+  return jacobian;
 }
 
 void
@@ -104,9 +121,9 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
 
   if (n_outer_faces == 0)
     mooseError("MFEMPMLStretchVector: the perfectly matched layer has no outer surface. Check "
-               "that the kernel is restricted to a layer of elements that borders the exterior of "
-               "the mesh, and that the boundary capping the layer does not share its attribute "
-               "with a boundary of the rest of the domain.");
+               "that the coefficient is restricted to a layer of elements that borders the "
+               "exterior of the mesh, and that the boundary capping the layer does not share its "
+               "attribute with a boundary of the rest of the domain.");
 
   _h1_scalar_fes.Synchronize(interior_marker);
   _h1_scalar_fes.Synchronize(outer_marker);
