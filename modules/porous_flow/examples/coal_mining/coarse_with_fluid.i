@@ -755,56 +755,56 @@
   []
 
   [mc_coh_strong_harden]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1.99 # MPa
     value_residual = 2.01 # MPa
     rate = 1.0
   []
   [mc_fric]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.61 # 35deg
   []
   [mc_dil]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.15 # 8deg
   []
 
   [mc_tensile_str_strong_harden]
-    type = TensorMechanicsHardeningExponential
+    type = SolidMechanicsHardeningExponential
     value_0 = 1.0 # MPa
     value_residual = 1.0 # MPa
     rate = 1.0
   []
   [mc_compressive_str]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 100 # Large!
     value_residual = 100
     internal_limit = 0.1
   []
 
   [wp_coh_harden]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.05
     value_residual = 0.05
     internal_limit = 10
   []
   [wp_tan_fric]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.26 # 15deg
   []
   [wp_tan_dil]
-    type = TensorMechanicsHardeningConstant
+    type = SolidMechanicsHardeningConstant
     value = 0.18 # 10deg
   []
 
   [wp_tensile_str_harden]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 0.05
     value_residual = 0.05
     internal_limit = 10
   []
   [wp_compressive_str_soften]
-    type = TensorMechanicsHardeningCubic
+    type = SolidMechanicsHardeningCubic
     value_0 = 100
     value_residual = 1
     internal_limit = 1.0

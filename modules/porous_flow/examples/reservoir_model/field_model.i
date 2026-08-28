@@ -113,8 +113,7 @@
   []
   [watertab]
     type = TabulatedBicubicFluidProperties
-    fp = water
-    save_file = false
+    input_fp = water
   []
 []
 
