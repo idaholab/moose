@@ -60,13 +60,13 @@ public:
   }
   virtual void initFrom(const MooseObject * obj) override
   {
-    auto o = static_cast<const TestObject *>(obj);
+    auto o = cast_ptr<const TestObject *>(obj);
     val = o->vals[index];
   }
 
   virtual bool isMatch(const Attribute & other) const override
   {
-    auto o = static_cast<const TestAttrib *>(&other);
+    auto o = cast_ptr<const TestAttrib *>(&other);
     return val == o->val;
   }
   virtual bool isEqual(const Attribute & other) const override { return isMatch(other); }
