@@ -15,9 +15,9 @@ registerMooseObject("NavierStokesApp", LinearFVAnisotropicDiffusionJump);
 InputParameters
 LinearFVAnisotropicDiffusionJump::validParams()
 {
-  InputParameters params = LinearFVAnisotropicDiffusion::validParams();
+  InputParameters params = LinearFVPressureCorrectionDiffusion::validParams();
   params.addClassDescription(
-      "Anisotropic diffusion kernel that adds a baffle jump contribution on internal faces.");
+      "Pressure correction diffusion kernel that adds a baffle jump contribution on internal faces.");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object", "The rhie-chow user-object which provides baffle jump information.");
   params.addParam<bool>("debug_baffle_jump", false, "Enable debug output for baffle jumps.");
@@ -25,7 +25,7 @@ LinearFVAnisotropicDiffusionJump::validParams()
 }
 
 LinearFVAnisotropicDiffusionJump::LinearFVAnisotropicDiffusionJump(const InputParameters & params)
-  : LinearFVAnisotropicDiffusion(params),
+  : LinearFVPressureCorrectionDiffusion(params),
     _rc_uo(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _debug_baffle_jump(getParam<bool>("debug_baffle_jump"))
 {

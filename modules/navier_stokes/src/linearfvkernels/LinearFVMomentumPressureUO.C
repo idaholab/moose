@@ -25,8 +25,7 @@ LinearFVMomentumPressureUO::validParams()
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
   params.addRequiredParam<UserObjectName>(
-      "rhie_chow_user_object",
-      "The rhie-chow user-object which provides the pressure gradient.");
+      "rhie_chow_user_object", "The rhie-chow user-object which provides the pressure gradient.");
   params.addParam<bool>(
       "use_corrected_gradient",
       true,
@@ -54,7 +53,7 @@ LinearFVMomentumPressureUO::computeMatrixContribution()
 Real
 LinearFVMomentumPressureUO::computeRightHandSideContribution()
 {
-  const Moose::ElemArg elem_arg{_current_elem_info->elem()};
+  const Moose::ElemArg elem_arg{_current_elem_info->elem(), false};
   const auto time_arg = determineState();
   const Real eps = _eps(elem_arg, time_arg);
   const Real grad_p = _use_corrected_gradient

@@ -22,7 +22,7 @@
 #include "LinearFVGradientManager.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
-<<<<<<< HEAD
+#include "LinearFVAnisotropicDiffusion.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVMomentumPressure.h"
 #include "LinearFVPressureFluxBC.h"
@@ -845,7 +845,8 @@ RhieChowMassFlux::populateCouplingFunctors(
   // We loop through the faces and populate the coupling fields (face H/A and 1/H)
   for (auto & fi : _flow_face_info)
   {
-    RealVectorValue face_rho_hbya(0);
+    Real face_rho = 0;
+    RealVectorValue face_hbya;
 
     // We do the lookup in advance
     auto & Ainv = _Ainv[fi->id()];
@@ -864,14 +865,14 @@ RhieChowMassFlux::populateCouplingFunctors(
       const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
       const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
 
+      // Now we do the interpolation to the face
+      interpolate(Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
       for (const auto dim_i : index_range(raw_hbya))
       {
-        // Interpolate rho*H/A directly so the pressure RHS uses an arithmetic interpolation
-        // of the product rather than the product of separately interpolated fields.
         interpolate(Moose::FV::InterpMethod::Average,
-                    face_rho_hbya(dim_i),
-                    elem_rho * hbya_reader[dim_i](elem_dof),
-                    neighbor_rho * hbya_reader[dim_i](neighbor_dof),
+                    face_hbya(dim_i),
+                    hbya_reader[dim_i](elem_dof),
+                    hbya_reader[dim_i](neighbor_dof),
                     *fi,
                     true);
         interpolate(_pressure_diffusion_interp_method,
@@ -904,11 +905,12 @@ RhieChowMassFlux::populateCouplingFunctors(
       {
         const Moose::FaceArg boundary_face{
             fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
-        const Real face_rho = _rho(boundary_face, Moose::currentState());
+        face_rho = _rho(boundary_face, Moose::currentState());
 
         for (const auto dim_i : make_range(_dim))
         {
-          Real face_hbya =
+
+          face_hbya(dim_i) =
               -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
           face_hbya(dim_i) *= boundary_normal_multiplier;
         }
@@ -918,19 +920,18 @@ RhieChowMassFlux::populateCouplingFunctors(
       {
         const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-        const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+        face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
         for (const auto dim_i : make_range(_dim))
-          face_rho_hbya(dim_i) =
-              boundary_normal_multiplier * elem_rho * hbya_reader[dim_i](elem_dof);
+          face_hbya(dim_i) = boundary_normal_multiplier * hbya_reader[dim_i](elem_dof);
       }
 
       // We just do a one-term expansion for 1/A no matter what
-      // const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+      const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
       for (const auto dim_i : index_range(raw_Ainv))
         Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
     }
     // Lastly, we populate the face flux resulted by H/A
-    _HbyA_flux[fi->id()] = face_rho_hbya * fi->normal();
+    _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
   }
 }
 

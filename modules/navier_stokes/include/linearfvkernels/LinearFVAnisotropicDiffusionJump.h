@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "LinearFVAnisotropicDiffusion.h"
+#include "LinearFVPressureCorrectionDiffusion.h"
 
 class RhieChowMassFlux;
 
@@ -17,7 +17,7 @@ class RhieChowMassFlux;
  * Diffusion kernel that adds a per-face jump contribution to the RHS, used to
  * enforce porous baffle pressure jumps.
  */
-class LinearFVAnisotropicDiffusionJump : public LinearFVAnisotropicDiffusion
+class LinearFVAnisotropicDiffusionJump : public LinearFVPressureCorrectionDiffusion
 {
 public:
   static InputParameters validParams();

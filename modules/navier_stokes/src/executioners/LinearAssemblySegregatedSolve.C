@@ -642,7 +642,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
   _rc_uo->finalizePressureCorrector();
 
   for (const auto system_i : index_range(_momentum_systems))
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
 
   return residuals;
 }
