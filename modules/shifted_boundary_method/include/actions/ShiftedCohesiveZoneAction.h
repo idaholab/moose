@@ -32,6 +32,24 @@ public:
   virtual void act() override;
 
 protected:
+  /// Adds the surface distance functions used by the generated distance user object.
+  void addSBMDistanceFunctions();
+
+  /// Adds the surface mesh builders and the aggregate boundary distance user object.
+  void addSBMDistanceUserObjects();
+
+  /// Returns the saved surface mesh names, defaulting to the boundary names.
+  std::vector<std::string> surfaceMeshNames() const;
+
+  /// Returns the generated builder name for a boundary.
+  UserObjectName surfaceMeshBuilderName(const BoundaryName & boundary) const;
+
+  /// Returns the generated distance function name for a boundary.
+  FunctionName surfaceDistanceFunctionName(const BoundaryName & boundary) const;
+
+  /// Returns the generated aggregate distance user object name.
+  UserObjectName sbmDistanceUserObjectName() const;
+
   /**
    * Adds the SCZM-specific interface kernels.
    * Note: This does not 'override' the base method because the base is not virtual.

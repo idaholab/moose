@@ -7,7 +7,6 @@ nx = '${fparse ny*3/2}'
 [GlobalParams]
   displacements = 'disp_x disp_y'
   use_displaced_mesh = false
-  sbm_distance_uo = sbm_distance_uo
 []
 
 [Problem]
@@ -100,12 +99,6 @@ nx = '${fparse ny*3/2}'
     save_with_name = 'grain4_grain5'
   []
 
-  [boundary_mesh2]
-    type = FileMeshGenerator
-    file = 'grain_boundary_only.msh'
-    save_with_name = 'boundary_mesh2'
-  []
-
   add_subdomain_ids = '10'
   add_subdomain_names = 'block_10'
   final_generator = 'right_top'
@@ -134,6 +127,8 @@ nx = '${fparse ny*3/2}'
   [czm_ik]
     use_automatic_differentiation = false
     boundary = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
+    generate_sbm_distance = true
+    check_surface_watertightness = true
   []
 []
 
@@ -161,68 +156,6 @@ nx = '${fparse ny*3/2}'
   []
 []
 
-[UserObjects]
-  [grain1_grain2_builder]
-    type = SBMSurfaceMeshBuilder
-    check_watertightness = true
-    surface_mesh = grain1_grain2
-  []
-
-  [grain1_grain4_builder]
-    type = SBMSurfaceMeshBuilder
-    check_watertightness = true
-    surface_mesh = grain1_grain4
-  []
-
-  [grain1_grain5_builder]
-    type = SBMSurfaceMeshBuilder
-    check_watertightness = true
-    surface_mesh = grain1_grain5
-  []
-
-  [grain2_grain4_builder]
-    type = SBMSurfaceMeshBuilder
-    check_watertightness = true
-    surface_mesh = grain2_grain4
-  []
-
-  [grain3_grain4_builder]
-    type = SBMSurfaceMeshBuilder
-    check_watertightness = true
-    surface_mesh = grain3_grain4
-  []
-
-  [grain3_grain5_builder]
-    type = SBMSurfaceMeshBuilder
-    check_watertightness = true
-    surface_mesh = grain3_grain5
-  []
-
-  [grain4_grain5_builder]
-    type = SBMSurfaceMeshBuilder
-    check_watertightness = true
-    surface_mesh = grain4_grain5
-  []
-
-  [SBMMeshBySubBuilder]
-    type = SurfaceMeshBySubdomainBuilder
-    surface_mesh = boundary_mesh2
-  []
-
-  [point_in_subdomain_check]
-    type = PointInSubdomainCheckUO
-    builder = SBMMeshBySubBuilder
-  []
-
-  [sbm_distance_uo]
-    type = BoundaryShortestDistanceToSurface
-    surfaces = 'dist_grain1_grain2 dist_grain1_grain4 dist_grain1_grain5 dist_grain2_grain4 dist_grain3_grain4 dist_grain3_grain5 dist_grain4_grain5'
-    boundary = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
-    execution_order_group = 0
-    execute_on = 'INITIAL'
-  []
-[]
-
 [Executioner]
   type = Transient
   # solve_type = FD
@@ -244,34 +177,6 @@ nx = '${fparse ny*3/2}'
 []
 
 [Functions]
-  [dist_grain1_grain2]
-    type = UnsignedDistanceToSurfaceMesh
-    builder = grain1_grain2_builder
-  []
-  [dist_grain1_grain4]
-    type = UnsignedDistanceToSurfaceMesh
-    builder = grain1_grain4_builder
-  []
-  [dist_grain1_grain5]
-    type = UnsignedDistanceToSurfaceMesh
-    builder = grain1_grain5_builder
-  []
-  [dist_grain2_grain4]
-    type = UnsignedDistanceToSurfaceMesh
-    builder = grain2_grain4_builder
-  []
-  [dist_grain3_grain4]
-    type = UnsignedDistanceToSurfaceMesh
-    builder = grain3_grain4_builder
-  []
-  [dist_grain3_grain5]
-    type = UnsignedDistanceToSurfaceMesh
-    builder = grain3_grain5_builder
-  []
-  [dist_grain4_grain5]
-    type = UnsignedDistanceToSurfaceMesh
-    builder = grain4_grain5_builder
-  []
   [displacement_with_time]
     type = ParsedFunction
     expression = '1e-2*t'
