@@ -57,6 +57,8 @@ protected:
   /// The suffix to be added to the original subdomain name for the subdomains containing the
   /// elements converted to C0POLYHEDRON.
   const SubdomainName _converted_poly_element_subdomain_name_suffix;
+  /// Whether to output to console about specific cases encountered
+  const bool _verbose;
   /// Reference to input mesh pointer
   std::unique_ptr<MeshBase> & _input;
   /// function parser object describing the level set

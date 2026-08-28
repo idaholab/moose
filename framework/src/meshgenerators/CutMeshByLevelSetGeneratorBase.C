@@ -67,6 +67,11 @@ CutMeshByLevelSetGeneratorBase::validParams()
       "The suffix to be added to the original subdomain name for the subdomains containing the "
       "elements converted to C0POLYHEDRON.");
 
+  params.addParam<bool>("verbose",
+                        false,
+                        "Whether to output information about specific element cut cases, for "
+                        "example dealing with nonplanarity or non-convexity.");
+
   params.addClassDescription(
       "This CutMeshByLevelSetGeneratorBase object is designed to be the base class of mesh "
       "generator that cuts a 3D mesh based on an analytic level set function. The level set "
@@ -88,6 +93,7 @@ CutMeshByLevelSetGeneratorBase::CutMeshByLevelSetGeneratorBase(const InputParame
         getParam<SubdomainName>("converted_pyramid_element_subdomain_name_suffix")),
     _converted_poly_element_subdomain_name_suffix(
         getParam<SubdomainName>("converted_poly_element_subdomain_name_suffix")),
+    _verbose(getParam<bool>("verbose")),
     _input(getMeshByName(_input_name))
 {
   _cut_face_id = isParamValid("cut_face_id") ? getParam<boundary_id_type>("cut_face_id") : -1;
@@ -345,6 +351,10 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
   _block_id_to_remove = sid_shift_base * 2;
 
+  // Keep track of edge cases
+  unsigned int num_non_planar_at_cut = 0;
+  unsigned int num_non_convex_at_cut = 0;
+
   // First pass: classify each active element
   std::set<subdomain_id_type> original_subdomain_ids;
   std::vector<dof_id_type> elems_to_cut;
@@ -447,7 +457,7 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
       bdry_side_list, elem_id, n_orig_sides, elem_side_list);
 
   // Polygon sides of the new polyhedron, plus an index back into elem_side_list. The index -1
-  // marks the new face that lies on the cut surface (it inherits _cut_face_id).
+  // marks the new face that lies on the cut surface (it will be on the _cut_face_id boundary).
   std::vector<std::shared_ptr<libMesh::Polygon>> new_polygons;
   std::vector<int> new_polygon_to_orig_side;
 
@@ -487,6 +497,8 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
         polygon->set_node(i, const_cast<Node *>(side_ptr->node_ptr(i)));
       new_polygons.push_back(polygon);
       new_polygon_to_orig_side.push_back(-1);
+      // note that there could be more than one face on the cut, or one face
+      // could be on the cut and there is a cut again in the back of the element
       continue;
     }
 
@@ -516,10 +528,10 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
       const Node * curr_node = side_ptr->node_ptr(curr_idx);
       const bool curr_retained = (rels[curr_idx] != PointLevelSetRelationIndex::level_set_out_side);
 
+      // still inside, keep the node to keep the edge
       if (prev_retained && curr_retained)
-      {
         new_face_nodes.push_back(curr_node);
-      }
+      // we just crossed out of the retained domain
       else if (prev_retained && !curr_retained)
       {
         const Node * prev_node = side_ptr->node_ptr(prev_idx);
@@ -529,14 +541,17 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
           // and is itself the cut entry point.
           cut_entry = prev_node;
         }
+        // we crossed out, find the intersection and add it.
         else
         {
           const Point cross_pt = pointPairLevelSetInterception(*prev_node, *curr_node);
+          // we might have already added this node while working on a previous neighbor element
           const Node * cross_node = nonDuplicateNodeCreator(mesh, new_on_plane_nodes, cross_pt);
           new_face_nodes.push_back(cross_node);
           cut_entry = cross_node;
         }
       }
+      // we just crossed back into the retained domain
       else if (!prev_retained && curr_retained)
       {
         const Node * prev_node = side_ptr->node_ptr(prev_idx);
@@ -545,9 +560,11 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
           new_face_nodes.push_back(curr_node);
           cut_exit = curr_node;
         }
+        // we crossed in, find the intersection and keep it
         else
         {
           const Point cross_pt = pointPairLevelSetInterception(*prev_node, *curr_node);
+          // we might have already added this node while working on a neighbor
           const Node * cross_node = nonDuplicateNodeCreator(mesh, new_on_plane_nodes, cross_pt);
           new_face_nodes.push_back(cross_node);
           new_face_nodes.push_back(curr_node);
@@ -574,7 +591,7 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
 
     if (cut_entry && cut_exit && cut_entry != cut_exit)
       cut_edges.push_back(std::make_pair(cut_entry, cut_exit));
-  }
+  } // end for loop on faces
 
   // Chain the per-face cut edges into a single closed polygon for the new cut face. Each face
   // contributes one directed edge but neighbouring faces may walk in opposite directions, so
@@ -598,8 +615,10 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
       bool found_next = false;
       for (const auto j : index_range(cut_edges))
       {
+        // each edge on the cut would only be in the cut face one
         if (used[j])
           continue;
+        // chain the edge to the tail. Edge is in the same order
         if (cut_edges[j].first == tail)
         {
           cut_face_nodes.push_back(cut_edges[j].second);
@@ -646,16 +665,20 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
 
     if (cut_face_planar)
     {
-      Moose::out << "elem " << elem_id << " PLANAR size=" << cut_face_nodes.size() << std::endl;
       auto cut_polygon = std::make_shared<libMesh::C0Polygon>(cut_face_nodes.size());
       for (const auto i : index_range(cut_face_nodes))
         cut_polygon->set_node(i, const_cast<Node *>(cut_face_nodes[i]));
       new_polygons.push_back(cut_polygon);
       new_polygon_to_orig_side.push_back(-1);
     }
+    // Non planar polygonal face, we simply need to subdivide it
     else
     {
-      Moose::out << "elem " << elem_id << " NONPLANAR size=" << cut_face_nodes.size() << std::endl;
+      if (_verbose)
+        Moose::out << "elem id: " << elem_id << " NONPLANAR cut size=" << cut_face_nodes.size()
+                   << std::endl;
+      _num_non_planar_at_cut++;
+
       // Steiner point: the linear average of the chained cut vertices, then projected onto
       // the level set by bisecting toward a vertex of the original element that sits on the
       // opposite side of the level set.
@@ -683,6 +706,8 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
       }
 
       const Node * steiner = nonDuplicateNodeCreator(mesh, new_on_plane_nodes, center_on_ls);
+      // Make a triangle hat with the steiner point and the cut face nodes. Not optimal but
+      // each triangle is guaranteed to be planar!
       for (const auto i : index_range(cut_face_nodes))
       {
         const auto j = (i + 1) % cut_face_nodes.size();
@@ -784,6 +809,15 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
 
   // Mark the original element for deletion in the cleanup pass
   orig_elem->subdomain_id() = _block_id_to_remove;
+
+  // Report on cases encountered
+  if (_verbose)
+  {
+    if (num_non_planar_at_cut)
+      _console << "Total number of nonplanar polygons (faces) subdivided on cut: " << num_non_planar_at_cut << std::endl;
+    if (num_non_convex_at_cut)
+      _console << "Total number of non-convex polyhedra subdivided on cut: " << num_non_convex_at_cut << std::endl;
+  }
 }
 
 CutMeshByLevelSetGeneratorBase::PointLevelSetRelationIndex
