@@ -11,7 +11,12 @@
 
 #pragma once
 
-#include "MFEMKernel.h"
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
+
+#include <Eigen/Dense>
+#include <complex>
 
 /**
  * Perfectly matched layer coordinate stretch built on a harmonic coordinate.
@@ -30,11 +35,15 @@
  *
  * W is discontinuous between elements, as it is built from the gradient of psi, so it is
  * interpolated onto a continuous space once and differentiated there. The class evaluates W as a
- * vector coefficient for that interpolation and afterwards serves grad(W).
+ * vector coefficient for that interpolation and afterwards serves the stretch Jacobian.
  */
 class MFEMPMLStretchVector : public mfem::VectorCoefficient
 {
 public:
+  /// Dense complex matrix sized at run time, but never larger than the three dimensions of space.
+  using ComplexMatrix = Eigen::
+      Matrix<std::complex<mfem::real_t>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor, 3, 3>;
+
   MFEMPMLStretchVector(mfem::ParMesh & mesh,
                        const mfem::Array<int> & pml_attributes,
                        double decay_coefficient,
@@ -48,12 +57,8 @@ public:
             mfem::ElementTransformation & transformation,
             const mfem::IntegrationPoint & integration_point) override;
 
-  /// grad(W), the imaginary part of the stretch Jacobian J = I + i grad(W).
-  void stretchGradient(mfem::ElementTransformation & transformation,
-                       mfem::DenseMatrix & gradient) const
-  {
-    _W_h1.GetVectorGradient(transformation, gradient);
-  }
+  /// The stretch Jacobian J = I + i grad(W), which is complex only through the explicit i.
+  ComplexMatrix jacobian(mfem::ElementTransformation & transformation) const;
 
 private:
   /// Solve for the harmonic coordinate, holding degrees of freedom outside the layer at zero and
