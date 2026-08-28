@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SubdomainGrainIDGenerator.h"
+#include "SBMUtils.h"
+
 #include <algorithm>
 
 registerMooseObject("ShiftedBoundaryMethodApp", SubdomainGrainIDGenerator);
@@ -21,11 +23,6 @@ SubdomainGrainIDGenerator::validParams()
                                              "The boundary mesh to use for identifying grain IDs");
 
   // --- Point-In-Polyhedron checks ---
-
-  params.addParam<bool>("brute_force",
-                        false,
-                        "If true, use brute force to check if the point is inside the geometry "
-                        "by loop over every elements.");
 
   params.addParam<Point>(
       "ray_direction", Point(0, 0, 0), "The direction of the ray for in-out testing.");
@@ -52,7 +49,6 @@ SubdomainGrainIDGenerator::SubdomainGrainIDGenerator(const InputParameters & par
   : SBMSubdomainGeneratorBase(parameters),
     _boundary_mesh(getMesh("boundary_mesh")),
     _ray_direction(getParam<Point>("ray_direction")),
-    _brute_force(getParam<bool>("brute_force")),
     _eps(getParam<Real>("eps")),
     _leaf_max_size(getParam<int>("leaf_max_size"))
 {
@@ -70,43 +66,20 @@ SubdomainGrainIDGenerator::generate()
   // (a) read the boundary mesh to be our own data structure
   buildSubdomainGroupedData();
 
-  const Order qrule_order = _qrule_order;
-
-  auto initFEBase = [&](const Elem * elem)
-  {
-    FEType fe_type(elem->default_order(), LAGRANGE);
-    std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
-    QGauss qrule(elem->dim(), qrule_order);
-    fe->get_xyz(); // this is very important, otherwise the quadrature points are not
-                   // initialized
-    fe->get_JxW();
-    fe->attach_quadrature_rule(&qrule);
-    fe->reinit(elem);
-    return fe;
-  };
-
-  // (b) build the PointInPolyhedronCheck for each subdomain
+  // (b) build the point-containment checker for each subdomain
   buildInOutTesters();
 
   std::vector<const SubdomainCheckerEntry *> candidate_entries;
   candidate_entries.reserve(_checker_entries.size());
 
-  struct CandidateInfo
-  {
-    const SubdomainCheckerEntry * entry;
-    unsigned int num_inside_nodes;
-  };
-
-  std::vector<CandidateInfo> candidate_infos;
-  candidate_infos.reserve(_checker_entries.size());
-
-  std::vector<Real> remaining_weights;
+  std::vector<SBMUtils::SubdomainOccupancy> candidate_occupancies;
+  candidate_occupancies.reserve(_checker_entries.size());
 
   for (const auto & elem : mesh->active_element_ptr_range() /*gen only run rank = 0*/)
   {
     const auto elem_bbox = elem->loose_bounding_box();
     candidate_entries.clear();
-    candidate_infos.clear();
+    candidate_occupancies.clear();
 
     for (const auto & entry : _checker_entries)
       if (boundingBoxesIntersect(elem_bbox, entry.bbox, _eps))
@@ -116,85 +89,33 @@ SubdomainGrainIDGenerator::generate()
       for (const auto & entry : _checker_entries)
         candidate_entries.push_back(&entry);
 
-    SubdomainID fully_inside_subdomain;
-    SubdomainID best_intercepted_subdomain;
-    Real best_active_area = -1.0;
-
-    bool find_fully_inside = false;
-
     for (const auto * entry : candidate_entries)
     {
-      auto * checker_ptr = entry->checker;
-      unsigned int num_inside_nodes = 0;
-      for (unsigned int i = 0; i < elem->n_nodes(); ++i)
-        if (checker_ptr->sideness(elem->point(i)) != SurfaceSide::OUTSIDE)
-          ++num_inside_nodes;
-
-      if (num_inside_nodes == elem->n_nodes())
-      {
-        fully_inside_subdomain = entry->subdomain_id;
-        find_fully_inside = true;
-        break;
-      }
-
-      candidate_infos.push_back({entry, num_inside_nodes});
+      const auto * const checker = entry->checker;
+      const auto is_in_domain = [checker](const Point & point)
+      { return checker->sideness(point) != SurfaceGeometry::SurfaceSide::OUTSIDE; };
+      candidate_occupancies.push_back(
+          {entry->subdomain_id,
+           SBMUtils::elementDomainOccupancy(*elem, _qrule_order, is_in_domain)});
     }
 
-    if (find_fully_inside)
+    const auto subdomain = SBMUtils::selectSubdomainFromOccupancies(
+        candidate_occupancies, _intercepted_subdomain_policy, _lambda);
+    if (subdomain)
+      elem->subdomain_id() = *subdomain;
+    else if (!candidate_occupancies.empty())
     {
-      elem->subdomain_id() = fully_inside_subdomain;
-      continue;
+      const auto best =
+          std::max_element(candidate_occupancies.begin(),
+                           candidate_occupancies.end(),
+                           [](const auto & lhs, const auto & rhs)
+                           {
+                             if (lhs.occupancy.domain_fraction != rhs.occupancy.domain_fraction)
+                               return lhs.occupancy.domain_fraction < rhs.occupancy.domain_fraction;
+                             return lhs.subdomain_id > rhs.subdomain_id;
+                           });
+      elem->subdomain_id() = best->subdomain_id;
     }
-
-    std::sort(candidate_infos.begin(),
-              candidate_infos.end(),
-              [](const CandidateInfo & lhs, const CandidateInfo & rhs)
-              { return lhs.num_inside_nodes > rhs.num_inside_nodes; });
-
-    auto fe = initFEBase(elem);
-    const auto & JxW = fe->get_JxW();
-    const auto & q_points = fe->get_xyz();
-
-    remaining_weights.assign(q_points.size() + 1, 0.0);
-    for (int i = static_cast<int>(q_points.size()) - 1; i >= 0; --i)
-      remaining_weights[i] = remaining_weights[i + 1] + JxW[i];
-
-    const Real total_area = remaining_weights.front();
-
-    for (const auto & candidate : candidate_infos)
-    {
-      auto * checker_ptr = candidate.entry->checker;
-      Real active_area = 0.0;
-      bool eliminated = false;
-
-      for (unsigned int i = 0; i < q_points.size(); ++i)
-      {
-        if (checker_ptr->sideness(q_points[i]) != SurfaceSide::OUTSIDE)
-          active_area += JxW[i];
-
-        if (active_area + remaining_weights[i + 1] <= best_active_area)
-        {
-          eliminated = true;
-          break;
-        }
-      }
-
-      if (eliminated)
-        continue;
-
-      if (active_area > best_active_area)
-      {
-        best_active_area = active_area;
-        best_intercepted_subdomain = candidate.entry->subdomain_id;
-
-        if (best_active_area >= total_area)
-          break;
-      }
-    }
-
-    elem->subdomain_id() = best_intercepted_subdomain;
-
-    // TODO: take care of fully outside case
   }
 
   // Signal that the mesh has been modified and needs preparation.
@@ -212,7 +133,7 @@ SubdomainGrainIDGenerator::buildSubdomainGroupedData()
     BoundingBox bbox;
     bool has_bbox = false;
     std::vector<Point> centroids;
-    std::vector<std::unique_ptr<SBMBndElementBase>> boundary_elements;
+    std::vector<std::unique_ptr<SurfaceElement>> boundary_elements;
   };
 
   _boundary_owned = std::move(_boundary_mesh);
@@ -271,11 +192,11 @@ SubdomainGrainIDGenerator::buildSubdomainGroupedData()
 
     bucket.centroids.emplace_back(elem->vertex_average());
 
-    std::unique_ptr<SBMBndElementBase> bnd_elem;
+    std::unique_ptr<SurfaceElement> bnd_elem;
     if (elem->type() == EDGE2)
-      bnd_elem = std::make_unique<SBMBndEdge2>(elem);
+      bnd_elem = std::make_unique<SurfaceEdge2>(elem);
     else if (elem->type() == TRI3)
-      bnd_elem = std::make_unique<SBMBndTri3>(elem);
+      bnd_elem = std::make_unique<SurfaceTri3>(elem);
     else
       mooseError("Unsupported element type in SubdomainGrainIDGenerator");
 
@@ -298,15 +219,15 @@ SubdomainGrainIDGenerator::buildInOutTesters()
   _checker_entries.clear();
   _checker_entries.reserve(_boundary_elements_by_subdomain.size());
 
+  const SurfaceGeometry::RayDirectionOptions ray_options{
+      _ray_direction.norm_sq() == 0 ? SurfaceGeometry::RayDirectionMode::AUTO_PCA
+                                    : SurfaceGeometry::RayDirectionMode::USER_SPECIFIED,
+      _ray_direction};
+
   for (const auto & [subdomain_id, elements] : _boundary_elements_by_subdomain)
   {
-    auto checker =
-        std::make_unique<PointInPolyhedronCheck>(elements,
-                                                 _centroids_by_subdomain.at(subdomain_id),
-                                                 _ray_direction,
-                                                 _brute_force,
-                                                 _eps,
-                                                 _leaf_max_size);
+    auto checker = std::make_unique<AdaptiveRayContainmentCheck>(
+        elements, _centroids_by_subdomain.at(subdomain_id), ray_options, _eps, _leaf_max_size);
 
     auto * checker_ptr = checker.get();
     _subdomain_id_checkers[subdomain_id] = std::move(checker);

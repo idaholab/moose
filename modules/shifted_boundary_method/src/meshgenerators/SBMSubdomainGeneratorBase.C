@@ -13,20 +13,14 @@ InputParameters
 SBMSubdomainGeneratorBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params += SBMElementClassificationInterface::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-
-  params.addRangeCheckedParam<int>("qrule_order",
-                                   9,
-                                   "qrule_order >= 0 & qrule_order <= 10",
-                                   "Quadrature order used to estimate the active area.");
 
   return params;
 }
 
 SBMSubdomainGeneratorBase::SBMSubdomainGeneratorBase(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input(getMesh("input")),
-    _qrule_order(static_cast<Order>(getParam<int>("qrule_order")))
+  : MeshGenerator(parameters), SBMElementClassificationInterface(this), _input(getMesh("input"))
 {
 }

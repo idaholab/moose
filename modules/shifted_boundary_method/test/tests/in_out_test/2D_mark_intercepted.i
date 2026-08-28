@@ -5,7 +5,7 @@
 # InterceptedElementModifier::computeSubdomainID and the corresponding branch of
 # SBMElementSubdomainModifierBase.
 nx = 16
-lambda = 0.5
+
 a = 1.6
 b = 1.0
 cx = 2.03
@@ -58,7 +58,6 @@ n_seg = 48
     type = InterceptedElementModifier
     subdomain_id_inside = 1
     subdomain_id_outside = 2
-    lambda = ${lambda}
     is_domain_inside_surface = true
     in_out_test = inout_test
     mark_intercepted = true

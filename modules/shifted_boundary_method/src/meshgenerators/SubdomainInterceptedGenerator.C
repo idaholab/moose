@@ -25,7 +25,6 @@ SubdomainInterceptedGenerator::validParams()
   params.addRequiredParam<SubdomainID>("subdomain_id_outside", "ID for outside elements.");
 
   params.addParam<Real>("threshold", 0.0, "Threshold for inside/outside classification.");
-  params.addRequiredParam<Real>("lambda", "Lambda for false intersection classification.");
   params.addRequiredParam<bool>(
       "is_domain_inside_surface",
       "If true, the inside subdomain is the region enclosed by the surface (negative signed "
@@ -50,7 +49,6 @@ SubdomainInterceptedGenerator::SubdomainInterceptedGenerator(const InputParamete
     _subdomain_id_inside(getParam<SubdomainID>("subdomain_id_inside")),
     _subdomain_id_outside(getParam<SubdomainID>("subdomain_id_outside")),
     _threshold(getParam<Real>("threshold")),
-    _lambda(getParam<Real>("lambda")),
     _is_domain_inside_surface(getParam<bool>("is_domain_inside_surface")),
     _multi_geo(getParam<bool>("multi_geo")),
     _keep_inside_as_inside(getParam<bool>("keep_inside_as_inside")),
@@ -74,7 +72,7 @@ SubdomainInterceptedGenerator::generate()
 
   for (const auto & elem : mesh->active_element_ptr_range() /*gen only run rank = 0*/)
   {
-    // (a) Skip elements that have already been explicitly assigned by a
+    // Skip elements that have already been explicitly assigned by a
     //       previous geometry in a multi‑geometry workflow.
     if (_multi_geo)
     {
@@ -84,49 +82,37 @@ SubdomainInterceptedGenerator::generate()
         continue;
     }
 
-    // (b) Evaluate the distance function at the element nodes and capture
-    //       the extrema.
-    Real min_phi = std::numeric_limits<Real>::max();
-    Real max_phi = std::numeric_limits<Real>::lowest();
-
-    for (unsigned int n = 0; n < elem->n_nodes(); ++n)
-    {
-      const Point & p = elem->point(n);
-      _func_params = {p(0), p(1), p(2)};
-      Real phi = evaluate(_parsed_function);
-      min_phi = std::min(min_phi, phi);
-      max_phi = std::max(max_phi, phi);
-    }
-
     const auto outside_id = (_modify_inside_only) ? elem->subdomain_id() : _subdomain_id_outside;
     const auto inside_id = (_modify_outside_only) ? elem->subdomain_id() : _subdomain_id_inside;
 
-    // (c) Trivial inside / outside if all nodes are on the same side.
-    if (max_phi < _threshold)
+    const auto is_in_domain = [&](const Point & point)
     {
-      elem->subdomain_id() = _is_domain_inside_surface ? inside_id : outside_id;
-      continue;
-    }
-    else if (min_phi > _threshold)
-    {
-      elem->subdomain_id() = _is_domain_inside_surface ? outside_id : inside_id;
-      continue;
-    }
-
-    // (d) Element straddles the interface – estimate the active‑area ratio
-    //       with Gaussian quadrature.
-    auto is_active = [&](const Point & p)
-    {
-      _func_params = {p(0), p(1), p(2)};
-      Real phi = evaluate(_parsed_function);
+      _func_params = {point(0), point(1), point(2)};
+      const Real phi = evaluate(_parsed_function);
       return (_is_domain_inside_surface && phi < _threshold) ||
              (!_is_domain_inside_surface && phi > _threshold);
     };
 
-    const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+    const auto is_outside_domain = [&](const Point & point)
+    {
+      _func_params = {point(0), point(1), point(2)};
+      const Real phi = evaluate(_parsed_function);
+      return (_is_domain_inside_surface && phi > _threshold) ||
+             (!_is_domain_inside_surface && phi < _threshold);
+    };
 
-    // (e) Decide inside / outside based on the inactive fraction and _lambda.
-    elem->subdomain_id() = SBMUtils::isInactive(ratio_active, _lambda) ? outside_id : inside_id;
+    // Calculate the element occupancy at nodes and quadrature points according to the domain
+    // policy.
+    const auto occupancy =
+        SBMUtils::elementDomainOccupancy(*elem, _qrule_order, is_in_domain, is_outside_domain);
+
+    // The subdomain IDs to assign for inside, outside, and intercepted elements.
+    const SBMUtils::ClassificationSubdomains subdomain_id_settings{
+        inside_id, outside_id, _intercepted_subdomain_policy.subdomain_id};
+
+    // Classify the element based on its occupancy and the intercepted-subdomain policy.
+    elem->subdomain_id() = SBMUtils::classifySubdomainFromOccupancy(
+        occupancy, subdomain_id_settings, _intercepted_subdomain_policy.mark_intercepted, _lambda);
   }
 
   // Signal that the mesh has been modified and needs preparation.

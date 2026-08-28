@@ -33,9 +33,6 @@ protected:
   /// Threshold value for classification
   Real _threshold;
 
-  /// Lambda parameter for false intersection classification
-  Real _lambda;
-
   /// If true, the inside subdomain is the region enclosed by the surface (negative side)
   bool _is_domain_inside_surface;
 

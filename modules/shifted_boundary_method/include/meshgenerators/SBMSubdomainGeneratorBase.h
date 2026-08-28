@@ -10,13 +10,13 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "libmesh/enum_order.h"
+#include "SBMElementClassificationInterface.h"
 
 /**
  * Common parameters and members for shifted boundary subdomain mesh generators that classify volume
  * elements against a geometry using quadrature-based active-area estimation.
  */
-class SBMSubdomainGeneratorBase : public MeshGenerator
+class SBMSubdomainGeneratorBase : public MeshGenerator, public SBMElementClassificationInterface
 {
 public:
   static InputParameters validParams();
@@ -25,7 +25,4 @@ public:
 protected:
   /// The input mesh we want to modify
   std::unique_ptr<libMesh::MeshBase> & _input;
-
-  /// Quadrature order used to estimate the active area
-  const Order _qrule_order;
 };
