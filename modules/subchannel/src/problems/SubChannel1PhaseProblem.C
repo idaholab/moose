@@ -436,6 +436,11 @@ SubChannel1PhaseProblem::computeBulkReynoldsNumber()
   const Real inlet_mu = viscosity_in / mass_flow_in;
   _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * flow_area);
   _bulk_V = volumetric_flow_in / flow_area;
+  if (MooseUtils::absoluteFuzzyEqual(_bulk_Re, 0.0))
+    mooseError("The computed bulk Reynolds number is zero.");
+
+  if (MooseUtils::absoluteFuzzyEqual(_bulk_V, 0.0))
+    mooseError("The computed bulk velocity is zero.");
 }
 
 void

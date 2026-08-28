@@ -115,30 +115,105 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
 
   const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
 
-  // Calculation of flow regime
-  Real ReL;
-  Real ReT;
-  if (_mixing_model == "1986")
-  {
-    ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
-    ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
-  }
-  else
-  {
-    ReL = 700.0;
-    ReT = 10000.0;
-  }
+  const Real theta = std::acos(
+      wire_lead_length / std::sqrt(Utility::pow<2>(wire_lead_length) +
+                                   Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
 
-  // This beta is used by the global turbulent crossflow relation:
-  // w'_ij = beta * S_ij * G_bar. Peripheral sweep flow is handled separately by
-  // computeSweepFlowMixingParameter().
-  if (subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER)
+  // Pacio applicability
+  const bool center_edge =
+      (subch_type_i == EChannelType::CENTER && subch_type_j == EChannelType::EDGE) ||
+      (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CENTER);
+
+  const bool edge_corner =
+      (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CORNER) ||
+      (subch_type_i == EChannelType::CORNER && subch_type_j == EChannelType::EDGE);
+
+  // Pacio defines the mixing treatment across center-edge and edge-corner gaps.
+  // For all other applicable gaps, we retain the original Chen-Todreas (1986) model.
+  if (_mixing_model == "Pacio" && (center_edge || edge_corner))
   {
-    // wire angle
-    const Real theta =
-        std::acos(wire_lead_length /
-                  std::sqrt(Utility::pow<2>(wire_lead_length) +
-                            Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
+    const Real ReL = 700.0;
+    const Real ReT = 10000.0;
+
+    const Real rho_i_in = _rho_soln(node_in_i);
+    const Real rho_j_in = _rho_soln(node_in_j);
+    const Real rho_i_out = _rho_soln(node_out_i);
+    const Real rho_j_out = _rho_soln(node_out_j);
+
+    const Real rho_i = 0.5 * (rho_i_in + rho_i_out);
+    const Real rho_j = 0.5 * (rho_j_in + rho_j_out);
+
+    const Real Vi = 0.5 * (_mdot_soln(node_in_i) + _mdot_soln(node_out_i)) / (rho_i * Si);
+    const Real Vj = 0.5 * (_mdot_soln(node_in_j) + _mdot_soln(node_out_j)) / (rho_j * Sj);
+    const Real bulk_V = _scm_problem.getBulkVelocity();
+    const Real Xi = Vi / bulk_V;
+    const Real Xj = Vj / bulk_V;
+
+    constexpr Real flow_split_exponent = 2.0 - 0.18;
+
+    Real fraction;
+    if (MooseUtils::absoluteFuzzyEqual(Xi, Xj))
+    {
+      const Real Xavg = 0.5 * (Xi + Xj);
+
+      if (Xavg < 0.0)
+        mooseError("The Pacio mixing correlation does not support negative flow splits "
+                   "when evaluating the fractional flow-split exponent.");
+
+      fraction = flow_split_exponent * std::pow(Xavg, flow_split_exponent - 1.0);
+    }
+    else
+    {
+      if (Xi < 0.0 || Xj < 0.0)
+        mooseError("The Pacio mixing correlation does not support negative flow splits "
+                   "when evaluating the fractional flow-split exponent.");
+
+      fraction =
+          (std::pow(Xi, flow_split_exponent) - std::pow(Xj, flow_split_exponent)) / (Xi - Xj);
+    }
+
+    const Real WmL = 0.0;
+    const Real WmT = 8.8 * fraction / std::pow(std::max(bulk_Re, 1.0), 0.18);
+
+    Real Cm;
+
+    if (bulk_Re < ReL)
+      Cm = WmL;
+    else if (bulk_Re > ReT)
+      Cm = WmT;
+    else
+    {
+      const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
+
+      const Real gamma = 2.0 / 3.0;
+
+      Cm = WmL + (WmT - WmL) * std::pow(psi, gamma);
+    }
+
+    // Pacio uses the edge-subchannel projected wire area and bare flow area.
+    const Real dpgap = _tri_sch_mesh->getDuctToPinGap();
+    const Real w = pin_diameter + dpgap;
+
+    const Real Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
+
+    const Real A2prime =
+        pitch * (w - pin_diameter / 2.0) - libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
+
+    beta = Cm * std::sqrt(Ar2 / A2prime) * std::tan(theta);
+  }
+  else if (subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER)
+  {
+    //
+    // Original Chen-Todreas (1986) mixing correlation.
+    //
+    // This remains active for center-center gaps even when Pacio is selected,
+    // while center-edge gaps and edge-corner gaps are replaced by the Pacio treatment above.
+    // When Pacio is not selected: beta is defined for center-center, center-edge gaps.
+    // In edge-edge, edge-corner beta = zero.
+
+    const Real ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
+
+    const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
 
     // projected area of wire on center subchannel
     const Real Ar1 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
@@ -147,9 +222,8 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
     const Real A1prime = (std::sqrt(3.0) / 4.0) * Utility::pow<2>(pitch) -
                          libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
 
-    // 1986 coefficients
-    Real CmL_constant = 0.0;
-    Real CmT_constant = 0.0;
+    Real CmL_constant;
+    Real CmT_constant;
 
     if (Nr == 1)
     {
@@ -163,92 +237,25 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
     }
 
     const Real CmT = CmT_constant * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
+
     const Real CmL = CmL_constant * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
 
-    Real Cm = 0.0;
+    Real Cm;
 
-    if (_mixing_model == "1986")
-    {
-      // Preserve the original Chen-Todreas (1986) path.
-      if (bulk_Re < ReL)
-        Cm = CmL;
-      else if (bulk_Re > ReT)
-        Cm = CmT;
-      else
-      {
-        const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
-        const Real gamma = 2.0 / 3.0;
-        Cm = CmL + (CmT - CmL) * std::pow(psi, gamma);
-      }
-
-      beta = Cm * std::sqrt(Ar1 / A1prime) * std::tan(theta);
-    }
+    if (bulk_Re < ReL)
+      Cm = CmL;
+    else if (bulk_Re > ReT)
+      Cm = CmT;
     else
     {
-      // Pacio-only flow-split calculation.
-      const Real rho_i_in = _rho_soln(node_in_i);
-      const Real rho_j_in = _rho_soln(node_in_j);
-      const Real rho_i_out = _rho_soln(node_out_i);
-      const Real rho_j_out = _rho_soln(node_out_j);
-      const Real rho_i = 0.5 * (rho_i_in + rho_i_out);
-      const Real rho_j = 0.5 * (rho_j_in + rho_j_out);
+      const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
 
-      const Real Vi = 0.5 * (_mdot_soln(node_in_i) + _mdot_soln(node_out_i)) / (rho_i * Si);
-      const Real Vj = 0.5 * (_mdot_soln(node_in_j) + _mdot_soln(node_out_j)) / (rho_j * Sj);
+      const Real gamma = 2.0 / 3.0;
 
-      const Real bulk_V = _scm_problem.getBulkVelocity();
-      if (MooseUtils::absoluteFuzzyEqual(bulk_V, 0.0))
-        return 0.0;
-
-      const Real Xi = Vi / bulk_V;
-      const Real Xj = Vj / bulk_V;
-
-      constexpr Real flow_split_exponent = 2.0 - 0.18;
-      Real fraction;
-      if (MooseUtils::absoluteFuzzyEqual(Xi, Xj))
-      {
-        const Real Xavg = 0.5 * (Xi + Xj);
-        if (Xavg < 0.0)
-          mooseError("The Pacio mixing correlation does not support negative flow splits "
-                     "when evaluating the fractional flow-split exponent.");
-        fraction = flow_split_exponent * std::pow(Xavg, flow_split_exponent - 1.0);
-      }
-      else
-      {
-        if (Xi < 0.0 || Xj < 0.0)
-          mooseError("The Pacio mixing correlation does not support negative flow splits "
-                     "when evaluating the fractional flow-split exponent.");
-        fraction =
-            (std::pow(Xi, flow_split_exponent) - std::pow(Xj, flow_split_exponent)) / (Xi - Xj);
-      }
-
-      const Real WmL = 0.0;
-      const Real WmT = 8.8 * fraction / std::pow(std::max(bulk_Re, 1.0), 0.18);
-
-      if (bulk_Re < ReL)
-        Cm = WmL;
-      else if (bulk_Re > ReT)
-        Cm = WmT;
-      else
-      {
-        const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
-        const Real gamma = 2.0 / 3.0;
-        Cm = WmL + (WmT - WmL) * std::pow(psi, gamma);
-      }
-
-      // distance from pin surface to duct
-      const Real dpgap = _tri_sch_mesh->getDuctToPinGap();
-
-      // Edge pitch parameter defined as pin diameter plus distance to duct wall
-      const Real w = pin_diameter + dpgap;
-
-      const Real Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
-
-      const Real A2prime =
-          pitch * (w - pin_diameter / 2.0) - libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
-
-      beta = Cm * std::sqrt(Ar2 / A2prime) * std::tan(theta);
+      Cm = CmL + (CmT - CmL) * std::pow(psi, gamma);
     }
+
+    beta = Cm * std::sqrt(Ar1 / A1prime) * std::tan(theta);
   }
 
   return beta;
@@ -256,7 +263,7 @@ SCMMixingChenTodreas::computeMixingParameter(const unsigned int i_gap, const uns
 
 Real
 SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
-                                                      const unsigned int iz) const
+                                                      const unsigned int /* iz */) const
 {
   Real beta = 0.0;
 
@@ -275,34 +282,11 @@ SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
   const auto subch_type_i = _subchannel_mesh.getSubchannelType(i_ch);
   const auto subch_type_j = _subchannel_mesh.getSubchannelType(j_ch);
 
-  const Node * const node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-  const Node * const node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-  const Node * const node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-  const Node * const node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-
-  // Surface area
-  const Real Si_in = _S_soln(node_in_i);
-  const Real Sj_in = _S_soln(node_in_j);
-  const Real Si_out = _S_soln(node_out_i);
-  const Real Sj_out = _S_soln(node_out_j);
-  const Real Si = 0.5 * (Si_in + Si_out);
-  const Real Sj = 0.5 * (Sj_in + Sj_out);
-
   const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
 
-  // Calculation of flow regime
-  Real ReL;
-  Real ReT;
-  if (_mixing_model == "1986")
-  {
-    ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
-    ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
-  }
-  else
-  {
-    ReL = 700.0;
-    ReT = 10000.0;
-  }
+  // Sweep flow always uses the original Chen-Todreas (1986) correlation.
+  const Real ReL = 320.0 * std::pow(10.0, p_over_d - 1.0);
+  const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (p_over_d - 1.0));
 
   if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
       (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE))
@@ -323,9 +307,8 @@ SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     const Real A2prime =
         pitch * (w - pin_diameter / 2.0) - libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
 
-    // 1986 sweep coefficients
-    Real CsL_constant = 0.0;
-    Real CsT_constant = 0.0;
+    Real CsL_constant;
+    Real CsT_constant;
 
     if (Nr == 1)
     {
@@ -341,74 +324,17 @@ SCMMixingChenTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     const Real CsL = CsL_constant * std::pow(wire_lead_length / pin_diameter, 0.3);
     const Real CsT = CsT_constant * std::pow(wire_lead_length / pin_diameter, 0.3);
 
-    Real Cs = 0.0;
-
-    if (_mixing_model == "1986")
-    {
-      // Preserve the original Chen-Todreas (1986) path.
-      if (bulk_Re < ReL)
-        Cs = CsL;
-      else if (bulk_Re > ReT)
-        Cs = CsT;
-      else
-      {
-        const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
-        const Real gamma = 2.0 / 3.0;
-        Cs = CsL + (CsT - CsL) * std::pow(psi, gamma);
-      }
-    }
+    Real Cs;
+    if (bulk_Re < ReL)
+      Cs = CsL;
+    else if (bulk_Re > ReT)
+      Cs = CsT;
     else
     {
-      // Pacio-only flow-split calculation.
-      const Real rho_i_in = _rho_soln(node_in_i);
-      const Real rho_j_in = _rho_soln(node_in_j);
-      const Real rho_i_out = _rho_soln(node_out_i);
-      const Real rho_j_out = _rho_soln(node_out_j);
-      const Real rho_i = 0.5 * (rho_i_in + rho_i_out);
-      const Real rho_j = 0.5 * (rho_j_in + rho_j_out);
+      const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
+      const Real gamma = 2.0 / 3.0;
 
-      const Real Vi = 0.5 * (_mdot_soln(node_in_i) + _mdot_soln(node_out_i)) / (rho_i * Si);
-      const Real Vj = 0.5 * (_mdot_soln(node_in_j) + _mdot_soln(node_out_j)) / (rho_j * Sj);
-
-      const Real bulk_V = _scm_problem.getBulkVelocity();
-      if (MooseUtils::absoluteFuzzyEqual(bulk_V, 0.0))
-        return 0.0;
-
-      const Real Xi = Vi / bulk_V;
-      const Real Xj = Vj / bulk_V;
-
-      constexpr Real flow_split_exponent = 2.0 - 0.18;
-      Real fraction;
-      if (MooseUtils::absoluteFuzzyEqual(Xi, Xj))
-      {
-        const Real Xavg = 0.5 * (Xi + Xj);
-        if (Xavg < 0.0)
-          mooseError("The Pacio mixing correlation does not support negative flow splits "
-                     "when evaluating the fractional flow-split exponent.");
-        fraction = flow_split_exponent * std::pow(Xavg, flow_split_exponent - 1.0);
-      }
-      else
-      {
-        if (Xi < 0.0 || Xj < 0.0)
-          mooseError("The Pacio mixing correlation does not support negative flow splits "
-                     "when evaluating the fractional flow-split exponent.");
-        fraction =
-            (std::pow(Xi, flow_split_exponent) - std::pow(Xj, flow_split_exponent)) / (Xi - Xj);
-      }
-
-      const Real WsL = 0.0;
-      const Real WsT = 8.8 * fraction / std::pow(std::max(bulk_Re, 1.0), 0.18);
-
-      if (bulk_Re < ReL)
-        Cs = WsL;
-      else if (bulk_Re > ReT)
-        Cs = WsT;
-      else
-      {
-        const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
-        const Real gamma = 2.0 / 3.0;
-        Cs = WsL + (WsT - WsL) * std::pow(psi, gamma);
-      }
+      Cs = CsL + (CsT - CsL) * std::pow(psi, gamma);
     }
 
     // Sweep-flow coefficient used only by the peripheral enthalpy calculation.
