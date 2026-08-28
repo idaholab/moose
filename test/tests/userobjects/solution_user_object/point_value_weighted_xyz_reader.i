@@ -15,8 +15,8 @@
   [solution]
     type = SolutionUserObject
     system = aux0
-    mesh = point_value_wrapper_xyz_source_0001_mesh.xda
-    es = point_value_wrapper_xyz_source_0001.xda
+    mesh = point_value_weighted_xyz_source_0001_mesh.xda
+    es = point_value_weighted_xyz_source_0001.xda
     system_variables = source_xyz
     # Multivalued point evaluation requires the discontinuous source mesh
     # to be available on every processor.
@@ -26,7 +26,7 @@
 
 [Postprocessors]
   [xyz_average]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = source_xyz
     point = '0.5 0.5 0'
     weighting_type = average

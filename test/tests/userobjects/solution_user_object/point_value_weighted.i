@@ -28,7 +28,7 @@
 
 [Postprocessors]
   [scalar_average_face]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = discontinuous_variable
     point = '0.5 0.25 0'
     weighting_type = average
@@ -37,7 +37,7 @@
   []
 
   [scalar_smallest_face]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = discontinuous_variable
     point = '0.5 0.25 0'
     weighting_type = smallest_element_id
@@ -46,7 +46,7 @@
   []
 
   [scalar_largest_face]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = discontinuous_variable
     point = '0.5 0.25 0'
     weighting_type = largest_element_id
@@ -55,7 +55,7 @@
   []
 
   [scalar_largest_elem_zero]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = discontinuous_variable
     point = '0.25 0.25 0'
     weighting_type = largest_element_id
@@ -64,7 +64,7 @@
   []
 
   [gradient_average_face]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = continuous_variable
     point = '0.5 0.25 0'
     evaluate_gradient = true
@@ -75,7 +75,7 @@
   []
 
   [gradient_smallest_face]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = continuous_variable
     point = '0.5 0.25 0'
     evaluate_gradient = true
@@ -86,7 +86,7 @@
   []
 
   [gradient_largest_face]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = continuous_variable
     point = '0.5 0.25 0'
     evaluate_gradient = true
@@ -97,7 +97,7 @@
   []
 
   [gradient_largest_elem_zero]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = continuous_variable
     point = '0.25 0.25 0'
     evaluate_gradient = true

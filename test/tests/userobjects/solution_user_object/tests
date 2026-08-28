@@ -18,44 +18,44 @@
 
     requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
   []
-  [point_value_wrapper]
+  [point_value_weighted]
     type = CSVDiff
-    input = point_value_wrapper.i
-    csvdiff = point_value_wrapper_out.csv
+    input = point_value_weighted.i
+    csvdiff = point_value_weighted_out.csv
     prereq = discontinuous_value_solution_uo_p1
     issues = '#31766'
     requirement = "The system shall reduce multivalued imported solution values and gradients using selectable weighting policies."
   []
 
-  [point_value_wrapper_xyz_source]
+  [point_value_weighted_xyz_source]
     type = RunApp
-    input = point_value_wrapper_xyz_source.i
+    input = point_value_weighted_xyz_source.i
     issues = '#31766'
     requirement = "The system shall write an XYZ-family imported solution for testing multivalued point evaluation."
   []
 
-  [point_value_wrapper_xyz_reader]
+  [point_value_weighted_xyz_reader]
     type = CSVDiff
-    input = point_value_wrapper_xyz_reader.i
-    csvdiff = point_value_wrapper_xyz_reader_out.csv
-    prereq = point_value_wrapper_xyz_source
+    input = point_value_weighted_xyz_reader.i
+    csvdiff = point_value_weighted_xyz_reader_out.csv
+    prereq = point_value_weighted_xyz_source
     issues = '#31766'
     requirement = "The system shall reduce multivalued XYZ-family imported solution values using the selected weighting policy."
   []
 
-  [point_value_wrapper_time_source]
+  [point_value_weighted_time_source]
     type = RunApp
-    input = point_value_wrapper_time_source.i
+    input = point_value_weighted_time_source.i
     issues = '#31766'
     requirement = "The system shall write time-dependent scalar and gradient fields on multiple source subdomains for testing imported-solution interpolation."
   []
 
-  [point_value_wrapper_time_reader]
+  [point_value_weighted_time_reader]
     type = CSVDiff
-    input = point_value_wrapper_time_reader.i
+    input = point_value_weighted_time_reader.i
     recover = false
-    csvdiff = point_value_wrapper_time_reader_out.csv
-    prereq = point_value_wrapper_time_source
+    csvdiff = point_value_weighted_time_reader_out.csv
+    prereq = point_value_weighted_time_source
     issues = '#31766'
     requirement = "The system shall apply source-subdomain restrictions to both interpolation states and interpolate imported gradients between distinct time states."
   []

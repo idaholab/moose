@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TestSolutionPointValueWrapper.h"
+#include "TestSolutionPointValueWeighted.h"
 
 #include "SolutionUserObjectBase.h"
 
-registerMooseObject("MooseTestApp", TestSolutionPointValueWrapper);
+registerMooseObject("MooseTestApp", TestSolutionPointValueWeighted);
 
 InputParameters
-TestSolutionPointValueWrapper::validParams()
+TestSolutionPointValueWeighted::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
 
@@ -43,7 +43,7 @@ TestSolutionPointValueWrapper::validParams()
   return params;
 }
 
-TestSolutionPointValueWrapper::TestSolutionPointValueWrapper(const InputParameters & parameters)
+TestSolutionPointValueWeighted::TestSolutionPointValueWeighted(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _variable_name(getParam<VariableName>("variable")),
     _point(getParam<Point>("point")),
@@ -56,13 +56,13 @@ TestSolutionPointValueWrapper::TestSolutionPointValueWrapper(const InputParamete
 }
 
 void
-TestSolutionPointValueWrapper::initialSetup()
+TestSolutionPointValueWeighted::initialSetup()
 {
   _solution_object_ptr = &getUserObject<SolutionUserObjectBase>("solution");
 }
 
 Real
-TestSolutionPointValueWrapper::getValue() const
+TestSolutionPointValueWeighted::getValue() const
 {
   const std::set<subdomain_id_type> source_subdomain_ids(_source_subdomain_ids.begin(),
                                                          _source_subdomain_ids.end());
@@ -71,9 +71,9 @@ TestSolutionPointValueWrapper::getValue() const
       source_subdomain_ids.empty() ? nullptr : &source_subdomain_ids;
 
   if (_evaluate_gradient)
-    return _solution_object_ptr->pointValueGradientWrapper(
+    return _solution_object_ptr->pointValueGradient(
         _t, _point, _variable_name, _weighting_type, source_subdomain_ids_ptr)(_gradient_component);
 
-  return _solution_object_ptr->pointValueWrapper(
+  return _solution_object_ptr->pointValue(
       _t, _point, _variable_name, _weighting_type, source_subdomain_ids_ptr);
 }

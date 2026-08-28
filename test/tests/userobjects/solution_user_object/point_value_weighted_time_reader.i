@@ -14,21 +14,21 @@
 [UserObjects]
   [fixed_solution]
     type = SolutionUserObject
-    mesh = point_value_wrapper_time_source_out.e
+    mesh = point_value_weighted_time_source_out.e
     system_variables = 'source_value source_gradient'
     timestep = LATEST
   []
 
   [interpolated_solution]
     type = SolutionUserObject
-    mesh = point_value_wrapper_time_source_out.e
+    mesh = point_value_weighted_time_source_out.e
     system_variables = 'source_value source_gradient'
   []
 []
 
 [Postprocessors]
   [scalar_restricted_latest]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = source_value
     point = '0.5 0.5 0'
     weighting_type = average
@@ -38,7 +38,7 @@
   []
 
   [scalar_restricted_interpolated]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = source_value
     point = '0.5 0.5 0'
     weighting_type = average
@@ -48,7 +48,7 @@
   []
 
   [gradient_average_interpolated]
-    type = TestSolutionPointValueWrapper
+    type = TestSolutionPointValueWeighted
     variable = source_gradient
     point = '0.5 0.5 0'
     evaluate_gradient = true

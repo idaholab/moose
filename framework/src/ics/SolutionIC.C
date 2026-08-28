@@ -109,7 +109,7 @@ Real
 SolutionIC::value(const Point & p)
 {
   if (_weighting_type)
-    return _solution_object.pointValueWrapper(
+    return _solution_object.pointValue(
         0., p, _solution_object_var_name, *_weighting_type, &_exo_block_ids);
 
   return _solution_object.pointValue(0., p, _solution_object_var_name, &_exo_block_ids);

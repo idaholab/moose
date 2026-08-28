@@ -41,6 +41,6 @@
 []
 
 [Outputs]
-  file_base = point_value_wrapper_xyz_source
+  file_base = point_value_weighted_xyz_source
   xda = true
 []

@@ -16,12 +16,12 @@
  * Tests the policy-based point-value and point-gradient wrappers of
  * SolutionUserObjectBase.
  */
-class TestSolutionPointValueWrapper : public GeneralPostprocessor
+class TestSolutionPointValueWeighted : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  TestSolutionPointValueWrapper(const InputParameters & parameters);
+  TestSolutionPointValueWeighted(const InputParameters & parameters);
 
   void initialize() override {}
   void execute() override {}

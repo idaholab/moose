@@ -739,11 +739,11 @@ SolutionUserObjectBase::getLocalVarIndex(const std::string & var_name) const
 }
 
 Real
-SolutionUserObjectBase::pointValueWrapper(Real t,
-                                          const Point & p,
-                                          const std::string & var_name,
-                                          WeightingType weighting_type,
-                                          const std::set<subdomain_id_type> * subdomain_ids) const
+SolutionUserObjectBase::pointValue(Real t,
+                                   const Point & p,
+                                   const std::string & var_name,
+                                   WeightingType weighting_type,
+                                   const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // Use multivalued evaluation only for spatial discontinuous scalar fields.
   const auto & fe_type = _system->variable_type(var_name);
@@ -791,7 +791,7 @@ SolutionUserObjectBase::pointValueWrapper(Real t,
     }
   }
 
-  mooseError("SolutionUserObjectBase::pointValueWrapper reaches line that it should not be able to "
+  mooseError("SolutionUserObjectBase::pointValue reaches line that it should not be able to "
              "reach.");
   return 0.0;
 }
@@ -916,12 +916,11 @@ SolutionUserObjectBase::discontinuousPointValue(
 }
 
 RealGradient
-SolutionUserObjectBase::pointValueGradientWrapper(
-    Real t,
-    const Point & p,
-    const std::string & var_name,
-    WeightingType weighting_type,
-    const std::set<subdomain_id_type> * subdomain_ids) const
+SolutionUserObjectBase::pointValueGradient(Real t,
+                                           const Point & p,
+                                           const std::string & var_name,
+                                           WeightingType weighting_type,
+                                           const std::set<subdomain_id_type> * subdomain_ids) const
 {
 
   // the shape function is discontinuous so we need to compute a suitable unique value
@@ -962,7 +961,7 @@ SolutionUserObjectBase::pointValueGradientWrapper(
     }
   }
 
-  mooseError("SolutionUserObjectBase::pointValueGradientWrapper reaches line that it should not be "
+  mooseError("SolutionUserObjectBase::pointValueGradient reaches line that it should not be "
              "able to reach.");
   return RealGradient(0.0, 0.0, 0.0);
 }

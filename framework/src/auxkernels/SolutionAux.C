@@ -111,7 +111,7 @@ SolutionAux::computeValue()
     const Point p = isNodal() ? Point(*_current_node) : _current_elem->vertex_average();
 
     if (_weighting_type)
-      output = _solution_object.pointValueWrapper(_t, p, _var_name, *_weighting_type);
+      output = _solution_object.pointValue(_t, p, _var_name, *_weighting_type);
     else
       output = _solution_object.pointValue(_t, p, _var_name);
   }

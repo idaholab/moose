@@ -107,8 +107,8 @@ Real
 SolutionFunction::value(Real t, const Point & p) const
 {
   if (_weighting_type)
-    return _scale_factor * _solution_object_ptr->pointValueWrapper(
-                               t, p, _solution_object_var_name, *_weighting_type) +
+    return _scale_factor *
+               _solution_object_ptr->pointValue(t, p, _solution_object_var_name, *_weighting_type) +
            _add_factor;
 
   return _scale_factor * _solution_object_ptr->pointValue(t, p, _solution_object_var_name) +
@@ -119,7 +119,7 @@ RealGradient
 SolutionFunction::gradient(Real t, const Point & p) const
 {
   if (_weighting_type)
-    return _scale_factor * _solution_object_ptr->pointValueGradientWrapper(
+    return _scale_factor * _solution_object_ptr->pointValueGradient(
                                t, p, _solution_object_var_name, *_weighting_type) +
            _add_grad;
 
