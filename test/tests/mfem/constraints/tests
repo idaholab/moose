@@ -1,0 +1,13 @@
+[Tests]
+  design = 'MFEMEssentialConstraint.md'
+  issues = '#33623'
+  [MFEMInteriorEssentialConstraint]
+    type = CSVDiff
+    input = subdomain_constraint_source.i
+    csvdiff = subdomain_constraint_source_out_line_sample_0001.csv
+    requirement = 'The system shall have the ability to apply essential constraints on interior degrees of freedom in MFEM problems'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+[]
