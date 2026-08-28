@@ -37,6 +37,31 @@
                   "either a replicated or a distributed mesh, retaining the elements needed by the "
                   "constraint when remote elements are deleted."
   []
+  [generate_evbc_presplit_displaced]
+    type = CheckFiles
+    input = 'evbc_presplit_displaced.i'
+    cli_args = '--split-mesh 2 --split-file evbc_presplit_displaced Mesh/parallel_type=replicated Outputs/exodus=false'
+    check_files = 'evbc_presplit_displaced.cpa.gz/2/header.gz
+                   evbc_presplit_displaced.cpa.gz/2/split-2-0.gz
+                   evbc_presplit_displaced.cpa.gz/2/split-2-1.gz'
+    recover = false
+    requirement = "The system shall generate a two-way pre-split mesh for an equal value boundary "
+                  "constraint problem with a displaced mesh."
+  []
+  [evbc_presplit_displaced]
+    type = Exodiff
+    input = 'evbc_presplit_displaced.i'
+    cli_args = '--use-split --split-file evbc_presplit_displaced Outputs/file_base=evbc_presplit_displaced_out'
+    exodiff = 'evbc_presplit_displaced_out.e'
+    abs_zero = 1e-9
+    prereq = 'generate_evbc_presplit_displaced'
+    mesh_mode = DISTRIBUTED
+    min_parallel = 2
+    max_parallel = 2
+    recover = false
+    requirement = "The system shall enforce an equal value boundary constraint after loading a "
+                  "pre-split distributed reference mesh and its displaced mesh."
+  []
   [set_primary_and_coord_error]
     type = RunException
     input = 'equal_value_boundary_constraint_test.i'
