@@ -40,7 +40,7 @@ public:
 
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
-  virtual void ApplyEssentialBCs() override;
+  virtual void ApplyEssentialConstraints() override;
 
   /// Verify that the problem is homogeneous (all Dirichlet BCs are zero)
   virtual void CheckProblemIsHomogeneous();

@@ -17,7 +17,7 @@ namespace Moose::MFEM
 {
 
 void
-EigenproblemEquationSystem::ApplyEssentialBCs()
+EigenproblemEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(1);
   _ess_markers.resize(1);
@@ -97,7 +97,7 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
 
   height = trueX.Size();
   width = trueX.Size();
-  ApplyEssentialBCs();
+  ApplyEssentialConstraints();
   FormEigenproblemMatrix();
   FormMassMatrix(rhs_coefficient);
 }
