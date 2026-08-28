@@ -187,11 +187,12 @@ protected:
 
   /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
   /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & var_name,
-                                mfem::ParGridFunction & trial_gf,
-                                mfem::Array<int> & global_ess_markers);
+  virtual void ApplyEssentialConstraint(const std::string & var_name,
+                                        mfem::ParGridFunction & trial_gf,
+                                        mfem::Array<int> & global_bdr_markers,
+                                        mfem::Array<int> & global_ess_tdofs);
   /// Update all essentially constrained true DoF markers and values on boundaries
-  virtual void ApplyEssentialBCs();
+  virtual void ApplyEssentialConstraints();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
   /// Build linear forms and eliminate constrained DoFs

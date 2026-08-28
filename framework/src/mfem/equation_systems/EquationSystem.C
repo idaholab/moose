@@ -201,10 +201,12 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 }
 
 void
-EquationSystem::ApplyEssentialBC(const std::string & var_name,
-                                 mfem::ParGridFunction & trial_gf,
-                                 mfem::Array<int> & global_ess_markers)
+EquationSystem::ApplyEssentialConstraint(const std::string & var_name,
+                                         mfem::ParGridFunction & trial_gf,
+                                         mfem::Array<int> & global_bdr_markers,
+                                         mfem::Array<int> & global_ess_tdofs)
 {
+  global_bdr_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
   if (_essential_bc_map.Has(var_name))
     for (auto & bc : _essential_bc_map.GetRef(var_name))
     {
@@ -214,12 +216,13 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
       for (const auto i : make_range(ess_bdrs.Size()))
-        global_ess_markers[i] |= ess_bdrs[i];
+        global_bdr_markers[i] |= ess_bdrs[i];
     }
+  trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
 }
 
 void
-EquationSystem::ApplyEssentialBCs()
+EquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
   _ess_markers.resize(_trial_var_names.size());
@@ -234,11 +237,8 @@ EquationSystem::ApplyEssentialBCs()
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
-    _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
-    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the _ess_markers array
-    ApplyEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));
-    trial_gf.ParFESpace()->GetEssentialTrueDofs(_ess_markers.at(i), _ess_tdof_lists.at(i));
+    // Set strongly constrained DoFs of trial_gf and set essential bdr markers
+    ApplyEssentialConstraint(trial_var_name, trial_gf, _ess_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 
@@ -499,7 +499,7 @@ EquationSystem::BuildLinearForms()
   }
 
   // Apply essential boundary conditions
-  ApplyEssentialBCs();
+  ApplyEssentialConstraints();
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
