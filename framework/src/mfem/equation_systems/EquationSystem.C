@@ -150,6 +150,20 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 }
 
 void
+EquationSystem::AddEssentialConstraint(std::shared_ptr<MFEMEssentialConstraint> constraint)
+{
+  const auto & trial_var_name = constraint->getTrialVariableName();
+  AddTestVariableNameIfMissing(trial_var_name);
+  // Register new essential bc map if not present for the test variable
+  if (!_essential_constraint_map.Has(trial_var_name))
+  {
+    auto constraints = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialConstraint>>>();
+    _essential_constraint_map.Register(trial_var_name, std::move(constraints));
+  }
+  _essential_constraint_map.GetRef(trial_var_name).push_back(std::move(constraint));
+}
+
+void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
                      Moose::MFEM::ComplexGridFunctions & /*cmplx_gridfunctions*/,
                      mfem::AssemblyLevel assembly_level)
@@ -219,6 +233,18 @@ EquationSystem::ApplyEssentialConstraint(const std::string & var_name,
         global_bdr_markers[i] |= ess_bdrs[i];
     }
   trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
+
+  if (_essential_constraint_map.Has(var_name))
+    for (auto & constraint : _essential_constraint_map.GetRef(var_name))
+    {
+      // Set constrained DoFs values
+      mfem::Array<int> ess_tdofs;
+      constraint->ApplyConstraint(trial_gf, ess_tdofs);
+      // Add these constrained tdofs to the set of all tdofs
+      global_ess_tdofs.Append(ess_tdofs);
+    }
+  // Deduplicate
+  global_ess_tdofs.Unique();
 }
 
 void

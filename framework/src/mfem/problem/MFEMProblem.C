@@ -440,6 +440,20 @@ MFEMProblem::addAuxKernel(const std::string & kernel_name,
 }
 
 void
+MFEMProblem::addConstraint(const std::string & constraint_name,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  auto constraint = addObject<MFEMEssentialConstraint>(constraint_name, name, parameters).front();
+  auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+  if (eqsys)
+    eqsys->AddEssentialConstraint(std::move(constraint));
+  else
+    mooseError("Cannot add constraint with name '" + name +
+               "' because there is no corresponding equation system.");
+}
+
+void
 MFEMProblem::addKernel(const std::string & kernel_name,
                        const std::string & name,
                        InputParameters & parameters)
