@@ -11,11 +11,17 @@
 
 // MOOSE includes
 #include "Assembly.h"
+#include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/null_output_iterator.h"
+#include "libmesh/parallel_elem.h"
+#include "libmesh/parallel_node.h"
 #include "libmesh/sparse_matrix.h"
+
+#include <algorithm>
 
 InputParameters
 NodalConstraint::validParams()
@@ -57,14 +63,77 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     mooseError("Formulation must be either Penalty or Kinematic");
 }
 
-void
-NodalConstraint::addRetainedGhostedElem(const dof_id_type elem_id)
+std::vector<dof_id_type>
+NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
+                                               const std::vector<dof_id_type> & node_ids)
 {
-  Elem * const elem = _mesh.elemPtr(elem_id);
-  if (auto * const distributed_mesh = dynamic_cast<libMesh::DistributedMesh *>(&_mesh.getMesh()))
-    distributed_mesh->add_extra_ghost_elem(elem);
+  const auto & node_to_elem_map = mesh.nodeToElemMap();
+  auto * const distributed_mesh =
+      dynamic_cast<libMesh::DistributedMesh *>(&mesh.getMesh());
 
-  _subproblem.addGhostedElem(elem_id);
+  // Elements connected to these nodes may already be remote on a distributed mesh, so gather
+  // every locally available connected element before rebuilding the connectivity map.
+  if (distributed_mesh)
+  {
+    std::set<Elem *, CompareElemsByLevel> elems_to_ghost;
+    std::set<Node *> nodes_to_ghost;
+    for (const auto node_id : node_ids)
+    {
+      const auto node_to_elem_pair = node_to_elem_map.find(node_id);
+#ifndef NDEBUG
+      bool someone_found_elems = node_to_elem_pair != node_to_elem_map.end();
+      mesh.getMesh().comm().max(someone_found_elems);
+      mooseAssert(someone_found_elems, "Missing entry in node to elem map");
+#endif
+
+      if (node_to_elem_pair != node_to_elem_map.end())
+        for (const auto elem_id : node_to_elem_pair->second)
+          if (auto * const elem = mesh.queryElemPtr(elem_id))
+          {
+            elems_to_ghost.insert(elem);
+            for (const auto n : make_range(elem->n_nodes()))
+              nodes_to_ghost.insert(elem->node_ptr(n));
+          }
+    }
+
+    // Send nodes first since elements need them.
+    mesh.getMesh().comm().allgather_packed_range(&mesh.getMesh(),
+                                                 nodes_to_ghost.begin(),
+                                                 nodes_to_ghost.end(),
+                                                 libMesh::null_output_iterator<Node>());
+    mesh.getMesh().comm().allgather_packed_range(&mesh.getMesh(),
+                                                 elems_to_ghost.begin(),
+                                                 elems_to_ghost.end(),
+                                                 libMesh::null_output_iterator<Elem>());
+
+    // Rebuild the node-to-element map after gathering the remote mesh entities.
+    mesh.update();
+  }
+
+  std::vector<dof_id_type> elem_ids;
+  const auto & updated_node_to_elem_map = mesh.nodeToElemMap();
+  for (const auto node_id : node_ids)
+  {
+    const auto node_to_elem_pair = updated_node_to_elem_map.find(node_id);
+    if (node_to_elem_pair == updated_node_to_elem_map.end() || node_to_elem_pair->second.empty())
+      mooseError("Couldn't find any elements connected to primary node");
+
+    for (const auto elem_id : node_to_elem_pair->second)
+    {
+      elem_ids.push_back(elem_id);
+
+      // Keep gathered elements when libMesh later deletes unneeded remote elements.
+      if (distributed_mesh)
+        distributed_mesh->add_extra_ghost_elem(mesh.elemPtr(elem_id));
+    }
+  }
+
+  // The reference and displaced meshes share topology, but their connectivity maps need not have
+  // the same iteration order.
+  std::sort(elem_ids.begin(), elem_ids.end());
+  elem_ids.erase(std::unique(elem_ids.begin(), elem_ids.end()), elem_ids.end());
+
+  return elem_ids;
 }
 
 void

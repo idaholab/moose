@@ -13,6 +13,8 @@
 #include "Constraint.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
+class MooseMesh;
+
 class NodalConstraint : public Constraint,
                         public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                         public NeighborMooseVariableInterface<Real>
@@ -64,9 +66,10 @@ public:
 
 protected:
   /**
-   * Retain an element on a distributed mesh and add its DoFs to the ghosting list.
+   * Gather and retain elements connected to the provided nodes on the provided mesh.
    */
-  void addRetainedGhostedElem(dof_id_type elem_id);
+  std::vector<dof_id_type> gatherAndRetainConnectedElems(
+      MooseMesh & mesh, const std::vector<dof_id_type> & node_ids);
 
   /**
    * This is the virtual that derived classes should override for computing the residual on
