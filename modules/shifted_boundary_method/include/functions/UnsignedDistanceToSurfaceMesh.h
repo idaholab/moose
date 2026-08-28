@@ -14,7 +14,7 @@
 // Forward declarations
 class SBMSurfaceMeshBuilder;
 class KDTree;
-class SBMBndElementBase;
+class SurfaceElement;
 
 /**
  * Computes the unsigned distance to a surface mesh using KDTree nearest
@@ -33,7 +33,7 @@ public:
   UnsignedDistanceToSurfaceMesh(const InputParameters & parameters);
 
   /// find closest boundary element using KDTree
-  const SBMBndElementBase & closestBoundaryElem(const Point & p) const;
+  const SurfaceElement & closestBoundaryElem(const Point & p) const;
 
   /// find closest boundary element and return its distance vector
   RealVectorValue distanceVectorToSurface(const Point & p) const;
@@ -53,5 +53,5 @@ public:
 protected:
   /// Cached pointers for speed
   KDTree * _kd_tree;
-  const std::vector<std::unique_ptr<SBMBndElementBase>> * _boundary_elements;
+  const std::vector<std::unique_ptr<SurfaceElement>> * _boundary_elements;
 };
