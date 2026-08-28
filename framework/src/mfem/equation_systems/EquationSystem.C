@@ -324,7 +324,9 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
 
   op.Reset(aux_a.Ptr());
 
-  // hold a reference to op
+  // hold a reference to op. Later, we'll pass this into SumOperatorExtension
+  // so we can perform AddMult on the linear part of the system, then on the
+  // nonlinear part of the system.
   _system_operator = &op;
 
   aux_a.SetOperatorOwner(false);
@@ -630,7 +632,6 @@ EquationSystem::BuildNonlinearForms()
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
-
     nlf->Setup();
   }
 }

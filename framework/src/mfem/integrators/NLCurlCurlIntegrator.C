@@ -12,11 +12,9 @@
 
 #include "NLCurlCurlIntegrator.h"
 
-// Silence warning in the CI caused by this header
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include "libmesh/ignore_warnings.h"
 #include "mfem/fem/integ/bilininteg_hcurl_kernels.hpp"
-#pragma GCC diagnostic pop
+#include "libmesh/restore_warnings.h"
 
 namespace Moose::MFEM
 {
