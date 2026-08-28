@@ -121,10 +121,6 @@ dt = 1
     maximum_shear_traction = 300
     boundary = 'Block1_Block2'
   []
-  [gc_integral]
-    type = CZMGcIntegral
-    boundary = 'Block1_Block2'
-  []
 []
 
 [Executioner]
@@ -236,32 +232,6 @@ dt = 1
   [length]
     type = AreaPostprocessor
     boundary = 'right'
-  []
-
-  [left_distance_integral]
-    type = SideIntegralShiftedVariablePostprocessor
-    variable = disp_x
-    boundary = 'Block1_Block2'
-  []
-
-  [right_distance_integral]
-    type = SideIntegralShiftedVariablePostprocessor
-    variable = disp_x
-    boundary = 'Block2_Block1'
-  []
-
-  [gc]
-    type = SideIntegralMaterialProperty
-    boundary = 'Block1_Block2'
-    property = gc_integral
-    execute_on = 'TIMESTEP_END'
-  []
-
-  [gc_corrected]
-    type = AreaCorrectedSideIntegralMaterialProperty
-    boundary = 'Block1_Block2'
-    property = gc_integral
-    execute_on = 'TIMESTEP_END'
   []
 []
 

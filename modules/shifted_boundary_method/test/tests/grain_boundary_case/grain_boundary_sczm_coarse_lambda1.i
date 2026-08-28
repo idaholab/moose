@@ -159,10 +159,6 @@ nx = '${fparse ny*3/2}'
     eta = 2.2
     viscosity = 1e-3
   []
-  [gc_integral]
-    type = CZMGcIntegral
-    boundary = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
-  []
 []
 
 [UserObjects]
@@ -336,13 +332,6 @@ nx = '${fparse ny*3/2}'
     functor = 1
     block = '1 2'
     execute_on = 'final'
-  []
-
-  [gc_corrected]
-    type = AreaCorrectedSideIntegralMaterialProperty
-    boundary = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
-    property = gc_integral
-    execute_on = 'TIMESTEP_END'
   []
 []
 

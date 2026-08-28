@@ -8,8 +8,7 @@
     recover = false
     requirement = 'The system shall solve a shifted cohesive zone problem on a '
                   'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action '
-                  'with the non-AD SalehaniIrani3DCTraction law and accumulate the cohesive '
-                  'work of separation with CZMGcIntegral.'
+                  'with the non-AD SalehaniIrani3DCTraction law.'
   []
   [rectangle_sczm_tri_material_field_correction]
     type = 'CSVDiff'

@@ -154,7 +154,7 @@ SubdomainGrainIDGenerator::buildSubdomainGroupedData()
   {
     const auto [it, inserted] = bucket_index_by_subdomain.emplace(sid, buckets.size());
     if (inserted)
-      buckets.push_back({sid});
+      buckets.push_back({sid, 0, {}, false, {}, {}});
     return buckets[it->second];
   };
 
