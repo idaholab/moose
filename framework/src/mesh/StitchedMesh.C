@@ -83,7 +83,7 @@ void
 StitchedMesh::buildMesh()
 {
   // Get the original mesh
-  _original_mesh = static_cast<ReplicatedMesh *>(&getMesh());
+  _original_mesh = cast_ptr<ReplicatedMesh *>(&getMesh());
 
   // Read the first mesh into the original mesh... then we'll stitch all of the others into that
   _original_mesh->read(_files[0]);

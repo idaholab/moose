@@ -1099,7 +1099,7 @@ private:
   getSolutionStates(const Moose::SolutionIterationType iteration_type)
   {
     return const_cast<std::vector<NumericVector<Number> *> &>(
-        static_cast<const SystemBase *>(this)->getSolutionStates(iteration_type));
+        cast_ptr<const SystemBase *>(this)->getSolutionStates(iteration_type));
   }
 
   /**

@@ -5610,9 +5610,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
                                      displaced,
                                      mortar);
 
-            auto * const subproblem = displaced
-                                          ? static_cast<SubProblem *>(_displaced_problem.get())
-                                          : static_cast<SubProblem *>(this);
+            auto * const subproblem = displaced ? cast_ptr<SubProblem *>(_displaced_problem.get())
+                                                : cast_ptr<SubProblem *>(this);
             MortarUserObjectThread muot(mortar_uos_to_execute,
                                         *interface_config.amg,
                                         *subproblem,
@@ -10095,8 +10094,8 @@ FEProblemBase::getMortarUserObjects(const BoundaryID primary_boundary_id,
                                     const std::vector<MortarUserObject *> & mortar_uo_superset)
 {
   std::vector<MortarUserObject *> mortar_uos;
-  auto * const subproblem = displaced ? static_cast<SubProblem *>(_displaced_problem.get())
-                                      : static_cast<SubProblem *>(this);
+  auto * const subproblem =
+      displaced ? cast_ptr<SubProblem *>(_displaced_problem.get()) : cast_ptr<SubProblem *>(this);
   for (auto * const obj : mortar_uo_superset)
     if (obj->onInterface(primary_boundary_id, secondary_boundary_id) &&
         (&obj->getSubProblem() == subproblem))

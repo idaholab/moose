@@ -53,7 +53,7 @@ PointVariableSamplerBase::PointVariableSamplerBase(const InputParameters & param
     const auto * const var = _coupled_moose_vars[i];
     var_names[i] = var->name();
     SamplerBase::checkForStandardFieldVariableType(var);
-    _var_slns[i] = &libMesh::cast_ptr<const MooseVariableField<Real> *>(var)->sln();
+    _var_slns[i] = &cast_ptr<const MooseVariableField<Real> *>(var)->sln();
   }
 
   // Initialize the data structures in SamplerBase

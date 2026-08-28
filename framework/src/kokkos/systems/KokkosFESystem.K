@@ -106,8 +106,7 @@ FESystem::setupDofs()
 
   _local_node_dof_index.create(_num_vars);
 
-  auto * const solution =
-      libMesh::cast_ptr<PetscVector<Number> *>(sys.current_local_solution.get());
+  auto * const solution = cast_ptr<PetscVector<Number> *>(sys.current_local_solution.get());
 
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
   // Kokkos array thinks OpenMP clause is device code when using OpenMP backend

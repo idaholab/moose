@@ -303,7 +303,7 @@ Factory::createUnique(const std::string & obj_name,
 {
   auto object = createUnique(obj_name, name, parameters, tid, false);
   createCheckObjectType<T>(object, obj_name);
-  return std::unique_ptr<T>(static_cast<T *>(object.release()));
+  return std::unique_ptr<T>(cast_ptr<T *>(object.release()));
 }
 
 template <typename T>

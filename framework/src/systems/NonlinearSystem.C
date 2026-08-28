@@ -110,7 +110,7 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
   nonlinearSolver()->nearnullspace = Moose::compute_nearnullspace;
 
   PetscNonlinearSolver<Real> * petsc_solver =
-      static_cast<PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
+      cast_ptr<PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
   if (petsc_solver)
   {
     petsc_solver->set_residual_zero_out(false);
@@ -261,10 +261,10 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
   _nl_implicit_sys.nonlinear_solver->jacobian = nullptr;
 
   PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
-      static_cast<PetscNonlinearSolver<Number> *>(_nl_implicit_sys.nonlinear_solver.get());
+      cast_ptr<PetscNonlinearSolver<Number> *>(_nl_implicit_sys.nonlinear_solver.get());
 
   PetscMatrix<Number> * petsc_mat =
-      static_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
+      cast_ptr<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
 
   LibmeshPetscCall(SNESSetJacobian(petsc_nonlinear_solver->snes(),
                                    petsc_mat->mat(),
