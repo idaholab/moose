@@ -1,6 +1,8 @@
 mu = 0.0 # 1e-2
 rho = 2.0
 advected_interp_method = 'average'
+forcheimer_value = 50
+inlet_u = 0.1
 
 [Mesh]
   [mesh]
@@ -42,7 +44,7 @@ advected_interp_method = 'average'
     pressure_baffle_sidesets = 'baffle baffle2'
     pressure_gradient_limiter = 'baffle baffle2'
     pressure_baffle_relaxation = 0.1
-    debug_baffle = true
+    debug_baffle = false
     use_flux_velocity_reconstruction = true
     flux_velocity_reconstruction_relaxation = 1.0
   []
@@ -52,7 +54,7 @@ advected_interp_method = 'average'
   [superficial_u]
     type = MooseLinearVariableFVReal
     solver_sys = u_system
-    initial_condition = 0.1
+    initial_condition = ${inlet_u}
   []
   [pressure]
     type = MooseLinearVariableFVReal
@@ -61,11 +63,17 @@ advected_interp_method = 'average'
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
 [LinearFVKernels]
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     momentum_component = 'x'
@@ -113,7 +121,7 @@ advected_interp_method = 'average'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = left
     variable = superficial_u
-    functor = 0.1
+    functor = ${inlet_u}
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -133,7 +141,7 @@ advected_interp_method = 'average'
   [forch]
     type = GenericVectorFunctorMaterial
     prop_names = forch
-    prop_values = '50 50 50'
+    prop_values = '${forcheimer_value} ${forcheimer_value} ${forcheimer_value}'
   []
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
@@ -158,21 +166,6 @@ advected_interp_method = 'average'
     expression = 'p_left - p_right'
     pp_names = 'p_left p_right'
   []
-  [p_block_1]
-    type = ElementAverageValue
-    variable = pressure
-    block = 1
-  []
-  [p_block_2]
-    type = ElementAverageValue
-    variable = pressure
-    block = 2
-  []
-  [p_block_jump]
-    type = ParsedPostprocessor
-    expression = 'p_block_1 - p_block_2'
-    pp_names = 'p_block_1 p_block_2'
-  []
   [u_block_1]
     type = ElementAverageValue
     variable = superficial_u
@@ -187,25 +180,6 @@ advected_interp_method = 'average'
     type = ParsedPostprocessor
     expression = 'u_block_1 - u_block_2'
     pp_names = 'u_block_1 u_block_2'
-  []
-[]
-
-[VectorPostprocessors]
-  [u_line]
-    type = LineValueSampler
-    variable = superficial_u
-    start_point = '0 0 0'
-    end_point = '1.5 0 0'
-    num_points = 41
-    sort_by = id
-  []
-  [p_line]
-    type = LineValueSampler
-    variable = pressure
-    start_point = '0 0 0'
-    end_point = '1.5 0 0'
-    num_points = 41
-    sort_by = id
   []
 []
 
