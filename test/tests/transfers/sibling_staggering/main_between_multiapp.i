@@ -11,7 +11,7 @@
   dim = 2
 []
 
-# This application use at most 3 processes
+# This application uses at most 3 processes
 [MultiApps]
   [ma1]
     type = TransientMultiApp
@@ -19,10 +19,8 @@
     max_procs_per_app = 3
     output_in_position = true
   []
-[]
 
-# This application will use as many processes as the main app
-[MultiApps]
+  # This application will use as many processes as the main app
   [ma2]
     type = TransientMultiApp
     input_files = sub_between_diffusion2.i

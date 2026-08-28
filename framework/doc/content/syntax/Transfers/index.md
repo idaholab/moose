@@ -70,8 +70,8 @@ Within a given `execute_on` schedule, the following rules are applied:
   If no `MultiApps` are executed on that `execute_on`, the `Transfers` on that `execute_on` are executed anyway.
 - transfers from the child app(s) to the parent are executed after the execution of all the `MultiApps`.
 
-For transfers executing between sibling `Multiapps`, e.g. from one `MultiApps` (with potentially multiple child apps)
-to another `MultiApps`, there are two possibilities:
+For transfers executing between sibling `MultiApps`, e.g. from one `MultiApp` (with potentially multiple child apps)
+to another `MultiApp`, there are two possibilities:
 
 - if the transfer is executed on the same `execute_on` as the [!param](/Transfers/MultiAppCopyTransfer/from_multi_app),
   then by default, it will be executed right AFTER that application, on the same [!param](/MultiApps/TransientMultiApp/execution_order_group),

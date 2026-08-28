@@ -108,7 +108,7 @@ MultiAppPostprocessorTransfer::execute()
                           !getToMultiApp()->hasLocalApp(i),
                       "Source and target app parallel distribution must be the same");
 
-        // Case 1: a single source app, multiple (or single) target apps
+        // Case 1: a single source app, possibly multiple target apps
         // All target apps must be local
         if (getFromMultiApp()->numGlobalApps() == 1)
           for (const auto j : make_range(getToMultiApp()->numGlobalApps()))

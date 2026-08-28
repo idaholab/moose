@@ -13,15 +13,6 @@
 
   [warnings]
     requirement = 'The system shall report a warning if'
-    [different_execute_on]
-      type = RunApp
-      input = 'main_between_multiapp.i'
-      cli_args = "Transfers/pp_1_to_2/execute_after_from_multiapp=false
-                  Transfers/pp_1_to_2/execute_on=INITIAL"
-      expect_out = 'This parameter is only obeyed when the from_multi_app and the transfer are executing on the same execute_on flag.'
-      detail = 'a sibling transfer is set to execute before its source application but it does not share the same execution schedule as that source application,'
-      allow_warnings = true
-    []
     [execution_order_groups]
       type = RunException
       input = 'main_between_multiapp.i'
@@ -34,6 +25,15 @@
   [errors]
     requirement = 'The system shall report an error if'
     [different_execute_on]
+      type = RunException
+      input = 'main_between_multiapp.i'
+      cli_args = "Transfers/pp_1_to_2/execute_after_from_multiapp=false
+                  Transfers/pp_1_to_2/execute_on=INITIAL"
+      allow_warnings = true
+      expect_err = 'This parameter is only obeyed when the from_multi_app and the transfer are executing on the same execute_on flag.'
+      detail = 'a sibling transfer is set to execute before its source application but it does not share the same execution schedule as that source application,'
+    []
+    [non-sibling_param_does_not_apply]
       type = RunException
       input = 'main_between_multiapp.i'
       # create a non-sibling transfer

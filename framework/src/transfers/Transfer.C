@@ -50,7 +50,7 @@ Transfer::validParams()
   // No default to avoid displaying it in the documentation
   params.addParam<bool>(
       "execute_after_from_multiapp",
-      "Whether to execute the transfer after the from_multiapp has executed when both share and "
+      "Whether to execute the transfer after the from_multiapp has executed when both share an "
       "execute_on flag. Note that this setting is only used to move the execution of "
       "BETWEEN_MULTIAPP (siblings) transfers, FROM_ and TO_MULTIAPP transfers are always executed "
       "after the from_multiapp and before the to_multiapp respectively.");

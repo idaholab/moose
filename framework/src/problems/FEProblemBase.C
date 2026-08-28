@@ -5893,7 +5893,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
   else
     string_direction = " Between ";
   if (!source_app.empty())
-    additional_source_info = " from app. '" + source_app + "'";
+    additional_source_info = " from app '" + source_app + "'";
 
   // This lambda only checks the source app, since the exec_type selection is done in the warehouse
   auto executeThisTransfer = [this, &direction, &source_app, &type](auto & transfer)
@@ -5907,11 +5907,8 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
     if (transfer->getFromName() == source_app && transfer->executeAfterSiblingSourceApp())
     {
       libmesh_ignore(this);
-      mooseAssert(
-          this->getMultiApp(transfer->parameters().template get<MultiAppName>("from_multi_app"))
-              ->getExecuteOnEnum()
-              .contains(type),
-          "from_multiapp should also execute on this schedule");
+      mooseAssert(this->getMultiApp(transfer->getFromName())->getExecuteOnEnum().contains(type),
+                  "from_multiapp should also execute on this schedule");
     }
     // Execute if:
     // - transfer is set execute before from_multiapp, and we are calling this before source apps
@@ -5967,7 +5964,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type,
 
     for (const auto & transfer : transfers)
     {
-      auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(transfer.get());
+      auto multiapp_transfer = libMesh::cast_ptr<MultiAppTransfer *>(transfer.get());
       if (!executeThisTransfer(multiapp_transfer))
         continue;
 
@@ -6036,7 +6033,7 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
   execMultiAppTransfers(exec_on, MultiAppTransfer::TO_MULTIAPP);
 
   // Execute Transfers _beween_ MultiApps for the multiapps that don't execute on this flag
-  // NOTE: these is usually no need to execute a transfer unless the multiapp providing its
+  // NOTE: there is usually no need to execute a transfer unless the multiapp providing its
   // data also executed. But we need to obey what the user requested for the execution schedule,
   // hence the two executions
   execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP);
@@ -6074,7 +6071,7 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
           break;
       }
 
-      // Execute Transfers _between_ Multiapps after each app executes
+      // Execute Transfers _between_ MultiApps after each app executes
       for (const auto & multi_app : multi_app_group)
         execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
     }
