@@ -9,45 +9,41 @@
 
 #pragma once
 
-#include "KokkosKernel.h"
+#include "KokkosKernelGrad.h"
 
 /**
  * This kernel implements the Laplacian operator:
  * $\nabla u \cdot \nabla \phi_i$
  */
-class KokkosDiffusion : public Moose::Kokkos::Kernel
+class KokkosDiffusion : public Moose::Kokkos::KernelGrad
 {
+  using Real3 = Moose::Kokkos::Real3;
+
 public:
   static InputParameters validParams();
 
   KokkosDiffusion(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const;
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpResidual(const unsigned int i,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosDiffusion::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _grad_u(datum, qp) * _grad_test(datum, i, qp);
+  return _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosDiffusion::computeQpJacobian(const unsigned int i,
-                                   const unsigned int j,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KOKKOS_FUNCTION Moose::Kokkos::Real3
+KokkosDiffusion::precomputeQpJacobian(const unsigned int j,
+                                      const unsigned int qp,
+                                      AssemblyDatum & datum) const
 {
-  return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
+  return _grad_phi(datum, j, qp);
 }
