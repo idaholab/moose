@@ -281,4 +281,12 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMAnisotropicDiffusion]
+    type = XMLDiff
+    xmldiff = 'OutputData/AnisotropicDiffusion/Run0/Cycle000001/data.pvtu OutputData/AnisotropicDiffusion/Run0/Cycle000001/proc000000.vtu'
+    input = anisotropic_diffusion.i
+    requirement = 'The system shall have the ability to solve anisotropic diffusion problems with a given coefficient matrix, using MFEM.'
+    capabilities = 'mfem'
+    recover = false
+  []
 []
