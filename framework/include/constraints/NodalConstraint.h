@@ -68,8 +68,8 @@ protected:
   /**
    * Gather and retain elements connected to the provided nodes on the provided mesh.
    */
-  std::vector<dof_id_type> gatherAndRetainConnectedElems(
-      MooseMesh & mesh, const std::vector<dof_id_type> & node_ids);
+  std::vector<dof_id_type> gatherAndRetainConnectedElems(MooseMesh & mesh,
+                                                         const std::vector<dof_id_type> & node_ids);
 
   /**
    * This is the virtual that derived classes should override for computing the residual on

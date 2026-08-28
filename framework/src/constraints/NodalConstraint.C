@@ -68,8 +68,7 @@ NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
                                                const std::vector<dof_id_type> & node_ids)
 {
   const auto & node_to_elem_map = mesh.nodeToElemMap();
-  auto * const distributed_mesh =
-      dynamic_cast<libMesh::DistributedMesh *>(&mesh.getMesh());
+  auto * const distributed_mesh = dynamic_cast<libMesh::DistributedMesh *>(&mesh.getMesh());
 
   // Elements connected to these nodes may already be remote on a distributed mesh, so gather
   // every locally available connected element before rebuilding the connectivity map.
