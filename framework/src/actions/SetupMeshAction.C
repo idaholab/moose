@@ -278,9 +278,8 @@ SetupMeshAction::act()
                   dynamic_cast<AddMeshGeneratorAction *>(generator_actions.front()))
             if (const auto * const is_mfem =
                     mesh_generator_action->getObjectParams().queryParam<bool>(
-                        "_mfem_mesh_generator");
-                is_mfem && *is_mfem)
-              has_mfem_generator = true;
+                        "_mfem_mesh_generator"))
+              has_mfem_generator = *is_mfem;
 #endif
 
           _type = has_mfem_generator ? "MFEMMeshGeneratorMesh" : "MeshGeneratorMesh";
