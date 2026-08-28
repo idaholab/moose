@@ -39,12 +39,37 @@ FVFluxBC::FVFluxBC(const InputParameters & parameters)
                "boundary condition for an auxiliary variable.");
 }
 
+FaceInfo::VarFaceNeighbors
+FVFluxBC::checkFaceIntegrity(const FaceInfo & fi) const
+{
+  const auto face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
+
+  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("FVFluxBC '",
+               name(),
+               "' for variable '",
+               _var.name(),
+               "' is being triggered on an internal face with centroid ",
+               fi.faceCentroid(),
+               " where the variable is defined on both sides.");
+  else if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+    mooseError("FVFluxBC '",
+               name(),
+               "' for variable '",
+               _var.name(),
+               "' is being triggered on a face with centroid ",
+               fi.faceCentroid(),
+               " where the variable is defined on neither side.");
+
+  return face_type;
+}
+
 void
 FVFluxBC::updateCurrentFace(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
+  _face_type = checkFaceIntegrity(fi);
 
   // For FV flux kernels, the normal is always oriented outward from the lower-id
   // element's perspective.  But for BCs, there is only a residual
@@ -61,14 +86,6 @@ void
 FVFluxBC::computeResidual(const FaceInfo & fi)
 {
   updateCurrentFace(fi);
-
-  if (_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
-               fi.faceCentroid());
-  else if (_face_type == FaceInfo::VarFaceNeighbors::NEITHER)
-    mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
-               "with the relevant finite volume variable. Its centroid: ",
-               fi.faceCentroid());
 
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
@@ -94,19 +111,7 @@ FVFluxBC::computeResidualAndJacobian(const FaceInfo & fi)
 void
 FVFluxBC::computeJacobian(const FaceInfo & fi)
 {
-  _face_info = &fi;
-  _normal = fi.normal();
-  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
-
-  // For FV flux kernels, the normal is always oriented outward from the lower-id
-  // element's perspective.  But for BCs, there is only a Jacobian
-  // contribution to one element (one side of the face).  Because of this, we
-  // make an exception and orient the normal to point outward from whichever
-  // side of the face the BC's variable is defined on; we flip it if this
-  // variable is defined on the neighbor side of the face (instead of elem) since
-  // the FaceInfo normal polarity is always oriented with respect to the lower-id element.
-  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-    _normal = -_normal;
+  updateCurrentFace(fi);
 
   ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
