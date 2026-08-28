@@ -6,7 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 
-#include "TestGhostBoundarySideUserObject.h"
+#include "TestSolidMechanicsGhostBoundarySideUserObject.h"
 #include "MooseMesh.h"
 
 registerMooseObject("SolidMechanicsTestApp", TestSolidMechanicsGhostBoundarySideUserObject);

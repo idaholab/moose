@@ -12,33 +12,6 @@
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
 
-namespace // Anonymous namespace for helpers
-{
-/**
- * Specific weak ordering for Elem *'s to be used in a set.
- * We use the id, but first sort by level.  This guarantees
- * when traversing the set from beginning to end the lower
- * level (parent) elements are encountered first.
- *
- * This was swiped from libMesh mesh_communication.C, and ought to be
- * replaced with libMesh::CompareElemIdsByLevel just as soon as I refactor to
- * create that - @roystgnr
- */
-struct CompareElemsByLevel
-{
-  bool operator()(const Elem * a, const Elem * b) const
-  {
-    libmesh_assert(a);
-    libmesh_assert(b);
-    const unsigned int al = a->level(), bl = b->level();
-    const dof_id_type aid = a->id(), bid = b->id();
-
-    return (al == bl) ? aid < bid : al < bl;
-  }
-};
-
-} // anonymous namespace
-
 registerMooseObject("MooseApp", EqualValueBoundaryConstraint);
 
 InputParameters

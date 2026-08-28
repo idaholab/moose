@@ -9,7 +9,6 @@
 
 // MOOSE includes
 #include "NodalStickConstraint.h"
-#include "NodalConstraintUtils.h"
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
 #include "Assembly.h"

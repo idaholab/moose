@@ -13,6 +13,9 @@
 #include "Constraint.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
+#include <map>
+#include <set>
+
 class MooseMesh;
 
 class NodalConstraint : public Constraint,
@@ -70,6 +73,9 @@ protected:
    */
   std::vector<dof_id_type> gatherAndRetainConnectedElems(MooseMesh & mesh,
                                                          const std::vector<dof_id_type> & node_ids);
+
+  /// Elements this constraint retained on each distributed mesh during the previous mesh update.
+  std::map<MooseMesh *, std::set<Elem *>> _retained_elems;
 
   /**
    * This is the virtual that derived classes should override for computing the residual on
