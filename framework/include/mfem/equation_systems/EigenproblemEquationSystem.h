@@ -34,7 +34,7 @@ public:
 
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
-  virtual void ApplyEssentialBCs() override;
+  virtual void ApplyEssentialConstraints() override;
 
   /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
   void FormEigenproblemMatrix();
