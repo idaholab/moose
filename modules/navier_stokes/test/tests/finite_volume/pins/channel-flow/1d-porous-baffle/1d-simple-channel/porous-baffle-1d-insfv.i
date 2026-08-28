@@ -146,21 +146,6 @@ velocity_interp_method = 'rc'
     expression = 'p_left - p_right'
     pp_names = 'p_left p_right'
   []
-  [p_block_1]
-    type = ElementAverageValue
-    variable = pressure
-    block = 1
-  []
-  [p_block_2]
-    type = ElementAverageValue
-    variable = pressure
-    block = 2
-  []
-  [p_block_jump]
-    type = ParsedPostprocessor
-    expression = 'p_block_1 - p_block_2'
-    pp_names = 'p_block_1 p_block_2'
-  []
   [u_block_1]
     type = ElementAverageValue
     variable = superficial_u
@@ -175,25 +160,6 @@ velocity_interp_method = 'rc'
     type = ParsedPostprocessor
     expression = 'u_block_1 - u_block_2'
     pp_names = 'u_block_1 u_block_2'
-  []
-[]
-
-[VectorPostprocessors]
-  [u_line]
-    type = LineValueSampler
-    variable = superficial_u
-    start_point = '0 0 0'
-    end_point = '1 0 0'
-    num_points = 41
-    sort_by = id
-  []
-  [p_line]
-    type = LineValueSampler
-    variable = pressure
-    start_point = '0 0 0'
-    end_point = '1 0 0'
-    num_points = 41
-    sort_by = id
   []
 []
 
@@ -224,4 +190,5 @@ velocity_interp_method = 'rc'
 [Outputs]
   exodus = true
   csv = true
+  execute_on = 'timestep_end'
 []

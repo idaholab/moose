@@ -1,0 +1,58 @@
+[Tests]
+  [linear-bernoulli-no-visc]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-no-visc.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli pressure jump and the non-oscillatory superficial velocity profile using the linear finite volume SIMPLE solve.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'forcheimer_value=0 Outputs/file_base=linear-bernoulli-no-visc'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+  [linear-bernoulli]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli pressure jump and the non-oscillatory superficial velocity profile using the linear finite volume SIMPLE solve.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'forcheimer_value=0 mu=1 Outputs/file_base=linear-bernoulli'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+  [linear-bernoulli-forcheimer]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-forcheimer.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli pressure jump and the non-oscillatory superficial velocity profile using the linear finite volume SIMPLE solve.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'forcheimer_value=50 mu=1 Outputs/file_base=linear-bernoulli-forcheimer'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+  [linear-bernoulli-forcheimer-form-loss]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'linear-bernoulli-forcheimer-form-loss.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli pressure jump and the non-oscillatory superficial velocity profile using the linear finite volume SIMPLE solve.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = "forcheimer_value=50 mu=1 Outputs/file_base=linear-bernoulli-forcheimer-form-loss "
+               "UserObjects/rc/baffle_form_loss='10 10'"
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
+  [insfv]
+    type = 'CSVDiff'
+    input = porous-baffle-1d-insfv.i
+    csvdiff = 'porous-baffle-1d-insfv_out.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli pressure jump and the non-oscillatory superficial velocity profile using the nonlinear incompressible finite volume solve.'
+    design = 'PINSFVRhieChowInterpolator.md BernoulliPressureVariable.md PINSFVMomentumFriction.md'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+[]
