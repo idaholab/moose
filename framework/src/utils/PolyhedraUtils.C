@@ -98,10 +98,10 @@ namespace
   }
 
   void
-  buildAdjacencyAndNormals(const std::vector<Point> & coords,
-                           std::vector<Face> & faces,
-                           std::map<EdgeKey, EdgeFaces> & edges,
-                           std::vector<Point> & fnormal)
+  buildFaceData(const std::vector<Point> & coords,
+                std::vector<Face> & faces,
+                std::map<EdgeKey, EdgeFaces> & edges,
+                std::vector<Point> & fnormal)
   {
     Point c(0, 0, 0);
     if (!coords.empty())
@@ -170,9 +170,9 @@ namespace
 
       const Point & n0 = fnormal[ef.f0];
       const Point & n1 = fnormal[ef.f1];
-      if (MooseUtils::absoluteFuzzyEqual(n0.norm(), 0.0) ||
-          MooseUtils::absoluteFuzzyEqual(n1.norm(), 0.0))
-        continue;
+      libmesh_assert_msg(!MooseUtils::absoluteFuzzyEqual(n0.norm(), 0.0) &&
+                             !MooseUtils::absoluteFuzzyEqual(n1.norm(), 0.0),
+                         "Normals are degenerate");
 
       const Real dot = n0 * n1;
       if (dot < 0.0)
@@ -345,7 +345,7 @@ splitNonConvexPolyhedron(ReplicatedMesh & mesh,
 
   std::map<EdgeKey, EdgeFaces> edges;
   std::vector<Point> fnormal;
-  buildAdjacencyAndNormals(coords, faces, edges, fnormal);
+  buildFaceData(coords, faces, edges, fnormal);
 
   EdgeKey ce{0u, 0u};
   unsigned int f0 = invalid_uint, f1 = invalid_uint;

@@ -94,6 +94,8 @@ CutMeshByLevelSetGeneratorBase::CutMeshByLevelSetGeneratorBase(const InputParame
     _converted_poly_element_subdomain_name_suffix(
         getParam<SubdomainName>("converted_poly_element_subdomain_name_suffix")),
     _verbose(getParam<bool>("verbose")),
+    _num_non_planar_at_cut(0),
+    _num_non_convex_at_cut(0),
     _input(getMeshByName(_input_name))
 {
   _cut_face_id = isParamValid("cut_face_id") ? getParam<boundary_id_type>("cut_face_id") : -1;
@@ -351,10 +353,6 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
   _block_id_to_remove = sid_shift_base * 2;
 
-  // Keep track of edge cases
-  unsigned int num_non_planar_at_cut = 0;
-  unsigned int num_non_convex_at_cut = 0;
-
   // First pass: classify each active element
   std::set<subdomain_id_type> original_subdomain_ids;
   std::vector<dof_id_type> elems_to_cut;
@@ -436,6 +434,17 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
                      ", that already exists in the mesh. Please choose a different "
                      "suffix.");
     mesh.subdomain_name(new_sid) = new_name;
+  }
+
+  // Report on cases encountered
+  if (_verbose)
+  {
+    if (_num_non_planar_at_cut)
+      _console << "Total number of nonplanar polygons (faces) subdivided on cut: "
+               << _num_non_planar_at_cut << std::endl;
+    if (_num_non_convex_at_cut)
+      _console << "Total number of non-convex polyhedra subdivided on cut: "
+               << _num_non_convex_at_cut << std::endl;
   }
 }
 
@@ -738,9 +747,33 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
   try
   {
     polyhedron = std::make_unique<libMesh::C0Polyhedron>(new_polygons, mid_elem_node);
+
+    if (!polyhedron->convex())
+      throw libMesh::NotImplemented("Non-convex polyhedron");
+
+    // Add the single polyhedron to mesh
+    polyhedron->subdomain_id() = orig_elem->subdomain_id() + sid_shift_base;
+    Elem * new_elem = mesh.add_elem(std::move(polyhedron));
+    if (mid_elem_node)
+      mesh.add_node(std::move(mid_elem_node));
+
+    // Re-attach boundary ids: each new polygon either matches an original side (inheriting its
+    // boundary ids) or is the new cut face (gets _cut_face_id).
+    BoundaryInfo & boundary_info = mesh.get_boundary_info();
+    for (const auto new_side_i : index_range(new_polygons))
+    {
+      const int orig_side = new_polygon_to_orig_side[new_side_i];
+      if (orig_side < 0)
+        boundary_info.add_side(new_elem, new_side_i, _cut_face_id);
+      else
+        for (const auto & bdry_id : elem_side_list[orig_side])
+          boundary_info.add_side(new_elem, new_side_i, bdry_id);
+    }
   }
   catch (const libMesh::NotImplemented &)
   {
+    _num_non_convex_at_cut++;
+
     // Build a compact vertex list and face descriptors for splitting.
     std::vector<const Node *> existing_nodes;
     std::unordered_map<const Node *, unsigned int> vertex_index;
@@ -783,41 +816,10 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
           "the level set, refine the mesh enough that each cell's retained geometry is convex, "
           "or switch to cut_interface = tetrahedra.");
     }
-
-    // The convex decomposition has created new polyhedra and attached boundary ids.
-    // Mark the original element for deletion in the cleanup pass and return.
-    orig_elem->subdomain_id() = _block_id_to_remove;
-    return;
-  }
-  polyhedron->subdomain_id() = orig_elem->subdomain_id() + sid_shift_base;
-  Elem * new_elem = mesh.add_elem(std::move(polyhedron));
-  if (mid_elem_node)
-    mesh.add_node(std::move(mid_elem_node));
-
-  // Re-attach boundary ids: each new polygon either matches an original side (inheriting its
-  // boundary ids) or is the new cut face (gets _cut_face_id).
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  for (const auto new_side_i : index_range(new_polygons))
-  {
-    const int orig_side = new_polygon_to_orig_side[new_side_i];
-    if (orig_side < 0)
-      boundary_info.add_side(new_elem, new_side_i, _cut_face_id);
-    else
-      for (const auto & bdry_id : elem_side_list[orig_side])
-        boundary_info.add_side(new_elem, new_side_i, bdry_id);
   }
 
   // Mark the original element for deletion in the cleanup pass
   orig_elem->subdomain_id() = _block_id_to_remove;
-
-  // Report on cases encountered
-  if (_verbose)
-  {
-    if (num_non_planar_at_cut)
-      _console << "Total number of nonplanar polygons (faces) subdivided on cut: " << num_non_planar_at_cut << std::endl;
-    if (num_non_convex_at_cut)
-      _console << "Total number of non-convex polyhedra subdivided on cut: " << num_non_convex_at_cut << std::endl;
-  }
 }
 
 CutMeshByLevelSetGeneratorBase::PointLevelSetRelationIndex

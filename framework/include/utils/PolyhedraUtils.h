@@ -38,7 +38,7 @@ namespace PolyhedraUtils
 
   /**
    * Attempt to split a non-convex polyhedron (given only by vertices and faces)
-   * into two convex pieces by cutting along one concave region.
+   * into two or more convex pieces by cutting along one concave region.
    *
    * The caller is responsible for:
    *  - providing the distinct vertex positions via existing_nodes
@@ -46,15 +46,14 @@ namespace PolyhedraUtils
    *
    * On success, this routine:
    *  - Adds one or more C0Polyhedron elements to the mesh (children of orig_elem)
-   *  - Re-attaches boundary ids based on orig_side and cut_face_id
+   *  - Re-assigns the various boundary ids based on orig_side and cut_face_id
    *  - Sets each new element's subdomain_id() = orig_elem->subdomain_id() + sid_shift_base
    *
-   * The routine does *not* mark orig_elem for deletion; the caller should set
-   * orig_elem->subdomain_id() = block_id_to_remove when done.
+   * The routine does *not* mark orig_elem for deletion
    *
    * Return value:
    *  - true  : at least one convex C0Polyhedron was created
-   *  - false : could not find a valid split; caller should fall back to error path
+   *  - false : could not find a valid split; caller should handle this case
    *
    * This implementation is intentionally conservative: if the geometry is not
    * amenable to a simple convex decomposition, it returns false rather than

@@ -59,6 +59,10 @@ protected:
   const SubdomainName _converted_poly_element_subdomain_name_suffix;
   /// Whether to output to console about specific cases encountered
   const bool _verbose;
+  /// Number of non-planar faces we had to subdivide with CUT_ELEM_POLY
+  unsigned int _num_non_planar_at_cut;
+  /// Number of non-convex elements we had to subdivide with CUT_ELEM_POLY
+  unsigned int _num_non_convex_at_cut;
   /// Reference to input mesh pointer
   std::unique_ptr<MeshBase> & _input;
   /// function parser object describing the level set
