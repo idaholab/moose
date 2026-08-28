@@ -16,6 +16,7 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMIntegratedBC.h"
 #include "MFEMEssentialBC.h"
+#include "MFEMEssentialConstraint.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"
@@ -53,6 +54,8 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
+  /// Add constraint associated with essentially constrained DoFs on domains.
+  virtual void AddEssentialConstraint(std::shared_ptr<MFEMEssentialConstraint> constraint);
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
@@ -327,6 +330,9 @@ protected:
   /// Arrays to store essential BCs to act on each component of weak form.
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+  /// Arrays to store essential domain constraints to act on each component of weak form.
+  /// Named according to trial variable.
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialConstraint>>> _essential_constraint_map;
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
