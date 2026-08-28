@@ -29,6 +29,7 @@ public:
 
 protected:
   mfem::Coefficient & _coef;
+  mfem::MatrixCoefficient & _matrix_coef;
 };
 
 #endif
