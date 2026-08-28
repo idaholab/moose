@@ -56,11 +56,11 @@ SnapshotContainerBase::execute()
 void
 dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, void * context)
 {
-  storeHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
+  dataStore(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
 
 void
 dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, void * context)
 {
-  loadHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
+  dataLoad(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }

@@ -184,11 +184,11 @@ template <>
 inline void
 dataStore(std::ostream & stream, MooseRandom & v, void * context)
 {
-  storeHelper(stream, v._states, context);
+  dataStore(stream, v._states, context);
 }
 template <>
 inline void
 dataLoad(std::istream & stream, MooseRandom & v, void * context)
 {
-  loadHelper(stream, v._states, context);
+  dataLoad(stream, v._states, context);
 }

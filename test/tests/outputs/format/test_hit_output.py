@@ -54,9 +54,9 @@ class TestHITBase(unittest.TestCase):
     def getBlockParams(self, node):
         return {k: v for k, v in node.params()}
 
-    def getInputFileFormat(self, extra=[]):
+    def getInputFileFormatOutput(self, extra=[]):
         """
-        Does a dump and uses the GetPotParser to parse the output.
+        Does a dump and returns the formatter output.
         """
         args = ["--disable-refcount-printing"]
         if extra:
@@ -71,6 +71,13 @@ class TestHITBase(unittest.TestCase):
         output = output.split("### END DUMP DATA ###")[0]
 
         self.assertNotEqual(len(output), 0)
+        return output
+
+    def getInputFileFormat(self, extra=[]):
+        """
+        Does a dump and uses the GetPotParser to parse the output.
+        """
+        output = self.getInputFileFormatOutput(extra)
         root = pyhit.parse(output)
         errors = list(Parser.checkDuplicates(root))
         self.assertEqual(errors, [])
@@ -140,6 +147,15 @@ class TestInputFileFormatSearch(TestHITBase):
         params = self.getBlockParams(adaptivity)
         self.assertIn("initial_steps", params)
         self.assertEqual(len(params.keys()), 1)
+
+    def testLowerCaseOptionDocs(self):
+        """
+        Make sure lower-case enum option documentation is dumped.
+        """
+        output = self.getInputFileFormatOutput(["change_over"])
+        self.assertIn("time_step: Over the time step", output)
+        self.assertIn("nonlinear: Over the nonlinear iteration", output)
+        self.assertIn("fixed_point: Over the MultiApp fixed point iteration", output)
 
 
 if __name__ == "__main__":

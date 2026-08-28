@@ -62,3 +62,29 @@ RestartableDataValue::store(nlohmann::json & json, const StoreJSONParams & param
   if (params.has_context)
     json["has_context"] = hasContext();
 }
+
+template <>
+void
+dataStore(std::ostream & stream, RestartableDataValue::StoreJSONParams & v, void * ctx)
+{
+  dataStore(stream, v.value, ctx);
+  dataStore(stream, v.type, ctx);
+  dataStore(stream, v.name, ctx);
+  dataStore(stream, v.declared, ctx);
+  dataStore(stream, v.loaded, ctx);
+  dataStore(stream, v.stored, ctx);
+  dataStore(stream, v.has_context, ctx);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RestartableDataValue::StoreJSONParams & v, void * ctx)
+{
+  dataLoad(stream, v.value, ctx);
+  dataLoad(stream, v.type, ctx);
+  dataLoad(stream, v.name, ctx);
+  dataLoad(stream, v.declared, ctx);
+  dataLoad(stream, v.loaded, ctx);
+  dataLoad(stream, v.stored, ctx);
+  dataLoad(stream, v.has_context, ctx);
+}

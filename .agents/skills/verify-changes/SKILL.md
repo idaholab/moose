@@ -1,5 +1,5 @@
 ---
-name: moose-verify-changes
+name: verify-changes
 description: >-
   Select and run focused builds, tests, and executable checks for MOOSE
   changes, with a mandatory environment gate, protection against stale
@@ -15,6 +15,10 @@ Use the smallest set of checks that establishes whether the changed behavior
 works. This skill owns verification execution and evidence; it does not decide
 whether a PR is ready, assess test SQA metadata, modify review conversations,
 or publish anything.
+
+Use the `run-tests` skill for `run_tests`/TestHarness mechanics - locating it,
+scoping to a subset of tests, and reading failure types (DIFF, CRASH,
+EXODIFF, CSVDIFF, etc.).
 
 ## Step 1 - Establish the verification scope
 

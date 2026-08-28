@@ -60,6 +60,7 @@ protected:
   /// @param relaxation_factor The relaxation factor for matrix relaxation
   /// @param solver_config The solver configuration object for the linear solve
   /// @param abs_tol The scaled absolute tolerance for the linear solve
+  /// @param reuse_pc Whether to reuse the preconditioning from the previous solve
   /// @param field_relaxation (optional) The relaxation factor for fields if relax_fields is true. Default value is 1.0.
   /// @param min_value_limiter (optional) The minimum value for the solution field
   /// @return The normalized residual norm of the equation.
@@ -69,6 +70,7 @@ protected:
                       const Real relaxation_factor,
                       libMesh::SolverConfiguration & solver_config,
                       const Real abs_tol,
+                      const bool reuse_pc,
                       const Real field_relaxation = 1.0,
                       const Real min_value_limiter = std::numeric_limits<Real>::min());
 
@@ -112,6 +114,12 @@ protected:
   /// Pointer(s) to the system(s) corresponding to the momentum equation(s)
   std::vector<LinearSystem *> _momentum_systems;
 
+  /// How often to recompute the momentum equations preconditioner
+  const unsigned int _momentum_pc_recompute_frequency;
+
+  /// Number of momentum equations solves performed without recomputing the preconditioner
+  unsigned int _momentum_pc_solve_counter;
+
   /// The number of the system corresponding to the pressure equation
   const unsigned int _pressure_sys_number;
 
@@ -125,8 +133,7 @@ protected:
   /// every solve; a value of N rebuilds it once every N solves and reuses it in between.
   const unsigned int _pressure_pc_recompute_frequency;
 
-  /// Number of pressure corrector solves performed since the start of the current SIMPLE solve,
-  /// used together with _pressure_pc_recompute_frequency to decide when to reuse the preconditioner.
+  /// Number of pressure corrector solves performed without recomputing the preconditioner
   unsigned int _pressure_pc_solve_counter;
 
   /// The number of the system corresponding to the energy equation
@@ -135,11 +142,35 @@ protected:
   /// Pointer to the linear system corresponding to the fluid energy equation
   LinearSystem * _energy_system;
 
+  /// How often to recompute the energy equation preconditioner
+  const unsigned int _energy_pc_recompute_frequency;
+
+  /// Number of energy solves performed without recomputing the preconditioner
+  unsigned int _energy_pc_solve_counter;
+
   /// The number of the system corresponding to the solid energy equation
   const unsigned int _solid_energy_sys_number;
 
   /// Pointer to the linear system corresponding to the solid energy equation
   LinearSystem * _solid_energy_system;
+
+  /// How often to recompute the solid energy equation preconditioner
+  const unsigned int _solid_energy_pc_recompute_frequency;
+
+  /// Number of solid energy solves performed without recomputing the preconditioner
+  unsigned int _solid_energy_pc_solve_counter;
+
+  /// How often to recompute the passive scalar equations preconditioner
+  const unsigned int _passive_scalar_pc_recompute_frequency;
+
+  /// Number of passive scalar solves performed without recomputing the preconditioner
+  unsigned int _passive_scalar_pc_solve_counter;
+
+  /// How often to recompute the turbulence equations preconditioner
+  const unsigned int _turbulence_pc_recompute_frequency;
+
+  /// Number of turbulence equations solves performed without recomputing the preconditioner
+  unsigned int _turbulence_pc_solve_counter;
 
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<LinearSystem *> _passive_scalar_systems;
@@ -195,6 +226,12 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in active scalars
   const std::vector<Real> _active_scalar_absolute_tolerance;
+
+  /// How often to recompute the active scalar equations preconditioner
+  const unsigned int _active_scalar_pc_recompute_frequency;
+
+  /// Number of active scalar solves performed without recomputing the preconditioner
+  unsigned int _active_scalar_pc_solve_counter;
 
   /// ********************** Conjugate heat transfer variables ************** //
 

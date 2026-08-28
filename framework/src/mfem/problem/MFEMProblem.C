@@ -608,7 +608,7 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else if ("MFEMParsedFunction" != type)
+  else if ("MFEMParsedFunction" != type && "MFEMCoordinateTransformations" != type)
   {
     mooseWarning("Could not identify whether function ",
                  type,

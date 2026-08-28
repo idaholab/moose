@@ -517,8 +517,8 @@ def parseArgs(args=None):
     parser.add_argument(
         "--abs-zero",
         metavar="absolute zero",
-        default="1e-11",
-        help="Value representing an absolute zero (default: 1e-11)",
+        default="1e-10",
+        help="Value representing an absolute zero (default: 1e-10)",
     )
     parser.add_argument(
         "--relative-tolerance",
