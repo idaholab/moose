@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMObject.h"
+#include "MFEMBlockRestrictable.h"
 
 class MFEMEssentialConstraint : public MFEMObject, public MFEMBlockRestrictable
 {
