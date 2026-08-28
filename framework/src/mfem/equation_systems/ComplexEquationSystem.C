@@ -80,8 +80,8 @@ ComplexEquationSystem::BuildLinearForms()
     clf->Assemble();
   }
 
-  // Apply boundary conditions
-  ApplyEssentialBCs();
+  // Apply essential constraints on strongly constrained DoFs
+  ApplyEssentialConstraints();
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
@@ -154,10 +154,14 @@ ComplexEquationSystem::BuildMixedBilinearForms()
 }
 
 void
-ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
-                                               mfem::ParComplexGridFunction & trial_gf,
-                                               mfem::Array<int> & global_ess_markers)
+ComplexEquationSystem::ApplyComplexEssentialConstraint(const std::string & var_name,
+                                                       mfem::ParComplexGridFunction & trial_gf,
+                                                       mfem::Array<int> & global_bdr_markers,
+                                                       mfem::Array<int> & global_ess_tdofs)
 {
+  // A mesh without boundary elements, such as a periodic one, has no boundary attributes
+  const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
+  global_bdr_markers.SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
   if (_cmplx_essential_bc_map.Has(var_name))
     for (auto & bc : _cmplx_essential_bc_map.GetRef(var_name))
     {
@@ -167,12 +171,13 @@ ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
       for (const auto i : make_range(ess_bdrs.Size()))
-        global_ess_markers[i] |= ess_bdrs[i];
+        global_bdr_markers[i] |= ess_bdrs[i];
     }
+  trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
 }
 
 void
-ComplexEquationSystem::ApplyEssentialBCs()
+ComplexEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
   _ess_markers.resize(_trial_var_names.size());
@@ -187,13 +192,9 @@ ComplexEquationSystem::ApplyEssentialBCs()
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
     cast_ref<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
-    // A mesh without boundary elements, such as a periodic one, has no boundary attributes
-    const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
-    _ess_markers.at(i).SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
-    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the _ess_markers array
-    ApplyComplexEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));
-    trial_gf.ParFESpace()->GetEssentialTrueDofs(_ess_markers.at(i), _ess_tdof_lists.at(i));
+    // Set strongly constrained DoFs of trial_gf and set essential bdr markers
+    ApplyComplexEssentialConstraint(
+        trial_var_name, trial_gf, _ess_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 
