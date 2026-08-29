@@ -16,10 +16,10 @@ The $i\omega\sigma\vec A$ term removes the gradient null space of the curl-curl 
 inside a conductor, but any surrounding non-conducting region has no such term and the
 discrete operator is singular there.
 
-The set of edge degrees of freedom to fix is computed exactly as in the real case - the
-mesh 1-skeleton is gathered onto every rank keyed on endpoint coordinates and one
-canonical seeded spanning forest is grown, so the gauge is independent of the MPI
-partitioning (the implementation is shared through `Moose::MFEM::TreeCotreeGauge`). Here the
+The set of edge degrees of freedom to fix is computed exactly as in the real case - a
+distributed Boruvka pass grows the unique minimum spanning forest of the mesh graph under a
+canonical, geometry-derived edge order, so the gauge is independent of the MPI partitioning
+(the implementation is shared through `Moose::MFEM::TreeCotreeGauge`). Here the
 **real and imaginary parts** of each gauged edge dof are both strongly set to zero.
 
 The `boundary` and `block` parameters behave as for the real constraint: `boundary` lists
