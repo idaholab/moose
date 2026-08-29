@@ -27,8 +27,6 @@ pebble_diameter = 0.06
 power_fn_scaling = 0.9792628
 offset = -0.29119
 
-
-
 # mass_flow_rate = 60.0   #value with low rho
 mass_flow_rate = 64.3
 flow_area = '${fparse pi * bed_radius * bed_radius}'
@@ -200,7 +198,7 @@ axial_coordinate_shift = 1.167
     new_boundary = baffle_cav_bed
   []
 
-  [bed_br_baffle]                              # ADD THIS BLOCK
+  [bed_br_baffle] # ADD THIS BLOCK
     type = SideSetsBetweenSubdomainsGenerator
     input = baffle_cav_bed
     primary_block = 1
@@ -236,6 +234,12 @@ axial_coordinate_shift = 1.167
   []
 
   coord_type = RZ
+[]
+
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
 []
 
 [Problem]
@@ -282,7 +286,6 @@ axial_coordinate_shift = 1.167
     use_corrected_pressure_gradient = true
   []
 []
-
 
 [Executioner]
   type = SIMPLE
@@ -356,17 +359,14 @@ axial_coordinate_shift = 1.167
     initial_condition = ${T_inlet}
     block = 'pebble_bed bottom_reflector side_reflector bottom_plenum upper_plenum'
   []
-
-
 []
 
 [LinearFVKernels]
 
-
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v
@@ -379,7 +379,7 @@ axial_coordinate_shift = 1.167
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v
@@ -598,7 +598,6 @@ axial_coordinate_shift = 1.167
     HbyA_flux = 'HbyA'
   []
 
-
   [top_h_fluid]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = inlet
@@ -631,10 +630,6 @@ axial_coordinate_shift = 1.167
     functor = 0.0
     diffusion_coeff = kappa_s
   []
-
-
-
-
 []
 
 [Functions]
@@ -648,7 +643,6 @@ axial_coordinate_shift = 1.167
     type = ParsedFunction
     expression = 'if((y-${axial_coordinate_shift}) < 10, 2.65 + 0.11*exp(0.40*(y-${axial_coordinate_shift})), 8.60161)'
   []
-
 []
 
 [FunctorMaterials]
@@ -747,7 +741,7 @@ axial_coordinate_shift = 1.167
   [drag_bottom_reflector]
     type = GenericVectorFunctorMaterial
     prop_names = 'br_forch'
-    prop_values = '270 0.027 270'    #  times porosity/2
+    prop_values = '270 0.027 270' #  times porosity/2
   []
 
   [forch]
@@ -759,7 +753,6 @@ axial_coordinate_shift = 1.167
                               bottom_plenum cavity_forch_vec
                               upper_plenum cavity_forch_vec'
   []
-
 
   [fluid_enthalpy_material]
     type = LinearFVEnthalpyFunctorMaterial
@@ -821,7 +814,7 @@ axial_coordinate_shift = 1.167
     block = 'upper_plenum'
   []
 
-[alpha_mat_bed]
+  [alpha_mat_bed]
     type = GenericFunctorMaterial
     prop_names = 'alpha'
     prop_values = '1.55e5'
@@ -850,8 +843,6 @@ axial_coordinate_shift = 1.167
     initial_condition = ${T_inlet}
     block = 'pebble_bed cavity bottom_reflector bottom_plenum upper_plenum'
   []
-
-
 []
 
 [AuxKernels]
@@ -862,8 +853,6 @@ axial_coordinate_shift = 1.167
     functor = 'rho'
     execute_on = 'INITIAL NONLINEAR'
   []
-
-
 
   [assign_porosity_aux]
     type = FunctorAux
@@ -879,7 +868,6 @@ axial_coordinate_shift = 1.167
     block = 'pebble_bed cavity bottom_reflector bottom_plenum upper_plenum'
     execute_on = 'INITIAL NONLINEAR'
   []
-
 []
 
 [Postprocessors]
@@ -988,11 +976,9 @@ axial_coordinate_shift = 1.167
     type = SideAverageValue
     variable = T_fluid
     boundary = outlet
-    execute_on='INITIAL LINEAR TIMESTEP_END'
+    execute_on = 'INITIAL LINEAR TIMESTEP_END'
   []
 []
-
-
 
 [Outputs]
   exodus = true

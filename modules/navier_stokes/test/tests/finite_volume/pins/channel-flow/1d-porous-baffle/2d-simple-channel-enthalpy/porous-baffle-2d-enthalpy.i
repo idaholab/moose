@@ -50,6 +50,12 @@ T_initial = 300
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system energy_system solid_energy_system'
   previous_nl_solution_required = true
@@ -69,7 +75,7 @@ T_initial = 300
     # pressure_gradient_limiter_blend = 0.5
     baffle_form_loss = ${bf}
     velocity_form_loss = 'lower_epsilon higher_epsilon'
-    pressure_baffle_relaxation = 0.1
+    pressure_baffle_relaxation = 0.01
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
@@ -98,7 +104,7 @@ T_initial = 300
   [h_fluid]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${fparse cp_fluid * T_initial}
+    initial_condition = '${fparse cp_fluid * T_initial}'
   []
   [T_solid]
     type = MooseLinearVariableFVReal
@@ -112,7 +118,7 @@ T_initial = 300
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -125,7 +131,7 @@ T_initial = 300
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -299,6 +305,17 @@ T_initial = 300
     u = superficial_u
     v = superficial_v
     momentum_component = y
+  []
+
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'bottom_to_1 bottom_to_2 bottom_to_3 top_to_1 top_to_2 top_to_3'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
   []
 
   [outlet_p]

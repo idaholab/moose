@@ -29,6 +29,12 @@ pressure_left_constant_exact = '${fparse pressure_right_constant_exact - transpo
 
 advected_interp_method = 'average'
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
@@ -89,7 +95,7 @@ advected_interp_method = 'average'
     use_interpolated_density_in_bernoulli_jump = true
     # pressure_gradient_limiter = 'baffle'
     # pressure_gradient_limiter_blend = 1.0
-    use_corrected_pressure_gradient = true
+    # use_corrected_pressure_gradient = true
   []
 []
 
@@ -115,7 +121,7 @@ advected_interp_method = 'average'
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v
@@ -128,7 +134,7 @@ advected_interp_method = 'average'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v

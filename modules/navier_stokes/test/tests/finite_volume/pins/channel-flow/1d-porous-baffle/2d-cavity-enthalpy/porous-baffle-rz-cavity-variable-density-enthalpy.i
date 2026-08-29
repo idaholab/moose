@@ -60,6 +60,12 @@ advected_interp_method = 'upwind'
   previous_nl_solution_required = true
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [UserObjects]
   [rc]
     type = PorousRhieChowMassFlux
@@ -86,9 +92,10 @@ advected_interp_method = 'upwind'
     flux_velocity_reconstruction_zero_flux_sidesets = 'left right top bottom'
 
     use_interpolated_density_in_bernoulli_jump = true
-    use_corrected_pressure_gradient = true
+    # use_corrected_pressure_gradient = true
 
-    body_force_kernel_names = 'r_buoyancy; z_buoyancy'
+    # body_force_kernel_names = 'r_buoyancy; z_buoyancy'
+    pressure_projection_method = CONSISTENT
   []
 []
 
@@ -119,7 +126,7 @@ advected_interp_method = 'upwind'
   [r_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_r
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_r
     v = superficial_z
@@ -132,7 +139,7 @@ advected_interp_method = 'upwind'
   [z_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_z
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_r
     v = superficial_z
@@ -284,6 +291,9 @@ advected_interp_method = 'upwind'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    rho = 'rho'
+    u = superficial_r
+    v = superficial_z
   []
 
   [right_T_fluid]
@@ -464,9 +474,9 @@ advected_interp_method = 'upwind'
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
   energy_system = energy_system
-  momentum_equation_relaxation = 0.2
+  momentum_equation_relaxation = 0.3
   pressure_variable_relaxation = 0.1
-  energy_equation_relaxation = 0.2
+  energy_equation_relaxation = 0.3
   num_iterations = 3000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
@@ -487,7 +497,7 @@ advected_interp_method = 'upwind'
 
 [Outputs]
   exodus = true
-  csv = false
+  csv = true
   perf_graph = false
   print_nonlinear_residuals = false
   print_linear_residuals = true

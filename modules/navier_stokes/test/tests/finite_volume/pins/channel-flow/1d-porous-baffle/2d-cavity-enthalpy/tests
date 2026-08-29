@@ -5,7 +5,7 @@
     csvdiff = 'porous-baffle-rz-cavity-variable-density-enthalpy_out.csv porous-baffle-rz-cavity-variable-density-enthalpy_out_centerline_solution_0001.csv'
     requirement = 'The system shall preserve the axisymmetric variable-density porous baffle pressure response, buoyant recirculation extrema, and enthalpy-driven temperature profile.'
     design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumBuoyancy.md LinearFVEnergyAdvection.md LinearFVEnthalpyFunctorMaterial.md'
-    cli_args = 'Outputs/csv=true Outputs/exodus=false Outputs/console=false'
+    cli_args = ''
     recover = false
     max_threads = 1
     allow_warnings = true

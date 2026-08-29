@@ -10,13 +10,13 @@ mu = 2e-3
 # eps_zone_2 = 0.68
 eps_zone_1 = 0.5
 eps_zone_2 = 0.7
-forch_zone_1 = 100
-forch_zone_2 = 100
+forch_zone_1 = 10
+forch_zone_2 = 10
 # forch_zone_1 = 0
 # forch_zone_2 = 0
-entry_form_loss = 0
+entry_form_loss = 20
 corner_form_loss = 20
-exit_form_loss = 0
+exit_form_loss = 20
 advected_interp_method = 'upwind'
 
 [Mesh]
@@ -205,6 +205,12 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [Variables]
   [superficial_u]
     type = MooseLinearVariableFVReal
@@ -227,7 +233,7 @@ advected_interp_method = 'upwind'
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -241,7 +247,7 @@ advected_interp_method = 'upwind'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
