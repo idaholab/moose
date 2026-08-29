@@ -36,6 +36,16 @@ void subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
 void projectScalarCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                           mfem::Coefficient & coef,
                                           const mfem::Array<int> & subdomain_attrs);
+
+/**
+ * Vector-valued analogue of projectScalarCoefficientOnSubdomains: overwrite the
+ * degrees of freedom of grid function @p gf that lie in elements whose mesh
+ * attribute appears in @p subdomain_attrs with the local projection of vector
+ * coefficient @p coef. Works for both vector H1 and H(curl)/H(div) spaces.
+ */
+void projectVectorCoefficientOnSubdomains(mfem::ParGridFunction & gf,
+                                          mfem::VectorCoefficient & coef,
+                                          const mfem::Array<int> & subdomain_attrs);
 }
 
 #endif
