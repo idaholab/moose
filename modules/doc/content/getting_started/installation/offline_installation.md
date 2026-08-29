@@ -205,10 +205,3 @@ Please submit a detailed log of the error, to the
 [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 !template load file=installation/test_moose.md.template PATH=~/projects
-
-Now that you have a working MOOSE, and you know how to make your MPI wrapper available, proceed to
-'New Users' to begin your tour of MOOSE!
-
-!content pagination use_title=True
-                    previous=installation/offline_index.md
-                    next=getting_started/offline_new_users.md
