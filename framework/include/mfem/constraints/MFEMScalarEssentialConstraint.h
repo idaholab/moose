@@ -13,6 +13,10 @@
 
 #include "MFEMEssentialConstraint.h"
 
+/**
+ * Strongly constrains a scalar variable in the specified subdomain(s) to a scalar
+ * coefficient.
+ */
 class MFEMScalarEssentialConstraint : public MFEMEssentialConstraint
 {
 public:

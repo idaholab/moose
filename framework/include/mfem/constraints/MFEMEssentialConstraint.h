@@ -14,6 +14,13 @@
 #include "MFEMObject.h"
 #include "MFEMBlockRestrictable.h"
 
+/**
+ * Base class for applying essential volumetric constraints to the trial
+ * ParGridFunction of an MFEM problem. Derived classes overwrite the values a
+ * solution takes within the subdomain(s) given by 'block' and report the true
+ * degrees of freedom that must be eliminated from the discrete system. This is
+ * the volumetric analogue of MFEMEssentialBC.
+ */
 class MFEMEssentialConstraint : public MFEMObject, public MFEMBlockRestrictable
 {
 public:
