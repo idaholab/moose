@@ -13,6 +13,13 @@ If the system of equations is singular - commonly arising, for example, when sol
 magnetic vector potential in magnetostatic systems in the steady state - users should set the
 `singular` parameter to `true` to add a small mass term to ensure solvability.
 
+If only part of the domain has a zero mass term (e.g. a zero-conductivity region embedded in a
+conducting domain), the `block` parameter may be set to the list of subdomains in which the mass
+term vanishes. The solver then restricts the `HypreAMS` interior-node correction to the nodes
+lying strictly inside those subdomains. The `projection_frequency` parameter controls how many
+iterations elapse between successive projections of the iterate onto the compatible
+$H(\mathrm{curl})$ subspace; leaving it at `0` disables periodic projection.
+
 A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter
 [!param](/Solvers/MFEMHypreAMS/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial
 order systems.
