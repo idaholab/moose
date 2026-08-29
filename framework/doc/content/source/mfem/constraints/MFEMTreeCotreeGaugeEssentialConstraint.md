@@ -51,7 +51,7 @@ perturbs it by several percent.
 
 For a complex (time-harmonic) variable use
 [MFEMComplexTreeCotreeGaugeEssentialConstraint.md], which selects the same degrees of
-freedom (the selection is shared via `TreeCotreeGaugeBuilder`) and fixes both their real
+freedom (the selection is shared via `Moose::MFEM::TreeCotreeGauge`) and fixes both their real
 and imaginary parts.
 
 ### Notes and limitations
