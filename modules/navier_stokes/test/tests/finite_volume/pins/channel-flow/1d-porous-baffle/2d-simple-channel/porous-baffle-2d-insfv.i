@@ -1,5 +1,6 @@
 mu = 1e-2
-rho = 2.0
+rho = 1000.0
+u_in = 2.0
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
 
@@ -15,8 +16,8 @@ velocity_interp_method = 'rc'
     dim = 2
     dx = '0.5 0.5 0.5'
     dy = '0.5'
-    ix = '35 35 35'
-    iy = '35'
+    ix = '21 21 21'
+    iy = '21'
     subdomain_id = '1 2 3'
   []
   [baffle]
@@ -48,7 +49,7 @@ velocity_interp_method = 'rc'
 [Variables]
   [superficial_u]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = 0.1
+    initial_condition = ${u_in}
   []
   [superficial_v]
     type = PINSFVSuperficialVelocityVariable
@@ -142,20 +143,35 @@ velocity_interp_method = 'rc'
     type = INSFVInletVelocityBC
     boundary = left
     variable = superficial_u
-    functor = 0.1
+    functor = ${u_in}
   []
   [top_u]
-    type = INSFVInletVelocityBC
+    type = INSFVNaturalFreeSlipBC
+    momentum_component = x
+    rhie_chow_user_object = rc
     boundary = top
     variable = superficial_u
-    functor = 0.0
   []
   [bottom_u]
-    type = INSFVInletVelocityBC
+    type = INSFVNaturalFreeSlipBC
+    momentum_component = x
+    rhie_chow_user_object = rc
     boundary = bottom
     variable = superficial_u
-    functor = 0.0
   []
+
+  # [top_u]
+  #   type = INSFVInletVelocityBC
+  #   boundary = top
+  #   variable = superficial_u
+  #   functor = 0.0
+  # []
+  # [bottom_u]
+  #   type = INSFVInletVelocityBC
+  #   boundary = bottom
+  #   variable = superficial_u
+  #   functor = 0.0
+  # []
 
   [left_v]
     type = INSFVInletVelocityBC
@@ -163,17 +179,32 @@ velocity_interp_method = 'rc'
     variable = superficial_v
     functor = 0.0
   []
+  # [top_v]
+  #   type = INSFVInletVelocityBC
+  #   boundary = top
+  #   variable = superficial_v
+  #   functor = 0.0
+  # []
+  # [bottom_v]
+  #   type = INSFVInletVelocityBC
+  #   boundary = bottom
+  #   variable = superficial_v
+  #   functor = 0.0
+  # []
+
   [top_v]
-    type = INSFVInletVelocityBC
+    type = INSFVNaturalFreeSlipBC
+    momentum_component = y
+    rhie_chow_user_object = rc
     boundary = top
     variable = superficial_v
-    functor = 0.0
   []
   [bottom_v]
-    type = INSFVInletVelocityBC
+    type = INSFVNaturalFreeSlipBC
+    momentum_component = y
+    rhie_chow_user_object = rc
     boundary = bottom
     variable = superficial_v
-    functor = 0.0
   []
 
   [outlet_p]
@@ -188,12 +219,12 @@ velocity_interp_method = 'rc'
   [forch]
     type = ADGenericVectorFunctorMaterial
     prop_names = forch
-    prop_values = '1000 1000 1000'
+    prop_values = '10 10 10'
   []
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = porosity
-    subdomain_to_prop_value = '1 0.5 2 1.0 3 0.5'
+    subdomain_to_prop_value = '1 1.0 2 0.5 3 1.0'
   []
   [speed_material]
     type = PINSFVSpeedFunctorMaterial
@@ -219,21 +250,6 @@ velocity_interp_method = 'rc'
     expression = 'p_left - p_right'
     pp_names = 'p_left p_right'
   []
-  [p_block_1]
-    type = ElementAverageValue
-    variable = pressure
-    block = 1
-  []
-  [p_block_2]
-    type = ElementAverageValue
-    variable = pressure
-    block = 2
-  []
-  [p_block_jump]
-    type = ParsedPostprocessor
-    expression = 'p_block_1 - p_block_2'
-    pp_names = 'p_block_1 p_block_2'
-  []
   [u_block_1]
     type = ElementAverageValue
     variable = superficial_u
@@ -248,25 +264,6 @@ velocity_interp_method = 'rc'
     type = ParsedPostprocessor
     expression = 'u_block_1 - u_block_2'
     pp_names = 'u_block_1 u_block_2'
-  []
-[]
-
-[VectorPostprocessors]
-  [u_line]
-    type = LineValueSampler
-    variable = superficial_u
-    start_point = '0 0.5 0'
-    end_point = '1.5 0.5 0'
-    num_points = 61
-    sort_by = id
-  []
-  [p_line]
-    type = LineValueSampler
-    variable = pressure
-    start_point = '0 0.5 0'
-    end_point = '1.5 0.5 0'
-    num_points = 61
-    sort_by = id
   []
 []
 
@@ -291,9 +288,10 @@ velocity_interp_method = 'rc'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
   l_tol = 1e-10
+  line_search = none
   # print_fields = true
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
+  petsc_options_value = 'lu NONZERO 0.5'
 []
 
 [Outputs]
