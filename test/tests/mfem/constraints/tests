@@ -5,6 +5,7 @@
     type = CSVDiff
     input = subdomain_constraint_source.i
     csvdiff = subdomain_constraint_source_out_line_sample_0001.csv
+    design = 'MFEMScalarEssentialConstraint.md'
     requirement = 'The system shall have the ability to apply essential constraints on interior degrees of freedom in MFEM problems'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -59,5 +60,37 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
+  []
+  [MFEMInvalidConstraintBlock]
+    type = RunException
+    input = invalid_constraint_block.i
+    expect_err = "Subdomain attribute 99 is not present in the mesh"
+    design = 'MFEMScalarEssentialConstraint.md'
+    requirement = 'The system shall report an error if an essential constraint in an MFEM problem is restricted to a subdomain that the mesh does not contain'
+    capabilities = 'mfem'
+  []
+  [MFEMComplexConstraintInRealProblem]
+    type = RunException
+    input = complex_constraint_in_real_problem.i
+    expect_err = "there is no corresponding complex equation system"
+    design = 'MFEMComplexScalarEssentialConstraint.md'
+    requirement = 'The system shall report an error if a complex essential constraint is applied in a real MFEM problem'
+    capabilities = 'mfem'
+  []
+  [MFEMRealConstraintInComplexProblem]
+    type = RunException
+    input = real_constraint_in_complex_problem.i
+    expect_err = "acts on a real variable and cannot be used in a complex"
+    design = 'MFEMScalarEssentialConstraint.md'
+    requirement = 'The system shall report an error if a real essential constraint is applied in a complex MFEM problem'
+    capabilities = 'mfem'
+  []
+  [MFEMTreeCotreeGaugeHighOrder]
+    type = RunException
+    input = tree_cotree_gauge_high_order.i
+    expect_err = "requires a FIRST order H\(curl\) space"
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall report an error if a tree-cotree gauge is applied to an H(curl) variable whose finite element space is of higher than first order, since only the lowest-order edge degrees of freedom are gauged'
+    capabilities = 'mfem'
   []
 []
