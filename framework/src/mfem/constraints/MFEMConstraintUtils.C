@@ -14,6 +14,93 @@
 
 #include <vector>
 
+namespace
+{
+
+/**
+ * Table mapping a mesh element attribute to whether the constraint acts there.
+ * An empty @p subdomain_attrs marks every attribute, which is what an empty
+ * 'block' parameter means (see MFEMBlockRestrictable::validParams). Attributes
+ * are validated against the mesh by MFEMEssentialConstraint's constructor, so
+ * out-of-range entries cannot reach here.
+ */
+std::vector<char>
+wantedAttributes(const mfem::Mesh & mesh, const mfem::Array<int> & subdomain_attrs)
+{
+  const int max_attr = mesh.attributes.Size() ? mesh.attributes.Max() : 0;
+  std::vector<char> wanted(max_attr + 1, subdomain_attrs.Size() ? 0 : 1);
+  for (const auto a : subdomain_attrs)
+    wanted[a] = 1;
+  return wanted;
+}
+
+/**
+ * Accumulate the local projection of @p coef over every element carrying a wanted
+ * attribute into @p values, counting the contributions made to each dof in
+ * @p counter. Both are sized and zeroed here.
+ */
+template <typename CoefficientType>
+void
+accumulateSubdomainProjection(mfem::ParGridFunction & gf,
+                              CoefficientType & coef,
+                              const std::vector<char> & wanted,
+                              mfem::Vector & values,
+                              mfem::Array<int> & counter)
+{
+  mfem::FiniteElementSpace & fes = *gf.FESpace();
+  values.SetSize(fes.GetVSize());
+  values = 0.0;
+  counter.SetSize(fes.GetVSize());
+  counter = 0;
+
+  mfem::Array<int> vdofs;
+  mfem::Vector vals;
+  mfem::DofTransformation doftrans;
+  for (const auto e : make_range(fes.GetNE()))
+  {
+    if (!wanted[fes.GetAttribute(e)])
+      continue;
+    fes.GetElementVDofs(e, vdofs, doftrans);
+    vals.SetSize(vdofs.Size());
+    // The Project overload resolved here handles vector H1 (one scalar basis per
+    // component) and H(curl)/H(div) (tangential/normal edge/face moments) alike;
+    // the DofTransformation fixes ND/RT dof orientation.
+    fes.GetFE(e)->Project(coef, *fes.GetElementTransformation(e), vals);
+    doftrans.TransformPrimal(vals);
+    // AddElementVector undoes the ND/RT sign encoding carried in vdofs.
+    values.AddElementVector(vdofs, vals);
+    for (const auto vdof : vdofs)
+      counter[vdof < 0 ? -1 - vdof : vdof]++;
+  }
+}
+
+/**
+ * Average the accumulated projection over every rank that contributed to a dof and
+ * write the result into the dofs of @p gf that received a contribution.
+ */
+void
+distributeSubdomainProjection(mfem::ParGridFunction & gf,
+                              mfem::Vector & values,
+                              mfem::Array<int> & counter)
+{
+  // Sum the contributions and their multiplicity across the ranks sharing a dof,
+  // then broadcast both back so every rank forms the same average. Without this a
+  // dof on the subdomain boundary owned by a rank that holds no element of the
+  // subdomain would keep its unprojected value, and that is the value
+  // ParBilinearForm::FormLinearSystem eliminates against. This mirrors the idiom
+  // used by mfem::ParGridFunction::ProjectBdrCoefficientTangent.
+  mfem::GroupCommunicator & gcomm = gf.ParFESpace()->GroupComm();
+  gcomm.Reduce<int>(counter.HostReadWrite(), mfem::GroupCommunicator::Sum);
+  gcomm.Bcast<int>(counter.HostReadWrite());
+  gcomm.Reduce<mfem::real_t>(values.HostReadWrite(), mfem::GroupCommunicator::Sum);
+  gcomm.Bcast<mfem::real_t>(values.HostReadWrite());
+
+  for (const auto i : make_range(gf.Size()))
+    if (counter[i])
+      gf(i) = values(i) / counter[i];
+}
+}
+
 namespace Moose::MFEM
 {
 
@@ -23,15 +110,9 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
                   mfem::Array<int> & tdofs)
 {
   tdofs.DeleteAll();
-  if (subdomain_attrs.Size() == 0)
-    return;
 
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
-  const int max_attr = pmesh.attributes.Size() ? pmesh.attributes.Max() : 0;
-  std::vector<char> wanted(max_attr + 1, 0);
-  for (const auto a : subdomain_attrs)
-    if (a >= 1 && a <= max_attr)
-      wanted[a] = 1;
+  const std::vector<char> wanted = wantedAttributes(pmesh, subdomain_attrs);
 
   // Local L-dof marker: 1 if the dof touches a local element carrying one of the
   // requested attributes. All requested attributes are marked in a single pass so
@@ -60,29 +141,12 @@ projectScalarCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                      mfem::Coefficient & coef,
                                      const mfem::Array<int> & subdomain_attrs)
 {
-  if (subdomain_attrs.Size() == 0)
-    return;
+  const std::vector<char> wanted = wantedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
 
-  mfem::FiniteElementSpace & fes = *gf.FESpace();
-  const int max_attr = fes.GetMesh()->attributes.Size() ? fes.GetMesh()->attributes.Max() : 0;
-  std::vector<char> wanted(max_attr + 1, 0);
-  for (const auto a : subdomain_attrs)
-    if (a >= 1 && a <= max_attr)
-      wanted[a] = 1;
-
-  mfem::Array<int> vdofs;
-  mfem::Vector vals;
-  mfem::DofTransformation doftrans;
-  for (const auto e : make_range(fes.GetNE()))
-  {
-    if (!wanted[fes.GetAttribute(e)])
-      continue;
-    fes.GetElementVDofs(e, vdofs, doftrans);
-    vals.SetSize(vdofs.Size());
-    fes.GetFE(e)->Project(coef, *fes.GetElementTransformation(e), vals);
-    doftrans.TransformPrimal(vals);
-    gf.SetSubVector(vdofs, vals);
-  }
+  mfem::Vector values;
+  mfem::Array<int> counter;
+  accumulateSubdomainProjection(gf, coef, wanted, values, counter);
+  distributeSubdomainProjection(gf, values, counter);
 }
 
 void
@@ -90,32 +154,13 @@ projectVectorCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                      mfem::VectorCoefficient & coef,
                                      const mfem::Array<int> & subdomain_attrs)
 {
-  if (subdomain_attrs.Size() == 0)
-    return;
+  MFEM_VERIFY(gf.VectorDim() == coef.GetVDim(), "coef vdim != VectorDim()");
+  const std::vector<char> wanted = wantedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
 
-  mfem::FiniteElementSpace & fes = *gf.FESpace();
-  const int max_attr = fes.GetMesh()->attributes.Size() ? fes.GetMesh()->attributes.Max() : 0;
-  std::vector<char> wanted(max_attr + 1, 0);
-  for (const auto a : subdomain_attrs)
-    if (a >= 1 && a <= max_attr)
-      wanted[a] = 1;
-
-  mfem::Array<int> vdofs;
-  mfem::Vector vals;
-  mfem::DofTransformation doftrans;
-  for (const auto e : make_range(fes.GetNE()))
-  {
-    if (!wanted[fes.GetAttribute(e)])
-      continue;
-    fes.GetElementVDofs(e, vdofs, doftrans);
-    vals.SetSize(vdofs.Size());
-    // The VectorCoefficient overload of Project handles vector H1 (one scalar
-    // basis per component) and H(curl)/H(div) (tangential/normal edge/face
-    // moments) alike; the DofTransformation fixes ND/RT dof orientation.
-    fes.GetFE(e)->Project(coef, *fes.GetElementTransformation(e), vals);
-    doftrans.TransformPrimal(vals);
-    gf.SetSubVector(vdofs, vals);
-  }
+  mfem::Vector values;
+  mfem::Array<int> counter;
+  accumulateSubdomainProjection(gf, coef, wanted, values, counter);
+  distributeSubdomainProjection(gf, values, counter);
 }
 }
 

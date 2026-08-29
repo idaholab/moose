@@ -447,27 +447,37 @@ MFEMProblem::addConstraint(const std::string & constraint_name,
                            InputParameters & parameters)
 {
   auto constraint = addObject<MFEMEssentialConstraint>(constraint_name, name, parameters).front();
+  // ComplexEquationSystem derives from EquationSystem but keeps its constraints in
+  // a separate map, so the complex case has to be resolved first and a real
+  // constraint rejected outright rather than being registered and never read.
+  auto complex_eqsys =
+      std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
 
   if (auto complex_constraint =
           std::dynamic_pointer_cast<MFEMComplexEssentialConstraint>(constraint))
   {
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddComplexEssentialConstraint(std::move(complex_constraint));
-    else
-      mooseError("Cannot add constraint with name '" + name +
+    if (!complex_eqsys)
+      mooseError("Cannot add constraint with name '",
+                 name,
                  "' because there is no corresponding complex equation system.");
+    complex_eqsys->AddComplexEssentialConstraint(std::move(complex_constraint));
   }
+  else if (complex_eqsys)
+    mooseError("Constraint '",
+               name,
+               "' of type '",
+               constraint_name,
+               "' acts on a real variable and cannot be used in a complex (time-harmonic) "
+               "problem. Use its complex counterpart instead.");
   else
   {
     auto eqsys =
         std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddEssentialConstraint(std::move(constraint));
-    else
-      mooseError("Cannot add constraint with name '" + name +
+    if (!eqsys)
+      mooseError("Cannot add constraint with name '",
+                 name,
                  "' because there is no corresponding equation system.");
+    eqsys->AddEssentialConstraint(std::move(constraint));
   }
 }
 

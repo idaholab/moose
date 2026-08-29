@@ -193,7 +193,7 @@ public:
                    const std::string & name,
                    InputParameters & parameters) override;
   /**
-   * Override of ExternalProblem::addConstraint. Creates the MOOSE-side MFEM constraint.
+   * Override of FEProblemBase::addConstraint. Creates the MOOSE-side MFEM constraint.
    */
   void addConstraint(const std::string & constraint_name,
                      const std::string & name,

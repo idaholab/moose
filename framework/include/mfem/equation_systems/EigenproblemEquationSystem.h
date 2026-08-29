@@ -32,6 +32,10 @@ public:
 
   bool IsEigen() const override { return true; }
 
+  /// Eigenproblems mark external boundaries as essential and do not consult the
+  /// constraint map, so reject constraints rather than silently ignoring them.
+  void AddEssentialConstraint(std::shared_ptr<MFEMEssentialConstraint> constraint) override;
+
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
   virtual void ApplyEssentialConstraints() override;

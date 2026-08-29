@@ -170,7 +170,10 @@ ComplexEquationSystem::ApplyComplexEssentialConstraint(const std::string & var_n
       constraint->ApplyConstraint(trial_gf, ess_tdofs);
       global_ess_tdofs.Append(ess_tdofs);
     }
-  // Deduplicate
+  // Deduplicate. mfem::Array::Unique only drops *consecutive* duplicates, so the
+  // list must be sorted first; a constraint whose block touches an essential
+  // boundary reports tdofs already present from GetEssentialTrueDofs.
+  global_ess_tdofs.Sort();
   global_ess_tdofs.Unique();
 }
 

@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "TreeCotreeGaugeBuilder.h"
+#include "MFEMTreeCotreeGauge.h"
 #include "libmesh/int_range.h"
 
 #include <algorithm>
@@ -68,11 +68,12 @@ private:
 using Coord3 = std::array<mfem::real_t, 3>;
 using EdgeKey = std::pair<int, int>;
 
-// Lowest-order edge dof of parallel mesh edge e, sign-decoded.
+// Lowest-order edge dof of parallel mesh edge e, sign-decoded. Called once per
+// mesh edge in each pass below, so the caller supplies the dof scratch space
+// rather than having it reallocated for every edge.
 int
-edgeLDof(mfem::ParFiniteElementSpace & pfes, int e)
+edgeLDof(mfem::ParFiniteElementSpace & pfes, int e, mfem::Array<int> & dofs)
 {
-  mfem::Array<int> dofs;
   pfes.GetEdgeDofs(e, dofs);
   return (dofs[0] >= 0) ? dofs[0] : -1 - dofs[0];
 }
@@ -172,10 +173,10 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   //    [x0 y0 z0  x1 y1 z1  is_pec  is_excluded].
   constexpr int stride = 8;
   std::vector<mfem::real_t> local;
-  mfem::Array<int> ev;
+  mfem::Array<int> ev, edge_dofs;
   for (const auto e : make_range(pmesh.GetNEdges()))
   {
-    const int ldof = edgeLDof(pfes, e);
+    const int ldof = edgeLDof(pfes, e, edge_dofs);
     if (pfes.GetLocalTDofNumber(ldof) < 0)
       continue; // owned by another rank; it will contribute this edge
 
@@ -273,7 +274,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   mfem::Array<int> tree_tdofs;
   for (const auto e : make_range(pmesh.GetNEdges()))
   {
-    const int ldof = edgeLDof(pfes, e);
+    const int ldof = edgeLDof(pfes, e, edge_dofs);
     const int ltdof = pfes.GetLocalTDofNumber(ldof);
     if (ltdof < 0)
       continue;
@@ -292,12 +293,22 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
 
 } // namespace
 
-mfem::Array<int>
-TreeCotreeGaugeBuilder::gaugeTrueDofs(mfem::ParFiniteElementSpace & pfes,
-                                      const mfem::Array<int> * pec_bdr_markers,
-                                      const mfem::Array<int> & gauge_block_attrs)
+namespace Moose::MFEM
+{
+
+const mfem::Array<int> &
+TreeCotreeGauge::trueDofs(mfem::ParFiniteElementSpace & pfes,
+                          const mfem::Array<int> * pec_bdr_markers,
+                          const mfem::Array<int> & gauge_block_attrs)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
+
+  // The gauge is a property of the mesh and the space alone, so it only has to be
+  // rebuilt when one of them is refined. Rebuilding it every time the linear forms
+  // are assembled would repeat an all-to-all gather of the mesh 1-skeleton on
+  // every time step.
+  if (_mesh_sequence == pmesh.GetSequence() && _fespace_sequence == pfes.GetSequence())
+    return _tdofs;
 
   // Boundary attribute marker for the tangential Dirichlet ("PEC") condition on
   // this variable; all-zero when no such boundary is given.
@@ -313,7 +324,11 @@ TreeCotreeGaugeBuilder::gaugeTrueDofs(mfem::ParFiniteElementSpace & pfes,
   // Edges of subdomains that are not gauged (empty gauge_block_attrs -> none).
   mfem::Array<int> edge_excluded = excludedEdgeMarker(pmesh, gauge_block_attrs);
 
-  return buildTreeCotreeGaugeTDofs(pfes, ess_bdr, pec_tdofs, edge_excluded);
+  _tdofs = buildTreeCotreeGaugeTDofs(pfes, ess_bdr, pec_tdofs, edge_excluded);
+  _mesh_sequence = pmesh.GetSequence();
+  _fespace_sequence = pfes.GetSequence();
+  return _tdofs;
+}
 }
 
 #endif
