@@ -307,6 +307,12 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [UserObjects]
   [rc]
     type = PorousRhieChowMassFlux
@@ -338,7 +344,6 @@ advected_interp_method = 'upwind'
     use_corrected_pressure_gradient = false
   []
 []
-
 
 [Executioner]
   type = SIMPLE
@@ -412,17 +417,14 @@ advected_interp_method = 'upwind'
     initial_condition = ${T_inlet}
     block = 'pebble_bed bottom_reflector side_reflector riser upper_plenum bottom_plenum'
   []
-
-
 []
 
 [LinearFVKernels]
 
-
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v
@@ -435,7 +437,7 @@ advected_interp_method = 'upwind'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v
@@ -654,7 +656,6 @@ advected_interp_method = 'upwind'
     HbyA_flux = 'HbyA'
   []
 
-
   [top_h_fluid]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = inlet
@@ -686,10 +687,6 @@ advected_interp_method = 'upwind'
     functor = 0.0
     diffusion_coeff = kappa_s
   []
-
-
-
-
 []
 
 [Functions]
@@ -698,7 +695,6 @@ advected_interp_method = 'upwind'
     expression = '${power_fn_scaling} * (-1.0612e4 * pow(y+${offset}, 4) + 1.5963e5 * pow(y+${offset}, 3)
                    -6.2993e5 * pow(y+${offset}, 2) + 1.4199e6 * (y+${offset}) + 5.5402e4)'
   []
-
 []
 
 [FunctorMaterials]
@@ -783,7 +779,7 @@ advected_interp_method = 'upwind'
   [drag_bottom_reflector]
     type = GenericVectorFunctorMaterial
     prop_names = 'br_forch'
-    prop_values = '270 0.027 270'    #  times porosity/2
+    prop_values = '270 0.027 270' #  times porosity/2
   []
 
   [forch]
@@ -796,7 +792,6 @@ advected_interp_method = 'upwind'
                               bottom_plenum cavity_forch_vec
                               riser br_forch'
   []
-
 
   [fluid_enthalpy_material]
     type = LinearFVEnthalpyFunctorMaterial
@@ -911,8 +906,6 @@ advected_interp_method = 'upwind'
     initial_condition = ${T_inlet}
     block = 'pebble_bed cavity bottom_reflector upper_plenum bottom_plenum riser'
   []
-
-
 []
 
 [AuxKernels]
@@ -923,8 +916,6 @@ advected_interp_method = 'upwind'
     functor = 'rho'
     execute_on = 'INITIAL NONLINEAR'
   []
-
-
 
   [assign_porosity_aux]
     type = FunctorAux
@@ -940,7 +931,6 @@ advected_interp_method = 'upwind'
     block = 'pebble_bed cavity bottom_reflector upper_plenum bottom_plenum riser'
     execute_on = 'INITIAL NONLINEAR'
   []
-
 []
 
 [Postprocessors]
@@ -1055,11 +1045,9 @@ advected_interp_method = 'upwind'
     type = SideAverageValue
     variable = T_fluid
     boundary = outlet
-    execute_on='INITIAL LINEAR TIMESTEP_END'
+    execute_on = 'INITIAL LINEAR TIMESTEP_END'
   []
 []
-
-
 
 [Outputs]
   exodus = true

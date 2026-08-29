@@ -20,7 +20,7 @@ pebble_diameter = 0.06
 power_fn_scaling = 0.88689239556
 offset = 0.56331
 
-mass_flow_rate = 60.0   #value with low rho
+mass_flow_rate = 60.0 #value with low rho
 flow_area = '${fparse pi * bed_radius * bed_radius}'
 flow_vel = '${fparse mass_flow_rate / (flow_area * rho_f)}'
 
@@ -40,7 +40,6 @@ advected_interp_method = 'upwind'
     subdomain_id = '1 2'
   []
 
-
   [rename_blocks]
     type = RenameBlockGenerator
     old_block = '1 2'
@@ -56,7 +55,6 @@ advected_interp_method = 'upwind'
     new_boundary = 'baffle'
   []
   coord_type = RZ
-
 []
 
 [Problem]
@@ -67,6 +65,12 @@ advected_interp_method = 'upwind'
 [FluidProperties]
   [fp]
     type = HeliumFluidProperties
+  []
+[]
+
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
   []
 []
 
@@ -86,7 +90,7 @@ advected_interp_method = 'upwind'
 
     debug_baffle = false
 
-    use_flux_velocity_reconstruction = true     #diverges if false
+    use_flux_velocity_reconstruction = true #diverges if false
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
     reconstructed_pressure_gradient_feedback_relaxation = 1.0
@@ -171,15 +175,13 @@ advected_interp_method = 'upwind'
     initial_condition = ${T_inlet}
     block = 'bed'
   []
-
-
 []
 
 [LinearFVKernels]
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v
@@ -192,7 +194,7 @@ advected_interp_method = 'upwind'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     u = superficial_u
     v = superficial_v
@@ -386,7 +388,6 @@ advected_interp_method = 'upwind'
     HbyA_flux = 'HbyA'
   []
 
-
   [top_h_fluid]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = top
@@ -418,7 +419,6 @@ advected_interp_method = 'upwind'
     functor = 0.0
     diffusion_coeff = kappa_s
   []
-
 []
 
 [Functions]
@@ -487,7 +487,6 @@ advected_interp_method = 'upwind'
     characteristic_length = ${pebble_diameter}
   []
 
-
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = porosity
@@ -512,7 +511,6 @@ advected_interp_method = 'upwind'
     subdomain_to_prop_value = 'bed bed_forch_vec
                               cavity cavity_forch_vec'
   []
-
 
   [fluid_enthalpy_material]
     type = LinearFVEnthalpyFunctorMaterial
@@ -607,7 +605,6 @@ advected_interp_method = 'upwind'
   #   initialize_from_rho = true
   #   execute_on = 'INITIAL NONLINEAR TIMESTEP_END'
   # []
-
 
   [assign_porosity_aux]
     type = FunctorAux
@@ -738,12 +735,9 @@ advected_interp_method = 'upwind'
     type = SideAverageValue
     variable = T_fluid
     boundary = bottom
-    execute_on='INITIAL LINEAR TIMESTEP_END'
+    execute_on = 'INITIAL LINEAR TIMESTEP_END'
   []
 []
-
-
-
 
 [Outputs]
   exodus = true

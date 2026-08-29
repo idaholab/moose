@@ -205,6 +205,12 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [Variables]
   [superficial_u]
     type = MooseLinearVariableFVReal
@@ -227,7 +233,7 @@ advected_interp_method = 'upwind'
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -240,7 +246,7 @@ advected_interp_method = 'upwind'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v

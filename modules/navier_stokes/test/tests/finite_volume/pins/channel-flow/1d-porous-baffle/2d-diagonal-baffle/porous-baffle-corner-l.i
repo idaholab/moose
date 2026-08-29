@@ -1,6 +1,6 @@
 inlet_velocity = 0.1
 rho = 998.2
-mu = 2e-3
+mu = 0.0
 eps_zone_1 = 0.8
 eps_zone_2 = 0.6
 # eps_zone_1 = 1.0
@@ -191,14 +191,19 @@ advected_interp_method = 'upwind'
     baffle_form_loss = '${entry_form_loss} ${corner_form_loss} ${exit_form_loss}'
     velocity_form_loss = 'lower_epsilon lower_epsilon lower_epsilon'
     # pressure_gradient_limiter_blend = 0.5
-    pressure_baffle_relaxation = 0.2
+    pressure_baffle_relaxation = 0.1
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
-    reconstructed_pressure_gradient_feedback_relaxation = 0.2
-    flux_velocity_reconstruction_zero_flux_sidesets = 'bottom_porous inner_horizontal_porous right_porous inner_vertical_porous'
-    use_corrected_pressure_gradient = true
+    reconstructed_pressure_gradient_feedback_relaxation = 0.1
+    # flux_velocity_reconstruction_zero_flux_sidesets = 'bottom_porous inner_horizontal_porous right_porous inner_vertical_porous'
+  []
+[]
+
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
   []
 []
 
@@ -206,12 +211,12 @@ advected_interp_method = 'upwind'
   [superficial_u]
     type = MooseLinearVariableFVReal
     solver_sys = u_system
-    initial_condition = ${inlet_velocity}
+    initial_condition = 1e-6
   []
   [superficial_v]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
-    initial_condition = 0.0
+    initial_condition = 1e-6
   []
   [pressure]
     type = MooseLinearVariableFVReal
@@ -224,7 +229,7 @@ advected_interp_method = 'upwind'
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -237,7 +242,7 @@ advected_interp_method = 'upwind'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -354,6 +359,9 @@ advected_interp_method = 'upwind'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
   []
 
   [slip_u]
@@ -372,11 +380,15 @@ advected_interp_method = 'upwind'
     v = superficial_v
     momentum_component = y
   []
-  [pressure_slip]
-    type = LinearFVPressureSymmetryBC
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
     boundary = 'bottom_porous inner_horizontal_porous right_porous inner_vertical_porous'
     variable = pressure
     HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
   []
 []
 
@@ -500,7 +512,7 @@ advected_interp_method = 'upwind'
   [porosity_aux]
     type = MooseLinearVariableFVReal
   []
-    [superficial_w]
+  [superficial_w]
     type = MooseLinearVariableFVReal
   []
 []
@@ -523,7 +535,7 @@ advected_interp_method = 'upwind'
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.7
+  momentum_equation_relaxation = 0.5
   pressure_variable_relaxation = 0.2
   num_iterations = 2000
   pressure_absolute_tolerance = 1e-8

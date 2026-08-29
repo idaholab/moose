@@ -41,6 +41,12 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
   previous_nl_solution_required = true
@@ -95,7 +101,7 @@ advected_interp_method = 'upwind'
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -108,7 +114,7 @@ advected_interp_method = 'upwind'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -240,6 +246,9 @@ advected_interp_method = 'upwind'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC

@@ -5,12 +5,12 @@ u_in = 2
 forchheimer = 0
 bf = '0 0'
 
-cp_fluid = 2
+cp_fluid = 4200
 k_fluid = 0.4
 h_vol = 300
 T_inlet = 300
 T_initial = 300
-q=10000
+q = 20000000
 
 [Mesh]
   [mesh]
@@ -48,6 +48,12 @@ q=10000
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system energy_system'
   previous_nl_solution_required = true
@@ -66,8 +72,8 @@ q=10000
     pressure_gradient_limiter = 'baffle baffle2'
     baffle_form_loss = ${bf}
     velocity_form_loss = 'lower_epsilon higher_epsilon'
-    pressure_gradient_limiter_blend = 0.5
-    pressure_baffle_relaxation = 0.5
+    # pressure_gradient_limiter_blend = 1.0
+    pressure_baffle_relaxation = 0.01
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
@@ -96,7 +102,7 @@ q=10000
   [h_fluid]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${fparse cp_fluid * T_initial}
+    initial_condition = '${fparse cp_fluid * T_initial}'
   []
 []
 
@@ -104,7 +110,7 @@ q=10000
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -117,7 +123,7 @@ q=10000
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -228,22 +234,22 @@ q=10000
     use_two_term_expansion = false
   []
 
-  [noslip_v]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top_to_1 top_to_3 bottom_to_1 bottom_to_3'
-    variable = superficial_v
-    functor = 0.0
-  []
-  [noslip_u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top_to_1 top_to_3 bottom_to_1 bottom_to_3'
-    variable = superficial_u
-    functor = 0.0
-  []
+  # [noslip_v]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   boundary = 'top_to_1 top_to_3 bottom_to_1 bottom_to_3'
+  #   variable = superficial_v
+  #   functor = 0.0
+  # []
+  # [noslip_u]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   boundary = 'top_to_1 top_to_3 bottom_to_1 bottom_to_3'
+  #   variable = superficial_u
+  #   functor = 0.0
+  # []
 
   [symmetry-u]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top_to_2 bottom_to_2'
+    boundary = 'top_to_2 bottom_to_2 top_to_1 top_to_3 bottom_to_1 bottom_to_3'
     variable = superficial_u
     u = superficial_u
     v = superficial_v
@@ -251,7 +257,7 @@ q=10000
   []
   [symmetry-v]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top_to_2 bottom_to_2'
+    boundary = 'top_to_2 bottom_to_2 top_to_1 top_to_3 bottom_to_1 bottom_to_3'
     variable = superficial_v
     u = superficial_u
     v = superficial_v
@@ -263,6 +269,17 @@ q=10000
     boundary = right
     variable = pressure
     functor = 0.0
+  []
+
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'bottom_to_1 bottom_to_2 bottom_to_3 top_to_1 top_to_2 top_to_3'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
   []
 
   [left_T_fluid]
@@ -433,8 +450,8 @@ q=10000
   pressure_system = pressure_system
   energy_system = energy_system
   momentum_equation_relaxation = 0.4
-  pressure_variable_relaxation = 0.1
-  energy_equation_relaxation = 0.8
+  pressure_variable_relaxation = 0.2
+  energy_equation_relaxation = 0.7
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
