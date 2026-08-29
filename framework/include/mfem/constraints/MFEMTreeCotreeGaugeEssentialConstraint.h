@@ -13,6 +13,7 @@
 
 #include "MFEMEssentialConstraint.h"
 #include "MFEMBoundaryRestrictable.h"
+#include "TreeCotreeGaugeBuilder.h"
 
 /**
  * Removes the gradient null space of an H(curl) (Nedelec) variable by strongly
@@ -37,7 +38,8 @@
  * independent of the MPI partitioning.
  */
 class MFEMTreeCotreeGaugeEssentialConstraint : public MFEMEssentialConstraint,
-                                               public MFEMBoundaryRestrictable
+                                               public MFEMBoundaryRestrictable,
+                                               protected TreeCotreeGaugeBuilder
 {
 public:
   static InputParameters validParams();
