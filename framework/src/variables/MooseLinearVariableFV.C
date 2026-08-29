@@ -99,6 +99,13 @@ MooseLinearVariableFV<OutputType>::requestCellGradients()
 }
 
 template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeCellGradients()
+{
+  requestCellGradients();
+}
+
+template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name)
 {

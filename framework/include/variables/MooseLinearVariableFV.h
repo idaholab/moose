@@ -109,6 +109,12 @@ public:
   const LinearFVGradientReader & requestCellGradients();
 
   /**
+   * Backward-compatible interface for requesting cell gradients.
+   * Equivalent to calling requestCellGradients() with the default method.
+   */
+  void computeCellGradients();
+
+  /**
    * Register a named gradient method and return its reader.
    */
   const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name);
