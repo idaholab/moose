@@ -75,6 +75,25 @@
     valgrind = heavy
     min_slots = 3 # memory heavy, needs extra slot for -p 2
   []
+  [MFEMHypreAMSInteriorNodes]
+    design = 'MFEMHypreAMS.md'
+    issues = '#33625'
+    type = CSVDiff
+    input = av_magnetostatic.i
+    cli_args = 'Solvers/ams/block=Exterior '
+               'Solvers/ams/projection_frequency=1 '
+               'Outputs/ReportedPostprocessors/file_base=OutputData/AVMagnetostaticInteriorNodesCSV'
+    csvdiff = 'OutputData/AVMagnetostaticInteriorNodesCSV.csv'
+    requirement = 'The system shall be able to precondition an MFEM curl-curl solve with a HypreAMS '
+                  'preconditioner whose interior-node correction is restricted to the subdomains in '
+                  'which the mass term is zero and whose compatible-subspace projection frequency is '
+                  'set.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    valgrind = heavy
+    min_slots = 3 # memory heavy, needs extra slot for -p 2
+  []
   [MFEMBoundaryFluxCutTransitionSubMesh]
     design = 'MFEMVectorBoundaryFluxIntegralPostprocessor.md'
     issues = '#32851'
