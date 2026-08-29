@@ -18,6 +18,7 @@ InputParameters
 MFEMHypreAMS::validParams()
 {
   InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>::validParams();
+  params += MFEMBlockRestrictable::validParams();
   params.addClassDescription("Hypre auxiliary-space Maxwell solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMFESpaceName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
@@ -29,12 +30,10 @@ MFEMHypreAMS::validParams()
   params.addParam<unsigned int>(
       "projection_frequency",
       0,
-      "Number of iterations between each projection of onto the compatible H(curl) subspace.");
-  params.addParam<std::vector<SubdomainName>>(
-      "block",
-      {},
-      "The list of subdomains (names or ids) in which the mass term is zero. Typically, this may "
-      "represent a zero-conductivity region in the domain.");
+      "Number of iterations between each projection onto the compatible H(curl) subspace.");
+  params.setDocString("block",
+                      "The list of subdomains (names or ids) in which the mass term is zero. "
+                      "Typically, this may represent a zero-conductivity region in the domain.");
   return params;
 }
 
@@ -50,7 +49,7 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>(
         "MFEMFESpace", getParam<MFEMFESpaceName>("fespace"))),
     _projection_frequency(getParam<unsigned int>("projection_frequency")),
-    _interior_nodes(*BuildInteriorNodes())
+    _interior_nodes(isParamSetByUser("block") ? BuildInteriorNodes() : nullptr)
 {
   ConstructSolver();
 }
@@ -72,13 +71,13 @@ MFEMHypreAMS::SetSolverParameters(mfem::HypreAMS & solver)
   solver.SetPrintLevel(getParam<int>("print_level"));
 
   HYPRE_Solver ams_solver = static_cast<HYPRE_Solver>(solver);
-  if (isParamSetByUser("block"))
-    HYPRE_AMSSetInteriorNodes(ams_solver, static_cast<HYPRE_ParVector>(_interior_nodes));
+  if (_interior_nodes)
+    HYPRE_AMSSetInteriorNodes(ams_solver, static_cast<HYPRE_ParVector>(*_interior_nodes));
   if (_projection_frequency > 0)
     HYPRE_AMSSetProjectionFrequency(ams_solver, _projection_frequency);
 }
 
-mfem::HypreParVector *
+std::unique_ptr<mfem::HypreParVector>
 MFEMHypreAMS::BuildInteriorNodes()
 {
   mfem::ParMesh & pmesh = *_mfem_fespace.getFESpace()->GetParMesh();
@@ -89,32 +88,30 @@ MFEMHypreAMS::BuildInteriorNodes()
   vertex_exterior_marker = 0;
 
   mfem::Array<int> vdofs;
-  for (int e = 0; e < pmesh.GetNE(); e++)
+  for (const auto e : make_range(pmesh.GetNE()))
     // if element attribute is not in list of interior domains, it must be exterior (conducting)
-    if (getSubdomainAttributes().Find(pmesh.GetAttribute(e) == -1))
+    if (getSubdomainAttributes().Find(pmesh.GetAttribute(e)) == -1)
     {
       vert_fespace.GetElementVDofs(e, vdofs);
-      for (int i = 0; i < vdofs.Size(); i++)
-      {
+      // The local H1 GaussLobatto basis has no sign-encoded dofs, so vdofs entries index
+      // vertex_exterior_marker directly.
+      for (const auto i : make_range(vdofs.Size()))
         vertex_exterior_marker[vdofs[i]] = 1;
-      }
     }
   // A dof shared between processors must be marked exterior on all of them
   // if it is exterior on any of them (bitwise OR across the shared group).
   vert_fespace.Synchronize(vertex_exterior_marker);
 
-  mfem::Vector node_marker_l(vert_fespace.GetVSize());
-  for (int i = 0; i < node_marker_l.Size(); i++)
-  {
-    node_marker_l(i) = 1.0 - vertex_exterior_marker[i];
-  }
   mfem::ParGridFunction node_marker_gf(&vert_fespace);
-  node_marker_gf = node_marker_l;
+  for (const auto i : make_range(node_marker_gf.Size()))
+    node_marker_gf(i) = 1.0 - vertex_exterior_marker[i];
 
   mfem::Vector node_marker_t;
   node_marker_gf.GetTrueDofs(node_marker_t);
 
-  mfem::HypreParVector * interior_nodes = vert_fespace.NewTrueDofVector();
+  // hypre copies the (2-entry, assumed-partition) dof offsets into the vector, so it stays
+  // valid after vert_fespace is destroyed.
+  auto interior_nodes = std::make_unique<mfem::HypreParVector>(&vert_fespace);
   interior_nodes->Set(1.0, node_marker_t);
   return interior_nodes;
 }
