@@ -1,0 +1,14 @@
+[Tests]
+  parallel_scheduling = True
+  [6b]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '6b_out.csv'
+    input = '6b.i'
+    requirement = 'The system shall compute 3-D, triaxial secondary creep under displacement control in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]
