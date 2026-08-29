@@ -161,6 +161,17 @@ ComplexEquationSystem::ApplyComplexEssentialConstraint(const std::string & var_n
         global_bdr_markers[i] |= ess_bdrs[i];
     }
   trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
+
+  if (_cmplx_essential_constraint_map.Has(var_name))
+    for (auto & constraint : _cmplx_essential_constraint_map.GetRef(var_name))
+    {
+      // Set strongly constrained DoF values on real and imaginary components
+      mfem::Array<int> ess_tdofs;
+      constraint->ApplyConstraint(trial_gf, ess_tdofs);
+      global_ess_tdofs.Append(ess_tdofs);
+    }
+  // Deduplicate
+  global_ess_tdofs.Unique();
 }
 
 void
@@ -243,6 +254,21 @@ ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssenti
     _cmplx_essential_bc_map.Register(test_var_name, std::move(bcs));
   }
   _cmplx_essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
+}
+
+void
+ComplexEquationSystem::AddComplexEssentialConstraint(
+    std::shared_ptr<MFEMComplexEssentialConstraint> constraint)
+{
+  const auto & trial_var_name = constraint->getTrialVariableName();
+  AddTestVariableNameIfMissing(trial_var_name);
+  if (!_cmplx_essential_constraint_map.Has(trial_var_name))
+  {
+    auto constraints =
+        std::make_shared<std::vector<std::shared_ptr<MFEMComplexEssentialConstraint>>>();
+    _cmplx_essential_constraint_map.Register(trial_var_name, std::move(constraints));
+  }
+  _cmplx_essential_constraint_map.GetRef(trial_var_name).push_back(std::move(constraint));
 }
 
 void
