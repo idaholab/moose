@@ -14,6 +14,8 @@
 #include "MFEMLORLinearSolverBase.h"
 #include "MFEMFESpace.h"
 
+#include <memory>
+
 /**
  * Wrapper for mfem::HypreAMS solver.
  */
@@ -30,12 +32,18 @@ protected:
 
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::HypreAMS & solver) override;
-  mfem::HypreParVector * BuildInteriorNodes();
+
+  /// Builds the true-dof vector marking nodes interior to the zero-mass ("block") region,
+  /// for use with HYPRE_AMSSetInteriorNodes. Only called when "block" is set by the user.
+  std::unique_ptr<mfem::HypreParVector> BuildInteriorNodes();
 
 private:
   const MFEMFESpace & _mfem_fespace;
+  /// Number of iterations between projections onto the compatible H(curl) subspace (0 disables).
   const unsigned int _projection_frequency;
-  const mfem::HypreParVector _interior_nodes;
+  /// True-dof marker (1.0 at interior nodes) passed to HYPRE_AMSSetInteriorNodes;
+  /// null unless the "block" parameter is set by the user.
+  const std::unique_ptr<mfem::HypreParVector> _interior_nodes;
 };
 
 #endif
