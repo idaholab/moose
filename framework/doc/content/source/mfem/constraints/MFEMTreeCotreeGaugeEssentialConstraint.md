@@ -49,6 +49,11 @@ For the example below, gauging only the vacuum reproduces the solution obtained 
 vanishing artificial regularisation to six significant figures, whereas a whole-mesh gauge
 perturbs it by several percent.
 
+For a complex (time-harmonic) variable use
+[MFEMComplexTreeCotreeGaugeEssentialConstraint.md], which selects the same degrees of
+freedom (the selection is shared via `TreeCotreeGaugeBuilder`) and fixes both their real
+and imaginary parts.
+
 ### Notes and limitations
 
 - The gauge acts on the lowest-order (edge) DOFs only. For `fec_order` greater than

@@ -20,6 +20,8 @@
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
 #include "MFEMNonlinearSolverBase.h"
+#include "MFEMComplexEssentialConstraint.h"
+#include "ComplexEquationSystem.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "DataIO.h"
@@ -445,12 +447,28 @@ MFEMProblem::addConstraint(const std::string & constraint_name,
                            InputParameters & parameters)
 {
   auto constraint = addObject<MFEMEssentialConstraint>(constraint_name, name, parameters).front();
-  auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-  if (eqsys)
-    eqsys->AddEssentialConstraint(std::move(constraint));
+
+  if (auto complex_constraint =
+          std::dynamic_pointer_cast<MFEMComplexEssentialConstraint>(constraint))
+  {
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
+    if (eqsys)
+      eqsys->AddComplexEssentialConstraint(std::move(complex_constraint));
+    else
+      mooseError("Cannot add constraint with name '" + name +
+                 "' because there is no corresponding complex equation system.");
+  }
   else
-    mooseError("Cannot add constraint with name '" + name +
-               "' because there is no corresponding equation system.");
+  {
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    if (eqsys)
+      eqsys->AddEssentialConstraint(std::move(constraint));
+    else
+      mooseError("Cannot add constraint with name '" + name +
+                 "' because there is no corresponding equation system.");
+  }
 }
 
 void
