@@ -78,6 +78,14 @@
     design = 'LinearFVNormalVelocityFunctorDirichletBC.md'
     issues = '#32371'
   []
+  [bad_momentum_abs_tols]
+    type = RunException
+    input = 2d-velocity-pressure.i
+    cli_args = "Executioner/momentum_absolute_tolerance='1e-7 1e-7 1e-7'"
+    expect_err = "The number of momentum absolute tolerances must be one or match the number of momentum systems."
+    requirement = 'The system shall report an error if the number of momentum absolute tolerances does not equal one or the number of momentum systems.'
+    design = 'SIMPLE.md'
+  []
   [pressure-drop-interpolation]
     requirement = "The system shall be able to solve a laminar channel flow on a structured orthogonal mesh using direct "
                   "linear finite volume kernels and present spatial convergence for pressure drop using"

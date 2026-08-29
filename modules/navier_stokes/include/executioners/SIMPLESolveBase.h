@@ -234,8 +234,10 @@ protected:
 
   // ************************ Iteration control **************************** //
 
-  /// The user-defined absolute tolerance for determining the convergence in momentum
-  const Real _momentum_absolute_tolerance;
+  /// The user-defined absolute tolerance(s) for determining the convergence in momentum.
+  /// If a single value is provided it is applied to all momentum components; otherwise one
+  /// value per momentum system is expected.
+  const std::vector<Real> _momentum_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence in pressure
   const Real _pressure_absolute_tolerance;
