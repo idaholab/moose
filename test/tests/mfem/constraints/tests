@@ -10,4 +10,14 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMTreeCotreeGaugeMagnetodynamic]
+    type = CSVDiff
+    input = tree_cotree_gauge_magnetodynamic.i
+    csvdiff = tree_cotree_gauge_magnetodynamic_out.csv
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall be able to apply a tree-cotree gauge restricted to the non-conducting region that removes the gradient null space of an H(curl) variable in an otherwise singular magnetodynamic MFEM problem, giving a partition-independent solution'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
 []
