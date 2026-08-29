@@ -17,7 +17,8 @@
 /**
  * Wrapper for mfem::HypreAMS solver.
  */
-class MFEMHypreAMS : public Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>
+class MFEMHypreAMS : public Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>,
+                     public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
@@ -29,10 +30,12 @@ protected:
 
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::HypreAMS & solver) override;
+  mfem::HypreParVector * BuildInteriorNodes();
 
 private:
   const MFEMFESpace & _mfem_fespace;
   const unsigned int _projection_frequency;
+  const mfem::HypreParVector _interior_nodes;
 };
 
 #endif

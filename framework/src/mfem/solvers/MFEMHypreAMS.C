@@ -30,15 +30,27 @@ MFEMHypreAMS::validParams()
       "projection_frequency",
       0,
       "Number of iterations between each projection of onto the compatible H(curl) subspace.");
-
+  params.addParam<std::vector<SubdomainName>>(
+      "block",
+      {},
+      "The list of subdomains (names or ids) in which the mass term is zero. Typically, this may "
+      "represent a zero-conductivity region in the domain.");
   return params;
 }
 
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
   : Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>(parameters),
+    MFEMBlockRestrictable(
+        parameters,
+        *getMFEMProblem()
+             .getMFEMObject<MFEMFESpace>("MFEMFESpace", getParam<MFEMFESpaceName>("fespace"))
+             .getFESpace()
+             .get()
+             ->GetParMesh()),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>(
         "MFEMFESpace", getParam<MFEMFESpaceName>("fespace"))),
-    _projection_frequency(getParam<unsigned int>("projection_frequency"))
+    _projection_frequency(getParam<unsigned int>("projection_frequency")),
+    _interior_nodes(*BuildInteriorNodes())
 {
   ConstructSolver();
 }
@@ -60,26 +72,26 @@ MFEMHypreAMS::SetSolverParameters(mfem::HypreAMS & solver)
   solver.SetPrintLevel(getParam<int>("print_level"));
 
   HYPRE_Solver ams_solver = static_cast<HYPRE_Solver>(solver);
-  // HYPRE_AMSSetInteriorNodes(ams_solver,
-  //                           static_cast<mfem::HYPRE_ParVector>(*interior_nodes));
+  if (isParamSetByUser("block"))
+    HYPRE_AMSSetInteriorNodes(ams_solver, static_cast<HYPRE_ParVector>(_interior_nodes));
   if (_projection_frequency > 0)
     HYPRE_AMSSetProjectionFrequency(ams_solver, _projection_frequency);
 }
 
-void
+mfem::HypreParVector *
 MFEMHypreAMS::BuildInteriorNodes()
 {
-  mfem::H1_FECollection vert_fec(order, dim);
+  mfem::ParMesh & pmesh = *_mfem_fespace.getFESpace()->GetParMesh();
+  mfem::H1_FECollection vert_fec(_mfem_fespace.getFESpace()->GetOrder(0), pmesh.Dimension());
   mfem::ParFiniteElementSpace vert_fespace(&pmesh, &vert_fec);
 
-  // REPLACE WITH INPUT EXTERIOR BLOCK
   mfem::Array<int> vertex_exterior_marker(vert_fespace.GetVSize());
   vertex_exterior_marker = 0;
 
   mfem::Array<int> vdofs;
   for (int e = 0; e < pmesh.GetNE(); e++)
-  {
-    if (!interior_set.count(pmesh.GetAttribute(e)))
+    // if element attribute is not in list of interior domains, it must be exterior (conducting)
+    if (getSubdomainAttributes().Find(pmesh.GetAttribute(e) == -1))
     {
       vert_fespace.GetElementVDofs(e, vdofs);
       for (int i = 0; i < vdofs.Size(); i++)
@@ -87,7 +99,6 @@ MFEMHypreAMS::BuildInteriorNodes()
         vertex_exterior_marker[vdofs[i]] = 1;
       }
     }
-  }
   // A dof shared between processors must be marked exterior on all of them
   // if it is exterior on any of them (bitwise OR across the shared group).
   vert_fespace.Synchronize(vertex_exterior_marker);
@@ -105,6 +116,7 @@ MFEMHypreAMS::BuildInteriorNodes()
 
   mfem::HypreParVector * interior_nodes = vert_fespace.NewTrueDofVector();
   interior_nodes->Set(1.0, node_marker_t);
+  return interior_nodes;
 }
 
 #endif
