@@ -1,4 +1,4 @@
-mu = 2e-3 # 1e-2
+mu = 1e-2
 rho = 1000
 advected_interp_method = 'upwind'
 u_in = 2
@@ -46,6 +46,12 @@ bf = '0 0'
   previous_nl_solution_required = true
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [UserObjects]
   [rc]
     type = PorousRhieChowMassFlux
@@ -60,14 +66,13 @@ bf = '0 0'
     baffle_form_loss = ${bf}
     velocity_form_loss = 'lower_epsilon higher_epsilon'
     # pressure_gradient_limiter_blend = 0.5
-    pressure_baffle_relaxation = 0.1
+    pressure_baffle_relaxation = 0.05
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
-    flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    # flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
     use_corrected_pressure_gradient = false
-    # body_force_kernel_names = "u_friction; v_friction"
   []
 []
 
@@ -93,7 +98,7 @@ bf = '0 0'
   [u_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -106,7 +111,7 @@ bf = '0 0'
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = superficial_u
     v = superficial_v
@@ -233,20 +238,23 @@ bf = '0 0'
     functor = 0.0
   []
 
-  # [pressure-extrapolation]
-  #   type = LinearFVPressureFluxBC
-  #   boundary = 'bottom_to_1 bottom_to_2 bottom_to_3 top_to_1 top_to_2 top_to_3'
-  #   variable = pressure
-  #   HbyA_flux = HbyA
-  #   Ainv = Ainv
-  # []
-
-  [pressure-symmetry]
-    type = LinearFVPressureSymmetryBC
-    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'bottom_to_1 bottom_to_2 bottom_to_3 top_to_1 top_to_2 top_to_3'
     variable = pressure
-    HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
   []
+
+  # [pressure-symmetry]
+  #   type = LinearFVPressureSymmetryBC
+  #   boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+  #   variable = pressure
+  #   HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
+  # []
 []
 
 [FunctorMaterials]
@@ -278,21 +286,6 @@ bf = '0 0'
     expression = 'p_left - p_right'
     pp_names = 'p_left p_right'
   []
-  [p_block_1]
-    type = ElementAverageValue
-    variable = pressure
-    block = 1
-  []
-  [p_block_2]
-    type = ElementAverageValue
-    variable = pressure
-    block = 2
-  []
-  [p_block_jump]
-    type = ParsedPostprocessor
-    expression = 'p_block_1 - p_block_2'
-    pp_names = 'p_block_1 p_block_2'
-  []
   [u_block_1]
     type = ElementAverageValue
     variable = superficial_u
@@ -307,39 +300,6 @@ bf = '0 0'
     type = ParsedPostprocessor
     expression = 'u_block_1 - u_block_2'
     pp_names = 'u_block_1 u_block_2'
-  []
-  [v_top_int]
-    type = SideIntegralVariablePostprocessor
-    variable = superficial_v
-    boundary = 'top_to_1 top_to_2 top_to_3'
-  []
-  [top_area]
-    type = AreaPostprocessor
-    boundary = 'top_to_1 top_to_2 top_to_3'
-  []
-  [v_top_avg]
-    type = ParsedPostprocessor
-    pp_names = 'v_top_int top_area'
-    expression = 'v_top_int/top_area'
-  []
-[]
-
-[VectorPostprocessors]
-  [u_line]
-    type = LineValueSampler
-    variable = superficial_u
-    start_point = '0 0.25 0'
-    end_point = '1.5 0.25 0'
-    num_points = 401
-    sort_by = id
-  []
-  [p_line]
-    type = LineValueSampler
-    variable = pressure
-    start_point = '0 0.25 0'
-    end_point = '1.5 0.25 0'
-    num_points = 401
-    sort_by = id
   []
 []
 
@@ -360,18 +320,18 @@ bf = '0 0'
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
+  momentum_l_abs_tol = 1e-16
+  pressure_l_abs_tol = 1e-16
   momentum_l_tol = 0
   pressure_l_tol = 0
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.4
+  momentum_equation_relaxation = 0.3
   pressure_variable_relaxation = 0.1
-  num_iterations = 1000
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
+  num_iterations = 1500
+  pressure_absolute_tolerance = 1e-9
+  momentum_absolute_tolerance = 1e-9
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
