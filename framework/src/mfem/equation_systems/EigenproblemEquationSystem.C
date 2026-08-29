@@ -17,6 +17,16 @@ namespace Moose::MFEM
 {
 
 void
+EigenproblemEquationSystem::AddEssentialConstraint(
+    std::shared_ptr<MFEMEssentialConstraint> constraint)
+{
+  mooseError("Constraint '",
+             constraint->name(),
+             "' cannot be used in an MFEM eigenproblem: essential constraints on interior "
+             "degrees of freedom are not supported by the eigenproblem equation system.");
+}
+
+void
 EigenproblemEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(1);

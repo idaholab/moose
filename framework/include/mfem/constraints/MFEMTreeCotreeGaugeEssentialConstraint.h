@@ -13,7 +13,7 @@
 
 #include "MFEMEssentialConstraint.h"
 #include "MFEMBoundaryRestrictable.h"
-#include "TreeCotreeGaugeBuilder.h"
+#include "MFEMTreeCotreeGauge.h"
 
 /**
  * Removes the gradient null space of an H(curl) (Nedelec) variable by strongly
@@ -36,10 +36,13 @@
  * The spanning forest is grown from the mesh 1-skeleton gathered onto every
  * rank with edges keyed on their endpoint coordinates, so the gauge is
  * independent of the MPI partitioning.
+ *
+ * Only the lowest-order edge dofs are gauged, so the variable's finite element
+ * space must be order 1; a higher order space would keep the gradient modes
+ * carried by its interior dofs and stay singular.
  */
 class MFEMTreeCotreeGaugeEssentialConstraint : public MFEMEssentialConstraint,
-                                               public MFEMBoundaryRestrictable,
-                                               protected TreeCotreeGaugeBuilder
+                                               public MFEMBoundaryRestrictable
 {
 public:
   static InputParameters validParams();
@@ -47,6 +50,10 @@ public:
   MFEMTreeCotreeGaugeEssentialConstraint(const InputParameters & parameters);
 
   void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list) override;
+
+protected:
+  /// Selects and caches the gauged true dofs.
+  Moose::MFEM::TreeCotreeGauge _gauge;
 };
 
 #endif

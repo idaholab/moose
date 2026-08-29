@@ -43,8 +43,16 @@ MFEMTreeCotreeGaugeEssentialConstraint::ApplyConstraint(mfem::ParGridFunction & 
                                                         mfem::Array<int> & ess_tdof_list)
 {
   mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
+  if (pfes.GetMaxElementOrder() > 1)
+    mooseError("The tree-cotree gauge fixes the lowest-order edge degrees of freedom only, so it "
+               "requires a FIRST order H(curl) space; the space of variable '",
+               getTrialVariableName(),
+               "' is order ",
+               pfes.GetMaxElementOrder(),
+               ". The gradient modes carried by the higher-order degrees of freedom would be left "
+               "in place and the system would stay singular.");
 
-  mfem::Array<int> tree_tdofs = gaugeTrueDofs(
+  const mfem::Array<int> & tree_tdofs = _gauge.trueDofs(
       pfes, isBoundaryRestricted() ? &getBoundaryMarkers() : nullptr, getSubdomainAttributes());
 
   // The gauge fixes the tree dofs to zero: zero those entries of the solution
