@@ -20,4 +20,14 @@
     compute_devices = 'cpu'
     recover = false
   []
+  [MFEMComplexTreeCotreeGaugeTimeHarmonic]
+    type = CSVDiff
+    input = tree_cotree_gauge_time_harmonic.i
+    csvdiff = tree_cotree_gauge_time_harmonic_out.csv
+    design = 'MFEMComplexTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall be able to apply a tree-cotree gauge to a complex (time-harmonic) H(curl) variable, removing the gradient null space of the curl-curl operator in an otherwise singular frequency-domain MFEM problem'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
 []
