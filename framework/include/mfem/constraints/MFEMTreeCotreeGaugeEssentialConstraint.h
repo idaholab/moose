@@ -12,8 +12,32 @@
 #pragma once
 
 #include "MFEMEssentialConstraint.h"
+#include "MFEMBoundaryRestrictable.h"
 
-class MFEMTreeCotreeGaugeEssentialConstraint : public MFEMEssentialConstraint
+/**
+ * Removes the gradient null space of an H(curl) (Nedelec) variable by strongly
+ * fixing the lowest-order edge degrees of freedom lying on a spanning tree of
+ * the mesh graph to zero (a tree-cotree gauge). This makes curl-curl systems
+ * with no (or only partial) mass regularization solvable, e.g. the magnetic
+ * vector potential A in a magnetodynamic A-formulation where the surrounding
+ * non-conducting region carries no sigma * dA/dt term.
+ *
+ * The 'boundary' parameter should list exactly the boundaries on which a
+ * tangential Dirichlet ("PEC") condition is applied to the variable: those
+ * edges are seeded into the spanning forest so the interior gauge stays
+ * compatible with the boundary condition rather than over-constraining it.
+ *
+ * The 'block' parameter restricts the gauge to the given subdomains (e.g. the
+ * non-conducting region, where a sigma * dA/dt term does not already fix the
+ * gauge). Edges of the excluded subdomains seed the forest but are not gauged.
+ * An empty 'block' gauges the whole mesh.
+ *
+ * The spanning forest is grown from the mesh 1-skeleton gathered onto every
+ * rank with edges keyed on their endpoint coordinates, so the gauge is
+ * independent of the MPI partitioning.
+ */
+class MFEMTreeCotreeGaugeEssentialConstraint : public MFEMEssentialConstraint,
+                                               public MFEMBoundaryRestrictable
 {
 public:
   static InputParameters validParams();
@@ -21,12 +45,6 @@ public:
   MFEMTreeCotreeGaugeEssentialConstraint(const InputParameters & parameters);
 
   void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list) override;
-
-  void
-  GetSubdomainTrueDofs(const mfem::ParGridFunction & gf, int attr, mfem::Array<int> & ess_tdofs);
-
-protected:
-  mfem::Coefficient & _coef;
 };
 
 #endif
