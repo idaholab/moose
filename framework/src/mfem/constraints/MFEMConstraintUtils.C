@@ -85,6 +85,38 @@ projectScalarCoefficientOnSubdomains(mfem::ParGridFunction & gf,
   }
 }
 
+void
+projectVectorCoefficientOnSubdomains(mfem::ParGridFunction & gf,
+                                     mfem::VectorCoefficient & coef,
+                                     const mfem::Array<int> & subdomain_attrs)
+{
+  if (subdomain_attrs.Size() == 0)
+    return;
+
+  mfem::FiniteElementSpace & fes = *gf.FESpace();
+  const int max_attr = fes.GetMesh()->attributes.Size() ? fes.GetMesh()->attributes.Max() : 0;
+  std::vector<char> wanted(max_attr + 1, 0);
+  for (const auto a : subdomain_attrs)
+    if (a >= 1 && a <= max_attr)
+      wanted[a] = 1;
+
+  mfem::Array<int> vdofs;
+  mfem::Vector vals;
+  mfem::DofTransformation doftrans;
+  for (const auto e : make_range(fes.GetNE()))
+  {
+    if (!wanted[fes.GetAttribute(e)])
+      continue;
+    fes.GetElementVDofs(e, vdofs, doftrans);
+    vals.SetSize(vdofs.Size());
+    // The VectorCoefficient overload of Project handles vector H1 (one scalar
+    // basis per component) and H(curl)/H(div) (tangential/normal edge/face
+    // moments) alike; the DofTransformation fixes ND/RT dof orientation.
+    fes.GetFE(e)->Project(coef, *fes.GetElementTransformation(e), vals);
+    doftrans.TransformPrimal(vals);
+    gf.SetSubVector(vdofs, vals);
+  }
+}
 }
 
 #endif
