@@ -36,10 +36,12 @@ public:
    * to zero, in addition to those already fixed by the tangential Dirichlet
    * ("PEC") boundary condition.
    *
-   * The mesh 1-skeleton is gathered onto every rank with edges keyed on their
-   * endpoint coordinates (bit-identical across ranks), so one canonical seeded
-   * spanning forest is grown identically on every rank; the result is
-   * independent of the MPI partitioning.
+   * The seeded spanning forest is grown by a distributed Boruvka pass, so no
+   * rank holds more than its own share of the mesh graph. Edges are weighted by
+   * their canonical global endpoint ids, which are derived from the (bit-identical
+   * across ranks) endpoint coordinates; because those weights are distinct the
+   * minimum spanning forest is unique and the result is independent of the MPI
+   * partitioning.
    *
    * The returned reference stays valid until the next call on this object.
    *
