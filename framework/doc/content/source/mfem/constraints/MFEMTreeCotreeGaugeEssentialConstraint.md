@@ -23,12 +23,17 @@ every tree edge to zero. The remaining "cotree" edge DOFs are exactly enough to 
 any curl, so the gauged system is non-singular while the physical solution
 $\vec\nabla\times\vec u$ is unchanged.
 
-The mesh 1-skeleton is gathered onto every rank with each edge keyed on its two endpoint
-coordinates. Vertex coordinates are copied verbatim from the serial mesh when it is
-partitioned, so they are bit-identical on every rank and give an edge identity that does
-not depend on the partitioning. One canonical seeded spanning forest is grown from that
-gathered list (identically on every rank) and mapped back onto each rank's DOFs, so the
-gauge - and hence the solution - is independent of the number of MPI ranks.
+The forest is grown by a distributed Boruvka pass in which no rank ever holds more than its
+own share of the mesh graph. Each edge is keyed on its two endpoint coordinates; vertex
+coordinates are copied verbatim from the serial mesh when it is partitioned, so they are
+bit-identical on every rank. A distributed sort turns those coordinates into dense global
+vertex ids in canonical (lexicographic) order, which gives every edge a weight that depends
+only on the geometry and not on the partitioning.
+
+Because those weights are distinct, the minimum spanning forest is *unique*, so the result
+is the same as a serial Kruskal pass over the globally sorted edge list. The gauge - and
+hence the solution - is therefore independent of the number of MPI ranks and of how the mesh
+was partitioned, without the construction ever being replicated.
 
 The `boundary` parameter should list the boundaries on which a tangential Dirichlet
 ("PEC") condition is applied to the variable. Edges on those boundaries are already fixed
@@ -60,8 +65,10 @@ and imaginary parts.
   `FIRST` the higher-order gradient modes are not removed.
 - Conforming meshes only; the coordinate key assumes vertex coordinates are identical
   across ranks (true for a mesh read from a file, not for periodic meshes).
-- The 1-skeleton is gathered onto every rank; this is cheap relative to the assembled
-  system but is not a fully distributed construction.
+- Construction is fully distributed in memory, but it is a global graph computation: it
+  costs `O(log V)` communication rounds and is rebuilt whenever the mesh or the finite
+  element space is refined. The result is cached between solves, so a transient pays for it
+  once rather than once per time step.
 
 ## Example Input File Syntax
 
