@@ -183,12 +183,11 @@ EqualValueBoundaryConstraint::getPrimaryNodeIDByCoord() const
 void
 EqualValueBoundaryConstraint::ghostPrimary()
 {
-  mooseAssert(_primary_node_vector.size() == 1,
-              "EqualValueBoundaryConstraint should have exactly one primary node");
+  mooseAssert(_primary_node_vector.size() == 1, type() + " should have exactly one primary node");
 
   const auto primary_node_id = _primary_node_vector.front();
   const auto connected_elem_ids =
-      gatherAndRetainConnectedElems(_fe_problem.mesh(false), {primary_node_id});
+      gatherAndRetainConnectedElems(_fe_problem.mesh(), {primary_node_id});
   const auto primary_elem_id = connected_elem_ids.front();
   _subproblem.addGhostedElem(primary_elem_id);
 

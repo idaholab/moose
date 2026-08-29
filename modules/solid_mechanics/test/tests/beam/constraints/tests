@@ -30,8 +30,7 @@
     allow_test_objects = true
     design = 'source/constraints/NodalStickConstraint.md'
     issues = '#33564'
-    requirement = "The mechanics system shall retain elements needed by a nodal stick constraint "
-                  "when remote elements are deleted from a distributed mesh."
+    requirement = "The mechanics system shall retain elements needed by a nodal stick constraint."
   []
   [frictional_constraint_ghosting]
     type = Exodiff
@@ -41,7 +40,6 @@
     allow_test_objects = true
     design = 'source/constraints/NodalFrictionalConstraint.md'
     issues = '#33564'
-    requirement = "The mechanics system shall retain elements needed by a nodal frictional "
-                  "constraint when remote elements are deleted from a distributed mesh."
+    requirement = "The mechanics system shall retain elements needed by a nodal frictional constraint."
   []
 []

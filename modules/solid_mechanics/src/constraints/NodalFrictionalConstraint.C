@@ -94,8 +94,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
   for (auto in : primary_nodelist)
     _primary_node_vector.push_back(in);
 
-  const auto elem_ids =
-      gatherAndRetainConnectedElems(_fe_problem.mesh(false), _primary_node_vector);
+  const auto elem_ids = gatherAndRetainConnectedElems(_fe_problem.mesh(), _primary_node_vector);
   for (const auto elem_id : elem_ids)
     _subproblem.addGhostedElem(elem_id);
 

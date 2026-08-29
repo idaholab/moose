@@ -39,8 +39,11 @@
   []
   [generate_evbc_presplit_displaced]
     type = CheckFiles
-    input = 'evbc_presplit_displaced.i'
-    cli_args = '--split-mesh 2 --split-file evbc_presplit_displaced Mesh/parallel_type=replicated Outputs/exodus=false'
+    input = 'evbc_primary_element_ghosting.i'
+    cli_args = "--split-mesh 2 --split-file evbc_presplit_displaced Mesh/parallel_type=replicated "
+               "Mesh/displacements='disp_x disp_y' AuxVariables/disp_x/order=FIRST "
+               "AuxVariables/disp_y/order=FIRST Constraints/top/use_displaced_mesh=true "
+               "Outputs/exodus=false"
     check_files = 'evbc_presplit_displaced.cpa.gz/2/header.gz
                    evbc_presplit_displaced.cpa.gz/2/split-2-0.gz
                    evbc_presplit_displaced.cpa.gz/2/split-2-1.gz'
@@ -50,8 +53,11 @@
   []
   [evbc_presplit_displaced]
     type = Exodiff
-    input = 'evbc_presplit_displaced.i'
-    cli_args = '--use-split --split-file evbc_presplit_displaced Outputs/file_base=evbc_presplit_displaced_out'
+    input = 'evbc_primary_element_ghosting.i'
+    cli_args = "--use-split --split-file evbc_presplit_displaced "
+               "Mesh/displacements='disp_x disp_y' AuxVariables/disp_x/order=FIRST "
+               "AuxVariables/disp_y/order=FIRST Constraints/top/use_displaced_mesh=true "
+               "Outputs/hide='disp_x disp_y' Outputs/file_base=evbc_presplit_displaced_out"
     exodiff = 'evbc_presplit_displaced_out.e'
     abs_zero = 1e-9
     prereq = 'generate_evbc_presplit_displaced'

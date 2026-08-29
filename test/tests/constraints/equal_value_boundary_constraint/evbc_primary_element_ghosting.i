@@ -1,5 +1,4 @@
 [Mesh]
-  # Alex: Exodus uses geometric mapping for comparisons by default. Renumbering should not affect that comparison
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -61,10 +60,8 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  # Even though this problem is linear, the tolerances below control how far both the linear and
-  # nonlinear solves proceed. They are tightened well past the exodiff comparison tolerance so
-  # that the converged solution is independent of the processor count and of the mesh mode.
-  l_tol = 1e-10
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -ksp_norm_type'
+  petsc_options_value = 'lu               mumps                                     preconditioned'
   nl_rel_tol = 1e-12
 []
 
