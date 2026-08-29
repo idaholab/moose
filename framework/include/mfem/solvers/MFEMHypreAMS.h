@@ -32,6 +32,7 @@ protected:
 
 private:
   const MFEMFESpace & _mfem_fespace;
+  const unsigned int _projection_frequency;
 };
 
 #endif
