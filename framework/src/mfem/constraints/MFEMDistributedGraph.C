@@ -126,11 +126,19 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
   const std::int64_t owned_begin = dist.begin(rank);
   const auto num_owned = static_cast<std::size_t>(dist.end(rank) - owned_begin);
 
+  // Global id of an owned slot.
+  auto id_of = [&](std::size_t slot) { return owned_begin + static_cast<std::int64_t>(slot); };
+
   // Representative of every id this rank owns. Edge endpoints always name a
   // current representative, but ids absorbed in an earlier round do not, so this
-  // has to be carried forward separately from the per-round hooks below.
-  std::vector<std::int64_t> label(num_owned);
-  std::iota(label.begin(), label.end(), owned_begin);
+  // has to be carried forward separately from the per-round hooks below. It costs
+  // an extra exchange per round, so it is only maintained when asked for.
+  std::vector<std::int64_t> label;
+  if (owned_labels)
+  {
+    label.resize(num_owned);
+    std::iota(label.begin(), label.end(), owned_begin);
+  }
 
   while (true)
   {
@@ -156,9 +164,15 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
     }
 
     std::vector<int> counts;
-    const auto grouped = groupByDestination(
+    auto grouped = groupByDestination(
         proposals, nprocs, [&](const Proposal & p) { return dist.owner(p.component); }, counts);
+    // The ungrouped copy is dead once grouped; release it before the exchange
+    // allocates its own buffers, since this is the largest allocation per round.
+    proposals.clear();
+    proposals.shrink_to_fit();
     const auto received = allToAll(grouped, counts, comm);
+    grouped.clear();
+    grouped.shrink_to_fit();
 
     // Each component keeps its lightest incident edge. Distinct weights make the
     // choice unique, so the forest matches a serial Kruskal pass exactly.
@@ -189,18 +203,17 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
 
     // Hook each component onto the component at the far end of its chosen edge.
     // A component that received no offer is already a root and hooks to itself.
-    std::vector<std::int64_t> hook(num_owned), self(num_owned);
-    std::iota(self.begin(), self.end(), owned_begin);
+    std::vector<std::int64_t> hook(num_owned);
     for (const auto slot : index_range(best))
-      hook[slot] = best[slot] ? best[slot]->partner : self[slot];
+      hook[slot] = best[slot] ? best[slot]->partner : id_of(slot);
 
     // Two components that chose the same edge point at each other. Root that pair
     // at the smaller id; every other chain terminates at such a pair, because the
     // chosen weights strictly decrease along a chain.
     const auto partner_hook = fetchLabels(hook, hook, dist, comm);
     for (const auto slot : index_range(hook))
-      if (partner_hook[slot] == self[slot])
-        hook[slot] = std::min(self[slot], hook[slot]);
+      if (partner_hook[slot] == id_of(slot))
+        hook[slot] = std::min(id_of(slot), hook[slot]);
 
     // Pointer-jump until every component points directly at its root.
     while (true)
@@ -221,7 +234,8 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
     }
 
     // Carry every id's representative through this round's merge.
-    label = fetchLabels(label, hook, dist, comm);
+    if (owned_labels)
+      label = fetchLabels(label, hook, dist, comm);
 
     // Relabel this rank's edges onto the merged components.
     std::vector<std::int64_t> endpoints;

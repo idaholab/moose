@@ -35,7 +35,7 @@ MFEMVectorEssentialConstraint::ApplyConstraint(mfem::ParGridFunction & gridfunc,
                                                mfem::Array<int> & ess_tdof_list)
 {
   const mfem::Array<int> & attrs = getSubdomainAttributes();
-  Moose::MFEM::projectVectorCoefficientOnSubdomains(gridfunc, _vec_coef, attrs);
+  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc, _vec_coef, attrs);
   Moose::MFEM::subdomainTrueDofs(*gridfunc.ParFESpace(), attrs, ess_tdof_list);
 }
 

@@ -42,8 +42,8 @@ MFEMComplexScalarEssentialConstraint::ApplyConstraint(mfem::ParComplexGridFuncti
                                                       mfem::Array<int> & ess_tdof_list)
 {
   const mfem::Array<int> & attrs = getSubdomainAttributes();
-  Moose::MFEM::projectScalarCoefficientOnSubdomains(gridfunc.real(), _coef_real, attrs);
-  Moose::MFEM::projectScalarCoefficientOnSubdomains(gridfunc.imag(), _coef_imag, attrs);
+  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.real(), _coef_real, attrs);
+  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.imag(), _coef_imag, attrs);
   gridfunc.Sync();
   Moose::MFEM::subdomainTrueDofs(*gridfunc.ParFESpace(), attrs, ess_tdof_list);
 }
