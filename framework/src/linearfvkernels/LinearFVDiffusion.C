@@ -24,6 +24,11 @@ LinearFVDiffusion::validParams()
       "use_nonorthogonal_correction",
       true,
       "If the nonorthogonal correction should be used when computing the normal gradient.");
+  params.addParam<bool>(
+      "use_nonorthogonal_projected_distance",
+      "If the orthogonal two-point flux coefficient should use the projected center-to-center "
+      "distance |d_CN . n| instead of |d_CN|. Defaults to the value of "
+      "use_nonorthogonal_correction for backward compatibility.");
   params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The diffusion coefficient.");
   params.addParam<InterpolationMethodName>(
       "coeff_interp_method",
@@ -41,6 +46,10 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
                                    getParam<InterpolationMethodName>("coeff_interp_method"))
                              : nullptr),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
+    _use_nonorthogonal_projected_distance(
+        params.isParamSetByUser("use_nonorthogonal_projected_distance")
+            ? getParam<bool>("use_nonorthogonal_projected_distance")
+            : _use_nonorthogonal_correction),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0),
     _cached_face_diffusivity(false),
@@ -118,9 +127,9 @@ LinearFVDiffusion::computeFluxMatrixContribution()
   // If we don't have the value yet, we compute it
   if (!_cached_matrix_contribution)
   {
-    // If we requested nonorthogonal correction, we use the normal component of the
-    // cell to face vector.
-    const auto d = _use_nonorthogonal_correction
+    // The orthogonal two-point coefficient may still use the projected center-to-center
+    // distance even when the skew correction is disabled.
+    const auto d = _use_nonorthogonal_projected_distance
                        ? std::abs(_current_face_info->dCN() * _current_face_info->normal())
                        : _current_face_info->dCNMag();
 

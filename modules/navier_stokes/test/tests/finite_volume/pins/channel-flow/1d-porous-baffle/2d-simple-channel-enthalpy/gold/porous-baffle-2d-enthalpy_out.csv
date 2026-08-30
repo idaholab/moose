@@ -1,0 +1,2 @@
+time,T_fluid_block_2,T_fluid_out,T_solid_block_2,h_fluid_out,p_jump,p_left,p_right,u_block_2
+2,300.31179146417,300.59523809524,633.6451247975,1262500,-2.4684276670971e-10,-2.4684276670971e-10,0,2

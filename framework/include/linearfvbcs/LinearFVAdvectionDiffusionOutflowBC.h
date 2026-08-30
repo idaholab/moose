@@ -39,4 +39,7 @@ public:
   virtual bool needsBoundaryNonorthogonalCorrection() const override { return false; }
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
   virtual bool providesCompleteBoundaryFlux() const override { return true; }
+
+private:
+  bool _assume_fully_developed_flow;
 };

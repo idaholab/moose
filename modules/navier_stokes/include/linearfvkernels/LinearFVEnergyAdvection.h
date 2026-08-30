@@ -23,6 +23,8 @@ public:
   static InputParameters validParams();
   LinearFVEnergyAdvection(const InputParameters & params);
 
+  virtual void addMatrixContribution() override;
+
   virtual Real computeElemMatrixContribution() override;
 
   virtual Real computeNeighborMatrixContribution() override;
@@ -63,6 +65,9 @@ private:
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
   Real _face_mass_flux;
+
+  /// Whether to subtract the discrete continuity error to preserve constant enthalpy/temperature
+  bool _subtract_continuity_error;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;

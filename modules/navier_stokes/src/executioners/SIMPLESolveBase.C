@@ -15,6 +15,7 @@ InputParameters
 SIMPLESolveBase::validParams()
 {
   InputParameters params = emptyInputParameters();
+
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
 
   /*
@@ -58,11 +59,12 @@ SIMPLESolveBase::validParams()
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
       "momentum equation");
 
-  params.addRangeCheckedParam<Real>(
+  params.addRangeCheckedParam<std::vector<Real>>(
       "momentum_absolute_tolerance",
-      1e-5,
-      "0.0<momentum_absolute_tolerance",
-      "The absolute tolerance on the normalized residual of the momentum equation.");
+      {1e-5},
+      "momentum_absolute_tolerance > 0.0",
+      "The absolute tolerance on the normalized residual of the momentum equations. A single value "
+      "is used for all momentum components; otherwise values are ordered by momentum_systems.");
 
   params.addRangeCheckedParam<Real>("momentum_l_tol",
                                     1e-5,
@@ -160,6 +162,13 @@ SIMPLESolveBase::validParams()
       "The relaxation which should be used for the energy equation. (=1 for no relaxation, "
       "diagonal dominance will still be enforced)");
 
+  params.addRangeCheckedParam<Real>(
+      "energy_field_relaxation",
+      1.0,
+      "0.0<energy_field_relaxation<=1.0",
+      "The relaxation which should be used for the energy solution update. (=1 for no "
+      "relaxation)");
+
   params.addParam<MultiMooseEnum>("energy_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "Singleton PETSc options for the energy equation");
@@ -194,7 +203,8 @@ SIMPLESolveBase::validParams()
       "The maximum allowed iterations in the linear solver of the energy equation.");
 
   params.addParamNamesToGroup(
-      "energy_equation_relaxation energy_petsc_options energy_petsc_options_iname "
+      "energy_equation_relaxation energy_field_relaxation energy_petsc_options "
+      "energy_petsc_options_iname "
       "energy_petsc_options_value energy_petsc_options_value energy_absolute_tolerance "
       "energy_l_tol energy_l_abs_tol energy_l_max_its",
       "Energy Equation");
@@ -202,6 +212,13 @@ SIMPLESolveBase::validParams()
   /*
    * Parameters to control the solution of the solid energy equation
    */
+
+  params.addRangeCheckedParam<Real>(
+      "solid_energy_field_relaxation",
+      1.0,
+      "0.0<solid_energy_field_relaxation<=1.0",
+      "The relaxation which should be used for the solid energy solution update. (=1 for no "
+      "relaxation)");
 
   params.addParam<MultiMooseEnum>("solid_energy_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
@@ -237,7 +254,8 @@ SIMPLESolveBase::validParams()
       "0<solid_energy_l_max_its",
       "The maximum allowed iterations in the linear solver of the solid energy equation.");
 
-  params.addParamNamesToGroup("solid_energy_petsc_options solid_energy_petsc_options_iname "
+  params.addParamNamesToGroup("solid_energy_field_relaxation solid_energy_petsc_options "
+                              "solid_energy_petsc_options_iname "
                               "solid_energy_petsc_options_value solid_energy_absolute_tolerance "
                               "solid_energy_l_tol solid_energy_l_abs_tol solid_energy_l_max_its",
                               "Solid Energy Equation");
@@ -431,8 +449,10 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _pressure_pin_dof(libMesh::invalid_uint),
     _has_energy_system(isParamValid("energy_system")),
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
+    _energy_field_relaxation(getParam<Real>("energy_field_relaxation")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
+    _solid_energy_field_relaxation(getParam<Real>("solid_energy_field_relaxation")),
     _solid_energy_l_abs_tol(getParam<Real>("solid_energy_l_abs_tol")),
     _passive_scalar_system_names(getParam<std::vector<SolverSystemName>>("passive_scalar_systems")),
     _has_passive_scalar_systems(!_passive_scalar_system_names.empty()),
@@ -450,7 +470,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _turbulence_field_relaxation(getParam<std::vector<Real>>("turbulence_field_relaxation")),
     _turbulence_field_min_limit(getParam<std::vector<Real>>("turbulence_field_min_limit")),
     _turbulence_l_abs_tol(getParam<Real>("turbulence_l_abs_tol")),
-    _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
+    _momentum_absolute_tolerance(getParam<std::vector<Real>>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
     _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
@@ -467,6 +487,13 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     paramError("momentum_systems",
                "The number of momentum components should be equal to the number of "
                "spatial dimensions on the mesh.");
+  if (_momentum_absolute_tolerance.size() == 1)
+    _momentum_absolute_tolerance.resize(_momentum_system_names.size(),
+                                        _momentum_absolute_tolerance.front());
+  else if (_momentum_absolute_tolerance.size() != _momentum_system_names.size())
+    paramError("momentum_absolute_tolerance",
+               "Specify either one tolerance to use for all momentum components or one tolerance "
+               "per momentum system.");
 
   const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");
   const auto & momentum_petsc_pair_options = getParam<MooseEnumItem, std::string>(
@@ -517,7 +544,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "energy_l_abs_tol",
                                   "energy_l_max_its",
                                   "energy_absolute_tolerance",
-                                  "energy_equation_relaxation"},
+                                  "energy_equation_relaxation",
+                                  "energy_field_relaxation"},
                                  false);
 
   if (_has_solid_energy_system)
@@ -549,7 +577,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "solid_energy_l_abs_tol",
                                   "solid_energy_l_max_its",
                                   "solid_energy_absolute_tolerance",
-                                  "solid_energy_equation_relaxation"},
+                                  "solid_energy_field_relaxation"},
                                  false);
 
   // We check for input errors with regards to the participating media radiation equations. At the
