@@ -26,6 +26,7 @@
     type = StitchedMeshGenerator
     inputs = 'big_one cut_one'
     stitch_boundaries_pairs = 'left right'
+    require_boundaries_fully_stitch = false # nodes do not match on boundary
   []
   [diag]
     type = MeshDiagnosticsGenerator
