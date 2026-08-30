@@ -32,23 +32,24 @@ void subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
 /**
  * Overwrite the degrees of freedom of grid function @p gf that lie in elements
  * whose mesh attribute appears in @p subdomain_attrs with the projection of
- * scalar coefficient @p coef. An empty @p subdomain_attrs means every subdomain.
- * The projected values are averaged across all ranks contributing to a shared
- * dof, so they agree on every rank including the one that owns the dof.
+ * coefficient @p coef. An empty @p subdomain_attrs means every subdomain. The
+ * projected values are averaged across all ranks contributing to a shared dof, so
+ * they agree on every rank including the one that owns the dof.
+ *
+ * The vector overload works for vector H1 as well as H(curl)/H(div) spaces.
  */
-void projectScalarCoefficientOnSubdomains(mfem::ParGridFunction & gf,
-                                          mfem::Coefficient & coef,
-                                          const mfem::Array<int> & subdomain_attrs);
+void projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
+                                    mfem::Coefficient & coef,
+                                    const mfem::Array<int> & subdomain_attrs);
+void projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
+                                    mfem::VectorCoefficient & coef,
+                                    const mfem::Array<int> & subdomain_attrs);
 
 /**
- * Vector-valued analogue of projectScalarCoefficientOnSubdomains: overwrite the
- * degrees of freedom of grid function @p gf that lie in elements whose mesh
- * attribute appears in @p subdomain_attrs with the projection of vector
- * coefficient @p coef. Works for both vector H1 and H(curl)/H(div) spaces.
+ * Strongly set the true dofs listed in @p tdofs of grid function @p gf to zero,
+ * leaving its local vector consistent with the true vector.
  */
-void projectVectorCoefficientOnSubdomains(mfem::ParGridFunction & gf,
-                                          mfem::VectorCoefficient & coef,
-                                          const mfem::Array<int> & subdomain_attrs);
+void zeroTrueDofs(mfem::ParGridFunction & gf, const mfem::Array<int> & tdofs);
 }
 
 #endif
