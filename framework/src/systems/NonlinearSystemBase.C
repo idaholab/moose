@@ -1089,8 +1089,7 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
       {
-        _fe_problem.reinitNodes(primary_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(secondary_node_ids, tid);
+        nc->reinitConstraintNodes();
         nc->computeResidual(residual);
       }
     }
@@ -1117,8 +1116,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(const SparseMatrix<Number> 
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
       {
-        _fe_problem.reinitNodes(primary_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(secondary_node_ids, tid);
+        nc->reinitConstraintNodes();
         nc->computeJacobian(jacobian_to_view);
       }
     }

@@ -45,6 +45,16 @@ public:
   virtual void updateConnectivity();
 
   /**
+   * Reinitialize the primary and secondary nodes on the SubProblem that owns this constraint's
+   * variables.
+   *
+   * This must be called before computeResidual()/computeJacobian(). It is deliberately not part of
+   * those methods because derived classes may override them without calling the base
+   * implementation, which would silently skip the reinitialization.
+   */
+  void reinitConstraintNodes();
+
+  /**
    * Computes the nodal residual.
    */
   virtual void computeResidual() override final

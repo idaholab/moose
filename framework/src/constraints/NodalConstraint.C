@@ -13,6 +13,7 @@
 #include "Assembly.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
+#include "SubProblem.h"
 #include "SystemBase.h"
 
 #include "libmesh/compare_elems_by_level.h"
@@ -159,6 +160,15 @@ NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
               "Mismatch between number of primary nodes and connected elements");
 
   return elem_ids;
+}
+
+void
+NodalConstraint::reinitConstraintNodes()
+{
+  // _subproblem is the displaced problem when this constraint uses the displaced mesh, which is
+  // where its variables (and therefore the dof indices the assembly loops iterate over) live.
+  _subproblem.reinitNodes(_primary_node_vector, _tid);
+  _subproblem.reinitNodesNeighbor(_connected_nodes, _tid);
 }
 
 void
