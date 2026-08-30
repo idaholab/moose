@@ -397,9 +397,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         if (_first && !_app.isRecovering() && !_app.isRestarting())
           problem.advanceState();
 
-        if (auto_advance)
-          problem.allowOutput(true);
-
         ex->takeStep(dt);
 
         if (auto_advance)

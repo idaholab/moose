@@ -32,7 +32,7 @@ public:
 #ifdef LIBMESH_HAVE_TBB_API
     _ids.pop(id);
 #elif LIBMESH_HAVE_OPENMP
-    id = omp_get_thread_num();
+    id = 0; // omp_get_thread_num();
 #elif LIBMESH_HAVE_PTHREAD
     Threads::spin_mutex::scoped_lock lock(_pthread_id_mutex);
 
@@ -40,8 +40,8 @@ public:
       throw MooseException(
           "No Thread IDs available in ParallelUniqueID. Did you forget to initialize()?");
 
-    id = _ids.front();
-    _ids.pop();
+    id = 0; //_ids.front();
+            // _ids.pop();
 #else
     // There is no thread model active, so we're always on thread 0.
     id = 0;

@@ -96,7 +96,7 @@ ThreadedNodeLoop<RangeType, IteratorType>::operator()(const RangeType & range)
   try
   {
     ParallelUniqueId puid;
-    _tid = puid.id;
+    _tid = 0; // puid.id;
 
     pre();
     printGeneralExecutionInformation();
