@@ -14,30 +14,15 @@
 InputParameters
 MFEMEssentialConstraint::validParams()
 {
-  InputParameters params = MFEMObject::validParams();
-  params += MFEMBlockRestrictable::validParams();
-
+  InputParameters params = MFEMConstraint::validParams();
   params.addClassDescription(
       "Base class for applying essential volumetric constraints to MFEM problems.");
-  params.registerBase("Constraint");
-  params.registerSystemAttributeName("Constraint");
-  params.addParam<VariableName>("variable", "Variable on which to apply the constraint");
   return params;
 }
 
 MFEMEssentialConstraint::MFEMEssentialConstraint(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    MFEMBlockRestrictable(parameters,
-                          getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
-    _trial_var_name(getParam<VariableName>("variable"))
+  : MFEMConstraint(parameters)
 {
-  // A numeric 'block' entry is not checked against the mesh by
-  // MFEMBlockRestrictable, and one naming no subdomain would silently constrain
-  // nothing. ParMesh::SetAttributes distributes the attribute list, so this is the
-  // same set on every rank.
-  for (const auto attribute : getSubdomainAttributes())
-    if (getMesh().attributes.Find(attribute) < 0)
-      paramError("block", "Subdomain attribute ", attribute, " is not present in the mesh.");
 }
 
 #endif

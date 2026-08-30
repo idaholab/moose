@@ -15,7 +15,7 @@
 #include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
 
-class MFEMEssentialConstraint;
+class MFEMConstraint;
 
 namespace Moose::MFEM
 {
@@ -60,7 +60,7 @@ public:
    *                            complementary subdomains seed the forest but are
    *                            never gauged. Empty gauges the whole mesh.
    */
-  const mfem::Array<int> & trueDofs(const MFEMEssentialConstraint & constraint,
+  const mfem::Array<int> & trueDofs(const MFEMConstraint & constraint,
                                     mfem::ParFiniteElementSpace & pfes,
                                     const mfem::Array<int> * essential_bdr_markers,
                                     const mfem::Array<int> & gauge_block_attrs);
