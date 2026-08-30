@@ -11,6 +11,7 @@
 
 #include "MFEMComplexTreeCotreeGaugeEssentialConstraint.h"
 #include "MFEMProblem.h"
+#include "MFEMConstraintUtils.h"
 
 registerMooseObject("MooseApp", MFEMComplexTreeCotreeGaugeEssentialConstraint);
 
@@ -24,10 +25,9 @@ MFEMComplexTreeCotreeGaugeEssentialConstraint::validParams()
       "strongly fixing the real and imaginary parts of the lowest-order edge degrees of freedom on "
       "a spanning tree of the mesh to zero, removing the gradient null space of a curl-curl "
       "operator. List in 'boundary' the boundaries carrying a tangential Dirichlet condition on "
-      "the "
-      "variable. Set 'block' to the subdomains to gauge (e.g. the non-conducting region of a "
-      "time-harmonic eddy-current problem); the complement seeds the spanning forest but is not "
-      "gauged. Leaving 'block' empty gauges the whole mesh.");
+      "the variable. Set 'block' to the subdomains to gauge; the complement seeds the spanning "
+      "forest but is not gauged. Leaving 'block' empty gauges the whole mesh. Requires a FIRST "
+      "order space.");
   return params;
 }
 
@@ -43,29 +43,16 @@ void
 MFEMComplexTreeCotreeGaugeEssentialConstraint::ApplyConstraint(
     mfem::ParComplexGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list)
 {
-  mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
-  if (pfes.GetMaxElementOrder() > 1)
-    mooseError("The tree-cotree gauge fixes the lowest-order edge degrees of freedom only, so it "
-               "requires a FIRST order H(curl) space; the space of variable '",
-               getTrialVariableName(),
-               "' is order ",
-               pfes.GetMaxElementOrder(),
-               ". The gradient modes carried by the higher-order degrees of freedom would be left "
-               "in place and the system would stay singular.");
-
-  const mfem::Array<int> & tree_tdofs = _gauge.trueDofs(
-      pfes, isBoundaryRestricted() ? &getBoundaryMarkers() : nullptr, getSubdomainAttributes());
+  const mfem::Array<int> & tree_tdofs =
+      _gauge.trueDofs(*this,
+                      *gridfunc.ParFESpace(),
+                      isBoundaryRestricted() ? &getBoundaryMarkers() : nullptr,
+                      getSubdomainAttributes());
 
   // The gauge fixes the tree dofs to zero in both components so the lifted
   // right-hand side stays consistent.
-  for (mfem::ParGridFunction * component : {&gridfunc.real(), &gridfunc.imag()})
-  {
-    component->SetTrueVector();
-    mfem::Vector & true_dofs = component->GetTrueVector();
-    for (const auto tdof : tree_tdofs)
-      true_dofs(tdof) = 0.0;
-    component->SetFromTrueVector();
-  }
+  Moose::MFEM::zeroTrueDofs(gridfunc.real(), tree_tdofs);
+  Moose::MFEM::zeroTrueDofs(gridfunc.imag(), tree_tdofs);
   gridfunc.Sync();
 
   ess_tdof_list.Append(tree_tdofs);

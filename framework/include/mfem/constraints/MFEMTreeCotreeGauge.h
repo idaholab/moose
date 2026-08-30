@@ -15,6 +15,8 @@
 #include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
 
+class MFEMEssentialConstraint;
+
 namespace Moose::MFEM
 {
 /**
@@ -33,8 +35,8 @@ class TreeCotreeGauge
 public:
   /**
    * This rank's ND true-dof indices that the tree-cotree gauge must strongly set
-   * to zero, in addition to those already fixed by the tangential Dirichlet
-   * ("PEC") boundary condition.
+   * to zero, in addition to those already fixed by an essential (tangential
+   * Dirichlet) boundary condition on the variable.
    *
    * The seeded spanning forest is grown by a distributed Boruvka pass, so no
    * rank holds more than its own share of the mesh graph. Edges are weighted by
@@ -45,16 +47,22 @@ public:
    *
    * The returned reference stays valid until the next call on this object.
    *
-   * @param pfes              the ND space being solved on. Only the lowest-order
-   *                          (edge) dofs are gauged, so the space must be order 1
-   * @param pec_bdr_markers   boundary attribute marker for the PEC condition, or
-   *                          nullptr when there is no such boundary
-   * @param gauge_block_attrs subdomain attributes to gauge; edges of the
-   *                          complementary subdomains seed the forest but are
-   *                          never gauged. Empty gauges the whole mesh.
+   * @param constraint          the constraint requesting the gauge, used to report
+   *                            errors against the right input block
+   * @param pfes                the ND space being solved on. Only the lowest-order
+   *                            (edge) dofs are gauged, so the space must be order 1
+   * @param essential_bdr_markers boundary attribute marker for an essential
+   *                            condition already applied to the variable, or
+   *                            nullptr when there is no such boundary. Those edges
+   *                            seed the forest so the interior gauge stays
+   *                            compatible with the boundary condition
+   * @param gauge_block_attrs   subdomain attributes to gauge; edges of the
+   *                            complementary subdomains seed the forest but are
+   *                            never gauged. Empty gauges the whole mesh.
    */
-  const mfem::Array<int> & trueDofs(mfem::ParFiniteElementSpace & pfes,
-                                    const mfem::Array<int> * pec_bdr_markers,
+  const mfem::Array<int> & trueDofs(const MFEMEssentialConstraint & constraint,
+                                    mfem::ParFiniteElementSpace & pfes,
+                                    const mfem::Array<int> * essential_bdr_markers,
                                     const mfem::Array<int> & gauge_block_attrs);
 
 private:

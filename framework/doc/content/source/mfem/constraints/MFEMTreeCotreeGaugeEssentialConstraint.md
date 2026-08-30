@@ -12,10 +12,9 @@ $H^1$ functions,
 \vec\nabla \times \left(k \vec\nabla \times \vec u\right) = 0 \quad \text{for } \vec u = \vec\nabla \phi ,
 
 so a problem of the form $(k\,\vec\nabla\times\vec u, \vec\nabla\times\vec v) = (\vec f, \vec v)$ with no
-(or only partial) mass term is singular. This is the situation for the magnetic vector
-potential $\vec A$ in a magnetodynamic A-formulation: inside a conductor the
-$\sigma\,\partial_t\vec A$ term removes the null space, but any surrounding non-conducting
-region has no such term.
+(or only partial) mass term is singular. Whenever a mass-like term is absent over part or all
+of the domain, that part of the operator retains the null space and the discrete system
+cannot be solved without either an artificial regularisation or a gauge.
 
 The constraint removes the null space by building a spanning tree of the mesh 1-skeleton
 (its vertices and edges) and strongly fixing the lowest-order edge degree of freedom on
@@ -35,24 +34,26 @@ is the same as a serial Kruskal pass over the globally sorted edge list. The gau
 hence the solution - is therefore independent of the number of MPI ranks and of how the mesh
 was partitioned, without the construction ever being replicated.
 
+### Seeding the forest with `boundary`
+
 The `boundary` parameter should list the boundaries on which a tangential Dirichlet
-("PEC") condition is applied to the variable. Edges on those boundaries are already fixed
-by the boundary condition; they are used to seed the spanning forest so that the interior
-gauge stays compatible with the boundary condition instead of over-constraining it.
+condition is applied to the variable. Edges on those boundaries are already fixed by the
+boundary condition; they are used to seed the spanning forest so that the interior gauge
+stays compatible with the boundary condition instead of over-constraining it.
 
 ### Restricting the gauge with `block`
 
-In an A-formulation eddy-current problem the $\sigma\,\partial_t\vec A$ term already fixes
-the gauge inside a conductor, so there is no gauge freedom to remove there. Set `block` to
-the non-conducting subdomain(s); edges of the excluded (conductor) elements then seed the
-spanning forest but are never gauged, while vacuum edges that merely touch the conductor
-surface are still gauged, so every free vacuum vertex is reached. Leaving `block` empty
-gauges the whole mesh, which is correct only where the curl-curl operator is genuinely
-unregularised everywhere (magnetostatics with a divergence-free source).
+Where another term of the weak form already removes the null space, there is no gauge
+freedom left to fix and gauging anyway would over-constrain the solution. Set `block` to the
+subdomain(s) that do need gauging; edges of the excluded elements then seed the spanning
+forest but are never gauged, while edges of a gauged subdomain that merely touch an excluded
+one are still gauged, so every free vertex is reached. Leaving `block` empty gauges the whole
+mesh, which is correct only when the operator is genuinely unregularised everywhere.
 
-For the example below, gauging only the vacuum reproduces the solution obtained from a
-vanishing artificial regularisation to six significant figures, whereas a whole-mesh gauge
-perturbs it by several percent.
+Getting this wrong is not a subtle effect: in the example below, gauging only the
+unregularised subdomain reproduces the solution obtained from a vanishing artificial
+regularisation to six significant figures, whereas a whole-mesh gauge perturbs it by several
+percent.
 
 For a complex (time-harmonic) variable use
 [MFEMComplexTreeCotreeGaugeEssentialConstraint.md], which selects the same degrees of
@@ -69,6 +70,16 @@ and imaginary parts.
   costs `O(log V)` communication rounds and is rebuilt whenever the mesh or the finite
   element space is refined. The result is cached between solves, so a transient pays for it
   once rather than once per time step.
+
+## Example: a magnetodynamic A-formulation
+
+The parameters above are formulation-independent; this is one concrete case. For the magnetic
+vector potential $\vec A$ in an eddy-current A-formulation, the conducting region carries a
+$\sigma\,\partial_t\vec A$ term that removes the null space, but a surrounding non-conducting
+region has no such term and is singular. Setting `block` to the non-conducting subdomain(s)
+gauges exactly the region that needs it, and `boundary` lists the boundaries carrying the
+tangential Dirichlet condition on $\vec A$ (a perfect electric conductor, or "PEC", boundary
+in that terminology).
 
 ## Example Input File Syntax
 
