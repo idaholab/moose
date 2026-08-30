@@ -11,24 +11,26 @@
 
 #pragma once
 
-#include "MFEMEssentialConstraint.h"
+#include "MFEMConstraint.h"
 
 /**
  * Base class for applying essential volumetric constraints to the trial
  * ParComplexGridFunction of a complex (time-harmonic) MFEM problem. The
  * constraint acts on the real and imaginary components together.
+ *
+ * A sibling of MFEMEssentialConstraint rather than a derived class: the two act
+ * on different grid function types, so neither can implement the other's
+ * interface.
  */
-class MFEMComplexEssentialConstraint : public MFEMEssentialConstraint
+class MFEMComplexEssentialConstraint : public MFEMConstraint
 {
 public:
   static InputParameters validParams();
 
   MFEMComplexEssentialConstraint(const InputParameters & parameters);
 
-  /// Real-valued entry point is unused for complex problems.
-  void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list) override;
-
-  /// Apply the essential constraint, overwriting values of gridfunc as desired.
+  /// Apply the essential constraint, overwriting the values of gridfunc in the
+  /// subdomain as desired and appending the constrained true dofs.
   virtual void ApplyConstraint(mfem::ParComplexGridFunction & gridfunc,
                                mfem::Array<int> & ess_tdof_list) = 0;
 };

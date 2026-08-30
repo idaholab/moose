@@ -21,7 +21,7 @@ namespace
  * Table mapping a mesh element attribute to whether the constraint acts there.
  * An empty @p subdomain_attrs marks every attribute, which is what an empty
  * 'block' parameter means (see MFEMBlockRestrictable::validParams). Attributes
- * are validated against the mesh by MFEMEssentialConstraint's constructor, so
+ * are validated against the mesh by MFEMConstraint's constructor, so
  * out-of-range entries cannot reach here.
  */
 std::vector<char>
