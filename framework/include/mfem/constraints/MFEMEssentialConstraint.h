@@ -11,8 +11,7 @@
 
 #pragma once
 
-#include "MFEMObject.h"
-#include "MFEMBlockRestrictable.h"
+#include "MFEMConstraint.h"
 
 /**
  * Base class for applying essential volumetric constraints to the trial
@@ -21,25 +20,17 @@
  * degrees of freedom that must be eliminated from the discrete system. This is
  * the volumetric analogue of MFEMEssentialBC.
  */
-class MFEMEssentialConstraint : public MFEMObject, public MFEMBlockRestrictable
+class MFEMEssentialConstraint : public MFEMConstraint
 {
 public:
   static InputParameters validParams();
 
   MFEMEssentialConstraint(const InputParameters & parameters);
-  virtual ~MFEMEssentialConstraint() = default;
 
-  /// Get name of the trial variable (gridfunction) the constraint acts on.
-  /// Defaults to the name of the test variable labelling the weak form.
-  virtual const std::string & getTrialVariableName() const { return _trial_var_name; }
-
-  // Apply the essential constraint, overwriting the values of gridfunc in the subdomain as desired.
+  /// Apply the essential constraint, overwriting the values of gridfunc in the
+  /// subdomain as desired and appending the constrained true dofs.
   virtual void ApplyConstraint(mfem::ParGridFunction & gridfunc,
                                mfem::Array<int> & ess_tdof_list) = 0;
-
-protected:
-  /// Name of the trial variable the constraint is applied to.
-  const VariableName & _trial_var_name;
 };
 
 #endif

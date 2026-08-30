@@ -14,22 +14,15 @@
 InputParameters
 MFEMComplexEssentialConstraint::validParams()
 {
-  InputParameters params = MFEMEssentialConstraint::validParams();
+  InputParameters params = MFEMConstraint::validParams();
   params.addClassDescription(
       "Base class for applying essential volumetric constraints to complex MFEM problems.");
   return params;
 }
 
 MFEMComplexEssentialConstraint::MFEMComplexEssentialConstraint(const InputParameters & parameters)
-  : MFEMEssentialConstraint(parameters)
+  : MFEMConstraint(parameters)
 {
-}
-
-void
-MFEMComplexEssentialConstraint::ApplyConstraint(mfem::ParGridFunction &, mfem::Array<int> &)
-{
-  mooseError(type(),
-             " acts on a complex (time-harmonic) variable and cannot be used in a real problem.");
 }
 
 #endif
