@@ -87,6 +87,18 @@
     # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
     recover = false
   []
+  [block-dynamics-friction-regularization-unsupported]
+    type = 'RunException'
+    input = 'block-dynamics-friction-action.i'
+    cli_args = 'Contact/mechanical/friction_elastic_slip=1e-4'
+    expect_err = 'Friction regularization is not supported with mortar_dynamics'
+    requirement = 'The contact action shall reject friction regularization for dynamic mortar '
+                  'contact.'
+    design = 'actions/ContactAction.md'
+    issues = '#33356'
+    recover = false
+    restep = false
+  []
   [block-dynamics-friction-creep]
     type = 'Exodiff'
     exodiff = 'block-dynamics-friction-creep_out.e'
