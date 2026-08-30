@@ -53,20 +53,20 @@
 [Functions]
   [./xtimes]
     type = ParsedGradFunction
-    value = '1.1*x+y'
+    expression = '1.1*x+y'
     grad_x = '1.1'
     grad_y = '1'
   [../]
 
   [./twoxplus1]
     type = ParsedGradFunction
-    value = '2*x+1'
+    expression = '2*x+1'
     grad_x = '2'
   [../]
 
   [./tover2]
     type = ParsedGradFunction
-    value = '0.5*t-y*7'
+    expression = '0.5*t-y*7'
     grad_y = '-7'
   [../]
 

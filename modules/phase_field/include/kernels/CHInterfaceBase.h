@@ -12,7 +12,7 @@
 #include "Kernel.h"
 #include "Material.h"
 #include "JvarMapInterface.h"
-#include "DerivativeKernelInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 /**
  * This is the Cahn-Hilliard equation base class that implements the interfacial or gradient energy
