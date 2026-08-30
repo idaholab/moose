@@ -99,6 +99,21 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
     if (counter[i])
       gf(i) = values(i) / counter[i];
 }
+
+/// Shared body of the scalar and vector subdomain projections.
+template <typename CoefficientType>
+void
+projectOnSubdomains(mfem::ParGridFunction & gf,
+                    CoefficientType & coef,
+                    const mfem::Array<int> & subdomain_attrs)
+{
+  const std::vector<char> wanted = wantedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
+
+  mfem::Vector values;
+  mfem::Array<int> counter;
+  accumulateSubdomainProjection(gf, coef, wanted, values, counter);
+  distributeSubdomainProjection(gf, values, counter);
+}
 }
 
 namespace Moose::MFEM
@@ -137,30 +152,32 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
 }
 
 void
-projectScalarCoefficientOnSubdomains(mfem::ParGridFunction & gf,
-                                     mfem::Coefficient & coef,
-                                     const mfem::Array<int> & subdomain_attrs)
+projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
+                               mfem::Coefficient & coef,
+                               const mfem::Array<int> & subdomain_attrs)
 {
-  const std::vector<char> wanted = wantedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
-
-  mfem::Vector values;
-  mfem::Array<int> counter;
-  accumulateSubdomainProjection(gf, coef, wanted, values, counter);
-  distributeSubdomainProjection(gf, values, counter);
+  projectOnSubdomains(gf, coef, subdomain_attrs);
 }
 
 void
-projectVectorCoefficientOnSubdomains(mfem::ParGridFunction & gf,
-                                     mfem::VectorCoefficient & coef,
-                                     const mfem::Array<int> & subdomain_attrs)
+projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
+                               mfem::VectorCoefficient & coef,
+                               const mfem::Array<int> & subdomain_attrs)
 {
   MFEM_VERIFY(gf.VectorDim() == coef.GetVDim(), "coef vdim != VectorDim()");
-  const std::vector<char> wanted = wantedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
+  projectOnSubdomains(gf, coef, subdomain_attrs);
+}
 
-  mfem::Vector values;
-  mfem::Array<int> counter;
-  accumulateSubdomainProjection(gf, coef, wanted, values, counter);
-  distributeSubdomainProjection(gf, values, counter);
+void
+zeroTrueDofs(mfem::ParGridFunction & gf, const mfem::Array<int> & tdofs)
+{
+  // Go through the true vector so the local vector is left consistent across the
+  // ranks sharing a dof.
+  gf.SetTrueVector();
+  mfem::Vector & true_dofs = gf.GetTrueVector();
+  for (const auto tdof : tdofs)
+    true_dofs(tdof) = 0.0;
+  gf.SetFromTrueVector();
 }
 }
 
