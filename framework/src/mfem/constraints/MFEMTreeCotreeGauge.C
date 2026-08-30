@@ -11,7 +11,7 @@
 
 #include "MFEMTreeCotreeGauge.h"
 #include "MFEMDistributedGraph.h"
-#include "MFEMEssentialConstraint.h"
+#include "MFEMConstraint.h"
 #include "libmesh/int_range.h"
 
 #include <algorithm>
@@ -483,7 +483,7 @@ namespace Moose::MFEM
 {
 
 const mfem::Array<int> &
-TreeCotreeGauge::trueDofs(const MFEMEssentialConstraint & constraint,
+TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
                           mfem::ParFiniteElementSpace & pfes,
                           const mfem::Array<int> * essential_bdr_markers,
                           const mfem::Array<int> & gauge_block_attrs)
