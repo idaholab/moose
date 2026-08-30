@@ -105,7 +105,7 @@ conductivity = 1.0
     # the gauge. Conductor edges seed the spanning forest but are not gauged.
     block = '3'
     # Boundaries where a tangential Dirichlet condition is applied to a_field, so
-    # the interior gauge is seeded consistently with the PEC boundary.
+    # the interior gauge is seeded consistently with that boundary condition.
     boundary = 'Exterior'
   []
 []
