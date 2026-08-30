@@ -2,10 +2,6 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export REPO=$1
 export MOOSE_JOBS=${MOOSE_JOBS:-$2}
-export TEMPLATE=template
-if [ -n "$3" ]; then
-    export TEMPLATE=empty_shell
-fi
 
 function create_tmp()
 {
@@ -66,12 +62,13 @@ function string_replace()
         "VERSION" "MOOSE_JOBS" "SKIP_DOCS" "PREFIX_PACKAGE_WITH"
         "MOOSE_OPTIONS" "MOOSE_DOCS_FLAGS"
     )
+    local TEMPLATE_PATH="${SCRIPT_DIR}/template"
     # shellcheck disable=SC2044  # we will never allow spaces in our filesnames
-    for sfile in $(find "${SCRIPT_DIR}/${TEMPLATE}" -type l); do
+    for sfile in $(find "$TEMPLATE_PATH" -type l); do
         cat "${sfile}" > "${TMP_DIR}/${RECIPES}/$(basename "${sfile}")"
     done
     # shellcheck disable=SC2044 # we will never allow spaces in our filesnames
-    for cfile in $(find "${SCRIPT_DIR}/${TEMPLATE}" -type f); do
+    for cfile in $(find "$TEMPLATE_PATH" -type f); do
         cp "${cfile}" "${TMP_DIR}/${RECIPES}"
         for THIS in "${REPLACE[@]}"; do
             if [ "$(uname)" == 'Darwin' ]; then
