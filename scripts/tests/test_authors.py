@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
         locations = [os.path.join(mooseutils.git_root_dir(), "python", "mooseutils")]
 
         # Helper that returns the total commit count reported on the TOTAL row.
-        # Titles are the languages followed by Total, Commits, Merges, so the
+        # A since-date run only shows the Commits and Merges columns, so the
         # commit total is the second-to-last whitespace-delimited token.
         def total_commits(out):
             total_line = [l for l in out.splitlines() if l.split()[:1] == ["TOTAL"]][0]
@@ -74,9 +74,10 @@ class Test(unittest.TestCase):
         out_recent = run_since("2024-01-01")
         out_older = run_since("2020-01-01")
         self.assertGreater(total_commits(out_older), total_commits(out_recent))
-        # Line counts are unaffected by --since, so the table is still populated
-        self.assertIn("Python", out_recent)
-        self.assertIn("TOTAL", out_recent)
+        # --since drops the all-time line-count columns; only the date-accurate
+        # Commits and Merges columns remain in the table header.
+        header = [l for l in out_recent.splitlines() if l.split()[:1] == ["Name"]][0]
+        self.assertEqual(header.split(), ["Name", "Commits", "Merges"])
 
 
 if __name__ == "__main__":
