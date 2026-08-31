@@ -520,7 +520,7 @@ ifeq ($(KOKKOS_COMPILER),CPU)
 $(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-		$(KOKKOS_CXX) -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(libmesh_LIBS) -rpath $(FRAMEWORK_DIR) ${SILENCE_SOME_WARNINGS}'
+		$(KOKKOS_CXX) -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(libmesh_LIBS) -rpath $(FRAMEWORK_DIR) ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(MOOSE_KOKKOS_LIB) $(FRAMEWORK_DIR)
 
 else ifeq ($(KOKKOS_COMPILER),NVCC)
@@ -533,7 +533,7 @@ else
 
 $(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
-	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(libmesh_LIBS)
+	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(libmesh_LIBS)
 
 endif
 
@@ -631,17 +631,6 @@ exodiff_objects  := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
 exodiff_includes := -I$(exodiff_DIR) $(libmesh_INCLUDE)
 # dependency files
 exodiff_deps := $(patsubst %.C, %.$(obj-suffix).d, $(exodiff_srcfiles))
-# Kokkos CUDA strips out -lpetsckokkos and -lpetsckokkosdlink from libmesh_LIBS, because
-# those static archives contain CUDA registration/device images and need to be linked
-# exactly once per program (namely, intermediate shared libraries should not link them,
-# and only the final executable should link them). Since exodiff is an independent program,
-# those flags should be added back for proper linking.
-exodiff_link_group_end := -Wl,--end-group
-exodiff_LIBS = $(if $(libmesh_PETSC_KOKKOS_LIBS), \
-  $(if $(findstring $(exodiff_link_group_end),$(libmesh_LIBS)), \
-    $(subst $(exodiff_link_group_end),$(libmesh_PETSC_KOKKOS_LIBS) $(exodiff_link_group_end),$(libmesh_LIBS)), \
-    $(libmesh_LIBS) $(libmesh_PETSC_KOKKOS_LIBS)), \
-  $(libmesh_LIBS))
 
 all: exodiff
 
@@ -653,7 +642,7 @@ $(exodiff_objects): | prebuild
 $(exodiff_APP): $(exodiff_objects)
 	@echo "Linking Executable "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objects) -o $@ $(LDFLAGS) $(libmesh_LDFLAGS) $(exodiff_LIBS) $(EXTERNAL_FLAGS) ${SILENCE_SOME_WARNINGS}'
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objects) -o $@ $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) ${SILENCE_SOME_WARNINGS}'
 
 -include $(wildcard $(exodiff_DIR)/*.d)
 
@@ -822,7 +811,7 @@ ifeq ($(ENABLE_KOKKOS),true)
 # Kokkos sources
 	$(file >> .compile_commands.json,$(CURDIR))
 	$(file >> .compile_commands.json,$(KOKKOS_CXX))
-	$(file >> .compile_commands.json,$(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES))
+	$(file >> .compile_commands.json,$(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(libmesh_INCLUDE) $(app_INCLUDES))
 	$(file >> .compile_commands.json,$(compile_commands_all_kokkos_srcfiles))
 endif
 else
@@ -835,7 +824,7 @@ ifeq ($(ENABLE_KOKKOS),true)
 # Kokkos sources
 	@echo $(CURDIR) >> .compile_commands.json
 	@echo $(KOKKOS_CXX) >> .compile_commands.json
-	@echo $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) >> .compile_commands.json
+	@echo $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(libmesh_INCLUDE) $(app_INCLUDES) >> .compile_commands.json
 	@echo $(compile_commands_all_kokkos_srcfiles) >> .compile_commands.json
 endif
 endif
