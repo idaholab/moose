@@ -147,15 +147,8 @@ ifeq ($(METHOD),opt)
 endif
 
 ifeq ($(KOKKOS_COMPILER),CPU)
-  KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).la
-else ifeq ($(KOKKOS_COMPILER),NVCC)
-  KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).a
-else
-  KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).so
-endif
 
-ifeq ($(KOKKOS_COMPILER),CPU)
-
+KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).la
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).lo
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K
@@ -165,6 +158,7 @@ KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).lo
 
 else
 
+KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).so
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K

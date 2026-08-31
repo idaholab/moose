@@ -523,14 +523,9 @@ $(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
 		$(KOKKOS_CXX) -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(libmesh_LIBS) -rpath $(FRAMEWORK_DIR) ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(MOOSE_KOKKOS_LIB) $(FRAMEWORK_DIR)
 
-else ifeq ($(KOKKOS_COMPILER),NVCC)
-
-$(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
-	@echo "Linking Kokkos Library "$@"..."
-	@ar rcs $@ $(MOOSE_KOKKOS_OBJECTS)
-
 else
 
+# libtool ignores nvcc and just uses mpicxx to link, so cannot be used
 $(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
 	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(libmesh_LIBS)
