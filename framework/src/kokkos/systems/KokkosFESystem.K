@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosFESystem.h"
-#include "KokkosNodalBCBase.h"
 
 #include "MooseMesh.h"
 #include "Assembly.h"
@@ -29,9 +28,6 @@ FESystem::FESystem(SystemBase & system)
   setupDofs();
   setupCoupling();
 
-  if (dynamic_cast<NonlinearSystemBase *>(&_system))
-    setupNodalBCDofs();
-
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
   _qp_vector_solutions.create(MAX_TAG);
@@ -44,9 +40,6 @@ FESystem::FESystem(System & base, SystemBase & system)
 {
   setupVariables();
   setupDofs();
-
-  if (dynamic_cast<NonlinearSystemBase *>(&_system))
-    setupNodalBCDofs();
 
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
@@ -139,65 +132,6 @@ FESystem::setupDofs()
   }
 
   _local_node_dof_index.copyToDeviceNested();
-}
-
-void
-FESystem::setupNodalBCDofs()
-{
-  auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
-
-  _nbc_matrix_tag_dof.create(MAX_TAG);
-
-  for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
-  {
-    auto nbc = static_cast<NodalBCBase *>(bc.get());
-
-    auto matrix_tags = nbc->getMatrixTags({});
-
-    for (auto tag : matrix_tags)
-      getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
-  }
-
-  _nbc_matrix_tag_dof.copyToDeviceNested();
-}
-
-void
-FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
-{
-  auto var = nbc->variable().number();
-  auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
-
-  if (!dofs.isAlloc())
-  {
-    dofs.create(_num_local_dofs + _num_ghost_dofs);
-    dofs = false;
-  }
-
-  for (auto node : nbc->getContiguousNodes())
-  {
-    auto dof = _local_node_dof_index[var][node];
-
-    if (dof != libMesh::DofObject::invalid_id)
-      for (const auto i : make_range(num_dofs))
-        dofs[dof + i] = true;
-  }
-
-  // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
-
-  auto num_procs = _comm.size();
-
-  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (auto dof : _local_comm_list[proc])
-      send[proc].push_back(dofs[dof]);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    _comm.scatter(send, recv[proc], proc);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
-      dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
 }
 
 void
@@ -321,7 +255,7 @@ FESystem::operator()(const ThreadID tid) const
     getVectorQpVectorValue(info, qp_offset + qp, var, tag) = value;
     getVectorQpVectorGrad(info, qp_offset + qp, var, tag) = grad;
     getVectorQpVectorCurl(info, qp_offset + qp, var, tag) =
-        curlFromVectorGradient(grad, kokkosAssembly().getDimension());
+        curlFromVectorGradient(grad, kokkosMesh().getDimension());
   }
   else
   {

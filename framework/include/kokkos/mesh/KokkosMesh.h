@@ -199,6 +199,11 @@ public:
   }
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
+   * Get the mesh dimension
+   * @returns The mesh dimension
+   */
+  KOKKOS_FUNCTION auto getDimension() const { return _dimension; }
+  /**
    * Get the element information object
    * @param elem The contiguous element ID
    * @returns The element information object
@@ -453,6 +458,10 @@ private:
    * Flag whether the mesh was initialized
    */
   bool _initialized = false;
+  /**
+   * Mesh dimenson
+   */
+  unsigned int _dimension;
 
   /**
    * The wrapper of host maps

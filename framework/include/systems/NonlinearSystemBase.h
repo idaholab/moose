@@ -104,6 +104,10 @@ public:
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void setupKokkos();
+#endif
+
   virtual void setupFiniteDifferencedPreconditioner() = 0;
 
   bool haveFiniteDifferencedPreconditioner() const
@@ -798,7 +802,12 @@ protected:
   /**
    * Compute Kokkos nodal BCs
    */
+  ///@{
   void computeKokkosNodalBCsResidual(const std::set<TagID> & tags);
+  void computeKokkosNodalBCsJacobian(const std::set<TagID> & tags);
+  void computeKokkosNodalBCsResidualAndJacobian(const std::set<TagID> & vector_tags,
+                                                const std::set<TagID> & matrix_tags);
+  ///@}
 #endif
 
   /**
@@ -971,6 +980,11 @@ protected:
   MooseObjectWarehouse<ResidualObject> _kokkos_preset_nodal_bcs;
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
   ///@}
+
+  /**
+   * List of DOFs where Kokkos nodal BCs apply for each matrix tag
+   */
+  std::map<TagID, std::vector<PetscInt>> _kokkos_nodal_bcs_dofs;
 #endif
 
   /// Dirac Kernel storage for each thread
