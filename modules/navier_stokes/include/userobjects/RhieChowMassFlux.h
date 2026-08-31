@@ -89,12 +89,6 @@ public:
   /// Blend the reconstructed pressure-gradient candidate into the relaxed stored gradient.
   void relaxReconstructedGradient();
 
-  /// Copy the relaxed reconstructed gradient into the registered pressure-gradient field.
-  void copyReconstructedGradientToField();
-
-  /// Whether a relaxed reconstructed gradient is currently available.
-  bool hasReconstructedGradient() const;
-
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
 
@@ -235,9 +229,6 @@ protected:
   /// Cell pressure gradient reconstructed from the pressure part of the face fluxes.
   std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_pressure_gradient;
 
-  /// Relaxed reconstructed pressure gradient blended from base and reconstructed candidates.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _relaxed_pressure_gradient;
-
   /// Cell velocity gradients used by the Aguerre face-flux reconstruction.
   std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
       _reconstruction_velocity_gradient;
@@ -288,9 +279,6 @@ protected:
 
   /// Whether a reconstructed gradient candidate has been initialized.
   bool _reconstructed_candidate_available = false;
-
-  /// Whether a relaxed reconstructed pressure gradient has been initialized.
-  bool _reconstructed_gradient_available = false;
 
 private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the

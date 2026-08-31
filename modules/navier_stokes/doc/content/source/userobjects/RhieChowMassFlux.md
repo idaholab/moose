@@ -37,19 +37,14 @@ Aguerre-style reconstruction: it removes the face-flux contribution from the pre
 gradient, reconstructs a cell velocity from the corrected total conservative face flux, and then
 recovers the pressure gradient from the momentum balance.
 
-On strongly nonorthogonal meshes, this reconstruction is only as accurate as the decomposition of
-the conservative face fluxes into pressure-gradient and velocity components. In those cases, a
-standard gradient method such as [FVGreenGaussGradient.md] may be a better choice.
-
 The reconstructed gradient is available after the first pressure correction; until then the gradient
 method falls back to its base gradient method. The current velocity correction uses the selected
-reconstructed quantity directly, and the pressure gradient used by the next momentum predictor
-is relaxed with
-[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation). Set
+reconstructed quantity directly, and after each pressure corrector Rhie-Chow passes the newly
+reconstructed candidate to the gradient method, which relaxes the stored coupling gradient with
+[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once
+per corrector. Set
 [!param](/UserObjects/RhieChowMassFlux/momentum_pressure_kernel) so Rhie-Chow uses the same pressure
-gradient field as the momentum predictor while constructing H/A. When the pressure diffusion kernel
-uses nonorthogonal correction, set [!param](/UserObjects/RhieChowMassFlux/pressure_projection_method)
-to `consistent`.
+gradient field as the momentum predictor while constructing H/A.
 
 The [!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation) parameter selects
 whether `average` or `harmonic` interpolation is used when computing the face values of `Ainv`,

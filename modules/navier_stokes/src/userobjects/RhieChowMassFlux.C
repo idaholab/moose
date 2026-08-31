@@ -260,8 +260,6 @@ RhieChowMassFlux::linkMomentumPressureSystems(
     const auto & reconstructed_method = reconstructedGradientMethod();
     reconstructed_method.setupDependencies(*_pressure_system, pressure_var->number());
 
-    reconstructed_method.setupReconstructedGradientSource(_relaxed_pressure_gradient);
-
     const auto & base_reader =
         pressure_var->requestCellGradients(reconstructed_method.baseGradientMethodName());
     _base_pressure_gradient_field = &base_reader;
@@ -329,9 +327,7 @@ RhieChowMassFlux::meshChanged()
   _Ainv.clear();
   _face_mass_flux.clear();
   _reconstructed_pressure_gradient.clear();
-  _relaxed_pressure_gradient.clear();
   _reconstructed_candidate_available = false;
-  _reconstructed_gradient_available = false;
   _reconstruction_velocity_gradient.clear();
   _boundary_cell_ids.clear();
   setupMeshInformation();
@@ -373,28 +369,8 @@ RhieChowMassFlux::relaxReconstructedGradient()
                  "layout.");
   }
 
-  if (!_reconstructed_gradient_available)
-  {
-    _relaxed_pressure_gradient.clear();
-    for (const auto component : index_range(base_gradient))
-      _relaxed_pressure_gradient.push_back(base_gradient[component]->clone());
-
-    for (const auto component : index_range(_relaxed_pressure_gradient))
-      *_relaxed_pressure_gradient[component] = *base_gradient[component];
-  }
-
   const auto & reconstructed_method = reconstructedGradientMethod();
-  const Real alpha = reconstructed_method.gradientRelaxation();
-
-  for (const auto component : index_range(_relaxed_pressure_gradient))
-  {
-    auto & stored_gradient = *_relaxed_pressure_gradient[component];
-    stored_gradient.scale(1.0 - alpha);
-    stored_gradient.add(alpha, *_reconstructed_pressure_gradient[component]);
-    stored_gradient.close();
-  }
-
-  _reconstructed_gradient_available = true;
+  reconstructed_method.updateFeedbackGradient(base_gradient, _reconstructed_pressure_gradient);
 }
 
 void
@@ -515,35 +491,6 @@ RhieChowMassFlux::computeReconstructedPressureGradientCandidate()
     pressure_gradient_vec->close();
 
   _reconstructed_candidate_available = true;
-}
-
-void
-RhieChowMassFlux::copyReconstructedGradientToField()
-{
-  mooseAssert(_reconstructed_gradient_available,
-              "copyReconstructedGradientToField should only be called after the relaxed "
-              "reconstructed gradient has been initialized.");
-
-  const auto & relaxed_components = _relaxed_pressure_gradient;
-  const auto & field_components = pressureGradientComponents();
-
-  mooseAssert(relaxed_components.size() == field_components.size(),
-              "Relaxed gradient container must match the pressure gradient field size.");
-
-  for (const auto component : index_range(relaxed_components))
-  {
-    mooseAssert(relaxed_components[component]->size() == field_components[component]->size(),
-                "Relaxed gradient and pressure gradient field components must have the same "
-                "size.");
-    *field_components[component] = *relaxed_components[component];
-    field_components[component]->close();
-  }
-}
-
-bool
-RhieChowMassFlux::hasReconstructedGradient() const
-{
-  return _reconstructed_gradient_available;
 }
 
 void

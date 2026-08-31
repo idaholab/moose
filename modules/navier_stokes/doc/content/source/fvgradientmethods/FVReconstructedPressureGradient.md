@@ -14,18 +14,13 @@ base gradient for the momentum predictor and the H/A construction.
 
 The reconstructed gradient is relaxed between SIMPLE iterations using
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) before
-the next momentum predictor reads it.
+the next momentum predictor reads it. The method owns a persistent relaxed feedback
+field that is updated exactly once per pressure corrector; repeated gradient
+evaluations within an iteration are idempotent and do not change the stored field.
 
 To use this method, configure [RhieChowMassFlux.md] with
 [!param](/UserObjects/RhieChowMassFlux/momentum_pressure_kernel) so the momentum
-pressure kernel and Rhie-Chow share the same pressure gradient field. When the
-pressure diffusion kernel uses nonorthogonal correction, also set
-[!param](/UserObjects/RhieChowMassFlux/pressure_projection_method) to `consistent`.
-
-On strongly nonorthogonal meshes, the reconstruction is only as accurate as the
-decomposition of the conservative face fluxes into pressure-gradient and velocity
-components. In those cases, a standard gradient method such as
-[FVGreenGaussGradient.md] may be a better choice.
+pressure kernel and Rhie-Chow share the same pressure gradient field.
 
 !syntax parameters /FVGradientMethods/FVReconstructedPressureGradient
 
