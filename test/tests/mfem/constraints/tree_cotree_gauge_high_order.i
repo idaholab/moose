@@ -4,7 +4,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/embedded_concentric_torus.e
+  file = ../mesh/beam-tet.mesh
 []
 
 [Problem]
@@ -40,7 +40,7 @@
     type = MFEMVectorTangentialDirichletBC
     variable = a_field
     vector_coefficient = '0 0 0'
-    boundary = 'Exterior'
+    boundary = '1'
   []
 []
 
@@ -48,7 +48,7 @@
   [tree_cotree_gauge]
     type = MFEMTreeCotreeGaugeEssentialConstraint
     variable = a_field
-    boundary = 'Exterior'
+    boundary = '1'
   []
 []
 
