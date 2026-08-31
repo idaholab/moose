@@ -144,12 +144,6 @@ class RunApp(Tester):
             "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.",
         )
 
-        device_list_str = "', '".join(
-            d.upper() for d in TestHarness.validComputeDevices()
-        )
-        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
-        params.addParam("compute_devices", ["CPU"], device_param_doc)
-
         return params
 
     def __init__(self, name, params):
@@ -191,10 +185,6 @@ class RunApp(Tester):
                 "The parameters 'command_proxy' and 'no_additional_cli_args' "
                 "cannot be supplied together"
             )
-
-        for value in params["compute_devices"]:
-            if value.lower() not in TestHarness.validComputeDevices():
-                raise Exception(f'Unknown device "{value}"')
 
         # The capabilities file that we need to set with
         # --testharness-capabilities, if any. This should
@@ -245,13 +235,6 @@ class RunApp(Tester):
             self.addCaveats("EXECUTABLE PATTERN")
             self.setStatus(self.skip)
             return False
-
-        devices_lower = [x.lower() for x in self.specs["compute_devices"]]
-        if options.compute_device not in devices_lower:
-            self.addCaveats(f"{options.compute_device} not in compute devices")
-            self.setStatus(self.skip)
-            return False
-
         if (
             options.hpc
             and self.specs.isValid("command_proxy")

@@ -892,10 +892,10 @@ class Job(OutputInterface):
             return self.timer.totalTime()
         return 0.0
 
-    def getMaxMemory(self) -> Optional[int]:
+    def getMaxMemory(self) -> Optional[Runner.MaxMemory]:
         """Get the Job's estimated max memory usage in bytes, if any."""
         if self._runner is not None and (value := self._runner.max_memory) is not None:
-            return value
+            return copy.deepcopy(value)
         return None
 
     def getStatus(self):
@@ -1024,7 +1024,9 @@ class Job(OutputInterface):
         else:
             job_data["output"] = self.getAllOutput()
         if (max_memory := self.getMaxMemory()) is not None:
-            job_data["max_memory"] = max_memory
+            job_data["max_memory_cpu"] = max_memory.cpu
+            if max_memory.gpu is not None:
+                job_data["max_memory_gpu"] = max_memory.gpu
 
         unique_test_id = self.getTester().getUniqueTestID()
         if unique_test_id is not None:

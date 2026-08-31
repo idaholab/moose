@@ -411,6 +411,17 @@ protected:
 
   /// Restartable MFEM solution state associated with this problem.
   Moose::MFEM::SolutionState & _solution_state_data;
+
+private:
+  /// Initialises Hypre and creates a dummy hypre PC to consume -hypre_umpire_device_pool_size
+  void initHypre()
+  {
+    PC pc;
+    LibmeshPetscCall(PCCreate(PETSC_COMM_SELF, &pc));
+    LibmeshPetscCall(PCSetType(pc, PCHYPRE));
+    LibmeshPetscCall(PCDestroy(&pc));
+    mfem::Hypre::Init();
+  }
 };
 
 template <typename T>
