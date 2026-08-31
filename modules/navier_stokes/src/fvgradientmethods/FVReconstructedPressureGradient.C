@@ -84,20 +84,6 @@ FVReconstructedPressureGradient::setupDependencies(SystemBase & system,
 }
 
 void
-FVReconstructedPressureGradient::setupReconstructedGradientSource(
-    const std::vector<std::unique_ptr<NumericVector<Number>>> & relaxed_source) const
-{
-  if (!_relaxed_gradient_source)
-  {
-    _relaxed_gradient_source = &relaxed_source;
-    return;
-  }
-
-  mooseAssert(_relaxed_gradient_source == &relaxed_source,
-              "Reconstructed gradient source must be set at most once.");
-}
-
-void
 FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     SystemBase & system,
     GradientContainer & gradient,
@@ -113,24 +99,112 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
                name(),
                "' expects at least one pressure variable number.");
 
-  const auto * relaxed_source = _relaxed_gradient_source;
-  const bool has_reconstructed = relaxed_source && !relaxed_source->empty();
+  // When no feedback has been initialized yet or the stored feedback layout no longer matches
+  // the requested gradient storage (for example after mesh changes), fall back to the base
+  // gradient method.
+  const auto feedback_components = _feedback.size();
+  bool feedback_layout_matches = _feedback_initialized && feedback_components == gradient.size();
 
-  if (!has_reconstructed)
+  if (feedback_layout_matches)
   {
-    // Before a reconstructed gradient is available, use the configured base gradient.
+    for (const auto component : index_range(gradient))
+    {
+      const auto & stored = *_feedback[component];
+      if (stored.size() != gradient[component]->size() ||
+          stored.local_size() != gradient[component]->local_size())
+      {
+        feedback_layout_matches = false;
+        break;
+      }
+    }
+  }
+
+  if (!feedback_layout_matches)
+  {
     _base_gradient_method->computeGradient(system, gradient, variable_numbers);
     return;
   }
 
-  mooseAssert(relaxed_source->size() == gradient.size(),
-              "Relaxed gradient container must match the output gradient size.");
-
+  // After feedback has been initialized, publish the stored relaxed gradient without further
+  // modification so repeated reads are idempotent.
   for (const auto component : index_range(gradient))
-  {
-    mooseAssert((*relaxed_source)[component]->size() == gradient[component]->size(),
-                "Relaxed gradient and output gradient components must have the same size.");
+    *gradient[component] = *_feedback[component];
+}
 
-    *gradient[component] = *(*relaxed_source)[component];
+void
+FVReconstructedPressureGradient::updateFeedbackGradient(
+    const GradientContainer & base_gradient,
+    const GradientContainer & reconstructed_candidate) const
+{
+  const auto num_components = base_gradient.size();
+  if (num_components == 0)
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' requires a nonzero number of gradient components when updating the "
+               "reconstructed pressure gradient.");
+
+  if (reconstructed_candidate.size() != num_components)
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' requires base and reconstructed gradients to have the same number of "
+               "components.");
+
+  for (const auto component : index_range(base_gradient))
+  {
+    const auto & base_vec = *base_gradient[component];
+    const auto & candidate_vec = *reconstructed_candidate[component];
+
+    if (base_vec.size() != candidate_vec.size() ||
+        base_vec.local_size() != candidate_vec.local_size())
+      mooseError("FVReconstructedPressureGradient '",
+                 name(),
+                 "' requires base and reconstructed gradient components to have the same "
+                 "layout.");
   }
+
+  // (Re)initialize the feedback container when first updating from a candidate or when the
+  // stored layout no longer matches the base gradient (for example after mesh changes).
+  bool need_reinit = !_feedback_initialized || _feedback.size() != num_components;
+
+  if (!need_reinit)
+  {
+    for (const auto component : index_range(_feedback))
+    {
+      const auto & stored = *_feedback[component];
+      const auto & base_vec = *base_gradient[component];
+      if (stored.size() != base_vec.size() || stored.local_size() != base_vec.local_size())
+      {
+        need_reinit = true;
+        break;
+      }
+    }
+  }
+
+  if (need_reinit)
+  {
+    _feedback.clear();
+    for (const auto component : index_range(base_gradient))
+      _feedback.push_back(base_gradient[component]->clone());
+
+    for (const auto component : index_range(_feedback))
+    {
+      *_feedback[component] = *base_gradient[component];
+      _feedback[component]->close();
+    }
+
+    _feedback_initialized = true;
+    _feedback_generation = 0;
+  }
+
+  const Real alpha = _gradient_relaxation;
+
+  for (const auto component : index_range(_feedback))
+  {
+    auto & stored_gradient = *_feedback[component];
+    stored_gradient.scale(1.0 - alpha);
+    stored_gradient.add(alpha, *reconstructed_candidate[component]);
+    stored_gradient.close();
+  }
+
+  ++_feedback_generation;
 }
