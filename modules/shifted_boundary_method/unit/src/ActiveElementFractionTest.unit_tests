@@ -1,10 +1,10 @@
 [Tests]
   design = 'InterceptedElementModifier.md'
-  issues = '#33397 #33398'
+  issues = '#33397'
 
   [unit_square]
     type = GoogleTest
     unit_test = ActiveElementFractionTest.UnitSquare
-    requirement = 'The system shall compute active fractions of zero, one-half, and one for predicates integrated over a unit-square element.'
+    requirement = 'The system shall compute the fraction of a quadrilateral element occupied by the physical domain when the element is fully inside, fully outside, or cut in half by the true boundary.'
   []
 []

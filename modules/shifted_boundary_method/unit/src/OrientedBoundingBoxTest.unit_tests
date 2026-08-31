@@ -1,6 +1,6 @@
 [Tests]
   design = 'AdaptiveRayContainmentCheck.md'
-  issues = '#33397 #33398'
+  issues = '#33397'
 
   [write_3d_box]
     type = GoogleTest

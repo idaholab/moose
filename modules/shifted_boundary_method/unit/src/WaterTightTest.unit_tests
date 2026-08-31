@@ -1,6 +1,6 @@
 [Tests]
   design = 'SBMSurfaceMeshBuilder.md'
-  issues = '#31937 #31938'
+  issues = '#31937'
 
   [two_d_open_and_closed_geometry]
     type = GoogleTest

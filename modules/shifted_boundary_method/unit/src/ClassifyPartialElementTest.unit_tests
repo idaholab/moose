@@ -1,6 +1,6 @@
 [Tests]
   design = 'InterceptedElementModifier.md'
-  issues = '#33397 #33398'
+  issues = '#33397'
 
   [fully_active_or_inactive]
     type = GoogleTest
