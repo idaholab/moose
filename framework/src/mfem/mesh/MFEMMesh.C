@@ -82,6 +82,13 @@ MFEMMesh::buildMesh()
     paramError("serial_refine",
                "Cannot set both serial_refine and uniform_refine at the same time.");
 
+  // mfem::ParMesh::NURBSUniformRefinement is not implemented, and silently leaves the mesh
+  // unrefined, so refinement of NURBS meshes must all be done here, before partitioning.
+  if (mfem_ser_mesh.NURBSext && getParam<unsigned int>("parallel_refine") > 0)
+    paramError("parallel_refine",
+               "MFEM does not support parallel refinement of NURBS meshes. Use 'serial_refine' or "
+               "'uniform_refine' to insert knots before the mesh is partitioned instead.");
+
   uniformRefinement(mfem_ser_mesh,
                     isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
                                                       : getParam<unsigned int>("uniform_refine"));
