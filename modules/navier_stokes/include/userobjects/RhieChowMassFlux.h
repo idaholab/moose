@@ -13,7 +13,6 @@
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
-#include "LinearFVAnisotropicDiffusion.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -25,6 +24,8 @@ class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class ElemInfo;
 class LinearFVGradientReader;
+class FVReconstructedPressureGradient;
+class LinearFVAnisotropicDiffusion;
 namespace libMesh
 {
 class Elem;
@@ -56,27 +57,14 @@ public:
   /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
   const LinearFVGradientReader & pressureGradientField() const;
 
-  /// Mark the registered pressure gradient field update as a base-gradient update.
-  void preparePressureGradientUpdate();
-
-  /// Whether reconstructed pressure gradients are ready for the gradient method to consume.
-  bool hasReconstructedPressureGradient() const;
-
-  /// Get the pressure-layout reconstructed pressure-gradient component vectors.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  reconstructedPressureGradientComponents() const;
+  /// Get the base pressure gradient field used to seed reconstructed gradient updates.
+  const LinearFVGradientReader & basePressureGradientField() const;
 
   /// Get the momentum-layout H/A component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & HbyAComponents() const;
 
   /// Get the momentum-layout 1/A component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & AinvComponents() const;
-
-  /// Relaxation factor used when feeding reconstructed pressure gradients back into the solve.
-  Real reconstructedPressureGradientFeedbackRelaxation() const
-  {
-    return _reconstructed_pressure_gradient_feedback_relaxation;
-  }
 
   /// Variable number of the pressure variable reconstructed by this object.
   unsigned int pressureVariableNumber() const;
@@ -95,6 +83,18 @@ public:
   void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
   void computeCellVelocity();
+
+  /// Blend the reconstructed pressure-gradient candidate into the relaxed stored gradient.
+  void relaxReconstructedGradient();
+
+  /// Copy the relaxed reconstructed gradient into the registered pressure-gradient field.
+  void copyReconstructedGradientToField();
+
+  /// Whether a relaxed reconstructed gradient is currently available.
+  bool hasReconstructedGradient() const;
+
+  /// Whether the registered pressure gradient field is produced by the reconstructed method.
+  bool usingReconstructedPressureGradientMethod() const;
 
   virtual void meshChanged() override;
   virtual void initialize() override;
@@ -127,8 +127,12 @@ protected:
   /// Get the registered pressure gradient component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
 
-  /// Whether the registered pressure gradient field is produced by the reconstructed method.
-  bool usingReconstructedPressureGradientMethod() const;
+  /// Get the base-pressure gradient component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  basePressureGradientComponents() const;
+
+  /// Access the reconstructed gradient method when it is selected.
+  const FVReconstructedPressureGradient & reconstructedGradientMethod() const;
 
   /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
   void checkReconstructedPressureGradientCompatibility() const;
@@ -145,7 +149,7 @@ protected:
                                                  bool elem_has_info,
                                                  unsigned int velocity_component) const;
 
-  /// Update the cell velocity from the currently published pressure gradient.
+  /// Update the cell velocity from the current pressure gradient field.
   void computeCellVelocityFromPressureGradient();
 
   /// Recover a face-normal value from a conservative face flux.
@@ -180,7 +184,8 @@ protected:
   /// The thread 0 copy of the pressure variable
   const MooseLinearVariableFVReal * const _p;
 
-  /// The thread 0 copy of the x-velocity variable
+  /// Thread 0 copies of the velocity variables; non-const to allow writing
+  /// cell velocities in computeCellVelocityFromPressureGradient().
   std::vector<MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
@@ -231,12 +236,12 @@ protected:
   /// Cell pressure gradient reconstructed from the pressure part of the face fluxes.
   std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_pressure_gradient;
 
+  /// Relaxed reconstructed pressure gradient blended from base and reconstructed candidates.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _relaxed_pressure_gradient;
+
   /// Cell velocity gradients used by the Aguerre face-flux reconstruction.
   std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
       _reconstruction_velocity_gradient;
-
-  /// Whether _reconstructed_pressure_gradient should be exposed through FVReconstructedPressureGradient.
-  bool _reconstructed_pressure_gradient_ready;
 
   /**
    * Functor describing the density of the fluid
@@ -261,6 +266,9 @@ protected:
   /// Registered pressure gradient field used by Rhie-Chow and compatible momentum pressure kernels.
   const LinearFVGradientReader * _pressure_gradient_field;
 
+  /// Base pressure gradient field used to seed reconstructed gradient updates.
+  const LinearFVGradientReader * _base_pressure_gradient_field;
+
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;
 
@@ -273,14 +281,14 @@ protected:
   /// Interpolation method used for the pressure diffusion coefficient on faces
   const Moose::FV::InterpMethod _pressure_diffusion_interp_method;
 
-  /// Relaxation factor used when feeding reconstructed pressure gradients back into the solve
-  const Real _reconstructed_pressure_gradient_feedback_relaxation;
-
   /// How reconstructed-pressure-gradient mode updates the cell velocity after pressure correction
   const MooseEnum _reconstructed_pressure_gradient_velocity_update;
 
   /// Which pressure gradient is fed back on boundary-adjacent cells
   const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
+
+  /// Whether a relaxed reconstructed pressure gradient has been initialized.
+  bool _reconstructed_gradient_available = false;
 
 private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the

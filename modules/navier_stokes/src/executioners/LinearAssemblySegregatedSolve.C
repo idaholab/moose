@@ -464,7 +464,14 @@ LinearAssemblySegregatedSolve::initialSetup()
 }
 
 void
-LinearAssemblySegregatedSolve::updatePressureGradient()
+LinearAssemblySegregatedSolve::updateBasePressureGradient()
+{
+  mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
+  _pressure_system.updateFVGradient(_rc_uo->basePressureGradientField());
+}
+
+void
+LinearAssemblySegregatedSolve::finalizePressureGradient()
 {
   mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
   _pressure_system.updateFVGradient(_rc_uo->pressureGradientField());
@@ -638,8 +645,14 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
 
-  // We recompute the updated pressure gradient
-  updatePressureGradient();
+  // Refresh the base pressure gradient used to seed reconstructed gradient updates.
+  updateBasePressureGradient();
+
+  if (_rc_uo->usingReconstructedPressureGradientMethod())
+  {
+    _rc_uo->relaxReconstructedGradient();
+    finalizePressureGradient();
+  }
 
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
@@ -792,10 +805,13 @@ LinearAssemblySegregatedSolve::solve()
     if (_should_solve_momentum)
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
-    // Initialize pressure gradients, after this we just reuse the last ones from each
-    // iteration
+    // Initialize base and coupling pressure gradients. After this we reuse the last gradients
+    // until the pressure corrector finalizes a new coupling field.
     if (_should_solve_pressure && simple_iteration_counter == 1)
-      updatePressureGradient();
+    {
+      updateBasePressureGradient();
+      finalizePressureGradient();
+    }
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 

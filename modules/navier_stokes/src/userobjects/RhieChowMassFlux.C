@@ -25,6 +25,7 @@
 #include "LinearFVPressureFluxBC.h"
 #include "FVReconstructedPressureGradient.h"
 #include "FVUtils.h"
+#include "LinearFVAnisotropicDiffusion.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -78,18 +79,12 @@ RhieChowMassFlux::validParams()
       "",
       "Momentum pressure kernel whose registered pressure gradient field should also be used by "
       "Rhie-Chow when constructing H/A.");
-  params.addRangeCheckedParam<Real>(
-      "reconstructed_pressure_gradient_feedback_relaxation",
-      0.1,
-      "0.0<reconstructed_pressure_gradient_feedback_relaxation<=1.0",
-      "Relaxation factor applied when feeding reconstructed pressure gradients back into the "
-      "momentum predictor.");
   params.addParam<MooseEnum>(
       "reconstructed_pressure_gradient_velocity_update",
       MooseEnum("reconstructed pressure_gradient", "reconstructed"),
       "How the velocity is updated when using FVReconstructedPressureGradient. 'reconstructed' "
       "writes the reconstructed velocity directly. 'pressure_gradient' updates the velocity from "
-      "the published pressure gradient.");
+      "the registered pressure gradient field.");
   params.addParam<MooseEnum>(
       "reconstructed_pressure_gradient_boundary_cells",
       MooseEnum("reconstructed base_gradient", "reconstructed"),
@@ -112,18 +107,16 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
     _momentum_pressure_kernel_name(getParam<std::string>("momentum_pressure_kernel")),
-    _reconstructed_pressure_gradient_ready(false),
     _rho(getFunctor<Real>(NS::density)),
     _pressure_system(nullptr),
     _pressure_gradient_field(nullptr),
+    _base_pressure_gradient_field(nullptr),
     _global_pressure_system_number(0),
     _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method")),
     _pressure_diffusion_interp_method(getParam<MooseEnum>("pressure_diffusion_interpolation") ==
                                               "harmonic"
                                           ? Moose::FV::InterpMethod::HarmonicAverage
                                           : Moose::FV::InterpMethod::Average),
-    _reconstructed_pressure_gradient_feedback_relaxation(
-        getParam<Real>("reconstructed_pressure_gradient_feedback_relaxation")),
     _reconstructed_pressure_gradient_velocity_update(
         getParam<MooseEnum>("reconstructed_pressure_gradient_velocity_update")),
     _reconstructed_pressure_gradient_boundary_cells(
@@ -209,10 +202,23 @@ RhieChowMassFlux::linkMomentumPressureSystems(
     _pressure_gradient_field = &pressure_kernel->pressureGradientField();
   }
 
-  if (const auto * const reconstructed_method =
-          dynamic_cast<const FVReconstructedPressureGradient *>(
-              &_pressure_gradient_field->method()))
-    reconstructed_method->setupDependencies(*_pressure_system, 0);
+  if (usingReconstructedPressureGradientMethod())
+  {
+    const auto & reconstructed_method = reconstructedGradientMethod();
+    reconstructed_method.setupDependencies(*_pressure_system, pressure_var->number());
+
+    reconstructed_method.setupReconstructedGradientSource(_relaxed_pressure_gradient);
+
+    const auto & base_reader =
+        pressure_var->requestCellGradients(reconstructed_method.baseGradientMethodName());
+    _base_pressure_gradient_field = &base_reader;
+
+    mooseAssert(_base_pressure_gradient_field != _pressure_gradient_field,
+                "Reconstructed and base pressure gradient readers must be distinct when "
+                "FVReconstructedPressureGradient is active.");
+  }
+  else
+    _base_pressure_gradient_field = _pressure_gradient_field;
 
   _momentum_implicit_systems.clear();
   for (auto & system : _momentum_systems)
@@ -270,10 +276,94 @@ RhieChowMassFlux::meshChanged()
   _Ainv.clear();
   _face_mass_flux.clear();
   _reconstructed_pressure_gradient.clear();
+  _relaxed_pressure_gradient.clear();
+  _reconstructed_gradient_available = false;
   _reconstruction_velocity_gradient.clear();
   _boundary_cell_ids.clear();
-  _reconstructed_pressure_gradient_ready = false;
   setupMeshInformation();
+}
+
+void
+RhieChowMassFlux::relaxReconstructedGradient()
+{
+  const auto & base_gradient = basePressureGradientComponents();
+
+  const auto num_components = base_gradient.size();
+  if (num_components == 0)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' requires a nonzero number of gradient components when relaxing the "
+               "reconstructed pressure gradient.");
+
+  if (_reconstructed_pressure_gradient.size() != num_components)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' requires base and reconstructed gradients to have the same number of "
+               "components.");
+
+  for (const auto component : index_range(base_gradient))
+  {
+    const auto & base_vec = *base_gradient[component];
+    const auto & candidate_vec = *_reconstructed_pressure_gradient[component];
+
+    if (base_vec.size() != candidate_vec.size() || base_vec.local_size() != candidate_vec.local_size())
+      mooseError("RhieChowMassFlux '",
+                 name(),
+                 "' requires base and reconstructed gradient components to have the same "
+                 "layout.");
+  }
+
+  if (!_reconstructed_gradient_available)
+  {
+    _relaxed_pressure_gradient.clear();
+    for (const auto component : index_range(base_gradient))
+      _relaxed_pressure_gradient.push_back(base_gradient[component]->clone());
+
+    for (const auto component : index_range(_relaxed_pressure_gradient))
+      *_relaxed_pressure_gradient[component] = *base_gradient[component];
+  }
+
+  const auto & reconstructed_method = reconstructedGradientMethod();
+  const Real alpha = reconstructed_method.gradientRelaxation();
+
+  for (const auto component : index_range(_relaxed_pressure_gradient))
+  {
+    auto & stored_gradient = *_relaxed_pressure_gradient[component];
+    stored_gradient.scale(1.0 - alpha);
+    stored_gradient.add(alpha, *_reconstructed_pressure_gradient[component]);
+    stored_gradient.close();
+  }
+
+  _reconstructed_gradient_available = true;
+}
+
+void
+RhieChowMassFlux::copyReconstructedGradientToField()
+{
+  mooseAssert(_reconstructed_gradient_available,
+              "copyReconstructedGradientToField should only be called after the relaxed "
+              "reconstructed gradient has been initialized.");
+
+  const auto & relaxed_components = _relaxed_pressure_gradient;
+  const auto & field_components = pressureGradientComponents();
+
+  mooseAssert(relaxed_components.size() == field_components.size(),
+              "Relaxed gradient container must match the pressure gradient field size.");
+
+  for (const auto component : index_range(relaxed_components))
+  {
+    mooseAssert(relaxed_components[component]->size() == field_components[component]->size(),
+                "Relaxed gradient and pressure gradient field components must have the same "
+                "size.");
+    *field_components[component] = *relaxed_components[component];
+    field_components[component]->close();
+  }
+}
+
+bool
+RhieChowMassFlux::hasReconstructedGradient() const
+{
+  return _reconstructed_gradient_available;
 }
 
 void
@@ -683,24 +773,15 @@ RhieChowMassFlux::pressureGradientField() const
   return *_pressure_gradient_field;
 }
 
-void
-RhieChowMassFlux::preparePressureGradientUpdate()
+const LinearFVGradientReader &
+RhieChowMassFlux::basePressureGradientField() const
 {
-  _reconstructed_pressure_gradient_ready = false;
-}
+  if (!_base_pressure_gradient_field)
+    mooseError("The base pressure gradient field has not been registered for RhieChowMassFlux '",
+               name(),
+               "'.");
 
-bool
-RhieChowMassFlux::hasReconstructedPressureGradient() const
-{
-  return _reconstructed_pressure_gradient_ready && !_reconstructed_pressure_gradient.empty();
-}
-
-const std::vector<std::unique_ptr<NumericVector<Number>>> &
-RhieChowMassFlux::reconstructedPressureGradientComponents() const
-{
-  mooseAssert(hasReconstructedPressureGradient(), "Reconstructed pressure gradient is not ready.");
-
-  return _reconstructed_pressure_gradient;
+  return *_base_pressure_gradient_field;
 }
 
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
@@ -717,6 +798,12 @@ RhieChowMassFlux::AinvComponents() const
   mooseAssert(!_Ainv_raw.empty(), "Ainv data is not ready.");
 
   return _Ainv_raw;
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::basePressureGradientComponents() const
+{
+  return basePressureGradientField().components();
 }
 
 unsigned int
@@ -821,7 +908,7 @@ RhieChowMassFlux::computeCellVelocity()
         _reconstructed_pressure_gradient_velocity_update == "reconstructed";
     const bool use_base_gradient_on_boundary =
         _reconstructed_pressure_gradient_boundary_cells == "base_gradient";
-    const auto & pressure_gradient = pressureGradientComponents();
+    const auto & base_pressure_gradient = basePressureGradientComponents();
 
     updateReconstructionVelocityGradient();
 
@@ -907,7 +994,7 @@ RhieChowMassFlux::computeCellVelocity()
       solve_projection(projection_rhs, reconstructed_quantity);
 
       // Always build the reconstructed pressure-gradient candidate. The velocity update can either
-      // use the direct reconstructed value or the pressure-gradient field published below.
+      // use the direct reconstructed value or the pressure-gradient field written below.
       for (const auto component : make_range(_dim))
       {
         const auto momentum_dof =
@@ -917,7 +1004,7 @@ RhieChowMassFlux::computeCellVelocity()
 
         const Real HbyA = (*_HbyA_raw[component])(momentum_dof);
         const Real Ainv = (*_Ainv_raw[component])(momentum_dof);
-        const Real base_gradient = (*pressure_gradient[component])(pressure_dof);
+        const Real base_gradient = (*base_pressure_gradient[component])(pressure_dof);
         const Real reconstructed_gradient =
             Ainv != 0.0 ? (-reconstructed_quantity(component) - HbyA) / Ainv : base_gradient;
         const Real direct_velocity = reconstructed_quantity(component);
@@ -930,27 +1017,24 @@ RhieChowMassFlux::computeCellVelocity()
       }
     }
 
-    if (update_velocity_from_reconstruction)
+  if (update_velocity_from_reconstruction)
+  {
+    for (const auto system_i : index_range(_momentum_implicit_systems))
     {
-      for (const auto system_i : index_range(_momentum_implicit_systems))
-      {
-        _momentum_implicit_systems[system_i]->solution->close();
-        _momentum_implicit_systems[system_i]->update();
-        _momentum_systems[system_i]->setSolution(
-            *_momentum_implicit_systems[system_i]->current_local_solution);
-      }
+      _momentum_implicit_systems[system_i]->solution->close();
+      _momentum_implicit_systems[system_i]->update();
+      _momentum_systems[system_i]->setSolution(
+          *_momentum_implicit_systems[system_i]->current_local_solution);
     }
+  }
 
-    for (auto & pressure_gradient_vec : _reconstructed_pressure_gradient)
-      pressure_gradient_vec->close();
+  for (auto & pressure_gradient_vec : _reconstructed_pressure_gradient)
+    pressure_gradient_vec->close();
 
-    _reconstructed_pressure_gradient_ready = true;
-    _pressure_system->updateFVGradient(pressureGradientField());
+  if (!update_velocity_from_reconstruction)
+    computeCellVelocityFromPressureGradient();
 
-    if (!update_velocity_from_reconstruction)
-      computeCellVelocityFromPressureGradient();
-
-    return;
+  return;
   }
 
   computeCellVelocityFromPressureGradient();
@@ -1266,15 +1350,19 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 std::vector<std::unique_ptr<NumericVector<Number>>> &
 RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
 {
+  const auto & source_components =
+      usingReconstructedPressureGradientMethod() ? basePressureGradientComponents()
+                                                 : pressureGradientComponents();
+
   if (updated_pressure)
   {
     _grad_p_current.clear();
-    for (const auto & component : pressureGradientComponents())
+    for (const auto & component : source_components)
       _grad_p_current.push_back(component->clone());
   }
 
   if (_grad_p_current.empty())
-    for (const auto & component : pressureGradientComponents())
+    for (const auto & component : source_components)
       _grad_p_current.push_back(component->clone());
 
   return _grad_p_current;
@@ -1290,6 +1378,16 @@ bool
 RhieChowMassFlux::usingReconstructedPressureGradientMethod() const
 {
   return dynamic_cast<const FVReconstructedPressureGradient *>(&pressureGradientField().method());
+}
+
+const FVReconstructedPressureGradient &
+RhieChowMassFlux::reconstructedGradientMethod() const
+{
+  mooseAssert(usingReconstructedPressureGradientMethod(),
+              "reconstructedGradientMethod() should only be called when reconstructed "
+              "pressure gradients are active.");
+
+  return dynamic_cast<const FVReconstructedPressureGradient &>(pressureGradientField().method());
 }
 
 void

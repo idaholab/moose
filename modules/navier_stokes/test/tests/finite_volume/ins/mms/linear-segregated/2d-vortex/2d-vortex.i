@@ -26,7 +26,6 @@ pressure_gradient_method = 'green-gauss'
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
     pressure_projection_method = CONSISTENT
-    reconstructed_pressure_gradient_feedback_relaxation = 0.2
     momentum_pressure_kernel = u_pressure
   []
 []
@@ -52,7 +51,8 @@ pressure_gradient_method = 'green-gauss'
 [FVGradientMethods]
   [reconstructed]
     type = FVReconstructedPressureGradient
-    rhie_chow_user_object = rc
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.2
   []
 []
 

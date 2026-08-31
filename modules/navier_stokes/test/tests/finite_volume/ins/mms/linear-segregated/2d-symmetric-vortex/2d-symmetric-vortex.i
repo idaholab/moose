@@ -56,7 +56,8 @@ pressure_gradient_method = 'green-gauss'
 [FVGradientMethods]
   [reconstructed]
     type = FVReconstructedPressureGradient
-    rhie_chow_user_object = rc
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
   []
 []
 

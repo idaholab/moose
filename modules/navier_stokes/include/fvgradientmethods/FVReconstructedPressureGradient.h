@@ -13,7 +13,7 @@
 
 #include "libmesh/numeric_vector.h"
 
-class RhieChowMassFlux;
+#include <cstdint>
 
 /**
  * Pressure gradient method that uses Rhie-Chow face fluxes to reconstruct a cell-centered pressure
@@ -30,15 +30,29 @@ public:
    */
   FVReconstructedPressureGradient(const InputParameters & params);
 
+  /// Resolve dependencies required by the reconstructed pressure-gradient method.
   void setupDependencies(SystemBase & system, unsigned int variable_number) const;
+
+  /// Register the source of relaxed reconstructed gradients owned by RhieChowMassFlux.
+  void setupReconstructedGradientSource(
+      const std::vector<std::unique_ptr<NumericVector<Number>>> & relaxed_source) const;
+
+  /// Name of the gradient method used before reconstructed Rhie-Chow data are available.
+  const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
+
+  /// Relaxation factor applied to reconstructed gradients.
+  Real gradientRelaxation() const { return _gradient_relaxation; }
+
+  // Reconstructed gradient state is owned by RhieChowMassFlux.
 
 private:
   /**
    * Compute reconstructed pressure gradients before the base class applies any limiter.
+   * When a relaxed reconstructed gradient is available, this method copies it into the
+   * output gradient container; otherwise it delegates to the configured base method.
    *
    * @param system Pressure system that owns the pressure variable and gradient storage.
-   * @param output_gradient Component vectors where pre-limiter gradients are written.
-   * @param scratch_gradient Temporary component vectors available during the computation.
+   * @param gradient Component vectors where pre-limiter gradients are written.
    * @param variable_numbers Pressure variable numbers whose gradients should be updated.
    */
   virtual void computeGradientWithoutLimiter(
@@ -53,18 +67,16 @@ private:
    */
   const FVGradientMethod & resolveBaseGradientMethod(SystemBase & system) const;
 
-  /// Rhie-Chow user object that supplies the reconstructed pressure gradient.
-  const UserObjectName _rhie_chow_user_object_name;
-
   /// Gradient method used before reconstructed Rhie-Chow data are available.
   const GradientMethodName _base_gradient_method_name;
+
+  /// Relaxation factor used when updating reconstructed pressure gradients in the solve.
+  const Real _gradient_relaxation;
 
   /// Cached gradient method used before reconstructed Rhie-Chow data are available.
   mutable const FVGradientMethod * _base_gradient_method = nullptr;
 
-  /// Cached Rhie-Chow user object that owns the reconstructed gradients.
-  mutable const RhieChowMassFlux * _rhie_chow_user_object = nullptr;
-
-  /// Persistent relaxed reconstructed pressure gradient from the previous feedback update.
-  mutable GradientContainer _reconstructed_gradient_feedback;
+  /// Optional source for reconstructed gradients owned by RhieChowMassFlux.
+  mutable const std::vector<std::unique_ptr<NumericVector<Number>>> *
+      _relaxed_gradient_source = nullptr;
 };
