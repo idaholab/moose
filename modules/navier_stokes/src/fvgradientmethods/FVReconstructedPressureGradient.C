@@ -25,19 +25,23 @@ FVReconstructedPressureGradient::validParams()
   params.addClassDescription("Pressure gradient method that uses Rhie-Chow reconstructed "
                              "gradients once they are available, and otherwise falls back to a "
                              "base gradient method.");
-  params.addRequiredParam<UserObjectName>(
-      "rhie_chow_user_object", "Rhie-Chow user object that owns the reconstructed gradients.");
   params.addParam<GradientMethodName>(
       "base_gradient_method",
       "green-gauss",
       "Gradient method used before Rhie-Chow has computed reconstructed gradients.");
+  params.addRangeCheckedParam<Real>(
+      "gradient_relaxation",
+      0.1,
+      "0.0<gradient_relaxation<=1.0",
+      "Relaxation factor applied when updating reconstructed pressure gradients used by the "
+      "momentum predictor.");
   return params;
 }
 
 FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputParameters & params)
   : FVGradientMethod(params),
-    _rhie_chow_user_object_name(getParam<UserObjectName>("rhie_chow_user_object")),
-    _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method"))
+    _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method")),
+    _gradient_relaxation(getParam<Real>("gradient_relaxation"))
 {
 }
 
@@ -73,21 +77,24 @@ FVReconstructedPressureGradient::resolveBaseGradientMethod(SystemBase & system) 
 
 void
 FVReconstructedPressureGradient::setupDependencies(SystemBase & system,
-                                                   const unsigned int variable_number) const
+                                                   const unsigned int /*variable_number*/) const
 {
   if (!_base_gradient_method)
     _base_gradient_method = &resolveBaseGradientMethod(system);
+}
 
-  if (!_rhie_chow_user_object)
-    _rhie_chow_user_object =
-        &system.feProblem().getUserObject<RhieChowMassFlux>(_rhie_chow_user_object_name);
+void
+FVReconstructedPressureGradient::setupReconstructedGradientSource(
+    const std::vector<std::unique_ptr<NumericVector<Number>>> & relaxed_source) const
+{
+  if (!_relaxed_gradient_source)
+  {
+    _relaxed_gradient_source = &relaxed_source;
+    return;
+  }
 
-  if (variable_number != _rhie_chow_user_object->pressureVariableNumber())
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' can only be used for the pressure variable registered on RhieChowMassFlux '",
-               _rhie_chow_user_object_name,
-               "'.");
+  mooseAssert(_relaxed_gradient_source == &relaxed_source,
+              "Reconstructed gradient source must be set at most once.");
 }
 
 void
@@ -96,71 +103,34 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     GradientContainer & gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  if (!_base_gradient_method || !_rhie_chow_user_object)
+  if (!_base_gradient_method)
     mooseError("FVReconstructedPressureGradient '", name(), "' has not been set up.");
 
-  const auto & rc = *_rhie_chow_user_object;
-  const auto pressure_variable_number = rc.pressureVariableNumber();
+  // This method replaces the pressure gradient used by Rhie-Chow. Compatibility between the
+  // registered pressure variable and the gradient method is enforced by RhieChowMassFlux.
+  if (variable_numbers.empty())
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' expects at least one pressure variable number.");
 
-  // This method replaces the pressure gradient used by Rhie-Chow, so every variable assigned to
-  // this shared method must be that pressure variable.
-  for (const auto variable_number : variable_numbers)
-    if (variable_number != pressure_variable_number)
-      mooseError("FVReconstructedPressureGradient '",
-                 name(),
-                 "' can only be used for the pressure variable registered on RhieChowMassFlux '",
-                 _rhie_chow_user_object_name,
-                 "'.");
+  const auto * relaxed_source = _relaxed_gradient_source;
+  const bool has_reconstructed = relaxed_source && !relaxed_source->empty();
 
-  // During the first pressure-gradient update, Rhie-Chow has not yet reconstructed pressure
-  // gradients from the face fluxes. Use the base method until those reconstructed gradients exist.
-  if (!rc.hasReconstructedPressureGradient())
+  if (!has_reconstructed)
   {
+    // Before a reconstructed gradient is available, use the configured base gradient.
     _base_gradient_method->computeGradient(system, gradient, variable_numbers);
     return;
   }
 
-  // Start from the configured base gradient. It remains the fallback value and seeds the relaxed
-  // feedback state the first time reconstructed gradients become available.
-  _base_gradient_method->computeGradient(system, gradient, variable_numbers);
+  mooseAssert(relaxed_source->size() == gradient.size(),
+              "Relaxed gradient container must match the output gradient size.");
 
-  const auto dim = system.feProblem().mesh().dimension();
-  const Real alpha = rc.reconstructedPressureGradientFeedbackRelaxation();
-  const auto & reconstructed_pressure_gradient = rc.reconstructedPressureGradientComponents();
-
-  mooseAssert(reconstructed_pressure_gradient.size() == dim,
-              "Reconstructed pressure-gradient container must match the mesh dimension.");
-
-  bool reset_feedback = _reconstructed_gradient_feedback.size() != dim;
-  if (!reset_feedback)
-    for (const auto component : make_range(dim))
-      if (_reconstructed_gradient_feedback[component]->size() != gradient[component]->size())
-      {
-        reset_feedback = true;
-        break;
-      }
-
-  if (reset_feedback)
+  for (const auto component : index_range(gradient))
   {
-    _reconstructed_gradient_feedback.clear();
-    for (const auto component : make_range(dim))
-      _reconstructed_gradient_feedback.push_back(gradient[component]->clone());
-  }
+    mooseAssert((*relaxed_source)[component]->size() == gradient[component]->size(),
+                "Relaxed gradient and output gradient components must have the same size.");
 
-  for (const auto component : make_range(dim))
-  {
-    mooseAssert(reconstructed_pressure_gradient[component]->size() == gradient[component]->size(),
-                "Reconstructed and published pressure gradient vectors must have the same size.");
-
-    // Relax the persistent feedback state toward the newly reconstructed value:
-    // feedback = (1 - alpha) * feedback + alpha * reconstructed_gradient.
-    auto & feedback = *_reconstructed_gradient_feedback[component];
-    feedback.scale(1.0 - alpha);
-    feedback.add(alpha, *reconstructed_pressure_gradient[component]);
-    feedback.close();
-
-    // Publish the feedback state. Unlike a fresh blend with the base gradient, this accumulates the
-    // reconstructed pressure-gradient update over SIMPLE iterations.
-    *gradient[component] = feedback;
+    *gradient[component] = *(*relaxed_source)[component];
   }
 }
