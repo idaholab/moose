@@ -166,7 +166,7 @@ nx = 1000
   # Pressure diffusion kernel kept only because the Rhie-Chow object
   # references it. Pressure solve is disabled in the Executioner.
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     block = salt
@@ -197,6 +197,7 @@ nx = 1000
     T_liquidus = ${T_liquidus}
     T_solidus = ${T_solidus}
     rho = ${rho_salt}
+    smoothing = 'sharp'
   []
 []
 
