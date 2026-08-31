@@ -184,8 +184,9 @@ private:
   std::size_t locate(const Point2D & p) const;
 
   /**
-   * Collects the triangles that have to make way for a new vertex, starting from the triangle it
-   * falls in and spreading to every neighbor whose circumcircle contains it. Constrained segments
+   * Collects the triangles of the triangulation built so far that have to make way for a new
+   * vertex, the cavity of its insertion, starting from the triangle it falls in and spreading to
+   * every neighbor whose circumcircle contains it. Constrained segments
    * stop the spread. A neighbor is also taken in when the shared edge would otherwise produce a
    * triangle of zero or negative area, which is what keeps the cavity star shaped about the vertex.
    * @param seed The triangle the new vertex falls in

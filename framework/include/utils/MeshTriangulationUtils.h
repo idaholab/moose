@@ -91,7 +91,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
 /**
  * Performs the subdomain and boundary naming, the boundary id remapping (outer boundary to 0 and
  * hole i to i + 1), and the hole stitching on a mesh that has already been triangulated. This is
- * shared by the Triangle-backed and the frontal triangulators.
+ * shared by the Poly2Tri-backed and the frontal triangulators.
  * @param mg The calling mesh generator (used for paramError reporting)
  * @param mesh The triangulated mesh, modified in place
  * @param holes The hole meshes used by the triangulation (empty vector if no holes)

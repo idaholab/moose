@@ -1,6 +1,6 @@
 [Tests]
   design = '/XYFrontalDelaunayGenerator.md /TriToQuadConverter.md'
-  issues = '#27545'
+  issues = '#33522'
   [mbb_quads_yield_baseline]
     type = 'CSVDiff'
     input = 'mbb_pipeline.i'

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MoveNodesToCurveGenerator.h"
+#include "MoveBoundaryNodesToCurveGenerator.h"
 #include "ParsedCurveGenerator.h"
 #include "MooseMeshUtils.h"
 
@@ -22,10 +22,10 @@
 #include <limits>
 #include <set>
 
-registerMooseObject("MooseApp", MoveNodesToCurveGenerator);
+registerMooseObject("MooseApp", MoveBoundaryNodesToCurveGenerator);
 
 InputParameters
-MoveNodesToCurveGenerator::validParams()
+MoveBoundaryNodesToCurveGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -50,7 +50,8 @@ MoveNodesToCurveGenerator::validParams()
   return params;
 }
 
-MoveNodesToCurveGenerator::MoveNodesToCurveGenerator(const InputParameters & parameters)
+MoveBoundaryNodesToCurveGenerator::MoveBoundaryNodesToCurveGenerator(
+    const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     // The mesh of the curve is not used by this generator. It is requested so that the mesh
@@ -86,7 +87,7 @@ MoveNodesToCurveGenerator::MoveNodesToCurveGenerator(const InputParameters & par
 }
 
 std::unique_ptr<MeshBase>
-MoveNodesToCurveGenerator::generate()
+MoveBoundaryNodesToCurveGenerator::generate()
 {
   // The mesh generator system requires that every requested mesh is released here, and the mesh of
   // the curve is only requested for the dependency it creates
@@ -139,7 +140,7 @@ MoveNodesToCurveGenerator::generate()
 }
 
 ParsedCurveGenerator &
-MoveNodesToCurveGenerator::curveGenerator() const
+MoveBoundaryNodesToCurveGenerator::curveGenerator() const
 {
   const MeshGenerator & curve_generator =
       _app.getMeshGenerator(getParam<MeshGeneratorName>("parsed_curve_generator"));
@@ -160,19 +161,20 @@ MoveNodesToCurveGenerator::curveGenerator() const
 }
 
 Point
-MoveNodesToCurveGenerator::curvePoint(const Real t_param)
+MoveBoundaryNodesToCurveGenerator::curvePoint(const Real t_param)
 {
   return _curve_generator.pointCalculator(_is_closed_loop ? boundedParameter(t_param) : t_param);
 }
 
 Real
-MoveNodesToCurveGenerator::squaredDistance(const Real t_param, const Point & point)
+MoveBoundaryNodesToCurveGenerator::squaredDistance(const Real t_param, const Point & point)
 {
   return squaredDistance(curvePoint(t_param), point);
 }
 
 Real
-MoveNodesToCurveGenerator::squaredDistance(const Point & curve_point, const Point & point) const
+MoveBoundaryNodesToCurveGenerator::squaredDistance(const Point & curve_point,
+                                                   const Point & point) const
 {
   const Real dx = curve_point(0) - point(0);
   const Real dy = curve_point(1) - point(1);
@@ -180,7 +182,7 @@ MoveNodesToCurveGenerator::squaredDistance(const Point & curve_point, const Poin
 }
 
 Real
-MoveNodesToCurveGenerator::closestParameter(const Point & point)
+MoveBoundaryNodesToCurveGenerator::closestParameter(const Point & point)
 {
   // Sampling the whole curve brackets the closest point globally, so that the refinement below
   // does not converge onto a closest point of another part of the curve
@@ -215,9 +217,9 @@ MoveNodesToCurveGenerator::closestParameter(const Point & point)
 }
 
 Real
-MoveNodesToCurveGenerator::goldenSectionSearch(const Real t_lower,
-                                               const Real t_upper,
-                                               const Point & point)
+MoveBoundaryNodesToCurveGenerator::goldenSectionSearch(const Real t_lower,
+                                                       const Real t_upper,
+                                                       const Point & point)
 {
   // Inverse of the golden ratio, which is the factor the bracket shrinks by in each iteration
   const Real inv_golden_ratio = (std::sqrt(5.0) - 1.0) / 2.0;
@@ -256,7 +258,7 @@ MoveNodesToCurveGenerator::goldenSectionSearch(const Real t_lower,
 }
 
 Real
-MoveNodesToCurveGenerator::boundedParameter(const Real t_param) const
+MoveBoundaryNodesToCurveGenerator::boundedParameter(const Real t_param) const
 {
   const Real t_min =
       std::min(_section_bounding_t_values.front(), _section_bounding_t_values.back());

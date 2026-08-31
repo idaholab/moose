@@ -237,7 +237,7 @@ gridPoints()
 }
 
 /**
- * A table whose convex hull is the triangle (0, 0), (6, 0), (3, 3) with two more points sitting
+ * A point set whose convex hull is the triangle (0, 0), (6, 0), (3, 3) with two more points sitting
  * exactly on its base, so that four of the points are exactly collinear and two of those are on the
  * hull boundary without being corners of it. Point (2, 1) is the only one strictly inside.
  * @return the six points
@@ -262,13 +262,13 @@ flatQuadPoints()
 }
 
 /**
- * Builds the triangulation of a table by inserting the points one at a time, checking after every
- * single insertion that nothing is broken. Checking here rather than only at the end is what
+ * Builds the triangulation of a point set by inserting the points one at a time, checking after
+ * every single insertion that nothing is broken. Checking here rather than only at the end is what
  * catches a corruption that a later insertion would repair, and the point index in the message says
  * which insertion broke it.
  *
- * No table this runs on carries a constrained segment, so the empty circumcircle test is the whole
- * Delaunay contract here rather than a criterion that is too strong.
+ * No point set this runs on carries a constrained segment, so the empty circumcircle test is the
+ * whole Delaunay contract here rather than a criterion that is too strong.
  * @param points the points to triangulate, all distinct, the first of which initializes the
  * triangulation
  * @param tri filled with the triangulation of the points
@@ -475,9 +475,9 @@ TEST(XYIncrementalDelaunayTest, triangleCountMatchesEulerFormula)
   grid.initialize(gridPoints(), {});
   EXPECT_EQ(eulerTriangleCount(16, 12), grid.getTriangles().size());
 
-  // The collinear table: its hull is the triangle (0, 0), (6, 0), (3, 3), and points 1 and 2 count
-  // towards h even though they are not corners of it, because they are on its boundary. So h is 5
-  // rather than 3, and 2 * 6 - 5 - 2 = 5. Reading it the other way, a region with 5 boundary
+  // The collinear point set: its hull is the triangle (0, 0), (6, 0), (3, 3), and points 1 and 2
+  // count towards h even though they are not corners of it, because they are on its boundary. So h
+  // is 5 rather than 3, and 2 * 6 - 5 - 2 = 5. Reading it the other way, a region with 5 boundary
   // vertices and 1 point inside takes 5 + 2 * 1 - 2 = 5 triangles.
   XYIncrementalDelaunay collinear;
   collinear.initialize(collinearPoints(), {});

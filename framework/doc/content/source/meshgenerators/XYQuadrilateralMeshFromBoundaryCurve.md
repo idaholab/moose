@@ -4,7 +4,8 @@
 
 ## Overview
 
-Meshing a curved region with quadrilaterals takes a chain of generators: a triangulation biased
+We mesh a curved region with quadrilaterals using a chain of generators: a triangulation in the
+domain defined by the curve that is biased
 toward right angles, the conversion of that triangulation into quadrilaterals, the snap of the
 boundary nodes the conversion added back onto the boundary curves, and an optional smoothing
 pass. `XYQuadrilateralMeshFromBoundaryCurve` packages that chain behind one block. It creates the
@@ -19,8 +20,9 @@ generators as sub-generators:
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/eta_min). With
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/all_quad), its default, the triangles that could not
    be merged are eliminated and the mesh is purely quadrilateral; without it the mesh is
-   quad-dominant.
-3. [MoveNodesToCurveGenerator.md] snaps each boundary named in
+   quad-dominant, and the triangles of each subdomain are collected in a subdomain of their own
+   named after it with the suffix `_tri`.
+3. [MoveBoundaryNodesToCurveGenerator.md] snaps each boundary named in
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/snap_boundaries) onto the curve of the
    [ParsedCurveGenerator.md] it is paired with in
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/parsed_curve_generators), one snap per pair. Boundaries

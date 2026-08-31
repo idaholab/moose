@@ -59,7 +59,7 @@
     type = TriToQuadConverter
     input = eeid
     algorithm = RECOMBINE
-    tri_subdomain_name = leftover_tris
+    tri_subdomain_name_suffix = leftover
   []
 
   # Both the triangulation and the recombination depend on element id numbering

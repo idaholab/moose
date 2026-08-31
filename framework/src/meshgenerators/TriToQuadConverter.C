@@ -165,14 +165,17 @@ TriToQuadConverter::validParams()
       "eta_min",
       0.3,
       "eta_min > 0 & eta_min <= 1",
-      "'RECOMBINE' algorithm only: the quality score that a pair of adjacent triangles must reach "
-      "to be merged into a quadrilateral. A perfect rectangle scores 1.");
+      "'RECOMBINE' algorithm only: the quality score eta = 1 - (2 / pi) max_k |pi / 2 - alpha_k| "
+      "of the quadrilateral, in which alpha_k are its four internal angles, that a pair of "
+      "adjacent triangles must reach to be merged. A rectangle scores 1 and a non-convex "
+      "quadrilateral 0.");
 
   params.addParam<SubdomainName>(
-      "tri_subdomain_name",
-      "'RECOMBINE' algorithm only: the name of the subdomain that the triangles which could not be "
-      "merged are moved into. Those triangles stay in their original subdomain if this parameter "
-      "is not set.");
+      "tri_subdomain_name_suffix",
+      "tri",
+      "'RECOMBINE' algorithm only: the triangles which could not be merged are moved out of each "
+      "subdomain into a new subdomain named after it, with an underscore and this suffix "
+      "appended. A subdomain without a name contributes its id instead.");
 
   params.addParam<bool>("all_quad",
                         false,
@@ -180,7 +183,7 @@ TriToQuadConverter::validParams()
                         "merged are eliminated so that the converted mesh consists exclusively of "
                         "quadrilaterals.");
 
-  params.addParamNamesToGroup("eta_min tri_subdomain_name all_quad", "Recombination");
+  params.addParamNamesToGroup("eta_min tri_subdomain_name_suffix all_quad", "Recombination");
 
   params.addClassDescription("Converts a mesh consisting of TRI3 elements into a mesh consisting "
                              "of QUAD4 elements, either by splitting every triangle into three "
@@ -194,18 +197,16 @@ TriToQuadConverter::TriToQuadConverter(const InputParameters & parameters)
     _input(getMesh("input")),
     _algorithm(getParam<MooseEnum>("algorithm")),
     _eta_min(getParam<Real>("eta_min")),
-    _has_tri_subdomain(isParamValid("tri_subdomain_name")),
-    _tri_subdomain_name(_has_tri_subdomain ? getParam<SubdomainName>("tri_subdomain_name")
-                                           : SubdomainName()),
+    _tri_subdomain_name_suffix(getParam<SubdomainName>("tri_subdomain_name_suffix")),
     _all_quad(getParam<bool>("all_quad"))
 {
   if (_all_quad && _algorithm == "SUBDIVISION")
     paramError("all_quad",
                "The 'all_quad' option is only available with the 'RECOMBINE' algorithm.");
 
-  if (_all_quad && _has_tri_subdomain)
+  if (_all_quad && isParamSetByUser("tri_subdomain_name_suffix"))
     paramError("all_quad",
-               "The 'all_quad' option leaves no triangle for 'tri_subdomain_name' to name.");
+               "The 'all_quad' option leaves no triangle for 'tri_subdomain_name_suffix' to name.");
 }
 
 std::unique_ptr<MeshBase>
@@ -216,11 +217,6 @@ TriToQuadConverter::generate()
     paramError("input", "Input is not a replicated mesh, which is required");
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
-
-  // The conversion is driven by the neighbor links, and those are only built, along with the
-  // element ranges that the loops below rely on, once the mesh is prepared
-  if (!mesh.is_prepared())
-    mesh.prepare_for_use();
 
   for (const auto & elem : mesh.element_ptr_range())
     if (elem->type() != libMesh::ElemType::TRI3)
@@ -463,6 +459,11 @@ TriToQuadConverter::recombine(ReplicatedMesh & mesh) const
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   const auto bdry_side_list = boundary_info.build_side_list();
 
+  // The candidate pairs are read off the neighbor links, which are all the recombination needs of
+  // the mesh preparation; the full preparation is left to the end, once the elements are final
+  if (!mesh.preparation().has_neighbor_ptrs)
+    mesh.find_neighbors();
+
   // Keyed by edge rather than by element side so that an id registered on either of the two sides
   // of an interior edge is found
   std::set<std::pair<dof_id_type, dof_id_type>> boundary_edges;
@@ -537,7 +538,8 @@ TriToQuadConverter::recombine(ReplicatedMesh & mesh) const
     second->subdomain_id() = scratch_subdomain_id;
   }
 
-  if (_has_tri_subdomain)
+  // Once the elimination has run there is no triangle left to move
+  if (!_all_quad)
     moveSurvivingTriangles(mesh, scratch_subdomain_id);
 
   removeScratchElements(mesh, scratch_subdomain_id);
@@ -553,24 +555,38 @@ void
 TriToQuadConverter::moveSurvivingTriangles(ReplicatedMesh & mesh,
                                            const subdomain_id_type scratch_subdomain_id) const
 {
-  // A name the input mesh already uses for a block would leave two subdomain ids sharing that
-  // name, so the surviving triangles join the existing subdomain instead of a new one. Otherwise
-  // the scratch subdomain is empty when nothing was merged, so its id is taken as the reference
-  // rather than asking the mesh for its highest subdomain id again
-  const auto existing_id = MooseMeshUtils::getSubdomainID(_tri_subdomain_name, mesh);
-  const subdomain_id_type tri_subdomain_id =
-      (existing_id != Moose::INVALID_BLOCK_ID) ? existing_id : scratch_subdomain_id + 1;
-
-  bool has_surviving_tri = false;
+  // The triangles that were not merged still carry the subdomain they came from, and they are
+  // grouped by it so that each original subdomain gets one new subdomain, in the order of the
+  // original ids
+  std::map<subdomain_id_type, std::vector<Elem *>> surviving_tris;
   for (const auto & elem : mesh.active_element_ptr_range())
     if (elem->type() == libMesh::ElemType::TRI3 && elem->subdomain_id() != scratch_subdomain_id)
-    {
-      elem->subdomain_id() = tri_subdomain_id;
-      has_surviving_tri = true;
-    }
+      surviving_tris[elem->subdomain_id()].push_back(elem);
 
-  // Naming a subdomain that holds no element would leave the mesh with a block name that matches
-  // nothing
-  if (has_surviving_tri && existing_id == Moose::INVALID_BLOCK_ID)
-    mesh.set_subdomain_name(tri_subdomain_id, _tri_subdomain_name);
+  // The scratch subdomain holds the highest id in use, so the ids past it are free; the scratch
+  // subdomain itself is emptied before the mesh is returned
+  const auto & subdomain_names = mesh.get_subdomain_name_map();
+  subdomain_id_type tri_subdomain_id = scratch_subdomain_id + 1;
+  for (const auto & [original_id, tris] : surviving_tris)
+  {
+    const auto name_it = subdomain_names.find(original_id);
+    const SubdomainName original_name =
+        (name_it == subdomain_names.end() || name_it->second.empty()) ? std::to_string(original_id)
+                                                                      : name_it->second;
+    const SubdomainName tri_subdomain_name = original_name + "_" + _tri_subdomain_name_suffix;
+
+    // Two subdomain ids sharing a name would make that name ambiguous everywhere it is used
+    if (MooseMeshUtils::getSubdomainID(tri_subdomain_name, mesh) != Moose::INVALID_BLOCK_ID)
+      paramError("tri_subdomain_name_suffix",
+                 "The subdomain name '",
+                 tri_subdomain_name,
+                 "' that this suffix gives the unmerged triangles of subdomain ",
+                 original_id,
+                 " already exists in the mesh.");
+
+    for (Elem * const tri : tris)
+      tri->subdomain_id() = tri_subdomain_id;
+    mesh.set_subdomain_name(tri_subdomain_id, tri_subdomain_name);
+    ++tri_subdomain_id;
+  }
 }

@@ -56,7 +56,6 @@
     input = triang
     algorithm = RECOMBINE
     eta_min = 0.3
-    tri_subdomain_name = leftover_tris
   []
   [smooth]
     type = SmoothMeshGenerator

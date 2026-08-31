@@ -43,8 +43,9 @@ XYQuadrilateralMeshFromBoundaryCurve::validParams()
       "eta_min",
       0.3,
       "eta_min > 0 & eta_min <= 1",
-      "The quality score that a pair of adjacent triangles must reach to be merged into a "
-      "quadrilateral. A perfect rectangle scores 1.");
+      "The quality score eta = 1 - (2 / pi) max_k |pi / 2 - alpha_k| of the quadrilateral, in "
+      "which alpha_k are its four internal angles, that a pair of adjacent triangles must reach "
+      "to be merged. A rectangle scores 1 and a non-convex quadrilateral 0.");
   params.addParam<bool>("all_quad",
                         true,
                         "Whether the triangles that could not be merged are eliminated so that the "
@@ -134,14 +135,14 @@ XYQuadrilateralMeshFromBoundaryCurve::XYQuadrilateralMeshFromBoundaryCurve(
   MeshGeneratorName previous = name() + "_to_quad";
   for (const auto snap_i : index_range(parsed_curve_generators))
   {
-    auto params = _app.getFactory().getValidParams("MoveNodesToCurveGenerator");
+    auto params = _app.getFactory().getValidParams("MoveBoundaryNodesToCurveGenerator");
 
     params.set<MeshGeneratorName>("input") = previous;
     params.set<BoundaryName>("boundary") = snap_boundaries[snap_i];
     params.set<MeshGeneratorName>("parsed_curve_generator") = parsed_curve_generators[snap_i];
 
     previous = name() + "_snap_" + std::to_string(snap_i);
-    addMeshSubgenerator("MoveNodesToCurveGenerator", previous, params);
+    addMeshSubgenerator("MoveBoundaryNodesToCurveGenerator", previous, params);
   }
 
   if (getParam<bool>("smooth"))

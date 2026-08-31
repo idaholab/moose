@@ -1,10 +1,9 @@
 [Tests]
   design = '/XYFrontalDelaunayGenerator.md'
-  issues = '#27545'
+  issues = '#33522'
   [frontal]
-    requirement = 'The system shall triangulate a planar region by advancing a front that places '
-                  'points at a target size ahead of the triangles that are still too large, '
-                  'reporting the meshed area, the average element size and the average element '
+    requirement = 'The system shall triangulate a planar region with an advancing front algorithm '
+                  'and report the meshed area, the average element size and the average element '
                   'shape quality of the triangulation, '
     # The exact point placement depends on the rounding of every floating point operation feeding
     # the front, so the meshes differ between platforms and cannot be golded. The meshed area is

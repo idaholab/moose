@@ -1,6 +1,6 @@
 [Tests]
-  design = '/MoveNodesToCurveGenerator.md'
-  issues = '#27545'
+  design = '/MoveBoundaryNodesToCurveGenerator.md'
+  issues = '#33522'
   [snap_circle]
     type = 'CSVDiff'
     input = 'snap_circle.i'

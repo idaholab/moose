@@ -1,6 +1,6 @@
 [Tests]
   design = '/XYQuadrilateralMeshFromBoundaryCurve.md'
-  issues = '#27545'
+  issues = '#33522'
   [gear]
     type = 'CSVDiff'
     input = 'gear.i'

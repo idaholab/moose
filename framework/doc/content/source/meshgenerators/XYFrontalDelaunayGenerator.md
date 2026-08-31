@@ -6,7 +6,9 @@
 
 `XYFrontalDelaunayGenerator` triangulates the planar region enclosed by an input boundary mesh,
 optionally around holes. It shares the boundary, hole and sizing parameters of
-[XYDelaunayGenerator.md], but not that generator's own parameters. It defines the region with
+[XYDelaunayGenerator.md]; the boundary layer, `output_subdomain_id`, `smooth_triangulation`,
+`tri_element_type`, `interior_point_files`, stitching `algorithm` and `verbose_stitching`
+parameters of that generator are not available here. It defines the region with
 [!param](/Mesh/XYFrontalDelaunayGenerator/boundary) and
 [!param](/Mesh/XYFrontalDelaunayGenerator/holes), limits the element size with
 [!param](/Mesh/XYFrontalDelaunayGenerator/desired_area),
@@ -66,10 +68,13 @@ background triangulation is built first; the boundary tangents are imposed on it
 representation under which four directions $\pi/2$ apart are the same value, that representation
 is smoothed by a Laplace solve, and the frame at any point is then interpolated from the
 background mesh. The field is boundary-aligned near the boundary and varies smoothly inside,
-which is what keeps the quadrilaterals aligned with each other across the interior.
+which is what keeps the right isosceles triangles, and so the quadrilaterals that
+[TriToQuadConverter.md] later merges them into, aligned with each other across the interior.
 
-A cross field cannot be smooth everywhere on every domain. It has singularities, and around a
-singularity the quadrilateral mesh acquires a node whose valence is not four. Those singularities
+A cross field cannot be smooth everywhere on every domain. It has singularities, points where
+the frame is undefined. The triangles placed around a singularity cannot all be aligned with each
+other, and a quadrilateral mesh recombined from them acquires a node there whose valence is not
+four. Those singularities
 are forced by the geometry, not by the solve: they arise where a boundary corner turns through an
 angle that is +not+ a multiple of $\pi/2$, and where the tangent of a curved boundary winds far
 enough that no smooth interpolation of the imposed directions exists in the interior. A circular
@@ -102,9 +107,10 @@ A polyline boundary with a reentrant corner, which the front reaches from two si
 
 !listing test/tests/meshgenerators/xy_frontal_delaunay_generator/frontal_l_shape.i block=Mesh
 
-The end-to-end use is the pipeline below, which triangulates an MBB-beam domain with three
-circular holes and then recombines the result into quadrilaterals, collecting the triangles that
-could not be merged into their own subdomain so the yield can be measured:
+The end-to-end use is the pipeline below, which triangulates the domain of the MBB beam (the
+Messerschmitt-Bölkow-Blohm beam, the rectangular benchmark domain of topology optimization) with
+three circular holes cut into it, and then recombines the result into quadrilaterals, collecting
+the triangles that could not be merged into their own subdomain so the yield can be measured:
 
 !listing test/tests/meshgenerators/mbb_pipeline/mbb_pipeline.i block=Mesh
 

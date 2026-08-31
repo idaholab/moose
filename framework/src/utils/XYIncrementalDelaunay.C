@@ -122,6 +122,9 @@ XYIncrementalDelaunay::isStrictlyBetween(const std::size_t v_first,
                                          const std::size_t v_mid,
                                          const std::size_t v_last) const
 {
+  mooseAssert(moose_orient2d(xy(v_first), xy(v_mid), xy(v_last)) == 0.0,
+              "The three vertices have to be collinear for a coordinate comparison to order them");
+
   // The three are collinear, so whichever coordinate separates the two ends orders all three.
   const auto & first = _vertices[v_first];
   const auto & mid = _vertices[v_mid];
@@ -313,14 +316,23 @@ XYIncrementalDelaunay::triangulatePseudopolygon(
     const std::size_t last,
     std::vector<std::array<std::size_t, 3>> & triangles) const
 {
+  // An empty chain leaves nothing but the edge from v_start to v_end itself, so there is no
+  // polygon to cover
   if (first == last)
     return;
 
+  // The triangle the edge (v_start, v_end) belongs to in a Delaunay triangulation of the polygon
+  // is the one whose apex leaves no other chain vertex inside its circumcircle. Every chain vertex
+  // sees the edge, so whenever a vertex lies inside the circumcircle of the current apex, that
+  // vertex takes over as the apex; the one left standing has an empty circumcircle
   auto best = first;
   for (const auto i : make_range(first + 1, last))
     if (moose_incircle(xy(v_start), xy(v_end), xy(chain[best]), xy(chain[i])) > 0.0)
       best = i;
 
+  // That triangle splits the polygon in two: the chain vertices before the apex form a polygon
+  // seen from the new edge (apex, v_end), and those after it a polygon seen from (v_start, apex),
+  // each of which is covered the same way
   triangles.push_back({v_start, v_end, chain[best]});
   triangulatePseudopolygon(chain[best], v_end, chain, first, best, triangles);
   triangulatePseudopolygon(v_start, chain[best], chain, best + 1, last, triangles);
@@ -352,8 +364,11 @@ XYIncrementalDelaunay::initialize(const std::vector<Point2D> & points,
     y_max = std::max(y_max, p.y);
   }
 
-  // A triangle far enough outside the points that all of them are strictly inside it, which is what
-  // makes the cavity of every insertion a closed polygon.
+  // A triangle far enough outside the points that all of them are strictly inside it. Inserting a
+  // point deletes the cavity of that insertion, the triangles whose circumcircle contains the point
+  // (see growCavity()), and fans the hole they leave out from the point. With every point inside
+  // the bounding triangle that hole is always a closed polygon, so no insertion ever has to extend
+  // the convex hull of the triangulation.
   const auto reach = _bounding_reach * std::max({x_max - x_min, y_max - y_min, 1.0});
   const auto x_mid = 0.5 * (x_min + x_max);
   const auto y_mid = 0.5 * (y_min + y_max);

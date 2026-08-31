@@ -37,7 +37,9 @@ class LinearImplicitSystem;
  *
  *   Laplace(z) = 0,   z = exp(4 i theta_t) on the boundary,   theta = arg(z) / 4
  *
- * where theta_t is the boundary tangent angle. Working with z instead of theta makes the problem
+ * where theta_t is the boundary tangent angle and theta is the angle of one of the four directions
+ * of the cross at any point of the domain, which is theta_t itself on the boundary. Working with z
+ * instead of theta makes the problem
  * linear and single valued: theta itself is only defined modulo pi/2, so it can neither be solved
  * for nor interpolated directly. Zeros of z are the field singularities and become the irregular
  * (valence 3 and 5) vertices of the final quad mesh.

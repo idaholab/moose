@@ -21,12 +21,12 @@ class ParsedCurveGenerator;
  * point of the curve recovers the geometry that those chords approximate. The curve is used in
  * the XY plane, so only the x and y coordinates of the nodes are snapped.
  */
-class MoveNodesToCurveGenerator : public MeshGenerator
+class MoveBoundaryNodesToCurveGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  MoveNodesToCurveGenerator(const InputParameters & parameters);
+  MoveBoundaryNodesToCurveGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

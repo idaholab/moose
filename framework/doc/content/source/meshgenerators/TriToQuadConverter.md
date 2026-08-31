@@ -61,11 +61,15 @@ reproducible from one run to the next; it does not attempt to reconcile the two 
 
 ### Leftover Triangles
 
-The triangles that recombination could not merge can be handled in either of two ways, which are
+The triangles that recombination could not merge are handled in either of two ways, which are
 mutually exclusive.
 
-[!param](/Mesh/TriToQuadConverter/tri_subdomain_name) moves them into a subdomain of their own,
-leaving a mixed TRI3/QUAD4 mesh. Isolating them makes the recombination yield measurable, and allows
+By default they are moved out of the subdomains they came from, so that no subdomain mixes TRI3
+and QUAD4 elements. The triangles of each subdomain go into a new subdomain of their own, named
+after the original one with an underscore and
+[!param](/Mesh/TriToQuadConverter/tri_subdomain_name_suffix) appended: with the default suffix,
+the triangles of `left_block` end up in `left_block_tri`, and a subdomain without a name
+contributes its id instead. Isolating them makes the recombination yield measurable, and allows
 [Exodus.md] output, which requires a single element type per subdomain.
 
 [!param](/Mesh/TriToQuadConverter/all_quad) instead eliminates them, so that the output consists
@@ -79,14 +83,15 @@ unsplit neighbors with a hanging node in the middle of a side. Splitting everyth
 the mesh conformal, and it is why the two algorithms cannot be mixed element by element.
 
 On a curved boundary, the nodes this subdivision creates are the midpoints of the existing
-chords, so they sit strictly inside the curve. [MoveNodesToCurveGenerator.md] moves them back
+chords, so they sit strictly inside the curve. [MoveBoundaryNodesToCurveGenerator.md] moves them back
 onto the curve.
 
 ## Preserved Mesh Data
 
 The conversion carries the following through, under both algorithms:
 
-- subdomain ids and names;
+- subdomain ids and names, apart from the leftover triangles of a recombination, which move into
+  the subdomains derived from theirs as described above;
 - sideset ids and names. Where a boundary edge is split, under `SUBDIVISION` or under
   [!param](/Mesh/TriToQuadConverter/all_quad), both halves inherit the ids of the original edge;
 - nodesets, rebuilt on the converted mesh;
@@ -99,8 +104,9 @@ and no leftover triangle:
 
 !listing test/tests/meshgenerators/tri_to_quad_converter/subdivision_all_quad.i block=Mesh
 
-Recombining the same kind of mesh, with the leftover triangles collected into their own
-subdomain. The mesh reaching the conversion carries two subdomains, a sideset on their interface,
+Recombining the same kind of mesh, with the leftover triangles of each of its two subdomains
+collected into a subdomain named after it. The mesh reaching the conversion carries two
+subdomains, a sideset on their interface,
 a second sideset on an interior edge, a nodeset, and an extra element integer, none of which the
 conversion discards:
 
@@ -118,7 +124,7 @@ stable.
 Triangulations intended for recombination are best produced by
 [XYFrontalDelaunayGenerator.md], which biases the triangles toward right angles so that more
 pairs clear [!param](/Mesh/TriToQuadConverter/eta_min). When the boundary of the input is a
-parametric curve, [MoveNodesToCurveGenerator.md] can move the boundary nodes that
+parametric curve, [MoveBoundaryNodesToCurveGenerator.md] can move the boundary nodes that
 [!param](/Mesh/TriToQuadConverter/all_quad) created back onto that curve.
 
 !bibtex bibliography

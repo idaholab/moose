@@ -1,6 +1,6 @@
-# MoveNodesToCurveGenerator
+# MoveBoundaryNodesToCurveGenerator
 
-!syntax description /Mesh/MoveNodesToCurveGenerator
+!syntax description /Mesh/MoveBoundaryNodesToCurveGenerator
 
 ## Overview
 
@@ -8,12 +8,12 @@ A boundary (of a 2D mesh) meshed from a curve is a chain of straight element edg
 encloses the chord
 polygon of the curve rather than the curve itself. Every node of that chain does lie on the
 curve, but any node added to the boundary afterwards lies on a chord, and the gap between the
-chord and the curve is real geometry that the mesh has lost.
+chord and the curve is a part of the geometry that the mesh is not capturing.
 
-`MoveNodesToCurveGenerator` closes that gap. It takes the boundary named in
-[!param](/Mesh/MoveNodesToCurveGenerator/boundary) and moves each of its nodes to the closest
+`MoveBoundaryNodesToCurveGenerator` closes that gap. It takes the boundary named in
+[!param](/Mesh/MoveBoundaryNodesToCurveGenerator/boundary) and moves each of its nodes to the closest
 point of the curve defined by the [ParsedCurveGenerator.md] named in
-[!param](/Mesh/MoveNodesToCurveGenerator/parsed_curve_generator). The curve is not re-entered here:
+[!param](/Mesh/MoveBoundaryNodesToCurveGenerator/parsed_curve_generator). The curve is not re-entered here:
 [!param](/Mesh/ParsedCurveGenerator/section_bounding_t_values) and
 [!param](/Mesh/ParsedCurveGenerator/is_closed_loop) are read from that generator,
 and the curve itself is evaluated by it, so the nodes are snapped onto the same curve
@@ -30,12 +30,12 @@ in-plane coordinates of a node are changed. The input mesh must be replicated.
 The closest point is found in the curve parameter $t$, not in space. Each section of the curve
 delimited by [!param](/Mesh/ParsedCurveGenerator/section_bounding_t_values) is first sampled
 uniformly at
-[!param](/Mesh/MoveNodesToCurveGenerator/samples_per_section) values of $t$, and the sample
+[!param](/Mesh/MoveBoundaryNodesToCurveGenerator/samples_per_section) values of $t$, and the sample
 nearest the node brackets the minimum between its two neighbors. A golden-section search then
 refines $t$ within that bracket.
 
 The sampling is what makes the bracket correct, so
-[!param](/Mesh/MoveNodesToCurveGenerator/samples_per_section) has to resolve the features of
+[!param](/Mesh/MoveBoundaryNodesToCurveGenerator/samples_per_section) has to resolve the features of
 the curve: a curve that turns sharply, or approaches itself, within one sampling interval can
 bracket the wrong minimum, and the refinement will then converge to a point that is close by but
 not closest. Raising the parameter costs only setup time.
@@ -49,7 +49,7 @@ interval.
 
 One instance snaps one boundary onto one curve. A domain bounded by several curves needs one
 instance per pair, chained through
-[!param](/Mesh/MoveNodesToCurveGenerator/input).
+[!param](/Mesh/MoveBoundaryNodesToCurveGenerator/input).
 
 Place the snap after the quadrilateral conversion, so that it also catches the nodes that
 conversion introduced, and follow it with a [SmoothMeshGenerator.md] to let the interior absorb
@@ -58,7 +58,7 @@ geometry is kept while the elements just inside it are relaxed.
 
 [CircularBoundaryCorrectionGenerator.md] addresses a related but distinct problem. It corrects
 the radius of a circular polygonal boundary so that the polygon encloses the area of the circle
-it stands for, keeping the boundary polygonal. `MoveNodesToCurveGenerator` moves nodes onto an
+it stands for, keeping the boundary polygonal. `MoveBoundaryNodesToCurveGenerator` moves nodes onto an
 arbitrary parametric curve, and reduces the polygonization error rather than compensating for it.
 In the circle example below, the boundary mesh approximates a unit circle by the chords of a
 32-sided polygon and so encloses an area of $3.121445$, in error by $0.64\%$; the snap brings the
@@ -70,14 +70,14 @@ instead remove the volume error to numerical precision, at the expense of the no
 A unit circle triangulated by [XYFrontalDelaunayGenerator.md], converted to quadrilaterals,
 snapped back onto the circle it was generated from, and smoothed:
 
-!listing test/tests/meshgenerators/move_nodes_to_curve_generator/snap_circle.i block=Mesh
+!listing test/tests/meshgenerators/move_boundary_nodes_to_curve_generator/snap_circle.i block=Mesh
 
 The boundary the snap acts on is the one that
 [!param](/Mesh/XYFrontalDelaunayGenerator/output_boundary) named on the triangulation, which is
-the sideset the outer curve left behind.
+the sideset that was placed on the outer curve.
 
-!syntax parameters /Mesh/MoveNodesToCurveGenerator
+!syntax parameters /Mesh/MoveBoundaryNodesToCurveGenerator
 
-!syntax inputs /Mesh/MoveNodesToCurveGenerator
+!syntax inputs /Mesh/MoveBoundaryNodesToCurveGenerator
 
-!syntax children /Mesh/MoveNodesToCurveGenerator
+!syntax children /Mesh/MoveBoundaryNodesToCurveGenerator

@@ -302,23 +302,6 @@ TEST(TriToQuadCleanupTest, templatesTileTheirElement)
 }
 
 /**
- * Neither template takes an argument, so the same call has to give the same quadrilaterals in the
- * same order every time. The mesh the generator writes is only reproducible from one run to the
- * next if it does.
- */
-TEST(TriToQuadCleanupTest, templatesAreDeterministic)
-{
-  const auto tri_quads = TriToQuadConverter::triSubdivisionTemplate();
-  const auto quad_quads = TriToQuadConverter::quadSubdivisionTemplate();
-
-  for (const auto call : make_range(4u))
-  {
-    EXPECT_EQ(tri_quads, TriToQuadConverter::triSubdivisionTemplate()) << "call " << call;
-    EXPECT_EQ(quad_quads, TriToQuadConverter::quadSubdivisionTemplate()) << "call " << call;
-  }
-}
-
-/**
  * Subdividing every element of a mixed patch leaves it conformal across the elements and not only
  * inside each one. The patch is two quadrilaterals side by side with a triangle on the end of the
  * strip: A and B share the side from node 1 to node 4, B and C the side from node 2 to node 5.

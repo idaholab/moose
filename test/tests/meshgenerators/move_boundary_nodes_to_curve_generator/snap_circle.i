@@ -24,7 +24,7 @@
     all_quad = true
   []
   [snap]
-    type = MoveNodesToCurveGenerator
+    type = MoveBoundaryNodesToCurveGenerator
     input = to_quad
     boundary = 'circumference'
     parsed_curve_generator = circle

@@ -16,6 +16,7 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/int_range.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/mesh_generation.h"
 #include "libmesh/node.h"
 #include "libmesh/parallel.h"
 #include "libmesh/point.h"
@@ -166,19 +167,16 @@ outgoingBoundaryTangents(const libMesh::MeshBase & mesh)
 }
 
 /**
- * Background mesh of a disk centered on the origin, built as concentric rings of nodes joined by a
- * fan of triangles at the center and by two triangles per quadrilateral between rings. The boundary
- * tangent is the analytic tangent of the circle rather than the direction of the polygonal edge, so
- * that the recovered field can be compared against the exact solution on the disk.
+ * Background mesh of a disk centered on the origin, built by libMesh from its five element coarse
+ * grid, refined uniformly with the boundary nodes snapped onto the circle at every step. The
+ * boundary tangent is the analytic tangent of the circle at each boundary node rather than the
+ * direction of the polygonal edge, so that the recovered field can be compared against the exact
+ * solution on the disk.
  * @param comm the communicator to build the mesh on
- * @param n_angular number of nodes per ring, which must exceed eight so that arg(z) advances by
- * less than half a turn between neighboring boundary nodes
- * @param n_radial number of rings, that is, the number of elements along a radius
+ * @param n_refinements number of uniform refinements of the coarse grid
  */
 BackgroundMesh
-makeDiskMesh(const libMesh::Parallel::Communicator & comm,
-             const unsigned int n_angular,
-             const unsigned int n_radial)
+makeDiskMesh(const libMesh::Parallel::Communicator & comm, const unsigned int n_refinements)
 {
   BackgroundMesh background;
   background.mesh = std::make_unique<libMesh::ReplicatedMesh>(comm);
@@ -186,39 +184,16 @@ makeDiskMesh(const libMesh::Parallel::Communicator & comm,
   mesh.set_mesh_dimension(2);
   mesh.set_spatial_dimension(2);
 
-  // The boundary data and every result the solver reports are keyed by node id.
-  mesh.allow_renumbering(false);
+  libMesh::MeshTools::Generation::build_sphere(mesh, disk_radius, n_refinements, libMesh::TRI3);
 
-  libMesh::Node * const center = mesh.add_point(Point(0.0, 0.0, 0.0));
-
-  // ring[j][k] sits at radius (j + 1) * disk_radius / n_radial and angle 2 pi k / n_angular.
-  std::vector<std::vector<libMesh::Node *>> ring(n_radial,
-                                                 std::vector<libMesh::Node *>(n_angular, nullptr));
-  for (const auto j : make_range(n_radial))
-    for (const auto k : make_range(n_angular))
-    {
-      const Real radius = (j + 1) * disk_radius / n_radial;
-      const Real angle = 2.0 * libMesh::pi * k / n_angular;
-      ring[j][k] = mesh.add_point(Point(radius * std::cos(angle), radius * std::sin(angle), 0.0));
-    }
-
-  for (const auto k : make_range(n_angular))
-    addTri(mesh, center, ring[0][k], ring[0][(k + 1) % n_angular]);
-
-  for (const auto j : make_range(n_radial - 1))
-    for (const auto k : make_range(n_angular))
-    {
-      const auto next = (k + 1) % n_angular;
-      addTri(mesh, ring[j][k], ring[j + 1][k], ring[j + 1][next]);
-      addTri(mesh, ring[j][k], ring[j + 1][next], ring[j][next]);
-    }
-
-  mesh.prepare_for_use();
-
-  for (const auto k : make_range(n_angular))
+  // Every boundary node sits on the circle, so its polar angle gives the tangent of the circle
+  // there. The ids are read off the finished mesh, which is what the solver keys its results by.
+  for (const auto & boundary_node : outgoingBoundaryTangents(mesh))
   {
-    const Real angle = 2.0 * libMesh::pi * k / n_angular;
-    background.boundary_tangent_angles[ring[n_radial - 1][k]->id()] = angle + 0.5 * libMesh::pi;
+    const auto node_id = boundary_node.first;
+    const Point & node_point = mesh.point(node_id);
+    background.boundary_tangent_angles[node_id] =
+        std::atan2(node_point(1), node_point(0)) + 0.5 * libMesh::pi;
   }
 
   return background;
@@ -364,7 +339,7 @@ windingSites(const libMesh::MeshBase & mesh, const XYCrossFieldSolver & solver)
 
 TEST_F(XYCrossFieldSolverTest, diskBoundaryTangentAngle)
 {
-  const auto background = makeDiskMesh(_app->comm(), 64, 16);
+  const auto background = makeDiskMesh(_app->comm(), 5);
   XYCrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
   solver.solve();
 
@@ -402,7 +377,7 @@ TEST_F(XYCrossFieldSolverTest, diskBoundaryTangentAngle)
 
 TEST_F(XYCrossFieldSolverTest, diskSingularityIndexSum)
 {
-  const auto background = makeDiskMesh(_app->comm(), 64, 16);
+  const auto background = makeDiskMesh(_app->comm(), 5);
   XYCrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
   solver.solve();
 
@@ -464,7 +439,8 @@ TEST_F(XYCrossFieldSolverTest, lShapeHasNoInteriorSingularity)
 
 TEST_F(XYCrossFieldSolverTest, equilateralTriangleSingularityAtCentroid)
 {
-  const auto background = makeEquilateralTriangleMesh(_app->comm(), 18);
+  const unsigned int n_side = 18;
+  const auto background = makeEquilateralTriangleMesh(_app->comm(), n_side);
   XYCrossFieldSolver solver(*background.mesh, background.boundary_tangent_angles);
   solver.solve();
 
@@ -491,21 +467,25 @@ TEST_F(XYCrossFieldSolverTest, equilateralTriangleSingularityAtCentroid)
   // Each of the three corners turns the boundary tangent by a third of a turn, which the four fold
   // symmetric z sees as 4 / 3 of a turn, that is, as a third of a turn once whole turns are
   // discarded. The three of them wind z once around the boundary, so the triangle carries a single
-  // singularity of index 1/4, the valence five vertex a quad mesh of a triangle needs.
+  // singularity of index 1/4, the valence three vertex a quad mesh of a triangle needs.
   EXPECT_EQ(total_winding, 1);
 
   // The domain, its lattice and its boundary data are all invariant under a third of a turn about
   // the centroid, under which z picks up a third of a turn of phase. Only z = 0 satisfies that, so
-  // the field vanishes exactly on the node the lattice puts at the centroid.
-  ASSERT_FALSE(solver.singularNodes().empty());
-  Real closest_singular_node = std::numeric_limits<Real>::max();
+  // the field vanishes exactly on the node the lattice puts at the centroid, and that node has to
+  // be reported singular. Around a singularity of index 1/4 the magnitude of z grows linearly with
+  // the distance from it, so the only other nodes that can fall under the singular magnitude are
+  // the immediate lattice neighbors of the centroid, one lattice spacing away.
+  const Real lattice_spacing = 1.0 / n_side;
+  bool centroid_is_singular = false;
   for (const auto node_id : solver.singularNodes())
   {
     const Real distance = (background.mesh->point(node_id) - centroid).norm();
-    EXPECT_LT(distance, 0.7 * inradius)
+    EXPECT_LT(distance, 1.5 * lattice_spacing)
         << "node " << node_id << " is reported singular " << distance
-        << " away from the centroid, where the field does not come close to vanishing";
-    closest_singular_node = std::min(closest_singular_node, distance);
+        << " away from the centroid, further than the lattice neighbors of the singularity";
+    if (distance < algebraic_tol)
+      centroid_is_singular = true;
   }
-  EXPECT_NEAR(closest_singular_node, 0.0, algebraic_tol);
+  EXPECT_TRUE(centroid_is_singular) << "the node at the centroid is not reported singular";
 }

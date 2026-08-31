@@ -15,7 +15,7 @@
  * Meshes a region bounded by input curves with quadrilaterals in one step, by chaining the
  * generators of the all-quad pipeline as sub-generators: XYFrontalDelaunayGenerator triangulates
  * the region, TriToQuadConverter recombines the triangles into quadrilaterals,
- * MoveNodesToCurveGenerator moves the boundary nodes the conversion added back onto each
+ * MoveBoundaryNodesToCurveGenerator moves the boundary nodes the conversion added back onto each
  * parametric boundary curve, and SmoothMeshGenerator optionally relaxes the result.
  */
 class XYQuadrilateralMeshFromBoundaryCurve : public MeshGenerator

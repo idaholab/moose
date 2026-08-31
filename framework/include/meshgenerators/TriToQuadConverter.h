@@ -92,10 +92,8 @@ protected:
   const MooseEnum _algorithm;
   /// Score below which a pair of adjacent triangles is not recombined
   const Real _eta_min;
-  /// Whether the triangles that survive recombination are moved into their own subdomain
-  const bool _has_tri_subdomain;
-  /// Name of the subdomain that the triangles surviving recombination are moved into
-  const SubdomainName _tri_subdomain_name;
+  /// Suffix appended to the name of a subdomain to name the one its surviving triangles move into
+  const SubdomainName _tri_subdomain_name_suffix;
   /// Whether the triangles that survive recombination are eliminated
   const bool _all_quad;
 
@@ -126,8 +124,9 @@ private:
   void recombine(ReplicatedMesh & mesh) const;
 
   /**
-   * Move the triangles that recombination did not consume into the subdomain named by the
-   * tri_subdomain_name parameter.
+   * Move the triangles that recombination did not consume out of the subdomains they came from,
+   * into one new subdomain per original subdomain, named after it with an underscore and the
+   * tri_subdomain_name_suffix parameter appended.
    * @param mesh The mesh being converted
    * @param scratch_subdomain_id The subdomain holding the triangles that recombination consumed
    */
