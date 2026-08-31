@@ -1,6 +1,6 @@
 [Tests]
   design = 'MFEMNURBSFESpace.md'
-  issues = '#33623'
+  issues = '#33631'
   [MFEMIGADiffusion]
     type = CSVDiff
     input = iga_diffusion.i
@@ -43,6 +43,7 @@
   [MFEMNURBSParallelRefineError]
     type = RunException
     input = iga_diffusion.i
+    design = 'MFEMMesh.md'
     cli_args = 'Mesh/parallel_refine=1'
     expect_err = 'MFEM does not support parallel refinement of NURBS meshes'
     requirement = 'The system shall report an error if parallel refinement of a NURBS mesh is '
