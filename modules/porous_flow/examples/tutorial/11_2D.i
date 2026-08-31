@@ -290,7 +290,7 @@
   []
   [tabulated_water]
     type = TabulatedBicubicFluidProperties
-    fp = true_water
+    input_fp = true_water
     temperature_min = 275
     pressure_max = 1E8
     fluid_property_output_file = water97_tabulated_11.csv
@@ -302,7 +302,7 @@
   []
   [tabulated_co2]
     type = TabulatedBicubicFluidProperties
-    fp = true_co2
+    input_fp = true_co2
     temperature_min = 275
     pressure_max = 1E8
     fluid_property_output_file = co2_tabulated_11.csv
