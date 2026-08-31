@@ -41,6 +41,9 @@ public:
   /// Variable number of the pressure-like variable used by this kernel.
   unsigned int pressureVariableNumber() const { return _pressure_var.number(); }
 
+  /// Index x|y|z of the momentum equation component this kernel applies to.
+  unsigned int momentumComponent() const { return _index; }
+
 protected:
   MooseLinearVariableFV<Real> & getPressureVariable(const std::string & vname);
 
