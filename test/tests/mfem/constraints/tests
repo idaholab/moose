@@ -64,7 +64,7 @@
   [MFEMInvalidConstraintBlock]
     type = RunException
     input = invalid_constraint_block.i
-    expect_err = "Subdomain attribute 99 is not present in the mesh"
+    expect_err = "the mesh has no block with ID 99"
     design = 'MFEMScalarEssentialConstraint.md'
     requirement = 'The system shall report an error if an essential constraint in an MFEM problem is restricted to a subdomain that the mesh does not contain'
     capabilities = 'mfem'

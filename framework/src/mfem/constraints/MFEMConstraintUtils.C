@@ -56,7 +56,7 @@ accumulateSubdomainProjection(mfem::ParGridFunction & gf,
   mfem::Array<int> vdofs;
   mfem::Vector vals;
   mfem::DofTransformation doftrans;
-  for (const auto e : make_range(fes.GetNE()))
+  for (const auto e : libMesh::make_range(fes.GetNE()))
   {
     if (!wanted[fes.GetAttribute(e)])
       continue;
@@ -95,7 +95,7 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
   gcomm.Reduce<mfem::real_t>(values.HostReadWrite(), mfem::GroupCommunicator::Sum);
   gcomm.Bcast<mfem::real_t>(values.HostReadWrite());
 
-  for (const auto i : make_range(gf.Size()))
+  for (const auto i : libMesh::make_range(gf.Size()))
     if (counter[i])
       gf(i) = values(i) / counter[i];
 }
@@ -135,7 +135,7 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
   mfem::Array<int> dof_marker(pfes.GetVSize());
   dof_marker = 0;
   mfem::Array<int> vdofs;
-  for (const auto e : make_range(pmesh.GetNE()))
+  for (const auto e : libMesh::make_range(pmesh.GetNE()))
     if (wanted[pmesh.GetAttribute(e)])
     {
       pfes.GetElementVDofs(e, vdofs);
