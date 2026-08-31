@@ -32,6 +32,17 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
     _subdomain_names(parameters.get<std::vector<SubdomainName>>("block")),
     _subdomain_attributes(subdomainsToAttributes())
 {
+  // A numeric 'block' entry bypasses the attribute set lookup in
+  // subdomainsToAttributes(), so it is the only path that can name a subdomain the
+  // mesh does not have. Check it before AttrToMarker, which indexes a marker array
+  // sized by the mesh's maximum attribute and would otherwise run off the end.
+  // ParMesh::SetAttributes distributes the attribute list, so this is the same set
+  // on every rank.
+  for (const auto attribute : _subdomain_attributes)
+    if (_mfem_mesh.attributes.Find(attribute) < 0)
+      parameters.paramError(
+          "block", "Subdomain attribute ", attribute, " is not present in the mesh.");
+
   if (!_subdomain_attributes.IsEmpty())
     mfem::common::AttrToMarker(
         _mfem_mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);

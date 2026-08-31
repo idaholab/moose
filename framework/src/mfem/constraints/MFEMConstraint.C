@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMConstraint.h"
+#include "MFEMProblem.h"
 
 InputParameters
 MFEMConstraint::validParams()
@@ -31,13 +32,6 @@ MFEMConstraint::MFEMConstraint(const InputParameters & parameters)
                           getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _trial_var_name(getParam<VariableName>("variable"))
 {
-  // A numeric 'block' entry is not checked against the mesh by
-  // MFEMBlockRestrictable, and one naming no subdomain would silently constrain
-  // nothing. ParMesh::SetAttributes distributes the attribute list, so this is the
-  // same set on every rank.
-  for (const auto attribute : getSubdomainAttributes())
-    if (getMesh().attributes.Find(attribute) < 0)
-      paramError("block", "Subdomain attribute ", attribute, " is not present in the mesh.");
 }
 
 #endif
