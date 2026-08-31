@@ -1,6 +1,6 @@
 [Tests]
   design = 'UnsignedDistanceToSurfaceMesh.md'
-  issues = '#33397 #33398'
+  issues = '#31937 #31938'
 
   [edge_projection]
     type = GoogleTest
