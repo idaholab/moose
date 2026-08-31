@@ -1,6 +1,6 @@
 [Tests]
-  design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureFunctorMaterial.md'
-  issues = '#23357'
+  design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureFunctorMaterial.md LinearFVPhaseChangeSource.md'
+  issues = '#23357 33635'
   [solidification_exo_no_advection]
     type = 'Exodiff'
     input = 'solidification_no_advection.i'
@@ -31,5 +31,20 @@
     requirement = 'The system must be able to obtain the correct temperature profile over the center line in a solidification problem.'
     rel_err = 1.0E-7
     mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed
+  []
+  [stefan_1d_smooth_linearfv]
+    type = CSVDiff
+    input = 1d-stefan_linearfv.i
+    csvdiff = 1d-stefan_linearfv_out.csv
+    requirement = 'The system shall solve a one-dimensional Stefan phase-change problem with the linear finite volume discretization using an apparent heat-capacity source term with a smoothed liquid fraction.'
+    recover = false
+  []
+  [stefan_1d_sharp_linearfv]
+    type = CSVDiff
+    input = 1d-stefan_linearfv.i
+    cli_args = 'LinearFVKernels/energy_source/smoothing=sharp Outputs/file_base=1d-stefan_linearfv-sharp_out'
+    csvdiff = 1d-stefan_linearfv-sharp_out.csv
+    requirement = 'The system shall solve a one-dimensional Stefan phase-change problem with the linear finite volume discretization using an apparent heat-capacity source term with a linear (sharp) liquid fraction.'
+    recover = false
   []
 []
