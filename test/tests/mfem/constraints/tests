@@ -85,6 +85,14 @@
     requirement = 'The system shall report an error if a real essential constraint is applied in a complex MFEM problem'
     capabilities = 'mfem'
   []
+  [MFEMConstraintOnNonTrialVariable]
+    type = RunException
+    input = constraint_on_non_trial_variable.i
+    expect_err = "is not a trial variable of the equation system"
+    design = 'MFEMEssentialConstraint.md'
+    requirement = 'The system shall report an error if an essential constraint in an MFEM problem is applied to a variable that no equation is solved for, since the constraint would otherwise never be applied'
+    capabilities = 'mfem'
+  []
   [MFEMTreeCotreeGaugeHighOrder]
     type = RunException
     input = tree_cotree_gauge_high_order.i
