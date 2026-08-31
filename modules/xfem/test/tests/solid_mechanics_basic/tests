@@ -136,38 +136,36 @@
                'maximum-hoop-stress growth without an equilibrium solve, or'
     []
     [face_cut_mid_scc]
-      type = Exodiff
+      type = JSONDiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
       cli_args = 'fname=hex_block'
-      exodiff = 'hex_block_scc_offset_0_spin_0_tilt_0_XFEMCutMeshOutput.e'
-      map = true # only matching cutter mesh, not xfem volume mesh
+      abs_zero = 1e-3
+      rel_err = 1e-3
+      jsondiff = 'hex_block_scc_offset_0_spin_0_tilt_0.json'
       capabilities = 'unique_id'
       detail = ' properly moving crack front nodes using SCC-driven non-uniform growth, or'
     []
     [face_cut_corner_scc]
-      type = Exodiff
+      type = JSONDiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
       cli_args = 'fname=hex_block offset=0.21'
-      exodiff = 'hex_block_scc_offset_0.21_spin_0_tilt_0_XFEMCutMeshOutput.e'
-      map = true # only matching cutter mesh, not xfem volume mesh
+      jsondiff = 'hex_block_scc_offset_0.21_spin_0_tilt_0.json'
       capabilities = 'unique_id'
       detail = ' properly moving crack front nodes for a corner crack using SCC-driven non-uniform growth, or'
     []
     [inactive_refine]
-      type = Exodiff
+      type = JSONDiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
       cli_args = 'fname=hex_block spin=25 Executioner/end_time=2'
-      exodiff = 'hex_block_scc_offset_0_spin_25_tilt_0_XFEMCutMeshOutput.e'
-      map = true # only matching cutter mesh, not xfem volume mesh
+      jsondiff = 'hex_block_scc_offset_0_spin_25_tilt_0.json'
       capabilities = 'unique_id'
       detail = ' correct refinement of the surface-cutting crack front when crack front refinement occurs inside the volume, or'
     []
     [inactive_no_refine]
-      type = Exodiff
+      type = JSONDiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
       cli_args = 'fname=hex_block spin=15 Executioner/end_time=2'
-      exodiff = 'hex_block_scc_offset_0_spin_15_tilt_0_XFEMCutMeshOutput.e'
-      map = true # only matching cutter mesh, not xfem volume mesh
+      jsondiff = 'hex_block_scc_offset_0_spin_15_tilt_0.json'
       capabilities = 'unique_id'
       detail = ' no refinement of the surface-cutting crack front when crack front refinement would occur outside the volume, or'
     []
