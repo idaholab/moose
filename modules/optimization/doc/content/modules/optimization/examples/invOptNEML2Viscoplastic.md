@@ -617,14 +617,21 @@ $E = 8 \times 10^4$, $\sigma_y = 85$, $C = 8 \times 10^3$, $\eta = 400$ under
 takes about 23 iterations, and the criterion that stops it is `-tao_gatol`, as described in
 [#sec:loadbearing].
 
-The recovered parameters, read from the gold file and multiplied by their scales, are
+The recovery regression test, `recovery_vjp`, drives this inversion through the vector-Jacobian
+product path of [#sec:vjp], which computes the same gradient as [#sec:wiring] from one reverse pass
+instead of 24.  The materialized path is exercised by `grad_check_viscoplastic` alone, marked
+`heavy`, because each of its forward-and-adjoint solves costs about seven times as much as the VJP
+path's for the reason given in [#sec:vjpmechanism]; running it to convergence as well would add
+nothing the gradient check and `recovery_vjp` do not already establish (see [#sec:vjpequivalence]).
+
+The recovered parameters, read from the `recovery_vjp` gold file and multiplied by their scales, are
 
 | Parameter | Recovered $\hat{p}_k$ | $p_k^0$ | Recovered physical | True | Relative error |
 | :- | :- | :- | :- | :- | :- |
 | `elasticity_E` | 1.2499999038574 | 8.0e4 | 99999.992 | 1e5 | 7.7e-08 |
-| `yield_sy` | 1.1764704806029 | 85 | 99.999991 | 100 | 9.1e-08 |
-| `Xrate_C` | 1.4999990218005 | 8.0e3 | 11999.992 | 1.2e4 | 6.5e-07 |
-| `flow_rate_eta` | 1.2500011813110 | 400 | 500.00047 | 500 | 9.4e-07 |
+| `yield_sy` | 1.1764704806030 | 85 | 99.999991 | 100 | 9.1e-08 |
+| `Xrate_C` | 1.4999990218003 | 8.0e3 | 11999.992 | 1.2e4 | 6.5e-07 |
+| `flow_rate_eta` | 1.2500011813111 | 400 | 500.00047 | 500 | 9.4e-07 |
 
 All four are recovered to better than $10^{-6}$ relative.  $C$ and $\eta$ are the least accurate, by
 about an order; both enter only through the plastic response, and $\eta$ only through its rate
@@ -717,13 +724,14 @@ mesh, the BCs, the model, `Functions`, `Reporters`, `DiracKernels` and the optim
 
 Both paths compute the same quantity, [!eqref](eq:neml2_grad), from the same forward solve.
 `grad_check_vjp` verifies the VJP gradient against a finite-difference gradient the same way
-`grad_check_viscoplastic` verifies the materialized one (see [#sec:gradcheck]), and `recovery_vjp`
-recovers the same four parameters `recovery_multiparam` recovers, from the same measurements and the
-same starting guess.  At the starting guess the two gradients agree with each other to machine
-precision: the `recovery_vjp` and `recovery_multiparam` gold files agree to about 12 significant
-digits, the remaining difference being floating-point round-off from a different summation order
-rather than a difference in the underlying calculus.  `recovery_vjp` is a regression test in its own
-right, checked at `rel_err = 1e-3` against its own gold rather than against the materialized path's.
+`grad_check_viscoplastic` verifies the materialized one (see [#sec:gradcheck]).  At the starting
+guess the two gradients agree with each other to machine precision, and when the materialized path
+is run to convergence from `main.i` its recovered parameters agree with the `recovery_vjp` gold to
+about 12 significant digits, the remaining difference being floating-point round-off from a
+different summation order rather than a difference in the underlying calculus.  `recovery_vjp` is
+the example's recovery regression test (see [#sec:convergence]), checked at `rel_err = 1e-3`
+against its own gold; the materialized path is not run to convergence in CI because of the cost
+difference described in [#sec:vjpmechanism].
 
 ### Choosing Between the Two Paths id=sec:vjpchoice
 
