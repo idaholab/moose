@@ -46,13 +46,24 @@ DiffusionFV::initializePhysicsAdditional()
 void
 DiffusionFV::addFVKernels()
 {
-  // Diffusion term
+  // Diffusion term(s)
+  unsigned int num_diffusion_terms = 1;
+  if (isParamValid("diffusivity_functor"))
+    num_diffusion_terms = getParam<std::vector<MooseFunctorName>>("diffusivity_functor").size();
+
+  for (const auto i_diff_block_group : make_range(num_diffusion_terms))
   {
     const std::string kernel_type = "FVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
+    if (isParamValid("diffusivity_blocks"))
+      assignBlocks(params,
+                   getParam<std::vector<std::vector<SubdomainName>>>(
+                       "diffusivity_blocks")[i_diff_block_group]);
+    else
+      assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    params.set<MooseFunctorName>("coeff") = getParam<MooseFunctorName>("diffusivity_functor");
+    params.set<MooseFunctorName>("coeff") =
+        getParam<std::vector<MooseFunctorName>>("diffusivity_functor")[i_diff_block_group];
     getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
   }
   // Source term

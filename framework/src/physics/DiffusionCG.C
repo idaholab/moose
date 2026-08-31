@@ -42,7 +42,14 @@ DiffusionCG::DiffusionCG(const InputParameters & parameters)
 void
 DiffusionCG::addFEKernels()
 {
-  // Diffusion term
+  // Diffusion term(s)
+  unsigned int num_diffusion_terms = 1;
+  if (isParamValid("diffusivity_matprop"))
+    num_diffusion_terms = getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop").size();
+  else if (isParamValid("diffusivity_functor"))
+    num_diffusion_terms = getParam<std::vector<MooseFunctorName>>("diffusivity_functor").size();
+
+  for (const auto i_diff_block_group : make_range(num_diffusion_terms))
   {
     // Select the kernel type based on the user parameters
     std::string kernel_type;
@@ -50,7 +57,8 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADMatDiffusion" : "MatDiffusion";
     else if (isParamValid("diffusivity_functor"))
     {
-      const auto & d = getParam<MooseFunctorName>("diffusivity_functor");
+      const auto & d =
+          getParam<std::vector<MooseFunctorName>>("diffusivity_functor")[i_diff_block_group];
       if (getProblem().hasFunction(d) || MooseUtils::parsesToReal(d))
         kernel_type = "FunctionDiffusion";
       else
@@ -62,17 +70,26 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADDiffusion" : "Diffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    assignBlocks(params, _blocks);
+    if (isParamValid("diffusivity_blocks"))
+      assignBlocks(params,
+                   getParam<std::vector<std::vector<SubdomainName>>>(
+                       "diffusivity_blocks")[i_diff_block_group]);
+    else
+      assignBlocks(params, _blocks);
 
     // Transfer the diffusivity parameter from the Physics to the kernel
     // From parameters
     if (isParamValid("diffusivity_matprop"))
       params.set<MaterialPropertyName>("diffusivity") =
-          getParam<MaterialPropertyName>("diffusivity_matprop");
+          getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop")[i_diff_block_group];
     else if (isParamValid("diffusivity_functor"))
-      params.set<FunctionName>("function") = getParam<MooseFunctorName>("diffusivity_functor");
+      params.set<FunctionName>("function") =
+          getParam<std::vector<MooseFunctorName>>("diffusivity_functor")[i_diff_block_group];
 
-    getProblem().addKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
+    const auto kernel_name =
+        prefix() + _var_name + "_diffusion" +
+        ((num_diffusion_terms > 1) ? "_" + std::to_string(i_diff_block_group) : "");
+    getProblem().addKernel(kernel_type, kernel_name, params);
   }
 
   // Source term
@@ -86,6 +103,10 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADBodyForce" : "BodyForce";
     else if (getProblem().hasVariable(source))
       kernel_type = _use_ad ? "ADCoupledForce" : "CoupledForce";
+    else if (getProblem().hasFunctor(source, 0))
+      kernel_type = _use_ad ? "ADFunctorKernel" : "FunctorKernel";
+    else if (getProblem().getMaterialPropertyRegistry().hasProperty(source))
+      kernel_type = _use_ad ? "ADMatBodyForce" : "MatBodyForce";
     else
       paramError("source_functor",
                  "No kernel defined for a source term in CG for the type of '",
@@ -109,6 +130,25 @@ DiffusionCG::addFEKernels()
     {
       params.set<Real>("value") = coef;
       params.set<PostprocessorName>("postprocessor") = source;
+    }
+    else if (getProblem().hasFunctor(source, 0))
+    {
+      params.set<MooseFunctorName>("functor") = source;
+      if (isParamSetByUser("source_coef"))
+        paramError("source_coef",
+                   "Setting a coefficient is not implemented with a source functor. Use an "
+                   "intermediate (parsed) functor material to define a new functors which "
+                   "multiplies the functor by the coefficient");
+    }
+    else if (getProblem().getMaterialPropertyRegistry().hasProperty(source))
+    {
+      params.set<MaterialPropertyName>("material_property") = source;
+      if (isParamSetByUser("source_coef"))
+        paramError(
+            "source_coef",
+            "Setting a coefficient is not implemented with a material property source. Use an "
+            "intermediate (parsed) material to define a new functors which "
+            "multiplies the property by the coefficient");
     }
     else
     {
