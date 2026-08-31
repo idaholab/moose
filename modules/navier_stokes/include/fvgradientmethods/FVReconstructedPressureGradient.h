@@ -33,17 +33,21 @@ public:
   /// Resolve dependencies required by the reconstructed pressure-gradient method.
   void setupDependencies(SystemBase & system, unsigned int variable_number) const;
 
-  /// Register the source of relaxed reconstructed gradients owned by RhieChowMassFlux.
-  void setupReconstructedGradientSource(
-      const std::vector<std::unique_ptr<NumericVector<Number>>> & relaxed_source) const;
-
   /// Name of the gradient method used before reconstructed Rhie-Chow data are available.
   const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
 
   /// Relaxation factor applied to reconstructed gradients.
   Real gradientRelaxation() const { return _gradient_relaxation; }
 
-  // Reconstructed gradient state is owned by RhieChowMassFlux.
+  /// True once a reconstructed-feedback field has been initialized.
+  bool hasFeedback() const { return _feedback_initialized; }
+
+  /// Monotonically increasing feedback generation index.
+  std::uint64_t generation() const { return _feedback_generation; }
+
+  /// Update the stored feedback field from a newly reconstructed gradient candidate.
+  void updateFeedbackGradient(const GradientContainer & base_gradient,
+                              const GradientContainer & reconstructed_candidate) const;
 
 private:
   /**
@@ -76,7 +80,12 @@ private:
   /// Cached gradient method used before reconstructed Rhie-Chow data are available.
   mutable const FVGradientMethod * _base_gradient_method = nullptr;
 
-  /// Optional source for reconstructed gradients owned by RhieChowMassFlux.
-  mutable const std::vector<std::unique_ptr<NumericVector<Number>>> *
-      _relaxed_gradient_source = nullptr;
+  /// Persistent relaxed feedback field published by this method.
+  mutable GradientContainer _feedback;
+
+  /// Whether the feedback field has been initialized.
+  mutable bool _feedback_initialized = false;
+
+  /// Feedback generation index incremented on every feedback update.
+  mutable std::uint64_t _feedback_generation = 0;
 };
