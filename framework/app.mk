@@ -396,19 +396,26 @@ $(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
 $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
+		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(libmesh_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
-else
-
-# libtool ignores nvcc and just uses mpicxx to link, so cannot be used
+else ifeq ($(KOKKOS_COMPILER),NVCC)
 
 $(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
 $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 	@mkdir -p $(curr_dir)/lib
 	@echo "Linking Kokkos Library "$@"..."
-	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+	@ar rcs $@ $(curr_objs)
+
+else
+
+$(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
+$(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
+$(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
+	@mkdir -p $(curr_dir)/lib
+	@echo "Linking Kokkos Library "$@"..."
+	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(libmesh_LIBS)
 
 endif
 
@@ -452,19 +459,26 @@ $(app_KOKKOS_TEST_LIB): curr_objs := $(app_KOKKOS_TEST_OBJECTS)
 $(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
 	@echo "Linking Kokkos Test Library "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
+		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(libmesh_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
-else
-
-# libtool ignores nvcc and just uses mpicxx to link, so cannot be used
+else ifeq ($(KOKKOS_COMPILER),NVCC)
 
 $(app_KOKKOS_TEST_LIB): curr_dir  := $(APPLICATION_DIR)/test
 $(app_KOKKOS_TEST_LIB): curr_objs := $(app_KOKKOS_TEST_OBJECTS)
 $(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
 	@mkdir -p $(curr_dir)/lib
 	@echo "Linking Kokkos Test Library "$@"..."
-	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+	@ar rcs $@ $(curr_objs)
+
+else
+
+$(app_KOKKOS_TEST_LIB): curr_dir  := $(APPLICATION_DIR)/test
+$(app_KOKKOS_TEST_LIB): curr_objs := $(app_KOKKOS_TEST_OBJECTS)
+$(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
+	@mkdir -p $(curr_dir)/lib
+	@echo "Linking Kokkos Test Library "$@"..."
+	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(libmesh_LIBS)
 
 endif
 
@@ -480,7 +494,7 @@ $(KOKKOS_DEVICE_LINK_OBJECT): curr_dir := $(APPLICATION_DIR)
 $(KOKKOS_DEVICE_LINK_OBJECT): $(KOKKOS_OBJECTS)
 	@mkdir -p $(curr_dir)/lib
 	@echo "Device Linking Kokkos Objects..."
-	@$(KOKKOS_CXX) -dlink -o $@ $(KOKKOS_LDFLAGS) $(KOKKOS_OBJECTS) $(KOKKOS_LIBS)
+	@$(KOKKOS_CXX) -dlink -o $@ $(KOKKOS_LDFLAGS) $(KOKKOS_OBJECTS) $(KOKKOS_LIBS) $(libmesh_LIBS)
 
 endif
 
@@ -583,7 +597,7 @@ endif
 $(app_EXEC): $(app_LIBS) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS) $(app_KOKKOS_TEST_LIB) $(KOKKOS_DEVICE_LINK_OBJECT) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_EXEC_OBJECTS)
 	@echo "Linking Executable "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(if $(filter yes,$(HAVE_NO_AS_NEEDED)),$(NO_AS_NEEDED_FLAG)) $(depend_test_libs_flags) $(applibs) $(KOKKOS_DEVICE_LINK_OBJECT) $(ADDITIONAL_LIBS) $(ADDITIONAL_EXEC_OBJECTS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) ${SILENCE_SOME_WARNINGS}'
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(if $(filter yes,$(HAVE_NO_AS_NEEDED)),$(NO_AS_NEEDED_FLAG)) $(depend_test_libs_flags) $(applibs) $(KOKKOS_DEVICE_LINK_OBJECT) $(ADDITIONAL_LIBS) $(ADDITIONAL_EXEC_OBJECTS) $(LDFLAGS) $(libmesh_LDFLAGS) $(KOKKOS_LIBS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) ${SILENCE_SOME_WARNINGS}'
 	@$(codesign)
 
 ###### install stuff #############
