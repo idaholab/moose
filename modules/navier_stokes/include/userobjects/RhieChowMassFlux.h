@@ -81,6 +81,8 @@ public:
   void initCouplingField();
   /// Update the values of the face velocities in the containers
   void computeFaceMassFlux();
+  /// Compute the reconstructed pressure-gradient candidate from Rhie-Chow face fluxes.
+  void computeReconstructedPressureGradientCandidate();
   /// Update the cell values of the velocity variables
   void computeCellVelocity();
 
@@ -224,9 +226,6 @@ protected:
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
 
-  /// Optional momentum pressure kernel whose registered pressure gradient field should be reused.
-  const std::string _momentum_pressure_kernel_name;
-
   /**
    * for a PISO iteration we need to hold on to the original pressure gradient field.
    * Should not be used in other conditions.
@@ -286,6 +285,9 @@ protected:
 
   /// Which pressure gradient is fed back on boundary-adjacent cells
   const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
+
+  /// Whether a reconstructed gradient candidate has been initialized.
+  bool _reconstructed_candidate_available = false;
 
   /// Whether a relaxed reconstructed pressure gradient has been initialized.
   bool _reconstructed_gradient_available = false;
