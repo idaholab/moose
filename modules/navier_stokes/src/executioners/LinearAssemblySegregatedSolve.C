@@ -985,11 +985,15 @@ LinearAssemblySegregatedSolve::setupResidualStorage() const
   // Residual store: position in this vector defines the ordering used by NS::FV::converged()
   // Each entry holds (linear its, normalized residual) for one system
   if (_should_solve_momentum)
-    for ([[maybe_unused]] const auto system_i : index_range(_momentum_systems))
+    for (const auto system_i : index_range(_momentum_systems))
     {
       storage.momentum_indices.push_back(storage.ns_residuals.size());
       storage.ns_residuals.push_back(std::make_pair(0, 1.0));
-      storage.ns_abs_tols.push_back(_momentum_absolute_tolerance);
+
+      const auto abs_tol = _momentum_absolute_tolerance.size() == 1
+                               ? _momentum_absolute_tolerance[0]
+                               : _momentum_absolute_tolerance[system_i];
+      storage.ns_abs_tols.push_back(abs_tol);
     }
 
   if (_should_solve_pressure)

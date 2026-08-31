@@ -454,7 +454,18 @@ SIMPLESolveNonlinearAssembly::solve()
   if (_has_turbulence_systems)
     no_systems += _turbulence_systems.size();
   std::vector<std::pair<unsigned int, Real>> ns_its_residuals(no_systems, std::make_pair(0, 1.0));
-  std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
+
+  std::vector<Real> ns_abs_tols;
+  ns_abs_tols.reserve(no_systems);
+
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    const auto abs_tol = _momentum_absolute_tolerance.size() == 1
+                             ? _momentum_absolute_tolerance[0]
+                             : _momentum_absolute_tolerance[system_i];
+    ns_abs_tols.push_back(abs_tol);
+  }
+
   ns_abs_tols.push_back(_pressure_absolute_tolerance);
   if (_has_energy_system)
   {
