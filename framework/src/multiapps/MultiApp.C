@@ -686,12 +686,17 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         for (const auto i : make_range(_my_num_apps))
         {
           auto app_ptr = _apps[i];
+          auto & mesh = app_ptr->getExecutioner()->feProblem().mesh();
           if (usingPositions())
             app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+                mesh, _positions[_first_local_app + i]);
           else
-            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(mesh,
+                                                                                  Point(0, 0, 0));
+
+          // Transforming marks mesh->spatial_dimension() as invalid,
+          // so we reprepare before trying to print that later.
+          mesh.getMesh().complete_preparation();
         }
 
       // If the time step covers multiple reset times, set them all as having 'happened'
@@ -1286,12 +1291,16 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Transform the app mesh if requested
   if (_run_in_position)
   {
+    auto & mesh = app->getExecutioner()->feProblem().mesh();
     if (usingPositions())
       app->getExecutioner()->feProblem().coordTransform().transformMesh(
-          app->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+          mesh, _positions[_first_local_app + i]);
     else
-      app->getExecutioner()->feProblem().coordTransform().transformMesh(
-          app->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(mesh, Point(0, 0, 0));
+
+    // Transforming marks mesh->spatial_dimension() as invalid, so we
+    // reprepare before trying to print that later.
+    mesh.getMesh().complete_preparation();
   }
 }
 
