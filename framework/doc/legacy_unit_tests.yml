@@ -460,7 +460,6 @@ unit:
   - FVInterpolationMethodTest.advectedMinmodWeightBasedFullBlendYieldsLinearWeights
   - FVInterpolationMethodTest.advectedUpwind
   - FVInterpolationMethodTest.advectedVanLeerWeightBasedClampsToLinearWhenRequested
-  - FVInterpolationMethodTest.advectedVenkatakrishnanDeferredCorrection
   - FVInterpolationMethodTest.geometricAverageMatchesGC
   - FVInterpolationMethodTest.harmonicAverage
   - FactorizedRankTwoTensor.addIa
