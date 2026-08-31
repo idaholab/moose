@@ -175,6 +175,29 @@ protected:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
+  /// Error if any variable that @p map holds strongly constrained DoFs for is not
+  /// a trial variable of this system. Essential BCs and constraints do not create
+  /// an equation for the variable they act on; they rely on one already existing,
+  /// and are only ever applied while iterating the trial variables, so a variable
+  /// missing from that set would have them silently dropped. @p description names
+  /// the kind of object for the error message.
+  template <typename T>
+  void CheckConstrainedVariablesAreTrialVariables(
+      const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map,
+      const std::string & description) const
+  {
+    for (const auto & [var_name, _] : map)
+      if (!VectorContainsName(_trial_var_names, var_name))
+        mooseError("MFEM variable '",
+                   var_name,
+                   "' has ",
+                   description,
+                   " applied to it, but it is not a trial variable of the equation system, so "
+                   "nothing would apply it. Add a kernel acting on '",
+                   var_name,
+                   "', or remove it.");
+  }
+
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
   /// itself, resetting all dimensions to zero.
