@@ -32,7 +32,7 @@ class UnionFind
 public:
   explicit UnionFind(int n) : _parent(n), _rank(n, 0)
   {
-    for (const auto i : make_range(n))
+    for (const auto i : libMesh::make_range(n))
       _parent[i] = i;
   }
 
@@ -84,7 +84,7 @@ vertexCoord(const mfem::ParMesh & pmesh, int v)
 {
   Coord3 p{0.0, 0.0, 0.0};
   const mfem::real_t * x = pmesh.GetVertex(v);
-  for (const auto d : make_range(pmesh.SpaceDimension()))
+  for (const auto d : libMesh::make_range(pmesh.SpaceDimension()))
     p[d] = x[d];
   return p;
 }
@@ -118,7 +118,7 @@ excludedEdgeMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & 
   mfem::Array<int> marker(pfes.GetVSize());
   marker = 0;
   mfem::Array<int> edofs;
-  for (const auto el : make_range(pmesh.GetNE()))
+  for (const auto el : libMesh::make_range(pmesh.GetNE()))
     if (!is_gauge_attr[pmesh.GetAttribute(el)])
     {
       pfes.GetElementDofs(el, edofs);
@@ -127,7 +127,7 @@ excludedEdgeMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & 
     }
   pfes.Synchronize(marker); // boolean-OR over shared edges
 
-  for (const auto e : make_range(pmesh.GetNEdges()))
+  for (const auto e : libMesh::make_range(pmesh.GetNEdges()))
     excluded[e] = marker[edgeLDof(pfes, e, edofs)];
   return excluded;
 }
@@ -197,7 +197,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
   // the mapping from every input coordinate onto it, so no coordinate ever has to
   // be looked up by binary search afterwards.
   std::vector<std::pair<Coord3, int>> sorted(coords.size());
-  for (const auto i : index_range(coords))
+  for (const auto i : libMesh::index_range(coords))
     sorted[i] = {coords[i], static_cast<int>(i)};
   std::sort(sorted.begin(), sorted.end());
 
@@ -220,7 +220,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
   constexpr std::size_t oversample = 32;
   const std::size_t num_samples = std::min(oversample, distinct.size());
   std::vector<Coord3> sample;
-  for (const auto i : make_range(num_samples))
+  for (const auto i : libMesh::make_range(num_samples))
     sample.push_back(distinct[i * distinct.size() / num_samples]);
 
   int sample_count = static_cast<int>(sample.size());
@@ -245,7 +245,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
   std::sort(all_samples.begin(), all_samples.end());
 
   std::vector<Coord3> splitters;
-  for (const auto p : make_range(nprocs - 1))
+  for (const auto p : libMesh::make_range(nprocs - 1))
     if (!all_samples.empty())
       splitters.push_back(all_samples[(p + 1) * all_samples.size() / nprocs]);
   auto bucketOf = [&](const Coord3 & c)
@@ -256,7 +256,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
 
   // Send each distinct local coordinate to the rank owning its bucket.
   std::vector<CoordQuery> outgoing(distinct.size());
-  for (const auto i : index_range(distinct))
+  for (const auto i : libMesh::index_range(distinct))
     outgoing[i] = {distinct[i], 0, rank, static_cast<int>(i)};
 
   std::vector<int> counts;
@@ -293,7 +293,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
 
   // Spread the distinct ids back over the caller's coordinate list.
   numbering.global_id.resize(coords.size());
-  for (const auto i : index_range(coords))
+  for (const auto i : libMesh::index_range(coords))
     numbering.global_id[i] = distinct_ids[numbering.local_index[i]];
   return numbering;
 }
@@ -366,7 +366,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   //    the union over ranks is the mesh 1-skeleton with no duplicates.
   std::vector<OwnedEdge> owned_edges;
   mfem::Array<int> ev, edge_dofs;
-  for (const auto e : make_range(pmesh.GetNEdges()))
+  for (const auto e : libMesh::make_range(pmesh.GetNEdges()))
   {
     const int ldof = edgeLDof(pfes, e, edge_dofs);
     if (pfes.GetLocalTDofNumber(ldof) < 0)
@@ -393,7 +393,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   endpoints.shrink_to_fit();
 
   std::vector<CandidateEdge> seed_edges, free_edges;
-  for (const auto i : index_range(owned_edges))
+  for (const auto i : libMesh::index_range(owned_edges))
   {
     const std::int64_t a = numbering.global_id[2 * i], b = numbering.global_id[2 * i + 1];
     const int la = numbering.local_index[2 * i], lb = numbering.local_index[2 * i + 1];
@@ -413,7 +413,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   //    boundary and of the excluded subdomains, which are fixed without being
   //    gauged.
   std::vector<Moose::MFEM::DistributedEdge> seed_graph(seed_edges.size());
-  for (const auto i : index_range(seed_edges))
+  for (const auto i : libMesh::index_range(seed_edges))
     seed_graph[i] = {seed_edges[i].wu,
                      seed_edges[i].wv,
                      seed_edges[i].wu,
@@ -441,7 +441,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
 
   std::vector<Moose::MFEM::DistributedEdge> free_graph;
   free_graph.reserve(free_edges.size());
-  for (const auto i : index_range(free_edges))
+  for (const auto i : libMesh::index_range(free_edges))
     free_graph.push_back({free_edges[i].wu,
                           free_edges[i].wv,
                           free_labels[2 * i],
@@ -454,7 +454,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
 
   // 6. Map the selected edges back onto this rank's ND true dofs.
   std::vector<char> is_essential_tdof(pfes.GetTrueVSize(), 0);
-  for (const auto i : make_range(essential_tdofs.Size()))
+  for (const auto i : libMesh::make_range(essential_tdofs.Size()))
     is_essential_tdof[essential_tdofs[i]] = 1;
 
   // An edge chosen by the components at both of its ends is reported twice.
