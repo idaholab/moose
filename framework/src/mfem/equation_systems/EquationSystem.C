@@ -138,23 +138,25 @@ EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 void
 EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 {
-  const auto & test_var_name = bc->getTestVariableName();
-  AddTestVariableNameIfMissing(test_var_name);
-  // Register new essential bc map if not present for the test variable
-  if (!_essential_bc_map.Has(test_var_name))
+  // Essential BCs act on a trial gridfunction and are applied while iterating the
+  // trial variables, so they are keyed by trial variable name. The variable's
+  // equation is established by its kernels; a BC does not create one, and Init
+  // checks that one exists.
+  const auto & trial_var_name = bc->getTrialVariableName();
+  // Register new essential bc map if not present for the trial variable
+  if (!_essential_bc_map.Has(trial_var_name))
   {
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialBC>>>();
-    _essential_bc_map.Register(test_var_name, std::move(bcs));
+    _essential_bc_map.Register(trial_var_name, std::move(bcs));
   }
-  _essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
+  _essential_bc_map.GetRef(trial_var_name).push_back(std::move(bc));
 }
 
 void
 EquationSystem::AddEssentialConstraint(std::shared_ptr<MFEMEssentialConstraint> constraint)
 {
   const auto & trial_var_name = constraint->getTrialVariableName();
-  AddTestVariableNameIfMissing(trial_var_name);
-  // Register new essential bc map if not present for the test variable
+  // Register new essential constraint map if not present for the trial variable
   if (!_essential_constraint_map.Has(trial_var_name))
   {
     auto constraints = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialConstraint>>>();
@@ -172,6 +174,8 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
   SetTrialVariableNames();
+  CheckConstrainedVariablesAreTrialVariables(_essential_bc_map, "an essential boundary condition");
+  CheckConstrainedVariablesAreTrialVariables(_essential_constraint_map, "an essential constraint");
 
   for (auto & test_var_name : _test_var_names)
   {

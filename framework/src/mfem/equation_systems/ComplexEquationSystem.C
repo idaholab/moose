@@ -39,6 +39,10 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
   SetTrialVariableNames();
+  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_bc_map,
+                                             "an essential boundary condition");
+  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_constraint_map,
+                                             "an essential constraint");
 
   // Store pointers to coupled variable ComplexGridFunctions that are to be eliminated prior to
   // forming the jacobian
@@ -248,15 +252,18 @@ ComplexEquationSystem::AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegra
 void
 ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc)
 {
-  const auto & test_var_name = bc->getTestVariableName();
-  AddTestVariableNameIfMissing(test_var_name);
-  // Register new complex essential bc map if not present for the test variable
-  if (!_cmplx_essential_bc_map.Has(test_var_name))
+  // Essential BCs act on a trial gridfunction and are applied while iterating the
+  // trial variables, so they are keyed by trial variable name. The variable's
+  // equation is established by its kernels; a BC does not create one, and Init
+  // checks that one exists.
+  const auto & trial_var_name = bc->getTrialVariableName();
+  // Register new complex essential bc map if not present for the trial variable
+  if (!_cmplx_essential_bc_map.Has(trial_var_name))
   {
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>>();
-    _cmplx_essential_bc_map.Register(test_var_name, std::move(bcs));
+    _cmplx_essential_bc_map.Register(trial_var_name, std::move(bcs));
   }
-  _cmplx_essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
+  _cmplx_essential_bc_map.GetRef(trial_var_name).push_back(std::move(bc));
 }
 
 void
@@ -264,7 +271,7 @@ ComplexEquationSystem::AddComplexEssentialConstraint(
     std::shared_ptr<MFEMComplexEssentialConstraint> constraint)
 {
   const auto & trial_var_name = constraint->getTrialVariableName();
-  AddTestVariableNameIfMissing(trial_var_name);
+  // Register new complex essential constraint map if not present for the trial variable
   if (!_cmplx_essential_constraint_map.Has(trial_var_name))
   {
     auto constraints =
