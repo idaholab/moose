@@ -5,6 +5,12 @@
 #               u = 0    on the boundary,
 #
 # which has the exact solution u = 8 - x^2 - y^2.
+#
+# The gold value is the L2 error of the discrete solution, and is self-checking under
+# refinement: with NURBS basis functions of order p the error converges at the optimal rate
+# O(h^(p+1)), so each increment of uniform_refine should divide it by 2^(p+1). For the
+# quadratic space used here that is a factor of 8 per increment, and 16 for the cubic space
+# the superparametric test uses. A regold that does not follow that rate is wrong.
 
 [Mesh]
   type = MFEMMesh

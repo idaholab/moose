@@ -46,8 +46,10 @@ std::shared_ptr<mfem::ParFiniteElementSpace>
 MFEMNURBSFESpace::buildFESpace() const
 {
   if (!_pmesh.NURBSext)
-    mooseError("A NURBS finite element space can only be built on a NURBS mesh. Set the 'file' "
-               "parameter of the mesh to an MFEM NURBS mesh file.");
+    mooseError("A NURBS finite element space can only be built on a NURBS mesh. Either set the "
+               "'file' parameter of the mesh to an MFEM NURBS mesh file, or, if the 'submesh' "
+               "parameter is set, note that submeshes do not inherit the NURBS geometry of the "
+               "mesh they are extracted from.");
 
   const mfem::Array<int> & mesh_orders = _pmesh.NURBSext->GetOrders();
 

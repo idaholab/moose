@@ -25,9 +25,29 @@ Note that MFEM is unable to refine a NURBS mesh once it has been partitioned, so
 the `parallel_refine` parameter of [MFEMMesh.md] cannot be used with such a mesh;
 use `uniform_refine` (equivalently, `serial_refine`) instead.
 
+## Relationship to MFEMGenericFESpace
+
+An isoparametric NURBS space, whose basis functions are of the same order as the
+geometry of the mesh, can equally be built with [MFEMGenericFESpace.md] by
+setting `fec_name` to `NURBS` followed by that order, and doing so gives the same
+space and the same solution. This class exists for the two things that cannot be
+expressed that way:
+
+- Requesting an order higher than the geometry builds a superparametric space,
+  which requires degree elevating a copy of the mesh knot vectors and handing the
+  result to the finite element space. `MFEMGenericFESpace` always builds the
+  space directly on the knot vectors of the mesh, so it can only ever produce the
+  isoparametric case.
+- The order and the mesh are validated. Requesting an order below that of the
+  geometry, or a NURBS space on a mesh with no NURBS geometry at all, is reported
+  as an error instead of silently producing a space that is not the one asked
+  for.
+
+Use [MFEMGenericFESpace.md] if neither of those matters to you.
+
 ## Example Input File Syntax
 
-!listing test/tests/mfem/nurbs/iga_diffusion.i block=Mesh FESpaces Variables
+!listing test/tests/mfem/iga/iga_diffusion.i block=Mesh FESpaces Variables
 
 !syntax parameters /FESpaces/MFEMNURBSFESpace
 
