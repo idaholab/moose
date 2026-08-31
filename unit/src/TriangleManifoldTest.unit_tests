@@ -1,0 +1,45 @@
+[Tests]
+  design = 'TriangleManifold.md PointContainmentClassifier.md'
+  issues = '#33397 #33398'
+
+  [sideness]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sideness
+    requirement = 'The system shall classify interior and exterior points of a closed TRI3 manifold and keep containment consistent with sideness.'
+  []
+  [on_surface]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sidenessOnSurface
+    requirement = 'The system shall classify points on TRI3 face interiors and vertices as on the manifold surface.'
+  []
+  [solid_angle_fallback]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sidenessSolidAngleFallback
+    requirement = 'The system shall use solid-angle containment when a fixed-axis ray intersects a shared TRI3 edge ambiguously.'
+  []
+  [on_edge]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sidenessOnEdge
+    requirement = 'The system shall classify a point on an edge of a closed TRI3 manifold as on the surface.'
+  []
+  [multiple_crossings]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.multiCrossingTwoCubes
+    requirement = 'The system shall apply odd-even parity across multiple disconnected closed components.'
+  []
+  [fixed_ray_direction]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.classifierFixedXRayHasNoRayDirection
+    requirement = 'The system shall reject requests for a configurable ray direction from the fixed-axis containment backend.'
+  []
+  [missing_user_ray_options]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.classifierUserSelectedRayRequiresOptions
+    requirement = 'The system shall require explicit ray options for user-selected-ray containment.'
+  []
+  [ambiguous_user_ray]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.classifierAmbiguousUserSelectedRay
+    requirement = 'The system shall report an ambiguous user-selected ray intersection rather than silently changing the requested direction.'
+  []
+[]

@@ -1,0 +1,30 @@
+[Tests]
+  design = 'AdaptiveRayContainmentCheck.md'
+  issues = '#33397 #33398'
+
+  [from_mesh]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.fromMesh
+    requirement = 'The system shall construct indexed TRI3 surface elements, centroids, and a bounding box from a surface mesh.'
+  []
+  [from_edge_mesh]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.fromMeshEdge2
+    requirement = 'The system shall construct indexed EDGE2 surface elements, centroids, and a bounding box from a surface mesh.'
+  []
+  [from_elements]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.fromElements
+    requirement = 'The system shall construct a surface-element set from a selected collection of TRI3 elements.'
+  []
+  [unsupported_type]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.rejectsUnsupportedElementType
+    requirement = 'The system shall reject unsupported element types when constructing a surface-element set.'
+  []
+  [mixed_types]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.rejectsMixedElementTypes
+    requirement = 'The system shall reject mixed element types when constructing a surface-element set.'
+  []
+[]

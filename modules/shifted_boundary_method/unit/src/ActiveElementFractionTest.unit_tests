@@ -1,0 +1,10 @@
+[Tests]
+  design = 'InterceptedElementModifier.md'
+  issues = '#33397 #33398'
+
+  [unit_square]
+    type = GoogleTest
+    unit_test = ActiveElementFractionTest.UnitSquare
+    requirement = 'The system shall compute active fractions of zero, one-half, and one for predicates integrated over a unit-square element.'
+  []
+[]
