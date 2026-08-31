@@ -1,6 +1,6 @@
 [Tests]
   design = 'PointContainmentClassifier.md'
-  issues = '#33397 #33398'
+  issues = '#33397'
 
   [negative_inside]
     type = GoogleTest
@@ -15,6 +15,6 @@
   [union]
     type = GoogleTest
     unit_test = SurfaceSideTest.Union
-    requirement = 'The system shall combine surface-side classifications for a union using INSIDE, ON, and OUTSIDE precedence.'
+    requirement = 'The system shall combine surface-side classifications for a union using "inside", "on", and "outside" precedence.'
   []
 []

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#31937 #33397 #33398'
+  issues = '#31937 #33397'
   design = 'UnsignedDistanceToSurfaceMesh.md SignedDistanceToSurfaceMesh.md ShortestDistanceToSurface.md'
 
   [distance_test]

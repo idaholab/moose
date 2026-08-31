@@ -1,6 +1,6 @@
 [Tests]
   design = 'TriangleManifold.md PointContainmentClassifier.md'
-  issues = '#33397 #33398'
+  issues = '#33397'
 
   [sideness]
     type = GoogleTest

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#33397 #33398'
+  issues = '#33397'
   design = 'InterceptedElementModifier.md PointInPolyhedronCheckUO.md SBMSurfaceMeshBuilder.md'
   [sbm_test]
     requirement = 'The system shall be capable of performing point-in-polyhedron in-out testing to '

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#33397 #33398'
+  issues = '#33397'
   design = 'PointInUnionCheckUO.md PointInSignedFunctionCheckUO.md '
            'PointInPolyhedronCheckUO.md'
 

@@ -1,6 +1,6 @@
 [Tests]
   design = 'AdaptiveRayContainmentCheck.md'
-  issues = '#33397 #33398'
+  issues = '#33397'
 
   [rectangle]
     type = GoogleTest
@@ -10,7 +10,7 @@
   [pca_fallback]
     type = GoogleTest
     unit_test = AdaptiveRayContainmentCheck.PcaFallbackUsesFallbackDirection
-    requirement = 'The system shall use an unpruned fallback PCA direction when the primary ray directions do not determine containment.'
+    requirement = 'The system shall classify a point as outside when opposite rays along the primary Principal Component Analysis (PCA) direction yield inconsistent crossing parity and a fallback PCA ray exits without crossing the surface.'
   []
   [cube_user_ray]
     type = GoogleTest
