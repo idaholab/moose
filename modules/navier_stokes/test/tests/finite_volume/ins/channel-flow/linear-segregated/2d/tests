@@ -59,6 +59,24 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-mixed-method]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/u_pressure/gradient_method=reconstructed LinearFVKernels/v_pressure/gradient_method=gg'
+    expect_err = "must use the same pressure gradient method"
+    requirement = "The system shall report an error when different momentum components request different pressure gradient methods for the reconstructed coupling field."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-mixed-pressure-variable]
+    type = 'RunException'
+    input = reconstructed-gradient-wrong-variable.i
+    cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/v_pressure/pressure=wrong_pressure'
+    expect_err = "must use the same pressure variable"
+    requirement = "The system shall report an error when different momentum components use different pressure variables for the reconstructed coupling gradient."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i
