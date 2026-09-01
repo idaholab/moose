@@ -68,8 +68,13 @@ public:
    */
   ~CSGBase();
 
-  /// Create a deep copy of this CSGBase instance
-  std::unique_ptr<CSGBase> clone() const { return std::make_unique<CSGBase>(*this); }
+  /**
+   * Create a deep copy of this CSGBase instance. This method calls
+   * std::make_unique to create the deep copy. However, the surface references
+   * of all cloned cells are updated manually to make sure they point to the surfaces
+   * of the cloned object and not the original CSGBase instance.
+   */
+  std::unique_ptr<CSGBase> clone() const;
 
   /**
    * @brief add a unique surface pointer to this base instance
