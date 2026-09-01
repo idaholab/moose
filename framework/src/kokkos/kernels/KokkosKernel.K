@@ -76,4 +76,20 @@ Kernel::computeJacobian()
   }
 }
 
+void
+Kernel::computeJacobianVectorProduct()
+{
+  if (!DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
+    return;
+
+  _thread.resize(_num_local_jacobian_threads, numKokkosBlockElements());
+
+  Policy policy(0, _thread.size());
+
+  if (!_jvp_dispatcher)
+    _jvp_dispatcher = DispatcherRegistry::build<JacobianVectorProductLoop>(this, type());
+
+  _jvp_dispatcher->parallelFor(policy);
+}
+
 } // namespace Moose::Kokkos

@@ -47,6 +47,19 @@ public:
   virtual bool preset() const { return false; }
   virtual void presetSolution(TagID /* tag */) {}
   ///@}
+
+  /**
+   * Compute the local contribution to the action of this nodal boundary condition's Jacobian on
+   * the Kokkos matrix-free direction vector, accumulating the result into the Kokkos matrix-free
+   * action vector.
+   */
+  virtual void computeJacobianVectorProduct()
+  {
+    mooseError("computeJacobianVectorProduct() is not implemented for Kokkos nodal boundary "
+               "condition type '",
+               type(),
+               "'.");
+  }
 };
 
 } // namespace Moose::Kokkos
