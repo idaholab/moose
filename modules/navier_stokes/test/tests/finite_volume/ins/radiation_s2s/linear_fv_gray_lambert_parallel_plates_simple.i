@@ -142,7 +142,7 @@
   []
 
   [radiation]
-    type = LinearFVGrayLambert
+    type = LinearFVGrayLambertBC
     variable = temperature
     temperature_radiation = temperature
     coeff_diffusion = 10.
@@ -230,6 +230,7 @@
 []
 
 [Outputs]
+  execute_on = FINAL
   exodus = true
   csv = true
 []

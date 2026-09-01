@@ -1,15 +1,15 @@
-# LinearFVGrayLambert
+# LinearFVGrayLambertBC
 
-!syntax description /LinearFVBCs/LinearFVGrayLambert
+!syntax description /LinearFVBCs/LinearFVGrayLambertBC
 
 ## Description
 
-`LinearFVGrayLambert` applies a surface-to-surface radiation boundary condition to a
+`LinearFVGrayLambertBC` applies a surface-to-surface radiation boundary condition to a
 linear finite-volume temperature variable. It is the LinearFV counterpart of
 [GrayLambertNeumannBC.md]. Both boundary conditions obtain
 the radiative exchange quantities from a
 [GrayLambertSurfaceRadiationBase.md] user object;
-the difference is that `LinearFVGrayLambert` contributes to a linear finite-volume
+the difference is that `LinearFVGrayLambertBC` contributes to a linear finite-volume
 system using the Robin boundary-condition assembly provided by
 `LinearFVAdvectionDiffusionFunctorRobinBCBase`.
 
@@ -21,7 +21,7 @@ remain the responsibility of a surface-radiation user object such as
 [ViewFactorObjectSurfaceRadiation.md].
 
 !alert note
-`LinearFVGrayLambert` models surface-to-surface exchange among opaque, gray, diffuse
+`LinearFVGrayLambertBC` models surface-to-surface exchange among opaque, gray, diffuse
 surfaces. It is distinct from a Marshak boundary condition used with a participating-
 media radiation-diffusion model.
 
@@ -57,7 +57,7 @@ $\boldsymbol{n}$ is the outward unit normal.
 
 ## LinearFV formulation
 
-When [!param](/LinearFVBCs/LinearFVGrayLambert/reconstruct_emission) is `true`, the
+When [!param](/LinearFVBCs/LinearFVGrayLambertBC/reconstruct_emission) is `true`, the
 emitted portion of the heat flux is reconstructed using the local boundary-face
 temperature. Substitution of [eq:linear-fv-gray-lambert-flux] into
 [eq:linear-fv-gray-lambert-conduction] gives
@@ -99,7 +99,7 @@ physical coefficient as the `diffusion_coeff` used by the associated
 [LinearFVDiffusion.md] kernel. For a heat-conduction equation, both parameters
 represent the thermal conductivity.
 
-When [!param](/LinearFVBCs/LinearFVGrayLambert/reconstruct_emission) is `false`, the
+When [!param](/LinearFVBCs/LinearFVGrayLambertBC/reconstruct_emission) is `false`, the
 surface-averaged heat-flux density obtained directly from the Gray--Lambert user
 object is imposed as a constant Neumann flux over each participating sideset. The
 Robin coefficients then reduce to
@@ -133,13 +133,13 @@ between two conducting slabs:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/radiation_s2s/linear_fv_gray_lambert_parallel_plates_simple.i
 
-The boundary names supplied to `LinearFVGrayLambert` must also participate in the
+The boundary names supplied to `LinearFVGrayLambertBC` must also participate in the
 referenced Gray--Lambert surface-radiation user object. A boundary face may match
-only one boundary listed for a given `LinearFVGrayLambert` object; overlapping
+only one boundary listed for a given `LinearFVGrayLambertBC` object; overlapping
 boundary restrictions are not currently supported.
 
-!syntax parameters /LinearFVBCs/LinearFVGrayLambert
+!syntax parameters /LinearFVBCs/LinearFVGrayLambertBC
 
-!syntax inputs /LinearFVBCs/LinearFVGrayLambert
+!syntax inputs /LinearFVBCs/LinearFVGrayLambertBC
 
-!syntax children /LinearFVBCs/LinearFVGrayLambert
+!syntax children /LinearFVBCs/LinearFVGrayLambertBC
