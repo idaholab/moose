@@ -497,6 +497,11 @@ FEProblemSolve::solve()
             if (_perform_multi_sys_fp_relaxation[sys_i])
               sys->applyFixedPointRelaxation(_multi_sys_fp_relax_factors[sys_i],
                                              Moose::SolutionIterationType::MultiSystemFixedPoint);
+
+              // Store the accepted, possibly relaxed LinearFV solution for nonlinear lagging.
+            if (!is_nonlinear)
+              sys->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
+
             _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << "\n"
                      << std::endl;
           }
