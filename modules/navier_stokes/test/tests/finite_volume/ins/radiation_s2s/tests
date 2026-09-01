@@ -1,0 +1,13 @@
+[Tests]
+  design = 'LinearFVGrayLambert.md'
+  issues = '#33641'
+
+  [radiation_s2s_linearfv_noaction_simple]
+    type = Exodiff
+    input = 'radiative_transfer_no_action_linearfv_simple.i'
+    exodiff = 'radiative_transfer_no_action_linearfv_simple_out.e'
+    mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
+    requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and SIMPLE solver.'
+    issues = '#33641'
+  []
+[]
