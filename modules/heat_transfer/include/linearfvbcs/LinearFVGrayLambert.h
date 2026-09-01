@@ -14,8 +14,8 @@
 class GrayLambertSurfaceRadiationBase;
 
 /**
- * Class implementing a Marshak boundary condition for P1 radiation model in
- * linear finite volume variables. This is only applicable for advection-diffusion problems.
+ * Applies a Gray-Lambert surface-to-surface radiative heat-flux boundary condition
+ * to a linear finite-volume advection-diffusion equation.
  */
 class LinearFVGrayLambert : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {
@@ -33,13 +33,12 @@ protected:
   virtual Real getBeta(Moose::FaceArg face, Moose::StateArg state) const override;
   virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const override;
 
-  /// Functor giving the alpha coefficient (multiplying normal gradient)
+  /// Temperature functor used to reconstruct the local surface emission
   const Moose::Functor<Real> & _temperature_radiation;
-  /// Functor giving the beta coefficient (multiplying value)
+  /// Diffusion coefficient multiplying the outward normal temperature gradient
   const Moose::Functor<Real> & _coeff_diffusion;
-  /// Functor giving the gamma coefficient (on right hand side, treated explicitly)
-  // const Moose::Functor<Real> & _eps_boundary;
-  /// User object to compute the net heat flux at the boundary
+  /// User object providing surface emissivity, irradiation, and net radiative heat flux
   const GrayLambertSurfaceRadiationBase & _glsr_uo;
+  /// Whether to reconstruct the local emitted heat flux using the boundary-face temperature
   bool _reconstruct_emission;
 };
