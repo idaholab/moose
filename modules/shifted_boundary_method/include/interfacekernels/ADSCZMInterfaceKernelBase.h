@@ -37,15 +37,9 @@ protected:
   /// number of displacement components
   const unsigned int _ndisp;
 
-  /// Pointer to displacement variables
-  std::vector<MooseVariable *> _vars;
-
   /// values of the traction used
   const ADMaterialProperty<RealVectorValue> & _traction_global;
 
   /// Applying Shifted Integration
   const bool _shifted;
-
-  /// Whether to add the field correction term
-  const bool _field_correction;
 };

@@ -25,7 +25,6 @@ SCZMInterfaceKernelBase::validParams()
                                "Name of the traction material property (global frame)");
 
   params.addParam<bool>("no_shifted", false, "Applying Shifted.");
-  params.addParam<bool>("field_correction", false, "Whether to add the field correction.");
 
   return params;
 }
@@ -39,14 +38,11 @@ SCZMInterfaceKernelBase::SCZMInterfaceKernelBase(const InputParameters & paramet
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _vars(_ndisp),
-    _grad_disp(_ndisp),
-    _grad_disp_neighbor(_ndisp),
     _traction_global(getMaterialPropertyByName<RealVectorValue>(
         _base_name + getParam<std::string>("traction_global_name"))),
     _dtraction_djump_global(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "dtraction_djump_global")),
-    _shifted(!getParam<bool>("no_shifted")),
-    _field_correction(getParam<bool>("field_correction"))
+    _shifted(!getParam<bool>("no_shifted"))
 {
   // Enforce consistency
   if (_ndisp != _mesh.dimension())
@@ -59,8 +55,6 @@ SCZMInterfaceKernelBase::SCZMInterfaceKernelBase(const InputParameters & paramet
   {
     _disp_var[i] = coupled("displacements", i);
     _vars[i] = getVar("displacements", i);
-    _grad_disp[i] = &coupledGradient("displacements", i);
-    _grad_disp_neighbor[i] = &coupledNeighborGradient("displacements", i);
   }
 }
 
@@ -68,17 +62,6 @@ Real
 SCZMInterfaceKernelBase::computeQpResidual(Moose::DGResidualType type)
 {
   Real r = _traction_global[_qp](_component);
-
-  if (_field_correction)
-  {
-    RealVectorValue traction_gradient;
-    for (unsigned int j = 0; j < _ndisp; ++j)
-      // dt/djump * djump/dx
-      traction_gradient += _dtraction_djump_global[_qp](_component, j) *
-                           ((*_grad_disp_neighbor[j])[_qp] - (*_grad_disp[j])[_qp]);
-
-    r += traction_gradient * surrogateDistance();
-  }
 
   switch (type)
   {

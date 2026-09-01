@@ -121,8 +121,7 @@ ShiftedCohesiveZoneAction::validParams()
                         "Whether generated surface mesh builders check mesh watertightness.");
 
   params.addParam<bool>("no_shifted", false, "Disable shifted terms.");
-  params.addParam<bool>("field_correction", false, "Whether to add the field correction.");
-  params.addParam<bool>("consistency", true, "Adding Shifted consistency terms.");
+  params.addParam<bool>("directional_correction", true, "Add the directional correction terms.");
   params.addParam<MaterialPropertyName>(
       "stress", "stress", "Name of the stress tensor material property for small strain SCZM.");
   params.addParam<MaterialPropertyName>("tangent",
@@ -144,25 +143,27 @@ ShiftedCohesiveZoneAction::validParams()
   params.addParam<bool>("normal_stress_component",
                         false,
                         "Whether to use the normal component of stress instead of the full vector "
-                        "for the consistency term in small strain SCZM.");
+                        "for the directional correction term in small strain SCZM.");
   params.addParam<std::vector<Point>>(
       "junction_pts",
       std::vector<Point>(),
-      "Points where projected quadrature points within 'radius' use position-dependent consistency "
-      "scaling.");
-  params.addRangeCheckedParam<Real>(
-      "radius",
-      0.0,
-      "radius >= 0.0",
-      "Distance threshold for position-dependent consistency scaling around each junction point.");
-  params.addParam<bool>("volumetric_locking_correction",
-                        false,
-                        "Whether to apply volume locking to the consistency term in SCZM.");
+      "Points where projected quadrature points within 'radius' use position-dependent directional "
+      "correction scaling.");
+  params.addRangeCheckedParam<Real>("radius",
+                                    0.0,
+                                    "radius >= 0.0",
+                                    "Distance threshold for position-dependent directional "
+                                    "correction scaling around each junction point.");
+  params.addParam<bool>(
+      "volumetric_locking_correction",
+      false,
+      "Whether to apply volume locking to the directional correction term in SCZM.");
 
-  params.addParam<bool>("pk1_to_stress",
-                        false,
-                        "Whether to convert PK1 stress to Cauchy stress for the consistency term "
-                        "in small strain SCZM");
+  params.addParam<bool>(
+      "pk1_to_stress",
+      false,
+      "Whether to convert PK1 stress to Cauchy stress for the directional correction term "
+      "in small strain SCZM");
 
   params.addParam<bool>(
       "complex_dir_form", false, "Whether to use the complex form of the directional correction");
@@ -243,7 +244,7 @@ ShiftedCohesiveZoneAction::act()
   if (_ndisp != _mesh->dimension())
     paramError("displacements", "Number of displacements must match problem dimension.");
 
-  if (_current_task == "add_interface_kernel" && getParam<bool>("consistency"))
+  if (_current_task == "add_interface_kernel" && getParam<bool>("directional_correction"))
   {
     std::vector<MaterialPropertyName> stress_names;
     std::vector<MaterialPropertyName> tangent_names;
@@ -297,9 +298,10 @@ ShiftedCohesiveZoneAction::act()
               "interface",
               "This NEML2 block provides the material property '",
               neml2_property_name,
-              "' used by [Physics/SolidMechanics/ShiftedCohesiveZone] with consistency=true. "
-              "Set 'interface' to the SCZM boundary (for example, interface = ${boundary}) or set "
-              "'consistency = false' in the ShiftedCohesiveZone block.");
+              "' used by [Physics/SolidMechanics/ShiftedCohesiveZone] with "
+              "directional_correction = true. Set 'interface' to the SCZM boundary (for example, "
+              "interface = ${boundary}) or set "
+              "'directional_correction = false' in the ShiftedCohesiveZone block.");
 
         if (!hasOverlap(_boundary, interfaces))
           neml2_action->paramError(
@@ -307,9 +309,10 @@ ShiftedCohesiveZoneAction::act()
               "This NEML2 block provides the material property '",
               neml2_property_name,
               "' used by "
-              "[Physics/SolidMechanics/ShiftedCohesiveZone] with consistency=true, but its "
-              "'interface' setting does not overlap the SCZM boundary. Make the NEML2 "
-              "'interface' include the SCZM boundary or set 'consistency = false'.");
+              "[Physics/SolidMechanics/ShiftedCohesiveZone] with directional_correction = true, "
+              "but "
+              "its 'interface' setting does not overlap the SCZM boundary. Make the NEML2 "
+              "'interface' include the SCZM boundary or set 'directional_correction = false'.");
 
         return;
       }
@@ -432,10 +435,8 @@ ShiftedCohesiveZoneAction::addRequiredADSCZMInterfaceKernels()
       paramsk.set<UserObjectName>("sbm_distance_uo") = getParam<UserObjectName>("sbm_distance_uo");
     if (isParamSetByUser("no_shifted"))
       paramsk.set<bool>("no_shifted") = getParam<bool>("no_shifted");
-    if (isParamSetByUser("field_correction") && paramsk.isParamValid("field_correction"))
-      paramsk.set<bool>("field_correction") = getParam<bool>("field_correction");
-    if (isParamSetByUser("consistency"))
-      paramsk.set<bool>("consistency") = getParam<bool>("consistency");
+    if (isParamSetByUser("directional_correction"))
+      paramsk.set<bool>("directional_correction") = getParam<bool>("directional_correction");
 
     if (isParamSetByUser("stress"))
       paramsk.set<MaterialPropertyName>("stress") = getParam<MaterialPropertyName>("stress");

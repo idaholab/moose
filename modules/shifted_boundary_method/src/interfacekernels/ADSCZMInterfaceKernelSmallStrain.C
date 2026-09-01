@@ -17,7 +17,7 @@ ADSCZMInterfaceKernelSmallStrain::validParams()
 {
   InputParameters params = ADSCZMInterfaceKernelBase::validParams();
 
-  params.addParam<bool>("consistency", true, "Adding Shifted consistency terms.");
+  params.addParam<bool>("directional_correction", true, "Add the directional correction terms.");
   params.addClassDescription(
       "Shifted CZM Interface kernel to use when using the Small Strain kinematic formulation.");
 
@@ -29,7 +29,7 @@ ADSCZMInterfaceKernelSmallStrain::ADSCZMInterfaceKernelSmallStrain(
   : ADSCZMInterfaceKernelBase(parameters),
     _stress(getADMaterialPropertyByName<RankTwoTensor>("stress")),
     _stress_neighbor(getNeighborADMaterialPropertyByName<RankTwoTensor>("stress")),
-    _consistency_term(getParam<bool>("consistency"))
+    _directional_correction(getParam<bool>("directional_correction"))
 {
 }
 
@@ -45,7 +45,7 @@ ADSCZMInterfaceKernelSmallStrain::computeQpResidual(Moose::DGResidualType type)
   auto residual = ADSCZMInterfaceKernelBase::computeQpResidual(type);
   residual *= true_normal_dot_surrogate_normal;
 
-  if (_consistency_term)
+  if (_directional_correction)
   {
     const auto stress = _stress[_qp].row(_component);
     const auto stress_neigh = _stress_neighbor[_qp].row(_component);

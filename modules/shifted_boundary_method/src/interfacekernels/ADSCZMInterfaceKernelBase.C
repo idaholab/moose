@@ -25,7 +25,6 @@ ADSCZMInterfaceKernelBase::validParams()
   params.set<std::string>("traction_global_name") = "traction_global";
 
   params.addParam<bool>("no_shifted", false, "Applying Shifted.");
-  params.addParam<bool>("field_correction", false, "Whether to add the field correction.");
 
   return params;
 }
@@ -37,11 +36,9 @@ ADSCZMInterfaceKernelBase::ADSCZMInterfaceKernelBase(const InputParameters & par
                    : ""),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
-    _vars(_ndisp),
     _traction_global(getADMaterialPropertyByName<RealVectorValue>(
         _base_name + getParam<std::string>("traction_global_name"))),
-    _shifted(!getParam<bool>("no_shifted")),
-    _field_correction(getParam<bool>("field_correction"))
+    _shifted(!getParam<bool>("no_shifted"))
 {
   // Enforce consistency
   if (_ndisp != _mesh.dimension())
@@ -49,38 +46,12 @@ ADSCZMInterfaceKernelBase::ADSCZMInterfaceKernelBase(const InputParameters & par
 
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM material requires 1, 2 or 3 displacement variables");
-
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    _vars[i] = getVar("displacements", i);
 }
 
 ADReal
 ADSCZMInterfaceKernelBase::computeQpResidual(Moose::DGResidualType type)
 {
   auto r = _traction_global[_qp](_component);
-
-  if (_field_correction)
-  {
-    RealVectorValue traction_gradient;
-    const auto & traction_derivatives = r.derivatives();
-
-    for (unsigned int component = 0; component < _ndisp; ++component)
-    {
-      const auto * const var = _vars[component];
-      const auto & dof_indices = var->dofIndices();
-      const auto & grad_phi = var->gradPhiFace();
-      for (const auto j : index_range(dof_indices))
-        traction_gradient += traction_derivatives[dof_indices[j]] * grad_phi[j][_qp];
-
-      const auto & dof_indices_neighbor = var->dofIndicesNeighbor();
-      const auto & grad_phi_neighbor = var->gradPhiFaceNeighbor();
-      for (const auto j : index_range(dof_indices_neighbor))
-        traction_gradient +=
-            traction_derivatives[dof_indices_neighbor[j]] * grad_phi_neighbor[j][_qp];
-    }
-
-    r += traction_gradient * surrogateDistance();
-  }
 
   switch (type)
   {

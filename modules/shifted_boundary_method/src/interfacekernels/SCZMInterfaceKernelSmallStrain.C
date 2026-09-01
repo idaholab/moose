@@ -9,6 +9,47 @@
 
 #include "SCZMInterfaceKernelSmallStrain.h"
 #include "ElasticityTensorTools.h"
+#include "StabilizationUtils.h"
+
+namespace
+{
+RankTwoTensor
+gradOpForCoord(const Moose::CoordinateSystemType coord_sys,
+               const unsigned int component,
+               const RealVectorValue & grad,
+               const Real value,
+               const Point & point)
+{
+  RankTwoTensor grad_op;
+
+  switch (coord_sys)
+  {
+    case Moose::COORD_XYZ:
+      for (const auto j : make_range(3))
+        grad_op(component, j) = grad(j);
+      break;
+
+    case Moose::COORD_RZ:
+      for (const auto j : make_range(2))
+        grad_op(component, j) = grad(j);
+
+      if (component == 0)
+        grad_op(2, 2) = value / point(0);
+      break;
+
+    case Moose::COORD_RSPHERICAL:
+      grad_op(0, 0) = grad(0);
+      grad_op(1, 1) = value / point(0);
+      grad_op(2, 2) = value / point(0);
+      break;
+
+    default:
+      mooseError("Unsupported coordinate system for SCZMInterfaceKernelSmallStrain.");
+  }
+
+  return grad_op;
+}
+}
 
 registerMooseObject("ShiftedBoundaryMethodApp", SCZMInterfaceKernelSmallStrain);
 
@@ -17,11 +58,15 @@ SCZMInterfaceKernelSmallStrain::validParams()
 {
   InputParameters params = SCZMInterfaceKernelBase::validParams();
 
-  params.addParam<bool>("consistency", true, "Adding Shifted consistency terms.");
+  params.addParam<bool>("directional_correction", true, "Add the directional correction terms.");
   params.addParam<MaterialPropertyName>(
       "stress", "stress", "Name of the stress tensor material property.");
   params.addParam<MaterialPropertyName>(
       "tangent", "Jacobian_mult", "Name of the material Jacobian tensor property.");
+  params.addParam<bool>(
+      "volumetric_locking_correction",
+      false,
+      "Whether to apply volumetric locking correction to the directional correction term.");
   params.addClassDescription(
       "Shifted CZM Interface kernel to use when using the Small Strain kinematic formulation.");
 
@@ -37,7 +82,8 @@ SCZMInterfaceKernelSmallStrain::SCZMInterfaceKernelSmallStrain(const InputParame
         getMaterialPropertyByName<RankFourTensor>(getParam<MaterialPropertyName>("tangent"))),
     _Jacobian_mult_neighbor(getNeighborMaterialPropertyByName<RankFourTensor>(
         getParam<MaterialPropertyName>("tangent"))),
-    _consistency_term(getParam<bool>("consistency"))
+    _directional_correction(getParam<bool>("directional_correction")),
+    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
 }
 
@@ -55,8 +101,8 @@ SCZMInterfaceKernelSmallStrain::computeQpResidual(Moose::DGResidualType type)
   Real residual = SCZMInterfaceKernelBase::computeQpResidual(type);
   residual *= true_normal_dot_surrogate_normal;
 
-  // Optional stress-based consistency term restoring traction balance on the true interface.
-  if (_consistency_term)
+  // Optional stress-based directional correction restoring traction balance on the true interface.
+  if (_directional_correction)
   {
     const RealVectorValue stress = _stress[_qp].row(_component);
     const RealVectorValue stress_neigh = _stress_neighbor[_qp].row(_component);
@@ -90,36 +136,21 @@ SCZMInterfaceKernelSmallStrain::computeDResidualDDisplacement(
   Real jac = jacsd;
 
   const auto d = surrogateDistance();
-  const auto field_correction_jac = [this, component_j, jacsd, d](const bool neighbor)
-  {
-    return jacsd * ((neighbor ? _vars[component_j]->gradPhiFaceNeighbor()[_j][_qp]
-                              : _vars[component_j]->gradPhiFace()[_j][_qp]) *
-                    d);
-  };
-
   if (!_shifted)
   {
     switch (type)
     {
       case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
         jac *= _test[_i][_qp] * _vars[component_j]->phiFace()[_j][_qp];
-        if (_field_correction)
-          jac += _test[_i][_qp] * field_correction_jac(/*neighbor=*/false);
         break;
       case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
         jac *= -_test[_i][_qp] * _vars[component_j]->phiFaceNeighbor()[_j][_qp];
-        if (_field_correction)
-          jac -= _test[_i][_qp] * field_correction_jac(/*neighbor=*/true);
         break;
       case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
         jac *= -_test_neighbor[_i][_qp] * _vars[component_j]->phiFace()[_j][_qp];
-        if (_field_correction)
-          jac -= _test_neighbor[_i][_qp] * field_correction_jac(/*neighbor=*/false);
         break;
       case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
         jac *= _test_neighbor[_i][_qp] * _vars[component_j]->phiFaceNeighbor()[_j][_qp];
-        if (_field_correction)
-          jac += _test_neighbor[_i][_qp] * field_correction_jac(/*neighbor=*/true);
         break;
     }
     return jac;
@@ -134,26 +165,18 @@ SCZMInterfaceKernelSmallStrain::computeDResidualDDisplacement(
     case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
       jac *= _test[_i][_qp] * (_vars[component_j]->phiFace()[_j][_qp] +
                                _vars[component_j]->gradPhiFace()[_j][_qp] * d);
-      if (_field_correction)
-        jac += _test[_i][_qp] * field_correction_jac(/*neighbor=*/false);
       break;
     case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
       jac *= -_test[_i][_qp] * (_vars[component_j]->phiFaceNeighbor()[_j][_qp] +
                                 _vars[component_j]->gradPhiFaceNeighbor()[_j][_qp] * d);
-      if (_field_correction)
-        jac -= _test[_i][_qp] * field_correction_jac(/*neighbor=*/true);
       break;
     case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
       jac *= -_test_neighbor[_i][_qp] * (_vars[component_j]->phiFace()[_j][_qp] +
                                          _vars[component_j]->gradPhiFace()[_j][_qp] * d);
-      if (_field_correction)
-        jac -= _test_neighbor[_i][_qp] * field_correction_jac(/*neighbor=*/false);
       break;
     case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
       jac *= _test_neighbor[_i][_qp] * (_vars[component_j]->phiFaceNeighbor()[_j][_qp] +
                                         _vars[component_j]->gradPhiFaceNeighbor()[_j][_qp] * d);
-      if (_field_correction)
-        jac += _test_neighbor[_i][_qp] * field_correction_jac(/*neighbor=*/true);
       break;
   }
 
@@ -168,14 +191,14 @@ SCZMInterfaceKernelSmallStrain::computeQpJacobian(Moose::DGJacobianType type)
   // The area correction is taken care of by computeDResidualDDisplacement.
   Real jacobian = SCZMInterfaceKernelBase::computeQpJacobian(type);
 
-  if (_shifted && _consistency_term)
+  if (_shifted && _directional_correction)
     switch (type)
     {
       case Moose::ElementElement:
-        jacobian -= calculateConsistencyJacobian(_component, _component, type);
+        jacobian -= calculateDirectionalCorrectionJacobian(_component, _component, type);
         break;
       case Moose::NeighborNeighbor:
-        jacobian += calculateConsistencyJacobian(_component, _component, type);
+        jacobian += calculateDirectionalCorrectionJacobian(_component, _component, type);
         break;
       case Moose::ElementNeighbor:
       case Moose::NeighborElement:
@@ -191,16 +214,16 @@ SCZMInterfaceKernelSmallStrain::computeQpOffDiagJacobian(Moose::DGJacobianType t
 {
   Real jacobian = SCZMInterfaceKernelBase::computeQpOffDiagJacobian(type, jvar);
 
-  if (_shifted && _consistency_term)
+  if (_shifted && _directional_correction)
     for (unsigned int coupled_component = 0; coupled_component < _ndisp; ++coupled_component)
       if (jvar == _disp_var[coupled_component])
         switch (type)
         {
           case Moose::ElementElement:
-            jacobian -= calculateConsistencyJacobian(_component, coupled_component, type);
+            jacobian -= calculateDirectionalCorrectionJacobian(_component, coupled_component, type);
             break;
           case Moose::NeighborNeighbor:
-            jacobian += calculateConsistencyJacobian(_component, coupled_component, type);
+            jacobian += calculateDirectionalCorrectionJacobian(_component, coupled_component, type);
             break;
           case Moose::ElementNeighbor:
           case Moose::NeighborElement:
@@ -211,16 +234,16 @@ SCZMInterfaceKernelSmallStrain::computeQpOffDiagJacobian(Moose::DGJacobianType t
 }
 
 Real
-SCZMInterfaceKernelSmallStrain::calculateConsistencyJacobian(unsigned int ivar,
-                                                             unsigned int jvar,
-                                                             Moose::DGJacobianType type) const
+SCZMInterfaceKernelSmallStrain::calculateDirectionalCorrectionJacobian(
+    unsigned int ivar, unsigned int jvar, Moose::DGJacobianType type) const
 {
   const auto true_normal =
       _shifted ? RealVectorValue(trueNormal()) : RealVectorValue(_normals[_qp]);
 
-  const auto grad_phi = (type == Moose::ElementElement || type == Moose::NeighborElement)
-                            ? _grad_phi[_j][_qp]
-                            : _grad_phi_neighbor[_j][_qp];
+  const bool trial_on_element =
+      type == Moose::ElementElement || type == Moose::NeighborElement;
+  const auto grad_phi =
+      trial_on_element ? _grad_phi[_j][_qp] : _grad_phi_neighbor[_j][_qp];
 
   const auto nt_tangent = _normals[_qp] - (true_normal * _normals[_qp]) * true_normal;
 
@@ -252,5 +275,33 @@ SCZMInterfaceKernelSmallStrain::calculateConsistencyJacobian(unsigned int ivar,
        (r4t(i, 2, 0, k) * gp0 + r4t(i, 2, 1, k) * gp1 + r4t(i, 2, 2, k) * gp2) * n2) *
       test;
 
-  return (origin_part + symmetric_part) * 0.5;
+  Real jacobian = (origin_part + symmetric_part) * 0.5;
+
+  if (_volumetric_locking_correction)
+  {
+    const auto grad_op = gradOpForCoord(_coord_sys,
+                                        k,
+                                        grad_phi,
+                                        trial_on_element ? _phi[_j][_qp] : _phi_neighbor[_j][_qp],
+                                        _q_point[_qp]);
+    const auto avg_grad_op = StabilizationUtils::elementAverage(
+        [this, k, trial_on_element](unsigned int qp)
+        {
+          return gradOpForCoord(_coord_sys,
+                                k,
+                                trial_on_element ? _grad_phi[_j][qp] : _grad_phi_neighbor[_j][qp],
+                                trial_on_element ? _phi[_j][qp] : _phi_neighbor[_j][qp],
+                                _q_point[qp]);
+        },
+        _JxW,
+        _coord);
+    const Real volumetric_increment = (avg_grad_op.trace() - grad_op.trace()) / 3.0;
+
+    for (const auto m : make_range(3))
+      jacobian += (r4t(i, 0, m, m) * n0 + r4t(i, 1, m, m) * n1 +
+                   r4t(i, 2, m, m) * n2) *
+                  test * volumetric_increment;
+  }
+
+  return jacobian;
 }

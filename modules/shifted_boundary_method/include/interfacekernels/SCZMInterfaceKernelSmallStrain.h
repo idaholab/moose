@@ -29,10 +29,10 @@ protected:
   Real computeDResidualDDisplacement(const unsigned int & component_j,
                                      const Moose::DGJacobianType & type) const override;
 
-  /// Analytic Jacobian of the stress-based consistency term
-  Real calculateConsistencyJacobian(unsigned int ivar,
-                                    unsigned int jvar,
-                                    Moose::DGJacobianType type) const;
+  /// Analytic Jacobian of the stress-based directional correction term
+  Real calculateDirectionalCorrectionJacobian(unsigned int ivar,
+                                               unsigned int jvar,
+                                               Moose::DGJacobianType type) const;
 
   /// The stress tensor on the element and neighbor sides
   ///@{
@@ -46,6 +46,9 @@ protected:
   const MaterialProperty<RankFourTensor> & _Jacobian_mult_neighbor;
   ///@}
 
-  /// Whether to add the shifted consistency term
-  const bool _consistency_term;
+  /// Whether to add the directional correction term
+  const bool _directional_correction;
+
+  /// Whether to apply the volumetric locking correction to the directional correction term
+  const bool _volumetric_locking_correction;
 };

@@ -28,5 +28,6 @@ protected:
   /// The stress tensor from the neighbor side
   const ADMaterialProperty<RankTwoTensor> & _stress_neighbor;
 
-  const bool _consistency_term;
+  /// Whether to add the directional correction term
+  const bool _directional_correction;
 };

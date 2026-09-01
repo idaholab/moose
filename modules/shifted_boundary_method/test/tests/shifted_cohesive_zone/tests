@@ -10,16 +10,26 @@
                   'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action '
                   'with the non-AD SalehaniIrani3DCTraction law.'
   []
-  [rectangle_sczm_tri_material_field_correction]
-    type = 'CSVDiff'
+  [rectangle_sczm_tri_material_volumetric_locking_jacobian]
+    type = 'PetscJacobianTester'
     input = 'rectangle_sczm_tri_material.i'
-    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/field_correction=true '
-               'Outputs/csv/file_base=rectangle_sczm_tri_material_fc'
-    csvdiff = 'rectangle_sczm_tri_material_fc.csv'
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true "
+               "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
-    recover = false
-    requirement = 'The system shall solve a shifted cohesive zone problem with the field '
-                  'correction term enabled in the ShiftedCohesiveZone interface kernel.'
+    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall produce an exact '
+                  'Jacobian when volumetric locking correction is inherited from the QuasiStatic '
+                  'SolidMechanics Physics.'
+  []
+  [volumetric_locking_mismatch]
+    type = 'RunException'
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true '
+               'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/volumetric_locking_correction=false'
+    expect_err = "'volumetric_locking_correction' value in ShiftedCohesiveZone block is different"
+    requirement = 'The system shall report an error when explicitly specified volumetric locking '
+                  'correction settings differ between shifted cohesive zone and solid mechanics '
+                  'Physics blocks.'
   []
 
   [rectangle_sczm_tri_material_exodus]

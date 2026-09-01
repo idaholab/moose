@@ -49,12 +49,6 @@ protected:
   /// Pointer to displacement variables
   std::vector<MooseVariable *> _vars;
 
-  /// Coupled displacement gradients on the element and neighbor sides
-  ///@{
-  std::vector<const VariableGradient *> _grad_disp;
-  std::vector<const VariableGradient *> _grad_disp_neighbor;
-  ///@}
-
   /// Values of the traction and its derivative w.r.t. the displacement jump
   ///@{
   const MaterialProperty<RealVectorValue> & _traction_global;
@@ -63,7 +57,4 @@ protected:
 
   /// Applying shifted integration
   const bool _shifted;
-
-  /// Whether to add the field correction term
-  const bool _field_correction;
 };
