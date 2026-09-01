@@ -227,9 +227,6 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
   virtual void reinitNode(const Node * node, const THREAD_ID tid) override;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) override;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) override;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes,
-                                   const THREAD_ID tid) override;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
 
   /**

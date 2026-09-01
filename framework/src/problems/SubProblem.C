@@ -985,6 +985,22 @@ SubProblem::reinitLowerDElem(const Elem * elem,
 }
 
 void
+SubProblem::reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
+{
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).reinitNodes(nodes, tid);
+  systemBaseAuxiliary().reinitNodes(nodes, tid);
+}
+
+void
+SubProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
+{
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).reinitNodesNeighbor(nodes, tid);
+  systemBaseAuxiliary().reinitNodesNeighbor(nodes, tid);
+}
+
+void
 SubProblem::reinitNeighborLowerDElem(const Elem * elem, const THREAD_ID tid)
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
