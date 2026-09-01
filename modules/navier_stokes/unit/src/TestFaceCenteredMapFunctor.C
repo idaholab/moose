@@ -62,7 +62,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
     mesh->setMeshBase(std::move(lm_mesh));
   }
 
-  mesh->prepare(nullptr);
+  mesh->prepare();
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
   mesh->setCoordSystem({}, coord_type_enum);
   mesh->buildFiniteVolumeInfo();

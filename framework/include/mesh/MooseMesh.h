@@ -549,22 +549,9 @@ public:
 
   /**
    * Calls prepare_for_use() if the underlying MeshBase object isn't prepared, then communicates
-   * various boundary information on parallel meshes. Also calls update() internally. Instead of
-   * calling \p prepare_for_use on the currently held \p MeshBase object, a \p mesh_to_clone can be
-   * provided. If it is provided (e.g. this method is given a non-null argument), then \p _mesh will
-   * be assigned a clone of the \p mesh_to_clone. The provided \p mesh_to_clone must already be
-   * prepared
-   * @param mesh_to_clone If nonnull, we will clone this mesh instead of preparing our current one
-   * @return Whether the libMesh mesh was prepared. This should really only be relevant in MOOSE
-   * framework contexts where we need to make a decision about what to do with the displaced mesh.
-   * If the reference mesh base object has \p complete_preparation() called (e.g. this method
-   * returns \p true when called for the reference mesh), then we must pass the reference mesh base
-   * object into this method when we call this for the displaced mesh. This is because the displaced
-   * mesh \emph must be an exact clone of the reference mesh. We have seen that \p
-   * complete_preparation() called on two previously identical meshes can result in two different
-   * meshes even with Metis partitioning
+   * various boundary information on parallel meshes. Also calls update() internally.
    */
-  bool prepare(const MeshBase * mesh_to_clone);
+  void prepare();
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().

@@ -394,7 +394,6 @@ addActionTypes(Syntax & syntax)
                            "(attach_geometric_rm)"
                            "(init_mesh)"
                            "(prepare_mesh)"
-                           "(add_mortar_interface)"
                            "(uniform_refine_mesh)"
                            "(setup_mesh_complete)"
                            "(post_mesh_prepared)"

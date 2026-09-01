@@ -382,14 +382,12 @@ MooseMesh::freeBndElems()
   _bnd_elem_range.reset();
 }
 
-bool
-MooseMesh::prepare(const MeshBase * const mesh_to_clone)
+void
+MooseMesh::prepare()
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
 
   parallel_object_only();
-
-  bool libmesh_mesh_prepared = false;
 
   mooseAssert(_mesh, "The MeshBase has not been constructed");
 
@@ -397,22 +395,14 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     // For whatever reason we do not want to allow renumbering here nor ever in the future?
     getMesh().allow_renumbering(false);
 
-  if (mesh_to_clone)
-  {
-    mooseAssert(mesh_to_clone->is_prepared(),
-                "The mesh we wish to clone from must already be prepared");
-    _mesh = mesh_to_clone->clone();
-    _moose_mesh_prepared = false;
-  }
-  else if (!_mesh->is_prepared())
+  if (!_mesh->is_prepared())
   {
     _mesh->complete_preparation();
     _moose_mesh_prepared = false;
-    libmesh_mesh_prepared = true;
   }
 
   if (_moose_mesh_prepared)
-    return libmesh_mesh_prepared;
+    return;
 
   // Collect (local) subdomain IDs
   _mesh_subdomains.clear();
@@ -595,8 +585,6 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   checkDuplicateSubdomainNames();
 
   _moose_mesh_prepared = true;
-
-  return libmesh_mesh_prepared;
 }
 
 bool

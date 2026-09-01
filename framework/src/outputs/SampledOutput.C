@@ -503,7 +503,7 @@ SampledOutput::cloneMesh()
 
   // Prepare mesh, needed for the mesh functions
   if (_using_external_sampling_file)
-    _sampling_mesh_ptr->prepare(/*mesh to clone*/ nullptr);
+    _sampling_mesh_ptr->prepare();
   else if (_serialize && isParamValid("sampling_blocks"))
     // TODO: constraints have not been initialized?
     _sampling_mesh_ptr->getMesh().prepare_for_use();
