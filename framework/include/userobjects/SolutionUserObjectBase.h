@@ -535,5 +535,11 @@ protected:
   mutable DenseVector<Number> _cached_values2;
 
 private:
+  /**
+   * Checks that an imported variable is scalar-valued.
+   */
+  void checkVariableIsScalarValued(unsigned int local_var_index,
+                                   const std::string & evaluation_type) const;
+
   static Threads::spin_mutex _solution_user_object_mutex;
 };

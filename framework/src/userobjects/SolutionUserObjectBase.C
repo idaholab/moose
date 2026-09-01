@@ -626,6 +626,20 @@ SolutionUserObjectBase::isVariableSpatiallyDiscontinuous(const std::string & var
          FEInterface::get_continuity(fe_type) == libMesh::DISCONTINUOUS;
 }
 
+void
+SolutionUserObjectBase::checkVariableIsScalarValued(const unsigned int local_var_index,
+                                                    const std::string & evaluation_type) const
+{
+  mooseAssert(local_var_index < _system_variables.size(),
+              "The local variable index is outside the range of imported solution variables.");
+
+  const auto & fe_type = _system->variable_type(_system_variables[local_var_index]);
+  if (FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR)
+    mooseError(evaluation_type,
+               " of vector-valued finite element variables is not currently supported by "
+               "SolutionUserObjectBase.");
+}
+
 MooseEnum
 SolutionUserObjectBase::getSolutionFileType() const
 {
@@ -812,6 +826,8 @@ SolutionUserObjectBase::pointValue(Real libmesh_dbg_var(t),
                                    const unsigned int local_var_index,
                                    const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point value evaluation");
+
   // Create copy of point
   Point pt(p);
 
@@ -866,6 +882,8 @@ SolutionUserObjectBase::discontinuousPointValue(
     const unsigned int local_var_index,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point value evaluation");
+
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
   {
@@ -982,6 +1000,8 @@ SolutionUserObjectBase::pointValueGradient(Real libmesh_dbg_var(t),
                                            const unsigned int local_var_index,
                                            const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point gradient evaluation");
+
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
   {
@@ -1033,6 +1053,8 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
     const unsigned int local_var_index,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point gradient evaluation");
+
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
   {

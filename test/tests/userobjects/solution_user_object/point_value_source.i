@@ -16,6 +16,12 @@
     family = XYZ
     order = CONSTANT
   []
+
+  [source_vector]
+    family = LAGRANGE_VEC
+    order = FIRST
+    initial_condition = '3 2 0'
+  []
 []
 
 [AuxKernels]
@@ -41,6 +47,6 @@
 []
 
 [Outputs]
-  file_base = point_value_weighted_xyz_source
+  file_base = point_value_source
   xda = true
 []

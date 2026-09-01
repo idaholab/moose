@@ -27,20 +27,31 @@
     requirement = "The system shall reduce multivalued imported solution values and gradients using selectable weighting policies."
   []
 
-  [point_value_weighted_xyz_source]
+  [point_value_source]
     type = RunApp
-    input = point_value_weighted_xyz_source.i
+    input = point_value_source.i
     issues = '#31766'
-    requirement = "The system shall write an XYZ-family imported solution for testing multivalued point evaluation."
+    requirement = "The system shall write scalar and vector-valued finite element fields for imported point-evaluation testing."
   []
 
   [point_value_weighted_xyz_reader]
     type = CSVDiff
     input = point_value_weighted_xyz_reader.i
     csvdiff = point_value_weighted_xyz_reader_out.csv
-    prereq = point_value_weighted_xyz_source
+    prereq = point_value_source
     issues = '#31766'
     requirement = "The system shall reduce multivalued XYZ-family imported solution values using the selected weighting policy."
+  []
+
+  [point_value_vector_error]
+    type = RunException
+    input = point_value_weighted_xyz_reader.i
+    cli_args = 'UserObjects/solution/system_variables=source_vector
+                Postprocessors/xyz_average/variable=source_vector'
+    prereq = point_value_source
+    expect_err = "Point value evaluation of vector-valued finite element variables is not currently supported"
+    issues = '#31766'
+    requirement = "The system shall report an error when scalar point-value evaluation is requested for a vector-valued imported finite element variable."
   []
 
   [point_value_weighted_time_source]
