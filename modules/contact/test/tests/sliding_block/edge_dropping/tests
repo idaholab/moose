@@ -147,19 +147,24 @@
     issues = '#18853'
     allow_test_objects = true
   []
-  [nodal-scaling-rejects-distributed-mesh]
-    type = 'RunException'
+  [frictionless-slide-2d-nodal-scaling-distributed]
+    type = 'CSVDiff'
     input = 'two_equal_blocks_slide_2d.i'
-    mesh_mode = 'REPLICATED'
+    csvdiff = 'two_equal_blocks_slide_2d_nodal_scaling_out.csv'
+    min_parallel = 2
+    max_parallel = 2
     cli_args = 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
-               'Mesh/parallel_type=DISTRIBUTED'
-    expect_err = 'not supported on a distributed mesh'
-    requirement = 'The system shall report an error when node-based mortar scaling is requested on '
-                  'a distributed mesh'
+               'Mesh/parallel_type=DISTRIBUTED '
+               'Outputs/file_base="two_equal_blocks_slide_2d_nodal_scaling_out"'
+    prereq = 'frictionless-slide-2d-nodal-scaling-parallel'
+    requirement = 'The system shall produce the same node-based-scaled mortar contact solution on a '
+                  'distributed mesh as on a replicated mesh, the nodal factor being independent of '
+                  'the mesh partitioning'
     design = 'constraints/ComputeWeightedGapLMMechanicalContact.md '
              'userobjects/LMWeightedGapUserObject.md'
     issues = '#18853'
     allow_test_objects = true
+    capabilities = 'ad_size>=100'
   []
   [nodal-scaling-requires-first-order]
     type = 'RunException'

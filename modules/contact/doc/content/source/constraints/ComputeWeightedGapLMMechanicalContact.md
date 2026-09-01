@@ -60,23 +60,26 @@ $(\lambda_n)_j = \hat{z}_j / \kappa_j$ is recovered for the mortar coupling and 
 pressures. It requires `correct_edge_dropping = true`.
 
 The Lagrange multiplier stored in the solution vector is the scaled multiplier $\hat{z}_j$, not the
-physical pressure. The physical pressure is recovered internally for the mortar force coupling and
-is reported through the user object's `getNormalContactPressure` (used by the contact auxiliary
-kernels). Because the stored quantity depends on whether scaling is enabled, do not restart a
-simulation with a different `use_nodal_scaling` setting than the one that wrote the restart data.
+physical pressure, so plotting the Lagrange multiplier variable directly shows the scaled quantity.
+The physical pressure is recovered internally for the mortar force coupling, and to output it use
+[MortarUserObjectAux](/MortarUserObjectAux.md) with `contact_quantity = normal_pressure` (whereas
+`normal_lm` reports the stored, scaled multiplier). Because the stored quantity depends on whether
+scaling is enabled, do not restart a simulation with a different `use_nodal_scaling` setting than
+the one that wrote the restart data.
 
 !alert warning title=Limited support
 Node-based scaling is implemented for frictionless normal Lagrange multiplier contact
 ([LMWeightedGapUserObject](/LMWeightedGapUserObject.md) with
-`ComputeWeightedGapLMMechanicalContact`) using a first-order Lagrange multiplier on a replicated
-mesh, in Cartesian, RZ, or spherical coordinates, and it runs in parallel across multiple processes.
-An error is reported for a distributed mesh, a second-order Lagrange multiplier, frictional contact
+`ComputeWeightedGapLMMechanicalContact`) using a first-order Lagrange multiplier, in Cartesian, RZ,
+or spherical coordinates, and it runs in parallel on both replicated and distributed meshes. An
+error is reported for a second-order Lagrange multiplier, frictional contact
 (`ComputeFrictionalForceLMMechanicalContact`), `correct_edge_dropping = false`, or
-`normalize_c = true`. Second-order multipliers require the transformed dual basis (a separate
-development). The consistent linearization of $\kappa_j$ (its
-dependence on displacement) is omitted because the mortar segment geometry is carried non-AD
-throughout the framework, so Newton convergence near a dropping edge may be less than quadratic;
-the converged solution is unaffected.
+`normalize_c = true`. Second-order multipliers are excluded because the normalization
+$\int_e N_j$ is zero at TRI6 and TET10 vertices and negative at QUAD8 and HEX20 corners, which makes
+$\kappa_j$ undefined or negative; that case requires the transformed dual basis (a separate
+development). The consistent linearization of $\kappa_j$ (its dependence on displacement) is omitted
+because the mortar segment geometry is carried non-AD throughout the framework, so Newton
+convergence near a dropping edge may be less than quadratic; the converged solution is unaffected.
 
 !syntax description /Constraints/ComputeWeightedGapLMMechanicalContact
 

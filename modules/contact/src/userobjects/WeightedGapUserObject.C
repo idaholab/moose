@@ -40,8 +40,8 @@ WeightedGapUserObject::validParams()
       "secondary elements are only partially covered (edge dropping). Requires "
       "'correct_edge_dropping = true'. Supported for frictionless normal Lagrange multiplier "
       "contact (LMWeightedGapUserObject with ComputeWeightedGapLMMechanicalContact) using a "
-      "first-order Lagrange multiplier on a replicated mesh, in Cartesian, RZ, or spherical "
-      "coordinates, and in parallel.");
+      "first-order Lagrange multiplier, in Cartesian, RZ, or spherical coordinates, and in "
+      "parallel.");
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
@@ -87,14 +87,6 @@ WeightedGapUserObject::initialSetup()
     if (!getParam<bool>("correct_edge_dropping"))
       paramError("use_nodal_scaling",
                  "Node-based scaling requires 'correct_edge_dropping = true'.");
-
-    // n_j^e (adjacency count) is globally complete only on a replicated mesh; on a distributed mesh
-    // kappa_j would be partition dependent. Multi-rank on a replicated mesh is fine.
-    if (_subproblem.mesh().isDistributedMesh())
-      paramError("use_nodal_scaling",
-                 "Node-based scaling is not supported on a distributed mesh; run mortar contact on "
-                 "a replicated mesh (Mesh/parallel_type = REPLICATED). Parallel multi-rank "
-                 "execution on a replicated mesh is supported.");
   }
 }
 
@@ -172,9 +164,8 @@ WeightedGapUserObject::computeQpIProperties()
   if (_use_nodal_scaling)
   {
     // Numerator of kappa_j (Popp 2013 eq. 36): covered fraction (int_{e_int} N_j)/(int_e N_j)
-    // summed over adjacent elements, using the standard N_j (displacement basis, fePhiLower) -- not
-    // the dual test, so kappa_j = 1 at full coverage in every coordinate system, RZ/spherical
-    // included.
+    // summed over adjacent elements. Both use the standard N_j (fePhiLower), not the dual test, so
+    // kappa_j is 1 at full coverage in every coordinate system.
     const auto & std_phi = _assembly.fePhiLower<Real>(_disp_x_var->feType());
     _dof_to_covered_fraction_sum[dof] +=
         std_phi[_i][_qp] * _qp_factor / fullNodalIntegrals(_lower_secondary_elem)[_i];
@@ -216,7 +207,7 @@ WeightedGapUserObject::finalize()
                                                   /*send_data_back=*/true);
 
     // Divide by n_j^e (adjacent-element count, including fully dropped neighbors) for the eq. 36
-    // mean; the map is globally complete on the replicated mesh.
+    // mean; the fully ghosted mortar interface makes that count global on every process.
     const auto & nodes_to_secondary_elem = amg().nodesToSecondaryElem();
     for (const auto & [dof, fraction_sum] : _dof_to_covered_fraction_sum)
       _dof_to_nodal_scale[dof] =
