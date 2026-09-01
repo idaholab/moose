@@ -98,14 +98,6 @@
       "behavior": "UNIVERSE",
       "unit_type": "CSG::DuctedPinEngUnit"
     },
-    "pin1_radial_boundary": {
-      "attributes": {
-        "apothem": 0.710315,
-        "num_sides": 6
-      },
-      "behavior": "SURFACE",
-      "unit_type": "CSG::CSGNPolygonUnit"
-    },
     "pin2_ducted_pin_unit": {
       "attributes": {
         "duct_apothems": [],
@@ -119,14 +111,6 @@
       },
       "behavior": "UNIVERSE",
       "unit_type": "CSG::DuctedPinEngUnit"
-    },
-    "pin2_radial_boundary": {
-      "attributes": {
-        "apothem": 0.710315,
-        "num_sides": 6
-      },
-      "behavior": "SURFACE",
-      "unit_type": "CSG::CSGNPolygonUnit"
     }
   },
   "universes": {

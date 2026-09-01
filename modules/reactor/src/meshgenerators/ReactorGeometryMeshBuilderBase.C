@@ -237,7 +237,8 @@ ReactorGeometryMeshBuilderBase::callExtrusionMeshSubgenerators(
 }
 
 std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj)
+ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj,
+                                                      const bool skip_intermediate_plane_generation)
 {
   std::vector<std::string> axial_surf_names;
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
@@ -265,7 +266,7 @@ ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj)
     if (csg_obj.hasSurface(surf_name))
       // Surface exists in CSGBase, retrieve from object
       surfaces_by_axial_region.push_back(csg_obj.getSurfaceByName(surf_name));
-    else
+    else if (!skip_intermediate_plane_generation || i == 0 || i == axial_surf_names.size() - 1)
     {
       // Surface has not been defined, create it and add to CSGBase
       std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =

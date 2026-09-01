@@ -288,12 +288,14 @@ protected:
   /**
    * Get CSGSurfaces corresponding to axial planes of the extruded RGMB mesh
    * @param csg_obj Reference to CSGBase object for retrieving axial plane surfaces
+   * @param skip_intermediate_plane_generation Skip generation of intermediate axial planes
+   *                                           if they don't exist.
    * @return vector of surfaces that correspond to axial planes of extruded RGMB mesh
-   * @note This method assumes axial surfaces have already been created and added to CSGBase
-   *       instance
+   * @note This method will always generate the top and bottom axial surfaces if they do not
+   *       exist in the CSGBase instance
    */
   std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-  getAxialPlaneSurfaces(CSG::CSGBase & csg_obj);
+  getAxialPlaneSurfaces(CSG::CSGBase & csg_obj, const bool skip_intermediate_plane_generation);
 
   /**
    * Create CSG lattice for assembly and core lattices. This method does not set the outer universe

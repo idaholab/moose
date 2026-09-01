@@ -935,8 +935,15 @@ CoreMeshGenerator::generateCSG()
       {
         const auto & cell_to_delete = cell.get();
         const auto & fill_univ_name = cell_to_delete.getFillUniverse().getName();
+        // Store surfaces use to define cell region. The radial surfaces will be deleted
+        // as they are no longer used in CSGBase instance after cell deletion.
+        const auto & surfs_to_delete = cell_to_delete.getRegion().getSurfaces();
         csg_obj->deleteCell(cell_to_delete);
         univ_id_names[i] = fill_univ_name;
+        for (const auto & surf : surfs_to_delete)
+          // Only delete those surfaces that aren't used as axial planes
+          if (surf.get().getName().find(RGMB::CSG_AXIAL_PLANE_PREFIX) == std::string::npos)
+            csg_obj->deleteSurface(surf);
       }
     }
   }
@@ -990,7 +997,7 @@ CoreMeshGenerator::generateCSG()
 
   if (_mesh_dimensions == 3)
   {
-    const auto surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
+    const auto surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj, true);
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
     lat_cell_region = lat_cell_region & +lowest_axial_surf & -highest_axial_surf;

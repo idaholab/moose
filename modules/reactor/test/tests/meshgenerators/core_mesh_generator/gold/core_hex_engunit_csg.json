@@ -261,22 +261,6 @@
     }
   },
   "units": {
-    "amg1_radial_boundary": {
-      "attributes": {
-        "apothem": 3.551575,
-        "num_sides": 6
-      },
-      "behavior": "SURFACE",
-      "unit_type": "CSG::CSGNPolygonUnit"
-    },
-    "amg2_radial_boundary": {
-      "attributes": {
-        "apothem": 3.551575,
-        "num_sides": 6
-      },
-      "behavior": "SURFACE",
-      "unit_type": "CSG::CSGNPolygonUnit"
-    },
     "amg2_radial_duct_0": {
       "attributes": {
         "apothem": 3.5,
@@ -313,14 +297,6 @@
       "behavior": "UNIVERSE",
       "unit_type": "CSG::DuctedPinEngUnit"
     },
-    "pin1_radial_boundary": {
-      "attributes": {
-        "apothem": 0.710315,
-        "num_sides": 6
-      },
-      "behavior": "SURFACE",
-      "unit_type": "CSG::CSGNPolygonUnit"
-    },
     "pin2_ducted_pin_unit": {
       "attributes": {
         "axial_plane_levels": [
@@ -340,14 +316,6 @@
       },
       "behavior": "UNIVERSE",
       "unit_type": "CSG::DuctedPinEngUnit"
-    },
-    "pin2_radial_boundary": {
-      "attributes": {
-        "apothem": 0.710315,
-        "num_sides": 6
-      },
-      "behavior": "SURFACE",
-      "unit_type": "CSG::CSGNPolygonUnit"
     },
     "pin3_ducted_pin_unit": {
       "attributes": {
@@ -372,14 +340,6 @@
       },
       "behavior": "UNIVERSE",
       "unit_type": "CSG::DuctedPinEngUnit"
-    },
-    "pin3_radial_boundary": {
-      "attributes": {
-        "apothem": 0.710315,
-        "num_sides": 6
-      },
-      "behavior": "SURFACE",
-      "unit_type": "CSG::CSGNPolygonUnit"
     }
   },
   "universes": {
