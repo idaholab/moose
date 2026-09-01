@@ -7,26 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVGrayLambert.h"
+#include "LinearFVGrayLambertBC.h"
 #include "HeatConductionNames.h"
 #include "GrayLambertSurfaceRadiationBase.h"
 
-
-registerMooseObject("HeatTransferApp", LinearFVGrayLambert);
+registerMooseObject("HeatTransferApp", LinearFVGrayLambertBC);
 
 InputParameters
-LinearFVGrayLambert::validParams()
+LinearFVGrayLambertBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionFunctorRobinBCBase::validParams();
   params.addClassDescription(
-    "Applies a surface-to-surface Gray-Lambert radiation heat flux boundary "
-    "condition to a linear finite-volume energy equation.");
+      "Applies a surface-to-surface Gray-Lambert radiation heat flux boundary "
+      "condition to a linear finite-volume energy equation.");
   params.addRequiredParam<MooseFunctorName>(
-    "temperature_radiation",
-    "Temperature functor used to reconstruct the local surface emission.");
+      "temperature_radiation",
+      "Temperature functor used to reconstruct the local surface emission.");
   params.addRequiredParam<MooseFunctorName>(
-    "coeff_diffusion",
-    "Diffusion coefficient used by the corresponding LinearFVDiffusion kernel.");
+      "coeff_diffusion",
+      "Diffusion coefficient used by the corresponding LinearFVDiffusion kernel.");
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",
                                           "Name of the GrayLambertSurfaceRadiationBase UO");
   params.addParam<bool>(
@@ -37,7 +36,7 @@ LinearFVGrayLambert::validParams()
   return params;
 }
 
-LinearFVGrayLambert::LinearFVGrayLambert(const InputParameters & parameters)
+LinearFVGrayLambertBC::LinearFVGrayLambertBC(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionFunctorRobinBCBase(parameters),
     _temperature_radiation(getFunctor<Real>("temperature_radiation")),
     _coeff_diffusion(getFunctor<Real>("coeff_diffusion")),
@@ -47,14 +46,14 @@ LinearFVGrayLambert::LinearFVGrayLambert(const InputParameters & parameters)
 }
 
 Real
-LinearFVGrayLambert::getAlpha(Moose::FaceArg face, Moose::StateArg state) const
+LinearFVGrayLambertBC::getAlpha(Moose::FaceArg face, Moose::StateArg state) const
 {
   const auto alpha = -_coeff_diffusion(face, state);
   return alpha;
 }
 
 Real
-LinearFVGrayLambert::getBeta(Moose::FaceArg face, Moose::StateArg state) const
+LinearFVGrayLambertBC::getBeta(Moose::FaceArg face, Moose::StateArg state) const
 {
   if (!_reconstruct_emission)
     return 0.;
@@ -62,28 +61,38 @@ LinearFVGrayLambert::getBeta(Moose::FaceArg face, Moose::StateArg state) const
   const auto & all_face_bids = _current_face_info->boundaryIDs();
   const auto & all_bc_bids = boundaryIDs();
   std::set<BoundaryID> current_bid;
-  set_intersection(all_face_bids.begin(), all_face_bids.end(), all_bc_bids.begin(), all_bc_bids.end(),
-                 std::inserter(current_bid, current_bid.begin()));
+  set_intersection(all_face_bids.begin(),
+                   all_face_bids.end(),
+                   all_bc_bids.begin(),
+                   all_bc_bids.end(),
+                   std::inserter(current_bid, current_bid.begin()));
   if (current_bid.size() != 1)
-    paramError("boundary", std::to_string(current_bid.size()) + " boundaries overlap. This is not currently supported");
+    paramError("boundary",
+               std::to_string(current_bid.size()) +
+                   " boundaries overlap. This is not currently supported");
 
   Real eps = _glsr_uo.getSurfaceEmissivity(*current_bid.begin());
 
   const auto beta = -eps * HeatConduction::Constants::sigma *
-                       Utility::pow<3>(_temperature_radiation(face, state));
+                    Utility::pow<3>(_temperature_radiation(face, state));
   return beta;
 }
 
 Real
-LinearFVGrayLambert::getGamma(Moose::FaceArg face, Moose::StateArg /*state*/) const
+LinearFVGrayLambertBC::getGamma(Moose::FaceArg face, Moose::StateArg /*state*/) const
 {
   const auto & all_face_bids = face.fi->boundaryIDs();
   const auto & all_bc_bids = boundaryIDs();
   std::set<BoundaryID> current_bid;
-  set_intersection(all_face_bids.begin(), all_face_bids.end(), all_bc_bids.begin(), all_bc_bids.end(),
-                 std::inserter(current_bid, current_bid.begin()));
+  set_intersection(all_face_bids.begin(),
+                   all_face_bids.end(),
+                   all_bc_bids.begin(),
+                   all_bc_bids.end(),
+                   std::inserter(current_bid, current_bid.begin()));
   if (current_bid.size() != 1)
-    paramError("boundary", std::to_string(current_bid.size()) + " boundaries overlap. This is not currently supported");
+    paramError("boundary",
+               std::to_string(current_bid.size()) +
+                   " boundaries overlap. This is not currently supported");
 
   if (!_reconstruct_emission)
     return _glsr_uo.getSurfaceHeatFluxDensity(*current_bid.begin());
