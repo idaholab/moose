@@ -28,6 +28,9 @@ AddMFEMComplexKernelComponentAction::AddMFEMComplexKernelComponentAction(
     const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
+  // Block restriction is taken from the parent MFEMComplexKernel.
+  if (_moose_object_pars.have_parameter<std::vector<SubdomainName>>("block"))
+    _moose_object_pars.suppressParameter<std::vector<SubdomainName>>("block");
 }
 
 void
