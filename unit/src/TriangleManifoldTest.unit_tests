@@ -5,22 +5,22 @@
   [sideness]
     type = GoogleTest
     unit_test = TriangleManifoldTest.sideness
-    requirement = 'The system shall classify interior and exterior points of a closed TRI3 manifold and keep containment consistent with sideness.'
+    requirement = 'The system shall classify interior and exterior points of a closed manifold composed of first-order triangular elements and report consistent containment results.'
   []
   [on_surface]
     type = GoogleTest
     unit_test = TriangleManifoldTest.sidenessOnSurface
-    requirement = 'The system shall classify points on TRI3 face interiors and vertices as on the manifold surface.'
+    requirement = 'The system shall classify points on the face interiors and vertices of first-order triangular elements as on the manifold surface.'
   []
   [solid_angle_fallback]
     type = GoogleTest
     unit_test = TriangleManifoldTest.sidenessSolidAngleFallback
-    requirement = 'The system shall use solid-angle containment when a fixed-axis ray intersects a shared TRI3 edge ambiguously.'
+    requirement = 'The system shall use solid-angle containment when a fixed-axis ray ambiguously intersects an edge shared by first-order triangular elements.'
   []
   [on_edge]
     type = GoogleTest
     unit_test = TriangleManifoldTest.sidenessOnEdge
-    requirement = 'The system shall classify a point on an edge of a closed TRI3 manifold as on the surface.'
+    requirement = 'The system shall classify a point on an edge of a closed manifold composed of first-order triangular elements as on the surface.'
   []
   [multiple_crossings]
     type = GoogleTest
@@ -30,12 +30,12 @@
   [fixed_ray_direction]
     type = GoogleTest
     unit_test = TriangleManifoldTest.classifierFixedXRayHasNoRayDirection
-    requirement = 'The system shall reject requests for a configurable ray direction from the fixed-axis containment backend.'
+    requirement = 'The system shall reject requests for a configurable ray direction when point containment uses a fixed-axis ray.'
   []
   [missing_user_ray_options]
     type = GoogleTest
     unit_test = TriangleManifoldTest.classifierUserSelectedRayRequiresOptions
-    requirement = 'The system shall require explicit ray options for user-selected-ray containment.'
+    requirement = 'The system shall require a direction when classifying point containment with a user-selected ray.'
   []
   [ambiguous_user_ray]
     type = GoogleTest

@@ -5,7 +5,7 @@
   [rectangle]
     type = GoogleTest
     unit_test = AdaptiveRayContainmentCheck.RectangleAdaptiveRayContainmentCheck
-    requirement = 'The system shall classify points inside, outside, and on a closed EDGE2 rectangle using a user-specified ray.'
+    requirement = 'The system shall classify points as \"inside\", \"on\", and \"outside\" a closed rectangle composed of first-order line elements using a user-specified ray.'
   []
   [pca_fallback]
     type = GoogleTest
@@ -15,12 +15,12 @@
   [cube_user_ray]
     type = GoogleTest
     unit_test = AdaptiveRayContainmentCheck.UnitCube3DUserRay
-    requirement = 'The system shall classify points against a closed TRI3 cube using a normalized user-specified ray.'
+    requirement = 'The system shall classify points against a closed cube composed of first-order triangular elements using a normalized user-specified ray.'
   []
   [box_pca_ray]
     type = GoogleTest
     unit_test = AdaptiveRayContainmentCheck.Box3DPcaRay
-    requirement = 'The system shall classify points against a closed TRI3 box using a unit direction selected by principal-component analysis.'
+    requirement = 'The system shall classify points against a closed box composed of first-order triangular elements using a unit direction selected by principal-component analysis.'
   []
   [symmetric_vertex_hits]
     type = GoogleTest
@@ -50,7 +50,7 @@
   [surface_tolerance]
     type = GoogleTest
     unit_test = AdaptiveRayContainmentCheck.EpsSensitivityOnEdge
-    requirement = 'The system shall use the configured surface tolerance when identifying points on an EDGE2 surface.'
+    requirement = 'The system shall use the configured surface tolerance when identifying points on a surface composed of first-order line elements.'
   []
   [empty_surface]
     type = GoogleTest
