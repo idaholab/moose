@@ -1686,8 +1686,11 @@ public:
    * Execute MultiAppTransfers associated with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.
+   * @param source_app The source application to execute transfers from. Defaults to all sources
    */
-  void execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION direction);
+  void execMultiAppTransfers(ExecFlagType type,
+                             Transfer::DIRECTION direction,
+                             const MultiAppName & source_app = "");
 
   /**
    * Execute the MultiApps associated with the ExecFlagType
@@ -1740,14 +1743,6 @@ public:
   virtual void addTransfer(const std::string & transfer_name,
                            const std::string & name,
                            InputParameters & parameters);
-
-  /**
-   * Execute the Transfers associated with the ExecFlagType
-   *
-   * Note: This does _not_ execute MultiApp Transfers!
-   * Those are executed automatically when MultiApps are executed.
-   */
-  void execTransfers(ExecFlagType type);
 
   /**
    * Computes the residual of a nonlinear system using whatever is sitting in the current
