@@ -592,6 +592,15 @@ MooseMesh::prepare()
   _moose_mesh_prepared = true;
 }
 
+void
+MooseMesh::prepare(const MeshBase * libmesh_dbg_var(mesh_to_clone))
+{
+  mooseDeprecated("MooseMesh::prepare(const MeshBase *) is deprecated, please use the "
+                  "no-argument MooseMesh::prepare() instead");
+  mooseAssert(!mesh_to_clone, "Cloning a mesh_to_clone is no longer supported by prepare()");
+  prepare();
+}
+
 bool
 MooseMesh::possiblyRebuildNodeToElemMap()
 {

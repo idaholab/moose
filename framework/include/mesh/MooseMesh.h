@@ -554,6 +554,13 @@ public:
   void prepare();
 
   /**
+   * Deprecated method; \p mesh_to_clone is no longer supported and must be null. Use the
+   * no-argument prepare() instead.
+   * @param mesh_to_clone Must be null; mesh cloning is handled elsewhere now
+   */
+  void prepare(const MeshBase * mesh_to_clone);
+
+  /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().
    */
   void update();
