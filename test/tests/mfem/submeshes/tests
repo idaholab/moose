@@ -81,9 +81,8 @@
     type = CSVDiff
     input = av_magnetostatic.i
     cli_args = 'Solvers/ams/block=Exterior '
-               'Solvers/ams/projection_frequency=1 '
-               'Outputs/ReportedPostprocessors/file_base=OutputData/AVMagnetostaticInteriorNodesCSV'
-    csvdiff = 'OutputData/AVMagnetostaticInteriorNodesCSV.csv'
+               'Solvers/ams/projection_frequency=1'
+    csvdiff = 'OutputData/AVMagnetostaticClosedCoilCSV.csv'
     requirement = 'The system shall be able to precondition an MFEM curl-curl solve with a HypreAMS '
                   'preconditioner whose interior-node correction is restricted to the subdomains in '
                   'which the mass term is zero and whose compatible-subspace projection frequency is '

@@ -14,8 +14,6 @@
 #include "MFEMLORLinearSolverBase.h"
 #include "MFEMFESpace.h"
 
-#include <memory>
-
 /**
  * Wrapper for mfem::HypreAMS solver.
  */
