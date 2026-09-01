@@ -68,6 +68,8 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     _kokkos_var(object._kokkos_var),
     _thread(object._thread),
     _dimension(object._dimension),
+    _mf_x_tag(object._mf_x_tag),
+    _mf_y_tag(object._mf_y_tag),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),

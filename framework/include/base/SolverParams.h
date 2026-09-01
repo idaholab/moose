@@ -20,6 +20,12 @@ public:
   Moose::LineSearchType _line_search;
   Moose::MffdType _mffd_type;
 
+  /// Whether to use the Kokkos matrix-free Jacobian-vector product (an analytic partial-assembly
+  /// operator action) as the actual SNES Amat, while still assembling the ordinary Jacobian for
+  /// preconditioning. Mutually exclusive with the PETSc-native ST_PJFNK/ST_JFNK finite-difference
+  /// matrix-free modes.
+  bool _kokkos_matrix_free;
+
   // solver parameters for eigenvalue problems
   Moose::EigenSolveType _eigen_solve_type;
   Moose::EigenProblemType _eigen_problem_type;
