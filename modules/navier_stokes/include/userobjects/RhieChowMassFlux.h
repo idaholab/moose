@@ -133,6 +133,9 @@ protected:
   /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
   void checkReconstructedPressureGradientCompatibility() const;
 
+  /// Check that the gradient removed in H/A matches the coupling pressure gradient field.
+  void checkCouplingPressureGradientIdentity() const;
+
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
 
@@ -276,6 +279,13 @@ protected:
 
   /// Which pressure gradient is fed back on boundary-adjacent cells
   const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
+
+  /// Whether to enforce the discrete identity between the coupling pressure gradient and
+  /// the gradient removed while constructing H/A.
+  const bool _enforce_coupling_pressure_gradient_identity;
+
+  /// Tolerance for the discrete identity check between coupling and removed pressure gradients.
+  const Real _coupling_pressure_gradient_identity_tolerance;
 
   /// Whether a reconstructed gradient candidate has been initialized.
   bool _reconstructed_candidate_available = false;

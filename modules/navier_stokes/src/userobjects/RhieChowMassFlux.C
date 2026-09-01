@@ -84,6 +84,19 @@ RhieChowMassFlux::validParams()
       "reconstructed_pressure_gradient_boundary_cells",
       MooseEnum("reconstructed base_gradient", "reconstructed"),
       "Which pressure gradient is fed back on cells touching a boundary face.");
+  params.addParam<bool>(
+      "enforce_coupling_pressure_gradient_identity",
+      false,
+      "Whether to enforce that the pressure gradient removed while constructing H/A matches "
+      "the registered momentum-coupling pressure gradient field. Intended primarily for "
+      "diagnostic tests.");
+  params.addRangeCheckedParam<Real>(
+      "coupling_pressure_gradient_identity_tolerance",
+      1e-12,
+      "coupling_pressure_gradient_identity_tolerance >= 0.0",
+      "Tolerance for the discrete identity between the momentum pressure-source gradient and "
+      "the gradient removed while constructing H/A when "
+      "'enforce_coupling_pressure_gradient_identity' is true.");
   return params;
 }
 
@@ -114,7 +127,11 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _reconstructed_pressure_gradient_velocity_update(
         getParam<MooseEnum>("reconstructed_pressure_gradient_velocity_update")),
     _reconstructed_pressure_gradient_boundary_cells(
-        getParam<MooseEnum>("reconstructed_pressure_gradient_boundary_cells"))
+        getParam<MooseEnum>("reconstructed_pressure_gradient_boundary_cells")),
+    _enforce_coupling_pressure_gradient_identity(
+        getParam<bool>("enforce_coupling_pressure_gradient_identity")),
+    _coupling_pressure_gradient_identity_tolerance(
+        getParam<Real>("coupling_pressure_gradient_identity_tolerance"))
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a MooseLinearVariableFVReal.");
@@ -741,13 +758,13 @@ RhieChowMassFlux::reconstructionVelocityGradient(const ElemInfo & elem_info,
 void
 RhieChowMassFlux::computeCellVelocityFromPressureGradient()
 {
-  const auto & pressure_gradient = pressureGradientComponents();
+  const auto & coupling_pressure_gradient = pressureGradientComponents();
 
   // u_C = -(H/A)_C - (1/A)_C * grad(p)_C.
   for (const auto system_i : index_range(_momentum_implicit_systems))
   {
     auto working_vector = _Ainv_raw[system_i]->clone();
-    working_vector->pointwise_mult(*working_vector, *pressure_gradient[system_i]);
+    working_vector->pointwise_mult(*working_vector, *coupling_pressure_gradient[system_i]);
     working_vector->add(*_HbyA_raw[system_i]);
     working_vector->scale(-1.0);
     (*_momentum_implicit_systems[system_i]->solution) = *working_vector;
@@ -1169,7 +1186,13 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
 
-  auto & pressure_gradient = selectPressureGradient(with_updated_pressure);
+  // Select (and, if requested, snapshot) the momentum-coupling pressure gradient
+  // used by all LinearFVMomentumPressure kernels so that the discrete vector
+  // removed from the momentum RHS here matches the one assembled into it.
+  auto & coupling_pressure_gradient = selectPressureGradient(with_updated_pressure);
+
+  if (_enforce_coupling_pressure_gradient_identity && with_updated_pressure)
+    checkCouplingPressureGradientIdentity();
 
   _HbyA_raw.clear();
   _Ainv_raw.clear();
@@ -1236,8 +1259,9 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
     HbyA.add(-1.0, rhs);
 
     // Unfortunately, the pressure forces are included in the momentum RHS
-    // so we have to correct them back
-    working_vector_petsc->pointwise_mult(*pressure_gradient[system_i], *_cell_volumes);
+    // so we have to correct them back using the same coupling gradient that
+    // assembled the momentum pressure source.
+    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i], *_cell_volumes);
     HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
@@ -1311,7 +1335,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 
       // Correct HbyA
       Ainv_full->add(-1.0, Ainv);
-      working_vector_petsc->pointwise_mult(*Ainv_full, *pressure_gradient[system_i]);
+      working_vector_petsc->pointwise_mult(*Ainv_full, *coupling_pressure_gradient[system_i]);
       working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
       HbyA.add(-1.0, *working_vector_petsc);
 
@@ -1342,19 +1366,20 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 std::vector<std::unique_ptr<NumericVector<Number>>> &
 RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
 {
-  const auto & source_components =
-      usingReconstructedPressureGradientMethod() ? basePressureGradientComponents()
-                                                 : pressureGradientComponents();
+  // The pressure-gradient field removed while constructing H/A must be the same
+  // coupling field used by the LinearFVMomentumPressure kernels. In reconstructed
+  // mode, this is the reconstructed gradient, not the base gradient.
+  const auto & coupling_pressure_gradient_components = pressureGradientComponents();
 
   if (updated_pressure)
   {
     _grad_p_current.clear();
-    for (const auto & component : source_components)
+    for (const auto & component : coupling_pressure_gradient_components)
       _grad_p_current.push_back(component->clone());
   }
 
   if (_grad_p_current.empty())
-    for (const auto & component : source_components)
+    for (const auto & component : coupling_pressure_gradient_components)
       _grad_p_current.push_back(component->clone());
 
   return _grad_p_current;
@@ -1380,6 +1405,59 @@ RhieChowMassFlux::reconstructedGradientMethod() const
               "pressure gradients are active.");
 
   return dynamic_cast<const FVReconstructedPressureGradient &>(pressureGradientField().method());
+}
+
+void
+RhieChowMassFlux::checkCouplingPressureGradientIdentity() const
+{
+  const auto & coupling_components = pressureGradientComponents();
+
+  if (coupling_components.empty())
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' has no registered pressure gradient components when enforcing the coupling "
+               "pressure-gradient identity.");
+
+  if (_grad_p_current.size() != coupling_components.size())
+    mooseError(
+        "RhieChowMassFlux '",
+        name(),
+        "' requires the pressure-gradient snapshot used to construct H/A to have the same "
+        "number of components as the registered momentum-coupling pressure gradient field when "
+        "enforcing the coupling pressure-gradient identity.");
+
+  Real max_difference = 0.0;
+
+  for (const auto component : index_range(coupling_components))
+  {
+    const auto & coupling_vec = *coupling_components[component];
+    const auto & snapshot_vec = *_grad_p_current[component];
+
+    if (coupling_vec.size() != snapshot_vec.size() ||
+        coupling_vec.local_size() != snapshot_vec.local_size())
+      mooseError("RhieChowMassFlux '",
+                 name(),
+                 "' requires the pressure-gradient snapshot used to construct H/A to have the "
+                 "same layout as the registered momentum-coupling gradient field when enforcing "
+                 "the coupling pressure-gradient identity.");
+
+    auto diff = coupling_vec.clone();
+    diff->add(-1.0, snapshot_vec);
+    const Real component_max = diff->linfty_norm();
+    if (component_max > max_difference)
+      max_difference = component_max;
+  }
+
+  if (max_difference > _coupling_pressure_gradient_identity_tolerance)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' violates the coupling pressure-gradient identity: the maximum difference "
+               "between the registered momentum-coupling pressure gradient and the gradient "
+               "removed while constructing H/A is ",
+               max_difference,
+               ", which exceeds the tolerance ",
+               _coupling_pressure_gradient_identity_tolerance,
+               ".");
 }
 
 void
