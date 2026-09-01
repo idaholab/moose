@@ -28,6 +28,7 @@ pressure_gradient_method = 'green-gauss'
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
     momentum_pressure_kernel = u_pressure
+    enforce_coupling_pressure_gradient_identity = true
   []
 []
 
