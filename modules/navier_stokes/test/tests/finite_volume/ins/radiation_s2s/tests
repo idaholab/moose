@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVGrayLambert.md'
+  design = 'LinearFVGrayLambertBC.md'
   issues = '#33641'
 
   [radiation_s2s_linearfv_noaction_simple]
