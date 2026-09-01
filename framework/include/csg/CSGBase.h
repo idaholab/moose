@@ -951,10 +951,12 @@ private:
    * @param univ Reference to universe under consideration
    * @param linked_universe_names List of universe names linked to current universe
    * @param linked_cell_names List of cell names linked to current universe
+   * @param linked_surface_names List of surface names linked to current universe
    */
   void getLinkedUniverses(const CSGUniverse & univ,
-                          std::vector<std::string> & linked_universe_names,
-                          std::vector<std::string> & linked_cell_names) const;
+                          std::set<std::string> & linked_universe_names,
+                          std::set<std::string> & linked_cell_names,
+                          std::set<std::string> & linked_surface_names) const;
 
   /**
    * @brief Get a const reference to the CSGSurfaceList object
