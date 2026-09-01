@@ -40,6 +40,19 @@ public:
    * Copy constructor for parallel dispatch
    */
   KernelBase(const KernelBase & object);
+
+  /**
+   * Compute the local contribution to the action of this kernel's Jacobian on the Kokkos
+   * matrix-free direction vector, accumulating the result into the Kokkos matrix-free action
+   * vector. Only supported for kernels with factored (precomputed) Jacobian hooks, e.g.
+   * KernelGrad/KernelValue; the default implementation errors out.
+   */
+  virtual void computeJacobianVectorProduct()
+  {
+    mooseError("computeJacobianVectorProduct() is not implemented for Kokkos kernel type '",
+               type(),
+               "'.");
+  }
 };
 
 } // namespace Moose::Kokkos

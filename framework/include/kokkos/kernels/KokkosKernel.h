@@ -54,6 +54,10 @@ public:
    * Dispatch diagonal and off-diagonal Jacobian calculation
    */
   virtual void computeJacobian() override;
+  /**
+   * Dispatch Kokkos matrix-free Jacobian-vector product calculation
+   */
+  virtual void computeJacobianVectorProduct() override;
 
   /**
    * Default methods to prevent compile errors even when these methods were not defined in the
@@ -134,6 +138,9 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived & kernel) const;
   ///@}
 
   /**
@@ -164,6 +171,17 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
                                                       AssemblyDatum & datum) const;
+  /**
+   * Compute the action of the Jacobian on the Kokkos matrix-free direction vector. The base
+   * implementation always aborts: plain (non-factored) kernels admit no partial-assembly
+   * decomposition and are unsupported for the Kokkos matrix-free Jacobian-vector product;
+   * factored kernel bases (e.g. KernelGrad) hide this with a real implementation.
+   * @param kernel The kernel object of the final derived type
+   * @param datum The AssemblyDatum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianVectorProductInternal(const Derived & kernel,
+                                                            AssemblyDatum & datum) const;
   ///@}
 
 protected:
@@ -251,6 +269,24 @@ Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kern
 
 template <typename Derived>
 KOKKOS_FUNCTION void
+Kernel::operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived & kernel) const
+{
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
+
+  AssemblyDatum datum(elem,
+                      libMesh::invalid_uint,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var());
+
+  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
+
+  kernel.computeJacobianVectorProductInternal(kernel, datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
 Kernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
@@ -291,6 +327,15 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
             local_ke[i] += datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
                                                i, j, datum.jvar(), qp, datum);
       });
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Kernel::computeJacobianVectorProductInternal(const Derived & /* kernel */,
+                                             AssemblyDatum & /* datum */) const
+{
+  ::Kokkos::abort("The Kokkos matrix-free Jacobian-vector product is not supported for plain "
+                  "(non-factored) kernels. Derive from KernelGrad or KernelValue instead.");
 }
 
 } // namespace Moose::Kokkos

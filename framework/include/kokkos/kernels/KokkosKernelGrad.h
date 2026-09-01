@@ -130,6 +130,18 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
                                                       AssemblyDatum & datum) const;
+  /**
+   * Compute the action of the Jacobian on the Kokkos matrix-free direction vector, reusing
+   * precomputeQpJacobian() -- the partial-assembly "B" operator -- without ever forming the
+   * element Jacobian: the direction vector is contracted against B once per quadrature point (not
+   * once per trial/test DOF pair), then the qp-level geometric/coefficient factor ("D") is applied
+   * once, and the result is scattered through the test-function gradient exactly like a residual.
+   * @param kernel The kernel object of the final derived type
+   * @param datum The AssemblyDatum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianVectorProductInternal(const Derived & kernel,
+                                                            AssemblyDatum & datum) const;
   ///@}
 };
 
@@ -188,6 +200,42 @@ KernelGrad::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum
 
           for (unsigned int i = ib; i < ie; ++i)
             local_ke[i] += value * _grad_test.reference(datum, i, qp);
+        }
+      });
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+KernelGrad::computeJacobianVectorProductInternal(const Derived & kernel,
+                                                  AssemblyDatum & datum) const
+{
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+
+  ResidualObject::computeJacobianVectorProductInternal(
+      datum,
+      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
+      {
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+        {
+          // B * x, contracted once per qp instead of once per (i, j) pair
+          Real3 Bx(0);
+
+          for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+          {
+            auto x_j = sys.getVectorDofValue(
+                sys.getElemLocalDofIndex(datum.elem().id, j, datum.jvar()), _mf_x_tag);
+
+            if (x_j)
+              Bx += x_j * kernel.template precomputeQpJacobian<Derived>(j, qp, datum);
+          }
+
+          // D applied once per qp -- the same geometric/JxW factor computeJacobianInternal()
+          // applies once per (i, j) pair above
+          Real3 value = datum.J(qp).transpose() * (datum.JxW(qp) * Bx);
+
+          // B^T * (D * B * x), scattered through the test-function gradient like a residual
+          for (unsigned int i = ib; i < ie; ++i)
+            local_re[i] += value * _grad_test.reference(datum, i, qp);
         }
       });
 }

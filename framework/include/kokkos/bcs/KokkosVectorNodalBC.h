@@ -89,6 +89,18 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const;
+  /**
+   * The Kokkos matrix-free Jacobian-vector product is not supported for vector nodal boundary
+   * conditions; this exists only to satisfy the shared dispatcher registration macro's
+   * compile-time requirements.
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(JacobianVectorProductLoop, const ThreadID, const Derived &) const
+  {
+    ::Kokkos::abort("The Kokkos matrix-free Jacobian-vector product is not supported for vector "
+                    "nodal boundary conditions.");
+  }
   ///@}
 
 protected:
