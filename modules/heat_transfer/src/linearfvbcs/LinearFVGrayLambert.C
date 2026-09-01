@@ -18,11 +18,15 @@ InputParameters
 LinearFVGrayLambert::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionFunctorRobinBCBase::validParams();
-  params.addClassDescription("Marshak boundary condition for radiative heat flux.");
-  params.addRequiredParam<MooseFunctorName>("temperature_radiation", "The radiation temperature.");
-  params.addRequiredParam<MooseFunctorName>("coeff_diffusion",
-                                            "Radiative heat flux P1 diffusion coefficient.");
-  // params.addParam<MooseFunctorName>("boundary_emissivity", 1.0, "Emissivity of the boundary.");
+  params.addClassDescription(
+    "Applies a surface-to-surface Gray-Lambert radiation heat flux boundary "
+    "condition to a linear finite-volume energy equation.");
+  params.addRequiredParam<MooseFunctorName>(
+    "temperature_radiation",
+    "Temperature functor used to reconstruct the local surface emission.");
+  params.addRequiredParam<MooseFunctorName>(
+    "coeff_diffusion",
+    "Diffusion coefficient used by the corresponding LinearFVDiffusion kernel.");
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",
                                           "Name of the GrayLambertSurfaceRadiationBase UO");
   params.addParam<bool>(
