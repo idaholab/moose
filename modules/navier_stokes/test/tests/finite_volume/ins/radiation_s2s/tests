@@ -10,4 +10,23 @@
     requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and SIMPLE solver.'
     issues = '#33641'
   []
+
+  [parallel_plates_csv]
+    type = CSVDiff
+    input = linear_fv_gray_lambert_parallel_plates_simple.i
+    csvdiff = 'linear_fv_gray_lambert_parallel_plates_simple_out.csv'
+    ignore_columns = 'time'
+    rel_err = 1e-6
+    abs_zero = 1e-6
+    requirement = 'The system shall compute the surface temperatures and heat fluxes for two conducting slabs exchanging gray diffuse radiation when solved with SIMPLE.'
+  []
+
+  [parallel_plates_exodus]
+    type = Exodiff
+    input = linear_fv_gray_lambert_parallel_plates_simple.i
+    exodiff = 'linear_fv_gray_lambert_parallel_plates_simple_out.e'
+    rel_err = 1e-6
+    abs_zero = 1e-10
+    requirement = 'The system shall compute the spatial temperature solution for two conducting slabs exchanging gray diffuse radiation when solved with SIMPLE.'
+  []
 []
