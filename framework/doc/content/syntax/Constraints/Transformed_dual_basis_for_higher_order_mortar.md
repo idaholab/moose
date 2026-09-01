@@ -19,8 +19,12 @@ is well posed.
 On the *serendipity* quadratic faces QUAD8 and TRI6 the construction breaks down because the raw
 diagonal is no longer positive: QUAD8 corner nodes have $d_k = -1/3$ and TRI6 vertex nodes have
 $d_k = 0$. The per-node physical-gap normalization used by mortar mechanical contact divides the
-weighted gap by $\int_{\gamma} \Phi_j\,\mathrm{d}\gamma = d_j$, so a zero or negative diagonal makes
-the nodal contact logic ill posed. The full biquadratic QUAD9 face is unaffected -- its shape functions
+weighted gap by $\int_{\gamma} \Phi_j\,\mathrm{d}\gamma = d_j$, so a zero or negative diagonal can make
+the nodal contact logic ill posed. The TRI6 case is unconditionally broken, since $d_k = 0$ makes that
+normalization undefined and the vertex dual shape functions vanish identically. A negative $d_k$, as on
+a QUAD8 corner, instead flips the sign of the per-node normalization; whether a particular problem
+visibly suffers depends on its active set, and a fully-compressed patch may still converge to the
+correct pressure. The full biquadratic QUAD9 face is unaffected -- its shape functions
 all satisfy the positivity condition and can be used directly, as [!cite](popp2012dual) show in
 Sec. 4.3, so its diagonals ($1/9$, $4/9$, $16/9$) are correspondingly all positive -- but HEX20 and
 TET10, the usual second-order 3D elements, present exactly the QUAD8 and TRI6 faces that fail, so
@@ -77,7 +81,7 @@ multiplier, whereas Petrov-Galerkin instead weights the multiplier with the *sta
 same non-positive quantity ($-1/3$ at a QUAD8 corner, $0$ at a TRI6 vertex) that motivates the
 transform. Restoring Petrov-Galerkin positivity on quadratic faces needs a separate treatment, out
 of scope here, so `use_petrov_galerkin = true` for dual mortar on a QUAD8 or TRI6 secondary face is
-rejected with an error rather than silently using the ill-posed standard dual.
+rejected with an error rather than silently falling back to a non-positive per-node normalization.
 
 In the [Contact](Contact/index.md optional=True) action, request the dual basis with `use_dual = true`; the
 transform is then applied automatically on quadratic secondary faces:
