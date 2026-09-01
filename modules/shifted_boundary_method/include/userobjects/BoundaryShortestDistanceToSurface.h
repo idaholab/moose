@@ -14,6 +14,7 @@
 #include <vector>
 
 class Function;
+class SBMInterfaceManager;
 
 class BoundaryShortestDistanceToSurface : public SideUserObject
 {
@@ -23,6 +24,7 @@ public:
   static InputParameters validParams();
   BoundaryShortestDistanceToSurface(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void execute() override;
   virtual void finalize() override;
   virtual void initialize() override {}
@@ -48,6 +50,12 @@ protected:
 
   /// side id to index map
   std::map<BoundaryID, unsigned int> _side_id_index;
+
+  /// Optional manager supplying geometry for interfaces in a single surface mesh.
+  const SBMInterfaceManager * _manager = nullptr;
+
+  /// Ordered subdomain pair associated with each surrogate boundary.
+  std::map<BoundaryID, std::pair<SubdomainID, SubdomainID>> _boundary_subdomain_pairs;
 
 private:
   /// @brief If true, the local true normal direction will be corrected to match the direction of the local surrogate normal.

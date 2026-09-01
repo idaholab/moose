@@ -17,7 +17,6 @@ nx = '${fparse ny*3/2}'
   [boundary_mesh]
     type = FileMeshGenerator
     file = 'grain_boundary_only.msh'
-    save_with_name = boundary_mesh
   []
 
   [gen]
@@ -58,6 +57,48 @@ nx = '${fparse ny*3/2}'
     new_boundary = 'right_top'
   []
 
+  [grain1_grain2]
+    type = FileMeshGenerator
+    file = 'grain1_grain2.msh'
+    save_with_name = 'grain1_grain2'
+  []
+
+  [grain1_grain4]
+    type = FileMeshGenerator
+    file = 'grain1_grain4.msh'
+    save_with_name = 'grain1_grain4'
+  []
+
+  [grain1_grain5]
+    type = FileMeshGenerator
+    file = 'grain1_grain5.msh'
+    save_with_name = 'grain1_grain5'
+  []
+
+  [grain2_grain4]
+    type = FileMeshGenerator
+    file = 'grain2_grain4.msh'
+    save_with_name = 'grain2_grain4'
+  []
+
+  [grain3_grain4]
+    type = FileMeshGenerator
+    file = 'grain3_grain4.msh'
+    save_with_name = 'grain3_grain4'
+  []
+
+  [grain3_grain5]
+    type = FileMeshGenerator
+    file = 'grain3_grain5.msh'
+    save_with_name = 'grain3_grain5'
+  []
+
+  [grain4_grain5]
+    type = FileMeshGenerator
+    file = 'grain4_grain5.msh'
+    save_with_name = 'grain4_grain5'
+  []
+
   add_subdomain_ids = '10'
   add_subdomain_names = 'block_10'
   final_generator = 'right_top'
@@ -75,7 +116,6 @@ nx = '${fparse ny*3/2}'
     [QuasiStatic]
       [all]
         strain = SMALL
-        volumetric_locking_correction = true
         extra_vector_tags = 'ref'
         use_automatic_differentiation = false
         generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
@@ -87,7 +127,8 @@ nx = '${fparse ny*3/2}'
   [czm_ik]
     use_automatic_differentiation = false
     boundary = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
-    complete_interface_mesh = boundary_mesh
+    generate_sbm_distance = true
+    check_surface_watertightness = true
   []
 []
 
@@ -130,7 +171,7 @@ nx = '${fparse ny*3/2}'
   nl_abs_tol = 1e-12
   nl_rel_tol = 1e-50
   dt = 1
-  end_time = 5
+  end_time = 200
   abort_on_solve_fail = true
 []
 

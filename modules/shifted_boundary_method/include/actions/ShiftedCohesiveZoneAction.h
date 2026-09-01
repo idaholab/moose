@@ -35,7 +35,7 @@ protected:
   /// Adds the surface distance functions used by the generated distance user object.
   void addSBMDistanceFunctions();
 
-  /// Adds the surface mesh builders and the aggregate boundary distance user object.
+  /// Adds the generated surface geometry and aggregate boundary distance user objects.
   void addSBMDistanceUserObjects();
 
   /// Returns the saved surface mesh names, defaulting to the boundary names.
@@ -49,6 +49,9 @@ protected:
 
   /// Returns the generated aggregate distance user object name.
   UserObjectName sbmDistanceUserObjectName() const;
+
+  /// Returns the generated single-mesh interface manager name.
+  UserObjectName interfaceManagerName() const;
 
   /**
    * Adds the SCZM-specific interface kernels.

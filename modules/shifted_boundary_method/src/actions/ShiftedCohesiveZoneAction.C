@@ -119,6 +119,17 @@ ShiftedCohesiveZoneAction::validParams()
   params.addParam<bool>("check_surface_watertightness",
                         false,
                         "Whether generated surface mesh builders check mesh watertightness.");
+  params.addParam<MeshGeneratorName>(
+      "complete_interface_mesh",
+      "Saved surface mesh containing the complete boundary of each subdomain. Setting this "
+      "parameter automatically creates one interface manager and distance user object.");
+  params.addParam<std::vector<std::vector<SubdomainID>>>(
+      "interface_subdomain_pairs",
+      {},
+      "Ordered subdomain pair for each boundary when it cannot be inferred from boundary names.");
+  params.addParam<Real>("interface_matching_tolerance",
+                        libMesh::TOLERANCE,
+                        "Relative face-matching tolerance for the single-mesh interface manager.");
 
   params.addParam<bool>("no_shifted", false, "Disable shifted terms.");
   params.addParam<bool>("directional_correction", true, "Add the directional correction terms.");
@@ -189,22 +200,33 @@ ShiftedCohesiveZoneAction::validParams()
 ShiftedCohesiveZoneAction::ShiftedCohesiveZoneAction(const InputParameters & params)
   : CohesiveZoneAction(params)
 {
-  if (getParam<bool>("generate_sbm_distance"))
-  {
-    if (isParamSetByUser("sbm_distance_uo"))
-      paramError("generate_sbm_distance",
-                 "Cannot automatically generate the SBM distance objects when 'sbm_distance_uo' "
-                 "is also specified.");
+  const bool generate_distance = getParam<bool>("generate_sbm_distance");
+  const bool has_distance_uo = isParamSetByUser("sbm_distance_uo");
+  const bool has_complete_interface_mesh = isParamSetByUser("complete_interface_mesh");
+  if (static_cast<unsigned int>(generate_distance) + static_cast<unsigned int>(has_distance_uo) +
+          static_cast<unsigned int>(has_complete_interface_mesh) >
+      1)
+    paramError("sbm_distance_uo",
+               "Specify only one of 'sbm_distance_uo', 'generate_sbm_distance', and "
+               "'complete_interface_mesh'.");
 
+  if (generate_distance)
+  {
     const auto surface_meshes = surfaceMeshNames();
     if (surface_meshes.size() != _boundary.size())
-      paramError("surface_meshes",
-                 "The number of surface meshes must match the number of boundaries.");
-
-    if (std::set<std::string>(surface_meshes.begin(), surface_meshes.end()).size() !=
+      paramError("surface_meshes", "The number of surface meshes must match the boundaries.");
+    if (std::set<MeshGeneratorName>(surface_meshes.begin(), surface_meshes.end()).size() !=
         surface_meshes.size())
       paramError("surface_meshes", "Each saved surface mesh may only be used once.");
   }
+
+  if (!has_complete_interface_mesh && isParamSetByUser("interface_subdomain_pairs"))
+    paramError("interface_subdomain_pairs",
+               "This parameter is only valid with 'complete_interface_mesh'.");
+  if (has_complete_interface_mesh && isParamSetByUser("interface_subdomain_pairs") &&
+      getParam<std::vector<std::vector<SubdomainID>>>("interface_subdomain_pairs").size() !=
+          _boundary.size())
+    paramError("interface_subdomain_pairs", "Provide exactly one subdomain pair per boundary.");
 
   switch (_strain)
   {
@@ -331,7 +353,8 @@ ShiftedCohesiveZoneAction::act()
   // Task Routing
   if (_current_task == "add_function" && getParam<bool>("generate_sbm_distance"))
     addSBMDistanceFunctions();
-  else if (_current_task == "add_user_object" && getParam<bool>("generate_sbm_distance"))
+  else if (_current_task == "add_user_object" &&
+           (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh")))
     addSBMDistanceUserObjects();
   else if (_current_task == "add_interface_kernel")
     addRequiredADSCZMInterfaceKernels();
@@ -373,6 +396,12 @@ ShiftedCohesiveZoneAction::sbmDistanceUserObjectName() const
   return name() + "_sbm_distance";
 }
 
+UserObjectName
+ShiftedCohesiveZoneAction::interfaceManagerName() const
+{
+  return name() + "_interface_manager";
+}
+
 void
 ShiftedCohesiveZoneAction::addSBMDistanceFunctions()
 {
@@ -388,27 +417,42 @@ ShiftedCohesiveZoneAction::addSBMDistanceFunctions()
 void
 ShiftedCohesiveZoneAction::addSBMDistanceUserObjects()
 {
-  const auto surface_meshes = surfaceMeshNames();
-  std::vector<FunctionName> distance_functions;
-  distance_functions.reserve(_boundary.size());
+  auto distance_params = _factory.getValidParams("BoundaryShortestDistanceToSurface");
+  distance_params.set<std::vector<BoundaryName>>("boundary") = _boundary;
+  distance_params.set<int>("execution_order_group") = 0;
+  distance_params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
 
-  for (const auto i : index_range(_boundary))
+  if (isParamSetByUser("complete_interface_mesh"))
   {
-    auto params = _factory.getValidParams("SBMSurfaceMeshBuilder");
-    params.set<MeshGeneratorName>("interface_mesh") = surface_meshes[i];
-    params.set<bool>("check_watertightness") =
-        getParam<bool>("check_surface_watertightness");
-    _problem->addUserObject("SBMSurfaceMeshBuilder", surfaceMeshBuilderName(_boundary[i]), params);
-    distance_functions.push_back(surfaceDistanceFunctionName(_boundary[i]));
+    auto manager_params = _factory.getValidParams("SBMInterfaceManager");
+    manager_params.set<MeshGeneratorName>("complete_interface_mesh") =
+        getParam<MeshGeneratorName>("complete_interface_mesh");
+    manager_params.set<Real>("tolerance") = getParam<Real>("interface_matching_tolerance");
+    _problem->addUserObject("SBMInterfaceManager", interfaceManagerName(), manager_params);
+    distance_params.set<UserObjectName>("manager") = interfaceManagerName();
+    if (isParamSetByUser("interface_subdomain_pairs"))
+      distance_params.set<std::vector<std::vector<SubdomainID>>>("interface_subdomain_pairs") =
+          getParam<std::vector<std::vector<SubdomainID>>>("interface_subdomain_pairs");
+  }
+  else
+  {
+    const auto surface_meshes = surfaceMeshNames();
+    std::vector<FunctionName> distance_functions;
+    distance_functions.reserve(_boundary.size());
+    for (const auto i : index_range(_boundary))
+    {
+      auto params = _factory.getValidParams("SBMSurfaceMeshBuilder");
+      params.set<MeshGeneratorName>("interface_mesh") = surface_meshes[i];
+      params.set<bool>("check_watertightness") = getParam<bool>("check_surface_watertightness");
+      _problem->addUserObject(
+          "SBMSurfaceMeshBuilder", surfaceMeshBuilderName(_boundary[i]), params);
+      distance_functions.push_back(surfaceDistanceFunctionName(_boundary[i]));
+    }
+    distance_params.set<std::vector<FunctionName>>("surfaces") = distance_functions;
   }
 
-  auto params = _factory.getValidParams("BoundaryShortestDistanceToSurface");
-  params.set<std::vector<FunctionName>>("surfaces") = distance_functions;
-  params.set<std::vector<BoundaryName>>("boundary") = _boundary;
-  params.set<int>("execution_order_group") = 0;
-  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   _problem->addUserObject(
-      "BoundaryShortestDistanceToSurface", sbmDistanceUserObjectName(), params);
+      "BoundaryShortestDistanceToSurface", sbmDistanceUserObjectName(), distance_params);
 }
 
 void
@@ -429,7 +473,7 @@ ShiftedCohesiveZoneAction::addRequiredADSCZMInterfaceKernels()
     paramsk.set<std::string>("base_name") = _base_name;
 
     // Set SCZM-specific parameters
-    if (getParam<bool>("generate_sbm_distance"))
+    if (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh"))
       paramsk.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();
     else if (isParamSetByUser("sbm_distance_uo"))
       paramsk.set<UserObjectName>("sbm_distance_uo") = getParam<UserObjectName>("sbm_distance_uo");
@@ -453,6 +497,8 @@ ShiftedCohesiveZoneAction::addRequiredADSCZMInterfaceKernels()
         getInheritedVolumetricLockingCorrection(_awh);
     if (paramsk.isParamValid("volumetric_locking_correction"))
     {
+      // If the user explicitly sets the parameter, use that value. Otherwise, inherit from the
+      // physics block.
       if (user_set_volumetric_locking_correction)
       {
         paramsk.set<bool>("volumetric_locking_correction") =
@@ -524,7 +570,7 @@ ShiftedCohesiveZoneAction::addRequiredSCZMInterfaceMaterials()
   params_jump.set<std::string>("base_name") = _base_name;
 
   // Set SCZM-specific parameters
-  if (getParam<bool>("generate_sbm_distance"))
+  if (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh"))
     params_jump.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();
   else if (isParamSetByUser("sbm_distance_uo"))
     params_jump.set<UserObjectName>("sbm_distance_uo") =
