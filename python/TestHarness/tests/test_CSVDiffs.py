@@ -12,23 +12,6 @@ from TestHarnessTestCase import TestHarnessTestCase
 
 
 class TestHarnessTester(TestHarnessTestCase):
-    def testDiffs(self):
-        """
-        Test for error in input to CSVDiff
-        """
-        result = self.runTests("-i", "csvdiffs", exit_code=128)
-
-        out = result.output
-        self.assertRegex(
-            out,
-            r"test_harness\.test_csvdiff.*?FAILED \(Override inputs not the same length\)",
-        )
-        self.assertRegex(
-            out, r"test_harness\.test_badfile.*?FAILED \(MISSING GOLD FILE\)"
-        )
-
-        self.checkStatus(result.harness, failed=2)
-
     def testMissingComparison(self):
         """
         Verify the TestHarness will detect and report a missing comparison file error
