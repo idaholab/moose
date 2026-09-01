@@ -62,12 +62,13 @@ exactly.
 
 ## Implementation and Usage Details
 
-The transform is applied inside the dual-coefficient computation and is triggered only for TRI6 and
-QUAD8 lower-dimensional secondary faces; all other face types (including QUAD9 and first-order
-faces) fall through to the standard dual construction unchanged. The transform is applied
-automatically whenever a dual basis is active on a TRI6 or QUAD8 secondary face; there is no user
-option to enable or disable it. First-order dual mortar results are bit-identical because the
-transform never fires on first-order faces.
+The transform is implemented in libMesh, inside the dual shape-coefficient computation
+(`FEGenericBase::compute_dual_shape_coeffs`) that builds the dual basis for every dual mortar
+problem, and is triggered only for TRI6 and QUAD8 lower-dimensional secondary faces; all other face
+types (including QUAD9 and first-order faces) fall through to the standard dual construction
+unchanged. The transform is applied automatically whenever a dual basis is active on a TRI6 or QUAD8
+secondary face; there is no user option to enable or disable it. First-order dual mortar results are
+bit-identical because the transform never fires on first-order faces.
 
 The transform is not combined with the Petrov-Galerkin dual mortar approach; the two are mutually
 exclusive on quadratic secondary faces. The transform repairs the *dual* basis that interpolates the

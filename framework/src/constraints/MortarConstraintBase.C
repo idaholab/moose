@@ -161,12 +161,6 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   if (_use_dual)
     _assembly.activateDual();
 
-  // Apply the transformed dual basis automatically for dual mortar (fires only on QUAD8/TRI6
-  // secondary faces, gated in Assembly::reinitDual), but not under Petrov-Galerkin, which weights
-  // the multiplier with the standard basis -- a separate positivity problem the transform ignores.
-  if (_use_dual && !_use_petrov_galerkin)
-    _assembly.activateTransformedDual();
-
   if (_use_petrov_galerkin && (!_use_dual))
     paramError("use_petrov_galerkin",
                "We need to set `use_dual = true` while using the Petrov-Galerkin approach");
@@ -181,9 +175,11 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
 
-  // Under Petrov-Galerkin the transform is off, so a dual mortar problem on a QUAD8/TRI6 secondary
-  // face would fall back to the ill-posed standard dual; detect such a face and error out. The
-  // scan stops at the first match; the collective max keeps the decision consistent across ranks.
+  // Petrov-Galerkin weights the multiplier with the standard basis, whose per-node normalization is
+  // the same non-positive quantity (zero at a TRI6 vertex, -1/3 at a QUAD8 corner) that the
+  // transformed dual repairs, so the two cannot be combined on such a face; detect one and error
+  // out. The scan stops at the first match; the collective max keeps the decision consistent
+  // across ranks.
   if (_use_petrov_galerkin && _use_dual)
   {
     bool higher_order_secondary = false;
