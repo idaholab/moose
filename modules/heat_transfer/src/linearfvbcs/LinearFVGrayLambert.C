@@ -37,7 +37,6 @@ LinearFVGrayLambert::LinearFVGrayLambert(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionFunctorRobinBCBase(parameters),
     _temperature_radiation(getFunctor<Real>("temperature_radiation")),
     _coeff_diffusion(getFunctor<Real>("coeff_diffusion")),
-    // _eps_boundary(getFunctor<Real>("boundary_emissivity")),
     _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name")),
     _reconstruct_emission(getParam<bool>("reconstruct_emission"))
 {
@@ -64,8 +63,6 @@ LinearFVGrayLambert::getBeta(Moose::FaceArg face, Moose::StateArg state) const
   if (current_bid.size() != 1)
     paramError("boundary", std::to_string(current_bid.size()) + " boundaries overlap. This is not currently supported");
 
-  // std::cout << "Normal: " <<_current_face_info->normal() << " Temp: " << _temperature_radiation(face, state) << std::endl;
-  // std::cout << " Temp: " << _temperature_radiation(face, state) << " current_bid: " << *current_bid.begin() << std::endl;
   Real eps = _glsr_uo.getSurfaceEmissivity(*current_bid.begin());
 
   const auto beta = -eps * HeatConduction::Constants::sigma *
