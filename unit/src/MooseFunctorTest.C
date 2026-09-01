@@ -333,7 +333,7 @@ TEST(MooseFunctorTest, testArgs)
     mesh->setMeshBase(std::move(lm_mesh));
   }
 
-  mesh->prepare(nullptr);
+  mesh->prepare();
   mesh->setCoordSystem({}, coord_type_enum);
   // Build the face info
   mesh->buildFiniteVolumeInfo();
