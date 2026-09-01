@@ -74,6 +74,24 @@ CSGBase::CSGBase(const CSGBase & other_base)
 
 CSGBase::~CSGBase() {}
 
+std::unique_ptr<CSGBase>
+CSGBase::clone() const
+{
+  std::unique_ptr<CSGBase> clone = std::make_unique<CSGBase>(*this);
+
+  // Store list of surface names to surface references in clone to update region definitions
+  std::map<std::string, std::reference_wrapper<const CSGSurface>> identical_surface_refs;
+  auto & surf_list_map = clone->getSurfaceList().getSurfaceListMap();
+  for (const auto & [surf_name, surf_ptr] : surf_list_map)
+    identical_surface_refs.insert({surf_name, clone->getSurfaceByName(surf_name)});
+
+  // Update surface references of cell regions to those of clone
+  for (auto & [cell_name, cell_ptr] : clone->getCellList().getCellListMap())
+    cell_ptr->updateCellRegionSurfaces(identical_surface_refs);
+
+  return clone;
+}
+
 const CSGSurface &
 CSGBase::addSurface(std::unique_ptr<CSGSurface> surf)
 {

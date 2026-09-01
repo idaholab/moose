@@ -69,7 +69,7 @@ public:
   ~CSGBase();
 
   /// Create a deep copy of this CSGBase instance
-  std::unique_ptr<CSGBase> clone() const { return std::make_unique<CSGBase>(*this); }
+  std::unique_ptr<CSGBase> clone() const;
 
   /**
    * @brief add a unique surface pointer to this base instance
