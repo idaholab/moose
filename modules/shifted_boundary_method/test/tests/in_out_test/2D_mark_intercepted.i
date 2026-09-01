@@ -44,7 +44,7 @@ n_seg = 48
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
     check_watertightness = true
-    surface_mesh = shift_boundary_mesh
+    interface_mesh = shift_boundary_mesh
   []
 
   [inout_test]

@@ -21,9 +21,9 @@ BoundaryMeshBuilder::validParams()
       "Owns a saved surface (boundary) mesh and the SurfaceElement wrappers built from it, "
       "for use by point-containment and distance user objects.");
 
-  params.addRequiredParam<std::string>(
-      "surface_mesh",
-      "The name of the surface mesh saved via the MeshGenerator's `save_with_name` parameter.");
+  params.addRequiredParam<MeshGeneratorName>(
+      "boundary_mesh",
+      "The name of the boundary mesh saved via the MeshGenerator's `save_with_name` parameter.");
 
   params.addParam<bool>(
       "check_watertightness",
@@ -35,7 +35,7 @@ BoundaryMeshBuilder::validParams()
 
 BoundaryMeshBuilder::BoundaryMeshBuilder(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _bnd_mesh_name(getParam<std::string>("surface_mesh")),
+    _bnd_mesh_name(getParam<MeshGeneratorName>("boundary_mesh")),
     _check_watertightness(getParam<bool>("check_watertightness")),
     _dim_embedding_mesh(_fe_problem.mesh().dimension() /*MooseMesh*/)
 {

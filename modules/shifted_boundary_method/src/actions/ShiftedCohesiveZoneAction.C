@@ -112,7 +112,7 @@ ShiftedCohesiveZoneAction::validParams()
       false,
       "Automatically create surface mesh builders, distance functions, and the boundary distance "
       "user object from the supplied boundaries.");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<MeshGeneratorName>>(
       "surface_meshes",
       "Names of saved surface meshes corresponding one-to-one with boundary. If omitted, the "
       "boundary names are used.");
@@ -339,13 +339,13 @@ ShiftedCohesiveZoneAction::act()
   actOutputGeneration();
 }
 
-std::vector<std::string>
+std::vector<MeshGeneratorName>
 ShiftedCohesiveZoneAction::surfaceMeshNames() const
 {
   if (isParamValid("surface_meshes"))
-    return getParam<std::vector<std::string>>("surface_meshes");
+    return getParam<std::vector<MeshGeneratorName>>("surface_meshes");
 
-  std::vector<std::string> surface_meshes;
+  std::vector<MeshGeneratorName> surface_meshes;
   surface_meshes.reserve(_boundary.size());
   for (const auto & boundary : _boundary)
     surface_meshes.push_back(boundary);
@@ -392,7 +392,7 @@ ShiftedCohesiveZoneAction::addSBMDistanceUserObjects()
   for (const auto i : index_range(_boundary))
   {
     auto params = _factory.getValidParams("SBMSurfaceMeshBuilder");
-    params.set<std::string>("surface_mesh") = surface_meshes[i];
+    params.set<MeshGeneratorName>("interface_mesh") = surface_meshes[i];
     params.set<bool>("check_watertightness") =
         getParam<bool>("check_surface_watertightness");
     _problem->addUserObject("SBMSurfaceMeshBuilder", surfaceMeshBuilderName(_boundary[i]), params);

@@ -39,7 +39,7 @@ protected:
   void addSBMDistanceUserObjects();
 
   /// Returns the saved surface mesh names, defaulting to the boundary names.
-  std::vector<std::string> surfaceMeshNames() const;
+  std::vector<MeshGeneratorName> surfaceMeshNames() const;
 
   /// Returns the generated builder name for a boundary.
   UserObjectName surfaceMeshBuilderName(const BoundaryName & boundary) const;

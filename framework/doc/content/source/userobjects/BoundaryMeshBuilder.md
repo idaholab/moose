@@ -9,7 +9,7 @@ non-owning reference to this builder rather than retrieving the saved mesh again
 
 ## Description
 
-The builder retrieves the saved surface mesh named by the `surface_mesh`
+The builder retrieves the saved surface mesh named by the `boundary_mesh`
 parameter during `initialSetup`, prepares it for use, and validates that:
 
 - the mesh is replicated (serialized); a distributed surface mesh is rejected,
@@ -31,7 +31,7 @@ non-watertight surface may not be suitable for in-out tests.
 [UserObjects]
   [surface_builder]
     type = BoundaryMeshBuilder
-    surface_mesh = boundary_mesh
+    boundary_mesh = boundary_mesh
   []
 []
 ```

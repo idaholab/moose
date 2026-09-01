@@ -17,6 +17,9 @@ InputParameters
 SBMSurfaceMeshBuilder::validParams()
 {
   InputParameters params = BoundaryMeshBuilder::validParams();
+  params.renameParam("boundary_mesh",
+                     "interface_mesh",
+                     "The saved mesh representing one interface surface.");
   params.addClassDescription(
       "Constructs boundary elements and a centroid KDTree from a pre-existing surface mesh. "
       "The surface mesh is specified in the Mesh block via `save_with_name`.");

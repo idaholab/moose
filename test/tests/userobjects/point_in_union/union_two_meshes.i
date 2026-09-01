@@ -57,11 +57,11 @@
 [UserObjects]
   [builder1]
     type = BoundaryMeshBuilder
-    surface_mesh = circle1
+    boundary_mesh = circle1
   []
   [builder2]
     type = BoundaryMeshBuilder
-    surface_mesh = circle2
+    boundary_mesh = circle2
   []
   [check1]
     type = PointInPolyhedronCheckUO
