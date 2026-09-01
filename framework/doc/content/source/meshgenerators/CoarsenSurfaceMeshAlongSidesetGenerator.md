@@ -1,6 +1,6 @@
-# CoarsenMeshAlongSidesetGenerator
+# CoarsenSurfaceMeshAlongSidesetGenerator
 
-!syntax description /Mesh/CoarsenMeshAlongSidesetGenerator
+!syntax description /Mesh/CoarsenSurfaceMeshAlongSidesetGenerator
 
 ## Overview
 
@@ -19,15 +19,15 @@ performed on the elements of both sides simultaneously, and the sideset is prese
 the merged element sides).
 
 The sidesets to coarsen along are selected either explicitly with
-[!param](/Mesh/CoarsenMeshAlongSidesetGenerator/boundaries), or by coarsening along all the sidesets
+[!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/boundaries), or by coarsening along all the sidesets
 of the mesh except those listed in
-[!param](/Mesh/CoarsenMeshAlongSidesetGenerator/exclude_boundaries). Exactly one of the two must be
+[!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/exclude_boundaries). Exactly one of the two must be
 provided.
 
 A single invocation removes a maximal set of non-adjacent sideset nodes, coarsening the sideset
 discretization by roughly a factor of two. To coarsen further, either apply the generator multiple
 times in sequence, or set
-[!param](/Mesh/CoarsenMeshAlongSidesetGenerator/coarsen_more_than_two_elements), which repeats the
+[!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/coarsen_more_than_two_elements), which repeats the
 coarsening pass within a single invocation until no further collapse is possible. In that case more
 than two elements can be merged into one, so it is usually combined with the merge criteria below to
 bound the amount of coarsening.
@@ -35,12 +35,12 @@ bound the amount of coarsening.
 A collapse is skipped if it would invert or flatten an element. The collapse can be further
 restricted, in order to preserve geometric features, with:
 
-- [!param](/Mesh/CoarsenMeshAlongSidesetGenerator/max_normal_deviation): the maximum angle, in
+- [!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/max_normal_deviation): the maximum angle, in
   degrees, between the normals of the two elements being merged. This prevents merging across a
   curved region or a feature edge of the surface.
-- [!param](/Mesh/CoarsenMeshAlongSidesetGenerator/max_merged_side_length): the maximum length of the
+- [!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/max_merged_side_length): the maximum length of the
   side created along the sideset by the merge.
-- [!param](/Mesh/CoarsenMeshAlongSidesetGenerator/max_merged_element_area): the maximum area of an
+- [!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/max_merged_element_area): the maximum area of an
   element created by the merge.
 
 !alert note
@@ -48,8 +48,8 @@ Only TRI3 and QUAD4 elements are supported, and the input mesh must not be distr
 would be deleted by a collapse (one holding the collapsed side) blocks that collapse, since it would
 require converting the quad to a triangle; quads that are only re-pointed are supported.
 
-!syntax parameters /Mesh/CoarsenMeshAlongSidesetGenerator
+!syntax parameters /Mesh/CoarsenSurfaceMeshAlongSidesetGenerator
 
-!syntax inputs /Mesh/CoarsenMeshAlongSidesetGenerator
+!syntax inputs /Mesh/CoarsenSurfaceMeshAlongSidesetGenerator
 
-!syntax children /Mesh/CoarsenMeshAlongSidesetGenerator
+!syntax children /Mesh/CoarsenSurfaceMeshAlongSidesetGenerator

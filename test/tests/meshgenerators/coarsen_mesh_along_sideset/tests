@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/CoarsenMeshAlongSidesetGenerator.md'
+  design = 'meshgenerators/CoarsenSurfaceMeshAlongSidesetGenerator.md'
   issues = '#30957'
 
   [internal]

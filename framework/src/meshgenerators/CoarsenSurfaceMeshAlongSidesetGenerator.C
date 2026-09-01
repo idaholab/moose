@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CoarsenMeshAlongSidesetGenerator.h"
+#include "CoarsenSurfaceMeshAlongSidesetGenerator.h"
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", CoarsenMeshAlongSidesetGenerator);
+registerMooseObject("MooseApp", CoarsenSurfaceMeshAlongSidesetGenerator);
 
 InputParameters
-CoarsenMeshAlongSidesetGenerator::validParams()
+CoarsenSurfaceMeshAlongSidesetGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -59,7 +59,7 @@ CoarsenMeshAlongSidesetGenerator::validParams()
   return params;
 }
 
-CoarsenMeshAlongSidesetGenerator::CoarsenMeshAlongSidesetGenerator(
+CoarsenSurfaceMeshAlongSidesetGenerator::CoarsenSurfaceMeshAlongSidesetGenerator(
     const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
@@ -104,7 +104,7 @@ newellNormal(const std::vector<Point> & pts)
 }
 
 std::unique_ptr<MeshBase>
-CoarsenMeshAlongSidesetGenerator::generate()
+CoarsenSurfaceMeshAlongSidesetGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
@@ -163,7 +163,7 @@ CoarsenMeshAlongSidesetGenerator::generate()
 }
 
 unsigned int
-CoarsenMeshAlongSidesetGenerator::coarsenAlongSidesets(
+CoarsenSurfaceMeshAlongSidesetGenerator::coarsenAlongSidesets(
     std::unique_ptr<MeshBase> & mesh, const std::set<boundary_id_type> & boundary_id_set)
 {
   const auto & boundary_info = mesh->get_boundary_info();
@@ -280,7 +280,7 @@ CoarsenMeshAlongSidesetGenerator::coarsenAlongSidesets(
           // Re-pointed element: reject the collapse if it would invert or nearly flatten it
           const Point orig_n = newellNormal(info.orig_pts);
           const Point new_n = newellNormal(info.new_pts);
-          if (new_n * orig_n <= 1e-6 * orig_n.norm_sq())
+          if (new_n * orig_n <= libMesh::TOLERANCE * orig_n.norm_sq())
           {
             valid = false;
             break;

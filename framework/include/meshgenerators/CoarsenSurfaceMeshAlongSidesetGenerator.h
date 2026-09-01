@@ -16,12 +16,12 @@
  * collapsing alternate boundary nodes. The sideset may be internal: elements on both sides
  * of it are coarsened and the sideset itself is preserved.
  */
-class CoarsenMeshAlongSidesetGenerator : public MeshGenerator
+class CoarsenSurfaceMeshAlongSidesetGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  CoarsenMeshAlongSidesetGenerator(const InputParameters & parameters);
+  CoarsenSurfaceMeshAlongSidesetGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

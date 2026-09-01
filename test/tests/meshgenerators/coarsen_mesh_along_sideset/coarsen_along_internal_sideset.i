@@ -24,7 +24,7 @@
     new_boundary = 'interface'
   []
   [coarsen]
-    type = CoarsenMeshAlongSidesetGenerator
+    type = CoarsenSurfaceMeshAlongSidesetGenerator
     input = 'interface'
     boundaries = 'interface'
     verbose = true
