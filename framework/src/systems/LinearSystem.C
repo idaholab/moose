@@ -328,7 +328,7 @@ LinearSystem::solve()
            << std::endl;
 
   // Populate the old solution for cases that need variable lagging at non linear iterations.
-  this->copyPreviousNonlinearSolutions();
+  // this->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
 
   // determine whether solution invalid occurs in the converged solution
   checkInvalidSolution();
