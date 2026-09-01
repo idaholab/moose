@@ -44,7 +44,6 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
         *getMFEMProblem()
              .getMFEMObject<MFEMFESpace>("MFEMFESpace", getParam<MFEMFESpaceName>("fespace"))
              .getFESpace()
-             .get()
              ->GetParMesh()),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>(
         "MFEMFESpace", getParam<MFEMFESpaceName>("fespace"))),
@@ -81,7 +80,7 @@ std::unique_ptr<mfem::HypreParVector>
 MFEMHypreAMS::BuildInteriorNodes()
 {
   mfem::ParMesh & pmesh = *_mfem_fespace.getFESpace()->GetParMesh();
-  mfem::H1_FECollection vert_fec(_mfem_fespace.getFESpace()->GetOrder(0), pmesh.Dimension());
+  mfem::H1_FECollection vert_fec(_mfem_fespace.getFESpace()->GetTypicalFE()->GetOrder(), pmesh.Dimension());
   mfem::ParFiniteElementSpace vert_fespace(&pmesh, &vert_fec);
 
   mfem::Array<int> vertex_exterior_marker(vert_fespace.GetVSize());
