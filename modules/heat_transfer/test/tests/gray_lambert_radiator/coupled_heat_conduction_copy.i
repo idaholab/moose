@@ -146,7 +146,7 @@
     functor = 300.
   [../]
   [./radiation]
-    type = LinearFVGrayLambert
+    type = LinearFVGrayLambertBC
     variable = temperature
     temperature_radiation = temperature
     coeff_diffusion = 1

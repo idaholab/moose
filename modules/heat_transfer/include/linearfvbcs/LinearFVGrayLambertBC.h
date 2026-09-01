@@ -17,14 +17,14 @@ class GrayLambertSurfaceRadiationBase;
  * Applies a Gray-Lambert surface-to-surface radiative heat-flux boundary condition
  * to a linear finite-volume advection-diffusion equation.
  */
-class LinearFVGrayLambert : public LinearFVAdvectionDiffusionFunctorRobinBCBase
+class LinearFVGrayLambertBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {
 public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVGrayLambert(const InputParameters & parameters);
+  LinearFVGrayLambertBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 

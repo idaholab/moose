@@ -588,8 +588,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 
   _solid_energy_system->setSolution(current_local_solution);
 
-  _solid_energy_system->copyPreviousSolutions(
-    Moose::SolutionIterationType::Nonlinear);
+  _solid_energy_system->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
 
   const auto residuals =
       std::make_pair(its_res_pair.first, solver.get_initial_residual() / norm_factor);
