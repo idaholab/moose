@@ -19,8 +19,6 @@
 // system includes
 #include <iomanip>
 
-using namespace libMesh;
-
 namespace Moose
 {
 std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;

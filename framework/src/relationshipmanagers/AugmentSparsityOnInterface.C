@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", AugmentSparsityOnInterface);
 
-using namespace libMesh;
-
 InputParameters
 AugmentSparsityOnInterface::validParams()
 {

@@ -37,8 +37,6 @@
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", INSFVRhieChowInterpolator);
 
 InputParameters

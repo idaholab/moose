@@ -13,8 +13,6 @@
 #include "TimeIntegrator.h"
 #include "MooseUtils.h"
 
-using namespace libMesh;
-
 SolverSystem::SolverSystem(SubProblem & subproblem,
                            FEProblemBase & fe_problem,
                            const std::string & name,

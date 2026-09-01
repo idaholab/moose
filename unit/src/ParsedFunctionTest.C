@@ -14,8 +14,6 @@
 #include "libmesh/fe_map.h"
 #include "libmesh/quadrature_gauss.h"
 
-using namespace libMesh;
-
 ParsedFunction<Real> *
 ParsedFunctionTest::fptr(MooseParsedFunction & f)
 {

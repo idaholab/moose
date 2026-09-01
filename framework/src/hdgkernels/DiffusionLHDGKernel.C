@@ -17,8 +17,6 @@
 #include "MaterialPropertyInterface.h"
 #include "NonlinearThread.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", DiffusionLHDGKernel);
 
 InputParameters

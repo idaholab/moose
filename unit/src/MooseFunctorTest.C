@@ -24,7 +24,6 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/type_tensor.h"
 
-using namespace libMesh;
 using namespace Moose;
 using namespace FV;
 

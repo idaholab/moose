@@ -19,8 +19,6 @@
 #include <cstdio>
 #include <vector>
 
-using namespace libMesh;
-
 namespace
 {
 /// True if `target` matches some point in `pts` within `tol`.

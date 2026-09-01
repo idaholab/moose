@@ -15,8 +15,6 @@
 // MOOSE includes
 #include "NEML2Assembly.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", NEML2Assembly);
 
 InputParameters

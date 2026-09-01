@@ -18,8 +18,6 @@
 
 #include <limits>
 
-using namespace libMesh;
-
 namespace
 {
 /// Build closed-loop EDGE2 boundary elements from an ordered list of polygon vertices, keeping the

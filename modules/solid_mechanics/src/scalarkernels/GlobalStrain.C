@@ -17,8 +17,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-using namespace libMesh;
-
 registerMooseObject("SolidMechanicsApp", GlobalStrain);
 
 InputParameters

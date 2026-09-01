@@ -19,8 +19,6 @@
 // libMesh
 #include "libmesh/system.h"
 
-using namespace libMesh;
-
 const Number Transfer::OutOfMeshValue = -999999;
 
 InputParameters

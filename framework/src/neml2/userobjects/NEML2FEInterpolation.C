@@ -22,8 +22,6 @@
 // MOOSE includes
 #include "NEML2FEInterpolation.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", NEML2FEInterpolation);
 
 InputParameters
