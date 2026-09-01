@@ -44,7 +44,8 @@ isWatertight(MeshBase & mesh)
   return SBMUtils::checkWatertightnessFromRawElems(raw_ptrs);
 }
 
-// Build an EDGE2 loop from the given points and 2-node connectivity, then test watertightness.
+// Build an first-order line loop from the given points and 2-node connectivity, then test
+// watertightness.
 bool
 edgeLoopIsWatertight(const Parallel::Communicator & comm,
                      const std::vector<Point> & points,
