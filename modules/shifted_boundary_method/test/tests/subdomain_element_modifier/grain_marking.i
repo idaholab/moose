@@ -55,7 +55,6 @@
   [assign_subdomains]
     type = SubdomainElementModifier
     subdomain_id_tester = subdomain_tester
-    lambda = 0.5
     execute_on = INITIAL
   []
 []
