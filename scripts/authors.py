@@ -71,13 +71,24 @@ def get_options():
     parser.add_argument(
         "--sort-by",
         type=str,
-        default="Total",
+        default=None,
         choices=["C++", "Python", "Make", "Total", "Commits"],
         action="store",
-        help="How to sort results in the console output",
+        help="How to sort results in the console output (default: Total, or Commits when --since is used)",
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    # When restricting to a since-date, only the commit counts respect the date,
+    # so sorting by anything else is misleading: force sorting by Commits.
+    if args.since:
+        if args.sort_by not in (None, "Commits"):
+            parser.error("--sort-by must be 'Commits' when using --since")
+        args.sort_by = "Commits"
+    elif args.sort_by is None:
+        args.sort_by = "Total"
+
+    return args
 
 
 def target(filename):
@@ -98,11 +109,18 @@ def update_count(c, lang, counts):
         counts[key][lang] += value
 
 
-def report(counts, commits, merges):
+def report(counts, commits, merges, args):
     """
     Prints the global count in a table on the screen
     """
-    titles = list(list(counts.values())[0].keys()) + ["Total", "Commits", "Merges"]
+    languages = list(list(counts.values())[0].keys())
+    # Line counts (per-language columns and their Total) are all-time regardless
+    # of --since, so they are inaccurate for a since-date run; only the commit
+    # and merge counts respect the date. Drop the misleading columns in that case.
+    if args.since:
+        titles = ["Commits", "Merges"]
+    else:
+        titles = languages + ["Total", "Commits", "Merges"]
 
     row_format = "{:>25}"
     row_format += "{:>10}" * (len(titles))
@@ -124,7 +142,6 @@ def report(counts, commits, merges):
             totals[key] += row[key]
 
     # Sort and print
-    args = get_options()
     for author, row in reversed(
         sorted(counts.items(), key=lambda item: item[1][args.sort_by])
     ):
@@ -179,4 +196,4 @@ if __name__ == "__main__":
         commits.update(mooseutils.git_committers(location, commits_args))
         merges.update(mooseutils.git_committers(location, merges_args))
 
-    report(counts, commits, merges)
+    report(counts, commits, merges, args)
