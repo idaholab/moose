@@ -51,6 +51,12 @@ public:
    * Dispatch diagonal and off-diagonal Jacobian calculation
    */
   virtual void computeJacobian() override;
+  /**
+   * Dispatch Kokkos matrix-free Jacobian-vector product calculation. Only the diagonal
+   * (row-replacement) contribution is supported; a boundary condition with a real off-diagonal
+   * Jacobian contribution is not yet supported in matrix-free mode.
+   */
+  virtual void computeJacobianVectorProduct() override;
 
   /**
    * Default methods to prevent compile errors even when these methods were not defined in the
@@ -120,6 +126,9 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived & bc) const;
   ///@}
 
 protected:
@@ -180,6 +189,30 @@ NodalBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc)
   Real local_ke = bc.template computeQpOffDiagJacobian<Derived>(jvar, 0, datum);
 
   accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+NodalBC::operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived & bc) const
+{
+  auto node = kokkosBoundaryNodeID(tid);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
+
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+  // Row-replacement Dirichlet-style contribution: y_row = local_ke * x_row. This reproduces the
+  // identity row the assembled matrix gets from accumulateTaggedNodalMatrix(false, ...) because
+  // the corresponding kernel contributions to this row are already excluded by
+  // accumulateTaggedElementalVector()'s nodal-BC-constrained-row check.
+  Real local_ke = bc.template computeQpJacobian<Derived>(0, datum);
+
+  auto row = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var());
+  auto x_row = sys.getVectorDofValue(row, _mf_x_tag);
+
+  ::Kokkos::atomic_add(&sys.getVectorDofValue(row, _mf_y_tag), local_ke * x_row);
 }
 
 } // namespace Moose::Kokkos

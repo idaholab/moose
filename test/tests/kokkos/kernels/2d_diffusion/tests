@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#30655'
+  issues = '#30655 #33644'
 
   [testdirichlet]
     type = Exodiff
@@ -38,6 +38,20 @@
     recover = false
     requirement = 'The Kokkos system shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
     design = 'framework_stp.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [test_matrix_free_jacobian]
+    type = Exodiff
+    input = 'kokkos_2d_diffusion_test.i'
+    exodiff = 'kokkos_2d_diffusion_test_out.e'
+    cli_args = 'Executioner/use_kokkos_matrix_free_jacobian=true'
+    prereq = testdirichlet
+    requirement = 'The Kokkos system shall reproduce the same solution when the Newton-Krylov '
+                  'linear solve uses an analytic partial-assembly Jacobian-vector product '
+                  'instead of the fully assembled Jacobian for the matrix-vector product.'
+    design = 'KokkosDiffusion.md KokkosDirichletBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
