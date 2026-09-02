@@ -18,6 +18,7 @@
 
 class ElemInfo;
 class FaceInfo;
+class LinearFVGradientReader;
 class RhieChowMassFlux;
 
 /**
@@ -33,17 +34,28 @@ public:
 
   FVReconstructedPressureGradient(const InputParameters & params);
 
+  /// Bind this stateful method to one Rhie-Chow flow-system configuration.
+  void bindFlowSystem(const RhieChowMassFlux & rc,
+                      const LinearFVGradientReader & pressure_gradient) const;
+
   /// Name of the gradient method used before reconstructed feedback is available.
   const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
 
   /// Reset solver-iteration state once per attempted time step.
-  void resetForTimeStep() const;
+  void resetForTimeStep(const RhieChowMassFlux & rc) const;
 
   /// Capture the lagged cell velocity gradient used by the reconstruction.
   void captureLaggedVelocityGradient(const RhieChowMassFlux & rc) const;
 
-  /// Reconstruct and relax the pressure-coupling gradient from the corrected face flux.
-  void updateFromCorrectedFlux(const RhieChowMassFlux & rc) const;
+  /// Reconstruct the conservative pressure-gradient candidate from the corrected face flux.
+  void computeCandidateFromCorrectedFlux(const RhieChowMassFlux & rc) const;
+
+  /// Get the conservative candidate produced by the current pressure corrector.
+  const GradientContainer & reconstructedCandidate(const RhieChowMassFlux & rc) const;
+
+  /// Relax the current candidate into the feedback field published to gradient consumers.
+  void publishRelaxedFeedback(const RhieChowMassFlux & rc,
+                              const GradientContainer & base_gradient) const;
 
   virtual void meshChanged() override;
 
@@ -56,8 +68,8 @@ private:
   /// Resolve the method used before reconstructed feedback is available.
   const FVGradientMethod & resolveBaseGradientMethod(SystemBase & system) const;
 
-  /// Compute a reconstructed pressure-gradient candidate from the corrected face flux.
-  void computeReconstructedPressureGradientCandidate(const RhieChowMassFlux & rc) const;
+  /// Check that a stateful operation is requested by the bound Rhie-Chow object.
+  void checkFlowSystem(const RhieChowMassFlux & rc) const;
 
   /// Blend a reconstructed candidate into the persistent feedback field.
   void updateFeedbackGradient(const GradientContainer & base_gradient,
@@ -81,6 +93,18 @@ private:
 
   /// Relaxation factor applied to reconstructed pressure gradients.
   const Real _gradient_relaxation;
+
+  /// Rhie-Chow object that owns this stateful reconstruction method.
+  mutable const RhieChowMassFlux * _rhie_chow = nullptr;
+
+  /// Pressure system that owns the reconstructed pressure variable.
+  mutable const SystemBase * _pressure_system = nullptr;
+
+  /// Pressure variable reconstructed by this method.
+  mutable unsigned int _pressure_variable_number = libMesh::invalid_uint;
+
+  /// Momentum systems coupled through the owning Rhie-Chow object.
+  mutable std::vector<const SystemBase *> _momentum_systems;
 
   /// Cached base gradient method.
   mutable const FVGradientMethod * _base_gradient_method = nullptr;
@@ -106,6 +130,9 @@ private:
 
   /// Face-flux generation consumed by the current candidate.
   mutable dof_id_type _reconstructed_candidate_face_flux_generation = 0;
+
+  /// Candidate generation consumed by the published relaxed feedback.
+  mutable dof_id_type _published_candidate_generation = 0;
 
   /// Reconstructed pressure-gradient candidate.
   mutable GradientContainer _reconstructed_pressure_gradient;

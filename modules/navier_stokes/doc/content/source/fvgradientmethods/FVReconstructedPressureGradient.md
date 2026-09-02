@@ -17,12 +17,17 @@ compatible cell velocity. It then recovers the pressure gradient satisfying
                -\mathbf{A}^{-1}_P\left(\nabla p\right)_P.
 \end{equation}
 
-The reconstructed candidate is blended into the published coupling field using
+The candidate is formed before pressure relaxation from the unrelaxed pressure gradient and its
+conservative corrected face flux. It is used directly for the immediate cell-velocity correction,
+so that correction remains compatible with the face flux. After the relaxed pressure solution is
+installed, the reconstructed candidate is blended into the published coupling field using
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation). Before the first
 candidate of a time step is available, the method publishes
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method), such as
-[FVGreenGaussGradient.md]. The feedback and generation counters are reset once per attempted time
-step, while allocated vector storage is reused when its layout remains valid.
+[FVGreenGaussGradient.md]. Because the method retains flow-system state, each instance can be used
+by only one `RhieChowMassFlux`, pressure system, pressure variable, and set of momentum systems. The
+feedback and generation counters are reset once per attempted time step, while allocated vector
+storage is reused when its layout remains valid.
 
 This method is intended specifically for momentum-pressure coupling. Diffusion corrections,
 diagnostics, and unrelated equations should continue to use an ordinary gradient method.

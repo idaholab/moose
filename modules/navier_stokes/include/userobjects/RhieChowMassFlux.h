@@ -101,11 +101,6 @@ public:
   void initCouplingField();
   /// Update the values of the face velocities in the containers
   void computeFaceMassFlux();
-  /// Update the cell velocity from the published, possibly relaxed, momentum-coupling pressure
-  /// gradient: u_C = -(H/A)_C - Ainv_C * grad(p)_C. This is the single velocity-update path; it
-  /// is exact when gradient_relaxation = 1 (the published gradient equals the freshly
-  /// reconstructed candidate) and a consistently relaxed extension of it otherwise.
-  void updateCellVelocityFromCouplingGradient();
 
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
@@ -115,12 +110,16 @@ public:
   void prepareMomentumPredictor();
 
   /**
-   * Finalize a pressure corrector: refresh the base pressure gradient, and - when using the
-   * reconstructed method - ask the gradient method to update its candidate/feedback and
-   * publish the result, then update the cell velocity from whichever coupling gradient is now
-   * published. Callers must call computeFaceMassFlux() themselves first if the momentum
-   * predictor's advection terms need the freshly corrected face flux - that call is not bundled
-   * in here because it must happen before the caller's own pressure-field relaxation, not after.
+   * Before pressure relaxation, form the conservative reconstructed candidate from the corrected
+   * face flux and update the cell velocity from that unrelaxed candidate. No-op for ordinary
+   * pressure-gradient methods.
+   */
+  void preparePressureRelaxation();
+
+  /**
+   * After pressure relaxation, refresh the base pressure gradient and publish relaxed
+   * reconstructed feedback for the next momentum predictor. Ordinary methods also update the
+   * cell velocity here, preserving their existing relaxed-pressure behavior.
    */
   void finalizePressureCorrector();
 
@@ -163,6 +162,10 @@ public:
   void computeHbyA(const bool with_updated_pressure, const bool verbose);
 
 protected:
+  /// Update cell velocity from the supplied momentum-coupling pressure gradient.
+  void updateCellVelocity(
+      const std::vector<std::unique_ptr<NumericVector<Number>>> & pressure_gradient);
+
   /// Select the right pressure gradient field and return a reference to the container
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure);
@@ -208,7 +211,7 @@ protected:
   const MooseLinearVariableFVReal * const _p;
 
   /// Thread 0 copies of the velocity variables; non-const to allow writing
-  /// cell velocities in updateCellVelocityFromCouplingGradient().
+  /// cell velocities in updateCellVelocity().
   std::vector<MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
