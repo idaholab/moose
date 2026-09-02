@@ -26,7 +26,6 @@
     [source]
       type = RunApp
       input = 'solution_ic_weighting_source.i'
-
       detail = "supporting a discontinuous elemental source field,"
     []
 
@@ -35,7 +34,6 @@
       input = 'solution_ic_weighting.i'
       csvdiff = 'solution_ic_weighting_out.csv'
       prereq = weighting/source
-
       detail = "reducing point values using selectable weighting policies, and"
     []
 
@@ -44,7 +42,6 @@
       input = 'solution_ic_weighting_no_weight.i'
       expect_err = "A weighting policy must be specified when the imported variable 'source_value' is spatially discontinuous"
       prereq = weighting/source
-
       detail = "requiring an explicit weighting policy for spatially discontinuous point lookup."
     []
   []

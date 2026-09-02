@@ -77,7 +77,6 @@
     [source]
       type = RunApp
       input = solution_function_weighting_source.i
-
       detail = "supporting continuous and discontinuous source fields,"
     []
 
@@ -86,16 +85,14 @@
       input = solution_function_weighting.i
       csvdiff = solution_function_weighting_out.csv
       prereq = weighting/source
-
       detail = "reducing point values and gradients using selectable weighting policies, and"
     []
 
     [missing_weighting]
       type = RunException
       input = solution_function_missing_weighting.i
-      expect_err = "A weighting policy must be specified when the imported variable 'source_value' is spatially discontinuous"
+      expect_err = "A weighting policy must be specified when the imported variable 'source_piecewise_constant' is spatially discontinuous"
       prereq = weighting/source
-
       detail = "requiring an explicit weighting policy for spatially discontinuous point lookup."
     []
   []

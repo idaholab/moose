@@ -22,23 +22,23 @@
   [source_solution]
     type = SolutionUserObject
     mesh = solution_function_weighting_source_out.e
-    system_variables = 'source_value source_gradient'
+    system_variables = 'source_piecewise_constant source_piecewise_linear'
     timestep = LATEST
   []
 []
 
 [Functions]
-  [weighted_value]
+  [weighted_piecewise_constant]
     type = SolutionFunction
     solution = source_solution
-    from_variable = source_value
+    from_variable = source_piecewise_constant
     weighting_type = average
   []
 
-  [weighted_gradient]
+  [weighted_piecewise_linear]
     type = SolutionFunction
     solution = source_solution
-    from_variable = source_gradient
+    from_variable = source_piecewise_linear
     weighting_type = average
   []
 []
@@ -47,7 +47,7 @@
   [evaluate_gradient_x]
     type = FunctionDerivativeAux
     variable = gradient_x
-    function = weighted_gradient
+    function = weighted_piecewise_linear
     component = x
     execute_on = INITIAL
   []
@@ -56,7 +56,7 @@
 [Postprocessors]
   [function_value]
     type = FunctionValuePostprocessor
-    function = weighted_value
+    function = weighted_piecewise_constant
     point = '0.5 0.5 0'
     execute_on = INITIAL
   []

@@ -12,29 +12,29 @@
 []
 
 [AuxVariables]
-  [source_value]
+  [source_piecewise_constant]
     family = MONOMIAL
     order = CONSTANT
   []
 
-  [source_gradient]
+  [source_piecewise_linear]
     family = LAGRANGE
     order = FIRST
   []
 []
 
 [AuxKernels]
-  [set_source_value]
+  [set_source_piecewise_constant]
     type = ParsedAux
-    variable = source_value
+    variable = source_piecewise_constant
     expression = 'if(x < 0.5, 3, 5)'
     use_xyzt = true
     execute_on = INITIAL
   []
 
-  [set_source_gradient]
+  [set_source_piecewise_linear]
     type = ParsedAux
-    variable = source_gradient
+    variable = source_piecewise_linear
     expression = 'if(x < 0.5, x, 0.5 + 2*(x - 0.5))'
     use_xyzt = true
     execute_on = INITIAL

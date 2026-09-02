@@ -11,7 +11,7 @@
   [source_solution]
     type = SolutionUserObject
     mesh = solution_function_weighting_source_out.e
-    system_variables = source_value
+    system_variables = source_piecewise_constant
     timestep = LATEST
   []
 []
@@ -20,7 +20,7 @@
   [reader]
     type = SolutionFunction
     solution = source_solution
-    from_variable = source_value
+    from_variable = source_piecewise_constant
   []
 []
 

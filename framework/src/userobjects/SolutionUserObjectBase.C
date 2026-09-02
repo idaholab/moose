@@ -9,6 +9,8 @@
 
 #include "SolutionUserObjectBase.h"
 
+#include <iterator>
+
 // MOOSE includes
 #include "ConsoleUtils.h"
 #include "MooseError.h"
@@ -770,6 +772,10 @@ SolutionUserObjectBase::pointValue(Real t,
 
   // the shape function is discontinuous so we need to compute a suitable unique value
   std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name, subdomain_ids);
+
+  mooseAssert(!values.empty(),
+              "discontinuousPointValue() should error rather than return an empty map.");
+
   switch (weighting_type)
   {
     case WeightingType::AVERAGE:
@@ -783,11 +789,11 @@ SolutionUserObjectBase::pointValue(Real t,
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       Real selected_value = values.begin()->second;
-      for (const auto & v : values)
-        if (v.first->id() < selected_elem_id)
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() < selected_elem_id)
         {
-          selected_elem_id = v.first->id();
-          selected_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
       return selected_value;
     }
@@ -795,11 +801,11 @@ SolutionUserObjectBase::pointValue(Real t,
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       Real selected_value = values.begin()->second;
-      for (const auto & v : values)
-        if (v.first->id() > selected_elem_id)
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() > selected_elem_id)
         {
-          selected_elem_id = v.first->id();
-          selected_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
       return selected_value;
     }
@@ -944,6 +950,10 @@ SolutionUserObjectBase::pointValueGradient(Real t,
   // the shape function is discontinuous so we need to compute a suitable unique value
   std::map<const Elem *, RealGradient> values =
       discontinuousPointValueGradient(t, p, var_name, subdomain_ids);
+
+  mooseAssert(!values.empty(),
+              "discontinuousPointValueGradient() should error rather than return an empty map.");
+
   switch (weighting_type)
   {
     case WeightingType::AVERAGE:
@@ -957,11 +967,11 @@ SolutionUserObjectBase::pointValueGradient(Real t,
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       RealGradient selected_value = values.begin()->second;
-      for (const auto & v : values)
-        if (v.first->id() < selected_elem_id)
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() < selected_elem_id)
         {
-          selected_elem_id = v.first->id();
-          selected_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
       return selected_value;
     }
@@ -969,11 +979,11 @@ SolutionUserObjectBase::pointValueGradient(Real t,
     {
       dof_id_type selected_elem_id = values.begin()->first->id();
       RealGradient selected_value = values.begin()->second;
-      for (const auto & v : values)
-        if (v.first->id() > selected_elem_id)
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() > selected_elem_id)
         {
-          selected_elem_id = v.first->id();
-          selected_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
       return selected_value;
     }
