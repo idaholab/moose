@@ -32,6 +32,103 @@
                   'Physics blocks.'
   []
 
+  [no_shifted]
+    type = Exodiff
+    input = 'rectangle_sczm_tri_material.i'
+    exodiff = 'no_shifted.e'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/no_shifted=true "
+               "UserObjects/active='' Executioner/num_steps=1 Outputs/file_base=no_shifted"
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The non-AD shifted cohesive zone kernel shall not require shifted-boundary '
+                  'distance data when shifted evaluation is disabled.'
+    issues = '#33397'
+  []
+  [named_properties]
+    type = Exodiff
+    input = 'named_properties.i'
+    exodiff = 'named_properties_out.e'
+    cli_args = 'Executioner/num_steps=1'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall consume configured '
+                  'stress and tangent properties with the configured base-name prefix.'
+    issues = '#33397'
+  []
+  [pk1_tangent]
+    type = Exodiff
+    input = 'pk1_tangent.i'
+    exodiff = 'pk1_tangent_out.e'
+    cli_args = 'Executioner/num_steps=1'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall automatically '
+                  'interpret the standard pk1_jacobian property as the derivative of first '
+                  'Piola-Kirchhoff stress with respect to deformation gradient.'
+    issues = '#33397'
+  []
+  [custom_tangent_requires_definition]
+    type = RunException
+    input = 'named_properties.i'
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent_definition=auto'
+    expect_err = "Cannot infer the mathematical definition of custom tangent property 'bulk_tangent'"
+    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall require the '
+                  'mathematical definition of a custom tangent property.'
+    issues = '#33397'
+  []
+  [ad_tangent_rejected]
+    type = RunException
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/use_automatic_differentiation=true '
+               'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent=Jacobian_mult'
+    expect_err = 'This parameter applies only to the non-AD SCZM interface kernel.'
+    requirement = 'The shifted cohesive zone action shall reject tangent configuration that the '
+                  'AD interface kernel would otherwise ignore.'
+    issues = '#33397'
+  []
+  [ad_named_stress]
+    type = Exodiff
+    input = 'ad_named_stress.i'
+    exodiff = 'ad_named_stress_out.e'
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/use_automatic_differentiation=true "
+               "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/use_automatic_differentiation=true "
+               "Materials/elastic_stress/type=ADComputeLinearElasticStress "
+               "Materials/elasticity_tensor_in/type=ADComputeIsotropicElasticityTensor "
+               "Materials/elasticity_tensor_out/type=ADComputeIsotropicElasticityTensor "
+               "Executioner/num_steps=1"
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The AD small-strain shifted cohesive zone kernel shall consume the configured '
+                  'stress property with the configured base-name prefix.'
+    issues = '#33397'
+  []
+  [finite_strain_rejected]
+    type = RunException
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/strain=FINITE'
+    expect_err = 'Shifted cohesive zone models currently support only small strain.'
+    requirement = 'The shifted cohesive zone action shall reject unsupported finite-strain '
+                  'kinematics.'
+    issues = '#33397'
+  []
+  [reversed_function_normal]
+    type = CSVDiff
+    input = 'rectangle_sczm_tri_material.i'
+    csvdiff = 'rectangle_sczm_tri_material_csv.csv'
+    cli_args = "Functions/signed_dist_func/expression='-x+${x0}'"
+    prereq = rectangle_sczm_tri_material
+    min_parallel = 2
+    max_parallel = 2
+    min_threads = 2
+    max_threads = 2
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The shifted-boundary distance user object shall orient true-interface normals '
+                  'so their integrated area correction factor is positive across processes and '
+                  'threads.'
+    issues = '#33397'
+  []
+
   [rectangle_sczm_tri_material_exodus]
     type = 'Exodiff'
     input = 'rectangle_sczm_tri_material.i'

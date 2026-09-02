@@ -10,6 +10,30 @@
                   'correction on a polycrystalline grain structure whose grain IDs and interfaces '
                   'are determined from one complete boundary mesh.'
   []
+  [reversed_interface_pairs]
+    type = CSVDiff
+    input = 'grain_boundary_sczm_coarse_lambda1.i'
+    csvdiff = 'grain_boundary_sczm_coarse_lambda1_csv.csv'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/boundary='grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5' "
+               "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='2 1; 4 1; 5 1; 4 2; 4 3; 5 3; 5 4' "
+               "Materials/interface_traction/boundary='grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'"
+    prereq = grain_boundary_sczm_coarse_lambda1
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The complete-interface shifted-boundary manager shall automatically orient '
+                  'true-interface normals independently of interface subdomain pair ordering.'
+    issues = '#33397'
+  []
+  [outside_grains]
+    type = Exodiff
+    input = 'outside_grains.i'
+    exodiff = 'outside_grains_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The grain subdomain generator shall retain an element input subdomain when no '
+                  'grain occupancy is selected.'
+    issues = '#33397'
+  []
   [grain_boundary_sczm_separate_interfaces]
     type = 'CSVDiff'
     input = 'grain_boundary_sczm_separate_interfaces.i'
