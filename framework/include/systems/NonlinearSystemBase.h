@@ -59,6 +59,10 @@ class SparseMatrix;
 template <typename T>
 class DiagonalMatrix;
 class DofMapBase;
+#ifdef MOOSE_KOKKOS_ENABLED
+template <typename T>
+class PetscMatrixShellMatrix;
+#endif
 } // namespace libMesh
 
 /**
@@ -995,16 +999,8 @@ protected:
   TagID _kokkos_mf_x_tag = 0;
   TagID _kokkos_mf_y_tag = 0;
   NumericVector<Number> * _kokkos_mf_x = nullptr;
-  Mat _kokkos_mf_shell = nullptr;
+  std::unique_ptr<libMesh::PetscMatrixShellMatrix<Number>> _kokkos_mf_shell;
   ///@}
-
-  /**
-   * Get (lazily creating or resizing as needed) the Kokkos matrix-free Amat shell matching the
-   * size of the given (assembled) Pmat
-   * @param pmat The assembled Jacobian matrix used for preconditioning
-   * @returns The Kokkos matrix-free Amat shell
-   */
-  Mat getOrCreateKokkosMatrixFreeShell(Mat pmat);
 #endif
 
   /// Dirac Kernel storage for each thread
