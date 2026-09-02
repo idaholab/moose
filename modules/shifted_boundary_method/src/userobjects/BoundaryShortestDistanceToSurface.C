@@ -12,6 +12,7 @@
 #include "Function.h"
 #include "SBMInterfaceManager.h"
 
+#include <algorithm>
 #include <limits>
 #include <regex>
 
@@ -33,14 +34,6 @@ BoundaryShortestDistanceToSurface::validParams()
       {},
       "Ordered subdomain pair for each boundary. If omitted, pairs are inferred from boundary "
       "names of the form grainX_grainY or blockX_blockY.");
-  params.addParam<std::vector<bool>>(
-      "flip_normals", {}, "Whether to flip the direction of the normal vectors.");
-
-  params.addParam<bool>("local_true_normal_correct",
-                        false,
-                        "If true, the local true normal direction will be corrected to match the "
-                        "direction of the local surrogate normal.");
-
   params.addParam<bool>("suppress_distance_warning",
                         false,
                         "If true, warnings about large distances will be suppressed.");
@@ -54,8 +47,6 @@ BoundaryShortestDistanceToSurface::validParams()
 BoundaryShortestDistanceToSurface::BoundaryShortestDistanceToSurface(
     const InputParameters & parameters)
   : SideUserObject(parameters),
-    _local_true_normal_correct(getParam<bool>("local_true_normal_correct")),
-    _surrogate_dot_true_normal_sums_has_reduced(false),
     _suppress_distance_warning(getParam<bool>("suppress_distance_warning")),
     _debug_output(getParam<bool>("debug_output"))
 {
@@ -125,20 +116,7 @@ BoundaryShortestDistanceToSurface::BoundaryShortestDistanceToSurface(
       paramError("interface_subdomain_pairs", "Interface pairs are only valid in manager mode.");
   }
 
-  std::vector<bool> flip_normals_param = getParam<std::vector<bool>>("flip_normals");
-  if (flip_normals_param.empty())
-    _flip_normals.resize(boundary_names.size(), false);
-  else if (flip_normals_param.size() == 1)
-    _flip_normals = std::vector<bool>(boundary_names.size(), flip_normals_param[0]);
-  else if (flip_normals_param.size() == boundary_names.size())
-    _flip_normals = flip_normals_param;
-  else
-    paramError("flip_normals",
-               "Size of flip_normals must be either 1 or match number of boundaries.");
-
-  // Accumulator for the boundary-wise integral of (surrogate normal . true normal), used in
-  // finalize() to canonicalize the sign of the true normal on each boundary.
-  _surrogate_dot_true_normal_sums.resize(boundary_names.size(), 0.0);
+  _true_interface_measures.resize(boundary_names.size(), 0.0);
 }
 
 void
@@ -151,6 +129,15 @@ BoundaryShortestDistanceToSurface::initialSetup()
                    "Boundary '",
                    _mesh.getBoundaryName(boundary),
                    "' maps to an interface not detected by the manager.");
+}
+
+void
+BoundaryShortestDistanceToSurface::initialize()
+{
+  _distance_vectors.clear();
+  _normal_vectors.clear();
+  _elem_side_to_bid.clear();
+  std::fill(_true_interface_measures.begin(), _true_interface_measures.end(), 0.0);
 }
 
 void
@@ -175,7 +162,7 @@ BoundaryShortestDistanceToSurface::execute()
   const unsigned int func_idx =
       (_distance_functions.size() == 1) ? 0 : bid_index; // single function or multiple functions
 
-  bool flip_normal = _flip_normals[bid_index];
+  _elem_side_to_bid[elem_side] = bid_index;
 
   for (unsigned int qp = 0; qp < n_qp; qp++)
   {
@@ -195,12 +182,11 @@ BoundaryShortestDistanceToSurface::execute()
       _normal_vectors[elem_side][qp] = SBMUtils::trueNormalFromFunction(func, pt, _t);
     }
 
-    auto & true_normal = _normal_vectors[elem_side][qp];
+    const auto & true_normal = _normal_vectors[elem_side][qp];
 
-    if (flip_normal)
-      true_normal *= -1.0;
-    else if (_local_true_normal_correct)
-      true_normal = (true_normal * _normals[qp] < 0) ? -true_normal : true_normal;
+    // This signed area correction factor integrates to the true-interface measure, so its
+    // boundary integral must be positive when the true normal has the correct orientation.
+    _true_interface_measures[bid_index] += _normals[qp] * true_normal * _JxW[qp];
 
     if (_debug_output)
     {
@@ -212,43 +198,29 @@ BoundaryShortestDistanceToSurface::execute()
                << " true_normal=" << true_normal << " tangent=" << nt_tangent << std::endl;
     }
 
-    // Accumulate the integral of (surrogate normal . true normal) over this boundary so that
-    // finalize() can flip the true normals of any boundary whose integral is negative, giving a
-    // consistent global orientation.
-    _surrogate_dot_true_normal_sums_has_reduced = false;
-    _surrogate_dot_true_normal_sums[bid_index] += _normals[qp] * true_normal * _JxW[qp];
-    _elem_side_to_bid[elem_side] = bid_index;
   }
+}
+
+void
+BoundaryShortestDistanceToSurface::threadJoin(const UserObject & uo)
+{
+  const auto & other = static_cast<const BoundaryShortestDistanceToSurface &>(uo);
+  _distance_vectors.insert(other._distance_vectors.begin(), other._distance_vectors.end());
+  _normal_vectors.insert(other._normal_vectors.begin(), other._normal_vectors.end());
+  _elem_side_to_bid.insert(other._elem_side_to_bid.begin(), other._elem_side_to_bid.end());
+  for (const auto i : index_range(_true_interface_measures))
+    _true_interface_measures[i] += other._true_interface_measures[i];
 }
 
 void
 BoundaryShortestDistanceToSurface::finalize()
 {
-  // Canonicalize the global sign of the true normals: flip the normals of any boundary whose
-  // integral of (surrogate normal . true normal) is negative so they align with the surrogate.
-  if (!_surrogate_dot_true_normal_sums_has_reduced)
-  {
-    this->comm().sum(_surrogate_dot_true_normal_sums);
+  this->comm().sum(_true_interface_measures);
 
-    for (auto & [elem_side, normals] : _normal_vectors /*reference because we want to change*/)
-    {
-      const auto bid_it = _elem_side_to_bid.find(elem_side);
-      if (bid_it == _elem_side_to_bid.end())
-        mooseError("BoundaryShortestDistanceToSurface::finalize missing boundary index for "
-                   "elem_id = ",
-                   elem_side.first,
-                   ", side = ",
-                   elem_side.second,
-                   ".");
-      const unsigned int bid_index = bid_it->second;
-      if (_surrogate_dot_true_normal_sums[bid_index] < 0.0)
-      {
-        for (auto & normal : normals)
-          normal *= -1.0;
-      }
-    }
-    _surrogate_dot_true_normal_sums_has_reduced = true;
-  }
+  for (auto & [elem_side, normals] : _normal_vectors)
+    if (_true_interface_measures[libmesh_map_find(_elem_side_to_bid, elem_side)] < 0.0)
+      for (auto & normal : normals)
+        normal *= -1.0;
 }
 
 const RealVectorValue &

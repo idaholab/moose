@@ -27,8 +27,8 @@ public:
   virtual void initialSetup() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void initialize() override {}
-  virtual void threadJoin(const UserObject & /*uo*/) override {}
+  virtual void initialize() override;
+  virtual void threadJoin(const UserObject & uo) override;
 
   /// Provides query interfaces for distance vector
   const RealVectorValue & surrogateDistance(const ElemSide & elem_side, unsigned int qp) const;
@@ -45,9 +45,6 @@ protected:
   /// normal
   mutable std::map<ElemSide, std::vector<RealVectorValue>> _normal_vectors;
 
-  /// Whether to flip the normal vectors
-  std::vector<bool> _flip_normals;
-
   /// side id to index map
   std::map<BoundaryID, unsigned int> _side_id_index;
 
@@ -58,17 +55,11 @@ protected:
   std::map<BoundaryID, std::pair<SubdomainID, SubdomainID>> _boundary_subdomain_pairs;
 
 private:
-  /// @brief If true, the local true normal direction will be corrected to match the direction of the local surrogate normal.
-  bool _local_true_normal_correct;
+  /// Signed true-interface measure integrated over each surrogate boundary.
+  std::vector<Real> _true_interface_measures;
 
-  /// @brief Sum of dot products between surrogate and true normals for each boundary.
-  std::vector<Real> _surrogate_dot_true_normal_sums;
-
-  /// @brief Whether the sums has been reduced across processors.
-  bool _surrogate_dot_true_normal_sums_has_reduced;
-
-  /// @brief Map from ElemSide to boundary ID index.
-  mutable std::map<ElemSide, unsigned int> _elem_side_to_bid;
+  /// Map from ElemSide to boundary ID index.
+  std::map<ElemSide, unsigned int> _elem_side_to_bid;
 
   /// @brief Whether to suppress warnings about large distances.
   bool _suppress_distance_warning;
