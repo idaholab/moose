@@ -26,7 +26,7 @@ public:
   /// Sets the mass matrix for the eigensolver
   virtual void SetMassMatrix(mfem::Operator & mass) override
   {
-    _eigensolver->SetMassMatrix(libMesh::cast_ref<mfem::HypreParMatrix &>(mass));
+    _eigensolver->SetMassMatrix(cast_ref<mfem::HypreParMatrix &>(mass));
   }
 
   /// Solves the eigenvalue problem
@@ -53,7 +53,7 @@ protected:
   {
     if (_preconditioner)
       _preconditioner->SetOperator(op);
-    _eigensolver->SetOperator(libMesh::cast_ref<mfem::HypreParMatrix &>(op));
+    _eigensolver->SetOperator(cast_ref<mfem::HypreParMatrix &>(op));
   }
 
   /// Eigensolver to be used for the problem

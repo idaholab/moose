@@ -104,7 +104,7 @@ protected:
   /// System this kernel is part of
   SystemBase & _sys;
   SystemBase & _nl_sys;
-  AuxiliarySystem & _aux_sys;
+  SystemBase & _aux_sys;
 
   /// Thread ID
   const THREAD_ID _tid;

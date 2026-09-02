@@ -119,7 +119,7 @@ LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
                                   mfem::HypreBoomerAMG,
                                   mfem::HypreAMS,
                                   mfem::HypreADS>)
-    SetPreconditioner(static_cast<MFEMSolverType &>(GetSolver()));
+    SetPreconditioner(cast_ref<MFEMSolverType &>(GetSolver()));
 }
 
 template <class MFEMSolverType>

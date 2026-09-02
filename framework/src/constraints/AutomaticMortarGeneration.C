@@ -259,9 +259,8 @@ public:
       mooseError("No entries found in the secondary node -> nodal geometry map.");
 
     auto & problem = _app.feProblem();
-    auto & subproblem = _amg._on_displaced
-                            ? static_cast<SubProblem &>(*problem.getDisplacedProblem())
-                            : static_cast<SubProblem &>(problem);
+    auto & subproblem = _amg._on_displaced ? cast_ref<SubProblem &>(*problem.getDisplacedProblem())
+                                           : cast_ref<SubProblem &>(problem);
     auto & nodal_normals_es = subproblem.es();
 
     const std::string nodal_normals_sys_name = "nodal_normals";
@@ -639,7 +638,7 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
               : Moose::fe_lagrange_2D_shape(secondary_elem.type(),
                                             secondary_elem.default_order(),
                                             n,
-                                            static_cast<const TypeVector<Real> &>(xi1_pts[qp]));
+                                            cast_ref<const TypeVector<Real> &>(xi1_pts[qp]));
       normals[qp] += phi * nodal_normals[n];
     }
 
@@ -1825,8 +1824,8 @@ AutomaticMortarGeneration::computeMsmStatistics()
     }
 
     _mesh.comm().set_union(primary_elems_to_volume);
-    _mesh.comm().allgather(static_cast<std::vector<Real> &>(secondary));
-    _mesh.comm().allgather(static_cast<std::vector<Real> &>(msm));
+    _mesh.comm().allgather(cast_ref<std::vector<Real> &>(secondary));
+    _mesh.comm().allgather(cast_ref<std::vector<Real> &>(msm));
     primary.reserve(primary_elems_to_volume.size());
     for (const auto [_, volume] : primary_elems_to_volume)
       primary.push_back(volume);
@@ -2624,8 +2623,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
         _failed_secondary_node_projections.insert(secondary_node->id());
         if (_debug)
           _console << "Failed to find primary Elem into which secondary node "
-                   << static_cast<const Point &>(*secondary_node) << ", id '"
-                   << secondary_node->id() << "', projects onto\n"
+                   << cast_ref<const Point &>(*secondary_node) << ", id '" << secondary_node->id()
+                   << "', projects onto\n"
                    << std::endl;
       }
       else if (_debug)
@@ -2879,7 +2878,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       if (!projection_succeeded && _debug)
       {
         _console << "\nFailed to find point from which primary node "
-                 << static_cast<const Point &>(*primary_node) << " was projected." << std::endl
+                 << cast_ref<const Point &>(*primary_node) << " was projected." << std::endl
                  << std::endl;
       }
     } // loop over side nodes

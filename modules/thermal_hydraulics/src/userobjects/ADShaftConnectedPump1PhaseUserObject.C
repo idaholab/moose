@@ -238,7 +238,7 @@ ADShaftConnectedPump1PhaseUserObject::threadJoin(const UserObject & uo)
   ADVolumeJunction1PhaseUserObject::threadJoin(uo);
   ADShaftConnectableUserObjectInterface::threadJoin(uo);
 
-  const auto & scpuo = static_cast<const ADShaftConnectedPump1PhaseUserObject &>(uo);
+  const auto & scpuo = cast_ref<const ADShaftConnectedPump1PhaseUserObject &>(uo);
   _hydraulic_torque += scpuo._hydraulic_torque;
   _friction_torque += scpuo._friction_torque;
   _pump_head += scpuo._pump_head;

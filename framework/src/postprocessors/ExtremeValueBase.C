@@ -82,7 +82,7 @@ template <class T>
 void
 ExtremeValueBase<T>::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const ExtremeValueBase<T> &>(y);
+  const auto & pps = cast_ref<const ExtremeValueBase<T> &>(y);
 
   if (((_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS) &&
        pps._proxy_value > _proxy_value) ||

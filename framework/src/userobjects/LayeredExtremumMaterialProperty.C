@@ -93,7 +93,7 @@ LayeredExtremumMaterialProperty::finalize()
 void
 LayeredExtremumMaterialProperty::threadJoin(const UserObject & y)
 {
-  const auto & lb = static_cast<const LayeredExtremumMaterialProperty &>(y);
+  const auto & lb = cast_ref<const LayeredExtremumMaterialProperty &>(y);
   for (const auto i : make_range(_num_layers))
     if (lb.layerHasValue(i))
       setLayerValue(i, extreme_value(getLayerValue(i), lb.getLayerValue(i)));

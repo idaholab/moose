@@ -189,8 +189,8 @@ ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(FEProblemBase & fe_problem,
     _tags(tags),
     _nl_system_num(nl_system_num),
     _on_displaced(on_displaced),
-    _subproblem(_on_displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
-                              : static_cast<SubProblem &>(_fe_problem)),
+    _subproblem(_on_displaced ? cast_ref<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                              : cast_ref<SubProblem &>(_fe_problem)),
     _zeroth_copy(true),
     _incoming_throw_on_error(Moose::_throw_on_error)
 {

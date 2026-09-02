@@ -174,7 +174,7 @@ ComplexEquationSystem::ApplyEssentialBCs()
     trial_gf.Update();
 
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
-    static_cast<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
+    cast_ref<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
     _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all

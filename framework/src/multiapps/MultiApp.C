@@ -1563,7 +1563,7 @@ dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
 
   multi_app->backup();
 
-  dataStore(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
+  dataStore(stream, cast_ref<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 }
 
 void
@@ -1572,7 +1572,7 @@ dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
   MultiApp * multi_app = static_cast<MultiApp *>(context);
   mooseAssert(multi_app, "Not set");
 
-  dataLoad(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
+  dataLoad(stream, cast_ref<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 
   multi_app->restore();
 }

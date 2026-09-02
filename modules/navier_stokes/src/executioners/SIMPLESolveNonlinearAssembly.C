@@ -182,10 +182,10 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
 
     // We will need the right hand side and the solution of the next component
     NonlinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
 
     PetscLinearSolver<Real> & momentum_solver =
-        libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+        cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
@@ -248,7 +248,7 @@ SIMPLESolveNonlinearAssembly::solvePressureCorrector()
 
   // We will need some members from the implicit nonlinear system
   NonlinearImplicitSystem & pressure_system =
-      libMesh::cast_ref<NonlinearImplicitSystem &>(_pressure_system.system());
+      cast_ref<NonlinearImplicitSystem &>(_pressure_system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
@@ -258,7 +258,7 @@ SIMPLESolveNonlinearAssembly::solvePressureCorrector()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
@@ -313,8 +313,7 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   _problem.setCurrentNonlinearSystem(system_num);
 
   // We will need some members from the implicit nonlinear system
-  NonlinearImplicitSystem & ni_system =
-      libMesh::cast_ref<NonlinearImplicitSystem &>(system.system());
+  NonlinearImplicitSystem & ni_system = cast_ref<NonlinearImplicitSystem &>(system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(ni_system.current_local_solution);
@@ -327,7 +326,7 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
@@ -383,7 +382,7 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
 
   // We will need some members from the implicit nonlinear system
   NonlinearImplicitSystem & se_system =
-      libMesh::cast_ref<NonlinearImplicitSystem &>(_solid_energy_system->system());
+      cast_ref<NonlinearImplicitSystem &>(_solid_energy_system->system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(se_system.current_local_solution);
@@ -393,7 +392,7 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & se_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*se_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*se_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side

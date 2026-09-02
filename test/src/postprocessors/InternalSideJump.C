@@ -69,6 +69,6 @@ InternalSideJump::getValue() const
 void
 InternalSideJump::threadJoin(const UserObject & y)
 {
-  const InternalSideJump & pps = static_cast<const InternalSideJump &>(y);
+  const InternalSideJump & pps = cast_ref<const InternalSideJump &>(y);
   _integral_value += pps._integral_value;
 }

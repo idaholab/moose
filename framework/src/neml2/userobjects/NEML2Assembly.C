@@ -59,7 +59,7 @@ NEML2Assembly::initialize()
 void
 NEML2Assembly::threadJoin(const UserObject & y)
 {
-  const auto & other = static_cast<const NEML2Assembly &>(y);
+  const auto & other = cast_ref<const NEML2Assembly &>(y);
   mooseAssert(_up_to_date == other._up_to_date,
               "NEML2Assembly becomes out of sync with other thread");
 

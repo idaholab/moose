@@ -89,7 +89,7 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
     if (p->negativeSignEigenKernel())
       LibmeshPetscCallA(
           p->comm().get(),
-          MatScale(static_cast<PetscMatrix<Number> &>(eigen_system.get_matrix_B()).mat(), -1.0));
+          MatScale(cast_ref<PetscMatrix<Number> &>(eigen_system.get_matrix_B()).mat(), -1.0));
 #endif
     return;
   }
@@ -359,7 +359,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
     // Condensed Matrix A
     if (_eigen_sys.has_condensed_matrix_A())
     {
-      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_condensed_matrix_A()).mat();
+      Mat mat = cast_ref<PetscMatrix<Number> &>(_eigen_sys.get_condensed_matrix_A()).mat();
 
       Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
     }
@@ -367,7 +367,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
     // Condensed Matrix B
     if (_eigen_sys.has_condensed_matrix_B())
     {
-      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_condensed_matrix_B()).mat();
+      Mat mat = cast_ref<PetscMatrix<Number> &>(_eigen_sys.get_condensed_matrix_B()).mat();
 
       Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
     }
@@ -375,7 +375,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
     // Condensed Preconditioning matrix
     if (_eigen_sys.has_condensed_precond_matrix())
     {
-      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_condensed_precond_matrix()).mat();
+      Mat mat = cast_ref<PetscMatrix<Number> &>(_eigen_sys.get_condensed_precond_matrix()).mat();
 
       Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
     }
@@ -385,7 +385,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
     // Matrix A
     if (_eigen_sys.has_matrix_A())
     {
-      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_A()).mat();
+      Mat mat = cast_ref<PetscMatrix<Number> &>(_eigen_sys.get_matrix_A()).mat();
 
       Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
     }
@@ -393,7 +393,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
     // Matrix B
     if (_eigen_sys.has_matrix_B())
     {
-      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_B()).mat();
+      Mat mat = cast_ref<PetscMatrix<Number> &>(_eigen_sys.get_matrix_B()).mat();
 
       Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
     }
@@ -401,7 +401,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
     // Preconditioning matrix
     if (_eigen_sys.has_precond_matrix())
     {
-      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_precond_matrix()).mat();
+      Mat mat = cast_ref<PetscMatrix<Number> &>(_eigen_sys.get_precond_matrix()).mat();
 
       Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
     }
@@ -410,7 +410,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   // Shell matrix A
   if (_eigen_sys.has_shell_matrix_A())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_A()).mat();
+    Mat mat = cast_ref<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_A()).mat();
 
     // Attach callbacks for nonlinear eigenvalue solver
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
@@ -422,7 +422,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   // Shell matrix B
   if (_eigen_sys.has_shell_matrix_B())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_B()).mat();
+    Mat mat = cast_ref<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_B()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
 
@@ -433,7 +433,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   // Shell preconditioning matrix
   if (_eigen_sys.has_shell_precond_matrix())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_precond_matrix()).mat();
+    Mat mat = cast_ref<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_precond_matrix()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }

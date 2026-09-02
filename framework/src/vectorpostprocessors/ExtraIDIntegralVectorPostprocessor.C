@@ -165,7 +165,7 @@ ExtraIDIntegralVectorPostprocessor::finalize()
 void
 ExtraIDIntegralVectorPostprocessor::threadJoin(const UserObject & s)
 {
-  const auto & sibling = static_cast<const ExtraIDIntegralVectorPostprocessor &>(s);
+  const auto & sibling = cast_ref<const ExtraIDIntegralVectorPostprocessor &>(s);
 
   for (unsigned int i = 0; i < _integrals.size(); ++i)
     for (size_t j = 0; j < (*_integrals[i]).size(); ++j)

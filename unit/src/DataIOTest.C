@@ -58,13 +58,13 @@ dataLoad(std::istream & stream, std::unique_ptr<DataType> & v, void * context)
 void
 dataStore(std::ostream & stream, DataStorage & v, void * context)
 {
-  dataStore(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+  dataStore(stream, cast_ref<UniqueStorage<DataType> &>(v), context);
 }
 
 void
 dataLoad(std::istream & stream, DataStorage & v, void * context)
 {
-  dataLoad(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+  dataLoad(stream, cast_ref<UniqueStorage<DataType> &>(v), context);
 }
 
 TEST(DataIOTest, signedChar)

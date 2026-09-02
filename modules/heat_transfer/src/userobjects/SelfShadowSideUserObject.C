@@ -84,7 +84,7 @@ SelfShadowSideUserObject::execute()
 void
 SelfShadowSideUserObject::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const SelfShadowSideUserObject &>(y);
+  const auto & uo = cast_ref<const SelfShadowSideUserObject &>(y);
 
   // merge lists
   _lines.insert(_lines.end(), uo._lines.begin(), uo._lines.end());
