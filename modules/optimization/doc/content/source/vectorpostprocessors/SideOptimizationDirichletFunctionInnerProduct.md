@@ -67,7 +67,7 @@ gradient with [SideOptimizationNeumannFunctionInnerProduct.md] scaled by the pen
 
 This function is primarily used for computing the gradient in an optimization routine where the
 value of a [Dirichlet boundary condition](FunctionDirichletBC.md) is being optimized. See
-[bc_load_dirichlet/forward.i] and [bc_load_dirichlet/adjoint.i] as an example of the forward and
+[!file](bc_load_dirichlet/forward.i) and [!file](bc_load_dirichlet/adjoint.i) as an example of the forward and
 adjoint input pair.
 
 !syntax parameters /VectorPostprocessors/SideOptimizationDirichletFunctionInnerProduct
