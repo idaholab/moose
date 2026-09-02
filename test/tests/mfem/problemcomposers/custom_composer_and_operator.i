@@ -40,7 +40,20 @@
   device = cpu
 []
 
+[Postprocessors]
+  [solution_l2_norm]
+    type = MFEML2Error
+    variable = u
+    function = 0
+  []
+[]
+
 [Outputs]
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/custom_composer_and_operator/custom_composer_and_operator_l2norm
+  []
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/custom_composer_and_operator

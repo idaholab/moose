@@ -25,11 +25,9 @@
     restep = false
   []
   [CustomProblemComposer]
-    type = XMLDiff
+    type = CSVDiff
     input = custom_composer_and_operator.i
-    xmldiff = 'OutputData/custom_composer_and_operator/Run0/Run0.pvd '
-              'OutputData/custom_composer_and_operator/Run0/Cycle000000/proc000000.vtu '
-              'OutputData/custom_composer_and_operator/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/custom_composer_and_operator/custom_composer_and_operator_l2norm.csv'
     requirement = 'The system shall have the ability to use a custom operator based on MFEM ex0p'
     capabilities = 'mfem'
     compute_devices = 'cpu'
