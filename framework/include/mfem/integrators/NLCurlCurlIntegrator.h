@@ -48,6 +48,8 @@ protected:
 class NLCurlCurlIntegrator : public mfem::NonlinearFormIntegrator
 {
 public:
+  using mfem::NonlinearFormIntegrator::AssemblePA;
+
   NLCurlCurlIntegrator(mfem::Coefficient & k,
                        mfem::Coefficient & curlu_dk_dcurlu,
                        mfem::Coefficient & dk_dcurlu,
@@ -64,12 +66,11 @@ public:
                                    const mfem::Vector & elfun,
                                    mfem::DenseMatrix & elmat) override;
 
-  virtual void AssemblePA(const mfem::FiniteElementSpace & fes) override;
-  virtual void AssembleGradPA(const mfem::Vector & x,
-                              const mfem::FiniteElementSpace & fes) override;
-  virtual void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const override;
-  virtual void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
-  virtual void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
+  void AssemblePA(const mfem::FiniteElementSpace & fes) override;
+  void AssembleGradPA(const mfem::Vector & x, const mfem::FiniteElementSpace & fes) override;
+  void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
 
   // pass in pointer to a quadrature space, so that the assembly method
   // can fetch what it needs
