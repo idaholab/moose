@@ -7,9 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
 import os
 import sys
+
+from FileTester import FileTester
 from mooseutils.ImageDiffer import ImageDiffer
 
 
@@ -45,13 +46,14 @@ class ImageDiff(FileTester):
             self.specs["required_python_packages"] += " skimage"
 
     def getOutputFiles(self, options):
-        return super().getOutputFiles(options) + self.specs["imagediff"]
+        return super().getOutputFiles(options) + [
+            os.path.join(self.specs["output_dir"], f) for f in self.specs["imagediff"]
+        ]
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         """
         Perform image diff
         """
-
         # Call base class processResults
         output = super().processResults(moose_dir, options, exit_code, runner_output)
         if self.isFail():
@@ -75,7 +77,7 @@ class ImageDiff(FileTester):
             else:
                 output = "Running ImageDiffer.py"
                 gold = os.path.join(self.getTestDir(), specs["gold_dir"], filename)
-                test = os.path.join(self.getTestDir(), filename)
+                test = os.path.join(self.getTestDir(), specs["output_dir"], filename)
 
                 if sys.platform in ["linux", "linux2"]:
                     name = "allowed_linux"
