@@ -51,6 +51,7 @@ MFEMMeshTest::buildMFEMMesh(MeshFileName filename, int serial_ref, int parallel_
   _app->actionWarehouse().mesh() = _mfem_mesh_ptr;
   _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
   _mfem_mesh_ptr->buildMesh();
+  _mfem_mesh_ptr->prepare();
 }
 
 /**
