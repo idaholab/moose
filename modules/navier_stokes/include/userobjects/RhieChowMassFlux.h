@@ -85,8 +85,11 @@ public:
   void computeReconstructedPressureGradientCandidate();
   /// Capture the lagged cell velocity gradient used by the Aguerre reconstruction.
   void captureLaggedVelocityGradient();
-  /// Update the cell values of the velocity variables
-  void computeCellVelocity();
+  /// Update the cell velocity from the published, possibly relaxed, momentum-coupling pressure
+  /// gradient: u_C = -(H/A)_C - Ainv_C * grad(p)_C. This is the single velocity-update path; it
+  /// is exact when gradient_relaxation = 1 (the published gradient equals the freshly
+  /// reconstructed candidate) and a consistently relaxed extension of it otherwise.
+  void updateCellVelocityFromCouplingGradient();
 
   /// Blend the reconstructed pressure-gradient candidate into the relaxed stored gradient.
   void relaxReconstructedGradient();
@@ -158,9 +161,6 @@ protected:
                                                  bool elem_has_info,
                                                  unsigned int velocity_component) const;
 
-  /// Update the cell velocity from the current pressure gradient field.
-  void computeCellVelocityFromPressureGradient();
-
   /// Recover a face-normal value from a conservative face flux.
   Real
   faceNormalValueFromFlux(const FaceInfo & fi, const Point & face_normal, Real face_flux) const;
@@ -194,7 +194,7 @@ protected:
   const MooseLinearVariableFVReal * const _p;
 
   /// Thread 0 copies of the velocity variables; non-const to allow writing
-  /// cell velocities in computeCellVelocityFromPressureGradient().
+  /// cell velocities in updateCellVelocityFromCouplingGradient().
   std::vector<MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
@@ -325,9 +325,6 @@ protected:
 
   /// Interpolation method used for the pressure diffusion coefficient on faces
   const Moose::FV::InterpMethod _pressure_diffusion_interp_method;
-
-  /// How reconstructed-pressure-gradient mode updates the cell velocity after pressure correction
-  const MooseEnum _reconstructed_pressure_gradient_velocity_update;
 
   /// Which pressure gradient is fed back on boundary-adjacent cells
   const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
