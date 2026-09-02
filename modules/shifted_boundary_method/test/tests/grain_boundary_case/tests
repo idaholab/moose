@@ -44,4 +44,43 @@
                   'grain structure using a separately loaded surface mesh for each grain '
                   'interface.'
   []
+  [explicit_surface_mesh_names]
+    type = 'CSVDiff'
+    input = 'grain_boundary_sczm_separate_interfaces.i'
+    csvdiff = 'grain_boundary_sczm_separate_interfaces_csv.csv'
+    cli_args = "Mesh/grain1_grain2/save_with_name=surface_12 "
+               "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/surface_meshes='surface_12 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'"
+    prereq = grain_boundary_sczm_separate_interfaces
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The shifted cohesive zone action shall associate each surrogate boundary with '
+                  'an explicitly named saved surface mesh.'
+  []
+  [complete_interface_pair_count]
+    type = RunException
+    input = 'grain_boundary_sczm_coarse_lambda1.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 2'"
+    expect_err = 'Provide exactly one subdomain pair per boundary.'
+    mesh_mode = REPLICATED
+    requirement = 'The shifted cohesive zone action shall require one explicit subdomain pair for '
+                  'each surrogate boundary.'
+  []
+  [ambiguous_distance_source]
+    type = RunException
+    input = 'grain_boundary_sczm_coarse_lambda1.i'
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/sbm_distance_uo=unused'
+    expect_err = "Specify only one of 'sbm_distance_uo', 'generate_sbm_distance', and 'complete_interface_mesh'."
+    mesh_mode = REPLICATED
+    requirement = 'The shifted cohesive zone action shall reject simultaneous explicit and '
+                  'automatically generated distance sources.'
+  []
+  [unknown_manager_pair]
+    type = RunException
+    input = 'grain_boundary_sczm_coarse_lambda1.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 99; 1 4; 1 5; 2 4; 3 4; 3 5; 4 5'"
+    expect_err = 'maps to an interface not detected by the manager.'
+    mesh_mode = REPLICATED
+    requirement = 'The generated boundary-distance user object shall reject an explicit subdomain '
+                  'pair absent from the complete-interface manager.'
+  []
 []
