@@ -1,5 +1,15 @@
 [Tests]
-  design = 'index.md'
+  design = 'source/actions/ShiftedCohesiveZoneAction.md'
+  [manufactured_solution]
+    type = Exodiff
+    input = 'sczm_triangle_mms.i'
+    exodiff = 'sczm_triangle_mms_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The AD small-strain shifted cohesive zone formulation shall reproduce a '
+                  'manufactured displacement solution across a non-interface-fitted material '
+                  'interface.'
+  []
   [rectangle_sczm_tri_material]
     type = 'CSVDiff'
     input = 'rectangle_sczm_tri_material.i'
@@ -9,6 +19,35 @@
     requirement = 'The system shall solve a shifted cohesive zone problem on a '
                   'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action '
                   'with the non-AD SalehaniIrani3DCTraction law.'
+  []
+  [rectangle_sczm_tri_material_jacobian]
+    type = PetscJacobianTester
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+    requirement = 'The non-AD small-strain shifted cohesive zone kernel with directional correction '
+                  'shall produce an exact Jacobian.'
+  []
+  [rectangle_sczm_tri_material_no_directional_correction_jacobian]
+    type = PetscJacobianTester
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/directional_correction=false "
+               "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+    requirement = 'The non-AD small-strain shifted cohesive zone kernel without directional '
+                  'correction shall produce an exact Jacobian.'
+  []
+  [rectangle_sczm_tri_material_no_shifted_jacobian]
+    type = PetscJacobianTester
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/no_shifted=true "
+               "UserObjects/active='' Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED
+    requirement = 'The non-AD cohesive zone kernel without shifted terms shall produce an exact '
+                  'Jacobian.'
   []
   [rectangle_sczm_tri_material_volumetric_locking_jacobian]
     type = 'PetscJacobianTester'
