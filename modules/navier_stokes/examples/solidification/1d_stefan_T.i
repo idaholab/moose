@@ -3,50 +3,25 @@ cp_salt = 1
 k_salt = 1
 L = 1
 
-T_solidus = 0
-
 # Numerical regularization of sharp melting at T_m = 0.
 # For a sharper run, reduce this to 1e-4 or 1e-5.
 # Setting it exactly to zero activates your degenerate sharp branch.
+T_solidus = 0
 T_liquidus = 1e-2
-
-# T_hot = 1
 T_hot_bc = 1
-#T_cold = 0 not used but defined here
 
-#stefan_lambda = 0.6200626333
-# erf_lambda = 0.6194595791366345
+erf_lambda = 0.6194595791366345
+t0 = 0.0065023282
 
-# t0 = 0.0065023282
-# s0 = 0.1
-# tau_end = 0.1 #0.25
-simulation_end_time = 0.25 #${fparse tau_end - t0}
+simulation_end_time = 0.25
 
 Lx = 2.0
 nx = 1000
 
-# Reference enthalpy: h(T_solidus) = 0
-#
-# For the sharp analytical Stefan problem:
-#
-#   h_liquid(T) = L + cp * (T - T_m)
-#
-# Since T_m = 0, cp = 1, L = 1:
-#
-#   h_hot = 2
-#
-# h_hot_bc = ${fparse L + cp_salt * (T_hot_bc - T_solidus)}
-
-
 [Problem]
-  kernel_coverage_check = false
-  material_coverage_check = false
   previous_nl_solution_required = true
-
-  # Keep the same system structure as your PIMPLE setup.
   linear_sys_names = 'energy_system p_system u_system'
 []
-
 
 [Mesh]
   [salt_mesh]
@@ -67,27 +42,11 @@ nx = 1000
   []
 []
 
-# dT_pc = ${fparse T_liquidus - T_solidus}
-# h_liq = ${fparse L + cp_salt * dT_pc}
-
 [Functions]
-  # Initial enthalpy corresponding to the sharp analytical solution.
-  #
-  # In the liquid:
-  #
-  #   h = L + cp * (T - T_m)
-  #
-  # In the solid:
-  #
-  #   h = 0
-  #
-  # This gives h = 2 at x = 0 and h approaches 1 on the liquid
-  # side of the initial front.
-  #
+  # Initial temperature corresponding to the sharp analytical solution.
   [T_exact_initial]
     type = ParsedFunction
-    expression = 'if(x < 0.1, 1.0 - erf(x / (2.0 * sqrt(0.0065023282))) / 0.6194595791, 0.0)'
-    # expression = 'if(x < 0.1, 1 - 10*x,0)'
+    expression = 'if(x < 0.1, 1.0 - erf(x / (2.0 * sqrt(${t0}))) / ${erf_lambda}, 0.0)'
   []
 []
 
@@ -155,13 +114,6 @@ nx = 1000
   []
 []
 
-# [FVInterpolationMethods]
-#   [harm]
-#     type = FVGeometricAverage
-#   []
-# []
-
-
 [LinearFVKernels]
   # Pressure diffusion kernel kept only because the Rhie-Chow object
   # references it. Pressure solve is disabled in the Executioner.
@@ -203,11 +155,6 @@ nx = 1000
 
 [LinearFVBCs]
   # Hot wall at x = 0.
-  #
-  # For the nondimensional benchmark:
-  #
-  #   h_hot = L + cp * (T_hot - T_m) = 1 + 1 = 2
-  #
   [hot_left]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
@@ -216,14 +163,11 @@ nx = 1000
   []
 
   # Far-field solid at T_m = 0.
-  #
-  # Since h(T_m solid) = 0, this is h = 0.
-  #
   [cold_right]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
     boundary = right
-    functor = 0.0 #Enthalpy at T_solidus is 0
+    functor = 0.0
   []
 []
 
@@ -252,7 +196,6 @@ nx = 1000
 [Executioner]
   type = PIMPLE
 
-  # Recommended implicit time step for this benchmark.
   dt = 1.25e-4
 
   # This corresponds to analytical final time tau_end = 0.25
@@ -277,17 +220,12 @@ nx = 1000
   energy_absolute_tolerance = 1e-18
 
   energy_equation_relaxation = 0.9
-  # energy_field_relaxation = 0.9
 
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  # [out_csv]
-  #   type = CSV
-  #   execute_on = FINAL
-  # []
   [out_test]
     type = Exodus
     time_step_interval = 400

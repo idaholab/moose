@@ -1,6 +1,6 @@
 [Tests]
   design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureFunctorMaterial.md LinearFVPhaseChangeSource.md'
-  issues = '#23357 33635'
+  issues = '#23357 #33635'
   [solidification_exo_no_advection]
     type = 'Exodiff'
     input = 'solidification_no_advection.i'
@@ -46,5 +46,6 @@
     csvdiff = 1d-stefan_linearfv-sharp_out.csv
     requirement = 'The system shall solve a one-dimensional Stefan phase-change problem with the linear finite volume discretization using an apparent heat-capacity source term with a linear (sharp) liquid fraction.'
     recover = false
+    max_threads = 1
   []
 []

@@ -2,7 +2,7 @@
 
 #include "MooseEnum.h"
 
-#include <algorithm> // std::clamp
+#include <algorithm>
 
 registerMooseObject("NavierStokesApp", LinearFVPhaseChangeSource);
 

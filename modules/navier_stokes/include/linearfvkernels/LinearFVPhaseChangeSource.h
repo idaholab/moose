@@ -45,6 +45,9 @@ protected:
 
 private:
   /// Compute df/dT at temperature T for the selected liquid-fraction shape
+  /// @param T Temperature
+  /// @param T_sol Solidus temperature
+  /// @param dT_pc Phase change temperature interval
   Real computeDfDT(const Real T, const Real T_sol, const Real dT_pc) const;
 
   /// Current and older values of the material property multiplier.

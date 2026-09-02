@@ -361,19 +361,9 @@ Ny = 120
   print_fields = false
   continue_on_max_its = true
   dt = 0.005
-  # scheme = 'bdf2'
-  #num_steps = 300
 
   start_time = 0.0
-  end_time = 60
-  # [TimeStepper]
-  #   type = IterationAdaptiveDT
-  #   # Raise time step often but not by as much
-  #   # There's a rough spot for convergence near 10% fluid fraction
-  #   optimal_iterations = 15
-  #   growth_factor = 1.1
-  #   dt = 0.01
-  # []
+  end_time = 60.0
   num_piso_iterations = 0
 
   pin_pressure = true
@@ -398,14 +388,6 @@ Ny = 120
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
-
-# [VectorPostprocessors]
-#   [vel_x]
-#     type = ElementValueSampler
-#     variable = 'vel_x fl'
-#     sort_by = 'x'
-#   []
-# []
 
 [Outputs]
   [out_avg]

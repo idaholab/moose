@@ -23,8 +23,9 @@ Two liquid-fraction shapes are available through the
 [!param](/LinearFVKernels/LinearFVPhaseChangeSource/smoothing) parameter:
 
 - `smooth` (default): a smoothstep $f(s) = 3s^2 - 2s^3$, giving
-  $\partial f / \partial T = 6 s (1 - s) / (T_{liq} - T_{sol})$, which vanishes
-  continuously at both ends of the mushy interval;
+  $\partial f / \partial T = 6 s (1 - s) / (T_{liq} - T_{sol})$, which vanishes is a
+  regularization using the cubic Hermite interpolation employed for solid–liquid phase
+  interpolation [!cite](wang1993thermodynamically),
 - `sharp`: a linear liquid fraction $f(s) = s$, giving a constant
   $\partial f / \partial T = 1 / (T_{liq} - T_{sol})$ inside the interval and zero
   outside.
@@ -33,6 +34,10 @@ Both variants release the same total latent heat across the interval. The matrix
 contribution treats the temperature time derivative implicitly using the time
 integrator of the system, while $\partial f / \partial T$ is evaluated using the
 current temperature iterate.
+
+!alert note
+Ensure that the simulation has the proper spatial-temporal discretization, to converge
+the liquid-solid front advancement.
 
 !alert note
 This kernel is intended for temperature-based solves only. It must not be combined
