@@ -58,12 +58,12 @@ MFEMScalarQuadratureFunctionCoefficient::Refresh()
   mfem::IsoparametricTransformation T;
   mfem::Vector values;
   _qf.HostWrite();
-  for (const auto iel : libMesh::make_range(qspace.GetNE()))
+  for (const auto iel : make_range(qspace.GetNE()))
   {
     _qf.GetValues(iel, values);
     const mfem::IntegrationRule & ir = qspace.GetIntRule(iel);
     mesh.GetElementTransformation(iel, &T);
-    for (const auto iq : libMesh::make_range(ir.Size()))
+    for (const auto iq : make_range(ir.Size()))
     {
       const mfem::IntegrationPoint & ip = ir[iq];
       T.SetIntPoint(&ip);
