@@ -39,31 +39,14 @@ MFEMMesh::validParams()
                         false,
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
                         "Only Hilbert sorting is supported at present.");
-  params.addParam<bool>(
-      "periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
-  params.addParam<std::vector<Real>>("translation_x",
-                                     "Vector specifying translation in x direction.");
-  params.addParam<std::vector<Real>>("translation_y",
-                                     "Vector specifying translation in y direction.");
-  params.addParam<std::vector<Real>>("translation_z",
-                                     "Vector specifying translation in z direction.");
-  params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : MooseMesh(parameters), MFEMTopology(parameters),
-  _periodic(getParam<bool>("periodic"))
+MFEMMesh::MFEMMesh(const InputParameters & parameters)
+  : MooseMesh(parameters), MFEMTopology(parameters)
 {
-  if (_periodic) {
-    // hardcode to fetch x and y
-    _translation_x = getParam<std::vector<Real>>("translation_x");
-    _translation_y = getParam<std::vector<Real>>("translation_y");
-    if (isParamSetByUser("translation_z"))
-      _translation_z = getParam<std::vector<Real>>("translation_z");
-  }
-
-MFEMMesh::~MFEMMesh() {}
+}
 
 void
 MFEMMesh::init()
