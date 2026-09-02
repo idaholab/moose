@@ -15,6 +15,11 @@
     type = CSVDiff
     input = tree_cotree_gauge_magnetodynamic.i
     csvdiff = tree_cotree_gauge_magnetodynamic_out.csv
+    # MFEM transient problems do not restore their state when a timestep is
+    # rejected and retried, so a repeated step does not reproduce the original
+    # result. Every other MFEM transient test opts out of restep for the same
+    # reason.
+    restep = false
     design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
     requirement = 'The system shall be able to apply a tree-cotree gauge restricted to the non-conducting region that removes the gradient null space of an H(curl) variable in an otherwise singular magnetodynamic MFEM problem, giving a partition-independent solution'
     capabilities = 'mfem'

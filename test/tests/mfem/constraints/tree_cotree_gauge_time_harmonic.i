@@ -4,20 +4,25 @@
 #   curl(nu curl A) + i omega sigma A = J_src
 #
 # The i omega sigma A term removes the gradient null space of the curl-curl
-# operator inside the conductor (block 1), but the surrounding insulator
-# (block 2) has no such term and the discrete operator is singular there. A
-# tree-cotree gauge restricted to block 2 fixes the real and imaginary parts of
-# its edge DOFs on a spanning tree to zero, making the system solvable. Block 1
-# edges seed the spanning forest but are not gauged.
+# operator inside the conductor, but the surrounding insulator has no such term
+# and the discrete operator is singular there. A tree-cotree gauge restricted to
+# the insulator fixes the real and imaginary parts of its edge DOFs on a spanning
+# tree to zero, making the system solvable. Conductor edges seed the spanning
+# forest but are not gauged.
+#
+# The mesh is a cylinder split into a conducting core (r <= 0.5) and an
+# insulating shell (0.5 <= r <= 1). The shell is multiply connected - a loop
+# encircling the core cannot be contracted within it - so the cotree carries a
+# genuine loop rather than just a spanning tree of a simply connected region.
 
-conductor_block = '1'
-insulator_block = '2'
+conductor_block = 'interior'
+insulator_block = 'exterior'
 reluctivity = 1.0
 omega_sigma = 1.0 # angular frequency * conductivity
 
 [Mesh]
-  type = MFEMMesh
-  file = ../mesh/waveguide.g
+  type = MFEMFileMesh
+  file = ../mesh/cylinder-hex-q2.gen
 []
 
 [Problem]
@@ -67,7 +72,7 @@ omega_sigma = 1.0 # angular frequency * conductivity
   [tangential_a_zero]
     type = MFEMComplexVectorTangentialDirichletBC
     variable = a_field
-    boundary = '1 2 3 4 5 6'
+    boundary = 'front back curved_surface'
   []
 []
 
@@ -76,7 +81,7 @@ omega_sigma = 1.0 # angular frequency * conductivity
     type = MFEMComplexTreeCotreeGaugeEssentialConstraint
     variable = a_field
     block = ${insulator_block}
-    boundary = '1 2 3 4 5 6'
+    boundary = 'front back curved_surface'
   []
 []
 
@@ -143,9 +148,4 @@ omega_sigma = 1.0 # angular frequency * conductivity
 
 [Outputs]
   csv = true
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/TreeCotreeGaugeTimeHarmonic
-    vtk_format = ASCII
-  []
 []
