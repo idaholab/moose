@@ -75,20 +75,10 @@
   []
 []
 
-[Functions]
-  [exact_a_field]
-    type = ParsedVectorFunction
-    expression_x = '0'
-    expression_y = '0'
-    expression_z = '0'
-  []
-[]
-
 [BCs]
   [tangential_a_bdr]
     type = MFEMVectorTangentialDirichletBC
     variable = a_field
-    vector_coefficient = exact_a_field
     boundary = 'Exterior'
   []
 []

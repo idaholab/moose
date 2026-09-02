@@ -8,14 +8,6 @@
   solve = false
 []
 
-[FESpaces]
-  [H1FESpace]
-    type = MFEMScalarFESpace
-    fec_type = H1
-    fec_order = FIRST
-  []
-[]
-
 [MultiApps]
   [recv_app]
     type = FullSolveMultiApp
