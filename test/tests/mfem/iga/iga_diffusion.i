@@ -13,7 +13,7 @@
 # the superparametric test uses. A regold that does not follow that rate is wrong.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/disc-nurbs.mesh
   # Refinement of a NURBS mesh inserts knots, leaving the geometry unchanged.
   uniform_refine = 3
