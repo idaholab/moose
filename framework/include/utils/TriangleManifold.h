@@ -142,9 +142,6 @@ private:
   Real _z_cell_size = 1.0;
 
   /// Lookup from packed yz-grid cell index to triangles that could intersect the +x query ray.
-  /// Each key stores the y index in the upper 32 bits and the z index in the lower 32 bits.
-  /// The key must remain 64-bit even when libMesh uses a 32-bit `dof_id_type`; otherwise, the
-  /// y index is truncated, causing key collisions.
   std::unordered_map<std::uint64_t, std::vector<dof_id_type>> _ray_grid;
 
   MeshBase & _mesh;
