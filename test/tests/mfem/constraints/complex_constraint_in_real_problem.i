@@ -2,7 +2,7 @@
 # which has no complex equation system to register it with.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
