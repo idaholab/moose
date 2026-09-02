@@ -26,7 +26,6 @@ pressure_gradient_method = 'green-gauss'
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
     pressure_projection_method = CONSISTENT
-    momentum_pressure_kernel = u_pressure
   []
 []
 
