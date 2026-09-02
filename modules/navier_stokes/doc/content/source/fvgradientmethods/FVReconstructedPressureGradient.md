@@ -208,6 +208,10 @@ The cell velocity is subsequently updated from the same stored coupling gradient
 \left(\nabla p\right)_{\mathrm{c},P}.
 \end{equation}
 
+When \(\alpha = 1\), \(\left(\nabla p\right)_{\mathrm{c}}\) equals \(\left(\nabla p\right)^{\mathrm{rec}}\)
+exactly, so \(\mathbf{u}_P\) above reproduces the direct face-flux reconstruction. For \(\alpha < 1\)
+it is a consistently relaxed extension of that reconstruction, not the reconstruction itself.
+
 ## Time-step lifecycle
 
 The stored feedback field is solver-iteration state, not an independent physical solution.

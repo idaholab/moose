@@ -38,11 +38,15 @@ gradient, reconstructs a cell velocity from the corrected total conservative fac
 recovers the pressure gradient from the momentum balance.
 
 The reconstructed gradient is available after the first pressure correction; until then the gradient
-method falls back to its base gradient method. The current velocity correction uses the selected
-reconstructed quantity directly, and after each pressure corrector Rhie-Chow passes the newly
-reconstructed candidate to the gradient method, which relaxes the stored coupling gradient with
+method falls back to its base gradient method. After each pressure corrector, Rhie-Chow passes the
+newly reconstructed candidate to the gradient method, which relaxes the stored coupling gradient with
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once
-per corrector. Set
+per corrector, and the cell velocity is then updated from that same published, possibly relaxed,
+coupling gradient. When
+[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) is `1`, the
+published gradient equals the freshly reconstructed candidate and the updated velocity equals the
+direct face-flux reconstruction; for smaller values it is a consistently relaxed extension of it.
+Set
 [!param](/UserObjects/RhieChowMassFlux/momentum_pressure_kernel) so Rhie-Chow uses the same pressure
 gradient field as the momentum predictor while constructing H/A.
 
