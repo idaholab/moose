@@ -9,7 +9,7 @@
 # sampled field is exactly (2, 3) at the point inside the constrained subdomain.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
