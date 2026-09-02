@@ -32,15 +32,17 @@ multiphase flows, problems with rapidly varying thermophysical properties, and,
 in general, when using high-resolution grids.
 
 The pressure-gradient term used by [LinearFVMomentumPressure.md] kernels comes from the kernel's
-configured gradient method. With [FVReconstructedPressureGradient.md], Rhie-Chow applies an
-Aguerre-style reconstruction: it removes the face-flux contribution from the previous velocity
+configured gradient method. [FVReconstructedPressureGradient.md] owns the Aguerre reconstruction
+and its relaxed feedback field: it removes the face-flux contribution from the previous velocity
 gradient, reconstructs a cell velocity from the corrected total conservative face flux, and then
-recovers the pressure gradient from the momentum balance.
+recovers the pressure gradient from the momentum balance. Rhie-Chow supplies H/A, 1/A, the base
+pressure gradient, the conservative face flux, and momentum/pressure system metadata, and drives
+the gradient method's prepare/finalize lifecycle.
 
 The reconstructed gradient is available after the first pressure correction; until then the gradient
-method falls back to its base gradient method. After each pressure corrector, Rhie-Chow passes the
-newly reconstructed candidate to the gradient method, which relaxes the stored coupling gradient with
-[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once
+method falls back to its base gradient method. After each pressure corrector, Rhie-Chow asks the
+gradient method to update from the newly corrected face flux, which relaxes the stored coupling
+gradient with [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once
 per corrector, and the cell velocity is then updated from that same published, possibly relaxed,
 coupling gradient. When
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) is `1`, the

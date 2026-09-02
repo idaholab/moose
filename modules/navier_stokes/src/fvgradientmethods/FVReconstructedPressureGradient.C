@@ -10,11 +10,17 @@
 #include "FVReconstructedPressureGradient.h"
 
 #include "FEProblemBase.h"
+#include "FVUtils.h"
+#include "LinearSystem.h"
 #include "MooseMesh.h"
 #include "RhieChowMassFlux.h"
 #include "SystemBase.h"
 
-#include "libmesh/numeric_vector.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
+#include "libmesh/elem.h"
+
+using namespace libMesh;
 
 registerMooseObject("NavierStokesApp", FVReconstructedPressureGradient);
 
@@ -22,25 +28,31 @@ InputParameters
 FVReconstructedPressureGradient::validParams()
 {
   InputParameters params = FVGradientMethod::validParams();
-  params.addClassDescription("Pressure gradient method that uses Rhie-Chow reconstructed "
-                             "gradients once they are available, and otherwise falls back to a "
-                             "base gradient method.");
+  params += MeshChangedInterface::validParams();
+  params.addClassDescription(
+      "Reconstructs and relaxes the pressure gradient used for Rhie-Chow momentum coupling.");
   params.addParam<GradientMethodName>(
       "base_gradient_method",
       "green-gauss",
       "Gradient method used before Rhie-Chow has computed reconstructed gradients.");
+  params.addParam<MooseEnum>(
+      "reconstructed_pressure_gradient_boundary_cells",
+      MooseEnum("reconstructed base_gradient", "reconstructed"),
+      "Which pressure gradient is retained on cells touching a boundary face.");
   params.addRangeCheckedParam<Real>(
       "gradient_relaxation",
       0.1,
       "0.0<gradient_relaxation<=1.0",
-      "Relaxation factor applied when updating reconstructed pressure gradients used by the "
-      "momentum predictor.");
+      "Relaxation factor applied when updating the reconstructed pressure-coupling gradient.");
   return params;
 }
 
 FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputParameters & params)
   : FVGradientMethod(params),
+    MeshChangedInterface(params),
     _base_gradient_method_name(getParam<GradientMethodName>("base_gradient_method")),
+    _reconstructed_pressure_gradient_boundary_cells(
+        getParam<MooseEnum>("reconstructed_pressure_gradient_boundary_cells")),
     _gradient_relaxation(getParam<Real>("gradient_relaxation"))
 {
 }
@@ -56,7 +68,6 @@ FVReconstructedPressureGradient::resolveBaseGradientMethod(SystemBase & system) 
 
   if (_base_gradient_method_name == "green-gauss" &&
       !fe_problem.hasFVGradientMethod(_base_gradient_method_name))
-
   {
     auto params = fe_problem.getMooseApp().getFactory().getValidParams("FVGreenGaussGradient");
     fe_problem.addFVGradientMethod("FVGreenGaussGradient", _base_gradient_method_name, params);
@@ -76,48 +87,28 @@ FVReconstructedPressureGradient::resolveBaseGradientMethod(SystemBase & system) 
 }
 
 void
-FVReconstructedPressureGradient::setupDependencies(SystemBase & system,
-                                                   const unsigned int /*variable_number*/) const
-{
-  if (!_base_gradient_method)
-    _base_gradient_method = &resolveBaseGradientMethod(system);
-}
-
-void
 FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     SystemBase & system,
     GradientContainer & gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  if (!_base_gradient_method)
-    mooseError("FVReconstructedPressureGradient '", name(), "' has not been set up.");
-
-  // This method replaces the pressure gradient used by Rhie-Chow. Compatibility between the
-  // registered pressure variable and the gradient method is enforced by RhieChowMassFlux.
   if (variable_numbers.empty())
     mooseError("FVReconstructedPressureGradient '",
                name(),
                "' expects at least one pressure variable number.");
 
-  // When no feedback has been initialized yet or the stored feedback layout no longer matches
-  // the requested gradient storage (for example after mesh changes), fall back to the base
-  // gradient method.
-  const auto feedback_components = _feedback.size();
-  bool feedback_layout_matches = _feedback_initialized && feedback_components == gradient.size();
+  if (!_base_gradient_method)
+    _base_gradient_method = &resolveBaseGradientMethod(system);
 
+  bool feedback_layout_matches = _feedback_initialized && _feedback.size() == gradient.size();
   if (feedback_layout_matches)
-  {
     for (const auto component : index_range(gradient))
-    {
-      const auto & stored = *_feedback[component];
-      if (stored.size() != gradient[component]->size() ||
-          stored.local_size() != gradient[component]->local_size())
+      if (_feedback[component]->size() != gradient[component]->size() ||
+          _feedback[component]->local_size() != gradient[component]->local_size())
       {
         feedback_layout_matches = false;
         break;
       }
-    }
-  }
 
   if (!feedback_layout_matches)
   {
@@ -125,10 +116,368 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     return;
   }
 
-  // After feedback has been initialized, publish the stored relaxed gradient without further
-  // modification so repeated reads are idempotent.
   for (const auto component : index_range(gradient))
     *gradient[component] = *_feedback[component];
+}
+
+void
+FVReconstructedPressureGradient::resetForTimeStep() const
+{
+  _feedback_initialized = false;
+  _lagged_velocity_gradient_available = false;
+  _lagged_velocity_gradient_generation = 0;
+  _reconstructed_candidate_generation = 0;
+  _reconstructed_candidate_face_flux_generation = 0;
+}
+
+void
+FVReconstructedPressureGradient::meshChanged()
+{
+  _boundary_cell_cache_built = false;
+  _boundary_cell_ids.clear();
+  _lagged_reconstruction_velocity_gradient.clear();
+  _reconstructed_pressure_gradient.clear();
+  _feedback.clear();
+  resetForTimeStep();
+}
+
+void
+FVReconstructedPressureGradient::buildBoundaryCellCache(const RhieChowMassFlux & rc) const
+{
+  _boundary_cell_ids.clear();
+  for (const auto & fi : rc.pressureSystem().feProblem().mesh().faceInfo())
+    if (!fi->boundaryIDs().empty())
+    {
+      if (fi->elemPtr() && rc.hasBlocks(fi->elemPtr()->subdomain_id()))
+        _boundary_cell_ids.insert(fi->elemPtr()->id());
+      if (fi->neighborPtr() && rc.hasBlocks(fi->neighborPtr()->subdomain_id()))
+        _boundary_cell_ids.insert(fi->neighborPtr()->id());
+    }
+
+  _boundary_cell_cache_built = true;
+}
+
+void
+FVReconstructedPressureGradient::captureLaggedVelocityGradient(
+    const RhieChowMassFlux & rc) const
+{
+  const auto dimension = rc.dimension();
+  if (_lagged_reconstruction_velocity_gradient.empty())
+  {
+    _lagged_reconstruction_velocity_gradient.resize(dimension);
+    for (const auto component : make_range(dimension))
+    {
+      _lagged_reconstruction_velocity_gradient[component].resize(dimension);
+      for (const auto direction : make_range(dimension))
+        _lagged_reconstruction_velocity_gradient[component][direction] =
+            rc.momentumSystem(component).currentSolution()->zero_clone();
+    }
+  }
+
+  for (auto & component_gradients : _lagged_reconstruction_velocity_gradient)
+    for (auto & gradient : component_gradients)
+      gradient->zero();
+
+  const auto & mesh = rc.pressureSystem().feProblem().mesh();
+  const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
+  const auto time_arg = Moose::currentState();
+
+  for (const auto & elem_info : mesh.elemInfoVector())
+  {
+    if (!rc.hasBlocks(elem_info->subdomain_id()))
+      continue;
+
+    const Elem & elem = *elem_info->elem();
+    std::vector<RealVectorValue> surface_sum(dimension, RealVectorValue());
+
+    auto act = [&](const Elem &,
+                   const Elem * const,
+                   const FaceInfo * const fi,
+                   const Point & surface_vector,
+                   const Real,
+                   const bool elem_has_info)
+    {
+      const ElemInfo * const neighbor_info = elem_has_info ? fi->neighborInfo() : fi->elemInfo();
+      const bool neighbor_active = neighbor_info && rc.hasBlocks(neighbor_info->subdomain_id());
+
+      for (const auto component : make_range(dimension))
+      {
+        const auto & velocity = rc.velocityVariable(component);
+        const Real elem_value = velocity.getElemValue(*elem_info, time_arg);
+        Real face_value = elem_value;
+
+        if (neighbor_active)
+        {
+          const Real neighbor_value = velocity.getElemValue(*neighbor_info, time_arg);
+          Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                                 face_value,
+                                 elem_value,
+                                 neighbor_value,
+                                 *fi,
+                                 elem_has_info);
+        }
+
+        surface_sum[component] += surface_vector * face_value;
+      }
+    };
+
+    Moose::FV::loopOverElemFaceInfo(
+        elem, mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
+
+    const Real volume = elem_info->volume() * elem_info->coordFactor();
+    if (volume == 0.0)
+      continue;
+
+    for (const auto component : make_range(dimension))
+    {
+      const auto & velocity = rc.velocityVariable(component);
+      const auto dof = elem_info->dofIndices()[rc.momentumSystem(component).number()]
+                                               [velocity.number()];
+      for (const auto direction : make_range(dimension))
+        _lagged_reconstruction_velocity_gradient[component][direction]->set(
+            dof, surface_sum[component](direction) / volume);
+    }
+  }
+
+  for (const auto & elem_info : mesh.elemInfoVector())
+  {
+    if (!rc.hasBlocks(elem_info->subdomain_id()) ||
+        mesh.getCoordSystem(elem_info->subdomain_id()) != Moose::CoordinateSystemType::COORD_XYZ)
+      continue;
+
+    DenseMatrix<Real> least_squares_matrix(dimension, dimension);
+    std::vector<DenseVector<Real>> least_squares_rhs(dimension, DenseVector<Real>(dimension));
+    least_squares_matrix.zero();
+
+    std::vector<Real> elem_values(dimension);
+    for (const auto component : make_range(dimension))
+      elem_values[component] = rc.velocityVariable(component).getElemValue(*elem_info, time_arg);
+
+    unsigned int neighbor_count = 0;
+    const Elem & elem = *elem_info->elem();
+    auto act = [&](const Elem &,
+                   const Elem * const,
+                   const FaceInfo * const fi,
+                   const Point &,
+                   const Real,
+                   const bool elem_has_info)
+    {
+      const ElemInfo * const neighbor_info = elem_has_info ? fi->neighborInfo() : fi->elemInfo();
+      if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
+        return;
+
+      const Point d_cn = neighbor_info->centroid() - elem_info->centroid();
+      if (d_cn.norm() == 0.0)
+        return;
+
+      neighbor_count++;
+      for (const auto i : make_range(dimension))
+      {
+        for (const auto j : make_range(dimension))
+          least_squares_matrix(i, j) += d_cn(i) * d_cn(j);
+
+        for (const auto component : make_range(dimension))
+          least_squares_rhs[component](i) +=
+              (rc.velocityVariable(component).getElemValue(*neighbor_info, time_arg) -
+               elem_values[component]) *
+              d_cn(i);
+      }
+    };
+
+    Moose::FV::loopOverElemFaceInfo(
+        elem, mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
+
+    if (neighbor_count < dimension)
+      continue;
+
+    for (const auto component : make_range(dimension))
+    {
+      DenseVector<Real> gradient(dimension);
+      DenseMatrix<Real> solve_matrix(least_squares_matrix);
+      solve_matrix.svd_solve(least_squares_rhs[component], gradient);
+
+      const auto & velocity = rc.velocityVariable(component);
+      const auto dof = elem_info->dofIndices()[rc.momentumSystem(component).number()]
+                                               [velocity.number()];
+      for (const auto direction : make_range(dimension))
+        _lagged_reconstruction_velocity_gradient[component][direction]->set(dof,
+                                                                            gradient(direction));
+    }
+  }
+
+  for (auto & component_gradients : _lagged_reconstruction_velocity_gradient)
+    for (auto & gradient : component_gradients)
+      gradient->close();
+
+  _lagged_velocity_gradient_available = true;
+  ++_lagged_velocity_gradient_generation;
+}
+
+RealVectorValue
+FVReconstructedPressureGradient::reconstructionVelocityGradient(
+    const RhieChowMassFlux & rc,
+    const ElemInfo & elem_info,
+    const FaceInfo & fi,
+    const bool elem_has_info,
+    const unsigned int velocity_component) const
+{
+  const auto dimension = rc.dimension();
+  const auto & velocity = rc.velocityVariable(velocity_component);
+  const auto system_number = rc.momentumSystem(velocity_component).number();
+
+  RealVectorValue elem_gradient;
+  for (const auto direction : make_range(dimension))
+    elem_gradient(direction) =
+        (*_lagged_reconstruction_velocity_gradient[velocity_component][direction])(
+            elem_info.dofIndices()[system_number][velocity.number()]);
+
+  const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
+  if (!neighbor_info || !rc.hasBlocks(neighbor_info->subdomain_id()))
+    return elem_gradient;
+
+  RealVectorValue neighbor_gradient;
+  for (const auto direction : make_range(dimension))
+    neighbor_gradient(direction) =
+        (*_lagged_reconstruction_velocity_gradient[velocity_component][direction])(
+            neighbor_info->dofIndices()[system_number][velocity.number()]);
+
+  RealVectorValue face_gradient;
+  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                         face_gradient,
+                         elem_gradient,
+                         neighbor_gradient,
+                         fi,
+                         elem_has_info);
+
+  return face_gradient;
+}
+
+void
+FVReconstructedPressureGradient::computeReconstructedPressureGradientCandidate(
+    const RhieChowMassFlux & rc) const
+{
+  if (!_lagged_velocity_gradient_available)
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' requires a lagged velocity-gradient snapshot before computing a reconstructed "
+               "pressure-gradient candidate.");
+
+  const auto next_candidate_generation = _reconstructed_candidate_generation + 1;
+  mooseAssert(_lagged_velocity_gradient_generation >= next_candidate_generation,
+              "The lagged velocity-gradient snapshot must be captured before forming a "
+              "reconstructed pressure-gradient candidate.");
+  mooseAssert(_lagged_velocity_gradient_generation == next_candidate_generation,
+              "Each reconstructed pressure-gradient candidate must consume exactly one lagged "
+              "velocity-gradient snapshot.");
+  _reconstructed_candidate_generation = next_candidate_generation;
+
+  mooseAssert(rc.faceMassFluxGeneration() != _reconstructed_candidate_face_flux_generation,
+              "Each reconstructed pressure-gradient candidate must consume a face mass flux "
+              "computed by the current pressure corrector.");
+  _reconstructed_candidate_face_flux_generation = rc.faceMassFluxGeneration();
+
+  if (!_boundary_cell_cache_built)
+    buildBoundaryCellCache(rc);
+
+  const auto dimension = rc.dimension();
+  const bool use_base_gradient_on_boundary =
+      _reconstructed_pressure_gradient_boundary_cells == "base_gradient";
+  const auto & base_pressure_gradient = rc.basePressureGradientComponents();
+
+  if (_reconstructed_pressure_gradient.empty())
+    for (const auto component : make_range(dimension))
+      _reconstructed_pressure_gradient.push_back(base_pressure_gradient[component]->zero_clone());
+
+  for (auto & pressure_gradient : _reconstructed_pressure_gradient)
+    pressure_gradient->zero();
+
+  const auto & mesh = rc.pressureSystem().feProblem().mesh();
+  const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
+
+  for (const auto & elem_info : mesh.elemInfoVector())
+  {
+    if (!rc.hasBlocks(elem_info->subdomain_id()))
+      continue;
+
+    const bool boundary_cell = _boundary_cell_ids.count(elem_info->elem()->id());
+    DenseMatrix<Real> matrix(dimension, dimension);
+    DenseVector<Real> projection_rhs(dimension);
+    matrix.zero();
+    projection_rhs.zero();
+
+    const Elem & elem = *elem_info->elem();
+    auto act = [&](const Elem &,
+                   const Elem * const,
+                   const FaceInfo * const fi,
+                   const Point & surface_vector,
+                   const Real,
+                   const bool elem_has_info)
+    {
+      const Real surface_area = surface_vector.norm();
+      if (surface_area == 0.0)
+        return;
+
+      const auto face_normal = surface_vector / surface_area;
+      const Point flux_normal =
+          rc.hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->normal() : Point(-fi->normal());
+      Real face_normal_reconstructed_quantity =
+          rc.getVolumetricFaceFlux(*fi) * (flux_normal * face_normal);
+
+      const Point d_pf = fi->faceCentroid() - elem_info->centroid();
+      Real gradient_flux_correction = 0.0;
+      for (const auto component : make_range(dimension))
+        gradient_flux_correction +=
+            (reconstructionVelocityGradient(rc, *elem_info, *fi, elem_has_info, component) * d_pf) *
+            surface_vector(component);
+
+      face_normal_reconstructed_quantity -= gradient_flux_correction / surface_area;
+
+      for (const auto i : make_range(dimension))
+      {
+        projection_rhs(i) += face_normal_reconstructed_quantity * surface_vector(i);
+        for (const auto j : make_range(dimension))
+          matrix(i, j) += surface_vector(i) * surface_vector(j) / surface_area;
+      }
+    };
+
+    Moose::FV::loopOverElemFaceInfo(
+        elem, mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
+
+    DenseVector<Real> reconstructed_quantity(dimension);
+    if (dimension == 1)
+    {
+      const Real denominator = matrix(0, 0);
+      reconstructed_quantity(0) =
+          denominator != 0.0 ? projection_rhs(0) / denominator : 0.0;
+    }
+    else
+    {
+      DenseMatrix<Real> solve_matrix(matrix);
+      solve_matrix.cholesky_solve(projection_rhs, reconstructed_quantity);
+    }
+
+    for (const auto component : make_range(dimension))
+    {
+      const auto momentum_dof =
+          elem_info->dofIndices()[rc.momentumSystem(component).number()][0];
+      const auto pressure_dof = elem_info->dofIndices()[rc.pressureSystem().number()]
+                                                      [rc.pressureVariableNumber()];
+
+      const Real HbyA = (*rc.HbyAComponents()[component])(momentum_dof);
+      const Real Ainv = (*rc.AinvComponents()[component])(momentum_dof);
+      const Real base_gradient = (*base_pressure_gradient[component])(pressure_dof);
+      const Real reconstructed_gradient =
+          Ainv != 0.0 ? (-reconstructed_quantity(component) - HbyA) / Ainv : base_gradient;
+      const Real stored_gradient =
+          use_base_gradient_on_boundary && boundary_cell ? base_gradient : reconstructed_gradient;
+
+      _reconstructed_pressure_gradient[component]->set(pressure_dof, stored_gradient);
+    }
+  }
+
+  for (auto & pressure_gradient : _reconstructed_pressure_gradient)
+    pressure_gradient->close();
+
 }
 
 void
@@ -137,52 +486,30 @@ FVReconstructedPressureGradient::updateFeedbackGradient(
     const GradientContainer & reconstructed_candidate) const
 {
   const auto num_components = base_gradient.size();
-  if (num_components == 0)
+  if (num_components == 0 || reconstructed_candidate.size() != num_components)
     mooseError("FVReconstructedPressureGradient '",
                name(),
-               "' requires a nonzero number of gradient components when updating the "
-               "reconstructed pressure gradient.");
-
-  if (reconstructed_candidate.size() != num_components)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' requires base and reconstructed gradients to have the same number of "
-               "components.");
+               "' requires nonempty base and reconstructed gradients with equal component "
+               "counts.");
 
   for (const auto component : index_range(base_gradient))
-  {
-    const auto & base_vec = *base_gradient[component];
-    const auto & candidate_vec = *reconstructed_candidate[component];
-
-    if (base_vec.size() != candidate_vec.size() ||
-        base_vec.local_size() != candidate_vec.local_size())
+    if (base_gradient[component]->size() != reconstructed_candidate[component]->size() ||
+        base_gradient[component]->local_size() !=
+            reconstructed_candidate[component]->local_size())
       mooseError("FVReconstructedPressureGradient '",
                  name(),
-                 "' requires base and reconstructed gradient components to have the same "
-                 "layout.");
-  }
+                 "' requires base and reconstructed gradient components with equal layouts.");
 
-  // Whether the currently allocated storage (if any) still matches the base gradient's layout.
-  // This is checked independently of _feedback_initialized: resetFeedback() only invalidates the
-  // stored *values* for a new time step, it does not deallocate, so storage allocated in a
-  // previous time step can be reused here instead of being freed and recreated with clone().
   bool storage_matches = _feedback.size() == num_components;
   if (storage_matches)
-  {
     for (const auto component : index_range(_feedback))
-    {
-      const auto & stored = *_feedback[component];
-      const auto & base_vec = *base_gradient[component];
-      if (stored.size() != base_vec.size() || stored.local_size() != base_vec.local_size())
+      if (_feedback[component]->size() != base_gradient[component]->size() ||
+          _feedback[component]->local_size() != base_gradient[component]->local_size())
       {
         storage_matches = false;
         break;
       }
-    }
-  }
 
-  // No storage yet, or its layout no longer matches (for example after mesh changes): allocate
-  // fresh vectors from the base gradient's layout.
   if (!storage_matches)
   {
     _feedback.clear();
@@ -190,8 +517,6 @@ FVReconstructedPressureGradient::updateFeedbackGradient(
       _feedback.push_back(base_gradient[component]->clone());
   }
 
-  // Either freshly allocated above, or explicitly reset by resetFeedback() at the start of this
-  // time step: (re)seed the values from the base gradient without allocating anything.
   if (!storage_matches || !_feedback_initialized)
   {
     for (const auto component : index_range(_feedback))
@@ -199,30 +524,21 @@ FVReconstructedPressureGradient::updateFeedbackGradient(
       *_feedback[component] = *base_gradient[component];
       _feedback[component]->close();
     }
-
     _feedback_initialized = true;
-    _feedback_generation = 0;
   }
-
-  const Real alpha = _gradient_relaxation;
 
   for (const auto component : index_range(_feedback))
   {
-    auto & stored_gradient = *_feedback[component];
-    stored_gradient.scale(1.0 - alpha);
-    stored_gradient.add(alpha, *reconstructed_candidate[component]);
-    stored_gradient.close();
+    _feedback[component]->scale(1.0 - _gradient_relaxation);
+    _feedback[component]->add(_gradient_relaxation, *reconstructed_candidate[component]);
+    _feedback[component]->close();
   }
 
-  ++_feedback_generation;
 }
 
 void
-FVReconstructedPressureGradient::resetFeedback() const
+FVReconstructedPressureGradient::updateFromCorrectedFlux(const RhieChowMassFlux & rc) const
 {
-  // Deliberately do not clear _feedback: the vector layout is still valid for the next time
-  // step, so keeping it allocated lets updateFeedbackGradient() reuse this storage instead of
-  // deallocating and reallocating (via clone()) on every time step.
-  _feedback_initialized = false;
-  _feedback_generation = 0;
+  computeReconstructedPressureGradientCandidate(rc);
+  updateFeedbackGradient(rc.basePressureGradientComponents(), _reconstructed_pressure_gradient);
 }
