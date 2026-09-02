@@ -17,7 +17,19 @@
 #include "MooseVariableFieldBase.h"
 #include "FEProblemBase.h"
 
-#include "libmesh/petsc_nonlinear_solver.h"
+#include "libmesh/petsc_matrix_shell_matrix.h"
+
+namespace
+{
+PetscErrorCode
+mooseKokkosMatShellMult(Mat shell, Vec x, Vec y)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  static_cast<NonlinearSystemBase *>(ctx)->computeKokkosJacobianVectorProduct(x, y);
+  return LIBMESH_PETSC_SUCCESS;
+}
+} // namespace
 
 void
 NonlinearSystemBase::addKokkosKernel(const std::string & kernel_name,
@@ -171,6 +183,27 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
 
     object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag);
   }
+
+  // Build the matrix-free Amat shell once, sized from the DofMap (not from Pmat, which need not
+  // be allocated yet), and register it with the PETSc nonlinear solver so every subsequent
+  // solve() call uses it for Amat automatically -- no per-solve swap logic needed on our side.
+  const auto & dof_map = system().get_dof_map();
+  const auto m = dof_map.n_dofs();
+  const auto m_l = dof_map.n_local_dofs();
+
+  _kokkos_mf_shell = std::make_unique<libMesh::PetscMatrixShellMatrix<Number>>(comm());
+  _kokkos_mf_shell->init(m, m, m_l, m_l);
+
+  // Overwrite the context init() set (a pointer to _kokkos_mf_shell itself, needed by no PETSc
+  // operation this class ever registers) with the context our own MatMult callback expects.
+  LibmeshPetscCallA(comm().get(), MatShellSetContext(_kokkos_mf_shell->mat(), this));
+  LibmeshPetscCallA(comm().get(),
+                    MatShellSetOperation(_kokkos_mf_shell->mat(),
+                                         MATOP_MULT,
+                                         (void (*)(void))mooseKokkosMatShellMult));
+
+  libMesh::cast_ptr<libMesh::NonlinearImplicitSystem *>(&system())
+      ->set_operator_matrix(_kokkos_mf_shell.get());
 
   _kokkos_mf_enabled = true;
 }
@@ -460,41 +493,6 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
-  // If Kokkos matrix-free mode is enabled, swap SNES's Amat for the matrix-free shell the first
-  // time it's found reset back to Pmat (i.e. the reset libMesh's PetscNonlinearSolver::solve()
-  // unconditionally performs before every solve). SNESSetJacobian() with null pc/func/ctx leaves
-  // Pmat, the Jacobian callback, and its context untouched -- only Amat changes. Because
-  // SNESSolve's Newton driver re-reads snes->jacobian/snes->jacobian_pre fresh every iteration,
-  // this swap, performed from inside the very Jacobian evaluation that just (re-)assembled Pmat,
-  // takes effect starting with this same iteration's linear solve.
-
-  if (_kokkos_mf_enabled)
-  {
-    auto * const petsc_solver =
-        libMesh::cast_ptr<libMesh::PetscNonlinearSolver<Number> *>(nonlinearSolver());
-
-    const char * snes_prefix = nullptr;
-    std::string snes_prefix_str;
-    if (system().prefix_with_name())
-    {
-      snes_prefix_str = system().prefix();
-      snes_prefix = snes_prefix_str.c_str();
-    }
-
-    SNES snes = petsc_solver->snes(snes_prefix);
-
-    Mat amat, pmat;
-    LibmeshPetscCallA(comm().get(), SNESGetJacobian(snes, &amat, &pmat, nullptr, nullptr));
-
-    if (amat == pmat)
-    {
-      Mat shell = getOrCreateKokkosMatrixFreeShell(pmat);
-      LibmeshPetscCallA(comm().get(),
-                        SNESSetJacobian(snes, shell, LIBMESH_PETSC_NULLPTR, LIBMESH_PETSC_NULLPTR,
-                                        LIBMESH_PETSC_NULLPTR));
-    }
-  }
-
   // Clear
 
   systems[number()].clearActiveMatrixTags();
@@ -621,50 +619,6 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
   }
-}
-
-namespace
-{
-PetscErrorCode
-mooseKokkosMatShellMult(Mat shell, Vec x, Vec y)
-{
-  void * ctx;
-  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
-  static_cast<NonlinearSystemBase *>(ctx)->computeKokkosJacobianVectorProduct(x, y);
-  return LIBMESH_PETSC_SUCCESS;
-}
-} // namespace
-
-Mat
-NonlinearSystemBase::getOrCreateKokkosMatrixFreeShell(Mat pmat)
-{
-  PetscInt m, n, M, N;
-  LibmeshPetscCallA(comm().get(), MatGetLocalSize(pmat, &m, &n));
-  LibmeshPetscCallA(comm().get(), MatGetSize(pmat, &M, &N));
-
-  if (_kokkos_mf_shell)
-  {
-    PetscInt sm, sn;
-    LibmeshPetscCallA(comm().get(), MatGetLocalSize(_kokkos_mf_shell, &sm, &sn));
-
-    if (sm != m || sn != n)
-    {
-      LibmeshPetscCallA(comm().get(), MatDestroy(&_kokkos_mf_shell));
-      _kokkos_mf_shell = LIBMESH_PETSC_NULLPTR;
-    }
-  }
-
-  if (!_kokkos_mf_shell)
-  {
-    LibmeshPetscCallA(comm().get(),
-                      MatCreateShell(comm().get(), m, n, M, N, this, &_kokkos_mf_shell));
-    LibmeshPetscCallA(comm().get(),
-                      MatShellSetOperation(_kokkos_mf_shell,
-                                            MATOP_MULT,
-                                            (void (*)(void))mooseKokkosMatShellMult));
-  }
-
-  return _kokkos_mf_shell;
 }
 
 void
