@@ -301,10 +301,6 @@ protected:
   /// Pointers to the momentum equation implicit system(s) from libmesh
   std::vector<libMesh::LinearImplicitSystem *> _momentum_implicit_systems;
 
-  /// Optional user-specified name of the momentum pressure kernel associated with this
-  /// RhieChowMassFlux object. When empty, the kernel is deduced from the momentum systems.
-  const std::string _momentum_pressure_kernel_name;
-
   /// Pointer to the pressure system
   LinearSystem * _pressure_system;
 

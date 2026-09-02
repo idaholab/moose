@@ -1,16 +1,16 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
-pressure_gradient_method = 'green-gauss'
 
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '0.3'
+    dx = '0.15 0.15'
     dy = '0.3'
-    ix = '3'
+    ix = '3 3'
     iy = '3'
+    subdomain_id = '0 1'
   []
 []
 
@@ -27,7 +27,6 @@ pressure_gradient_method = 'green-gauss'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    enforce_coupling_pressure_gradient_identity = true
   []
 []
 
@@ -46,18 +45,12 @@ pressure_gradient_method = 'green-gauss'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
-    gradient_method = ${pressure_gradient_method}
   []
 []
 
 [FVGradientMethods]
-  [gg]
+  [gg2]
     type = FVGreenGaussGradient
-  []
-  [reconstructed]
-    type = FVReconstructedPressureGradient
-    base_gradient_method = green-gauss
-    gradient_relaxation = 0.1
   []
 []
 
@@ -90,17 +83,33 @@ pressure_gradient_method = 'green-gauss'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
   []
-  [u_pressure]
+  [u_pressure_left]
     type = LinearFVMomentumPressure
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    block = 0
   []
-  [v_pressure]
+  [u_pressure_right]
+    type = LinearFVMomentumPressure
+    variable = vel_x
+    pressure = pressure
+    momentum_component = 'x'
+    block = 1
+  []
+  [v_pressure_left]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    block = 0
+  []
+  [v_pressure_right]
+    type = LinearFVMomentumPressure
+    variable = vel_y
+    pressure = pressure
+    momentum_component = 'y'
+    block = 1
   []
   [p_diffusion]
     type = LinearFVPressureCorrectionDiffusion
@@ -117,8 +126,6 @@ pressure_gradient_method = 'green-gauss'
 []
 
 [LinearFVBCs]
-  inactive = 'inlet_and_wall_pressure_flux'
-
   [inlet-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'left'
@@ -148,16 +155,6 @@ pressure_gradient_method = 'green-gauss'
     boundary = 'right'
     variable = pressure
     functor = 1.4
-  []
-  [inlet_and_wall_pressure_flux]
-    type = LinearFVPressureFluxBC
-    boundary = 'left top bottom'
-    variable = pressure
-    HbyA_flux = HbyA
-    Ainv = Ainv
-    u = vel_x
-    v = vel_y
-    rho = ${rho}
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -192,8 +189,4 @@ pressure_gradient_method = 'green-gauss'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
-[]
-
-[Outputs]
-  exodus = true
 []
