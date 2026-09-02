@@ -8,7 +8,7 @@ coil_conductivity = 1.0
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/meshed_wedge_test.e
   rotational_symmetry_axes = '0.0 0.0 1.0'
   rotational_symmetry_orders = '12'

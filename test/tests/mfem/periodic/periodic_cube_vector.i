@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/cube_hex8.e
   lattice_vectors = '1.0 0.0 0.0'
 []
