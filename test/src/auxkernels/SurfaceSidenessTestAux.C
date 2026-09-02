@@ -43,7 +43,7 @@ Real
 SurfaceSidenessTestAux::computeValue()
 {
   const Point & p =
-      isNodal() ? static_cast<const Point &>(*_current_node) : _current_elem->vertex_average();
+      isNodal() ? cast_ref<const Point &>(*_current_node) : _current_elem->vertex_average();
   switch (_check.sideness(p))
   {
     case SurfaceGeometry::SurfaceSide::INSIDE:
