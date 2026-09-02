@@ -10,93 +10,109 @@
 #pragma once
 
 #include "FVGradientMethod.h"
+#include "MeshChangedInterface.h"
 
 #include "libmesh/numeric_vector.h"
 
-#include <cstdint>
+#include <unordered_set>
+
+class ElemInfo;
+class FaceInfo;
+class RhieChowMassFlux;
 
 /**
- * Pressure gradient method that uses Rhie-Chow face fluxes to reconstruct a cell-centered pressure
- * gradient for the momentum predictor.
+ * Reconstructs the pressure gradient used for Rhie-Chow momentum coupling from corrected face
+ * fluxes and publishes a relaxed feedback field to linear finite-volume consumers.
  */
-class FVReconstructedPressureGradient : public FVGradientMethod
+class FVReconstructedPressureGradient : public FVGradientMethod, public MeshChangedInterface
 {
 public:
-  /// Input parameters for the reconstructed pressure-gradient method.
+  using GradientContainer = FVGradientMethod::GradientContainer;
+
   static InputParameters validParams();
 
-  /**
-   * @param params Input parameters used to construct the reconstructed pressure-gradient method.
-   */
   FVReconstructedPressureGradient(const InputParameters & params);
 
-  /// Resolve dependencies required by the reconstructed pressure-gradient method.
-  void setupDependencies(SystemBase & system, unsigned int variable_number) const;
-
-  /// Name of the gradient method used before reconstructed Rhie-Chow data are available.
+  /// Name of the gradient method used before reconstructed feedback is available.
   const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
 
-  /// Relaxation factor applied to reconstructed gradients.
-  Real gradientRelaxation() const { return _gradient_relaxation; }
+  /// Reset solver-iteration state once per attempted time step.
+  void resetForTimeStep() const;
 
-  /// True once a reconstructed-feedback field has been initialized.
-  bool hasFeedback() const { return _feedback_initialized; }
+  /// Capture the lagged cell velocity gradient used by the reconstruction.
+  void captureLaggedVelocityGradient(const RhieChowMassFlux & rc) const;
 
-  /// Monotonically increasing feedback generation index.
-  std::uint64_t generation() const { return _feedback_generation; }
+  /// Reconstruct and relax the pressure-coupling gradient from the corrected face flux.
+  void updateFromCorrectedFlux(const RhieChowMassFlux & rc) const;
 
-  /// Update the stored feedback field from a newly reconstructed gradient candidate.
-  void updateFeedbackGradient(const GradientContainer & base_gradient,
-                              const GradientContainer & reconstructed_candidate) const;
-
-  /**
-   * Invalidate the stored relaxed feedback values so the next request falls back to the base
-   * gradient method. Called once per attempted time step (see RhieChowMassFlux::timestepSetup())
-   * so that continuous, recovered, and retried time steps all start the momentum predictor from
-   * the same state; the feedback is solver-iteration state, not an independent physical
-   * solution, so it must not carry across time-step boundaries. This does not deallocate the
-   * feedback storage: its vector layout stays valid across time steps, so
-   * updateFeedbackGradient() reuses it rather than reallocating on every time step.
-   */
-  void resetFeedback() const;
+  virtual void meshChanged() override;
 
 private:
-  /**
-   * Compute reconstructed pressure gradients before the base class applies any limiter.
-   * When a relaxed reconstructed gradient is available, this method copies it into the
-   * output gradient container; otherwise it delegates to the configured base method.
-   *
-   * @param system Pressure system that owns the pressure variable and gradient storage.
-   * @param gradient Component vectors where pre-limiter gradients are written.
-   * @param variable_numbers Pressure variable numbers whose gradients should be updated.
-   */
-  virtual void computeGradientWithoutLimiter(
+  void computeGradientWithoutLimiter(
       SystemBase & system,
       GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
-  /**
-   * Resolve the method used before reconstructed Rhie-Chow data are available.
-   *
-   * @param system Pressure system used to access registered gradient methods.
-   */
+  /// Resolve the method used before reconstructed feedback is available.
   const FVGradientMethod & resolveBaseGradientMethod(SystemBase & system) const;
 
-  /// Gradient method used before reconstructed Rhie-Chow data are available.
+  /// Compute a reconstructed pressure-gradient candidate from the corrected face flux.
+  void computeReconstructedPressureGradientCandidate(const RhieChowMassFlux & rc) const;
+
+  /// Blend a reconstructed candidate into the persistent feedback field.
+  void updateFeedbackGradient(const GradientContainer & base_gradient,
+                              const GradientContainer & reconstructed_candidate) const;
+
+  /// Interpolate a lagged velocity-component gradient to a face.
+  RealVectorValue reconstructionVelocityGradient(const RhieChowMassFlux & rc,
+                                                 const ElemInfo & elem_info,
+                                                 const FaceInfo & fi,
+                                                 bool elem_has_info,
+                                                 unsigned int velocity_component) const;
+
+  /// Build the set of Rhie-Chow cells touching boundary faces.
+  void buildBoundaryCellCache(const RhieChowMassFlux & rc) const;
+
+  /// Gradient method used before reconstructed feedback is available.
   const GradientMethodName _base_gradient_method_name;
 
-  /// Relaxation factor used when updating reconstructed pressure gradients in the solve.
+  /// Which pressure gradient is retained on cells touching a boundary face.
+  const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
+
+  /// Relaxation factor applied to reconstructed pressure gradients.
   const Real _gradient_relaxation;
 
-  /// Cached gradient method used before reconstructed Rhie-Chow data are available.
+  /// Cached base gradient method.
   mutable const FVGradientMethod * _base_gradient_method = nullptr;
 
-  /// Persistent relaxed feedback field published by this method.
+  /// Whether the boundary-cell cache has been built since the last mesh change.
+  mutable bool _boundary_cell_cache_built = false;
+
+  /// Rhie-Chow element ids touching a boundary face.
+  mutable std::unordered_set<dof_id_type> _boundary_cell_ids;
+
+  /// Lagged velocity gradients indexed by velocity component and spatial direction.
+  mutable std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
+      _lagged_reconstruction_velocity_gradient;
+
+  /// Whether a lagged velocity-gradient snapshot is available.
+  mutable bool _lagged_velocity_gradient_available = false;
+
+  /// Producer generation for lagged velocity-gradient snapshots.
+  mutable dof_id_type _lagged_velocity_gradient_generation = 0;
+
+  /// Lagged velocity-gradient generation consumed by the current candidate.
+  mutable dof_id_type _reconstructed_candidate_generation = 0;
+
+  /// Face-flux generation consumed by the current candidate.
+  mutable dof_id_type _reconstructed_candidate_face_flux_generation = 0;
+
+  /// Reconstructed pressure-gradient candidate.
+  mutable GradientContainer _reconstructed_pressure_gradient;
+
+  /// Persistent relaxed feedback field.
   mutable GradientContainer _feedback;
 
   /// Whether the feedback field has been initialized.
   mutable bool _feedback_initialized = false;
-
-  /// Feedback generation index incremented on every feedback update.
-  mutable std::uint64_t _feedback_generation = 0;
 };
