@@ -18,6 +18,8 @@ ADSCZMInterfaceKernelSmallStrain::validParams()
   InputParameters params = ADSCZMInterfaceKernelBase::validParams();
 
   params.addParam<bool>("directional_correction", true, "Add the directional correction terms.");
+  params.addParam<MaterialPropertyName>(
+      "stress", "stress", "Name of the stress tensor material property.");
   params.addClassDescription(
       "Shifted CZM Interface kernel to use when using the Small Strain kinematic formulation.");
 
@@ -27,8 +29,10 @@ ADSCZMInterfaceKernelSmallStrain::validParams()
 ADSCZMInterfaceKernelSmallStrain::ADSCZMInterfaceKernelSmallStrain(
     const InputParameters & parameters)
   : ADSCZMInterfaceKernelBase(parameters),
-    _stress(getADMaterialPropertyByName<RankTwoTensor>("stress")),
-    _stress_neighbor(getNeighborADMaterialPropertyByName<RankTwoTensor>("stress")),
+    _stress(getADMaterialPropertyByName<RankTwoTensor>(
+        _base_name + getParam<MaterialPropertyName>("stress"))),
+    _stress_neighbor(getNeighborADMaterialPropertyByName<RankTwoTensor>(
+        _base_name + getParam<MaterialPropertyName>("stress"))),
     _directional_correction(getParam<bool>("directional_correction"))
 {
 }

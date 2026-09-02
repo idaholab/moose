@@ -56,8 +56,6 @@ protected:
   /**
    * Adds the SCZM-specific interface kernels.
    * Note: This does not 'override' the base method because the base is not virtual.
-   * Also forwards optional junction-based directional correction parameters when supported
-   * by the target kernel.
    */
   void addRequiredADSCZMInterfaceKernels();
 

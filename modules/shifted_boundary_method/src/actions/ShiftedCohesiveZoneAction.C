@@ -139,60 +139,17 @@ ShiftedCohesiveZoneAction::validParams()
                                         "Jacobian_mult",
                                         "Name of the material Jacobian tensor property for small "
                                         "strain SCZM.");
-  params.addParam<bool>(
-      "tangent_wrt_deformation_gradient",
-      false,
-      "Set true if the provided tangent is already dP/dF (e.g. pk1_jacobian). "
-      "If false, tangent is assumed to be strain-based d(stress)/d(strain) (e.g. Jacobian_mult). "
-      "Passing a custom dP/dF through ComputeLagrangianCauchyCustomStress still stays on this "
-      "strain-based path when the exposed property name here is Jacobian_mult, unless "
-      "tangent_wrt_deformation_gradient is set explicitly.");
-
-  params.addParam<bool>("debug_output",
-                        false,
-                        "Print out stress and neighbor stress for debugging in small strain SCZM.");
-  params.addParam<bool>("normal_stress_component",
-                        false,
-                        "Whether to use the normal component of stress instead of the full vector "
-                        "for the directional correction term in small strain SCZM.");
-  params.addParam<std::vector<Point>>(
-      "junction_pts",
-      std::vector<Point>(),
-      "Points where projected quadrature points within 'radius' use position-dependent directional "
-      "correction scaling.");
-  params.addRangeCheckedParam<Real>("radius",
-                                    0.0,
-                                    "radius >= 0.0",
-                                    "Distance threshold for position-dependent directional "
-                                    "correction scaling around each junction point.");
+  params.addParam<MooseEnum>(
+      "tangent_definition",
+      MooseEnum("auto stress_wrt_strain pk1_wrt_deformation_gradient", "auto"),
+      "Mathematical definition of the tangent material property. 'auto' recognizes the standard "
+      "Jacobian_mult property as d(stress)/d(strain) and pk1_jacobian as d(PK1)/d(F). Select "
+      "'stress_wrt_strain' or 'pk1_wrt_deformation_gradient' explicitly for a custom tangent "
+      "property; use the latter only when the property is known to be d(PK1)/d(F).");
   params.addParam<bool>(
       "volumetric_locking_correction",
       false,
       "Whether to apply volume locking to the directional correction term in SCZM.");
-
-  params.addParam<bool>(
-      "pk1_to_stress",
-      false,
-      "Whether to convert PK1 stress to Cauchy stress for the directional correction term "
-      "in small strain SCZM");
-
-  params.addParam<bool>(
-      "complex_dir_form", false, "Whether to use the complex form of the directional correction");
-
-  params.addParam<Real>("lambda",
-                        0.5,
-                        "Lambda parameter for the directional correction in small strain SCZM. "
-                        "Only used if complex_dir_form=true.");
-
-  params.addParam<Real>("start_directional_correction_time",
-                        0.0,
-                        "Start time for applying the directional correction term");
-  params.addRangeCheckedParam<Real>(
-      "directional_correction_ramp_duration",
-      0.0,
-      "directional_correction_ramp_duration >= 0.0",
-      "Duration over which the directional correction term ramps "
-      "from 0 to full strength after start_directional_correction_time.");
 
   return params;
 }
@@ -228,6 +185,13 @@ ShiftedCohesiveZoneAction::ShiftedCohesiveZoneAction(const InputParameters & par
           _boundary.size())
     paramError("interface_subdomain_pairs", "Provide exactly one subdomain pair per boundary.");
 
+  if (_use_AD && isParamSetByUser("tangent"))
+    paramError("tangent", "This parameter applies only to the non-AD SCZM interface kernel.");
+  if (_use_AD && isParamSetByUser("tangent_definition"))
+    paramError("tangent_definition",
+               "This parameter applies only to the non-AD SCZM interface kernel. The AD kernel "
+               "differentiates the residual automatically.");
+
   switch (_strain)
   {
     case Strain::Small:
@@ -243,15 +207,7 @@ ShiftedCohesiveZoneAction::ShiftedCohesiveZoneAction(const InputParameters & par
       break;
     }
     case Strain::Finite:
-    {
-      _czm_kernel_name =
-          _use_AD ? "ADSCZMInterfaceKernelTotalLagrangian" : "SCZMInterfaceKernelTotalLagrangian";
-      _disp_jump_provider_name = _use_AD ? "ADSCZMComputeDisplacementJumpTotalLagrangian"
-                                         : "SCZMComputeDisplacementJumpTotalLagrangian";
-      _equilibrium_traction_calculator_name = _use_AD ? "ADCZMComputeGlobalTractionTotalLagrangian"
-                                                      : "CZMComputeGlobalTractionTotalLagrangian";
-      break;
-    }
+      paramError("strain", "Shifted cohesive zone models currently support only small strain.");
     default:
       mooseError(
           "ShiftedCohesiveZoneAction Error: Invalid kinematic parameter. Allowed values are: "
@@ -486,11 +442,8 @@ ShiftedCohesiveZoneAction::addRequiredADSCZMInterfaceKernels()
       paramsk.set<MaterialPropertyName>("stress") = getParam<MaterialPropertyName>("stress");
     if (isParamSetByUser("tangent"))
       paramsk.set<MaterialPropertyName>("tangent") = getParam<MaterialPropertyName>("tangent");
-    if (isParamSetByUser("tangent_wrt_deformation_gradient"))
-      paramsk.set<bool>("tangent_wrt_deformation_gradient") =
-          getParam<bool>("tangent_wrt_deformation_gradient");
-    if (isParamSetByUser("debug_output"))
-      paramsk.set<bool>("debug_output") = getParam<bool>("debug_output");
+    if (isParamSetByUser("tangent_definition") && paramsk.isParamValid("tangent_definition"))
+      paramsk.set<MooseEnum>("tangent_definition") = getParam<MooseEnum>("tangent_definition");
     const bool user_set_volumetric_locking_correction =
         isParamSetByUser("volumetric_locking_correction");
     const bool inherited_volumetric_locking_correction =
@@ -514,32 +467,6 @@ ShiftedCohesiveZoneAction::addRequiredADSCZMInterfaceKernels()
         paramsk.set<bool>("volumetric_locking_correction") =
             inherited_volumetric_locking_correction;
     }
-    if (isParamSetByUser("normal_stress_component") &&
-        paramsk.isParamValid("normal_stress_component"))
-      paramsk.set<bool>("normal_stress_component") = getParam<bool>("normal_stress_component");
-    if (isParamSetByUser("junction_pts") && paramsk.isParamValid("junction_pts"))
-      paramsk.set<std::vector<Point>>("junction_pts") =
-          getParam<std::vector<Point>>("junction_pts");
-    if (isParamSetByUser("radius") && paramsk.isParamValid("radius"))
-      paramsk.set<Real>("radius") = getParam<Real>("radius");
-
-    if (isParamSetByUser("pk1_to_stress") && paramsk.isParamValid("pk1_to_stress"))
-      paramsk.set<bool>("pk1_to_stress") = getParam<bool>("pk1_to_stress");
-
-    if (isParamSetByUser("complex_dir_form") && paramsk.isParamValid("complex_dir_form"))
-      paramsk.set<bool>("complex_dir_form") = getParam<bool>("complex_dir_form");
-    if (isParamSetByUser("lambda") && paramsk.isParamValid("lambda"))
-      paramsk.set<Real>("lambda") = getParam<Real>("lambda");
-
-    if (isParamSetByUser("start_directional_correction_time") &&
-        paramsk.isParamValid("start_directional_correction_time"))
-      paramsk.set<Real>("start_directional_correction_time") =
-          getParam<Real>("start_directional_correction_time");
-    if (isParamSetByUser("directional_correction_ramp_duration") &&
-        paramsk.isParamValid("directional_correction_ramp_duration"))
-      paramsk.set<Real>("directional_correction_ramp_duration") =
-          getParam<Real>("directional_correction_ramp_duration");
-
     std::string save_in_side;
     std::vector<AuxVariableName> save_in_var_names;
     if (_save_in_primary.size() == _ndisp || _save_in_secondary.size() == _ndisp)

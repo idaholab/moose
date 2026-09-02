@@ -40,11 +40,14 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress_neighbor;
   ///@}
 
-  /// The material Jacobian (d(stress)/d(strain)) on the element and neighbor sides
+  /// The material tangent on the element and neighbor sides
   ///@{
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   const MaterialProperty<RankFourTensor> & _Jacobian_mult_neighbor;
   ///@}
+
+  /// Whether the material tangent is d(PK1)/d(F) instead of d(stress)/d(strain)
+  bool _tangent_is_dpk1_df;
 
   /// Whether to add the directional correction term
   const bool _directional_correction;

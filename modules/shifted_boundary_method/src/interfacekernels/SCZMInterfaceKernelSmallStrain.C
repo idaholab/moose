@@ -63,6 +63,13 @@ SCZMInterfaceKernelSmallStrain::validParams()
       "stress", "stress", "Name of the stress tensor material property.");
   params.addParam<MaterialPropertyName>(
       "tangent", "Jacobian_mult", "Name of the material Jacobian tensor property.");
+  params.addParam<MooseEnum>(
+      "tangent_definition",
+      MooseEnum("auto stress_wrt_strain pk1_wrt_deformation_gradient", "auto"),
+      "Mathematical definition of the tangent material property. 'auto' recognizes the standard "
+      "Jacobian_mult property as d(stress)/d(strain) and pk1_jacobian as d(PK1)/d(F). Select "
+      "'stress_wrt_strain' or 'pk1_wrt_deformation_gradient' explicitly for a custom tangent "
+      "property; use the latter only when the property is known to be d(PK1)/d(F).");
   params.addParam<bool>(
       "volumetric_locking_correction",
       false,
@@ -75,16 +82,35 @@ SCZMInterfaceKernelSmallStrain::validParams()
 
 SCZMInterfaceKernelSmallStrain::SCZMInterfaceKernelSmallStrain(const InputParameters & parameters)
   : SCZMInterfaceKernelBase(parameters),
-    _stress(getMaterialPropertyByName<RankTwoTensor>(getParam<MaterialPropertyName>("stress"))),
-    _stress_neighbor(
-        getNeighborMaterialPropertyByName<RankTwoTensor>(getParam<MaterialPropertyName>("stress"))),
-    _Jacobian_mult(
-        getMaterialPropertyByName<RankFourTensor>(getParam<MaterialPropertyName>("tangent"))),
+    _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name +
+                                                     getParam<MaterialPropertyName>("stress"))),
+    _stress_neighbor(getNeighborMaterialPropertyByName<RankTwoTensor>(
+        _base_name + getParam<MaterialPropertyName>("stress"))),
+    _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + getParam<MaterialPropertyName>("tangent"))),
     _Jacobian_mult_neighbor(getNeighborMaterialPropertyByName<RankFourTensor>(
-        getParam<MaterialPropertyName>("tangent"))),
+        _base_name + getParam<MaterialPropertyName>("tangent"))),
+    _tangent_is_dpk1_df(false),
     _directional_correction(getParam<bool>("directional_correction")),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
+  const auto & tangent_name = getParam<MaterialPropertyName>("tangent");
+  const auto & tangent_definition = getParam<MooseEnum>("tangent_definition");
+  if (tangent_definition == "auto")
+  {
+    if (tangent_name == "Jacobian_mult")
+      _tangent_is_dpk1_df = false;
+    else if (tangent_name == "pk1_jacobian")
+      _tangent_is_dpk1_df = true;
+    else
+      paramError("tangent_definition",
+                 "Cannot infer the mathematical definition of custom tangent property '",
+                 tangent_name,
+                 "'. Set 'tangent_definition' to 'stress_wrt_strain' or "
+                 "'pk1_wrt_deformation_gradient'.");
+  }
+  else
+    _tangent_is_dpk1_df = tangent_definition == "pk1_wrt_deformation_gradient";
 }
 
 Real
@@ -135,7 +161,6 @@ SCZMInterfaceKernelSmallStrain::computeDResidualDDisplacement(
   const auto jacsd = _dtraction_djump_global[_qp](_component, component_j);
   Real jac = jacsd;
 
-  const auto d = surrogateDistance();
   if (!_shifted)
   {
     switch (type)
@@ -156,6 +181,7 @@ SCZMInterfaceKernelSmallStrain::computeDResidualDDisplacement(
     return jac;
   }
 
+  const auto d = surrogateDistance();
   const auto true_normal = RealVectorValue(trueNormal());
   const auto true_normal_dot_surrogate_normal = true_normal * _normals[_qp];
 
@@ -240,10 +266,8 @@ SCZMInterfaceKernelSmallStrain::calculateDirectionalCorrectionJacobian(
   const auto true_normal =
       _shifted ? RealVectorValue(trueNormal()) : RealVectorValue(_normals[_qp]);
 
-  const bool trial_on_element =
-      type == Moose::ElementElement || type == Moose::NeighborElement;
-  const auto grad_phi =
-      trial_on_element ? _grad_phi[_j][_qp] : _grad_phi_neighbor[_j][_qp];
+  const bool trial_on_element = type == Moose::ElementElement || type == Moose::NeighborElement;
+  const auto grad_phi = trial_on_element ? _grad_phi[_j][_qp] : _grad_phi_neighbor[_j][_qp];
 
   const auto nt_tangent = _normals[_qp] - (true_normal * _normals[_qp]) * true_normal;
 
@@ -275,7 +299,9 @@ SCZMInterfaceKernelSmallStrain::calculateDirectionalCorrectionJacobian(
        (r4t(i, 2, 0, k) * gp0 + r4t(i, 2, 1, k) * gp1 + r4t(i, 2, 2, k) * gp2) * n2) *
       test;
 
-  Real jacobian = (origin_part + symmetric_part) * 0.5;
+  // dP/dF acts on the full displacement gradient. A strain-based tangent instead acts on the
+  // symmetric gradient, which contributes the transposed contraction as well.
+  Real jacobian = _tangent_is_dpk1_df ? origin_part : (origin_part + symmetric_part) * 0.5;
 
   if (_volumetric_locking_correction)
   {
@@ -298,9 +324,8 @@ SCZMInterfaceKernelSmallStrain::calculateDirectionalCorrectionJacobian(
     const Real volumetric_increment = (avg_grad_op.trace() - grad_op.trace()) / 3.0;
 
     for (const auto m : make_range(3))
-      jacobian += (r4t(i, 0, m, m) * n0 + r4t(i, 1, m, m) * n1 +
-                   r4t(i, 2, m, m) * n2) *
-                  test * volumetric_increment;
+      jacobian += (r4t(i, 0, m, m) * n0 + r4t(i, 1, m, m) * n1 + r4t(i, 2, m, m) * n2) * test *
+                  volumetric_increment;
   }
 
   return jacobian;
