@@ -22,8 +22,6 @@
 #include "VectorCompositeFunctor.h"
 #include "FVElementalKernel.h"
 
-using namespace libMesh;
-
 InputParameters
 RhieChowInterpolatorBase::validParams()
 {

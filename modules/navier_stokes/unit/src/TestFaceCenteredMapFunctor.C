@@ -15,7 +15,6 @@
 #include "libmesh/quadrature_gauss.h"
 #include "MooseMain.h"
 
-using namespace libMesh;
 using namespace Moose;
 using namespace FV;
 

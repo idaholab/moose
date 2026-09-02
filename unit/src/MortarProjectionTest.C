@@ -19,8 +19,6 @@
 #include <array>
 #include <vector>
 
-using namespace libMesh;
-
 namespace
 {
 Point

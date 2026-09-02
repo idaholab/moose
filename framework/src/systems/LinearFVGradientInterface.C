@@ -22,8 +22,6 @@
 
 #include "libmesh/numeric_vector.h"
 
-using namespace libMesh;
-
 const FVGradientMethod &
 LinearFVGradientInterface::resolveFVGradientMethod(const GradientMethodName & method_name)
 {

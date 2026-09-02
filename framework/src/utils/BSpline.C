@@ -13,8 +13,6 @@
 #include "SplineUtils.h"
 #include "Conversion.h"
 
-using namespace libMesh;
-
 namespace Moose
 {
 BSpline::BSpline(const unsigned int degree,

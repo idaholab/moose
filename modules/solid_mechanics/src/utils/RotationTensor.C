@@ -10,8 +10,6 @@
 #include "RotationTensor.h"
 #include "libmesh/libmesh.h"
 
-using namespace libMesh;
-
 RotationTensor::RotationTensor(Axis axis, Real angle) { update(axis, angle); }
 
 RotationTensor::RotationTensor(const RealVectorValue & euler_angles) { update(euler_angles); }

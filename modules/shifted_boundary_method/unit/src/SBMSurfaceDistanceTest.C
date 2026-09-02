@@ -15,8 +15,6 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/edge_edge2.h"
 
-using namespace libMesh;
-
 // The surface-element geometry (normals, intersect, bounding ball, projected
 // bounding-box diagonal, unsupported-geometry dispatchers) is covered by the
 // framework SurfaceElementTest. These tests cover only the SBM-owned

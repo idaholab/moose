@@ -17,8 +17,6 @@
 
 #include "gtest/gtest.h"
 
-using namespace libMesh;
-
 namespace
 {
 

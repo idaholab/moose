@@ -23,8 +23,6 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/string_to_enum.h"
 
-using namespace libMesh;
-
 // Users should never actually create this object
 registerMooseObject("MooseApp", MooseVariableBase);
 

@@ -16,8 +16,6 @@
 #include "NS.h"
 #include "TransientInterface.h"
 
-using namespace libMesh;
-
 InputParameters
 NavierStokesLHDGAssemblyHelper::validParams()
 {

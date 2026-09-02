@@ -16,8 +16,6 @@
 #include "NonlinearThread.h"
 #include "TransientInterface.h"
 
-using namespace libMesh;
-
 InputParameters
 DiffusionLHDGAssemblyHelper::validParams()
 {

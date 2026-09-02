@@ -19,8 +19,6 @@
 
 #include "libmesh/numeric_vector.h"
 
-using namespace libMesh;
-
 LinearFVGradientReader::LinearFVGradientReader(const SystemBase & sys,
                                                const GradientContainer & components,
                                                const FVGradientMethod & method,

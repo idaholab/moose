@@ -27,8 +27,6 @@
 #include "libmesh/elem_range.h"
 #include "libmesh/petsc_matrix.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", RhieChowMassFlux);
 
 InputParameters

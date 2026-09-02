@@ -15,8 +15,6 @@
 #include "libmesh/quadrature.h"
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", TestWeightedGapUserObject);
 
 InputParameters

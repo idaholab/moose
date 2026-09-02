@@ -29,8 +29,6 @@
 
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 namespace MooseMeshUtils
 {
 

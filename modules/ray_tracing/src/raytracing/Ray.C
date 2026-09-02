@@ -17,8 +17,6 @@
 // MOOSE includes
 #include "DataIO.h"
 
-using namespace libMesh;
-
 Ray::Ray(RayTracingStudy * study,
          const RayID id,
          const std::size_t data_size,

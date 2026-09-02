@@ -24,8 +24,6 @@
 
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", MultiAppVariableValueSamplePostprocessorTransfer);
 
 InputParameters

@@ -17,8 +17,6 @@
 #include "LineSegment.h"
 #include "Ball.h"
 
-using namespace libMesh;
-
 namespace
 {
 // Owns an Edge2 and its two nodes; a SurfaceEdge2 wrapping owner.edge is valid only while the
