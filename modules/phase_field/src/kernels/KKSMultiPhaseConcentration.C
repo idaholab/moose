@@ -10,89 +10,86 @@
 #include "KKSMultiPhaseConcentration.h"
 
 registerMooseObject("PhaseFieldApp", KKSMultiPhaseConcentration);
+registerMooseObject("PhaseFieldApp", ADKKSMultiPhaseConcentration);
 
+template <bool is_ad>
 InputParameters
-KKSMultiPhaseConcentration::validParams()
+KKSMultiPhaseConcentrationTempl<is_ad>::validParams()
 {
-  InputParameters params = KernelValue::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription(
-      "KKS multi-phase model kernel to enforce $c = h_1c_1 + h_2c_2 + h_3c_3 + \\dots$"
-      ". The non-linear variable of this kernel is $c_n$, the final phase "
-      "concentration in the list.");
-  params.addRequiredCoupledVar(
-      "cj", "Array of phase concentrations cj. Place in same order as hj_names!");
+      "KKS multiphase kernel enforcing $c = h_1c_1 + h_2c_2 + h_3c_3 + \\dots$. "
+      "The nonlinear variable must be one of the phase concentrations listed in cj.");
+  params.addRequiredCoupledVar("cj", "Phase concentrations c_j, in the same order as hj_names");
   params.addRequiredCoupledVar("c", "Physical concentration");
-  params.addCoupledVar("etas", "Order parameters for all phases");
+  params.addRequiredCoupledVar("etas", "Order parameters, one for each phase");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
-      "hj_names", "Switching Function Materials that provide $h(\\eta_1, \\eta_2,\\dots)$");
+      "hj_names", "Switching functions h_j, in the same order as cj and etas");
   return params;
 }
 
-// Phase interpolation func
-KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue>>(parameters),
-    _num_j(coupledComponents("cj")),
-    _cj(coupledValues("cj")),
-    _cj_map(getParameterJvarMap("cj")),
+template <bool is_ad>
+KKSMultiPhaseConcentrationTempl<is_ad>::KKSMultiPhaseConcentrationTempl(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>(parameters),
+    _num_j(this->coupledComponents("cj")),
+    _cj(this->template coupledGenericValues<is_ad>("cj")),
     _k(-1),
-    _c(coupledValue("c")),
-    _c_var(coupled("c")),
-    _hj_names(getParam<std::vector<MaterialPropertyName>>("hj_names")),
-    _prop_hj(_hj_names.size()),
-    _eta_names(coupledComponents("etas")),
-    _eta_map(getParameterJvarMap("etas")),
-    _prop_dhjdetai(_num_j)
+    _c(this->template coupledGenericValue<is_ad>("c")),
+    _hj_names(this->template getParam<std::vector<MaterialPropertyName>>("hj_names")),
+    _prop_hj(_num_j),
+    _eta_names(this->coupledComponents("etas"))
 {
-  // Check to make sure the the number of hj's is the same as the number of cj's
-  if (_num_j != _hj_names.size())
-    paramError("hj_names", "Need to pass in as many hj_names as cjs");
-  // Check to make sure the the number of etas is the same as the number of cj's
-  if (_num_j != _eta_names.size())
-    paramError("etas", "Need to pass in as many etas as cjs");
-
   if (_num_j == 0)
-    mooseError("Need to supply at least 1 phase concentration cj in KKSMultiPhaseConcentration",
-               name());
+    this->paramError("cj", "At least one phase concentration must be supplied");
 
-  // get order parameter names and variable indices
-  for (unsigned int i = 0; i < _num_j; ++i)
-    _eta_names[i] = coupledName("etas", i);
+  if (_hj_names.size() != _num_j)
+    this->paramError("hj_names", "The number of switching functions must equal the number of cjs");
 
-  // Load concentration variables into the arrays
-  for (unsigned int m = 0; m < _num_j; ++m)
+  if (_eta_names.size() != _num_j)
+    this->paramError("etas", "The number of order parameters must equal the number of cjs");
+
+  for (unsigned int j = 0; j < _num_j; ++j)
   {
-    _prop_hj[m] = &getMaterialPropertyByName<Real>(_hj_names[m]);
-    _prop_dhjdetai[m].resize(_num_j);
-    // Set _k to the position of the nonlinear variable in the list of cj's
-    if (coupled("cj", m) == _var.number())
-      _k = m;
+    _eta_names[j] = this->coupledName("etas", j);
+    _prop_hj[j] = &this->template getGenericMaterialPropertyByName<Real, is_ad>(_hj_names[j]);
 
-    // Get derivatives of switching functions wrt order parameters
-    for (unsigned int n = 0; n < _num_j; ++n)
-      _prop_dhjdetai[m][n] = &getMaterialPropertyDerivative<Real>(_hj_names[m], _eta_names[n]);
+    if (this->coupled("cj", j) == _var.number())
+      _k = j;
   }
 
-  // Check to make sure the nonlinear variable is set to one of the cj's
   if (_k < 0)
-    mooseError("Need to set nonlinear variable to one of the cj's in KKSMultiPhaseConcentration",
-               name());
+    this->paramError("cj", "The kernel variable must be one of the phase concentrations in cj");
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+KKSMultiPhaseConcentrationTempl<is_ad>::computeQpResidual()
+{
+  GenericReal<is_ad> sum_ch = 0.0;
+  for (unsigned int j = 0; j < _num_j; ++j)
+    sum_ch += (*_cj[j])[_qp] * (*_prop_hj[j])[_qp];
+
+  return _test[_i][_qp] * (sum_ch - _c[_qp]);
+}
+
+KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & parameters)
+  : KKSMultiPhaseConcentrationTempl<false>(parameters),
+    _cj_map(getParameterJvarMap("cj")),
+    _c_var(coupled("c")),
+    _eta_map(getParameterJvarMap("etas")),
+    _prop_dhjdetai(_num_j, std::vector<const MaterialProperty<Real> *>(_num_j, nullptr))
+{
+  for (unsigned int j = 0; j < _num_j; ++j)
+    for (unsigned int i = 0; i < _num_j; ++i)
+      _prop_dhjdetai[j][i] =
+          &getMaterialPropertyDerivativeByName<Real>(_hj_names[j], _eta_names[i]);
 }
 
 Real
-KKSMultiPhaseConcentration::precomputeQpResidual()
+KKSMultiPhaseConcentration::computeQpJacobian()
 {
-  // R = sum_i (h_i * c_i) - c
-  Real sum_ch = 0.0;
-  for (unsigned int m = 0; m < _num_j; ++m)
-    sum_ch += (*_cj[m])[_qp] * (*_prop_hj[m])[_qp];
-
-  return sum_ch - _c[_qp];
-}
-
-Real
-KKSMultiPhaseConcentration::precomputeQpJacobian()
-{
-  return (*_prop_hj[_k])[_qp] * _phi[_j][_qp];
+  return _test[_i][_qp] * (*_prop_hj[_k])[_qp] * _phi[_j][_qp];
 }
 
 Real
@@ -101,20 +98,22 @@ KKSMultiPhaseConcentration::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _c_var)
     return -_test[_i][_qp] * _phi[_j][_qp];
 
-  auto cjvar = mapJvarToCvar(jvar, _cj_map);
+  const int cjvar = mapJvarToCvar(jvar, _cj_map);
   if (cjvar >= 0)
     return _test[_i][_qp] * (*_prop_hj[cjvar])[_qp] * _phi[_j][_qp];
 
-  auto etavar = mapJvarToCvar(jvar, _eta_map);
+  const int etavar = mapJvarToCvar(jvar, _eta_map);
   if (etavar >= 0)
   {
     Real sum = 0.0;
-
-    for (unsigned int n = 0; n < _num_j; ++n)
-      sum += (*_prop_dhjdetai[n][etavar])[_qp] * (*_cj[n])[_qp];
+    for (unsigned int j = 0; j < _num_j; ++j)
+      sum += (*_prop_dhjdetai[j][etavar])[_qp] * (*_cj[j])[_qp];
 
     return _test[_i][_qp] * sum * _phi[_j][_qp];
   }
 
   return 0.0;
 }
+
+template class KKSMultiPhaseConcentrationTempl<false>;
+template class KKSMultiPhaseConcentrationTempl<true>;

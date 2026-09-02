@@ -10,11 +10,13 @@
 #include "BarrierFunctionMaterial.h"
 
 registerMooseObject("PhaseFieldApp", BarrierFunctionMaterial);
+registerMooseObject("PhaseFieldApp", ADBarrierFunctionMaterial);
 
+template <bool is_ad>
 InputParameters
-BarrierFunctionMaterial::validParams()
+BarrierFunctionMaterialTempl<is_ad>::validParams()
 {
-  InputParameters params = OrderParameterFunctionMaterial::validParams();
+  InputParameters params = OrderParameterFunctionMaterialTempl<is_ad>::validParams();
   params.addClassDescription("Helper material to provide $g(\\eta)$ and its derivative in a "
                              "polynomial.\nSIMPLE: $\\eta^2(1-\\eta)^2$\nLOW: $\\eta(1-\\eta)$"
                              "\nHIGH: $\\eta^2(1-\\eta^2)^2$");
@@ -29,47 +31,53 @@ BarrierFunctionMaterial::validParams()
   return params;
 }
 
-BarrierFunctionMaterial::BarrierFunctionMaterial(const InputParameters & parameters)
-  : OrderParameterFunctionMaterial(parameters),
-    _g_order(getParam<MooseEnum>("g_order")),
-    _well_only(getParam<bool>("well_only"))
+template <bool is_ad>
+BarrierFunctionMaterialTempl<is_ad>::BarrierFunctionMaterialTempl(
+    const InputParameters & parameters)
+  : OrderParameterFunctionMaterialTempl<is_ad>(parameters),
+    _g_order(this->template getParam<MooseEnum>("g_order")),
+    _well_only(this->template getParam<bool>("well_only"))
 {
 }
 
+template <bool is_ad>
 void
-BarrierFunctionMaterial::computeQpProperties()
+BarrierFunctionMaterialTempl<is_ad>::computeQpProperties()
 {
-  const Real n = _eta[_qp];
+  const auto & n = this->_eta[this->_qp];
 
-  if (_well_only && n >= 0.0 && n <= 1.0)
+  if (_well_only && MetaPhysicL::raw_value(n) >= 0.0 && MetaPhysicL::raw_value(n) <= 1.0)
   {
-    _prop_f[_qp] = 0.0;
-    _prop_df[_qp] = 0.0;
-    _prop_d2f[_qp] = 0.0;
+    this->_prop_f[this->_qp] = 0.0;
+    this->_prop_df[this->_qp] = 0.0;
+    this->_prop_d2f[this->_qp] = 0.0;
     return;
   }
 
   switch (_g_order)
   {
     case 0: // SIMPLE
-      _prop_f[_qp] = n * n * (1.0 - n) * (1.0 - n);
-      _prop_df[_qp] = 2.0 * n * (n - 1.0) * (2.0 * n - 1.0);
-      _prop_d2f[_qp] = 12.0 * (n * n - n) + 2.0;
+      this->_prop_f[this->_qp] = n * n * (1.0 - n) * (1.0 - n);
+      this->_prop_df[this->_qp] = 2.0 * n * (n - 1.0) * (2.0 * n - 1.0);
+      this->_prop_d2f[this->_qp] = 12.0 * (n * n - n) + 2.0;
       break;
 
     case 1: // LOW
-      _prop_f[_qp] = n * (1.0 - n);
-      _prop_df[_qp] = 1.0 - 2.0 * n;
-      _prop_d2f[_qp] = -2.0;
+      this->_prop_f[this->_qp] = n * (1.0 - n);
+      this->_prop_df[this->_qp] = 1.0 - 2.0 * n;
+      this->_prop_d2f[this->_qp] = -2.0;
       break;
 
     case 2: // HIGH
-      _prop_f[_qp] = n * n * (1.0 - n * n) * (1.0 - n * n);
-      _prop_df[_qp] = n * (2.0 - n * n * (8.0 + 6.0 * n * n));
-      _prop_d2f[_qp] = 2.0 - n * n * (24.0 + 30.0 * n * n);
+      this->_prop_f[this->_qp] = n * n * (1.0 - n * n) * (1.0 - n * n);
+      this->_prop_df[this->_qp] = 2 * n * (1 - n * n * (4 - 3 * n * n));
+      this->_prop_d2f[this->_qp] = 2 - 6 * n * n * (4 - 5 * n * n);
       break;
 
     default:
-      mooseError("Internal error");
+      this->mooseError("Internal error");
   }
 }
+
+template class BarrierFunctionMaterialTempl<false>;
+template class BarrierFunctionMaterialTempl<true>;

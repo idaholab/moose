@@ -10,11 +10,13 @@
 #include "SwitchingFunctionConstraintEta.h"
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintEta);
+registerMooseObject("PhaseFieldApp", ADSwitchingFunctionConstraintEta);
 
+template <bool is_ad>
 InputParameters
-SwitchingFunctionConstraintEta::validParams()
+SwitchingFunctionConstraintEtaTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching "
                              "functions in a multiphase system. This kernel acts on a "
                              "non-conserved order parameter eta_i.");
@@ -26,25 +28,33 @@ SwitchingFunctionConstraintEta::validParams()
   return params;
 }
 
-SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
+template <bool is_ad>
+SwitchingFunctionConstraintEtaTempl<is_ad>::SwitchingFunctionConstraintEtaTempl(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>(parameters),
     _eta_name(_var.name()),
-    _dh(getMaterialPropertyDerivative<Real>("h_name", _eta_name)),
+    _dh(this->template getMaterialPropertyDerivative<Real, is_ad>("h_name", _eta_name)),
+    _lambda(this->template coupledGenericValue<is_ad>("lambda"))
+{
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+SwitchingFunctionConstraintEtaTempl<is_ad>::computeQpResidual()
+{
+  return _lambda[_qp] * _dh[_qp] * _test[_i][_qp];
+}
+
+SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const InputParameters & parameters)
+  : SwitchingFunctionConstraintEtaTempl<false>(parameters),
     _d2h(getMaterialPropertyDerivative<Real>("h_name", _eta_name, _eta_name)),
     _d2ha(coupledComponents("coupled_variables")),
     _d2ha_map(getParameterJvarMap("coupled_variables")),
-    _lambda(coupledValue("lambda")),
     _lambda_var(coupled("lambda"))
 {
   for (std::size_t i = 0; i < _d2ha.size(); ++i)
     _d2ha[i] = &getMaterialPropertyDerivative<Real>(
         "h_name", _eta_name, coupledName("coupled_variables", i));
-}
-
-Real
-SwitchingFunctionConstraintEta::computeQpResidual()
-{
-  return _lambda[_qp] * _dh[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -65,3 +75,6 @@ SwitchingFunctionConstraintEta::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
+
+template class SwitchingFunctionConstraintEtaTempl<false>;
+template class SwitchingFunctionConstraintEtaTempl<true>;
