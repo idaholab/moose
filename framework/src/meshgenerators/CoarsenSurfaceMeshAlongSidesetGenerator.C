@@ -117,7 +117,7 @@ CoarsenSurfaceMeshAlongSidesetGenerator::generate()
                    std::to_string(mesh->mesh_dimension()));
 
   if (!mesh->is_prepared())
-    mesh->prepare_for_use();
+    mesh->complete_preparation();
 
   const auto & boundary_info = mesh->get_boundary_info();
 
@@ -300,46 +300,47 @@ CoarsenSurfaceMeshAlongSidesetGenerator::coarsenAlongSidesets(
       if (valid && _has_max_normal_deviation)
       {
         const Real cos_threshold = std::cos(_max_normal_deviation * libMesh::pi / 180.0);
-        for (const auto & d : infos)
+        for (const auto & degen_only : infos)
         {
-          if (!d.degenerate)
+          if (!degen_only.degenerate)
             continue;
           dof_id_type apex_id = DofObject::invalid_id;
-          for (const auto id : d.ids)
+          for (const auto id : degen_only.ids)
             if (id != target_id && id != node_id)
               apex_id = id;
-          for (const auto & r : infos)
+          for (const auto & remaining : infos)
           {
-            if (r.degenerate || std::find(r.ids.begin(), r.ids.end(), apex_id) == r.ids.end())
+            if (remaining.degenerate ||
+                std::find(remaining.ids.begin(), remaining.ids.end(), apex_id) ==
+                    remaining.ids.end())
               continue;
-            const Point nd = newellNormal(d.orig_pts);
-            const Point nr = newellNormal(r.orig_pts);
-            const Real denom = nd.norm() * nr.norm();
-            if (denom > 0 && (nd * nr) / denom < cos_threshold)
+            const Point normal_degenerate = newellNormal(degen_only.orig_pts);
+            const Point normal_remaining = newellNormal(remaining.orig_pts);
+            const Real denom = normal_degenerate.norm() * normal_remaining.norm();
+            if (denom > 0 && (normal_degenerate * normal_remaining) / denom < cos_threshold)
               valid = false;
           }
         }
       }
 
       // A clean collapse removes exactly one triangle per side of the sideset
-      std::vector<Elem *> degenerate;
+      std::set<Elem *> degenerate_set;
       for (const auto & info : infos)
         if (info.degenerate)
-          degenerate.push_back(info.elem);
-      if (!valid || degenerate.empty())
+          degenerate_set.insert(info.elem);
+      if (!valid || degenerate_set.empty())
         continue;
 
       // Commit: re-point every incident element from the collapsed node to the target node, and
       // mark the degenerate triangles for deletion.
-      const std::set<Elem *> degenerate_set(degenerate.begin(), degenerate.end());
       for (const auto incident_id : node_to_elems[node_id])
       {
         Elem * elem = mesh->elem_ptr(incident_id);
         if (!elem || degenerate_set.count(elem))
           continue;
-        elem->set_node(elem->get_node_index(b_node)) = mesh->node_ptr(target_id);
+        elem->set_node(elem->get_node_index(b_node), mesh->node_ptr(target_id));
       }
-      for (auto elem : degenerate)
+      for (auto elem : degenerate_set)
         elems_to_delete.push_back(elem);
 
       locked.insert(node_id);
@@ -357,9 +358,13 @@ CoarsenSurfaceMeshAlongSidesetGenerator::coarsenAlongSidesets(
     _console << name() << ": collapsed " << num_collapsed << " boundary node(s), deleted "
              << elems_to_delete.size() << " element(s)." << std::endl;
 
+  // deleting nodes possibly changes neighbors, nodesets and element sets
+  mesh->unset_has_neighbor_ptrs();
+  mesh->unset_has_cached_elem_data();
+  mesh->unset_has_boundary_id_sets();
+
   // Orphaned nodes (the collapsed ones) are removed while preparing the mesh for use
   mesh->contract();
-  mesh->prepare_for_use();
 
   return num_collapsed;
 }

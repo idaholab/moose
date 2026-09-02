@@ -27,7 +27,7 @@ public:
 
 protected:
   /**
-   * Performs a single coarsening pass: collapse a maximal independent set of sideset nodes,
+   * Performs a single coarsening pass: collapse non-adjacent sideset nodes,
    * merging pairs of elements.
    * @return the number of nodes collapsed during the pass
    */

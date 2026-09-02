@@ -24,7 +24,7 @@ of the mesh except those listed in
 [!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/exclude_boundaries). Exactly one of the two must be
 provided.
 
-A single invocation removes a maximal set of non-adjacent sideset nodes, coarsening the sideset
+A single invocation removes all non-adjacent sideset nodes that meet the criteria outlined below, coarsening the sideset
 discretization by roughly a factor of two. To coarsen further, either apply the generator multiple
 times in sequence, or set
 [!param](/Mesh/CoarsenSurfaceMeshAlongSidesetGenerator/coarsen_more_than_two_elements), which repeats the
