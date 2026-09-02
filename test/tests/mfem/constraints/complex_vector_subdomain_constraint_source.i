@@ -7,7 +7,7 @@
 # extension of its subdomain and boundary values.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 

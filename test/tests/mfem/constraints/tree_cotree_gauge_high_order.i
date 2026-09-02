@@ -3,7 +3,7 @@
 # its higher-order degrees of freedom and stay singular.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/beam-tet.mesh
 []
 

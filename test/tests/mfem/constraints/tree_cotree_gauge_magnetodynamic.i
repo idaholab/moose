@@ -1,25 +1,30 @@
 # Magnetodynamic (eddy current) A-formulation solved with first-kind Nedelec
 # elements. The magnetic vector potential A is only constrained up to a gradient,
 # so the curl-curl operator has a large null space. Inside the conductor the
-# sigma * dA/dt term removes it, but the surrounding vacuum has no such term and
-# the discrete operator is singular there. A tree-cotree gauge fixes the edge
-# DOFs on a spanning tree of the mesh to zero, removing the residual null space
-# and making the system solvable without an artificial mass regularisation.
+# sigma * dA/dt term removes it, but the surrounding insulator has no such term
+# and the discrete operator is singular there. A tree-cotree gauge fixes the edge
+# DOFs on a spanning tree of the insulator to zero, removing the residual null
+# space and making the system solvable without an artificial mass regularisation.
+#
+# The mesh is a cylinder split into a conducting core (r <= 0.5) and an insulating
+# shell (0.5 <= r <= 1). The shell is multiply connected - a loop encircling the
+# core cannot be contracted within it - so the cotree carries a genuine loop and
+# the gauge is not merely a spanning tree of a simply connected region.
 #
 #   nu       : reluctivity  (1 / magnetic permeability)   [whole domain]
 #   sigma    : conductivity                               [conductor only]
-#   J_src(t) : prescribed source current density          [core only]
+#   J_src(t) : prescribed source current density          [conductor only]
 #
 # Weak form:  (nu curl A, curl v) + (sigma dA/dt, v) = (J_src, v)
 
-conductor_blocks = 'TorusCore TorusSheath'
-core_block = 'TorusCore'
+conductor_block = 'interior'
+insulator_block = 'exterior'
 reluctivity = 1.0
 conductivity = 1.0
 
 [Mesh]
-  type = MFEMMesh
-  file = ../mesh/embedded_concentric_torus.e
+  type = MFEMFileMesh
+  file = ../mesh/cylinder-hex-q2.gen
 []
 
 [Problem]
@@ -64,7 +69,7 @@ conductivity = 1.0
 []
 
 [Functions]
-  # Azimuthal ramp current density localised (by the source kernel) in the core.
+  # Azimuthal ramp current density, localised (by the source kernel) in the core.
   [source_current]
     type = ParsedVectorFunction
     expression_x = '-y * t'
@@ -74,7 +79,7 @@ conductivity = 1.0
 []
 
 [FunctorMaterials]
-  [Vacuum]
+  [Insulator]
     type = MFEMGenericFunctorMaterial
     prop_names = 'reluctivity'
     prop_values = ${reluctivity}
@@ -83,7 +88,7 @@ conductivity = 1.0
     type = MFEMGenericFunctorMaterial
     prop_names = 'conductivity'
     prop_values = ${conductivity}
-    block = ${conductor_blocks}
+    block = ${conductor_block}
   []
 []
 
@@ -92,7 +97,7 @@ conductivity = 1.0
     type = MFEMVectorTangentialDirichletBC
     variable = a_field
     vector_coefficient = '0 0 0'
-    boundary = 'Exterior'
+    boundary = 'front back curved_surface'
   []
 []
 
@@ -100,13 +105,12 @@ conductivity = 1.0
   [tree_cotree_gauge]
     type = MFEMTreeCotreeGaugeEssentialConstraint
     variable = a_field
-    # Gauge only the non-conducting region: block 3 is the vacuum surrounding the
-    # TorusCore/TorusSheath conductors, where the sigma*dA/dt term already fixes
-    # the gauge. Conductor edges seed the spanning forest but are not gauged.
-    block = '3'
+    # Gauge only the non-conducting region, where the sigma*dA/dt term is absent.
+    # Conductor edges seed the spanning forest but are not gauged.
+    block = ${insulator_block}
     # Boundaries where a tangential Dirichlet condition is applied to a_field, so
     # the interior gauge is seeded consistently with that boundary condition.
-    boundary = 'Exterior'
+    boundary = 'front back curved_surface'
   []
 []
 
@@ -120,13 +124,13 @@ conductivity = 1.0
     type = MFEMTimeDerivativeVectorFEMassKernel
     variable = a_field
     coefficient = conductivity
-    block = ${conductor_blocks}
+    block = ${conductor_block}
   []
   [source]
     type = MFEMVectorFEDomainLFKernel
     variable = a_field
     vector_coefficient = source_current
-    block = ${core_block}
+    block = ${conductor_block}
   []
 []
 
@@ -148,7 +152,7 @@ conductivity = 1.0
   device = cpu
   dt = 0.25
   start_time = 0.0
-  end_time = 1.0
+  num_steps = 2
 []
 
 [Postprocessors]
@@ -163,9 +167,4 @@ conductivity = 1.0
 
 [Outputs]
   csv = true
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/TreeCotreeGaugeMagnetodynamic
-    vtk_format = ASCII
-  []
 []

@@ -3,7 +3,7 @@
 # a real constraint would leave it silently unapplied.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
