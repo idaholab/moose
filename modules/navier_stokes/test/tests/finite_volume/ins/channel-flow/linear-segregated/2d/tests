@@ -82,6 +82,19 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-wrong-system]
+    type = 'RunException'
+    input = reconstructed-gradient-wrong-system.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "Problem/linear_sys_names='u_system v_system pressure_system wrong_pressure_system' "
+               "LinearFVKernels/u_pressure/pressure=wrong_pressure"
+    expect_err = "can only be used with pressure system 'pressure_system' owned by RhieChowMassFlux"
+    requirement = "The system shall report an error when one reconstructed pressure gradient "
+                  "method is reused for a pressure system other than the one owned by its "
+                  "Rhie-Chow user object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [reconstructed-gradient-mixed-method]
     type = 'RunException'
     input = 2d-velocity-pressure.i
@@ -95,7 +108,7 @@
     type = 'RunException'
     input = reconstructed-gradient-wrong-variable.i
     cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/v_pressure/pressure=wrong_pressure'
-    expect_err = "must use the same pressure variable"
+    expect_err = "can only be used for the pressure variable registered on RhieChowMassFlux"
     requirement = "The system shall report an error when different momentum components use different pressure variables for the reconstructed coupling gradient."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'

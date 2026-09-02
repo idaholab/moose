@@ -277,6 +277,10 @@ RhieChowMassFlux::linkMomentumPressureSystems(
   {
     const auto & reader = kernel->pressureGradientField();
 
+    if (const auto * const reconstructed_method =
+            dynamic_cast<const FVReconstructedPressureGradient *>(&reader.method()))
+      reconstructed_method->bindFlowSystem(*this, reader);
+
     if (&reader.system() != &coupling_reader.system() ||
         reader.systemNumber() != coupling_reader.systemNumber())
       mooseError("RhieChowMassFlux '",
@@ -412,7 +416,7 @@ RhieChowMassFlux::timestepSetup()
   // starts from the base pressure gradient regardless of whether the preceding step ran
   // continuously, was recovered from a checkpoint, or is a retry after a rejected step (see the
   // class-level comment on the declaration for why this hook fires exactly once per attempt).
-  reconstructedGradientMethod().resetForTimeStep();
+  reconstructedGradientMethod().resetForTimeStep(*this);
 
   // This counter is otherwise self-refreshing every SIMPLE/PISO iteration, but resetting it here
   // avoids any accidental cross-time-step coupling and keeps the reconstructed gradient's paired
@@ -430,22 +434,31 @@ RhieChowMassFlux::prepareMomentumPredictor()
 }
 
 void
+RhieChowMassFlux::preparePressureRelaxation()
+{
+  if (!usingReconstructedPressureGradientMethod())
+    return;
+
+  // The current pressure solution and corrected face flux are both unrelaxed here. Form the
+  // conservative candidate before pressure relaxation replaces that solution.
+  _pressure_system->updateFVGradient(basePressureGradientField());
+  reconstructedGradientMethod().computeCandidateFromCorrectedFlux(*this);
+  updateCellVelocity(reconstructedGradientMethod().reconstructedCandidate(*this));
+}
+
+void
 RhieChowMassFlux::finalizePressureCorrector()
 {
-  // Refresh the base pressure gradient used to seed reconstructed gradient updates. In
-  // non-reconstructed mode basePressureGradientField() and pressureGradientField() are the same
-  // reader, so this duplicates the publish below; that's harmless and keeps this method's
-  // behavior identical regardless of which method is configured.
+  // Refresh the ordinary base gradient from the relaxed pressure solution.
   _pressure_system->updateFVGradient(basePressureGradientField());
 
   if (usingReconstructedPressureGradientMethod())
   {
-    reconstructedGradientMethod().updateFromCorrectedFlux(*this);
+    reconstructedGradientMethod().publishRelaxedFeedback(*this, basePressureGradientComponents());
     _pressure_system->updateFVGradient(pressureGradientField());
   }
-
-  // Reconstruct the cell velocity from the published coupling pressure gradient
-  updateCellVelocityFromCouplingGradient();
+  else
+    updateCellVelocity(pressureGradientComponents());
 }
 
 void
@@ -504,15 +517,14 @@ RhieChowMassFlux::setupMeshInformation()
 }
 
 void
-RhieChowMassFlux::updateCellVelocityFromCouplingGradient()
+RhieChowMassFlux::updateCellVelocity(
+    const std::vector<std::unique_ptr<NumericVector<Number>>> & pressure_gradient)
 {
-  const auto & coupling_pressure_gradient = pressureGradientComponents();
-
   // u_C = -(H/A)_C - (1/A)_C * grad(p)_C.
   for (const auto system_i : index_range(_momentum_implicit_systems))
   {
     auto working_vector = _Ainv_raw[system_i]->clone();
-    working_vector->pointwise_mult(*working_vector, *coupling_pressure_gradient[system_i]);
+    working_vector->pointwise_mult(*working_vector, *pressure_gradient[system_i]);
     working_vector->add(*_HbyA_raw[system_i]);
     working_vector->scale(-1.0);
     (*_momentum_implicit_systems[system_i]->solution) = *working_vector;
@@ -523,10 +535,9 @@ RhieChowMassFlux::updateCellVelocityFromCouplingGradient()
       // u_C + (H/A)_C + Ainv_C * grad(p)_C = 0. The solution was just assigned directly from
       // this formula, so the residual is pure floating-point round-off from the
       // clone/scale/add sequence, not solver error; 1e-10 is a loose absolute bound with
-      // headroom over that round-off. A violation indicates a refactor broke the single
-      // velocity-update path's algebraic consistency.
+      // headroom over that round-off.
       auto defect = _Ainv_raw[system_i]->clone();
-      defect->pointwise_mult(*defect, *coupling_pressure_gradient[system_i]);
+      defect->pointwise_mult(*defect, *pressure_gradient[system_i]);
       defect->add(*_HbyA_raw[system_i]);
       defect->add(*_momentum_implicit_systems[system_i]->solution);
       mooseAssert(MooseUtils::absoluteFuzzyEqual(defect->linfty_norm(), 0.0, 1e-10),

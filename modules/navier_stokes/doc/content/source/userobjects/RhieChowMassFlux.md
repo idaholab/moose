@@ -40,14 +40,13 @@ pressure gradient, the conservative face flux, and momentum/pressure system meta
 the gradient method's prepare/finalize lifecycle.
 
 The reconstructed gradient is available after the first pressure correction; until then the gradient
-method falls back to its base gradient method. After each pressure corrector, Rhie-Chow asks the
-gradient method to update from the newly corrected face flux, which relaxes the stored coupling
-gradient with [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once
-per corrector, and the cell velocity is then updated from that same published, possibly relaxed,
-coupling gradient. When
-[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) is `1`, the
-published gradient equals the freshly reconstructed candidate and the updated velocity equals the
-direct face-flux reconstruction; for smaller values it is a consistently relaxed extension of it.
+method falls back to its base gradient method. After each pressure solve, Rhie-Chow first forms the
+candidate from the unrelaxed pressure gradient and conservative corrected face flux, and updates the
+cell velocity from that candidate. The pressure solution is then relaxed, ordinary pressure gradients
+are refreshed, and the candidate is blended into the published coupling gradient with
+[!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once per
+corrector. This keeps the immediate velocity correction compatible with continuity while providing
+relaxed feedback to the next momentum predictor.
 Rhie-Chow automatically discovers the [LinearFVMomentumPressure.md] kernel(s) attached to each
 momentum system so it uses the same pressure gradient field as the momentum predictor while
 constructing H/A. Multiple kernels are allowed per momentum system as long as they partition the
