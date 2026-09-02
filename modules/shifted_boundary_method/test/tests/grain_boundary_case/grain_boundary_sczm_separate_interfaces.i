@@ -34,6 +34,7 @@ nx = '${fparse ny*3/2}'
     type = SubdomainGrainIDGenerator
     input = gen
     boundary_mesh = boundary_mesh
+    lambda = 1
   []
 
   [break7]

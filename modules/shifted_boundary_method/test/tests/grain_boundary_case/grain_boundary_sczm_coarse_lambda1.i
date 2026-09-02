@@ -29,12 +29,14 @@ nx = '${fparse ny*3/2}'
     ymax = 0.4
     nx = ${nx}
     ny = ${ny}
+    subdomain_ids = 10
   []
 
   [grain_gen]
     type = SubdomainGrainIDGenerator
     input = gen
     boundary_mesh = boundary_mesh
+    lambda = 1
   []
 
   [break7]
@@ -192,7 +194,7 @@ nx = '${fparse ny*3/2}'
   [area]
     type = ElementIntegralFunctorPostprocessor
     functor = 1
-    block = '1 2'
+    block = '1 2 3 4 5 10'
     execute_on = 'final'
   []
 []

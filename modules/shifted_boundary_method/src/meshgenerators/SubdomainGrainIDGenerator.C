@@ -10,8 +10,6 @@
 #include "SubdomainGrainIDGenerator.h"
 #include "SBMUtils.h"
 
-#include <algorithm>
-
 registerMooseObject("ShiftedBoundaryMethodApp", SubdomainGrainIDGenerator);
 
 InputParameters
@@ -40,7 +38,8 @@ SubdomainGrainIDGenerator::validParams()
       "Based on the boundary_mesh, which contains distinct grain boundaries as separate "
       "watertight regions, this generator assigns grain IDs (subdomain IDs) to the volume mesh. "
       "Even if the mesh does not perfectly align with the grain boundaries, each element is "
-      "assigned the grain ID of the region that occupies the largest portion of the element.");
+      "assigned the selected grain ID, or retains its input subdomain ID when no grain is "
+      "selected.");
 
   return params;
 }
@@ -103,19 +102,6 @@ SubdomainGrainIDGenerator::generate()
         candidate_occupancies, _intercepted_subdomain_policy, _lambda);
     if (subdomain)
       elem->subdomain_id() = *subdomain;
-    else if (!candidate_occupancies.empty())
-    {
-      const auto best =
-          std::max_element(candidate_occupancies.begin(),
-                           candidate_occupancies.end(),
-                           [](const auto & lhs, const auto & rhs)
-                           {
-                             if (lhs.occupancy.domain_fraction != rhs.occupancy.domain_fraction)
-                               return lhs.occupancy.domain_fraction < rhs.occupancy.domain_fraction;
-                             return lhs.subdomain_id > rhs.subdomain_id;
-                           });
-      elem->subdomain_id() = best->subdomain_id;
-    }
   }
 
   // Signal that the mesh has been modified and needs preparation.
