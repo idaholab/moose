@@ -100,6 +100,61 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [momentum-pressure-block-restricted]
+    type = 'RunApp'
+    input = momentum-pressure-block-restricted.i
+    requirement = "The system shall allow a momentum system's pressure-gradient source to be "
+                  "covered by multiple block-restricted LinearFVMomentumPressure kernels that "
+                  "partition the Rhie-Chow object's blocks and share the same coupling gradient."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-block-restricted-inconsistent]
+    type = 'RunException'
+    input = momentum-pressure-block-restricted.i
+    cli_args = 'LinearFVKernels/u_pressure_right/gradient_method=gg2'
+    expect_err = "must use the same pressure gradient method"
+    requirement = "The system shall report an error when two disjoint block-restricted "
+                  "LinearFVMomentumPressure kernels on the same Rhie-Chow object use different "
+                  "pressure gradient methods."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-duplicate-kernel]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "LinearFVKernels/u_pressure2/type=LinearFVMomentumPressure "
+               "LinearFVKernels/u_pressure2/variable=vel_x "
+               "LinearFVKernels/u_pressure2/pressure=pressure "
+               "LinearFVKernels/u_pressure2/momentum_component=x"
+    expect_err = "more than one LinearFVMomentumPressure kernel contributing a pressure source on the same block"
+    requirement = "The system shall report an error when two LinearFVMomentumPressure kernels "
+                  "contribute a pressure source to the same momentum system on the same block."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-wrong-component]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = 'LinearFVKernels/u_pressure/momentum_component=y'
+    expect_err = "declares momentum component"
+    requirement = "The system shall report an error when a LinearFVMomentumPressure kernel "
+                  "declares a momentum component different from the momentum system it is "
+                  "linked to."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-missing-kernel]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "LinearFVKernels/inactive='u_pressure'"
+    expect_err = "found no applicable LinearFVMomentumPressure kernel for momentum system"
+    requirement = "The system shall report an error when a momentum system has no applicable "
+                  "LinearFVMomentumPressure kernel covering one of the Rhie-Chow object's blocks."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i

@@ -46,9 +46,11 @@ coupling gradient. When
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) is `1`, the
 published gradient equals the freshly reconstructed candidate and the updated velocity equals the
 direct face-flux reconstruction; for smaller values it is a consistently relaxed extension of it.
-Set
-[!param](/UserObjects/RhieChowMassFlux/momentum_pressure_kernel) so Rhie-Chow uses the same pressure
-gradient field as the momentum predictor while constructing H/A.
+Rhie-Chow automatically discovers the [LinearFVMomentumPressure.md] kernel(s) attached to each
+momentum system so it uses the same pressure gradient field as the momentum predictor while
+constructing H/A. Multiple kernels are allowed per momentum system as long as they partition the
+Rhie-Chow object's blocks without overlapping and all read from the same registered gradient
+field.
 
 The [!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation) parameter selects
 whether `average` or `harmonic` interpolation is used when computing the face values of `Ainv`,
