@@ -2,7 +2,7 @@
 # have. Without the check this would silently constrain nothing.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
