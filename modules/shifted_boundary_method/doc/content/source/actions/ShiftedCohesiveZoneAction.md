@@ -10,13 +10,43 @@ Exactly one of the following geometry configurations may be used:
 
 - Set `sbm_distance_uo` to an existing `BoundaryShortestDistanceToSurface` object for full
   manual control.
-- Set `generate_sbm_distance = true` to create one `SBMSurfaceMeshBuilder` and
-  `UnsignedDistanceToSurfaceMesh` per surrogate boundary. Use `surface_meshes` when the
+- Set `generate_sbm_distance = true` when providing one interface or boundary mesh for each
+  interface or boundary through MeshGenerators. The action creates one `SBMSurfaceMeshBuilder` and
+  `UnsignedDistanceToSurfaceMesh` per surrogate boundary/interface. Use `surface_meshes` when the
   saved mesh names differ from the boundary names.
 - Set `complete_interface_mesh` to one saved mesh containing the complete outward-oriented
   surface of every subdomain. The action creates one
   [`SBMInterfaceManager`](userobjects/SBMInterfaceManager.md) and obtains each interface
   pair from boundary names such as `grain1_grain2` or `block1_block2`.
+
+For example, when the saved surface mesh names differ from the corresponding surrogate boundary/interface
+names, list them in the same order:
+
+```
+[Mesh]
+  [interface_12]
+    type = FileMeshGenerator
+    file = 'grain1_grain2.msh'
+    save_with_name = 'surface_12'
+  []
+  [interface_14]
+    type = FileMeshGenerator
+    file = 'grain1_grain4.msh'
+    save_with_name = 'surface_14'
+  []
+[]
+
+[Physics/SolidMechanics/ShiftedCohesiveZone]
+  [czm]
+    boundary = 'grain1_grain2 grain1_grain4'
+    generate_sbm_distance = true
+    surface_meshes = 'surface_12 surface_14'
+  []
+[]
+```
+
+Here, `surface_12` corresponds to `grain1_grain2`, and `surface_14` corresponds to
+`grain1_grain4`.
 
 For boundary names that do not follow the supported naming forms, provide one subdomain pair
 per boundary with `interface_subdomain_pairs`. The pair identifies the interface; the true normal
@@ -31,9 +61,8 @@ interpreted as $\partial\boldsymbol{\sigma}/\partial\boldsymbol{\varepsilon}$ an
 `pk1_jacobian` is interpreted as $\partial\mathbf{P}/\partial\mathbf{F}$. A custom `tangent`
 property name requires an explicit `tangent_definition`:
 
-- Use `stress_wrt_strain` only for a derivative of stress with respect to symmetric strain.
-- Use `pk1_wrt_deformation_gradient` only for a derivative of first Piola-Kirchhoff stress with
-  respect to the full deformation gradient.
+- Use `stress_wrt_strain` only for a derivative of stress with respect to symmetric strain ($\partial\boldsymbol{\sigma}/\partial\boldsymbol{\varepsilon}$).
+- Use `pk1_wrt_deformation_gradient` only for a derivative of first Piola-Kirchhoff stress with respect to the full deformation gradient ($\partial\mathbf{P}/\partial\mathbf{F}$).
 
 The AD interface kernel differentiates its residual automatically and does not use `tangent` or
 `tangent_definition`; setting either parameter with AD enabled is an error.
