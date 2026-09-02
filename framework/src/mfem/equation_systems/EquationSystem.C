@@ -13,6 +13,7 @@
 #include "MFEMLinearSolverBase.h"
 #include "CoefficientManager.h"
 #include "libmesh/int_range.h"
+#include "SumOperatorExtension.h"
 
 namespace Moose::MFEM
 {
@@ -375,7 +376,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         // By the time we get to here, the linear form has been modified, and it's
         // the same as aux_rhs. It correctly holds the contributions from the linear
         // kernels. Now we just need to add in the nonlinear stuff.
-        if (_non_linear and _nlfs.Has(test_var_name))
+        if (_non_linear and _nlfs.Has(test_var_name) and _ess_tdof_lists.at(j).Size())
         {
           // make a copy of aux_rhs, since this has all the values
           // we'd like to see in our lf
@@ -477,7 +478,7 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
     auto nlf = _nlfs.GetShared(test_var_name);
 
     // if (_assembly_level == mfem::AssemblyLevel::PARTIAL) {
-    if (true)
+    if (_ess_tdof_lists.at(i).Size())
     {
       // perform some elimination
       mfem::Operator * A;
@@ -489,6 +490,10 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
         cA->SetDiagonalPolicy(DIAG_ZERO); // Let the linear part handle this
 
       A->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+    }
+    else
+    {
+      nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
     }
 
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
