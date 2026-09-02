@@ -25,7 +25,7 @@ private:
   mfem::ParLinearForm * _b;
 
   // The coefficient
-  mfem::ConstantCoefficient _one;
+  mfem::Coefficient & _coeff;
 
   // The boundary conditions arrays
   mfem::Array<int> _boundary_dofs;
@@ -37,7 +37,7 @@ private:
 
 public:
   // The constructor
-  CustomProblemOperator(MFEMProblem & mfem_problem);
+  CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coeff);
 
   // The destructor
   ~CustomProblemOperator() = default;

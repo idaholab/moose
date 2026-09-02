@@ -17,6 +17,7 @@ InputParameters
 CustomProblemComposer::validParams()
 {
   InputParameters params = MFEMProblemComposer::validParams();
+  params.addParam<MFEMScalarCoefficientName>("coefficient","1.", "Diffusion coefficient");
   return params;
 }
 
@@ -28,7 +29,7 @@ CustomProblemComposer::CustomProblemComposer(const InputParameters & parameters)
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 CustomProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  return std::make_shared<CustomProblemOperator>(mfem_problem);
+  return std::make_shared<CustomProblemOperator>(mfem_problem, getScalarCoefficient("coefficient") );
 }
 
 #endif
