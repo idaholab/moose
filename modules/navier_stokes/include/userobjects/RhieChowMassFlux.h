@@ -15,14 +15,12 @@
 #include "VectorComponentFunctor.h"
 #include <unordered_map>
 #include <set>
-#include <unordered_set>
 
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
-class ElemInfo;
 class LinearFVGradientReader;
 class FVReconstructedPressureGradient;
 class LinearFVAnisotropicDiffusion;
@@ -45,12 +43,6 @@ public:
   /// Get the face velocity times density (used in advection terms)
   Real getMassFlux(const FaceInfo & fi) const;
 
-  /// Get the H/A face flux.
-  Real getHbyAFlux(const FaceInfo & fi) const;
-
-  /// Get the face-centered A inverse.
-  RealVectorValue getFaceAinv(const FaceInfo & fi) const;
-
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
@@ -60,6 +52,9 @@ public:
   /// Get the base pressure gradient field used to seed reconstructed gradient updates.
   const LinearFVGradientReader & basePressureGradientField() const;
 
+  /// Get the base-pressure gradient component vectors used to seed reconstructed updates.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & basePressureGradientComponents() const;
+
   /// Get the momentum-layout H/A component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & HbyAComponents() const;
 
@@ -68,6 +63,31 @@ public:
 
   /// Variable number of the pressure variable reconstructed by this object.
   unsigned int pressureVariableNumber() const;
+
+  /// Number of spatial dimensions of the coupled momentum/pressure systems.
+  unsigned int dimension() const { return _dim; }
+
+  /// Velocity variable for one spatial component.
+  const MooseLinearVariableFVReal & velocityVariable(unsigned int component) const
+  {
+    return *_vel[component];
+  }
+
+  /// Momentum linear system for one spatial component.
+  const LinearSystem & momentumSystem(unsigned int component) const
+  {
+    return *_momentum_systems[component];
+  }
+
+  /// Pressure linear system.
+  const LinearSystem & pressureSystem() const { return *_pressure_system; }
+
+  /**
+   * Producer counter for the conservative face mass flux: incremented every time
+   * computeFaceMassFlux() runs. Used to verify reconstruction consumes the face flux produced by
+   * the current pressure corrector, not one left over from a preceding corrector.
+   */
+  dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -81,21 +101,32 @@ public:
   void initCouplingField();
   /// Update the values of the face velocities in the containers
   void computeFaceMassFlux();
-  /// Compute the reconstructed pressure-gradient candidate from Rhie-Chow face fluxes.
-  void computeReconstructedPressureGradientCandidate();
-  /// Capture the lagged cell velocity gradient used by the Aguerre reconstruction.
-  void captureLaggedVelocityGradient();
   /// Update the cell velocity from the published, possibly relaxed, momentum-coupling pressure
   /// gradient: u_C = -(H/A)_C - Ainv_C * grad(p)_C. This is the single velocity-update path; it
   /// is exact when gradient_relaxation = 1 (the published gradient equals the freshly
   /// reconstructed candidate) and a consistently relaxed extension of it otherwise.
   void updateCellVelocityFromCouplingGradient();
 
-  /// Blend the reconstructed pressure-gradient candidate into the relaxed stored gradient.
-  void relaxReconstructedGradient();
-
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
+
+  /// Capture the lagged velocity gradient used by the Aguerre reconstruction, if in use. No-op
+  /// otherwise. Called once before the momentum predictor and between PISO correctors.
+  void prepareMomentumPredictor();
+
+  /**
+   * Finalize a pressure corrector: refresh the base pressure gradient, and - when using the
+   * reconstructed method - ask the gradient method to update its candidate/feedback and
+   * publish the result, then update the cell velocity from whichever coupling gradient is now
+   * published. Callers must call computeFaceMassFlux() themselves first if the momentum
+   * predictor's advection terms need the freshly corrected face flux - that call is not bundled
+   * in here because it must happen before the caller's own pressure-field relaxation, not after.
+   */
+  void finalizePressureCorrector();
+
+  /// Compute the base and coupling pressure gradients once, before the first momentum predictor
+  /// of a SIMPLE iteration sequence has anything to read.
+  void initPressureGradient();
 
   virtual void meshChanged() override;
   virtual void initialize() override;
@@ -139,10 +170,6 @@ protected:
   /// Get the registered pressure gradient component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
 
-  /// Get the base-pressure gradient component vectors.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  basePressureGradientComponents() const;
-
   /// Access the reconstructed gradient method when it is selected.
   const FVReconstructedPressureGradient & reconstructedGradientMethod() const;
 
@@ -154,19 +181,6 @@ protected:
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
-
-  /// Interpolate one velocity component gradient from the lagged cell state to the face.
-  RealVectorValue reconstructionVelocityGradient(const ElemInfo & elem_info,
-                                                 const FaceInfo & fi,
-                                                 bool elem_has_info,
-                                                 unsigned int velocity_component) const;
-
-  /// Recover a face-normal value from a conservative face flux.
-  Real
-  faceNormalValueFromFlux(const FaceInfo & fi, const Point & face_normal, Real face_flux) const;
-
-  /// Recover the face-normal velocity from the conservative mass flux.
-  Real faceNormalVelocityFromMassFlux(const FaceInfo & fi, const Point & face_normal) const;
 
   /// Populate the face values of the H/A and 1/A fields
   void
@@ -239,50 +253,13 @@ protected:
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
 
-  /// Cell pressure gradient reconstructed from the pressure part of the face fluxes.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_pressure_gradient;
-
-  /// Cell velocity gradients from the preceding pressure-corrector velocity, used by the
-  /// Aguerre face-flux reconstruction.
-  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _lagged_reconstruction_velocity_gradient;
-
-  /// Whether a lagged velocity-gradient snapshot is available for reconstruction.
-  bool _lagged_velocity_gradient_available = false;
-
-  /**
-   * Producer counter for the lagged velocity-gradient snapshot: incremented every time
-   * captureLaggedVelocityGradient() runs. Paired with _reconstructed_candidate_generation so
-   * computeReconstructedPressureGradientCandidate() can verify it is consuming a snapshot it
-   * has not already consumed, i.e. one captured by the current PISO corrector rather than a
-   * leftover from a previous one.
-   */
-  dof_id_type _lagged_velocity_gradient_generation = 0;
-
-  /**
-   * Consumer counter paired with _lagged_velocity_gradient_generation: the lagged
-   * velocity-gradient generation already consumed by the most recently computed reconstructed
-   * pressure-gradient candidate. computeReconstructedPressureGradientCandidate() asserts this
-   * differs from the current _lagged_velocity_gradient_generation before proceeding.
-   */
-  dof_id_type _reconstructed_candidate_generation = 0;
-
   /**
    * Producer counter for the conservative face mass flux: incremented every time
-   * computeFaceMassFlux() runs. Paired with _reconstructed_candidate_face_flux_generation so
-   * computeReconstructedPressureGradientCandidate() can verify it is reconstructing from the
-   * face flux produced by the current pressure corrector, not one left over from a preceding
-   * corrector.
+   * computeFaceMassFlux() runs. Exposed read-only through faceMassFluxGeneration() so the
+   * reconstructed gradient can verify it is reconstructing from the face flux produced by the
+   * current pressure corrector, not one left over from a preceding corrector.
    */
   dof_id_type _face_mass_flux_generation = 0;
-
-  /**
-   * Consumer counter paired with _face_mass_flux_generation: the face mass-flux generation
-   * already consumed by the most recently computed reconstructed pressure-gradient candidate.
-   * computeReconstructedPressureGradientCandidate() asserts this differs from the current
-   * _face_mass_flux_generation before proceeding.
-   */
-  dof_id_type _reconstructed_candidate_face_flux_generation = 0;
 
   /**
    * Functor describing the density of the fluid
@@ -322,9 +299,6 @@ protected:
   /// Interpolation method used for the pressure diffusion coefficient on faces
   const Moose::FV::InterpMethod _pressure_diffusion_interp_method;
 
-  /// Which pressure gradient is fed back on boundary-adjacent cells
-  const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
-
   /// Whether to enforce the discrete identity between the coupling pressure gradient and
   /// the gradient removed while constructing H/A.
   const bool _enforce_coupling_pressure_gradient_identity;
@@ -332,16 +306,10 @@ protected:
   /// Tolerance for the discrete identity check between coupling and removed pressure gradients.
   const Real _coupling_pressure_gradient_identity_tolerance;
 
-  /// Whether a reconstructed gradient candidate has been initialized.
-  bool _reconstructed_candidate_available = false;
-
 private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the
   /// flow field is defined on. Cached for performance optimization.
   std::vector<const FaceInfo *> _flow_face_info;
-
-  /// Element ids of cells touching a boundary face on the flow blocks.
-  std::unordered_set<dof_id_type> _boundary_cell_ids;
 };
 
 template <typename VarType>

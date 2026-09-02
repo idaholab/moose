@@ -177,7 +177,6 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
     _pressure_pc_recompute_frequency(getParam<unsigned int>("pressure_pc_recompute_frequency")),
     _pressure_pc_solve_counter(0),
-    _pressure_gradient_field(nullptr),
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
@@ -463,20 +462,6 @@ LinearAssemblySegregatedSolve::initialSetup()
   }
 }
 
-void
-LinearAssemblySegregatedSolve::updateBasePressureGradient()
-{
-  mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
-  _pressure_system.updateFVGradient(_rc_uo->basePressureGradientField());
-}
-
-void
-LinearAssemblySegregatedSolve::finalizePressureGradient()
-{
-  mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
-  _pressure_system.updateFVGradient(_rc_uo->pressureGradientField());
-}
-
 std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::solvePressureCorrector()
 {
@@ -645,18 +630,9 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
 
-  // Refresh the base pressure gradient used to seed reconstructed gradient updates.
-  updateBasePressureGradient();
-
-  if (_rc_uo->usingReconstructedPressureGradientMethod())
-  {
-    _rc_uo->computeReconstructedPressureGradientCandidate();
-    _rc_uo->relaxReconstructedGradient();
-    finalizePressureGradient();
-  }
-
-  // Reconstruct the cell velocity from the published coupling pressure gradient
-  _rc_uo->updateCellVelocityFromCouplingGradient();
+  // Refresh the base pressure gradient, update the reconstructed candidate/feedback if in use,
+  // publish the coupling gradient, and reconstruct the cell velocity from it.
+  _rc_uo->finalizePressureCorrector();
 
   return residuals;
 }
@@ -806,19 +782,15 @@ LinearAssemblySegregatedSolve::solve()
     if (_should_solve_momentum)
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
-    // Capture the lagged velocity gradient from the current pressure-corrected velocity before
-    // the momentum predictor updates the velocity field.
-    if (_should_solve_momentum && _should_solve_pressure && _rc_uo &&
-        _rc_uo->usingReconstructedPressureGradientMethod())
-      _rc_uo->captureLaggedVelocityGradient();
+    // Capture the lagged velocity gradient (if using the reconstructed method) from the current
+    // pressure-corrected velocity before the momentum predictor updates the velocity field.
+    if (_should_solve_momentum && _should_solve_pressure && _rc_uo)
+      _rc_uo->prepareMomentumPredictor();
 
     // Initialize base and coupling pressure gradients. After this we reuse the last gradients
     // until the pressure corrector finalizes a new coupling field.
     if (_should_solve_pressure && simple_iteration_counter == 1)
-    {
-      updateBasePressureGradient();
-      finalizePressureGradient();
-    }
+      _rc_uo->initPressureGradient();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 

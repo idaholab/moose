@@ -57,7 +57,7 @@ PIMPLESolve::correctVelocity(const bool /*subtract_updated_pressure*/,
     // After each PISO corrector except the last, refresh the lagged velocity gradient from the
     // newly corrected velocity field before starting the next corrector.
     if (!last_piso_corrector && reconstructed)
-      _rc_uo->captureLaggedVelocityGradient();
+      _rc_uo->prepareMomentumPredictor();
 
     piso_iteration_counter++;
   }
