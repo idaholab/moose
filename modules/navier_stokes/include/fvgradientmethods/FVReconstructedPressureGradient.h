@@ -49,6 +49,17 @@ public:
   void updateFeedbackGradient(const GradientContainer & base_gradient,
                               const GradientContainer & reconstructed_candidate) const;
 
+  /**
+   * Invalidate the stored relaxed feedback values so the next request falls back to the base
+   * gradient method. Called once per attempted time step (see RhieChowMassFlux::timestepSetup())
+   * so that continuous, recovered, and retried time steps all start the momentum predictor from
+   * the same state; the feedback is solver-iteration state, not an independent physical
+   * solution, so it must not carry across time-step boundaries. This does not deallocate the
+   * feedback storage: its vector layout stays valid across time steps, so
+   * updateFeedbackGradient() reuses it rather than reallocating on every time step.
+   */
+  void resetFeedback() const;
+
 private:
   /**
    * Compute reconstructed pressure gradients before the base class applies any limiter.

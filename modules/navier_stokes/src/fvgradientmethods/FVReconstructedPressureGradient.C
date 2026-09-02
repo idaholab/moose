@@ -162,11 +162,12 @@ FVReconstructedPressureGradient::updateFeedbackGradient(
                  "layout.");
   }
 
-  // (Re)initialize the feedback container when first updating from a candidate or when the
-  // stored layout no longer matches the base gradient (for example after mesh changes).
-  bool need_reinit = !_feedback_initialized || _feedback.size() != num_components;
-
-  if (!need_reinit)
+  // Whether the currently allocated storage (if any) still matches the base gradient's layout.
+  // This is checked independently of _feedback_initialized: resetFeedback() only invalidates the
+  // stored *values* for a new time step, it does not deallocate, so storage allocated in a
+  // previous time step can be reused here instead of being freed and recreated with clone().
+  bool storage_matches = _feedback.size() == num_components;
+  if (storage_matches)
   {
     for (const auto component : index_range(_feedback))
     {
@@ -174,18 +175,25 @@ FVReconstructedPressureGradient::updateFeedbackGradient(
       const auto & base_vec = *base_gradient[component];
       if (stored.size() != base_vec.size() || stored.local_size() != base_vec.local_size())
       {
-        need_reinit = true;
+        storage_matches = false;
         break;
       }
     }
   }
 
-  if (need_reinit)
+  // No storage yet, or its layout no longer matches (for example after mesh changes): allocate
+  // fresh vectors from the base gradient's layout.
+  if (!storage_matches)
   {
     _feedback.clear();
     for (const auto component : index_range(base_gradient))
       _feedback.push_back(base_gradient[component]->clone());
+  }
 
+  // Either freshly allocated above, or explicitly reset by resetFeedback() at the start of this
+  // time step: (re)seed the values from the base gradient without allocating anything.
+  if (!storage_matches || !_feedback_initialized)
+  {
     for (const auto component : index_range(_feedback))
     {
       *_feedback[component] = *base_gradient[component];
@@ -207,4 +215,14 @@ FVReconstructedPressureGradient::updateFeedbackGradient(
   }
 
   ++_feedback_generation;
+}
+
+void
+FVReconstructedPressureGradient::resetFeedback() const
+{
+  // Deliberately do not clear _feedback: the vector layout is still valid for the next time
+  // step, so keeping it allocated lets updateFeedbackGradient() reuse this storage instead of
+  // deallocating and reallocating (via clone()) on every time step.
+  _feedback_initialized = false;
+  _feedback_generation = 0;
 }
