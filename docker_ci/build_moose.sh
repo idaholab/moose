@@ -15,6 +15,16 @@
 # METHODS: The methods to build
 # MOOSE_JOBS: The number of jobs to run make with
 # BUILD_MODULES: If set, build modules
+# MOOSE_BUILD_SYSTEM: "make" (default) or "cmake" to build with CMake instead
+
+# Opt-in CMake build (additive; the make path below is unchanged and remains the default).
+if [[ "${MOOSE_BUILD_SYSTEM:-make}" == "cmake" ]]; then
+  MOOSE_REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  MOOSE_ENABLE_MODULES_FLAG="-DMOOSE_ENABLE_MODULES=$( [[ -n "$BUILD_MODULES" ]] && echo ON || echo OFF )"
+  MOOSE_METHODS="$MOOSE_METHODS" MOOSE_JOBS="$MOOSE_JOBS" \
+    "${MOOSE_REPO_DIR}/scripts/build_moose_cmake.sh" ${MOOSE_ENABLE_MODULES_FLAG}
+  exit $?
+fi
 
 # Runs make in the current directory for all of
 # the methods in METHODS, with MOOSE_JOBS jobs
