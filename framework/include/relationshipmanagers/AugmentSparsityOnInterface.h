@@ -72,13 +72,13 @@ protected:
   /**
    * Query the mortar interface couplings of the query element. If a lower dimensional secondary
    * element is found, then we search for its point neighbors, which we ghost, as well as all of the
-   * mortar interface couplings of the point neighbors. This kind of ghosting is required for mortar
-   * nodal auxiliary kernels
+   * point neighbors, their interior parents, and the point neighbors' mortar interface couplings.
+   * This kind of ghosting is required for mortar nodal auxiliary kernels and nodal-normal contact
+   * Jacobians.
    */
   void ghostLowerDSecondaryElemPointNeighbors(const processor_id_type p,
                                               const Elem * const query_elem,
                                               map_type & coupled_elements,
-                                              BoundaryID secondary_boundary_id,
                                               SubdomainID secondary_subdomain_id,
                                               const AutomaticMortarGeneration & amg) const;
 
@@ -98,8 +98,8 @@ protected:
   /// the matrix sparsity pattern
   const bool _is_coupling_functor;
 
-  /// Whether to ghost point neighbors of secondary lower subdomain elements and their
-  /// cross mortar interface counterparts for applications such as mortar nodal auxiliary kernels
+  /// Whether to ghost secondary face point neighbors, their interior parents, and their
+  /// cross-interface counterparts
   const bool _ghost_point_neighbors;
 
   /// Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing

@@ -10,9 +10,8 @@
 #pragma once
 
 #include "ComputeWeightedGapLMMechanicalContact.h"
+#include "LMWeightedVelocitiesUserObject.h"
 #include "Function.h"
-
-class WeightedVelocitiesUserObject;
 
 /**
  * Computes frictional constraints (and normal contact constraints by calling its parent object)
@@ -90,10 +89,20 @@ protected:
   ADRealVectorValue _qp_real_tangential_velocity_nodal;
 
   /// The weighted gap user object
-  const WeightedVelocitiesUserObject & _weighted_velocities_uo;
+  LMWeightedVelocitiesUserObject & _weighted_velocities_uo;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
+
+  /// When true, c_t is derived per-node from c_normal_eff and the tangential velocity magnitude
+  const bool _dynamic_c_t;
+
+  /// Tangential velocity magnitude below which c_t falls back to c_normal_eff (stick regime)
+  const Real _vel_floor;
+
+  /// When true, use the degree-one Alart-Curnier friction residual instead of the degree-two
+  /// Hueber-Stadler-Wohlmuth friction residual (the default); see MortarContactUtils.h
+  const bool _degree_one_friction_residual;
 
   /// Frictional Lagrange's multiplier variable pointers
   std::vector<MooseVariable *> _friction_vars;
@@ -116,7 +125,7 @@ protected:
   /// z-velocity on the primary face
   const ADVariableValue * const _primary_z_dot;
 
-  /// Small contact pressure value to trigger computation of frictional forces
+  /// Minimum value of contact pressure that will trigger frictional enforcement
   const Real _epsilon;
 
   /// Friction coefficient

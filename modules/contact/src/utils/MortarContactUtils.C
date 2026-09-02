@@ -9,6 +9,7 @@
 
 #include "MortarContactUtils.h"
 
+#include <limits>
 #include <tuple>
 
 namespace Moose

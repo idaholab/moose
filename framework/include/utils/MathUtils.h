@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
+#include "MooseUtils.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
@@ -466,6 +467,91 @@ timeDerivName(const T & base_prop_name)
  * @param mat_B Reference to the other matrix
  */
 void kron(RealEigenMatrix & product, const RealEigenMatrix & mat_A, const RealEigenMatrix & mat_B);
+
+/**
+ * Return the square of the Euclidean (L2) norm of \p value. Recurses into containers using the
+ * same \p MooseUtils::Has_size trait as \p MooseUtils::isZero, and into rank 1 and rank 2 tensors
+ * component by component. Composed entirely of sums and products, this is safe to call
+ * unconditionally on dual number types, including at zero.
+ */
+template <typename T>
+auto
+normSquared(const T & value)
+{
+  if constexpr (MooseUtils::Has_size<T>::value)
+  {
+    decltype(normSquared(*value.begin())) sum{};
+    for (const auto & component : value)
+      sum += normSquared(component);
+    return sum;
+  }
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
+    return value * value;
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 1)
+  {
+    auto sum = value(0) * value(0);
+    for (const auto i : make_range(std::size_t(1), Moose::dim))
+      sum += value(i) * value(i);
+    return sum;
+  }
+  else
+  {
+    auto sum = value(0, 0) * value(0, 0);
+    for (const auto j : make_range(std::size_t(1), Moose::dim))
+      sum += value(0, j) * value(0, j);
+    for (const auto i : make_range(std::size_t(1), Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+        sum += value(i, j) * value(i, j);
+    return sum;
+  }
+}
+
+/**
+ * Return the Euclidean (L2) norm of \p value.
+ *
+ * For dual number types, differentiating \p std::sqrt at a zero argument produces a NaN
+ * derivative (d(sqrt(x))/dx = 1 / (2 * sqrt(x))), so this short-circuits to a literal zero
+ * whenever \p value is (fuzzy) zero.
+ */
+template <typename T>
+auto
+norm(const T & value)
+{
+  using std::sqrt;
+  if (MooseUtils::isZero(value))
+    return decltype(normSquared(value)){};
+  return sqrt(normSquared(value));
+}
+
+/**
+ * Computes the norm of \p value, with \p epsilon added under the square root so that the result
+ * and its derivative remain smooth (and finite) as \p value approaches the zero vector. This is
+ * needed because AD types fail to compute a derivative through sqrt() at zero:
+ * d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx diverges as f(x) -> 0. \p epsilon only needs to be
+ * negligible relative to the physical scale of \p value's components; its exact value is
+ * otherwise arbitrary.
+ *
+ * \p value may be any rank-1 tensor type providing operator()(unsigned int) over Moose::dim
+ * components (e.g. VectorValue), or any fixed-size container of scalars (e.g. std::array).
+ */
+template <typename T>
+auto
+regularizedNorm(const T & value, const Real epsilon = 1e-42)
+{
+  using std::sqrt;
+
+  typename T::value_type sum_of_squares = 0;
+  if constexpr (MooseUtils::Has_size<T>::value)
+  {
+    for (const auto & component : value)
+      sum_of_squares += component * component;
+  }
+  else
+    for (const auto i : make_range(Moose::dim))
+      sum_of_squares += value(i) * value(i);
+
+  return sqrt(sum_of_squares + epsilon);
+}
 
 } // namespace MathUtils
 

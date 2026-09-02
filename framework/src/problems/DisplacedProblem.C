@@ -1240,12 +1240,6 @@ DisplacedProblem::undisplaceMesh()
   Threads::parallel_reduce(node_range, rdmt);
 }
 
-LineSearch *
-DisplacedProblem::getLineSearch()
-{
-  return _mproblem.getLineSearch();
-}
-
 const CouplingMatrix *
 DisplacedProblem::couplingMatrix(const unsigned int nl_sys_num) const
 {

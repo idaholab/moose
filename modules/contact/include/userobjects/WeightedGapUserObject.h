@@ -48,6 +48,21 @@ public:
    */
   virtual Real getNormalGap(const Node * const /*node*/) const;
 
+  /// Whether this user object includes derivatives of the secondary nodal normals
+  bool usesNodalNormalDerivatives() const;
+
+  /// Enable derivatives during construction of a supported quasistatic contact constraint.
+  /// Other contact formulations intentionally leave this disabled.
+  void includeNodalNormalDerivatives();
+
+  /**
+   * Return the cached contact normal for the supplied lower-dimensional secondary element node.
+   * The raw value is the stored normalized secondary nodal normal. Coordinate derivatives are
+   * included while this object's formulation and the current assembly mode require them.
+   */
+  const ADRealVectorValue & contactNormal(const Elem & lower_secondary_elem,
+                                          unsigned int nodal_index) const;
+
   /**
    * Compute physical gap from integration gap quantity
    */
@@ -127,6 +142,11 @@ protected:
     return it->second;
   }
 
+  /**
+   * Add displacement derivatives to the coordinate used for the stored mortar nodal geometry.
+   */
+  ADPoint nodalCoordinate(const Node & node, const Point & geometry_coordinate) const;
+
   /// The base finite element problem
   FEProblemBase & _fe_problem;
 
@@ -183,6 +203,15 @@ protected:
   /// A pointer to the test function associated with the weighted gap. We have this member so that
   /// we don't do virtual calls during inner quadrature-point/test-function loops
   const VariableTestValue * _test = nullptr;
+
+  /// AD nodal normals computed from the secondary face one-ring
+  mutable std::unordered_map<const Node *, ADRealVectorValue> _ad_nodal_normals;
+
+  /// Whether this concrete user object supports nodal-normal derivatives
+  const bool _allow_nodal_normal_derivatives;
+
+  /// Set once while supported contact constraints are constructed, before user object execution
+  bool _use_nodal_normal_derivatives;
 
   /// Whether the weighted gap is associated with nodes or elements (like for a CONSTANT MONOMIAL
   /// Lagrange multiplier). We have this member so that we don't do virtual calls during inner

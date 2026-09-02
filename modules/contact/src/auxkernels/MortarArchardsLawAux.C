@@ -11,6 +11,7 @@
 #include "MooseVariableFE.h"
 #include "FEProblemBase.h"
 #include "Assembly.h"
+#include "LMWeightedGapUserObject.h"
 
 registerMooseObject("ContactApp", MortarArchardsLawAux);
 
@@ -30,6 +31,12 @@ MortarArchardsLawAux::validParams()
   params.addRequiredCoupledVar("normal_pressure",
                                "The name of the Lagrange multiplier that holds the normal contact "
                                "pressure in mortar formulations");
+  params.addParam<UserObjectName>(
+      "weighted_gap_uo",
+      "A weighted gap user object with 'derive_c_from_elasticity = true' whose per-node physical "
+      "stiffness scale should be applied to 'normal_pressure'. Needed only when that Lagrange "
+      "multiplier uses 'c_normal_strategy = physical', whose raw dof value is not yet in "
+      "physical pressure units.");
   params.addParam<bool>("use_displaced_mesh",
                         true,
                         "Whether to use the displaced mesh to compute the auxiliary kernel value");
@@ -51,6 +58,9 @@ MortarArchardsLawAux::validParams()
 MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
   : MortarNodalAuxKernel(parameters),
     _normal_pressure(coupledValueLower("normal_pressure")),
+    _weighted_gap_uo(isParamValid("weighted_gap_uo")
+                         ? &getUserObject<LMWeightedGapUserObject>("weighted_gap_uo")
+                         : nullptr),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _energy_wear_coefficient(getParam<Real>("energy_wear_coefficient")),
     _displacements(
@@ -93,6 +103,16 @@ MortarArchardsLawAux::computeQpProperties()
   _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
 }
 
+Real
+MortarArchardsLawAux::physicalNormalPressure() const
+{
+  if (!_weighted_gap_uo || !_weighted_gap_uo->deriveCFromElasticity())
+    return _normal_pressure[0];
+
+  const auto * const dof = static_cast<const DofObject *>(_current_node);
+  return libmesh_map_find(_weighted_gap_uo->dofToDerivedC(), dof)[0] * _normal_pressure[0];
+}
+
 void
 MortarArchardsLawAux::computeQpIProperties()
 {
@@ -110,8 +130,8 @@ MortarArchardsLawAux::computeQpIProperties()
   const auto norm_tangential_vel = gap_velocity_vec.norm();
 
   const auto worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient *
-                                 _friction_coefficient * _normal_pressure[0] * _dt * _JxW_msm[_qp] *
-                                 _coord_msm[_qp];
+                                 _friction_coefficient * physicalNormalPressure() * _dt *
+                                 _JxW_msm[_qp] * _coord_msm[_qp];
 
   // Accumulate worn-out depth over time.
   _worn_depth += _test_lower[_i][_qp] * worn_out_depth_dt;

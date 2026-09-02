@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 #include "LinearSystem.h"
+#include "LineSearch.h"
 #include "Convergence.h"
 #include "Executioner.h"
 #include "ConvergenceIterationTypes.h"
@@ -91,6 +92,12 @@ FEProblemSolve::validParams()
                         "The linear relative tolerance to be used while the contact state is "
                         "changing between non-linear iterations. We recommend that this tolerance "
                         "be looser than the standard linear tolerance");
+  MooseEnum contact_line_search_backing("basic bt l2 cp", "bt");
+  params.addParam<MooseEnum>(
+      "contact_line_search_backing",
+      contact_line_search_backing,
+      "The standard PETSc SNES line search type the contact line search uses internally as its "
+      "backing algorithm. The default is provisional pending the backing-strategy sweep.");
 
   params += Moose::PetscSupport::getPetscValidParams();
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
@@ -186,7 +193,8 @@ FEProblemSolve::validParams()
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
       "Solver variable scaling");
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
-                              "contact_line_search_allowed_lambda_cuts",
+                              "contact_line_search_allowed_lambda_cuts "
+                              "contact_line_search_backing",
                               "Solver line search");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
@@ -197,9 +205,43 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   : MultiSystemSolveObject(ex),
     _num_grid_steps(cast_int<unsigned int>(getParam<unsigned int>("num_grids") - 1))
 {
-  if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
-      _moose_line_searches.end())
-    _problem.addLineSearch(_pars);
+  const auto line_search_name = getParam<MooseEnum>("line_search").operator std::string();
+  if (_moose_line_searches.find(line_search_name) != _moose_line_searches.end())
+  {
+    mooseDeprecated("line_search = '",
+                    line_search_name,
+                    "' is deprecated. Use a [LineSearch] block with type = "
+                    "NodeFaceContactLineSearch or PetscProjectSolutionOntoBounds instead.");
+
+    std::shared_ptr<LineSearch> line_search;
+    if (line_search_name == "contact")
+    {
+      InputParameters ls_params = _app.getFactory().getValidParams("NodeFaceContactLineSearch");
+
+      bool affect_ltol = _pars.isParamValid("contact_line_search_ltol");
+      ls_params.set<bool>("affect_ltol") = affect_ltol;
+      ls_params.set<unsigned>("allowed_lambda_cuts") =
+          _pars.get<unsigned>("contact_line_search_allowed_lambda_cuts");
+      ls_params.set<Real>("contact_ltol") =
+          affect_ltol ? _pars.get<Real>("contact_line_search_ltol") : _pars.get<Real>("l_tol");
+      ls_params.set<MooseEnum>("backing_line_search") =
+          _pars.get<MooseEnum>("contact_line_search_backing");
+      ls_params.set<FEProblem *>("_fe_problem") = dynamic_cast<FEProblem *>(&_problem);
+
+      line_search = _app.getFactory().create<LineSearch>(
+          "NodeFaceContactLineSearch", "contact_line_search", ls_params);
+    }
+    else // "project"
+    {
+      InputParameters ls_params =
+          _app.getFactory().getValidParams("PetscProjectSolutionOntoBounds");
+      ls_params.set<FEProblem *>("_fe_problem") = dynamic_cast<FEProblem *>(&_problem);
+
+      line_search = _app.getFactory().create<LineSearch>(
+          "PetscProjectSolutionOntoBounds", "project_solution_onto_bounds_line_search", ls_params);
+    }
+    _problem.getNonlinearSystemBase(0).setLineSearch(line_search);
+  }
 
   auto set_solver_params = [this, &ex](const SolverSystem & sys)
   {

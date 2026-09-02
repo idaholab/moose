@@ -9,31 +9,25 @@
 
 #pragma once
 
+#include "LineSearch.h"
+
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_macro.h"
-
-#include "ContactLineSearchBase.h"
+#include "libmesh/petsc_nonlinear_solver.h"
+#include <petscsnes.h>
 
 using namespace libMesh;
 
-namespace libMesh
-{
-template <typename>
-class PetscNonlinearSolver;
-}
-
 /**
- *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)
+ * Minimal LineSearch that accepts the full Newton step. Used to test that each nonlinear
+ * system's LineSearch object is dispatched independently by PETSc.
  */
-class PetscContactLineSearch : public ContactLineSearchBase
+class TestObjectLineSearch : public LineSearch
 {
 public:
   static InputParameters validParams();
 
-  PetscContactLineSearch(const InputParameters & parameters);
+  TestObjectLineSearch(const InputParameters & parameters);
 
   virtual void lineSearch() override;
-
-protected:
-  PetscNonlinearSolver<Real> * _solver;
 };

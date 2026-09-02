@@ -13,6 +13,7 @@
 #include "ADReal.h"
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
+#include "MathUtils.h"
 
 #include "libmesh/dof_object.h"
 
@@ -26,8 +27,12 @@
 #include "timpi/parallel_sync.h"
 
 #include <utility>
+#include <algorithm>
 #include <array>
+#include <cmath>
+#include <optional>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace TIMPI
@@ -56,6 +61,173 @@ namespace Mortar
 {
 namespace Contact
 {
+
+/** Return the augmented normal pressure p_n - C_n g_bar. */
+template <typename T>
+T
+augmentedNormalPressure(const T & normal_pressure, const T & scaled_normal_gap)
+{
+  return normal_pressure - scaled_normal_gap;
+}
+
+/** Return the nonnegative Coulomb-ball radius. */
+template <typename T>
+T
+coulombFrictionRadius(const T & friction_coefficient, const T & augmented_normal_pressure)
+{
+  return friction_coefficient * std::max(T(0), augmented_normal_pressure);
+}
+
+/** Project a tangential contact vector onto the closed ball of radius \p radius. */
+template <typename T, std::size_t N>
+std::array<T, N>
+projectToFrictionBall(const std::array<T, N> & vector, const T & radius)
+{
+  const T norm = MathUtils::norm(vector);
+  if (norm <= radius)
+    return vector;
+
+  std::array<T, N> projection;
+  for (const auto i : index_range(projection))
+    projection[i] = radius * vector[i] / norm;
+  return projection;
+}
+
+/**
+ * Return the degree-one Alart-Curnier friction residual
+ * p_t - Proj_{B_radius}(q_t).
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
+                             const std::array<T, N> & augmented_tangential_pressure,
+                             const T & radius)
+{
+  const auto projection = projectToFrictionBall(augmented_tangential_pressure, radius);
+  std::array<T, N> residual;
+  for (const auto i : index_range(residual))
+    residual[i] = tangential_pressure[i] - projection[i];
+  return residual;
+}
+
+/**
+ * Same as the three-argument \p alartCurnierFrictionResidual, but additionally short-circuits to
+ * the trivial identity residual whenever the raw, unaugmented normal contact pressure
+ * \p normal_pressure falls below \p epsilon, mirroring the epsilon-gated
+ * \p hueberStadlerWohlmuthFrictionResidual overload below so both friction-residual degrees
+ * apply the same active-set transition guard.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
+                             const std::array<T, N> & augmented_tangential_pressure,
+                             const T & radius,
+                             const T & normal_pressure,
+                             const T & epsilon)
+{
+  if (normal_pressure < epsilon)
+    return tangential_pressure;
+
+  return alartCurnierFrictionResidual(tangential_pressure, augmented_tangential_pressure, radius);
+}
+
+/**
+ * Return the degree-two Hueber-Stadler-Wohlmuth friction residual
+ * max(radius, ||q_t||) p_t - radius q_t.
+ *
+ * At radius = ||q_t|| = 0 the degree-two expression vanishes for every p_t. Returning p_t in
+ * that state preserves the Coulomb solution set during separation.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressure,
+                                      const std::array<T, N> & augmented_tangential_pressure,
+                                      const T & radius)
+{
+  const T augmented_norm = MathUtils::norm(augmented_tangential_pressure);
+  const T weight = std::max(radius, augmented_norm);
+  if (weight == 0)
+    return tangential_pressure;
+
+  std::array<T, N> residual;
+  for (const auto i : index_range(residual))
+    residual[i] = weight * tangential_pressure[i] - radius * augmented_tangential_pressure[i];
+  return residual;
+}
+
+/**
+ * Same as the three-argument \p hueberStadlerWohlmuthFrictionResidual, but additionally
+ * short-circuits to the trivial identity residual whenever the raw, unaugmented normal
+ * contact pressure \p normal_pressure falls below \p epsilon.
+ *
+ * The pure weight == 0 condition in the three-argument overload is an exact mathematical
+ * criterion, but it is a poor numerical proxy for "this dof is separated" during Newton
+ * iteration: \p augmented_tangential_pressure includes a tangential penalty term that is
+ * essentially never exactly zero in floating point, so the full weight/radius expression
+ * stays active even for dofs whose normal contact state is still swinging between contact
+ * and separation as the active set settles. Because that expression is only piecewise smooth
+ * across the active-set boundary, evaluating it on a dof that has not yet settled can inject a
+ * large, poorly conditioned residual and Jacobian row into that Newton step. Gating on the raw
+ * normal Lagrange multiplier instead is a coarser but cheaper and more conservative criterion:
+ * it forces such transitioning dofs onto the trivial identity residual (a well-conditioned,
+ * constant-derivative Jacobian row) until the normal contact state has clearly resolved,
+ * trading a small amount of formulation fidelity for solver robustness during that transient.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressure,
+                                      const std::array<T, N> & augmented_tangential_pressure,
+                                      const T & radius,
+                                      const T & normal_pressure,
+                                      const T & epsilon)
+{
+  if (normal_pressure < epsilon)
+    return tangential_pressure;
+
+  return hueberStadlerWohlmuthFrictionResidual(
+      tangential_pressure, augmented_tangential_pressure, radius);
+}
+
+/**
+ * Compute the epsilon-gated frictional residual for a mortar contact dof. This composes the
+ * tangential pressure augmentation
+ * \p tangential_pressure + c_t * tangential_velocity * dt with \p augmentedNormalPressure,
+ * \p coulombFrictionRadius, and the epsilon-gated friction residual (degree-two
+ * Hueber-Stadler-Wohlmuth by default, or degree-one Alart-Curnier when
+ * \p degree_one_friction_residual is true) -- the composition shared by the normal, dynamic, and
+ * Cartesian mortar frictional contact constraints.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+frictionalContactResidual(const std::array<T, N> & tangential_pressure,
+                          const std::array<T, N> & tangential_velocity,
+                          const T & c_t,
+                          const T & dt,
+                          const T & normal_pressure,
+                          const T & scaled_normal_gap,
+                          const T & friction_coefficient,
+                          const T & epsilon,
+                          const bool degree_one_friction_residual = false)
+{
+  std::array<T, N> augmented_tangential_pressure;
+  for (const auto i : index_range(augmented_tangential_pressure))
+    augmented_tangential_pressure[i] = tangential_pressure[i] + c_t * tangential_velocity[i] * dt;
+
+  const auto radius = coulombFrictionRadius(
+      friction_coefficient, augmentedNormalPressure(normal_pressure, scaled_normal_gap));
+
+  return degree_one_friction_residual
+             ? alartCurnierFrictionResidual(tangential_pressure,
+                                            augmented_tangential_pressure,
+                                            radius,
+                                            normal_pressure,
+                                            epsilon)
+             : hueberStadlerWohlmuthFrictionResidual(tangential_pressure,
+                                                     augmented_tangential_pressure,
+                                                     radius,
+                                                     normal_pressure,
+                                                     epsilon);
+}
 
 /**
  * This function is used to communicate velocities across processes

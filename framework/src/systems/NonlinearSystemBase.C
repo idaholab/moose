@@ -54,6 +54,7 @@
 #include "Parser.h"
 #include "Split.h"
 #include "FieldSplitPreconditioner.h"
+#include "LineSearch.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
@@ -106,6 +107,7 @@
 
 #include <ios>
 #include <type_traits>
+#include <cmath>
 
 #include "petscsnes.h"
 #include <PetscDMMoose.h>
@@ -3704,6 +3706,21 @@ MoosePreconditioner const *
 NonlinearSystemBase::getPreconditioner() const
 {
   return _preconditioner.get();
+}
+
+void
+NonlinearSystemBase::setLineSearch(std::shared_ptr<LineSearch> line_search)
+{
+  if (_line_search.get() != nullptr)
+    mooseError("More than one active LineSearch detected");
+
+  _line_search = line_search;
+}
+
+LineSearch *
+NonlinearSystemBase::getLineSearch() const
+{
+  return _line_search.get();
 }
 
 void

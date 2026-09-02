@@ -38,6 +38,9 @@ protected:
    */
   void computeJacobian(Moose::MortarType mortar_type) override;
 
+  /// Whether rows assembled by this constraint can have distinct AD derivative supports
+  virtual bool hasHeterogeneousJacobianRowSupport() const;
+
   /// Nodal map from secondary interior parent to lower dimensional domain
   std::map<unsigned int, unsigned int> _secondary_ip_lowerd_map;
 

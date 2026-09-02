@@ -172,6 +172,8 @@
     model = frictionless
     formulation = mortar
     correct_edge_dropping = true
+    c_normal_strategy = physical
+    use_automatic_differentiation = true
   []
 []
 

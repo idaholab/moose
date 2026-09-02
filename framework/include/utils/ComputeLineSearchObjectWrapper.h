@@ -23,7 +23,7 @@ class ComputeLineSearchObjectWrapper
   : public libMesh::PetscNonlinearSolver<libMesh::Real>::ComputeLineSearchObject
 {
 public:
-  ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem);
+  ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem, unsigned int nl_sys_num);
 
   /**
    * Shim that calls into the MOOSE line search system using FEProblemBase::linesearch
@@ -32,4 +32,5 @@ public:
 
 protected:
   FEProblemBase & _fe_problem;
+  const unsigned int _nl_sys_num;
 };
