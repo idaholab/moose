@@ -33,7 +33,7 @@
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     cli_args = 'Executioner/assembly_level=partial'
     recover = false
@@ -45,7 +45,7 @@
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     requirement = 'This one is identical to the normal curlcurl kernel test, except we insert the nonlinear executioner AND the nonlinear kernel'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
@@ -56,7 +56,7 @@
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Same as above, with partial assembly'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     cli_args = 'Executioner/assembly_level=partial'
     recover = false

@@ -13,7 +13,6 @@
 #include "MFEMLinearSolverBase.h"
 #include "CoefficientManager.h"
 #include "libmesh/int_range.h"
-#include "SumOperatorExtension.h"
 
 namespace Moose::MFEM
 {
@@ -376,6 +375,10 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         // By the time we get to here, the linear form has been modified, and it's
         // the same as aux_rhs. It correctly holds the contributions from the linear
         // kernels. Now we just need to add in the nonlinear stuff.
+        //
+        // The final check is to skip this stuff if the ess_tdof_list is empty here.
+        // This one was found with trial and error. Proper justification to follow
+        // later.
         if (_non_linear and _nlfs.Has(test_var_name) and _ess_tdof_lists.at(j).Size())
         {
           // make a copy of aux_rhs, since this has all the values

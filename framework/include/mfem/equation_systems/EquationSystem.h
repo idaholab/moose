@@ -21,6 +21,7 @@
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
 #include "NLScaleIntegrator.h"
+#include "SumOperatorExtension.h"
 
 namespace Moose::MFEM
 {
