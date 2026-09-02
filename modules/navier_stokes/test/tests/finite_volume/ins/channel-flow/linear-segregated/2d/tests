@@ -48,6 +48,29 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [momentum-pressure-reconstructed-gradient-high-relaxation]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    # No new gold: gradient_relaxation only changes the SIMPLE iteration path, not the converged
+    # physical solution, so a much higher relaxation (0.9, vs. the default 0.1 used by
+    # momentum-pressure-reconstructed-gradient above) should converge to the same result. This
+    # reuses that test's gold via the symlinked exodiff name (same pattern as
+    # momentum-pressure-gradient-method's gold below). gradient_relaxation=1 (no relaxation at
+    # all) does not converge within a reasonable iteration count with this problem's default
+    # momentum_equation_relaxation/pressure_variable_relaxation - stabilizing it further would
+    # need those under-relaxation factors tuned too, which is a separate numerics investigation.
+    exodiff = 2d-velocity-pressure-reconstructed-gradient-high-relaxation_out.e
+    cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 '
+               'FVGradientMethods/reconstructed/gradient_relaxation=0.9 '
+               'Outputs/file_base=2d-velocity-pressure-reconstructed-gradient-high-relaxation_out'
+    requirement = "The system shall converge to the same steady-state Navier-Stokes solution in a "
+                  "2D channel using the SIMPLE algorithm with reconstructed pressure gradients in "
+                  "the linear finite volume momentum predictor regardless of the relaxation factor "
+                  "used to publish the momentum-coupling pressure gradient."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [reconstructed-gradient-wrong-variable]
     type = 'RunException'
     input = reconstructed-gradient-wrong-variable.i

@@ -81,12 +81,6 @@ RhieChowMassFlux::validParams()
       MooseEnum("average harmonic", "average"),
       "The face interpolation method for Ainv in the pressure correction diffusion term.");
   params.addParam<MooseEnum>(
-      "reconstructed_pressure_gradient_velocity_update",
-      MooseEnum("reconstructed pressure_gradient", "reconstructed"),
-      "How the velocity is updated when using FVReconstructedPressureGradient. 'reconstructed' "
-      "writes the reconstructed velocity directly. 'pressure_gradient' updates the velocity from "
-      "the registered pressure gradient field.");
-  params.addParam<MooseEnum>(
       "reconstructed_pressure_gradient_boundary_cells",
       MooseEnum("reconstructed base_gradient", "reconstructed"),
       "Which pressure gradient is fed back on cells touching a boundary face.");
@@ -131,8 +125,6 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
                                               "harmonic"
                                           ? Moose::FV::InterpMethod::HarmonicAverage
                                           : Moose::FV::InterpMethod::Average),
-    _reconstructed_pressure_gradient_velocity_update(
-        getParam<MooseEnum>("reconstructed_pressure_gradient_velocity_update")),
     _reconstructed_pressure_gradient_boundary_cells(
         getParam<MooseEnum>("reconstructed_pressure_gradient_boundary_cells")),
     _enforce_coupling_pressure_gradient_identity(
@@ -554,11 +546,16 @@ RhieChowMassFlux::computeReconstructedPressureGradientCandidate()
       }
     };
 
+    // reconstructed_quantity is the target cell velocity implied by the corrected face flux
+    // (the Aguerre reconstruction), not the published cell velocity itself.
     DenseVector<Real> reconstructed_quantity(_dim);
     solve_projection(projection_rhs, reconstructed_quantity);
 
-    // Always build the reconstructed pressure-gradient candidate. The velocity update can either
-    // use the direct reconstructed value or the pressure-gradient field published later.
+    // Recover the candidate gradient that would exactly reproduce reconstructed_quantity via
+    // u = -(H/A) - Ainv*grad(p). relaxReconstructedGradient() may blend this candidate with the
+    // preceding published coupling gradient, and the published cell velocity is always computed
+    // from that published, possibly-relaxed gradient (updateCellVelocityFromCouplingGradient()),
+    // not from reconstructed_quantity directly.
     for (const auto component : make_range(_dim))
     {
       const auto momentum_dof =
@@ -834,7 +831,7 @@ RhieChowMassFlux::reconstructionVelocityGradient(const ElemInfo & elem_info,
 }
 
 void
-RhieChowMassFlux::computeCellVelocityFromPressureGradient()
+RhieChowMassFlux::updateCellVelocityFromCouplingGradient()
 {
   const auto & coupling_pressure_gradient = pressureGradientComponents();
 
@@ -846,6 +843,25 @@ RhieChowMassFlux::computeCellVelocityFromPressureGradient()
     working_vector->add(*_HbyA_raw[system_i]);
     working_vector->scale(-1.0);
     (*_momentum_implicit_systems[system_i]->solution) = *working_vector;
+
+#ifndef NDEBUG
+    {
+      // Proof that the assignment above satisfies the momentum-coupling identity
+      // u_C + (H/A)_C + Ainv_C * grad(p)_C = 0. The solution was just assigned directly from
+      // this formula, so the residual is pure floating-point round-off from the
+      // clone/scale/add sequence, not solver error; 1e-10 is a loose absolute bound with
+      // headroom over that round-off. A violation indicates a refactor broke the single
+      // velocity-update path's algebraic consistency.
+      auto defect = _Ainv_raw[system_i]->clone();
+      defect->pointwise_mult(*defect, *coupling_pressure_gradient[system_i]);
+      defect->add(*_HbyA_raw[system_i]);
+      defect->add(*_momentum_implicit_systems[system_i]->solution);
+      mooseAssert(MooseUtils::absoluteFuzzyEqual(defect->linfty_norm(), 0.0, 1e-10),
+                  "RhieChowMassFlux: cell-velocity update violates the momentum-coupling "
+                  "identity u + H/A + Ainv*grad(p) = 0.");
+    }
+#endif
+
     _momentum_implicit_systems[system_i]->update();
     _momentum_systems[system_i]->setSolution(
         *_momentum_implicit_systems[system_i]->current_local_solution);
@@ -1121,12 +1137,6 @@ RhieChowMassFlux::computeFaceMassFlux()
   }
 
   ++_face_mass_flux_generation;
-}
-
-void
-RhieChowMassFlux::computeCellVelocity()
-{
-  computeCellVelocityFromPressureGradient();
 }
 
 void

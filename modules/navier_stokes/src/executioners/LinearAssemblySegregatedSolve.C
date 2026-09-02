@@ -656,7 +656,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   }
 
   // Reconstruct the cell velocity from the published coupling pressure gradient
-  _rc_uo->computeCellVelocity();
+  _rc_uo->updateCellVelocityFromCouplingGradient();
 
   return residuals;
 }
