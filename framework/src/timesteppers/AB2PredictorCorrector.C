@@ -25,8 +25,6 @@
 #include <iostream>
 #include <fstream>
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", AB2PredictorCorrector);
 
 InputParameters

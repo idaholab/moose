@@ -22,11 +22,11 @@ public:
   KokkosRadiativeHeatFluxBCBase(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
+                                            const unsigned int qp,
+                                            AssemblyDatum & datum) const;
 
 protected:
   /// Stefan-Boltzmann constant
@@ -38,7 +38,8 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosRadiativeHeatFluxBCBase::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosRadiativeHeatFluxBCBase::precomputeQpResidual(const unsigned int qp,
+                                                    AssemblyDatum & datum) const
 {
   auto bc = static_cast<const Derived *>(this);
 
@@ -50,9 +51,9 @@ KokkosRadiativeHeatFluxBCBase::computeQpResidual(const unsigned int qp, Assembly
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosRadiativeHeatFluxBCBase::computeQpJacobian(const unsigned int j,
-                                                 const unsigned int qp,
-                                                 AssemblyDatum & datum) const
+KokkosRadiativeHeatFluxBCBase::precomputeQpJacobian(const unsigned int j,
+                                                    const unsigned int qp,
+                                                    AssemblyDatum & datum) const
 {
   auto bc = static_cast<const Derived *>(this);
 

@@ -80,6 +80,16 @@ string-value).  MOOSE currently has five built-in brace-expression commands:
   `1.0364269656262e-05`. The `to_unit` argument is optional resulting in a no-op that serves
   only for documentation purposes (`${units 1 J/mol}` would evaluate to the value `1.0`).
 
+- `${enumerate <prefix> <first_index> <last_index>}`: expands to the
+  whitespace-separated inclusive list of names formed by appending each integer
+  in the range to the prefix, e.g. `${enumerate block 0 10}` evaluates to
+  `block0 block1 ... block10`. The last index must not be smaller than
+  the first.
+
+- `${repeat <name> <count>}`: expands to the name repeated count times,
+  separated by whitespace, e.g. `${repeat foo 3}` evaluates to
+  `foo foo foo`.
+
 Examples:
 
 ```

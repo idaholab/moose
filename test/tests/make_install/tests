@@ -97,6 +97,8 @@
       no_additional_cli_args = True
       capabilities = 'installation_type=in_tree'
       max_parallel = 1
+      # observed at 787 MB
+      min_slots = 2
       prereq = 'test_copy_install/link_exec_installed'
       expect_out = 'version.print_version_long:(.*)2 passed, 0 skipped, 0 failed'
 

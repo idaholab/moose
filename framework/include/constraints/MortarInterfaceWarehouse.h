@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "Mortar3DSubpatchPlane.h"
 #include "MooseTypes.h"
 #include "MooseHashing.h"
 #include "MortarSegmentInfo.h"
@@ -28,15 +29,19 @@ class MooseEnum;
 /**
  * Per-mortar-interface configuration. Owns the AutomaticMortarGeneration object together with
  * the user-supplied flags that must remain consistent across all constraints sharing a primary-
- * secondary surface pair (periodic, debug, triangulation mode, triangulate-triangles).
+ * secondary surface pair (periodic, debug, minimum projection angle, 3D subpatch plane mode,
+ * triangulation mode, triangulate-triangles, and 3D quadrature point mapping).
  */
 struct MortarInterfaceConfig
 {
   std::unique_ptr<AutomaticMortarGeneration> amg;
   bool periodic;
   bool debug;
+  Real minimum_projection_angle;
+  Mortar3DSubpatchPlane mortar_3d_subpatch_plane;
   MortarSegmentTriangulationMode triangulation;
   bool triangulate_triangles;
+  Mortar3DQuadraturePointMapping mortar_3d_qp_mapping;
 };
 
 class MortarInterfaceWarehouse : public libMesh::ParallelObject
@@ -57,9 +62,11 @@ public:
    * @param correct_edge_dropping edge dropping treatment selection
    * @param minimum_projection_angle minimum projection angle allowed for building mortar segment
    * mesh
+   * @param mortar_3d_subpatch_plane method for constructing 3D mortar subpatch planes
    * @param triangulation triangulation strategy used for clipped 3D mortar polygons
    * @param triangulate_triangles whether a clipped polygon that is already a triangle should still
    * be subdivided
+   * @param mortar_3d_qp_mapping method for mapping 3D mortar quadrature points to faces
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
@@ -69,8 +76,11 @@ public:
                              const bool debug,
                              const bool correct_edge_dropping,
                              const Real minimum_projection_angle,
+                             const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
                              const MooseEnum & triangulation,
-                             const bool triangulate_triangles);
+                             const bool triangulate_triangles,
+                             const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
+                                 Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and

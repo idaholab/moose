@@ -71,7 +71,7 @@ void
 InternalSideElementCounterWithID::threadJoin(const UserObject & y)
 {
   const InternalSideElementCounterWithID & uo =
-      static_cast<const InternalSideElementCounterWithID &>(y);
+      cast_ref<const InternalSideElementCounterWithID &>(y);
   for (auto & id : _unique_ids)
     _counters[id] += uo._counters.at(id);
 }

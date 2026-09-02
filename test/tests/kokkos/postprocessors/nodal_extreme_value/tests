@@ -10,7 +10,7 @@
       exodiff = 'kokkos_nodal_extreme_pps_test_out.e'
       detail = 'the variable reaches the extreme (min/max) value and'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [proxy]
       type = 'CSVDiff'
@@ -18,7 +18,7 @@
       csvdiff = 'kokkos_nodal_proxy_extreme_value_out.csv'
       detail = 'the proxy variable reaches the extreme (min/max) value.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 
@@ -31,7 +31,7 @@
       abs_zero = 1e-8
       detail = 'over the whole domain and'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [block_restricted]
       type = 'Exodiff'
@@ -39,7 +39,7 @@
       exodiff = 'kokkos_block_nodal_pps_test_out.e'
       detail = 'within a subdomain.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

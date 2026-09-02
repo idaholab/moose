@@ -19,7 +19,7 @@ Installation instructions for MFEM-MOOSE can be found in [this page](getting_sta
 ## Solving a problem with MFEM-MOOSE
 
 Much of the syntax of the usual MOOSE input file is preserved when creating input files for MFEM-MOOSE. For each input file block, the user can browse the syntax [page](syntax/index.md) for classes prefixed with `MFEM` or, alternatively, browse the MFEM section of the source [page](source/index.md exact=True). A selection of thermal, mechanical, electromagnetic and fluid example problems is described in a supporting [page](syntax/MFEM/examples_index.md).
-Here, we lay out the step-by-step process of writing a MFEM-MOOSE input file to solve a simple steady state diffusion problem. The full input file may be found [here](/test/tests/mfem/kernels/diffusion.i). We roughly split the input file into five parts: Problem, Geometry, Equation System, Solver and Executioner, and Output.
+Here, we lay out the step-by-step process of writing a MFEM-MOOSE input file to solve a simple steady state diffusion problem. The full input file may be found [!file text=here](/test/tests/mfem/kernels/diffusion.i). We roughly split the input file into five parts: Problem, Geometry, Equation System, Solver and Executioner, and Output.
 
 ### Problem
 
@@ -29,7 +29,12 @@ First of all, we must specify that the type of problem we wish to solve is an [M
 
 ### Geometry - Mesh and Finite Element Spaces
 
-Given that we wish to utilize MFEM as the backend, the mesh we import into the problem must be of [MFEMMesh.md] type. Therefore, this must be specified in the parameter [!param](/Mesh/type) within the `Mesh` block.
+Given that we wish to utilize MFEM as the backend, the mesh we provide to the problem must be an
+MFEM mesh type. MFEM-MOOSE supports reading meshes from file via [MFEMFileMesh.md] or generating
+them via [MFEMMeshGeneratorMesh.md] (which can use MFEM mesh generators such as [MFEMGeneratedMeshGenerator.md]).
+[MFEMFileMesh.md] meshes should explicitly set [!param](/Mesh/type) within the `Mesh` block;
+the [MFEMMeshGeneratorMesh.md] type will be automatically deduced if
+MFEM mesh generators are used.
 
 !listing test/tests/mfem/kernels/diffusion.i block=/Mesh
 
@@ -69,7 +74,7 @@ Now we set up boundary conditions. Here, we choose scalar Dirichlet boundary con
 
 ### Solver and Executioner
 
-With the equation system set up, we specify how it is to be solved. Firstly, we choose a preconditioner and solver. For problems with high polynomial order, setting [!param](/Solvers/MFEMHypreGMRES/low_order_refined) to `true` may greatly increase performance, as explained [here](MFEMLinearSolverBase.md).
+With the equation system set up, we specify how it is to be solved. Firstly, we choose a preconditioner and solver. For problems with high polynomial order, setting [!param](/Solvers/MFEMHypreGMRES/low_order_refined) to `true` may greatly increase performance, as explained [here](MFEMLORLinearSolverBase.md).
 
 While in principle any solver may be used as the main solver or preconditioner, the main limitation to keep in mind is that Hypre solvers may only be preconditioned by other Hypre solvers. Furthermore, when a Hypre solver has its `low_order_refined` parameter set to `true`, it ceases to be considered a Hypre solver for preconditioning purposes.
 

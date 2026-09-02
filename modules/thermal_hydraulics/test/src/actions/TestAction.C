@@ -36,7 +36,9 @@ TestAction::validParams()
   params.addPrivateParam<std::string>("fe_family");
   params.addPrivateParam<std::string>("fe_order");
 
-  params.addParam<bool>("abort_on_solve_fail", false, "Abort if the solve did not converge rather than cut the timestep");
+  params.addParam<bool>("abort_on_solve_fail",
+                        false,
+                        "Abort if the solve did not converge rather than cut the timestep");
 
   return params;
 }
@@ -312,8 +314,8 @@ TestAction::addExecutioner()
     use_transient_executioner = _default_use_transient_executioner;
 
   // Due to more consistent divergence status reporting in PETSc (as of 5f3c5e7a), users should have
-  // the option to abort on the first fail if desired. Otherwise Jacobian testing, for example, could
-  // fail in undesired ways, even if the Jacobian test achieves a passing result.
+  // the option to abort on the first fail if desired. Otherwise Jacobian testing, for example,
+  // could fail in undesired ways, even if the Jacobian test achieves a passing result.
   bool abort_on_solve_fail = getParam<bool>("abort_on_solve_fail");
 
   // if a time kernel is being tested, then use a transient executioner instead of steady

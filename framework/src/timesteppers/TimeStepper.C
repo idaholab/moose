@@ -143,7 +143,7 @@ TimeStepper::constrainStep(Real & dt)
 
     if (dt <= 0.0)
     {
-      _console << diag.str();
+      _console << diag.str() << std::flush;
       mooseError("Adjusting to sync_time resulted in a non-positive time step.  dt: ",
                  dt,
                  " sync_time: ",
@@ -157,7 +157,7 @@ TimeStepper::constrainStep(Real & dt)
 
   if (_verbose)
   {
-    _console << diag.str();
+    _console << diag.str() << std::flush;
   }
 
   return at_sync_point;

@@ -15,8 +15,6 @@
 // MOOSE includes
 #include "NEML2Assembly.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", NEML2Assembly);
 
 InputParameters
@@ -60,7 +58,7 @@ NEML2Assembly::initialize()
 void
 NEML2Assembly::threadJoin(const UserObject & y)
 {
-  const auto & other = static_cast<const NEML2Assembly &>(y);
+  const auto & other = cast_ref<const NEML2Assembly &>(y);
 
   if (_up_to_date)
     return;

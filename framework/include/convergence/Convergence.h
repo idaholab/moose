@@ -55,7 +55,7 @@ public:
   /**
    * Method that gets called in each iteration before the solve
    */
-  virtual void preExecute() {}
+  virtual void preSolve() {}
 
   /**
    * Returns convergence status.

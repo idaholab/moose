@@ -55,6 +55,8 @@ The test: Every changed line should trace directly to the user's request.
 
 - Never delete correct preexisting code comments.
 - Add comments when the code alone does not make clear what's happening.
+- Explain every non-obvious numeric value, including tolerances, with a nearby
+  comment that records its source or rationale rather than merely restating it.
 - Add Doxygen comments for classes and class members whose purpose is not
   obvious from their names.
 - Use ASCII characters.
@@ -75,10 +77,26 @@ The test: Every changed line should trace directly to the user's request.
 
 - Prefer builtin tools over bash commands whenever possible in the vein of
   reducing permission prompting.
-- Before building or testing with conda, ask the user which conda environment
-  to activate rather than guessing.
+- Before building or performing verification, including running tests or
+  invoking a pre-existing MOOSE executable, ask the user whether their MOOSE
+  stack uses conda unless this has already been established in the
+  conversation. If it does, ask which conda environment to activate and wait
+  for the answer before running the command; do not use an existing binary or
+  current shell state as a shortcut around this check.
 
-## 7. Goal-Driven Execution
+## 7. TestHarness Coverage
+
+- Do not create separate test specifications or gold files solely to exercise
+  different MPI process counts, thread counts, mesh modes, recovery, or
+  restep. Use the same test with the TestHarness options `-p<n>`,
+  `--n-threads=<n>`, `--distributed-mesh`, `--recover`, and `--restep`.
+  Split tests only when a mode intentionally has different inputs, expected
+  output, or requirements.
+- Give the TestHarness enough job slots for each test: `-j` must be at least
+  the requested `-p` process count or `--n-threads` thread count. When MPI
+  processes and threads are combined, use at least their product.
+
+## 8. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 

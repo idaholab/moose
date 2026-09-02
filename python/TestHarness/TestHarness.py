@@ -546,10 +546,8 @@ class TestHarness:
 
         # Add extra capabilities that are known even though they might not
         # exist (if they are not set by the app). This is needed in specific
-        # when testing against known applications. For example, in the
-        # fluid_properties module, we check against "airapp". We don't want
-        # to error when "airapp" doesn't exist in the app because we know
-        # that it could actually be false.
+        # when testing against known applications, even though they might
+        # not be available.
         if test_root_params is not None and (
             known_capabilities := test_root_params.get("known_capabilities")
         ):
@@ -1634,6 +1632,11 @@ class TestHarness:
             const="HEAVY",
             help="Run heavy valgrind tests",
         )
+        filtergroup.add_argument(
+            "--valgrind-track-origins",
+            action="store_true",
+            help="Enable --track-origins=yes when running valgrind",
+        )
 
         capabilitygroup = parser.add_argument_group(
             "Additional Capabilities",
@@ -2118,6 +2121,10 @@ class TestHarness:
 
         if not opts.valgrind_mode:
             opts.valgrind_mode = ""
+            if opts.valgrind_track_origins:
+                self.errorExit(
+                    "Cannot specify --valgrind-track-origins without --valgrind"
+                )
 
         # Set default
         if not opts.input_file_name:
@@ -2206,7 +2213,10 @@ class TestHarness:
         """
         Helper for printing an error and exiting
         """
-        util.errorExit(*args, colored=self.options.colored is True)
+        colored = True
+        if options := getattr(self, "options", None):
+            colored = options.colored
+        util.errorExit(*args, colored=colored is True)
 
     def printInfo(self, *args):
         """Print the given message as information."""

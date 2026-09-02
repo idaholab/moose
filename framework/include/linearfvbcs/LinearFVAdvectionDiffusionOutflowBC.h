@@ -36,6 +36,7 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
   ///@}
 
-  virtual bool useBoundaryGradientExtrapolation() const override { return false; }
+  virtual bool needsBoundaryNonorthogonalCorrection() const override { return false; }
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
 };

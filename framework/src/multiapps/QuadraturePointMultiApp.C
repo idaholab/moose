@@ -18,8 +18,6 @@
 #include "libmesh/elem.h"
 #include "libmesh/fe.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", QuadraturePointMultiApp);
 // TODO: Deprecate and use Positions system
 

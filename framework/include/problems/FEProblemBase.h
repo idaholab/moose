@@ -30,6 +30,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
 #include "MortarInterfaceWarehouse.h"
+#include "Mortar3DSubpatchPlane.h"
 #include "MooseVariableFE.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
@@ -93,6 +94,7 @@ class IntegratedBCBase;
 class LineSearch;
 class UserObject;
 class UserObjectBase;
+class FVGradientMethod;
 class FVInterpolationMethod;
 class FVFaceInterpolationMethod;
 class FVAdvectedInterpolationMethod;
@@ -387,6 +389,10 @@ public:
   setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
   virtual void setNeighborSubdomainID(const Elem * elem, const THREAD_ID tid);
   virtual void prepareAssembly(const THREAD_ID tid) override;
+  /**
+   * Begin a fresh neighbor accumulation phase by sizing and zeroing the neighbor blocks.
+   */
+  virtual void prepareAssemblyNeighbor(const THREAD_ID tid);
 
   virtual void addGhostedElem(dof_id_type elem_id) override;
   virtual void addGhostedBoundary(BoundaryID boundary_id) override;
@@ -1477,6 +1483,29 @@ public:
                                         InputParameters & parameters);
 
   /**
+   * Add an FV gradient method
+   * @param method_type The type of the method.
+   * @param name The name of the method.
+   * @param parameters The input parameters of the method.
+   */
+  virtual void addFVGradientMethod(const std::string & method_type,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+
+  /**
+   * Retrieve an FV gradient method
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  const FVGradientMethod & getFVGradientMethod(const GradientMethodName & name,
+                                               const THREAD_ID tid = 0) const;
+
+  /**
+   * Check if an FV gradient method with a given name exists
+   */
+  bool hasFVGradientMethod(const GradientMethodName & name) const;
+
+  /**
    * Retrieve an FV interpolation method
    * @param name The name of the method.
    * @param tid The thread ID.
@@ -1657,8 +1686,11 @@ public:
    * Execute MultiAppTransfers associated with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.
+   * @param source_app The source application to execute transfers from. Defaults to all sources
    */
-  void execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION direction);
+  void execMultiAppTransfers(ExecFlagType type,
+                             Transfer::DIRECTION direction,
+                             const MultiAppName & source_app = "");
 
   /**
    * Execute the MultiApps associated with the ExecFlagType
@@ -1711,14 +1743,6 @@ public:
   virtual void addTransfer(const std::string & transfer_name,
                            const std::string & name,
                            InputParameters & parameters);
-
-  /**
-   * Execute the Transfers associated with the ExecFlagType
-   *
-   * Note: This does _not_ execute MultiApp Transfers!
-   * Those are executed automatically when MultiApps are executed.
-   */
-  void execTransfers(ExecFlagType type);
 
   /**
    * Computes the residual of a nonlinear system using whatever is sitting in the current
@@ -2002,8 +2026,11 @@ public:
       const bool debug,
       const bool correct_edge_dropping,
       const Real minimum_projection_angle,
+      const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
       const MooseEnum & triangulation,
-      const bool triangulate_triangles);
+      const bool triangulate_triangles,
+      const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
+          Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
 
   /**
    * Return the undisplaced or displaced mortar generation object associated with the provided
@@ -2483,6 +2510,37 @@ public:
    */
   bool needsPreviousMultiAppFixedPointIterationAuxiliary() const;
 
+  /**
+   * Set a flag that indicates that user requires values for the previous multi-system fixed point
+   * iterate for the solver systems (not auxiliary)
+   * @param needed the value that should be set to the flag
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
+   */
+  void needsPreviousMultiSystemFixedPointIterationSolution(bool needed,
+                                                           const unsigned int solver_sys_num);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous multi-system fixed
+   * point iteration for the solver systems (not auxiliary)
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
+   * @return true if the user required values of the previous multi-system fixed point iteration
+   */
+  bool needsPreviousMultiSystemFixedPointIterationSolution(const unsigned int solver_sys_num) const;
+
+  /**
+   * Set a flag that indicates that user requires values for the previous multi-system fixed point
+   * iterate for the auxiliary system
+   */
+  void needsPreviousMultiSystemFixedPointIterationAuxiliary(bool state);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous multi-system fixed
+   * point iteration for the auxiliary system
+   * @return true if the user required values of the previous multi-system fixed point iteration
+   * from the auxiliary system
+   */
+  bool needsPreviousMultiSystemFixedPointIterationAuxiliary() const;
+
   ///@{
   /**
    * Convenience zeros
@@ -2715,6 +2773,15 @@ public:
    * @return whether to perform a boundary condition integrity check for finite volume
    */
   bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
+
+  /**
+   * @return whether to perform an integrity check for side user objects consuming interface
+   * material properties
+   */
+  bool sideUOInterfaceMatPropIntegrityCheck() const
+  {
+    return _side_uo_interface_mat_prop_integrity_check;
+  }
 
   /**
    * @param fv_bcs_integrity_check Whether to perform a boundary condition integrity check for
@@ -3351,6 +3418,10 @@ protected:
   std::vector<bool> _previous_multiapp_fp_nl_solution_required;
   /// Indicates we need to save the previous multiapp fixed-point iteration auxiliary variable values
   bool _previous_multiapp_fp_aux_solution_required;
+  /// Indicates we need to save the previous multi-system fixed-point iteration solver variable values
+  std::vector<bool> _previous_multisystem_fp_nl_solution_required;
+  /// Indicates we need to save the previous multi-system fixed-point iteration auxiliary variable values
+  bool _previous_multisystem_fp_aux_solution_required;
 
   /// Indicates if nonlocal coupling is required/exists
   bool _has_nonlocal_coupling;
@@ -3375,12 +3446,18 @@ protected:
   /// e.g. whether the variable dependencies are defined on the selected boundaries
   const bool _boundary_restricted_elem_integrity_check;
 
+  /// Whether to check that side user objects do not consume interface material properties
+  const bool _side_uo_interface_mat_prop_integrity_check;
+
   /// Determines whether and which subdomains are to be checked to ensure that they have an active material
   CoverageCheckMode _material_coverage_check;
   std::vector<SubdomainName> _material_coverage_blocks;
 
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
   bool _fv_bcs_integrity_check;
+
+  /// Whether to check FV boundary and interface objects against the faces on which they execute
+  const bool _fv_face_integrity_check;
 
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;

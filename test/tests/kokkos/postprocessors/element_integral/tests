@@ -11,7 +11,7 @@
       csvdiff = 'kokkos_element_integral_test_out.csv'
       detail = 'over the whole domain, and'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
 
     [block_test]
@@ -20,7 +20,7 @@
       csvdiff = 'kokkos_element_block_integral_test_out.csv'
       detail = 'over a subset of the domain,'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
       prereq = 'element_integral/test'
     []
 
@@ -31,7 +31,7 @@
       cli_args = 'BCs/right/value=-1 Postprocessors/integral/use_absolute_value=true'
       detail = 'and also optionally, using the absolute variable value.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 
@@ -41,6 +41,6 @@
     csvdiff = 'kokkos_element_block_average_test_out.csv'
     requirement = 'The Kokkos system shall compute the element average of a variable.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

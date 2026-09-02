@@ -33,6 +33,7 @@ private:
   enum SolveType
   {
     FACE_AVERAGE,
+    NODE_AVERAGE,
     LAYERED_AVERAGE,
     REMOVE_CHECKERBOARD
   };

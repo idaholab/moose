@@ -3,8 +3,8 @@
         "mesh_info": {
             "type": "MeshInfo",
             "values": {
-                "subdomain_elems": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                "subdomains": {
+                    "type": "MeshInfo::DomainInfoMap<unsigned short, MeshInfo::SubdomainInfo>"
                 }
             }
         }
@@ -12,14 +12,14 @@
     "time_steps": [
         {
             "mesh_info": {
-                "subdomain_elems": null
+                "subdomains": null
             },
             "time": 0.0,
             "time_step": 0
         },
         {
             "mesh_info": {
-                "subdomain_elems": [
+                "subdomains": [
                     {
                         "elems": [
                             0,

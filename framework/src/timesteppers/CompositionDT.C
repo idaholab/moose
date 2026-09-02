@@ -78,7 +78,19 @@ CompositionDT::actOnTimeSteppers(Lambda && act)
 void
 CompositionDT::init()
 {
-  actOnTimeSteppers([](auto & ts) { ts.init(); });
+  if (_app.testCheckpointHalfTransient())
+  {
+    const auto half_end_time = _executioner.endTime();
+    actOnTimeSteppers(
+        [this, half_end_time](auto & ts)
+        {
+          _executioner.endTime() = half_end_time;
+          ts.init();
+        });
+    _executioner.endTime() = half_end_time;
+  }
+  else
+    actOnTimeSteppers([](auto & ts) { ts.init(); });
 }
 
 void
@@ -181,13 +193,10 @@ CompositionDT::getSequenceSteppersNextTime()
   Real next_time_to_hit = std::numeric_limits<Real>::max();
   for (auto & tss : time_sequence_steppers)
   {
-    Real ts_time_to_hit = tss->getNextTimeInSequence();
+    Real ts_time_to_hit;
+    if (!tss->advanceToFutureTime(_time, _dt_min, ts_time_to_hit))
+      continue;
 
-    if (ts_time_to_hit - _time <= _dt_min)
-    {
-      tss->increaseCurrentStep();
-      ts_time_to_hit = tss->getNextTimeInSequence();
-    }
     if (next_time_to_hit > ts_time_to_hit)
     {
       _closest_time_sequence_stepper = tss;

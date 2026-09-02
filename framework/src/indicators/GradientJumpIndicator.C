@@ -23,12 +23,13 @@ GradientJumpIndicator::validParams()
 
   // We need more ghosting to compute finite volume gradients across from a boundary
   // We do not use skewness correction here, therefore avoiding needing three layers
-  params.addRelationshipManager(
-      "ElementSideNeighborLayers",
-      Moose::RelationshipManagerType::ALGEBRAIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<unsigned short>("layers") = obj_params.get<bool>("variable_is_FV") ? 2 : 1;
-      });
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::ALGEBRAIC,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  rm_params.set<unsigned short>("layers") =
+                                      obj_params.get<bool>("variable_is_FV") ? 2 : 1;
+                                });
 
   return params;
 }

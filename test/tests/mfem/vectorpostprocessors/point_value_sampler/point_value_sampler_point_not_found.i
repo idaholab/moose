@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/mug.e
 []
 
@@ -30,7 +30,7 @@
 
 [VectorPostprocessors]
   [point_sample]
-    type = MFEMPointValueSampler
+    type = MFEMVariablePointValueSampler
     variable = 'h1_scalar'
     points = '0 0 1000'
   []

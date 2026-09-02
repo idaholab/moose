@@ -56,6 +56,6 @@ void
 ParsedSubdomainMeshGenerator::setBlockName(std::unique_ptr<MeshBase> & mesh)
 {
   if (isParamValid("block_name"))
-    mesh->subdomain_name(getParam<subdomain_id_type>("block_id")) =
-        getParam<SubdomainName>("block_name");
+    mesh->set_subdomain_name(getParam<subdomain_id_type>("block_id"),
+                             getParam<SubdomainName>("block_name"));
 }

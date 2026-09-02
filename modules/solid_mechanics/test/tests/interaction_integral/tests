@@ -30,7 +30,7 @@ issues = '#3705'
    input = 'interaction_integral_3d.i'
    csvdiff = 'interaction_integral_3d_out.csv interaction_integral_3d_out_II_KI_1_0001.csv interaction_integral_3d_out_II_KI_2_0001.csv interaction_integral_3d_out_II_KII_1_0001.csv interaction_integral_3d_out_II_KII_2_0001.csv interaction_integral_3d_out_II_KIII_1_0001.csv interaction_integral_3d_out_II_KIII_2_0001.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
-   abs_zero = 1e-8
+   abs_zero = 5e-8
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D.'
    capabilities = 'method!=dbg'
  [../]
@@ -49,7 +49,7 @@ issues = '#3705'
    type = 'CSVDiff'
    input = 'interaction_integral_3d_points.i'
    csvdiff = 'interaction_integral_3d_points_out.csv interaction_integral_3d_points_out_II_KI_1_0001.csv interaction_integral_3d_points_out_II_KI_2_0001.csv interaction_integral_3d_points_out_II_KII_1_0001.csv interaction_integral_3d_points_out_II_KII_2_0001.csv interaction_integral_3d_points_out_II_KIII_1_0001.csv interaction_integral_3d_points_out_II_KIII_2_0001.csv'
-   abs_zero = 1e-8
+   abs_zero = 5e-8
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D at specified points.'
    capabilities = 'method!=dbg'

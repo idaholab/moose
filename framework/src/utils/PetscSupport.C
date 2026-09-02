@@ -67,14 +67,14 @@ using namespace libMesh;
 void
 MooseVecView(NumericVector<Number> & vector)
 {
-  PetscVector<Number> & petsc_vec = static_cast<PetscVector<Number> &>(vector);
+  PetscVector<Number> & petsc_vec = cast_ref<PetscVector<Number> &>(vector);
   LibmeshPetscCallA(vector.comm().get(), VecView(petsc_vec.vec(), 0));
 }
 
 void
 MooseMatView(SparseMatrix<Number> & mat)
 {
-  PetscMatrixBase<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
+  PetscMatrixBase<Number> & petsc_mat = cast_ref<PetscMatrix<Number> &>(mat);
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
@@ -82,7 +82,7 @@ void
 MooseVecView(const NumericVector<Number> & vector)
 {
   PetscVector<Number> & petsc_vec =
-      static_cast<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
+      cast_ref<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
   LibmeshPetscCallA(vector.comm().get(), VecView(petsc_vec.vec(), 0));
 }
 
@@ -90,7 +90,7 @@ void
 MooseMatView(const SparseMatrix<Number> & mat)
 {
   PetscMatrixBase<Number> & petsc_mat =
-      static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
+      cast_ref<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
@@ -98,6 +98,25 @@ namespace Moose
 {
 namespace PetscSupport
 {
+
+PetscOptionsScope::PetscOptionsScope(FEProblemBase & problem) : _problem(problem), _pushed(false)
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_problem.getMooseApp().isUltimateMaster())
+  {
+    LibmeshPetscCallA(_problem.comm().get(), PetscOptionsPush(_problem.petscOptionsDatabase()));
+    _pushed = true;
+  }
+#endif
+}
+
+PetscOptionsScope::~PetscOptionsScope()
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (_pushed)
+    PetscCallAbort(_problem.comm().get(), PetscOptionsPop());
+#endif
+}
 
 namespace
 {
@@ -436,8 +455,7 @@ petscNonlinearConverged(SNES /*snes*/,
   }
   else
   {
-    auto & convergence = problem.getConvergence(
-        problem.getNonlinearConvergenceNames()[problem.currentNonlinearSystem().number()]);
+    auto & convergence = problem.currentNonlinearSystem().convergence();
     status = convergence.checkConvergence(it);
   }
 

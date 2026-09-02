@@ -125,7 +125,7 @@ WeightedGapUserObject::computeQpIProperties()
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
-  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
+  const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   auto & [weighted_gap, normalization] = _dof_to_weighted_gap[dof];
 

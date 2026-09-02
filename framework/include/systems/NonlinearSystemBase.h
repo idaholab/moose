@@ -47,6 +47,7 @@ class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
 class FieldSplitPreconditionerBase;
+class Convergence;
 
 // libMesh forward declarations
 namespace libMesh
@@ -773,6 +774,15 @@ public:
    */
   void destroyColoring();
 
+  /// Sets the name of the associated Convergence object
+  void setConvergenceName(const ConvergenceName & convergence_name)
+  {
+    _convergence_name = convergence_name;
+  }
+
+  /// Retrieves the associated Convergence object
+  Convergence & convergence();
+
 protected:
   /**
    * Compute the residual for a given tag
@@ -830,7 +840,9 @@ protected:
   void computeKokkosJacobian(const std::set<TagID> & tags);
 #endif
 
-  void computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian);
+  void computeDiracContributions(const std::set<TagID> & vector_tags,
+                                 const std::set<TagID> & matrix_tags,
+                                 Moose::ComputeType compute_type);
 
   void computeScalarKernelsJacobians(const std::set<TagID> & tags);
 
@@ -1080,6 +1092,14 @@ protected:
 
 private:
   /**
+   * Retrieve every finite volume object belonging to this system on thread \p tid, as
+   * SetupInterfaces, so that the setup methods can be dispatched to all finite volume families
+   * with a single loop. Each family is queried through a MooseObject-derived base class to avoid
+   * runtime side-casts in TheWarehouse.
+   */
+  std::vector<SetupInterface *> getFVSetupObjects(THREAD_ID tid);
+
+  /**
    * Finds the implicit sparsity graph between geometrically related dofs.
    */
   void findImplicitGeometricCouplingEntries(
@@ -1110,4 +1130,7 @@ private:
 
   /// The number of scaling groups
   std::size_t _num_scaling_groups;
+
+  /// Associated convergence object name
+  ConvergenceName _convergence_name;
 };

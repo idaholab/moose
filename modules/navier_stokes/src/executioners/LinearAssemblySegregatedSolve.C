@@ -98,6 +98,70 @@ LinearAssemblySegregatedSolve::validParams()
                               "Solve control");
 
   /*
+   * Parameter to amortize the (often dominant) pressure preconditioner setup cost. The pressure
+   * operator changes slowly between SIMPLE iterations, so its preconditioner can be reused for
+   * several iterations rather than rebuilt every solve.
+   */
+  const std::string recompute_frequency_explanation =
+      "The default of 1 rebuilds it on every solve. A value of N rebuilds it once every N solves "
+      "and "
+      "reuses it in between, which can substantially reduce the solve cost when the "
+      "preconditioner setup dominates (e.g. algebraic multigrid). Larger values trade more reuse "
+      "for a possibly staler preconditioner (more Krylov iterations); for solves where the "
+      "operator changes significantly between linear solves, prefer a smaller value.";
+  params.addRangeCheckedParam<unsigned int>(
+      "pressure_pc_recompute_frequency",
+      1,
+      "pressure_pc_recompute_frequency >= 1",
+      "How often (in pressure corrector solves) to recompute the pressure preconditioner. " +
+          recompute_frequency_explanation);
+  params.addParamNamesToGroup("pressure_pc_recompute_frequency", "Pressure Equation");
+  // Other preconditioner reuse
+  params.addRangeCheckedParam<unsigned int>(
+      "momentum_pc_recompute_frequency",
+      1,
+      "momentum_pc_recompute_frequency >= 1",
+      "How often (in SIMPLE iteration solves) to recompute the momentum preconditioner. " +
+          recompute_frequency_explanation);
+  params.addParamNamesToGroup("momentum_pc_recompute_frequency", "Momentum Equations");
+  params.addRangeCheckedParam<unsigned int>(
+      "energy_pc_recompute_frequency",
+      1,
+      "energy_pc_recompute_frequency >= 1",
+      "How often (in terms of CHT and SIMPLE iterations) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
+  params.addParamNamesToGroup("energy_pc_recompute_frequency", "Energy Equation");
+  params.addRangeCheckedParam<unsigned int>("solid_energy_pc_recompute_frequency",
+                                            1,
+                                            "solid_energy_pc_recompute_frequency >= 1",
+                                            "How often (in terms of CHT solves nested within "
+                                            "SIMPLE solves) to recompute the preconditioner. " +
+                                                recompute_frequency_explanation);
+  params.addParamNamesToGroup("solid_energy_pc_recompute_frequency", "Solid Energy Equation");
+  params.addRangeCheckedParam<unsigned int>(
+      "passive_scalar_pc_recompute_frequency",
+      1,
+      "passive_scalar_pc_recompute_frequency >= 1",
+      "How often (in advection solves) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
+  params.addParamNamesToGroup("passive_scalar_pc_recompute_frequency",
+                              "Passive Scalars Advection Equation");
+  params.addRangeCheckedParam<unsigned int>(
+      "turbulence_pc_recompute_frequency",
+      1,
+      "turbulence_pc_recompute_frequency >= 1",
+      "How often (in advection solves) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
+  params.addParamNamesToGroup("turbulence_pc_recompute_frequency", "Turbulence Equation");
+  params.addRangeCheckedParam<unsigned int>(
+      "active_scalar_pc_recompute_frequency",
+      1,
+      "active_scalar_pc_recompute_frequency >= 1",
+      "How often (in advection solves) to recompute the preconditioner. " +
+          recompute_frequency_explanation);
+  params.addParamNamesToGroup("active_scalar_pc_recompute_frequency", "Active Scalars Equation");
+
+  /*
    * Parameters to control the conjugate heat transfer
    */
   params += NS::FV::CHTHandler::validParams();
@@ -107,18 +171,32 @@ LinearAssemblySegregatedSolve::validParams()
 
 LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   : SIMPLESolveBase(ex),
+    _momentum_pc_recompute_frequency(getParam<unsigned int>("momentum_pc_recompute_frequency")),
+    _momentum_pc_solve_counter(0),
     _pressure_sys_number(_problem.linearSysNum(getParam<SolverSystemName>("pressure_system"))),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+    _pressure_pc_recompute_frequency(getParam<unsigned int>("pressure_pc_recompute_frequency")),
+    _pressure_pc_solve_counter(0),
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
     _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr),
+    _energy_pc_recompute_frequency(getParam<unsigned int>("energy_pc_recompute_frequency")),
+    _energy_pc_solve_counter(0),
     _solid_energy_sys_number(
         _has_solid_energy_system
             ? _problem.linearSysNum(getParam<SolverSystemName>("solid_energy_system"))
             : libMesh::invalid_uint),
     _solid_energy_system(
         _has_solid_energy_system ? &_problem.getLinearSystem(_solid_energy_sys_number) : nullptr),
+    _solid_energy_pc_recompute_frequency(
+        getParam<unsigned int>("solid_energy_pc_recompute_frequency")),
+    _solid_energy_pc_solve_counter(0),
+    _passive_scalar_pc_recompute_frequency(
+        getParam<unsigned int>("passive_scalar_pc_recompute_frequency")),
+    _passive_scalar_pc_solve_counter(0),
+    _turbulence_pc_recompute_frequency(getParam<unsigned int>("turbulence_pc_recompute_frequency")),
+    _turbulence_pc_solve_counter(0),
     _should_solve_momentum(getParam<bool>("should_solve_momentum")),
     _should_solve_pressure(getParam<bool>("should_solve_pressure")),
     _should_solve_energy(getParam<bool>("should_solve_energy")),
@@ -134,6 +212,9 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _active_scalar_l_abs_tol(getParam<Real>("active_scalar_l_abs_tol")),
     _active_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("active_scalar_absolute_tolerance")),
+    _active_scalar_pc_recompute_frequency(
+        getParam<unsigned int>("active_scalar_pc_recompute_frequency")),
+    _active_scalar_pc_solve_counter(0),
     _cht(ex.parameters())
 {
   if (!_should_solve_momentum && _should_solve_pressure)
@@ -163,6 +244,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
 
   if (_has_solid_energy_system && _should_solve_solid_energy)
     _systems_to_solve.push_back(_solid_energy_system);
+
   // and for the turbulence surrogate equations
   if (_has_turbulence_systems && _should_solve_turbulence)
     for (auto system_i : index_range(_turbulence_system_names))
@@ -279,10 +361,10 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   std::vector<std::pair<unsigned int, Real>> its_normalized_residuals;
 
   LinearImplicitSystem & momentum_system_0 =
-      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
+      cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
 
   PetscLinearSolver<Real> & momentum_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
 
   // Solve the momentum equations.
   // TO DO: These equations are VERY similar. If we can store the differences (things coming from
@@ -293,7 +375,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 
     // We will need the right hand side and the solution of the next component
     LinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
 
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
@@ -356,14 +438,16 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   for (const auto system_i : index_range(_momentum_systems))
   {
     LinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
   }
 
-  // We reset this to ensure the preconditioner is recomputed new time we go to the momentum
-  // predictor
-  momentum_solver.reuse_preconditioner(false);
+  // We reset this to ensure the preconditioner is computed again when we go to the momentum
+  // predictor, if the number of reuses has been met
+  momentum_solver.reuse_preconditioner(
+      (_momentum_pc_solve_counter % _momentum_pc_recompute_frequency) != 0);
+  ++_momentum_pc_solve_counter;
 
   return its_normalized_residuals;
 }
@@ -378,6 +462,12 @@ LinearAssemblySegregatedSolve::initialSetup()
   }
 }
 
+void
+LinearAssemblySegregatedSolve::updatePressureGradient()
+{
+  _pressure_system.computeGradients();
+}
+
 std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::solvePressureCorrector()
 {
@@ -385,7 +475,7 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
 
   // We will need some members from the linear system
   LinearImplicitSystem & pressure_system =
-      libMesh::cast_ref<LinearImplicitSystem &>(_pressure_system.system());
+      cast_ref<LinearImplicitSystem &>(_pressure_system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
@@ -395,7 +485,7 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   _problem.computeLinearSystemSys(pressure_system, mmat, rhs, false);
 
@@ -418,6 +508,12 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   if (_pin_pressure)
     NS::FV::constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
   pressure_system.update();
+
+  // Optionally reuse the pressure preconditioner across SIMPLE iterations to amortize its setup
+  // cost. We rebuild it on the first solve and then once every _pressure_pc_recompute_frequency
+  // solves, reusing it in between. With the default frequency of 1 this rebuilds on every solve.
+  pressure_solver.reuse_preconditioner(
+      (_pressure_pc_solve_counter++ % _pressure_pc_recompute_frequency) != 0);
 
   auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
@@ -448,8 +544,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
   _problem.setCurrentLinearSystem(_solid_energy_sys_number);
 
   // We will need some members from the linear system
-  LinearImplicitSystem & system =
-      libMesh::cast_ref<LinearImplicitSystem &>(_solid_energy_system->system());
+  LinearImplicitSystem & system = cast_ref<LinearImplicitSystem &>(_solid_energy_system->system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(system.current_local_solution);
@@ -459,7 +554,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*system.get_linear_solver());
 
   _problem.computeLinearSystemSys(system, mmat, rhs, false);
 
@@ -478,6 +573,11 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
   // Setting the linear tolerances and maximum iteration counts
   _solid_energy_linear_control.real_valued_data["abs_tol"] = _solid_energy_l_abs_tol * norm_factor;
   solver.set_solver_configuration(_solid_energy_linear_control);
+
+  // Handle preconditioner reuse logic
+  solver.reuse_preconditioner(
+      (_solid_energy_pc_solve_counter % _solid_energy_pc_recompute_frequency) != 0);
+  ++_solid_energy_pc_solve_counter;
 
   auto its_res_pair = solver.solve(mmat, mmat, solution, rhs);
   system.update();
@@ -536,7 +636,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   _pressure_system.setSolution(pressure_current_solution);
 
   // We recompute the updated pressure gradient
-  _pressure_system.computeGradients();
+  updatePressureGradient();
 
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
@@ -550,13 +650,14 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
                                                    const Real relaxation_factor,
                                                    SolverConfiguration & solver_config,
                                                    const Real absolute_tol,
+                                                   const bool reuse_pc,
                                                    const Real field_relaxation,
                                                    const Real min_value_limiter)
 {
   _problem.setCurrentLinearSystem(system_num);
 
   // We will need some members from the implicit linear system
-  LinearImplicitSystem & li_system = libMesh::cast_ref<LinearImplicitSystem &>(system.system());
+  LinearImplicitSystem & li_system = cast_ref<LinearImplicitSystem &>(system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(li_system.current_local_solution);
@@ -569,7 +670,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
 
   _problem.computeLinearSystemSys(li_system, mmat, rhs, true);
 
@@ -592,6 +693,9 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   // Setting the linear tolerances and maximum iteration counts
   solver_config.real_valued_data["abs_tol"] = absolute_tol * norm_factor;
   linear_solver.set_solver_configuration(solver_config);
+
+  // Preconditioner reuse to reduce computational cost
+  linear_solver.reuse_preconditioner(reuse_pc);
 
   // Solve the system and update current local solution
   auto its_res_pair = linear_solver.solve(mmat, mmat, solution, rhs);
@@ -638,6 +742,8 @@ LinearAssemblySegregatedSolve::solve()
   if (!_problem.shouldSolve())
     return true;
 
+  Moose::PetscSupport::PetscOptionsScope petsc_options_scope(_problem);
+
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;
   solver_params._type = Moose::SolveType::ST_LINEAR;
@@ -645,6 +751,15 @@ LinearAssemblySegregatedSolve::solve()
 
   // Initialize the SIMPLE iteration counter
   unsigned int simple_iteration_counter = 0;
+
+  // Reset all the PC solve counters for preconditioner re-use
+  _momentum_pc_solve_counter = 0;
+  _pressure_pc_solve_counter = 0;
+  _energy_pc_solve_counter = 0;
+  _solid_energy_pc_solve_counter = 0;
+  _passive_scalar_pc_solve_counter = 0;
+  _turbulence_pc_solve_counter = 0;
+  _active_scalar_pc_solve_counter = 0;
 
   // We set up the residual storage and the corresponding tolerances.
   ResidualStorage residual_storage = setupResidualStorage();
@@ -677,7 +792,7 @@ LinearAssemblySegregatedSolve::solve()
     // Initialize pressure gradients, after this we just reuse the last ones from each
     // iteration
     if (_should_solve_pressure && simple_iteration_counter == 1)
-      _pressure_system.computeGradients();
+      updatePressureGradient();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 
@@ -709,11 +824,13 @@ LinearAssemblySegregatedSolve::solve()
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
         Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-        ns_residuals[energy_index] = solveAdvectedSystem(_energy_sys_number,
-                                                         *_energy_system,
-                                                         _energy_equation_relaxation,
-                                                         _energy_linear_control,
-                                                         _energy_l_abs_tol);
+        ns_residuals[energy_index] =
+            solveAdvectedSystem(_energy_sys_number,
+                                *_energy_system,
+                                _energy_equation_relaxation,
+                                _energy_linear_control,
+                                _energy_l_abs_tol,
+                                (_energy_pc_solve_counter++ % _energy_pc_recompute_frequency) != 0);
 
         if (_has_pm_radiation_systems && _should_solve_pm_radiation)
         {
@@ -727,7 +844,8 @@ LinearAssemblySegregatedSolve::solve()
                                     *_pm_radiation_systems[i],
                                     _pm_radiation_equation_relaxation[i],
                                     _pm_radiation_linear_control,
-                                    _pm_radiation_l_abs_tol);
+                                    _pm_radiation_l_abs_tol,
+                                    /*reuse_pc*/ false);
           }
         }
 
@@ -773,12 +891,14 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
       for (const auto i : index_range(_active_scalar_system_names))
-        ns_residuals[active_scalar_indices[i]] =
-            solveAdvectedSystem(_active_scalar_system_numbers[i],
-                                *_active_scalar_systems[i],
-                                _active_scalar_equation_relaxation[i],
-                                _active_scalar_linear_control,
-                                _active_scalar_l_abs_tol);
+        ns_residuals[active_scalar_indices[i]] = solveAdvectedSystem(
+            _active_scalar_system_numbers[i],
+            *_active_scalar_systems[i],
+            _active_scalar_equation_relaxation[i],
+            _active_scalar_linear_control,
+            _active_scalar_l_abs_tol,
+            (_active_scalar_pc_solve_counter % _active_scalar_pc_recompute_frequency) != 0);
+      ++_active_scalar_pc_solve_counter;
     }
 
     // If we have turbulence equations, solve them here.
@@ -790,15 +910,17 @@ LinearAssemblySegregatedSolve::solve()
       Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
       for (const auto i : index_range(_turbulence_system_names))
       {
-        ns_residuals[turbulence_indices[i]] =
-            solveAdvectedSystem(_turbulence_system_numbers[i],
-                                *_turbulence_systems[i],
-                                _turbulence_equation_relaxation[i],
-                                _turbulence_linear_control,
-                                _turbulence_l_abs_tol,
-                                _turbulence_field_relaxation[i],
-                                _turbulence_field_min_limit[i]);
+        ns_residuals[turbulence_indices[i]] = solveAdvectedSystem(
+            _turbulence_system_numbers[i],
+            *_turbulence_systems[i],
+            _turbulence_equation_relaxation[i],
+            _turbulence_linear_control,
+            _turbulence_l_abs_tol,
+            (_turbulence_pc_solve_counter % _turbulence_pc_recompute_frequency) != 0,
+            _turbulence_field_relaxation[i],
+            _turbulence_field_min_limit[i]);
       }
+      ++_turbulence_pc_solve_counter;
     }
 
     _problem.execute(EXEC_NONLINEAR);
@@ -833,11 +955,14 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
       for (const auto i : index_range(_passive_scalar_system_names))
-        scalar_residuals[i] = solveAdvectedSystem(_passive_scalar_system_numbers[i],
-                                                  *_passive_scalar_systems[i],
-                                                  _passive_scalar_equation_relaxation[i],
-                                                  _passive_scalar_linear_control,
-                                                  _passive_scalar_l_abs_tol);
+        scalar_residuals[i] = solveAdvectedSystem(
+            _passive_scalar_system_numbers[i],
+            *_passive_scalar_systems[i],
+            _passive_scalar_equation_relaxation[i],
+            _passive_scalar_linear_control,
+            _passive_scalar_l_abs_tol,
+            (_passive_scalar_pc_solve_counter % _passive_scalar_pc_recompute_frequency) != 0);
+      ++_passive_scalar_pc_solve_counter;
 
       passive_scalar_converged = NS::FV::converged(scalar_residuals, scalar_abs_tols);
     }
@@ -859,11 +984,15 @@ LinearAssemblySegregatedSolve::setupResidualStorage() const
   // Residual store: position in this vector defines the ordering used by NS::FV::converged()
   // Each entry holds (linear its, normalized residual) for one system
   if (_should_solve_momentum)
-    for ([[maybe_unused]] const auto system_i : index_range(_momentum_systems))
+    for (const auto system_i : index_range(_momentum_systems))
     {
       storage.momentum_indices.push_back(storage.ns_residuals.size());
       storage.ns_residuals.push_back(std::make_pair(0, 1.0));
-      storage.ns_abs_tols.push_back(_momentum_absolute_tolerance);
+
+      const auto abs_tol = _momentum_absolute_tolerance.size() == 1
+                               ? _momentum_absolute_tolerance[0]
+                               : _momentum_absolute_tolerance[system_i];
+      storage.ns_abs_tols.push_back(abs_tol);
     }
 
   if (_should_solve_pressure)

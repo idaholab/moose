@@ -41,7 +41,7 @@ using namespace libMesh;
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
   : SystemBase(subproblem, subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
-    LinearFVGradientInterface(static_cast<SystemBase &>(*this)),
+    LinearFVGradientInterface(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
@@ -460,7 +460,7 @@ AuxiliarySystem::compute(ExecFlagType type)
     kokkosCompute(type);
 #endif
 
-    if (!_raw_grad_container.empty())
+    if (hasLinearFVGradients())
     {
       solution().close();
       _sys.update();
@@ -920,7 +920,7 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
     // Block Elemental AuxKernels
     PARALLEL_TRY
     {
-      ConstElemRange & range = *_mesh.getActiveLocalElementRange();
+      const ConstElemRange & range = *_mesh.getActiveLocalElementRange();
       ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, warehouse, true);
       try
       {

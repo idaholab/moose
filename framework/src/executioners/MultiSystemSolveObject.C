@@ -102,4 +102,11 @@ MultiSystemSolveObject::setupMultiSystemFixedPointRelaxationFactors()
     paramError("multi_system_fixed_point_relaxation_factor",
                "Must provide either 1 value or " + Moose::stringify(_systems.size()) +
                    " values (one per system in the solve order).");
+
+  // For each solver system; record whether to perform relaxation (relaxation_factor != 1)
+  _perform_multi_sys_fp_relaxation.resize(_systems.size(), false);
+  for (const auto i : make_range(_systems.size()))
+    if (_using_multi_sys_fp_iterations &&
+        !MooseUtils::absoluteFuzzyEqual(_multi_sys_fp_relax_factors[i], 1.0))
+      _perform_multi_sys_fp_relaxation[i] = true;
 }

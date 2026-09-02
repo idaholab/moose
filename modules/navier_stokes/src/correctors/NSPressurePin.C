@@ -17,8 +17,6 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/mesh_tools.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", NSPressurePin);
 registerMooseObjectRenamed("NavierStokesApp", NSFVPressurePin, "01/19/2025 00:00", NSPressurePin);
 

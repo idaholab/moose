@@ -29,7 +29,7 @@ LinearFVAdvectionDiffusionScalarSymmetryBC::LinearFVAdvectionDiffusionScalarSymm
     _two_term_expansion(getParam<bool>("use_two_term_expansion"))
 {
   if (_two_term_expansion)
-    _var.computeCellGradients();
+    _var.requestCellGradients();
 }
 
 Real

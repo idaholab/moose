@@ -21,8 +21,6 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", MultiAppVariableValueSampleTransfer);
 
 InputParameters
@@ -77,7 +75,7 @@ MultiAppVariableValueSampleTransfer::execute()
     case TO_MULTIAPP:
     {
       FEProblemBase & from_problem = getToMultiApp()->problemBase();
-      MooseVariableField<Real> & from_var = static_cast<MooseVariableField<Real> &>(
+      MooseVariableField<Real> & from_var = cast_ref<MooseVariableField<Real> &>(
           from_problem.getActualFieldVariable(0, _from_var_name));
       SystemBase & from_system_base = from_var.sys();
       SubProblem & from_sub_problem = from_system_base.subproblem();

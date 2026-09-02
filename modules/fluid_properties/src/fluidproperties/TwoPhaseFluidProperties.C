@@ -106,7 +106,8 @@ TwoPhaseFluidProperties::L_fusion() const
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
-Real TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
+Real
+TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
 {
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
@@ -123,7 +124,8 @@ TwoPhaseFluidProperties::sigma_from_T(const ADReal & T) const
   return sigma;
 }
 
-Real TwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const
+Real
+TwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const
 {
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }

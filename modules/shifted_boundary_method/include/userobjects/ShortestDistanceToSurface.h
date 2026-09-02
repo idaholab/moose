@@ -41,6 +41,14 @@ public:
   /// @brief Get the SBMSurfaceMeshBuilder user objects
   const std::vector<const Function *> & getDistanceFuncs() const { return _distance_functions; }
 
+  /// @brief Returns the minimum distance from point pt to a collection of surfaces.
+  ///
+  /// This routine supports both signed and unsigned distance functions, depending
+  /// on the type of distance functions provided in the 'surfaces' parameter list.
+  /// When signed distance functions are used, this corresponds to the standard
+  /// union signed distance definition.
+  virtual Real value(Real t, const Point & p) const;
+
   /// Return the closest distance vector from point pt to the boundaries
   RealVectorValue distanceVector(const Point & pt) const;
 
@@ -64,4 +72,6 @@ public:
 protected:
   /// Optional signed-distance function
   std::vector<const Function *> _distance_functions;
+
+  bool _signed_distance;
 };

@@ -299,7 +299,11 @@ ContactAction::validParams()
       false,
       "Whether we are going to enable mortar segment mesh debug information. An exodus"
       "file will be generated if the user sets this flag to true");
-  params.transferParam<MooseEnum>(MortarConstraintBase::validParams(), "segment_quadrature");
+  const auto mortar_constraint_params = MortarConstraintBase::validParams();
+  params.transferParam<MooseEnum>(mortar_constraint_params, "segment_quadrature");
+  params.transferParam<Real>(mortar_constraint_params, "minimum_projection_angle");
+  params.transferParam<MooseEnum>(mortar_constraint_params, "mortar_3d_subpatch_plane");
+  params.transferParam<MooseEnum>(mortar_constraint_params, "mortar_3d_qp_mapping");
 
   // Contact surface definition
   params.addParamNamesToGroup("primary secondary displacements", "Contact Surface Definition");
@@ -325,7 +329,8 @@ ContactAction::validParams()
   params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
                               "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
-                              "generate_mortar_mesh segment_quadrature wear_depth debug_mesh",
+                              "generate_mortar_mesh segment_quadrature minimum_projection_angle "
+                              "mortar_3d_subpatch_plane mortar_3d_qp_mapping wear_depth debug_mesh",
                               "Mortar");
   // Mortar dynamics (Newmark-beta)
   params.addParamNamesToGroup("mortar_dynamics newmark_beta newmark_gamma", "Mortar Dynamics");
@@ -459,6 +464,21 @@ ContactAction::ContactAction(const InputParameters & params)
              _formulation != ContactFormulation::MORTAR_PENALTY)
       paramError("triangulate_triangles",
                  "The 'triangulate_triangles' option can only be used with mortar-based "
+                 "formulations.");
+    else if (params.isParamSetByUser("minimum_projection_angle") &&
+             _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("minimum_projection_angle",
+                 "The 'minimum_projection_angle' option can only be used with mortar-based "
+                 "formulations.");
+    else if (params.isParamSetByUser("mortar_3d_subpatch_plane") &&
+             _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("mortar_3d_subpatch_plane",
+                 "The 'mortar_3d_subpatch_plane' option can only be used with mortar-based "
+                 "formulations.");
+    else if (params.isParamSetByUser("mortar_3d_qp_mapping") &&
+             _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("mortar_3d_qp_mapping",
+                 "The 'mortar_3d_qp_mapping' option can only be used with mortar-based "
                  "formulations.");
     else if (params.isParamSetByUser("use_dual") &&
              _formulation != ContactFormulation::MORTAR_PENALTY)
@@ -844,6 +864,9 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
     params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
     params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
     params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
+    params.set<Real>("minimum_projection_angle") = getParam<Real>("minimum_projection_angle");
+    params.set<MooseEnum>("mortar_3d_subpatch_plane") =
+        getParam<MooseEnum>("mortar_3d_subpatch_plane");
     addRelationshipManagers(input_rm_type, params);
   }
   else
@@ -1026,6 +1049,9 @@ ContactAction::addMortarContact()
                                         {"correct_edge_dropping",
                                          "triangulation",
                                          "triangulate_triangles",
+                                         "minimum_projection_angle",
+                                         "mortar_3d_subpatch_plane",
+                                         "mortar_3d_qp_mapping",
                                          "use_petrov_galerkin",
                                          "debug_mesh"});
       if (getParam<bool>("use_petrov_galerkin"))
@@ -1060,6 +1086,9 @@ ContactAction::addMortarContact()
                                         {"correct_edge_dropping",
                                          "triangulation",
                                          "triangulate_triangles",
+                                         "minimum_projection_angle",
+                                         "mortar_3d_subpatch_plane",
+                                         "mortar_3d_qp_mapping",
                                          "use_petrov_galerkin",
                                          "debug_mesh"});
       if (getParam<bool>("use_petrov_galerkin"))
@@ -1087,6 +1116,9 @@ ContactAction::addMortarContact()
                                         {"correct_edge_dropping",
                                          "triangulation",
                                          "triangulate_triangles",
+                                         "minimum_projection_angle",
+                                         "mortar_3d_subpatch_plane",
+                                         "mortar_3d_qp_mapping",
                                          "penalty",
                                          "debug_mesh",
                                          "max_penalty_multiplier",
@@ -1158,6 +1190,9 @@ ContactAction::addMortarContact()
       uo_params.applySpecificParameters(parameters(),
                                         {"triangulation",
                                          "triangulate_triangles",
+                                         "minimum_projection_angle",
+                                         "mortar_3d_subpatch_plane",
+                                         "mortar_3d_qp_mapping",
                                          "friction_coefficient",
                                          "penalty",
                                          "penalty_friction"});
@@ -1209,6 +1244,9 @@ ContactAction::addMortarContact()
                                      {"correct_edge_dropping",
                                       "triangulation",
                                       "triangulate_triangles",
+                                      "minimum_projection_angle",
+                                      "mortar_3d_subpatch_plane",
+                                      "mortar_3d_qp_mapping",
                                       "normalize_c",
                                       "extra_vector_tags",
                                       "absolute_value_vector_tags",
@@ -1270,6 +1308,9 @@ ContactAction::addMortarContact()
       params.applySpecificParameters(parameters(),
                                      {"triangulation",
                                       "triangulate_triangles",
+                                      "minimum_projection_angle",
+                                      "mortar_3d_subpatch_plane",
+                                      "mortar_3d_qp_mapping",
                                       "extra_vector_tags",
                                       "absolute_value_vector_tags",
                                       "debug_mesh"});
@@ -1308,6 +1349,9 @@ ContactAction::addMortarContact()
       params.applySpecificParameters(parameters(),
                                      {"triangulation",
                                       "triangulate_triangles",
+                                      "minimum_projection_angle",
+                                      "mortar_3d_subpatch_plane",
+                                      "mortar_3d_qp_mapping",
                                       "extra_vector_tags",
                                       "absolute_value_vector_tags",
                                       "debug_mesh"});

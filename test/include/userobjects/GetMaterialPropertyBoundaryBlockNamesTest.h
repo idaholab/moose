@@ -22,10 +22,10 @@ public:
   static InputParameters validParams();
 
   GetMaterialPropertyBoundaryBlockNamesTest(const InputParameters & parameters);
-  virtual ~GetMaterialPropertyBoundaryBlockNamesTest(){};
-  virtual void execute(){};
-  virtual void initialize(){};
-  virtual void finalize(){};
+  virtual ~GetMaterialPropertyBoundaryBlockNamesTest() {}
+  virtual void execute() {}
+  virtual void initialize() {}
+  virtual void finalize() {}
   virtual void initialSetup();
 
 private:

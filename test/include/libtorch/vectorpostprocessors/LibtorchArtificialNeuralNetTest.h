@@ -24,9 +24,9 @@ public:
 
   LibtorchArtificialNeuralNetTest(const InputParameters & params);
 
-  virtual void initialize(){};
+  virtual void initialize() {}
   virtual void execute();
-  virtual void finalize(){};
+  virtual void finalize() {}
 
 protected:
   /// We create a vector to store the output of the neural net

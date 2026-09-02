@@ -22,6 +22,6 @@ public:
   SplitTester(const InputParameters & parameters);
 
   virtual void execute() override;
-  virtual void initialize() override{};
-  virtual void finalize() override{};
+  virtual void initialize() override {};
+  virtual void finalize() override {};
 };

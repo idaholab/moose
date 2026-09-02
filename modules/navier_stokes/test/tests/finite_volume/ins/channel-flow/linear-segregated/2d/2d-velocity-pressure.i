@@ -1,6 +1,7 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Mesh]
   [mesh]
@@ -44,6 +45,13 @@ advected_interp_method = 'average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+    gradient_method = ${pressure_gradient_method}
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
   []
 []
 
@@ -103,6 +111,8 @@ advected_interp_method = 'average'
 []
 
 [LinearFVBCs]
+  inactive = 'inlet_and_wall_pressure_flux'
+
   [inlet-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'left'
@@ -132,6 +142,16 @@ advected_interp_method = 'average'
     boundary = 'right'
     variable = pressure
     functor = 1.4
+  []
+  [inlet_and_wall_pressure_flux]
+    type = LinearFVPressureFluxBC
+    boundary = 'left top bottom'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC

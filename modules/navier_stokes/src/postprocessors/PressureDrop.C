@@ -155,8 +155,8 @@ PressureDrop::execute()
               _downstream_boundaries.end())
         status_known = true;
 
-        // in debug mode we will check all boundaries the face info is a part of
-        // to make sure they are consistently upstream or downstream
+      // in debug mode we will check all boundaries the face info is a part of
+      // to make sure they are consistently upstream or downstream
 #ifdef NDEBUG
       if (status_known)
         break;
@@ -307,7 +307,7 @@ PressureDrop::computeQpWeightIntegral() const
 void
 PressureDrop::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const PressureDrop &>(y);
+  const auto & pps = cast_ref<const PressureDrop &>(y);
   _weighted_pressure_upstream += pps._weighted_pressure_upstream;
   _weighted_pressure_downstream += pps._weighted_pressure_downstream;
   _weight_upstream += pps._weight_upstream;

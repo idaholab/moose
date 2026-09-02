@@ -237,7 +237,7 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravaisSlipSystems(
     {
       // Check that the slip plane normal indices of the basal plane sum to zero for consistency
       Real basal_pl_sum = 0.0;
-      for (const auto k : make_range(LIBMESH_DIM))
+      for (const auto k : make_range(Moose::dim))
         basal_pl_sum += reader.getData(i)[k];
 
       if (basal_pl_sum > _zero_tol)
@@ -390,8 +390,8 @@ CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
     local_direction_vector[i].zero();
     local_plane_normal[i].zero();
 
-    for (const auto j : make_range(LIBMESH_DIM))
-      for (const auto k : make_range(LIBMESH_DIM))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
       {
         local_direction_vector[i](j) =
             local_direction_vector[i](j) + crysrot(j, k) * direction_vector[i](k);
@@ -401,8 +401,8 @@ CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
       }
 
     // Calculate Schmid tensor
-    for (const auto j : make_range(LIBMESH_DIM))
-      for (const auto k : make_range(LIBMESH_DIM))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
       {
         schmid_tensor[i](j, k) = local_direction_vector[i](j) * local_plane_normal[i](k);
       }

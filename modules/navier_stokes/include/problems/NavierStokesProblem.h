@@ -38,25 +38,6 @@ public:
   TagID LMatrixTagID() const { return getMatrixTagID(_L_matrix); }
 
   /**
-   * Clear the field split index sets
-   */
-  void clearIndexSets() { _index_sets.clear(); }
-
-  /*
-   * Given a \p KSP \p node and where we are in the field split tree, given by \p tree_position,
-   * return the next \p KSP object in the tree on the way to the Schur complement \p KSP object.
-   * Each invocation of this method moves through one level of our \p _index_sets data member. This
-   * method will call itself recursively until it reaches the Schur complement \p KSP
-   */
-  KSP findSchurKSP(KSP node, unsigned int tree_position);
-
-  /**
-   * Setup the Least Squares Commutator (LSC) preconditioner given the Schur complement \p KSP
-   * object
-   */
-  void setupLSCMatrices(KSP schur_ksp);
-
-  /**
    * Will destroy any matrices we allocated
    */
   virtual ~NavierStokesProblem();
@@ -70,6 +51,31 @@ protected:
   virtual void initPetscOutputAndSomeSolverSettings() override;
 
 private:
+  /**
+   * Context object attached to a field split PC via PCSetApplicationContext so that the static
+   * \p fieldSplitPostSetUpCallback can recover which problem and which position in the field
+   * split tree triggered the callback
+   */
+  struct FieldSplitPostSetUpContext
+  {
+    /// The problem that owns the field split tree being set up
+    NavierStokesProblem * problem;
+    /// The position of this PC within the field split tree; see \p _schur_fs_index
+    std::size_t tree_position;
+  };
+
+  /// Run after PETSc sets up a field split in the tree leading to the Schur complement
+  static PetscErrorCode fieldSplitPostSetUpCallback(PC pc);
+
+  /// Continue through the field split tree or set up the target Schur complement matrices
+  void fieldSplitPostSetUp(PC pc, std::size_t tree_position);
+
+  /// Install the post-setup callback and its context on a field split PC
+  void setFieldSplitPostSetUp(PC pc, std::size_t tree_position);
+
+  /// Set up the Least Squares Commutator (LSC) preconditioner for the Schur complement
+  void setupLSCMatrices(PC schur_pc);
+
   /// Whether to commute operators in the style of Olshanskii. If this is true, then the user must
   /// provide both (pressure) mass matrices and a Poisson operator for the velocity
   const bool _commute_lsc;
@@ -109,5 +115,8 @@ private:
   /// complement at index 1 of the top split handles all non-Dirichlet velocity degrees of freedom
   /// and all pressure degrees of freedom
   std::vector<IS> _index_sets;
+
+  /// Stable callback contexts for each level of the field split tree and its terminal node
+  std::vector<FieldSplitPostSetUpContext> _field_split_post_setup_contexts;
 #endif
 };

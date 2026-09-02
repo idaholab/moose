@@ -20,7 +20,7 @@ MFEMProblemSolve::validParams()
   params.addClassDescription("Solve object for MFEM problems.");
   params.addParam<std::string>("device", "Run app on the chosen device.");
   params.addParam<bool>("gpu_aware_mpi", false, "Use GPU-aware MPI.");
-  MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
+  MooseEnum assembly_levels("legacy full element partial none", "legacy");
   params.addParam<MooseEnum>("assembly_level", assembly_levels, "Matrix assembly level.");
   return params;
 }

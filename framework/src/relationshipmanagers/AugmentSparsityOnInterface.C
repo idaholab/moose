@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", AugmentSparsityOnInterface);
 
-using namespace libMesh;
-
 InputParameters
 AugmentSparsityOnInterface::validParams()
 {
@@ -376,7 +374,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
         ghostHigherDNeighbors(
             p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
     } // end for loop over input range
-  }   // end if amg
+  } // end if amg
 }
 
 bool

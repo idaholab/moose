@@ -17,8 +17,6 @@
 #include "TraceRayTools.h"
 #include "DebugRay.h"
 
-using namespace libMesh;
-
 BoundingBoxIntersectionHelper::BoundingBoxIntersectionHelper(const BoundingBox & bbox,
                                                              const unsigned int dim)
   : _comm(), _mesh(std::make_unique<Mesh>(_comm, dim))

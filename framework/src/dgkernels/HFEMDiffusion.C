@@ -41,7 +41,11 @@ HFEMDiffusion::computeLowerDQpResidual()
   return (_u_neighbor[_qp] - _u[_qp]) * _test_lambda[_i][_qp];
 }
 
-Real HFEMDiffusion::computeQpJacobian(Moose::DGJacobianType) { return 0; }
+Real
+HFEMDiffusion::computeQpJacobian(Moose::DGJacobianType)
+{
+  return 0;
+}
 
 Real
 HFEMDiffusion::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)

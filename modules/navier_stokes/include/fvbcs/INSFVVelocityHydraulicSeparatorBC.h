@@ -26,6 +26,8 @@ public:
   static InputParameters validParams();
   INSFVVelocityHydraulicSeparatorBC(const InputParameters & params);
 
+  bool checkVariableBoundaryIntegrity() const override { return false; }
+
   using INSFVFluxBC::gatherRCData;
   // The flow separator does not allow any outflow nor does it impose any viscous
   // stress so there is no data to contribute from this object

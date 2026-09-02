@@ -13,7 +13,6 @@
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
-#include "LinearFVElementalKernel.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -24,6 +23,7 @@ class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVPressureCorrectionDiffusion;
+class LinearFVGradientReader;
 namespace libMesh
 {
 class Elem;
@@ -45,6 +45,9 @@ public:
 
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+
+  /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
+  const LinearFVGradientReader & pressureGradientField() const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -75,7 +78,7 @@ public:
    * @param momentum_system_numbers The numbers of these systems
    */
   void linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
-                                   const LinearSystem & pressure_system,
+                                   LinearSystem & pressure_system,
                                    const std::vector<unsigned int> & momentum_system_numbers);
 
   /**
@@ -88,6 +91,9 @@ protected:
   /// Select the right pressure gradient field and return a reference to the container
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure);
+
+  /// Get the registered pressure gradient component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
@@ -156,11 +162,6 @@ protected:
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
 
-  /// Pointer to the body force terms
-  std::vector<std::vector<LinearFVElementalKernel *>> _body_force_kernels;
-  /// Vector of body force term names
-  std::vector<std::vector<std::string>> _body_force_kernel_names;
-
   /**
    * for a PISO iteration we need to hold on to the original pressure gradient field.
    * Should not be used in other conditions.
@@ -185,7 +186,10 @@ protected:
   std::vector<libMesh::LinearImplicitSystem *> _momentum_implicit_systems;
 
   /// Pointer to the pressure system
-  const LinearSystem * _pressure_system;
+  LinearSystem * _pressure_system;
+
+  /// Registered pressure gradient field used by Rhie-Chow and compatible momentum pressure kernels.
+  const LinearFVGradientReader * _pressure_gradient_field;
 
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;

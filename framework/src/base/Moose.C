@@ -21,6 +21,7 @@
 #include "Syntax.h"
 #include "MooseSyntax.h"
 #include "ExecFlagRegistry.h"
+#include "FVGradientMethod.h"
 
 #include "hit/parse.h"
 
@@ -43,8 +44,8 @@ const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_BEGIN");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_CONVERGENCE");
-const ExecFlagType EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE =
-    registerDefaultExecFlag("MULTISYSTEM_FIXED_POINT_CONVERGENCE");
+const ExecFlagType EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END =
+    registerDefaultExecFlag("MULTISYSTEM_FIXED_POINT_ITERATION_END");
 const ExecFlagType EXEC_FINAL = registerDefaultExecFlag("FINAL");
 const ExecFlagType EXEC_FORCED = registerExecFlag("FORCED");
 const ExecFlagType EXEC_FAILED = registerExecFlag("FAILED");
@@ -215,6 +216,7 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_dirac_kernel",                 VectorDiracKernel);
   registerMooseObjectTask("add_dg_kernel",                    DGKernel,                  false);
   registerMooseObjectTask("add_fv_kernel",                    FVKernel,                  false);
+  registerMooseObjectTask("add_gradient_method",              FVGradientMethod,          false);
   registerMooseObjectTask("add_interpolation_method",         FVInterpolationMethod,     false);
   registerMooseObjectTask("add_interpolation_method_physics", FVInterpolationMethod,     false);
   registerMooseObjectTask("add_linear_fv_kernel",             LinearFVKernel,            false);
@@ -430,6 +432,7 @@ addActionTypes(Syntax & syntax)
                            " add_default_steady_state_convergence)"
                            "(add_positions)"
                            "(add_periodic_bc)"
+                           "(add_gradient_method)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_field_split)" // split objects required before field split preconditioner itself
                            "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
@@ -553,6 +556,9 @@ addActionTypes(Syntax & syntax)
   registerTask("resolve_mfem_solvers", true);
   addTaskDependency("resolve_mfem_solvers", "add_mfem_solver");
   addTaskDependency("init_problem", "resolve_mfem_solvers");
+
+  // indicators/estimators before markers
+  addTaskDependency("add_marker", "add_indicator");
 #endif
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics
@@ -562,6 +568,10 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_linear_fv_kernel", "add_interpolation_method_physics");
   addTaskDependency("add_fv_kernel", "add_interpolation_method");
   addTaskDependency("add_linear_fv_kernel", "add_interpolation_method");
+  // Linear FV kernels and BCs may register named FVGradientMethod instances in their constructors
+  addTaskDependency("add_user_object", "add_gradient_method");
+  addTaskDependency("add_linear_fv_kernel", "add_gradient_method");
+  addTaskDependency("add_linear_fv_bc", "add_gradient_method");
 
   registerTask("parse_neml2", /*required=*/false);
   addTaskDependency("add_material", "parse_neml2");
@@ -792,6 +802,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // FVInterpolationMethods
   registerSyntax("AddFVInterpolationMethodAction", "FVInterpolationMethods/*");
   syntax.registerSyntaxType("FVInterpolationMethods/*", "InterpolationMethodName");
+
+  // FVGradientMethods
+  registerSyntax("AddFVGradientMethodAction", "FVGradientMethods/*");
+  syntax.registerSyntaxType("FVGradientMethods/*", "GradientMethodName");
 
   // Indicator
   registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");

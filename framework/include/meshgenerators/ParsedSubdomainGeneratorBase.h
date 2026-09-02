@@ -53,5 +53,5 @@ protected:
 
   virtual void assignElemSubdomainID(Elem * elem) = 0;
 
-  virtual void setBlockName(std::unique_ptr<MeshBase> &){};
+  virtual void setBlockName(std::unique_ptr<MeshBase> &) {}
 };

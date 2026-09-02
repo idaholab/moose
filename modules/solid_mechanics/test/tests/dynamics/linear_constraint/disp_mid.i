@@ -21,16 +21,16 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y'
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y'
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = false
+    strain = small
+    block = '1 2'
   [../]
 []
 
@@ -69,12 +69,6 @@
     C_ijkl = '400. 200.'
   [../]
 
-  [./strain_1]
-    type = ComputeSmallStrain
-    block = 1
-    displacements = 'disp_x disp_y'
-  [../]
-
   [./stress_1]
     type = ComputeLinearElasticStress
     block = 1
@@ -92,12 +86,6 @@
     block = 2
     fill_method = 'symmetric_isotropic'
     C_ijkl = '1000. 500.'
-  [../]
-
-  [./strain_2]
-    type = ComputeSmallStrain
-    block = 2
-    displacements = 'disp_x disp_y'
   [../]
 
   [./stress_2]

@@ -92,11 +92,11 @@ RestartableDataReporter::execute()
                                 ReporterName::REPORTER_RESTARTABLE_DATA_PREFIX + "/*"))
       continue;
     // Does not match include patterns
-    if (_include.size() && std::find_if(_include.begin(),
-                                        _include.end(),
-                                        [&value](const auto & pattern) {
-                                          return MooseUtils::globCompare(value.name(), pattern);
-                                        }) == _include.end())
+    if (_include.size() &&
+        std::find_if(_include.begin(),
+                     _include.end(),
+                     [&value](const auto & pattern)
+                     { return MooseUtils::globCompare(value.name(), pattern); }) == _include.end())
       continue;
     // Matches exclude patterns
     if (std::find_if(_exclude.begin(),

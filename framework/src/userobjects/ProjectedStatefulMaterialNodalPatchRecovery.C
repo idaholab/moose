@@ -172,7 +172,7 @@ void
 ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>::threadJoin(const UserObject & uo)
 {
   const auto & npr =
-      static_cast<const ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad> &>(uo);
+      cast_ref<const ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad> &>(uo);
   _abs.insert(npr._abs.begin(), npr._abs.end());
 }
 

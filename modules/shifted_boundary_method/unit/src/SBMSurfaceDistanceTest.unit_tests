@@ -1,0 +1,30 @@
+[Tests]
+  design = 'UnsignedDistanceToSurfaceMesh.md'
+  issues = '#31937'
+
+  [edge_projection]
+    type = GoogleTest
+    unit_test = SBMSurfaceDistanceTest.Edge2NormalProjection
+    requirement = 'The system shall compute the normal distance vector from a point to a first-order line element when the normal projection of the point lies within the element.'
+  []
+  [edge_node_fallback]
+    type = GoogleTest
+    unit_test = SBMSurfaceDistanceTest.Edge2NodeFallback
+    requirement = 'The system shall compute the distance vector from a point to the nearest endpoint of a first-order line element when the normal projection of the point lies outside the element.'
+  []
+  [tilted_edge]
+    type = GoogleTest
+    unit_test = SBMSurfaceDistanceTest.Edge2TiltedDirection
+    requirement = 'The system shall compute the direction and magnitude of the distance vector from a point to a tilted first-order line element.'
+  []
+  [triangle_projection]
+    type = GoogleTest
+    unit_test = SBMSurfaceDistanceTest.Tri3NormalProjection
+    requirement = 'The system shall compute the normal distance vector from a point to a first-order triangular surface element when the normal projection of the point lies within the element.'
+  []
+  [tilted_triangle]
+    type = GoogleTest
+    unit_test = SBMSurfaceDistanceTest.Tri3Tilted
+    requirement = 'The system shall compute distance vectors from points on and off a tilted first-order triangular surface element to their nearest points on the element.'
+  []
+[]

@@ -329,7 +329,7 @@ EFAFace::sortEdges()
         break;
       }
     } // j
-  }   // i
+  } // i
   _edges = ordered_edges;
 }
 

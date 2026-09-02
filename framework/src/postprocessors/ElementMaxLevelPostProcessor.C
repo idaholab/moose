@@ -60,7 +60,7 @@ ElementMaxLevelPostProcessor::getValue() const
 void
 ElementMaxLevelPostProcessor::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const ElementMaxLevelPostProcessor &>(y);
+  const auto & pps = cast_ref<const ElementMaxLevelPostProcessor &>(y);
   _max_level = std::max(_max_level, pps._max_level);
 }
 

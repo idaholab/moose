@@ -179,7 +179,7 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & Em
     {
       Efa::deleteFromMap(EmbeddedNodes, invalid_emb[i]);
       _host_elem->removeEmbeddedNode(invalid_emb[i], true); // also remove from neighbors
-    }                                                       // i
+    } // i
   }
 }
 

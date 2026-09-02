@@ -52,7 +52,7 @@ StoreVariableByElemIDSideUserObject::execute()
 void
 StoreVariableByElemIDSideUserObject::threadJoin(const UserObject & uo)
 {
-  const auto & other_uo = static_cast<const StoreVariableByElemIDSideUserObject &>(uo);
+  const auto & other_uo = cast_ref<const StoreVariableByElemIDSideUserObject &>(uo);
   const auto other_map = other_uo._elem_id_to_var_values;
   for (auto & it : other_map)
     _elem_id_to_var_values[it.first] = it.second;

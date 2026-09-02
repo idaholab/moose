@@ -14,8 +14,6 @@
 #include "libmesh/elem.h"
 #include "libmesh/mesh_serializer.h"
 
-using namespace libMesh;
-
 registerMooseObject("ReactorApp", CoarseMeshExtraElementIDGenerator);
 
 InputParameters

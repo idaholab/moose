@@ -130,7 +130,7 @@ CohesiveZoneModelBase::computeQpIProperties()
 {
   WeightedVelocitiesUserObject::computeQpIProperties();
   // Get the _dof_to_weighted_gap map
-  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
+  const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   // TODO: Probably better to interpolate the deformation gradients.
   _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
@@ -277,7 +277,7 @@ CohesiveZoneModelBase::reinit()
 
     // Compute mechanical contact until end of method.
     const auto penalty_friction = findValue(
-        _dof_to_local_penalty_friction, static_cast<const DofObject *>(node), _penalty_friction);
+        _dof_to_local_penalty_friction, cast_ptr<const DofObject *>(node), _penalty_friction);
 
     // utilized quantities
     const auto & normal_pressure = _dof_to_normal_pressure[node];
@@ -376,7 +376,7 @@ CohesiveZoneModelBase::reinit()
     // End of CZM bilinear computations
     auto it = _dof_to_czm_traction.find(node);
     if (it == _dof_to_czm_traction.end())
-      return;
+      continue;
 
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
@@ -395,9 +395,9 @@ CohesiveZoneModelBase::prepareJumpKinematicQuantities()
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
     // First call does not have maps available
-    const bool return_boolean = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
-    if (return_boolean)
-      return;
+    const bool skip_node = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
+    if (skip_node)
+      continue;
 
     _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotation<true>(
         _normals[i], _subproblem.mesh().dimension());

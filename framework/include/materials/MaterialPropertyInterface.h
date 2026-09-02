@@ -762,7 +762,7 @@ MaterialPropertyInterface::defaultGenericMaterialProperty(const std::string & na
       const auto nqp = Moose::constMaxQpsPerElem;
       auto & property =
           _default_properties.emplace_back(std::make_unique<prop_type>(default_property_id));
-      auto & T_property = static_cast<prop_type &>(*property);
+      auto & T_property = cast_ref<prop_type &>(*property);
 
       T_property.resize(nqp);
       for (const auto qp : make_range(nqp))
@@ -783,7 +783,7 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
     mooseError("getBlockMaterialProperty must be called by a block restrictable object");
 
   const auto name = _get_suffix.empty()
-                        ? static_cast<const std::string &>(name_in)
+                        ? cast_ref<const std::string &>(name_in)
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
 
   using pair_type = std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>;
@@ -952,7 +952,7 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
   }
 
   const auto name = _get_suffix.empty()
-                        ? static_cast<const std::string &>(name_in)
+                        ? cast_ref<const std::string &>(name_in)
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
 
   checkExecutionStage();
@@ -1016,7 +1016,7 @@ MaterialPropertyInterface::getKokkosMaterialPropertyByName(const std::string & p
 
   const auto prop_name =
       _get_suffix.empty()
-          ? static_cast<const std::string &>(prop_name_in)
+          ? cast_ref<const std::string &>(prop_name_in)
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
 
   checkExecutionStage();
@@ -1054,7 +1054,7 @@ MaterialPropertyInterface::getKokkosBlockMaterialProperty(const MaterialProperty
     mooseError("getKokkosBlockMaterialProperty must be called by a block restrictable object");
 
   const auto name = _get_suffix.empty()
-                        ? static_cast<const std::string &>(name_in)
+                        ? cast_ref<const std::string &>(name_in)
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
 
   using pair_type = std::pair<Moose::Kokkos::MaterialProperty<T, dimension>, std::set<SubdomainID>>;

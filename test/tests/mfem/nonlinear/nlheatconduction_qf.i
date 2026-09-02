@@ -6,7 +6,7 @@ kappa = 0.5
 alpha = 1e-2
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/star.mesh
   uniform_refine = 1
 []
@@ -104,7 +104,7 @@ alpha = 1e-2
 
 [VectorPostprocessors]
   [centre_temperature]
-    type = MFEMPointValueSampler
+    type = MFEMVariablePointValueSampler
     variable = 'temperature'
     points = '0.0 0.0 0.0'
     execute_on = TIMESTEP_END

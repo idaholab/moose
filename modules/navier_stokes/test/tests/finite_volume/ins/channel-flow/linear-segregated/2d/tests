@@ -10,6 +10,32 @@
     max_threads = 1 # see libmesh issue #3808
     design = 'SIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md'
   []
+  [momentum-pressure-flux]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    cli_args = "LinearFVBCs/inactive='' Outputs/file_base=2d-velocity-pressure-flux_out"
+    exodiff = 2d-velocity-pressure-flux_out.e
+    requirement = "The system shall solve a high-viscosity, steady-state Navier-Stokes problem in a 2D "
+                  "channel with a nonzero prescribed inlet mass flux using a pressure flux boundary "
+                  "condition and the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    design = 'SIMPLE.md LinearFVPressureFluxBC.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md'
+    issues = '#32719'
+  []
+  [momentum-pressure-gradient-method]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    exodiff = 2d-velocity-pressure-gradient-method_out.e
+    cli_args = 'pressure_gradient_method=gg Outputs/file_base=2d-velocity-pressure-gradient-method_out'
+    requirement = "The system shall allow the pressure variable in a linear finite volume SIMPLE "
+                  "solve to use a named Green-Gauss gradient method used by Rhie-Chow and "
+                  "momentum pressure-gradient consumers."
+    recover = false # we don't support recovery for SIMPLE yet
+    design = 'SIMPLE.md linear_fv_design.md'
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32999'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i
@@ -64,6 +90,14 @@
     max_threads = 1 # see libmesh issue #3808
     design = 'LinearFVNormalVelocityFunctorDirichletBC.md'
     issues = '#32371'
+  []
+  [bad_momentum_abs_tols]
+    type = RunException
+    input = 2d-velocity-pressure.i
+    cli_args = "Executioner/momentum_absolute_tolerance='1e-7 1e-7 1e-7'"
+    expect_err = "The number of momentum absolute tolerances must be one or match the number of momentum systems."
+    requirement = 'The system shall report an error if the number of momentum absolute tolerances does not equal one or the number of momentum systems.'
+    design = 'SIMPLE.md'
   []
   [pressure-drop-interpolation]
     requirement = "The system shall be able to solve a laminar channel flow on a structured orthogonal mesh using direct "

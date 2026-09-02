@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/mug.e
 []
 
@@ -30,7 +30,7 @@
 
 [VectorPostprocessors]
   [point_sample]
-    type = MFEMPointValueSampler
+    type = MFEMVariablePointValueSampler
     variable = 'h1_scalar'
     # this point is considered found
     # unless tolerance is tightened, then it is outside the mesh

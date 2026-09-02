@@ -1325,7 +1325,7 @@ assignConvertedElementsSubdomainNameSuffix(
         throw MooseException(
             "This suffix for converted TET4 elements results in a subdomain name, " + new_name +
             ", that already exists in the mesh. Please choose a different suffix.");
-      mesh.subdomain_name(subdomain_id + sid_shift_base) = new_name;
+      mesh.set_subdomain_name(subdomain_id + sid_shift_base, new_name, true);
     }
     if (MooseMeshUtils::hasSubdomainID(mesh, subdomain_id + 2 * sid_shift_base))
     {
@@ -1337,7 +1337,7 @@ assignConvertedElementsSubdomainNameSuffix(
         throw MooseException(
             "This suffix for converted PYRAMID5 elements results in a subdomain name, " + new_name +
             ", that already exists in the mesh. Please choose a different suffix.");
-      mesh.subdomain_name(subdomain_id + 2 * sid_shift_base) = new_name;
+      mesh.set_subdomain_name(subdomain_id + 2 * sid_shift_base, new_name, true);
     }
   }
 }

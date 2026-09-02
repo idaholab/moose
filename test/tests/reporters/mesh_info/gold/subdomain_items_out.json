@@ -1,0 +1,40 @@
+{
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "subdomains": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long>, MeshInfo::DomainInfoItems>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "subdomains": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "subdomains": [
+                    {
+                        "id": 0,
+                        "max_volume": 0.0227154094218556,
+                        "min_volume": 0.006611882063148393
+                    },
+                    {
+                        "id": 1,
+                        "max_volume": 0.015514930279253882,
+                        "min_volume": 0.0037322350532374483,
+                        "name": "foo"
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

@@ -13,6 +13,26 @@
       expect_out = 'Number of non-conformal nodes: 3'
       detail = 'element overlapping,'
     []
+    [nonconforming_faces]
+      type = 'RunApp'
+      input = 'nonconforming_faces.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conforming element faces \(border another cell but match no neighbor element across the '
+                   'face\): 3'
+      detail = 'element faces that border material but match no neighbor face, such as a quad face '
+               'abutting two triangle faces (which leaves no hanging node),'
+    []
+    [conforming_faces]
+      type = 'RunApp'
+      input = 'nonconforming_faces.i'
+      cli_args = 'Mesh/htet/type=ElementsToTetrahedronsConverter Mesh/htet/input=hexbox '
+                 'Mesh/stitch/inputs="htet tetbox" --mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conforming element faces \(border another cell but match no neighbor element across the '
+                   'face\): 0'
+      detail = 'reporting no such faces when the same interface is made conforming,'
+    []
     [intersecting_edges]
       type = RunApp
       input = 'intersecting_edge_test.i'

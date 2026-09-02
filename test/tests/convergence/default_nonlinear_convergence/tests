@@ -2,12 +2,19 @@
   design = 'DefaultNonlinearConvergence.md'
   issues = '#25931'
 
-  [test]
+  [single_system]
     type = CSVDiff
     input = 'default_nonlinear_convergence.i'
     csvdiff = 'default_nonlinear_convergence_out.csv'
     expect_out = 'Converged due to absolute residual'
     requirement = 'The system shall be able to determine convergence of the nonlinear solve using default criteria through an object.'
+  []
+  [multi_system]
+    type = RunApp
+    input = 'multi_system.i'
+    expect_out = 'u_conv: Converged due to.*relative tolerance \(1e-08\).*v_conv: Converged due to.*absolute tolerance \(1e-09\)'
+    requirement = 'The system shall be able to determine convergence of each nonlinear solve when there are multiple nonlinear systems in the same application.'
+    issues = '#33271'
   []
   [error_reporting]
     requirement = 'The system shall report an error for the default nonlinear convergence class'

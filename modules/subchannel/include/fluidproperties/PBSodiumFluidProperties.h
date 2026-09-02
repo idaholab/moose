@@ -32,6 +32,8 @@ public:
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
   virtual Real h_from_p_T(Real pressure, Real temperature) const override;
+  virtual void
+  h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   virtual Real beta_from_p_T(Real pressure, Real temperature) const override;
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVTurbulentAdvection.h"
+#include "LinearFVGradientInterface.h"
 #include "MooseLinearVariableFV.h"
 #include "NavierStokesMethods.h"
 #include "NS.h"
@@ -41,11 +42,12 @@ LinearFVTurbulentAdvection::LinearFVTurbulentAdvection(const InputParameters & p
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _adv_interp_method(getFVAdvectedInterpolationMethod(
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
+    _gradient_field(_adv_interp_method.needsGradients()
+                        ? &_var.requestCellGradients(_adv_interp_method.gradientMethodName())
+                        : nullptr),
     _mass_face_flux(0.0),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-  if (_adv_interp_method.needsGradients())
-    _var.computeCellGradients(_adv_interp_method.gradientLimiter());
 }
 
 void
@@ -219,7 +221,7 @@ LinearFVTurbulentAdvection::computeNeighborRightHandSideContribution()
 Real
 LinearFVTurbulentAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   const auto boundary_value_matrix_contrib = adv_bc->computeBoundaryValueMatrixContribution();
@@ -233,7 +235,7 @@ LinearFVTurbulentAdvection::computeBoundaryMatrixContribution(const LinearFVBoun
 Real
 LinearFVTurbulentAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   // We support internal boundaries too so we have to make sure the normal points always outward
@@ -265,9 +267,9 @@ LinearFVTurbulentAdvection::setupFaceData(const FaceInfo * face_info)
   const Real neighbor_value = _var.getElemValue(neighbor_info, state);
   if (_adv_interp_method.needsGradients())
   {
-    const auto limiter_type = _adv_interp_method.gradientLimiter();
-    _elem_grad_storage = _var.gradSln(elem_info, state, limiter_type);
-    _neighbor_grad_storage = _var.gradSln(neighbor_info, state, limiter_type);
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
+    _elem_grad_storage = _gradient_field->gradient(elem_info);
+    _neighbor_grad_storage = _gradient_field->gradient(neighbor_info);
   }
 
   _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,

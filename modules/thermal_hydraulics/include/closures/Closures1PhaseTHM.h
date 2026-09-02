@@ -45,7 +45,7 @@ public:
                                  const FlowChannelBase & flow_channel) const override;
   virtual void addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel) override;
   virtual void addMooseObjectsHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
-                                           const FlowChannelBase & /*flow_channel*/) override{};
+                                           const FlowChannelBase & /*flow_channel*/) override {};
 
 protected:
   /**

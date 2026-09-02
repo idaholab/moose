@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.e
 []
 
@@ -69,7 +69,7 @@
 [VectorPostprocessors]
   active = ''
   [point_sample]
-    type = MFEMPointValueSampler
+    type = MFEMVariablePointValueSampler
     variable = concentration
     points = '0.5 0.25 0
               0.5 0.50 0

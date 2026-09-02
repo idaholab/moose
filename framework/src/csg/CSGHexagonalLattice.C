@@ -17,7 +17,7 @@ CSGHexagonalLattice::CSGHexagonalLattice(
     Real pitch,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
     const std::optional<OuterVariant> & outer)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>(), outer), _pitch(pitch)
+  : CSGLattice(name, outer), _pitch(pitch)
 {
   setUniverses(universes); // this will set _nrow
   if (_pitch < 0)
@@ -27,10 +27,7 @@ CSGHexagonalLattice::CSGHexagonalLattice(
 CSGHexagonalLattice::CSGHexagonalLattice(const std::string & name,
                                          Real pitch,
                                          const std::optional<OuterVariant> & outer)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>(), outer),
-    _pitch(pitch),
-    _nrow(0),
-    _nring(0)
+  : CSGLattice(name, outer), _pitch(pitch), _nrow(0), _nring(0)
 {
   if (_pitch < 0)
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");

@@ -30,7 +30,7 @@ void
 AddMFEMFESpaceHierarchyAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).addFESpaceHierarchy(_type, _name, _moose_object_pars);
+    cast_ref<MFEMProblem &>(*_problem).addFESpaceHierarchy(_type, _name, _moose_object_pars);
 }
 
 #endif

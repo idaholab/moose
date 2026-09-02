@@ -47,7 +47,7 @@ SideOptimizationFunctionInnerProduct::execute()
 void
 SideOptimizationFunctionInnerProduct::threadJoin(const UserObject & y)
 {
-  const auto & vpp = static_cast<const SideOptimizationFunctionInnerProduct &>(y);
+  const auto & vpp = cast_ref<const SideOptimizationFunctionInnerProduct &>(y);
   add(vpp);
 }
 

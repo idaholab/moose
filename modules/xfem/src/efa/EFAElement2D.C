@@ -1269,10 +1269,10 @@ EFAElement2D::connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNode
               } // i
             }
           } // loop over NeighborElem's children
-        }   // if (merge_phantom_edges)
-      }     // IF edge-j has_intersection()
-    }       // k, loop over neighbors on edge j
-  }         // j, loop over all edges
+        } // if (merge_phantom_edges)
+      } // IF edge-j has_intersection()
+    } // k, loop over neighbors on edge j
+  } // j, loop over all edges
 
   // Now do a second loop through edges and convert remaining nodes to permanent nodes.
   // Important: temp nodes are not shared by any neighbor, so no need to switch nodes on neighbors
@@ -1653,7 +1653,7 @@ EFAElement2D::getTipEmbeddedNode() const
         {
           if (_edges[i]->containsEdge(*_fragments[0]->getEdge(j)))
             frag_edges.push_back(_fragments[0]->getEdge(j));
-        }                           // j
+        } // j
         if (frag_edges.size() == 2) // element edge contains two fragment edges
         {
           if (frag_edges[1]->containsNode(frag_edges[0]->getNode(1)))

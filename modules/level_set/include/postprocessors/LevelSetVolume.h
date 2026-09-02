@@ -27,7 +27,7 @@ public:
   virtual void execute() override;
   virtual Real getValue() const override;
   virtual void threadJoin(const UserObject & y) override;
-  virtual void computeQpValue() override{};
+  virtual void computeQpValue() override {};
 
 protected:
   /// The accumulated volume to return as a PostprocessorValue

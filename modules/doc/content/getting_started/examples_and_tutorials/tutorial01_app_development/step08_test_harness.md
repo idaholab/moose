@@ -8,7 +8,7 @@ When developing software for scientific computation, it is prudent to maintain a
 
 ## TestHarness
 
-The application testing system is provided by the [`TestHarness`](python/TestHarness/TestHarness.py) Python module. This system lends its users a rich set of testing methods, such as testing input conditions that are supposed to invoke an error and checking whether that error does indeed occur. Every `MooseObject` should have automated test(s) for rapid verification. The primary approach used in MOOSE is *gold file* references, which involves executing an input file and comparing the outputs---usually in the form of `.csv` and/or ExodusII files---to a database of expected outputs stored in a directory named "gold." An example of this test approach was demonstrated in Step 1 when the [simple diffusion test](getting_started/examples_and_tutorials/tutorial01_app_development/step01_moose_app.md#test) was ran.
+The application testing system is provided by the [!file text=`TestHarness`](python/TestHarness/TestHarness.py) Python module. This system lends its users a rich set of testing methods, such as testing input conditions that are supposed to invoke an error and checking whether that error does indeed occur. Every `MooseObject` should have automated test(s) for rapid verification. The primary approach used in MOOSE is *gold file* references, which involves executing an input file and comparing the outputs---usually in the form of `.csv` and/or ExodusII files---to a database of expected outputs stored in a directory named "gold." An example of this test approach was demonstrated in Step 1 when the [simple diffusion test](getting_started/examples_and_tutorials/tutorial01_app_development/step01_moose_app.md#test) was ran.
 
 ### Test Setup id=setup
 
@@ -33,11 +33,11 @@ Although it is important that regression tests be comprehensive, ideally, they s
 
 ### Run Tests
 
-The [`run_tests`](tutorials/tutorial01_app_development/step08_test_harness/run_tests language=python) Python script located in the application root can be executed to invoke `TestHarness` on all test specifications it finds in `test/tests`. The basic command was already demonstrated in [Step 1](getting_started/examples_and_tutorials/tutorial01_app_development/step01_moose_app.md#test):
+The [!file text=`run_tests` language=python](tutorials/tutorial01_app_development/step08_test_harness/run_tests) Python script located in the application root can be executed to invoke `TestHarness` on all test specifications it finds in `test/tests`. The basic command was already demonstrated in [Step 1](getting_started/examples_and_tutorials/tutorial01_app_development/step01_moose_app.md#test):
 
 !include commands/run_tests.md
 
-This will execute the [`simple_diffusion.i`](tutorials/tutorial01_app_development/step08_test_harness/test/tests/kernels/simple_diffusion/simple_diffusion.i) file and conduct the `Exodiff` procedure. When the [#test-demo] section introduces two new specifications, it will be shown that the above command will cause those tests to run as well.
+This will execute the [!file text=`simple_diffusion.i`](tutorials/tutorial01_app_development/step08_test_harness/test/tests/kernels/simple_diffusion/simple_diffusion.i) file and conduct the `Exodiff` procedure. When the [#test-demo] section introduces two new specifications, it will be shown that the above command will cause those tests to run as well.
 
 !alert! note title=Tests can be executed in parallel (in a variety of ways).
 The `run_tests` script has several command-line options that can be useful to developers (see [TestHarness.md#moreoptions]). The most common is the "`-j <n>`" argument for specifying the number of tests to run simultaneously. When used, each of the `n` processors will independently run one of the test specifications, which decreases the total time it takes to run all tests.

@@ -74,7 +74,15 @@ MeshDiagnosticsGenerator::validParams()
       "examine_nonplanar_sides", chk_option, "whether to check element sides are planar");
   params.addParam<MooseEnum>("examine_non_conformality",
                              chk_option,
-                             "whether to examine the conformality of elements in the mesh");
+                             "whether to examine the conformality of elements in the mesh. "
+                             "Automatically turns on 'examine_nonconforming_faces' as well,"
+                             " unless specified otherwise.");
+  params.addParam<MooseEnum>(
+      "examine_nonconforming_faces",
+      chk_option,
+      "whether to check for element faces that border another element but do not match a "
+      "neighbor face (for example a quad face abutting two triangle faces). Unlike "
+      "'examine_non_conformality', this does not require a hanging node.");
   params.addParam<MooseEnum>("examine_non_matching_edges",
                              chk_option,
                              "Whether to check if there are any intersecting edges");
@@ -111,6 +119,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
+    _check_nonconforming_faces(getParam<MooseEnum>("examine_nonconforming_faces")),
     _check_non_matching_edges(getParam<MooseEnum>("examine_non_matching_edges")),
     _non_matching_edge_tol(getParam<Real>("intersection_tol")),
     _check_adaptivity_non_conformality(
@@ -133,7 +142,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
       _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" &&
-      _check_non_matching_edges == "NO_CHECK" && _check_polygons == "NO_CHECK")
+      _check_non_matching_edges == "NO_CHECK" && _check_nonconforming_faces == "NO_CHECK" &&
+      _check_polygons == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -182,6 +192,10 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_non_conformal_mesh != "NO_CHECK")
     checkNonConformalMesh(mesh);
+
+  if (_check_nonconforming_faces != "NO_CHECK" ||
+      (_check_non_conformal_mesh != "NO_CHECK" && !isParamSetByUser("examine_nonconforming_faces")))
+    checkNonConformingFaces(mesh);
 
   if (_check_adaptivity_non_conformality != "NO_CHECK")
     checkNonConformalMeshFromAdaptivity(mesh);
@@ -690,6 +704,64 @@ MeshDiagnosticsGenerator::checkNonConformalMesh(const std::unique_ptr<MeshBase> 
   diagnosticsLog("Number of non-conformal nodes: " + Moose::stringify(num_nonconformal_nodes),
                  _check_non_conformal_mesh,
                  num_nonconformal_nodes);
+}
+
+void
+MeshDiagnosticsGenerator::checkNonConformingFaces(const std::unique_ptr<MeshBase> & mesh) const
+{
+  // A conforming internal interface has a matching face on each side, so libMesh assigns a
+  // neighbor across it. This check finds element faces that have NO neighbor on a side,
+  // (considered external) yet have material on the other side -- i.e. the face is covered by
+  // neighbor faces that share only part of it, such as a HEX8 quad face abutting two TET4
+  // triangle faces. All corners are shared in that situation, so no node lies on another
+  // element's face and the hanging-node 'examine_non_conformality' check does not detect it.
+  //
+  // For each external (no-neighbor) face, we probe a point just outside it, along the outward
+  // direction from the element centroid. If the point locator finds another element there, the
+  // face borders material but matched no neighbor face, so the interface is non-conforming.
+  auto pl = mesh->sub_point_locator();
+  pl->enable_out_of_mesh_mode();
+  unsigned int num_nonconforming_faces = 0;
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    const Point elem_center = elem->vertex_average();
+    for (const auto s : elem->side_index_range())
+    {
+      // Skip faces that already have a matching neighbor; those are conforming.
+      if (elem->neighbor_ptr(s) != nullptr)
+        continue;
+      const auto side = elem->side_ptr(s);
+      const Point side_center = side->vertex_average();
+      // Just outside the face (1% of the centroid-to-face distance beyond it).
+      const Point probe = side_center + 0.01 * (side_center - elem_center);
+      std::set<const Elem *> found;
+      (*pl)(probe, found);
+      bool material_outside = false;
+      for (const auto other : found)
+        if (other != elem && other->active())
+        {
+          material_outside = true;
+          break;
+        }
+      if (material_outside)
+      {
+        if (num_nonconforming_faces < _num_outputs)
+          _console << "Non-conforming element face (borders another cell but matches no neighbor "
+                      "element across the face) on "
+                      "element "
+                   << elem->id() << " side " << s << " near " << side_center << std::endl;
+        num_nonconforming_faces++;
+      }
+    }
+  }
+  pl->disable_out_of_mesh_mode();
+  diagnosticsLog(
+      "Number of non-conforming element faces (border another cell but match no neighbor "
+      "element across the face): " +
+          std::to_string(num_nonconforming_faces),
+      _check_nonconforming_faces != "NO_CHECK" ? _check_nonconforming_faces
+                                               : _check_non_conformal_mesh,
+      num_nonconforming_faces);
 }
 
 void

@@ -108,7 +108,7 @@ MultiAppPostprocessorTransfer::execute()
                           !getToMultiApp()->hasLocalApp(i),
                       "Source and target app parallel distribution must be the same");
 
-        // Case 1: a single source app, multiple target apps
+        // Case 1: a single source app, possibly multiple target apps
         // All target apps must be local
         if (getFromMultiApp()->numGlobalApps() == 1)
           for (const auto j : make_range(getToMultiApp()->numGlobalApps()))
@@ -215,7 +215,9 @@ MultiAppPostprocessorTransfer::checkSiblingsTransferSupported() const
   // Check that we are in one of the supported configurations
   // Case 2: same number of source and target apps
   // The allocation of the child apps on the processors must be the same
-  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
+  // Note: case 1 is supported because we do a reduction on the postprocessor value
+  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps() &&
+      getFromMultiApp()->numGlobalApps() != 1)
   {
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
       if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)

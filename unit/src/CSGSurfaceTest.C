@@ -411,6 +411,19 @@ TEST(CSGSurfaceTest, testSetName)
   ASSERT_EQ("new_name", sph.getName());
 }
 
+/// tests that getSurfaceType() resolves to the derived surface type even when the object is
+/// accessed through a base CSGSurface reference (getSurfaceType() uses typeid(*this))
+TEST(CSGSurfaceTest, testGetSurfaceTypeThroughBase)
+{
+  CSGSphere sphere("sphere_surf", 1.0);
+  CSGPlane plane("plane_surf", -1.0, 0.0, 0.0, 2.0);
+
+  const CSGSurface & sphere_base = sphere;
+  const CSGSurface & plane_base = plane;
+  ASSERT_EQ("CSG::CSGSphere", sphere_base.getSurfaceType());
+  ASSERT_EQ("CSG::CSGPlane", plane_base.getSurfaceType());
+}
+
 /// tests CSGUtils::checkValidCSGName
 TEST(CSGSurfaceTest, testValidSurfaceName)
 {

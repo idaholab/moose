@@ -3,8 +3,8 @@
         "mesh_info": {
             "type": "MeshInfo",
             "values": {
-                "sideset_elems": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
+                "sidesets": {
+                    "type": "MeshInfo::DomainInfoMap<short, MeshInfo::SidesetInfo>"
                 }
             }
         }
@@ -12,18 +12,16 @@
     "time_steps": [
         {
             "mesh_info": {
-                "sideset_elems": null
+                "sidesets": null
             },
             "time": 0.0,
             "time_step": 0
         },
         {
             "mesh_info": {
-                "sideset_elems": [
+                "sidesets": [
                     {
-                        "id": 0,
-                        "name": "top_and_bottom",
-                        "sides": [
+                        "elems": [
                             {
                                 "elem_id": 0,
                                 "side": 0
@@ -40,12 +38,12 @@
                                 "elem_id": 3,
                                 "side": 1
                             }
-                        ]
+                        ],
+                        "id": 0,
+                        "name": "top_and_bottom"
                     },
                     {
-                        "id": 2,
-                        "name": "left",
-                        "sides": [
+                        "elems": [
                             {
                                 "elem_id": 0,
                                 "side": 3
@@ -62,7 +60,9 @@
                                 "elem_id": 3,
                                 "side": 2
                             }
-                        ]
+                        ],
+                        "id": 2,
+                        "name": "left"
                     }
                 ]
             },

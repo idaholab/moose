@@ -38,7 +38,7 @@ LinearFVTurbulentDiffusion::LinearFVTurbulentDiffusion(const InputParameters & p
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
   if (_use_nonorthogonal_correction)
-    _var.computeCellGradients();
+    _var.requestCellGradients();
 }
 
 void
@@ -80,7 +80,7 @@ LinearFVTurbulentDiffusion::computeNeighborRightHandSideContribution()
 Real
 LinearFVTurbulentDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   auto grad_contrib = diff_bc->computeBoundaryGradientMatrixContribution() * _current_face_area;
@@ -99,7 +99,7 @@ LinearFVTurbulentDiffusion::computeBoundaryMatrixContribution(const LinearFVBoun
 Real
 LinearFVTurbulentDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   const auto face_arg = singleSidedFaceArg(_current_face_info);
@@ -113,7 +113,7 @@ LinearFVTurbulentDiffusion::computeBoundaryRHSContribution(const LinearFVBoundar
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction)
+  if (_use_nonorthogonal_correction && diff_bc->needsBoundaryNonorthogonalCorrection())
   {
     const auto correction_vector =
         _current_face_info->normal() -

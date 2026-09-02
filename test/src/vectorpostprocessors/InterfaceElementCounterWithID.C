@@ -76,7 +76,7 @@ InterfaceElementCounterWithID::finalize()
 void
 InterfaceElementCounterWithID::threadJoin(const UserObject & y)
 {
-  const InterfaceElementCounterWithID & uo = static_cast<const InterfaceElementCounterWithID &>(y);
+  const InterfaceElementCounterWithID & uo = cast_ref<const InterfaceElementCounterWithID &>(y);
   for (auto & id : _unique_ids)
   {
     _counters[id].first += uo._counters.at(id).first;

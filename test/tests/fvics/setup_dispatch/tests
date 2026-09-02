@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#33335'
+  design = '/SetupInterface.md'
+  [initial_setup]
+    type = CSVDiff
+    input = setup_dispatch.i
+    csvdiff = setup_dispatch_out.csv
+    max_threads = 1
+    restep = false
+    requirement = "The system shall dispatch the initial setup method exactly once to finite "
+                  "volume initial conditions."
+  []
+[]

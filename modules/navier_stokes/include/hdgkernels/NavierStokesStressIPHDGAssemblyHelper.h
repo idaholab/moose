@@ -11,6 +11,8 @@
 
 #include "DiffusionIPHDGAssemblyHelper.h"
 
+class MooseMesh;
+
 /**
  * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
  * (IPDG-H), which is a type of HDG method, discretization of the Navier-Stokes stress term

@@ -30,7 +30,7 @@ void
 AddMFEMSubMeshAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).addSubMesh(_type, _name, _moose_object_pars);
+    cast_ref<MFEMProblem &>(*_problem).addSubMesh(_type, _name, _moose_object_pars);
 }
 
 #endif

@@ -22,8 +22,6 @@
 #include "libmesh/type_n_tensor.h"
 #include "libmesh/fe_interface.h"
 
-using namespace libMesh;
-
 template <typename OutputType>
 MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputType> & var,
                                                  SystemBase & sys,

@@ -3,7 +3,7 @@
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/stacked_hexes.e
 []
 
@@ -105,7 +105,7 @@
 
 [VectorPostprocessors]
   [line_sample]
-    type = MFEMLineValueSampler
+    type = MFEMVariableLineValueSampler
     variable = 'temperature'
     start_point = '0.0 0.5 0.5'
     end_point = '1.0 0.5 0.5'

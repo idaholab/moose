@@ -16,17 +16,10 @@
     subdomain_ids = '0 1
                      0 1'
   [../]
-  displacements = 'disp_x disp_y'
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [GlobalParams]
+  displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
 []
 
@@ -196,10 +189,6 @@
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y'
-  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
@@ -255,9 +244,11 @@
   exodus = true
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y'
-    use_displaced_mesh = true
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
+

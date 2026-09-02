@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MortarSegmentInfo.h"
+#include "Mortar3DSubpatchPlane.h"
 #include "MooseHashing.h"
 #include "ConsoleStreamInterface.h"
 #include "MooseError.h"
@@ -22,6 +23,7 @@
 #include "libmesh/int_range.h"
 
 // C++ includes
+#include <array>
 #include <optional>
 #include <set>
 #include <memory>
@@ -51,6 +53,15 @@ typedef boundary_id_type BoundaryID;
 typedef subdomain_id_type SubdomainID;
 
 /**
+ * Parent-face reference coordinates associated with the vertices of one triangular mortar segment.
+ */
+struct MortarSegmentReferencePoints
+{
+  std::array<Point, 3> secondary_reference_points;
+  std::array<Point, 3> primary_reference_points;
+};
+
+/**
  * This class is a container/interface for the objects involved in
  * automatic generation of mortar spaces.
  */
@@ -76,8 +87,11 @@ public:
                             const bool debug,
                             const bool correct_edge_dropping,
                             const Real minimum_projection_angle,
+                            const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
                             const MortarSegmentTriangulationMode triangulation_mode,
-                            const bool triangulate_triangles);
+                            const bool triangulate_triangles,
+                            const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
+                                Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -314,6 +328,13 @@ public:
   }
 
   int dim() const { return _mesh.mesh_dimension(); }
+
+  /// Return the 3D mortar quadrature-point mapping method.
+  Mortar3DQuadraturePointMapping mortar3DQpMapping() const { return _mortar_3d_qp_mapping; }
+
+  /// Return the parent-face reference coordinates for a mortar segment.
+  const MortarSegmentReferencePoints &
+  mortarSegmentReferencePoints(const Elem & mortar_segment_elem) const;
 
   /**
    * @return The set of nodes on which mortar constraints are not active
@@ -563,11 +584,20 @@ private:
   /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
   const Real _minimum_projection_angle;
 
+  /// Method used to define the local projection planes for 3D secondary subpatches.
+  const Mortar3DSubpatchPlane _mortar_3d_subpatch_plane;
+
   /// Triangulation mode used for clipped 3D mortar polygons.
   const MortarSegmentTriangulationMode _triangulation_mode;
 
   /// Whether already-triangular clipped polygons should still be centroid-subdivided.
   const bool _triangulate_triangles;
+
+  /// Method used to map 3D mortar segment quadrature points to primary and secondary faces.
+  const Mortar3DQuadraturePointMapping _mortar_3d_qp_mapping;
+
+  /// Reference-coordinate data used only by the reference-interpolation mapping mode.
+  std::unordered_map<const Elem *, MortarSegmentReferencePoints> _msm_elem_to_reference_points;
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;

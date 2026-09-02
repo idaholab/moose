@@ -15,8 +15,6 @@
 #include "libmesh/quadrature.h"
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", TestWeightedGapUserObject);
 
 InputParameters
@@ -64,7 +62,7 @@ TestWeightedGapUserObject::computeQpIProperties()
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
-  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
+  const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   auto & [weighted_gap, volume] = _dof_to_weighted_gap[dof];
   weighted_gap += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
@@ -112,7 +110,7 @@ communicateGaps(std::unordered_map<const DofObject *, std::pair<Real, Real>> & d
 
     for (auto & [dof_id, weighted_gap, volume] : sent_data)
     {
-      const auto * const dof_object = static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id));
+      const auto * const dof_object = cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       auto & [our_weighted_gap, our_volume] = dof_to_weighted_gap[dof_object];
       our_weighted_gap += weighted_gap;

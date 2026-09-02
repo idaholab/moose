@@ -78,7 +78,7 @@ for this case is presented in [sub_app].
 ## Training surrogate models
 
 Both surrogate models are constructed using some knowledge about the full-order problem.
-This means that the [full-order problem](surrogates/polynomial_regression/sub.i) is solved
+This means that the [!file text=full-order problem](surrogates/polynomial_regression/sub.i) is solved
 multiple times with different parameter samples and the value of the QoI is stored from
 each computation.
 This step is managed by a master input file which creates parameter samples,
@@ -88,8 +88,8 @@ For more information about setting up master input files see
 [examples/surrogate_training.md] and [examples/parameter_study.md].
 The two complete training input files used for the two cases with
 the two different parameter distributions
-are available under [uniform](surrogates/polynomial_regression/uniform_train.i) and
-[normal](surrogates/polynomial_regression/normal_train.i).
+are available under [!file text=uniform](surrogates/polynomial_regression/uniform_train.i) and
+[!file text=normal](surrogates/polynomial_regression/normal_train.i).
 
 The training phase starts with the definition of the distributions
 in the `Distributions` block. The uniform distributions can be defined as:
@@ -138,8 +138,8 @@ again without the need to carry out the training process from the beginning.
 ## Evaluation of surrogate models
 
 To evaluate surrogate models, a new master input file has to be created for
-[uniform](surrogates/polynomial_regression/uniform_surr.i) and
-[normal](surrogates/polynomial_regression/normal_surr.i) parameter distributions.
+[!file text=uniform](surrogates/polynomial_regression/uniform_surr.i) and
+[!file text=normal](surrogates/polynomial_regression/normal_surr.i) parameter distributions.
 The input files contain testing distributions for the parameters defined in the `Distributions` block.
 In this study, the training distributions are used for the testing of the surrogates as well.
 Both surrogate models are tested using the same parameter samples. These samples are selected
@@ -170,7 +170,7 @@ as well to showcase potential issues the user might encounter when using polynom
 
 First, the case with parameters having uniform distributions are investigated.
 The statistical moments obtained by the execution of the
-[surrogate model](surrogates/polynomial_regression/uniform_surr.i) are summarized in
+[!file text=surrogate model](surrogates/polynomial_regression/uniform_surr.i) are summarized in
 [stats_uniform].
 
 !table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models assuming uniform parameter distributions.
@@ -193,7 +193,7 @@ It is apparent that the two methods give similar solutions.
 
 Next, the case with normally distributed parameters is analyzed.
 The statistical moments of the results from testing the
-[surrogate model](surrogates/polynomial_regression/uniform_surr.i) are summarized in
+[!file text=surrogate model](surrogates/polynomial_regression/uniform_surr.i) are summarized in
 [stats_normal].
 
 !table id=stats_normal caption=Comparison of the statistical moments from different surrogate models assuming normal distributions.

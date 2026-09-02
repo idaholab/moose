@@ -231,7 +231,7 @@ ArrayDGLowerDKernel::computeOffDiagLowerDJacobian(Moose::ConstraintJacobianType 
 
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    const auto & jv0 = static_cast<const MooseVariable &>(jvar);
+    const auto & jv0 = cast_ref<const MooseVariable &>(jvar);
     const VariableTestValue & loc_phi =
         (type == Moose::LowerLower || type == Moose::SecondaryLower || type == Moose::PrimaryLower)
             ? jv0.phiLower()
@@ -251,7 +251,7 @@ ArrayDGLowerDKernel::computeOffDiagLowerDJacobian(Moose::ConstraintJacobianType 
   }
   else if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    const auto & jv1 = static_cast<const ArrayMooseVariable &>(jvar);
+    const auto & jv1 = cast_ref<const ArrayMooseVariable &>(jvar);
     const ArrayVariableTestValue & loc_phi =
         (type == Moose::LowerLower || type == Moose::SecondaryLower || type == Moose::PrimaryLower)
             ? jv1.phiLower()

@@ -51,7 +51,7 @@ registerMooseAction("ExampleApp", ExampleAction, "example_task_b");
 
 Like MOOSE objects, tasks and syntax are registered in an application's constructor,
 conventionally from a static method called `registerAll`. MOOSE's tasks, actions,
-and syntax are defined in [Moose.C](framework/src/base/Moose.C), for example.
+and syntax are defined in [!file text=Moose.C](framework/src/base/Moose.C), for example.
 
 Several macros are relevant for registration of tasks and syntax.
 
@@ -167,6 +167,10 @@ These flags are used in a `Debug` block:
   show_action_dependencies = true
 []
 ```
+
+## Command line arguments
+
+- `--show-actions` Shows the list of Actions as they execute, in order of execution.
 
 ## Additional Notes
 

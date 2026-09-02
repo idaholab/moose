@@ -25,6 +25,7 @@
 #include "ElemInfo.h"
 
 #include <memory> //std::unique_ptr
+#include <filesystem>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -180,6 +181,17 @@ public:
    * This is where the Mesh object is actually created and filled in.
    */
   virtual void buildMesh() = 0;
+
+  /**
+   * Write the mesh files needed for recovery/checkpointing.
+   *
+   * The base implementation writes the libMesh checkpoint mesh.
+   * Derived classes may extend this to write additional backend-specific files.
+   *
+   * @return The additional backend-specific files written by the derived class.
+   */
+  virtual std::vector<std::filesystem::path>
+  writeRecoveryFiles(const std::filesystem::path & file_base);
 
   /**
    * Returns MeshBase::mesh_dimension(), (not
@@ -440,7 +452,7 @@ public:
    * Return pointers to range objects for various types of ranges
    * (local nodes, boundary elems, etc.).
    */
-  libMesh::ConstElemRange * getActiveLocalElementRange();
+  const libMesh::ConstElemRange * getActiveLocalElementRange();
   libMesh::NodeRange * getActiveNodeRange();
   SemiLocalNodeRange * getActiveSemiLocalNodeRange() const;
   libMesh::ConstNodeRange * getLocalNodeRange();
@@ -1557,6 +1569,11 @@ public:
   bool possiblyRebuildNodeToElemMap();
 
 protected:
+  /**
+   * Returns whether this mesh is allowed to read a recovery file.
+   */
+  bool allowRecovery() const { return _allow_recovery; }
+
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
 
@@ -1641,11 +1658,9 @@ protected:
   std::set<Node *> _semilocal_node_list;
 
   /**
-   * A range for use with threading.  We do this so that it doesn't have
-   * to get rebuilt all the time (which takes time).
+   * Ranges for use with threading, cached so they don't have to get
+   * rebuilt all the time (which takes time).
    */
-  std::unique_ptr<libMesh::ConstElemRange> _active_local_elem_range;
-
   std::unique_ptr<SemiLocalNodeRange> _active_semilocal_node_range;
   std::unique_ptr<libMesh::NodeRange> _active_node_range;
   std::unique_ptr<libMesh::ConstNodeRange> _local_node_range;

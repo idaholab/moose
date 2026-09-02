@@ -35,6 +35,8 @@ template <bool is_ad>
 void
 SideIntegralMaterialPropertyTempl<is_ad>::initialSetup()
 {
+  SideIntegralPostprocessor::initialSetup();
+
   // check if the material property type and number of supplied components match
   _prop.check();
 }

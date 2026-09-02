@@ -60,8 +60,13 @@ NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters) : F
     _have_mass_matrix(!_mass_matrix.empty()),
     _have_L_matrix(!_L_matrix.empty()),
     _set_schur_pre((getParam<MooseEnum>("set_schur_pre").getEnum<SetSchurPreType>())),
-    _schur_fs_index(getParam<std::vector<unsigned int>>("schur_fs_index"))
+    _schur_fs_index(getParam<std::vector<unsigned int>>("schur_fs_index")),
+    _index_sets(_schur_fs_index.size()),
+    _field_split_post_setup_contexts(_schur_fs_index.size() + 1)
 {
+  for (const auto tree_position : index_range(_field_split_post_setup_contexts))
+    _field_split_post_setup_contexts[tree_position] = {this, tree_position};
+
   if (_commute_lsc)
   {
     if (!_have_mass_matrix)
@@ -115,73 +120,79 @@ NavierStokesProblem::initialSetup()
             .uncondensed_dofs_only();
     }
 }
-KSP
-NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
+PetscErrorCode
+NavierStokesProblem::fieldSplitPostSetUpCallback(PC pc)
 {
-  auto it = _schur_fs_index.begin() + tree_position;
-  if (it == _schur_fs_index.end())
-    return node;
+  PetscFunctionBegin;
 
-  PC fs_pc;
-  PetscInt num_splits;
-  KSP * subksp;
-  KSP next_ksp;
-  IS is;
-  PetscBool is_fs;
+  void * context;
+  PetscCall(PCGetApplicationContext(pc, &context));
+  const auto & post_setup_context = *static_cast<FieldSplitPostSetUpContext *>(context);
+  post_setup_context.problem->fieldSplitPostSetUp(pc, post_setup_context.tree_position);
 
-  auto sub_ksp_index = *it;
-
-  // Get the preconditioner associated with the linear solver
-  LibmeshPetscCall(KSPGetPC(node, &fs_pc));
-
-  // Verify the preconditioner is a field split preconditioner
-  LibmeshPetscCall(PetscObjectTypeCompare((PetscObject)fs_pc, PCFIELDSPLIT, &is_fs));
-  if (!is_fs)
-    mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
-
-  // Setup the preconditioner. We need to call this first in order to be able to retrieve the sub
-  // ksps and sub index sets associated with the splits
-  LibmeshPetscCall(PCSetUp(fs_pc));
-
-  // Get the linear solvers associated with each split
-  LibmeshPetscCall(PCFieldSplitGetSubKSP(fs_pc, &num_splits, &subksp));
-  next_ksp = subksp[sub_ksp_index];
-
-  // Get the index set for the split at this level of the tree we are traversing to the Schur
-  // complement preconditioner
-  LibmeshPetscCall(PCFieldSplitGetISByIndex(fs_pc, sub_ksp_index, &is));
-
-  // Store this tree level's index set, which we will eventually use to get the sub-matrices
-  // required for our preconditioning process from the system matrices
-  _index_sets.push_back(is);
-
-  // Free the array of sub linear solvers that got allocated in the PCFieldSplitGetSubKSP call
-  LibmeshPetscCall(PetscFree(subksp));
-
-  // Continue traversing down the tree towards the Schur complement linear solver/preconditioner
-  return findSchurKSP(next_ksp, tree_position + 1);
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 void
-NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
+NavierStokesProblem::setFieldSplitPostSetUp(PC pc, const std::size_t tree_position)
+{
+  LibmeshPetscCall(PCSetApplicationContext(pc, &_field_split_post_setup_contexts[tree_position]));
+  LibmeshPetscCall(PCSetPostSetUp(pc, &NavierStokesProblem::fieldSplitPostSetUpCallback));
+}
+
+void
+NavierStokesProblem::fieldSplitPostSetUp(PC pc, const std::size_t tree_position)
+{
+  PetscBool is_fs;
+  LibmeshPetscCall(PetscObjectTypeCompare((PetscObject)pc, PCFIELDSPLIT, &is_fs));
+  if (!is_fs)
+    mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
+
+  if (tree_position == _schur_fs_index.size())
+  {
+    setupLSCMatrices(pc);
+    return;
+  }
+
+  PetscInt num_splits;
+  KSP * subksp;
+  IS is;
+  PC next_pc;
+  const auto sub_ksp_index = _schur_fs_index[tree_position];
+
+  // Get the linear solvers associated with each split
+  LibmeshPetscCall(PCFieldSplitGetSubKSP(pc, &num_splits, &subksp));
+  LibmeshPetscCall(KSPGetPC(subksp[sub_ksp_index], &next_pc));
+
+  // Get the index set for the split at this level of the tree we are traversing to the Schur
+  // complement preconditioner
+  LibmeshPetscCall(PCFieldSplitGetISByIndex(pc, sub_ksp_index, &is));
+
+  // Store this tree level's index set, which we will eventually use to get the sub-matrices
+  // required for our preconditioning process from the system matrices
+  _index_sets[tree_position] = is;
+
+  // PETSc will set up the child while recursively setting up the field split blocks
+  setFieldSplitPostSetUp(next_pc, tree_position + 1);
+
+  // Free the array of sub linear solvers that got allocated in the PCFieldSplitGetSubKSP call
+  LibmeshPetscCall(PetscFree(subksp));
+}
+
+void
+NavierStokesProblem::setupLSCMatrices(PC schur_pc)
 {
   KSP * subksp; // This will be length two, with the former being the A KSP and the latter being the
                 // Schur complement KSP
   KSP schur_complement_ksp;
-  PC schur_pc, lsc_pc;
+  PC lsc_pc;
   PetscInt num_splits;
   Mat lsc_pc_pmat;
   IS velocity_is, pressure_is;
   PetscInt rstart, rend;
-  PetscBool is_lsc, is_fs;
+  PetscBool is_lsc;
   std::vector<Mat> intermediate_Qs;
   std::vector<Mat> intermediate_Ls;
-
-  // Get the preconditioner for the linear solver. It must be a field split preconditioner
-  LibmeshPetscCall(KSPGetPC(schur_ksp, &schur_pc));
-  LibmeshPetscCall(PetscObjectTypeCompare((PetscObject)schur_pc, PCFIELDSPLIT, &is_fs));
-  if (!is_fs)
-    mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
 
   // The mass matrix. This will correspond to velocity degrees of freedom for Elman LSC and pressure
   // degrees of freedom for Olshanskii LSC or when directly using the mass matrix as a
@@ -234,10 +245,6 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   Mat our_parent_L = nullptr;
   if (_have_L_matrix)
     our_parent_L = process_intermediate_mats(intermediate_Ls, global_L);
-
-  // Setup the preconditioner. We need to call this first in order to be able to retrieve the sub
-  // ksps and sub index sets associated with the splits
-  LibmeshPetscCall(PCSetUp(schur_pc));
 
   // There are always two splits in a Schur complement split. The zeroth split is the split with the
   // on-diagonals, e.g. the velocity dofs. Here we retrive the velocity dofs/index set
@@ -379,19 +386,6 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   LibmeshPetscCall(PetscFree(subksp));
 }
 
-PetscErrorCode
-navierStokesKSPPreSolve(KSP root_ksp, Vec /*rhs*/, Vec /*x*/, void * context)
-{
-  PetscFunctionBegin;
-
-  auto * ns_problem = static_cast<NavierStokesProblem *>(context);
-  ns_problem->clearIndexSets();
-  auto schur_ksp = ns_problem->findSchurKSP(root_ksp, 0);
-  ns_problem->setupLSCMatrices(schur_ksp);
-
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
 void
 NavierStokesProblem::initPetscOutputAndSomeSolverSettings()
 {
@@ -407,9 +401,12 @@ NavierStokesProblem::initPetscOutputAndSomeSolverSettings()
     return;
   }
 
-  // Set the pre-KSP solve callback. At that time we will setup our Schur complement preconditioning
+  // Each field split callback will install the callback on the next nested split until PETSc sets
+  // up the target Schur complement split
   auto ksp = currentNonlinearSystem().getFieldSplitPreconditioner().getKSP();
-  LibmeshPetscCall(KSPSetPreSolve(ksp, &navierStokesKSPPreSolve, this));
+  PC pc;
+  LibmeshPetscCall(KSPGetPC(ksp, &pc));
+  setFieldSplitPostSetUp(pc, 0);
 }
 
 #endif

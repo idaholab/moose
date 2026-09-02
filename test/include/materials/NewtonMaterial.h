@@ -24,7 +24,7 @@ public:
   static InputParameters validParams();
 
   NewtonMaterial(const InputParameters & parameters);
-  virtual ~NewtonMaterial(){};
+  virtual ~NewtonMaterial() {}
 
   virtual void initialSetup() override;
 

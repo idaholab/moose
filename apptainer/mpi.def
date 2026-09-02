@@ -1,28 +1,37 @@
-{#- Required jinja arguments                                                                  -#}
-{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
+{#-
+   Required jinja arguments:
 
-{#- Optional jinja arguments                                                                  -#}
-{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
-{#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang_min, gcc_min)    -#}
+   - MOOSE_DIR: Path on the host to the MOOSE repository
 
-{#- The files directory for this definition                                                   -#}
+   Optional jinja arguments:
+
+   - VARIANT: Set an alternate variant (from image)
+-#}
+
+{#- Directory definitions                              -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
 
-# TODO: Update packages to production versions
+{#- Image variant definitions
+    rocky8_gcc:        moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260822
+    rocky8_oneapi:     moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.1.1-mpich4.3.2-20260822
+    rocky9_gcc:        moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260822
+    ubuntu24_clang:    moose-mpi-ubuntu24-clang:24.04-clang22.1.8-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260823
+    ubuntu24_cuda_gcc: moose-mpi-ubuntu24-cuda-gcc:24.04-cuda13.3.1-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260823
+    ubuntu24_gcc:      moose-mpi-ubuntu24-gcc:24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260823
+    ubuntu24_gccmin:   moose-mpi-ubuntu24-gccmin:24.04-gcc9.5.0-mpich5.0.1-20260823
+-#}
+{%- set FROM_IMAGES = {
+  "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc@sha256:01c4a2165728aa841f14f801cf811dcfe2fd6e5cbfb844de67563c0710e7ef1c",
+  "rocky8_oneapi":     "ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi@sha256:c8d64a4ccb9a32dc4061ce48b55fbb60e689afe2b47c9d617a35b6f48e15de80",
+  "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc@sha256:04e82ba22859fe86552f7edbe54b0f5f85bc0a95b79846ee03d7ff2f641588f2",
+  "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-clang@sha256:54b368cfefa325a7fed53bf7b4c01fa217c85301d1e449d76aa1195165954776",
+  "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-cuda-gcc@sha256:db1a9740fdfce9a0378e6b451bf03967d62e3df09d29a2a4e6d5a4963378f943",
+  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gcc@sha256:01b6fcadea485db93f6d265d960f6688e6bd3e5913f014c35e68ac6816946650",
+  "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/moose-mpi-ubuntu24-gccmin@sha256:7153a3528ec3925015d818b276c4a5b760d9f00b9ce0b712780df33c764354ad"
+} -%}
+
 Bootstrap: docker
-{%- if ALTERNATE_FROM == "clang" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-clang:8.10-clang21.1.8-gcc15.2.1-mpich5.0.1-20260605
-{%- elif ALTERNATE_FROM == "cuda" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-cuda-gcc:8.10-cuda13.2.1-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260605
-{%- elif ALTERNATE_FROM == "gcc_min" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gccmin:8.10-gcc9.2.1-mpich5.0.1-20260605
-{%- elif ALTERNATE_FROM == "intel" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.0.0-mpich4.3.2-20260605
-{%- elif ALTERNATE_FROM == "rocky9" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260605
-{%- else %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260605
-{%- endif %}
+From: {{ FROM_IMAGES.get(VARIANT, FROM_IMAGES.get("ubuntu24_gcc")) }}
 
 %environment
     # Fix locale warnings
@@ -31,40 +40,54 @@ From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpic
     # Environment from underyling docker image
     test -f /moose_env.sh && . /moose_env.sh
 
-%post
-    # Be careful about unknown variables
-    set -u
+%post -c /bin/bash
+    set -uexo pipefail
 
-    # Determine rocky version
-    grep -q "Rocky" /etc/os-release && IS_ROCKY=1
-    if [ -n "${IS_ROCKY:-}" ]; then
-        grep 'VERSION=\"8.' /etc/os-release && IS_ROCKY_8=1
-        grep 'VERSION=\"9.' /etc/os-release && IS_ROCKY_9=1
-    fi
+    source /.singularity.d/build_utils.sh
+    update_system_packages
 
     # Remove apptainer if it's installed
-    if dnf list installed apptainer &> /dev/null; then
+    if is_rocky && dnf list installed apptainer &> /dev/null; then
         dnf remove -y apptainer
     fi
 
-    # Enable additional repos
-    dnf install -y dnf-plugins-core
-    if [ -n "${IS_ROCKY_8:-}" ]; then
-        dnf config-manager --set-enabled powertools
-        dnf install -y redhat-lsb-core.x86_64
-    elif [ -n "${IS_ROCKY_9:-}" ]; then
-        dnf config-manager --set-enabled crb
+    # Enable additional rocky repos
+    if is_rocky; then
+        dnf install -y dnf-plugins-core
+        if is_rocky8; then
+            dnf config-manager --set-enabled powertools
+            dnf install -y redhat-lsb-core.x86_64
+        elif is_rocky9; then
+            dnf config-manager --set-enabled crb
+        fi
+        dnf install -y epel-release
     fi
-    dnf install -y epel-release
 
     # Additional installs
-    dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
-        perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
-        libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
-        automake cppunit-devel glpk-devel patchelf lcov bash-completion ninja-build
+    INSTALLS=(
+        "autoconf" "automake" "bash-completion" "bison" "cmake" "diffutils"
+        "doxygen" "emacs" "flex" "lcov" "libtool" "ninja-build" "patch" "patchelf"
+        "patchutils"
+    )
+    ROCKY_INSTALLS=(
+        "cppunit" "cppunit-devel" "fftw-devel" "glpk-devel" "gsl-devel" "libpng"
+        "libpng-devel" "libtirpc" "libtirpc-devel" "perl-IO-Compress" "perl-JSON"
+        "perl-JSON-PP" "zlib-devel"
+    )
+    UBUNTU_INSTALLS=(
+        "libcppunit-dev" "libfftw3-dev" "libglpk-dev" "libgsl-dev" "libio-compress-perl"
+        "libjson-perl" "libjson-pp-perl" "libpng-dev" "libtirpc3" "libtirpc-dev"
+        "zlib1g-dev" "libc6-dbg"
+    )
+    if is_rocky; then
+        dnf install -y "${INSTALLS[@]}" "${ROCKY_INSTALLS[@]}"
+        dnf debuginfo-install -y glibc
+    elif is_ubuntu; then
+        apt-get install -y --no-install-recommends "${INSTALLS[@]}" "${UBUNTU_INSTALLS[@]}"
+    fi
 
     # Clean after install
-    dnf clean all
+    clean_system_packages
 
 %test
     if [ -n "$MOOSE_MPICH_DIR" ]; then
@@ -78,3 +101,4 @@ From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpic
 %files
     {{ FILES_DIR }}/.singularity.d/env/02-fix-actions.sh /.singularity.d/env/02-fix-actions.sh
     {{ FILES_DIR }}/.singularity.d/moose_bashrc /.singularity.d/moose_bashrc
+    {{ FILES_DIR }}/.singularity.d/build_utils.sh /.singularity.d/build_utils.sh

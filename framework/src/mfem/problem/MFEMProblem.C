@@ -22,6 +22,7 @@
 #include "MFEMNonlinearSolverBase.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
+#include "DataIO.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -42,16 +43,13 @@ getMFEMSolverDependencies(const InputParameters & parameters)
 
   for (const auto & [param_name, _] : parameters)
   {
-    if (parameters.isPrivate(param_name) || !parameters.isParamValid(param_name))
+    if (parameters.isPrivate(param_name))
       continue;
 
-    if (parameters.have_parameter<MFEMSolverName>(param_name))
-      dependencies.push_back(parameters.get<MFEMSolverName>(param_name));
-    else if (parameters.have_parameter<std::vector<MFEMSolverName>>(param_name))
-    {
-      const auto & names = parameters.get<std::vector<MFEMSolverName>>(param_name);
-      dependencies.insert(dependencies.end(), names.begin(), names.end());
-    }
+    if (auto * name = parameters.queryParam<MFEMSolverName>(param_name))
+      dependencies.push_back(*name);
+    else if (auto * names = parameters.queryParam<std::vector<MFEMSolverName>>(param_name))
+      dependencies.insert(dependencies.end(), names->begin(), names->end());
   }
 
   return dependencies;
@@ -71,7 +69,10 @@ MFEMProblem::validParams()
 }
 
 MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params), _num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))}
+  : ExternalProblem(params),
+    _num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))},
+    _solution_state_data(declareRestartableDataWithContext<Moose::MFEM::SolutionState>(
+        "mfem_solution_state", &_problem_data))
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
@@ -88,12 +89,14 @@ MFEMProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
 
-  // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
-  // setup pass because they are no longer initialized through the libMesh/MOOSE user-object path.
-  std::vector<MFEMRefinementMarker *> markers;
-  theWarehouse().query().condition<AttribSystem>("Marker").queryInto(markers);
-  for (auto marker : markers)
-    marker->initialSetup();
+  std::vector<MFEMExecutedObject *> objects;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("MFEMExecutedObject")
+      .condition<AttribThread>(0)
+      .queryInto(objects);
+  for (auto * const object : objects)
+    object->initialSetup();
 }
 
 void
@@ -139,9 +142,8 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  if (!_mfem_solver_definitions.emplace(name, MFEMSolverDefinition{solver_type, &parameters})
-           .second)
-    mooseError("Multiple MFEM solvers named '", name, "' were provided.");
+  mooseAssert(!_mfem_solver_definitions.count(name), "Multiple MFEM solvers named '" + name + "'.");
+  _mfem_solver_definitions.emplace(name, MFEMSolverDefinition{solver_type, &parameters});
 }
 
 void
@@ -185,8 +187,8 @@ MFEMProblem::resolveMFEMSolvers()
   }
 
   auto & problem_data = getProblemData();
-  problem_data.jacobian_solver = nullptr;
-  problem_data.nonlinear_solver = nullptr;
+  mooseAssert(!problem_data.jacobian_solver, "MFEM linear solver driver already assigned");
+  mooseAssert(!problem_data.nonlinear_solver, "MFEM nonlinear solver driver already assigned");
 
   for (const auto & solver_name : *sorted_solver_names)
   {
@@ -312,7 +314,7 @@ MFEMProblem::addFESpace(const std::string & type,
   if (getProblemData().fespace_hierarchies.Has(name))
     mooseError("Cannot add FESpace '",
                name,
-               "': a FESpaceHierarchy with the same name already exists. "
+               "': an MFEMFESpaceHierarchy with the same name already exists. "
                "FESpaces and FESpaceHierarchies share the fespaces namespace.");
 
   auto & mfem_fespace = *addObject<MFEMFESpace>(type, name, parameters).front();
@@ -328,7 +330,7 @@ MFEMProblem::addFESpaceHierarchy(const std::string & type,
                                  InputParameters & parameters)
 {
   if (getProblemData().fespaces.Has(name))
-    mooseError("Cannot add FESpaceHierarchy '",
+    mooseError("Cannot add MFEMFESpaceHierarchy '",
                name,
                "': a FESpace with the same name already exists. "
                "FESpaces and FESpaceHierarchies share the fespaces namespace.");
@@ -341,10 +343,22 @@ MFEMProblem::addFESpaceHierarchy(const std::string & type,
   // variables can say `fespace = <hierarchy_name>` without a separate FESpace definition.
   // The aliasing shared_ptr keeps the hierarchy alive as long as this entry lives.
   auto finest = std::shared_ptr<mfem::ParFiniteElementSpace>(
-      hierarchy_shared,
-      &static_cast<mfem::ParFiniteElementSpace &>(
-          hierarchy_obj->getHierarchy().GetFinestFESpace()));
+      hierarchy_shared, &hierarchy_obj->getHierarchy().GetFinestFESpace());
   getProblemData().fespaces.Register(name, finest);
+}
+
+void
+MFEMProblem::validateVariableNumericType(const std::string & var_type,
+                                         const std::string & var_name) const
+{
+  const bool variable_is_complex = var_type == "MFEMComplexVariable";
+  const bool problem_is_complex = _num_type == NumericType::COMPLEX;
+  if (variable_is_complex != problem_is_complex)
+    paramError("numeric_type",
+               "The problem numeric type does not match primary MFEM variable '",
+               var_name,
+               "', which is ",
+               variable_is_complex ? "complex." : "real.");
 }
 
 void
@@ -352,6 +366,7 @@ MFEMProblem::addVariable(const std::string & var_type,
                          const std::string & var_name,
                          InputParameters & parameters)
 {
+  validateVariableNumericType(var_type, var_name);
   addGridFunction(var_type, var_name, parameters);
   // MOOSE variables store DoFs for the trial variable and its time derivatives up to second order;
   // MFEM GridFunctions store data for only one set of DoFs each, so we must add additional
@@ -593,7 +608,7 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else if ("MFEMParsedFunction" != type)
+  else if ("MFEMParsedFunction" != type && "MFEMCoordinateTransformations" != type)
   {
     mooseWarning("Could not identify whether function ",
                  type,
@@ -754,9 +769,10 @@ MFEMProblem::getAuxVariableNames()
 MFEMMesh &
 MFEMProblem::mesh()
 {
-  mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
-              "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
-  return static_cast<MFEMMesh &>(_mesh);
+  auto * mfem_mesh = dynamic_cast<MFEMMesh *>(&_mesh);
+  mooseAssert(mfem_mesh,
+              "The mesh for an MFEMProblem must be MFEMFileMesh or MFEMMeshGeneratorMesh.");
+  return *mfem_mesh;
 }
 
 const MFEMMesh &

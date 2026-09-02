@@ -169,10 +169,9 @@ Kernel::computeOffDiagJacobian(const unsigned int jvar_num)
         for (_j = 0; _j < phi_size; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           {
-            const RealEigenVector v =
-                _JxW[_qp] * _coord[_qp] *
-                computeQpOffDiagJacobianArray(
-                    static_cast<ArrayMooseVariable &>(const_cast<MooseVariableFieldBase &>(jvar)));
+            const RealEigenVector v = _JxW[_qp] * _coord[_qp] *
+                                      computeQpOffDiagJacobianArray(cast_ref<ArrayMooseVariable &>(
+                                          const_cast<MooseVariableFieldBase &>(jvar)));
             for (unsigned int k = 0; k < v.size(); ++k)
               _local_ke(_i, _j + k * n) += v(k);
           }

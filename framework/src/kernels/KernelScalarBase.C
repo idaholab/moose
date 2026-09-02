@@ -142,7 +142,7 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
     // Get dofs and order of this variable; at least one will be _var
-    // const auto & jv0 = static_cast<const MooseVariable &>(jvar);
+    // const auto & jv0 = cast_ref<const MooseVariable &>(jvar);
     // const auto & loc_phi = jv0.phi();
     const auto jvar_size = jvar.phiSize();
     _local_ke.resize(_k_order, jvar_size);

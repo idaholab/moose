@@ -48,7 +48,7 @@ TrackDiracFront::execute()
 void
 TrackDiracFront::threadJoin(const UserObject & y)
 {
-  const TrackDiracFront & tdf = static_cast<const TrackDiracFront &>(y);
+  const TrackDiracFront & tdf = cast_ref<const TrackDiracFront &>(y);
 
   // Merge in the values from "y"
   _dirac_points.insert(_dirac_points.end(), tdf._dirac_points.begin(), tdf._dirac_points.end());

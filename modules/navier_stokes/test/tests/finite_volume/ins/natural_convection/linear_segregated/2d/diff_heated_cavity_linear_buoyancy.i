@@ -51,7 +51,6 @@ walls = 'right left top bottom'
     pressure = pressure
     rho = 'rho'
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = 'u_buoyancy; v_buoyancy'
   []
 []
 
@@ -194,6 +193,9 @@ walls = 'right left top bottom'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = 'rho'
   []
 []
 
@@ -255,4 +257,3 @@ walls = 'right left top bottom'
 [Outputs]
   exodus = true
 []
-

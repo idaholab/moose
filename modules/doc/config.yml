@@ -171,6 +171,7 @@ Extensions:
             fviks: syntax/FVInterfaceKernels/index.md
             fvics: syntax/FVICs/index.md
             fvkernels: syntax/FVKernels/index.md
+            fvgradientmethods: syntax/FVGradientMethods/index.md
             hdgkernels: syntax/HDGKernels/index.md
             linearfvkernels: syntax/LinearFVKernels/index.md
             linearfvbcs: syntax/LinearFVBCs/index.md

@@ -14,6 +14,7 @@
 #include "MooseTypes.h"
 #include "MooseLagrangeHelpers.h"
 #include "MortarSegmentHelper.h"
+#include "MortarUtils.h"
 #include "FormattedTable.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
@@ -258,9 +259,8 @@ public:
       mooseError("No entries found in the secondary node -> nodal geometry map.");
 
     auto & problem = _app.feProblem();
-    auto & subproblem = _amg._on_displaced
-                            ? static_cast<SubProblem &>(*problem.getDisplacedProblem())
-                            : static_cast<SubProblem &>(problem);
+    auto & subproblem = _amg._on_displaced ? cast_ref<SubProblem &>(*problem.getDisplacedProblem())
+                                           : cast_ref<SubProblem &>(problem);
     auto & nodal_normals_es = subproblem.es();
 
     const std::string nodal_normals_sys_name = "nodal_normals";
@@ -395,8 +395,10 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const bool debug,
     const bool correct_edge_dropping,
     const Real minimum_projection_angle,
+    const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
     const MortarSegmentTriangulationMode triangulation_mode,
-    const bool triangulate_triangles)
+    const bool triangulate_triangles,
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
   : ConsoleStreamInterface(app),
     _app(app),
     _mesh(mesh_in),
@@ -409,8 +411,10 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _distributed(_mesh.mesh_dimension() == 3 ? true : (!_on_displaced && !_mesh.is_replicated())),
     _correct_edge_dropping(correct_edge_dropping),
     _minimum_projection_angle(minimum_projection_angle),
+    _mortar_3d_subpatch_plane(mortar_3d_subpatch_plane),
     _triangulation_mode(triangulation_mode),
-    _triangulate_triangles(triangulate_triangles)
+    _triangulate_triangles(triangulate_triangles),
+    _mortar_3d_qp_mapping(mortar_3d_qp_mapping)
 {
   _primary_secondary_boundary_id_pairs.push_back(boundary_key);
   _primary_requested_boundary_ids.insert(boundary_key.first);
@@ -460,6 +464,7 @@ AutomaticMortarGeneration::initOutput()
 void
 AutomaticMortarGeneration::clear()
 {
+  _msm_elem_to_reference_points.clear();
   _mortar_segment_mesh->clear();
   _nodes_to_secondary_elem_map.clear();
   _nodes_to_primary_elem_map.clear();
@@ -476,6 +481,23 @@ AutomaticMortarGeneration::clear()
   _primary_ip_sub_ids.clear();
   _projected_secondary_nodes.clear();
   _failed_secondary_node_projections.clear();
+}
+
+const MortarSegmentReferencePoints &
+AutomaticMortarGeneration::mortarSegmentReferencePoints(const Elem & mortar_segment_elem) const
+{
+  if (_mortar_3d_qp_mapping != Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION)
+    mooseError("Mortar segment reference points were requested for mortar segment element ",
+               mortar_segment_elem.id(),
+               ", but the reference-interpolation mapping mode is not enabled.");
+
+  const auto reference_points_it = _msm_elem_to_reference_points.find(&mortar_segment_elem);
+  if (reference_points_it == _msm_elem_to_reference_points.end())
+    mooseError("No reference-point record was found for mortar segment element ",
+               mortar_segment_elem.id(),
+               ". The mortar segment info and reference-point maps are not aligned.");
+
+  return reference_points_it->second;
 }
 
 void
@@ -616,7 +638,7 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
               : Moose::fe_lagrange_2D_shape(secondary_elem.type(),
                                             secondary_elem.default_order(),
                                             n,
-                                            static_cast<const TypeVector<Real> &>(xi1_pts[qp]));
+                                            cast_ref<const TypeVector<Real> &>(xi1_pts[qp]));
       normals[qp] += phi * nodal_normals[n];
     }
 
@@ -1137,6 +1159,9 @@ AutomaticMortarGeneration::outputMortarMesh()
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 {
+  const bool use_reference_interpolation =
+      _mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION;
+
   // Add an integer flag to mortar segment mesh to keep track of which subelem
   // of second order primal elements mortar segments correspond to
   auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
@@ -1186,67 +1211,41 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // Construct the KD tree.
     kd_tree.buildIndex();
 
-    // Define expression for getting sub-elements nodes (for sub-dividing secondary and primary
-    // elements)
-    auto get_sub_elem_nodes = [](const ElemType type,
-                                 const unsigned int sub_elem) -> std::vector<unsigned int>
+    // Return the unoriented geometric normal of a linearized subpatch. These expressions are the
+    // TRI3 and QUAD4 mapping tangents evaluated at the reference center, equivalent to evaluating
+    // the first-order finite-element normal there without constructing a temporary element.
+    auto get_sub_elem_geometric_normal = [](const std::vector<Point> & nodes)
     {
-      switch (type)
+      Point dxdxi;
+      Point dxdeta;
+      if (nodes.size() == 3)
       {
-        case TRI3:
-          return {{0, 1, 2}};
-        case QUAD4:
-          return {{0, 1, 2, 3}};
-        case TRI6:
-        case TRI7:
-          switch (sub_elem)
-          {
-            case 0:
-              return {{0, 3, 5}};
-            case 1:
-              return {{3, 4, 5}};
-            case 2:
-              return {{3, 1, 4}};
-            case 3:
-              return {{5, 4, 2}};
-            default:
-              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
-          }
-        case QUAD8:
-          switch (sub_elem)
-          {
-            case 0:
-              return {{0, 4, 7}};
-            case 1:
-              return {{4, 1, 5}};
-            case 2:
-              return {{5, 2, 6}};
-            case 3:
-              return {{7, 6, 3}};
-            case 4:
-              return {{4, 5, 6, 7}};
-            default:
-              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
-          }
-        case QUAD9:
-          switch (sub_elem)
-          {
-            case 0:
-              return {{0, 4, 8, 7}};
-            case 1:
-              return {{4, 1, 5, 8}};
-            case 2:
-              return {{8, 5, 2, 6}};
-            case 3:
-              return {{7, 8, 6, 3}};
-            default:
-              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
-          }
-        default:
-          mooseError("get_sub_elem_inds: Face element type: ",
-                     libMesh::Utility::enum_to_string<ElemType>(type),
-                     " invalid for 3D mortar");
+        dxdxi = nodes[1] - nodes[0];
+        dxdeta = nodes[2] - nodes[0];
       }
+      else if (nodes.size() == 4)
+      {
+        // Bilinear center tangents define one normal for the full quad instead of selecting one of
+        // the two diagonal triangle normals.
+        dxdxi = 0.25 * (nodes[1] + nodes[2] - nodes[0] - nodes[3]);
+        dxdeta = 0.25 * (nodes[2] + nodes[3] - nodes[0] - nodes[1]);
+      }
+      else
+        mooseError("GEOMETRIC_NORMAL 3D mortar subpatch plane construction only supports "
+                   "triangular and quadrilateral subpatches, but received ",
+                   nodes.size(),
+                   " nodes.");
+
+      Point geometric_normal = dxdxi.cross(dxdeta);
+      const auto normal_norm = geometric_normal.norm();
+      // The cross product has units of area, so compare it with the product of tangent lengths.
+      // Their ratio is the sine of the included angle and is independent of the mesh length scale.
+      if (normal_norm <= TOLERANCE * dxdxi.norm() * dxdeta.norm())
+        mooseError("GEOMETRIC_NORMAL 3D mortar subpatch plane construction encountered a "
+                   "degenerate subpatch.");
+
+      geometric_normal /= normal_norm;
+      return geometric_normal;
     };
 
     /**
@@ -1288,14 +1287,15 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
         // Get indices of sub-element nodes in element
-        auto sub_elem_nodes = get_sub_elem_nodes(secondary_side_elem->type(), sel);
+        const auto sub_elem_nodes =
+            Moose::Mortar::getMortarSubElementNodeIndices(*secondary_side_elem, sel);
 
         // Secondary sub-element center, normal, and nodes
         Point center;
         Point normal;
         std::vector<Point> nodes(sub_elem_nodes.size());
 
-        // Loop through sub_element nodes, collect points and compute center and normal
+        // Collect the sub-element points and evaluate its center and averaged nodal normal.
         for (auto iv : make_range(sub_elem_nodes.size()))
         {
           const auto n = sub_elem_nodes[iv];
@@ -1306,9 +1306,32 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         center /= sub_elem_nodes.size();
         normal = normal.unit();
 
-        // Build and store linearized sub-elements for later use
-        mortar_segment_helper[sel] = std::make_unique<MortarSegmentHelper>(
-            nodes, center, normal, _triangulation_mode, _triangulate_triangles);
+        if (_mortar_3d_subpatch_plane == Mortar3DSubpatchPlane::GEOMETRIC_NORMAL)
+        {
+          const Point averaged_normal = normal;
+          normal = get_sub_elem_geometric_normal(nodes);
+          if (normal * averaged_normal < 0)
+            normal *= -1;
+        }
+
+        if (use_reference_interpolation)
+        {
+          std::vector<Point> sub_elem_reference_points;
+          sub_elem_reference_points.reserve(sub_elem_nodes.size());
+          for (const auto node_index : sub_elem_nodes)
+            sub_elem_reference_points.push_back(secondary_side_elem->master_point(node_index));
+
+          mortar_segment_helper[sel] =
+              std::make_unique<MortarSegmentHelper>(std::move(nodes),
+                                                    std::move(sub_elem_reference_points),
+                                                    center,
+                                                    normal,
+                                                    _triangulation_mode,
+                                                    _triangulate_triangles);
+        }
+        else
+          mortar_segment_helper[sel] = std::make_unique<MortarSegmentHelper>(
+              std::move(nodes), center, normal, _triangulation_mode, _triangulate_triangles);
       }
 
       /**
@@ -1365,6 +1388,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       // search
       bool primary_elem_found = false;
       std::set<const Elem *, CompareDofObjectsByID> primary_elem_candidates;
+      const bool use_geometric_subpatch_normals =
+          _mortar_3d_subpatch_plane == Mortar3DSubpatchPlane::GEOMETRIC_NORMAL;
+      // In geometric mode the projection-angle cutoff also rejects near-orthogonal subpatch pairs.
+      // The absolute dot product below keeps opposing primary/secondary orientations admissible.
+      const Real minimum_subpatch_normal_alignment =
+          use_geometric_subpatch_normals ? std::sin(_minimum_projection_angle * libMesh::pi / 180.0)
+                                         : 0.0;
 
       // Loop candidate nodes (returned by Nanoflann) and add all adjoining elems to candidate set
       for (auto r : make_range(result_set.size()))
@@ -1396,7 +1426,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
         // If we've already processed this candidate, we don't need to check it again.
         if (processed_primary_elems.count(primary_elem_candidate))
+        {
+          primary_elem_candidates.erase(primary_elem_candidate);
           continue;
+        }
 
         // Initialize set of nodes used to construct mortar segment elements
         std::vector<Point> nodal_points;
@@ -1406,6 +1439,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
         // Initialize list of secondary and primary sub-elements that formed each mortar segment
         std::vector<std::pair<unsigned int, unsigned int>> sub_elem_map;
+        std::vector<std::array<Point, 3>> elem_to_secondary_reference_points;
+        std::vector<std::array<Point, 3>> elem_to_primary_reference_points;
 
         /**
          * Step 1.3.2: Sub-divide primary element candidate, then project onto secondary
@@ -1414,7 +1449,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         for (auto p_el : make_range(primary_elem_candidate->n_sub_elem()))
         {
           // Get nodes of primary sub-elements
-          auto sub_elem_nodes = get_sub_elem_nodes(primary_elem_candidate->type(), p_el);
+          const auto sub_elem_nodes =
+              Moose::Mortar::getMortarSubElementNodeIndices(*primary_elem_candidate, p_el);
 
           // Get list of primary sub-element vertex nodes
           std::vector<Point> primary_sub_elem(sub_elem_nodes.size());
@@ -1423,10 +1459,29 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             const auto n = sub_elem_nodes[iv];
             primary_sub_elem[iv] = primary_elem_candidate->point(n);
           }
+          Point primary_sub_elem_normal;
+          if (use_geometric_subpatch_normals)
+            primary_sub_elem_normal = get_sub_elem_geometric_normal(primary_sub_elem);
+
+          std::vector<Point> sub_elem_reference_points;
+          if (use_reference_interpolation)
+          {
+            sub_elem_reference_points.reserve(sub_elem_nodes.size());
+            for (const auto node_index : sub_elem_nodes)
+              sub_elem_reference_points.push_back(primary_elem_candidate->master_point(node_index));
+          }
 
           // Loop through secondary sub-elements
           for (auto s_el : make_range(secondary_side_elem->n_sub_elem()))
           {
+            // Nearby primary candidates can include adjacent corner faces. Those faces may clip to
+            // numerical slivers, which we do not consider valid face-to-face mortar pairs for this
+            // search.
+            if (use_geometric_subpatch_normals &&
+                std::abs(primary_sub_elem_normal * mortar_segment_helper[s_el]->normal()) <
+                    minimum_subpatch_normal_alignment)
+              continue;
+
             // Mortar segment helpers were defined for each secondary sub-element, they will:
             //  1. Project primary sub-element onto linearized secondary sub-element
             //  2. Clip projected primary sub-element against secondary sub-element
@@ -1434,11 +1489,21 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             //
             // Mortar segment helpers append a list of mortar segment nodes and connectivities that
             // can be directly used to build mortar segments
-            mortar_segment_helper[s_el]->getMortarSegments(
-                primary_sub_elem, nodal_points, elem_to_node_map);
+            const auto segments_before_helper = elem_to_node_map.size();
+            if (use_reference_interpolation)
+              mortar_segment_helper[s_el]->getMortarSegments(primary_sub_elem,
+                                                             sub_elem_reference_points,
+                                                             nodal_points,
+                                                             elem_to_node_map,
+                                                             elem_to_secondary_reference_points,
+                                                             elem_to_primary_reference_points,
+                                                             TOLERANCE * secondary_volume);
+            else
+              mortar_segment_helper[s_el]->getMortarSegments(
+                  primary_sub_elem, nodal_points, elem_to_node_map);
 
             // Keep track of which secondary and primary sub-elements created segment
-            for (auto i = sub_elem_map.size(); i < elem_to_node_map.size(); ++i)
+            for (auto i = segments_before_helper; i < elem_to_node_map.size(); ++i)
               sub_elem_map.push_back(std::make_pair(s_el, p_el));
           }
         }
@@ -1450,40 +1515,83 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         // If overlap of polygons was non-trivial (created mortar segment elements)
         if (!elem_to_node_map.empty())
         {
-          // If this is the first element with non-trivial overlap, set flag
-          // Candidates will now be neighbors of elements that had non-trivial overlap
-          // (i.e. we'll do a breadth first search now)
-          if (!primary_elem_found)
+          if (sub_elem_map.size() != elem_to_node_map.size())
+            mooseError("The mortar segment subpatch map is not aligned with the mortar segment "
+                       "connectivity map.");
+          if (use_reference_interpolation &&
+              (elem_to_secondary_reference_points.size() != elem_to_node_map.size() ||
+               elem_to_primary_reference_points.size() != elem_to_node_map.size()))
+            mooseError("The mortar segment reference-point maps are not aligned with the mortar "
+                       "segment connectivity map.");
+
+          // Only overlap polygons large enough to become mortar segments may switch the candidate
+          // search to breadth first.
+          bool seed_breadth_first_search = false;
+          std::vector<bool> retained_mortar_segments(elem_to_node_map.size(), false);
+          for (const auto el : index_range(elem_to_node_map))
           {
-            primary_elem_found = true;
-            primary_elem_candidates.clear();
+            const auto & node_map = elem_to_node_map[el];
+            if (node_map.size() != 3)
+              mooseError(
+                  "Active mortar segments only supports TRI elements, 3 nodes expected but: ",
+                  node_map.size(),
+                  " provided.");
+
+            const Point e1 = nodal_points[node_map[1]] - nodal_points[node_map[0]];
+            const Point e2 = nodal_points[node_map[2]] - nodal_points[node_map[0]];
+            retained_mortar_segments[el] =
+                0.5 * e1.cross(e2).norm() / secondary_volume >= TOLERANCE;
+            seed_breadth_first_search = seed_breadth_first_search || retained_mortar_segments[el];
           }
 
-          // Add neighbors to candidate list
-          for (auto neighbor : primary_elem_candidate->neighbor_ptr_range())
+          if (seed_breadth_first_search)
           {
-            // If not valid or not on lower dimensional secondary subdomain, skip
-            if (neighbor == nullptr || neighbor->subdomain_id() != primary_subd_id)
-              continue;
-            // If already processed, skip
-            if (processed_primary_elems.count(neighbor))
-              continue;
-            // Otherwise, add to candidates
-            primary_elem_candidates.insert(neighbor);
+            // If this is the first element with a qualifying overlap, set flag. Candidates will
+            // now be neighbors of elements that had qualifying overlap.
+            if (!primary_elem_found)
+            {
+              primary_elem_found = true;
+              primary_elem_candidates.clear();
+            }
+
+            // Add neighbors to candidate list
+            for (auto neighbor : primary_elem_candidate->neighbor_ptr_range())
+            {
+              // If not valid or not on lower dimensional secondary subdomain, skip
+              if (neighbor == nullptr || neighbor->subdomain_id() != primary_subd_id)
+                continue;
+              // If already processed, skip
+              if (processed_primary_elems.count(neighbor))
+                continue;
+              // Otherwise, add to candidates
+              primary_elem_candidates.insert(neighbor);
+            }
           }
 
           /**
            * Step 1.3.3: Create mortar segments and add to mortar segment mesh
            */
           std::vector<Node *> new_nodes;
-          for (auto pt : nodal_points)
-            new_nodes.push_back(_mortar_segment_mesh->add_point(
-                pt, next_node_id++, secondary_side_elem->processor_id()));
+          // Clipping can append points for triangles later rejected by the area tolerance. Add only
+          // points referenced by retained triangles so the mortar mesh has no orphan nodes.
+          std::vector<bool> retained_nodes(nodal_points.size(), false);
+          for (const auto el : index_range(elem_to_node_map))
+            if (retained_mortar_segments[el])
+              for (const auto node : elem_to_node_map[el])
+                retained_nodes[node] = true;
+
+          new_nodes.resize(nodal_points.size(), nullptr);
+          for (const auto node : index_range(nodal_points))
+            if (retained_nodes[node])
+              new_nodes[node] = _mortar_segment_mesh->add_point(
+                  nodal_points[node], next_node_id++, secondary_side_elem->processor_id());
 
           // Loop through triangular elements in map
           for (auto el : index_range(elem_to_node_map))
           {
-            // Create new triangular element
+            if (!retained_mortar_segments[el])
+              continue;
+
             std::unique_ptr<Elem> new_elem;
             if (elem_to_node_map[el].size() == 3)
               new_elem = std::make_unique<Tri3>();
@@ -1519,6 +1627,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             // Associate this MSM elem with the MortarSegmentInfo.
             _msm_elem_to_info.emplace(msm_new_elem, msinfo);
 
+            // Store reference data only for retained segments.
+            if (use_reference_interpolation)
+            {
+              MortarSegmentReferencePoints reference_points{elem_to_secondary_reference_points[el],
+                                                            elem_to_primary_reference_points[el]};
+              _msm_elem_to_reference_points.emplace(msm_new_elem, reference_points);
+            }
+
             // Add this mortar segment to the secondary elem to mortar segment map
             secondary_to_msm_element_set.insert(msm_new_elem);
 
@@ -1531,21 +1647,34 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         // End loop through primary element candidates
       }
 
-      for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
+      if (use_geometric_subpatch_normals)
       {
-        // Check if any segments failed to project
-        if (mortar_segment_helper[sel]->remainder() == 1.0)
+        // A geometric corner filter may intentionally leave individual subpatches uncovered. Warn
+        // only when the complete secondary element failed to produce a retained segment.
+        if (secondary_to_msm_element_set.empty())
           mooseDoOnce(
               mooseWarning("Some secondary elements on mortar interface were unable to identify"
                            " a corresponding primary element; this may be expected depending on"
                            " problem geometry but may indicate a failure of the element search"
                            " or projection"));
       }
+      else
+        for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
+          if (mortar_segment_helper[sel]->remainder() == 1.0)
+            mooseDoOnce(
+                mooseWarning("Some secondary elements on mortar interface were unable to identify"
+                             " a corresponding primary element; this may be expected depending on"
+                             " problem geometry but may indicate a failure of the element search"
+                             " or projection"));
 
       if (secondary_to_msm_element_set.empty())
         _secondary_elems_to_mortar_segments.erase(secondary_elem_to_msm_map_it);
     } // End loop through secondary elements
   } // End loop through mortar constraint pairs
+
+  mooseAssert(!use_reference_interpolation ||
+                  _msm_elem_to_reference_points.size() == _msm_elem_to_info.size(),
+              "Mortar segment info and reference-point maps must remain aligned.");
 
   _mortar_segment_mesh->cache_elem_data();
 
@@ -1695,8 +1824,8 @@ AutomaticMortarGeneration::computeMsmStatistics()
     }
 
     _mesh.comm().set_union(primary_elems_to_volume);
-    _mesh.comm().allgather(static_cast<std::vector<Real> &>(secondary));
-    _mesh.comm().allgather(static_cast<std::vector<Real> &>(msm));
+    _mesh.comm().allgather(cast_ref<std::vector<Real> &>(secondary));
+    _mesh.comm().allgather(cast_ref<std::vector<Real> &>(msm));
     primary.reserve(primary_elems_to_volume.size());
     for (const auto [_, volume] : primary_elems_to_volume)
       primary.push_back(volume);
@@ -2080,9 +2209,6 @@ AutomaticMortarGeneration::computeNodalGeometry()
     }
   }
 
-  // Note that contrary to the Bin Yang dissertation, we are not weighting by the face element
-  // lengths/volumes. It's not clear to me that this type of weighting is a good algorithm for cases
-  // where the face can be curved
   for (const auto & pr : node_to_normals_map)
   {
     // Compute normal vector
@@ -2497,8 +2623,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
         _failed_secondary_node_projections.insert(secondary_node->id());
         if (_debug)
           _console << "Failed to find primary Elem into which secondary node "
-                   << static_cast<const Point &>(*secondary_node) << ", id '"
-                   << secondary_node->id() << "', projects onto\n"
+                   << cast_ref<const Point &>(*secondary_node) << ", id '" << secondary_node->id()
+                   << "', projects onto\n"
                    << std::endl;
       }
       else if (_debug)
@@ -2752,7 +2878,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       if (!projection_succeeded && _debug)
       {
         _console << "\nFailed to find point from which primary node "
-                 << static_cast<const Point &>(*primary_node) << " was projected." << std::endl
+                 << cast_ref<const Point &>(*primary_node) << " was projected." << std::endl
                  << std::endl;
       }
     } // loop over side nodes

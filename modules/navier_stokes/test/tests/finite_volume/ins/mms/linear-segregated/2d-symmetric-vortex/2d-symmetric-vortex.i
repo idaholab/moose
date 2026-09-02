@@ -24,7 +24,6 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = "u_forcing; v_forcing"
   []
 []
 
@@ -147,6 +146,9 @@ advected_interp_method = 'average'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
@@ -205,7 +207,7 @@ advected_interp_method = 'average'
   pressure_variable_relaxation = 0.3
   num_iterations = 10000
   pressure_absolute_tolerance = 1e-7
-  momentum_absolute_tolerance = 1e-7
+  momentum_absolute_tolerance = '1e-7 1e-7'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'

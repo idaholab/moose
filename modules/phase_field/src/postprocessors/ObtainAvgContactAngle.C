@@ -60,7 +60,7 @@ ObtainAvgContactAngle::getValue() const
 void
 ObtainAvgContactAngle::threadJoin(const UserObject & y)
 {
-  const ObtainAvgContactAngle & pps = static_cast<const ObtainAvgContactAngle &>(y);
+  const ObtainAvgContactAngle & pps = cast_ref<const ObtainAvgContactAngle &>(y);
   _cos_theta_val += pps._cos_theta_val;
   _total_weight += pps._total_weight;
 }

@@ -36,7 +36,6 @@
 #include "LinearFVFluxKernel.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVBoundaryCondition.h"
-#include "GradientLimiterType.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -78,7 +77,7 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_SOLVER),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
-    LinearFVGradientInterface(static_cast<SystemBase &>(*this)),
+    LinearFVGradientInterface(cast_ref<SystemBase &>(*this)),
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
@@ -318,7 +317,7 @@ LinearSystem::solve()
   _n_linear_iters = _linear_implicit_system.n_linear_iterations();
 
   auto & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
   _initial_linear_residual = linear_solver.get_initial_residual();
   _final_linear_residual = _linear_implicit_system.final_linear_residual();
   _converged = linear_solver.get_converged_reason() > 0;

@@ -15,11 +15,10 @@ InputParameters
 EmptyReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addClassDescription(
-      "This is a dummy reporter containing data needed for the"
-      " PorousFlowLineGeometry but is empty to mimic a transfer"
-      " not taking place or the reporter not being properly filled"
-      " by another reporter");
+  params.addClassDescription("This is a dummy reporter containing data needed for the"
+                             " PorousFlowLineGeometry but is empty to mimic a transfer"
+                             " not taking place or the reporter not being properly filled"
+                             " by another reporter");
   return params;
 }
 

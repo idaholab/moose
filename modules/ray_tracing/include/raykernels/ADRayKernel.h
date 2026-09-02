@@ -53,7 +53,7 @@ protected:
   /**
    * Insertion point for calculation before the residual computation
    */
-  virtual void precalculateResidual(){};
+  virtual void precalculateResidual() {}
 
   /// The MooseVariable this kernel contributes to
   MooseVariableField<T> & _var;

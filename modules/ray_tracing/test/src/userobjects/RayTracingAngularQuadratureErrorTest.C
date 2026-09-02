@@ -24,8 +24,9 @@ RayTracingAngularQuadratureErrorTest::validParams()
   params.addParam<bool>("mu_min_too_small", false, "Tests mu_min < -1");
   params.addParam<bool>("mu_max_too_big", false, "Tests mu_max > 1");
   params.addParam<bool>("dim1", false, "Tests dimension 1");
-  params.addParam<bool>(
-      "non_positive_gauss_legendre_order", false, "Tests non-positive order in gauss-legendre quadrature");
+  params.addParam<bool>("non_positive_gauss_legendre_order",
+                        false,
+                        "Tests non-positive order in gauss-legendre quadrature");
   params.addParam<bool>("check_direction", false, "Checks for a non-valid direction index");
   params.addParam<bool>("orthonormal_vector_zero",
                         false,

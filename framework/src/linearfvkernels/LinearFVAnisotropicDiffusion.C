@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVGradientInterface.h"
 
 registerMooseObject("MooseApp", LinearFVAnisotropicDiffusion);
 
@@ -49,10 +50,10 @@ LinearFVAnisotropicDiffusion::LinearFVAnisotropicDiffusion(const InputParameters
         isParamValid("use_nonorthogonal_correction_on_boundary")
             ? getParam<bool>("use_nonorthogonal_correction_on_boundary")
             : _use_nonorthogonal_correction),
+    _gradient_field(_var.requestCellGradients()),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0)
 {
-  _var.computeCellGradients();
 }
 
 void
@@ -144,11 +145,9 @@ LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
   // Cache the RHS contribution
   if (!_cached_rhs_contribution)
   {
-    const auto state_arg = determineState();
-
     // Get the gradients from the adjacent cells
-    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state_arg);
-    const auto grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo(), state_arg);
+    const auto grad_elem = _gradient_field.gradient(*_current_face_info->elemInfo());
+    const auto grad_neighbor = _gradient_field.gradient(*_current_face_info->neighborInfo());
 
     // Interpolate the two gradients to the face
     const auto interp_coeffs =
@@ -191,7 +190,7 @@ Real
 LinearFVAnisotropicDiffusion::computeBoundaryMatrixContribution(
     const LinearFVBoundaryCondition & bc)
 {
-  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   auto grad_contrib = diff_bc->computeBoundaryGradientMatrixContribution() * _current_face_area;
@@ -217,7 +216,7 @@ LinearFVAnisotropicDiffusion::computeBoundaryMatrixContribution(
 Real
 LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   const auto face_arg = singleSidedFaceArg(_current_face_info);
@@ -235,25 +234,24 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
                              : _current_face_info->neighborInfo();
   mooseAssert(elem_info, "We should always have an element info for the current face");
 
-  auto boundary_grad = _var.gradSln(*elem_info, state_arg);
+  auto boundary_grad = _gradient_field.gradient(*elem_info);
 
-  // If the boundary condition does not include the diffusivity contribution then
-  // add it here.
+  // Apply the boundary-normal diffusivity when it is not already included by the BC.
   if (!diff_bc->includesMaterialPropertyMultiplier())
     grad_contrib *= normal_scaled_diff_tensor;
 
   // We allow internal boundaries as well, in that case we have to make sure the normals point in
-  // the right direction
+  // the right direction.
   const Real boundary_normal_multiplier =
       (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
-                                            _current_face_info->normal()) *
-                  boundary_grad;
+  // A complete prescribed flux already includes the anisotropic tangential contribution.
+  if (!diff_bc->providesCompleteBoundaryFlux())
+    grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
+                                              _current_face_info->normal()) *
+                    boundary_grad;
 
-  // We add the nonorthogonal corrector for the face here. Potential idea: we could do
-  // this in the boundary condition too. For now, however, we keep it like this.
-  if (diff_bc->useBoundaryGradientExtrapolation() && _use_nonorthogonal_correction_on_boundary)
+  if (diff_bc->needsBoundaryNonorthogonalCorrection() && _use_nonorthogonal_correction_on_boundary)
   {
     const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
     const auto correction_vector =

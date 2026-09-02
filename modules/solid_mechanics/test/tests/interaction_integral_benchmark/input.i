@@ -15,7 +15,6 @@
 
 [Mesh]
   file = 360degree_model.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Problem]

@@ -42,9 +42,14 @@
     variable = disp_y
     value = -9.81
   [../]
-  [./TensorMechanics]
-    #Stress divergence kernels
-    displacements = 'disp_x disp_y disp_z'
+[]
+
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = false
+    incremental = false
+    strain = small
+    block = 1
   [../]
 []
 
@@ -99,7 +104,7 @@
 []
 
 [Materials]
-  active = 'density_concrete stress strain elasticity_tensor_concrete'
+  active = 'density_concrete stress elasticity_tensor_concrete'
   [./elasticity_tensor_steel]
     #Creates the elasticity tensor using steel parameters
     youngs_modulus = 210e9 #Pa
@@ -113,12 +118,6 @@
     poissons_ratio = 0.2
     type = ComputeIsotropicElasticityTensor
     block = 1
-  [../]
-  [./strain]
-    #Computes the strain, assuming small strains
-    type = ComputeSmallStrain
-    block = 1
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     #Computes the stress, using linear elasticity

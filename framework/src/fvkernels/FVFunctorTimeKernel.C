@@ -30,8 +30,8 @@ FVFunctorTimeKernel::validParams()
 FVFunctorTimeKernel::FVFunctorTimeKernel(const InputParameters & parameters)
   : FVElementalKernel(parameters),
     _functor(isParamValid("functor")
-                 ? static_cast<const Moose::FunctorBase<ADReal> &>(getFunctor<ADReal>("functor"))
-                 : static_cast<Moose::FunctorBase<ADReal> &>(_var))
+                 ? cast_ref<const Moose::FunctorBase<ADReal> &>(getFunctor<ADReal>("functor"))
+                 : cast_ref<Moose::FunctorBase<ADReal> &>(_var))
 {
 }
 

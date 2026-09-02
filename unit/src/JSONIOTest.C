@@ -40,7 +40,7 @@ TEST(JSONIOTest, libMeshDenseMatrix)
 // This is guarded because there are issues with early implementations of
 // filesystem in the standard library that we have with our minimum
 // GCC and clang compilers
-#if __GLIBCXX__ > 20210514 || (!defined(__clang__) && defined(NDEBUG))
+#if __GLIBCXX__ > 20220527 || (!defined(__clang__) && defined(NDEBUG))
 template <typename T>
 void
 testDerivativeStringClass()

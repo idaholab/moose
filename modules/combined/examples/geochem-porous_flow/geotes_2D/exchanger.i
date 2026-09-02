@@ -24,6 +24,7 @@
   cold_temperature = 40.0
   source_species_names = 'H2O    Na+   Cl-   SiO2(aq)'
   source_species_rates = 'production_rate_H2O production_rate_Na production_rate_Cl production_rate_SiO2'
+  abs_tol = 1E-8 # Bulk mole totals are O(1E6), making the default 1E-10 sensitive to subtraction roundoff
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
   add_aux_pH = false # there is no H+ in this system
   evaluate_kinetic_rates_always = true # implicit time-marching used for stability
