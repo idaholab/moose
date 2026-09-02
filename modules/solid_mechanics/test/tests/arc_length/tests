@@ -218,16 +218,15 @@
     csvdiff = 'dcb_arclength_out.csv dcb_arclength_out_path.csv'
     prereq = dcb_arclength_smoke
     # The gold is the fingerprint of the whole method: without the per-increment damage commits
-    # the envelope past the peak comes out stiffer than the path, and without the dissipation
-    # guard a reflected step walks the trace back down the elastic branch to zero, either of
-    # which moves every row of this file.
+    # the envelope past the peak comes out stiffer than the path, and without the predictor of a
+    # step continuing the increment of the step before it a reflected step walks the trace back
+    # down the elastic branch to zero, either of which moves every row of this file.
     requirement = 'The system shall step along the peel path of a double cantilever beam one '
                   'committed continuation increment per time step, committing the cohesive '
                   'damage of every increment, carrying the trace up to the peak of the peel '
                   'resistance and down the descending serrated tearing branch that follows it, '
-                  'with the load factor parting from the time, failing and mirroring any step '
-                  'that descends without dissipating, and reaching states past the load of the '
-                  'first serration, at which a peel force ramped with plain Newton solves has no '
+                  'with the load factor parting from the time, and reaching states past the load '
+                  'of the first serration, at which a peel force ramped with plain Newton solves has no '
                   'equilibrium to converge to, and past the opening reversal that a prescribed '
                   'opening cannot follow.'
     capabilities = 'petsc>=3.22.0'
@@ -324,9 +323,8 @@
     recover = false
     restep = false
     max_parallel = 1
-    # about 860 committed steps, 1332 recorded increments, over the climb, the peak, and the
-    # descent; the cutbacks through the crack event are what carry the step count past the step
-    # count of a uniform dt = 0.05 run
+    # 600 committed steps at a uniform dt = 0.05 and 588 recorded increments over the climb, the
+    # peak and the descent, with no step cut back
     max_time = 1800
     abs_zero = 1e-8
     rel_err = 5e-4

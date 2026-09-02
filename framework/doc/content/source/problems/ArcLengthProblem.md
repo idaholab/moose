@@ -71,11 +71,7 @@ A constant load applied to a state that is not already in equilibrium with it pu
 reach, and the corrector settles on the nearest state it can find instead — characteristically a
 negative load factor that cancels the constant load back out. It converges, and it means nothing.
 Equilibrate the constant loads with an ordinary solve first and start the continuation from that
-state. A transient trace carrying a constant load through the whole run names the tag that load is
-routed to in [!param](/Problem/ArcLengthProblem/held_load_vector_tag) as well: route the load with
-`extra_vector_tags` into a tag created with `extra_tag_vectors`, which leaves it in the residual it
-already contributes to and fills the tag with a copy. Naming the tag changes nothing about how the
-load is applied; the descent guard of [#softening-transient] is what reads it.
+state.
 
 ## Where the continuation stops
 
@@ -285,9 +281,7 @@ prescribed ramp trails by a whole ramp increment.
 [!param](/Problem/ArcLengthProblem/step_size),
 [!param](/Problem/ArcLengthProblem/psi_squared) and
 [!param](/Problem/ArcLengthProblem/correction_type) govern every increment as they govern a
-one-shot continuation. [!param](/Problem/ArcLengthProblem/held_load_vector_tag) joins them. It names
-the tag carrying the loads held constant through the run, such as a preload held while the tagged
-load is continued, and the descent guard of [#softening-transient] reads it at the end of every step.
+one-shot continuation.
 [!param](/Problem/ArcLengthProblem/max_continuation_steps),
 [!param](/Problem/ArcLengthProblem/end_on_max_continuation_steps),
 [!param](/Problem/ArcLengthProblem/lambda_max) and
@@ -352,52 +346,34 @@ Step along the path under [Transient.md] for:
 Trace the whole path in one [Steady.md] solve for:
 
 - a single complete equilibrium path of a path-independent problem, where committing nothing along the
-  way costs nothing and the predictor carries its direction internally;
+  way costs nothing;
 - the per-increment animation of the path.
 
-### The direction of travel and the dissipation guard id=softening-transient
+### The direction of travel id=direction-of-travel
 
-The direction the path is travelled in has to survive a step boundary, and PETSc's predictor cannot
-carry it there: its memory ends with the solve, and a fresh solve opens its first increment with a
-sign choice made from the state it starts at. Near a limit point that choice can walk a step
-backward along the branch just traced. Such a step converges — the branch it retraces is made of
-equilibrium points — so the outcome of the solve cannot expose it, and the energy the step
-dissipates is what does [!citep](verhoosel2009). A descent along the path of a dissipative
-structure sheds load because the structure dissipates; unloading it elastically, with the
-irreversible state held by its own irreversibility, descends without dissipating, and the elastic
-unload of a linear structure is proportional, which cancels the dissipation increment
+Within one solve, PETSc's predictor opens every increment after the first in the direction that
+continues the increment before it, which is what carries a continuation through a limit point. The
+first increment of a solve has no increment before it, and a transient run opens a solve at every
+step. So before every solve the problem hands the solver the increment the previous step committed:
+the change that step made to the solution, and the load increment it committed as a fraction of the
+load increment armed for the step about to be solved. The predictor of the step then continues the
+path the way every later one does. A cut back retry, whose load span shrank, is handed the same
+physical increment, and ahead of the first step there is none and the predictor travels toward
+increasing load.
 
-\begin{equation}
-\Delta D = \tfrac{1}{2}\left(\Lambda\, R_\mathrm{load}^T \Delta u + R_\mathrm{held}^T \Delta u
-- \Delta\lambda\, R_\mathrm{load}^T u_0\right)
-\end{equation}
+The handoff is `SNESNewtonALSetPreviousIncrement()`, which PETSc's `SNESNEWTONAL` gained for this
+purpose, and a transient run errors on a PETSc without it. A predictor that opens every step toward
+increasing load parameter can walk a step backward along the branch just traced at a limit point,
+such a step converges — the branch it retraces is made of equilibrium points — and nothing in the
+outcome of the solve tells it from a descent along the path.
 
-exactly, where $\Lambda$ is the committed load factor the step starts from, $u_0$ the state it
-starts from, $\Delta u$ the change of the solution across it, $\Delta\lambda$ the change of the load
-factor it commits, and $R_\mathrm{held}$ the residual of the loads held constant through the run,
-which [!param](/Problem/ArcLengthProblem/held_load_vector_tag) names. The held term is what makes
-the cancellation exact under a preload: elastic unloading under a held load follows an affine line
-rather than the proportional ray it follows without one. Leave the parameter unset with a held load
-in the run and that work is missing from $\Delta D$, so elastic unloading reads as dissipative and a
-walk back down an elastic branch is accepted as a descent along the path. A converged step whose net
-load change runs downward without dissipating is therefore failed, its retry travels the other way,
-and the console says so:
-
-```
-Arc length step descended without dissipating, which is a walk back down an
-elastic branch rather than a descent along the path, so the attempt is failed
-and the retry travels the other way.
-```
-
-The problem also remembers a direction of travel of plus or minus one across steps: a step whose
-committed change ran against it turns it around, so a trace that has turned a genuine fold keeps
-descending rather than reading the next step as a climb back up the branch it just came down.
-
-The guard is decisive for dissipative physics — damage, cohesive fracture, plasticity — which is
-what stepping along the path with committed history exists for. On a purely elastic nonlinear path
-a retrace dissipates nothing *and* descends non-proportionally, so the measure cannot separate the
-two there; the direction memory still bounds a wrong turn, and the one-shot continuation, whose
-predictor carries its direction internally, is the mode of choice for such paths.
+The problem also remembers a direction of travel of plus or minus one across steps, which signs the
+load increment of a step so that the step local load parameter runs from zero to one along the path,
+and a step whose committed change ran against it turns it around. That direction sizes the clamps of
+the step local parameter and is what a prescribed step of a switched off continuation ramps along;
+the direction the predictor takes is the solver's, from the increment handed to it. The direction
+and the committed increment are restartable data, so a recovered run resumes travelling the way it
+left off.
 
 Choose between stepping along the path and an ordinary transient run on whether the load the run is
 after is known to sit below collapse. A load schedule needs it to be: the prescribed factor ramps

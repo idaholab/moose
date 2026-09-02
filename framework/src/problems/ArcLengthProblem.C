@@ -28,7 +28,6 @@
 #include "libmesh/sparse_matrix.h"
 
 #include <algorithm>
-#include <cmath>
 
 using namespace libMesh;
 
@@ -99,15 +98,6 @@ ArcLengthProblem::validParams()
                              "Scheme that corrects an iterate back onto the arc-length constraint "
                              "surface. 'exact' solves the quadratic constraint, 'normal' takes a "
                              "step orthogonal to the increment.");
-  params.addParam<TagName>(
-      "held_load_vector_tag",
-      "Name of a vector tag that holds the constant loads a transient continuation is run under, "
-      "such as a preload held while the tagged load is continued. Route each held load with "
-      "'extra_vector_tags', which leaves it in the residual it already contributes to and fills "
-      "this tag with a copy, and create the tag with 'extra_tag_vectors'. The dissipation "
-      "judgement of a descending step then accounts for the work the held loads do: without it, "
-      "unloading elastically under a held load reads as dissipative and a step that walks back "
-      "down an elastic branch is accepted as a descent along the path.");
   params.addParam<bool>(
       "use_continuation",
       true,
@@ -135,7 +125,7 @@ ArcLengthProblem::validParams()
                         "failed. A transient run owns this: the internal budget of one increment "
                         "per step is always a designed ending there.");
 
-  params.addParamNamesToGroup("load_vector_tag load_matrix_tag held_load_vector_tag", "Tagging");
+  params.addParamNamesToGroup("load_vector_tag load_matrix_tag", "Tagging");
   params.addParamNamesToGroup("step_size max_continuation_steps "
                               "lambda_max lambda_min psi_squared correction_type "
                               "end_on_max_continuation_steps use_continuation",
@@ -150,7 +140,6 @@ ArcLengthProblem::ArcLengthProblem(const InputParameters & parameters)
     _correction_type(correctionType(getParam<MooseEnum>("correction_type"))),
     _end_on_max_continuation_steps(getParam<bool>("end_on_max_continuation_steps")),
     _use_continuation(getParam<bool>("use_continuation")),
-    _retrace_handled(false),
     _increment(0),
     _ended_on_spent_budget(false),
     _checked_load_on_constrained_dofs(false),
@@ -159,6 +148,7 @@ ArcLengthProblem::ArcLengthProblem(const InputParameters & parameters)
     _path_direction(declareRestartableData<int>("path_direction", 1)),
     _lambda_accum(declareRestartableData<Real>("lambda_accum", 0.0)),
     _step_load_increment(declareRestartableData<Real>("step_load_increment", 0.0)),
+    _last_load_increment(declareRestartableData<Real>("last_load_increment", 0.0)),
 #endif
     _load_parameter(declareRestartableData<Real>("load_parameter", 0.0))
 {
@@ -201,19 +191,10 @@ ArcLengthProblem::ArcLengthProblem(const InputParameters & parameters)
   // objects have been added, so the matrix is always allocated.
   _arclength_nl->addMatrix(_arclength_nl->loadMatrixTag());
 
-  // createTagVectors() above has made the 'extra_tag_vectors' tags, so the held load tag is
-  // resolved here rather than on the first descending step that reads it
-  if (isParamValid("held_load_vector_tag"))
-  {
-    const auto & held_tag_name = getParam<TagName>("held_load_vector_tag");
-    if (!vectorTagExists(held_tag_name) || !_arclength_nl->hasVector(getVectorTagID(held_tag_name)))
-      paramError("held_load_vector_tag",
-                 "The nonlinear system holds no vector tag named '",
-                 held_tag_name,
-                 "'. Create it with 'extra_tag_vectors' in this block, and route each held load to "
-                 "it with 'extra_vector_tags'.");
-    _held_load_vector_tag = getVectorTagID(held_tag_name);
-  }
+  // The increment the previous transient step made to the solution is read off the old and the
+  // older solution states, which are requested here, ahead of the initial conditions, so that both
+  // start out at the initial condition and the first step reads no increment out of it
+  _arclength_nl->needSolutionState(2);
 #else
   mooseError("Arc-length continuation requires PETSc 3.22.0 or newer. It is done by PETSc's "
              "SNESNEWTONAL solver, which PETSc added in that release.");
@@ -353,7 +334,6 @@ ArcLengthProblem::initPetscOutputAndSomeSolverSettings()
   // per time step, so what a traced path records is cleared here rather than when a step is armed
   _increment = 0;
   _ended_on_spent_budget = false;
-  _retrace_handled = false;
 
   // A prescribed step keeps the solver MOOSE set up: an ordinary Newton solve, judged by the
   // ordinary convergence test, at the load factor updateLoadParameter() prescribes
@@ -365,6 +345,10 @@ ArcLengthProblem::initPetscOutputAndSomeSolverSettings()
   // The type has to be set before any SNESNewtonAL call: those are function lookups on the solver
   // object that do nothing at all, and report nothing, on a solver of another type
   LibmeshPetscCall(SNESSetType(snes, SNESNEWTONAL));
+  // A transient run opens a solve at every step, and the predictor of the first increment of a
+  // solve has no increment before it to continue, so it is given the one the previous step made
+  if (_transient)
+    setPreviousIncrement(snes);
   // Mandatory: libMesh hands SNESSolve no right hand side, so the callback is the only source of
   // the tangent load PETSc has
   LibmeshPetscCall(SNESNewtonALSetFunction(snes, arcLengthTangentLoad, this));
@@ -382,6 +366,37 @@ ArcLengthProblem::initPetscOutputAndSomeSolverSettings()
   // The update function signature carries no context, so the problem travels on the solver
   LibmeshPetscCall(SNESSetApplicationContext(snes, this));
   LibmeshPetscCall(SNESSetUpdate(snes, arcLengthUpdate));
+}
+
+void
+ArcLengthProblem::setPreviousIncrement(SNES snes)
+{
+  // The setter is looked up on the solver, under the name SNESNEWTONAL composes its implementation
+  // of SNESNewtonALSetPreviousIncrement() under, so that a PETSc without it is reported rather
+  // than compiled against
+  PetscErrorCode (*set_previous_increment)(SNES, Vec, PetscReal) = nullptr;
+  LibmeshPetscCall(PetscObjectQueryFunction(
+      (PetscObject)snes, "SNESNewtonALSetPreviousIncrement_C", &set_previous_increment));
+  if (!set_previous_increment)
+    mooseError("Stepping along the path under a Transient executioner needs a PETSc whose "
+               "SNESNEWTONAL provides SNESNewtonALSetPreviousIncrement(), which carries the "
+               "direction of travel across the solve of every step. The PETSc this executable "
+               "links against has no such function.");
+
+  // The step about to be solved is armed by onTimestepBegin() before every attempt, so a zero
+  // increment scale is a solve made outside the stepping, which has no previous step to continue
+  if (_step_load_increment == 0.0)
+    return;
+
+  auto change = _arclength_nl->solutionOld().clone();
+  *change -= _arclength_nl->solutionOlder();
+  change->close();
+
+  // The step local load parameter of this solve spans the armed load increment, so the increment
+  // the previous step committed is handed over as a fraction of it. PETSc copies the vector.
+  const Real previous_lambda = _last_load_increment / _step_load_increment;
+  LibmeshPetscCall(set_previous_increment(
+      snes, cast_ptr<PetscVector<Number> *>(change.get())->vec(), previous_lambda));
 }
 
 void
@@ -445,8 +460,10 @@ ArcLengthProblem::advanceState()
     return;
 
   // Only a converged step is advanced, so nothing else has to establish that the increment armed
-  // for this step is one that was actually traced
+  // for this step is one that was actually traced. The increment is kept for the predictor of the
+  // next step to continue, and is what advancing ahead of the first step leaves at zero.
   _lambda_accum += _step_load_increment;
+  _last_load_increment = _step_load_increment;
   _step_load_increment = 0.0;
 }
 
@@ -497,65 +514,7 @@ ArcLengthProblem::continuationConverged(const unsigned int sys_num)
     }
   }
 
-  if (!converged)
-    return false;
-
-  // A step whose net load change runs downward is either tracing a descending stretch of the path
-  // or walking back down an elastic branch, and both are made of equilibrium points, so the
-  // outcome of the solve cannot separate them and the energy the step dissipates is what does.
-  // Turning the direction of travel mirrors the tangent load of the retry.
-  if (_transient && _step_lambda * _step_load_increment < 0 && !stepDissipated())
-  {
-    if (!_retrace_handled)
-    {
-      _retrace_handled = true;
-      _path_direction = -_path_direction;
-      _console << "Arc length step descended without dissipating, which is a walk back down an "
-                  "elastic branch rather than a descent along the path, so the attempt is failed "
-                  "and the retry travels the other way."
-               << std::endl;
-    }
-    return false;
-  }
-
-  return true;
-}
-
-bool
-ArcLengthProblem::stepDissipated() const
-{
-  // The executioner asks for the convergence of a solve that has returned, so the solution holds
-  // the state the step ended at and the change of the step is its distance from the old state
-  auto change = _arclength_nl->solution().clone();
-  *change -= _arclength_nl->solutionOld();
-
-  // The load tag was assembled by the last residual evaluation of the solve, which is close enough
-  // to the pattern at the start of the step for a measure that is only ever read against zero
-  const auto & load = _arclength_nl->getVector(_arclength_nl->loadVectorTag());
-  const Real pattern_dot_change = libmesh_real(load.dot(*change));
-  const Real pattern_dot_start = libmesh_real(load.dot(_arclength_nl->solutionOld()));
-
-  // The terms of the dissipation increment are carried separately so that the measure can be read
-  // against their magnitudes rather than against a unit: the load pattern carries the arbitrary
-  // scale of the input, and the assembled load tag carries the sign convention of the residual.
-  const Real term_start = _lambda_accum * pattern_dot_change;
-  const Real term_change = _step_lambda * _step_load_increment * pattern_dot_start;
-
-  // A held load does work over the step that the two terms above never see: under one, elastic
-  // unloading follows an affine line rather than a proportional ray, the cancellation breaks by
-  // the work of the held load, and a walk back down an elastic branch would read as dissipative.
-  // Its work restores the cancellation, taken from the tag the input routes the held loads to.
-  Real term_held = 0.0;
-  if (_held_load_vector_tag)
-    term_held = libmesh_real(_arclength_nl->getVector(*_held_load_vector_tag).dot(*change));
-
-  const Real dissipation = 0.5 * (term_start + term_held - term_change);
-  const Real scale = 0.5 * (std::abs(term_start) + std::abs(term_held) + std::abs(term_change));
-
-  // The threshold sits between the residue a dissipation-free descent leaves, about a part in a
-  // thousand of the terms, and a descent along the path, whose remainder is of order the terms
-  constexpr Real dissipation_tolerance = 1e-2;
-  return std::abs(dissipation) > dissipation_tolerance * scale;
+  return converged;
 }
 
 void

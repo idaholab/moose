@@ -154,49 +154,6 @@
                   'the continuation on or off per step from a function or any other trigger, with '
                   'the committed load factor carried across every switch.'
   []
-  [dissipation_guard]
-    type = 'CSVDiff'
-    input = 'dissipation_guard.i'
-    csvdiff = 'dissipation_guard_out.csv dissipation_guard_out_path.csv'
-    capabilities = 'petsc>=3.22.0'
-    # The cheap cover for the rejection and mirroring of a step that descends without dissipating.
-    # A descending step is either tracing a descending stretch of the path or walking back down an
-    # elastic branch, both made of equilibrium points, so only the energy the step dissipates
-    # separates them, and the input is built so that one step of each kind happens in a run of ten.
-    #
-    # The restoring force is 'secant_stiffness' times the solution, so at any fixed time the whole
-    # equilibrium path is a straight ray through the origin: every step taken at an unchanged
-    # stiffness moves along that ray and dissipates EXACTLY nothing, and every step across a
-    # stiffness drop leaves it and dissipates. The stiffness drops once, at t = 0.45, which is the
-    # cheapest stand-in there is for the cohesive damage the module tests commit.
-    #
-    # The five steps to t = 0.45 climb the first ray with the load factor equal to the time. The
-    # step to t = 0.5 is the drop: the arc-length radius holds the solution change to its own scale
-    # while the flatter ray puts that solution at a lower load factor, so the step descends, and it
-    # descends across a stiffness change, so it dissipates and is committed. That commit turns the
-    # direction of travel around, which is what aims the NEXT step back down the ray it has just
-    # reached. That step is the walk back down an elastic branch: same ray, so exactly zero
-    # dissipation, and the guard fails it and mirrors the retry, which climbs and is committed.
-    # The remaining steps climb, so the run holds exactly one rejection.
-    #
-    # The console line is asserted as well as the path because the csv golds alone cannot fail
-    # loudly enough: a rejection that stopped happening would be regolded into a run that asserts
-    # nothing about the guard, while the missing line fails the leaf.
-    expect_out = 'descended without dissipating'
-    recover = false
-    # A rejected step leaves the increments it already recorded in the history, which is never
-    # reset, so a step the restep harness retries doubles the rows the path gold holds.
-    restep = false
-    max_parallel = 1
-    # the path is traced one increment at a time, so linear solver differences accumulate along it
-    abs_zero = 1e-8
-    rel_err = 1e-4
-    requirement = 'The system shall fail an arc-length continuation step of a transient run whose '
-                  'load factor descends without the step dissipating any energy, because such a '
-                  'step walks back down an elastic branch rather than descending along the path, '
-                  'and shall turn the direction of travel around so that the retry of that step '
-                  'travels the other way, while committing a descending step that does dissipate.'
-  []
   [transient_steady_only_params_error]
     type = 'RunException'
     input = 'transient_path.i'
@@ -281,7 +238,8 @@
       capabilities = 'petsc>=3.22.0'
       recover = false
       detail = 'an object that routes its Jacobian to the load matrix tag while its residual stays '
-               'out of the load, which would scale a derivative of something that is not the load,'
+               'out of the load, which would scale a derivative of something that is not the load, '
+               'and'
     []
     [steady_use_continuation_error]
       type = 'RunException'
@@ -293,16 +251,7 @@
       capabilities = 'petsc>=3.22.0'
       recover = false
       detail = 'a steady solve that switches off the per-step continuation, which only a transient '
-               'run has to switch, and'
-    []
-    [held_load_tag_undeclared_error]
-      type = 'RunException'
-      input = 'transient_path.i'
-      cli_args = 'Problem/held_load_vector_tag=not_a_tag'
-      expect_err = 'no vector tag named'
-      capabilities = 'petsc>=3.22.0'
-      recover = false
-      detail = "a held load vector tag naming a tag that no 'extra_tag_vectors' entry created."
+               'run has to switch.'
     []
   []
 []

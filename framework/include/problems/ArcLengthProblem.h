@@ -17,7 +17,6 @@
 
 #include <petscsnes.h>
 
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -112,9 +111,8 @@ public:
   /**
    * Reports a continuation that spent the whole of its step budget as converged where that budget
    * is a designed ending, which a transient step's internal budget of one increment always is and
-   * a one-shot path's is while 'end_on_max_continuation_steps' holds, judges every committed
-   * descent of a transient step by the energy it dissipates, and defers to the base class in every
-   * other case.
+   * a one-shot path's is while 'end_on_max_continuation_steps' holds, and defers to the base class
+   * in every other case.
    *
    * SNESSolve_NEWTONAL ends a spent budget and an increment that ran out of corrector iterations
    * with the same SNES_DIVERGED_MAX_IT. The count of increments the path started separates the two
@@ -237,6 +235,27 @@ private:
   Real updateLoadParameter();
 
   /**
+   * Hands the arc-length solver the increment the previous transient step committed, so that the
+   * predictor of the first increment of the coming solve continues the path the way every later
+   * one does, in the direction of the increment before it, instead of opening every step in the
+   * direction of increasing step local load parameter.
+   *
+   * The increment is the change the previous step made to the solution, read off the old and the
+   * older solution states, and the load increment it committed expressed as a fraction of the one
+   * armed for this step. That fraction carries the change of convention when the direction of
+   * travel has turned around between the two steps, and a cut back retry, whose load increment
+   * scale shrank, hands over the same physical increment. Ahead of the first step both are zero,
+   * which leaves the predictor to its default.
+   *
+   * The setter is looked up on the solver at run time, and a PETSc without it is an error: a
+   * predictor that opens every step toward increasing load parameter can walk a step backward
+   * along the branch just traced at a limit point, and nothing else tells such a step, which
+   * converges, from a descent along the path.
+   *
+   * @param snes The arc-length solver of the coming solve
+   */
+  void setPreviousIncrement(SNES snes);
+  /**
    * Localizes a PETSc iterate into the solution that MOOSE assembles with and samples
    *
    * @param x The iterate to localize
@@ -261,20 +280,6 @@ private:
    * the step add up to
    */
   bool inContinuation() const;
-
-  /**
-   * @return Whether the step that just converged dissipated energy, measured by the increment
-   * Verhoosel and de Borst control their continuation with, carrying the work of the loads held
-   * over the step alongside it: dtau = (lambda_0 * f^T * du + f_held^T * du - dlambda * f^T * u_0)
-   * / 2, with f the load pattern, f_held the pattern of the loads routed to
-   * 'held_load_vector_tag', which is zero where no tag is given, u_0 and lambda_0 the state and
-   * load factor the step started from, and du and dlambda the changes the step made. The elastic
-   * unload of a linear structure is proportional, which cancels the terms of dtau exactly, so the
-   * magnitude of dtau against the magnitudes of its terms is what tells a descent along the path
-   * from a walk back down an elastic branch, which converges just as well and which the outcome of
-   * the solve alone cannot expose
-   */
-  bool stepDissipated() const;
 
   /**
    * Maps the 'correction_type' parameter onto the PETSc correction type
@@ -309,10 +314,6 @@ private:
   /// The nonlinear system that owns the load tags
   std::shared_ptr<ArcLengthNonlinearSystem> _arclength_nl;
 
-  /// Vector tag of the loads held constant over a transient continuation, which is unset when
-  /// 'held_load_vector_tag' is not given and no held load work enters the dissipation judgement
-  std::optional<TagID> _held_load_vector_tag;
-
   /// Scheme PETSc corrects an iterate back onto the arc-length constraint surface with
   const SNESNewtonALCorrectionType _correction_type;
 
@@ -325,11 +326,6 @@ private:
   /// step add up to. Held by reference so that a [Controls] object writing the controllable
   /// parameter is obeyed by the next solve
   const bool & _use_continuation;
-
-  /// Whether the attempt being judged has already been failed as a dissipation-free descent, which
-  /// keeps a repeated convergence query from turning the direction of travel a second time. Reset
-  /// at the start of every solve, so every attempt may be failed that way once
-  bool _retrace_handled;
 
   /// Index of the continuation increment being published, counted from the start of the path,
   /// which every solve restarts because each traces a path of its own
@@ -365,6 +361,10 @@ private:
   /// path traced when the step ends on a spent step budget, and zero once it has been committed.
   /// Restartable because a step commits its increment only after the checkpoint has been written
   Real & _step_load_increment;
+  /// Signed load increment the most recently committed transient step applied, which together
+  /// with the change that step made to the solution is the increment the predictor of the next
+  /// step continues. Restartable so that a recovered run resumes travelling the way it left off
+  Real & _last_load_increment;
 #endif
 
   /// Load factor of the most recent continuation state
