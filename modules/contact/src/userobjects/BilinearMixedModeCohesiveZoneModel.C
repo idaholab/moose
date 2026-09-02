@@ -111,7 +111,7 @@ BilinearMixedModeCohesiveZoneModel::computeQpIProperties()
   CohesiveZoneModelBase::computeQpIProperties();
 
   // Get the _dof_to_weighted_gap map
-  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
+  const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   // TODO: Probably better to interpolate the deformation gradients.
   _dof_to_normal_strength[dof] += (*_test)[_i][_qp] * _normal_strength_interpolation;

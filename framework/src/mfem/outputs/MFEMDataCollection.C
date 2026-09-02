@@ -27,7 +27,7 @@ MFEMDataCollection::validParams()
 
 MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
   : FileOutput(parameters),
-    _problem_data(static_cast<MFEMProblem *>(_problem_ptr)->getProblemData()),
+    _problem_data(cast_ptr<MFEMProblem *>(_problem_ptr)->getProblemData()),
     _pmesh(parameters.isParamValid("submesh")
                ? _problem_data.submeshes.GetRef(getParam<std::string>("submesh"))
                : const_cast<mfem::ParMesh &>(*_problem_data.pmesh.get())),

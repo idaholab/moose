@@ -104,9 +104,8 @@ communicateVelocities(std::unordered_map<const DofObject *, T> & dof_map,
     for (auto & pr : sent_data)
     {
       const auto dof_id = pr.first;
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
 
       if (send_data_back)
@@ -145,9 +144,8 @@ communicateVelocities(std::unordered_map<const DofObject *, T> & dof_map,
 
     for (auto & [dof_id, tangents] : sent_data)
     {
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       auto & [our_tangent_one, our_tangent_two] = dof_map[dof_object];
       our_tangent_one = tangents[0];
@@ -208,9 +206,8 @@ communicateR2T(std::unordered_map<const DofObject *, ADRankTwoTensor> & dof_map_
     for (auto & pr : sent_data)
     {
       const auto dof_id = pr.first;
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
 
       if (send_data_back)
@@ -250,9 +247,8 @@ communicateR2T(std::unordered_map<const DofObject *, ADRankTwoTensor> & dof_map_
 
     for (auto & [dof_id, r2t_sent] : sent_data)
     {
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       auto & r2t = dof_map_adr2t[dof_object];
       r2t = r2t_sent;
@@ -304,9 +300,8 @@ communicateRealObject(std::unordered_map<const DofObject *, T> & dof_to_adreal,
 
     for (auto & [dof_id, weighted_gap] : sent_data)
     {
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       if (send_data_back)
         pid_to_dof_object_for_sending_back[pid].push_back(dof_object);
@@ -343,9 +338,8 @@ communicateRealObject(std::unordered_map<const DofObject *, T> & dof_to_adreal,
 
     for (auto & [dof_id, adreal] : sent_data)
     {
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       auto & our_adreal = dof_to_adreal[dof_object];
       our_adreal = adreal;

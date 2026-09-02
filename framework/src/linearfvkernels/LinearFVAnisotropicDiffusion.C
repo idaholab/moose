@@ -190,7 +190,7 @@ Real
 LinearFVAnisotropicDiffusion::computeBoundaryMatrixContribution(
     const LinearFVBoundaryCondition & bc)
 {
-  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   auto grad_contrib = diff_bc->computeBoundaryGradientMatrixContribution() * _current_face_area;
@@ -216,7 +216,7 @@ LinearFVAnisotropicDiffusion::computeBoundaryMatrixContribution(
 Real
 LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   const auto face_arg = singleSidedFaceArg(_current_face_info);

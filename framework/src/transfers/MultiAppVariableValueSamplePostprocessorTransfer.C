@@ -225,7 +225,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
       if (_var.isArray())
         array_var = &_fe_problem.getArrayVariable(0, _var_name);
       else if (!_var.isVector())
-        standard_var = static_cast<MooseVariableField<Real> *>(&_var);
+        standard_var = cast_ptr<MooseVariableField<Real> *>(&_var);
       else
         mooseError("MultiAppVariableValueSamplePostprocessorTransfer does not support transfer of "
                    "vector variables");

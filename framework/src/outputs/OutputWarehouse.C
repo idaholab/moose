@@ -134,7 +134,7 @@ OutputWarehouse::hasMaterialPropertyOutput(const std::string & name) const
   else
   {
     // Check if output object supports material property output
-    const auto * output_object = static_cast<const Output *>(_object_map.at(name));
+    const auto * output_object = cast_ptr<const Output *>(_object_map.at(name));
     return output_object->supportsMaterialPropertyOutput();
   }
 }
@@ -354,7 +354,7 @@ OutputWarehouse::getAllMaterialPropertyOutputNames() const
   std::set<OutputName> output_names;
   for (const auto & pair : _object_map)
   {
-    const auto * output = static_cast<const Output *>(pair.second);
+    const auto * output = cast_ptr<const Output *>(pair.second);
     if (output->supportsMaterialPropertyOutput())
       output_names.insert(pair.first);
   }

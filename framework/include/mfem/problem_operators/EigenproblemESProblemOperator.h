@@ -32,7 +32,7 @@ public:
 
   [[nodiscard]] EigenproblemEquationSystem * GetEquationSystem() const override
   {
-    return static_cast<EigenproblemEquationSystem *>(
+    return cast_ptr<EigenproblemEquationSystem *>(
         EquationSystemProblemOperator::GetEquationSystem());
   }
 

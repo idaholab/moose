@@ -20,7 +20,7 @@
 class ActionWarehouse;
 class Component;
 class ClosuresBase;
-class THMMesh;
+class MooseMesh;
 class THMProblem;
 
 /**
@@ -380,7 +380,7 @@ protected:
   };
 
   /// THM mesh
-  THMMesh & _thm_mesh;
+  MooseMesh & _thm_mesh;
 
   /// Pointer to FEProblem representing this simulation
   FEProblemBase & _fe_problem;
