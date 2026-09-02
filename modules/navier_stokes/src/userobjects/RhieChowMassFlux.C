@@ -373,6 +373,31 @@ RhieChowMassFlux::meshChanged()
 }
 
 void
+RhieChowMassFlux::timestepSetup()
+{
+  // Nothing to reset when momentum hasn't been linked (e.g. should_solve_momentum = false, used
+  // by the restart-freeze pattern) or when a reconstructed pressure gradient isn't in use.
+  if (!_pressure_gradient_field || !usingReconstructedPressureGradientMethod())
+    return;
+
+  // The feedback is solver-iteration state, not an independent physical solution: discard it so
+  // this time step's momentum predictor starts from the base pressure gradient regardless of
+  // whether the preceding step ran continuously, was recovered from a checkpoint, or is a retry
+  // after a rejected step (see the class-level comment on the declaration for why this hook fires
+  // exactly once per attempt).
+  reconstructedGradientMethod().resetFeedback();
+
+  // These candidate/generation counters are otherwise self-refreshing every SIMPLE/PISO
+  // iteration, but resetting them here avoids any accidental cross-time-step coupling and keeps
+  // the safety-assertion counters meaningful within a single time step.
+  _reconstructed_candidate_available = false;
+  _lagged_velocity_gradient_generation = 0;
+  _reconstructed_candidate_generation = 0;
+  _face_mass_flux_generation = 0;
+  _reconstructed_candidate_face_flux_generation = 0;
+}
+
+void
 RhieChowMassFlux::relaxReconstructedGradient()
 {
   if (!_reconstructed_candidate_available)
