@@ -82,10 +82,16 @@ edgeLDof(mfem::ParFiniteElementSpace & pfes, int e, mfem::Array<int> & dofs)
 Coord3
 vertexCoord(const mfem::ParMesh & pmesh, int v)
 {
+  // GetNode rather than GetVertex: on a curved (higher order geometry) mesh the
+  // authoritative coordinates live in the mesh Nodes grid function, and the
+  // vertices array is rebuilt per rank during partitioning, so its values are not
+  // bit-identical between ranks that share a vertex. Keying on it there would give
+  // one vertex several identities and a partition-dependent forest. GetNode reads
+  // the Nodes grid function when the mesh is curved and falls back to the vertices
+  // array when it is not. Only spaceDim components are written, so the unused
+  // trailing components keep the zero they are initialised with.
   Coord3 p{0.0, 0.0, 0.0};
-  const mfem::real_t * x = pmesh.GetVertex(v);
-  for (const auto d : libMesh::make_range(pmesh.SpaceDimension()))
-    p[d] = x[d];
+  pmesh.GetNode(v, p.data());
   return p;
 }
 
