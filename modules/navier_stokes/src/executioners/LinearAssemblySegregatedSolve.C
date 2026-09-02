@@ -806,6 +806,12 @@ LinearAssemblySegregatedSolve::solve()
     if (_should_solve_momentum)
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
+    // Capture the lagged velocity gradient from the current pressure-corrected velocity before
+    // the momentum predictor updates the velocity field.
+    if (_should_solve_momentum && _should_solve_pressure && _rc_uo &&
+        _rc_uo->usingReconstructedPressureGradientMethod())
+      _rc_uo->captureLaggedVelocityGradient();
+
     // Initialize base and coupling pressure gradients. After this we reuse the last gradients
     // until the pressure corrector finalizes a new coupling field.
     if (_should_solve_pressure && simple_iteration_counter == 1)

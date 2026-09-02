@@ -39,10 +39,26 @@ PIMPLESolve::correctVelocity(const bool /*subtract_updated_pressure*/,
 {
   std::pair<unsigned int, Real> residual;
   unsigned int piso_iteration_counter = 0;
+  const bool reconstructed = _rc_uo && _rc_uo->usingReconstructedPressureGradientMethod();
   while (piso_iteration_counter <= _num_piso_iterations)
   {
+    const bool first_piso_corrector = piso_iteration_counter == 0;
+    const bool last_piso_corrector = piso_iteration_counter == _num_piso_iterations;
+
+    // Reconstructed candidates always need the face flux produced by their own pressure
+    // solve, so every corrector must recompute it. Ordinary (non-reconstructed) PIMPLE only
+    // needs the final corrector's flux, which feeds the advection terms for the next outer
+    // iteration/time step.
+    const bool recompute_flux = reconstructed || last_piso_corrector;
+
     residual = LinearAssemblySegregatedSolve::correctVelocity(
-        piso_iteration_counter == 0, piso_iteration_counter == _num_piso_iterations, solver_params);
+        first_piso_corrector, recompute_flux, solver_params);
+
+    // After each PISO corrector except the last, refresh the lagged velocity gradient from the
+    // newly corrected velocity field before starting the next corrector.
+    if (!last_piso_corrector && reconstructed)
+      _rc_uo->captureLaggedVelocityGradient();
+
     piso_iteration_counter++;
   }
 

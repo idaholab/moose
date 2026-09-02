@@ -56,6 +56,12 @@ RhieChowMassFlux::validParams()
       "p_diffusion_kernel",
       "The LinearFVPressureCorrectionDiffusion kernel acting on the pressure.");
 
+  params.addParam<std::string>(
+      "momentum_pressure_kernel",
+      "",
+      "Optional name of the LinearFVMomentumPressure kernel associated with this RhieChowMassFlux. "
+      "When blank, the kernel is deduced automatically from the momentum systems.");
+
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
 
   // We disable the execution of this, should only provide functions
@@ -115,6 +121,7 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
     _rho(getFunctor<Real>(NS::density)),
+    _momentum_pressure_kernel_name(getParam<std::string>("momentum_pressure_kernel")),
     _pressure_system(nullptr),
     _pressure_gradient_field(nullptr),
     _base_pressure_gradient_field(nullptr),
@@ -228,6 +235,16 @@ RhieChowMassFlux::linkMomentumPressureSystems(
 
   const auto * const coupling_kernel = momentum_pressure_kernels.front();
   const auto & coupling_reader = coupling_kernel->pressureGradientField();
+
+  if (!_momentum_pressure_kernel_name.empty() &&
+      coupling_kernel->name() != _momentum_pressure_kernel_name)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' expected momentum pressure kernel '",
+               _momentum_pressure_kernel_name,
+               "' but detected '",
+               coupling_kernel->name(),
+               "'.");
 
   if (dynamic_cast<const FVReconstructedPressureGradient *>(&coupling_reader.method()) &&
       coupling_kernel->pressureVariableNumber() != _p->number())
@@ -345,7 +362,12 @@ RhieChowMassFlux::meshChanged()
   _face_mass_flux.clear();
   _reconstructed_pressure_gradient.clear();
   _reconstructed_candidate_available = false;
-  _reconstruction_velocity_gradient.clear();
+  _lagged_reconstruction_velocity_gradient.clear();
+  _lagged_velocity_gradient_available = false;
+  _lagged_velocity_gradient_generation = 0;
+  _reconstructed_candidate_generation = 0;
+  _face_mass_flux_generation = 0;
+  _reconstructed_candidate_face_flux_generation = 0;
   _boundary_cell_ids.clear();
   setupMeshInformation();
 }
@@ -396,11 +418,38 @@ RhieChowMassFlux::computeReconstructedPressureGradientCandidate()
   if (!usingReconstructedPressureGradientMethod())
     return;
 
+  if (!_lagged_velocity_gradient_available)
+    mooseError("RhieChowMassFlux '",
+               name(),
+               "' requires a lagged velocity-gradient snapshot before computing the "
+               "reconstructed pressure-gradient candidate. Call captureLaggedVelocityGradient() "
+               "before the momentum predictor and between PISO correctors.");
+
+  const auto next_candidate_generation = _reconstructed_candidate_generation + 1;
+
+  mooseAssert(_lagged_velocity_gradient_generation >= next_candidate_generation,
+              "The lagged velocity-gradient snapshot must be captured before forming a "
+              "reconstructed pressure-gradient candidate.");
+
+  mooseAssert(_lagged_velocity_gradient_generation == next_candidate_generation,
+              "Each reconstructed pressure-gradient candidate must consume exactly one lagged "
+              "velocity-gradient snapshot.");
+
+  _reconstructed_candidate_generation = next_candidate_generation;
+
+  // Guard against reconstructing from a face mass flux left over from a preceding pressure
+  // corrector: _face_mass_flux_generation (bumped by computeFaceMassFlux()) must have advanced
+  // past _reconstructed_candidate_face_flux_generation (the generation this object already
+  // consumed) before this candidate is allowed to consume it.
+  mooseAssert(_face_mass_flux_generation != _reconstructed_candidate_face_flux_generation,
+              "Each reconstructed pressure-gradient candidate must consume a face mass flux "
+              "computed by the current pressure corrector, not one left over from a previous "
+              "corrector.");
+  _reconstructed_candidate_face_flux_generation = _face_mass_flux_generation;
+
   const bool use_base_gradient_on_boundary =
       _reconstructed_pressure_gradient_boundary_cells == "base_gradient";
   const auto & base_pressure_gradient = basePressureGradientComponents();
-
-  updateReconstructionVelocityGradient();
 
   if (_reconstructed_pressure_gradient.empty())
   {
@@ -569,21 +618,21 @@ RhieChowMassFlux::setupMeshInformation()
 }
 
 void
-RhieChowMassFlux::updateReconstructionVelocityGradient()
+RhieChowMassFlux::captureLaggedVelocityGradient()
 {
-  if (_reconstruction_velocity_gradient.empty())
+  if (_lagged_reconstruction_velocity_gradient.empty())
   {
-    _reconstruction_velocity_gradient.resize(_dim);
+    _lagged_reconstruction_velocity_gradient.resize(_dim);
     for (const auto component : make_range(_dim))
     {
-      _reconstruction_velocity_gradient[component].resize(_dim);
+      _lagged_reconstruction_velocity_gradient[component].resize(_dim);
       for (const auto direction : make_range(_dim))
-        _reconstruction_velocity_gradient[component][direction] =
+        _lagged_reconstruction_velocity_gradient[component][direction] =
             _momentum_implicit_systems[component]->current_local_solution->zero_clone();
     }
   }
 
-  for (auto & component_gradients : _reconstruction_velocity_gradient)
+  for (auto & component_gradients : _lagged_reconstruction_velocity_gradient)
     for (auto & gradient : component_gradients)
       gradient->zero();
 
@@ -642,7 +691,7 @@ RhieChowMassFlux::updateReconstructionVelocityGradient()
           elem_info
               ->dofIndices()[_global_momentum_system_numbers[component]][_vel[component]->number()];
       for (const auto direction : make_range(_dim))
-        _reconstruction_velocity_gradient[component][direction]->set(
+        _lagged_reconstruction_velocity_gradient[component][direction]->set(
             dof, surface_sum[component](direction) / volume);
     }
   }
@@ -712,13 +761,17 @@ RhieChowMassFlux::updateReconstructionVelocityGradient()
           elem_info
               ->dofIndices()[_global_momentum_system_numbers[component]][_vel[component]->number()];
       for (const auto direction : make_range(_dim))
-        _reconstruction_velocity_gradient[component][direction]->set(dof, gradient(direction));
+        _lagged_reconstruction_velocity_gradient[component][direction]->set(
+            dof, gradient(direction));
     }
   }
 
-  for (auto & component_gradients : _reconstruction_velocity_gradient)
+  for (auto & component_gradients : _lagged_reconstruction_velocity_gradient)
     for (auto & gradient : component_gradients)
       gradient->close();
+
+  _lagged_velocity_gradient_available = true;
+  ++_lagged_velocity_gradient_generation;
 }
 
 RealVectorValue
@@ -729,7 +782,7 @@ RhieChowMassFlux::reconstructionVelocityGradient(const ElemInfo & elem_info,
 {
   RealVectorValue elem_gradient;
   for (const auto direction : make_range(_dim))
-    elem_gradient(direction) = (*_reconstruction_velocity_gradient[velocity_component][direction])(
+    elem_gradient(direction) = (*_lagged_reconstruction_velocity_gradient[velocity_component][direction])(
         elem_info.dofIndices()[_global_momentum_system_numbers[velocity_component]]
                               [_vel[velocity_component]->number()]);
 
@@ -740,7 +793,7 @@ RhieChowMassFlux::reconstructionVelocityGradient(const ElemInfo & elem_info,
   RealVectorValue neighbor_gradient;
   for (const auto direction : make_range(_dim))
     neighbor_gradient(direction) =
-        (*_reconstruction_velocity_gradient[velocity_component][direction])(
+        (*_lagged_reconstruction_velocity_gradient[velocity_component][direction])(
             neighbor_info->dofIndices()[_global_momentum_system_numbers[velocity_component]]
                                        [_vel[velocity_component]->number()]);
 
@@ -1041,6 +1094,8 @@ RhieChowMassFlux::computeFaceMassFlux()
     // Compute the new face flux
     _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
   }
+
+  ++_face_mass_flux_generation;
 }
 
 void
@@ -1269,7 +1324,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
       _console << "total RHS" << std::endl;
       rhs.print();
       _console << "pressure RHS" << std::endl;
-      pressure_gradient[system_i]->print();
+      coupling_pressure_gradient[system_i]->print();
       _console << " H(u)-rhs-relaxation_source" << std::endl;
       HbyA.print();
     }
@@ -1371,6 +1426,12 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
   // mode, this is the reconstructed gradient, not the base gradient.
   const auto & coupling_pressure_gradient_components = pressureGradientComponents();
 
+  // The snapshot is only (re-)taken when updated_pressure is true, i.e. on the first PISO
+  // corrector of a sequence. Later correctors in the same sequence reuse it unchanged, even
+  // though the reconstructed feedback gradient keeps changing corrector to corrector: the
+  // momentum matrix/RHS built for this sequence already has that first-corrector gradient baked
+  // into its pressure source, so computeHbyA() must keep subtracting the same gradient it used
+  // originally until the next momentum predictor rebuilds the matrix from scratch.
   if (updated_pressure)
   {
     _grad_p_current.clear();
