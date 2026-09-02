@@ -6,7 +6,7 @@
 [Mesh]
   type = MeshGeneratorMesh
 
-  [./cmg]
+  [cmg]
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1.3 1.9'
@@ -16,17 +16,17 @@
     subdomain_id = '0 1 0
                     4 5 2
                     0 3 0'
-  [../]
+  []
 
-  [./inner_bottom]
+  [inner_bottom]
     type = SideSetsBetweenSubdomainsGenerator
     input = cmg
     primary_block = 1
     paired_block = 5
     new_boundary = 'inner_bottom'
-  [../]
+  []
 
-  [./inner_left]
+  [inner_left]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_bottom
     primary_block = 4
@@ -34,64 +34,64 @@
     new_boundary = 'inner_left'
   [../]
 
-  [./inner_right]
+  [inner_right]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_left
     primary_block = 2
     paired_block = 5
     new_boundary = 'inner_right'
-  [../]
+  []
 
-  [./inner_top]
+  [inner_top]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_right
     primary_block = 3
     paired_block = 5
     new_boundary = 'inner_top'
-  [../]
+  []
 
-  [./rename]
+  [rename]
     type = RenameBlockGenerator
     old_block = '1 2 3 4'
     new_block = '0 0 0 0'
     input = inner_top
-  [../]
+  []
 
-  [./split_inner_bottom]
+  [split_inner_bottom]
     type = PatchSidesetGenerator
     boundary = 4
     n_patches = 2
     partitioner = centroid
     centroid_partitioner_direction = x
     input = rename
-  [../]
+  []
 
-  [./split_inner_left]
+  [split_inner_left]
     type = PatchSidesetGenerator
     boundary = 5
     n_patches = 2
     partitioner = centroid
     centroid_partitioner_direction = y
     input = split_inner_bottom
-  [../]
+  []
 
-  [./split_inner_right]
+  [split_inner_right]
     type = PatchSidesetGenerator
     boundary = 6
     n_patches = 2
     partitioner = centroid
     centroid_partitioner_direction = y
     input = split_inner_left
-  [../]
+  []
 
-  [./split_inner_top]
+  [split_inner_top]
     type = PatchSidesetGenerator
     boundary = 7
     n_patches = 3
     partitioner = centroid
     centroid_partitioner_direction = x
     input = split_inner_right
-  [../]
+  []
 
   [delete_others]
     type = BoundaryDeletionGenerator
@@ -124,7 +124,7 @@
 []
 
 [UserObjects]
-  [./gray_lambert]
+  [gray_lambert]
     type = ViewFactorObjectSurfaceRadiation
     boundary = 'inner_bottom_0 inner_bottom_1
                 inner_left_0 inner_left_1
@@ -139,10 +139,10 @@
                   1 1 1'
     temperature = temperature
     view_factor_object_name = view_factor
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END NONLINEAR'
-  [../]
+    execute_on = 'NONLINEAR'
+  []
 
-  [./view_factor]
+  [view_factor]
     type = UnobstructedPlanarViewFactor
     boundary = 'inner_bottom_0 inner_bottom_1
                 inner_left_0 inner_left_1
@@ -150,24 +150,24 @@
                 inner_top_0 inner_top_1 inner_top_2'
     normalize_view_factor = true
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [LinearFVBCs]
-  [./left]
+  [left]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = temperature
     boundary = 'left'
     functor = 600.
-  [../]
-  [./right]
+  []
+  [right]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = temperature
     boundary = 'right'
     functor = 300.
-  [../]
+  []
 
-  [./radiation]
+  [radiation]
     type = LinearFVGrayLambertBC
     variable = temperature
     temperature_radiation = temperature
@@ -175,12 +175,11 @@
     surface_radiation_object_name = gray_lambert
     boundary = 'inner_left_0 inner_left_1
                 inner_right_0 inner_right_1'
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
   petsc_options_iname = '-energy_system_pc_type -energy_system_pc_factor_shift_type -snes_linesearch_damping'
   petsc_options_value = 'hypre boomeramg 0.8'
   l_abs_tol = 1e-10

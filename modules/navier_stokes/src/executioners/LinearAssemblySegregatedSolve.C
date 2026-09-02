@@ -716,9 +716,6 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   {
     auto & old_local_solution = *(system.solutionPreviousNewton());
     NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
-
-    // // Update old solution, only needed if relaxing the field
-    // old_local_solution = current_local_solution;
   }
 
   system.setSolution(current_local_solution);
