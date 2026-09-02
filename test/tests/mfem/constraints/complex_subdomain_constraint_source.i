@@ -6,7 +6,7 @@
 # boundary and subdomain values.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
