@@ -30,8 +30,9 @@ class LinearImplicitSystem;
 }
 
 /**
- * Solves for a cross field, the smooth field of 4-fold symmetric directions that orients
- * quad-shaped elements during frontal meshing.
+ * Solves for a cross field, the smooth field of 4-fold symmetric directions that gives
+ * XYFrontalDelaunayGenerator the local frame in which it measures the target size ahead of the
+ * front.
  *
  * The cross field is represented by the complex field z whose argument carries the 4-fold symmetry,
  *
@@ -39,10 +40,10 @@ class LinearImplicitSystem;
  *
  * where theta_t is the boundary tangent angle and theta is the angle of one of the four directions
  * of the cross at any point of the domain, which is theta_t itself on the boundary. Working with z
- * instead of theta makes the problem
- * linear and single valued: theta itself is only defined modulo pi/2, so it can neither be solved
- * for nor interpolated directly. Zeros of z are the field singularities and become the irregular
- * (valence 3 and 5) vertices of the final quad mesh.
+ * instead of theta makes the problem linear and single valued: theta itself is only defined modulo
+ * pi/2, so it can neither be solved for nor interpolated directly. Zeros of z are the
+ * singularities of the field, the points where it has no direction; the frame is discontinuous
+ * around them, and singularNodes() reports the nodes where the solve found one.
  *
  * The solve is a pair of real Laplace problems (one for the real part of z, one for the imaginary
  * part) discretized with linear Lagrange finite elements on the background triangulation. It runs
@@ -97,7 +98,8 @@ public:
 
   /**
    * @return Ascending ids of the singular nodes, the nodes where the solved magnitude of z fell
-   * below 0.1 before normalization. These become the irregular vertices of the quad mesh.
+   * below 0.1 before normalization, so that the field has no direction there and the frame is
+   * discontinuous around them.
    */
   const std::vector<dof_id_type> & singularNodes() const { return _singular_nodes; }
 

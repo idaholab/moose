@@ -21,11 +21,11 @@
  * Constrained Delaunay triangulation of a set of points in the plane, built one point at a time.
  *
  * Points are inserted with the Bowyer-Watson construction: the triangle containing the new point is
- * found by walking the triangulation, the cavity of triangles whose circumcircle contains the point
- * is deleted, and the point is connected to the boundary of that cavity. Constrained segments are
- * edges that the triangulation is required to contain; the cavity never grows across one, and a
- * segment that is not an edge once the points are in is recovered by retriangulating the strip of
- * triangles it crosses.
+ * found by walking the triangulation, the Delaunay cavity (the triangles whose circumcircle
+ * contains the point) is deleted, and the point is connected to the boundary of that cavity.
+ * Constrained segments are edges that the triangulation is required to contain; the Delaunay
+ * cavity never grows across one, and a segment that is not an edge once the points are in is
+ * recovered by retriangulating the strip of triangles it crosses.
  *
  * After every insertion no vertex lies strictly inside the circumcircle of any triangle, except
  * where a constrained segment separates the two. Cocircular and collinear configurations are
@@ -37,10 +37,10 @@
  * plain index triples, so it can be exercised on its own.
  *
  * Internally the point set is padded with the three vertices of a bounding triangle that encloses
- * everything, which is what lets the cavity of every insertion be a closed polygon. Those three
- * vertices are not part of the caller's point set and never appear in the public interface: the
- * vertex ids used here run from 0 to numPoints() - 1 in the order the points were added, and
- * getTriangles() drops the triangles that touch the bounding triangle.
+ * everything, which is what lets the Delaunay cavity of every insertion be a closed polygon.
+ * Those three vertices are not part of the caller's point set and never appear in the public
+ * interface: the vertex ids used here run from 0 to numPoints() - 1 in the order the points were
+ * added, and getTriangles() drops the triangles that touch the bounding triangle.
  */
 class XYIncrementalDelaunay
 {
@@ -185,10 +185,10 @@ private:
 
   /**
    * Collects the triangles of the triangulation built so far that have to make way for a new
-   * vertex, the cavity of its insertion, starting from the triangle it falls in and spreading to
-   * every neighbor whose circumcircle contains it. Constrained segments
-   * stop the spread. A neighbor is also taken in when the shared edge would otherwise produce a
-   * triangle of zero or negative area, which is what keeps the cavity star shaped about the vertex.
+   * vertex, the Delaunay cavity of its insertion, starting from the triangle it falls in and
+   * spreading to every neighbor whose circumcircle contains it. Constrained segments stop the
+   * spread. A neighbor is also taken in when the shared edge would otherwise produce a triangle of
+   * zero or negative area, which is what keeps the cavity star shaped about the vertex.
    * @param seed The triangle the new vertex falls in
    * @param v_new The internal vertex id of the new vertex
    * @param cavity Filled with the triangles to remove

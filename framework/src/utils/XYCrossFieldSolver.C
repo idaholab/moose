@@ -74,8 +74,8 @@ XYCrossFieldSolver::XYCrossFieldSolver(const MeshBase & background_mesh,
     _imaginary_variable(0),
     _solved(false)
 {
-  // Only the local portion of a distributed mesh would be copied, which would silently solve on a
-  // fragment of the domain.
+  // Solving across a distributed mesh is not supported here: only the local portion of one would
+  // be copied, which would silently solve on a fragment of the domain.
   if (!background_mesh.is_replicated())
     mooseError("XYCrossFieldSolver: The cross field background mesh must be replicated.");
 

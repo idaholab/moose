@@ -145,6 +145,7 @@ XYIncrementalDelaunay::vertexName(const std::size_t v) const
 std::size_t
 XYIncrementalDelaunay::locate(const Point2D & p) const
 {
+  // start from the last insertion if existing
   auto current = _last_triangle < _triangles.size() ? _last_triangle : std::size_t(0);
 
   // The walk always arrives in a Delaunay triangulation, but a constrained one can in principle
@@ -173,6 +174,7 @@ XYIncrementalDelaunay::locate(const Point2D & p) const
     current = next;
   }
 
+  // search all triangles if starting from the last inserted one did not succeed
   for (const auto t : index_range(_triangles))
     if (containsPoint(t, p))
       return t;
@@ -254,7 +256,7 @@ XYIncrementalDelaunay::retriangulate(const std::vector<std::size_t> & removed,
     }
 
   // Filling the emptied slots in id order, rather than in the order the region happened to be
-  // walked, is what makes the triangle numbering repeat from one run to the next.
+  // walked, is what makes the triangle numbering repeatable from one run to the next.
   std::vector<std::size_t> slots(emptied.begin(), emptied.end());
   while (slots.size() < added.size())
   {
@@ -298,8 +300,10 @@ XYIncrementalDelaunay::retriangulate(const std::vector<std::size_t> & removed,
   {
     const auto [t, e] = entry;
     const auto it = outside.find(edge);
+    // true outer boundary (for now)
     if (it == outside.end())
       continue;
+    // boundary with 'outside' the retriangulated area
     _triangles[t].neighbors[e] = it->second;
     _triangles[it->second].neighbors[localEdgeIndex(it->second, edge)] = t;
   }
@@ -365,10 +369,10 @@ XYIncrementalDelaunay::initialize(const std::vector<Point2D> & points,
   }
 
   // A triangle far enough outside the points that all of them are strictly inside it. Inserting a
-  // point deletes the cavity of that insertion, the triangles whose circumcircle contains the point
-  // (see growCavity()), and fans the hole they leave out from the point. With every point inside
-  // the bounding triangle that hole is always a closed polygon, so no insertion ever has to extend
-  // the convex hull of the triangulation.
+  // point deletes the Delaunay cavity of that insertion, the triangles whose circumcircle contains
+  // the point (see growCavity()), and fans the hole they leave out from the point. With every
+  // point inside the bounding triangle that hole is always a closed polygon, so no insertion ever
+  // has to extend the convex hull of the triangulation.
   const auto reach = _bounding_reach * std::max({x_max - x_min, y_max - y_min, 1.0});
   const auto x_mid = 0.5 * (x_min + x_max);
   const auto y_mid = 0.5 * (y_min + y_max);
@@ -430,8 +434,8 @@ XYIncrementalDelaunay::insertPoint(const Point2D & p)
       return toCaller(v);
     }
 
-  // A point landing on a constrained segment divides it, because the cavity may not cross a
-  // constrained segment and a segment with a vertex on it can no longer be a single edge.
+  // A point landing on a constrained segment divides it, because the Delaunay cavity may not cross
+  // a constrained segment and a segment with a vertex on it can no longer be a single edge.
   Segment split(invalid_index, invalid_index);
   for (const auto i : make_range(3u))
   {
@@ -463,8 +467,8 @@ XYIncrementalDelaunay::insertPoint(const Point2D & p)
     }
 
   mooseAssert(added.size() == cavity.size() + 2,
-              "The cavity of an insertion is a disc, whose boundary has two more edges than the "
-              "disc has triangles");
+              "The Delaunay cavity of an insertion is a disc, whose boundary has two more edges "
+              "than the disc has triangles");
 
   const std::vector<std::size_t> removed(cavity.begin(), cavity.end());
   _last_triangle = retriangulate(removed, added).front();

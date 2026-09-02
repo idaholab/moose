@@ -8,6 +8,7 @@
     cli_args = '--mesh-only Mesh/to_quad/show_info=true'
     recover = false
     mesh_mode = REPLICATED
+    exodiff_opts = '-pedantic'
     # The mesh-only console output pins the element count and the absence of any leftover triangle
     expect_out = 'n_elem\(\)=96.*Mesh Element Type\(s\):.*QUAD4'
     absent_out = 'TRI3'
@@ -22,6 +23,7 @@
     cli_args = '--mesh-only Mesh/to_quad/show_info=true'
     recover = false
     mesh_mode = REPLICATED
+    exodiff_opts = '-pedantic'
     # The tri_id extra element integer is distinct for every triangle of the input mesh, so the
     # gold records which of the two parents each merged quadrilateral inherited it from, and the
     # mixed element type pins the presence of the triangles that recombination could not merge
@@ -40,6 +42,7 @@
     cli_args = '--mesh-only Mesh/to_quad/show_info=true'
     recover = false
     mesh_mode = REPLICATED
+    exodiff_opts = '-pedantic'
     # This is the contrasting case to recombine_ids, which runs the same mesh through the same
     # merges and asserts that triangles are left over, so the absent TRI3 is what the elimination
     # is worth and the binary gold alone would not state it
