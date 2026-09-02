@@ -84,7 +84,7 @@
 [VectorPostprocessors]
   [point_sample]
     type = MFEMVariablePointValueSampler
-    variable = 'l2_scalar'
+    variables = 'l2_scalar'
     # this is a point very close to an internal element face
     points = '0.1 1e-13 -2.3125'
   []

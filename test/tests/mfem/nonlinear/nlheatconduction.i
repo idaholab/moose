@@ -112,7 +112,7 @@ alpha = 1e-2
 [VectorPostprocessors]
   [centre_temperature]
     type = MFEMVariablePointValueSampler
-    variable = 'temperature'
+    variables = 'temperature'
     points = '0.0 0.0 0.0'
   []
 []

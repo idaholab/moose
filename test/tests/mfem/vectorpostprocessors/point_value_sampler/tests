@@ -35,7 +35,7 @@
   [MFEMValueSamplerBoundaryDiscontinuousWarningRT]
     type = RunException
     input = point_value_sampler_boundary_warn.i
-    cli_args = 'VectorPostprocessors/point_sample/variable=rt_vector'
+    cli_args = 'VectorPostprocessors/point_sample/variables=rt_vector'
     expect_err = 'MFEMVariablePointValueSampler "point_sample" found point .* on an element '
                  'boundary.*H\(div\).*continuous normal trace.*tangential component may differ '
                  'between elements.*element selected by GSLIB will supply the sampled value'
@@ -48,7 +48,7 @@
   [MFEMValueSamplerBoundaryDiscontinuousWarningND]
     type = RunException
     input = point_value_sampler_boundary_warn.i
-    cli_args = 'VectorPostprocessors/point_sample/variable=nd_vector'
+    cli_args = 'VectorPostprocessors/point_sample/variables=nd_vector'
     expect_err = 'MFEMVariablePointValueSampler "point_sample" found point .* on an element '
                  'boundary.*H\(curl\).*continuous tangential trace.*normal component may differ '
                  'between elements.*element selected by GSLIB will supply the sampled value'
@@ -72,7 +72,7 @@
     type = RunException
     input = complex_point_value_sampler_boundary_warn.i
     cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexVariablePointValueSampler '
-               'VectorPostprocessors/point_sample/variable=l2_complex '
+               'VectorPostprocessors/point_sample/variables=l2_complex '
                'VectorPostprocessors/point_sample/points="0 0 1000"'
     expect_err = 'MFEMComplexVariablePointValueSampler "point_sample" could not find point at'
     design = 'MFEMComplexVariablePointValueSampler.md'
@@ -86,7 +86,7 @@
     type = RunException
     input = complex_point_value_sampler_boundary_warn.i
     cli_args = 'VectorPostprocessors/point_sample/type=MFEMComplexVariablePointValueSampler '
-               'VectorPostprocessors/point_sample/variable=l2_complex'
+               'VectorPostprocessors/point_sample/variables=l2_complex'
     expect_err = 'MFEMComplexVariablePointValueSampler "point_sample" found a point on an element boundary but the FE space is discontinuous at element boundaries'
     design = 'MFEMComplexVariablePointValueSampler.md'
     issues = '#30076 #32988'
