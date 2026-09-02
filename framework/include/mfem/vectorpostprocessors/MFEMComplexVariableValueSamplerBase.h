@@ -35,18 +35,18 @@ public:
   void finalize() override;
 
 private:
-  int getFESpaceContinuityType() const override;
+  int getFESpaceContinuityType(size_t i_var) const override;
 
   /// Complex grid function being sampled.
-  const mfem::ParComplexGridFunction & _var;
+  std::vector<std::reference_wrapper<mfem::ParComplexGridFunction>> _vars;
   /// Values interpolated from the real part of the grid function.
-  mfem::Vector _real_interp_vals;
+  std::vector<mfem::Vector> _real_interp_vals;
   /// Values interpolated from the imaginary part of the grid function.
-  mfem::Vector _imag_interp_vals;
+  std::vector<mfem::Vector> _imag_interp_vals;
   /// VectorPostprocessor output columns for the real components.
-  std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_real_vals;
+  std::vector<std::vector<std::reference_wrapper<VectorPostprocessorValue>>> _declared_real_vals;
   /// VectorPostprocessor output columns for the imaginary components.
-  std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_imag_vals;
+  std::vector<std::vector<std::reference_wrapper<VectorPostprocessorValue>>> _declared_imag_vals;
 };
 
 #endif // MOOSE_MFEM_ENABLED

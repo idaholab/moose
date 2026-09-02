@@ -30,7 +30,7 @@
 [VectorPostprocessors]
   [line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'transfer_var'
+    variables = 'transfer_var'
     start_point = '0 0 0'
     end_point = '1 1 0.1'
     num_points = 101

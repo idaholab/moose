@@ -98,14 +98,14 @@
 [VectorPostprocessors]
   [temperature_line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'temperature'
+    variables = 'temperature'
     start_point = '0.01 0.01 0'
     end_point = '0.99 0.99 0'
     num_points = 114
   []
   [time_integrated_heat_flux_line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'time_integrated_heat_flux'
+    variables = 'time_integrated_heat_flux'
     start_point = '0.01 0.01 0'
     end_point = '0.99 0.99 0'
     num_points = 114
