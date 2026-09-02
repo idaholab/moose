@@ -83,6 +83,8 @@ public:
   void computeFaceMassFlux();
   /// Compute the reconstructed pressure-gradient candidate from Rhie-Chow face fluxes.
   void computeReconstructedPressureGradientCandidate();
+  /// Capture the lagged cell velocity gradient used by the Aguerre reconstruction.
+  void captureLaggedVelocityGradient();
   /// Update the cell values of the velocity variables
   void computeCellVelocity();
 
@@ -139,10 +141,7 @@ protected:
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
 
-  /// Update the cell velocity gradients used by the Aguerre flux reconstruction.
-  void updateReconstructionVelocityGradient();
-
-  /// Interpolate one velocity component gradient from the current cell to the face.
+  /// Interpolate one velocity component gradient from the lagged cell state to the face.
   RealVectorValue reconstructionVelocityGradient(const ElemInfo & elem_info,
                                                  const FaceInfo & fi,
                                                  bool elem_has_info,
@@ -232,9 +231,47 @@ protected:
   /// Cell pressure gradient reconstructed from the pressure part of the face fluxes.
   std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_pressure_gradient;
 
-  /// Cell velocity gradients used by the Aguerre face-flux reconstruction.
+  /// Cell velocity gradients from the preceding pressure-corrector velocity, used by the
+  /// Aguerre face-flux reconstruction.
   std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _reconstruction_velocity_gradient;
+      _lagged_reconstruction_velocity_gradient;
+
+  /// Whether a lagged velocity-gradient snapshot is available for reconstruction.
+  bool _lagged_velocity_gradient_available = false;
+
+  /**
+   * Producer counter for the lagged velocity-gradient snapshot: incremented every time
+   * captureLaggedVelocityGradient() runs. Paired with _reconstructed_candidate_generation so
+   * computeReconstructedPressureGradientCandidate() can verify it is consuming a snapshot it
+   * has not already consumed, i.e. one captured by the current PISO corrector rather than a
+   * leftover from a previous one.
+   */
+  dof_id_type _lagged_velocity_gradient_generation = 0;
+
+  /**
+   * Consumer counter paired with _lagged_velocity_gradient_generation: the lagged
+   * velocity-gradient generation already consumed by the most recently computed reconstructed
+   * pressure-gradient candidate. computeReconstructedPressureGradientCandidate() asserts this
+   * differs from the current _lagged_velocity_gradient_generation before proceeding.
+   */
+  dof_id_type _reconstructed_candidate_generation = 0;
+
+  /**
+   * Producer counter for the conservative face mass flux: incremented every time
+   * computeFaceMassFlux() runs. Paired with _reconstructed_candidate_face_flux_generation so
+   * computeReconstructedPressureGradientCandidate() can verify it is reconstructing from the
+   * face flux produced by the current pressure corrector, not one left over from a preceding
+   * corrector.
+   */
+  dof_id_type _face_mass_flux_generation = 0;
+
+  /**
+   * Consumer counter paired with _face_mass_flux_generation: the face mass-flux generation
+   * already consumed by the most recently computed reconstructed pressure-gradient candidate.
+   * computeReconstructedPressureGradientCandidate() asserts this differs from the current
+   * _face_mass_flux_generation before proceeding.
+   */
+  dof_id_type _reconstructed_candidate_face_flux_generation = 0;
 
   /**
    * Functor describing the density of the fluid
@@ -252,6 +289,10 @@ protected:
 
   /// Pointers to the momentum equation implicit system(s) from libmesh
   std::vector<libMesh::LinearImplicitSystem *> _momentum_implicit_systems;
+
+  /// Optional user-specified name of the momentum pressure kernel associated with this
+  /// RhieChowMassFlux object. When empty, the kernel is deduced from the momentum systems.
+  const std::string _momentum_pressure_kernel_name;
 
   /// Pointer to the pressure system
   LinearSystem * _pressure_system;

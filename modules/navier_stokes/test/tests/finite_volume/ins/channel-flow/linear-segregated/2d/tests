@@ -123,6 +123,36 @@
     design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
     issues = '#28951 #29150'
   []
+  [energy_boussinesq_pimple_reconstructed]
+    type = 'CSVDiff'
+    input = 2d-boussinesq-transient.i
+    csvdiff = 2d-boussinesq-transient-reconstructed-pimple_out_line_sample_0007.csv
+    cli_args = "pressure_gradient_method=reconstructed Outputs/file_base=2d-boussinesq-transient-reconstructed-pimple_out"
+    requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PIMPLE algorithm and reconstructed pressure gradients using the linear finite volume system."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+    issues = '#32995'
+  []
+  [energy_boussinesq_piso_reconstructed_two_correctors]
+    type = 'CSVDiff'
+    input = 2d-boussinesq-transient.i
+    csvdiff = 2d-boussinesq-transient-reconstructed-piso2_out_line_sample_0007.csv
+    cli_args = "pressure_gradient_method=reconstructed Executioner/num_piso_iterations=1 Outputs/file_base=2d-boussinesq-transient-reconstructed-piso2_out"
+    requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PISO algorithm using two pressure correctors and reconstructed pressure gradients, each corrector consuming the face mass flux from its own pressure solution."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+    issues = '#32995'
+  []
+  [energy_boussinesq_piso_reconstructed_three_correctors]
+    type = 'CSVDiff'
+    input = 2d-boussinesq-transient.i
+    csvdiff = 2d-boussinesq-transient-reconstructed-piso3_out_line_sample_0007.csv
+    cli_args = "pressure_gradient_method=reconstructed Executioner/num_piso_iterations=2 Outputs/file_base=2d-boussinesq-transient-reconstructed-piso3_out"
+    requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PISO algorithm using three pressure correctors and reconstructed pressure gradients without introducing oscillatory or divergent behavior relative to fewer correctors."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+    issues = '#32995'
+  []
   [normal_velocity]
     type = 'Exodiff'
     input = rotated-channel.i
