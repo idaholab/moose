@@ -208,6 +208,18 @@ The cell velocity is subsequently updated from the same stored coupling gradient
 \left(\nabla p\right)_{\mathrm{c},P}.
 \end{equation}
 
+## Time-step lifecycle
+
+The stored feedback field is solver-iteration state, not an independent physical solution.
+It is reset to uninitialized at the start of every attempted time step (once, before the
+outer SIMPLE/PISO iteration sequence for that attempt), so the first iteration of each time
+step always starts the momentum predictor from the base gradient method rather than from
+whatever was accumulated during the previous time step. This makes a continuous transient
+run, a run recovered from a checkpoint, and a run retried after a rejected/cut-back time
+step execute the same algorithm at the same physical time. For a steady SIMPLE solve, which
+has no sequence of physical time steps, the reset happens exactly once, before the first
+SIMPLE iteration, so feedback still accumulates across the entire steady solve as before.
+
 ## SIMPLE update sequence
 
 For a reconstructed-gradient solve, the relevant steps are:

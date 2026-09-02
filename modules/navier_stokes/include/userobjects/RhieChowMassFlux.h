@@ -101,6 +101,17 @@ public:
   virtual void initialSetup() override;
 
   /**
+   * Reset reconstructed-gradient feedback state once per attempted time step. This is called by
+   * FEProblemBase::timestepSetup(), which TransientBase::takeStep() invokes once before the
+   * segregated solve for every attempt (including retries after a rejected/cut-back step), and
+   * which SteadyBase::execute() invokes exactly once before the entire outer SIMPLE iteration
+   * sequence. That distinction is what keeps steady solves from losing their accumulated feedback
+   * every SIMPLE iteration while still making transient time steps (continuous, recovered, or
+   * retried) start the momentum predictor from the same state.
+   */
+  virtual void timestepSetup() override;
+
+  /**
    * Update the momentum system-related information
    * @param momentum_systems Pointers to the momentum systems which are solved for the momentum
    * vector components
