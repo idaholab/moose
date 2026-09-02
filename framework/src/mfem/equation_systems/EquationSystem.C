@@ -532,7 +532,16 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
       mooseAssert(nlf_jac,
                   "Jacobian contribution of nonlinear form associated with " + test_var_name +
                       " is not castable into a HypreParMatrix");
-      _jacobian_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      auto * const jacobian_block = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      // Both summands already carry a unit diagonal on the essential rows: the bilinear form's
+      // comes from ParBilinearForm::FormLinearSystem, which eliminates with the DIAG_ONE policy,
+      // and the nonlinear form's from ParNonlinearForm::GetGradient, which ends in
+      // OperatorHandle::EliminateRowsCols. Their sum therefore has a diagonal of two on the
+      // essential rows the nonlinear integrators touch and one on the rest, so it is not the
+      // gradient of Mult(). Re-eliminating restores the unit diagonal everywhere; the returned
+      // eliminated part is discarded because these rows and columns are already zero.
+      delete jacobian_block->EliminateRowsCols(_ess_tdof_lists.at(i));
+      _jacobian_blocks(i, i) = jacobian_block;
     }
     else
       _jacobian_blocks(i, i) = _h_blocks(i, i);
