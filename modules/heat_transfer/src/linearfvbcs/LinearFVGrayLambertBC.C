@@ -43,7 +43,7 @@ LinearFVGrayLambertBC::LinearFVGrayLambertBC(const InputParameters & parameters)
     _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name")),
     _reconstruct_emission(getParam<bool>("reconstruct_emission"))
 {
-  // Request the previous state. This assumes the BC acts on the temperature varible
+  // Request the previous state. This assumes the BC acts on the temperature variable
   _var.sys().needSolutionState(1, Moose::SolutionIterationType::Nonlinear);
 }
 

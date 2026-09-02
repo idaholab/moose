@@ -9,6 +9,7 @@
     mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
     requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and SIMPLE solver.'
     issues = '#33641'
+    max_threads = 1
   []
 
   [parallel_plates_csv]
@@ -19,6 +20,7 @@
     rel_err = 1e-6
     abs_zero = 1e-6
     requirement = 'The system shall compute the surface temperatures and heat fluxes for two conducting slabs exchanging gray diffuse radiation when solved with SIMPLE.'
+    max_threads = 1
   []
 
   [parallel_plates_exodus]
@@ -28,5 +30,6 @@
     rel_err = 1e-6
     abs_zero = 1e-10
     requirement = 'The system shall compute the spatial temperature solution for two conducting slabs exchanging gray diffuse radiation when solved with SIMPLE.'
+    max_threads = 1
   []
 []

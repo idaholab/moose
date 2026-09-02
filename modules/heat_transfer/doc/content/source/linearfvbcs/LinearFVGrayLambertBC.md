@@ -1,20 +1,15 @@
 # LinearFVGrayLambertBC
 
-!syntax description /LinearFVBCs/LinearFVGrayLambertBC
-
-## Description
-
 `LinearFVGrayLambertBC` applies a surface-to-surface radiation boundary condition to a
 linear finite-volume temperature variable. It is the LinearFV counterpart of
 [GrayLambertNeumannBC.md]. Both boundary conditions obtain
 the radiative exchange quantities from a
 [GrayLambertSurfaceRadiationBase.md] user object;
 the difference is that `LinearFVGrayLambertBC` contributes to a linear finite-volume
-system using the Robin boundary-condition assembly provided by
-`LinearFVAdvectionDiffusionFunctorRobinBCBase`.
+system.
 
 This boundary condition is intended for heat-conduction or energy equations using a
-`MooseLinearVariableFVReal` variable and a `LinearFVDiffusion` kernel. It does not
+[MooseLinearVariableFVReal.md] variable and a [LinearFVDiffusion.md] kernel. It does not
 compute view factors or solve the enclosure radiosity equations itself. Those tasks
 remain the responsibility of a surface-radiation user object such as
 [ConstantViewFactorSurfaceRadiation.md] or
@@ -68,7 +63,7 @@ temperature. Substitution of [eq:linear-fv-gray-lambert-flux] into
 =-\epsilon_iG_i.
 
 The LinearFV system is linear, so the fourth-power temperature dependence is treated
-with a Picard linearization. For outer iteration $m+1$,
+with linearization. For outer iteration $m+1$,
 
 !equation id=eq:linear-fv-gray-lambert-picard
 \left(T_b^{m+1}\right)^4
@@ -85,19 +80,43 @@ Consequently, [eq:linear-fv-gray-lambert-nonlinear-bc] is written in the Robin f
 with
 
 !equation id=eq:linear-fv-gray-lambert-coefficients
-\alpha=-k, \qquad
-\beta^m=-\epsilon_i\sigma\left(T_b^m\right)^3, \qquad
-\gamma^m=-\epsilon_iG_i^m.
+\alpha^m=-k_C^m, \qquad
+\beta^m=-\epsilon_i\sigma\left(T_C^m\right)^3, \qquad
+\gamma^m=-\epsilon_iG_i^m,
 
-The temperature-dependent coefficient is evaluated using the previous nonlinear
-solution state. At convergence, $T_b^{m+1}=T_b^m$, and the original nonlinear
-Gray--Lambert boundary condition is recovered.
+where $T_C^m$ and $k_C^m$ are the temperature and diffusion coefficient,
+respectively, evaluated in the cell adjacent to the boundary using the previous
+nonlinear solution state. For a constant diffusion coefficient,
+$\alpha^m=-k$.
+
+The use of $T_C^m$ avoids recursively evaluating the temperature at a boundary
+whose value is itself determined by this boundary condition. Consequently, the
+emission term is approximated as
+
+!equation id=eq:linear-fv-gray-lambert-emission-approximation
+\left(T_b^{m+1}\right)^4
+\approx
+\left(T_C^m\right)^3 T_b^{m+1}.
+
+This treatment combines fixed-point lagging of the nonlinear coefficient with
+a first-order approximation of the previous boundary temperature,
+$T_b^m\approx T_C^m$. Therefore, even after convergence of the nonlinear
+iterations, the reconstructed emission is proportional to
+$\left(T_C\right)^3T_b$ rather than exactly $T_b^4$.
+
+!alert note title=First-order boundary approximation
+The current implementation evaluates the temperature-dependent emission
+coefficient using the adjacent-cell temperature. This avoids recursive boundary
+evaluation but introduces a first-order spatial approximation in the nonlinear
+radiative coefficient.
 
 !alert warning title=Consistent diffusion coefficient
-The `coeff_diffusion` supplied to this boundary condition must represent the same
-physical coefficient as the `diffusion_coeff` used by the associated
+The `coeff_diffusion` supplied to this boundary condition must represent the
+same physical coefficient as the `diffusion_coeff` used by the associated
 [LinearFVDiffusion.md] kernel. For a heat-conduction equation, both parameters
-represent the thermal conductivity.
+represent the thermal conductivity. If the diffusion coefficient depends on
+temperature, the boundary-condition coefficient is evaluated at the adjacent
+cell using the previous nonlinear solution state.
 
 When [!param](/LinearFVBCs/LinearFVGrayLambertBC/reconstruct_emission) is `false`, the
 surface-averaged heat-flux density obtained directly from the Gray--Lambert user
@@ -116,15 +135,9 @@ enclosure radiation user object.
 
 Surface-to-surface radiation introduces two sources of nonlinearity and coupling:
 the emitted energy depends on $T^4$, and the irradiation on one surface depends on
-the radiosities of all surfaces in the enclosure. The energy system must therefore
-be solved repeatedly while updating both the lagged Robin coefficient and the
-surface-radiation user object.
-
-For a `SIMPLE` executioner, this update occurs through the outer SIMPLE iterations
-when the energy system is enabled. Equation and field relaxation may be used to
-stabilize the fixed-point iteration. For a `Steady` executioner, a multi-system
-fixed-point iteration can be used to repeat the linear energy solve until the
-radiative coupling converges.
+the radiosities of all surfaces in the enclosure. It is therefore important to use
+relaxation, either for the multi-system fixed-point iteration or through outer
+ SIMPLE iterations.
 
 ## Example syntax
 

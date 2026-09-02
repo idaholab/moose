@@ -82,5 +82,6 @@
     mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
     requirement = 'The system shall be able to solve surface-to-surface radiation with LinearFV system and Steady Newton solver.'
     issues = '#33641'
+    max_threads=1
   []
 []
