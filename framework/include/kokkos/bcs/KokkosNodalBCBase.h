@@ -60,6 +60,18 @@ public:
                type(),
                "'.");
   }
+
+  /**
+   * Compute the local contribution to the Kokkos matrix-free Jacobian diagonal, accumulating the
+   * result into the Kokkos matrix-free diagonal vector.
+   */
+  virtual void computeJacobianDiagonal()
+  {
+    mooseError("computeJacobianDiagonal() is not implemented for Kokkos nodal boundary "
+               "condition type '",
+               type(),
+               "'.");
+  }
 };
 
 } // namespace Moose::Kokkos

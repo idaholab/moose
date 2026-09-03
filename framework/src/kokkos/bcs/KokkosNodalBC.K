@@ -79,4 +79,15 @@ NodalBC::computeJacobianVectorProduct()
   _jvp_dispatcher->parallelFor(policy);
 }
 
+void
+NodalBC::computeJacobianDiagonal()
+{
+  Policy policy(0, numKokkosBoundaryNodes());
+
+  if (!_jacobian_diagonal_dispatcher)
+    _jacobian_diagonal_dispatcher = DispatcherRegistry::build<JacobianDiagonalLoop>(this, type());
+
+  _jacobian_diagonal_dispatcher->parallelFor(policy);
+}
+
 } // namespace Moose::Kokkos

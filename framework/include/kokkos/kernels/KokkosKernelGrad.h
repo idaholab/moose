@@ -142,6 +142,16 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void computeJacobianVectorProductInternal(const Derived & kernel,
                                                             AssemblyDatum & datum) const;
+  /**
+   * Compute the Kokkos matrix-free Jacobian diagonal, reusing precomputeQpJacobian() -- the
+   * partial-assembly "B" operator -- with the trial index fixed equal to the test index, so no
+   * element matrix is ever formed.
+   * @param kernel The kernel object of the final derived type
+   * @param datum The AssemblyDatum object of the current thread
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianDiagonalInternal(const Derived & kernel,
+                                                       AssemblyDatum & datum) const;
   ///@}
 };
 
@@ -237,6 +247,28 @@ KernelGrad::computeJacobianVectorProductInternal(const Derived & kernel,
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _grad_test.reference(datum, i, qp);
         }
+      });
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+KernelGrad::computeJacobianDiagonalInternal(const Derived & kernel, AssemblyDatum & datum) const
+{
+  ResidualObject::computeJacobianDiagonalInternal(
+      datum,
+      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
+      {
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+          for (unsigned int i = ib; i < ie; ++i)
+          {
+            // Diagonal entry (i, i): trial index fixed equal to the test index, so no j-loop and
+            // no off-diagonal contraction, unlike computeJacobianInternal()
+            Real3 value =
+                datum.J(qp).transpose() *
+                (datum.JxW(qp) * kernel.template precomputeQpJacobian<Derived>(i, qp, datum));
+
+            local_re[i] += value * _grad_test.reference(datum, i, qp);
+          }
       });
 }
 

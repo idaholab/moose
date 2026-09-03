@@ -450,6 +450,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
   DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianLoop, Object>(objectname);
   DispatcherRegistry::addDispatcher<typename Object::JacobianVectorProductLoop, Object>(
       objectname);
+  DispatcherRegistry::addDispatcher<typename Object::JacobianDiagonalLoop, Object>(objectname);
 
   if constexpr (Object::uses_precompute_hooks)
   {
@@ -477,6 +478,11 @@ registerResidualObjectDispatchers(const std::string & objectname)
   // NonlinearSystemBase::setupKokkosMatrixFreeJacobian() by object type name -- not tied to
   // whether Object overrides any hook.
   DispatcherRegistry::hasUserMethod<typename Object::JacobianVectorProductLoop>(
+      objectname, Object::uses_precompute_hooks);
+
+  // Same repurposing as JacobianVectorProductLoop above, for the Kokkos matrix-free Jacobian
+  // diagonal.
+  DispatcherRegistry::hasUserMethod<typename Object::JacobianDiagonalLoop>(
       objectname, Object::uses_precompute_hooks);
 
   if constexpr (Object::supports_scalar_jacobian)
