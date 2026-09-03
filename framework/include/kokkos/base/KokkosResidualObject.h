@@ -63,6 +63,9 @@ public:
   struct JacobianVectorProductLoop
   {
   };
+  struct JacobianDiagonalLoop
+  {
+  };
   ///@}
 
   virtual const MooseVariableBase & variable() const override { return _var; }
@@ -79,14 +82,17 @@ public:
 
   /**
    * Set the vector tags used to read the direction vector and accumulate the action vector for
-   * the Kokkos matrix-free Jacobian-vector product
+   * the Kokkos matrix-free Jacobian-vector product, and to accumulate the Kokkos matrix-free
+   * Jacobian diagonal
    * @param x_tag The vector tag of the direction vector
    * @param y_tag The vector tag of the action vector
+   * @param diag_tag The vector tag of the Jacobian diagonal
    */
-  void setMatrixFreeTags(TagID x_tag, TagID y_tag)
+  void setMatrixFreeTags(TagID x_tag, TagID y_tag, TagID diag_tag)
   {
     _mf_x_tag = x_tag;
     _mf_y_tag = y_tag;
+    _mf_diag_tag = diag_tag;
   }
 
 protected:
@@ -110,6 +116,7 @@ protected:
   std::unique_ptr<DispatcherBase> _jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _jvp_dispatcher;
+  std::unique_ptr<DispatcherBase> _jacobian_diagonal_dispatcher;
   ///@}
 
   /**
@@ -119,13 +126,15 @@ protected:
 
   /**
    * Vector tags used to read the direction vector and accumulate the action vector for the
-   * Kokkos matrix-free Jacobian-vector product. Set once, before the first parallel dispatch, by
+   * Kokkos matrix-free Jacobian-vector product, and to accumulate the Kokkos matrix-free Jacobian
+   * diagonal. Set once, before the first parallel dispatch, by
    * NonlinearSystemBase::setupKokkosMatrixFreeJacobian() -- unused unless matrix-free mode is
    * enabled.
    */
   ///@{
   TagID _mf_x_tag = 0;
   TagID _mf_y_tag = 0;
+  TagID _mf_diag_tag = 0;
   ///@}
 
   /**
@@ -266,6 +275,18 @@ protected:
                                                        const ContiguousElementID elem,
                                                        const unsigned int i,
                                                        const unsigned int comp = 0) const;
+  /**
+   * Accumulate local elemental contribution to the Kokkos matrix-free Jacobian diagonal,
+   * skipping any DOF constrained by a nodal BC on the given matrix tag
+   * @param value The local elemental contribution
+   * @param elem The contiguous element ID
+   * @param i The test/trial function DOF index
+   * @param comp The variable component
+   */
+  KOKKOS_FUNCTION void accumulateTaggedElementalDiagonal(const Real value,
+                                                         const ContiguousElementID elem,
+                                                         const unsigned int i,
+                                                         const unsigned int comp = 0) const;
 
   /**
    * The common loop structure template for computing elemental residual
@@ -283,6 +304,13 @@ protected:
   template <typename function>
   KOKKOS_FUNCTION void computeJacobianVectorProductInternal(AssemblyDatum & datum,
                                                             function body) const;
+  /**
+   * The common loop structure template for computing the Kokkos matrix-free Jacobian diagonal
+   * @param datum The AssemblyDatum object of the current thread
+   * @param body The quadrature point loop body
+   */
+  template <typename function>
+  KOKKOS_FUNCTION void computeJacobianDiagonalInternal(AssemblyDatum & datum, function body) const;
   /**
    * The common loop structure template for computing elemental Jacobian
    * @param datum The AssemblyDatum object of the current thread
@@ -539,6 +567,25 @@ ResidualObject::accumulateTaggedElementalVector(const Real value,
   ::Kokkos::atomic_add(&sys.getVectorDofValue(row, _mf_y_tag), value);
 }
 
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedElementalDiagonal(const Real value,
+                                                  const ContiguousElementID elem,
+                                                  const unsigned int i,
+                                                  const unsigned int comp) const
+{
+  if (!value)
+    return;
+
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
+
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
+    if (sys.hasNodalBCMatrixTag(row, _matrix_tags[t]))
+      return;
+
+  ::Kokkos::atomic_add(&sys.getVectorDofValue(row, _mf_diag_tag), value);
+}
+
 template <typename function>
 KOKKOS_FUNCTION void
 ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) const
@@ -606,6 +653,41 @@ ResidualObject::computeJacobianVectorProductInternal(AssemblyDatum & datum, func
 
     for (unsigned int i = ib; i < ie; ++i)
       accumulateTaggedElementalVector(local_re[i - ib], datum.elem().id, i);
+  }
+}
+
+template <typename function>
+KOKKOS_FUNCTION void
+ResidualObject::computeJacobianDiagonalInternal(AssemblyDatum & datum, function body) const
+{
+  Real local_re[MAX_CACHED_DOF];
+
+  unsigned int stride = MAX_CACHED_DOF * datum.num_local_threads();
+  unsigned int num_batches = datum.n_dofs() / stride;
+
+  if (datum.n_dofs() % stride)
+    ++num_batches;
+
+  for (unsigned int batch = 0; batch < num_batches; ++batch)
+  {
+    unsigned int ib = batch * stride;
+    unsigned int ie = ::Kokkos::min(ib + stride, datum.n_dofs());
+
+    const unsigned int n = ie - ib;
+    const unsigned int d = n / datum.num_local_threads();
+    const unsigned int m = n % datum.num_local_threads();
+    const unsigned int t = datum.local_thread_id();
+
+    ib += t * d + (t < m ? t : m);
+    ie = ib + d + (t < m ? 1 : 0);
+
+    for (unsigned int i = ib; i < ie; ++i)
+      local_re[i - ib] = 0;
+
+    body(local_re - ib, ib, ie);
+
+    for (unsigned int i = ib; i < ie; ++i)
+      accumulateTaggedElementalDiagonal(local_re[i - ib], datum.elem().id, i);
   }
 }
 

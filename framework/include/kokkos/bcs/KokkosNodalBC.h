@@ -57,6 +57,12 @@ public:
    * Jacobian contribution is not yet supported in matrix-free mode.
    */
   virtual void computeJacobianVectorProduct() override;
+  /**
+   * Dispatch Kokkos matrix-free Jacobian diagonal calculation. Reproduces the identity row
+   * accumulateTaggedNodalMatrix(false, ...) gives the assembled matrix, mirroring
+   * computeJacobianVectorProduct()'s row-replacement.
+   */
+  virtual void computeJacobianDiagonal() override;
 
   /**
    * Default methods to prevent compile errors even when these methods were not defined in the
@@ -129,6 +135,9 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived & bc) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(JacobianDiagonalLoop, const ThreadID tid, const Derived & bc) const;
   ///@}
 
 protected:
@@ -213,6 +222,27 @@ NodalBC::operator()(JacobianVectorProductLoop, const ThreadID tid, const Derived
   auto x_row = sys.getVectorDofValue(row, _mf_x_tag);
 
   ::Kokkos::atomic_add(&sys.getVectorDofValue(row, _mf_y_tag), local_ke * x_row);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+NodalBC::operator()(JacobianDiagonalLoop, const ThreadID tid, const Derived & bc) const
+{
+  auto node = kokkosBoundaryNodeID(tid);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
+
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+  // Reproduces the identity row accumulateTaggedNodalMatrix(false, ...) gives the assembled
+  // matrix, mirroring the JacobianVectorProductLoop row-replacement above
+  Real local_ke = bc.template computeQpJacobian<Derived>(0, datum);
+
+  auto row = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var());
+
+  ::Kokkos::atomic_add(&sys.getVectorDofValue(row, _mf_diag_tag), local_ke);
 }
 
 } // namespace Moose::Kokkos

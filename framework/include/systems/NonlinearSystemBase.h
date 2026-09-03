@@ -327,6 +327,15 @@ public:
    * @param y The action vector (owned by the caller); zeroed and filled by this call
    */
   void computeKokkosJacobianVectorProduct(Vec x, Vec y);
+
+  /**
+   * Compute the diagonal of the (unassembled) Kokkos Jacobian, using the partial-assembly
+   * Jacobian diagonal hooks on active Kokkos kernels. This is the MatGetDiagonal callback for a
+   * Kokkos matrix-free shell that is also the tagged system matrix (see
+   * SystemBase::addShellMatrix()), e.g. a Multigrid level operator.
+   * @param diag The diagonal vector (owned by the caller); zeroed and filled by this call
+   */
+  void computeKokkosJacobianDiagonal(Vec diag);
 #endif
 
   /**
@@ -998,6 +1007,7 @@ protected:
   bool _kokkos_mf_enabled = false;
   TagID _kokkos_mf_x_tag = 0;
   TagID _kokkos_mf_y_tag = 0;
+  TagID _kokkos_mf_diag_tag = 0;
   NumericVector<Number> * _kokkos_mf_x = nullptr;
   std::unique_ptr<libMesh::PetscMatrixShellMatrix<Number>> _kokkos_mf_shell;
   ///@}

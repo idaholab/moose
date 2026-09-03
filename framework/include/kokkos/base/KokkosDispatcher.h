@@ -474,14 +474,19 @@ hasUserOffDiagJacobianHook()
     DispatcherRegistry::addDispatcher<classname::OffDiagJacobianLoop, classname>(objectname);      \
     DispatcherRegistry::addDispatcher<classname::JacobianVectorProductLoop, classname>(            \
         objectname);                                                                               \
+    DispatcherRegistry::addDispatcher<classname::JacobianDiagonalLoop, classname>(objectname);     \
     DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(objectname,                         \
                                                                hasUserJacobianHook<classname>());  \
     DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
         objectname, hasUserOffDiagJacobianHook<classname>());                                      \
     /* Repurposed as a "supports the Kokkos matrix-free Jacobian-vector product" flag, queried  */ \
-    /* by NonlinearSystemBase::setupKokkosMatrixFreeJacobian() by object type name -- not tied */                                                                                                \
-    /* to whether classname overrides any hook. */                                                                                                \
+    /* by NonlinearSystemBase::setupKokkosMatrixFreeJacobian() by object type name -- not tied */  \
+    /* to whether classname overrides any hook. */                                                 \
     DispatcherRegistry::hasUserMethod<classname::JacobianVectorProductLoop>(                       \
+        objectname, classname::use_precompute_hooks);                                              \
+    /* Same repurposing as JacobianVectorProductLoop above, for the Kokkos matrix-free Jacobian */                                                                                                \
+    /* diagonal. */                                                                                                \
+    DispatcherRegistry::hasUserMethod<classname::JacobianDiagonalLoop>(                            \
         objectname, classname::use_precompute_hooks);                                              \
                                                                                                    \
     return 0;                                                                                      \

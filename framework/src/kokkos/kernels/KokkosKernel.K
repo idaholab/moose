@@ -92,4 +92,20 @@ Kernel::computeJacobianVectorProduct()
   _jvp_dispatcher->parallelFor(policy);
 }
 
+void
+Kernel::computeJacobianDiagonal()
+{
+  if (!DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
+    return;
+
+  _thread.resize(_num_local_jacobian_threads, numKokkosBlockElements());
+
+  Policy policy(0, _thread.size());
+
+  if (!_jacobian_diagonal_dispatcher)
+    _jacobian_diagonal_dispatcher = DispatcherRegistry::build<JacobianDiagonalLoop>(this, type());
+
+  _jacobian_diagonal_dispatcher->parallelFor(policy);
+}
+
 } // namespace Moose::Kokkos
