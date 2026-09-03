@@ -116,10 +116,34 @@
   [momentum-pressure-block-restricted]
     type = 'RunApp'
     input = momentum-pressure-block-restricted.i
+    cli_args = "--check-input LinearFVKernels/u_pressure_left/block=0 "
+               "LinearFVKernels/u_pressure_right/block=1 "
+               "LinearFVKernels/v_pressure_left/block=0 "
+               "LinearFVKernels/v_pressure_right/block=1"
     requirement = "The system shall allow a momentum system's pressure-gradient source to be "
                   "covered by multiple block-restricted LinearFVMomentumPressure kernels that "
                   "partition the Rhie-Chow object's blocks and share the same coupling gradient."
     recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-overlap-on-rc-block]
+    type = 'RunException'
+    input = momentum-pressure-block-restricted.i
+    cli_args = "LinearFVKernels/u_pressure_right/block='0 1 2'"
+    expect_err = "more than one LinearFVMomentumPressure kernel contributing a pressure source on the same block.*overlap on block.*0"
+    requirement = "The system shall report an error when two LinearFVMomentumPressure kernels "
+                  "contribute pressure sources to the same momentum system on a block handled by "
+                  "the Rhie-Chow object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-overlap-outside-rc-blocks]
+    type = 'RunApp'
+    input = momentum-pressure-block-restricted.i
+    cli_args = '--check-input'
+    requirement = "The system shall allow two LinearFVMomentumPressure kernels to overlap only "
+                  "on blocks outside the blocks handled by their Rhie-Chow object."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
@@ -165,6 +189,37 @@
     expect_err = "found no applicable LinearFVMomentumPressure kernel for momentum system"
     requirement = "The system shall report an error when a momentum system has no applicable "
                   "LinearFVMomentumPressure kernel covering one of the Rhie-Chow object's blocks."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-candidate-without-prepared-predictor]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
+               "UserObjects/sequence_test/rhie_chow_user_object=rc "
+               "UserObjects/sequence_test/operation=update_candidate "
+               "UserObjects/sequence_test/execute_on=TIMESTEP_BEGIN"
+    expect_assert = "A momentum predictor must be prepared before updating a reconstructed pressure-gradient candidate"
+    allow_test_objects = true
+    requirement = "The system shall report an internal sequencing error when a reconstructed "
+                  "pressure-gradient candidate is updated without a prepared momentum predictor."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-candidates-reuse-face-flux]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
+               "UserObjects/sequence_test/rhie_chow_user_object=rc "
+               "UserObjects/sequence_test/operation=reuse_face_flux "
+               "UserObjects/sequence_test/execute_on=TIMESTEP_END "
+               "Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
+    expect_assert = "Each reconstructed pressure-gradient candidate must consume a face mass flux computed by the current pressure corrector"
+    allow_test_objects = true
+    requirement = "The system shall report an internal sequencing error when two reconstructed "
+                  "pressure-gradient candidates consume the same corrected face-flux generation."
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []

@@ -35,7 +35,6 @@ pressure_gradient_method = reconstructed
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    enforce_coupling_pressure_gradient_identity = true
   []
 []
 
