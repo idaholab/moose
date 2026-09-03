@@ -1,5 +1,5 @@
 [Mesh]
-#   [hinomaru]  
+#   [hinomaru]
   type = MFEMFileMesh
   file = ../mesh/hinomaru_offset.e
 []
@@ -67,7 +67,7 @@
     prop_names = 'Jtheta sourceCoef'
     prop_values = '8.0 Jtheta_r_wire'
     block = wire
-  [] 
+  []
 []
 
 [AuxVariables]
