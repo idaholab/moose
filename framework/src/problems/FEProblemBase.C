@@ -2479,28 +2479,6 @@ FEProblemBase::reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD
 }
 
 void
-FEProblemBase::reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
-{
-  if (_displaced_problem && _reinit_displaced_elem)
-    _displaced_problem->reinitNodes(nodes, tid);
-
-  for (auto & nl : _nl)
-    nl->reinitNodes(nodes, tid);
-  _aux->reinitNodes(nodes, tid);
-}
-
-void
-FEProblemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
-{
-  if (_displaced_problem && _reinit_displaced_elem)
-    _displaced_problem->reinitNodesNeighbor(nodes, tid);
-
-  for (auto & nl : _nl)
-    nl->reinitNodesNeighbor(nodes, tid);
-  _aux->reinitNodesNeighbor(nodes, tid);
-}
-
-void
 FEProblemBase::reinitScalars(const THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
   TIME_SECTION("reinitScalars", 3, "Reinitializing Scalar Variables");

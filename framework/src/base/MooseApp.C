@@ -1792,7 +1792,7 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
   if (restoreMeshBackup(*this, *backup, feProblem().mesh()))
   {
     _restored_initial_backup_mesh = true;
-    feProblem().mesh().prepare(/*mesh_to_clone=*/nullptr);
+    feProblem().mesh().prepare();
     feProblem().meshChanged(/*intermediate_change=*/false,
                             /*contract_mesh=*/false,
                             /*clean_refinement_flags=*/false);

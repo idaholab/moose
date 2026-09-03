@@ -783,22 +783,6 @@ DisplacedProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, const THR
 }
 
 void
-DisplacedProblem::reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
-{
-  for (auto & nl : _displaced_solver_systems)
-    nl->reinitNodes(nodes, tid);
-  _displaced_aux->reinitNodes(nodes, tid);
-}
-
-void
-DisplacedProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
-{
-  for (auto & nl : _displaced_solver_systems)
-    nl->reinitNodesNeighbor(nodes, tid);
-  _displaced_aux->reinitNodesNeighbor(nodes, tid);
-}
-
-void
 DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
   reinitNeighbor(elem, side, tid, nullptr);

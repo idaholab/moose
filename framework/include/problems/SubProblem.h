@@ -438,8 +438,8 @@ public:
                                 const std::vector<Real> * const weights = nullptr);
   virtual void reinitNode(const Node * node, const THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) = 0;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
+  void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid);
+  void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
