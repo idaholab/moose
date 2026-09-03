@@ -141,13 +141,13 @@ relaxation, either for the multi-system fixed-point iteration or through outer
 
 ## Example syntax
 
-The following example applies the boundary condition to both faces of an empty gap
-between two conducting slabs:
+The following example applies the boundary condition to an inner empty cube within a
+2D domain
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/radiation_s2s/linear_fv_gray_lambert_parallel_plates_simple.i
+!listing modules/heat_transfer/test/tests/radiation_transfer_action/radiative_transfer_no_action_linearfv_steady.i
 
 The boundary names supplied to `LinearFVGrayLambertBC` must also participate in the
-referenced Gray--Lambert surface-radiation user object. A boundary face may match
+referenced Gray-Lambert surface-radiation user object. A boundary face may match
 only one boundary listed for a given `LinearFVGrayLambertBC` object; overlapping
 boundary restrictions are not currently supported.
 
