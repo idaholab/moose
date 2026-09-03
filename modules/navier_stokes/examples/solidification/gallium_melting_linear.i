@@ -263,7 +263,7 @@ Ny = 120
   [conduction]
     type = LinearFVDiffusion
     variable = T
-    diffusion_coeff = ${k_mixture}
+    diffusion_coeff = k_mixture
     use_nonorthogonal_correction = false
   []
   [energy_source]

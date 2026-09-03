@@ -189,6 +189,7 @@ nx = 1000
     variable = 'fl'
     sort_by = 'x'
     execute_on = 'FINAL'
+    warn_discontinuous_face_values = false
   []
 []
 

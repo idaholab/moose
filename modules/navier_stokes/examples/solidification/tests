@@ -14,6 +14,7 @@
     cli_args = "Nx=20 Ny=12 Executioner/end_time=0.01 Mesh/gen/bias_x=1.0"
     requirement = 'The system shall be able to simulate the melting of gallium using the LinearFV system.'
     heavy = true
+    max_threads = 1
   []
   [gallium_melting_physics]
     type = RunApp
@@ -27,6 +28,7 @@
     input = '1d_stefan_T.i'
     requirement = 'Stefan melting analytical problem for the LinearFV phase change model.'
     heavy = true
+    max_threads = 1
   []
 
 []

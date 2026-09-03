@@ -38,6 +38,7 @@
     csvdiff = 1d-stefan_linearfv_out.csv
     requirement = 'The system shall solve a one-dimensional Stefan phase-change problem with the linear finite volume discretization using an apparent heat-capacity source term with a smoothed liquid fraction.'
     recover = false
+    max_threads = 1
   []
   [stefan_1d_sharp_linearfv]
     type = CSVDiff
