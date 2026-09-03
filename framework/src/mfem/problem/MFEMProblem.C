@@ -625,12 +625,16 @@ MFEMProblem::addPostprocessor(const std::string & type,
   {
     checkUserObjectNameCollision(name, "Postprocessor");
     addObject<MFEMExecutedObject>(type, name, parameters);
-    const PostprocessorValue & val = getPostprocessorValueByName(name);
-    getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-        name, [&val](const mfem::Vector &) -> mfem::real_t { return val; });
   }
   else
     ExternalProblem::addPostprocessor(type, name, parameters);
+
+  // Make the postprocessor value available as a spatially uniform scalar coefficient. This is done
+  // for postprocessors of all types so that values calculated elsewhere and transferred in, such
+  // as from a subapp, may also be used to build coefficients.
+  const PostprocessorValue & val = getPostprocessorValueByName(name);
+  getCoefficients().declareScalar<mfem::FunctionCoefficient>(
+      name, [&val](const mfem::Vector &) -> mfem::real_t { return val; });
 }
 
 void
