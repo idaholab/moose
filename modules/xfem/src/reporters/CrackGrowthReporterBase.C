@@ -68,7 +68,7 @@ CrackGrowthReporterBase::execute()
 }
 
 void
-CrackGrowthReporterBase::copyVectorPostprocessorValues() const
+CrackGrowthReporterBase::copyVectorPostprocessorValues()
 {
   _x.resize(_ki_x.size());
   _y.resize(_ki_y.size());

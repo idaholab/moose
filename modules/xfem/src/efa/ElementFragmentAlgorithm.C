@@ -264,9 +264,14 @@ ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid,
   if (!curr_elem)
     EFAError("addElemEdgeIntersection: elem ", elemid, " is not of type EFAelement2D");
 
-  // add cuts to two face edges at the same time
-  curr_elem->addFaceEdgeCut(faceid, edgeid[0], position[0], nullptr, _embedded_nodes, true, true);
-  curr_elem->addFaceEdgeCut(faceid, edgeid[1], position[1], nullptr, _embedded_nodes, true, true);
+  // add cuts to two face edges at the same time. The two cuts are distinct physical points, so
+  // each gets its own in/out embedded node that addFaceEdgeCut creates or reconciles.
+  EFANode * embedded_node0 = nullptr;
+  EFANode * embedded_node1 = nullptr;
+  curr_elem->addFaceEdgeCut(
+      faceid, edgeid[0], position[0], embedded_node0, _embedded_nodes, true, true);
+  curr_elem->addFaceEdgeCut(
+      faceid, edgeid[1], position[1], embedded_node1, _embedded_nodes, true, true);
 }
 
 void

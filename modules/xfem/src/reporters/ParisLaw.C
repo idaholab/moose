@@ -47,27 +47,47 @@ ParisLaw::ParisLaw(const InputParameters & parameters)
 }
 
 void
-ParisLaw::computeGrowth(std::vector<int> & index)
+ParisLaw::computeGrowth(const std::vector<int> & index)
 {
-  _growth_increment.resize(_ki_x.size(), 0.0);
-  std::vector<Real> effective_k(_ki_x.size(), 0.0);
-  for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
-    if (index[i] != -1)
-      effective_k[i] = std::sqrt(Utility::pow<2>(_ki_vpp[i]) + 2 * Utility::pow<2>(_kii_vpp[i]));
+  _growth_increment.assign(_ki_vpp.size(), 0.0);
 
-  Real _max_k = *std::max_element(effective_k.begin(), effective_k.end());
-  if (_max_k == 0)
+  // The fracture integrals have not been computed yet on the first execution, so there is nothing
+  // to evaluate.
+  if (_ki_vpp.empty())
+    return;
+
+  // index is keyed by active-boundary position, but its value is the position of that node in
+  // _crack_front_points, which is the ordering of the fracture-integral VectorPostprocessors and of
+  // _growth_increment.  index is also sized by the active-boundary node count, which can be one or
+  // two nodes shorter than _ki_vpp when an active tip grows outside the body and flips to an
+  // inactive endpoint.  So loop over index and address everything else through it.  Inactive
+  // endpoints carry -1 and keep their 0.0 increment, as do any crack front points no longer active.
+  std::vector<Real> effective_k(_ki_vpp.size(), 0.0);
+  for (const auto i : index_range(index))
+  {
+    const int k = index[i];
+    if (k == -1)
+      continue;
+    effective_k.at(k) =
+        std::sqrt(Utility::pow<2>(_ki_vpp.at(k)) + 2 * Utility::pow<2>(_kii_vpp.at(k)));
+  }
+
+  const Real max_k = *std::max_element(effective_k.begin(), effective_k.end());
+  if (max_k == 0)
+  {
     _dn = std::numeric_limits<Real>::max();
-  else
-    _dn = _max_growth_increment / (_paris_law_c * std::pow(_max_k, _paris_law_m));
+    // Every increment stays at the 0.0 assigned above.
+    return;
+  }
 
-  for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
-    if (index[i] != -1)
-    {
-      if (_max_k == 0)
-        _growth_increment[i] = 0;
-      else
-        _growth_increment[i] =
-            _max_growth_increment * std::pow(effective_k[i] / _max_k, _paris_law_m);
-    }
+  _dn = _max_growth_increment / (_paris_law_c * std::pow(max_k, _paris_law_m));
+
+  for (const auto i : index_range(index))
+  {
+    const int k = index[i];
+    if (k == -1)
+      continue;
+    _growth_increment.at(k) =
+        _max_growth_increment * std::pow(effective_k.at(k) / max_k, _paris_law_m);
+  }
 }

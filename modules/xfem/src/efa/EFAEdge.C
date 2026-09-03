@@ -370,8 +370,31 @@ EFAEdge::switchNode(EFANode * new_node, EFANode * old_node)
     _edge_node2 = new_node;
   else if (isEmbeddedNode(old_node))
   {
-    unsigned int id = getEmbeddedNodeIndex(old_node);
-    _embedded_nodes[id] = new_node;
+    // An EFANode is a single physical point, so it may occupy at most one _embedded_nodes slot.
+    // Overwriting old_node's slot is only valid while new_node is absent; if new_node is already
+    // recorded here then both names describe the same intersection, so drop old_node's entry (which
+    // also drops its _intersection_x) rather than list new_node twice at two positions.
+    const unsigned int id = getEmbeddedNodeIndex(old_node);
+    if (isEmbeddedNode(new_node))
+    {
+      const unsigned int new_id = getEmbeddedNodeIndex(new_node);
+      // Xfem::tol is the same tolerance hasIntersectionAtPosition() uses to decide whether two
+      // intersections sit at the same place on an edge. Beyond it these are distinct cuts, and
+      // merging them would silently discard one.
+      if (std::abs(_intersection_x[id] - _intersection_x[new_id]) > Xfem::tol)
+        EFAError("In switchNode, embedded nodes ",
+                 old_node->id(),
+                 " at ",
+                 _intersection_x[id],
+                 " and ",
+                 new_node->id(),
+                 " at ",
+                 _intersection_x[new_id],
+                 " are separate intersections on one edge and cannot be merged.");
+      removeEmbeddedNode(old_node);
+    }
+    else
+      _embedded_nodes[id] = new_node;
   }
 }
 

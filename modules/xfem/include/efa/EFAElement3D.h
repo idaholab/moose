@@ -143,10 +143,16 @@ public:
   bool faceContainsTip(unsigned int face_id) const;
   bool fragmentFaceAlreadyCut(unsigned int ElemFaceID) const;
 
+  /**
+   * Add an intersection on edge edge_id of face face_id.
+   * @param embedded_node In/out: the embedded node to use for this intersection, or nullptr to
+   * create one.  It is updated when this method reconciles onto an embedded node that already
+   * exists on the edge, so that the caller does not keep propagating the discarded node.
+   */
   void addFaceEdgeCut(unsigned int face_id,
                       unsigned int edge_id,
                       double position,
-                      EFANode * embedded_node,
+                      EFANode *& embedded_node,
                       std::map<unsigned int, EFANode *> & EmbeddedNodes,
                       bool add_to_neighbor,
                       bool add_to_adjacent);

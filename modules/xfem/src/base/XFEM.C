@@ -274,6 +274,9 @@ XFEM::update(Real time,
   buildEFAMesh();
 
   _fe_problem->execute(EXEC_XFEM_MARK);
+  // Flush outputs that run on EXEC_XFEM_MARK (e.g. XFEMCutMeshOutput) here, while the cutter
+  // geometry that is about to be applied is still available.  If the cut below aborts, the
+  // timestep's normal output is never written, so this is the only chance to capture it.
   _fe_problem->outputStep(EXEC_XFEM_MARK);
 
   storeCrackTipOriginAndDirection();

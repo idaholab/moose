@@ -30,7 +30,7 @@ protected:
    * in an internal data structure.
    * @param index Vector of crack front point indices from the cutter mesh.
    */
-  virtual void computeGrowth(std::vector<int> & index) = 0;
+  virtual void computeGrowth(const std::vector<int> & index) = 0;
 
   /// cutter mesh object name
   const UserObjectName & _cutter_name;
@@ -75,5 +75,5 @@ private:
    */
   std::vector<int> getCutterMeshIndices() const;
   /// Copy VectorPostprocessor data into reporters
-  void copyVectorPostprocessorValues() const;
+  void copyVectorPostprocessorValues();
 };

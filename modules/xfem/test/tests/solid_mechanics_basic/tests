@@ -227,6 +227,26 @@
       capabilities = 'unique_id & method=opt'
       detail = ' keeping the crack front consistent on a concave-up curved volume surface under the maximum hoop stress growth direction, or'
     []
+    [scc_inactive_tip]
+      type = JSONDiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
+      cli_args = 'fname=hex_block offset=0.21 Executioner/end_time=4 '
+                 'Reporters/scc_crack_growth/max_growth_increment=0.08 '
+                 'Outputs/file_base=hex_block_scc_inactive_tip'
+      jsondiff = 'hex_block_scc_inactive_tip.json'
+      capabilities = 'unique_id'
+      # The only case that reaches an active crack front shorter than the fracture-integral
+      # VectorPostprocessors, which is the path the growth reporters address through
+      # getFrontPointsIndex(). Raising max_growth_increment from the input's 0.02 to 0.08 reaches
+      # that state on step 3 instead of step 8, so four steps cover it three times, with the active
+      # front short by four nodes and then by three.
+      #
+      # This is coverage for that path rather than a differential check: the reporters fill slot s
+      # from _ki_vpp[s] whether or not they loop over the index, and the sets of slots filled
+      # coincide, so the front coordinates are the same before and after the indexing fix.
+      detail = ' growth increments looked up by crack front point index after an active crack front '
+               'tip moves outside the body and becomes an inactive endpoint, or'
+    []
     [tet_block_tilt_14]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
@@ -238,6 +258,28 @@
       detail = ' growing a tilted crack through a tetrahedral volume when two geometric cut surfaces '
                'place their intersections on the same fragment face in a single growth step.'
     []
+  []
+  [xfem_cut_mesh_output_on_mark]
+    type = Exodiff
+    input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+    cli_args = 'fname=hex_block spin=4 Outputs/file_base=hex_block_xfem_mark '
+               'Outputs/xfemcutter/execute_on=xfem_mark'
+    exodiff = 'hex_block_xfem_mark_XFEMCutMeshOutput.e-s0005'
+    map = true # only matching cutter mesh, not xfem volume mesh
+    capabilities = 'unique_id'
+    # This file exists only because XFEM::update() calls outputStep(EXEC_XFEM_MARK); with that call
+    # removed nothing is written at all. Diffing the fifth file rather than the first also pins the
+    # output to one write per cut iteration, since the -s000N suffix counts the writes.
+    #
+    # The gold is a link to the double_cut_edge gold. This test runs that same configuration
+    # (fname=hex_block spin=4) and only redirects file_base and moves the output to xfem_mark, and
+    # the last xfem_mark write happens after the final cut, so it holds the same cutter mesh at the
+    # same time that execute_on = final produces. Regolding double_cut_edge therefore regolds this
+    # test too, which is what we want for two names for one mesh.
+    requirement = 'The XFEM module shall write the lower-dimensional cutter mesh once per cut '
+                  'iteration during the XFEM marking phase, before the mesh is cut, when '
+                  'XFEMCutMeshOutput is set to execute on xfem_mark.'
+    design = 'XFEMCutMeshOutput.md'
   []
   [penny_crack]
     requirement ='The XFEM system shall permit computation of fracture domain integrals in 3D mechanics '

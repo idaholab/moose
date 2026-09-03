@@ -57,8 +57,9 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
   params.addParam<unsigned int>("n_step_growth", 0, "Number of steps for crack growth");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>(
       "min_elem_area",
+      "min_elem_area>=0",
       "Growth elements smaller than min_elem_area will not be added. If unset, defaults to "
       "1e-4*size_control^2 so the threshold scales with the model length scale instead of "
       "assuming a fixed one.");
@@ -688,9 +689,15 @@ CrackMeshCut3DUserObject::findActiveBoundaryNodes()
 void
 CrackMeshCut3DUserObject::findActiveBoundaryDirection()
 {
-  mooseAssert(!(_cfd && _active_boundary.size() != 1),
-              "crack-front-definition using the cutter mesh only supports one active crack front "
-              "segment for now");
+  // The crack front exposed through CrackFrontDefinition is built from _active_boundary[0] alone,
+  // both here and in growFront(), so a front that leaves the body in more than one place would be
+  // silently truncated. This is a model outcome rather than a coding error, so it must also be
+  // caught in an opt build.
+  if (_cfd && _active_boundary.size() != 1)
+    mooseError("Crack-front definition using the cutter mesh only supports one active crack front "
+               "segment, but ",
+               _active_boundary.size(),
+               " were found.");
 
   _active_direction.clear();
 
@@ -827,10 +834,6 @@ CrackMeshCut3DUserObject::growFront()
 {
   _front.clear();
   _front_boundary_node_indices.clear();
-
-  mooseAssert(!(_cfd && _active_boundary.size() != 1),
-              "crack-front-definition using the cutter mesh only supports one active crack front "
-              "segment for now");
 
   // Re-seed _tracked_crack_front_points from the current _active_boundary[0].
   // The set of nodes in _active_boundary[0] can change between steps when an
@@ -1189,24 +1192,27 @@ CrackMeshCut3DUserObject::refineFront()
   {
     mooseAssert(_front[ifront].size() == _front_boundary_node_indices[ifront].size(),
                 "Each front node must map to an active-boundary node.");
+    // Inactive endpoints bracket the front, which both bounds the refinement loop below and
+    // identifies the segments adjacent to those endpoints.
+    const bool has_inactive = (_inactive_boundary_pos.size() != 0);
+
     unsigned int i1 = _front[ifront].size() - 1;
-    if (_inactive_boundary_pos.size() == 0)
+    if (!has_inactive)
       i1 = _front[ifront].size();
 
     // When there are inactive boundary nodes, determine which segment indices are
     // adjacent to the boundary endpoints (first and last in the segment).
     // Refinement nodes on those segments may land outside the FEM mesh and be
     // incorrectly treated as inactive endpoints on the next step.
-    bool has_inactive = (_inactive_boundary_pos.size() != 0);
     // segment between pos 0 and 1
-    unsigned int first_boundary_i = 1;
+    const unsigned int first_boundary_i = 1;
     // segment between pos size-2 and size-1
-    unsigned int last_boundary_i = _front[ifront].size() - 1;
+    const unsigned int last_boundary_i = _front[ifront].size() - 1;
 
     for (unsigned int i = i1; i >= 1; --i)
     {
       unsigned int i2 = i;
-      if (_inactive_boundary_pos.size() == 0)
+      if (!has_inactive)
         i2 = (i <= _front[ifront].size() - 1 ? i : 0);
 
       dof_id_type node1 = _front[ifront][i - 1];

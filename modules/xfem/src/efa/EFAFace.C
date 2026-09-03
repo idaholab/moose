@@ -349,9 +349,11 @@ EFAFace::sortEdges()
             << " -> node " << ordered_edges[k]->getNode(1)->id() << "\n";
       oss << "  Looking for an edge whose nodes include node "
           << ordered_edges[i - 1]->getNode(1)->id() << " - none found.\n";
-      oss << "This usually means a structural-face intersection produced a duplicate or\n"
-          << "topologically invalid edge pair (two hits on the same structural-face edge,\n"
-          << "or a face with more than one lone edge contributing to the cut plane).";
+      oss << "This usually means the collected edge set is not a simple closed loop: an edge\n"
+          << "appears more than once (for example two hits on the same structural-face edge),\n"
+          << "or a node is shared by more than two edges so the perimeter is non-manifold.\n"
+          << "Note that several lone edges per face is expected when a fragment inherits\n"
+          << "sub-faces of an earlier cut plane; see EFAFragment3D::connectSubfaces().";
       EFAError(oss.str());
     }
   } // i
