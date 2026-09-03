@@ -40,7 +40,6 @@ heated_length = 1.0
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = Sodium
-  n_blocks = 1
   P_out = report_pressure_outlet
   compute_density = true
   compute_viscosity = true
