@@ -45,7 +45,7 @@ referred to in the expressions by its own name; supply
 [!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_symbols) to give each functor a
 different symbol instead (one symbol per functor). Functors are evaluated at the node without a
 block connection, as elsewhere in MOOSE's nodal functor evaluations, so a functor material property
-must be defined on every block of the mesh to be usable here.
+must be defined on every block of the mesh (or of this object's spatial restriction) to be usable here.
 
 Variables cannot be passed through
 [!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_names); use
