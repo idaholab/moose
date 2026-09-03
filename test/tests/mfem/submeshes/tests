@@ -62,6 +62,25 @@
     max_parallel = 1
     recover = false
   []
+  [MFEMHypreAMSInteriorNodes]
+    design = 'MFEMHypreAMS.md'
+    issues = '#33625'
+    type = XMLDiff
+    input = magnetostatic.i
+    cli_args = 'Solvers/ams/singular=false '
+               'Solvers/ams/block="1 2" '
+               'Solvers/ams/projection_frequency=1'
+    xmldiff = 'OutputData/Magnetostatic/Run0/Run0.pvd
+                OutputData/Magnetostatic/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['UnstructuredGrid']['Piece']['PointData']['DataArray'][0]['#text']" # ignore vector potential
+    requirement = 'The system shall be able to precondition an MFEM curl-curl solve with a HypreAMS '
+                  'preconditioner whose interior-node correction is restricted to a subset of '
+                  'subdomains and whose compatible-subspace projection frequency is set.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'
@@ -69,24 +88,6 @@
     input = av_magnetostatic.i
     csvdiff = 'OutputData/AVMagnetostaticClosedCoilCSV.csv'
     requirement = 'MOOSE shall have the ability to strongly enforce global topological constraints in MFEM by defining a transition region for variable discontinuities on one side of a cut plane defined in a solid geometry.'
-    capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
-    recover = false
-    valgrind = heavy
-    min_slots = 3 # memory heavy, needs extra slot for -p 2
-  []
-  [MFEMHypreAMSInteriorNodes]
-    design = 'MFEMHypreAMS.md'
-    issues = '#33625'
-    type = CSVDiff
-    input = av_magnetostatic.i
-    cli_args = 'Solvers/ams/block=Exterior '
-               'Solvers/ams/projection_frequency=1'
-    csvdiff = 'OutputData/AVMagnetostaticClosedCoilCSV.csv'
-    requirement = 'The system shall be able to precondition an MFEM curl-curl solve with a HypreAMS '
-                  'preconditioner whose interior-node correction is restricted to the subdomains in '
-                  'which the mass term is zero and whose compatible-subspace projection frequency is '
-                  'set.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
