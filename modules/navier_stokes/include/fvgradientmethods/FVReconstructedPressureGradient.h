@@ -35,7 +35,7 @@ public:
   FVReconstructedPressureGradient(const InputParameters & params);
 
   /// Bind this stateful method to one Rhie-Chow flow-system configuration.
-  void bindFlowSystem(const RhieChowMassFlux & rc,
+  void bindFlowSystem(RhieChowMassFlux & rc,
                       const LinearFVGradientReader & pressure_gradient) const;
 
   /// Name of the gradient method used before reconstructed feedback is available.
@@ -45,7 +45,7 @@ public:
   void resetForTimeStep(const RhieChowMassFlux & rc) const;
 
   /// Capture the lagged cell velocity gradient used by the reconstruction.
-  void captureLaggedVelocityGradient(const RhieChowMassFlux & rc) const;
+  void captureLaggedVelocityGradient(RhieChowMassFlux & rc) const;
 
   /// Reconstruct the conservative pressure-gradient candidate from the corrected face flux.
   void computeCandidateFromCorrectedFlux(const RhieChowMassFlux & rc) const;
@@ -105,6 +105,9 @@ private:
 
   /// Momentum systems coupled through the owning Rhie-Chow object.
   mutable std::vector<const SystemBase *> _momentum_systems;
+
+  /// Ordinary gradient fields for the velocity components.
+  mutable std::vector<const LinearFVGradientReader *> _velocity_gradient_fields;
 
   /// Cached base gradient method.
   mutable const FVGradientMethod * _base_gradient_method = nullptr;

@@ -60,7 +60,7 @@ FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputPara
 
 void
 FVReconstructedPressureGradient::bindFlowSystem(
-    const RhieChowMassFlux & rc, const LinearFVGradientReader & pressure_gradient) const
+    RhieChowMassFlux & rc, const LinearFVGradientReader & pressure_gradient) const
 {
   if (&pressure_gradient.system() != &rc.pressureSystem())
     mooseError("FVReconstructedPressureGradient '",
@@ -86,8 +86,12 @@ FVReconstructedPressureGradient::bindFlowSystem(
     _pressure_system = &pressure_gradient.system();
     _pressure_variable_number = pressure_gradient.variableNumber();
     _momentum_systems.reserve(rc.dimension());
+    _velocity_gradient_fields.reserve(rc.dimension());
     for (const auto component : make_range(rc.dimension()))
+    {
       _momentum_systems.push_back(&rc.momentumSystem(component));
+      _velocity_gradient_fields.push_back(&rc.velocityVariable(component).requestCellGradients());
+    }
     return;
   }
 
@@ -267,10 +271,17 @@ FVReconstructedPressureGradient::buildBoundaryCellCache(const RhieChowMassFlux &
 
 void
 FVReconstructedPressureGradient::captureLaggedVelocityGradient(
-    const RhieChowMassFlux & rc) const
+    RhieChowMassFlux & rc) const
 {
   checkFlowSystem(rc);
   const auto dimension = rc.dimension();
+
+  mooseAssert(_velocity_gradient_fields.size() == dimension,
+              "A velocity gradient field must be registered for every momentum component.");
+
+  for (const auto component : make_range(dimension))
+    rc.momentumSystem(component).updateFVGradient(*_velocity_gradient_fields[component]);
+
   if (_lagged_reconstruction_velocity_gradient.empty())
   {
     _lagged_reconstruction_velocity_gradient.resize(dimension);
@@ -279,88 +290,14 @@ FVReconstructedPressureGradient::captureLaggedVelocityGradient(
       _lagged_reconstruction_velocity_gradient[component].resize(dimension);
       for (const auto direction : make_range(dimension))
         _lagged_reconstruction_velocity_gradient[component][direction] =
-            rc.momentumSystem(component).currentSolution()->zero_clone();
+            _velocity_gradient_fields[component]->components()[direction]->zero_clone();
     }
   }
 
-  for (auto & component_gradients : _lagged_reconstruction_velocity_gradient)
-    for (auto & gradient : component_gradients)
-      gradient->zero();
-
-  const auto & mesh = rc.pressureSystem().feProblem().mesh();
-  const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
-  const auto time_arg = Moose::currentState();
-
-  for (const auto & elem_info : mesh.elemInfoVector())
-  {
-    if (!rc.hasBlocks(elem_info->subdomain_id()))
-      continue;
-
-    const Elem & elem = *elem_info->elem();
-    std::vector<RealVectorValue> surface_sum(dimension, RealVectorValue());
-
-    auto act = [&](const Elem &,
-                   const Elem * const,
-                   const FaceInfo * const fi,
-                   const Point & surface_vector,
-                   const Real,
-                   const bool elem_has_info)
-    {
-      const ElemInfo * const neighbor_info = elem_has_info ? fi->neighborInfo() : fi->elemInfo();
-      const bool neighbor_active = neighbor_info && rc.hasBlocks(neighbor_info->subdomain_id());
-
-      for (const auto component : make_range(dimension))
-      {
-        const auto & velocity = rc.velocityVariable(component);
-        const Real elem_value = velocity.getElemValue(*elem_info, time_arg);
-        Real face_value = elem_value;
-
-        if (neighbor_active)
-        {
-          const Real neighbor_value = velocity.getElemValue(*neighbor_info, time_arg);
-          Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                                 face_value,
-                                 elem_value,
-                                 neighbor_value,
-                                 *fi,
-                                 elem_has_info);
-        }
-        else if (!velocity.isInternalFace(*fi))
-        {
-          const Moose::FaceArg boundary_face{fi,
-                                             Moose::FV::LimiterType::CentralDifference,
-                                             true,
-                                             false,
-                                             elem_info->elem(),
-                                             nullptr};
-          face_value = MetaPhysicL::raw_value(velocity(boundary_face, time_arg));
-        }
-
-        surface_sum[component] += surface_vector * face_value;
-      }
-    };
-
-    Moose::FV::loopOverElemFaceInfo(
-        elem, mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
-
-    const Real volume = elem_info->volume() * elem_info->coordFactor();
-    if (volume == 0.0)
-      continue;
-
-    for (const auto component : make_range(dimension))
-    {
-      const auto & velocity = rc.velocityVariable(component);
-      const auto dof = elem_info->dofIndices()[rc.momentumSystem(component).number()]
-                                               [velocity.number()];
-      for (const auto direction : make_range(dimension))
-        _lagged_reconstruction_velocity_gradient[component][direction]->set(
-            dof, surface_sum[component](direction) / volume);
-    }
-  }
-
-  for (auto & component_gradients : _lagged_reconstruction_velocity_gradient)
-    for (auto & gradient : component_gradients)
-      gradient->close();
+  for (const auto component : make_range(dimension))
+    for (const auto direction : make_range(dimension))
+      *_lagged_reconstruction_velocity_gradient[component][direction] =
+          *_velocity_gradient_fields[component]->components()[direction];
 
   _lagged_velocity_gradient_available = true;
   ++_lagged_velocity_gradient_generation;
