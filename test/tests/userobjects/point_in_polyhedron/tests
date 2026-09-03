@@ -9,8 +9,8 @@
     exodiff = 'fixed_x_ray_out.e'
     mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
     recover = false
-    requirement = 'The system shall classify points as inside or outside a closed 3D TRI3 surface '
-                  'mesh using the fixed_x_ray (TriangleManifold) point-in-polyhedron method.'
+    requirement = 'The system shall classify points as inside or outside a closed 3D linear triangular surface '
+                  'mesh using the fixed ray direction point-in-polyhedron method.'
   []
 
   [spatial_point_sampling]
@@ -37,7 +37,7 @@
     recover = false
     requirement = 'The system shall report via an informational message that requested OBB and ray '
                   'debug files are ignored, and shall write no such files, when they are requested '
-                  'with the fixed_x_ray point-in-polyhedron method, because that method does not '
+                  'with the fixed x-direction ray point-in-polyhedron method, because that method does not '
                   'produce them.'
   []
 
@@ -47,8 +47,8 @@
     expect_err = 'fixed_x_ray .* supports only TRI3 surface elements'
     mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
     recover = false
-    requirement = 'The system shall report an error when the fixed_x_ray point-in-polyhedron method '
-                  'is applied to a surface mesh that contains element types other than TRI3, since '
+    requirement = 'The system shall report an error when the fixed x-direction ray point-in-polyhedron method '
+                  'is applied to a surface mesh that contains element types other than linear triangular elements, since '
                   'that method supports triangulated surfaces only.'
   []
 
@@ -59,7 +59,8 @@
     mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
     recover = false
     requirement = 'The system shall classify points as inside or outside a closed two-dimensional '
-                  'EDGE2 surface mesh using the default pca_ray point-in-polyhedron method.'
+                  'piecewise-linear curve using the default principal component analysis ray '
+                  'point-in-polyhedron method.'
   []
 
   [pca_ray_2d_msh]
@@ -69,8 +70,8 @@
     mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
     recover = false
     requirement = 'The system shall classify points as inside or outside a closed, non-convex '
-                  'two-dimensional EDGE2 surface mesh read from a file using the default pca_ray '
-                  'point-in-polyhedron method.'
+                  'two-dimensional piecewise-linear curve read from a file using the default principal '
+                  'component analysis ray point-in-polyhedron method.'
   []
 
   [pca_ray_2d_symmetric_msh]
@@ -81,9 +82,9 @@
     exodiff = 'pca_ray_2d_symmetric_msh.e'
     mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
     recover = false
-    requirement = 'The system shall classify points against a symmetric L-shaped closed EDGE2 '
-                  'surface mesh whose symmetry axis coincides with the auto-selected pca_ray '
-                  'direction, resolving the diagonal rays that pass through boundary vertices '
+    requirement = 'The system shall classify points against a symmetric L-shaped closed piecewise-linear '
+                  'curve whose symmetry axis coincides with the automatically selected principal component '
+                  'analysis ray direction, resolving diagonal rays that pass through boundary vertices '
                   'without an undecidable result.'
   []
 
@@ -94,12 +95,12 @@
     mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
     recover = false
     requirement = 'The system shall classify points as inside or outside a closed three-dimensional '
-                  'TRI3 surface mesh read from an STL file using the default pca_ray '
-                  'point-in-polyhedron method.'
+                  'linear triangular surface mesh read from an STL file using the default principal '
+                  'component analysis ray point-in-polyhedron method.'
   []
 
   [user_selected_ray]
-    requirement = 'The system shall use the ray direction supplied to the user_selected_ray '
+    requirement = 'The system shall use the ray direction supplied to the user-specified ray '
                   'point-in-polyhedron method exactly, rather than the automatically selected '
                   'direction, by'
     [honored_neg_x]
@@ -109,7 +110,7 @@
       csvdiff = 'user_ray_neg_x.csv'
       mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
       recover = false
-      detail = 'reporting a negative axis direction as given, which the auto (PCA) direction would '
+      detail = 'reporting a negative axis direction as given, which the auto (Principal Component Analysis) direction would '
                'not match,'
     []
     [honored_oblique]
@@ -143,7 +144,7 @@
     expect_err = 'ray_direction for a 2D surface must lie in the mesh plane'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The system shall report an error when a user_selected_ray direction for a 2D '
+    requirement = 'The system shall report an error when a user-specified ray direction for a 2D '
                   'surface mesh has a nonzero out-of-plane (z) component, since such a ray cannot '
                   'test containment in the mesh plane.'
   []
@@ -155,14 +156,14 @@
     expect_err = 'fixed_x_ray .* supports only 3D TRI3 surface meshes'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The system shall report an error when the fixed_x_ray point-in-polyhedron method '
-                  'is applied to a two-dimensional (EDGE2) surface mesh, since that method supports '
+    requirement = 'The system shall report an error when the fixed x-direction ray point-in-polyhedron method '
+                  'is applied to a two-dimensional piecewise-linear curve, since that method supports '
                   'three-dimensional triangulated surfaces only.'
   []
 
   [invalid_parameters]
     requirement = 'The system shall report an error for an invalid point-in-polyhedron parameter '
-                  'combination, namely'
+                  'setting, namely'
     [leaf_max_size]
       type = 'RunException'
       input = 'fixed_x_ray.i'
@@ -197,7 +198,7 @@
       expect_err = 'ray_direction.*must be set to a non-zero vector'
       mesh_mode = REPLICATED
       recover = false
-      detail = 'the user_selected_ray method without a ray direction, and'
+      detail = 'the user-specified ray method without a ray direction, and'
     []
     [ray_direction_wrong_method]
       type = 'RunException'
@@ -206,7 +207,7 @@
       expect_err = 'ray_direction.*is only used by point_containment_method = user_selected_ray'
       mesh_mode = REPLICATED
       recover = false
-      detail = 'a ray direction supplied to a method other than user_selected_ray.'
+      detail = 'a ray direction supplied when user-specified ray selection is not enabled.'
     []
   []
 []
