@@ -94,16 +94,27 @@
     rho = 1
     p_diffusion_kernel = p_diffusion
   []
+  [view_factors_uo]
+    type = SpecifiedViewFactor
+    boundary = 'left_rad right_rad'
+
+    view_factors = '0 1;
+                    1 0'
+
+    execute_on = INITIAL
+  []
 
   [gray_lambert]
-    type = ConstantViewFactorSurfaceRadiation
+    type = ViewFactorObjectSurfaceRadiation
     boundary = 'left_rad right_rad'
+
     emissivity = '0.8 0.6'
     temperature = temperature
     stefan_boltzmann_constant = 5.67037e-8
-    view_factors = '0 1;
-                    1 0'
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END NONLINEAR'
+
+    view_factor_object_name = view_factors_uo
+
+    execute_on = 'NONLINEAR'
   []
 []
 
