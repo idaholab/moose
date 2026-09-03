@@ -109,3 +109,4 @@ MFEMAxisymmetricCurlAthetaAux::execute()
 
   _result_var.ProjectCoefficient(curl_coef);
 }
+#endif
