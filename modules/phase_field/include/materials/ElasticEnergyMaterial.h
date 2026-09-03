@@ -14,38 +14,42 @@
 #include "ADRankFourTensorForward.h"
 
 /**
- * Material class to compute the elastic free energy and its derivatives
+ * Material class to compute the elastic free energy and its derivatives.
  */
-class ElasticEnergyMaterial : public DerivativeFunctionMaterialBase
+template <bool is_ad>
+class ElasticEnergyMaterialTempl : public DerivativeFunctionMaterialBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ElasticEnergyMaterial(const InputParameters & parameters);
+  ElasticEnergyMaterialTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
 protected:
-  virtual Real computeF() override;
-  virtual Real computeDF(unsigned int i_var) override;
-  virtual Real computeD2F(unsigned int i_var, unsigned int j_var) override;
+  usingDerivativeFunctionMaterialBaseMembers(is_ad);
+
+  virtual GenericReal<is_ad> computeF() override;
+  virtual GenericReal<is_ad> computeDF(unsigned int i_var) override;
+  virtual GenericReal<is_ad> computeD2F(unsigned int i_var, unsigned int j_var) override;
 
   const std::string _base_name;
 
   /// Stress tensor
-  const MaterialProperty<RankTwoTensor> & _stress;
-  // std::vector<const MaterialProperty<RankTwoTensor> *> _dstress;
-  // std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2stress;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
 
-  ///@{ Elasticity tensor derivatives
-  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  ///@{ Elasticity tensor and its explicit non-AD derivatives
+  const GenericMaterialProperty<RankFourTensor, is_ad> & _elasticity_tensor;
   std::vector<const MaterialProperty<RankFourTensor> *> _delasticity_tensor;
   std::vector<std::vector<const MaterialProperty<RankFourTensor> *>> _d2elasticity_tensor;
   ///@}
 
-  ///@{ Strain and derivatives
-  const MaterialProperty<RankTwoTensor> & _strain;
+  ///@{ Elastic strain and its explicit non-AD derivatives
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _strain;
   std::vector<const MaterialProperty<RankTwoTensor> *> _dstrain;
   std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _d2strain;
   ///@}
 };
+
+typedef ElasticEnergyMaterialTempl<false> ElasticEnergyMaterial;
+typedef ElasticEnergyMaterialTempl<true> ADElasticEnergyMaterial;
