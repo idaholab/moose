@@ -24,9 +24,8 @@ MFEMPMLMatrixCoefficient::Eval(mfem::DenseMatrix & K,
   const ComplexMatrix jacobian = _stretch_vec.jacobian(transformation);
   const ComplexMatrix product = jacobian.transpose() * jacobian;
   const std::complex<mfem::real_t> determinant = jacobian.determinant();
-  const ComplexMatrix tensor = (_tensor == CURL)
-                                   ? ComplexMatrix(product / determinant)
-                                   : ComplexMatrix(product.inverse() * determinant);
+  const ComplexMatrix tensor = (_tensor == CURL) ? ComplexMatrix(product / determinant)
+                                                 : ComplexMatrix(product.inverse() * determinant);
 
   const mfem::real_t base = _base_coefficient->Eval(transformation, integration_point);
 

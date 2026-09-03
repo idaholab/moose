@@ -50,24 +50,26 @@ protected:
   mfem::Vector findFaceNormal(const mfem::ParMesh & mesh, const int & face);
 
   /// Checks whether an element lies on the positive side of the boundary at a given boundary
-  /// vertex, using the averaged surface normal at that vertex.
+  /// vertex, using the averaged orientation at that vertex. Only the sign of the result is
+  /// meaningful, and it assumes the boundary is flat over the length of an element.
   bool isPositiveSide(const int & el,
                       const int & boundary_vertex,
-                      const mfem::Vector & normal,
+                      const mfem::Vector & orientation,
                       mfem::ParMesh & mesh);
 
-  /// Averaged unit surface normal at every boundary vertex, keyed by global vertex id and summed
-  /// across ranks so that vertices shared between processors agree.
+  /// Direction picking out the positive side of the boundary at each of its vertices, obtained by
+  /// averaging the normals of the boundary faces meeting there. Keyed by global vertex id and
+  /// summed across ranks so that vertices shared between processors agree.
   std::map<HYPRE_BigInt, mfem::Vector>
-  computeVertexNormals(mfem::ParMesh & parent_mesh,
-                       const mfem::Array<HYPRE_BigInt> & global_vertex_ids);
+  computeVertexAverageOrientations(mfem::ParMesh & parent_mesh,
+                                   const mfem::Array<HYPRE_BigInt> & global_vertex_ids);
 
   /// Grow num_layers element rings from seed into transition_set, staying on the requested side of
   /// the boundary and within the user's subdomains.
   void growLayers(mfem::ParMesh & parent_mesh,
                   const mfem::Array<HYPRE_BigInt> & global_vertex_ids,
                   const mfem::Table & vert_to_elem,
-                  const std::map<HYPRE_BigInt, mfem::Vector> & vertex_normals,
+                  const std::map<HYPRE_BigInt, mfem::Vector> & vertex_orientations,
                   const mfem::Array<int> & seed,
                   unsigned int num_layers,
                   bool positive_side,
