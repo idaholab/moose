@@ -34,6 +34,18 @@
                   'integration rule.'
     capabilities = 'mfem'
   []
+  [PostprocessorCoefficient]
+    type = CSVDiff
+    input = postprocessor_coefficient.i
+    csvdiff = OutputData/PostprocessorCoefficient.csv
+    design = 'MFEMPostprocessor.md'
+    issues = '#33654'
+    requirement = 'The system shall make the value of a postprocessor of any type available to an '
+                  'MFEM problem as a spatially uniform scalar coefficient named after it.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
   [CylindricalCoefficients]
     type = CSVDiff
     input = cylindrical_coefficients.i
