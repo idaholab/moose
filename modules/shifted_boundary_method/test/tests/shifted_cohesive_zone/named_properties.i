@@ -27,6 +27,8 @@
   base_name = custom
 []
 
+# Copy the standard bulk properties to custom names. SCZM prepends the custom_ base name
+# to bulk_stress and bulk_tangent when requesting these properties.
 [Materials/stress_alias]
   type = RankTwoTensorMaterialADConverter
   intra_convert = true

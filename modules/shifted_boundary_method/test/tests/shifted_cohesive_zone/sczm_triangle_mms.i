@@ -91,7 +91,6 @@ number_of_point = '${fparse int(sqrt(1/(2*desired_area))) -1}'
   [sbm_distance_uo]
     type = BoundaryShortestDistanceToSurface
     surfaces = 'signed_dist_func'
-    # boundary = 'Block1_Block2 Block2_Block1'
     boundary = 'Block1_Block2'
     execution_order_group = 0
     execute_on = 'INITIAL'

@@ -6,9 +6,9 @@
     exodiff = 'sczm_triangle_mms_out.e'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The AD small-strain shifted cohesive zone formulation shall reproduce a '
-                  'manufactured displacement solution across a non-interface-fitted material '
-                  'interface.'
+    requirement = 'The system shall reproduce a manufactured displacement solution for a '
+                  'small-strain shifted cohesive zone problem across a non-interface-fitted '
+                  'material interface.'
   []
   [angled_ad_elastic]
     type = CSVDiff
@@ -16,8 +16,8 @@
     csvdiff = 'angled_sczm_ad_elastic_csv.csv'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The AD small-strain shifted cohesive zone formulation shall solve an angled '
-                  'non-interface-fitted interface with an elastic traction-separation law.'
+    requirement = 'The system shall solve a small-strain shifted cohesive zone problem on an '
+                  'angled, non-interface-fitted interface with an elastic traction-separation law.'
   []
   [angled_nonad_salehani]
     type = CSVDiff
@@ -25,8 +25,8 @@
     csvdiff = 'angled_sczm_nonad_salehani_csv.csv'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The non-AD small-strain shifted cohesive zone formulation shall solve an angled '
-                  'non-interface-fitted interface with the Salehani-Irani traction law.'
+    requirement = 'The system shall solve a small-strain shifted cohesive zone problem on an angled, '
+                  'non-interface-fitted interface using the Salehani-Irani traction law.'
   []
   [rectangle_sczm_tri_material]
     type = 'CSVDiff'
@@ -35,8 +35,7 @@
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
     recover = false
     requirement = 'The system shall solve a shifted cohesive zone problem on a '
-                  'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action '
-                  'with the non-AD SalehaniIrani3DCTraction law.'
+                  'non-interface-fitted triangular mesh using the Salehani-Irani traction law.'
   []
   [rectangle_sczm_czm_reaction_comparison]
     [shifted]
@@ -68,8 +67,8 @@
       recover = false
       restep = false
       valgrind = none
-      requirement = 'The shifted cohesive zone formulation shall reproduce the reaction-force '
-                    'history of an equivalent interface-fitted cohesive zone model within one percent.'
+      requirement = 'The system shall reproduce the reaction-force history of an equivalent '
+                    'interface-fitted cohesive zone model within one percent.'
     []
   []
   [rectangle_sczm_tri_material_jacobian]
@@ -78,8 +77,9 @@
     cli_args = "Executioner/num_steps=1 Outputs/active=''"
     run_sim = true
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
-    requirement = 'The non-AD small-strain shifted cohesive zone kernel with directional correction '
-                  'shall produce an exact Jacobian.'
+    requirement = 'The system shall compute a Jacobian consistent with its residual for a '
+                  'small-strain shifted cohesive zone problem with directional correction enabled '
+                  'when automatic differentiation is disabled.'
   []
   [rectangle_sczm_tri_material_no_directional_correction_jacobian]
     type = PetscJacobianTester
@@ -88,8 +88,9 @@
                "Executioner/num_steps=1 Outputs/active=''"
     run_sim = true
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
-    requirement = 'The non-AD small-strain shifted cohesive zone kernel without directional '
-                  'correction shall produce an exact Jacobian.'
+    requirement = 'The system shall compute a Jacobian consistent with its residual for a '
+                  'small-strain shifted cohesive zone problem with directional correction disabled '
+                  'when automatic differentiation is disabled.'
   []
   [rectangle_sczm_tri_material_no_shifted_jacobian]
     type = PetscJacobianTester
@@ -98,8 +99,9 @@
                "UserObjects/active='' Executioner/num_steps=1 Outputs/active=''"
     run_sim = true
     mesh_mode = REPLICATED
-    requirement = 'The non-AD cohesive zone kernel without shifted terms shall produce an exact '
-                  'Jacobian.'
+    requirement = 'The system shall compute a Jacobian consistent with its residual for a cohesive '
+                  'zone problem with shifted evaluation disabled when automatic differentiation is '
+                  'disabled.'
   []
   [rectangle_sczm_tri_material_volumetric_locking_jacobian]
     type = 'PetscJacobianTester'
@@ -108,9 +110,9 @@
                "Executioner/num_steps=1 Outputs/active=''"
     run_sim = true
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
-    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall produce an exact '
-                  'Jacobian when volumetric locking correction is inherited from the QuasiStatic '
-                  'SolidMechanics Physics.'
+    requirement = 'The system shall compute a Jacobian consistent with its residual for a '
+                  'small-strain shifted cohesive zone problem when volumetric locking correction is '
+                  'inherited and automatic differentiation is disabled.'
   []
   [volumetric_locking_mismatch]
     type = 'RunException'
@@ -131,8 +133,8 @@
                "UserObjects/active='' Executioner/num_steps=1 Outputs/file_base=no_shifted"
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The non-AD shifted cohesive zone kernel shall not require shifted-boundary '
-                  'distance data when shifted evaluation is disabled.'
+    requirement = 'The system shall solve a cohesive zone problem without distance data when '
+                  'shifted evaluation is disabled.'
     issues = '#33397'
   []
   [named_properties]
@@ -142,8 +144,8 @@
     cli_args = 'Executioner/num_steps=1'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall consume configured '
-                  'stress and tangent properties with the configured base-name prefix.'
+    requirement = 'The system shall use user-selected stress and constitutive-tangent properties '
+                  'with a common base-name prefix.'
     issues = '#33397'
   []
   [pk1_tangent]
@@ -153,9 +155,8 @@
     cli_args = 'Executioner/num_steps=1'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall automatically '
-                  'interpret the standard pk1_jacobian property as the derivative of first '
-                  'Piola-Kirchhoff stress with respect to deformation gradient.'
+    requirement = 'The system shall use the derivative of first Piola-Kirchhoff stress with respect '
+                  'to deformation gradient as the default constitutive tangent.'
     issues = '#33397'
   []
   [custom_tangent_requires_definition]
@@ -163,8 +164,8 @@
     input = 'named_properties.i'
     cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent_definition=auto'
     expect_err = "Cannot infer the mathematical definition of custom tangent property 'bulk_tangent'"
-    requirement = 'The non-AD small-strain shifted cohesive zone kernel shall require the '
-                  'mathematical definition of a custom tangent property.'
+    requirement = 'The system shall require an explicit mathematical definition for a custom '
+                  'constitutive-tangent property.'
     issues = '#33397'
   []
   [ad_tangent_rejected]
@@ -173,8 +174,8 @@
     cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/use_automatic_differentiation=true '
                'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/tangent=Jacobian_mult'
     expect_err = 'This parameter applies only to the non-AD SCZM interface kernel.'
-    requirement = 'The shifted cohesive zone action shall reject tangent configuration that the '
-                  'AD interface kernel would otherwise ignore.'
+    requirement = 'The system shall reject explicit tangent-property configuration when automatic '
+                  'differentiation is enabled.'
     issues = '#33397'
   []
   [ad_named_stress]
@@ -189,8 +190,8 @@
                "Executioner/num_steps=1"
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The AD small-strain shifted cohesive zone kernel shall consume the configured '
-                  'stress property with the configured base-name prefix.'
+    requirement = 'The system shall use a stress property with a user-selected base-name prefix '
+                  'when automatic differentiation is enabled.'
     issues = '#33397'
   []
   [finite_strain_rejected]
@@ -198,8 +199,7 @@
     input = 'rectangle_sczm_tri_material.i'
     cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/strain=FINITE'
     expect_err = 'Shifted cohesive zone models currently support only small strain.'
-    requirement = 'The shifted cohesive zone action shall reject unsupported finite-strain '
-                  'kinematics.'
+    requirement = 'The system shall reject unsupported finite-strain cohesive zone kinematics.'
     issues = '#33397'
   []
   [reversed_function_normal]
@@ -214,9 +214,8 @@
     max_threads = 2
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The shifted-boundary distance user object shall orient true-interface normals '
-                  'so their integrated area correction factor is positive across processes and '
-                  'threads.'
+    requirement = 'The system shall orient true-interface normals so their integrated area '
+                  'correction factor is positive across processes and threads.'
     issues = '#33397'
   []
 

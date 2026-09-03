@@ -1,5 +1,6 @@
 E = 1e3
 poi = 0.3
+interfaces = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
 
 ny = 6
 nx = '${fparse ny*3/2}'
@@ -127,7 +128,7 @@ nx = '${fparse ny*3/2}'
 [Physics/SolidMechanics/ShiftedCohesiveZone]
   [czm_ik]
     use_automatic_differentiation = false
-    boundary = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
+    boundary = ${interfaces}
     generate_sbm_distance = true
     check_surface_watertightness = true
   []
@@ -144,7 +145,7 @@ nx = '${fparse ny*3/2}'
   []
   [interface_traction]
     type = BiLinearMixedModeTraction
-    boundary = 'grain1_grain2 grain1_grain4 grain1_grain5 grain2_grain4 grain3_grain4 grain3_grain5 grain4_grain5'
+    boundary = ${interfaces}
     penalty_stiffness = 2e3
     GI_c = 1e3
     GII_c = 1e2

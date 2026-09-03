@@ -89,7 +89,7 @@ dt = 1
   [sbm_distance_uo]
     type = BoundaryShortestDistanceToSurface
     surfaces = 'signed_dist_func'
-    boundary = 'Block1_Block2 Block2_Block1'
+    boundary = 'Block1_Block2'
     execution_order_group = 0
     execute_on = 'INITIAL'
     # The coarse test mesh yields surrogate distances comparable to the element size.
