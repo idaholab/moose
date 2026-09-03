@@ -16,6 +16,7 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMIntegratedBC.h"
 #include "MFEMEssentialBC.h"
+#include "MFEMEssentialConstraint.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"
@@ -53,6 +54,8 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
+  /// Add constraint associated with essentially constrained DoFs on domains.
+  virtual void AddEssentialConstraint(std::shared_ptr<MFEMEssentialConstraint> constraint);
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
@@ -172,6 +175,29 @@ protected:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
+  /// Error if any variable that @p map holds strongly constrained DoFs for is not
+  /// a trial variable of this system. Essential BCs and constraints do not create
+  /// an equation for the variable they act on; they rely on one already existing,
+  /// and are only ever applied while iterating the trial variables, so a variable
+  /// missing from that set would have them silently dropped. @p description names
+  /// the kind of object for the error message.
+  template <typename T>
+  void CheckConstrainedVariablesAreTrialVariables(
+      const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map,
+      const std::string & description) const
+  {
+    for (const auto & [var_name, _] : map)
+      if (!VectorContainsName(_trial_var_names, var_name))
+        mooseError("MFEM variable '",
+                   var_name,
+                   "' has ",
+                   description,
+                   " applied to it, but it is not a trial variable of the equation system, so "
+                   "nothing would apply it. Add a kernel acting on '",
+                   var_name,
+                   "', or remove it.");
+  }
+
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
   /// itself, resetting all dimensions to zero.
@@ -187,11 +213,12 @@ protected:
 
   /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
   /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & var_name,
-                                mfem::ParGridFunction & trial_gf,
-                                mfem::Array<int> & global_ess_markers);
+  virtual void ApplyEssentialConstraint(const std::string & var_name,
+                                        mfem::ParGridFunction & trial_gf,
+                                        mfem::Array<int> & global_bdr_markers,
+                                        mfem::Array<int> & global_ess_tdofs);
   /// Update all essentially constrained true DoF markers and values on boundaries
-  virtual void ApplyEssentialBCs();
+  virtual void ApplyEssentialConstraints();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
   /// Build linear forms and eliminate constrained DoFs
@@ -326,6 +353,9 @@ protected:
   /// Arrays to store essential BCs to act on each component of weak form.
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+  /// Arrays to store essential domain constraints to act on each component of weak form.
+  /// Named according to trial variable.
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialConstraint>>> _essential_constraint_map;
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;

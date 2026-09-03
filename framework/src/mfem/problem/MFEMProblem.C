@@ -20,6 +20,10 @@
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
 #include "MFEMNonlinearSolverBase.h"
+#include "MFEMConstraint.h"
+#include "MFEMEssentialConstraint.h"
+#include "MFEMComplexEssentialConstraint.h"
+#include "ComplexEquationSystem.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "DataIO.h"
@@ -437,6 +441,53 @@ MFEMProblem::addAuxKernel(const std::string & kernel_name,
                           InputParameters & parameters)
 {
   addObject<MFEMExecutedObject>(kernel_name, name, parameters);
+}
+
+void
+MFEMProblem::addConstraint(const std::string & constraint_name,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  auto constraint = addObject<MFEMConstraint>(constraint_name, name, parameters).front();
+  // The real and complex constraint bases are siblings, so exactly one of these
+  // casts can succeed and each equation system is handed only the kind it reads.
+  auto real_constraint = std::dynamic_pointer_cast<MFEMEssentialConstraint>(constraint);
+  auto complex_constraint = std::dynamic_pointer_cast<MFEMComplexEssentialConstraint>(constraint);
+
+  if (complex_constraint)
+  {
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
+    if (!eqsys)
+      mooseError("Cannot add constraint with name '",
+                 name,
+                 "' because there is no corresponding complex equation system.");
+    eqsys->AddComplexEssentialConstraint(std::move(complex_constraint));
+  }
+  else if (real_constraint)
+  {
+    // ComplexEquationSystem derives from EquationSystem but keeps its constraints
+    // in a separate map, so a real constraint must be rejected outright rather
+    // than registered where nothing will read it.
+    if (std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system))
+      mooseError("Constraint '",
+                 name,
+                 "' of type '",
+                 constraint_name,
+                 "' acts on a real variable and cannot be used in a complex (time-harmonic) "
+                 "problem. Use its complex counterpart instead.");
+
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    if (!eqsys)
+      mooseError("Cannot add constraint with name '",
+                 name,
+                 "' because there is no corresponding equation system.");
+    eqsys->AddEssentialConstraint(std::move(real_constraint));
+  }
+  else
+    mooseError(
+        "Unsupported constraint of type '", constraint_name, "' and name '", name, "' detected.");
 }
 
 void
