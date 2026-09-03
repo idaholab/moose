@@ -50,16 +50,16 @@ LinearFVGrayLambertBC::LinearFVGrayLambertBC(const InputParameters & parameters)
 Real
 LinearFVGrayLambertBC::getAlpha(Moose::FaceArg /* face */, Moose::StateArg /* state */) const
 {
-  const Elem * const elem =
-      _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-          ? _current_face_info->elemPtr()
-          : _current_face_info->neighborPtr();
+  const Elem * const elem = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                ? _current_face_info->elemPtr()
+                                : _current_face_info->neighborPtr();
 
   mooseAssert(elem, "The boundary face must have an adjacent element.");
 
   const auto elem_arg = makeElemArg(elem);
   // First order extrapolation to the face
-  return -_coeff_diffusion(elem_arg, Moose::determineState());
+  const auto state = determineState();
+  return -_coeff_diffusion(elem_arg, state);
 }
 
 Real
@@ -84,22 +84,19 @@ LinearFVGrayLambertBC::getBeta(Moose::FaceArg /* face */, Moose::StateArg /* sta
 
   // Evaluate the radiation temperature on the adjacent element rather than
   // asking the variable for its value on the boundary face.
-  const Elem * const elem =
-      _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-          ? _current_face_info->elemPtr()
-          : _current_face_info->neighborPtr();
+  const Elem * const elem = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                ? _current_face_info->elemPtr()
+                                : _current_face_info->neighborPtr();
 
   mooseAssert(elem, "The radiating boundary face must have an adjacent element.");
 
   const auto elem_arg = makeElemArg(elem);
 
   // First order extrapolation to the face
-  const Real lagged_temperature = _temperature_radiation(
-      elem_arg, Moose::determineState());
+  const auto state = determineState();
+  const Real lagged_temperature = _temperature_radiation(elem_arg, state);
 
-  return -emissivity * HeatConduction::Constants::sigma *
-         Utility::pow<3>(lagged_temperature);
-
+  return -emissivity * HeatConduction::Constants::sigma * Utility::pow<3>(lagged_temperature);
 }
 
 Real
