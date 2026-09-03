@@ -623,6 +623,17 @@ public:
   bool needDual() const { return _need_dual; }
 
   /**
+   * Request the transformed dual basis for the mortar Lagrange multiplier on higher-order
+   * (TRI6/QUAD8) secondary faces
+   */
+  void activateTransformedDual() { _need_transformed_dual = true; }
+
+  /**
+   * Indicates whether the transformed dual basis is used on higher-order secondary faces
+   */
+  bool needTransformedDual() const { return _need_transformed_dual; }
+
+  /**
    * Set the cached quadrature rules to nullptr
    */
   void clearCachedQRules();
@@ -2642,6 +2653,8 @@ protected:
   Real _current_neighbor_lower_d_elem_volume;
   /// Whether dual shape functions need to be computed for mortar constraints
   bool _need_dual;
+  /// Whether the transformed dual basis is requested on higher-order faces
+  bool _need_transformed_dual;
 
   /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
   MooseArray<Point> _current_physical_points;
@@ -2769,6 +2782,14 @@ protected:
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_face_neighbor;
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_lower;
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_dual_lower;
+
+  /// Transformed dual coefficient matrices for higher-order (TRI6/QUAD8) lower-d faces, keyed by
+  /// trace FEType. Built in reinitDual, consumed in reinitLowerDElem; valid only for the element in
+  /// _transformed_dual_coeff_elem.
+  mutable std::map<FEType, DenseMatrix<Real>> _transformed_dual_coeff;
+  /// Face element the transformed coefficients were last built for; guards against applying a stale
+  /// matrix when reinitLowerDElem is not preceded by reinitDual.
+  mutable const Elem * _transformed_dual_coeff_elem = nullptr;
 
   /// Shape function values, gradients, second derivatives for each vector FE type
   mutable std::map<FEType, std::unique_ptr<VectorFEShapeData>> _vector_fe_shape_data;

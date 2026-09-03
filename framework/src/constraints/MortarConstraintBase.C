@@ -11,6 +11,7 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 #include "MooseVariableFE.h"
+#include "TransformedDualBasis.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -160,6 +161,12 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   if (_use_dual)
     _assembly.activateDual();
 
+  // Apply the transformed dual basis automatically for dual mortar (fires only on QUAD8/TRI6
+  // secondary faces, gated in Assembly::reinitDual), but not under Petrov-Galerkin, which weights
+  // the multiplier with the standard basis -- a separate positivity problem the transform ignores.
+  if (_use_dual && !_use_petrov_galerkin)
+    _assembly.activateTransformedDual();
+
   if (_use_petrov_galerkin && (!_use_dual))
     paramError("use_petrov_galerkin",
                "We need to set `use_dual = true` while using the Petrov-Galerkin approach");
@@ -173,6 +180,31 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     paramError("aux_lm",
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
+
+  // Under Petrov-Galerkin the transform is off, so a dual mortar problem on a QUAD8/TRI6 secondary
+  // face would fall back to the ill-posed standard dual; detect such a face and error out. The
+  // scan stops at the first match; the collective max keeps the decision consistent across ranks.
+  if (_use_petrov_galerkin && _use_dual)
+  {
+    bool higher_order_secondary = false;
+    for (const auto * const lower_elem :
+         _mci_mesh.getMesh().active_subdomain_elements_ptr_range(secondarySubdomain()))
+      if (Moose::Mortar::transformedDualBasisSupported(lower_elem->type()))
+      {
+        higher_order_secondary = true;
+        break;
+      }
+    comm().max(higher_order_secondary);
+    if (higher_order_secondary)
+      paramError(
+          "use_petrov_galerkin",
+          "The Petrov-Galerkin dual mortar approach is not supported on QUAD8/TRI6 secondary "
+          "faces. The transformed dual basis that makes the standard dual well posed on such "
+          "faces cannot be combined with Petrov-Galerkin, which weights the multiplier with a "
+          "standard (non-positive) basis. Use a first-order secondary face, or unset "
+          "`use_petrov_galerkin` to use the default transformed dual basis.");
+  }
+
   if (isParamSetByUser("quadrature") && isParamSetByUser("segment_quadrature"))
     paramError("quadrature", "Only one of 'quadrature' and 'segment_quadrature' should be set.");
 
