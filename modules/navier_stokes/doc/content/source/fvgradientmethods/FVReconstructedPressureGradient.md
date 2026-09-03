@@ -6,6 +6,9 @@
 ([!cite](aguerre2018oscillation)) used by the linear finite-volume segregated solver. It owns the
 lagged velocity-gradient snapshot, reconstructed pressure-gradient candidate, and relaxed feedback
 field used by the momentum predictor.
+The snapshot is copied from each velocity variable's ordinary configured gradient field after the
+previous pressure corrector, so this object does not implement a separate velocity-gradient
+algorithm.
 
 After each pressure corrector, [RhieChowMassFlux.md] supplies the corrected conservative face flux,
 $\mathbf{H}/\mathbf{A}$, $\mathbf{A}^{-1}$, and momentum/pressure system metadata. The method removes
