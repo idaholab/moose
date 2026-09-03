@@ -12,13 +12,9 @@
 // MOOSE includes
 #include "TorchAssembly.h"
 
-<<<<<<< HEAD:framework/src/neml2/userobjects/NEML2Assembly.C
-registerMooseObject("MooseApp", NEML2Assembly);
-=======
 using namespace libMesh;
 
 registerMooseObject("MooseApp", TorchAssembly);
->>>>>>> 047aff683e6 (Migrate the NEML2 integration to NEML2 v3):framework/src/libtorch/fem/TorchAssembly.C
 
 InputParameters
 TorchAssembly::validParams()
@@ -60,11 +56,7 @@ TorchAssembly::initialize()
 void
 TorchAssembly::threadJoin(const UserObject & y)
 {
-<<<<<<< HEAD:framework/src/neml2/userobjects/NEML2Assembly.C
-  const auto & other = cast_ref<const NEML2Assembly &>(y);
-=======
-  const auto & other = static_cast<const TorchAssembly &>(y);
->>>>>>> 047aff683e6 (Migrate the NEML2 integration to NEML2 v3):framework/src/libtorch/fem/TorchAssembly.C
+  const auto & other = cast_ref<const TorchAssembly &>(y);
   mooseAssert(_up_to_date == other._up_to_date,
               "TorchAssembly becomes out of sync with other thread");
 
