@@ -24,7 +24,6 @@ Material::validParams()
       "When SUBDOMAIN, MOOSE will only call computeQpProperties() for the 0th "
       "quadrature point, and then copy that value to the other qps. Evaluations on element qps "
       "will be skipped");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   return params;
 }
 

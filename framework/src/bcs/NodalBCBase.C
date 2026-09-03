@@ -26,8 +26,6 @@ NodalBCBase::validParams()
       "contributions to.  Everything about that variable must match everything "
       "about this variable (the type, what blocks it's on, etc.)");
 
-  params.addParamNamesToGroup("vector_tags matrix_tags", "Tagging");
-
   params.set<MultiMooseEnum>("vector_tags") = "residual";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
   return params;
