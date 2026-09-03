@@ -224,6 +224,32 @@
     design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
     issues = '#32995'
   []
+  [forced-channel-standard-gradient]
+    type = CSVDiff
+    input = reconstructed-force-channel.i
+    csvdiff = reconstructed-force-channel-standard.csv
+    cli_args = 'pressure_gradient_method=green-gauss Outputs/file_base=reconstructed-force-channel-standard Outputs/exodus=false'
+    requirement = "The standard pressure-gradient method shall exhibit nonuniform block-average "
+                  "streamwise velocities when a large momentum body force is applied only in the "
+                  "middle section of a three-section channel."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
+    issues = '#32995'
+  []
+  [forced-channel-reconstructed-gradient]
+    type = CSVDiff
+    input = reconstructed-force-channel.i
+    csvdiff = reconstructed-force-channel-reconstructed.csv
+    cli_args = 'pressure_gradient_method=reconstructed Outputs/file_base=reconstructed-force-channel-reconstructed Outputs/exodus=false'
+    # The exact block averages are one; this tolerance covers only the iterative solver error.
+    rel_err = 1e-6
+    requirement = "The reconstructed pressure-gradient method shall preserve the initial uniform "
+                  "streamwise velocity in all three channel sections when a large momentum body "
+                  "force is applied only in the middle section."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
+    issues = '#32995'
+  []
   [energy_boussinesq_piso_reconstructed_two_correctors]
     type = 'CSVDiff'
     input = 2d-boussinesq-transient.i

@@ -1,6 +1,7 @@
 mu = 2.6
 rho = 1.1
 advected_interp_method='average'
+pressure_gradient_method = 'green-gauss'
 
 [UserObjects]
   [rc]
@@ -44,6 +45,15 @@ advected_interp_method='average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+    gradient_method = ${pressure_gradient_method}
+  []
+[]
+
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
   []
 []
 
