@@ -232,12 +232,6 @@ number_of_point = '${fparse int(sqrt(1/(2*desired_area))) -1}'
   [n_elements]
     type = NumElements
   []
-
-  [sqroot_1_div_n_elements]
-    type = ParsedPostprocessor
-    expression = 'sqrt(1 / n_elements)'
-    pp_names = 'n_elements'
-  []
 []
 
 [Outputs]

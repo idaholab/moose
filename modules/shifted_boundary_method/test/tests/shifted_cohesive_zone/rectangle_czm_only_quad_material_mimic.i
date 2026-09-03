@@ -2,9 +2,6 @@ E1 = 1e3
 E2 = 1e3
 poi = 0.3
 
-desired_area = 0.1
-number_of_point = '${fparse int(sqrt(1/(2*desired_area))) -1}'
-
 x0 = 0.5
 
 dt = 1
@@ -12,7 +9,6 @@ dt = 1
 [GlobalParams]
   displacements = 'disp_x disp_y'
   use_displaced_mesh = false
-  sbm_distance_uo = sbm_distance_uo
 []
 
 [Problem]
@@ -20,21 +16,12 @@ dt = 1
 []
 
 [Mesh]
-  [square_boundary]
-    type = PolyLineMeshGenerator
-    points = '0.0 0.0 0.0
-            1.0 0.0 0.0
-            1.0 1.0 0.0
-            0.0 1.0 0.0'
-    loop = true
-  []
-
   [gen]
-    type = XYDelaunayGenerator
-    boundary = 'square_boundary'
-    desired_area = ${desired_area}
-    add_nodes_per_boundary_segment = ${number_of_point}
-    refine_boundary = false
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 6
+    ny = 6
+    elem_type = QUAD4
   []
 
   [subdomain_intercepted]
@@ -78,22 +65,10 @@ dt = 1
     []
   []
 []
-[Physics/SolidMechanics/ShiftedCohesiveZone]
+[Physics/SolidMechanics/CohesiveZone]
   [czm_ik]
     use_automatic_differentiation = false
     boundary = 'Block1_Block2'
-  []
-[]
-
-[UserObjects]
-  [sbm_distance_uo]
-    type = BoundaryShortestDistanceToSurface
-    surfaces = 'signed_dist_func'
-    boundary = 'Block1_Block2 Block2_Block1'
-    execution_order_group = 0
-    execute_on = 'INITIAL'
-    # The coarse test mesh yields surrogate distances comparable to the element size.
-    suppress_distance_warning = true
   []
 []
 

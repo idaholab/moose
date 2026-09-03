@@ -38,6 +38,40 @@
                   'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action '
                   'with the non-AD SalehaniIrani3DCTraction law.'
   []
+  [rectangle_sczm_czm_reaction_comparison]
+    [shifted]
+      type = CheckFiles
+      input = 'rectangle_sczm_tri_material.i'
+      cli_args = 'Outputs/file_base=rectangle_sczm_comparison Outputs/exodus=false'
+      check_files = 'rectangle_sczm_comparison.csv'
+      mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+      recover = false
+      requirement = 'The system shall compute the reaction-force history for a shifted cohesive '
+                    'zone problem on a non-interface-fitted mesh.'
+    []
+    [fitted]
+      type = CheckFiles
+      input = 'rectangle_czm_only_quad_material_mimic.i'
+      cli_args = 'Outputs/file_base=rectangle_czm_comparison Outputs/exodus=false'
+      check_files = 'rectangle_czm_comparison.csv'
+      recover = false
+      requirement = 'The system shall compute the reaction-force history for an equivalent '
+                    'interface-fitted cohesive zone problem.'
+    []
+    [compare]
+      type = RunCommand
+      command = 'python3 ../../../../../python/mooseutils/csvdiff.py '
+                'rectangle_sczm_comparison.csv rectangle_czm_comparison.csv '
+                '--comparison-file react_x.cmp'
+      prereq = 'rectangle_sczm_czm_reaction_comparison/shifted '
+               'rectangle_sczm_czm_reaction_comparison/fitted'
+      recover = false
+      restep = false
+      valgrind = none
+      requirement = 'The shifted cohesive zone formulation shall reproduce the reaction-force '
+                    'history of an equivalent interface-fitted cohesive zone model within one percent.'
+    []
+  []
   [rectangle_sczm_tri_material_jacobian]
     type = PetscJacobianTester
     input = 'rectangle_sczm_tri_material.i'
