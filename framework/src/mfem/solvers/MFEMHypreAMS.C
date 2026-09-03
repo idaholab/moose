@@ -84,12 +84,19 @@ MFEMHypreAMS::BuildInteriorNodes()
                                  pmesh.Dimension());
   mfem::ParFiniteElementSpace vert_fespace(&pmesh, &vert_fec);
 
+  // A vertex counts as interior to the zero-mass region only if every element touching it is in
+  // that region and it does not lie on the domain boundary. hypre uses the interior-node marker
+  // to build the discrete gradient restricted to the region and regularise A there; a vertex on
+  // the region boundary - the interface with the conducting region, or the domain boundary where
+  // the field is pinned by the essential BC - is not part of that operator null space, and
+  // marking it interior makes the preconditioner inconsistent and the Krylov solve diverge.
   mfem::Array<int> vertex_exterior_marker(vert_fespace.GetVSize());
   vertex_exterior_marker = 0;
 
   mfem::Array<int> vdofs;
   for (const auto e : make_range(pmesh.GetNE()))
-    // if element attribute is not in list of interior domains, it must be exterior (conducting)
+    // Element attribute not in the zero-mass subdomain list => conducting; its vertices are
+    // not interior to the zero-mass region.
     if (getSubdomainAttributes().Find(pmesh.GetAttribute(e)) == -1)
     {
       vert_fespace.GetElementVDofs(e, vdofs);
@@ -98,6 +105,14 @@ MFEMHypreAMS::BuildInteriorNodes()
       for (const auto i : make_range(vdofs.Size()))
         vertex_exterior_marker[vdofs[i]] = 1;
     }
+  // Vertices on the domain boundary are always essentially constrained, so exclude them.
+  for (const auto be : make_range(pmesh.GetNBE()))
+  {
+    vert_fespace.GetBdrElementVDofs(be, vdofs);
+    for (const auto i : make_range(vdofs.Size()))
+      vertex_exterior_marker[vdofs[i]] = 1;
+  }
+
   // A dof shared between processors must be marked exterior on all of them
   // if it is exterior on any of them (bitwise OR across the shared group).
   vert_fespace.Synchronize(vertex_exterior_marker);
