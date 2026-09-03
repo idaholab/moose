@@ -77,12 +77,11 @@ MFEMPerfectlyMatchedLayerFunction::MFEMPerfectlyMatchedLayerFunction(
                  "dimensions, where the curl of a vector field is a scalar. Declare a matrix "
                  "coefficient on a three dimensional mesh.");
 
-    coefficients.declareScalar<MFEMPMLScalarCoefficient>(name(),
-                                                         _stretch_vec,
-                                                         _base_coefficient,
-                                                         imaginary
-                                                             ? MFEMPMLScalarCoefficient::IMAGINARY
-                                                             : MFEMPMLScalarCoefficient::REAL);
+    coefficients.declareScalar<MFEMPMLScalarCoefficient>(
+        name(),
+        _stretch_vec,
+        _base_coefficient,
+        imaginary ? MFEMPMLScalarCoefficient::IMAGINARY : MFEMPMLScalarCoefficient::REAL);
   }
   else
   {
@@ -143,13 +142,12 @@ MFEMPerfectlyMatchedLayerFunction::getStretch()
   if (coefficients.vectorPropertyIsDefined(name, std::to_string(getSubdomainAttributes()[0])))
     return dynamic_cast<MFEMPMLStretchVector &>(coefficients.getVectorCoefficient(name));
 
-  return coefficients.declareVector<MFEMPMLStretchVector>(
-      name,
-      getMFEMProblem().mesh().getMFEMParMesh(),
-      getSubdomainAttributes(),
-      getParam<Real>("decay_coefficient"),
-      getParam<Real>("decay_polynomial"),
-      getMFEMProblem().getComm());
+  return coefficients.declareVector<MFEMPMLStretchVector>(name,
+                                                          getMFEMProblem().mesh().getMFEMParMesh(),
+                                                          getSubdomainAttributes(),
+                                                          getParam<Real>("decay_coefficient"),
+                                                          getParam<Real>("decay_polynomial"),
+                                                          getMFEMProblem().getComm());
 }
 
 #endif
