@@ -73,7 +73,7 @@ SubdomainInterceptedGenerator::generate()
   for (const auto & elem : mesh->active_element_ptr_range() /*gen only run rank = 0*/)
   {
     // Skip elements that have already been explicitly assigned by a
-    //       previous geometry in a multi‑geometry workflow.
+    //       previous geometry in a multi-geometry workflow.
     if (_multi_geo)
     {
       if (elem->subdomain_id() == _subdomain_id_inside && _keep_inside_as_inside)
