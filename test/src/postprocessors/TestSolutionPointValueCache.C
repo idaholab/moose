@@ -42,6 +42,14 @@ void
 TestSolutionPointValueCache::initialSetup()
 {
   _solution_object_ptr = &getUserObject<SolutionUserObjectBase>("solution");
+
+  if (!_solution_object_ptr->isVariableScalarValued(_variable_name))
+    paramError(
+        "variable",
+        "The imported variable '",
+        _variable_name,
+        "' is vector-valued, but TestSolutionPointValueCache supports only scalar-valued imported "
+        "variables.");
 }
 
 Real
