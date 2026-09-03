@@ -619,7 +619,7 @@ SolutionUserObjectBase::initialSetup()
 }
 
 bool
-SolutionUserObjectBase::isVariableSpatiallyDiscontinuous(const std::string & var_name) const
+SolutionUserObjectBase::isVariableADiscontinuousScalarField(const std::string & var_name) const
 {
   const auto & fe_type = _system->variable_type(var_name);
 
@@ -628,18 +628,20 @@ SolutionUserObjectBase::isVariableSpatiallyDiscontinuous(const std::string & var
          FEInterface::get_continuity(fe_type) == libMesh::DISCONTINUOUS;
 }
 
-void
-SolutionUserObjectBase::checkVariableIsScalarValued(const unsigned int local_var_index,
-                                                    const std::string & evaluation_type) const
+bool
+SolutionUserObjectBase::isVariableScalarValued(const std::string & var_name) const
+{
+  return isVariableScalarValued(getLocalVarIndex(var_name));
+}
+
+bool
+SolutionUserObjectBase::isVariableScalarValued(const unsigned int local_var_index) const
 {
   mooseAssert(local_var_index < _system_variables.size(),
               "The local variable index is outside the range of imported solution variables.");
 
   const auto & fe_type = _system->variable_type(_system_variables[local_var_index]);
-  if (FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR)
-    mooseError(evaluation_type,
-               " of vector-valued finite element variables is not currently supported by "
-               "SolutionUserObjectBase.");
+  return FEInterface::field_type(fe_type) == libMesh::TYPE_SCALAR;
 }
 
 MooseEnum
@@ -832,7 +834,8 @@ SolutionUserObjectBase::pointValue(Real libmesh_dbg_var(t),
                                    const unsigned int local_var_index,
                                    const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  checkVariableIsScalarValued(local_var_index, "Point value evaluation");
+  mooseAssert(isVariableScalarValued(local_var_index),
+              "Point value evaluation requires a scalar-valued imported variable.");
 
   // Create copy of point
   Point pt(p);
@@ -888,7 +891,8 @@ SolutionUserObjectBase::discontinuousPointValue(
     const unsigned int local_var_index,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  checkVariableIsScalarValued(local_var_index, "Point value evaluation");
+  mooseAssert(isVariableScalarValued(local_var_index),
+              "Point value evaluation requires a scalar-valued imported variable.");
 
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
@@ -1010,7 +1014,8 @@ SolutionUserObjectBase::pointValueGradient(Real libmesh_dbg_var(t),
                                            const unsigned int local_var_index,
                                            const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  checkVariableIsScalarValued(local_var_index, "Point gradient evaluation");
+  mooseAssert(isVariableScalarValued(local_var_index),
+              "Point gradient evaluation requires a scalar-valued imported variable.");
 
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
@@ -1063,7 +1068,8 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
     const unsigned int local_var_index,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  checkVariableIsScalarValued(local_var_index, "Point gradient evaluation");
+  mooseAssert(isVariableScalarValued(local_var_index),
+              "Point gradient evaluation requires a scalar-valued imported variable.");
 
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)

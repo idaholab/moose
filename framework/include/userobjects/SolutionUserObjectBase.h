@@ -264,9 +264,14 @@ public:
   static MooseEnum weightingType() { return MooseEnum(getWeightingTypeOptions()); }
 
   /**
-   * Returns whether the imported variable is a spatially discontinuous finite element field.
+   * Returns whether the imported variable has a scalar finite element field type.
    */
-  bool isVariableSpatiallyDiscontinuous(const std::string & var_name) const;
+  bool isVariableScalarValued(const std::string & var_name) const;
+
+  /**
+   * Returns whether the imported variable is a discontinuous scalar finite element field.
+   */
+  bool isVariableADiscontinuousScalarField(const std::string & var_name) const;
 
   /**
    * Return the spatial dimension of the mesh file
@@ -536,10 +541,10 @@ protected:
 
 private:
   /**
-   * Checks that an imported variable is scalar-valued.
+   * Returns whether the imported variable identified by its local index has a scalar finite element
+   * field type.
    */
-  void checkVariableIsScalarValued(unsigned int local_var_index,
-                                   const std::string & evaluation_type) const;
+  bool isVariableScalarValued(unsigned int local_var_index) const;
 
   static Threads::spin_mutex _solution_user_object_mutex;
 };

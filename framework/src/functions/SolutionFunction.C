@@ -91,11 +91,15 @@ SolutionFunction::initialSetup()
     _solution_object_var_name = vars[0];
   }
 
-  // Validate the imported variable name during setup rather than waiting for the first evaluation.
-  _solution_object_ptr->getLocalVarIndex(_solution_object_var_name);
+  if (!_solution_object_ptr->isVariableScalarValued(_solution_object_var_name))
+    paramError(
+        "from_variable",
+        "The imported variable '",
+        _solution_object_var_name,
+        "' is vector-valued, but SolutionFunction supports only scalar-valued imported variables.");
 
   // Require an explicit weighting policy for spatially discontinuous imported variables
-  if (_solution_object_ptr->isVariableSpatiallyDiscontinuous(_solution_object_var_name) &&
+  if (_solution_object_ptr->isVariableADiscontinuousScalarField(_solution_object_var_name) &&
       !_weighting_type)
     paramError("weighting_type",
                "A weighting policy must be specified when the imported variable '",

@@ -77,12 +77,17 @@ SolutionAux::initialSetup()
     // Define the variable
     _var_name = vars[0];
   }
-  // Validate the imported variable name during setup rather than waiting for the first
-  // evaluation.
-  _solution_object.getLocalVarIndex(_var_name);
+
+  if (!_solution_object.isVariableScalarValued(_var_name))
+    paramError(
+        "from_variable",
+        "The imported variable '",
+        _var_name,
+        "' is vector-valued, but SolutionAux supports only scalar-valued imported variables.");
 
   // Require an explicit weighting policy for spatially discontinuous imported variables
-  if (!_direct && _solution_object.isVariableSpatiallyDiscontinuous(_var_name) && !_weighting_type)
+  if (!_direct && _solution_object.isVariableADiscontinuousScalarField(_var_name) &&
+      !_weighting_type)
     paramError("weighting_type",
                "A weighting policy must be specified when the imported variable '",
                _var_name,

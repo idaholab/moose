@@ -52,7 +52,7 @@
     cli_args = 'UserObjects/solution/system_variables=source_vector
                 Postprocessors/xyz_average/variable=source_vector'
     prereq = point_value_source
-    expect_err = "Point value evaluation of vector-valued finite element variables is not currently supported"
+    expect_err = "The imported variable 'source_vector' is vector-valued"
     issues = '#31766'
     requirement = "The system shall report an error when scalar point-value evaluation is requested for a vector-valued imported finite element variable."
   []

@@ -93,11 +93,15 @@ SolutionIC::initialSetup()
                "not Exodus. Current file type: " +
                    std::string(_solution_object.getSolutionFileType()));
 
-  // Validate the imported variable name during setup rather than waiting for the first evaluation.
-  _solution_object.getLocalVarIndex(_solution_object_var_name);
+  if (!_solution_object.isVariableScalarValued(_solution_object_var_name))
+    paramError(
+        "from_variable",
+        "The imported variable '",
+        _solution_object_var_name,
+        "' is vector-valued, but SolutionIC supports only scalar-valued imported variables.");
 
   // Require an explicit weighting policy for spatially discontinuous imported variables
-  if (_solution_object.isVariableSpatiallyDiscontinuous(_solution_object_var_name) &&
+  if (_solution_object.isVariableADiscontinuousScalarField(_solution_object_var_name) &&
       !_weighting_type)
     paramError("weighting_type",
                "A weighting policy must be specified when the imported variable '",
