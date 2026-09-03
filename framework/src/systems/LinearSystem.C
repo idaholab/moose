@@ -326,7 +326,6 @@ LinearSystem::solve()
            << " Final residual: " << _final_linear_residual << " Num. of Iter. " << _n_linear_iters
            << std::endl;
 
-
   // determine whether solution invalid occurs in the converged solution
   checkInvalidSolution();
 }
