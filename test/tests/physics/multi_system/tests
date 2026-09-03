@@ -1,11 +1,31 @@
 [Tests]
   design = 'Physics/index.md'
-  issues = '#29019'
+  issues = '#29019 #16517'
   [cg]
     type = CSVDiff
     input = 'diffusion_multisys.i'
     csvdiff = 'diffusion_multisys_out_sample_0010.csv'
     requirement = 'The system shall be able to set up multi-system problems using a Physics syntax.'
+  []
+  [unprefixed_pc_type_prefixed_jfnk]
+    type = RunApp
+    input = 'diffusion_multisys.i'
+    cli_args = "Executioner/solve_type=JFNK
+                Physics/Diffusion/ContinuousGalerkin/diff_1/preconditioning=defer
+                Physics/Diffusion/ContinuousGalerkin/diff_2/preconditioning=defer
+                Outputs/csv=false
+                -pc_type lu"
+    absent_out = "PETSc option '-pc_type' requires an assembled preconditioning matrix"
+    requirement = "The system shall not reject an unprefixed PETSc preconditioner type option for a "
+                  "JFNK solve using prefixed solver systems."
+  []
+  [jfnk_physics_pc_type]
+    type = RunApp
+    input = 'diffusion_multisys.i'
+    cli_args = "Executioner/solve_type=JFNK Executioner/num_steps=1 Outputs/csv=false"
+    absent_out = "PETSc option '-sys1_pc_type' requires an assembled preconditioning matrix"
+    requirement = "The system shall allow Physics-added PETSc preconditioner type options for a "
+                  "JFNK solve."
   []
   [errors]
     requirement = 'The system shall return an error'
