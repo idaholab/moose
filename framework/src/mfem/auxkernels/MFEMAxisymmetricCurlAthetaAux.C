@@ -25,10 +25,7 @@ public:
   AxisymmetricCurlAthetaVectorCoefficient(mfem::Coefficient & a_theta,
                                           mfem::VectorCoefficient & grad_a_theta,
                                           mfem::Coefficient & inv_r)
-    : mfem::VectorCoefficient(2),
-      _a_theta(a_theta),
-      _grad_a_theta(grad_a_theta),
-      _inv_r(inv_r)
+    : mfem::VectorCoefficient(2), _a_theta(a_theta), _grad_a_theta(grad_a_theta), _inv_r(inv_r)
   {
   }
 
@@ -36,20 +33,21 @@ public:
                     mfem::ElementTransformation & T,
                     const mfem::IntegrationPoint & ip) override
   {
-  mfem::Vector grad;
-  grad.SetSize(2);
-  _grad_a_theta.Eval(grad, T, ip);
+    mfem::Vector grad;
+    grad.SetSize(2);
+    _grad_a_theta.Eval(grad, T, ip);
 
-  const mfem::real_t a_theta = _a_theta.Eval(T, ip);
-  const mfem::real_t inv_r = _inv_r.Eval(T, ip);
+    const mfem::real_t a_theta = _a_theta.Eval(T, ip);
+    const mfem::real_t inv_r = _inv_r.Eval(T, ip);
 
-  const mfem::real_t dA_dr = grad[0]; // ( x*\frac{\partial A}{\partial x} + y*\frac{\partial A}{\partial y} ) /rho 
-  const mfem::real_t dA_dz = grad[1];
+    const mfem::real_t dA_dr =
+        grad[0]; // ( x*\frac{\partial A}{\partial x} + y*\frac{\partial A}{\partial y} ) /rho
+    const mfem::real_t dA_dz = grad[1];
 
-  V.SetSize(2);
-  V[0] = -dA_dz; //in the meridian plane, the first component is the radial component
-  V[1] = dA_dr + a_theta * inv_r; //z-direction
-}
+    V.SetSize(2);
+    V[0] = -dA_dz; // in the meridian plane, the first component is the radial component
+    V[1] = dA_dr + a_theta * inv_r; // z-direction
+  }
 
 private:
   mfem::Coefficient & _a_theta;
@@ -77,8 +75,7 @@ MFEMAxisymmetricCurlAthetaAux::validParams()
   return params;
 }
 
-MFEMAxisymmetricCurlAthetaAux::MFEMAxisymmetricCurlAthetaAux(
-    const InputParameters & parameters)
+MFEMAxisymmetricCurlAthetaAux::MFEMAxisymmetricCurlAthetaAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getGridFunction(_source_var_name)),
