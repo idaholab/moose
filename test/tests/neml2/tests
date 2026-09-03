@@ -13,11 +13,12 @@
   # cpp-aoti compile-then-run pipeline: compile the NEML2TestModel to an AOTI artifact, then
   # evaluate it through the cpp-aoti runtime and check it reproduces the cpp-eager result (the
   # run loads the artifact, so it implicitly verifies the compile produced it). Requires the
-  # activated neml2 conda environment (neml2-compile on PATH).
+  # activated neml2 conda environment (neml2-compile on PATH). MOOSE conda environments set CXX
+  # to an MPI compiler wrapper, but TorchInductor requires a plain host compiler for AOTI builds.
   [aoti_compile]
     requirement = 'The framework shall compile a NEML2 model to ahead-of-time (AOTI) artifacts.'
     type = RunCommand
-    command = 'neml2-compile --model model models/custom_model.i --device cpu --output-dir aoti_artifacts --load models/test_models.py -d product:A'
+    command = 'env -u CXX neml2-compile --model model models/custom_model.i --device cpu --output-dir aoti_artifacts --load models/test_models.py -d product:A'
     capabilities = 'libtorch & neml2'
     valgrind = none
   []
