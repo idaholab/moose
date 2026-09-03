@@ -1,0 +1,158 @@
+# LinearFVGrayLambertBC
+
+`LinearFVGrayLambertBC` applies a surface-to-surface radiation boundary condition to a
+linear finite-volume temperature variable. It is the LinearFV counterpart of
+[GrayLambertNeumannBC.md]. Both boundary conditions obtain
+the radiative exchange quantities from a
+[GrayLambertSurfaceRadiationBase.md] user object;
+the difference is that `LinearFVGrayLambertBC` contributes to a linear finite-volume
+system.
+
+This boundary condition is intended for heat-conduction or energy equations using a
+[MooseLinearVariableFVReal.md] variable and a [LinearFVDiffusion.md] kernel. It does not
+compute view factors or solve the enclosure radiosity equations itself. Those tasks
+remain the responsibility of a surface-radiation user object such as
+[ConstantViewFactorSurfaceRadiation.md] or
+[ViewFactorObjectSurfaceRadiation.md].
+
+!alert note
+`LinearFVGrayLambertBC` models surface-to-surface exchange among opaque, gray, diffuse
+surfaces. It is distinct from a Marshak boundary condition used with a participating-
+media radiation-diffusion model.
+
+## Gray-Lambert surface exchange
+
+For a gray, diffuse surface $i$, the radiosity $J_i$, irradiation $G_i$, and net
+outward radiative heat-flux density $q_i''$ satisfy
+
+!equation id=eq:linear-fv-gray-lambert-radiosity
+J_i = \epsilon_i \sigma T_i^4 + \left(1-\epsilon_i\right)G_i,
+
+!equation id=eq:linear-fv-gray-lambert-irradiation
+G_i = \sum_j F_{ij}J_j,
+
+and
+
+!equation id=eq:linear-fv-gray-lambert-flux
+q_i'' = J_i-G_i = \epsilon_i\left(\sigma T_i^4-G_i\right),
+
+where $\epsilon_i$ is the surface emissivity, $\sigma$ is the Stefan--Boltzmann
+constant, $T_i$ is the absolute surface temperature, and $F_{ij}$ is the view factor
+from surface $i$ to surface $j$. The surface-radiation user object solves this
+enclosure problem and provides the irradiation, emissivity, and net heat flux for
+each participating boundary.
+
+The radiative heat flux is coupled to the finite-volume energy equation through
+
+!equation id=eq:linear-fv-gray-lambert-conduction
+-k\nabla T_b\cdot\boldsymbol{n} = q_i'',
+
+where $k$ is the diffusion coefficient, $T_b$ is the boundary-face temperature, and
+$\boldsymbol{n}$ is the outward unit normal.
+
+## LinearFV formulation
+
+When [!param](/LinearFVBCs/LinearFVGrayLambertBC/reconstruct_emission) is `true`, the
+emitted portion of the heat flux is reconstructed using the local boundary-face
+temperature. Substitution of [eq:linear-fv-gray-lambert-flux] into
+[eq:linear-fv-gray-lambert-conduction] gives
+
+!equation id=eq:linear-fv-gray-lambert-nonlinear-bc
+-k\frac{\partial T}{\partial n}
+-\epsilon_i\sigma T_b^4
+=-\epsilon_iG_i.
+
+The LinearFV system is linear, so the fourth-power temperature dependence is treated
+with linearization. For outer iteration $m+1$,
+
+!equation id=eq:linear-fv-gray-lambert-picard
+\left(T_b^{m+1}\right)^4
+\approx
+\left(T_b^m\right)^3T_b^{m+1}.
+
+Consequently, [eq:linear-fv-gray-lambert-nonlinear-bc] is written in the Robin form
+
+!equation id=eq:linear-fv-gray-lambert-robin
+\alpha\frac{\partial T^{m+1}}{\partial n}
++\beta^m T_b^{m+1}
+=\gamma^m,
+
+with
+
+!equation id=eq:linear-fv-gray-lambert-coefficients
+\alpha^m=-k_C^m, \qquad
+\beta^m=-\epsilon_i\sigma\left(T_C^m\right)^3, \qquad
+\gamma^m=-\epsilon_iG_i^m,
+
+where $T_C^m$ and $k_C^m$ are the temperature and diffusion coefficient,
+respectively, evaluated in the cell adjacent to the boundary using the previous
+nonlinear solution state. For a constant diffusion coefficient,
+$\alpha^m=-k$.
+
+The use of $T_C^m$ avoids recursively evaluating the temperature at a boundary
+whose value is itself determined by this boundary condition. Consequently, the
+emission term is approximated as
+
+!equation id=eq:linear-fv-gray-lambert-emission-approximation
+\left(T_b^{m+1}\right)^4
+\approx
+\left(T_C^m\right)^3 T_b^{m+1}.
+
+This treatment combines fixed-point lagging of the nonlinear coefficient with
+a first-order approximation of the previous boundary temperature,
+$T_b^m\approx T_C^m$. Therefore, even after convergence of the nonlinear
+iterations, the reconstructed emission is proportional to
+$\left(T_C\right)^3T_b$ rather than exactly $T_b^4$.
+
+!alert note title=First-order boundary approximation
+The current implementation evaluates the temperature-dependent emission
+coefficient using the adjacent-cell temperature. This avoids recursive boundary
+evaluation but introduces a first-order spatial approximation in the nonlinear
+radiative coefficient.
+
+!alert warning title=Consistent diffusion coefficient
+The `coeff_diffusion` supplied to this boundary condition must represent the
+same physical coefficient as the `diffusion_coeff` used by the associated
+[LinearFVDiffusion.md] kernel. For a heat-conduction equation, both parameters
+represent the thermal conductivity. If the diffusion coefficient depends on
+temperature, the boundary-condition coefficient is evaluated at the adjacent
+cell using the previous nonlinear solution state.
+
+When [!param](/LinearFVBCs/LinearFVGrayLambertBC/reconstruct_emission) is `false`, the
+surface-averaged heat-flux density obtained directly from the Gray--Lambert user
+object is imposed as a constant Neumann flux over each participating sideset. The
+Robin coefficients then reduce to
+
+!equation id=eq:linear-fv-gray-lambert-neumann-coefficients
+\alpha=-k, \qquad \beta=0, \qquad \gamma=q_i''.
+
+Reconstructing the emission is generally preferable when the temperature varies
+spatially along a radiating sideset because it preserves the local $T_b^4$ emission
+term. In this mode, irradiation remains the surface quantity supplied by the
+enclosure radiation user object.
+
+## Iterative coupling
+
+Surface-to-surface radiation introduces two sources of nonlinearity and coupling:
+the emitted energy depends on $T^4$, and the irradiation on one surface depends on
+the radiosities of all surfaces in the enclosure. It is therefore important to use
+relaxation, either for the multi-system fixed-point iteration or through outer
+ SIMPLE iterations.
+
+## Example syntax
+
+The following example applies the boundary condition to an inner empty cube within a
+2D domain
+
+!listing modules/heat_transfer/test/tests/radiation_transfer_action/radiative_transfer_no_action_linearfv_steady.i
+
+The boundary names supplied to `LinearFVGrayLambertBC` must also participate in the
+referenced Gray-Lambert surface-radiation user object. A boundary face may match
+only one boundary listed for a given `LinearFVGrayLambertBC` object; overlapping
+boundary restrictions are not currently supported.
+
+!syntax parameters /LinearFVBCs/LinearFVGrayLambertBC
+
+!syntax inputs /LinearFVBCs/LinearFVGrayLambertBC
+
+!syntax children /LinearFVBCs/LinearFVGrayLambertBC

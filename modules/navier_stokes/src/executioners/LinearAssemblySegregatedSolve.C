@@ -593,6 +593,8 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 
   _solid_energy_system->setSolution(current_local_solution);
 
+  _solid_energy_system->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
+
   const auto residuals =
       std::make_pair(its_res_pair.first, solver.get_initial_residual() / norm_factor);
 
@@ -719,12 +721,13 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   {
     auto & old_local_solution = *(system.solutionPreviousNewton());
     NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
-
-    // Update old solution, only needed if relaxing the field
-    old_local_solution = current_local_solution;
   }
 
   system.setSolution(current_local_solution);
+
+  // Store the accepted, possibly field-relaxed solution.
+  // This must also occur when field_relaxation == 1.
+  system.copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
 
   const auto residuals =
       std::make_pair(its_res_pair.first, linear_solver.get_initial_residual() / norm_factor);
@@ -830,7 +833,8 @@ LinearAssemblySegregatedSolve::solve()
                                 _energy_equation_relaxation,
                                 _energy_linear_control,
                                 _energy_l_abs_tol,
-                                (_energy_pc_solve_counter++ % _energy_pc_recompute_frequency) != 0);
+                                (_energy_pc_solve_counter++ % _energy_pc_recompute_frequency) != 0,
+                                _energy_field_relaxation);
 
         if (_has_pm_radiation_systems && _should_solve_pm_radiation)
         {
