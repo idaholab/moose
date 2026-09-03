@@ -14,7 +14,7 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * Class to set a vector auxvariable to the axisymmetric curl associated with
+ * Class to compute the axisymmetric curl associated with
  * an azimuthal scalar field A_theta.
  *
  * For A_theta(r,z), this computes
