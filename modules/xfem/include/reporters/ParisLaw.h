@@ -22,7 +22,7 @@ public:
   ParisLaw(const InputParameters & parameters);
 
 protected:
-  virtual void computeGrowth(std::vector<int> & index) override;
+  virtual void computeGrowth(const std::vector<int> & index) override;
   ///@{ Paris law parameters
   const Real _paris_law_c;
   const Real _paris_law_m;

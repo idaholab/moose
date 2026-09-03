@@ -3401,20 +3401,24 @@ TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseOnSharedEdge)
   std::map<unsigned int, EFANode *> embedded_nodes;
   EFANode embedded_a(1000, EFANode::N_CATEGORY_EMBEDDED);
   EFANode embedded_b(1001, EFANode::N_CATEGORY_EMBEDDED);
+  // addFaceEdgeCut() reports its reconciliation back through the embedded-node argument, so it
+  // takes an EFANode *& and needs an lvalue here.
+  EFANode * embedded_a_in = &embedded_a;
+  EFANode * embedded_b_in = &embedded_b;
   auto * face5_edge3 = base_elem->getFace(5)->getEdge(3);
   auto * face4_edge2 = base_elem->getFace(4)->getEdge(2);
 
   // Face 5 edge 3 and face 4 edge 2 are the same physical HEX8 edge with opposite face-local
   // orientation. Seed that shared edge from face 5 first, allowing adjacent-face propagation to
   // populate face 4 with the same embedded node.
-  base_elem->addFaceEdgeCut(5, 3, 0.5, &embedded_a, embedded_nodes, false, true);
+  base_elem->addFaceEdgeCut(5, 3, 0.5, embedded_a_in, embedded_nodes, false, true);
   ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
   ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
   ASSERT_EQ(face5_edge3->getEmbeddedNode(0), &embedded_a);
   ASSERT_EQ(face4_edge2->getEmbeddedNode(0), &embedded_a);
 
   // Revisit the same physical edge through the other face with a different embedded node.
-  base_elem->addFaceEdgeCut(4, 2, 0.5, &embedded_b, embedded_nodes, false, true);
+  base_elem->addFaceEdgeCut(4, 2, 0.5, embedded_b_in, embedded_nodes, false, true);
   ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
   ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
   ASSERT_EQ(face5_edge3->getEmbeddedNode(0), &embedded_a);
@@ -3442,16 +3446,20 @@ TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseAcrossNeighborPropagati
   std::map<unsigned int, EFANode *> embedded_nodes;
   EFANode embedded_a(1000, EFANode::N_CATEGORY_EMBEDDED);
   EFANode embedded_b(1001, EFANode::N_CATEGORY_EMBEDDED);
+  // addFaceEdgeCut() reports its reconciliation back through the embedded-node argument, so it
+  // takes an EFANode *& and needs an lvalue here.
+  EFANode * embedded_a_in = &embedded_a;
+  EFANode * embedded_b_in = &embedded_b;
 
   // Simulate a cut that arrived through a recursive path and therefore did not propagate to the
   // neighboring element.
-  elem0->addFaceEdgeCut(2, 0, 0.5, &embedded_a, embedded_nodes, false, true);
+  elem0->addFaceEdgeCut(2, 0, 0.5, embedded_a_in, embedded_nodes, false, true);
   ASSERT_EQ(elem0_edge->getEmbeddedNode(0), &embedded_a);
   ASSERT_EQ(elem1_edge->numEmbeddedNodes(), 0u);
 
   // A later independent path reaches the neighbor with a different node and propagates back. The
   // existing neighboring cut supplies the node used for the new copy of the physical edge.
-  elem1->addFaceEdgeCut(4, 0, 0.5, &embedded_b, embedded_nodes, true, true);
+  elem1->addFaceEdgeCut(4, 0, 0.5, embedded_b_in, embedded_nodes, true, true);
   ASSERT_EQ(elem0_edge->numEmbeddedNodes(), 1u);
   ASSERT_EQ(elem1_edge->numEmbeddedNodes(), 1u);
   ASSERT_EQ(elem0_edge->getEmbeddedNode(0), &embedded_a);

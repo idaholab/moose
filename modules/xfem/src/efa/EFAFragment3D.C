@@ -164,8 +164,7 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & /*
       if (emb_faces.size() == 1)
       {
         // Class A (lone-edge): erase the spurious intersection locally; the EFANode stays alive.
-        for (EFAFace * lone_face : emb_faces)
-          lone_face->removeEmbeddedNode(emb_node);
+        emb_faces.front()->removeEmbeddedNode(emb_node);
         continue;
       }
       if (emb_faces.size() > 2)

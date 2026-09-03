@@ -36,20 +36,31 @@ CriticalCrackGrowth::CriticalCrackGrowth(const InputParameters & parameters)
 }
 
 void
-CriticalCrackGrowth::computeGrowth(std::vector<int> & index)
+CriticalCrackGrowth::computeGrowth(const std::vector<int> & index)
 {
   _growth_increment.assign(_ki_vpp.size(), 0.0);
 
-  // index is sized by the active-boundary node count, which can be one or two nodes shorter than
-  // _ki_vpp (_crack_front_points) when an active tip grows outside the body and flips to an
-  // inactive endpoint. Bound the loop by index; the trailing _growth_increment entries stay 0.0.
+  // The fracture integrals have not been computed yet on the first execution, so there is nothing
+  // to evaluate.
+  if (_ki_vpp.empty())
+    return;
+
+  // index is keyed by active-boundary position, but its value is the position of that node in
+  // _crack_front_points, which is the ordering of the fracture-integral VectorPostprocessors and of
+  // _growth_increment.  The two orderings are not the same (_crack_front_points is stored in the
+  // reverse order of the active boundary), and index is sized by the active-boundary node count,
+  // which can be one or two nodes shorter than _ki_vpp when an active tip grows outside the body
+  // and flips to an inactive endpoint.  So loop over index and address everything else through it.
+  // Inactive endpoints carry -1 and keep their 0.0 increment, as do any trailing entries.
   for (const auto i : index_range(index))
   {
-    if (index[i] == -1 || _ki_vpp[i] <= 0.0)
+    const int k = index[i];
+    if (k == -1 || _ki_vpp.at(k) <= 0.0)
       continue;
 
-    const Real effective_k_squared = _ki_vpp[i] * _ki_vpp[i] + _kii_vpp[i] * _kii_vpp[i];
+    const Real effective_k_squared =
+        _ki_vpp.at(k) * _ki_vpp.at(k) + _kii_vpp.at(k) * _kii_vpp.at(k);
     if (effective_k_squared > _k_critical * _k_critical)
-      _growth_increment[i] = _max_growth_increment;
+      _growth_increment.at(k) = _max_growth_increment;
   }
 }

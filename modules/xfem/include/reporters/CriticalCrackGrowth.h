@@ -21,7 +21,7 @@ public:
   CriticalCrackGrowth(const InputParameters & parameters);
 
 protected:
-  void computeGrowth(std::vector<int> & index) override;
+  void computeGrowth(const std::vector<int> & index) override;
 
   /// Critical fracture toughness
   const Real _k_critical;

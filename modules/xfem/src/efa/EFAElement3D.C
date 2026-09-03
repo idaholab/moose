@@ -355,12 +355,25 @@ EFAElement3D::switchNode(EFANode * new_node, EFANode * old_node, bool descend_to
 void
 EFAElement3D::switchEmbeddedNode(EFANode * new_emb_node, EFANode * old_emb_node)
 {
+  // An embedded node created by an edge cut lives in the EFAEdge's intersection list, and
+  // EFAFace::switchNode() only descends into its edges when old_emb_node is one of the face's own
+  // nodes, so it is never reached through the faces alone.  Switch the edges explicitly;
+  // EFAElement2D::switchEmbeddedNode() gets this for free because a 2D element owns its edges.
   for (unsigned int i = 0; i < _num_faces; ++i)
+  {
     _faces[i]->switchNode(new_emb_node, old_emb_node);
+    for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
+      _faces[i]->getEdge(j)->switchNode(new_emb_node, old_emb_node);
+  }
   for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
     _interior_nodes[i]->switchNode(new_emb_node, old_emb_node);
   for (unsigned int i = 0; i < _fragments.size(); ++i)
+  {
     _fragments[i]->switchNode(new_emb_node, old_emb_node);
+    for (unsigned int j = 0; j < _fragments[i]->numFaces(); ++j)
+      for (unsigned int k = 0; k < _fragments[i]->getFace(j)->numEdges(); ++k)
+        _fragments[i]->getFace(j)->getEdge(k)->switchNode(new_emb_node, old_emb_node);
+  }
 }
 
 void
@@ -1995,7 +2008,7 @@ void
 EFAElement3D::addFaceEdgeCut(unsigned int face_id,
                              unsigned int edge_id,
                              double position,
-                             EFANode * embedded_node,
+                             EFANode *& embedded_node,
                              std::map<unsigned int, EFANode *> & EmbeddedNodes,
                              bool add_to_neighbor,
                              bool add_to_adjacent)
@@ -2021,11 +2034,15 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
     EFANode * old_emb = cut_edge->getEmbeddedNode(emb_id);
     // If the same physical edge point is rediscovered through a different face/neighbor path,
     // reuse the existing embedded node on that edge instead of treating it as a contradictory cut.
-    // Replace any references to a different caller-supplied node first, otherwise the same physical
-    // edge could carry two different EFANodes within this element (mirrors checkNeighborFaceCut).
+    // Hand this element's references over to the existing node first (mirrors
+    // checkNeighborFaceCut), then report the reconciliation back through embedded_node: an
+    // enclosing invocation would otherwise keep handing the discarded node to the adjacent face and
+    // to the face and edge neighbors, leaving one physical intersection represented by two
+    // different EFANodes.
     if (local_embedded && local_embedded != old_emb)
       switchEmbeddedNode(old_emb, local_embedded);
     local_embedded = old_emb;
+    embedded_node = old_emb;
     cut_exist = true;
   }
 
