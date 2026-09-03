@@ -9690,9 +9690,14 @@ FEProblemBase::addOutput(const std::string & object_type,
 
   // Apply only user-set parameters from the common [Outputs] block so that
   // each output type's own defaults are not overridden by common defaults.
+  // 'file_base' is excluded so that isParamValid("file_base") on the object
+  // continues to reflect whether this object set its own file_base, rather
+  // than one merely inherited from the common block; OutputWarehouse::
+  // resetFileBase() relies on that distinction to decide whether the object
+  // name needs to be appended to avoid a collision on the common file_base.
   const InputParameters * common = output_warehouse.getCommonParameters();
   if (common)
-    parameters.applyCommonUserSetParameters(*common);
+    parameters.applyCommonUserSetParameters(*common, {"file_base"});
 
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")

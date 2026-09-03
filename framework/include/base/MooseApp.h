@@ -259,6 +259,13 @@ public:
   std::string getOutputFileBase(bool for_non_moose_build_output = false) const;
 
   /**
+   * Whether this app's own [Outputs] block set file_base from input parsing.
+   * Unlike _file_base_set_by_user, this is not also set when a parent MultiApp
+   * overrides this app's output file base via setOutputFileBase().
+   */
+  bool commonOutputFileBaseSet() const { return _common_output_file_base_set; }
+
+  /**
    * Tell the app to output in a specific position.
    */
   void setOutputPosition(const Point & p);
@@ -1298,6 +1305,10 @@ protected:
 
   /// Whether or not file base is set through input or setOutputFileBase by MultiApp
   bool _file_base_set_by_user;
+
+  /// Whether this app's own [Outputs] block set file_base from input parsing (see
+  /// commonOutputFileBaseSet())
+  bool _common_output_file_base_set;
 
   /// Whether or not an output position has been set for this app
   bool _output_position_set;
