@@ -103,7 +103,7 @@ cp = 300
       C2_eps = ${C2_eps}
       Pr_t = 0.9
 
-      k_t_as_aux_variable = true
+      k_eff_t_as_aux_variable = true
       turbulence_walls = ${walls}
       wall_treatment_eps = ${wall_treatment}
       bulk_wall_treatment = ${bulk_wall_treatment}
