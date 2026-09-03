@@ -32,7 +32,7 @@
     primary_block = 4
     paired_block = 5
     new_boundary = 'inner_left'
-  [../]
+  []
 
   [inner_right]
     type = SideSetsBetweenSubdomainsGenerator

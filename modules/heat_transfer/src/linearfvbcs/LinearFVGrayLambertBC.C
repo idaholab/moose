@@ -59,7 +59,7 @@ LinearFVGrayLambertBC::getAlpha(Moose::FaceArg /* face */, Moose::StateArg /* st
 
   const auto elem_arg = makeElemArg(elem);
   // First order extrapolation to the face
-  return -_coeff_diffusion(elem_arg, Moose::previousNonlinearState());
+  return -_coeff_diffusion(elem_arg, Moose::determineState());
 }
 
 Real
@@ -95,7 +95,7 @@ LinearFVGrayLambertBC::getBeta(Moose::FaceArg /* face */, Moose::StateArg /* sta
 
   // First order extrapolation to the face
   const Real lagged_temperature = _temperature_radiation(
-      elem_arg, Moose::previousNonlinearState());
+      elem_arg, Moose::determineState());
 
   return -emissivity * HeatConduction::Constants::sigma *
          Utility::pow<3>(lagged_temperature);
