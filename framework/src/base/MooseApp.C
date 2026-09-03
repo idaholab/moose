@@ -639,6 +639,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     MooseBase(*this, AppFactory::instance().getAppParams(parameters)),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _file_base_set_by_user(false),
+    _common_output_file_base_set(false),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -1468,6 +1469,7 @@ MooseApp::setupOptions()
       {
         _output_file_base = common->getParam<std::string>("file_base");
         _file_base_set_by_user = true;
+        _common_output_file_base_set = true;
       }
       else if (isUltimateMaster())
       {

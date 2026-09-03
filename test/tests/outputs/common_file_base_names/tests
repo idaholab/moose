@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#4215'
+  design = 'OutputWarehouse.md'
+  [common_file_base_names]
+    type = CheckFiles
+    input = common_file_base_names.i
+    check_files = 'common_file_base_names_exodus_a.e common_file_base_names_exodus_b.e'
+    recover = false
+
+    requirement = "The system shall append an output object's name to a common output file base "
+                  "only when necessary to avoid a filename collision between multiple outputs "
+                  "sharing that common file base."
+  []
+[]

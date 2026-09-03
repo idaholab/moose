@@ -68,7 +68,11 @@ FileOutput::FileOutput(const InputParameters & parameters)
   if (_app.isRestarting())
     _file_num = 0;
 
-  if (isParamValid("file_base"))
+  // An explicit file_base set on this object, or on this app's own common
+  // [Outputs] block, conflicts with multiple child app instances the same
+  // way; the common case is no longer copied onto this object's own
+  // file_base parameter (see #4215), so it must be checked separately.
+  if (isParamValid("file_base") || _app.commonOutputFileBaseSet())
   {
     // Check that we are the only process or not a subapp
     if (!_app.isUltimateMaster())
@@ -76,8 +80,10 @@ FileOutput::FileOutput(const InputParameters & parameters)
         mooseError("The parameter 'file_base' may not be specified for a child app when the "
                    "MultiApp has multiple instances of the child app, since all instances would "
                    "use the same file base and thus write to the same file.");
-    setFileBaseInternal(getParam<std::string>("file_base"));
   }
+
+  if (isParamValid("file_base"))
+    setFileBaseInternal(getParam<std::string>("file_base"));
 }
 
 bool

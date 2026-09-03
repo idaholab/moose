@@ -409,6 +409,25 @@ OutputWarehouse::reset()
 void
 OutputWarehouse::resetFileBase()
 {
+  // Find the FileOutputs that will fall back to the app's common file_base,
+  // i.e. objects that are not shortcut-syntax outputs built by
+  // CommonOutputAction and that did not set their own file_base. Tentatively
+  // set each one's file base to the common value verbatim and tally the
+  // resulting (extension-inclusive) filenames: only a fallback object whose
+  // filename would actually collide with another's needs the object name
+  // appended to disambiguate. A lone fallback, or fallback outputs of
+  // different types that don't actually collide (e.g. one CSV and one
+  // Exodus sharing a common file_base), keep the common file_base unchanged
+  // (see #4215).
+  std::map<std::string, unsigned int> fallback_filename_counts;
+  for (const auto & obj : _all_objects)
+    if (FileOutput * file_output = dynamic_cast<FileOutput *>(obj))
+      if (!obj->parameters().get<bool>("_built_by_moose") && !obj->isParamValid("file_base"))
+      {
+        file_output->setFileBase(_app.getOutputFileBase());
+        fallback_filename_counts[file_output->filename()]++;
+      }
+
   // Set the file base from the application to FileOutputs and add associated filenames
   for (const auto & obj : _all_objects)
     if (FileOutput * file_output = dynamic_cast<FileOutput *>(obj))
@@ -421,7 +440,9 @@ OutputWarehouse::resetFileBase()
         else
           file_base = _app.getOutputFileBase();
       }
-      else if (obj->getParam<bool>("append_object_name"))
+      else if (obj->getParam<bool>("append_object_name") &&
+               (!_app.commonOutputFileBaseSet() ||
+                fallback_filename_counts[file_output->filename()] > 1))
         file_base = _app.getOutputFileBase(true) + "_" + obj->name();
       else
         file_base = _app.getOutputFileBase();
