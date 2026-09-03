@@ -78,7 +78,7 @@
   [MFEMAxisymmetricCurlAthetaAux]
     type = CSVDiff
     input = axisymmetric_magnetostatic.i
-    csvdiff = '2DMagnetostatic_LineSampler_0001.csv'
+    csvdiff = 'AxisymmetricMagnetostatic_LineSampler_0001.csv'
     design = 'MFEMAxisymmetricCurlAthetaAux.md'
     issues = '#33569'
     requirement = 'The system shall have the ability to compute the curl in axisymmetric RZ coordinates'

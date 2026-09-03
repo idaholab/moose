@@ -19,6 +19,7 @@ registerMooseObject("MooseApp", MFEMAxisymmetricCurlAthetaAux);
 
 namespace
 {
+
 class AxisymmetricCurlAthetaVectorCoefficient : public mfem::VectorCoefficient
 {
 public:
@@ -29,24 +30,24 @@ public:
   {
   }
 
-  virtual void Eval(mfem::Vector & V,
-                    mfem::ElementTransformation & T,
-                    const mfem::IntegrationPoint & ip) override
+  using mfem::VectorCoefficient::Eval;
+
+  void Eval(mfem::Vector & V,
+            mfem::ElementTransformation & T,
+            const mfem::IntegrationPoint & ip) override
   {
-    mfem::Vector grad;
-    grad.SetSize(2);
+    mfem::Vector grad(2);
     _grad_a_theta.Eval(grad, T, ip);
 
     const mfem::real_t a_theta = _a_theta.Eval(T, ip);
     const mfem::real_t inv_r = _inv_r.Eval(T, ip);
 
-    const mfem::real_t dA_dr =
-        grad[0]; // ( x*\frac{\partial A}{\partial x} + y*\frac{\partial A}{\partial y} ) /rho
+    const mfem::real_t dA_dr = grad[0];
     const mfem::real_t dA_dz = grad[1];
 
     V.SetSize(2);
-    V[0] = -dA_dz; // in the meridian plane, the first component is the radial component
-    V[1] = dA_dr + a_theta * inv_r; // z-direction
+    V[0] = -dA_dz;
+    V[1] = dA_dr + a_theta * inv_r;
   }
 
 private:
@@ -54,7 +55,6 @@ private:
   mfem::VectorCoefficient & _grad_a_theta;
   mfem::Coefficient & _inv_r;
 };
-
 }
 
 InputParameters

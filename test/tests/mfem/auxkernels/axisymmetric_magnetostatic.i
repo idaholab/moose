@@ -134,8 +134,8 @@
   [LineSampler]
     type = MFEMVariableLineValueSampler
     variable = 'B'
-    start_point = '2.9 -2 0'
-    end_point = '2.9 2 0'
+    start_point = '2.899 -1.98 0' # Ensure that it does not coincide with a vertical element boundary, thus not trigger the H(Div) boundary issue. 
+    end_point = '2.899 1.98 0' 
     num_points = 10
   []
 []
