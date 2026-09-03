@@ -226,7 +226,7 @@ pressure_gradient_method = reconstructed
   pressure_system = pressure_system
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  # Five hundred iterations allow the slowly relaxed reconstructed feedback to reach the same
+  # Five hundred iterations allow the reconstructed coupling pressure gradient to relax to the same
   # uniform steady field as the standard gradient. The reconstructed momentum residual is
   # cancellation-dominated at the source jumps and does not satisfy the generic normalized monitor.
   num_iterations = 500

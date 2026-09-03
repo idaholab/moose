@@ -23,7 +23,8 @@ class RhieChowMassFlux;
 
 /**
  * Reconstructs the pressure gradient used for Rhie-Chow momentum coupling from corrected face
- * fluxes and publishes a relaxed feedback field to linear finite-volume consumers.
+ * fluxes and publishes a relaxed coupling pressure-gradient field to linear finite-volume
+ * consumers.
  */
 class FVReconstructedPressureGradient : public FVGradientMethod, public MeshChangedInterface
 {
@@ -38,7 +39,7 @@ public:
   void bindFlowSystem(RhieChowMassFlux & rc,
                       const LinearFVGradientReader & pressure_gradient) const;
 
-  /// Name of the gradient method used before reconstructed feedback is available.
+  /// Name of the gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName & baseGradientMethodName() const { return _base_gradient_method_name; }
 
   /// Reset solver-iteration state once per attempted time step.
@@ -53,9 +54,9 @@ public:
   /// Get the conservative candidate produced by the current pressure corrector.
   const GradientContainer & reconstructedCandidate(const RhieChowMassFlux & rc) const;
 
-  /// Relax the current candidate into the feedback field published to gradient consumers.
-  void publishRelaxedFeedback(const RhieChowMassFlux & rc,
-                              const GradientContainer & base_gradient) const;
+  /// Relax and publish the current candidate as the coupling pressure gradient.
+  void publishCouplingPressureGradient(const RhieChowMassFlux & rc,
+                                       const GradientContainer & base_gradient) const;
 
   virtual void meshChanged() override;
 
@@ -65,15 +66,15 @@ private:
       GradientContainer & gradient,
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
-  /// Resolve the method used before reconstructed feedback is available.
+  /// Resolve the method used before the reconstructed coupling pressure gradient exists.
   const FVGradientMethod & resolveBaseGradientMethod(SystemBase & system) const;
 
   /// Check that a stateful operation is requested by the bound Rhie-Chow object.
   void checkFlowSystem(const RhieChowMassFlux & rc) const;
 
-  /// Blend a reconstructed candidate into the persistent feedback field.
-  void updateFeedbackGradient(const GradientContainer & base_gradient,
-                              const GradientContainer & reconstructed_candidate) const;
+  /// Blend a reconstructed candidate into the persistent coupling pressure gradient.
+  void updateCouplingPressureGradient(const GradientContainer & base_gradient,
+                                      const GradientContainer & reconstructed_candidate) const;
 
   /// Interpolate a lagged velocity-component gradient to a face.
   RealVectorValue reconstructionVelocityGradient(const RhieChowMassFlux & rc,
@@ -85,7 +86,7 @@ private:
   /// Build the set of Rhie-Chow cells touching boundary faces.
   void buildBoundaryCellCache(const RhieChowMassFlux & rc) const;
 
-  /// Gradient method used before reconstructed feedback is available.
+  /// Gradient method used before the reconstructed coupling pressure gradient exists.
   const GradientMethodName _base_gradient_method_name;
 
   /// Which pressure gradient is retained on cells touching a boundary face.
@@ -134,15 +135,15 @@ private:
   /// Face-flux generation consumed by the current candidate.
   mutable dof_id_type _reconstructed_candidate_face_flux_generation = 0;
 
-  /// Candidate generation consumed by the published relaxed feedback.
+  /// Candidate generation consumed by the published coupling pressure gradient.
   mutable dof_id_type _published_candidate_generation = 0;
 
   /// Reconstructed pressure-gradient candidate.
   mutable GradientContainer _reconstructed_pressure_gradient;
 
-  /// Persistent relaxed feedback field.
-  mutable GradientContainer _feedback;
+  /// Persistent coupling pressure gradient.
+  mutable GradientContainer _coupling_pressure_gradient;
 
-  /// Whether the feedback field has been initialized.
-  mutable bool _feedback_initialized = false;
+  /// Whether the coupling pressure gradient has been initialized.
+  mutable bool _coupling_pressure_gradient_initialized = false;
 };

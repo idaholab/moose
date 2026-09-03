@@ -33,11 +33,11 @@ in general, when using high-resolution grids.
 
 The pressure-gradient term used by [LinearFVMomentumPressure.md] kernels comes from the kernel's
 configured gradient method. [FVReconstructedPressureGradient.md] owns the Aguerre reconstruction
-and its relaxed feedback field: it removes the face-flux contribution from the previous velocity
-gradient, reconstructs a cell velocity from the corrected total conservative face flux, and then
-recovers the pressure gradient from the momentum balance. Rhie-Chow supplies H/A, 1/A, the base
-pressure gradient, the conservative face flux, and momentum/pressure system metadata, and drives
-the gradient method's prepare/finalize lifecycle.
+and its relaxed coupling pressure gradient: it removes the face-flux contribution from the previous
+velocity gradient, reconstructs a cell velocity from the corrected total conservative face flux,
+and then recovers the pressure gradient from the momentum balance. Rhie-Chow supplies H/A, 1/A, the
+base pressure gradient, the conservative face flux, and momentum/pressure system metadata, and
+drives the gradient method's prepare/finalize lifecycle.
 
 The reconstructed gradient is available after the first pressure correction; until then the gradient
 method falls back to its base gradient method. Immediately before each momentum predictor,
@@ -52,7 +52,7 @@ solution is then relaxed, ordinary pressure gradients are refreshed, and the can
 into the published coupling gradient with
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once per
 corrector. This keeps the immediate velocity correction compatible with continuity while providing
-relaxed feedback to the next momentum predictor.
+the relaxed coupling pressure gradient to the next momentum predictor.
 Rhie-Chow automatically discovers the [LinearFVMomentumPressure.md] kernel(s) attached to each
 momentum system so it uses the same pressure gradient field as the momentum predictor while
 constructing H/A. Multiple kernels are allowed per momentum system as long as they partition the
