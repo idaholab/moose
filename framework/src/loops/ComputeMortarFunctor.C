@@ -26,6 +26,23 @@
 
 // C++
 #include <cstring> // for "Jacobian" exception test
+#include <set>
+
+namespace
+{
+// Whether a subdomain-keyed mortar material map has an entry for every subdomain the mortar segment
+// mesh currently reports. Surplus entries are harmless because they are never looked up; a missing
+// entry is fatal.
+bool
+keysCover(const std::map<SubdomainID, std::deque<MaterialBase *>> & mats,
+          const std::set<SubdomainID> & sub_ids)
+{
+  for (const auto sub_id : sub_ids)
+    if (!mats.count(sub_id))
+      return false;
+  return true;
+}
+}
 
 ComputeMortarFunctor::ComputeMortarFunctor(
     const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
@@ -157,6 +174,18 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
       }
     }
   };
+
+  // The mortar segment mesh is rebuilt whenever the displaced mesh moves, so it can acquire
+  // interior-parent subdomains that it did not have before. A mortar segment registers its
+  // subdomain only once it has a valid primary projection, so an interface whose surfaces do not
+  // project onto each other registers nothing at all; relative motion can bring it into projection
+  // range later. Note this is about projection, not contact: a merely open gap still projects and
+  // still registers. The subdomain-keyed material maps are otherwise rebuilt only on meshChanged(),
+  // so without this re-sync loopOverMortarSegments would look up a subdomain key that was never
+  // inserted, and throw.
+  if (!keysCover(_secondary_ip_sub_to_mats, _amg.secondaryIPSubIDs()) ||
+      !keysCover(_primary_ip_sub_to_mats, _amg.primaryIPSubIDs()))
+    setupMortarMaterials();
 
   PARALLEL_TRY
   {
