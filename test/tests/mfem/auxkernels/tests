@@ -68,8 +68,8 @@
     input = scaledvector.i
     csvdiff = 'OutputData/ScaledVector.csv'
     design = 'MFEMScaledVectorAux.md'
-    issues = '#31404'
-    requirement = 'The system shall have the ability to project the product of a scalar coefficient '
+    issues = '#33653'
+    requirement = 'The system shall have the ability to project the product of a scalar coefficient, including one obtained from a postprocessor, '
                   'and a vector coefficient onto an MFEM vector auxvariable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
