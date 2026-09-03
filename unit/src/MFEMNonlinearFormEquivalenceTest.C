@@ -173,8 +173,8 @@ protected:
     nlf_params.set<VariableName>("variable") = _var_name;
     nlf_params.set<MFEMScalarCoefficientName>("k_coefficient") = _k_linear;
     nlf_params.set<MFEMScalarCoefficientName>("dk_du_coefficient") = "0.";
-    _linear_diffusion_nlf = addSharedObject<MFEMNLDiffusionKernel>(
-        "MFEMNLDiffusionKernel", "lin_diff_nlf", nlf_params);
+    _linear_diffusion_nlf =
+        addSharedObject<MFEMNLDiffusionKernel>("MFEMNLDiffusionKernel", "lin_diff_nlf", nlf_params);
   }
 
   /// Add the terms common to both systems and initialise. Init() may only be called once per
@@ -245,17 +245,19 @@ protected:
   /// Largest entry magnitude in a matrix, reduced across all ranks.
   static mfem::real_t maxAbsEntry(const mfem::HypreParMatrix & matrix)
   {
-    mfem::SparseMatrix diag, offd;
-    HYPRE_BigInt * cmap;
-    matrix.GetDiag(diag);
-    matrix.GetOffd(offd, cmap);
-
-    mfem::real_t local_max = 0.0;
-    for (const auto i : make_range(diag.NumNonZeroElems()))
-      local_max = std::max(local_max, std::abs(diag.GetData()[i]));
-    for (const auto i : make_range(offd.NumNonZeroElems()))
-      local_max = std::max(local_max, std::abs(offd.GetData()[i]));
-
+    auto scan =
+        [](const mfem::Memory<mfem::real_t> & data, const mfem::Memory<HYPRE_Int> & I, int height)
+    {
+      const mfem::real_t * d = data;
+      const auto nnz = I[height];
+      mfem::real_t m = 0.0;
+      for (const auto i : make_range(nnz))
+        m = std::max(m, std::abs(d[i]));
+      return m;
+    };
+    mfem::real_t local_max =
+        std::max(scan(matrix.GetDiagMemoryData(), matrix.GetDiagMemoryI(), matrix.Height()),
+                 scan(matrix.GetOffdMemoryData(), matrix.GetOffdMemoryI(), matrix.Height()));
     mfem::real_t global_max = local_max;
     MPI_Allreduce(&local_max, &global_max, 1, MPI_DOUBLE, MPI_MAX, matrix.GetComm());
     return global_max;
