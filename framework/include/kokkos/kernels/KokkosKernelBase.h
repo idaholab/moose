@@ -52,6 +52,18 @@ public:
     mooseError(
         "computeJacobianVectorProduct() is not implemented for Kokkos kernel type '", type(), "'.");
   }
+
+  /**
+   * Compute the local contribution to the Kokkos matrix-free Jacobian diagonal, accumulating the
+   * result into the Kokkos matrix-free diagonal vector. Only supported for kernels with factored
+   * (precomputed) Jacobian hooks, e.g. KernelGrad/KernelValue; the default implementation errors
+   * out.
+   */
+  virtual void computeJacobianDiagonal()
+  {
+    mooseError(
+        "computeJacobianDiagonal() is not implemented for Kokkos kernel type '", type(), "'.");
+  }
 };
 
 } // namespace Moose::Kokkos

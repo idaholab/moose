@@ -29,6 +29,15 @@ mooseKokkosMatShellMult(Mat shell, Vec x, Vec y)
   static_cast<NonlinearSystemBase *>(ctx)->computeKokkosJacobianVectorProduct(x, y);
   return LIBMESH_PETSC_SUCCESS;
 }
+
+PetscErrorCode
+mooseKokkosMatShellGetDiagonal(Mat shell, Vec diag)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  static_cast<NonlinearSystemBase *>(ctx)->computeKokkosJacobianDiagonal(diag);
+  return LIBMESH_PETSC_SUCCESS;
+}
 } // namespace
 
 void
@@ -145,8 +154,13 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
 
   using Moose::Kokkos::DispatcherRegistry;
 
-  _kokkos_mf_x_tag = _fe_problem.addVectorTag("kokkos_mf_x", Moose::VECTOR_TAG_SOLUTION);
-  _kokkos_mf_y_tag = _fe_problem.addVectorTag("kokkos_mf_y", Moose::VECTOR_TAG_RESIDUAL);
+  // Suffixed with name() because these tags are added at the FEProblem level and would otherwise
+  // collide across multiple matrix-free systems, e.g. the per-level systems of a Multigrid
+  // preconditioner
+  _kokkos_mf_x_tag = _fe_problem.addVectorTag(name() + "_kokkos_mf_x", Moose::VECTOR_TAG_SOLUTION);
+  _kokkos_mf_y_tag = _fe_problem.addVectorTag(name() + "_kokkos_mf_y", Moose::VECTOR_TAG_RESIDUAL);
+  _kokkos_mf_diag_tag =
+      _fe_problem.addVectorTag(name() + "_kokkos_mf_diag", Moose::VECTOR_TAG_RESIDUAL);
 
   _kokkos_mf_x = &addVector(_kokkos_mf_x_tag, false, libMesh::GHOSTED);
 
@@ -167,7 +181,7 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
                  "', which is a plain (non-factored) kernel. Derive from KernelGrad or "
                  "KernelValue instead.");
 
-    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag);
+    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
   }
 
   for (auto & nbc : _kokkos_nodal_bcs.getObjects(0))
@@ -181,12 +195,41 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
                  object.name(),
                  "', which has an off-diagonal Jacobian contribution.");
 
-    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag);
+    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
   }
 
-  // Build the matrix-free Amat shell once, sized from the DofMap (not from Pmat, which need not
-  // be allocated yet), and register it with the PETSc nonlinear solver so every subsequent
-  // solve() call uses it for Amat automatically -- no per-solve swap logic needed on our side.
+  // A Multigrid level system has already had its own shell installed as the tagged system matrix
+  // (SystemBase::addShellMatrix(), called early enough -- before EquationSystems::init() -- to
+  // stop libMesh ever allocating a CSR default in its place). That shell is already both Amat and
+  // Pmat for this system, so all that remains is registering the two PETSc operations the level
+  // preconditioner needs (MatMult for the operator action, MatGetDiagonal for the PA diagonal),
+  // pointed at this system's own matrix-free callbacks.
+  if (hasMatrix(systemMatrixTag()))
+  {
+    auto * const shell =
+        dynamic_cast<libMesh::PetscMatrixShellMatrix<Number> *>(&getMatrix(systemMatrixTag()));
+
+    if (shell)
+    {
+      LibmeshPetscCallA(comm().get(), MatShellSetContext(shell->mat(), this));
+      LibmeshPetscCallA(comm().get(),
+                        MatShellSetOperation(
+                            shell->mat(), MATOP_MULT, (void (*)(void))mooseKokkosMatShellMult));
+      LibmeshPetscCallA(comm().get(),
+                        MatShellSetOperation(shell->mat(),
+                                             MATOP_GET_DIAGONAL,
+                                             (void (*)(void))mooseKokkosMatShellGetDiagonal));
+
+      _kokkos_mf_enabled = true;
+      return;
+    }
+  }
+
+  // Otherwise (no Multigrid level shell already in place): build the matrix-free Amat shell,
+  // sized from the DofMap (not from Pmat, which need not be allocated yet), and register it with
+  // the PETSc nonlinear solver so every subsequent solve() call uses it for Amat automatically --
+  // no per-solve swap logic needed on our side. This is the original single-system, unpreconditioned
+  // matrix-free path; Pmat is untouched.
   const auto & dof_map = system().get_dof_map();
   const auto m = dof_map.n_dofs();
   const auto m_l = dof_map.n_local_dofs();
@@ -206,6 +249,51 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
       ->set_operator_matrix(_kokkos_mf_shell.get());
 
   _kokkos_mf_enabled = true;
+}
+
+void
+NonlinearSystemBase::computeKokkosJacobianDiagonal(Vec diag)
+{
+  TIME_SECTION("computeKokkosJacobianDiagonal", 1);
+
+  LibmeshPetscCallA(comm().get(), VecZeroEntries(diag));
+
+  if (!_kokkos_kernels.hasActiveObjects() && !_kokkos_nodal_bcs.hasActiveObjects())
+  {
+    LibmeshPetscCallA(comm().get(), VecAssemblyBegin(diag));
+    LibmeshPetscCallA(comm().get(), VecAssemblyEnd(diag));
+    return;
+  }
+
+  libMesh::PetscVector<Number> diag_wrap(diag, comm());
+  associateVectorToTag(diag_wrap, _kokkos_mf_diag_tag);
+
+  auto & systems = _fe_problem.getKokkosFESystems();
+
+  systems[number()].setActiveResidualTags({_kokkos_mf_diag_tag});
+
+  // No reinit(): kernels read _u/_grad_u from the qp-solution cache populated the last time
+  // computeKokkosJacobian() ran, at the same Newton point this diagonal must reflect.
+  for (auto & system : systems.constructedEntries())
+    system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+
+  systems.copyToDevice();
+
+  for (auto & kernel : _kokkos_kernels.getActiveObjects())
+    std::static_pointer_cast<Moose::Kokkos::KernelBase>(kernel)->computeJacobianDiagonal();
+
+  for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
+    std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->computeJacobianDiagonal();
+
+  for (auto & system : systems.constructedEntries())
+    system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+
+  systems[number()].clearActiveResidualTags();
+
+  disassociateVectorFromTag(diag_wrap, _kokkos_mf_diag_tag);
+
+  LibmeshPetscCallA(comm().get(), VecAssemblyBegin(diag));
+  LibmeshPetscCallA(comm().get(), VecAssemblyEnd(diag));
 }
 
 void

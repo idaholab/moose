@@ -100,6 +100,17 @@ public:
     ::Kokkos::abort("The Kokkos matrix-free Jacobian-vector product is not supported for vector "
                     "nodal boundary conditions.");
   }
+  /**
+   * The Kokkos matrix-free Jacobian diagonal is not supported for vector nodal boundary
+   * conditions; this exists only to satisfy the shared dispatcher registration macro's
+   * compile-time requirements.
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(JacobianDiagonalLoop, const ThreadID, const Derived &) const
+  {
+    ::Kokkos::abort("The Kokkos matrix-free Jacobian diagonal is not supported for vector "
+                    "nodal boundary conditions.");
+  }
   ///@}
 
 protected:
