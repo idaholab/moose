@@ -18,4 +18,15 @@
 
     requirement = 'The system shall report an error when the MultiAppCopyTransfer object is used on meshes with different variable types.'
   [../]
+  [./different_num_procs]
+    type = RunException
+    input = parent.i
+    cli_args = 'MultiApps/sub/max_procs_per_app=1'
+    min_parallel = 2
+    max_parallel = 2
+    issues = '#11045'
+    expect_err = 'The number of processors used by the origin and target problems must be the same'
+
+    requirement = 'The system shall report an error, instead of segfaulting, when a MultiAppCopyTransfer object is used with a sub-app restricted to a different number of processors than its parent app.'
+  [../]
 []
