@@ -22,9 +22,10 @@ InputParameters
 SBMInterfaceManager::validParams()
 {
   InputParameters params = SurfaceMeshBySubdomainBuilder::validParams();
-  params.renameParam("complete_boundary_mesh",
-                     "complete_interface_mesh",
-                     "The saved mesh containing the complete boundary of each interface subdomain.");
+  params.renameParam(
+      "complete_boundary_mesh",
+      "complete_interface_mesh",
+      "The saved mesh containing the complete boundary of each interface subdomain.");
   params.addRangeCheckedParam<unsigned int>(
       "leaf_max_size", 10, "leaf_max_size > 0", "Maximum number of points in a KDTree leaf.");
   params.addRangeCheckedParam<Real>(
@@ -143,7 +144,8 @@ SBMInterfaceManager::queryInterface(SubdomainID first,
   Point distance = SBMUtils::distanceFrom(*interface.elements[closest], point);
 
   std::vector<nanoflann::ResultItem<std::size_t, Real>> candidates;
-  interface.kd_tree->radiusSearch(point, distance.norm() + interface.max_element_radius, candidates);
+  interface.kd_tree->radiusSearch(
+      point, distance.norm() + interface.max_element_radius, candidates);
   for (const auto & candidate : candidates)
   {
     const Point candidate_distance =

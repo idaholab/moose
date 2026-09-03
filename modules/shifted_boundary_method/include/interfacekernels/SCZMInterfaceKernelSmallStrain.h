@@ -31,8 +31,8 @@ protected:
 
   /// Analytic Jacobian of the stress-based directional correction term
   Real calculateDirectionalCorrectionJacobian(unsigned int ivar,
-                                               unsigned int jvar,
-                                               Moose::DGJacobianType type) const;
+                                              unsigned int jvar,
+                                              Moose::DGJacobianType type) const;
 
   /// The stress tensor on the element and neighbor sides
   ///@{

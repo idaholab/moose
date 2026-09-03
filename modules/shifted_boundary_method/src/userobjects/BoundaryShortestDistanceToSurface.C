@@ -197,7 +197,6 @@ BoundaryShortestDistanceToSurface::execute()
                << " point=" << pt << " distance=" << _distance_vectors[elem_side][qp]
                << " true_normal=" << true_normal << " tangent=" << nt_tangent << std::endl;
     }
-
   }
 }
 

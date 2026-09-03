@@ -29,8 +29,8 @@ ADSCZMInterfaceKernelSmallStrain::validParams()
 ADSCZMInterfaceKernelSmallStrain::ADSCZMInterfaceKernelSmallStrain(
     const InputParameters & parameters)
   : ADSCZMInterfaceKernelBase(parameters),
-    _stress(getADMaterialPropertyByName<RankTwoTensor>(
-        _base_name + getParam<MaterialPropertyName>("stress"))),
+    _stress(getADMaterialPropertyByName<RankTwoTensor>(_base_name +
+                                                       getParam<MaterialPropertyName>("stress"))),
     _stress_neighbor(getNeighborADMaterialPropertyByName<RankTwoTensor>(
         _base_name + getParam<MaterialPropertyName>("stress"))),
     _directional_correction(getParam<bool>("directional_correction"))

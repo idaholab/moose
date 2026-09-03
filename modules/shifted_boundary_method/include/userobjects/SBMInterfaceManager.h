@@ -34,9 +34,8 @@ public:
   bool hasInterface(SubdomainID first, SubdomainID second) const;
 
   /// Return distance and normal data for an interface. The normal points from first to second.
-  InterfaceQueryResult queryInterface(SubdomainID first,
-                                      SubdomainID second,
-                                      const Point & point) const;
+  InterfaceQueryResult
+  queryInterface(SubdomainID first, SubdomainID second, const Point & point) const;
 
 protected:
   struct InterfaceData
