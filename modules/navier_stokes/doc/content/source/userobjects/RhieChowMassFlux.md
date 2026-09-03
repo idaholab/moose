@@ -40,18 +40,24 @@ pressure gradient, the conservative face flux, and momentum/pressure system meta
 the gradient method's prepare/finalize lifecycle.
 
 The reconstructed gradient is available after the first pressure correction; until then the gradient
-method falls back to its base gradient method. After each pressure solve, Rhie-Chow first forms the
-candidate from the unrelaxed pressure gradient and conservative corrected face flux, and updates the
-cell velocity from that candidate. The pressure solution is then relaxed, ordinary pressure gradients
-are refreshed, and the candidate is blended into the published coupling gradient with
+method falls back to its base gradient method. Immediately before each momentum predictor,
+Rhie-Chow snapshots both the previous corrected velocity gradient and the published coupling pressure
+gradient. Momentum assembly and the subsequent H/A computation therefore read the same coupling
+gradient snapshot. Additional PISO correctors retain that snapshot while refreshing only the lagged
+velocity gradient used by the next reconstructed candidate.
+
+After each pressure solve, Rhie-Chow first forms the candidate from the unrelaxed pressure gradient
+and conservative corrected face flux, and updates the cell velocity from that candidate. The pressure
+solution is then relaxed, ordinary pressure gradients are refreshed, and the candidate is blended
+into the published coupling gradient with
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/gradient_relaxation) exactly once per
 corrector. This keeps the immediate velocity correction compatible with continuity while providing
 relaxed feedback to the next momentum predictor.
 Rhie-Chow automatically discovers the [LinearFVMomentumPressure.md] kernel(s) attached to each
 momentum system so it uses the same pressure gradient field as the momentum predictor while
 constructing H/A. Multiple kernels are allowed per momentum system as long as they partition the
-Rhie-Chow object's blocks without overlapping and all read from the same registered gradient
-field.
+Rhie-Chow object's blocks without overlapping there and all read from the same registered gradient
+field. Kernel overlap outside the Rhie-Chow object's blocks is ignored by this validation.
 
 The [!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation) parameter selects
 whether `average` or `harmonic` interpolation is used when computing the face values of `Ainv`,

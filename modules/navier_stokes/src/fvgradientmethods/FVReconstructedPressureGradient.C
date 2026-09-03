@@ -30,6 +30,7 @@ FVReconstructedPressureGradient::validParams()
 {
   InputParameters params = FVGradientMethod::validParams();
   params += MeshChangedInterface::validParams();
+  params.suppressParameter<MooseEnum>("limiter");
   params.addClassDescription(
       "Reconstructs and relaxes the pressure gradient used for Rhie-Chow momentum coupling.");
   params.addParam<GradientMethodName>(
@@ -347,11 +348,12 @@ FVReconstructedPressureGradient::computeCandidateFromCorrectedFlux(
     const RhieChowMassFlux & rc) const
 {
   checkFlowSystem(rc);
-  if (!_lagged_velocity_gradient_available)
-    mooseError("FVReconstructedPressureGradient '",
-               name(),
-               "' requires a lagged velocity-gradient snapshot before computing a reconstructed "
-               "pressure-gradient candidate.");
+  mooseAssert(rc.momentumPredictorGeneration(),
+              "A momentum predictor must be prepared before updating a reconstructed "
+              "pressure-gradient candidate.");
+  mooseAssert(_lagged_velocity_gradient_available,
+              "A lagged velocity-gradient snapshot must exist before updating a reconstructed "
+              "pressure-gradient candidate.");
 
   const auto next_candidate_generation = _reconstructed_candidate_generation + 1;
   mooseAssert(_lagged_velocity_gradient_generation >= next_candidate_generation,
