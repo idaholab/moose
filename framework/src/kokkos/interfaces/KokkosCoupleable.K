@@ -26,6 +26,7 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
   {
     auto var = const_cast<MooseVariableField<Real> *>(
         getVarHelper<MooseVariableField<Real>>(var_name, comp));
+    var->requireQpComputations();
 
     if (tag_name == Moose::OLD_SOLUTION_TAG)
       var->sys().needSolutionState(1);
@@ -64,6 +65,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
     {
       auto var = const_cast<MooseVariableField<Real> *>(
           getVarHelper<MooseVariableField<Real>>(var_name, comp));
+      var->requireQpComputations();
 
       if (tag_name == Moose::OLD_SOLUTION_TAG)
         var->sys().needSolutionState(1);
@@ -103,6 +105,7 @@ Coupleable::kokkosCoupledVectorTagVectorVariable(const std::string & var_name,
   {
     auto var = const_cast<MooseVariableField<RealVectorValue> *>(
         getVarHelper<MooseVariableField<RealVectorValue>>(var_name, comp));
+    var->requireQpComputations();
 
     if (tag_name == Moose::OLD_SOLUTION_TAG)
       var->sys().needSolutionState(1);
@@ -141,6 +144,7 @@ Coupleable::kokkosCoupledVectorTagVectorVariables(const std::string & var_name,
     {
       auto var = const_cast<MooseVariableField<RealVectorValue> *>(
           getVarHelper<MooseVariableField<RealVectorValue>>(var_name, comp));
+      var->requireQpComputations();
 
       if (tag_name == Moose::OLD_SOLUTION_TAG)
         var->sys().needSolutionState(1);
