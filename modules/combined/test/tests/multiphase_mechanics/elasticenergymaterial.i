@@ -94,7 +94,7 @@
   #  eigen_base = '1'
   #  eigenstrain_name = eigenstrain
   #  prefactor = prefactor
-  #[]  
+  #[]
   [./elasticenergy]
     type = ElasticEnergyMaterial
     coupled_variables = 'c'

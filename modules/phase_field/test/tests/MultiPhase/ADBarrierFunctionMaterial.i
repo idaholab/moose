@@ -44,7 +44,6 @@
     mob_name = F
     variable_L = false
   []
-
   [detadt]
     type = ADTimeDerivative
     variable = eta
@@ -52,11 +51,26 @@
 []
 
 [Materials]
-  [barrier]
+  [barrier_high]
     type = ADBarrierFunctionMaterial
     eta = eta
     g_order = HIGH
     outputs = exodus
+    function_name = g_high
+  []
+  [barrier_low]
+    type = ADBarrierFunctionMaterial
+    eta = eta
+    g_order = LOW
+    outputs = exodus
+    function_name = g_low
+  []
+  [barrier_simple]
+    type = ADBarrierFunctionMaterial
+    eta = eta
+    g_order = SIMPLE
+    outputs = exodus
+    function_name = g_simple
   []
   [const]
     type = ADGenericConstantMaterial

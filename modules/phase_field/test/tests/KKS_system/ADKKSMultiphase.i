@@ -14,13 +14,6 @@
   xmax = 5
 []
 
-[AuxVariables]
-  [Fglobal]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-[]
-
 [Variables]
   # concentration
   [c]
