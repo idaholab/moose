@@ -107,7 +107,10 @@ FullSolveMultiApp::initialSetup()
                      "avoid an error if Transient solve fails.");
       }
 
-      ex->init();
+      {
+        ScopedAppInfoSuppression scoped_info(*app);
+        ex->init();
+      }
 
       if (_keep_solution_during_restore && _update_old_state_when_keeping_solution_during_restore &&
           (appProblemBase(_first_local_app + i).getMaterialPropertyStorage().hasStatefulProperties()
@@ -173,7 +176,10 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
       appProblemBase(_first_local_app + i).skipNextForwardSolutionCopyToOld();
 
     Executioner * ex = _executioners[i];
-    ex->execute();
+    {
+      ScopedAppInfoSuppression scoped_info(*_apps[i]);
+      ex->execute();
+    }
 
     last_solve_converged = last_solve_converged && ex->lastSolveConverged();
 

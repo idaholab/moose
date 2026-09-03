@@ -212,6 +212,11 @@ public:
   virtual void setupOptions();
 
   /**
+   * Whether informational messages are suppressed for this app.
+   */
+  bool suppressInfo() const;
+
+  /**
    * Return a writable reference to the ActionWarehouse associated with this app
    */
   ActionWarehouse & actionWarehouse() { return _action_warehouse; }

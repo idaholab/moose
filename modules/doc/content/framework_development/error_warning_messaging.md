@@ -20,6 +20,9 @@ messages:
 - `mooseInfoRepeated(args)`: The same as `mooseInfo(args)` but only prints a message
   once, even if called multiple times.
 
+Informational messages emitted with `mooseInfo(args)` or `mooseInfoRepeated(args)` can
+be suppressed with the command-line flag `--suppress-info`.
+
 !alert note title=Warnings in repeating sections
 For warnings in sections of the code that are often executed, it is recommended to leverage
 the [SolutionInvalidInterface.md], which will only output the warning once but keep track of
