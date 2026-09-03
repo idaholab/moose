@@ -16,13 +16,9 @@
 #include "TorchFEInterpolation.h"
 #include "TorchFEMUtils.h"
 
-<<<<<<< HEAD:framework/src/neml2/userobjects/NEML2FEInterpolation.C
-registerMooseObject("MooseApp", NEML2FEInterpolation);
-=======
 using namespace libMesh;
 
 registerMooseObject("MooseApp", TorchFEInterpolation);
->>>>>>> 047aff683e6 (Migrate the NEML2 integration to NEML2 v3):framework/src/libtorch/fem/TorchFEInterpolation.C
 
 InputParameters
 TorchFEInterpolation::validParams()
@@ -214,11 +210,7 @@ TorchFEInterpolation::syncWithMainThread()
 void
 TorchFEInterpolation::threadJoin(const UserObject & y)
 {
-<<<<<<< HEAD:framework/src/neml2/userobjects/NEML2FEInterpolation.C
-  const auto & other = cast_ref<const NEML2FEInterpolation &>(y);
-=======
-  const auto & other = static_cast<const TorchFEInterpolation &>(y);
->>>>>>> 047aff683e6 (Migrate the NEML2 integration to NEML2 v3):framework/src/libtorch/fem/TorchFEInterpolation.C
+  const auto & other = cast_ref<const TorchFEInterpolation &>(y);
   mooseAssert(_fem_context_up_to_date == other._fem_context_up_to_date,
               "TorchFEInterpolation becomes out of sync with other thread");
 
