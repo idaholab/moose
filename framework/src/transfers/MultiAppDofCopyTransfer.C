@@ -81,6 +81,16 @@ MultiAppDofCopyTransfer::initialSetup()
   if (from_problem->mesh().getParallelType() != to_problem->mesh().getParallelType())
     mooseError("The parallel types (distributed or replicated) of the meshes are not the same.");
 
+  // MultiAppDofCopyTransfer-derived transfers copy degree of freedom values directly between
+  // the origin and target solution vectors, so both problems must share the same parallel
+  // decomposition. A common way to violate this is restricting a sub-app's processor count,
+  // e.g. through the MultiApp 'max_procs_per_app' parameter (see idaholab/moose#11045).
+  if (from_problem->comm().size() != to_problem->comm().size())
+    mooseError("The number of processors used by the origin and target problems must be the "
+               "same to use MultiAppDofCopyTransfer-derived transfers. Check that the MultiApp "
+               "'max_procs_per_app' parameter is not restricting sub-apps to a different number "
+               "of processors than the parent app.");
+
   // Convert block names to block IDs, fill with all blocks if unspecified
   if (_has_block_restrictions)
   {
