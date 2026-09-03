@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MooseMesh.h"
+#include "MFEMTopology.h"
 
 /**
  * Abstract MooseMesh base for all MFEM-backed mesh types (MFEMFileMesh,
@@ -20,7 +21,7 @@
  * Subclasses implement buildSerialMFEMMesh() to supply the serial mesh;
  * buildMesh() applies the common operations using the template-method pattern.
  */
-class MFEMMesh : public MooseMesh
+class MFEMMesh : public MooseMesh, public MFEMTopology
 {
 public:
   static InputParameters validParams();
