@@ -29,10 +29,6 @@ MFEMTransitionSubMesh::validParams()
       "vertex on the specified boundary, that lie on one side of it (the single interior side "
       "for an exterior boundary), and that are restricted to the set of user-specified "
       "subdomains.");
-  params.makeParamRequired<std::vector<BoundaryName>>("boundary");
-  // Clear the inherited default, as a required parameter never uses one and --dump writes
-  // a default which is not parseable.
-  params.set<std::vector<BoundaryName>>("boundary") = {};
   params.setDocString(
       "boundary",
       "The boundary or boundaries from which the transition region is constructed. Accepts a "
