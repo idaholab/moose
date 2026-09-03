@@ -19,17 +19,6 @@ registerMooseObject("MooseApp", MFEMAxisymmetricCurlAthetaAux);
 
 namespace
 {
-
-/**
- * MFEM vector coefficient for the axisymmetric curl of A_theta:
- *
- *   B_r = -dA_theta/dz
- *   B_z =  dA_theta/dr + A_theta/r
- *
- * Assumes the standard 2D meridian-plane ordering:
- *   grad[0] = d/dr
- *   grad[1] = d/dz
- */
 class AxisymmetricCurlAthetaVectorCoefficient : public mfem::VectorCoefficient
 {
 public:
@@ -68,7 +57,7 @@ private:
   mfem::Coefficient & _inv_r;
 };
 
-} 
+}
 
 InputParameters
 MFEMAxisymmetricCurlAthetaAux::validParams()
@@ -123,5 +112,3 @@ MFEMAxisymmetricCurlAthetaAux::execute()
 
   _result_var.ProjectCoefficient(curl_coef);
 }
-
-#endif
