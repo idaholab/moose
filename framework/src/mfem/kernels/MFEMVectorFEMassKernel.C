@@ -11,6 +11,7 @@
 
 #include "MFEMVectorFEMassKernel.h"
 #include "MFEMPMLMatrixCoefficient.h"
+#include "MFEMPMLScalarCoefficient.h"
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorFEMassKernel);
@@ -42,6 +43,15 @@ MFEMVectorFEMassKernel::MFEMVectorFEMassKernel(const InputParameters & parameter
 {
   if (_matrix_coef && isParamSetByUser("coefficient"))
     mooseError("Only one of 'coefficient' and 'matrix_coefficient' may be set.");
+
+  // The field is a vector in any dimension, so the tensor stretching it never reduces to a scalar
+  // the way the one stretching its curl does in two dimensions.
+  if (dynamic_cast<const MFEMPMLScalarCoefficient *>(&_coef))
+    mooseError("The perfectly matched layer coefficient '",
+               getParam<MFEMScalarCoefficientName>("coefficient"),
+               "' is the scalar the stretched curl curl coefficient reduces to in two dimensions. "
+               "Pass a matrix coefficient declared with 'tensor = field' as 'matrix_coefficient' "
+               "instead.");
 
   // A perfectly matched layer stretches the field by a different tensor from its curl, and this
   // integrator integrates the field.
