@@ -598,14 +598,13 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 }
 
 std::pair<unsigned int, Real>
-LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_pressure,
+LinearAssemblySegregatedSolve::correctVelocity(const bool /*subtract_updated_pressure*/,
                                                const bool recompute_face_mass_flux,
                                                const SolverParams & solver_params)
 {
-  // Compute the coupling fields between the momentum and pressure equations.
-  // The first argument makes sure the pressure gradient is staged at the first
-  // iteration
-  _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
+  // Compute the coupling fields between the momentum and pressure equations using the pressure
+  // gradient captured before the current momentum predictor was assembled.
+  _rc_uo->computeHbyA(_print_fields);
 
   // We set the preconditioner/controllable parameters for the pressure equations through
   // petsc options. Linear tolerances will be overridden within the solver.
@@ -787,15 +786,14 @@ LinearAssemblySegregatedSolve::solve()
     if (_should_solve_momentum)
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
-    // Capture the lagged velocity gradient (if using the reconstructed method) from the current
-    // pressure-corrected velocity before the momentum predictor updates the velocity field.
-    if (_should_solve_momentum && _should_solve_pressure && _rc_uo)
-      _rc_uo->prepareMomentumPredictor();
-
     // Initialize base and coupling pressure gradients. After this we reuse the last gradients
     // until the pressure corrector finalizes a new coupling field.
     if (_should_solve_pressure && simple_iteration_counter == 1)
       _rc_uo->initPressureGradient();
+
+    // Capture the lagged velocity and coupling pressure gradients before momentum assembly.
+    if (_should_solve_momentum && _should_solve_pressure && _rc_uo)
+      _rc_uo->prepareMomentumPredictor();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 

@@ -54,10 +54,10 @@ PIMPLESolve::correctVelocity(const bool /*subtract_updated_pressure*/,
     residual = LinearAssemblySegregatedSolve::correctVelocity(
         first_piso_corrector, recompute_flux, solver_params);
 
-    // After each PISO corrector except the last, refresh the lagged velocity gradient from the
-    // newly corrected velocity field before starting the next corrector.
+    // After each PISO corrector except the last, refresh only the lagged velocity gradient. H/A
+    // continues using the coupling-gradient snapshot associated with the existing momentum system.
     if (!last_piso_corrector && reconstructed)
-      _rc_uo->prepareMomentumPredictor();
+      _rc_uo->preparePISOCorrector();
 
     piso_iteration_counter++;
   }

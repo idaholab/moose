@@ -98,6 +98,9 @@ public:
    */
   dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
 
+  /// Generation of the most recently prepared momentum predictor.
+  dof_id_type momentumPredictorGeneration() const { return _momentum_predictor_generation; }
+
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
                                      const Moose::StateArg & time,
@@ -114,9 +117,11 @@ public:
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
 
-  /// Capture the lagged velocity gradient used by the Aguerre reconstruction, if in use. No-op
-  /// otherwise. Called once before the momentum predictor and between PISO correctors.
+  /// Snapshot the fields read by the next momentum predictor and advance its generation.
   void prepareMomentumPredictor();
+
+  /// Capture the lagged velocity gradient for another corrector using the current predictor.
+  void preparePISOCorrector();
 
   /**
    * Before pressure relaxation, form the conservative reconstructed candidate from the corrected
@@ -168,16 +173,12 @@ public:
    * Computes the inverse of the diagonal (1/A) of the system matrix plus the H/A components for the
    * pressure equation plus Rhie-Chow interpolation.
    */
-  void computeHbyA(const bool with_updated_pressure, const bool verbose);
+  void computeHbyA(const bool verbose);
 
 protected:
   /// Update cell velocity from the supplied momentum-coupling pressure gradient.
   void updateCellVelocity(
       const std::vector<std::unique_ptr<NumericVector<Number>>> & pressure_gradient);
-
-  /// Select the right pressure gradient field and return a reference to the container
-  std::vector<std::unique_ptr<NumericVector<Number>>> &
-  selectPressureGradient(const bool updated_pressure);
 
   /// Get the registered pressure gradient component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
@@ -187,9 +188,6 @@ protected:
 
   /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
   void checkReconstructedPressureGradientCompatibility() const;
-
-  /// Check that the gradient removed in H/A matches the coupling pressure gradient field.
-  void checkCouplingPressureGradientIdentity() const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
@@ -259,11 +257,14 @@ protected:
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
 
-  /**
-   * for a PISO iteration we need to hold on to the original pressure gradient field.
-   * Should not be used in other conditions.
-   */
+  /// Coupling pressure gradient captured before the current momentum predictor is assembled.
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
+
+  /// Generation of the most recently prepared momentum predictor.
+  dof_id_type _momentum_predictor_generation = 0;
+
+  /// Predictor generation to which the coupling pressure-gradient snapshot belongs.
+  dof_id_type _coupling_pressure_gradient_snapshot_generation = 0;
 
   /**
    * Producer counter for the conservative face mass flux: incremented every time
@@ -310,13 +311,6 @@ protected:
 
   /// Interpolation method used for the pressure diffusion coefficient on faces
   const Moose::FV::InterpMethod _pressure_diffusion_interp_method;
-
-  /// Whether to enforce the discrete identity between the coupling pressure gradient and
-  /// the gradient removed while constructing H/A.
-  const bool _enforce_coupling_pressure_gradient_identity;
-
-  /// Tolerance for the discrete identity check between coupling and removed pressure gradients.
-  const Real _coupling_pressure_gradient_identity_tolerance;
 
 private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the

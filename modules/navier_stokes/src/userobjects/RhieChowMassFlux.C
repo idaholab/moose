@@ -73,19 +73,6 @@ RhieChowMassFlux::validParams()
       "pressure_diffusion_interpolation",
       MooseEnum("average harmonic", "average"),
       "The face interpolation method for Ainv in the pressure correction diffusion term.");
-  params.addParam<bool>(
-      "enforce_coupling_pressure_gradient_identity",
-      false,
-      "Whether to enforce that the pressure gradient removed while constructing H/A matches "
-      "the registered momentum-coupling pressure gradient field. Intended primarily for "
-      "diagnostic tests.");
-  params.addRangeCheckedParam<Real>(
-      "coupling_pressure_gradient_identity_tolerance",
-      1e-12,
-      "coupling_pressure_gradient_identity_tolerance >= 0.0",
-      "Tolerance for the discrete identity between the momentum pressure-source gradient and "
-      "the gradient removed while constructing H/A when "
-      "'enforce_coupling_pressure_gradient_identity' is true.");
   return params;
 }
 
@@ -112,11 +99,7 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _pressure_diffusion_interp_method(getParam<MooseEnum>("pressure_diffusion_interpolation") ==
                                               "harmonic"
                                           ? Moose::FV::InterpMethod::HarmonicAverage
-                                          : Moose::FV::InterpMethod::Average),
-    _enforce_coupling_pressure_gradient_identity(
-        getParam<bool>("enforce_coupling_pressure_gradient_identity")),
-    _coupling_pressure_gradient_identity_tolerance(
-        getParam<Real>("coupling_pressure_gradient_identity_tolerance"))
+                                          : Moose::FV::InterpMethod::Average)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a MooseLinearVariableFVReal.");
@@ -233,11 +216,9 @@ RhieChowMassFlux::linkMomentumPressureSystems(
       for (const auto j : make_range(i + 1, kernels.size()))
       {
         std::set<SubdomainID> overlap;
-        std::set_intersection(kernels[i]->blockIDs().begin(),
-                              kernels[i]->blockIDs().end(),
-                              kernels[j]->blockIDs().begin(),
-                              kernels[j]->blockIDs().end(),
-                              std::inserter(overlap, overlap.end()));
+        for (const auto block : kernels[i]->blockIDs())
+          if (hasBlocks(block) && kernels[j]->blockIDs().count(block))
+            overlap.insert(block);
         if (!overlap.empty())
           mooseError("Momentum system '",
                      system_name,
@@ -398,7 +379,10 @@ RhieChowMassFlux::meshChanged()
   _HbyA_flux.clear();
   _Ainv.clear();
   _face_mass_flux.clear();
+  _grad_p_current.clear();
   _face_mass_flux_generation = 0;
+  _momentum_predictor_generation = 0;
+  _coupling_pressure_gradient_snapshot_generation = 0;
   setupMeshInformation();
 
 }
@@ -407,8 +391,15 @@ void
 RhieChowMassFlux::timestepSetup()
 {
   // Nothing to reset when momentum hasn't been linked (e.g. should_solve_momentum = false, used
-  // by the restart-freeze pattern) or when a reconstructed pressure gradient isn't in use.
-  if (!_pressure_gradient_field || !usingReconstructedPressureGradientMethod())
+  // by the restart-freeze pattern).
+  if (!_pressure_gradient_field)
+    return;
+
+  _grad_p_current.clear();
+  _momentum_predictor_generation = 0;
+  _coupling_pressure_gradient_snapshot_generation = 0;
+
+  if (!usingReconstructedPressureGradientMethod())
     return;
 
   // The reconstructed gradient's feedback/candidate/generation state is solver-iteration state,
@@ -427,9 +418,36 @@ RhieChowMassFlux::timestepSetup()
 void
 RhieChowMassFlux::prepareMomentumPredictor()
 {
+  mooseAssert(_pressure_gradient_field,
+              "The pressure gradient field must be linked before preparing momentum.");
+
+  const auto next_predictor_generation = _momentum_predictor_generation + 1;
+
+  if (usingReconstructedPressureGradientMethod())
+    reconstructedGradientMethod().captureLaggedVelocityGradient(*this);
+
+  mooseAssert(_coupling_pressure_gradient_snapshot_generation != next_predictor_generation,
+              "The coupling pressure gradient must be captured exactly once per momentum "
+              "predictor.");
+  _grad_p_current.clear();
+  for (const auto & component : pressureGradientComponents())
+    _grad_p_current.push_back(component->clone());
+
+  _coupling_pressure_gradient_snapshot_generation = next_predictor_generation;
+  _momentum_predictor_generation = next_predictor_generation;
+}
+
+void
+RhieChowMassFlux::preparePISOCorrector()
+{
   if (!usingReconstructedPressureGradientMethod())
     return;
 
+  mooseAssert(_momentum_predictor_generation,
+              "A momentum predictor must be prepared before another PISO corrector.");
+  mooseAssert(_coupling_pressure_gradient_snapshot_generation == _momentum_predictor_generation,
+              "A PISO corrector must retain the current momentum predictor's coupling pressure "
+              "gradient snapshot.");
   reconstructedGradientMethod().captureLaggedVelocityGradient(*this);
 }
 
@@ -896,7 +914,7 @@ RhieChowMassFlux::populateCouplingFunctors(
 }
 
 void
-RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
+RhieChowMassFlux::computeHbyA(bool verbose)
 {
   if (verbose)
   {
@@ -907,13 +925,31 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
 
-  // Select (and, if requested, snapshot) the momentum-coupling pressure gradient
-  // used by all LinearFVMomentumPressure kernels so that the discrete vector
-  // removed from the momentum RHS here matches the one assembled into it.
-  auto & coupling_pressure_gradient = selectPressureGradient(with_updated_pressure);
+  mooseAssert(_momentum_predictor_generation,
+              "A momentum predictor must be prepared before computing H/A.");
+  mooseAssert(!_grad_p_current.empty(),
+              "A coupling pressure-gradient snapshot must exist before computing H/A.");
+  mooseAssert(_coupling_pressure_gradient_snapshot_generation == _momentum_predictor_generation,
+              "The coupling pressure-gradient snapshot must belong to the current momentum "
+              "predictor generation.");
+  mooseAssert(_grad_p_current.size() == _momentum_implicit_systems.size(),
+              "The coupling pressure-gradient snapshot must have one component per momentum "
+              "system.");
 
-  if (_enforce_coupling_pressure_gradient_identity && with_updated_pressure)
-    checkCouplingPressureGradientIdentity();
+#ifndef NDEBUG
+  for (const auto system_i : index_range(_momentum_implicit_systems))
+  {
+    const auto & snapshot = *_grad_p_current[system_i];
+    const auto & momentum_layout = *_momentum_implicit_systems[system_i]->current_local_solution;
+    mooseAssert(snapshot.size() == momentum_layout.size() &&
+                    snapshot.local_size() == momentum_layout.local_size() &&
+                    snapshot.first_local_index() == momentum_layout.first_local_index() &&
+                    snapshot.last_local_index() == momentum_layout.last_local_index(),
+                "The coupling pressure-gradient snapshot layout must match its momentum system.");
+  }
+#endif
+
+  const auto & coupling_pressure_gradient = _grad_p_current;
 
   _HbyA_raw.clear();
   _Ainv_raw.clear();
@@ -1084,34 +1120,6 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
   }
 }
 
-std::vector<std::unique_ptr<NumericVector<Number>>> &
-RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
-{
-  // The pressure-gradient field removed while constructing H/A must be the same
-  // coupling field used by the LinearFVMomentumPressure kernels. In reconstructed
-  // mode, this is the reconstructed gradient, not the base gradient.
-  const auto & coupling_pressure_gradient_components = pressureGradientComponents();
-
-  // The snapshot is only (re-)taken when updated_pressure is true, i.e. on the first PISO
-  // corrector of a sequence. Later correctors in the same sequence reuse it unchanged, even
-  // though the reconstructed feedback gradient keeps changing corrector to corrector: the
-  // momentum matrix/RHS built for this sequence already has that first-corrector gradient baked
-  // into its pressure source, so computeHbyA() must keep subtracting the same gradient it used
-  // originally until the next momentum predictor rebuilds the matrix from scratch.
-  if (updated_pressure)
-  {
-    _grad_p_current.clear();
-    for (const auto & component : coupling_pressure_gradient_components)
-      _grad_p_current.push_back(component->clone());
-  }
-
-  if (_grad_p_current.empty())
-    for (const auto & component : coupling_pressure_gradient_components)
-      _grad_p_current.push_back(component->clone());
-
-  return _grad_p_current;
-}
-
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
 RhieChowMassFlux::pressureGradientComponents() const
 {
@@ -1132,59 +1140,6 @@ RhieChowMassFlux::reconstructedGradientMethod() const
               "pressure gradients are active.");
 
   return dynamic_cast<const FVReconstructedPressureGradient &>(pressureGradientField().method());
-}
-
-void
-RhieChowMassFlux::checkCouplingPressureGradientIdentity() const
-{
-  const auto & coupling_components = pressureGradientComponents();
-
-  if (coupling_components.empty())
-    mooseError("RhieChowMassFlux '",
-               name(),
-               "' has no registered pressure gradient components when enforcing the coupling "
-               "pressure-gradient identity.");
-
-  if (_grad_p_current.size() != coupling_components.size())
-    mooseError(
-        "RhieChowMassFlux '",
-        name(),
-        "' requires the pressure-gradient snapshot used to construct H/A to have the same "
-        "number of components as the registered momentum-coupling pressure gradient field when "
-        "enforcing the coupling pressure-gradient identity.");
-
-  Real max_difference = 0.0;
-
-  for (const auto component : index_range(coupling_components))
-  {
-    const auto & coupling_vec = *coupling_components[component];
-    const auto & snapshot_vec = *_grad_p_current[component];
-
-    if (coupling_vec.size() != snapshot_vec.size() ||
-        coupling_vec.local_size() != snapshot_vec.local_size())
-      mooseError("RhieChowMassFlux '",
-                 name(),
-                 "' requires the pressure-gradient snapshot used to construct H/A to have the "
-                 "same layout as the registered momentum-coupling gradient field when enforcing "
-                 "the coupling pressure-gradient identity.");
-
-    auto diff = coupling_vec.clone();
-    diff->add(-1.0, snapshot_vec);
-    const Real component_max = diff->linfty_norm();
-    if (component_max > max_difference)
-      max_difference = component_max;
-  }
-
-  if (max_difference > _coupling_pressure_gradient_identity_tolerance)
-    mooseError("RhieChowMassFlux '",
-               name(),
-               "' violates the coupling pressure-gradient identity: the maximum difference "
-               "between the registered momentum-coupling pressure gradient and the gradient "
-               "removed while constructing H/A is ",
-               max_difference,
-               ", which exceeds the tolerance ",
-               _coupling_pressure_gradient_identity_tolerance,
-               ".");
 }
 
 void
