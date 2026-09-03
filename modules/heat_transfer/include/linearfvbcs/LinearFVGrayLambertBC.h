@@ -34,7 +34,6 @@ protected:
   virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const override;
 
   /// Temperature variable used to reconstruct the local-lagged surface emission.
-  ///
   const Moose::Functor<Real> & _temperature_radiation;
   /// Diffusion coefficient multiplying the outward normal temperature gradient
   const Moose::Functor<Real> & _coeff_diffusion;
