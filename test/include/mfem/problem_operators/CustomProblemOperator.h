@@ -14,8 +14,7 @@
 #include "ProblemOperator.h"
 
 /**
- * Custom Dummy Operator with a basic solve
- * uses same problem as mfem ex0p
+ * Custom operator with a basic solve, using the same problem as mfem ex0p
  */
 class CustomProblemOperator : public Moose::MFEM::ProblemOperator
 {
@@ -25,7 +24,7 @@ private:
   mfem::ParLinearForm * _b;
 
   // The coefficient
-  mfem::Coefficient & _coeff;
+  mfem::Coefficient & _coef;
 
   // The boundary conditions arrays
   mfem::Array<int> _boundary_dofs;
@@ -37,7 +36,7 @@ private:
 
 public:
   // The constructor
-  CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coeff);
+  CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coef);
 
   // The destructor
   ~CustomProblemOperator() = default;

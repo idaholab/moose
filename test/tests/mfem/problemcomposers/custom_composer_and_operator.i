@@ -52,7 +52,7 @@
   [CSV]
     type = CSV
     execute_on = 'timestep_end'
-    file_base = OutputData/custom_composer_and_operator/custom_composer_and_operator_l2norm
+    file_base = OutputData/custom_composer_and_operator/l2norm
   []
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection

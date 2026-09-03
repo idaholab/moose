@@ -27,7 +27,7 @@
   [CustomProblemComposer]
     type = CSVDiff
     input = custom_composer_and_operator.i
-    csvdiff = 'OutputData/custom_composer_and_operator/custom_composer_and_operator_l2norm.csv'
+    csvdiff = 'OutputData/custom_composer_and_operator/l2norm.csv'
     requirement = 'The system shall have the ability to use a custom operator based on MFEM ex0p'
     capabilities = 'mfem'
     compute_devices = 'cpu'

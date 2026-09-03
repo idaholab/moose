@@ -12,8 +12,8 @@
 #include "CustomProblemOperator.h"
 
 // The custom operator constructor
-CustomProblemOperator::CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coeff)
-  : Moose::MFEM::ProblemOperator(mfem_problem), _coeff(coeff)
+CustomProblemOperator::CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coef)
+  : Moose::MFEM::ProblemOperator(mfem_problem), _coef(coef)
 {
 }
 
@@ -29,7 +29,7 @@ CustomProblemOperator::Init(mfem::BlockVector &)
 
   // Build the linear form
   _b = new mfem::ParLinearForm(fes);
-  _b->AddDomainIntegrator(new mfem::DomainLFIntegrator(_coeff));
+  _b->AddDomainIntegrator(new mfem::DomainLFIntegrator(_coef));
   _b->Assemble();
 
   // Build the bilinear form
