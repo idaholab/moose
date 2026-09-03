@@ -87,7 +87,8 @@
 [Variables]
   [normal_lm]
     block = 'secondary_lower'
-    use_dual = true
+    # Standard basis, so that the check isolates the kappa_j denominator
+    use_dual = false
   []
 []
 
@@ -216,14 +217,13 @@
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount'
-  petsc_options_value = 'lu    superlu_dist nonzero 1e-10'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
+  petsc_options_value = 'lu    mumps                nonzero'
 
   line_search = 'none'
 
   dt = 0.1
-  dtmin = 0.01
+  dtmin = 0.1
   end_time = 0.5
 
   l_max_its = 20

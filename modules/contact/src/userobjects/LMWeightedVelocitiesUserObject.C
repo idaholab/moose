@@ -51,6 +51,28 @@ LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParame
     verifyLagrange(*_lm_variable_tangential_two, "lm_variable_tangential_two");
 }
 
+void
+LMWeightedVelocitiesUserObject::initialize()
+{
+  // Takes care of WeightedGapUserObject::initialize() as well
+  WeightedVelocitiesUserObject::initialize();
+  initializeNodalScaling();
+}
+
+void
+LMWeightedVelocitiesUserObject::finalize()
+{
+  WeightedVelocitiesUserObject::finalize();
+  finalizeNodalScaling();
+}
+
+void
+LMWeightedVelocitiesUserObject::computeQpIProperties()
+{
+  WeightedVelocitiesUserObject::computeQpIProperties();
+  computeQpINodalScaling();
+}
+
 const ADVariableValue &
 LMWeightedVelocitiesUserObject::contactTangentialPressureDirOne() const
 {

@@ -100,15 +100,6 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
       paramError(
           "friction_lm",
           "Frictional contact constraints only support elemental variables of CONSTANT order");
-
-  // The node-based Lagrange multiplier scaling stores the scaled multiplier zhat = kappa*lambda,
-  // but the Coulomb bound here reads the raw normal multiplier as the physical pressure, so the
-  // friction limit would be scaled by kappa. Reject the combination; scaling is currently only
-  // supported for frictionless normal contact (ComputeWeightedGapLMMechanicalContact).
-  if (_weighted_gap_uo.usesNodalScaling())
-    paramError("weighted_gap_uo",
-               "'use_nodal_scaling' is not supported with frictional contact; it is currently "
-               "implemented only for frictionless normal Lagrange multiplier contact.");
 }
 
 void
@@ -200,6 +191,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
+  contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
   // Get friction LMs
   std::array<const ADReal *, 2> & tangential_vel = _tangential_vel_ptr;
@@ -288,6 +281,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
+  contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
   // Get normalized c and c_t values (if normalization specified
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
