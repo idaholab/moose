@@ -15,7 +15,6 @@ L = 80160
 alpha_b = 1.2e-4
 T_solidus = 302.93
 T_liquidus = '${fparse T_solidus + 0.1}'
-advected_interp_method = 'average' #'upwind'
 T_cold = 301.15
 T_hot = 311.15
 Nx = 200
@@ -141,6 +140,12 @@ Ny = 120
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [u_time]
     type = LinearFVTimeDerivative
@@ -155,24 +160,24 @@ Ny = 120
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
+    advected_interp_method_name = upwind
   []
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
+    advected_interp_method_name = upwind
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -228,7 +233,7 @@ Ny = 120
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -243,6 +248,9 @@ Ny = 120
   [h_time]
     type = LinearFVTimeDerivative
     variable = T
+    # factor should be mixture. For simplicity and
+    # because the properties are the same for liquid and solid
+    # the factor is defined as below.
     factor = ${fparse rho_liquid*cp_liquid}
   []
   [h_advection]
@@ -250,13 +258,12 @@ Ny = 120
     variable = T
     advected_quantity = temperature
     cp = ${cp_liquid}
-    advected_interp_method = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
   []
   [conduction]
     type = LinearFVDiffusion
     variable = T
-    diffusion_coeff = ${k_liquid}
+    diffusion_coeff = ${k_mixture}
     use_nonorthogonal_correction = false
   []
   [energy_source]
@@ -297,12 +304,6 @@ Ny = 120
 []
 
 [FunctorMaterials]
-  [ins_fv]
-    type = INSFVEnthalpyFunctorMaterial
-    rho = rho_mixture
-    cp = cp_mixture
-    temperature = 'T'
-  []
   [eff_cp]
     type = NSFVMixtureFunctorMaterial
     phase_2_names = '${cp_solid} ${k_solid} ${rho_solid}'
