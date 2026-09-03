@@ -402,11 +402,11 @@ RhieChowMassFlux::timestepSetup()
   if (!usingReconstructedPressureGradientMethod())
     return;
 
-  // The reconstructed gradient's feedback/candidate/generation state is solver-iteration state,
-  // not an independent physical solution: discard it so this time step's momentum predictor
-  // starts from the base pressure gradient regardless of whether the preceding step ran
-  // continuously, was recovered from a checkpoint, or is a retry after a rejected step (see the
-  // class-level comment on the declaration for why this hook fires exactly once per attempt).
+  // The reconstructed coupling gradient's candidate/generation state is solver-iteration state,
+  // not an independent physical solution: discard it so this time step's momentum predictor starts
+  // from the base pressure gradient regardless of whether the preceding step ran continuously, was
+  // recovered from a checkpoint, or is a retry after a rejected step (see the class-level comment
+  // on the declaration for why this hook fires exactly once per attempt).
   reconstructedGradientMethod().resetForTimeStep(*this);
 
   // This counter is otherwise self-refreshing every SIMPLE/PISO iteration, but resetting it here
@@ -472,7 +472,8 @@ RhieChowMassFlux::finalizePressureCorrector()
 
   if (usingReconstructedPressureGradientMethod())
   {
-    reconstructedGradientMethod().publishRelaxedFeedback(*this, basePressureGradientComponents());
+    reconstructedGradientMethod().publishCouplingPressureGradient(*this,
+                                                                  basePressureGradientComponents());
     _pressure_system->updateFVGradient(pressureGradientField());
   }
   else

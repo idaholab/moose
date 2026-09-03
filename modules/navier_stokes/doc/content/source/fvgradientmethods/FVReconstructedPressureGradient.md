@@ -4,8 +4,8 @@
 
 `FVReconstructedPressureGradient` implements the Aguerre face-flux reconstruction
 ([!cite](aguerre2018oscillation)) used by the linear finite-volume segregated solver. It owns the
-lagged velocity-gradient snapshot, reconstructed pressure-gradient candidate, and relaxed feedback
-field used by the momentum predictor.
+lagged velocity-gradient snapshot, reconstructed pressure-gradient candidate, and relaxed coupling
+pressure gradient used by the momentum predictor.
 The snapshot is copied from each velocity variable's ordinary configured gradient field after the
 previous pressure corrector, so this object does not implement a separate velocity-gradient
 algorithm.
@@ -29,8 +29,8 @@ candidate of a time step is available, the method publishes
 [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method), such as
 [FVGreenGaussGradient.md]. Because the method retains flow-system state, each instance can be used
 by only one `RhieChowMassFlux`, pressure system, pressure variable, and set of momentum systems. The
-feedback and generation counters are reset once per attempted time step, while allocated vector
-storage is reused when its layout remains valid.
+coupling pressure gradient and generation counters are reset once per attempted time step, while
+allocated vector storage is reused when its layout remains valid.
 
 This method is intended specifically for momentum-pressure coupling. Diffusion corrections,
 diagnostics, and unrelated equations should continue to use an ordinary gradient method.
