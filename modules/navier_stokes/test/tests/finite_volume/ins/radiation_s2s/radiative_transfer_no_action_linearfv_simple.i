@@ -191,7 +191,7 @@
     variable = temperature
     boundary = 'left'
     functor = 600.
-  [.]
+  []
   [right]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = temperature
