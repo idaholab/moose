@@ -10,6 +10,24 @@
                   'manufactured displacement solution across a non-interface-fitted material '
                   'interface.'
   []
+  [angled_ad_elastic]
+    type = CSVDiff
+    input = 'angled_sczm_ad_elastic.i'
+    csvdiff = 'angled_sczm_ad_elastic_csv.csv'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The AD small-strain shifted cohesive zone formulation shall solve an angled '
+                  'non-interface-fitted interface with an elastic traction-separation law.'
+  []
+  [angled_nonad_salehani]
+    type = CSVDiff
+    input = 'angled_sczm_nonad_salehani.i'
+    csvdiff = 'angled_sczm_nonad_salehani_csv.csv'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The non-AD small-strain shifted cohesive zone formulation shall solve an angled '
+                  'non-interface-fitted interface with the Salehani-Irani traction law.'
+  []
   [rectangle_sczm_tri_material]
     type = 'CSVDiff'
     input = 'rectangle_sczm_tri_material.i'
