@@ -992,6 +992,18 @@ public:
 
 protected:
   /**
+   * Copy system-owned state not represented by solution vectors.
+   * Default implementation does nothing.
+   */
+  virtual void copyPreviousAdditionalStates(Moose::SolutionIterationType, bool) {}
+
+  /**
+   * Restore system-owned state not represented by solution vectors.
+   * Default implementation does nothing.
+   */
+  virtual void restoreAdditionalStates() {}
+
+  /**
    * Internal getter for solution owned by libMesh.
    */
   virtual NumericVector<Number> & solutionInternal() const = 0;

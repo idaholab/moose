@@ -171,6 +171,10 @@ public:
   virtual void compute(ExecFlagType type) override;
 
 protected:
+  virtual void copyPreviousAdditionalStates(Moose::SolutionIterationType iteration_type,
+                                            bool skip_current_to_old) override;
+  virtual void restoreAdditionalStates() override;
+
   /**
    * Compute the right hand side and system matrix for given tags
    * @param vector_tags The tags of kernels for which the right hand side is to be computed.

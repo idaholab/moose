@@ -1265,17 +1265,19 @@ void
 SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_type)
 {
   const auto num_states = getNumSolutionStates(iteration_type);
+  // Normally copy through old (index 1). For Time, optionally stop at older
+  // and leave old unchanged.
+  const bool skip_old =
+      iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
+
   if (num_states > 1)
   {
-    // Normally copy through old (index 1). For Time, optionally stop at older
-    // and leave old unchanged.
-    const bool skip_old =
-        iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
-
     const std::size_t stop = skip_old ? 1 : 0;
     for (std::size_t i = num_states - 1; i > stop; --i)
       solutionState(i, iteration_type) = solutionState(i - 1, iteration_type);
   }
+
+  copyPreviousAdditionalStates(iteration_type, skip_old);
 
   // Custom logic for changing state based on iteration type
   switch (iteration_type)
@@ -1325,6 +1327,7 @@ SystemBase::restoreSolutions()
   if (solutionPreviousNewton())
     *solutionPreviousNewton() = solutionOld();
   system().update();
+  restoreAdditionalStates();
 }
 
 void
