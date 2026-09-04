@@ -29,6 +29,7 @@ public:
 protected:
   mfem::Coefficient & _k_coef;
   mfem::Coefficient & _curlu_dk_dcurlu_coef;
+  mfem::Coefficient & _dk_dcurlu_coef;
   mfem::VectorCoefficient & _curlu_vec_coef;
   mfem::real_t _curlu_zero_tol;
 };

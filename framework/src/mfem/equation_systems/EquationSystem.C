@@ -296,6 +296,12 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
   trueRHS.SyncFromBlocks();
 
   op.Reset(aux_a.Ptr());
+
+  // hold a reference to op. Later, we'll pass this into SumOperatorExtension
+  // so we can perform AddMult on the linear part of the system, then on the
+  // nonlinear part of the system.
+  _system_operator = &op;
+
   aux_a.SetOperatorOwner(false);
 }
 
@@ -327,6 +333,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       if (test_var_name == trial_var_name)
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+
         auto blf = _blfs.Get(test_var_name);
         blf->FormLinearSystem(_ess_tdof_lists.at(j),
                               *_var_ess_constraints.at(j),
@@ -434,7 +441,16 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
       mooseAssert(nlf_jac,
                   "Jacobian contribution of nonlinear form associated with " + test_var_name +
                       " is not castable into a HypreParMatrix");
-      _jacobian_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      auto * const jacobian_block = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+      // Both summands already carry a unit diagonal on the essential rows: the bilinear form's
+      // comes from ParBilinearForm::FormLinearSystem, which eliminates with the DIAG_ONE policy,
+      // and the nonlinear form's from ParNonlinearForm::GetGradient, which ends in
+      // OperatorHandle::EliminateRowsCols. Their sum therefore has a diagonal of two on the
+      // essential rows the nonlinear integrators touch and one on the rest, so it is not the
+      // gradient of Mult(). Re-eliminating restores the unit diagonal everywhere; the returned
+      // eliminated part is discarded because these rows and columns are already zero.
+      delete jacobian_block->EliminateRowsCols(_ess_tdof_lists.at(i));
+      _jacobian_blocks(i, i) = jacobian_block;
     }
     else
       _jacobian_blocks(i, i) = _h_blocks(i, i);
@@ -453,10 +469,32 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
   if (_non_linear)
   {
-    if (_assembly_level != mfem::AssemblyLevel::LEGACY)
-      mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
-                 "assembly in EquationSystem.");
-    const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+    if (_assembly_level == mfem::AssemblyLevel::PARTIAL)
+    {
+      // Keep GridFunctions in sync for coefficients used by nonlinear integrators.
+      const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(u), _block_true_offsets);
+      SetTrialVariablesFromTrueVectors(block_solution);
+
+      const auto & test_var_name = _test_var_names.at(0);
+      auto nlf = _nlfs.Get(test_var_name);
+
+      mfem::Operator * nlf_grad = &nlf->GetGradient(u);
+
+      // does it cast into constrained operator?
+      mfem::ConstrainedOperator * c_nlf_grad = dynamic_cast<mfem::ConstrainedOperator *>(nlf_grad);
+      if (c_nlf_grad)
+        c_nlf_grad->SetDiagonalPolicy(DIAG_ZERO);
+
+      // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
+      _sumOperator =
+          std::make_unique<SumOperatorExtension>(nlf_grad, 1.0, _system_operator->Ptr(), 1.0, nlf);
+
+      return *_sumOperator;
+    }
+    else
+    {
+      const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+    }
   }
   else
     _jacobian = _linear_operator;
@@ -515,9 +553,11 @@ EquationSystem::BuildNonlinearForms()
     _nlfs.Register(test_var_name, std::make_shared<mfem::ParNonlinearForm>(_test_pfespaces.at(i)));
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
+    nlf->SetAssemblyLevel(_assembly_level);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
+    nlf->Setup();
   }
 }
 
