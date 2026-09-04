@@ -60,6 +60,13 @@ public:
                                const std::vector<unsigned int> & FragFaceEdgeID,
                                const std::vector<double> & position);
 
+  /**
+   * Prepare every element for its fragment update, globally purge embedded nodes grouped as
+   * phantom cuts, and then update the fragments. Lone-edge nodes are repaired locally during
+   * preparation, while over-shared nodes remain an error because they indicate non-manifold
+   * fragment topology. Purged nodes remain in the ownership registry until destruction so their
+   * IDs cannot be reused while inherited cut-plane faces may still reference them.
+   */
   void updatePhysicalLinksAndFragments();
 
   void updateTopology(bool mergeUncutVirtualEdges = true);

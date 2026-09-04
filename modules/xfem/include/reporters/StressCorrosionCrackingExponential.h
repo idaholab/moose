@@ -23,7 +23,7 @@ public:
   StressCorrosionCrackingExponential(const InputParameters & parameters);
 
 protected:
-  virtual void computeGrowth(std::vector<int> & index) override;
+  virtual void computeGrowth(const std::vector<int> & index) override;
 
   ///@{ Material specific scc parameters
   const Real & _k_low;
