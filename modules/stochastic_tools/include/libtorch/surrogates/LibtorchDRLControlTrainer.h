@@ -12,105 +12,102 @@
 #pragma once
 
 #include <torch/torch.h>
-#include "LibtorchArtificialNeuralNet.h"
+#include "LibtorchActorNeuralNet.h"
+#include "LibtorchObservationHistoryHelper.h"
+#include "LibtorchRLMiniBatchSampler.h"
+#include "LibtorchRLPPOLoss.h"
+#include "LibtorchRLTrajectoryBuffer.h"
+#include "LibtorchRLValueEstimator.h"
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
 /**
- * This trainer is responsible for training neural networks that efficiently control
- * different processes. It utilizes the Proximal Policy Optimization algorithms. For more
- * information on the algorithm, see the following resources: Schulman, John, et al. "Proximal
- * policy optimization algorithms." arXiv preprint arXiv:1707.06347 (2017).
- * https://medium.com/analytics-vidhya/coding-ppo-from-scratch-with-pytorch-part-1-4-613dfc1b14c8
- * https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html
+ * Fixed-horizon actor-critic trainer that collects trajectories from MOOSE reporters and runs a
+ * PPO update on top of reusable RL-core components (observation history, trajectory buffer,
+ * mini-batch sampler, value estimator, and PPO loss).
  */
 class LibtorchDRLControlTrainer : public SurrogateTrainerBase
 {
 public:
   static InputParameters validParams();
 
-  /// construct using input parameters
+  /**
+   * Build the PPO-based DRL trainer.
+   * @param parameters Input parameters for the trainer.
+   */
   LibtorchDRLControlTrainer(const InputParameters & parameters);
 
+  /// Pull fresh rollout data from the reporters and trigger training when ready.
   virtual void execute() override;
 
   /**
-   * Function which returns the current average episodic reward. It is only updated
-   * at the end of every episode.
+   * Return the current average episodic reward.
+   * @return Average episodic reward over the latest training window.
    */
   Real averageEpisodeReward() { return _average_episode_reward; }
+  /// Return the current episodic reward standard deviation.
+  Real stdEpisodeReward() { return _std_episode_reward; }
 
-  /// The condensed training function
-  void trainController();
+  /// Return per-sample mean episodic rewards from the latest update window.
+  std::vector<Real> sampleAverageEpsiodeRewards() { return _sample_average_episode_reward; }
+  /// Return per-sample episodic reward standard deviations from the latest update window.
+  std::vector<Real> sampleStdEpsiodeRewards() { return _sample_std_episode_reward; }
 
-  const Moose::LibtorchArtificialNeuralNet & controlNeuralNet() const { return *_control_nn; }
+  /**
+   * Run the PPO update on a flattened on-policy batch.
+   * @param batch Flattened trajectory batch to train on.
+   */
+  void trainController(const LibtorchRLTrajectoryBuffer::TensorBatch & batch);
+
+  /// Return the current actor network.
+  const Moose::LibtorchActorNeuralNet & controlNeuralNet() const { return *_control_nn; }
+  /// Return the trainer seed used for sampling and shuffling.
+  unsigned int seed() const { return _seed; }
 
 protected:
-  /// Compute the average eposiodic reward
-  void computeAverageEpisodeReward();
+  /// Compute the average episodic reward statistics for the latest samples.
+  void computeEpisodeRewardStatistics();
 
-  /**
-   * Function to convert input/output data from std::vector<std::vector> to torch::tensor
-   * @param vector_data The input data in vector-vectors format
-   * @param tensor_data The tensor where we would like to save the results
-   * @param detach If the gradient info needs to be detached from the tensor
-   */
-  void convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
-                           torch::Tensor & tensor_data,
-                           const bool detach = false);
-
-  /**
-   * Function which evaluates the critic to get the value (discounter reward)
-   * @param input The observation values (responses)
-   * @return The estimated value
-   */
-  torch::Tensor evaluateValue(torch::Tensor & input);
-
-  /**
-   * Function which evaluates the control net and then computes the logarithmic probability of the
-   * action
-   * @param input The observation values (responses)
-   * @param output The actions corresponding to the observations
-   * @return The estimated value for the logarithmic probability
-   */
-  torch::Tensor evaluateAction(torch::Tensor & input, torch::Tensor & output);
-
-  /// Compute the return value by discounting the rewards and summing them
-  void computeRewardToGo();
-
-  /// Reset data after updating the neural network
+  /// Reset the stored rollout data after an update.
   void resetData();
 
-  /// Response reporter names
-  const std::vector<ReporterName> _response_names;
+  /// Observation reporter names
+  const std::vector<ReporterName> _state_names;
 
-  /// Pointers to the current values of the responses
-  std::vector<const std::vector<Real> *> _response_value_pointers;
+  /// Pointers to the current values of the observations
+  /// We can have multiple observations, multiple samples, multiple timesteps
+  std::vector<const std::vector<std::vector<Real>> *> _state_value_pointers;
 
-  /// Shifting constants for the responses
-  const std::vector<Real> _response_shift_factors;
+  /// Shifting constants for the observations
+  const std::vector<Real> _state_shift_factors;
 
-  /// Scaling constants for the responses
-  const std::vector<Real> _response_scaling_factors;
+  /// Scaling constants for the observations
+  const std::vector<Real> _state_scaling_factors;
 
   /// Control reporter names
-  const std::vector<ReporterName> _control_names;
+  const std::vector<ReporterName> _action_names;
+
+  /// Multiplicative action scaling embedded in the actor outputs
+  const std::vector<Real> _action_scaling_factors;
 
   /// Pointers to the current values of the control signals
-  std::vector<const std::vector<Real> *> _control_value_pointers;
+  /// We can have multiple control signals, multiple samples, multiple timesteps
+  std::vector<const std::vector<std::vector<Real>> *> _action_value_pointers;
 
   /// Log probability reporter names
   const std::vector<ReporterName> _log_probability_names;
 
   /// Pointers to the current values of the control log probabilities
-  std::vector<const std::vector<Real> *> _log_probability_value_pointers;
+  /// We can have multiple control signals, multiple samples, multiple timesteps
+  std::vector<const std::vector<std::vector<Real>> *> _log_probability_value_pointers;
 
   /// Reward reporter name
   const ReporterName _reward_name;
 
   /// Pointer to the current values of the reward
-  const std::vector<Real> * _reward_value_pointer;
+  /// We can have multiple samples, multiple timesteps
+  const std::vector<std::vector<Real>> * _reward_value_pointer;
 
   /// Number of timesteps to fetch from the reporters to be the input of then eural nets
   const unsigned int _input_timesteps;
@@ -119,19 +116,6 @@ protected:
   unsigned int _num_inputs;
   /// Number of outputs for the control neural network
   unsigned int _num_outputs;
-
-  ///@{
-  /// The gathered data from the reporters, each row represents one QoI, each column represents one time step
-  std::vector<std::vector<Real>> _input_data;
-  std::vector<std::vector<Real>> _output_data;
-  std::vector<std::vector<Real>> _log_probability_data;
-  ///@}
-
-  ///@{
-  /// The reward and return data. The return is calculated using the _reward_data
-  std::vector<Real> _reward_data;
-  std::vector<Real> _return_data;
-  ///@}
 
   /// Number of epochs for the training of the emulator
   const unsigned int _num_epochs;
@@ -156,9 +140,8 @@ protected:
 
   /// Decaying factor that is used when calculating the return from the reward
   const Real _decay_factor;
-
-  /// Standard deviation for the actions
-  const std::vector<Real> _action_std;
+  /// GAE lambda factor used while estimating advantages and returns.
+  const Real _lambda_factor;
 
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data
@@ -173,9 +156,18 @@ protected:
   /// So using a shift can realign the corresponding input-output values while reading the
   /// reporters
   const bool _shift_outputs;
+  /// Average rewards over each reporter timestep window instead of sampling one boundary value.
+  const bool _average_reward_over_timestep_window;
 
   /// Storage for the current average episode reward
   Real _average_episode_reward;
+  /// Storage for the current episode reward standard deviation
+  Real _std_episode_reward;
+
+  /// Per-sample mean episodic rewards over the latest update window
+  std::vector<Real> _sample_average_episode_reward;
+  /// Per-sample episodic reward standard deviations over the latest update window
+  std::vector<Real> _sample_std_episode_reward;
 
   /// Switch to enable the standardization of the advantages
   const bool _standardize_advantage;
@@ -183,55 +175,84 @@ protected:
   /// The frequency the loss should be printed
   const unsigned int _loss_print_frequency;
 
+  /// Base seed for stochastic optimizers and policy sampling.
+  const unsigned int _seed;
+
+  /// Optional lower bounds for each control signal
+  std::vector<Real> _min_values;
+  /// Optional upper bounds for each control signal
+  std::vector<Real> _max_values;
+
   /// Pointer to the control (or actor) neural net object
-  std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _control_nn;
+  std::shared_ptr<Moose::LibtorchActorNeuralNet> _control_nn;
   /// Pointer to the critic neural net object
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _critic_nn;
 
-  /// standard deviation in a tensor format for sampling the actual control value
-  torch::Tensor _std;
+  /// Best average episode reward seen so far while training
+  Real _highest_reward;
+  /// Entropy bonus coefficient used in the PPO actor loss
+  Real _entropy_coeff;
 
-  /// Torch::tensor version of the input and action data
-  torch::Tensor _input_tensor;
-  torch::Tensor _output_tensor;
-  torch::Tensor _return_tensor;
-  torch::Tensor _log_probability_tensor;
+  /// Adam optimizer used to update the actor network
+  std::unique_ptr<torch::optim::Adam> _actor_optimizer;
+  /// Adam optimizer used to update the critic network
+  std::unique_ptr<torch::optim::Adam> _critic_optimizer;
 
 private:
   /**
-   * Extract the response values from the postprocessors of the controlled system.
-   * This assumes that they are stored in an AccumulateReporter
-   * @param data The data where we would like to store the response values
-   * @param reporter_names The names of the reporters which need to be extracted
-   * @param num_timesteps The number of timesteps we want to use for training
+   * Resolve reporter names into cached pointer storage.
+   * @param reporter_names Reporter names to look up.
+   * @param pointer_storage Output vector that receives the reporter pointers.
    */
-  void getInputDataFromReporter(std::vector<std::vector<Real>> & data,
-                                const std::vector<const std::vector<Real> *> & reporter_links,
-                                const unsigned int num_timesteps);
-  /**
-   * Extract the output (actions, logarithmic probabilities) values from the postprocessors
-   * of the controlled system. This assumes that they are stored in an AccumulateReporter
-   * @param data The data where we would like to store the output values
-   * @param reporter_names The names of the reporters which need to be extracted
-   */
-  void getOutputDataFromReporter(std::vector<std::vector<Real>> & data,
-                                 const std::vector<const std::vector<Real> *> & reporter_links);
-
-  /**
-   * Extract the reward values from the postprocessors of the controlled system
-   * This assumes that they are stored in an AccumulateReporter.
-   * @param data The data where we would like to store the reward values
-   * @param reporter_names The name of the reporter which need to be extracted
-   */
-  void getRewardDataFromReporter(std::vector<Real> & data,
-                                 const std::vector<Real> * const reporter_link);
-
-  /// Getting reporter pointers with given names
   void getReporterPointers(const std::vector<ReporterName> & reporter_names,
-                           std::vector<const std::vector<Real> *> & pointer_storage);
+                           std::vector<const std::vector<std::vector<Real>> *> & pointer_storage);
+
+  /// Pull trajectories out of the reporters and append them to the trajectory buffer.
+  void collectTrajectoriesFromReporters();
+
+  /**
+   * Figure out how many aligned transitions a raw reporter sequence contains.
+   * @param raw_sequence_size Number of raw time entries in the reporter sequence.
+   * @return Number of valid transitions after history stacking and downsampling.
+   */
+  unsigned int computeNumTransitions(std::size_t raw_sequence_size) const;
+
+  /**
+   * Downsample one raw reporter sequence into the aligned rollout sequence we train on.
+   * @param sample Raw reporter sequence.
+   * @param offset Starting offset used for the aligned sequence.
+   * @param num_entries Number of aligned entries to extract.
+   * @return Downsampled sequence.
+   */
+  std::vector<Real> extractDownsampledSequence(const std::vector<Real> & sample,
+                                               unsigned int offset,
+                                               unsigned int num_entries) const;
+
+  /**
+   * Average one raw reporter sequence over aligned timestep windows.
+   * @param sample Raw reporter sequence.
+   * @param num_entries Number of action-window reward entries to compute.
+   * @return Window-averaged sequence.
+   */
+  std::vector<Real> extractWindowAveragedSequence(const std::vector<Real> & sample,
+                                                  unsigned int num_entries) const;
 
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
+
+  /// Reporter downsampling stride used while assembling rollout trajectories
+  unsigned int _timestep_window;
+
+  /// Shared observation history stacking and factor-expansion helper
+  const LibtorchObservationHistoryHelper _observation_history;
+  /// Accumulated on-policy rollout data waiting to be flattened and trained on
+  LibtorchRLTrajectoryBuffer _trajectory_buffer;
+  /// Mini-batch sampler used to split flattened rollout data for PPO updates
+  const LibtorchRLMiniBatchSampler _sampler;
+  /// Helper that builds value targets and advantages from collected trajectories
+  const LibtorchRLValueEstimator _value_estimator;
+  /// PPO loss helper for the actor and critic updates
+  const LibtorchRLPPOLoss _ppo_loss;
 };
 
 #endif

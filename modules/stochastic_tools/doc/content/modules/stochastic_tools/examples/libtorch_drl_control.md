@@ -5,6 +5,17 @@ The following example demonstrates how to set up a Proximal Policy Optimization 
 Deep Reinforcement Learning (DRL) training sequence for neural-net-based controllers of MOOSE simulations.
 See [!cite](schulman2017proximal) for a more theoretical background on the PPO algorithm.
 
+The detailed PPO and GAE equations used by the trainer are documented on
+[LibtorchDRLControlTrainer](source/libtorch/trainers/LibtorchDRLControlTrainer.md).
+At a high level, the trainer collects on-policy tuples
+$(o_t, a_t, \log \pi_{\mathrm{old}}(a_t|o_t), r_t, o_{t+1})$, computes GAE
+advantages [!cite](schulman2015gae), and updates separate actor and critic
+networks with the PPO clipped objective [!cite](schulman2017proximal). The
+paired [LibtorchDRLControl](source/libtorch/controls/LibtorchDRLControl.md)
+executes the actor at `TIMESTEP_BEGIN`, stacks `input_timesteps` observations,
+and can optionally reuse or smooth sampled actions before they are applied to
+the physics model.
+
 ## Problem Statement
 
 In this example we would like to design a DRL-based controller for the air conditioning of a
@@ -80,9 +91,10 @@ using [LibtorchControlValuePostprocessor](source/libtorch/postprocessors/Libtorc
 [LibtorchDRLLogProbabilityPostprocessor](source/libtorch/postprocessors/LibtorchDRLLogProbabilityPostprocessor.md) as
 shown above.
 Furthermore, the additional [LibtorchNeuralNetControl](LibtorchNeuralNetControl.md) (`src_control_final`)
-can be used to evaluate the neural network without the additional random
-sampling process needed for the training process. In other words, this object will evaluate the
-final product of this training process.
+is optional and can be used to evaluate the trained network with a plain
+deterministic control object. The same trained actor could also be executed
+through [LibtorchDRLControl.md] with
+[!param](/Controls/LibtorchDRLControl/stochastic) set to `false`.
 
 ### Main Application
 
@@ -157,10 +169,12 @@ to balance these two factors by tuning the parameters in the `Trainer` and `Cont
   layout={'xaxis':{'type':'linear', 'title':'Number of simulations'},
           'yaxis':{'type':'linear','title':'Average Episodic Reward'}}
 
-Following the training procedure, we can replace the [LibtorchDRLControl.md] object with
+Following the training procedure, we can either set
+[!param](/Controls/LibtorchDRLControl/stochastic) to `false` on
+[LibtorchDRLControl.md] or replace it with
 [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md)
-to evaluate the final version of the neural network
-without the additional randomization. By doing this, the following results are obtained:
+for plain deterministic inference. In this example we use the latter, and the
+following results are obtained:
 
 !plot scatter
   id=results caption=The evolution of the room temperature at the sensor over the day.
