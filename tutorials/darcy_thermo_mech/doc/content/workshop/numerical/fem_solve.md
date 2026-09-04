@@ -72,8 +72,8 @@ Thus, the weak form of [example_weak_form2] becomes:
 
 !equation id=example_weak_residual
 \begin{aligned}
-\vec{R}_i(u_h) &= \sum_e \sum_{q} w_{q} \left|\mathcal{J}_e\right|\underbrace{\left[ \nabla\psi_i\cdot k \nabla u_h + \psi_i \left(\vec\beta\cdot \nabla u_h \right) - \psi_i f \right](\vec{x}_{q})}_{\textrm{Kernel Object(s)}} \\
-&- \sum_f \sum_{q_{face}} w_{q_{face}} \left|\mathcal{J}_f\right|\underbrace{\left[\psi_i k \nabla u_h \cdot \vec{n} \right](\vec x_{q_{face}})}_{\textrm{BoundaryCondition Object(s)}}
+\vec{R}_i(u_h) &= \sum_e \sum_{q} w_{q} \left|\mathcal{J}_e\right|\underbrace{\left[ \nabla\psi_i\cdot k \nabla u_h - \nabla\psi_i\cdot\left(\vec{\beta} u_h\right) - \psi_i f \right](\vec{x}_{q})}_{\textrm{Kernel Object(s)}} \\
+&+ \sum_f \sum_{q_{face}} w_{q_{face}} \left|\mathcal{J}_f\right|\underbrace{\left[\psi_i \left(\vec{\beta} u_h\right)\cdot\vec{n} - \psi_i k \nabla u_h \cdot \vec{n} \right](\vec x_{q_{face}})}_{\textrm{BoundaryCondition Object(s)}}
 \end{aligned}
 
 The second sum is over boundary faces, $f$. MOOSE `Kernel` or `BoundaryCondition` objects provide
@@ -307,7 +307,7 @@ Again, consider the advection-diffusion equation with nonlinear $k$, $\vec{\beta
 
 !equation
 \begin{aligned}
-- \nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u = f
+- \nabla\cdot\left(k\nabla u\right) + \nabla\cdot\left(\vec{\beta} u\right) = f
 \end{aligned}
 
 Thus, the $i^{th}$ component of the residual vector is:
@@ -315,7 +315,8 @@ Thus, the $i^{th}$ component of the residual vector is:
 !equation
 \begin{aligned}
 \vec{R}_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
-\left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right)
+\langle\psi_i, \left(\vec{\beta} u_h\right)\cdot \hat{n} \rangle -
+\left(\nabla\psi_i, \vec{\beta} u_h\right) - \left(\psi_i, f\right)
 \end{aligned}
 
 !---
@@ -323,19 +324,20 @@ Thus, the $i^{th}$ component of the residual vector is:
 !equation
 \begin{aligned}
 \vec{R}_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
-\left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right)
+\langle\psi_i, \left(\vec{\beta} u_h\right)\cdot \hat{n} \rangle -
+\left(\nabla\psi_i, \vec{\beta} u_h\right) - \left(\psi_i, f\right)
 \end{aligned}
 
 Using the previously-defined rules in [diff_u] and [grad_u] for $\frac{\partial u_h}{\partial u_j}$
-and $\frac{\partial \left(\nabla u_h\right)}{\partial u_j}$, the $(i,j)$ entry of the Jacobian is
-then:
+and $\frac{\partial \left(\nabla u_h\right)}{\partial u_j}$, along with the product rule for the
+advective flux, the $(i,j)$ entry of the Jacobian is then:
 
 !equation
 \begin{aligned}
-J_{ij}(u_h) &= \left(\nabla\psi_i, \frac{\partial k}{\partial u_j}\nabla u_h \right) + \left(\nabla\psi_i, k \nabla \phi_j \right) - \left \langle\psi_i, \frac{\partial k}{\partial u_j}\nabla u_h\cdot \hat{n} \right\rangle \\&- \left \langle\psi_i, k\nabla \phi_j\cdot \hat{n} \right\rangle + \left(\psi_i, \frac{\partial \vec{\beta}}{\partial u_j} \cdot\nabla u_h\right) + \left(\psi_i, \vec{\beta} \cdot \nabla \phi_j\right) - \left(\psi_i, \frac{\partial f}{\partial u_j}\right)
+J_{ij}(u_h) &= \left(\nabla\psi_i, \frac{\partial k}{\partial u_j}\nabla u_h \right) + \left(\nabla\psi_i, k \nabla \phi_j \right) - \left \langle\psi_i, \frac{\partial k}{\partial u_j}\nabla u_h\cdot \hat{n} \right\rangle \\&- \left \langle\psi_i, k\nabla \phi_j\cdot \hat{n} \right\rangle + \left\langle\psi_i, \left(\frac{\partial \vec{\beta}}{\partial u_j}u_h + \vec{\beta}\phi_j\right)\cdot\hat{n}\right\rangle \\&- \left(\nabla\psi_i, \frac{\partial \vec{\beta}}{\partial u_j}u_h + \vec{\beta}\phi_j\right) - \left(\psi_i, \frac{\partial f}{\partial u_j}\right)
 \end{aligned}
 
-That even for this "simple" equation, the Jacobian entries are nontrivial: they depend on the partial
+Even for this "simple" equation, the Jacobian entries are nontrivial: they depend on the partial
 derivatives of $k$, $\vec{\beta}$, and $f$, which may be difficult or time-consuming to compute
 analytically.
 
