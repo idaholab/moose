@@ -663,6 +663,7 @@ public:
    */
   void possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
                                        const std::filesystem::path & folder_base);
+
   /**
    * Loads all available restartable meta data if it is available with the folder base \p
    * folder_base
