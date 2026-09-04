@@ -12,15 +12,23 @@
 #include "libmesh/replicated_mesh.h"
 
 #include "MooseTypes.h"
-#include "MeshGenerator.h"
+
+class MooseObject;
+
+namespace libMesh
+{
+template <typename Output>
+class FunctionBase;
+}
 
 namespace MeshTriangulationUtils
 {
 
 /**
  * Bundle of inputs for triangulateWithDelaunay. Mirrors the user-facing parameter set of
- * XYDelaunayGenerator, plus parent-class fields for the auto area function. Empty optional fields
- * are skipped.
+ * XYDelaunayGenerator, plus parent-class fields for the auto area function and a target area
+ * function a caller can hand over directly rather than through an input parameter. Empty optional
+ * fields are skipped.
  */
 struct XYDelaunayOptions
 {
@@ -32,6 +40,13 @@ struct XYDelaunayOptions
   bool smooth_tri = false;
   Real desired_area = 0;
   std::string desired_area_func;
+  /**
+   * Target area as a function of position, for a caller whose target is not an expression of the
+   * coordinates. It takes precedence over 'desired_area_func' and 'use_auto_area_func'. The default
+   * of null leaves the sizing to those two, which is what a caller that never sets it gets. The
+   * triangulator clones it, but the caller still has to keep it alive across the call.
+   */
+  libMesh::FunctionBase<Real> * desired_area_function = nullptr;
   bool use_auto_area_func = false;
   Real auto_area_func_default_size = 0;
   Real auto_area_func_default_size_dist = 0;
@@ -63,14 +78,18 @@ struct XYDelaunayOptions
  * mesh with optional holes, optionally stitches the resulting triangulation to each hole mesh that
  * requests it, and applies subdomain / boundary renumbering. This is the core algorithm shared by
  * XYDelaunayGenerator and XYTriangleBoundaryLayerGenerator.
- * @param mg The calling mesh generator (used for paramError reporting and communicator)
+ *
+ * The calling object is only used for error reporting, so it is taken as a MooseObject rather
+ * than a MeshGenerator. This lets objects that triangulate at runtime, such as a remesher driving
+ * a remesh during a transient, share this algorithm with the mesh generators.
+ * @param moose_object The calling object (used for error reporting)
  * @param boundary_mesh The closed-loop boundary mesh
  * @param hole_meshes Optional hole meshes (one mesh per hole; empty vector if no holes)
  * @param xyd_opts Triangulation options (see XYDelaunayOptions)
  * @return The triangulated mesh with optionally stitched holes
  */
 std::unique_ptr<MeshBase>
-triangulateWithDelaunay(MeshGenerator & mg,
+triangulateWithDelaunay(const MooseObject & moose_object,
                         std::unique_ptr<MeshBase> boundary_mesh,
                         std::vector<std::unique_ptr<MeshBase>> hole_meshes,
                         const XYDelaunayOptions & xyd_opts);

@@ -201,6 +201,21 @@ public:
   bool isInitialized() { return _initialized; }
 
   /**
+   * Is adaptivity going to modify the mesh, as opposed to only computing indicator fields?
+   *
+   * The deciding fact is whether a marker variable name has been set, because adaptMesh() only
+   * flags elements when it has one, and refine_and_coarsen_elements() then reports that nothing
+   * changed. An [Adaptivity] block that supplies Indicators but no marker therefore computes its
+   * indicator fields and leaves the mesh untouched.
+   *
+   * The number of adaptivity cycles is deliberately not part of the answer, because steps is not
+   * used for transient or eigen solves, so a block that adapts every time step can have steps = 0.
+   *
+   * @return true if adaptivity can refine or coarsen elements, otherwise false
+   */
+  bool willModifyMesh() const;
+
+  /**
    * Sets the time when the adaptivity is active
    * @param start_time The time when adaptivity starts
    * @param stop_time The time when adaptivity stops

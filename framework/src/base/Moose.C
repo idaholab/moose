@@ -267,6 +267,10 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_indicator",                    Indicator,                 false);
   registerMooseObjectTask("add_marker",                       Marker,                    false);
 
+  registerMooseObjectTask("add_remesher",                     Remesher,                  false);
+  registerMooseObjectTask("add_remesh_criterion",             RemeshCriterion,           false);
+  registerMooseObjectTask("add_mesh_smoother",                MeshSmootherBase,          false);
+
   registerMooseObjectTask("add_multi_app",                    MultiApp,                  false);
   registerMooseObjectTask("add_transfer",                     Transfer,                  false);
 
@@ -333,6 +337,7 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_oversampling", false);
   registerTask("deprecated_block", false);
   registerTask("set_adaptivity_options", false);
+  registerTask("setup_remeshing", false);
   registerTask("add_mortar_interface", false);
   registerTask("coupling_functor_check", true);
   registerTask("add_master_action_material", false);
@@ -442,6 +447,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
+                           "(setup_remeshing)" // the engine must be on before its objects are built
                            "(add_ic, add_fv_ic)"
                            "(add_ics_physics)" // physics can skip adding initial conditions if they already exist
                            "(add_constraint)"
@@ -476,6 +482,8 @@ addActionTypes(Syntax & syntax)
                            " add_fv_bc, add_linear_fv_bc, add_fv_ik, add_interface_kernel,"
                            " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker,"
                            " add_bound, add_hybridized_kernel, add_hybridized_integrated_bc)"
+                           // Remeshing objects can couple to functions, variables and materials
+                           "(add_remesher, add_remesh_criterion, add_mesh_smoother)"
                            "(resolve_optional_materials)"
                            "(add_algebraic_rm)"
                            "(add_coupling_rm)"
@@ -819,6 +827,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // New Adaptivity System
   registerSyntax("SetAdaptivityOptionsAction", "Adaptivity");
+
+  // Remeshing
+  registerSyntax("RemeshingAction", "Remeshing");
+  registerSyntax("AddRemeshCriterionAction", "Remeshing/Criteria/*");
+  registerSyntax("AddRemesherAction", "Remeshing/Remeshers/*");
+  registerSyntax("AddMeshSmootherAction", "Remeshing/Smoothers/*");
 
   // Deprecated Block
   registerSyntax("DeprecatedBlockAction", "DeprecatedBlock");
