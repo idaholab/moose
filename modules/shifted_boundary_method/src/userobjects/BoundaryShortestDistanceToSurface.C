@@ -164,7 +164,7 @@ BoundaryShortestDistanceToSurface::execute()
 
   _elem_side_to_bid[elem_side] = bid_index;
 
-  for (unsigned int qp = 0; qp < n_qp; qp++)
+  for (const auto qp : make_range(n_qp))
   {
     const Point & pt = _q_point[qp];
     const Function * func = nullptr;

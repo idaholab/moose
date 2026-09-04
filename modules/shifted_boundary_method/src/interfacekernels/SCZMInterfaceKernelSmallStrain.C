@@ -241,7 +241,7 @@ SCZMInterfaceKernelSmallStrain::computeQpOffDiagJacobian(Moose::DGJacobianType t
   Real jacobian = SCZMInterfaceKernelBase::computeQpOffDiagJacobian(type, jvar);
 
   if (_shifted && _directional_correction)
-    for (unsigned int coupled_component = 0; coupled_component < _ndisp; ++coupled_component)
+    for (const auto coupled_component : make_range(_ndisp))
       if (jvar == _disp_var[coupled_component])
         switch (type)
         {

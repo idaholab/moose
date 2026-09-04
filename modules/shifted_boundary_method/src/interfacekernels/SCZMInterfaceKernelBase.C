@@ -51,7 +51,7 @@ SCZMInterfaceKernelBase::SCZMInterfaceKernelBase(const InputParameters & paramet
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the SCZM material requires 1, 2 or 3 displacement variables");
 
-  for (unsigned int i = 0; i < _ndisp; ++i)
+  for (const auto i : make_range(_ndisp))
   {
     _disp_var[i] = coupled("displacements", i);
     _vars[i] = getVar("displacements", i);
@@ -93,7 +93,7 @@ SCZMInterfaceKernelBase::computeQpOffDiagJacobian(Moose::DGJacobianType type, un
     return 0.0;
 
   // Jacobian of residual[_component] w.r.t. coupled displacement component
-  for (unsigned int off_diag_component = 0; off_diag_component < _ndisp; ++off_diag_component)
+  for (const auto off_diag_component : make_range(_ndisp))
     if (jvar == _disp_var[off_diag_component])
       return computeDResidualDDisplacement(off_diag_component, type);
 
