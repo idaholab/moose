@@ -13,10 +13,6 @@
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMTransitionSubMesh);
-registerMooseObjectRenamed("MooseApp",
-                           MFEMCutTransitionSubMesh,
-                           "07/23/2027 00:00",
-                           MFEMTransitionSubMesh);
 
 InputParameters
 MFEMTransitionSubMesh::validParams()
@@ -44,17 +40,15 @@ MFEMTransitionSubMesh::validParams()
       "closed_subdomain",
       "The name of the subdomain attribute to be created comprised of the set of all elements "
       "of the closed geometry, including the new transition region.");
-  params.addRangeCheckedParam<unsigned int>(
+  params.addParam<unsigned int>(
       "num_layers_positive",
       1,
-      "num_layers_positive >= 0",
       "Number of element-thick layers to grow on the positive side of the boundary (the side the "
       "surface normal points towards). Zero grows no layer on that side. For an exterior boundary "
       "this is the number of layers grown inwards.");
-  params.addRangeCheckedParam<unsigned int>(
+  params.addParam<unsigned int>(
       "num_layers_negative",
       0,
-      "num_layers_negative >= 0",
       "Number of element-thick layers to grow on the negative side of the boundary. Zero grows no "
       "layer on that side. Must be zero for an exterior boundary, which has only one side.");
   return params;
@@ -72,6 +66,10 @@ MFEMTransitionSubMesh::MFEMTransitionSubMesh(const InputParameters & parameters)
     _num_layers_positive(getParam<unsigned int>("num_layers_positive")),
     _num_layers_negative(getParam<unsigned int>("num_layers_negative"))
 {
+  // This guard is to avoid a user passing in an empty boundary attribute set.
+  if (getBoundaryAttributes().Size() == 1 && getBoundaryAttributes()[0] == -1)
+    mooseError(
+        "MFEMTransitionSubMesh '", name(), "': the boundary attribute set must be non-empty.");
 }
 
 void
@@ -95,22 +93,28 @@ MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 
   // Determine whether the supplied boundary is on the mesh exterior. A boundary face is
   // exterior only if its face topology is Boundary; interior cut faces and parallel
-  // processor-shared faces both report as interior. The classification is reduced across
-  // ranks so it is globally consistent.
+  // processor-shared faces both report as interior. Both classifications are reduced across
+  // ranks so they are globally consistent.
   const mfem::Array<int> & parent_bdr_id_map = _boundary_submesh->GetParentElementIDMap();
-  int local_interior_face_found = 0;
+  // Index 0 counts interior faces, index 1 exterior ones.
+  int face_kinds_found[2] = {0, 0};
   for (const auto i : make_range(parent_bdr_id_map.Size()))
   {
     const int face = parent_mesh.GetBdrElementFaceIndex(parent_bdr_id_map[i]);
-    if (!parent_mesh.GetFaceInformation(face).IsBoundary())
-    {
-      local_interior_face_found = 1;
+    face_kinds_found[parent_mesh.GetFaceInformation(face).IsBoundary() ? 1 : 0] = 1;
+    if (face_kinds_found[0] && face_kinds_found[1])
       break;
-    }
   }
-  MPI_Allreduce(
-      MPI_IN_PLACE, &local_interior_face_found, 1, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
-  _is_exterior_boundary = (local_interior_face_found == 0);
+  MPI_Allreduce(MPI_IN_PLACE, face_kinds_found, 2, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
+
+  if (face_kinds_found[0] && face_kinds_found[1])
+    mooseError("MFEMTransitionSubMesh '",
+               name(),
+               "': its boundary mixes interior and exterior faces, so which side of that boundary "
+               "an element lies on is not defined consistently over it. The boundary must be "
+               "either entirely interior to the mesh or entirely on its exterior.");
+
+  _is_exterior_boundary = (face_kinds_found[0] == 0);
 
   if (_is_exterior_boundary && _num_layers_negative > 0)
     mooseError("MFEMTransitionSubMesh: num_layers_negative must be zero for an exterior boundary, "
@@ -204,26 +208,40 @@ MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 mfem::Vector
 MFEMTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
 {
-  if (mesh.SpaceDimension() != 3)
-    mooseError("MFEMTransitionSubMesh only works in 3-dimensional meshes!");
+  const int sdim = mesh.SpaceDimension();
+  if (sdim != 2 && sdim != 3)
+    mooseError("MFEMTransitionSubMesh only works in 2- or 3-dimensional meshes!");
   mfem::Vector normal;
   mfem::Array<int> face_verts;
   std::vector<mfem::Vector> v;
   mesh.GetFaceVertices(face, face_verts);
 
-  // First we get the coordinates of 3 vertices on the face
+  // First we get the coordinates of the vertices on the face: the 2 ends of a segment in 2D, and
+  // 3 of the vertices of a planar face in 3D
   for (auto vtx : face_verts)
   {
-    mfem::Vector vtx_coords(3);
-    for (int j = 0; j < 3; ++j)
+    mfem::Vector vtx_coords(sdim);
+    for (int j = 0; j < sdim; ++j)
       vtx_coords[j] = mesh.GetVertex(vtx)[j];
     v.push_back(vtx_coords);
   }
 
   // Now we find the unit vector normal to the face
-  v[0] -= v[1];
-  v[1] -= v[2];
-  v[0].cross3D(v[1], normal);
+  if (sdim == 2)
+  {
+    // The normal of a segment is its tangent turned through a right angle. The sense is the one
+    // mfem::CalcOrtho takes for a 2x1 Jacobian, so that as in 3D the normal points out of the
+    // first element of the face.
+    normal.SetSize(2);
+    normal[0] = v[1][1] - v[0][1];
+    normal[1] = v[0][0] - v[1][0];
+  }
+  else
+  {
+    v[0] -= v[1];
+    v[1] -= v[2];
+    v[0].cross3D(v[1], normal);
+  }
   normal /= normal.Norml2();
   return normal;
 }
@@ -233,17 +251,15 @@ MFEMTransitionSubMesh::computeVertexAverageOrientations(
     mfem::ParMesh & parent_mesh, const mfem::Array<HYPRE_BigInt> & global_vertex_ids)
 {
   const int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
+  const int sdim = parent_mesh.SpaceDimension();
 
-  // Accumulate the normal of every local boundary face into each of its vertices. The face normals
-  // are kept, as the averaged result is checked against them below.
+  // Accumulate the normal of every local boundary face into each of its vertices.
   std::map<HYPRE_BigInt, mfem::Vector> local_normals;
   const mfem::Array<int> & parent_bdr_id_map = _boundary_submesh->GetParentElementIDMap();
-  std::vector<mfem::Vector> face_normals;
   for (const auto i : make_range(parent_bdr_id_map.Size()))
   {
     const int bdr_el = parent_bdr_id_map[i];
     const mfem::Vector n = findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_el));
-    face_normals.push_back(n);
     mfem::Array<int> verts;
     parent_mesh.GetBdrElementVertices(bdr_el, verts);
     for (const auto v : verts)
@@ -251,21 +267,21 @@ MFEMTransitionSubMesh::computeVertexAverageOrientations(
       auto & accumulated = local_normals[global_vertex_ids[v]];
       if (accumulated.Size() == 0)
       {
-        accumulated.SetSize(3);
+        accumulated.SetSize(sdim);
         accumulated = 0.0;
       }
-      for (const auto d : make_range(3))
+      for (const auto d : make_range(sdim))
         accumulated[d] += n[d];
     }
   }
 
-  // Flatten for communication: one global id and three normal components per entry.
+  // Flatten for communication: one global id and sdim normal components per entry.
   std::vector<HYPRE_BigInt> ids_local;
   std::vector<double> normals_local;
   for (const auto & [id, n] : local_normals)
   {
     ids_local.push_back(id);
-    for (const auto d : make_range(3))
+    for (const auto d : make_range(sdim))
       normals_local.push_back(n[d]);
   }
 
@@ -276,12 +292,12 @@ MFEMTransitionSubMesh::computeVertexAverageOrientations(
       normal_offset(mpi_comm_size);
   std::exclusive_scan(id_sizes.begin(), id_sizes.end(), id_offset.begin(), 0);
   for (const auto r : make_range(mpi_comm_size))
-    normal_sizes[r] = 3 * id_sizes[r];
+    normal_sizes[r] = sdim * id_sizes[r];
   std::exclusive_scan(normal_sizes.begin(), normal_sizes.end(), normal_offset.begin(), 0);
   const int n_total = std::accumulate(id_sizes.begin(), id_sizes.end(), 0);
 
   std::vector<HYPRE_BigInt> ids_all(n_total);
-  std::vector<double> normals_all(3 * n_total);
+  std::vector<double> normals_all(sdim * n_total);
   MPI_Allgatherv(ids_local.data(),
                  n_local,
                  HYPRE_MPI_BIG_INT,
@@ -291,7 +307,7 @@ MFEMTransitionSubMesh::computeVertexAverageOrientations(
                  HYPRE_MPI_BIG_INT,
                  getMFEMProblem().getComm());
   MPI_Allgatherv(normals_local.data(),
-                 3 * n_local,
+                 sdim * n_local,
                  MPI_DOUBLE,
                  normals_all.data(),
                  normal_sizes.data(),
@@ -306,29 +322,43 @@ MFEMTransitionSubMesh::computeVertexAverageOrientations(
     auto & accumulated = vertex_orientations[ids_all[i]];
     if (accumulated.Size() == 0)
     {
-      accumulated.SetSize(3);
+      accumulated.SetSize(sdim);
       accumulated = 0.0;
     }
-    for (const auto d : make_range(3))
-      accumulated[d] += normals_all[3 * i + d];
+    for (const auto d : make_range(sdim))
+      accumulated[d] += normals_all[sdim * i + d];
   }
 
+  checkOrientability(parent_mesh, global_vertex_ids, vertex_orientations);
+
+  return vertex_orientations;
+}
+
+void
+MFEMTransitionSubMesh::checkOrientability(
+    const mfem::ParMesh & parent_mesh,
+    const mfem::Array<HYPRE_BigInt> & global_vertex_ids,
+    const std::map<HYPRE_BigInt, mfem::Vector> & vertex_orientations)
+{
   // An averaged orientation only sorts the sides of the faces that built it while every one of
   // those faces agrees with it to within a right angle. Past that the mesh has oriented
   // neighbouring faces inconsistently, or the surface folds back on itself, and the sign taken in
   // isPositiveSide means nothing.
+  const mfem::Array<int> & parent_bdr_id_map = _boundary_submesh->GetParentElementIDMap();
   int is_inconsistent = 0;
-  for (const auto i : index_range(face_normals))
+  for (const auto i : make_range(parent_bdr_id_map.Size()))
   {
+    const int bdr_el = parent_bdr_id_map[i];
+    const mfem::Vector n = findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_el));
     mfem::Array<int> verts;
-    parent_mesh.GetBdrElementVertices(parent_bdr_id_map[i], verts);
+    parent_mesh.GetBdrElementVertices(bdr_el, verts);
     for (const auto v : verts)
     {
       const mfem::Vector & orientation =
           libmesh_map_find(vertex_orientations, global_vertex_ids[v]);
       double dot = 0.0;
-      for (const auto d : make_range(3))
-        dot += face_normals[i][d] * orientation[d];
+      for (const auto d : make_range(parent_mesh.SpaceDimension()))
+        dot += n[d] * orientation[d];
       if (dot <= 0.0)
         is_inconsistent = 1;
     }
@@ -342,8 +372,6 @@ MFEMTransitionSubMesh::computeVertexAverageOrientations(
                "boundary an element lies on is undefined. The boundary must be an orientable "
                "surface, and must not fold back on itself within the faces meeting at one of its "
                "vertices.");
-
-  return vertex_orientations;
 }
 
 void
