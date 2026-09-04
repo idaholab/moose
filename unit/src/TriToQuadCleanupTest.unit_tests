@@ -1,0 +1,25 @@
+[Tests]
+  design = '/TriToQuadConverter.md'
+  issues = '#33522'
+
+  [tri_template]
+    type = GoogleTest
+    unit_test = TriToQuadCleanupTest.triTemplateIsOneQuadPerCorner
+    requirement = 'The system shall subdivide a triangle into one quadrilateral per corner, each formed by that corner, the midpoints of its two sides and the centroid.'
+  []
+  [quad_template]
+    type = GoogleTest
+    unit_test = TriToQuadCleanupTest.quadTemplateIsOneQuadPerCorner
+    requirement = 'The system shall subdivide a quadrilateral into four quadrilaterals, one per corner, each formed by that corner, the midpoints of its two sides and the centroid.'
+  []
+  [templates_tile_their_element]
+    type = GoogleTest
+    unit_test = TriToQuadCleanupTest.templatesTileTheirElement
+    requirement = 'The system shall subdivide a triangle or quadrilateral into quadrilaterals that cover its area exactly once and are all wound counter-clockwise, with no inverted element.'
+  []
+  [mixed_patch_stays_conformal]
+    type = GoogleTest
+    unit_test = TriToQuadCleanupTest.mixedPatchStaysConformal
+    requirement = 'The system shall keep a patch of triangles and quadrilaterals conformal across shared sides when every element of it is subdivided, with the subdivisions on either side of a shared side meeting at its single midpoint.'
+  []
+[]
