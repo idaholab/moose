@@ -116,6 +116,6 @@ SubdomainInterceptedGenerator::generate()
   }
 
   // Signal that the mesh has been modified and needs preparation.
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return mesh;
 }

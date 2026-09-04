@@ -63,9 +63,11 @@ SubdomainGrainIDGenerator::generate()
   std::unique_ptr<libMesh::MeshBase> mesh = std::move(_input);
 
   std::set<SubdomainID> boundary_subdomain_ids;
-  _boundary_mesh->subdomain_ids(boundary_subdomain_ids);
+  // Bind a const reference so that we call the non-deprecated const subdomain_name() overload.
+  const libMesh::MeshBase & boundary_mesh = *_boundary_mesh;
+  boundary_mesh.subdomain_ids(boundary_subdomain_ids);
   for (const auto subdomain_id : boundary_subdomain_ids)
-    mesh->subdomain_name(subdomain_id) = _boundary_mesh->subdomain_name(subdomain_id);
+    mesh->set_subdomain_name(subdomain_id, boundary_mesh.subdomain_name(subdomain_id));
 
   // (a) read the boundary mesh to be our own data structure
   buildSubdomainGroupedData();
@@ -110,7 +112,7 @@ SubdomainGrainIDGenerator::generate()
   }
 
   // Signal that the mesh has been modified and needs preparation.
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return mesh;
 }
 
