@@ -60,8 +60,8 @@ MFEMPMLStretchVector::jacobian(mfem::ElementTransformation & transformation) con
   _W_h1.GetVectorGradient(transformation, stretch_gradient);
 
   ComplexMatrix jacobian = ComplexMatrix::Identity(_dim, _dim);
-  for (const auto a : make_range(_dim))
-    for (const auto b : make_range(_dim))
+  for (const auto a : libMesh::make_range(_dim))
+    for (const auto b : libMesh::make_range(_dim))
       jacobian(a, b) += std::complex<mfem::real_t>(0.0, stretch_gradient(a, b));
 
   return jacobian;
@@ -81,7 +81,7 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
   // than capping it, and so carries the natural no flux condition instead of being held at one.
   mfem::Array<int> lateral(n_boundary_attributes);
   lateral = 0;
-  for (const auto b : make_range(mesh.GetNBE()))
+  for (const auto b : libMesh::make_range(mesh.GetNBE()))
   {
     int element = -1, info = 0;
     mesh.GetBdrElementAdjacentElement(b, element, info);
@@ -96,7 +96,7 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
   outer_marker = 0;
 
   mfem::Array<int> dofs;
-  for (const auto e : make_range(mesh.GetNE()))
+  for (const auto e : libMesh::make_range(mesh.GetNE()))
     if (!in_pml(mesh.GetAttribute(e)))
     {
       _h1_scalar_fes.GetElementDofs(e, dofs);
@@ -105,7 +105,7 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
     }
 
   int n_outer_faces = 0;
-  for (const auto b : make_range(mesh.GetNBE()))
+  for (const auto b : libMesh::make_range(mesh.GetNBE()))
   {
     int element = -1, info = 0;
     mesh.GetBdrElementAdjacentElement(b, element, info);
@@ -130,7 +130,7 @@ MFEMPMLStretchVector::solveHarmonicCoordinate(mfem::ParMesh & mesh,
 
   _psi = 0.0;
   mfem::Array<int> essential_marker(_h1_scalar_fes.GetVSize());
-  for (const auto d : make_range(_h1_scalar_fes.GetVSize()))
+  for (const auto d : libMesh::make_range(_h1_scalar_fes.GetVSize()))
   {
     essential_marker[d] = interior_marker[d] || outer_marker[d];
     if (outer_marker[d])
@@ -180,7 +180,7 @@ MFEMPMLStretchVector::checkFoliation(mfem::ParMesh & mesh,
   double smallest = std::numeric_limits<double>::max(), largest = 0.0;
   mfem::Vector gradient(_dim);
 
-  for (const auto e : make_range(mesh.GetNE()))
+  for (const auto e : libMesh::make_range(mesh.GetNE()))
   {
     if (pml_attributes.Find(mesh.GetAttribute(e)) == -1)
       continue;
