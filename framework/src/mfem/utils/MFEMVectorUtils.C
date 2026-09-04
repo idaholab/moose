@@ -10,7 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorUtils.h"
-#include "libmesh/int_range.h"
+#include "libMeshReducedNamespace.h"
 
 namespace Moose::MFEM
 {
@@ -27,8 +27,8 @@ libMeshPointsToMFEMVector(const std::vector<libMesh::Point> & points,
 {
   const unsigned int num_points = points.size();
   mfem::Vector mfem_points(num_points * num_dims);
-  for (const auto i_point : libMesh::make_range(num_points))
-    for (const auto i_dim : libMesh::make_range(num_dims))
+  for (const auto i_point : make_range(num_points))
+    for (const auto i_dim : make_range(num_dims))
       mfem_points(MFEMIndex(i_dim, i_point, num_dims, num_points, ordering)) =
           points[i_point](i_dim);
 

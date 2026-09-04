@@ -608,7 +608,8 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else if ("MFEMParsedFunction" != type && "MFEMCoordinateTransformations" != type)
+  else if ("MFEMParsedFunction" != type && "MFEMCoordinateTransformations" != type &&
+           "MFEMScalarQuadratureFunction" != type && "MFEMVectorQuadratureFunction" != type)
   {
     mooseWarning("Could not identify whether function ",
                  type,
@@ -789,15 +790,6 @@ MFEMProblem::addSubMesh(const std::string & var_type,
   auto & mfem_submesh = *addObject<MFEMSubMesh>(var_type, var_name, parameters).front();
   // Register submesh.
   getProblemData().submeshes.Register(var_name, mfem_submesh.getSubMesh());
-}
-
-void
-MFEMProblem::addQuadratureFunction(const std::string & type,
-                                   const std::string & name,
-                                   InputParameters & parameters)
-{
-  // The object declares its coefficient with the CoefficientManager on construction.
-  addObject<MFEMObject>(type, name, parameters);
 }
 
 void

@@ -31,13 +31,13 @@ uses a rule of order $2p$ by default for elements of order $p$, whereas
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/functions/quadrature_function_source.i block=QuadratureFunctions Kernels
+!listing test/tests/mfem/functions/quadrature_function_source.i block=Functions Kernels
 
-!syntax parameters /QuadratureFunctions/MFEMScalarQuadratureFunction
+!syntax parameters /Functions/MFEMScalarQuadratureFunction
 
-!syntax inputs /QuadratureFunctions/MFEMScalarQuadratureFunction
+!syntax inputs /Functions/MFEMScalarQuadratureFunction
 
-!syntax children /QuadratureFunctions/MFEMScalarQuadratureFunction
+!syntax children /Functions/MFEMScalarQuadratureFunction
 
 !if-end!
 

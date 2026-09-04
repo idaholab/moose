@@ -17,13 +17,13 @@ otherwise) are all identical to the scalar case; see [MFEMScalarQuadratureFuncti
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/gravity_qf.i
+!listing test/tests/mfem/kernels/gravity_qf.i block=Functions Kernels
 
-!syntax parameters /QuadratureFunctions/MFEMVectorQuadratureFunction
+!syntax parameters /Functions/MFEMVectorQuadratureFunction
 
-!syntax inputs /QuadratureFunctions/MFEMVectorQuadratureFunction
+!syntax inputs /Functions/MFEMVectorQuadratureFunction
 
-!syntax children /QuadratureFunctions/MFEMVectorQuadratureFunction
+!syntax children /Functions/MFEMVectorQuadratureFunction
 
 !if-end!
 
