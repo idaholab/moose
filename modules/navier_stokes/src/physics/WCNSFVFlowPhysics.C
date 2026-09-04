@@ -77,10 +77,9 @@ WCNSFVFlowPhysics::validParams()
       "porosity_smoothing_layers use_friction_correction consistent_scaling "
       "pressure_drop_sidesets pressure_drop_form_factors",
       "Flow medium discontinuity treatment");
-  params.addParamNamesToGroup("pressure_face_interpolation "
-                              "mass_advection_interpolation momentum_advection_interpolation "
-                              "mass_scaling momentum_scaling characteristic_speed",
-                              "Numerical scheme");
+  params.addParamNamesToGroup(
+      "pressure_face_interpolation mass_advection_interpolation mass_scaling momentum_scaling",
+      "Numerical scheme");
 
   // TODO Add default preconditioning and move scaling parameters to a preconditioning group
 

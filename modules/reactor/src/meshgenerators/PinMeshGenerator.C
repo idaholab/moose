@@ -81,10 +81,9 @@ PinMeshGenerator::validParams()
 
   params.addParam<bool>(
       "quad_center_elements", true, "Whether the center elements are quad or triangular.");
-  params.addParamNamesToGroup("region_ids pin_type", "ID assigment");
-  params.addParamNamesToGroup(
-      "mesh_intervals ring_radii num_sectors pin_type homogenized use_as_assembly",
-      "Pin specifications");
+  params.addParamNamesToGroup("region_ids", "ID assigment");
+  params.addParamNamesToGroup("ring_radii pin_type homogenized use_as_assembly",
+                              "Pin specifications");
   params.addParamNamesToGroup("mesh_intervals duct_halfpitch num_sectors", "Duct specifications");
 
   params.addClassDescription("This PinMeshGenerator object is designed to generate pin-like "

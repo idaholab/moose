@@ -148,6 +148,35 @@ TEST(InputParametersTest, checkSetDocStringError)
       "Unable to set the documentation string (using setDocString)");
 }
 
+TEST(InputParametersTest, addParamNamesToGroup)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  ASSERT_EQ(params.getGroupName("a"), "Group1");
+}
+
+TEST(InputParametersTest, addParamNamesToGroupDuplicateError)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.addParamNamesToGroup("a", "Group2"); },
+      "The parameter 'a' has already been added to the group 'Group1' and cannot be added to "
+      "the group 'Group2' again.");
+}
+
+TEST(InputParametersTest, addParamNamesToGroupDuplicateWithinCallError)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.addParamNamesToGroup("a a", "Group1"); },
+      "The parameter 'a' has already been added to the group 'Group1' and cannot be added to "
+      "the group 'Group1' again.");
+}
+
 TEST(InputParametersTest, setCoupledVar)
 {
   InputParameters params = emptyInputParameters();

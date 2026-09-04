@@ -17,7 +17,6 @@ Material::validParams()
 {
   InputParameters params = MaterialBase::validParams();
   params += MaterialPropertyInterface::validParams();
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   return params;
 }
 

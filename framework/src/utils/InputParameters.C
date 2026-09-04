@@ -1038,7 +1038,18 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
 
   for (const auto & param_name : elements)
     if (_params.count(param_name) > 0)
-      _params[param_name]._group = group_name;
+    {
+      std::string & group = _params[param_name]._group;
+      if (!group.empty())
+        mooseError("The parameter '",
+                   param_name,
+                   "' has already been added to the group '",
+                   group,
+                   "' and cannot be added to the group '",
+                   group_name,
+                   "' again.");
+      group = group_name;
+    }
     else
       mooseError("Unable to find a parameter with name: ",
                  param_name,
