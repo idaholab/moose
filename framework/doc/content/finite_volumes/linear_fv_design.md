@@ -143,6 +143,29 @@ have gradients produced by different methods when different consumers require th
 Adding a new gradient algorithm therefore does not require adding a new set
 of dedicated gradient containers to the system.
 
+Gradient time states are optional. The no-argument `requestCellGradients()` API requests only
+the current gradient and retains the default memory cost of one published field plus one scratch
+field. A consumer that needs history passes the oldest required time-state index during setup.
+Requesting state `n` allocates states `0` through `n`, where state `0` is current, state `1` is
+the most recently accepted timestep, and subsequent indices are older accepted timesteps. State
+requests are cumulative, and because storage is grouped by gradient method, the deepest request
+applies to every variable registered with that method.
+
+The published time states and the scratch field have different purposes. Within-step gradient
+recomputation writes the scratch field and swaps it only with state `0`; it never advances history.
+Gradient history advances with the owning system's solution states, and timestep rejection restores
+state `0` from state `1`. Initial historical states are seeded from the initial current gradient.
+For mesh dimension `d`, system vector size `N`, and oldest requested state `n`, history adds
+approximately `n * d * N * sizeof(Number)` bytes per gradient method, excluding vector bookkeeping
+and ghost entries.
+
+Historical state depth must be requested before solution-state initialization because an accurate
+old state cannot be synthesized later. The current clone-based storage supports fixed-mesh,
+in-memory timestep advancement and rejection. Rebuilding after a mesh or DOF change reinitializes
+the requested depth, but exact historical gradients are not preserved across that rebuild or
+checkpoint recovery. Exact preservation in those cases requires named projectable and restartable
+system vectors.
+
 ## Boundary Conditions
 
 A significant difference compared to other systems in MOOSE is the way
@@ -191,7 +214,6 @@ To create a new boundary condition the following functions need to be overridden
   Continuing with the example above, we add the remaining part of the expression ($-\frac{u_b}{|d_Cf|}$)
   with the opposite sign to the right hand side. The additional multipliers, e.g. the diffusion coefficient
   and the surface area, are factored in at the kernel level.
-
 
 
 
