@@ -48,6 +48,7 @@
     from_variable = 'u_elem'
     block = '0 2'
     from_subdomains = 0
+    weighting_type = average
   []
   [initial_cond_aux]
     type = SolutionIC
@@ -64,6 +65,7 @@
     from_variable = 'u_aux_elem'
     block = '0 1'
     from_subdomains = 0
+    weighting_type = average
   []
 []
 

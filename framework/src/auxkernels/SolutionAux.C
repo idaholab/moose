@@ -21,7 +21,11 @@ SolutionAux::validParams()
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");
   params.addParam<std::string>("from_variable",
                                "The name of the variable to extract from the file");
-
+  params.addParam<MooseEnum>(
+      "weighting_type",
+      SolutionUserObjectBase::weightingType(),
+      "The policy used to select a unique value when the imported solution is multivalued and "
+      "direct is false.");
   params.addParam<bool>(
       "direct",
       false,
@@ -40,6 +44,10 @@ SolutionAux::validParams()
 SolutionAux::SolutionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _solution_object(getUserObject<SolutionUserObjectBase>("solution")),
+    _weighting_type(isParamSetByUser("weighting_type")
+                        ? std::make_optional(getParam<MooseEnum>("weighting_type")
+                                                 .getEnum<SolutionUserObjectBase::WeightingType>())
+                        : std::nullopt),
     _direct(getParam<bool>("direct")),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
@@ -69,6 +77,16 @@ SolutionAux::initialSetup()
     // Define the variable
     _var_name = vars[0];
   }
+  // Validate the imported variable name during setup rather than waiting for the first
+  // evaluation.
+  _solution_object.getLocalVarIndex(_var_name);
+
+  // Require an explicit weighting policy for spatially discontinuous imported variables
+  if (!_direct && _solution_object.isVariableSpatiallyDiscontinuous(_var_name) && !_weighting_type)
+    paramError("weighting_type",
+               "A weighting policy must be specified when the imported variable '",
+               _var_name,
+               "' is spatially discontinuous.");
 }
 
 Real
@@ -90,11 +108,12 @@ SolutionAux::computeValue()
   // _direct=false, extract the values using time and point
   else
   {
-    if (isNodal())
-      output = _solution_object.pointValue(_t, *_current_node, _var_name);
+    const Point p = isNodal() ? Point(*_current_node) : _current_elem->vertex_average();
 
+    if (_weighting_type)
+      output = _solution_object.pointValue(_t, p, _var_name, *_weighting_type);
     else
-      output = _solution_object.pointValue(_t, _current_elem->vertex_average(), _var_name);
+      output = _solution_object.pointValue(_t, p, _var_name);
   }
 
   // Apply factors and return the value

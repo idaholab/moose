@@ -35,6 +35,9 @@ public:
 
   SolutionUserObjectBase(const InputParameters & parameters);
 
+  /// Policies for reducing multiple imported solution values at the same point
+  CreateMooseEnumClass(WeightingType, AVERAGE = 2, SMALLEST_ELEMENT_ID = 4, LARGEST_ELEMENT_ID = 8);
+
   /**
    * Get the time at which to sample the solution
    */
@@ -51,23 +54,6 @@ public:
    * @return The local index of the variable
    */
   unsigned int getLocalVarIndex(const std::string & var_name) const;
-
-  /**
-   * Returns a value at a specific location and variable checking for multiple values and weighting
-   * these values to
-   * obtain a single unique value (see SolutionFunction)
-   * @param t The time at which to extract (not used, it is handled automatically when reading the
-   * data)
-   * @param p The location at which to return a value
-   * @param var_name The variable to be evaluated
-   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
-   * @return The desired value for the given variable at a location
-   */
-  Real pointValueWrapper(Real t,
-                         const Point & p,
-                         const std::string & var_name,
-                         const MooseEnum & weighting_type = weightingType(),
-                         const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns a value at a specific location and variable (see SolutionFunction)
@@ -95,6 +81,23 @@ public:
   Real pointValue(Real t,
                   const Point & p,
                   const std::string & var_name,
+                  const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
+
+  /**
+   * Returns a value at a specific location and variable, reducing multiple values according to the
+   * selected weighting policy.
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @param weighting_type Policy used to reduce multiple values at the same point
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
+   * @return The desired value for the given variable at a location
+   */
+  Real pointValue(Real t,
+                  const Point & p,
+                  const std::string & var_name,
+                  WeightingType weighting_type,
                   const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
@@ -134,31 +137,31 @@ public:
                           const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
-   * Returns the gradient at a specific location and variable checking for multiple values and
-   * weighting these values to
-   * obtain a single unique value (see SolutionFunction)
+   * Returns the gradient at a specific location and variable, reducing multiple gradients according
+   * to the selected weighting policy.
    * @param t The time at which to extract (not used, it is handled automatically when reading the
    * data)
-   * @param p The location at which to return a value
+   * @param p The location at which to return a gradient
    * @param var_name The variable to be evaluated
-   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
-   * @return The desired value for the given variable at a location
+   * @param weighting_type Policy used to reduce multiple gradient values at the same point
+   * @param subdomain_ids Subdomains IDs where to look for the gradient, if nullptr look everywhere
+   * @return The desired gradient for the given variable at a location
    */
   libMesh::RealGradient
-  pointValueGradientWrapper(Real t,
-                            const Point & p,
-                            const std::string & var_name,
-                            const MooseEnum & weighting_type = weightingType(),
-                            const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
+  pointValueGradient(Real t,
+                     const Point & p,
+                     const std::string & var_name,
+                     WeightingType weighting_type,
+                     const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns the gradient at a specific location and variable (see SolutionFunction)
    * @param t The time at which to extract (not used, it is handled automatically when reading the
    * data)
-   * @param p The location at which to return a value
+   * @param p The location at which to return a gradient
    * @param var_name The variable to be evaluated
-   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
-   * @return The desired value for the given variable at a location
+   * @param subdomain_ids Subdomains IDs where to look for the gradient, if nullptr look everywhere
+   * @return The desired gradient for the given variable at a location
    */
   libMesh::RealGradient
   pointValueGradient(Real t,
@@ -170,10 +173,10 @@ public:
    * Returns the gradient at a specific location and variable (see SolutionFunction)
    * @param t The time at which to extract (not used, it is handled automatically when reading the
    * data)
-   * @param p The location at which to return a value
+   * @param p The location at which to return a gradient
    * @param local_var_index The local index of the variable to be evaluated
-   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
-   * @return The desired value for the given variable at a location
+   * @param subdomain_ids Subdomains IDs where to look for the gradient, if nullptr look everywhere
+   * @return The desired gradient for the given variable at a location
    */
   libMesh::RealGradient
   pointValueGradient(Real t,
@@ -188,10 +191,10 @@ public:
    * element!
    * @param t The time at which to extract (not used, it is handled automatically when reading the
    * data)
-   * @param p The location at which to return a value
+   * @param p The location at which to return a gradient
    * @param var_name The variable to be evaluated
-   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
-   * @return The desired value for the given variable at a location
+   * @param subdomain_ids Subdomains IDs where to look for the gradient, if nullptr look everywhere
+   * @return The desired gradient for the given variable at a location
    */
   std::map<const Elem *, libMesh::RealGradient> discontinuousPointValueGradient(
       Real t,
@@ -206,10 +209,10 @@ public:
    * element!
    * @param t The time at which to extract (not used, it is handled automatically when reading the
    * data)
-   * @param p The location at which to return a value
+   * @param p The location at which to return a gradient
    * @param local_var_index The local index of the variable to be evaluated
-   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
-   * @return The desired value for the given variable at a location
+   * @param subdomain_ids Subdomains IDs where to look for the gradient, if nullptr look everywhere
+   * @return The desired gradient for the given variable at a location
    */
   std::map<const Elem *, libMesh::RealGradient> discontinuousPointValueGradient(
       Real t,
@@ -258,11 +261,12 @@ public:
 
   bool isVariableNodal(const std::string & var_name) const;
 
-  static MooseEnum weightingType()
-  {
-    return MooseEnum("found_first=1 average=2 smallest_element_id=4 largest_element_id=8",
-                     "found_first");
-  }
+  static MooseEnum weightingType() { return MooseEnum(getWeightingTypeOptions()); }
+
+  /**
+   * Returns whether the imported variable is a spatially discontinuous finite element field.
+   */
+  bool isVariableSpatiallyDiscontinuous(const std::string & var_name) const;
 
   /**
    * Return the spatial dimension of the mesh file
@@ -531,5 +535,11 @@ protected:
   mutable DenseVector<Number> _cached_values2;
 
 private:
+  /**
+   * Checks that an imported variable is scalar-valued.
+   */
+  void checkVariableIsScalarValued(unsigned int local_var_index,
+                                   const std::string & evaluation_type) const;
+
   static Threads::spin_mutex _solution_user_object_mutex;
 };

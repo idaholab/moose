@@ -18,9 +18,9 @@
 []
 
 [AuxVariables]
-  [./nn]
-    order = FIRST
-    family = LAGRANGE
+  [./en]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -32,10 +32,10 @@
 []
 
 [AuxKernels]
-  [./nn]
+  [./en]
     type = SolutionAux
     solution = soln
-    variable = nn
+    variable = en
     scale_factor = 2.0
     direct = true
   [../]
@@ -45,7 +45,7 @@
   [./soln]
     type = SolutionUserObject
     mesh = cubesource.e
-    system_variables = source_nodal
+    system_variables = source_element
     timestep = 2
   [../]
 []

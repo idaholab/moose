@@ -9,6 +9,8 @@
 
 #include "SolutionUserObjectBase.h"
 
+#include <iterator>
+
 // MOOSE includes
 #include "ConsoleUtils.h"
 #include "MooseError.h"
@@ -32,6 +34,7 @@
 #include "libmesh/nemesis_io_helper.h"
 #include "libmesh/enum_xdr_mode.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/fe_interface.h"
 
 InputParameters
 SolutionUserObjectBase::validParams()
@@ -615,6 +618,30 @@ SolutionUserObjectBase::initialSetup()
   _initialized = true;
 }
 
+bool
+SolutionUserObjectBase::isVariableSpatiallyDiscontinuous(const std::string & var_name) const
+{
+  const auto & fe_type = _system->variable_type(var_name);
+
+  return FEInterface::field_type(fe_type) == libMesh::TYPE_SCALAR &&
+         fe_type.family != libMesh::SCALAR &&
+         FEInterface::get_continuity(fe_type) == libMesh::DISCONTINUOUS;
+}
+
+void
+SolutionUserObjectBase::checkVariableIsScalarValued(const unsigned int local_var_index,
+                                                    const std::string & evaluation_type) const
+{
+  mooseAssert(local_var_index < _system_variables.size(),
+              "The local variable index is outside the range of imported solution variables.");
+
+  const auto & fe_type = _system->variable_type(_system_variables[local_var_index]);
+  if (FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR)
+    mooseError(evaluation_type,
+               " of vector-valued finite element variables is not currently supported by "
+               "SolutionUserObjectBase.");
+}
+
 MooseEnum
 SolutionUserObjectBase::getSolutionFileType() const
 {
@@ -728,64 +755,63 @@ SolutionUserObjectBase::getLocalVarIndex(const std::string & var_name) const
 }
 
 Real
-SolutionUserObjectBase::pointValueWrapper(Real t,
-                                          const Point & p,
-                                          const std::string & var_name,
-                                          const MooseEnum & weighting_type,
-                                          const std::set<subdomain_id_type> * subdomain_ids) const
+SolutionUserObjectBase::pointValue(Real t,
+                                   const Point & p,
+                                   const std::string & var_name,
+                                   WeightingType weighting_type,
+                                   const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  // first check if the FE type is continuous because in that case the value is
-  // unique and we can take a short cut, the default weighting_type found_first also
-  // shortcuts out
-  auto family =
-      _fe_problem
-          .getVariable(
-              _tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD)
-          .feType()
-          .family;
+  // Use multivalued evaluation only for spatial discontinuous scalar fields.
+  const auto & fe_type = _system->variable_type(var_name);
+  const auto continuity = FEInterface::get_continuity(fe_type);
+  const auto field_type = FEInterface::field_type(fe_type);
 
-  if (weighting_type == 1 ||
-      (family != L2_LAGRANGE && family != MONOMIAL && family != L2_HIERARCHIC))
+  if (field_type != libMesh::TYPE_SCALAR || continuity != libMesh::DISCONTINUOUS ||
+      fe_type.family == libMesh::SCALAR)
     return pointValue(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
-  std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name);
+  std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name, subdomain_ids);
+
+  mooseAssert(!values.empty(),
+              "discontinuousPointValue() should error rather than return an empty map.");
+
   switch (weighting_type)
   {
-    case 2:
+    case WeightingType::AVERAGE:
     {
       Real average = 0.0;
       for (auto & v : values)
         average += v.second;
       return average / Real(values.size());
     }
-    case 4:
+    case WeightingType::SMALLEST_ELEMENT_ID:
     {
-      Real smallest_elem_id_value = std::numeric_limits<Real>::max();
-      dof_id_type smallest_elem_id = _fe_problem.mesh().maxElemId();
-      for (auto & v : values)
-        if (v.first->id() < smallest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      Real selected_value = values.begin()->second;
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() < selected_elem_id)
         {
-          smallest_elem_id = v.first->id();
-          smallest_elem_id_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
-      return smallest_elem_id_value;
+      return selected_value;
     }
-    case 8:
+    case WeightingType::LARGEST_ELEMENT_ID:
     {
-      Real largest_elem_id_value = std::numeric_limits<Real>::lowest();
-      dof_id_type largest_elem_id = 0;
-      for (auto & v : values)
-        if (v.first->id() > largest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      Real selected_value = values.begin()->second;
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() > selected_elem_id)
         {
-          largest_elem_id = v.first->id();
-          largest_elem_id_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
-      return largest_elem_id_value;
+      return selected_value;
     }
   }
 
-  mooseError("SolutionUserObjectBase::pointValueWrapper reaches line that it should not be able to "
+  mooseError("SolutionUserObjectBase::pointValue reaches line that it should not be able to "
              "reach.");
   return 0.0;
 }
@@ -806,6 +832,8 @@ SolutionUserObjectBase::pointValue(Real libmesh_dbg_var(t),
                                    const unsigned int local_var_index,
                                    const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point value evaluation");
+
   // Create copy of point
   Point pt(p);
 
@@ -860,6 +888,8 @@ SolutionUserObjectBase::discontinuousPointValue(
     const unsigned int local_var_index,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point value evaluation");
+
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
   {
@@ -887,7 +917,8 @@ SolutionUserObjectBase::discontinuousPointValue(
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
-    std::map<const Elem *, Real> map2 = evalMultiValuedMeshFunction(pt, local_var_index, 2);
+    std::map<const Elem *, Real> map2 =
+        evalMultiValuedMeshFunction(pt, local_var_index, 2, subdomain_ids);
 
     if (map.size() != map2.size())
       mooseError(
@@ -909,56 +940,56 @@ SolutionUserObjectBase::discontinuousPointValue(
 }
 
 RealGradient
-SolutionUserObjectBase::pointValueGradientWrapper(
-    Real t,
-    const Point & p,
-    const std::string & var_name,
-    const MooseEnum & weighting_type,
-    const std::set<subdomain_id_type> * subdomain_ids) const
+SolutionUserObjectBase::pointValueGradient(Real t,
+                                           const Point & p,
+                                           const std::string & var_name,
+                                           WeightingType weighting_type,
+                                           const std::set<subdomain_id_type> * subdomain_ids) const
 {
-  // the default weighting_type found_first shortcuts out
-  if (weighting_type == 1)
-    return pointValueGradient(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
   std::map<const Elem *, RealGradient> values =
       discontinuousPointValueGradient(t, p, var_name, subdomain_ids);
+
+  mooseAssert(!values.empty(),
+              "discontinuousPointValueGradient() should error rather than return an empty map.");
+
   switch (weighting_type)
   {
-    case 2:
+    case WeightingType::AVERAGE:
     {
       RealGradient average = RealGradient(0.0, 0.0, 0.0);
       for (auto & v : values)
         average += v.second;
       return average / Real(values.size());
     }
-    case 4:
+    case WeightingType::SMALLEST_ELEMENT_ID:
     {
-      RealGradient smallest_elem_id_value;
-      dof_id_type smallest_elem_id = _fe_problem.mesh().maxElemId();
-      for (auto & v : values)
-        if (v.first->id() < smallest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      RealGradient selected_value = values.begin()->second;
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() < selected_elem_id)
         {
-          smallest_elem_id = v.first->id();
-          smallest_elem_id_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
-      return smallest_elem_id_value;
+      return selected_value;
     }
-    case 8:
+    case WeightingType::LARGEST_ELEMENT_ID:
     {
-      RealGradient largest_elem_id_value;
-      dof_id_type largest_elem_id = 0;
-      for (auto & v : values)
-        if (v.first->id() > largest_elem_id)
+      dof_id_type selected_elem_id = values.begin()->first->id();
+      RealGradient selected_value = values.begin()->second;
+      for (auto it = std::next(values.begin()); it != values.end(); ++it)
+        if (it->first->id() > selected_elem_id)
         {
-          largest_elem_id = v.first->id();
-          largest_elem_id_value = v.second;
+          selected_elem_id = it->first->id();
+          selected_value = it->second;
         }
-      return largest_elem_id_value;
+      return selected_value;
     }
   }
 
-  mooseError("SolutionUserObjectBase::pointValueGradientWrapper reaches line that it should not be "
+  mooseError("SolutionUserObjectBase::pointValueGradient reaches line that it should not be "
              "able to reach.");
   return RealGradient(0.0, 0.0, 0.0);
 }
@@ -979,6 +1010,8 @@ SolutionUserObjectBase::pointValueGradient(Real libmesh_dbg_var(t),
                                            const unsigned int local_var_index,
                                            const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point gradient evaluation");
+
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
   {
@@ -1030,6 +1063,8 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
     const unsigned int local_var_index,
     const std::set<subdomain_id_type> * subdomain_ids) const
 {
+  checkVariableIsScalarValued(local_var_index, "Point gradient evaluation");
+
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
   {
@@ -1058,18 +1093,18 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
     std::map<const Elem *, RealGradient> map2 =
-        evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
+        evalMultiValuedMeshFunctionGradient(pt, local_var_index, 2, subdomain_ids);
 
     if (map.size() != map2.size())
-      mooseError(
-          "In SolutionUserObjectBase::discontinuousPointValue map and map2 have different size");
+      mooseError("In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have "
+                 "different size");
 
     // construct the interpolated map
     for (auto & k : map)
     {
       if (map2.find(k.first) == map2.end())
-        mooseError(
-            "In SolutionUserObjectBase::discontinuousPointValue map and map2 have differing keys");
+        mooseError("In SolutionUserObjectBase::discontinuousPointValueGradient map and map2 have "
+                   "differing keys");
       RealGradient val = k.second;
       RealGradient val2 = map2[k.first];
       map[k.first] = val + (val2 - val) * _interpolation_factor;
@@ -1116,6 +1151,8 @@ SolutionUserObjectBase::evalMeshFunction(const Point & p,
       _cached_p = p;
       if (subdomain_ids)
         _cached_subdomain_ids = *subdomain_ids;
+      else
+        _cached_subdomain_ids.clear();
       _cached_values = output;
     }
 
@@ -1132,6 +1169,8 @@ SolutionUserObjectBase::evalMeshFunction(const Point & p,
       _cached_p2 = p;
       if (subdomain_ids)
         _cached_subdomain_ids2 = *subdomain_ids;
+      else
+        _cached_subdomain_ids2.clear();
       _cached_values2 = output;
     }
     else
