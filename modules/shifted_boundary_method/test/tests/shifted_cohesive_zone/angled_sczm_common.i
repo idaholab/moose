@@ -121,7 +121,6 @@ x0 = 0.5
   nl_rel_tol = 1e-10
   dt = 1
   end_time = 5
-  abort_on_solve_fail = true
 []
 
 [Outputs]

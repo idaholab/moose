@@ -111,7 +111,6 @@ dt = 1
   nl_rel_tol = 1e-50
   dt = ${dt}
   end_time = 5
-  abort_on_solve_fail = true
 []
 
 [Functions]

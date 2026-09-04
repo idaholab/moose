@@ -174,7 +174,6 @@ nx = '${fparse ny*3/2}'
   nl_rel_tol = 1e-50
   dt = 1
   end_time = 5
-  abort_on_solve_fail = true
 []
 
 [Functions]
