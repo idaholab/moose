@@ -16,9 +16,11 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::validParams()
   InputParameters params = StressUpdateBaseTempl<is_ad>::validParams();
   params.addClassDescription("Base class used to calculate viscoplastic responses to be used in "
                              "ComputeMultiplePorousInelasticStress");
-  params.addParam<Real>("max_inelastic_increment",
-                        1.0e-4,
-                        "The maximum inelastic strain increment allowed in a time step");
+  params.addRangeCheckedParam<Real>(
+      "max_inelastic_increment",
+      1.0e-4,
+      "max_inelastic_increment>0.0",
+      "The maximum inelastic strain increment allowed in a time step");
   params.addParam<std::string>(
       "inelastic_strain_name",
       "viscoplasticity",

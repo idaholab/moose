@@ -48,7 +48,8 @@ protected:
   {
   }
 
-  void updateIntermediatePorosity(const GenericRankTwoTensor<is_ad> & elastic_strain_increment);
+  virtual void
+  updateIntermediatePorosity(const GenericRankTwoTensor<is_ad> & elastic_strain_increment);
 
   /// String designating the base name of the total strain
   const std::string _total_strain_base_name;
@@ -102,10 +103,6 @@ protected:
   usingTransientInterfaceMembers;                                                                  \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_name;                                        \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_qp;                                          \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::isParamValid;                                 \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::paramError;                                   \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::paramWarning;                                 \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::updateState;                                  \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_console;                                     \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_q_point;                                     \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_verbose;                                     \
@@ -114,10 +111,7 @@ protected:
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain_old;              \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_inelastic_strain;                            \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_inelastic_strain_old;                        \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_porosity_old;                                \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity;                   \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressFinalize;                        \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressInitialize
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_porosity_old
 
 typedef ViscoplasticityStressUpdateBaseTempl<false> ViscoplasticityStressUpdateBase;
 typedef ViscoplasticityStressUpdateBaseTempl<true> ADViscoplasticityStressUpdateBase;
