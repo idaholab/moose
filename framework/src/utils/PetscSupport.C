@@ -682,6 +682,7 @@ processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParam
   setSolveTypeFromParams(fe_problem, params);
   setLineSearchFromParams(fe_problem, params);
   setMFFDTypeFromParams(fe_problem, params);
+  setKokkosMatrixFreeFromParams(fe_problem, params);
 }
 
 #define checkPrefix(prefix)                                                                        \
@@ -770,6 +771,24 @@ setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params
     for (const auto i : make_range(fe_problem.numNonlinearSystems()))
       fe_problem.solverParams(i)._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
   }
+}
+
+void
+setKokkosMatrixFreeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  if (params.isParamValid("use_kokkos_matrix_free_jacobian") &&
+      params.get<bool>("use_kokkos_matrix_free_jacobian"))
+    for (const auto i : make_range(fe_problem.numNonlinearSystems()))
+    {
+      auto & solver_params = fe_problem.solverParams(i);
+
+      if (solver_params._type == Moose::ST_PJFNK || solver_params._type == Moose::ST_JFNK)
+        mooseError("'use_kokkos_matrix_free_jacobian' cannot be used with solve_type PJFNK or "
+                   "JFNK, which already provide their own PETSc-native (finite-difference) "
+                   "matrix-free Amat.");
+
+      solver_params._kokkos_matrix_free = true;
+    }
 }
 
 template <typename T>
@@ -1062,8 +1081,19 @@ getPetscValidParams()
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+
+  params.addParam<bool>(
+      "use_kokkos_matrix_free_jacobian",
+      false,
+      "Whether to use an analytic, partial-assembly Kokkos matrix-free Jacobian-vector product "
+      "as SNES's actual Amat, while still assembling the ordinary Jacobian for preconditioning. "
+      "Requires Kokkos kernels/nodal boundary conditions that support the Jacobian-vector "
+      "product (e.g. KernelGrad/KernelValue-derived kernels). Mutually exclusive with the "
+      "PJFNK/JFNK solve types, which already provide their own (approximate, finite-difference) "
+      "matrix-free Amat via PETSc.");
+
   params.addParamNamesToGroup("solve_type petsc_options petsc_options_iname petsc_options_value "
-                              "mffd_type",
+                              "mffd_type use_kokkos_matrix_free_jacobian",
                               "PETSc");
 
   return params;

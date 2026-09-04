@@ -183,6 +183,11 @@ void setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters &
 void setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
+ * Sets the FE problem's Kokkos matrix-free Jacobian-vector product flag from the input params.
+ */
+void setKokkosMatrixFreeFromParams(FEProblemBase & fe_problem, const InputParameters & params);
+
+/**
  * Stores the Petsc flags and pair options fron the input params in the given PetscOptions object.
  */
 void storePetscOptionsFromParams(FEProblemBase & fe_problem, const InputParameters & params);

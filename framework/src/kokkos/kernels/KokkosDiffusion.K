@@ -14,10 +14,10 @@ registerKokkosResidualObject("MooseApp", KokkosDiffusion);
 InputParameters
 KokkosDiffusion::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = KernelGrad::validParams();
   params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
                              "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
   return params;
 }
 
-KokkosDiffusion::KokkosDiffusion(const InputParameters & parameters) : Kernel(parameters) {}
+KokkosDiffusion::KokkosDiffusion(const InputParameters & parameters) : KernelGrad(parameters) {}

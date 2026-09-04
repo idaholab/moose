@@ -17,6 +17,20 @@
 #include "MooseVariableFieldBase.h"
 #include "FEProblemBase.h"
 
+#include "libmesh/petsc_matrix_shell_matrix.h"
+
+namespace
+{
+PetscErrorCode
+mooseKokkosMatShellMult(Mat shell, Vec x, Vec y)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  static_cast<NonlinearSystemBase *>(ctx)->computeKokkosJacobianVectorProduct(x, y);
+  return LIBMESH_PETSC_SUCCESS;
+}
+} // namespace
+
 void
 NonlinearSystemBase::addKokkosKernel(const std::string & kernel_name,
                                      const std::string & name,
@@ -121,6 +135,77 @@ NonlinearSystemBase::setKokkosInitialSolution()
     system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
   disassociateVectorFromTag(solution(), tag);
+}
+
+void
+NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
+{
+  if (_kokkos_mf_enabled)
+    return;
+
+  using Moose::Kokkos::DispatcherRegistry;
+
+  _kokkos_mf_x_tag = _fe_problem.addVectorTag("kokkos_mf_x", Moose::VECTOR_TAG_SOLUTION);
+  _kokkos_mf_y_tag = _fe_problem.addVectorTag("kokkos_mf_y", Moose::VECTOR_TAG_RESIDUAL);
+
+  _kokkos_mf_x = &addVector(_kokkos_mf_x_tag, false, libMesh::GHOSTED);
+
+  for (auto & kernel : _kokkos_kernels.getObjects(0))
+  {
+    auto & object = *std::static_pointer_cast<Moose::Kokkos::ResidualObject>(kernel);
+
+    // A plain (non-factored) kernel admits no partial-assembly decomposition and its matvec hook
+    // is an abort-by-default stub; catch that here with a clean error instead of a device abort.
+    if (DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::JacobianLoop>(
+            object.type()) &&
+        !DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::JacobianVectorProductLoop>(
+            object.type()))
+      mooseError("The Kokkos matrix-free Jacobian-vector product does not support kernel '",
+                 object.name(),
+                 "' of type '",
+                 object.type(),
+                 "', which is a plain (non-factored) kernel. Derive from KernelGrad or "
+                 "KernelValue instead.");
+
+    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag);
+  }
+
+  for (auto & nbc : _kokkos_nodal_bcs.getObjects(0))
+  {
+    auto & object = *std::static_pointer_cast<Moose::Kokkos::ResidualObject>(nbc);
+
+    if (DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::OffDiagJacobianLoop>(
+            object.type()))
+      mooseError("The Kokkos matrix-free Jacobian-vector product does not support the nodal "
+                 "boundary condition '",
+                 object.name(),
+                 "', which has an off-diagonal Jacobian contribution.");
+
+    object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag);
+  }
+
+  // Build the matrix-free Amat shell once, sized from the DofMap (not from Pmat, which need not
+  // be allocated yet), and register it with the PETSc nonlinear solver so every subsequent
+  // solve() call uses it for Amat automatically -- no per-solve swap logic needed on our side.
+  const auto & dof_map = system().get_dof_map();
+  const auto m = dof_map.n_dofs();
+  const auto m_l = dof_map.n_local_dofs();
+
+  _kokkos_mf_shell = std::make_unique<libMesh::PetscMatrixShellMatrix<Number>>(comm());
+  _kokkos_mf_shell->init(m, m, m_l, m_l);
+
+  // Overwrite the context init() set (a pointer to _kokkos_mf_shell itself, needed by no PETSc
+  // operation this class ever registers) with the context our own MatMult callback expects.
+  LibmeshPetscCallA(comm().get(), MatShellSetContext(_kokkos_mf_shell->mat(), this));
+  LibmeshPetscCallA(comm().get(),
+                    MatShellSetOperation(_kokkos_mf_shell->mat(),
+                                         MATOP_MULT,
+                                         (void (*)(void))mooseKokkosMatShellMult));
+
+  libMesh::cast_ptr<libMesh::NonlinearImplicitSystem *>(&system())
+      ->set_operator_matrix(_kokkos_mf_shell.get());
+
+  _kokkos_mf_enabled = true;
 }
 
 void
@@ -534,4 +619,63 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
   }
+}
+
+void
+NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
+{
+  TIME_SECTION("computeKokkosJacobianVectorProduct", 1);
+
+  if (!_kokkos_kernels.hasActiveObjects() && !_kokkos_nodal_bcs.hasActiveObjects())
+    return;
+
+  // Populate the persistent ghosted direction vector from the raw PETSc x, then refresh its
+  // ghost values -- kernels read x by LOCAL (ghost-inclusive) dof index, same as the solution
+  {
+    libMesh::PetscVector<Number> x_wrap(x, comm());
+    *_kokkos_mf_x = x_wrap;
+  }
+
+  auto * const petsc_x = libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_kokkos_mf_x);
+  LibmeshPetscCallA(comm().get(),
+                    VecGhostUpdateBegin(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
+  LibmeshPetscCallA(comm().get(), VecGhostUpdateEnd(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
+
+  // Wrap the raw output vector for the duration of this call only; the caller owns it and must
+  // see the accumulated result once we return
+  LibmeshPetscCallA(comm().get(), VecZeroEntries(y));
+
+  libMesh::PetscVector<Number> y_wrap(y, comm());
+  associateVectorToTag(y_wrap, _kokkos_mf_y_tag);
+
+  auto & systems = _fe_problem.getKokkosFESystems();
+
+  systems[number()].setActiveSolutionTags({_kokkos_mf_x_tag});
+  systems[number()].setActiveResidualTags({_kokkos_mf_y_tag});
+
+  // No reinit(): kernels read _u/_grad_u from the qp-solution cache populated the last time
+  // computeKokkosJacobian() ran, at the same Newton point this matvec must reflect.
+  for (auto & system : systems.constructedEntries())
+    system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+
+  systems.copyToDevice();
+
+  for (auto & kernel : _kokkos_kernels.getActiveObjects())
+    std::static_pointer_cast<Moose::Kokkos::KernelBase>(kernel)->computeJacobianVectorProduct();
+
+  for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
+    std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->computeJacobianVectorProduct();
+
+  for (auto & system : systems.constructedEntries())
+    system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+
+  systems[number()].clearActiveResidualTags();
+
+  for (auto & system : systems.constructedEntries())
+    system.clearActiveSolutionTags();
+
+  disassociateVectorFromTag(y_wrap, _kokkos_mf_y_tag);
+
+  LibmeshPetscCallA(comm().get(), VecAssemblyBegin(y));
+  LibmeshPetscCallA(comm().get(), VecAssemblyEnd(y));
 }

@@ -982,6 +982,9 @@ NonlinearSystemBase::setInitialSolution()
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_kokkos_preset_nodal_bcs.hasObjects())
     setKokkosInitialSolution();
+
+  if (_fe_problem.solverParams(number())._kokkos_matrix_free)
+    setupKokkosMatrixFreeJacobian();
 #endif
 
   _sys.solution->close();

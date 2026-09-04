@@ -59,6 +59,10 @@ class SparseMatrix;
 template <typename T>
 class DiagonalMatrix;
 class DofMapBase;
+#ifdef MOOSE_KOKKOS_ENABLED
+template <typename T>
+class PetscMatrixShellMatrix;
+#endif
 } // namespace libMesh
 
 /**
@@ -307,6 +311,22 @@ public:
 
 #ifdef MOOSE_KOKKOS_ENABLED
   void setKokkosInitialSolution();
+
+  /**
+   * Set up the persistent direction vector and vector tags used by the Kokkos matrix-free
+   * Jacobian-vector product, and propagate the tags to every active Kokkos kernel/nodal BC. Only
+   * called when matrix-free mode is enabled.
+   */
+  void setupKokkosMatrixFreeJacobian();
+
+  /**
+   * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
+   * using the partial-assembly Jacobian-vector product hooks on active Kokkos kernels/nodal BCs.
+   * This is the MatMult callback for the Kokkos matrix-free Amat shell.
+   * @param x The direction vector (owned by the caller, e.g. a PETSc KSP work vector)
+   * @param y The action vector (owned by the caller); zeroed and filled by this call
+   */
+  void computeKokkosJacobianVectorProduct(Vec x, Vec y);
 #endif
 
   /**
@@ -970,6 +990,16 @@ protected:
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_bcs;
   MooseObjectWarehouse<ResidualObject> _kokkos_preset_nodal_bcs;
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
+  ///@}
+
+  ///@{
+  /// Kokkos matrix-free Jacobian-vector product state; only populated when matrix-free mode is
+  /// enabled (setupKokkosMatrixFreeJacobian())
+  bool _kokkos_mf_enabled = false;
+  TagID _kokkos_mf_x_tag = 0;
+  TagID _kokkos_mf_y_tag = 0;
+  NumericVector<Number> * _kokkos_mf_x = nullptr;
+  std::unique_ptr<libMesh::PetscMatrixShellMatrix<Number>> _kokkos_mf_shell;
   ///@}
 #endif
 
