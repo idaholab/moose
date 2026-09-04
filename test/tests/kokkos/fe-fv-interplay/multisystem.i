@@ -27,7 +27,7 @@
     variable = u
   []
   [coupled]
-    type = CoupledForce
+    type = KokkosCoupledForce
     variable = u
     v = v
   []
