@@ -51,21 +51,21 @@ P_out = 2.0e5 # Pa
   crossflow_relaxation = 0.8
   implicit = true
   segregated = false
-  duct_HTC_closure = 'gnielinski'
+  duct_HTC_closure = 'Dittus-Boelter'
   pin_HTC_closure = 'Dittus-Boelter'
-  friction_closure = 'cheng'
-  mixing_closure = 'cheng_todreas'
+  friction_closure = 'Chen'
+  mixing_closure = 'Chen_Todreas'
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
-    type = SCMMixingChengTodreas
+  [Chen_Todreas]
+    type = SCMMixingChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter

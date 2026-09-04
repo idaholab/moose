@@ -83,18 +83,18 @@ P_out = 2.0e5 # Pa
   verbose_subchannel = false
   pin_HTC_closure = 'Dittus-Boelter'
   # friction model
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
   full_output = true
-  mixing_closure = 'cheng_todreas'
+  mixing_closure = 'Chen_Todreas'
 
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
-  [cheng_todreas]
-    type = SCMMixingChengTodreas
+  [Chen_Todreas]
+    type = SCMMixingChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter

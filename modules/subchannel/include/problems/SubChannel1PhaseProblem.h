@@ -44,6 +44,8 @@ public:
   const SCMHTCClosureBase * getDuctHTCClosure() const { return _duct_HTC_closure; }
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
   const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
+  Real getBulkReynoldsNumber() const { return _bulk_Re; }
+  Real getBulkVelocity() const { return _bulk_V; }
 
   /// structure with the needed information to compute the friction factor at a specific subchannel cell
   struct FrictionStruct
@@ -152,6 +154,8 @@ protected:
   virtual void initializeSolution() = 0;
   /// Detects whether pin diameter or duct displacement fields require geometry recalculation
   void detectDeformation();
+  /// Computes the assembly bulk Reynolds number from inlet flow conditions
+  void computeBulkReynoldsNumber();
 
   /// Functions that computes the interpolation scheme given the Peclet number
   PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
@@ -223,6 +227,10 @@ protected:
   const bool _duct_mesh_exist;
   /// Variable that informs whether we exited external solve with a converged solution or not
   bool _converged;
+  /// Assembly bulk Reynolds number
+  Real _bulk_Re;
+  /// Assembly bulk velocity
+  Real _bulk_V;
   /// Whether the time integrator has been checked for consistency with the implementation
   bool _time_integrator_checked = false;
   /// Time step

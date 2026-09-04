@@ -1,11 +1,10 @@
 [Tests]
   design = 'FCTFdisplacementIC.md areva_fctf.md'
   issues = '#30069 #29501'
-  [PNNL-12_ss]
+  [FCTF_ss]
       type = CSVDiff
       input = FCTF_deformed.i
       csvdiff = FCTF_deformed_out.csv
-      # custom_cmp = 'test.exodiff'
       heavy = true
       capabilities = 'method!=dbg'
       valgrind = NONE
