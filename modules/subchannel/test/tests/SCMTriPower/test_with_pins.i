@@ -51,19 +51,19 @@ num_cells = 40
   compute_power = true
   implicit = true
   segregated = false
+  P_tol = 1.0e-4
+  T_tol = 1.0e-5
   verbose_subchannel = true
   interpolation_scheme = upwind
   pin_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
   full_output = true
   mixing_closure = 'cheng_todreas'
-  P_tol = 1.0e-6
-  T_tol = 1.0e-5
 []
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
@@ -75,9 +75,6 @@ num_cells = 40
 []
 
 [ICs]
-
-
-
   [q_prime_ic]
     type = SCMTriPowerIC
     variable = q_prime

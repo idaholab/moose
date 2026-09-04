@@ -1,6 +1,6 @@
-# SCMFrictionUpdatedChengTodreas
+# SCMFrictionUpgradedChengTodreas
 
-!syntax description /SCMClosures/SCMFrictionUpdatedChengTodreas
+!syntax description /SCMClosures/SCMFrictionUpgradedChengTodreas
 
 ## Overview
 
@@ -13,7 +13,7 @@ For triangular lattices, the closure flags a solution warning when $P/D$, wire-w
 In the intermittent regime between the laminar and turbulent friction factor limits, the original Cheng-Todreas treatment has been simplified in this implementation. The interpolation factor is evaluated as
 
 !equation
-\psi = \frac{\ln(Re/Re_L)}{\ln(Re_T/Re_L)}
+\psi = \frac{\ln(Reb/Re_L)}{\ln(Re_T/Re_L)}
 
 using the bulk transition limits
 
@@ -22,8 +22,8 @@ Re_L = 320 \, 10^{P/D - 1}, \qquad Re_T = 10^4 \, 10^{0.7(P/D - 1)} .
 
 These bulk $Re_L$ and $Re_T$ values are used for both triangular and quadrilateral lattice friction factor calculations.
 
-!syntax parameters /SCMClosures/SCMFrictionUpdatedChengTodreas
+!syntax parameters /SCMClosures/SCMFrictionUpgradedChengTodreas
 
-!syntax inputs /SCMClosures/SCMFrictionUpdatedChengTodreas
+!syntax inputs /SCMClosures/SCMFrictionUpgradedChengTodreas
 
-!syntax children /SCMClosures/SCMFrictionUpdatedChengTodreas
+!syntax children /SCMClosures/SCMFrictionUpgradedChengTodreas

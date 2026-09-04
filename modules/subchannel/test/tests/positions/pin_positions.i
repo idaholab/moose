@@ -162,7 +162,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [SCMClosures]
   [Cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
@@ -174,7 +174,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [SCMClosures]
   [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+    type = SCMFrictionUpgradedChengTodreas
   []
 []
 
