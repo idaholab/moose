@@ -88,7 +88,8 @@ protected:
 
   /**
    * Copy published gradient values into requested older time states.
-   * @param skip_current_to_old Whether state zero should not overwrite state one.
+   * @param skip_current_to_old Whether state zero should not overwrite state one while deeper
+   * states still shift, matching the owning system's solution-state advancement.
    */
   void copyPreviousGradientStates(bool skip_current_to_old);
 
