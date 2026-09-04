@@ -53,14 +53,9 @@ protected:
   /// Returns the generated single-mesh interface manager name.
   UserObjectName interfaceManagerName() const;
 
-  /**
-   * Adds the SCZM-specific interface kernels.
-   * Note: This does not 'override' the base method because the base is not virtual.
-   */
-  void addRequiredADSCZMInterfaceKernels();
+  /// Sets SCZM-specific parameters on each generated interface kernel.
+  void customizeCZMInterfaceKernel(InputParameters & params) const override;
 
-  /**
-   * Adds the SCZM-specific interface materials for jumps and tractions.
-   */
-  void addRequiredSCZMInterfaceMaterials();
+  /// Sets SCZM-specific parameters on the generated displacement jump material.
+  void customizeCZMDisplacementJump(InputParameters & params) const override;
 };

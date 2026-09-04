@@ -33,6 +33,12 @@ protected:
   /// adds the required interface materials based on the selected strain formulation
   void addRequiredCZMInterfaceMaterials();
 
+  /// Allows derived actions to set parameters on each generated interface kernel.
+  virtual void customizeCZMInterfaceKernel(InputParameters & params) const;
+
+  /// Allows derived actions to set parameters on the generated displacement jump material.
+  virtual void customizeCZMDisplacementJump(InputParameters & params) const;
+
   /// verifies order and family of output variables
   void verifyOrderAndFamilyOutputs();
 

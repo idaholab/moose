@@ -167,6 +167,15 @@ ShiftedCohesiveZoneAction::ShiftedCohesiveZoneAction(const InputParameters & par
                "Specify only one of 'sbm_distance_uo', 'generate_sbm_distance', and "
                "'complete_interface_mesh'.");
 
+  if (!generate_distance && isParamSetByUser("surface_meshes"))
+    paramError("surface_meshes", "This parameter is only valid with 'generate_sbm_distance=true'.");
+  if (!generate_distance && isParamSetByUser("check_surface_watertightness"))
+    paramError("check_surface_watertightness",
+               "This parameter is only valid with 'generate_sbm_distance=true'.");
+  if (!has_complete_interface_mesh && isParamSetByUser("interface_matching_tolerance"))
+    paramError("interface_matching_tolerance",
+               "This parameter is only valid with 'complete_interface_mesh'.");
+
   if (generate_distance)
   {
     const auto surface_meshes = surfaceMeshNames();
@@ -313,9 +322,9 @@ ShiftedCohesiveZoneAction::act()
            (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh")))
     addSBMDistanceUserObjects();
   else if (_current_task == "add_interface_kernel")
-    addRequiredADSCZMInterfaceKernels();
+    addRequiredCZMInterfaceKernels();
   else if (_current_task == "add_master_action_material")
-    addRequiredSCZMInterfaceMaterials();
+    addRequiredCZMInterfaceMaterials();
 
   // optional, add required outputs
   actOutputGeneration();
@@ -412,106 +421,48 @@ ShiftedCohesiveZoneAction::addSBMDistanceUserObjects()
 }
 
 void
-ShiftedCohesiveZoneAction::addRequiredADSCZMInterfaceKernels()
+ShiftedCohesiveZoneAction::customizeCZMInterfaceKernel(InputParameters & params) const
 {
-  for (unsigned int i = 0; i < _ndisp; ++i)
+  if (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh"))
+    params.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();
+  else if (isParamSetByUser("sbm_distance_uo"))
+    params.set<UserObjectName>("sbm_distance_uo") = getParam<UserObjectName>("sbm_distance_uo");
+  if (isParamSetByUser("no_shifted"))
+    params.set<bool>("no_shifted") = getParam<bool>("no_shifted");
+  if (isParamSetByUser("directional_correction"))
+    params.set<bool>("directional_correction") = getParam<bool>("directional_correction");
+  if (isParamSetByUser("stress"))
+    params.set<MaterialPropertyName>("stress") = getParam<MaterialPropertyName>("stress");
+  if (isParamSetByUser("tangent"))
+    params.set<MaterialPropertyName>("tangent") = getParam<MaterialPropertyName>("tangent");
+  if (isParamSetByUser("tangent_definition") && params.isParamValid("tangent_definition"))
+    params.set<MooseEnum>("tangent_definition") = getParam<MooseEnum>("tangent_definition");
+
+  if (params.isParamValid("volumetric_locking_correction"))
   {
-    // Create unique kernel name for each displacement component
-    std::string unique_kernel_name = _czm_kernel_name + "_" + _name + "_" + Moose::stringify(i);
-
-    InputParameters paramsk = _factory.getValidParams(_czm_kernel_name);
-
-    paramsk.set<unsigned int>("component") = i;
-    paramsk.set<NonlinearVariableName>("variable") = _displacements[i];
-    paramsk.set<std::vector<VariableName>>("neighbor_var") = {_displacements[i]};
-    paramsk.set<std::vector<VariableName>>("displacements") = _displacements;
-    paramsk.set<std::vector<BoundaryName>>("boundary") = _boundary;
-    paramsk.set<std::string>("base_name") = _base_name;
-
-    // Set SCZM-specific parameters
-    if (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh"))
-      paramsk.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();
-    else if (isParamSetByUser("sbm_distance_uo"))
-      paramsk.set<UserObjectName>("sbm_distance_uo") = getParam<UserObjectName>("sbm_distance_uo");
-    if (isParamSetByUser("no_shifted"))
-      paramsk.set<bool>("no_shifted") = getParam<bool>("no_shifted");
-    if (isParamSetByUser("directional_correction"))
-      paramsk.set<bool>("directional_correction") = getParam<bool>("directional_correction");
-
-    if (isParamSetByUser("stress"))
-      paramsk.set<MaterialPropertyName>("stress") = getParam<MaterialPropertyName>("stress");
-    if (isParamSetByUser("tangent"))
-      paramsk.set<MaterialPropertyName>("tangent") = getParam<MaterialPropertyName>("tangent");
-    if (isParamSetByUser("tangent_definition") && paramsk.isParamValid("tangent_definition"))
-      paramsk.set<MooseEnum>("tangent_definition") = getParam<MooseEnum>("tangent_definition");
-    const bool user_set_volumetric_locking_correction =
-        isParamSetByUser("volumetric_locking_correction");
-    const bool inherited_volumetric_locking_correction =
-        getInheritedVolumetricLockingCorrection(_awh);
-    if (paramsk.isParamValid("volumetric_locking_correction"))
+    const bool inherited_correction = getInheritedVolumetricLockingCorrection(_awh);
+    if (isParamSetByUser("volumetric_locking_correction"))
     {
-      // If the user explicitly sets the parameter, use that value. Otherwise, inherit from the
-      // physics block.
-      if (user_set_volumetric_locking_correction)
-      {
-        paramsk.set<bool>("volumetric_locking_correction") =
-            getParam<bool>("volumetric_locking_correction");
-        if (getParam<bool>("volumetric_locking_correction") !=
-            inherited_volumetric_locking_correction)
-          mooseWarning(
-              "ShiftedCohesiveZoneAction: 'volumetric_locking_correction' value in "
-              "ShiftedCohesiveZone block "
-              "is different from that in the physics block(s). Make sure this is intended.");
-      }
-      else
-        paramsk.set<bool>("volumetric_locking_correction") =
-            inherited_volumetric_locking_correction;
+      params.set<bool>("volumetric_locking_correction") =
+          getParam<bool>("volumetric_locking_correction");
+      if (getParam<bool>("volumetric_locking_correction") != inherited_correction)
+        mooseWarning(
+            "ShiftedCohesiveZoneAction: 'volumetric_locking_correction' value in "
+            "ShiftedCohesiveZone block is different from that in the physics block(s). Make sure "
+            "this is intended.");
     }
-    std::string save_in_side;
-    std::vector<AuxVariableName> save_in_var_names;
-    if (_save_in_primary.size() == _ndisp || _save_in_secondary.size() == _ndisp)
-    {
-      prepareSaveInInputs(save_in_var_names, save_in_side, _save_in_primary, _save_in_secondary, i);
-      paramsk.set<std::vector<AuxVariableName>>("save_in") = save_in_var_names;
-      paramsk.set<MultiMooseEnum>("save_in_var_side") = save_in_side;
-    }
-    if (_diag_save_in_primary.size() == _ndisp || _diag_save_in_secondary.size() == _ndisp)
-    {
-      prepareSaveInInputs(
-          save_in_var_names, save_in_side, _diag_save_in_primary, _diag_save_in_secondary, i);
-      paramsk.set<std::vector<AuxVariableName>>("diag_save_in") = save_in_var_names;
-      paramsk.set<MultiMooseEnum>("diag_save_in_var_side") = save_in_side;
-    }
-    _problem->addInterfaceKernel(_czm_kernel_name, unique_kernel_name, paramsk);
+    else
+      params.set<bool>("volumetric_locking_correction") = inherited_correction;
   }
 }
 
 void
-ShiftedCohesiveZoneAction::addRequiredSCZMInterfaceMaterials()
+ShiftedCohesiveZoneAction::customizeCZMDisplacementJump(InputParameters & params) const
 {
-  // Add the Shifted Displacement Jump Material
-  std::string unique_material_name = _disp_jump_provider_name + "_" + _name;
-  InputParameters params_jump = _factory.getValidParams(_disp_jump_provider_name);
-  params_jump.set<std::vector<BoundaryName>>("boundary") = _boundary;
-  params_jump.set<std::vector<VariableName>>("displacements") = _displacements;
-  params_jump.set<std::string>("base_name") = _base_name;
-
-  // Set SCZM-specific parameters
   if (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh"))
-    params_jump.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();
+    params.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();
   else if (isParamSetByUser("sbm_distance_uo"))
-    params_jump.set<UserObjectName>("sbm_distance_uo") =
-        getParam<UserObjectName>("sbm_distance_uo");
+    params.set<UserObjectName>("sbm_distance_uo") = getParam<UserObjectName>("sbm_distance_uo");
   if (isParamSetByUser("no_shifted"))
-    params_jump.set<bool>("no_shifted") = getParam<bool>("no_shifted");
-
-  _problem->addInterfaceMaterial(_disp_jump_provider_name, unique_material_name, params_jump);
-
-  // Add the Shifted Traction Material (traction calculation remains the same as standard CZM)
-  unique_material_name = _equilibrium_traction_calculator_name + "_" + _name;
-  InputParameters params_traction = _factory.getValidParams(_equilibrium_traction_calculator_name);
-  params_traction.set<std::vector<BoundaryName>>("boundary") = _boundary;
-  params_traction.set<std::string>("base_name") = _base_name;
-  _problem->addInterfaceMaterial(
-      _equilibrium_traction_calculator_name, unique_material_name, params_traction);
+    params.set<bool>("no_shifted") = getParam<bool>("no_shifted");
 }

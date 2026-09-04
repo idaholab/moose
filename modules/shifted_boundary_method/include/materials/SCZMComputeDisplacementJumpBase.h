@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "InterfaceMaterial.h"
+#include "CZMComputeDisplacementJumpBase.h"
 #include "BoundaryShortestDistanceToSurface.h"
 
 #define usingSCZMComputeDisplacementJumpBaseMembers                                                \
@@ -28,51 +28,32 @@
  * computeLocalDisplacementJump.
  */
 template <bool is_ad>
-class SCZMComputeDisplacementJumpBase : public InterfaceMaterial
+class SCZMComputeDisplacementJumpBase : public CZMComputeDisplacementJumpBase<is_ad>
 {
 public:
   static InputParameters validParams();
   SCZMComputeDisplacementJumpBase(const InputParameters & parameters);
 
 protected:
-  void computeQpProperties() override;
-  void initQpStatefulProperties() override;
+  using CZMComputeDisplacementJumpBase<is_ad>::_czm_total_rotation;
+  using CZMComputeDisplacementJumpBase<is_ad>::_displacement_jump_global;
+  using CZMComputeDisplacementJumpBase<is_ad>::_mesh;
+  using CZMComputeDisplacementJumpBase<is_ad>::_ndisp;
+  using CZMComputeDisplacementJumpBase<is_ad>::_qp;
 
   virtual void initialSetup() override final;
 
-  /// method used to compute the disaplcement jump in interface coordinates according to a
-  ///  specific kinematic formulation
-  virtual void computeLocalDisplacementJump() = 0;
+  /// Computes the jump at the true interface using displacement gradients.
+  void computeGlobalDisplacementJump() override;
 
-  /// method computing the required rotation matrices
-  virtual void computeRotationMatrices();
-
-  /// Base name of the material system
-  const std::string _base_name;
-
-  /// number of displacement components
-  const unsigned int _ndisp;
-
-  /// the coupled displacement and neighbor displacement values
-  ///@{
-  std::vector<const GenericVariableValue<is_ad> *> _disp;
-  std::vector<const GenericVariableValue<is_ad> *> _disp_neighbor;
-  ///@}
+  /// Computes the rotation using the true-interface normal.
+  void computeRotationMatrices() override;
 
   /// the coupled displacement gradients
   ///@{
   std::vector<const GenericVariableGradient<is_ad> *> _grad_disp;
   std::vector<const GenericVariableGradient<is_ad> *> _grad_disp_neighbor;
   ///@}
-
-  /// the displacement jump in global and interface coordiantes
-  ///@{
-  GenericMaterialProperty<RealVectorValue, is_ad> & _displacement_jump_global;
-  GenericMaterialProperty<RealVectorValue, is_ad> & _interface_displacement_jump;
-  ///@}
-
-  /// the rotation matrix transforming from the interface to the global coordinate systems
-  GenericMaterialProperty<RankTwoTensor, is_ad> & _czm_total_rotation;
 
   /// @brief  Flag indicating whether shifted terms are included
   bool _shifted;
