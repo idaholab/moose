@@ -25,7 +25,8 @@
 class MooseApp;
 
 /**
- * Type definition for a variant that can hold all the supported types for lattice attributes
+ * Type definition for a variant that can hold all the supported types for lattice and CSG
+ * engineering unit attributes
  */
 typedef std::variant<int,
                      unsigned int,
@@ -36,7 +37,8 @@ typedef std::variant<int,
                      std::vector<unsigned int>,
                      std::vector<std::string>,
                      std::vector<Real>,
-                     std::vector<bool>>
+                     std::vector<bool>,
+                     std::vector<std::vector<std::string>>>
     AttributeVariant;
 
 namespace libMesh
