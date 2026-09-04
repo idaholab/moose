@@ -1,0 +1,35 @@
+[Tests]
+  design = '/XYFrontalDelaunayGenerator.md'
+  issues = '#33522'
+
+  [duplicate_point]
+    type = GoogleTest
+    unit_test = XYIncrementalDelaunayTest.duplicatePointReturnsExistingVertex
+    requirement = 'The system shall return the existing vertex when a point identical to one already in the incremental Delaunay triangulation is inserted, leaving the point set and the triangulation unchanged.'
+  []
+  [regular_grid]
+    type = GoogleTest
+    unit_test = XYIncrementalDelaunayTest.regularGridStaysDelaunayAfterEveryInsertion
+    requirement = 'The system shall keep the incremental triangulation Delaunay after every insertion of the points of a regular grid, whose cells have exactly cocircular corners.'
+  []
+  [collinear_points]
+    type = GoogleTest
+    unit_test = XYIncrementalDelaunayTest.collinearPointsStayDelaunayAfterEveryInsertion
+    requirement = 'The system shall keep the incremental triangulation Delaunay after every insertion of a point set with collinear points on the convex hull, splitting the hull edge at every collinear point.'
+  []
+  [constrained_segment_survives]
+    type = GoogleTest
+    unit_test = XYIncrementalDelaunayTest.constrainedSegmentSurvivesInsertions
+    requirement = 'The system shall keep a constrained segment as an edge of the incremental triangulation through every later insertion, even where an unconstrained Delaunay triangulation would flip it away.'
+  []
+  [point_on_constrained_segment]
+    type = GoogleTest
+    unit_test = XYIncrementalDelaunayTest.pointOnConstrainedSegmentSplitsIt
+    requirement = 'The system shall split a constrained segment at a point inserted exactly on it and constrain both halves in its place.'
+  []
+  [euler_formula]
+    type = GoogleTest
+    unit_test = XYIncrementalDelaunayTest.triangleCountMatchesEulerFormula
+    requirement = 'The system shall report from the incremental triangulation the triangles covering exactly the convex hull of the inserted points, in the number the Euler formula gives for that hull.'
+  []
+[]

@@ -25,6 +25,55 @@
 namespace MeshTriangulationUtils
 {
 
+std::set<std::size_t>
+outerBoundaryIds(MeshGenerator & mg, MeshBase & boundary_mesh, const XYDelaunayOptions & opts)
+{
+  std::set<std::size_t> bdy_ids;
+
+  if (!opts.input_boundary_names.empty())
+  {
+    if (!opts.input_subdomain_names.empty())
+      mg.paramError(
+          "input_subdomain_names",
+          "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
+
+    for (const auto & name : opts.input_boundary_names)
+    {
+      auto bcid = MooseMeshUtils::getBoundaryID(name, boundary_mesh);
+      if (bcid == BoundaryInfo::invalid_id)
+        mg.paramError("input_boundary_names", name, " is not a boundary name in the input mesh");
+
+      bdy_ids.insert(bcid);
+    }
+  }
+
+  if (!opts.input_subdomain_names.empty())
+  {
+    // Make sure subdomain info caches are up to date
+    if (!boundary_mesh.preparation().has_cached_elem_data)
+      boundary_mesh.cache_elem_data();
+
+    const auto subdomain_ids =
+        MooseMeshUtils::getSubdomainIDs(boundary_mesh, opts.input_subdomain_names);
+
+    // Check that the requested subdomains exist in the mesh
+    std::set<SubdomainID> subdomains;
+    boundary_mesh.subdomain_ids(subdomains);
+
+    for (auto i : index_range(subdomain_ids))
+    {
+      if (subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(subdomain_ids[i]))
+        mg.paramError("input_subdomain_names",
+                      opts.input_subdomain_names[i],
+                      " was not found in the boundary mesh");
+
+      bdy_ids.insert(subdomain_ids[i]);
+    }
+  }
+
+  return bdy_ids;
+}
+
 std::unique_ptr<MeshBase>
 triangulateWithDelaunay(MeshGenerator & mg,
                         std::unique_ptr<MeshBase> boundary_mesh,
@@ -41,48 +90,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
 
   // If we're using a user-requested subset of boundaries on that
   // mesh, get their ids.
-  std::set<std::size_t> bdy_ids;
-
-  if (!xyd_opts.input_boundary_names.empty())
-  {
-    if (!xyd_opts.input_subdomain_names.empty())
-      mg.paramError(
-          "input_subdomain_names",
-          "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
-
-    for (const auto & name : xyd_opts.input_boundary_names)
-    {
-      auto bcid = MooseMeshUtils::getBoundaryID(name, *mesh);
-      if (bcid == BoundaryInfo::invalid_id)
-        mg.paramError("input_boundary_names", name, " is not a boundary name in the input mesh");
-
-      bdy_ids.insert(bcid);
-    }
-  }
-
-  if (!xyd_opts.input_subdomain_names.empty())
-  {
-    // Make sure subdomain info caches are up to date
-    if (!mesh->preparation().has_cached_elem_data)
-      mesh->cache_elem_data();
-
-    const auto subdomain_ids =
-        MooseMeshUtils::getSubdomainIDs(*mesh, xyd_opts.input_subdomain_names);
-
-    // Check that the requested subdomains exist in the mesh
-    std::set<SubdomainID> subdomains;
-    mesh->subdomain_ids(subdomains);
-
-    for (auto i : index_range(subdomain_ids))
-    {
-      if (subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(subdomain_ids[i]))
-        mg.paramError("input_subdomain_names",
-                      xyd_opts.input_subdomain_names[i],
-                      " was not found in the boundary mesh");
-
-      bdy_ids.insert(subdomain_ids[i]);
-    }
-  }
+  const std::set<std::size_t> bdy_ids = outerBoundaryIds(mg, *mesh, xyd_opts);
 
   if (!bdy_ids.empty())
     poly2tri.set_outer_boundary_ids(bdy_ids);
@@ -169,25 +177,36 @@ triangulateWithDelaunay(MeshGenerator & mg,
 
   poly2tri.triangulate();
 
-  SubdomainID output_subdomain_id =
-      xyd_opts.has_output_subdomain_id ? xyd_opts.output_subdomain_id : 0;
+  finalizeTriangulation(mg, *mesh, hole_meshes, holes_with_midpoints, xyd_opts);
 
-  if (xyd_opts.has_output_subdomain_name)
+  return mesh;
+}
+
+void
+finalizeTriangulation(MeshGenerator & mg,
+                      UnstructuredMesh & mesh,
+                      std::vector<std::unique_ptr<MeshBase>> & holes,
+                      const std::vector<bool> & holes_with_midpoints,
+                      const XYDelaunayOptions & opts)
+{
+  SubdomainID output_subdomain_id = opts.has_output_subdomain_id ? opts.output_subdomain_id : 0;
+
+  if (opts.has_output_subdomain_name)
   {
-    auto id = MooseMeshUtils::getSubdomainID(xyd_opts.output_subdomain_name, *mesh);
+    auto id = MooseMeshUtils::getSubdomainID(opts.output_subdomain_name, mesh);
 
     if (id == Elem::invalid_subdomain_id)
     {
-      if (!xyd_opts.has_output_subdomain_id)
+      if (!opts.has_output_subdomain_id)
       {
         // We'll probably need to make a new ID, then
-        output_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+        output_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(mesh);
 
         // But check the hole meshes for our output subdomain name too
-        for (auto & hole_ptr : hole_meshes)
+        for (auto & hole_ptr : holes)
         {
           auto possible_sbdid =
-              MooseMeshUtils::getSubdomainID(xyd_opts.output_subdomain_name, *hole_ptr);
+              MooseMeshUtils::getSubdomainID(opts.output_subdomain_name, *hole_ptr);
           // Huh, it was in one of them
           if (possible_sbdid != Elem::invalid_subdomain_id)
           {
@@ -201,7 +220,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
     }
     else
     {
-      if (xyd_opts.has_output_subdomain_id)
+      if (opts.has_output_subdomain_id)
       {
         if (id != output_subdomain_id)
           mg.paramError("output_subdomain_name",
@@ -212,18 +231,18 @@ triangulateWithDelaunay(MeshGenerator & mg,
         output_subdomain_id = id;
     }
     // We do not want to set an empty subdomain name
-    if (xyd_opts.output_subdomain_name.size())
-      mesh->set_subdomain_name(output_subdomain_id, xyd_opts.output_subdomain_name);
+    if (opts.output_subdomain_name.size())
+      mesh.set_subdomain_name(output_subdomain_id, opts.output_subdomain_name);
   }
 
-  if (xyd_opts.smooth_tri || output_subdomain_id)
-    for (auto elem : mesh->element_ptr_range())
+  if (opts.smooth_tri || output_subdomain_id)
+    for (auto elem : mesh.element_ptr_range())
     {
-      mooseAssert(elem->type() == (xyd_opts.tri_elem_type == "TRI6"
-                                       ? TRI6
-                                       : (xyd_opts.tri_elem_type == "TRI7" ? TRI7 : TRI3)),
-                  "Unexpected element type " << libMesh::Utility::enum_to_string(elem->type())
-                                             << " found in triangulation");
+      mooseAssert(
+          elem->type() ==
+              (opts.tri_elem_type == "TRI6" ? TRI6 : (opts.tri_elem_type == "TRI7" ? TRI7 : TRI3)),
+          "Unexpected element type " << libMesh::Utility::enum_to_string(elem->type())
+                                     << " found in triangulation");
 
       elem->subdomain_id() = output_subdomain_id;
 
@@ -232,7 +251,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
       // smoothing options, but even those might have failure cases.
       // Better to always do extra tests here than to ever let users
       // try to run on a degenerate mesh.
-      if (xyd_opts.smooth_tri)
+      if (opts.smooth_tri)
       {
         auto cross_prod = (elem->point(1) - elem->point(0)).cross(elem->point(2) - elem->point(0));
 
@@ -253,31 +272,31 @@ triangulateWithDelaunay(MeshGenerator & mg,
   // but we can't even use this for mesh stitching, because we can't
   // be sure it isn't also already in use on the hole's mesh and so we
   // won't be able to safely clear it afterwards.
-  const boundary_id_type end_bcid = hole_meshes.size() + 1;
+  const boundary_id_type end_bcid = holes.size() + 1;
 
   // If a hole has its boundary layer mesh, we need to move the hole bcid to the "real" hole
   // boundary in the boundary layer mesh. So we need to record them here.
-  std::vector<BoundaryID> hole_boundary_rec(hole_meshes.size());
+  std::vector<BoundaryID> hole_boundary_rec(holes.size());
   std::iota(hole_boundary_rec.begin(), hole_boundary_rec.end(), 1);
 
   // For the hole meshes that need to be stitched, we would like to make sure the hole boundary ids
   // and output boundary id are not conflicting with the existing boundary ids of the hole meshes to
   // be stitched.
   BoundaryID free_boundary_id = 0;
-  if (xyd_opts.stitch_holes.size())
+  if (opts.stitch_holes.size())
   {
-    for (auto hole_i : index_range(hole_meshes))
+    for (auto hole_i : index_range(holes))
     {
-      if (xyd_opts.stitch_holes[hole_i])
+      if (opts.stitch_holes[hole_i])
       {
         free_boundary_id =
-            std::max(free_boundary_id, MooseMeshUtils::getNextFreeBoundaryID(*hole_meshes[hole_i]));
-        hole_meshes[hole_i]->comm().max(free_boundary_id);
+            std::max(free_boundary_id, MooseMeshUtils::getNextFreeBoundaryID(*holes[hole_i]));
+        holes[hole_i]->comm().max(free_boundary_id);
       }
     }
-    for (auto h : index_range(hole_meshes))
+    for (auto h : index_range(holes))
     {
-      libMesh::MeshTools::Modification::change_boundary_id(*mesh, h + 1, h + 1 + free_boundary_id);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, h + 1, h + 1 + free_boundary_id);
       hole_boundary_rec[h] = h + 1 + free_boundary_id;
     }
   }
@@ -288,43 +307,43 @@ triangulateWithDelaunay(MeshGenerator & mg,
   // numbers because e.g. "0->2, 2->0" is impossible to do
   // sequentially, but "0->N, 2->N+2, N->2, N+2->0" works.
   libMesh::MeshTools::Modification::change_boundary_id(
-      *mesh, 0, (xyd_opts.has_output_boundary ? end_bcid : 0) + free_boundary_id);
+      mesh, 0, (opts.has_output_boundary ? end_bcid : 0) + free_boundary_id);
 
-  if (!xyd_opts.hole_boundaries.empty())
+  if (!opts.hole_boundaries.empty())
   {
-    auto hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, xyd_opts.hole_boundaries, true);
+    auto hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(mesh, opts.hole_boundaries, true);
 
-    for (auto h : index_range(hole_meshes))
+    for (auto h : index_range(holes))
       libMesh::MeshTools::Modification::change_boundary_id(
-          *mesh, h + 1 + free_boundary_id, h + 1 + free_boundary_id + end_bcid);
+          mesh, h + 1 + free_boundary_id, h + 1 + free_boundary_id + end_bcid);
 
-    for (auto h : index_range(hole_meshes))
+    for (auto h : index_range(holes))
     {
       libMesh::MeshTools::Modification::change_boundary_id(
-          *mesh, h + 1 + free_boundary_id + end_bcid, hole_boundary_ids[h]);
+          mesh, h + 1 + free_boundary_id + end_bcid, hole_boundary_ids[h]);
       hole_boundary_rec[h] = hole_boundary_ids[h];
-      mesh->get_boundary_info().sideset_name(hole_boundary_ids[h]) = xyd_opts.hole_boundaries[h];
+      mesh.get_boundary_info().sideset_name(hole_boundary_ids[h]) = opts.hole_boundaries[h];
       new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(hole_boundary_ids[h] + 1));
     }
   }
 
-  if (xyd_opts.has_output_boundary)
+  if (opts.has_output_boundary)
   {
     const std::vector<BoundaryID> output_boundary_id =
-        MooseMeshUtils::getBoundaryIDs(*mesh, {xyd_opts.output_boundary}, true);
+        MooseMeshUtils::getBoundaryIDs(mesh, {opts.output_boundary}, true);
 
     libMesh::MeshTools::Modification::change_boundary_id(
-        *mesh, end_bcid + free_boundary_id, output_boundary_id[0]);
-    mesh->get_boundary_info().sideset_name(output_boundary_id[0]) = xyd_opts.output_boundary;
+        mesh, end_bcid + free_boundary_id, output_boundary_id[0]);
+    mesh.get_boundary_info().sideset_name(output_boundary_id[0]) = opts.output_boundary;
 
     new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(output_boundary_id[0] + 1));
   }
 
   bool doing_stitching = false;
 
-  for (auto hole_i : index_range(hole_meshes))
+  for (auto hole_i : index_range(holes))
   {
-    const MeshBase & hole_mesh = *hole_meshes[hole_i];
+    const MeshBase & hole_mesh = *holes[hole_i];
     auto & hole_boundary_info = hole_mesh.get_boundary_info();
     const std::set<boundary_id_type> & local_hole_bcids = hole_boundary_info.get_boundary_ids();
 
@@ -332,7 +351,7 @@ triangulateWithDelaunay(MeshGenerator & mg,
       new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(*local_hole_bcids.rbegin() + 1));
     hole_mesh.comm().max(new_hole_bcid);
 
-    if (hole_i < xyd_opts.stitch_holes.size() && xyd_opts.stitch_holes[hole_i])
+    if (hole_i < opts.stitch_holes.size() && opts.stitch_holes[hole_i])
       doing_stitching = true;
   }
 
@@ -340,21 +359,21 @@ triangulateWithDelaunay(MeshGenerator & mg,
 
   // libMesh mesh stitching still requires a serialized mesh, and it's
   // cheaper to do that once than to do it once-per-hole
-  libMesh::MeshSerializer serial(*mesh, doing_stitching);
+  libMesh::MeshSerializer serial(mesh, doing_stitching);
 
   // Define a reference map variable for subdomain map
-  auto & main_subdomain_map = mesh->set_subdomain_name_map();
-  for (auto hole_i : index_range(hole_meshes))
+  auto & main_subdomain_map = mesh.set_subdomain_name_map();
+  for (auto hole_i : index_range(holes))
   {
-    if (hole_i < xyd_opts.stitch_holes.size() && xyd_opts.stitch_holes[hole_i])
+    if (hole_i < opts.stitch_holes.size() && opts.stitch_holes[hole_i])
     {
-      UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*hole_meshes[hole_i]);
+      UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*holes[hole_i]);
       // increase hole mesh order if the triangulation mesh has higher order
       if (!holes_with_midpoints[hole_i])
       {
-        if (xyd_opts.tri_elem_type == "TRI6")
+        if (opts.tri_elem_type == "TRI6")
           hole_mesh.all_second_order();
-        else if (xyd_opts.tri_elem_type == "TRI7")
+        else if (opts.tri_elem_type == "TRI7")
           hole_mesh.all_complete_order();
       }
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
@@ -370,8 +389,8 @@ triangulateWithDelaunay(MeshGenerator & mg,
       // We'll still use MeshedHole, for its code distinguishing
       // outer boundaries from inner boundaries on a
       // hole-with-holes.
-      const auto & hole_bdy_id_filter = (hole_i < xyd_opts.hole_boundary_id_filters.size())
-                                            ? xyd_opts.hole_boundary_id_filters[hole_i]
+      const auto & hole_bdy_id_filter = (hole_i < opts.hole_boundary_id_filters.size())
+                                            ? opts.hole_boundary_id_filters[hole_i]
                                             : std::set<std::size_t>();
       libMesh::TriangulatorInterface::MeshedHole mh{hole_mesh, hole_bdy_id_filter};
 
@@ -407,11 +426,11 @@ triangulateWithDelaunay(MeshGenerator & mg,
       }
       mooseAssert(found_hole_sides == np, "Failed to find full outer boundary of meshed hole");
 
-      auto & mesh_boundary_info = mesh->get_boundary_info();
+      auto & mesh_boundary_info = mesh.get_boundary_info();
 #ifndef NDEBUG
       int found_inner_sides = 0;
 #endif
-      for (auto elem : mesh->element_ptr_range())
+      for (auto elem : mesh.element_ptr_range())
       {
         auto ns = elem->n_sides();
         for (auto s : make_range(ns))
@@ -442,23 +461,23 @@ triangulateWithDelaunay(MeshGenerator & mg,
       {
         MooseMeshUtils::changeBoundaryId(
             hole_mesh,
-            xyd_opts.hole_boundary_inner_id_defaults[hole_i].empty()
+            opts.hole_boundary_inner_id_defaults[hole_i].empty()
                 ? 1
-                : *xyd_opts.hole_boundary_inner_id_defaults[hole_i].begin(),
+                : *opts.hole_boundary_inner_id_defaults[hole_i].begin(),
             hole_boundary_rec[hole_i],
             true);
         hole_mesh.get_boundary_info().sideset_name(hole_boundary_rec[hole_i]) =
-            mesh->get_boundary_info().sideset_name(hole_boundary_rec[hole_i]);
-        mesh->get_boundary_info().remove_id(hole_boundary_rec[hole_i]);
+            mesh.get_boundary_info().sideset_name(hole_boundary_rec[hole_i]);
+        mesh.get_boundary_info().remove_id(hole_boundary_rec[hole_i]);
       }
 
-      mesh->stitch_meshes(hole_mesh,
-                          inner_bcid,
-                          new_hole_bcid,
-                          TOLERANCE,
-                          /*clear_stitched_bcids*/ true,
-                          xyd_opts.verbose_stitching,
-                          xyd_opts.use_binary_search);
+      mesh.stitch_meshes(hole_mesh,
+                         inner_bcid,
+                         new_hole_bcid,
+                         TOLERANCE,
+                         /*clear_stitched_bcids*/ true,
+                         opts.verbose_stitching,
+                         opts.use_binary_search);
     }
   }
   // Check if one SubdomainName is shared by more than one subdomain ids
@@ -468,7 +487,6 @@ triangulateWithDelaunay(MeshGenerator & mg,
   if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
     mg.paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
 
-  mesh->unset_is_prepared();
-  return mesh;
+  mesh.unset_is_prepared();
 }
 }
