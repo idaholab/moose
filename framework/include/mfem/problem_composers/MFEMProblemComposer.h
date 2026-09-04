@@ -28,7 +28,7 @@ public:
 
   MFEMProblemComposer(const InputParameters & parameters);
 
-  ~MFEMProblemComposer() = default;
+  virtual ~MFEMProblemComposer() = default;
 
   /// Returns a pointer to a freshly minted problem operator.
   virtual std::shared_ptr<Moose::MFEM::ProblemOperatorBase>

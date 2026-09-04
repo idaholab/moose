@@ -22,8 +22,6 @@ class MFEMTimeDependentWeakFormProblemComposer : public MFEMProblemComposer
 public:
   MFEMTimeDependentWeakFormProblemComposer(const InputParameters & parameters);
 
-  ~MFEMTimeDependentWeakFormProblemComposer() = default;
-
   /// Returns a pointer to a freshly minted problem operator.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem & mfem_problem) override;

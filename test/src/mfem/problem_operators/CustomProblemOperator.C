@@ -53,4 +53,10 @@ CustomProblemOperator::Solve()
   grid_function->SetFromTrueDofs(_X);
 }
 
+CustomProblemOperator::~CustomProblemOperator()
+{
+  delete _a;
+  delete _b;
+}
+
 #endif

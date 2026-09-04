@@ -39,7 +39,7 @@ public:
   CustomProblemOperator(MFEMProblem & mfem_problem, mfem::Coefficient & coef);
 
   // The destructor
-  ~CustomProblemOperator() = default;
+  ~CustomProblemOperator() override;
 
   // The initialisation function
   void Init(mfem::BlockVector &) override;

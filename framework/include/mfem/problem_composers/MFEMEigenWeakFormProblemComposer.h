@@ -23,8 +23,6 @@ class MFEMEigenWeakFormProblemComposer : public MFEMProblemComposer
 public:
   MFEMEigenWeakFormProblemComposer(const InputParameters & parameters);
 
-  ~MFEMEigenWeakFormProblemComposer() = default;
-
   /// Returns a pointer to a freshly minted problem operator.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem & mfem_problem) override;
