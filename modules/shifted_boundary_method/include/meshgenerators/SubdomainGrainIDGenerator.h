@@ -55,7 +55,7 @@ protected:
   /// eps for intersection or on surface checking
   Real _eps;
   /// Maximum number of elements in a leaf node of the KD-tree
-  int _leaf_max_size;
+  unsigned int _leaf_max_size;
 
   /// The boundary mesh to use for identifying grain IDs
   std::unique_ptr<libMesh::MeshBase> _boundary_owned;

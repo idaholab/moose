@@ -101,7 +101,16 @@ SBMInterfaceManager::detectInterfaces()
               const auto & target = *target_set.elements()[candidate.first];
               if (std::abs(std::abs(source->normal() * target.normal()) - 1.0) > _normal_tolerance)
                 return false;
-              return SBMUtils::distanceFrom(target, centroid).norm() <= _distance_tolerance;
+
+              const auto all_vertices_on = [&](const Elem & element, const SurfaceElement & surface)
+              {
+                for (const auto & node : element.node_ref_range())
+                  if (SBMUtils::distanceFrom(surface, node).norm() > _distance_tolerance)
+                    return false;
+                return true;
+              };
+              return all_vertices_on(source->elem(), target) &&
+                     all_vertices_on(target.elem(), *source);
             });
 
         if (matched != candidates.end())

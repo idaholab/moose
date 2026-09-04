@@ -2,8 +2,9 @@
 
 `SBMInterfaceManager` detects shared interfaces in one saved surface mesh containing the
 complete boundary of each subdomain. It groups surface elements by subdomain ID, matches
-coincident faces between each pair, and builds a KDTree for distance and normal queries on
-each detected interface.
+coincident faces with the same vertices between each pair, and builds a KDTree for distance and
+normal queries on each detected interface. The interface meshes must therefore be conformal; partial
+face overlaps are not treated as complete interface elements.
 
 The source mesh must be replicated, have dimension one less than the solving mesh, and use
 subdomain IDs that identify the enclosed regions. Each per-subdomain surface must use

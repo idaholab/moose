@@ -31,8 +31,11 @@ SubdomainGrainIDGenerator::validParams()
                         "This parameter determines whether a point is considered on the geometry "
                         "or on the in/out sides of the geometry.");
 
-  params.addParam<int>(
-      "leaf_max_size", 10, "Maximum number of elements in a leaf node of the KD-tree.");
+  params.addRangeCheckedParam<unsigned int>(
+      "leaf_max_size",
+      10,
+      "leaf_max_size > 0",
+      "Maximum number of elements in a leaf node of the KD-tree.");
 
   params.addClassDescription(
       "Based on the boundary_mesh, which contains distinct grain boundaries as separate "
@@ -49,7 +52,7 @@ SubdomainGrainIDGenerator::SubdomainGrainIDGenerator(const InputParameters & par
     _boundary_mesh(getMesh("boundary_mesh")),
     _ray_direction(getParam<Point>("ray_direction")),
     _eps(getParam<Real>("eps")),
-    _leaf_max_size(getParam<int>("leaf_max_size"))
+    _leaf_max_size(getParam<unsigned int>("leaf_max_size"))
 {
 }
 
@@ -59,8 +62,10 @@ SubdomainGrainIDGenerator::generate()
   // Take ownership of the input mesh (already cloned by getMesh()).
   std::unique_ptr<libMesh::MeshBase> mesh = std::move(_input);
 
-  for (unsigned int i = 1; i <= _boundary_mesh->n_subdomains(); ++i)
-    mesh->subdomain_name(i) = _boundary_mesh->subdomain_name(i);
+  std::set<SubdomainID> boundary_subdomain_ids;
+  _boundary_mesh->subdomain_ids(boundary_subdomain_ids);
+  for (const auto subdomain_id : boundary_subdomain_ids)
+    mesh->subdomain_name(subdomain_id) = _boundary_mesh->subdomain_name(subdomain_id);
 
   // (a) read the boundary mesh to be our own data structure
   buildSubdomainGroupedData();
@@ -231,7 +236,7 @@ SubdomainGrainIDGenerator::boundingBoxesIntersect(const BoundingBox & lhs,
   const Point rhs_min = rhs.min();
   const Point rhs_max = rhs.max();
 
-  for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+  for (const auto d : make_range(LIBMESH_DIM))
     if (lhs_max(d) + tolerance < rhs_min(d) || rhs_max(d) + tolerance < lhs_min(d))
       return false;
 
