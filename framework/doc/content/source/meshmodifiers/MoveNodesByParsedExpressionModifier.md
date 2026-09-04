@@ -31,10 +31,12 @@ problem's mesh-changed event like [`MoveNodesToSphere`](/MoveNodesToSphere.md) d
 problem that the mesh has changed after the nodes are moved, so that mesh-dependent caches, the
 displaced mesh, geometric searches, and output reflect the new node positions.
 
-When [!param](/UserObjects/MoveNodesByParsedExpressionModifier/coupled_variables) are used in parallel, the
-referenced variable values are gathered onto all ranks each time the modifier runs so that nodal
-values can be read at any moved node. This serialized copy uses memory proportional to the number of
-degrees of freedom per rank.
+When [!param](/UserObjects/MoveNodesByParsedExpressionModifier/coupled_variables) are used, or when the
+mesh is distributed, each rank displaces only the nodes it owns and the resulting positions are then
+synchronized across ranks. Every degree of freedom of a node belongs to that node's owner, so this
+needs neither a serialized copy of the solution nor any additional ghosting. On a replicated mesh
+with no coupled variables, every rank instead evaluates every node, which avoids communicating
+positions at all.
 
 ## Functors
 
@@ -48,10 +50,11 @@ block connection, as elsewhere in MOOSE's nodal functor evaluations, so a functo
 must be defined on every block of the mesh (or of this object's spatial restriction) to be usable here.
 
 Variables cannot be passed through
-[!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_names); use
-[!param](/UserObjects/MoveNodesByParsedExpressionModifier/coupled_variables) instead, which gathers the
-nodal values needed to displace nodes owned by other processors (see above). An error is raised if a
-variable name is given as a functor.
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/functor_names): a variable functor reads a
+partitioned solution vector, and functors are evaluated on every rank whenever the displacement is
+not already restricted to owned nodes (see above). Use
+[!param](/UserObjects/MoveNodesByParsedExpressionModifier/coupled_variables) instead, which reads
+nodal values safely in parallel. An error is raised if a variable name is given as a functor.
 
 !listing test/tests/meshmodifiers/move_nodes_by_parsed_expression_modifier/functors.i block=UserObjects
 
@@ -64,9 +67,9 @@ names below); the modifier writes into them.
 - [!param](/UserObjects/MoveNodesByParsedExpressionModifier/original_coordinate_variables): writes the
   original (undisplaced) node coordinates to the three named nodal aux variables, given in
   x, y, z order.
-- [!param](/UserObjects/MoveNodesByParsedExpressionModifier/displacement_variables): writes the current
-  node displacement (current minus original position) to the three named nodal aux variables,
-  given in x, y, z order.
+- [!param](/UserObjects/MoveNodesByParsedExpressionModifier/parsed_displacement_variables): writes
+  the current node displacement (current minus original position) to the three named nodal aux
+  variables, given in x, y, z order.
 - [!param](/UserObjects/MoveNodesByParsedExpressionModifier/density_factor_variable): writes a
   per-element density adjustment factor to the named elemental (`MONOMIAL`, `CONSTANT`) aux
   variable. The factor is the original element volume divided by the current element volume

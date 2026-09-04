@@ -14,10 +14,6 @@
 #include "NonADFunctorInterface.h"
 #include "MooseTypes.h"
 
-#include "libmesh/numeric_vector.h"
-
-#include <map>
-#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -54,11 +50,12 @@ protected:
   /// Displace all selected nodes (boundary/block restricted, or all blocks)
   void moveNodes();
 
-  /// Displace a single node by the parsed expressions, relative to its original position
-  void displaceNode(Node & node);
+  /// Displace a single node by the parsed expressions, relative to its original position.
+  /// When \p owner_only is true, only the node's owning rank computes the displacement;
+  /// moveNodes() then synchronizes the resulting positions.
+  void displaceNode(Node & node, bool owner_only);
 
-  /// Gather coupled-variable solutions onto all ranks and capture original element
-  /// volumes (once) before moving any nodes
+  /// Capture the original element volumes (once) before moving any nodes
   void prepare();
 
   /// Write the optional original-coordinate, displacement, and density-factor aux variables
@@ -100,12 +97,6 @@ protected:
   /// that a recovered run keeps the undisplaced reference; the checkpointed mesh is already
   /// displaced, so re-capturing it here would compound the displacement.
   std::unordered_map<dof_id_type, Point> & _original_position;
-
-  /// Serialized (all-rank) copy of each coupled-variable system's solution, keyed
-  /// by system number; refreshed every pass so nodal values can be read at any
-  /// node (including non-semilocal nodes) during parallel execution
-  std::map<unsigned int, std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>
-      _localized_solution;
 
   ///@{ Optional outputs, each enabled only when its parameter is provided
   const bool _output_coordinates;

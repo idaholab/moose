@@ -85,7 +85,7 @@ MoveNodesByParsedExpressionModifier::validParams()
       "If set, the original (undisplaced) node coordinates are written to these three nodal "
       "auxiliary variables, given in x, y, z order, which must be created by the user.");
   params.addParam<std::vector<AuxVariableName>>(
-      "displacement_variables",
+      "parsed_displacement_variables",
       {},
       "If set, the current node displacement (current minus original position) is written to these "
       "three nodal auxiliary variables, given in x, y, z order, which must be created by the "
@@ -122,7 +122,7 @@ MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
     _output_coordinates(
         !getParam<std::vector<AuxVariableName>>("original_coordinate_variables").empty()),
     _output_displacements(
-        !getParam<std::vector<AuxVariableName>>("displacement_variables").empty()),
+        !getParam<std::vector<AuxVariableName>>("parsed_displacement_variables").empty()),
     _output_density_factor(!getParam<AuxVariableName>("density_factor_variable").empty()),
     _aux_sys_num(0),
     _density_factor_var(0),
@@ -178,14 +178,15 @@ MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
   for (const auto i : index_range(functor_names))
   {
     // A variable functor reads the variable's own partitioned solution vector, which cannot be
-    // indexed at a node owned by another processor. 'coupled_variables' gathers those values
-    // onto every rank, so variables must go through that parameter instead.
+    // indexed at a node owned by another processor, and functors are evaluated on every rank
+    // whenever moveNodes() is not already restricted to owned nodes. 'coupled_variables' reads
+    // nodal values safely in parallel, so variables must go through that parameter instead.
     if (_subproblem.hasVariable(functor_names[i]))
       paramError("functor_names",
                  "'",
                  functor_names[i],
-                 "' is a variable. Use 'coupled_variables' instead, which gathers the nodal "
-                 "values needed to displace nodes owned by other processors.");
+                 "' is a variable. Use 'coupled_variables' instead, which reads nodal values "
+                 "safely in parallel.");
     _functors.push_back(&getFunctor<Real>(functor_names[i]));
     add_symbol(functor_syms[i]);
   }
@@ -231,9 +232,10 @@ MoveNodesByParsedExpressionModifier::MoveNodesByParsedExpressionModifier(
         _coordinate_var);
 
   if (_output_displacements)
-    setupNodalOutputVariables("displacement_variables",
-                              getParam<std::vector<AuxVariableName>>("displacement_variables"),
-                              _displacement_var);
+    setupNodalOutputVariables(
+        "parsed_displacement_variables",
+        getParam<std::vector<AuxVariableName>>("parsed_displacement_variables"),
+        _displacement_var);
 
   if (_output_density_factor)
   {
@@ -295,27 +297,6 @@ MoveNodesByParsedExpressionModifier::execute()
 void
 MoveNodesByParsedExpressionModifier::prepare()
 {
-  // Gather each coupled-variable system's solution onto all ranks so that nodal
-  // values can be read at any moved node (including non-semilocal nodes on a
-  // replicated mesh) during parallel execution. Refreshed every pass.
-  std::set<unsigned int> localized;
-  for (const auto * const var : _coupled_vars)
-  {
-    const auto sys_num = var->sys().number();
-    if (!localized.insert(sys_num).second)
-      continue;
-    const SystemBase & sys = var->sys();
-    const auto n_dofs = sys.system().n_dofs();
-    auto & vec = _localized_solution[sys_num];
-    if (!vec)
-      vec = libMesh::NumericVector<libMesh::Number>::build(comm());
-    // size() asserts on an uninitialized vector, so check initialized() first: the
-    // vector is uninitialized on the first pass, and n_dofs can change under adaptivity.
-    if (!vec->initialized() || vec->size() != n_dofs)
-      vec->init(n_dofs, false, libMesh::SERIAL);
-    sys.currentSolution()->localize(*vec);
-  }
-
   // Record the original (undisplaced) coordinate-aware element volumes once, on the
   // first execution while the mesh is still in its reference state. These are
   // compared against the post-move volumes to form the density adjustment factor.
@@ -334,11 +315,19 @@ MoveNodesByParsedExpressionModifier::moveNodes()
 
   auto & mesh = _mesh.getMesh();
 
+  // A coupled variable can only be read at a node this rank owns, because every degree of
+  // freedom of a node belongs to that node's owner. A DistributedMesh likewise gives a rank
+  // only part of the mesh. In both cases each rank displaces just its own nodes and the
+  // positions are synchronized afterwards. On a ReplicatedMesh with no coupled variables
+  // every rank can evaluate every node identically, which is cheaper than communicating
+  // one position per node.
+  const bool owner_only = !_coupled_vars.empty() || !mesh.is_replicated();
+
   // Displace nodes on the requested boundaries.
   for (const auto & boundary_id : _boundary_ids)
     for (const auto & node_id : _mesh.getNodeList(boundary_id))
       if (Node * const node = mesh.query_node_ptr(node_id))
-        displaceNode(*node);
+        displaceNode(*node, owner_only);
 
   // Displace nodes by block. When the user specifies neither 'block' nor 'boundary',
   // operate on all blocks. Iterate the selected subdomains' elements (including
@@ -355,17 +344,14 @@ MoveNodesByParsedExpressionModifier::moveNodes()
         continue;
       for (auto & node : elem->node_ref_range())
         if (displaced_nodes.insert(node.id()).second)
-          displaceNode(node);
+          displaceNode(node, owner_only);
     }
   }
 
-  // Synchronize node positions across ranks. On a DistributedMesh a node shared
-  // between partitions may be moved on the rank that holds the block element (or
-  // boundary) containing it, yet remain unmoved on another rank that only holds the
-  // node through a different, non-selected element. SyncNodalPositions copies each
-  // node's position from its owning rank to every other rank holding a copy. Skipped
-  // on a ReplicatedMesh, where every rank has already moved every node identically.
-  if (!mesh.is_replicated())
+  // Each rank displaced only the nodes it owns, so copy every node's position from its
+  // owning rank to every other rank holding a copy. This is the pattern libMesh itself
+  // uses after moving nodes (LaplaceMeshSmoother::smooth, FEMSystem::mesh_position_set).
+  if (owner_only)
   {
     libMesh::SyncNodalPositions sync_positions(mesh);
     libMesh::Parallel::sync_dofobject_data_by_id(
@@ -376,11 +362,17 @@ MoveNodesByParsedExpressionModifier::moveNodes()
 }
 
 void
-MoveNodesByParsedExpressionModifier::displaceNode(Node & node)
+MoveNodesByParsedExpressionModifier::displaceNode(Node & node, const bool owner_only)
 {
   // Capture the original position on first touch (covers nodes created by adaptivity).
-  auto [it, inserted] = _original_position.try_emplace(node.id(), Point(node));
+  auto [it, _] = _original_position.try_emplace(node.id(), Point(node));
   const Point & ref = it->second;
+
+  // The reference position above is recorded on every rank that sees the node, so that it
+  // survives a later repartitioning, but the displacement itself is computed only where it
+  // can be: see the owner_only comment in moveNodes().
+  if (owner_only && node.processor_id() != processor_id())
+    return;
 
   std::size_t k = 0;
   for (const auto * const var : _coupled_vars)
@@ -395,7 +387,7 @@ MoveNodesByParsedExpressionModifier::displaceNode(Node & node)
                  node.id(),
                  ". All 'coupled_variables' must be defined on the blocks/boundaries being moved.");
     const auto dof = node.dof_number(sys_num, var->number(), 0);
-    _func_params[k++] = (*_localized_solution.at(sys_num))(dof);
+    _func_params[k++] = (*var->sys().currentSolution())(dof);
   }
   for (const auto * const func : _functions)
     _func_params[k++] = func->value(_t, ref);

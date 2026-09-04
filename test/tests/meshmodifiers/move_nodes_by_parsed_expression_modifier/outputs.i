@@ -47,7 +47,7 @@
     block = 0
     displacement_x = '0.1*x'
     original_coordinate_variables = 'ref_coord_x ref_coord_y ref_coord_z'
-    displacement_variables = 'mv_disp_x mv_disp_y mv_disp_z'
+    parsed_displacement_variables = 'mv_disp_x mv_disp_y mv_disp_z'
     density_factor_variable = 'jratio'
     execute_on = 'INITIAL'
   []
