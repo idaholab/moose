@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMPMLMatrixCoefficient.h"
+#include "libmesh/int_range.h"
 
 void
 MFEMPMLMatrixCoefficient::Eval(mfem::DenseMatrix & K,
