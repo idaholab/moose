@@ -36,6 +36,193 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32999'
   []
+  [momentum-pressure-reconstructed-gradient]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    exodiff = 2d-velocity-pressure-reconstructed-gradient_out.e
+    cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 Outputs/file_base=2d-velocity-pressure-reconstructed-gradient_out'
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
+                  "channel using the SIMPLE algorithm with reconstructed pressure gradients in "
+                  "the linear finite volume momentum predictor."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-reconstructed-gradient-high-relaxation]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    # No new gold: gradient_relaxation only changes the SIMPLE iteration path, not the converged
+    # physical solution, so a much higher relaxation (0.9, vs. the default 0.1 used by
+    # momentum-pressure-reconstructed-gradient above) should converge to the same result. This
+    # reuses that test's gold via the symlinked exodiff name (same pattern as
+    # momentum-pressure-gradient-method's gold below). gradient_relaxation=1 (no relaxation at
+    # all) does not converge within a reasonable iteration count with this problem's default
+    # momentum_equation_relaxation/pressure_variable_relaxation - stabilizing it further would
+    # need those under-relaxation factors tuned too, which is a separate numerics investigation.
+    exodiff = 2d-velocity-pressure-reconstructed-gradient-high-relaxation_out.e
+    cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 '
+               'FVGradientMethods/reconstructed/gradient_relaxation=0.9 '
+               'Outputs/file_base=2d-velocity-pressure-reconstructed-gradient-high-relaxation_out'
+    requirement = "The system shall converge to the same steady-state Navier-Stokes solution in a "
+                  "2D channel using the SIMPLE algorithm with reconstructed pressure gradients in "
+                  "the linear finite volume momentum predictor regardless of the relaxation factor "
+                  "used to publish the momentum-coupling pressure gradient."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-wrong-variable]
+    type = 'RunException'
+    input = reconstructed-gradient-wrong-variable.i
+    cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/u_pressure/pressure=wrong_pressure'
+    expect_err = "can only be used for the pressure variable registered on RhieChowMassFlux"
+    requirement = "The system shall report an error when a reconstructed pressure gradient method "
+                  "is registered for a variable other than the pressure variable owned by the "
+                  "Rhie-Chow user object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-wrong-system]
+    type = 'RunException'
+    input = reconstructed-gradient-wrong-system.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "Problem/linear_sys_names='u_system v_system pressure_system wrong_pressure_system' "
+               "LinearFVKernels/u_pressure/pressure=wrong_pressure"
+    expect_err = "can only be used with pressure system 'pressure_system' owned by RhieChowMassFlux"
+    requirement = "The system shall report an error when one reconstructed pressure gradient "
+                  "method is reused for a pressure system other than the one owned by its "
+                  "Rhie-Chow user object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-mixed-method]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/u_pressure/gradient_method=reconstructed LinearFVKernels/v_pressure/gradient_method=gg'
+    expect_err = "must use the same pressure gradient method"
+    requirement = "The system shall report an error when different momentum components request different pressure gradient methods for the reconstructed coupling field."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-mixed-pressure-variable]
+    type = 'RunException'
+    input = reconstructed-gradient-wrong-variable.i
+    cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/v_pressure/pressure=wrong_pressure'
+    expect_err = "can only be used for the pressure variable registered on RhieChowMassFlux"
+    requirement = "The system shall report an error when different momentum components use different pressure variables for the reconstructed coupling gradient."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-block-restricted]
+    type = 'RunApp'
+    input = momentum-pressure-block-restricted.i
+    cli_args = "--check-input LinearFVKernels/u_pressure_left/block=0 "
+               "LinearFVKernels/u_pressure_right/block=1 "
+               "LinearFVKernels/v_pressure_left/block=0 "
+               "LinearFVKernels/v_pressure_right/block=1"
+    requirement = "The system shall allow a momentum system's pressure-gradient source to be "
+                  "covered by multiple block-restricted LinearFVMomentumPressure kernels that "
+                  "partition the Rhie-Chow object's blocks and share the same coupling gradient."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-overlap-on-rc-block]
+    type = 'RunException'
+    input = momentum-pressure-block-restricted.i
+    cli_args = "LinearFVKernels/u_pressure_right/block='0 1 2'"
+    expect_err = "more than one LinearFVMomentumPressure kernel contributing a pressure source on the same block.*overlap on block.*0"
+    requirement = "The system shall report an error when two LinearFVMomentumPressure kernels "
+                  "contribute pressure sources to the same momentum system on a block handled by "
+                  "the Rhie-Chow object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-overlap-outside-rc-blocks]
+    type = 'RunApp'
+    input = momentum-pressure-block-restricted.i
+    cli_args = '--check-input'
+    requirement = "The system shall allow two LinearFVMomentumPressure kernels to overlap only "
+                  "on blocks outside the blocks handled by their Rhie-Chow object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-block-restricted-inconsistent]
+    type = 'RunException'
+    input = momentum-pressure-block-restricted.i
+    cli_args = 'LinearFVKernels/u_pressure_right/gradient_method=gg2'
+    expect_err = "must use the same pressure gradient method"
+    requirement = "The system shall report an error when two disjoint block-restricted "
+                  "LinearFVMomentumPressure kernels on the same Rhie-Chow object use different "
+                  "pressure gradient methods."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-duplicate-kernel]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "LinearFVKernels/u_pressure2/type=LinearFVMomentumPressure "
+               "LinearFVKernels/u_pressure2/variable=vel_x "
+               "LinearFVKernels/u_pressure2/pressure=pressure "
+               "LinearFVKernels/u_pressure2/momentum_component=x"
+    expect_err = "more than one LinearFVMomentumPressure kernel contributing a pressure source on the same block"
+    requirement = "The system shall report an error when two LinearFVMomentumPressure kernels "
+                  "contribute a pressure source to the same momentum system on the same block."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-wrong-component]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = 'LinearFVKernels/u_pressure/momentum_component=y'
+    expect_err = "declares momentum component"
+    requirement = "The system shall report an error when a LinearFVMomentumPressure kernel "
+                  "declares a momentum component different from the momentum system it is "
+                  "linked to."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-missing-kernel]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "LinearFVKernels/inactive='u_pressure'"
+    expect_err = "found no applicable LinearFVMomentumPressure kernel for momentum system"
+    requirement = "The system shall report an error when a momentum system has no applicable "
+                  "LinearFVMomentumPressure kernel covering one of the Rhie-Chow object's blocks."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-candidate-without-prepared-predictor]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
+               "UserObjects/sequence_test/rhie_chow_user_object=rc "
+               "UserObjects/sequence_test/operation=update_candidate "
+               "UserObjects/sequence_test/execute_on=TIMESTEP_BEGIN"
+    expect_assert = "A momentum predictor must be prepared before updating a reconstructed pressure-gradient candidate"
+    allow_test_objects = true
+    requirement = "The system shall report an internal sequencing error when a reconstructed "
+                  "pressure-gradient candidate is updated without a prepared momentum predictor."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-candidates-reuse-face-flux]
+    type = 'RunException'
+    input = 2d-velocity-pressure.i
+    cli_args = "pressure_gradient_method=reconstructed "
+               "UserObjects/sequence_test/type=TestRhieChowMassFluxSequence "
+               "UserObjects/sequence_test/rhie_chow_user_object=rc "
+               "UserObjects/sequence_test/operation=reuse_face_flux "
+               "UserObjects/sequence_test/execute_on=TIMESTEP_END "
+               "Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
+    expect_assert = "Each reconstructed pressure-gradient candidate must consume a face mass flux computed by the current pressure corrector"
+    allow_test_objects = true
+    requirement = "The system shall report an internal sequencing error when two reconstructed "
+                  "pressure-gradient candidates consume the same corrected face-flux generation."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i
@@ -81,6 +268,62 @@
     rel_err = 1e-5
     design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
     issues = '#28951 #29150'
+  []
+  [energy_boussinesq_pimple_reconstructed]
+    type = 'CSVDiff'
+    input = 2d-boussinesq-transient.i
+    csvdiff = 2d-boussinesq-transient-reconstructed-pimple_out_line_sample_0007.csv
+    cli_args = "pressure_gradient_method=reconstructed Outputs/file_base=2d-boussinesq-transient-reconstructed-pimple_out"
+    requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PIMPLE algorithm and reconstructed pressure gradients using the linear finite volume system."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+    issues = '#32995'
+  []
+  [forced-channel-standard-gradient]
+    type = CSVDiff
+    input = reconstructed-force-channel.i
+    csvdiff = reconstructed-force-channel-standard.csv
+    cli_args = 'pressure_gradient_method=green-gauss Outputs/file_base=reconstructed-force-channel-standard Outputs/exodus=false'
+    requirement = "The standard pressure-gradient method shall exhibit nonuniform block-average "
+                  "streamwise velocities when a large momentum body force is applied only in the "
+                  "middle section of a three-section channel."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
+    issues = '#32995'
+  []
+  [forced-channel-reconstructed-gradient]
+    type = CSVDiff
+    input = reconstructed-force-channel.i
+    csvdiff = reconstructed-force-channel-reconstructed.csv
+    cli_args = 'pressure_gradient_method=reconstructed Outputs/file_base=reconstructed-force-channel-reconstructed Outputs/exodus=false'
+    # The exact block averages are one; this tolerance covers only the iterative solver error.
+    rel_err = 1e-6
+    requirement = "The reconstructed pressure-gradient method shall preserve the initial uniform "
+                  "streamwise velocity in all three channel sections when a large momentum body "
+                  "force is applied only in the middle section."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'FVReconstructedPressureGradient.md SIMPLE.md'
+    issues = '#32995'
+  []
+  [energy_boussinesq_piso_reconstructed_two_correctors]
+    type = 'CSVDiff'
+    input = 2d-boussinesq-transient.i
+    csvdiff = 2d-boussinesq-transient-reconstructed-piso2_out_line_sample_0007.csv
+    cli_args = "pressure_gradient_method=reconstructed Executioner/num_piso_iterations=1 Outputs/file_base=2d-boussinesq-transient-reconstructed-piso2_out"
+    requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PISO algorithm using two pressure correctors and reconstructed pressure gradients, each corrector consuming the face mass flux from its own pressure solution."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+    issues = '#32995'
+  []
+  [energy_boussinesq_piso_reconstructed_three_correctors]
+    type = 'CSVDiff'
+    input = 2d-boussinesq-transient.i
+    csvdiff = 2d-boussinesq-transient-reconstructed-piso3_out_line_sample_0007.csv
+    cli_args = "pressure_gradient_method=reconstructed Executioner/num_piso_iterations=2 Outputs/file_base=2d-boussinesq-transient-reconstructed-piso3_out"
+    requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PISO algorithm using three pressure correctors and reconstructed pressure gradients without introducing oscillatory or divergent behavior relative to fewer correctors."
+    max_threads = 1 # see libmesh issue #3808
+    design = 'PIMPLE.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+    issues = '#32995'
   []
   [normal_velocity]
     type = 'Exodiff'
