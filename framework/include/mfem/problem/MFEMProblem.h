@@ -17,6 +17,7 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
+#include "MFEMProblemComposer.h"
 
 #include <map>
 
@@ -233,6 +234,13 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Method called in AddMFEMProblemComposerAction which will create the problem composer.
+   */
+  void addMFEMProblemComposer(const std::string & user_object_name,
+                              const std::string & name,
+                              InputParameters & parameters);
+
+  /**
    * Method called in AddMFEMSolverAction which records a solver for later dependency-ordered
    * construction.
    */
@@ -274,6 +282,11 @@ public:
    * Return the current MFEM problem data in a const context.
    */
   const MFEMProblemData & getProblemData() const { return _problem_data; }
+
+  /**
+   * Method to get the Problem Composer(s).
+   */
+  std::shared_ptr<MFEMProblemComposer> & getProblemComposer() { return _problem_composer; }
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
@@ -411,6 +424,11 @@ protected:
 
   /// Restartable MFEM solution state associated with this problem.
   Moose::MFEM::SolutionState & _solution_state_data;
+
+  /**
+   * The problem operator builders for this mfem problem.
+   */
+  std::shared_ptr<MFEMProblemComposer> _problem_composer;
 };
 
 template <typename T>
