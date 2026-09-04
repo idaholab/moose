@@ -8835,6 +8835,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
 
+  const bool should_contract = contract_mesh && allowMeshContraction();
+
   _app.markMeshChangedForBackup();
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
@@ -8858,7 +8860,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   else
     es().reinit();
 
-  if (contract_mesh)
+  if (should_contract)
     // Once vectors are restricted, we can delete children of coarsened elements
     _mesh.getMesh().contract();
   if (clean_refinement_flags)
@@ -8903,7 +8905,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 
   if (_displaced_problem)
   {
-    _displaced_problem->meshChanged(contract_mesh, clean_refinement_flags);
+    _displaced_problem->meshChanged(should_contract, clean_refinement_flags);
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
 
