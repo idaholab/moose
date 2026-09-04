@@ -2184,8 +2184,8 @@ public:
    * nodes and elements. \p clean_refinement_flags resets refinement flags such that any subsequent
    * calls to \p System::restrict_vectors or \p System::prolong_vectors before another AMR step do
    * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method.
-   * The value of \p contract_mesh is ignored when \p FEProblemBase::allowMeshContraction is set
-   * to false.
+   * The value of \p contract_mesh is ignored when
+   * \p FEProblemBase::allowMeshContractionAfterMeshChanged is set to false.
    */
   virtual void
   meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
