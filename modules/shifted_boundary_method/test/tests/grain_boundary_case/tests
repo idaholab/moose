@@ -14,8 +14,8 @@
     type = CSVDiff
     input = 'grain_boundary_sczm_coarse_lambda1.i'
     csvdiff = 'grain_boundary_sczm_coarse_lambda1_csv.csv'
-    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='"
-               "2 1; 4 1; 5 1; 4 2; 4 3; 5 3; 5 4'"
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs="'
+               '2 1; 4 1; 5 1; 4 2; 4 3; 5 3; 5 4"'
     prereq = grain_boundary_sczm_coarse_lambda1
     mesh_mode = REPLICATED
     recover = false
@@ -31,6 +31,25 @@
     recover = false
     requirement = 'The system shall retain an element input subdomain when no grain occupancy is '
                   'selected.'
+    issues = '#33397'
+  []
+  [sparse_grain_ids]
+    type = Exodiff
+    input = 'sparse_grain_ids.i'
+    exodiff = 'sparse_grain_ids_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall preserve grain names when boundary subdomain IDs are zero-based '
+                  'and noncontiguous.'
+    issues = '#33397'
+  []
+  [invalid_leaf_max_size]
+    type = RunException
+    input = 'outside_grains.i'
+    cli_args = 'Mesh/grains/leaf_max_size=0'
+    expect_err = 'Range check failed for parameter Mesh/grains/leaf_max_size'
+    mesh_mode = REPLICATED
+    requirement = 'The system shall reject a nonpositive maximum KD-tree leaf size.'
     issues = '#33397'
   []
   [grain_boundary_sczm_separate_interfaces]
@@ -80,5 +99,16 @@
     mesh_mode = REPLICATED
     requirement = 'The system shall reject an explicit subdomain pair that is absent from the '
                   'detected complete interface.'
+  []
+  [nonconformal_interface]
+    type = RunException
+    input = 'nonconformal_interface.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/boundary='grain1_grain2' "
+               "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 2'"
+    expect_err = 'maps to an interface not detected by the manager.'
+    mesh_mode = REPLICATED
+    requirement = 'The system shall reject partially overlapping interface faces when the complete '
+                  'interface mesh is nonconformal.'
+    issues = '#33666'
   []
 []

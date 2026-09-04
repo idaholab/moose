@@ -1,5 +1,6 @@
 [Tests]
   design = 'source/actions/ShiftedCohesiveZoneAction.md'
+  issues = '#33666'
   [manufactured_solution]
     type = Exodiff
     input = 'sczm_triangle_mms.i'
@@ -32,6 +33,7 @@
     type = 'CSVDiff'
     input = 'rectangle_sczm_tri_material.i'
     csvdiff = 'rectangle_sczm_tri_material_csv.csv'
+    cli_args = 'Outputs/active=csv'
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
     recover = false
     requirement = 'The system shall solve a shifted cohesive zone problem on a '
@@ -157,7 +159,15 @@
     recover = false
     requirement = 'The system shall use the derivative of first Piola-Kirchhoff stress with respect '
                   'to deformation gradient as the default constitutive tangent.'
-    issues = '#33397'
+  []
+  [pk1_tangent_jacobian]
+    type = PetscJacobianTester
+    input = 'pk1_tangent.i'
+    cli_args = "Executioner/num_steps=1 Outputs/active=''"
+    run_sim = true
+    mesh_mode = REPLICATED
+    requirement = 'The system shall contract the derivative of first Piola-Kirchhoff stress with '
+                  'respect to deformation gradient into a Jacobian consistent with its residual.'
   []
   [custom_tangent_requires_definition]
     type = RunException
@@ -202,11 +212,34 @@
     requirement = 'The system shall reject unsupported finite-strain cohesive zone kinematics.'
     issues = '#33397'
   []
+  [surface_meshes_without_generation]
+    type = RunException
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/surface_meshes='interface'"
+    expect_err = "This parameter is only valid with 'generate_sbm_distance=true'."
+    requirement = 'The system shall reject surface meshes when automatic distance generation is disabled.'
+  []
+  [watertightness_without_generation]
+    type = RunException
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/check_surface_watertightness=true'
+    expect_err = "This parameter is only valid with 'generate_sbm_distance=true'."
+    requirement = 'The system shall reject surface watertightness checks when automatic distance '
+                  'generation is disabled.'
+  []
+  [matching_tolerance_without_complete_mesh]
+    type = RunException
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_matching_tolerance=1e-6'
+    expect_err = "This parameter is only valid with 'complete_interface_mesh'."
+    requirement = 'The system shall reject interface matching tolerances when no complete interface '
+                  'mesh is supplied.'
+  []
   [reversed_function_normal]
     type = CSVDiff
     input = 'rectangle_sczm_tri_material.i'
     csvdiff = 'rectangle_sczm_tri_material_csv.csv'
-    cli_args = "Functions/signed_dist_func/expression='-x+${x0}'"
+    cli_args = "Functions/signed_dist_func/expression='-x+${x0}' Outputs/active=csv"
     prereq = rectangle_sczm_tri_material
     min_parallel = 2
     max_parallel = 2
@@ -223,6 +256,7 @@
     type = 'Exodiff'
     input = 'rectangle_sczm_tri_material.i'
     exodiff = 'rectangle_sczm_tri_material_out.e'
+    cli_args = 'Outputs/active=exodus'
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
     recover = false
     requirement = 'The system shall solve a shifted cohesive zone problem and output the results in Exodus format.'
