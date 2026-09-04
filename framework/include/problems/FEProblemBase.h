@@ -2169,7 +2169,7 @@ public:
    * elements and renumbers nodes and elements). This should be overriden with care as disabling
    * contraction may result in a substantial increase in the memory footprint of the mesh.
    */
-  virtual bool allowMeshContraction() { return true; }
+  virtual bool allowMeshContractionAfterMeshChanged() const { return true; }
 
   /**
    * Update data after a mesh change.

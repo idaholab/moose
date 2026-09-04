@@ -8835,7 +8835,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
 
-  const bool should_contract = contract_mesh && allowMeshContraction();
+  const bool should_contract = contract_mesh && allowMeshContractionAfterMeshChanged();
 
   _app.markMeshChangedForBackup();
 

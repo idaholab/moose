@@ -7,5 +7,5 @@ public:
 
   SkipContractionTestProblem(const InputParameters & params);
 
-  bool allowMeshContraction() override final { return false; }
+  bool allowMeshContractionAfterMeshChanged() const override final { return false; }
 };
