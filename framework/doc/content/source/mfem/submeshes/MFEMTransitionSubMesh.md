@@ -36,6 +36,10 @@ default of one positive and zero negative layers produces a single layer on the 
 exterior boundary has elements on one side only, so `num_layers_positive` gives the number of layers
 grown inwards and `num_layers_negative` must be zero.
 
+The boundary must be either entirely interior to the mesh or entirely on its exterior. A boundary
+mixing the two is an error, as the sides of its interior and exterior parts are not defined
+consistently with one another and the two parts would be grown by opposite layer counts.
+
 Growth is confined to the subdomains named by `block`, which accepts both numeric attributes and
 named attribute sets and applies to every layer, not just the first. A layer grown with
 `block = coil` therefore cannot pull in elements of a neighbouring subdomain such as the surrounding
