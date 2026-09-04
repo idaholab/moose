@@ -503,7 +503,7 @@ ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) co
     body(local_re - ib, ib, ie);
 
     for (unsigned int i = ib; i < ie; ++i)
-      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i, datum.comp());
   }
 }
 
@@ -532,7 +532,8 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
       body(local_ke - ib, ib, ie, j);
 
       for (unsigned int i = ib; i < ie; ++i)
-        accumulateTaggedElementalMatrix(local_ke[i - ib], datum.elem().id, i, j, datum.jvar());
+        accumulateTaggedElementalMatrix(
+            local_ke[i - ib], datum.elem().id, i, j, datum.jvar(), datum.comp());
     }
   }
 }

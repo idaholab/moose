@@ -53,8 +53,17 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
-  if (_var.isVector() && field_type != Moose::VarFieldType::VAR_FIELD_VECTOR)
-    paramError("variable", "Vector variable specified to a scalar Kokkos residual object.");
+  std::string expected;
+
+  if (field_type == Moose::VarFieldType::VAR_FIELD_STANDARD)
+    expected = "standard";
+  else if (field_type == Moose::VarFieldType::VAR_FIELD_VECTOR)
+    expected = "vector";
+  else if (field_type == Moose::VarFieldType::VAR_FIELD_ARRAY)
+    expected = "array";
+
+  if (_var.fieldType() != field_type)
+    paramError("variable", type(), " expects ", expected, " variables.");
 
   _kokkos_var.init(_var);
 }

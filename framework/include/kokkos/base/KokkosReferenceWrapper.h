@@ -17,32 +17,88 @@ namespace Moose::Kokkos
 {
 
 /**
- * The Kokkos object that can hold the reference of a variable.
+ * The Kokkos object that can hold a host reference and a device-compatible copy of a variable.
  * Reference of a host variable is not accessible on device, so if there is a variable that should
  * be stored as a reference but still needs to be accessed on device, define an instance of this
  * class and construct it with the reference of the variable.
  * This class holds the device copy as well as the host reference of the variable.
  * The copy constructor of this object that copies the host reference to the device copy is invoked
  * whenever a Kokkos functor containing this object is dispatched to device, so it is guaranteed
- * that the device copy is always up-to-date with the host reference when it is used on device
- * Therefore, the variable must be copy constructible.
+ * that the device copy is always up-to-date with the host reference when it is used on device.
+ * Therefore, D must be constructible from H.
+ * @tparam H The host reference type
+ * @tparam D The device copy type
  */
-template <typename T>
-class ReferenceWrapper
+template <typename H, typename D>
+class DualReferenceWrapper
 {
 public:
   /**
    * Constructor
-   * @param reference The writeable reference of the variable to store
+   * @param reference The host reference of the variable to store
    */
-  ReferenceWrapper(T & reference) : _reference(reference), _copy(reference) {}
+  DualReferenceWrapper(H & reference) : _reference(reference), _copy(reference) {}
   /**
    * Copy constructor
    */
-  ReferenceWrapper(const ReferenceWrapper<T> & object)
+  DualReferenceWrapper(const DualReferenceWrapper<H, D> & object)
     : _reference(object._reference), _copy(object._reference)
   {
   }
+
+  /**
+   * Get the host reference
+   * @returns The host reference
+   */
+  ///@{
+  H & host() { return _reference; }
+  const H & host() const { return _reference; }
+  ///@}
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get the device copy
+   * @returns The device copy
+   */
+  KOKKOS_FUNCTION const D & device() const
+  {
+    KOKKOS_IF_ON_HOST(
+        mooseError("Kokkos reference wrapper error: device() should not be called from host.");)
+
+    return _copy;
+  }
+#endif
+
+protected:
+  /**
+   * Writeable host reference of the variable
+   */
+  H & _reference;
+  /**
+   * Device copy of the variable
+   */
+  const D _copy;
+};
+
+/**
+ * Specialization of DualReferenceWrapper for the same host and device data type
+ */
+template <typename T>
+class ReferenceWrapper : public DualReferenceWrapper<T, T>
+{
+public:
+  /**
+   * Constructor
+   * @param reference The host reference of the variable to store
+   */
+  ReferenceWrapper(T & reference) : DualReferenceWrapper<T, T>(reference) {}
+  /**
+   * Copy constructor
+   */
+  ReferenceWrapper(const ReferenceWrapper<T> & object) : DualReferenceWrapper<T, T>(object) {}
+
+  using DualReferenceWrapper<T, T>::_copy;
+  using DualReferenceWrapper<T, T>::_reference;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -140,16 +196,12 @@ public:
   {
     return _reference(std::forward<Args>(args)...);
   }
+};
 
-protected:
-  /**
-   * Writeable host reference of the variable
-   */
-  T & _reference;
-  /**
-   * Device copy of the variable
-   */
-  const T _copy;
+template <typename H, typename D>
+struct ArrayDeepCopy<DualReferenceWrapper<H, D>>
+{
+  static constexpr bool value = true;
 };
 
 template <typename T>
