@@ -14,15 +14,6 @@
 #include "MooseTypes.h"
 #include "XFEM.h"
 
-using namespace libMesh;
-
-namespace libMesh
-{
-class MeshBase;
-class Elem;
-class Node;
-class QBase;
-}
 class EFANode;
 class EFAElement;
 

@@ -12,8 +12,6 @@
 #include "libmesh/libmesh_common.h"
 #include "ADReal.h"
 
-using namespace libMesh;
-
 namespace WallFriction
 {
 
