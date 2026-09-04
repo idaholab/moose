@@ -5,10 +5,6 @@ x0 = 0.25
 a = '${fparse (pi * cos(pi * x0) * (1 - E1 / E2)) / (2 * x0)}'
 b = '${fparse -pi * cos(pi * x0) * (E1 + (x0 / 2) * (1 - E1 / E2))}'
 
-desired_area = 0.01
-
-number_of_point = '${fparse int(sqrt(1/(2*desired_area))) -1}'
-
 [GlobalParams]
   displacements = 'disp_x disp_y'
   use_displaced_mesh = false
@@ -16,21 +12,9 @@ number_of_point = '${fparse int(sqrt(1/(2*desired_area))) -1}'
 []
 
 [Mesh]
-  [square_boundary]
-    type = PolyLineMeshGenerator
-    points = '-0.5 0.0 0.0
-            0.5 0.0 0.0
-            0.5 1.0 0.0
-            -0.5 1.0 0.0'
-    loop = true
-  []
-
   [gen]
-    type = XYDelaunayGenerator
-    boundary = 'square_boundary'
-    desired_area = ${desired_area}
-    add_nodes_per_boundary_segment = ${number_of_point}
-    refine_boundary = false
+    type = FileMeshGenerator
+    file = sczm_triangle_mesh.xda
   []
 
   [subdomain_intercepted]
