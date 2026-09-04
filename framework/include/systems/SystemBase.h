@@ -187,10 +187,19 @@ public:
    * Copy the solution back in time (older -> old, etc).
    */
   void copyOldSolutions();
+
   /**
-   * Copy a specific type of solution back in time (older -> old, etc).
+   * Advance solution vectors and additional system-owned state together.
+   */
+  void advanceStateHistory(Moose::SolutionIterationType iteration_type);
+
+  /**
+   * Copy a specific type of solution back in time (current -> old -> older, etc).
    */
   void copyPreviousSolutions(const Moose::SolutionIterationType iteration_type);
+
+  /// Restore solution vectors and additional system-owned state together.
+  void restoreStateHistory();
 
   virtual void restoreSolutions();
 
@@ -896,6 +905,11 @@ public:
    */
   virtual void copySolutionsBackwards();
 
+  /**
+   * Copy solution vectors and additional system-owned state into older states.
+   */
+  void copyStateHistoryBackwards();
+
   void addTimeIntegrator(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters);
@@ -993,6 +1007,9 @@ public:
 protected:
   /**
    * Copy system-owned state not represented by solution vectors.
+   * The first argument selects the solution history being advanced. The second indicates that
+   * state 0 must not overwrite state 1 while deeper states still shift; additional state must
+   * honor this to remain aligned with the solution history.
    * Default implementation does nothing.
    */
   virtual void copyPreviousAdditionalStates(Moose::SolutionIterationType, bool) {}

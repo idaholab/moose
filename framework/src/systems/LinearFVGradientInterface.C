@@ -283,6 +283,8 @@ LinearFVGradientInterface::copyPreviousGradientStates(const bool skip_current_to
 
     mooseAssert(container.current_state_initialized,
                 "Current gradient state must be initialized before advancing time states.");
+    // Mirror solution-state advancement: some restore workflows preserve state 1 by skipping the
+    // current-to-old copy while still shifting every deeper state.
     const std::size_t stop = skip_current_to_old ? 1 : 0;
     for (std::size_t state = number_of_states - 1; state > stop; --state)
       copyGradient(container.state_values[state - 1], container.state_values[state]);

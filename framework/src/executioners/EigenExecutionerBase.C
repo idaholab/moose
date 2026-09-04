@@ -249,12 +249,15 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     // Important: we do not call _problem.advanceState() because we do not
     // want to overwrite the old postprocessor values and old material
     // properties in stateful materials.
-    _eigen_sys.copyOldSolutions();
-    _problem.getAuxiliarySystem().copyOldSolutions();
+    _eigen_sys.advanceStateHistory(Moose::SolutionIterationType::Time);
+    _problem.getAuxiliarySystem().advanceStateHistory(Moose::SolutionIterationType::Time);
     if (_problem.getDisplacedProblem() != NULL)
     {
-      _problem.getDisplacedProblem()->solverSys(_eigen_sys.number()).copyOldSolutions();
-      _problem.getDisplacedProblem()->auxSys().copyOldSolutions();
+      _problem.getDisplacedProblem()
+          ->solverSys(_eigen_sys.number())
+          .advanceStateHistory(Moose::SolutionIterationType::Time);
+      _problem.getDisplacedProblem()->auxSys().advanceStateHistory(
+          Moose::SolutionIterationType::Time);
     }
 
     Real k_old = k;

@@ -7331,8 +7331,8 @@ FEProblemBase::copySolutionsBackwards()
   TIME_SECTION("copySolutionsBackwards", 3, "Copying Solutions Backward");
 
   for (auto & sys : _solver_systems)
-    sys->copySolutionsBackwards();
-  _aux->copySolutionsBackwards();
+    sys->copyStateHistoryBackwards();
+  _aux->copyStateHistoryBackwards();
 }
 
 void
@@ -7349,14 +7349,14 @@ FEProblemBase::advanceState()
   TIME_SECTION("advanceState", 5, "Advancing State");
 
   for (auto & sys : _solver_systems)
-    sys->copyOldSolutions();
-  _aux->copyOldSolutions();
+    sys->advanceStateHistory(Moose::SolutionIterationType::Time);
+  _aux->advanceStateHistory(Moose::SolutionIterationType::Time);
 
   if (_displaced_problem)
   {
     for (const auto i : index_range(_solver_systems))
-      _displaced_problem->solverSys(i).copyOldSolutions();
-    _displaced_problem->auxSys().copyOldSolutions();
+      _displaced_problem->solverSys(i).advanceStateHistory(Moose::SolutionIterationType::Time);
+    _displaced_problem->auxSys().advanceStateHistory(Moose::SolutionIterationType::Time);
   }
 
   _reporter_data.copyValuesBack();
@@ -7397,12 +7397,12 @@ FEProblemBase::restoreSolutions()
   {
     if (_verbose_restore)
       _console << "Restoring solutions on system " << sys->name() << "..." << std::endl;
-    sys->restoreSolutions();
+    sys->restoreStateHistory();
   }
 
   if (_verbose_restore)
     _console << "Restoring solutions on Auxiliary system..." << std::endl;
-  _aux->restoreSolutions();
+  _aux->restoreStateHistory();
 
   if (_verbose_restore)
     _console << "Restoring postprocessor, vector-postprocessor, and reporter data..." << std::endl;
