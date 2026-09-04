@@ -64,6 +64,13 @@ protected:
   computeVertexAverageOrientations(mfem::ParMesh & parent_mesh,
                                    const mfem::Array<HYPRE_BigInt> & global_vertex_ids);
 
+  /// Errors unless every boundary face agrees with the supplied orientations at each of its
+  /// vertices to within a right angle, which is the condition for those orientations to sort the
+  /// two sides of the boundary consistently.
+  void checkOrientability(const mfem::ParMesh & parent_mesh,
+                          const mfem::Array<HYPRE_BigInt> & global_vertex_ids,
+                          const std::map<HYPRE_BigInt, mfem::Vector> & vertex_orientations);
+
   /// Grow num_layers element rings from seed into transition_set, staying on the requested side of
   /// the boundary and within the user's subdomains.
   void growLayers(mfem::ParMesh & parent_mesh,

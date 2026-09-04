@@ -64,8 +64,11 @@
     type = CSVDiff
     input = pml.i
     csvdiff = 'OutputData/PML.csv'
+    design = 'MFEMPerfectlyMatchedLayerFunction.md'
+    issues = '#33450'
     requirement = 'The system shall have the ability to absorb an outgoing wave using a perfectly matched layer whose coordinate stretch is directed along the gradient of a harmonic coordinate solved for inside the layer.'
     capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
     recover = false
   []
   [MFEMMixedSesquilinear]
@@ -99,8 +102,11 @@
     type = CSVDiff
     input = pml_3d.i
     csvdiff = 'OutputData/PML3D.csv'
+    design = 'MFEMPerfectlyMatchedLayerFunction.md'
+    issues = '#33450'
     requirement = 'The system shall have the ability to absorb an outgoing wave using a harmonic coordinate perfectly matched layer on a three dimensional mesh, where the stretch tensor is a full matrix.'
     capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
     recover = false
   []
 []
