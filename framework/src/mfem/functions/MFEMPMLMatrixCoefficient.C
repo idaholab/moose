@@ -31,8 +31,8 @@ MFEMPMLMatrixCoefficient::Eval(mfem::DenseMatrix & K,
   const mfem::real_t base = _base_coefficient->Eval(transformation, integration_point);
 
   K.SetSize(dim);
-  for (const auto a : make_range(dim))
-    for (const auto b : make_range(dim))
+  for (const auto a : libMesh::make_range(dim))
+    for (const auto b : libMesh::make_range(dim))
       K(a, b) = base * ((_component == REAL) ? tensor(a, b).real() : tensor(a, b).imag());
 }
 
