@@ -109,6 +109,12 @@ public:
   const LinearFVGradientReader & requestCellGradients();
 
   /**
+   * Register the configured default gradient method with time-state storage.
+   * @param oldest_state Oldest time state that consumers need to read.
+   */
+  const LinearFVGradientReader & requestCellGradients(unsigned int oldest_state);
+
+  /**
    * Backward-compatible interface for requesting cell gradients.
    * Equivalent to calling requestCellGradients() with the default method.
    */
@@ -120,9 +126,25 @@ public:
   const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name);
 
   /**
+   * Register a named gradient method with time-state storage.
+   * @param method_name Name of the gradient method to register.
+   * @param oldest_state Oldest time state that consumers need to read.
+   */
+  const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name,
+                                                      unsigned int oldest_state);
+
+  /**
    * Register a specific gradient method object and return its reader.
    */
   const LinearFVGradientReader & requestCellGradients(const FVGradientMethod & method);
+
+  /**
+   * Register a specific gradient method object with time-state storage.
+   * @param method Gradient method to register.
+   * @param oldest_state Oldest time state that consumers need to read.
+   */
+  const LinearFVGradientReader & requestCellGradients(const FVGradientMethod & method,
+                                                      unsigned int oldest_state);
 
   /**
    * Check if cell gradient computations were requested for this variable.
@@ -146,6 +168,16 @@ public:
    * @param component The gradient component to retrieve
    */
   Real gradSlnComponent(const ElemInfo & elem_info, unsigned int component) const;
+
+  /**
+   * Get one default gradient component at a cell center and solution state.
+   * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param component The gradient component to retrieve
+   * @param state State argument describing which solution state to evaluate
+   */
+  Real gradSlnComponent(const ElemInfo & elem_info,
+                        unsigned int component,
+                        const StateArg & state) const;
 
   /**
    * Compute interpolated gradient on the provided face.
@@ -216,10 +248,6 @@ protected:
   /// Throw an error when somebody wants to use this variable with automatic differentiation
   [[noreturn]] void adError() const;
 
-  /// Throw an error when somebody requests gradients at a non-current solution state
-  /// @param state State that was requested.
-  [[noreturn]] void gradientStateError(const StateArg & state) const;
-
   /**
    * Setup the boundary to Dirichlet BC map
    */
@@ -232,6 +260,9 @@ protected:
 
   /// Boolean to check if this variable needs gradient computations.
   bool _needs_cell_gradients;
+
+  /// Oldest time state requested for any cell gradient method.
+  unsigned int _oldest_gradient_state_requested = 0;
 
   /// Owning concrete system pointers. One will be null.
   LinearSystem * const _linear_system;
@@ -555,18 +586,6 @@ MooseLinearVariableFV<OutputType>::timeIntegratorError() const
   mooseError("MooseLinearVariableFV does not support time integration at the moment! The variable "
              "which is causing the issue: ",
              this->name());
-}
-
-template <typename OutputType>
-void
-MooseLinearVariableFV<OutputType>::gradientStateError(const StateArg & state) const
-{
-  mooseError("MooseLinearVariableFV does not currently support ElemInfo/FaceInfo gradient "
-             "evaluation for non-current states. Requested state index ",
-             state.state,
-             " for variable '",
-             this->name(),
-             "'. Old-state requests typically use state index 1.");
 }
 
 template <typename OutputType>

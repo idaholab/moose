@@ -181,6 +181,20 @@ LinearSystem::reinit()
 }
 
 void
+LinearSystem::copyPreviousAdditionalStates(const Moose::SolutionIterationType iteration_type,
+                                           const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientInterface::copyPreviousGradientStates(skip_current_to_old);
+}
+
+void
+LinearSystem::restoreAdditionalStates()
+{
+  LinearFVGradientInterface::restoreGradientStates();
+}
+
+void
 LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
                                       const std::set<TagID> & matrix_tags,
                                       const bool compute_gradients)

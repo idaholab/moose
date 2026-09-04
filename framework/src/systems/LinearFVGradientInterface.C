@@ -52,7 +52,8 @@ LinearFVGradientInterface::resolveFVGradientMethod(const GradientMethodName & me
 
 LinearFVGradientReader
 LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number,
-                                              const FVGradientMethod & method)
+                                              const FVGradientMethod & method,
+                                              const unsigned int oldest_state)
 {
   auto * const variable =
       dynamic_cast<MooseVariableFieldBase *>(_sys.variableWarehouse().getVariable(variable_number));
@@ -66,13 +67,13 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
   auto & container = _linear_fv_gradient_container_by_method[&method];
   container.variable_numbers.insert(variable_number);
 
-  if (container.values.empty() && _sys.currentSolution())
-    initializeContainer(container.values);
+  ensureGradientStateStorage(container, oldest_state);
 
-  if (container.next_values.empty() && _sys.currentSolution())
+  if (container.next_values.empty() && _sys.solutionStatesInitialized() && _sys.currentSolution() &&
+      _sys.currentSolution()->initialized())
     initializeContainer(container.next_values);
 
-  return LinearFVGradientReader(_sys, container.values, method, variable_number);
+  return LinearFVGradientReader(_sys, container.state_values, method, variable_number);
 }
 
 void
@@ -140,10 +141,55 @@ void
 LinearFVGradientInterface::initializeContainer(GradientContainer & container) const
 {
   container.clear();
-  mooseAssert(_sys.currentSolution(),
+  mooseAssert(_sys.currentSolution() && _sys.currentSolution()->initialized(),
               "Current solution must exist before building FV gradient storage.");
-  for (unsigned int i = 0; i < _sys.mesh().dimension(); ++i)
-    container.push_back(_sys.currentSolution()->zero_clone());
+  container.resize(_sys.mesh().dimension());
+  for (auto & component : container)
+    component = _sys.currentSolution()->zero_clone();
+}
+
+void
+LinearFVGradientInterface::ensureGradientStateStorage(LinearFVGradientContainer & container,
+                                                      const unsigned int oldest_state)
+{
+  const auto required_states = static_cast<std::size_t>(oldest_state) + 1;
+  const auto old_size = container.state_values.size();
+  if (required_states > old_size && _sys.solutionStatesInitialized() && oldest_state > 0)
+    mooseError("Linear FV gradient state ",
+               oldest_state,
+               " was requested on system '",
+               _sys.name(),
+               "' after solution states were initialized. Old gradient states must be requested "
+               "during setup.");
+
+  if (required_states > old_size)
+    container.state_values.resize(required_states);
+
+  if (_sys.solutionStatesInitialized() && _sys.currentSolution() &&
+      _sys.currentSolution()->initialized())
+    for (const auto state : make_range(old_size, required_states))
+      initializeContainer(container.state_values[state]);
+
+  if (container.current_state_initialized)
+    for (const auto state : make_range(std::max<std::size_t>(old_size, 1), required_states))
+      copyGradient(container.state_values[0], container.state_values[state]);
+}
+
+void
+LinearFVGradientInterface::copyGradient(const GradientContainer & source,
+                                        GradientContainer & destination) const
+{
+  mooseAssert(!Threads::in_threads, "Linear FV gradient state copying is not thread-safe.");
+  mooseAssert(source.size() == destination.size(),
+              "Gradient state component counts must match when copying states.");
+
+  for (const auto component : index_range(source))
+  {
+    mooseAssert(source[component], "Source gradient component vector must be initialized.");
+    mooseAssert(destination[component],
+                "Destination gradient component vector must be initialized.");
+    *destination[component] = *source[component];
+  }
 }
 
 LinearFVGradientInterface::LinearFVGradientContainer &
@@ -151,11 +197,22 @@ LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMeth
 {
   auto & container = libmesh_map_find(_linear_fv_gradient_container_by_method, &method);
 
-  mooseAssert(!container.values.empty(),
+  mooseAssert(!container.state_values.empty(),
+              "Gradient state storage must contain a current state.");
+
+  for (auto & state : container.state_values)
+    if (state.empty())
+      initializeContainer(state);
+  if (container.next_values.empty())
+    initializeContainer(container.next_values);
+
+  mooseAssert(!container.state_values.empty(),
+              "Gradient state storage must contain a current state.");
+  mooseAssert(!container.state_values[0].empty(),
               "Gradient storage must be initialized before gradient computation.");
   mooseAssert(!container.next_values.empty(),
               "Replacement gradient storage must be initialized before gradient computation.");
-  mooseAssert(container.next_values.size() == container.values.size(),
+  mooseAssert(container.next_values.size() == container.state_values[0].size(),
               "Next and current gradient containers must have the same size.");
 
   method.computeGradient(_sys, container.next_values, container.variable_numbers);
@@ -166,9 +223,17 @@ LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMeth
 void
 LinearFVGradientInterface::finalizeLinearFVGradientContainer(LinearFVGradientContainer & container)
 {
-  mooseAssert(container.next_values.size() == container.values.size(),
+  mooseAssert(!container.state_values.empty(),
+              "Gradient state storage must contain a current state.");
+  mooseAssert(container.next_values.size() == container.state_values[0].size(),
               "Next and current gradient containers must have the same size.");
-  container.values.swap(container.next_values);
+  container.state_values[0].swap(container.next_values);
+
+  if (!container.current_state_initialized)
+    for (const auto state : make_range(std::size_t(1), container.state_values.size()))
+      copyGradient(container.state_values[0], container.state_values[state]);
+
+  container.current_state_initialized = true;
 }
 
 void
@@ -176,8 +241,10 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
   {
-    method_container_pair.second.values.clear();
+    for (auto & state : method_container_pair.second.state_values)
+      state.clear();
     method_container_pair.second.next_values.clear();
+    method_container_pair.second.current_state_initialized = false;
   }
 
   if (!hasLinearFVGradients())
@@ -185,7 +252,56 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
   {
-    initializeContainer(method_container_pair.second.values);
+    for (auto & state : method_container_pair.second.state_values)
+      initializeContainer(state);
     initializeContainer(method_container_pair.second.next_values);
+  }
+}
+
+void
+LinearFVGradientInterface::initializeGradientStatesForTimeAdvance()
+{
+  for (auto & [method, container] : _linear_fv_gradient_container_by_method)
+    if (container.state_values.size() > 1 && !container.current_state_initialized)
+      computeLinearFVGradientContainer(*method);
+
+  for (auto & [_, container] : _linear_fv_gradient_container_by_method)
+    if (container.state_values.size() > 1 && !container.current_state_initialized)
+      finalizeLinearFVGradientContainer(container);
+}
+
+void
+LinearFVGradientInterface::copyPreviousGradientStates(const bool skip_current_to_old)
+{
+  mooseAssert(!Threads::in_threads, "Linear FV gradient state copying is not thread-safe.");
+  initializeGradientStatesForTimeAdvance();
+
+  for (auto & [_, container] : _linear_fv_gradient_container_by_method)
+  {
+    const auto number_of_states = container.state_values.size();
+    if (number_of_states <= 1)
+      continue;
+
+    mooseAssert(container.current_state_initialized,
+                "Current gradient state must be initialized before advancing time states.");
+    const std::size_t stop = skip_current_to_old ? 1 : 0;
+    for (std::size_t state = number_of_states - 1; state > stop; --state)
+      copyGradient(container.state_values[state - 1], container.state_values[state]);
+  }
+}
+
+void
+LinearFVGradientInterface::restoreGradientStates()
+{
+  mooseAssert(!Threads::in_threads, "Linear FV gradient state copying is not thread-safe.");
+  for (auto & [_, container] : _linear_fv_gradient_container_by_method)
+  {
+    if (container.state_values.size() <= 1)
+      continue;
+
+    mooseAssert(container.current_state_initialized,
+                "Current gradient state must be initialized before restoration.");
+    copyGradient(container.state_values[1], container.state_values[0]);
+    copyGradient(container.state_values[0], container.next_values);
   }
 }

@@ -124,6 +124,20 @@ AuxiliarySystem::reinit()
 }
 
 void
+AuxiliarySystem::copyPreviousAdditionalStates(const Moose::SolutionIterationType iteration_type,
+                                              const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientInterface::copyPreviousGradientStates(skip_current_to_old);
+}
+
+void
+AuxiliarySystem::restoreAdditionalStates()
+{
+  LinearFVGradientInterface::restoreGradientStates();
+}
+
+void
 AuxiliarySystem::timestepSetup()
 {
   SystemBase::timestepSetup();

@@ -92,7 +92,14 @@ template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients()
 {
-  const auto & reader = requestCellGradients(_default_gradient_method_name);
+  return requestCellGradients(0);
+}
+
+template <typename OutputType>
+const LinearFVGradientReader &
+MooseLinearVariableFV<OutputType>::requestCellGradients(const unsigned int oldest_state)
+{
+  const auto & reader = requestCellGradients(_default_gradient_method_name, oldest_state);
 
   _gradient_reader = &reader;
   return reader;
@@ -109,25 +116,44 @@ template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name)
 {
+  return requestCellGradients(method_name, 0);
+}
+
+template <typename OutputType>
+const LinearFVGradientReader &
+MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name,
+                                                        const unsigned int oldest_state)
+{
   const auto & method = _linear_system ? _linear_system->resolveFVGradientMethod(method_name)
                                        : _auxiliary_system->resolveFVGradientMethod(method_name);
 
-  return requestCellGradients(method);
+  return requestCellGradients(method, oldest_state);
 }
 
 template <typename OutputType>
 const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method)
 {
+  return requestCellGradients(method, 0);
+}
+
+template <typename OutputType>
+const LinearFVGradientReader &
+MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method,
+                                                        const unsigned int oldest_state)
+{
   _needs_cell_gradients = true;
+  _oldest_gradient_state_requested = std::max(_oldest_gradient_state_requested, oldest_state);
+
+  auto new_reader =
+      _linear_system ? _linear_system->registerFVGradient(this->_var_num, method, oldest_state)
+                     : _auxiliary_system->registerFVGradient(this->_var_num, method, oldest_state);
 
   const auto it = _gradient_readers_by_method.find(&method);
   if (it != _gradient_readers_by_method.end())
     return *it->second;
 
-  auto reader = std::make_unique<LinearFVGradientReader>(
-      _linear_system ? _linear_system->registerFVGradient(this->_var_num, method)
-                     : _auxiliary_system->registerFVGradient(this->_var_num, method));
+  auto reader = std::make_unique<LinearFVGradientReader>(std::move(new_reader));
 
   auto & reader_ref = *reader;
   _gradient_readers_by_method.emplace(&method, std::move(reader));
@@ -173,10 +199,7 @@ VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const StateArg & state) const
 {
   mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
-  if (state.state != 0)
-    gradientStateError(state);
-
-  return _gradient_reader->gradient(elem_info);
+  return _gradient_reader->gradient(elem_info, state);
 }
 
 template <typename OutputType>
@@ -184,9 +207,18 @@ Real
 MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
                                                     const unsigned int component) const
 {
+  return gradSlnComponent(elem_info, component, Moose::currentState());
+}
+
+template <typename OutputType>
+Real
+MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
+                                                    const unsigned int component,
+                                                    const StateArg & state) const
+{
   mooseAssert(_gradient_reader,
               "Gradient component requested without calling requestCellGradients().");
-  return _gradient_reader->component(elem_info, component);
+  return _gradient_reader->component(elem_info, component, state);
 }
 
 template <typename OutputType>
@@ -194,10 +226,7 @@ VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & state) const
 {
   mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
-  if (state.state != 0)
-    gradientStateError(state);
-
-  return _gradient_reader->gradient(fi);
+  return _gradient_reader->gradient(fi, state);
 }
 
 template <typename OutputType>
@@ -601,7 +630,7 @@ template <typename OutputType>
 unsigned int
 MooseLinearVariableFV<OutputType>::oldestSolutionStateRequested() const
 {
-  unsigned int state = 0;
+  unsigned int state = _oldest_gradient_state_requested;
   state = std::max(state, _element_data->oldestSolutionStateRequested());
   state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
   return state;
