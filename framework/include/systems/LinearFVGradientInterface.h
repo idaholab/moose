@@ -54,13 +54,18 @@ public:
    * Register a variable for gradient values produced by a method object.
    * @param variable_number Variable number whose gradient should be stored.
    * @param method Gradient method that computes the field values.
+   * @param oldest_state Oldest time state that consumers need to read.
    */
   LinearFVGradientReader registerFVGradient(unsigned int variable_number,
-                                            const FVGradientMethod & method);
+                                            const FVGradientMethod & method,
+                                            unsigned int oldest_state = 0);
 
 protected:
   /// One vector per spatial component of a cell-centered gradient field.
   using GradientContainer = LinearFVGradientReader::GradientContainer;
+
+  /// Gradient fields indexed by solution time state.
+  using GradientStateContainer = LinearFVGradientReader::GradientStateContainer;
 
   /// Compute and finalize all registered linear FV gradient fields.
   void computeGradients();
@@ -72,9 +77,24 @@ protected:
   void updateFVGradient(const LinearFVGradientReader & reader);
 
   /**
+   * Initialize any unallocated gradient storage after solution-vector creation.
+   */
+  void initializeLinearFVGradientStorage();
+
+  /**
    * Rebuild cached gradient values and reusable scratch storage after mesh/DOF changes.
    */
   void rebuildLinearFVGradientStorage();
+
+  /**
+   * Copy published gradient values into requested older time states.
+   * @param skip_current_to_old Whether state zero should not overwrite state one while deeper
+   * states still shift, matching the owning system's solution-state advancement.
+   */
+  void copyPreviousGradientStates(bool skip_current_to_old);
+
+  /// Restore current gradients from state one after a failed timestep.
+  void restoreGradientStates();
 
   /// Whether any linear finite-volume gradient fields have been registered to this object.
   bool hasLinearFVGradients() const;
@@ -91,12 +111,32 @@ protected:
     /// Variable numbers whose gradients are stored in the gradient containers.
     std::unordered_set<unsigned int> variable_numbers;
 
-    /// Current gradient values read by consumers.
-    GradientContainer values;
+    /// Published gradient values indexed by solution time state.
+    GradientStateContainer state_values;
 
     /// Replacement gradient values computed before publication.
     GradientContainer next_values;
+
+    /// Whether the current gradient has received a computed value.
+    bool current_state_initialized = false;
   };
+
+  /**
+   * Ensure that a method container stores every requested time state.
+   * @param container Method container whose state storage should be grown.
+   * @param oldest_state Oldest time state that must be stored.
+   */
+  void ensureGradientStateStorage(LinearFVGradientContainer & container, unsigned int oldest_state);
+
+  /**
+   * Copy one complete gradient field.
+   * @param source Gradient field to copy.
+   * @param destination Gradient field to overwrite.
+   */
+  void copyGradient(const GradientContainer & source, GradientContainer & destination) const;
+
+  /// Compute and publish uninitialized gradients before their first time-state advancement.
+  void initializeGradientStatesForTimeAdvance();
 
   /**
    * Compute replacement field values for a registered gradient method.

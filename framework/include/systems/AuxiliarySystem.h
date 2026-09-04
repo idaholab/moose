@@ -48,6 +48,7 @@ public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
+  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
   virtual void timestepSetup() override;
@@ -165,6 +166,10 @@ public:
   void variableWiseRelativeSolutionDifferenceNorm(std::vector<Number> & var_diffs) const;
 
 protected:
+  virtual void copyPreviousAdditionalStates(Moose::SolutionIterationType iteration_type,
+                                            bool skip_current_to_old) override;
+  virtual void restoreAdditionalStates() override;
+
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
   void computeMortarNodalVars(ExecFlagType type);

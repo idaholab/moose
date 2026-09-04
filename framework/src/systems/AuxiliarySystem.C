@@ -72,13 +72,19 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 AuxiliarySystem::~AuxiliarySystem() = default;
 
 void
+AuxiliarySystem::initSolutionState()
+{
+  SystemBase::initSolutionState();
+  LinearFVGradientInterface::initializeLinearFVGradientStorage();
+}
+
+void
 AuxiliarySystem::initialSetup()
 {
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -121,6 +127,20 @@ AuxiliarySystem::reinit()
 {
   _current_solution = _sys.current_local_solution.get();
   LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+}
+
+void
+AuxiliarySystem::copyPreviousAdditionalStates(const Moose::SolutionIterationType iteration_type,
+                                              const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientInterface::copyPreviousGradientStates(skip_current_to_old);
+}
+
+void
+AuxiliarySystem::restoreAdditionalStates()
+{
+  LinearFVGradientInterface::restoreGradientStates();
 }
 
 void

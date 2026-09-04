@@ -1262,16 +1262,24 @@ SystemBase::copySolutionsBackwards()
 }
 
 void
+SystemBase::copyStateHistoryBackwards()
+{
+  system().update();
+  advanceStateHistory(Moose::SolutionIterationType::Time);
+  advanceStateHistory(Moose::SolutionIterationType::Nonlinear);
+}
+
+void
 SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_type)
 {
+  // Normally copy through old (index 1). For Time, optionally stop at older
+  // and leave old unchanged.
+  const bool skip_old =
+      iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
+
   const auto num_states = getNumSolutionStates(iteration_type);
   if (num_states > 1)
   {
-    // Normally copy through old (index 1). For Time, optionally stop at older
-    // and leave old unchanged.
-    const bool skip_old =
-        iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
-
     const std::size_t stop = skip_old ? 1 : 0;
     for (std::size_t i = num_states - 1; i > stop; --i)
       solutionState(i, iteration_type) = solutionState(i - 1, iteration_type);
@@ -1296,6 +1304,15 @@ SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_t
     case Moose::SolutionIterationType::Count:
       break;
   }
+}
+
+void
+SystemBase::advanceStateHistory(const Moose::SolutionIterationType iteration_type)
+{
+  const bool skip_current_to_old =
+      iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
+  copyPreviousSolutions(iteration_type);
+  copyPreviousAdditionalStates(iteration_type, skip_current_to_old);
 }
 
 /**
@@ -1325,6 +1342,13 @@ SystemBase::restoreSolutions()
   if (solutionPreviousNewton())
     *solutionPreviousNewton() = solutionOld();
   system().update();
+}
+
+void
+SystemBase::restoreStateHistory()
+{
+  restoreSolutions();
+  restoreAdditionalStates();
 }
 
 void
