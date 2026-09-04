@@ -65,7 +65,7 @@ LinearAssemblySegregatedSolve::validParams()
   params.addParamNamesToGroup(
       "active_scalar_systems active_scalar_equation_relaxation active_scalar_petsc_options "
       "active_scalar_petsc_options_iname "
-      "active_scalar_petsc_options_value active_scalar_petsc_options_value "
+      "active_scalar_petsc_options_value "
       "active_scalar_absolute_tolerance "
       "active_scalar_l_tol active_scalar_l_abs_tol active_scalar_l_max_its",
       "Active Scalars Equations");

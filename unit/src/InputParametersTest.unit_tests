@@ -1,0 +1,20 @@
+[Tests]
+  design = 'InputParameters.md'
+  issues = '#20935'
+
+  [group_assignment]
+    type = GoogleTest
+    unit_test = InputParametersTest.addParamNamesToGroup
+    requirement = 'The system shall allow a parameter to be assigned to a documentation group.'
+  []
+  [duplicate_group_assignment]
+    type = GoogleTest
+    unit_test = InputParametersTest.addParamNamesToGroupDuplicateError
+    requirement = 'The system shall error when a parameter is assigned to a documentation group it has already been assigned to.'
+  []
+  [duplicate_group_assignment_within_call]
+    type = GoogleTest
+    unit_test = InputParametersTest.addParamNamesToGroupDuplicateWithinCallError
+    requirement = 'The system shall error when a single group-assignment call lists the same parameter more than once.'
+  []
+[]
