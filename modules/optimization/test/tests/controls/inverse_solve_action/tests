@@ -1,0 +1,65 @@
+[Tests]
+  design = 'SingleParameterInverseSolveAction.md'
+  issues = '#33205'
+
+  [action_secant]
+    type = CSVDiff
+    input = action_secant.i
+    csvdiff = action_secant_out.csv
+    requirement = "The system shall generate a complete secant inverse-solve workflow (forward "
+                  "sub-app, transfers, postprocessors, convergence, and control) from a single "
+                  "SingleParameterInverseSolve block."
+  []
+  [action_newton]
+    type = CSVDiff
+    input = action_newton.i
+    csvdiff = action_newton_out.csv
+    requirement = "The system shall generate a complete finite-difference Newton inverse-solve "
+                  "workflow from a single SingleParameterInverseSolve block with the method set "
+                  "to newton."
+  []
+  [action_accept_on_max]
+    type = RunApp
+    input = action_secant.i
+    cli_args = 'SingleParameterInverseSolve/max_iterations=1 '
+               'SingleParameterInverseSolve/accept_on_max_iterations=true '
+               'Outputs/csv=false'
+    # Reuses action_secant.i, so its recover checkpoint would collide with the action_secant test.
+    recover = false
+    requirement = "The system shall, when the single-parameter inverse-solve block reaches the "
+                  "maximum number of fixed-point iterations and accept-on-max is enabled, accept "
+                  "the best estimate and continue without error."
+  []
+  [absolute_tolerance]
+    type = RunApp
+    input = action_secant.i
+    cli_args = 'SingleParameterInverseSolve/relative_tolerance=1e-30 Outputs/csv=false'
+    # Reuses action_secant.i, so its recover checkpoint would collide with the action_secant test.
+    recover = false
+    requirement = "The system shall converge a single-parameter inverse solve using the absolute "
+                  "tolerance criterion when the relative tolerance is negligible."
+  []
+  [action_newton_accept_on_max]
+    type = RunApp
+    input = action_newton.i
+    # max_iterations=2 is even, so the cap falls on a perturbed Newton iteration -- the case where
+    # the accepted solution comes from the last base iteration.
+    cli_args = 'SingleParameterInverseSolve/max_iterations=2 '
+               'SingleParameterInverseSolve/accept_on_max_iterations=true '
+               'Outputs/csv=false'
+    # Reuses action_newton.i, so its recover checkpoint would collide with the action_newton test.
+    recover = false
+    requirement = "The system shall, when the Newton single-parameter inverse-solve block reaches "
+                  "the maximum number of fixed-point iterations on a perturbed iteration and "
+                  "accept-on-max is enabled, accept the last base estimate and continue without "
+                  "error."
+  []
+  [missing_convergence]
+    type = RunException
+    input = action_no_convergence.i
+    expect_err = "requires the executioner to use its generated convergence"
+    requirement = "The system shall report a helpful error when the single-parameter inverse-solve "
+                  "block's generated convergence is not assigned to the executioner's "
+                  "multiapp_fixed_point_convergence."
+  []
+[]

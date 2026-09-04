@@ -123,6 +123,10 @@ public:
 
   FixedPointSolve & fixedPointSolve() { return *_fixed_point_solve; }
 
+  /// Whether a fixed-point solve object was built (false for executor-style executioners, whose
+  /// two-argument constructor leaves it null), so callers can guard fixedPointSolve() safely.
+  bool hasFixedPointSolve() const { return _fixed_point_solve != nullptr; }
+
   /**
    * Get the verbose output flag
    * @return The verbose output flag
