@@ -505,6 +505,8 @@ addActionTypes(Syntax & syntax)
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
   addTaskDependency("add_mfem_submeshes", "create_problem_complete");
+  // A function may be restricted to a subdomain that a submesh adds to the parent mesh.
+  addTaskDependency("add_function", "add_mfem_submeshes");
 
   // add SubMesh transfers
   appendMooseObjectTask("add_transfer", MFEMSubMeshTransfer);

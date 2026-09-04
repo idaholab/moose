@@ -60,6 +60,17 @@
     compute_devices = 'cpu'
     recover = false
   []
+  [MFEMPML]
+    type = CSVDiff
+    input = pml.i
+    csvdiff = 'OutputData/PML.csv'
+    design = 'MFEMPerfectlyMatchedLayerFunction.md'
+    issues = '#33450'
+    requirement = 'The system shall have the ability to absorb an outgoing wave using a perfectly matched layer whose coordinate stretch is directed along the gradient of a harmonic coordinate solved for inside the layer.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
   [MFEMMixedSesquilinear]
     type = CSVDiff
     input = mixed_sesquilinear.i
@@ -83,6 +94,17 @@
     input = mixed_sesquilinear_real_imag.i
     csvdiff = 'OutputData/MixedSesquilinearRealImag.csv'
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with a mixed sesquilinear form kernel carrying both real and imaginary integrators on a trial variable with essential degrees of freedom.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMPML3D]
+    type = CSVDiff
+    input = pml_3d.i
+    csvdiff = 'OutputData/PML3D.csv'
+    design = 'MFEMPerfectlyMatchedLayerFunction.md'
+    issues = '#33450'
+    requirement = 'The system shall have the ability to absorb an outgoing wave using a harmonic coordinate perfectly matched layer on a three dimensional mesh, where the stretch tensor is a full matrix.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
