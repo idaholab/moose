@@ -34,10 +34,10 @@ protected:
   void addRequiredCZMInterfaceMaterials();
 
   /// Allows derived actions to set parameters on each generated interface kernel.
-  virtual void customizeCZMInterfaceKernel(InputParameters & params) const;
+  virtual void customizeCZMInterfaceKernelParameters(InputParameters & /*params*/) const {}
 
   /// Allows derived actions to set parameters on the generated displacement jump material.
-  virtual void customizeCZMDisplacementJump(InputParameters & params) const;
+  virtual void customizeCZMDisplacementJumpMaterialParameters(InputParameters & /*params*/) const {}
 
   /// verifies order and family of output variables
   void verifyOrderAndFamilyOutputs();

@@ -54,8 +54,8 @@ protected:
   UserObjectName interfaceManagerName() const;
 
   /// Sets SCZM-specific parameters on each generated interface kernel.
-  void customizeCZMInterfaceKernel(InputParameters & params) const override;
+  void customizeCZMInterfaceKernelParameters(InputParameters & params) const override;
 
   /// Sets SCZM-specific parameters on the generated displacement jump material.
-  void customizeCZMDisplacementJump(InputParameters & params) const override;
+  void customizeCZMDisplacementJumpMaterialParameters(InputParameters & params) const override;
 };

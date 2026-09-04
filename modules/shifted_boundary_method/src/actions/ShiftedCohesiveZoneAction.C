@@ -421,7 +421,7 @@ ShiftedCohesiveZoneAction::addSBMDistanceUserObjects()
 }
 
 void
-ShiftedCohesiveZoneAction::customizeCZMInterfaceKernel(InputParameters & params) const
+ShiftedCohesiveZoneAction::customizeCZMInterfaceKernelParameters(InputParameters & params) const
 {
   if (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh"))
     params.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();
@@ -457,7 +457,8 @@ ShiftedCohesiveZoneAction::customizeCZMInterfaceKernel(InputParameters & params)
 }
 
 void
-ShiftedCohesiveZoneAction::customizeCZMDisplacementJump(InputParameters & params) const
+ShiftedCohesiveZoneAction::customizeCZMDisplacementJumpMaterialParameters(
+    InputParameters & params) const
 {
   if (getParam<bool>("generate_sbm_distance") || isParamSetByUser("complete_interface_mesh"))
     params.set<UserObjectName>("sbm_distance_uo") = sbmDistanceUserObjectName();

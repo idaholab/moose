@@ -130,7 +130,7 @@ CohesiveZoneAction::addRequiredCZMInterfaceKernels()
     paramsk.set<std::vector<VariableName>>("displacements") = _displacements;
     paramsk.set<std::vector<BoundaryName>>("boundary") = _boundary;
     paramsk.set<std::string>("base_name") = _base_name;
-    customizeCZMInterfaceKernel(paramsk);
+    customizeCZMInterfaceKernelParameters(paramsk);
 
     std::string save_in_side;
     std::vector<AuxVariableName> save_in_var_names;
@@ -152,11 +152,6 @@ CohesiveZoneAction::addRequiredCZMInterfaceKernels()
 }
 
 void
-CohesiveZoneAction::customizeCZMInterfaceKernel(InputParameters &) const
-{
-}
-
-void
 CohesiveZoneAction::addRequiredCZMInterfaceMaterials()
 {
   // Create unique material name for the "CZMComputeDisplacementJump" object
@@ -166,7 +161,7 @@ CohesiveZoneAction::addRequiredCZMInterfaceMaterials()
 
   paramsm.set<std::vector<VariableName>>("displacements") = _displacements;
   paramsm.set<std::string>("base_name") = _base_name;
-  customizeCZMDisplacementJump(paramsm);
+  customizeCZMDisplacementJumpMaterialParameters(paramsm);
   _problem->addInterfaceMaterial(_disp_jump_provider_name, unique_material_name, paramsm);
 
   // Create unique material name for the "CZMComputeGlobalTraction" object
@@ -177,11 +172,6 @@ CohesiveZoneAction::addRequiredCZMInterfaceMaterials()
   paramsm.set<std::string>("base_name") = _base_name;
   _problem->addInterfaceMaterial(
       _equilibrium_traction_calculator_name, unique_material_name, paramsm);
-}
-
-void
-CohesiveZoneAction::customizeCZMDisplacementJump(InputParameters &) const
-{
 }
 
 void
