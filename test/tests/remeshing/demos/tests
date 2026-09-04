@@ -1,0 +1,32 @@
+[Tests]
+  design = '/Remeshing/index.md'
+  issues = '#13610'
+
+  [ale_circle_traverse]
+    type = RunApp
+    input = 'ale_circle_traverse.i'
+    # The full-length demo sweeps a circular interface out and back across the rectangle; the
+    # smoke run keeps CI cheap and proves the input stays runnable
+    cli_args = 'Executioner/num_steps=6 Outputs/exo/enable=false Mesh/domain/desired_area=0.05'
+    recover = false
+    restep = false
+    requirement = 'The system shall demonstrate a circular interface swept across a rectangle and '
+                  'back by ALE mesh movement, remeshing the patches the motion distorts while a '
+                  'stateful material property accumulates without interruption.'
+  []
+
+  [distributed_wall_sweep]
+    type = RunApp
+    input = 'distributed_wall_sweep.i'
+    cli_args = 'Executioner/num_steps=3 Outputs/exo/enable=false Mesh/square/nx=8 Mesh/square/ny=8'
+    design = '/Remeshing/index.md VariationalSmoother.md'
+    min_parallel = 3
+    max_parallel = 3
+    recover = false
+    restep = false
+    requirement = 'The system shall demonstrate a graded moving wall compressing a distributed '
+                  'mesh across three processors, with every processor remeshing the elements it '
+                  'owns and the values of new elements drawn from the processors that own their '
+                  'source elements.'
+  []
+[]

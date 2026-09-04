@@ -386,6 +386,20 @@ Adaptivity::setInitialMarkerVariableName(std::string marker_field)
   _initial_marker_variable_name = marker_field;
 }
 
+bool
+Adaptivity::willModifyMesh() const
+{
+  if (!_mesh_refinement_on)
+    return false;
+
+  // The legacy path flags elements from an error estimator rather than from a marker variable, so
+  // an empty marker name says nothing about it. Answering true is the conservative direction.
+  if (!_use_new_system)
+    return true;
+
+  return !_marker_variable_name.empty() || !_initial_marker_variable_name.empty();
+}
+
 ErrorVector &
 Adaptivity::getErrorVector(const std::string & indicator_field)
 {

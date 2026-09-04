@@ -73,6 +73,9 @@
 #include "Positions.h"
 #include "Indicator.h"
 #include "Marker.h"
+#include "MeshSmootherBase.h"
+#include "RemeshCriterion.h"
+#include "Remesher.h"
 #include "MultiApp.h"
 #include "MultiAppTransfer.h"
 #include "TransientMultiApp.h"
@@ -476,6 +479,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _adaptivity(*this),
     _cycles_completed(0),
 #endif
+    _remeshing(*this),
     _displaced_mesh(nullptr),
     _geometric_search_data(*this, _mesh),
     _mortar_data(std::make_unique<MortarInterfaceWarehouse>(*this)),
@@ -1643,6 +1647,10 @@ FEProblemBase::initialSetup()
   // We do this late to allow objects to get late restartable data
   if (_app.isRestarting() || _app.isRecovering() || _force_restart)
     _app.finalizeRestore();
+
+  // This is late enough that the restarted reference configuration has been restored and that
+  // [Adaptivity] has been set up, which the remeshing engine checks against
+  _remeshing.initialSetup();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
 }
@@ -5913,6 +5921,59 @@ FEProblemBase::addMarker(const std::string & marker_name,
 }
 
 void
+FEProblemBase::addRemesher(const std::string & type,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  parallel_object_only();
+
+  parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  std::shared_ptr<Remesher> remesher = _factory.create<Remesher>(type, name, parameters, 0);
+  logAdd("Remesher", name, type, parameters);
+  _remeshing.addRemesher(remesher);
+}
+
+void
+FEProblemBase::addRemeshCriterion(const std::string & type,
+                                  const std::string & name,
+                                  InputParameters & parameters)
+{
+  parallel_object_only();
+
+  parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  std::shared_ptr<RemeshCriterion> criterion =
+      _factory.create<RemeshCriterion>(type, name, parameters, 0);
+  logAdd("RemeshCriterion", name, type, parameters);
+  _remeshing.addCriterion(criterion);
+}
+
+void
+FEProblemBase::addMeshSmoother(const std::string & type,
+                               const std::string & name,
+                               InputParameters & parameters)
+{
+  parallel_object_only();
+
+  parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  std::shared_ptr<MeshSmootherBase> smoother =
+      _factory.create<MeshSmootherBase>(type, name, parameters, 0);
+  logAdd("MeshSmootherBase", name, type, parameters);
+  _remeshing.addSmoother(smoother);
+}
+
+void
+FEProblemBase::remeshingStep(const Real dt)
+{
+  _remeshing.remeshingStep(dt);
+}
+
+void
 FEProblemBase::addMultiApp(const std::string & multi_app_name,
                            const std::string & name,
                            InputParameters & parameters)
@@ -9040,6 +9101,14 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
   if (_has_kokkos_objects)
     initKokkosStatefulProps();
 #endif
+}
+
+void
+FEProblemBase::eraseElementStatefulProps(const Elem & elem)
+{
+  _material_props.eraseProperty(&elem);
+  _bnd_material_props.eraseProperty(&elem);
+  _neighbor_material_props.eraseProperty(&elem);
 }
 
 void

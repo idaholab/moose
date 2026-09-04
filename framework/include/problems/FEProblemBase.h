@@ -20,6 +20,7 @@
 #include "MeshDivision.h"
 #include "ReporterData.h"
 #include "Adaptivity.h"
+#include "Remeshing.h"
 #include "InitialConditionWarehouse.h"
 #include "FVInitialConditionWarehouse.h"
 #include "ScalarInitialConditionWarehouse.h"
@@ -1657,6 +1658,21 @@ public:
                          const std::string & name,
                          InputParameters & parameters);
 
+  // Remeshing /////
+
+  /// Add the object that performs the surgery of a remesh event
+  virtual void
+  addRemesher(const std::string & type, const std::string & name, InputParameters & parameters);
+
+  /// Add a test that decides when to remesh
+  virtual void addRemeshCriterion(const std::string & type,
+                                  const std::string & name,
+                                  InputParameters & parameters);
+
+  /// Add the object that moves the mesh between remesh events
+  virtual void
+  addMeshSmoother(const std::string & type, const std::string & name, InputParameters & parameters);
+
   /**
    * Add a MultiApp to the problem.
    */
@@ -2155,6 +2171,31 @@ public:
   bool hasInitialAdaptivity() const { return false; }
 #endif // LIBMESH_ENABLE_AMR
 
+  // Remeshing /////
+
+  ///@{
+  /// Get the remeshing engine
+  Remeshing & getRemeshing() { return _remeshing; }
+  const Remeshing & getRemeshing() const { return _remeshing; }
+  ///@}
+
+  /**
+   * Find out whether the current analysis is using remeshing
+   *
+   * @return true if the [Remeshing] block turned remeshing on, otherwise false
+   */
+  bool hasRemeshing() const { return _remeshing.isOn(); }
+
+  /**
+   * Move the mesh, and remesh it when a criterion fires.
+   *
+   * Called once per attempt at a time step by the executioner, after the time step size is
+   * computed and before the solve. Does nothing when remeshing is off.
+   *
+   * @param dt the time step size the executioner is about to solve with
+   */
+  void remeshingStep(Real dt);
+
   /// Create XFEM controller object
   void initXFEM(std::shared_ptr<XFEMInterface> xfem);
 
@@ -2202,6 +2243,13 @@ public:
    * at an intermediate step
    */
   void initElementStatefulProps(const libMesh::ConstElemRange & elem_range, const bool threaded);
+
+  /**
+   * Erase the stateful property storage of \p elem
+   * The storage is keyed on Elem *, so this is needed before an element that is removed from the
+   * mesh is freed, otherwise the storage is left holding a dangling pointer.
+   */
+  void eraseElementStatefulProps(const Elem & elem);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   void initKokkosStatefulProps();
@@ -3365,6 +3413,9 @@ protected:
   Adaptivity _adaptivity;
   unsigned int _cycles_completed;
 #endif
+
+  /// The remeshing engine
+  Remeshing _remeshing;
 
   /// Pointer to XFEM controller
   std::shared_ptr<XFEMInterface> _xfem;

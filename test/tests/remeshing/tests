@@ -1,0 +1,632 @@
+[Tests]
+  design = '/Remeshing/index.md'
+  issues = '#13610'
+
+  [stateful_requires_projection]
+    type = RunException
+    input = 'stateful_requires_projection.i'
+    expect_err = 'is not projected for remeshing'
+    requirement = 'The system shall report an error when a stateful material property is declared in '
+                  'a simulation that uses remeshing without that property being projected into an '
+                  'auxiliary variable.'
+  []
+
+  [amr_mutually_exclusive]
+    type = RunException
+    input = 'amr_mutually_exclusive.i'
+    expect_err = 'cannot both be active in the same simulation'
+    requirement = 'The system shall report an error when adaptivity and remeshing are both active '
+                  'in the same simulation.'
+  []
+
+  [ale_interface_tracking]
+    type = Exodiff
+    input = 'ale_interface_tracking.i'
+    # 'sequence = true' writes one file per time step because Exodus stores the nodal coordinates
+    # once, when the file is created. Without it the moved coordinates would never reach the gold
+    # and this comparison would degenerate into a solution-only check.
+    exodiff = 'ale_interface_tracking_out.e '
+              'ale_interface_tracking_out.e-s002 '
+              'ale_interface_tracking_out.e-s003'
+    # A recovered run resumes from a checkpointed X0 and d, which this feature does not yet cover.
+    # A repeated time step is covered and is deliberately left on: no criterion can fire in this
+    # run, so the retry exercises the re-entry path where the failed attempt only moved the mesh.
+    # The engine restores the pseudo-displacement the step started from before moving the mesh
+    # again, so 'interface_centroid_x' stays at 0.5 * t however often the step is retried. Without
+    # that restore the retried step advances the interface twice and every row after it is wrong.
+    recover = false
+    design = '/Remeshing/index.md LaplaceSmoother.md MeshMotionCriterion.md '
+             'ElementQualityCriterion.md'
+    requirement = 'The system shall move the nodes of the reference mesh to follow a circular '
+                  'interface whose velocity is prescribed by functions, writing the updated node '
+                  'coordinates and the diffusion solution computed on the moved mesh at every time '
+                  'step, while thresholds chosen so that no criterion can fire keep the mesh '
+                  'topology unchanged.'
+  []
+
+  [ale_interface_tracking_positions]
+    type = CSVDiff
+    input = 'ale_interface_tracking.i'
+    # Golded as text so that the invariants of a regenerated gold can be read and checked by eye.
+    # The interface travels in x only, so 'interface_centroid_x' has to equal 0.5 * t and both y
+    # columns have to be identically zero; 'interior_mean_disp_x' has to sit strictly between zero
+    # and 'interface_centroid_x', which the maximum principle guarantees because the smoother makes
+    # each component of the pseudo-displacement harmonic, and 'wall_centroid_x' has to stay pinned
+    # at zero. A gold captured from a run that had lost the transverse or the interior part of the
+    # pseudo-displacement would violate those relations on inspection, which a binary comparison
+    # alone cannot reveal.
+    csvdiff = 'ale_interface_tracking_out.csv'
+    prereq = 'ale_interface_tracking'
+    should_execute = false
+    delete_output_before_running = false
+    # This block does not execute; it reads the artifact the prereq wrote, so under a restep run it
+    # compares the prereq's retried run against this same gold
+    recover = false
+    design = '/Remeshing/index.md LaplaceSmoother.md'
+    requirement = 'The system shall harmonically interpolate the prescribed motion of a moving '
+                  'boundary into the interior of the mesh, leaving the pinned boundaries at rest, '
+                  'holding every component of the motion that the prescribed velocity does not '
+                  'drive at zero, and displacing the interior by less than the boundary that '
+                  'drives it.'
+  []
+
+  [ale_remesh_reset]
+    type = CSVDiff
+    input = 'ale_remesh_reset.i'
+    csvdiff = 'ale_remesh_reset_out.csv'
+    # The engine moves and remeshes the mesh at the start of the step, before the solve, so a
+    # TIMESTEP_END postprocessor reports the post-remesh mesh that the step was solved on
+    #
+    # A recovered run resumes from a checkpointed reference configuration. A repeated time step is
+    # covered: the retried step here is one on which no criterion fires, so the engine restores the
+    # pseudo-displacement the step started from and moves the mesh once.
+    recover = false
+    design = '/Remeshing/index.md MeshMotionCriterion.md PatchDelaunayRemesher.md '
+             'LaplaceSmoother.md RemeshCount.md MaxPseudoDisplacement.md'
+    requirement = 'The system shall return the accumulated pseudo-displacement to zero and adopt '
+                  'the replaced mesh as the new reference configuration on the time step where a '
+                  'mesh motion criterion triggers a remesh, reporting the remesh count, the largest '
+                  'pseudo-displacement magnitude, and the element count at the end of every step.'
+  []
+
+  [true_disp_quality_remesh]
+    type = Exodiff
+    input = 'true_disp_quality_remesh.i'
+    # A single output written at FINAL is one file whose mesh is the post-remesh mesh, so this needs
+    # neither 'sequence = true' nor a displaced output. The assertion is the displacement field, and
+    # the displaced coordinates are only that field added to the reference coordinates. The remesh
+    # count and the element count ride along as Exodus global variables so that a run where no
+    # element is ever replaced cannot pass as a silently empty comparison
+    exodiff = 'true_disp_quality_remesh_out.e'
+    # The displacement variables are transient, so a recovered run resolves from a checkpointed old
+    # state rather than from the one the remesh transfer wrote. A repeated step does not: the
+    # executioner restores the solutions before it re-enters the step, so the retry resolves from
+    # the same old state the failed attempt did.
+    recover = false
+    design = '/Remeshing/index.md ElementQualityCriterion.md PatchDelaunayRemesher.md '
+             'RemeshCount.md'
+    requirement = 'The system shall replace elements of the reference mesh of a true displacement '
+                  'problem when a prescribed boundary displacement degrades the element quality of '
+                  'the displaced configuration past a threshold, carrying every displacement state '
+                  'onto the new elements so that the final displacement field, the remesh count '
+                  'and the element count match the reference output.'
+  []
+
+  [stateful_property_transfer]
+    type = CSVDiff
+    input = 'stateful_property_transfer.i'
+    csvdiff = 'stateful_property_transfer_out.csv'
+    # The accumulated state is a piecewise constant auxiliary variable, which the remesh transfer
+    # reproduces on a new element exactly, so the only error in the integral column is the round-off
+    # of the projection. 1e-8 is orders of magnitude below the jump that restarting the accumulation
+    # on the replaced elements would produce
+    rel_err = 1e-8
+    abs_zero = 1e-10
+    # The projected state is checkpointed independently of the mesh the remesh produced, which a
+    # recovered run cannot reconcile. A repeated time step is covered, and the retried step here is
+    # one on which a remesh fires: the engine keeps the mesh that attempt replaced and does not
+    # remesh or accumulate again, so 'remesh_count' and the integral advance once.
+    recover = false
+    design = '/Remeshing/index.md PatchDelaunayRemesher.md RemeshCount.md'
+    requirement = 'The system shall carry a stateful material property across a mesh replacement '
+                  'through the auxiliary variables of the projected stateful material storage, so '
+                  'that the integral of the property over the domain continues to accumulate '
+                  'without a jump on the step where the elements are replaced.'
+  []
+
+  [parallel_remesh]
+    type = CSVDiff
+    input = 'parallel_remesh.i'
+    csvdiff = 'parallel_remesh_out.csv'
+    # The wall velocity is graded along the wall on purpose. A spatially uniform wall velocity
+    # produces a spatially uniform strain field on this rectangle, which parks large symmetric
+    # families of candidate triangles on the Delaunay area threshold at once, so a one ulp change
+    # in the node coordinates flips a whole family together. The grading breaks those families and
+    # raises the activation threshold of the element count by orders of magnitude, which is what
+    # the sibling 'distributed_remesh' gold relies on. The slope is 0.6 rather than the sibling's
+    # 0.3 so that the peak wall motion stays at 0.06 per step, above the 0.05 per step a uniform
+    # 0.5 produced, and the remesh cadence is not weakened by the change.
+    #
+    # The gold is pinned to the default bjacobi and ilu linear solve of the smoother as much as to
+    # the rank count, and both pins are load-bearing. bjacobi carries one block per rank, so the
+    # Krylov iterate the smoother converges to is rank dependent: the largest pseudo-displacement
+    # moves by 4.29e-9 between one rank and three on a bit identical mesh, and a Delaunay area
+    # threshold tie-break that the last bits of the node coordinates decide amplifies that into
+    # whole elements; five exact LU solves differing only in their fill-reducing ordering landed on
+    # 86 elements and on 82. Tightening 'l_tol' re-rolls the element count rather than converging
+    # it. A PETSc bump that changes the bjacobi or the ilu internals, or any change to the linear
+    # solve the smoother performs, legitimately moves that column; regold rather than loosen it.
+    #
+    # 'remesh_count' and 'moved_volume' are the robust assertions: the count held across every
+    # perturbation that was measured, and the area is 1 - 0.3*t exactly, so a regenerated gold can
+    # be checked by eye. 'u_l2' is the transfer detector, the column a lost ghost or a dropped
+    # remesh transfer shows up in, and is kept at the default tolerance for that reason.
+    min_parallel = 3
+    max_parallel = 3
+    # A recovered run resumes from a checkpointed reference configuration. A repeated time step is
+    # covered on every rank alike: the retried step here is one on which a remesh fires, and the
+    # engine keeps the mesh that attempt replaced rather than replacing it a second time, so no
+    # rank re-enters the collectives of a surgery its neighbors have already performed.
+    recover = false
+    design = '/Remeshing/index.md PatchDelaunayRemesher.md LaplaceSmoother.md RemeshCount.md '
+             'MaxPseudoDisplacement.md'
+    requirement = 'The system shall remesh a moving mesh problem carried on a replicated mesh in '
+                  'parallel, reporting a remesh count, element count, largest pseudo-displacement '
+                  'magnitude, solution norm and moved mesh volume that match the reference output, '
+                  'with the volume equal to the area the graded wall motion leaves behind.'
+  []
+
+  [distributed_remesh]
+    type = CSVDiff
+    input = 'distributed_remesh.i'
+    csvdiff = 'distributed_remesh_out.csv'
+    # A rank replaces only the elements it owns and grows no cavity past a partition seam, so the
+    # element set this run reaches is a property of the partition rather than of the problem. Three
+    # ranks and an explicit GridPartitioner are what make that partition the same three horizontal
+    # strips on every machine and in every run, which is the only reason this gold reproduces. The
+    # partitioner in the input is not an optimization and must not be removed: the default
+    # partitioner is free to hand out a different partition on a different build of METIS or a
+    # different processor count, and every column of this gold would move with it.
+    #
+    # This gold is pinned to the default bjacobi and ilu linear solve of the smoother as much as to
+    # the rank count. bjacobi carries one block per rank, so the Krylov iterate the smoother
+    # converges to is rank dependent, and a PETSc bump that changes the bjacobi or the ilu
+    # internals will legitimately move these columns.
+    min_parallel = 3
+    max_parallel = 3
+    # There is deliberately no serial or replicated counterpart of this gold to compare against.
+    # Cutting the cavities at the seams gives the distributed run a different, equally valid mesh
+    # than the one a replicated run reaches from the same input, so asserting agreement between the
+    # two would assert something the system does not promise. What the gold does pin is that every
+    # rank enters the collectives, that a rank whose own record is empty still drops the ghost
+    # copies of what its neighbors deleted, that the reference mesh and the displaced mesh both
+    # stay conforming across the seam, and that the element count, the remesh count and the
+    # solution norm therefore evolve without a jump when the failing region crosses a seam.
+    #
+    # A mesh generator that cannot be built in parallel makes MOOSE fall back to a replicated mesh
+    # and say so rather than fail, and this test would then pass while exercising the replicated
+    # path it exists to leave. The console header is asserted so that such a fallback fails here.
+    # The header is column-padded, so \s+ is required; do not simplify this to a single space.
+    expect_out = 'Parallel Type:\s+distributed'
+    # A recovered run resumes from a checkpointed reference configuration. A repeated time step is
+    # covered, and the retried step here is one on which a remesh fires: the engine keeps the mesh
+    # that attempt replaced, so no rank re-enters the surgery collectives or the ghost-layer rebuild
+    # a second time. The harness skips this block under a restep sweep even so, because a block
+    # carrying 'expect_out' is skipped in that mode; the coverage comes from the siblings above.
+    recover = false
+    design = '/Remeshing/index.md PatchDelaunayRemesher.md LaplaceSmoother.md RemeshCount.md '
+             'MaxPseudoDisplacement.md'
+    requirement = 'The system shall remesh a moving mesh problem carried on a distributed mesh, '
+                  'with each processor replacing only the elements it owns, reporting a remesh '
+                  'count, element count, largest pseudo-displacement magnitude, displaced volume '
+                  'and solution norm that advance without an anomaly where the failing region '
+                  'crosses from one processor to the next.'
+  []
+
+  [refine_front]
+    type = CSVDiff
+    input = 'refine_front.i'
+    csvdiff = 'refine_front_out.csv'
+    # This is the deterministic refinement path. No triangulator runs here: the remesher splits a
+    # marked triangle at the midpoints of its three sides and closes the split with bisections, so
+    # the element set a run reaches is fixed arithmetic rather than the outcome of an area threshold
+    # tie-break. That is why 'n_elements' is asserted raw in this gold, which none of the coarsening
+    # siblings above can do.
+    #
+    # The input carries a real [Adaptivity] block that supplies only [Indicators], with no marker
+    # and no steps, next to the [Remeshing] block. That combination used to be rejected outright.
+    # It is admitted now because an [Adaptivity] block with no marker computes its indicator fields
+    # and leaves the mesh alone, so it is not a second system replacing the mesh. This test is where
+    # that admission is exercised: it fails at setup, before any comparison, if the two systems are
+    # made mutually exclusive again.
+    #
+    # A regenerated gold has to satisfy all of the following by inspection. A gold that does not is
+    # reporting a broken run rather than a new answer.
+    #
+    #   The first row is 64 elements, which is the 8 by 4 grid of quadrilaterals cut into triangles.
+    #
+    #   'n_elements' never decreases, and it moves on exactly the steps where 'remesh_count' moves.
+    #   Nothing else in this input replaces an element, so a row where one of those two columns
+    #   changed and the other did not is reporting a defect. Every increase is at least three: the
+    #   smallest event the splitter can perform is a single red, which replaces one triangle with
+    #   four, and the closure never produces a green without a red for it to close.
+    #
+    #   'remesh_count' rises by one on every step of this run, with no plateau, and that is the
+    #   correct answer rather than a runaway. The front enters at x = 0.15, travels at unit speed
+    #   for 0.4 time units and ends at x = 0.55, in a domain that runs to x = 2. It is still well
+    #   inside the mesh when the run ends, so there is fresh coarse mesh ahead of it to refine on
+    #   every step. The run is deliberately not extended until the front leaves: the front can only
+    #   leave by crossing the far block, and 'far_min_h' asserts nothing once that block has been
+    #   touched. What bounds the refinement is asserted through 'band_min_h' instead.
+    #
+    #   'u_integral_post_remesh' in a row equals 'u_integral' in the row above it to round-off. That
+    #   is an identity, not an approximation: the solution is piecewise linear, a red-green
+    #   subdivision only adds vertices at side midpoints, and the transfer evaluates the parent
+    #   element at exactly those points, so the function carried onto the children is the function
+    #   that was on the parent. The pair is read before and after a mesh replacement with no solve
+    #   between them, so a step between the two columns is a broken child-state transfer and nothing
+    #   else. The two columns are kept separate for that reason; a single end-of-step integral would
+    #   hide the jump behind the solve that follows the replacement.
+    #
+    #   'band_min_h' falls a long way below the starting element diameter of 0.353553, which is the
+    #   diagonal of a 0.25 by 0.25 quadrilateral, and it falls below the 0.09 floor that the sizing
+    #   auxiliary variable clamps the target element size to as well. That is expected, and the two
+    #   kinds of child have to be read differently. A red is chosen by
+    #   'TriSplitRemesher::selectOversizedElements', which compares an element diameter against the
+    #   target on that element, so an element whose diameter has already reached the floor is never
+    #   chosen as a red, and red splitting on its own bottoms out just under 0.09. A green is not
+    #   chosen by size at all: it is forced on a neighbor of a red purely so that the split leaves
+    #   no hanging node, so a green child's diameter is set by its parent's geometry and passes
+    #   straight through the floor. A green child can then be large enough to be chosen as a red on
+    #   the next event, and that alternation is how this run reaches diameters several halvings
+    #   below the floor.
+    #
+    #   The floor is still load-bearing, and it is not a tuning constant. It is what bounds the
+    #   reds, and a green is only ever created next to a red, so bounding the reds is what empties
+    #   the pattern out and stops the splitting. A target that kept shrinking as the mesh refined
+    #   would leave elements oversized after every event forever and this test would never
+    #   terminate, which is also why 'selectOversizedElements' refuses a non-positive target
+    #   outright. This version of the engine does not track green closures for later removal, so
+    #   nothing here asserts a bound on how far below the floor a green can reach.
+    #
+    #   'band_min_h' falling at all is also the subdomain check. The band elements are replaced by
+    #   their children, so a child that did not inherit the subdomain of its parent would leave
+    #   block 1 holding only the elements that were never touched, and this column would stay flat
+    #   at 0.353553 while 'n_elements' grew.
+    #
+    #   'far_min_h' holds at 0.353553 in every row. The far block sits many front widths downstream,
+    #   where the indicator is the tail of a tanh profile, so the size field leaves the target at its
+    #   ceiling of 0.4 there, which is above the starting element diameter and asks for nothing. A
+    #   far block that refines means the size field is no longer tracking the front.
+    #
+    # The refinement pattern is decided by comparing an element diameter against a target computed
+    # from the solution, so an element parked on that comparison could flip on solver noise.
+    # 'nl_rel_tol' is tightened to 1e-10 in the input for that reason, and the indicator of a tanh
+    # front falls off exponentially with distance, which keeps the elements away from the comparison
+    # rather than sitting on it.
+    #
+    # Pinned to a single rank. 'n_elements' is asserted raw, and the splitter defers an oversized
+    # element whose split would have reached onto another rank rather than growing a patch across a
+    # partition seam, so the element set a distributed run reaches is a property of the partition
+    # rather than of the problem. What a multi-rank run of this input should produce has not been
+    # established, so this pin is deliberate. Do not relax it without a gold captured on the rank
+    # count it is relaxed to.
+    max_parallel = 1
+    # A recovered run would resume from a checkpointed mesh rather than from the one the remesh
+    # transfer wrote. A repeated time step is covered: a remesh fires on every step of this run, so
+    # the retry always lands on the re-entry path where the failed attempt already replaced
+    # elements, and the engine keeps that mesh rather than splitting it a second time. Both
+    # 'n_elements' and 'remesh_count' would step twice on the retried row if it did not.
+    recover = false
+    design = '/Remeshing/index.md TriSplitRemesher.md IndicatorThresholdCriterion.md RemeshCount.md'
+    requirement = 'The system shall split the triangles of a mesh into four where an adaptivity '
+                  'indicator reports a sharp solution front, reporting an element count that '
+                  'grows only on the steps where a mesh replacement is recorded, a solution '
+                  'integral that does not jump across a mesh replacement, and a smallest element '
+                  'size that falls only in the region the front passes through.'
+  []
+
+  [refine_front_min_size]
+    type = CSVDiff
+    input = 'refine_front.i'
+    csvdiff = 'refine_front_min_size_out.csv'
+    # The sibling 'refine_front' carries its floor as the clamp 'max(h_min, ...)' inside the sizing
+    # auxiliary variable. This block carries the identical floor as the remesher's own
+    # 'min_element_size' parameter instead, and strips only the outer 'max(h_min, ...)' off the
+    # sizing expression, leaving 'h_min' alone because it also sets the slope '(h_max - h_min)'
+    # inside it. The field then genuinely falls to zero and below at the front, and the run
+    # exercises the path where the floor, not the field, keeps the target positive. The two floors
+    # are the same arithmetic: the clamp computes max(0.09, min(0.4, e)) and the parameter computes
+    # max(min(0.4, e), 0.09), so element selection is bit-identical and this gold is a copy of the
+    # sibling's. A run that diverges from it means the parameter floor and the clamp floor no
+    # longer state the same predicate.
+    cli_args = "Remeshing/Remeshers/split/min_element_size=0.09 "
+               "AuxKernels/sizing/expression='min(h_max, h_max - (h_max - h_min) * jump / jump_ref)' "
+               "Outputs/file_base=refine_front_min_size_out"
+    # Pinned and restricted for the reasons the sibling 'refine_front' sets out: 'n_elements' is
+    # asserted raw, and a recovered run would resume from a checkpointed mesh.
+    max_parallel = 1
+    recover = false
+    design = '/Remeshing/index.md TriSplitRemesher.md'
+    requirement = 'The system shall hold the target element size of the triangle splitting '
+                  'remesher at a floor given by a minimum element size parameter, permitting the '
+                  'sizing field to fall to zero or below where the floor takes over, and '
+                  'reproducing the refinement history of the run whose sizing field carries the '
+                  'same floor as a clamp.'
+  []
+
+  [refine_coarsen_cycle]
+    type = CSVDiff
+    input = 'refine_coarsen_cycle.i'
+    csvdiff = 'refine_coarsen_cycle_out.csv'
+    # The multi-remesher path: a 'TriSplitRemesher' refines the band the sweeping front is in and a
+    # 'PatchDelaunayRemesher' retriangulates the region the front has left, both inside one event
+    # and both reading the 'target_h' field the criterion reads. Giving them different fields would
+    # be a different test. How the two share the field, and the dead band between them, is set out
+    # in PatchDelaunayRemesher.md.
+    #
+    # 'remesh_count' counts remesher applications, not remesh events: the engine increments it once
+    # per record it applies, so the column steps by two on a step where both remeshers changed the
+    # mesh, by one where only one of them did, and holds where neither did. A regenerated gold whose
+    # count never steps by two is reporting a run in which one of the two remeshers never acted,
+    # which is the run this test exists to rule out. The count climbs for the whole run rather than
+    # flattening, because the front never leaves the domain and the splitter finds oversized
+    # elements at it on every step; a count that flattened would mean the splitter had stopped
+    # tracking the front. The column cannot show whether the coarsening arm did anything, since a
+    # remesher that declines every event leaves an empty record and does not increment it; that is
+    # settled by the integral pair below.
+    #
+    # 'n_elements' is deliberately absent from this gold and must not be added. Splitting is exact
+    # arithmetic on nodes already in the mesh, which is why the sibling 'refine_front' asserts the
+    # count raw, but the patch remesher hands a cavity polygon to the poly2tri Delaunay triangulator
+    # and the element count downstream of it was measured to flip on a one ulp change in a nodal
+    # coordinate, as 'parallel_remesh' above documents. This test asserts what the coarsening is
+    # for rather than how many triangles it happened to leave behind. A count of the elements under
+    # a size threshold was rejected for the same reason: it is an integer no tolerance can absorb,
+    # and it flips whenever a single triangle crosses the threshold.
+    #
+    # The front is graded along y on purpose, by the '0.15 * y' term in the driving function, for
+    # the reason the wall velocity of 'parallel_remesh' is graded: a front uniform along y parks
+    # symmetric families of candidate triangles on the Delaunay area threshold at once.
+    #
+    # The y window in the sizing auxiliary variable holds the target at its ceiling within one
+    # element of y = 0 and y = ymax, so the boundary row is never split and keeps its original 0.25
+    # exterior sides, which pass the rim threshold of 0.4 / sqrt(2) * 0.4 = 0.1131 by a factor of
+    # 2.2. Without it a refined element on the exterior boundary would pin its cavity for the rest
+    # of the run and the coarsening arm would go inert while still selecting elements every step;
+    # PatchDelaunayRemesher.md sets out why an exterior edge can never be repaired. The front is
+    # started at x = 0.7 and the domain runs to x = 2.5 for the same reason, so that the refined
+    # region never reaches the left or the right boundary either. If a run ever produces short
+    # exterior sides through the closure, it shows up as a deferral line on the console rather than
+    # as a wrong number.
+    #
+    # The measured blocks are inset off the exterior boundary in y for a second reason: 'wake_min_h'
+    # is a minimum, so a single element the window did not protect would pin it for every row that
+    # follows. Restoring either block to the full height of the domain, or dropping the window,
+    # destroys the assertion silently and leaves the test green against a gold regenerated with it.
+    # The far block is given the same y extent so that the two size columns measure comparable
+    # strips and their ratio is a like for like comparison.
+    #
+    # 1e-6 rather than the 1e-8 of 'stateful_property_transfer' above, because that transfer is
+    # exact and this one is not: retriangulating a patch resamples the field onto triangles that are
+    # not children of the ones they replace, and a build that reorders the triangulator arithmetic
+    # can move a new node in its last bits and move the resampled integral by more than round-off.
+    # The smallest patch this input coarsens carries of order a hundredth of the domain integral, so
+    # a transfer that reset or dropped the solution on a coarsened patch moves
+    # 'u_integral_post_remesh' by of order 1e-2 relative, four orders of magnitude above 1e-6. The
+    # legitimate resampling error is in the gold already.
+    rel_err = 1e-6
+    abs_zero = 1e-10
+    #
+    # A regenerated gold has to satisfy all of the following by inspection. A gold that does not is
+    # reporting a broken run rather than a new answer.
+    #
+    #   The first row is a remesh count of zero and 'wake_min_h', 'wake_avg_h' and 'far_min_h' all
+    #   at 0.353553, the diagonal of a 0.25 by 0.25 quadrilateral, so 'wake_far_size_ratio' is
+    #   exactly one.
+    #
+    #   'far_min_h' holds at 0.353553 in every row, and 'wake_far_size_ratio' is therefore readable
+    #   as the bulk wake size in units of the untouched mesh. The far block is the strip from 2.25
+    #   to 2.5 in x and from 0.25 to 1.25 in y; the front, at x = 0.7 along the bottom and 0.925
+    #   along the top at t = 0 and travelling at 1.2, has only reached 1.56 to 1.79 by the last
+    #   step, more than ten front widths short of it, so the size field sits at its 0.4 ceiling
+    #   there and asks for nothing. A single sticky step in this column to hypot(0.25, 0.125) =
+    #   0.279508, the diameter of a green bisection child, is the splitter's closure cascade laying
+    #   one green layer across the block seam and is correct behavior; three coarse element columns
+    #   stand between the refinement window and this block to keep the column constant, so check a
+    #   regenerated gold against 0.279508 before treating that value as a defect. What is a failure
+    #   is this column drifting to a value that is not a bisection of the starting diameter, or
+    #   moving more than once, either of which means the size field has stopped tracking the front.
+    #
+    #   'wake_min_h' falls from 0.353553 to below the 0.12 floor of the size field and then rises
+    #   again. Splitting on its own stops at 0.353553 / 4 = 0.0884, the first halving below the
+    #   floor; the observed minimum may sit under that because the nodes on the rim of a cavity are
+    #   pinned and the triangulator has to fit triangles between rim nodes that are already close
+    #   together. A minimum under 0.0884 is not runaway refinement; a minimum that keeps falling row
+    #   after row is.
+    #
+    #   The rise is the claim of this test. The wake block is the strip from 0.75 to 1.0 in x and
+    #   from 0.25 to 1.25 in y, which the front has crossed by t = 0.22 and stands five front widths
+    #   clear of by t = 0.39, so the size field there is back at its 0.4 ceiling for the last half
+    #   of the run and the patch remesher can select the refined triangles, which sit below
+    #   0.4 * 0.4 = 0.16, and retriangulate them. 'wake_min_h' only turns once the last refined
+    #   triangle in the block has gone, which is why the block is one the front leaves with time to
+    #   spare. If coarsening never fires, both wake columns hold at their refined values through the
+    #   last row while every other column still looks reasonable.
+    #
+    #   'wake_avg_h' carries the same claim and fails differently. The minimum proves no element
+    #   was left behind, since one permanently deferred triangle pins it; the mean, being the
+    #   integral of the size field over the block divided by its volume, barely moves for a handful
+    #   of pinned rim triangles and proves the bulk of the block coarsened. A run in which only the
+    #   mean rises has left a deferred element inside the block; a run in which only the minimum
+    #   rises has coarsened one triangle and nothing else.
+    #
+    #   Both wake columns are only readable because every triangle the patch remesher produces takes
+    #   the subdomain of the old cavity element that contains its centroid, so a cavity that
+    #   straddles the wake block boundary at x = 1.0 or y = 0.25, which cavity growth does
+    #   routinely, still leaves block 1 holding exactly the triangles inside it. A column that
+    #   jumped straight to the far field value in one row, while the front was still inside the
+    #   wake, would be that assignment having gone per-patch.
+    #
+    #   Neither wake column alternates between a refined and a coarsened value from one row to the
+    #   next: between 0.4 * target_h and target_h neither remesher acts and a triangle comes to
+    #   rest. Nothing in this input sits near the 0.4 threshold; the three element populations it
+    #   produces stand at 0.884, 0.737 and 0.221 of their own targets, the nearest a factor of 1.8
+    #   clear, and the 0.25 exterior side of an unrefined boundary element stands at 0.625 of its
+    #   0.4 target against a rim threshold of 0.4 / sqrt(2) = 0.2828. A run in which the two
+    #   remeshers fight shows 'remesh_count' stepping by two on every row to the last one, rather
+    #   than only on the early ones, while the wake columns oscillate. That is the failure to look
+    #   for first.
+    #
+    #   'u_integral_post_remesh' in a row equals 'u_integral' in the row above it to the resampling
+    #   error of the Delaunay path, which is small because the patch remesher only selects elements
+    #   whose target has returned to the 0.4 ceiling, where the front has gone and the solution is
+    #   flat. The pair is read before and after the mesh replacement with no solve between them, so
+    #   a step between the two is a broken transfer and nothing else, and a single end-of-step
+    #   integral would hide that step behind the solve that follows the replacement.
+    #
+    #   The difference between that pair is also the only positive evidence in the whole gold that
+    #   coarsening happened, and checking it is the gate a regenerated gold has to pass. A red-green
+    #   split reproduces its parent exactly and contributes nothing to the difference, so a row
+    #   where the difference is not bit-exactly zero is proof that a cavity was retriangulated on
+    #   that step, and a row where it is exactly zero is proof that none was. The front lays down
+    #   fresh wake for the whole run, so a healthy gold carries nonzero differences scattered
+    #   through it, including in its later rows. A gold whose differences fall to exactly zero early
+    #   and stay there is an inert run in which every cavity is being deferred, and must not be
+    #   accepted; no other column can tell that apart from a healthy run, since 'remesh_count' still
+    #   climbs from the splitter alone and both wake columns simply hold at their refined values.
+    #
+    #   The console says so out loud, and is worth reading once when the gold is regenerated. The
+    #   patch remesher prints nothing when it succeeds; it prints 'Remeshing: deferred N cavities
+    #   whose boundary was still finer than the target size' when it declines an event, and
+    #   'Remeshing: rejected ...' when a cavity is unusable. A deferral line on step after step is
+    #   the inert state above; an occasional deferral while the front is still inside a region is
+    #   ordinary.
+    #
+    # 'quality_lower_bound' is opened to 0.05 in the input rather than left at the bound libMesh
+    # suggests, so that the size test is the only thing that selects an element for the patch
+    # remesher. The triangles a generated TRI3 mesh and a red-green split produce score about 0.866
+    # on the default SHAPE metric, well clear of 0.05.
+    #
+    # Pinned to a single rank. The Delaunay path is rank dependent for the reason 'parallel_remesh'
+    # above sets out, and the splitter defers an oversized element whose split would reach across a
+    # partition seam, so the mesh a distributed run reaches is a property of the partition rather
+    # than of the problem. What a multi-rank run of this input should produce has not been
+    # established. Do not relax this without a gold captured on the rank count it is relaxed to.
+    max_parallel = 1
+    # A recovered run would resume from a checkpointed mesh rather than from the one the remesh
+    # transfer wrote. A repeated time step is covered, and this is the block that pins it for a
+    # multi-remesher event: the retried step is one where both remeshers acted, and the engine keeps
+    # the mesh the failed attempt left rather than asking either of them for a second record, so
+    # 'remesh_count' steps by two on that row once and not by four.
+    recover = false
+    design = '/Remeshing/index.md TriSplitRemesher.md PatchDelaunayRemesher.md '
+             'IndicatorThresholdCriterion.md RemeshCount.md'
+    requirement = 'The system shall apply a triangle splitting remesher and a Delaunay patch '
+                  'remesher in turn within one remesh event, reporting a remesh count that '
+                  'advances once for every remesher that changes the mesh, a solution integral '
+                  'that does not jump across a mesh replacement, and a smallest and a mean '
+                  'element size in a region the front has passed that fall while the front is '
+                  'passing and rise once it has gone.'
+  []
+
+  [edge_remesh_cycle]
+    type = CSVDiff
+    input = 'edge_remesh_cycle.i'
+    csvdiff = 'edge_remesh_cycle_out.csv'
+    # This is the single-remesher refine-and-coarsen path. The sibling 'refine_coarsen_cycle'
+    # divides the work between a splitter and a Delaunay patch remesher; here one 'TriEdgeRemesher'
+    # splits the edges that are long against the target, collapses the ones that are short and
+    # swaps for shape inside one event. Every operation is exact arithmetic on nodes and midpoints
+    # already decided and the candidates are processed in sorted order, so 'n_elements' is asserted
+    # raw here, which the Delaunay path of the sibling cannot do.
+    #
+    # 'initial_remesh_cycles = 5' remeshes the initial condition before the transient, so the first
+    # row of the gold reports a remesh count of five and an element count far from the 120 the mesh
+    # generator built: the background has already coarsened toward the 0.4 ceiling and the front
+    # has already refined toward the 0.04 floor when the initial values are taken. The two integral
+    # columns are zero in that row because they only execute at TIMESTEP_END.
+    #
+    # 'n_elements' breathes between the high and the low hundreds rather than settling, because
+    # the split and the collapse pass trade elements around the moving front from event to event.
+    # That is bounded churn, not a runaway: a runaway shows as a count that climbs without the low
+    # rows ever returning. Do not expect this column to flatten.
+    #
+    # 'wake_min_h' reads a position-masked box rather than a subdomain, because a subdomain seam
+    # pins its vertices against collapse and would hold the minimum at the refined size forever.
+    # It dips to the 0.03 scale while the front is inside the box and returns to 0.354 once the
+    # front has left, which is the coarsening claim: only the collapse pass can raise it.
+    #
+    # 'u_integral_post_remesh' in a row against 'u_integral' in the row above is the transfer
+    # detector, and the difference between them is the resampling of the collapse and swap
+    # operations, which is in the gold. The front is resolved on purpose: the 0.04 floor matches
+    # the 0.04 front width, and the time derivative is mass lumped, which together hold the Gibbs
+    # over- and undershoot of the linear elements to the few-percent scale.
+    #
+    # Pinned to one rank. A three-rank replicated run was measured to reproduce this gold to the
+    # bit, but the swap pass accepts on a 1e-6 quality-improvement margin and the collapse pass on
+    # thresholds the solution feeds through the sizing field, and how those margins behave across
+    # PETSc builds and rank counts has not been established. Do not relax this without golds
+    # captured on the rank counts it is relaxed to.
+    max_parallel = 1
+    # A recovered run resumes from a checkpointed mesh rather than the one the remesh transfer
+    # wrote, and the initial remesh cycles are deliberately skipped on recovery. A repeated time
+    # step is covered: a remesh fires on every step of this run, so the retry lands on the re-entry
+    # path where the engine keeps the mesh the failed attempt produced.
+    recover = false
+    design = '/Remeshing/index.md TriEdgeRemesher.md IndicatorThresholdCriterion.md RemeshCount.md'
+    requirement = 'The system shall adapt a triangle mesh toward a target element size field with '
+                  'edge splits, collapses and swaps, remeshing the initial condition before the '
+                  'transient starts, and report a deterministic element count, a solution '
+                  'integral that does not jump across a mesh replacement, and a smallest element '
+                  'size in the swept region that falls while the front is inside it and rises once '
+                  'it has gone.'
+  []
+
+  [edge_remesh_distributed_refused]
+    type = RunException
+    input = 'edge_remesh_cycle.i'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=edge_remesh_distributed_refused_out'
+    expect_err = 'cannot run on a distributed mesh'
+    # The remesher is constructed when the [Remeshing] sub-blocks are, before the engine's own
+    # setup checks run, so this fires at construction. It is refused because its surgery is
+    # performed identically on every processor of a replicated mesh and is not confined to the
+    # elements a processor owns.
+    design = '/Remeshing/index.md TriEdgeRemesher.md'
+    requirement = 'The system shall report an error when the edge-operation remesher is used on a '
+                  'distributed mesh.'
+  []
+
+  [distributed_remesh_exodus_refused]
+    type = RunException
+    input = 'distributed_remesh.i'
+    # X0 and d are keyed by node id, and Exodus output of a distributed mesh that a remesh event
+    # left non-contiguously numbered renumbers it, through 'handleExodusIOMeshRenumbering()' in
+    # framework/src/outputs/Exodus.C, which announces the renumbering through
+    # FEProblemBase::meshChanged() alone; the engine does not rebuild its bookkeeping on that
+    # notification. Why the combination is refused rather than absorbed by re-snapshotting X0 is
+    # set out in the parallel section of syntax/Remeshing/index.md. Do not "fix" this block by
+    # making Exodus output work through a re-snapshot: the remesh cadence, and every column
+    # downstream of it, would then depend on whether the user turned Exodus output on.
+    #
+    # Asserted at setup rather than at the corruption it prevents, because the setup refusal binds
+    # the behavior that was chosen rather than the symptom, and fails before the run burns three
+    # time steps. The symptom is worth recording even so: a contiguous renumbering reuses most of
+    # the id range, so most keys still resolve, to the wrong node, and only the minority that fall
+    # off the end of the new range fail a lookup. A fix that merely refilled the missing keys
+    # would have turned a crash into a mesh quietly wrong everywhere.
+    #
+    # Pinned to three ranks and paired with the input's GridPartitioner for the reason the
+    # 'distributed_remesh' block above sets out. Only a distributed mesh reaches this path,
+    # because MooseMesh::init() disables renumbering for every other kind, which is why the sibling
+    # Exodiff blocks on replicated meshes are untouched by the refusal.
+    min_parallel = 3
+    max_parallel = 3
+    # A distinct file base so that the CSV this run would write cannot land on the artifacts of
+    # 'distributed_remesh', which shares this input
+    cli_args = 'Outputs/exodus=true Outputs/file_base=distributed_remesh_exodus_refused_out'
+    expect_err = 'cannot be combined with the Exodus output'
+    requirement = 'The system shall report an error when remeshing is combined with Exodus output '
+                  'on a distributed mesh.'
+  []
+[]

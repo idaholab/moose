@@ -1566,4 +1566,127 @@ addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_ext
         binfo.add_side(elem, i_side, extern_bid);
       }
 }
+
+libMesh::ConstElemRange
+buildElemRange(const std::vector<Elem *> & elems)
+{
+  Elem * const * const range_begin = elems.data();
+  Elem * const * const range_end = range_begin + elems.size();
+
+  return libMesh::ConstElemRange(
+      MeshBase::const_element_iterator(
+          range_begin, range_end, libMesh::Predicates::NotNull<Elem * const *>()),
+      MeshBase::const_element_iterator(
+          range_end, range_end, libMesh::Predicates::NotNull<Elem * const *>()));
+}
+
+void
+rebuildAfterElementSurgery(MeshBase & mesh)
+{
+  mesh.update_parallel_id_counts();
+  MeshCommunication().make_elems_parallel_consistent(mesh);
+  MeshCommunication().make_nodes_parallel_consistent(mesh);
+  mesh.allow_renumbering(false);
+  mesh.skip_partitioning(true);
+  mesh.prepare_for_use();
+}
+
+void
+deleteGhostCopies(MeshBase & mesh,
+                  const std::vector<dof_id_type> & deleted_elem_ids,
+                  const std::vector<dof_id_type> & deleted_node_ids)
+{
+  // The elements go first because a node may still be used by a ghost element that is about to go,
+  // and because delete_elem invalidates the memoized element ranges while delete_node does not
+  for (const auto elem_id : deleted_elem_ids)
+  {
+    Elem * const elem = mesh.query_elem_ptr(elem_id);
+    if (!elem)
+      continue;
+
+    mooseAssert(elem->processor_id() != mesh.processor_id(),
+                "Element " << elem_id
+                           << " is owned by this rank, so this rank rather than another one had to "
+                              "delete it, and it should be gone from the mesh already.");
+
+    // The surviving neighbors have to stop pointing at the element before it is freed. They are
+    // linked to the remote element rather than to nothing because find_neighbors reads the links it
+    // is about to reset, which is what libMesh does when an element becomes remote.
+    elem->make_links_to_me_remote();
+    mesh.delete_elem(elem);
+  }
+
+  for (const auto node_id : deleted_node_ids)
+  {
+    Node * const node = mesh.query_node_ptr(node_id);
+    if (!node)
+      continue;
+
+    mooseAssert(node->processor_id() != mesh.processor_id(),
+                "Node " << node_id
+                        << " is owned by this rank, so this rank rather than another one had to "
+                           "delete it, and it should be gone from the mesh already.");
+
+    mesh.delete_node(node);
+  }
+}
+
+void
+restoreGhostedElements(MeshBase & mesh)
+{
+  if (mesh.n_processors() == 1)
+    return;
+
+  std::map<processor_id_type, std::vector<const Node *>> nodes_to_send;
+  std::map<processor_id_type, std::vector<const Elem *>> elems_to_send;
+
+  for (const auto pid : make_range(mesh.n_processors()))
+  {
+    if (pid == mesh.processor_id())
+      continue;
+
+    // What the ghosting functors want processor pid to hold around the elements of pid this rank
+    // knows about
+    connected_elem_set_type coupled_elements;
+    query_ghosting_functors(mesh,
+                            pid,
+                            mesh.active_pid_elements_begin(pid),
+                            mesh.active_pid_elements_end(pid),
+                            coupled_elements);
+
+    // Only the owner of an element may hand it out, so the copies of other ranks' elements that the
+    // query picked up are dropped here
+    connected_elem_set_type owned_elements;
+    for (const Elem * elem : coupled_elements)
+      if (elem->processor_id() == mesh.processor_id())
+        owned_elements.insert(elem);
+
+    if (owned_elements.empty())
+      continue;
+
+    connected_node_set_type connected_nodes;
+    connect_element_dependencies(mesh, owned_elements, connected_nodes);
+
+    nodes_to_send[pid].assign(connected_nodes.begin(), connected_nodes.end());
+    elems_to_send[pid].assign(owned_elements.begin(), owned_elements.end());
+  }
+
+  // Unpacking adds what it receives to the mesh, so nothing is left to do on arrival. The nodes go
+  // first because the elements attach to them.
+  auto no_node_action = [](processor_id_type, const std::vector<const Node *> &) {};
+  auto no_elem_action = [](processor_id_type, const std::vector<const Elem *> &) {};
+  TIMPI::push_parallel_packed_range(mesh.comm(), nodes_to_send, &mesh, no_node_action);
+  TIMPI::push_parallel_packed_range(mesh.comm(), elems_to_send, &mesh, no_elem_action);
+}
+
+void
+rebuildAfterParallelElementSurgery(MeshBase & mesh,
+                                   const std::vector<dof_id_type> & deleted_elem_ids,
+                                   const std::vector<dof_id_type> & deleted_node_ids)
+{
+  deleteGhostCopies(mesh, deleted_elem_ids, deleted_node_ids);
+  MeshCommunication().gather_neighboring_elements(cast_ref<DistributedMesh &>(mesh));
+  restoreGhostedElements(mesh);
+  rebuildAfterElementSurgery(mesh);
+}
 }

@@ -476,6 +476,12 @@ TransientBase::takeStep(Real input_dt)
   else
     _dt = input_dt;
 
+  // Move and, when a criterion fires, remesh the mesh. This is the peer of the adaptMesh() call in
+  // incrementStepOrReject(), but it has to happen here instead: the mesh motion is driven by the
+  // time step size, which is only known once the lines above have run, and the solve below has to
+  // see the new mesh.
+  _problem.remeshingStep(_dt);
+
   _time_stepper->preSolve();
 
   // Increment time
