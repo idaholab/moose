@@ -173,8 +173,8 @@ protected:
     nlf_params.set<VariableName>("variable") = _var_name;
     nlf_params.set<MFEMScalarCoefficientName>("k_coefficient") = _k_linear;
     nlf_params.set<MFEMScalarCoefficientName>("dk_du_coefficient") = "0.";
-    _linear_diffusion_nlf = addSharedObject<MFEMNLDiffusionKernel>(
-        "MFEMNLDiffusionKernel", "lin_diff_nlf", nlf_params);
+    _linear_diffusion_nlf =
+        addSharedObject<MFEMNLDiffusionKernel>("MFEMNLDiffusionKernel", "lin_diff_nlf", nlf_params);
   }
 
   /// Add the terms common to both systems and initialise. Init() may only be called once per
