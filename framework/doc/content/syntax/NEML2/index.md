@@ -33,7 +33,9 @@ In each sub-block, there are a total of 6 groups of parameters that can be speci
 5. Transfer of derivatives (of output variables w.r.t. input variables)
 6. Transfer of derivatives (of output variables w.r.t. model parameters)
 
-The configuration of model is controlled by parameters such as [!param](/NEML2/model), [!param](/NEML2/verbose), [!param](/NEML2/device), etc., each of which is explained in the syntax documentation at the bottom of the page.
+The configuration of model is controlled by parameters such as [!param](/NEML2/model), [!param](/NEML2/device), etc., each of which is explained in the syntax documentation at the bottom of the page.
+
+NEML2 models run through one of two runtimes, selected by [!param](/NEML2/eager). By default (`eager = false`) the *cpp-aoti* runtime evaluates an ahead-of-time-compiled artifact produced by `neml2-compile`, with no Python interpreter at runtime; here [!param](/NEML2/input) is the artifact folder that `neml2-compile` writes (the `metadata.json` inside it, or the legacy `<model>_aoti.i` stub, are also accepted). Setting `eager = true` selects the *cpp-eager* runtime, which embeds a Python interpreter and loads the model directly from the source NEML2 input file given by [!param](/NEML2/input). The cpp-eager runtime is required for NEML2 models hosted inside a MOOSE application as Python modules, which are imported via [!param](/NEML2/load) (only valid with `eager = true`).
 
 [!param](/NEML2/input_types) is a list of enums denoting the type of the MOOSE data structure used to hold the input variables. The following enums are supported
 
@@ -61,16 +63,18 @@ my-app-opt -i input.i --parse-neml2-only
 
 ## Work scheduling and dispatching
 
-When the number of material updates (i.e., number of quadrature points) gets large, it is ideal to utilize and coordinate work among multiple devices, e.g., CPUs, GPUs, etc. in a heterogeneous computing environment. This can be achieved using NEML2's work schedulers.
+NEML2 evaluation maps naturally onto MOOSE's MPI domain decomposition: each MPI rank evaluates the batch of quadrature points it owns. With the cpp-aoti runtime, [!param](/NEML2/device) takes a list of devices and the work is dispatched with NEML2's MPI scheduler, which round-robins the device list over the MPI ranks on each node:
 
-NEML2 offers a variety of different work scheduling strategies, the two most commonly used strategies are defined by
-- SimpleScheduler: Dispatch work to a single device.
-- StaticHybridScheduler: Coordinate work scheduling and dispatching among multiple devices.
+- one device per rank when the rank and device counts match,
+- device sharing when there are more ranks than devices,
+- an error when there are fewer ranks than devices (idle devices are disallowed).
+
+A single `cpu` entry (the default) sends every rank's local batch to the CPU. To drive several GPUs, list them, e.g. `device = 'cuda:0 cuda:1 cuda:2 cuda:3'`. [!param](/NEML2/device_batch) optionally sets a per-device chunk size along the leading batch axis (`0`, the default, runs the whole local batch at once); it must have length 1 (broadcast to all devices) or the same length as [!param](/NEML2/device).
+
+The cpp-eager runtime does not dispatch; it pins the model to the first entry of [!param](/NEML2/device).
 
 !alert tip
-For more information on various types of schedulers and dispatchers, please refer to the [NEML2 documentation](https://applied-material-modeling.github.io/neml2/system-schedulers.html).
-
-The schedulers are defined in the NEML2 input file, and can be selected using the [!param](/NEML2/scheduler) parameter. On top of that, the boolean parameter [!param](/NEML2/async_dispatch) can be used to control whether work is dispatched asynchronously.
+For more information on NEML2's schedulers and dispatchers, please refer to the [NEML2 documentation](https://applied-material-modeling.github.io/neml2/system-schedulers.html).
 
 !syntax parameters /NEML2/NEML2ActionCommon id=syntax-list
                                             heading=Common parameters

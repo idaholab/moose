@@ -8,10 +8,13 @@
 []
 
 [NEML2]
+  eager = true
   input = 'models/custom_model.i'
+  # NEML2TestModel is hosted inside MOOSE as a Python module; importing it registers the type with
+  # the embedded (cpp-eager) interpreter so the input file can reference it.
+  load = 'models/test_models.py'
   [all]
     model = 'model'
-    verbose = true
     device = 'cpu'
 
     # request derivatives (must be pairs of two)

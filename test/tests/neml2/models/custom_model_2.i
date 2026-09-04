@@ -2,10 +2,10 @@
   [model]
     type = NEML2TestModel
     # these are the default values for the parameters
-    A = forces/A
-    B = forces/B
-    sum = state/internal/sum
-    product = state/internal/product
+    A = 'A'
+    B = 'B'
+    sum = 'sum'
+    product = 'product'
   []
   [model_A]
     type = NEML2TestModel
@@ -20,13 +20,5 @@
   [model_non_ad]
     type = NEML2TestModel
     ad = false
-  []
-[]
-
-[Schedulers]
-  [simple]
-    type = SimpleScheduler
-    batch_size = 42
-    device = 'cpu'
   []
 []

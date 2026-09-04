@@ -41,8 +41,8 @@ NEML2ToMOOSEMaterialProperty<T>::validParams()
       "If supplied return the derivative of the NEML2 output variable with respect to this");
   params.addParam<std::string>(
       "neml2_parameter_derivative",
-      "If supplied return the derivative of neml2_variable with respect to this");
-
+      "If supplied return the derivative of the NEML2 output variable with respect to this NEML2 "
+      "model parameter");
   // provide an optional initialization of the moose property (because we don't really know if it is
   // going to become stateful or not)
   params.addParam<MaterialPropertyName>("moose_material_property_init",
@@ -61,15 +61,15 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
     _prop0(isParamValid("moose_material_property_init")
                ? &getMaterialProperty<T>("moose_material_property_init")
                : nullptr),
-    _value(!isParamValid("neml2_input_derivative")
-               ? (!isParamValid("neml2_parameter_derivative")
-                      ? _execute_neml2_model.getOutput(getParam<std::string>("from_neml2"))
-                      : _execute_neml2_model.getOutputParameterDerivative(
-                            getParam<std::string>("from_neml2"),
-                            getParam<std::string>("neml2_parameter_derivative")))
-               : _execute_neml2_model.getOutputDerivative(
+    _value(isParamValid("neml2_input_derivative")
+               ? _execute_neml2_model.getOutputDerivative(
                      getParam<std::string>("from_neml2"),
-                     getParam<std::string>("neml2_input_derivative")))
+                     getParam<std::string>("neml2_input_derivative"))
+               : (isParamValid("neml2_parameter_derivative")
+                      ? _execute_neml2_model.getOutputParameterDerivative(
+                            getParam<std::string>("from_neml2"),
+                            getParam<std::string>("neml2_parameter_derivative"))
+                      : _execute_neml2_model.getOutput(getParam<std::string>("from_neml2"))))
 #endif
 {
   NEML2Utils::assertNEML2Enabled();
@@ -91,13 +91,51 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
   if (!_execute_neml2_model.outputReady())
     return;
 
+  // A derivative retriever's tensor is produced only on passes that compute the derivative (see
+  // NEML2ModelExecutor::solve). If it has not been computed (e.g. an input derivative on a step
+  // where no Jacobian was assembled), report the derivative as zero.
+  if (!_value.defined())
+  {
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+      MathUtils::mooseSetToZero(_prop[_qp]);
+    return;
+  }
+
   // look up start index for current element
   const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    if (_value.batch_dim())
-      NEML2Utils::copyTensorToMOOSEData(_value.batch_index({neml2::Size(i + _qp)}), _prop[_qp]);
-    else
-      NEML2Utils::copyTensorToMOOSEData(_value, _prop[_qp]);
+  // The NEML2 output/derivative tensor is (batch, *base_shape) when batched; a leading batch
+  // axis is present iff the tensor has more dims than the base shape of the MOOSE type T.
+  const auto base_ndim = static_cast<int64_t>(NEML2Utils::Layout<T>::shape.size());
+  const bool batched = _value.dim() > base_ndim;
+
+  // Fast path: the retrieved output lives on the host (the default output_device) as a contiguous
+  // double buffer (see NEML2ModelExecutor::extractOutputs), so copy each element's data with a
+  // plain memcpy off data_ptr() rather than allocating an at::Tensor view per quadrature point.
+  // Fall back to the generic tensor copy only when the output was kept on an accelerator.
+  if (_value.is_cpu())
+  {
+    const Real * data = _value.template data_ptr<Real>();
+    const auto base_size = NEML2Utils::Layout<T>::strides[0];
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    {
+      // The batch-index map can outrun a not-yet-recomputed output/derivative tensor when the set
+      // of elements handled by the model grows mid-run (e.g. a moving subdomain adds elements
+      // before the next model evaluation). The generic tensor copy below relies on
+      // at::Tensor::operator[]'s bounds check throwing here; MOOSE catches that as a recoverable
+      // failure and cuts the time step, after which the model re-evaluates on the enlarged batch.
+      // The raw memcpy would instead read past the buffer, so guard it: on an out-of-range index
+      // fall back to the throwing copy to preserve that cut-back signal.
+      if (batched && static_cast<int64_t>(i + _qp) >= _value.size(0))
+        NEML2Utils::copyTensorToMOOSEData(_value[static_cast<int64_t>(i + _qp)], _prop[_qp]);
+      else
+        NEML2Utils::copyBlobToMOOSEData<T>(
+            batched ? data + static_cast<std::ptrdiff_t>(i + _qp) * base_size : data, _prop[_qp]);
+    }
+  }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+      NEML2Utils::copyTensorToMOOSEData(batched ? _value[static_cast<int64_t>(i + _qp)] : _value,
+                                        _prop[_qp]);
 }
 #endif
 
