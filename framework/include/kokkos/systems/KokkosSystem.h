@@ -155,8 +155,8 @@ public:
   const Array<Array<dof_id_type>> & getGhostCommList() const { return _ghost_comm_list; }
 
   /**
-   * Get the sparisty pattern data
-   * @returns The sparisty pattern data
+   * Get the sparsity pattern data
+   * @returns The sparsity pattern data
    */
   const Sparsity & getSparsity() const { return _sparsity; }
 

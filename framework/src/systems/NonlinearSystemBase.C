@@ -356,6 +356,10 @@ NonlinearSystemBase::initialSetup()
 
   if (_preconditioner)
     _preconditioner->initialSetup();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  setupKokkos();
+#endif
 }
 
 void
@@ -2299,7 +2303,7 @@ NonlinearSystemBase::computeNodalBCsResidualAndJacobian(
 {
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosResidualObjects())
-    computeKokkosNodalBCsResidual(vector_tags);
+    computeKokkosNodalBCsResidualAndJacobian(vector_tags, matrix_tags);
 #endif
 
   // Return early if there is no nodal kernel
@@ -3245,6 +3249,13 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   computeNodalBCsJacobian(tags);
   closeTaggedMatrices(tags);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  // If user mixes Kokkos and non-Kokkos residual objects, matrix might remain in unassembled state
+  // until calling closeTaggedMatrices(), so we call this after
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosNodalBCsJacobian(tags);
+#endif
 
   // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
   // on boundary nodes
