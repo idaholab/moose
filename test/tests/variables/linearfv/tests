@@ -23,4 +23,45 @@
     requirement = 'The system shall preserve gradients for multiple linear finite volume variables sharing one named gradient method.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [gradient_time_states]
+    type = CSVDiff
+    input = 'gradient-time-states.i'
+    csvdiff = 'gradient-time-states_csv.csv'
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall optionally preserve arbitrary linear finite volume gradient time-state depth for linear and auxiliary systems, including shared methods and face reads.'
+    min_parallel = 2
+    max_parallel = 2
+    max_threads = 1
+  []
+  [unavailable_gradient_state]
+    type = RunException
+    input = 'gradient-time-states.i'
+    cli_args = 'Postprocessors/u_current/state=4 Outputs/file_base=unavailable-gradient-state'
+    expect_err = "Linear FV gradient state 4 with iteration type 'time'.*maximum allocated state is 3"
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall report an error when a consumer reads an unallocated linear finite volume gradient state.'
+    max_threads = 1
+  []
+  [unsupported_gradient_iteration_state]
+    type = RunException
+    input = 'gradient-time-states.i'
+    cli_args = 'Postprocessors/u_old/iteration_type=nonlinear Outputs/file_base=unsupported-gradient-iteration-state'
+    expect_err = "Linear FV gradient state 1 with iteration type 'nonlinear'.*Only time iteration states are supported"
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall report an error when a consumer reads non-current linear finite volume gradient history for a non-time iteration type.'
+    max_threads = 1
+  []
+  [late_gradient_state_request]
+    type = RunException
+    input = 'gradient-time-states.i'
+    cli_args = 'Postprocessors/u_current/late_oldest_gradient_state=4 Outputs/file_base=late-gradient-state-request'
+    expect_err = 'Linear FV gradient state 4 was requested.*after solution states were initialized'
+    design = 'linear_fv_design.md MooseLinearVariableFV.md'
+    issues = '#33662'
+    requirement = 'The system shall report an error when a consumer increases linear finite volume gradient history depth after solution-state initialization.'
+    max_threads = 1
+  []
 []
