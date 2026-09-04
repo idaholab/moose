@@ -63,6 +63,19 @@
     recover = false
     restep = false
   []
+  [MFEMScaledVectorAux]
+    type = CSVDiff
+    input = scaledvector.i
+    csvdiff = 'OutputData/ScaledVector.csv'
+    design = 'MFEMScaledVectorAux.md'
+    issues = '#33653'
+    requirement = 'The system shall have the ability to project the product of a scalar coefficient, including one obtained from a postprocessor, '
+                  'and a vector coefficient onto an MFEM vector auxvariable.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+  []
   [MFEMNDtoRTAux]
     type = CSVDiff
     input = 2Dmagnetostatic.i
