@@ -21,6 +21,7 @@
 #include "MathFVUtils.h"
 
 #include "libmesh/numeric_vector.h"
+#include "libmesh/system.h"
 
 using namespace libMesh;
 
@@ -69,8 +70,9 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
 
   ensureGradientStateStorage(container, oldest_state);
 
-  if (container.next_values.empty() && _sys.solutionStatesInitialized() && _sys.currentSolution() &&
-      _sys.currentSolution()->initialized())
+  const auto & current_solution = _sys.system().current_local_solution;
+  if (container.next_values.empty() && _sys.solutionStatesInitialized() && current_solution &&
+      current_solution->initialized())
     initializeContainer(container.next_values);
 
   return LinearFVGradientReader(_sys, container.state_values, method, variable_number);
@@ -141,11 +143,12 @@ void
 LinearFVGradientInterface::initializeContainer(GradientContainer & container) const
 {
   container.clear();
-  mooseAssert(_sys.currentSolution() && _sys.currentSolution()->initialized(),
+  const auto & current_solution = _sys.system().current_local_solution;
+  mooseAssert(current_solution && current_solution->initialized(),
               "Current solution must exist before building FV gradient storage.");
   container.resize(_sys.mesh().dimension());
   for (auto & component : container)
-    component = _sys.currentSolution()->zero_clone();
+    component = current_solution->zero_clone();
 }
 
 void
@@ -165,8 +168,8 @@ LinearFVGradientInterface::ensureGradientStateStorage(LinearFVGradientContainer 
   if (required_states > old_size)
     container.state_values.resize(required_states);
 
-  if (_sys.solutionStatesInitialized() && _sys.currentSolution() &&
-      _sys.currentSolution()->initialized())
+  const auto & current_solution = _sys.system().current_local_solution;
+  if (_sys.solutionStatesInitialized() && current_solution && current_solution->initialized())
     for (const auto state : make_range(old_size, required_states))
       initializeContainer(container.state_values[state]);
 
@@ -199,15 +202,6 @@ LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMeth
 
   mooseAssert(!container.state_values.empty(),
               "Gradient state storage must contain a current state.");
-
-  for (auto & state : container.state_values)
-    if (state.empty())
-      initializeContainer(state);
-  if (container.next_values.empty())
-    initializeContainer(container.next_values);
-
-  mooseAssert(!container.state_values.empty(),
-              "Gradient state storage must contain a current state.");
   mooseAssert(!container.state_values[0].empty(),
               "Gradient storage must be initialized before gradient computation.");
   mooseAssert(!container.next_values.empty(),
@@ -237,6 +231,19 @@ LinearFVGradientInterface::finalizeLinearFVGradientContainer(LinearFVGradientCon
 }
 
 void
+LinearFVGradientInterface::initializeLinearFVGradientStorage()
+{
+  for (auto & [_, container] : _linear_fv_gradient_container_by_method)
+  {
+    for (auto & state : container.state_values)
+      if (state.empty())
+        initializeContainer(state);
+    if (container.next_values.empty())
+      initializeContainer(container.next_values);
+  }
+}
+
+void
 LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
@@ -247,15 +254,7 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
     method_container_pair.second.current_state_initialized = false;
   }
 
-  if (!hasLinearFVGradients())
-    return;
-
-  for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
-  {
-    for (auto & state : method_container_pair.second.state_values)
-      initializeContainer(state);
-    initializeContainer(method_container_pair.second.next_values);
-  }
+  initializeLinearFVGradientStorage();
 }
 
 void
