@@ -14,6 +14,17 @@
 
 class WeightedVelocitiesUserObject;
 
+namespace Moose
+{
+namespace Mortar
+{
+namespace Contact
+{
+enum class FrictionProjectionDegree;
+}
+}
+}
+
 /**
  * Computes frictional constraints (and normal contact constraints by calling its parent object)
  */
@@ -95,6 +106,11 @@ protected:
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
 
+  /// Degree of the friction-residual projection used by frictionalContactResidual (see
+  /// MortarContactUtils.h): ONE selects Alart-Curnier, TWO (the default) selects
+  /// Hueber-Stadler-Wohlmuth.
+  const Moose::Mortar::Contact::FrictionProjectionDegree _friction_projection_degree;
+
   /// Frictional Lagrange's multiplier variable pointers
   std::vector<MooseVariable *> _friction_vars;
 
@@ -116,7 +132,7 @@ protected:
   /// z-velocity on the primary face
   const ADVariableValue * const _primary_z_dot;
 
-  /// Small contact pressure value to trigger computation of frictional forces
+  /// Minimum value of contact pressure that will trigger frictional enforcement
   const Real _epsilon;
 
   /// Friction coefficient

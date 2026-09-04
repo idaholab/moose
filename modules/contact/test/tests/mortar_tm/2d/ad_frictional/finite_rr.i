@@ -70,12 +70,10 @@ name = 'finite_rr'
   [disp_x]
     order = ${order}
     block = 'plank block'
-    scaling = '${fparse 2.0 / (E_plank + E_block)}'
   []
   [disp_y]
     order = ${order}
     block = 'plank block'
-    scaling = '${fparse 2.0 / (E_plank + E_block)}'
   []
 []
 
@@ -96,10 +94,10 @@ name = 'finite_rr'
     secondary = block_left
     formulation = mortar
     model = coulomb
-    c_normal = 1e3
-    c_tangential = 1e-6
+    c_normal = 1e7
+    c_tangential = 1e9
+    friction_projection_degree = ONE
     friction_coefficient = 0.1
-    tangential_lm_scaling = 1.0e-10
   []
 []
 
@@ -157,13 +155,13 @@ name = 'finite_rr'
   type = Transient
   solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu        NONZERO               1e-15'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu        NONZERO              mumps'
   end_time = 5.3
   dt = 0.12
   dtmin = 0.12
   timestep_tolerance = 1e-6
-  line_search = 'contact'
+  line_search = 'basic'
   nl_div_tol = 1e100
   nl_abs_tol = 1e-7
 []
