@@ -56,6 +56,15 @@ public:
     return MetaPhysicL::raw_value(gap.first) / gap.second;
   }
 
+  /**
+   * Node-based Lagrange-multiplier scaling factor kappa_j of Popp et al. (2013), implemented by
+   * LMWeightedGapUserObject. The unit default recovers the unscaled formulation.
+   */
+  virtual Real nodalScale(const DofObject * const /*dof*/) const { return 1; }
+
+  /// @return Whether node-based Lagrange-multiplier scaling is active
+  virtual bool usesNodalScaling() const { return false; }
+
   ADReal adPhysicalGap(const std::pair<ADReal, Real> & gap) const { return gap.first / gap.second; }
 
   /**

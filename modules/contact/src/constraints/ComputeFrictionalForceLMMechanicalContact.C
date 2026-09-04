@@ -191,6 +191,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
+  contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
   // Get friction LMs
   std::array<const ADReal *, 2> & tangential_vel = _tangential_vel_ptr;
@@ -279,6 +281,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const ADReal & weighted_gap = *_weighted_gap_ptr;
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
+  // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
+  contact_pressure /= _weighted_gap_uo.nodalScale(dof);
 
   // Get normalized c and c_t values (if normalization specified
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;

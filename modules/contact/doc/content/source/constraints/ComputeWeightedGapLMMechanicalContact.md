@@ -44,6 +44,48 @@ gap is of order .01, then `c` should be set to 1e6 in order to bring
 components of the NCP function onto the same level and achieve optimal
 convergence in the non-linear solve.
 
+## Node-based scaling for edge dropping
+
+When a secondary element is only partially covered by the primary surface (so-called "edge
+dropping", for example when one body slides off another at a sharp edge), the discrete weighted gap
+and the corresponding entries of the mortar coupling matrices for the affected nodes become small,
+which can severely ill-condition the linear system. Setting
+[!param](/UserObjects/LMWeightedGapUserObject/use_nodal_scaling) to `true` applies the node-based
+scaling of [!citep](popp2013improved) (Sec. 4.2): the discrete Lagrange multiplier solved for is the
+scaled quantity $\hat{z}_j = \kappa_j (\lambda_n)_j$, where $\kappa_j \in (0, 1]$ is the mean, over
+the secondary elements adjacent to node $j$, of the covered fraction of that node's shape-function
+integral. This rescales the constraint row and coupling column of partially covered nodes back to
+$O(1)$, improving conditioning, while the physical contact pressure
+$(\lambda_n)_j = \hat{z}_j / \kappa_j$ is recovered for the mortar coupling and for reported
+pressures. It requires `correct_edge_dropping = true`.
+
+The Lagrange multiplier stored in the solution vector is the scaled multiplier $\hat{z}_j$, not the
+physical pressure, so plotting the Lagrange multiplier variable directly shows the scaled quantity.
+The physical pressure is recovered internally for the mortar force coupling, and to output it use
+[MortarUserObjectAux](/MortarUserObjectAux.md) with `contact_quantity = normal_pressure`. Any object
+that instead consumes the Lagrange multiplier variable itself, such as the `contact_pressure`
+argument of [MortarFrictionalStateAux](/MortarFrictionalStateAux.md), receives the scaled multiplier.
+Because the stored quantity depends on whether scaling is enabled, do not restart a simulation with a
+different `use_nodal_scaling` setting than the one that wrote the restart data.
+
+Use [!param](/UserObjects/LMWeightedGapUserObject/use_nodal_scaling) when the ill-conditioning caused
+by partially covered elements is the problem; use `normalize_c` when the gap and the contact pressure
+in the complementarity function are on different scales. The two are mutually exclusive: both divide
+by a measure of the node's covered area, so combining them makes the gap term grow without bound as
+the coverage vanishes instead of settling at $O(1)$.
+
+!alert warning title=Limited support
+Node-based scaling is implemented for Lagrange multiplier contact
+([LMWeightedGapUserObject](/LMWeightedGapUserObject.md) and
+[LMWeightedVelocitiesUserObject](/LMWeightedVelocitiesUserObject.md)) using a first-order Lagrange
+multiplier and first-order displacements. An error is reported for a second-order Lagrange
+multiplier or displacement, `correct_edge_dropping = false`, or `normalize_c = true`. Second order is
+excluded because the normalization $\int_e N_j$ is zero at TRI6 and TET10 vertices and negative at
+QUAD8 and HEX20 corners, which makes $\kappa_j$ undefined or negative. The consistent linearization of
+$\kappa_j$ (its dependence on displacement) is omitted because the mortar segment geometry is carried
+non-AD throughout the framework, so Newton convergence near a dropping edge may be less than
+quadratic; the converged solution is unaffected.
+
 !syntax description /Constraints/ComputeWeightedGapLMMechanicalContact
 
 !syntax parameters /Constraints/ComputeWeightedGapLMMechanicalContact
