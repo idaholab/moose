@@ -11,8 +11,13 @@
 
 #pragma once
 
-#include "MFEMProblem.h"
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 #include <functional>
+
+class MFEMProblem;
+struct MFEMProblemData;
 
 namespace Moose::MFEM
 {

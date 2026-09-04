@@ -14,9 +14,11 @@
 #include "Attributes.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
+#include "MFEMWeakForm.h"
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
+#include "ProblemOperatorBase.h"
 
 #include <map>
 
@@ -177,6 +179,38 @@ public:
   void addImagComponentToBC(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters);
+
+  /**
+   * Add an MFEM WeakForm to the problem.
+   */
+  void addWeakForm(const std::string & weak_form_name,
+                   const std::string & name,
+                   InputParameters & parameters);
+
+  /**
+   * Add default weak form if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm();
+
+  /**
+   * Set all MFEM EquationSystems for this problem
+   */
+  void setEquationSystems();
+
+  /**
+   * Get vector of all ProblemOperators added to this problem.
+   */
+  virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
+
+  /**
+   * Add an MFEM problem operator. Takes ownership.
+   */
+  void addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator);
+
+  /**
+   * Set all MFEM ProblemOperators to solve in this problem
+   */
+  virtual void setMFEMProblemOperators();
 
   /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
@@ -377,6 +411,11 @@ public:
    */
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
+  /**
+   * Default assembly level to use for EquationSystem assembly.
+   */
+  mfem::AssemblyLevel _default_assembly_level;
+
 protected:
   /**
    * Verify that a primary variable's numeric type matches the problem's equation system.
@@ -411,6 +450,11 @@ protected:
 
   /// Restartable MFEM solution state associated with this problem.
   Moose::MFEM::SolutionState & _solution_state_data;
+
+  /**
+   * Vector of MFEM problem operators executed in this problem.
+   */
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
 };
 
 template <typename T>

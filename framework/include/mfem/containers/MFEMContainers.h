@@ -27,8 +27,12 @@ class ParComplexGridFunction;
 class ParFiniteElementSpaceHierarchy;
 }
 
+class MFEMKernel;
+class MFEMBoundaryCondition;
+
 namespace Moose::MFEM
 {
+class EquationSystem;
 
 /// Lightweight adaptor over an std::map from strings to pointer to T
 template <typename T>
@@ -242,6 +246,9 @@ using SubMeshes = NamedFieldsMap<mfem::ParSubMesh>;
 using GridFunctions = NamedFieldsMap<mfem::ParGridFunction>;
 using ComplexGridFunctions = NamedFieldsMap<mfem::ParComplexGridFunction>;
 using FESpaceHierarchies = NamedFieldsMap<mfem::ParFiniteElementSpaceHierarchy>;
+using Kernels = NamedFieldsMap<MFEMKernel>;
+using BoundaryConditions = NamedFieldsMap<MFEMBoundaryCondition>;
+using EquationSystems = NamedFieldsMap<EquationSystem>;
 
 } // namespace Moose::MFEM
 
