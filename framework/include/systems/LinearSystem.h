@@ -62,6 +62,7 @@ public:
    */
   virtual bool converged() override { return _converged; }
 
+  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
 

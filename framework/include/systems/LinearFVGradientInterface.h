@@ -77,6 +77,11 @@ protected:
   void updateFVGradient(const LinearFVGradientReader & reader);
 
   /**
+   * Initialize any unallocated gradient storage after solution-vector creation.
+   */
+  void initializeLinearFVGradientStorage();
+
+  /**
    * Rebuild cached gradient values and reusable scratch storage after mesh/DOF changes.
    */
   void rebuildLinearFVGradientStorage();

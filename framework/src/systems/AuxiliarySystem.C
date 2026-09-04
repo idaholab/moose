@@ -72,13 +72,19 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 AuxiliarySystem::~AuxiliarySystem() = default;
 
 void
+AuxiliarySystem::initSolutionState()
+{
+  SystemBase::initSolutionState();
+  LinearFVGradientInterface::initializeLinearFVGradientStorage();
+}
+
+void
 AuxiliarySystem::initialSetup()
 {
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {

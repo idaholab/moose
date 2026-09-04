@@ -48,6 +48,7 @@ public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
+  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
   virtual void timestepSetup() override;

@@ -103,6 +103,13 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 LinearSystem::~LinearSystem() = default;
 
 void
+LinearSystem::initSolutionState()
+{
+  SystemBase::initSolutionState();
+  LinearFVGradientInterface::initializeLinearFVGradientStorage();
+}
+
+void
 LinearSystem::preInit()
 {
   SolverSystem::preInit();
@@ -125,8 +132,6 @@ LinearSystem::initialSetup()
       mooseError("You are trying to add a nonlinear variable to a linear system! The variable "
                  "which is assigned to the wrong system: ",
                  name);
-
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 
   // Calling initial setup for the linear kernels
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
