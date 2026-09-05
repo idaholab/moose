@@ -112,10 +112,12 @@ a = ${fparse
 
 Here are some important details about how brace-expressions are evaluated:
 
-- Brace expressions are evaluated in input-file order (i.e. lexical order) from top to bottom of
-  the input file.  Brace expressions must *not* depend on field values using brace expressions
-  that occur later in the input file - although they can depend on field values without brace
-  expressions that occur later in the input file.
+- A field's brace expression may depend on any other field's value, regardless of which one
+  appears first in the input file - e.g. `bar = ${foo}` followed later by `foo = ${raw 4 1}` is
+  resolved correctly. Each field is only expanded once, the first time it is needed, and that
+  result is reused for any other field that references it. A field whose expansion depends on
+  itself, directly or indirectly, is a cyclic-dependency error - e.g. `foo = ${bar}` and
+  `bar = ${foo}` together are rejected.
 
 - Nested brace expressions are evaluated from the most deeply nested outward.
 
