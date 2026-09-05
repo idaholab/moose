@@ -26,6 +26,7 @@ public:
 protected:
   virtual bool shouldApply() const override;
 
+  const bool _has_cut_off_radius;
   const Real _cut_off_radius;
 
 private:

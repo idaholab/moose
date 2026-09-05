@@ -93,6 +93,13 @@ public:
                       const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
                       AuxiliarySystem & aux) = 0;
 
+  virtual bool didNearTipEnrichmentChange() = 0;
+
+  /**
+   * Execute XFEM-specific subdomain modifiers after the XFEM mesh/crack-front update.
+   */
+  virtual void executeSubdomainModifiers() = 0;
+
   /**
    * Initialize the solution on newly created nodes
    */
