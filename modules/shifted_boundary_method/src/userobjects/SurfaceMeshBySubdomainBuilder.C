@@ -16,6 +16,9 @@ InputParameters
 SurfaceMeshBySubdomainBuilder::validParams()
 {
   InputParameters params = BoundaryMeshBuilder::validParams();
+  params.renameParam("boundary_mesh",
+                     "complete_boundary_mesh",
+                     "The saved mesh containing the complete boundary of each subdomain.");
   params.addClassDescription(
       "Builds one SurfaceElementSet per subdomain from a given surface mesh.");
   return params;

@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "SolidMechanicsApp.h"
 
 InputParameters
 ShiftedBoundaryMethodApp::validParams()
@@ -31,18 +32,23 @@ ShiftedBoundaryMethodApp::ShiftedBoundaryMethodApp(const InputParameters & param
 ShiftedBoundaryMethodApp::~ShiftedBoundaryMethodApp() {}
 
 void
-ShiftedBoundaryMethodApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+ShiftedBoundaryMethodApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
   Registry::registerObjectsTo(f, {"ShiftedBoundaryMethodApp"});
   Registry::registerActionsTo(af, {"ShiftedBoundaryMethodApp"});
 
   /* register custom execute flags, action syntax, etc. here */
+  registerSyntax("ShiftedCohesiveZoneAction", "Physics/SolidMechanics/ShiftedCohesiveZone/*");
+
+  SolidMechanicsApp::registerAll(f, af, syntax);
 }
 
 void
 ShiftedBoundaryMethodApp::registerApps()
 {
   registerApp(ShiftedBoundaryMethodApp);
+
+  SolidMechanicsApp::registerApps();
 }
 
 /***************************************************************************************************
