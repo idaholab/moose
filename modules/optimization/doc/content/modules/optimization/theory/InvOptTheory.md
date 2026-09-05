@@ -221,6 +221,7 @@ To compute the derivative of PDE with respect to the design parameters, i.e., $\
 
 - [#sec:forceInv]
 - [#sec:robinInv]
+- [#sec:dirichletInv]
 - [#sec:material_inversion]
 
 Examples for force and material inversion are given on the following pages:
@@ -333,6 +334,28 @@ In this section, the convective heat transfer coefficient, $h$, is considered as
 \end{aligned}
 \end{equation}
 This derivative requires the solution from the forward problem $T$ to be included in the integral over the boundary $\Gamma_R$ making this a nonlinear optimization problem.  This derivative is used in the [Convective Boundary Condition Example](materialInv_ConvectiveBC.md).
+
+[comment4b]: <> (% ----------------------------------------------------------------------------------------------------------%)
+
+## PDE Derivative for Dirichlet Boundary Condition Inversion id=sec:dirichletInv
+
+In this section, the prescribed value of a Dirichlet boundary condition is parameterized directly, rather than a body load or Robin coefficient. Let $\Gamma_c\subseteq\Gamma_D$ be the controlled boundary carrying the essential data $T_o=g\left(x,\mathbf{p}\right)$, where $g$ is an `OptimizationFunction` of the coordinates and the design parameters $\mathbf{p}$, while the remainder of $\Gamma_D$ keeps fixed data as before. Because $T$ is constrained to equal $g$ pointwise on $\Gamma_c$, the parameter dependence does not enter through the Jacobian in [eq:elementwise_discretized_terms]; it enters only through the $T_o$ term of the boundary Lagrangian $\mathcal{B}$ in [eqn:bcLagrangian].
+
+Since the residual $\mathcal{R}=\mathbf{0}$ is satisfied by the forward solve for every $\mathbf{p}$, $f\left(T\left(\mathbf{p}\right),\mathbf{p}\right)=\mathcal{L}\left(T\left(\mathbf{p}\right),\mathbf{p},\lambda\right)$ for any $\lambda$, given in [eqn:lagrangian]. Choosing $\lambda$ to satisfy the adjoint problem in [eqn:adjoint_problem] removes the dependence of $\text{d}f/\text{d}\mathbf{p}$ on $\partial T/\partial\mathbf{p}$, leaving $\text{d}f/\text{d}p_j=\partial\mathcal{L}/\partial p_j$. Differentiating the $T_o$ term of [eqn:bcLagrangian] with respect to $p_j$ gives
+\begin{equation}\label{eq:dirichletBC}
+\frac{\text{d}f}{\text{d}p_j} = -\int_{\Gamma_c}\kappa\left(\nabla\lambda\cdot\boldsymbol{n}\right)\frac{\partial g}{\partial p_j}~\text{d}\Gamma,
+\end{equation}
+the normal diffusive flux of the adjoint variable weighted by the parameter derivative of the boundary data. The adjoint variable $\lambda$ itself does not appear in [eq:dirichletBC], unlike the force inversion terms in [eq:bcLoad] and [eq:neumannBC], because [eqn:adjoint_problem] already enforces $\lambda=0$ on $\Gamma_D$; only its normal derivative survives the strong imposition.
+
+Discretely, imposing $T=T_o$ at a constrained degree of freedom is equivalent to enforcing it through a Lagrange multiplier equal to the negative of the finite element reaction at that degree of freedom, i.e. the residual contribution from the weak form before the row and column for that degree of freedom are eliminated. The gradient in [eq:dirichletBC] can therefore also be recovered from the adjoint solve's nodal reactions on $\Gamma_c$, without a separate boundary-flux quadrature.
+
+If the boundary data is instead imposed weakly with a `FunctionPenaltyDirichletBC` of penalty factor $\beta$, the penalty residual is a Robin-type load term with $G\left(T\right)=\beta\left(T-g\right)$, and the same [force inversion](#sec:forceInv) construction that gives [eq:neumannBC] yields
+\begin{equation}\label{eq:dirichletPenalty}
+\frac{\text{d}f}{\text{d}p_j} = \beta\int_{\Gamma_c}\lambda\frac{\partial g}{\partial p_j}~\text{d}\Gamma
+\end{equation}
+in place of [eq:dirichletBC]. As $\beta\to\infty$ the penalty solution approaches the strongly imposed one and [eq:dirichletPenalty] approaches [eq:dirichletBC]; because both forms share the same [ParsedOptimizationFunction.md] parameterization of $g$, the penalty form is a convenient gradient-verification oracle for the strong form.
+
+The derivative given in [eq:dirichletBC] is computed by [SideOptimizationDirichletFunctionInnerProduct.md], which pairs with a [FunctionDirichletBC](FunctionDirichletBC.md) imposing $g$ in the forward problem.
 
 [comment5]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
