@@ -3530,13 +3530,18 @@ protected:
   /// can be a good option if the sparsity pattern changes throughout the course of the simulation
   const bool _use_hash_table_matrix_assembly;
 
-private:
   /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
    * caller of this method must determine how to handle the thrown exception
    */
   void handleException(const std::string & calling_method);
 
+  /**
+   * Reset state of this object in preparation for the next evaluation.
+   */
+  virtual void resetState();
+
+private:
   /**
    * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,
    * and displaced parameters, given some initial set
@@ -3591,11 +3596,6 @@ private:
 #ifdef MOOSE_KOKKOS_ENABLED
   void kokkosJoinAndFinalize(const std::vector<Moose::Kokkos::UserObject *> & userobjs);
 #endif
-
-  /**
-   * Reset state of this object in preparation for the next evaluation.
-   */
-  virtual void resetState();
 
   // Parameters handling Jacobian sparsity pattern behavior
   /// Whether to error when the Jacobian is re-allocated, usually because the sparsity pattern changed

@@ -1,0 +1,365 @@
+[Tests]
+  design = 'ArcLengthProblem.md ArcLengthHistory.md ArcLengthLoadParameter.md'
+  issues = '#33523'
+  # These two inputs are a pair and should be read against each other. Both are finite strain
+  # circular arches carrying a dead point load at the crown, and they differ in how the ends are
+  # held: 'arch_snapthrough' clamps the whole end cross sections, 'arch_snapback' pins a single mid
+  # surface node at each springing and leaves those cross sections free to rotate. Each sits at the
+  # rise where its own behaviour is cleanest. Together they record a four configuration result:
+  # PINNED ENDS TRADE THE CONNECTED INVERTED BRANCH FOR A NEGATIVE TROUGH SNAP BACK LOOP.
+  #
+  #   arch_snapthrough (clamped) reaches a deep dip and LANDS on the inverted stiffening branch. It
+  #   ends snapped through, in the inverted shape, with the load parameter back at its target.
+  #
+  #   arch_snapback (pinned) instead drives the load parameter to a deeply NEGATIVE trough, and part
+  #   way down that trough the apex displacement ITSELF REVERSES and the arch springs back toward
+  #   its original shape before the load parameter recovers. It never inverts.
+  #
+  # The pinned path is the only-arc-length-survives case: prescribed load stepping dies at the first
+  # limit point, and prescribed displacement stepping dies at the apex reversal, because neither the
+  # load nor the displacement is monotonic along it. Alone, each of these inputs looks like an
+  # arbitrary choice of support condition. As a pair they are a result, so do not change the support
+  # condition of either one without changing the other.
+  #
+  # The behaviour has been MEASURED on these two inputs: the clamped path peaks at 1.2807 and
+  # troughs at +0.5330, and the pinned path troughs at -2.1075 with the apex displacement reversing
+  # at increment 69. The committed path golds record those values, so the four configuration result
+  # is verified here.
+  #
+  # Both meshes are AnnularMeshGenerator sectors placed so that the crown sits exactly at (0, radius)
+  # with no translation. nt must be EVEN so an angular division lands on the crown at 90 degrees,
+  # where both the point load and the apex postprocessor sit; an odd nt puts the crown at an element
+  # mid edge and smears the load across two nodes with no error reported. nr = 4 is even for the same
+  # reason radially, so a node ring falls exactly on the mid surface, and it keeps QUAD4 shear
+  # locking from putting the bending stiffness back. Do not coarsen either one.
+  #
+  # Both leaves are pinned to max_parallel = 1 on purpose, not as an arbitrary restriction. The path
+  # is traced with a serial -pc_type lu factorization, and the csv golds hold one fixed path, so a
+  # rank count that changes how the linear solve is factored moves the increment by increment values
+  # those golds record.
+  [arch_snapthrough]
+    type = 'CSVDiff'
+    input = 'arch_snapthrough.i'
+    csvdiff = 'arch_snapthrough_out_path.csv arch_snapthrough_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # The ends are clamped: both displacement components over the whole 'dmin' and 'dmax' end faces.
+    # That is not a stiffness preference, it is what gives the path a stable inverted branch to land
+    # on. AnnularMeshGenerator creates nodesets as well as sidesets under those two names, which is
+    # what these nodal DirichletBCs bind to. For what happens when the same arch is held on single
+    # support nodes instead, see 'arch_snapback' below; it does not invert at all.
+    #
+    # Those end faces carry ordinary strong DirichletBCs. That is safe in this input and is not safe
+    # in general: a strong row is overwritten after assembly, so a load tag entry landing in one
+    # would be dropped from the load, and the path would then be traced against a load the solver
+    # never applies. Here the load is a single point force at the crown and the load tag is exactly
+    # zero at every constrained dof, so no such row exists. Do not copy this pairing into an input
+    # whose load touches a constrained boundary.
+    #
+    # Clamped ends also suppress the antisymmetric modes that a rise to thickness ratio near 8 puts a
+    # bifurcation point close to, which the symmetric mesh and the centered load already keep the
+    # solver off. Should this ever fail with an LU zero pivot or a visibly asymmetric path, mesh half
+    # the arch against a symmetry BC rather than flattening it.
+    #
+    # lambda_min is a clamp on the load parameter, not an exit criterion. It has to sit BELOW the
+    # trough of the path, or the descending branch reflects off the floor and ping-pongs there until
+    # max_continuation_steps is exhausted and the solve dies with DIVERGED_MAX_IT. The clamped trough
+    # never goes negative: across the parabolic family it ROSE as the rise deepened, +0.44 and +0.58
+    # at the two rises measured, so it stays far above -4 and that floor is kept only as the guard.
+    # max_continuation_steps is the same kind of ceiling: the parabolic twin of this arch spent 93
+    # increments of the 0.06 step reaching lambda_max = 5, and 300 leaves room for a longer circular
+    # path. Raising lambda_max costs increments only on the inverted branch, which is stiff, so it is
+    # cheap; the peak sits near 1.4 and is in no danger of reaching the ceiling and reporting a
+    # converged path that never inverted.
+    #
+    # the path is traced one increment at a time through two limit points, so linear solver
+    # differences accumulate along it; this holds three digits, which no monotonic load path
+    # reproduces, while surviving compiler and PETSc jitter where the path turns
+    abs_zero = 1e-6
+    rel_err = 5e-4
+    requirement = 'The system shall trace the load displacement path of a finite strain circular '
+                  'arch with clamped ends that snaps through under a dead crown point load, '
+                  'carrying the arch from its initial curvature to an inverted shape within a '
+                  'single solve and recording a load parameter history that rises to a limit point, '
+                  'falls to a deep trough at less than half the peak as the arch snaps, and recovers '
+                  'to the target value along the inverted stiffening branch, a path that prescribed '
+                  'load stepping cannot trace.'
+  []
+  [arch_snapback]
+    type = 'CSVDiff'
+    input = 'arch_snapback.i'
+    csvdiff = 'arch_snapback_out_path.csv arch_snapback_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # This is the pinned twin of 'arch_snapthrough' above. The supports are single mid surface nodes
+    # at the two springings, selected by an ExtraNodesetGenerator at coordinates computed with
+    # fparse from the same radius and half angle the mesh is built from, so the geometry stays self
+    # consistent if either is retuned. use_closest_node is left at its default false so that a
+    # coordinate which misses a node fails loudly instead of silently snapping to a neighbour; the
+    # default 1e-6 tolerance is many orders above the round off between the fparse expression and
+    # the generator's own trigonometry. Constraining both components at those two nodes and nowhere
+    # else is what leaves the end cross sections free to rotate. Do not widen these BCs onto the
+    # 'dmin' and 'dmax' faces; that turns this input into a duplicate of the clamped one.
+    #
+    # lambda_min matters here in a way it does not for the clamped arch, because this path really
+    # does go deeply negative. The parabolic twin troughed at -2.13, so the floor must sit clearly
+    # BELOW that; -4 is used rather than -3 so a stiffer circular trough still has headroom. A floor
+    # above the trough does not truncate the path, it makes the descending branch reflect off the
+    # floor and ping-pong there until max_continuation_steps is exhausted. The parabolic twin took
+    # about 118 increments of the 0.06 step to reach lambda_max = 3, and 300 leaves ample room.
+    #
+    # lambda_max has the SAME failure shape at the other end, and it has now been MEASURED on this
+    # circular input: the recovery branch does not run away upward. It turns over at an UPPER limit
+    # point of about 3.59 near increment 121, then DESCENDS again to a second trough of about -2.17
+    # near increment 148. The pinned path is a CLOSED LOOP, so termination on this family is only
+    # meaningful BELOW the loop ceiling. A lambda_max above that ceiling can NEVER be crossed, and
+    # the continuation just cycles the loop until max_continuation_steps is spent, exactly the way
+    # a lambda_min floor set above the trough ping-pongs. lambda_max = 3 is crossed near increment
+    # 119, inside the expected 110 to 165 increment band, and it keeps 0.587 of margin below the
+    # turning point. Do NOT raise it: 3.5 would leave 0.087, and thin margin at a turning point is
+    # exactly what already cost this feature a wasted round on the lambda_min side.
+    #
+    # same tolerances and same reasoning as the clamped block: the path is traced one increment at a
+    # time, and this one turns twice in the load parameter and once in the apex displacement
+    abs_zero = 1e-6
+    rel_err = 5e-4
+    requirement = 'The system shall trace the load displacement path of a finite strain circular '
+                  'arch with pinned supports that snaps back under a dead crown point load, '
+                  'recording a load parameter history that rises to a limit point, falls through '
+                  'zero to a deeply negative trough during which the apex displacement itself '
+                  'reverses before the arch recovers, and then returns to the target value, a path '
+                  'that neither prescribed load stepping nor prescribed displacement stepping can '
+                  'trace.'
+  []
+  [arch_follower_pressure]
+    type = 'CSVDiff'
+    input = 'arch_follower_pressure.i'
+    csvdiff = 'arch_follower_pressure_out_path.csv arch_follower_pressure_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # This is the FOLLOWER twin of 'arch_snapthrough' above: same clamped circular arch, same mesh
+    # and same material, and the only change is what is tagged into the load. The dead crown point
+    # force is replaced by an ADPressure patch on the outer face with use_displaced_mesh = true, so
+    # the load direction is the CURRENT normal of that face rather than a fixed direction. It is the
+    # only leaf in this directory whose load depends on the geometry the load tag is assembled on,
+    # so it is the only one that reaches the displaced mesh move inside assembleLoadTag() at all.
+    # What its golds hold is that whole follower wiring: displaced mesh assembly on the tangent
+    # path, the tagged solution dependent load, and its exact derivative. What they can NOT hold is
+    # WHICH iterate's geometry the tag is assembled on: a stale mesh there only makes the residual
+    # inexact during the iteration, the error shrinks with the Newton update, and both variants
+    # share the same fixed point, so the converged path agrees to ~1e-10 (measured) and no
+    # converged value diff can tell them apart at any tolerance.
+    #
+    # Every load object carries both load tags, and this is the leaf where the matrix one is not
+    # empty: the load is solution dependent, so its exact AD derivative lands in the load matrix
+    # tag and is scaled with the load. Both tags are replacements and not extra_* appends, so the
+    # pressure contributes only to the load, which is what the load parameter is then free to
+    # scale.
+    #
+    # The pressure patch is cut out of the 'rmax' face by a ParsedGenerateSideset at abs(x) < 0.45,
+    # roughly the middle fifth of the span. It is localized on purpose and must NOT be widened onto
+    # the whole outer face. A circular arch under UNIFORM radial pressure is funicular, which trades
+    # this limit point for a bifurcation, and a full face patch would also reach the clamped end
+    # faces, where the load tag would land in rows that the strong DirichletBCs zero out of the
+    # default residual only. The patch keeps the load strictly interior, the same property the point
+    # load of the clamped twin has.
+    #
+    # The crown inverts along this path: it travels about -0.59 against a rise of 0.325, so the loaded
+    # face turns through most of a half turn and the current normal ends up pointing the other way.
+    # That is what makes the follower character measurable rather than a perturbation. The measured
+    # path peaks at 1.7654 at increment 11, troughs at 0.6268 at increment 56, and climbs the inverted
+    # branch to lambda_max in 93 increments, so the 300 increment ceiling and the -4 floor, which this
+    # path never approaches, are both kept only as guards. Do not lower 'factor', 'step_size' or the
+    # patch width without re-checking that the peak and the trough are both still on the path.
+    #
+    # same tolerances and same reasoning as the two dead load arch blocks: the path is traced one
+    # increment at a time through two limit points, so this holds three digits where the path turns
+    abs_zero = 1e-6
+    rel_err = 5e-4
+    requirement = 'The system shall trace the load displacement path of a finite strain circular '
+                  'arch with clamped ends that snaps through under a follower pressure applied on '
+                  'the deformed configuration, with the exact derivative of the solution dependent '
+                  'load supplied through the load matrix tag, and record a load parameter history '
+                  'that rises to a limit point, falls to a trough as the arch snaps, and recovers '
+                  'to the target value along the inverted stiffening branch, on which the loaded '
+                  'face has turned far enough that its current normal no longer resembles its '
+                  'original one.'
+  []
+  [dcb_arclength_smoke]
+    type = CSVDiff
+    input = dcb_arclength.i
+    # The switch function is overridden to fire from the first step, so every step of this run is a
+    # continuation increment and none of its wall time is spent on the prescribed ramp that gets
+    # the full leaf below to the switch. The ramp-then-switch behaviour of the Controls object is
+    # not lost by that: 'transient_continuation_control' in test/tests/problems/arc_length covers
+    # it in eight steps on a 1-D mesh. What is left here is what only a cohesive run has, the
+    # per-increment damage commit.
+    cli_args = 'Functions/switch_fn/expression=1 '
+               'Executioner/end_time=0.12 '
+               'Outputs/file_base=dcb_arclength_smoke_out'
+    csvdiff = 'dcb_arclength_smoke_out.csv dcb_arclength_smoke_out_path.csv'
+    requirement = 'The system shall advance the peel trace of a double cantilever beam whose '
+                  'pre-crack strip has near-zero strength by one committed continuation increment '
+                  'per time step from the first step of the run, committing the cohesive damage of '
+                  'every increment.'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    restep = false
+    max_parallel = 1
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [dcb_arclength]
+    type = CSVDiff
+    input = dcb_arclength.i
+    csvdiff = 'dcb_arclength_out.csv dcb_arclength_out_path.csv'
+    prereq = dcb_arclength_smoke
+    # The gold is the fingerprint of the whole method: without the per-increment damage commits
+    # the envelope past the peak comes out stiffer than the path, and without the predictor of a
+    # step continuing the increment of the step before it a reflected step walks the trace back
+    # down the elastic branch to zero, either of which moves every row of this file.
+    requirement = 'The system shall step along the peel path of a double cantilever beam one '
+                  'committed continuation increment per time step, committing the cohesive '
+                  'damage of every increment, carrying the trace up to the peak of the peel '
+                  'resistance and down the descending serrated tearing branch that follows it, '
+                  'with the load factor parting from the time, and reaching states past the load '
+                  'of the first serration, at which a peel force ramped with plain Newton solves has no '
+                  'equilibrium to converge to, and past the opening reversal that a prescribed '
+                  'opening cannot follow.'
+    capabilities = 'petsc>=3.22.0'
+    heavy = true
+    recover = false
+    restep = false
+    max_parallel = 1
+    # about 400 committed steps, the last 300 of them continuation increments at a
+    # tooth-resolving radius
+    max_time = 1800
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [lee_frame_arclength_smoke]
+    type = CSVDiff
+    input = lee_frame_arclength.i
+    cli_args = 'Executioner/end_time=1 '
+               'Outputs/file_base=lee_frame_arclength_smoke_out'
+    csvdiff = 'lee_frame_arclength_smoke_out.csv lee_frame_arclength_smoke_out_path.csv'
+    requirement = 'The system shall advance an elastic finite strain frame by one committed '
+                  'continuation increment per time step on the smooth rise of its load path, '
+                  'where the committed load factor tracks the time.'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    restep = false
+    max_parallel = 1
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [lee_frame_arclength]
+    type = CSVDiff
+    input = lee_frame_arclength.i
+    csvdiff = 'lee_frame_arclength_out.csv lee_frame_arclength_out_path.csv'
+    prereq = lee_frame_arclength_smoke
+    # the whole path is elastic, so this gold is the pure-kinematics fingerprint of the
+    # per-timestep stepping: the limit point, the descending branch, the deflection reversal of
+    # the snap back, the negative trough, and the recovery are all committed rows
+    requirement = 'The system shall step along the post-buckling path of the Lee frame one '
+                  'committed continuation increment per time step, carrying the trace over the '
+                  'limit point at which prescribed load stepping fails, down the descending '
+                  'branch through the deflection reversal of the snap back that prescribed '
+                  'displacement stepping cannot follow, through a deeply negative load factor '
+                  'trough, and onto the recovering branch, with the load factor tracking the '
+                  'time on the smooth rise and parting from it at the limit point.'
+    capabilities = 'petsc>=3.22.0'
+    heavy = true
+    recover = false
+    restep = false
+    max_parallel = 1
+    # 800 committed increments of a smooth elastic path
+    max_time = 1800
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [sent_arclength_smoke]
+    type = CSVDiff
+    input = sent_arclength.i
+    # The switch fires one step later than the first, so the run still crosses from prescribed
+    # Newton steps into continuation and then spends the rest of its steps taking increments,
+    # instead of spending nearly all of them on the ramp to reach a handful.
+    cli_args = '"Functions/switch_fn/expression=t>0.3" '
+               'Executioner/end_time=1.0 '
+               'Outputs/exodus=false '
+               'Outputs/file_base=sent_arclength_smoke_out'
+    csvdiff = 'sent_arclength_smoke_out.csv sent_arclength_smoke_out_path.csv'
+    requirement = 'The system shall ramp a dead traction on a rotating-platen notched tension '
+                  'strip with a cohesive ligament using prescribed Newton steps whose load '
+                  'factor equals the time, then advance the trace by committed continuation '
+                  'increments when a Controls object switches use_continuation on, within a '
+                  'single input.'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    restep = false
+    max_parallel = 1
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  [sent_arclength]
+    type = CSVDiff
+    input = sent_arclength.i
+    csvdiff = 'sent_arclength_out.csv sent_arclength_out_path.csv'
+    prereq = sent_arclength_smoke
+    cli_args = 'Outputs/exodus=false'
+    requirement = 'The system shall step along the equilibrium path of a notched tension strip '
+                  'with a cohesive ligament loaded through a freely rotating platen, one '
+                  'committed continuation increment per time step with the cohesive damage of '
+                  'every increment committed, crossing the crack event at which a dead traction '
+                  'ramped with plain Newton solves cannot converge, below the peak load, carrying '
+                  'the trace to the peak load and down the softening '
+                  'branch as the crack crosses the ligament and the platen rotation grows, on a '
+                  'structure where the free rotation leaves no single displacement to prescribe.'
+    capabilities = 'petsc>=3.22.0'
+    heavy = true
+    recover = false
+    restep = false
+    max_parallel = 1
+    # 600 committed steps at a uniform dt = 0.05 and 588 recorded increments over the climb, the
+    # peak and the descent, with no step cut back
+    max_time = 1800
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  []
+  # The two comparison runs below carry the two DISTINCT ways a prescribed step dies on these
+  # paths: a load that has no equilibrium above a limit point, and an opening that reverses. Each
+  # one is a plain Newton twin of the arc-length input it is named after, on the same mesh, so the
+  # load factor it dies at can be read against the path the twin traces. Neither is asked to pay
+  # for the whole ramp that reaches its failure: the frame run opens just below the limit load, and
+  # the opening run stops at the last opening its twin's path ever reaches. Both keep a dtmin floor
+  # and an iteration count that let a doomed step die in a few cutbacks rather than spending the
+  # run on a cutback ladder, which is where the wall time of these two used to go.
+  [lee_frame_load_control]
+    type = RunException
+    input = lee_frame_load_control.i
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = 'The system shall demonstrate that the Lee frame load ramped directly with '
+                  'plain Newton solves has no equilibrium to converge to above the limit point '
+                  'of the post-buckling path, so a run opened just below that limit load cuts '
+                  'its time step back to the minimum and aborts where the arc-length '
+                  'continuation rounds the limit point and traces on.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+  [dcb_disp_control]
+    type = RunException
+    input = dcb_disp_control.i
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = 'The system shall demonstrate that a prescribed opening cannot follow the '
+                  'opening reversal of a cohesive serration, neither at the time step size the '
+                  'run starts from nor at any of the sizes it is cut back to, so the run aborts '
+                  'within the range of openings the arc-length continuation traces on through.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]

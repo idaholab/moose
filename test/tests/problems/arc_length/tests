@@ -1,0 +1,257 @@
+[Tests]
+  design = 'ArcLengthProblem.md ArcLengthHistory.md ArcLengthLoadParameter.md'
+  issues = '#33523'
+  # The continuation leaves below are pinned to max_parallel = 1 on purpose, not as an arbitrary
+  # restriction. The path is traced with a serial -pc_type lu factorization, and the csv golds hold
+  # one fixed path, so a rank count that changes how the linear solve is factored moves the
+  # increment by increment values those golds record.
+  [cubic_snapthrough]
+    type = 'CSVDiff'
+    input = 'cubic_snapthrough.i'
+    csvdiff = 'cubic_snapthrough_out_path.csv cubic_snapthrough_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall trace an equilibrium path through the limit points of a snap '
+                  'through problem whose restoring force is a cubic function of the solution, '
+                  'recording a load parameter history that rises to the first limit point, falls '
+                  'through the snap, and recovers, a path that prescribed load stepping cannot '
+                  'trace.'
+  []
+  [cubic_snapthrough_increments]
+    type = 'CSVDiff'
+    input = 'cubic_snapthrough.i'
+    # The common csv output is switched off and a named CSV output is added in its place, so this
+    # leaf writes only the per increment file and cannot race 'cubic_snapthrough' above over the
+    # shared output names. The path history is already asserted there, so the vector
+    # postprocessors are left out here and only the postprocessor table is written.
+    cli_args = 'Outputs/csv=false '
+               'Outputs/increments/type=CSV '
+               'Outputs/increments/execute_on=ARC_LENGTH_INCREMENT '
+               'Outputs/increments/execute_vector_postprocessors_on=NONE'
+    csvdiff = 'cubic_snapthrough_increments.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # same reasoning as the leaf above: the values are accumulated one increment at a time
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall write an output file on every increment of an arc-length '
+                  'continuation, recording one row for each equilibrium point of the traced path '
+                  'with the increment index standing in for the time of the solve.'
+  []
+  [bratu_source]
+    type = 'CSVDiff'
+    input = 'bratu_source.i'
+    csvdiff = 'bratu_source_out_path.csv bratu_source_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall scale a solution dependent volumetric source and the Jacobian '
+                  'of that source by the load parameter of an arc-length continuation, recording a '
+                  'load parameter history whose solution response steepens as the path approaches '
+                  'a fold.'
+  []
+  [bratu_softening]
+    type = 'CSVDiff'
+    input = 'bratu_softening.i'
+    # The bratu path of the leaf above, driven past its fold instead of stopped short of it.
+    # 'bratu_softening.i' includes the input of that leaf and overrides its continuation settings.
+    # The fold sits near a load parameter of 6.8, so putting 'lambda_max' above it at 8 puts the
+    # only other exit out of reach and leaves the step budget as the end of the path: the
+    # continuation climbs to the peak, turns, and traces the descending branch until the budget
+    # runs out. The larger 'step_size' is what covers the whole of that within the budget.
+    #
+    # The 'file_base' of that input moves every output name off the leaf above, which is frozen,
+    # so the two share no file.
+
+    # The path gold holds one row per continuation increment entered, so it holds exactly
+    # 'max_continuation_steps' rows only when every corrector along the path converged. A corrector
+    # that failed part way would end the solve on the same PETSc reason with a shorter history, so
+    # the row count is what separates a completed path from that.
+    csvdiff = 'bratu_softening_path.csv bratu_softening.csv'
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall end an arc-length continuation that has taken the full number '
+                  'of continuation steps it is allowed as a successful solve rather than a '
+                  'diverged one, so that a softening branch, whose load parameter falls past the '
+                  'peak and never reaches the maximum it would otherwise have to stop at, is '
+                  'traced to the end of the step budget, recording a load parameter history that '
+                  'rises to the fold, turns, and descends, with one row for every allowed '
+                  'continuation step.'
+  []
+  [transient_path]
+    type = 'CSVDiff'
+    input = 'transient_path.i'
+    csvdiff = 'transient_path_out_path.csv transient_path_out.csv'
+    capabilities = 'petsc>=3.22.0'
+    # This is the snap through of 'cubic_snapthrough' above stepped along instead of traced in one
+    # solve: every time step advances the trace by a single continuation increment of radius
+    # step_size, which is the same at every time step size, with dt setting the scale of the load
+    # increment that increment spans, and commits the state it reaches. Cutting the cost of a
+    # transient continuation is therefore a step_size and dt change together, not a dt change
+    # alone. The committed load factor rises to the peak
+    # of 0.385, falls through the snap to the trough of -0.385, and recovers past 1, parting from
+    # the time at the first turn of the path while the solution advances monotonically, so the
+    # trace holds committed equilibrium states on every branch of the path.
+    #
+    # The checkpoint of a step is written before the load increment of that step is committed, so a
+    # recovered run has to resume the path from the load factor the committed steps carry rather
+    # than from zero. The harness half transient cuts the 25 steps mid descent, so what the
+    # recovered run resumes is a trace already parted from the time.
+    recover = true
+    # A rejected step leaves the increments it already recorded in the history, which is never
+    # reset, so a step the restep harness retries doubles the rows the path gold holds.
+    restep = false
+    max_parallel = 1
+    # the path is traced one increment at a time, so linear solver differences accumulate along it
+    abs_zero = 1e-8
+    rel_err = 1e-4
+    requirement = 'The system shall advance an arc-length trace by a single continuation increment '
+                  'per step of a transient run, committing the equilibrium state of every '
+                  'increment so that history accumulates along the path, carrying the committed '
+                  'load factor through both limit points of a snap-through problem, up to the '
+                  'peak, down through the snap, and back up the recovered branch, with the load '
+                  'factor free to part from the time, and shall resume that trace from a recovery '
+                  'file written mid descent.'
+  []
+  [transient_continuation_control]
+    type = 'CSVDiff'
+    input = 'transient_path.i'
+    cli_args = 'Executioner/dt=0.1 '
+               'Executioner/num_steps=8 '
+               'Functions/switch_fn/type=ParsedFunction '
+               '"Functions/switch_fn/expression=t>0.29" '
+               'Controls/switch/type=BoolFunctionControl '
+               '"Controls/switch/parameter=*/*/use_continuation" '
+               'Controls/switch/function=switch_fn '
+               '"Controls/switch/execute_on=initial timestep_begin" '
+               'Outputs/file_base=transient_continuation_control'
+    csvdiff = 'transient_continuation_control.csv transient_continuation_control_path.csv'
+    capabilities = 'petsc>=3.22.0'
+    # The rising branch with the first steps solved as ordinary prescribed ramps: a
+    # BoolFunctionControl writes the controllable 'use_continuation' before every step, so any
+    # trigger a Control can express -- a function of time here, a postprocessor threshold in a
+    # custom control -- decides which steps are continued. The first two steps are single Newton
+    # solves whose load factor equals the time, and the continuation opens at the committed factor
+    # of 0.2 and steps along the path from there, with the load factor parting from the time on
+    # the first continued step.
+    recover = false
+    restep = false
+    max_parallel = 1
+    requirement = 'The system shall expose whether a transient step runs an arc-length '
+                  'continuation as a controllable parameter, so that a Controls object can switch '
+                  'the continuation on or off per step from a function or any other trigger, with '
+                  'the committed load factor carried across every switch.'
+  []
+  [transient_steady_only_params_error]
+    type = 'RunException'
+    input = 'transient_path.i'
+    cli_args = 'Problem/lambda_min=-2'
+    expect_err = "belongs to a one-shot continuation alone"
+    capabilities = 'petsc>=3.22.0'
+    recover = false
+    requirement = 'The system shall report an error when a transient arc-length run sets a '
+                  'continuation parameter that belongs to a one-shot path alone, because a '
+                  'transient run advances the trace by a single increment per time step and owns '
+                  'the step budget and the load parameter clamps such a parameter would set.'
+  []
+  [errors]
+    requirement = 'The system shall report an error when an arc-length continuation problem is set '
+                  'up with '
+    [no_load_error]
+      type = 'RunException'
+      input = 'errors.i'
+      expect_err = 'requires at least one residual object routed to the load vector tag'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'no residual object routed to the load vector tag,'
+    []
+    [pjfnk_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Executioner/solve_type=PJFNK'
+      expect_err = 'requires solve_type = NEWTON'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a matrix free solve type that never forms the Jacobian the continuation needs,'
+    []
+    [snes_type_override_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Executioner/petsc_options_iname=-snes_type '
+                 'Executioner/petsc_options_value=newtonls'
+      expect_err = '-snes_type is owned by ArcLengthProblem'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a nonlinear solver type that would replace the arc-length solver,'
+    []
+    [fused_residual_and_jacobian_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      expect_err = 'does not support'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a fused residual and Jacobian assembly that bypasses the load tag split and would '
+               'leave the load residual unscaled by the load parameter,'
+    []
+    [double_tag_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Kernels/load/extra_vector_tags=arc_length_load'
+      expect_err = 'not with extra_vector_tags'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a load object that appends the load vector tag to its default tags instead of '
+               'replacing them, which would count the load twice,'
+    []
+    [load_matrix_tag_missing_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Kernels/load/vector_tags=arc_length_load'
+      expect_err = 'must also carry the load matrix tag'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a load object that carries the load vector tag while leaving its Jacobian in the '
+               'system matrix, where the load parameter would never scale it,'
+    []
+    [load_vector_tag_missing_error]
+      type = 'RunException'
+      input = 'errors.i'
+      # The 'load' object is tagged the way an input should tag it so that the load tag is
+      # populated and the offender is the diffusion kernel alone.
+      cli_args = 'Kernels/load/vector_tags=arc_length_load '
+                 'Kernels/load/matrix_tags=arc_length_load_jac '
+                 'Kernels/diff/matrix_tags=arc_length_load_jac'
+      expect_err = 'must also carry the load vector tag'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'an object that routes its Jacobian to the load matrix tag while its residual stays '
+               'out of the load, which would scale a derivative of something that is not the load, '
+               'and'
+    []
+    [steady_use_continuation_error]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'Problem/use_continuation=false '
+                 'Kernels/load/vector_tags=arc_length_load '
+                 'Kernels/load/matrix_tags=arc_length_load_jac'
+      expect_err = 'only meaningful for a transient'
+      capabilities = 'petsc>=3.22.0'
+      recover = false
+      detail = 'a steady solve that switches off the per-step continuation, which only a transient '
+               'run has to switch.'
+    []
+  []
+[]
