@@ -678,9 +678,9 @@ MooseVariableFE<OutputType>::computeNodalNeighborValues()
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::setNodalValue(const OutputType & value, unsigned int idx)
+MooseVariableFE<OutputType>::setNodalValue(const OutputType & value)
 {
-  _element_data->setNodalValue(value, idx);
+  _element_data->setNodalValue(value);
 }
 
 template <typename OutputType>

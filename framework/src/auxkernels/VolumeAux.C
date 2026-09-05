@@ -21,7 +21,8 @@ VolumeAux::validParams()
 
 VolumeAux::VolumeAux(const InputParameters & parameters) : AuxKernel(parameters)
 {
-  if (mooseVariableBase()->feType() != libMesh::FEType(CONSTANT, MONOMIAL))
+  const auto & fe_type = mooseVariableBase()->feType();
+  if (fe_type.order != CONSTANT || fe_type.family != MONOMIAL)
     paramError("variable", "Must be of type CONSTANT MONOMIAL");
 }
 

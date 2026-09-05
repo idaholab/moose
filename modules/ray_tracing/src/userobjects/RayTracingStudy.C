@@ -194,7 +194,8 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _threaded_trace_ray[tid] = std::make_shared<TraceRay>(*this, tid);
 
     // Setup the face FEs for normal computation on the fly
-    _threaded_fe_face[tid] = FEBase::build(_mesh.dimension(), FEType(CONSTANT, MONOMIAL));
+    _threaded_fe_face[tid] =
+        FEBase::build(_mesh.dimension(), FEType(CONSTANT, MONOMIAL).set_p_refinement(false));
     _threaded_q_face[tid] = QBase::build(QGAUSS, _mesh.dimension() - 1, CONSTANT);
     _threaded_fe_face[tid]->attach_quadrature_rule(_threaded_q_face[tid].get());
     _threaded_fe_face[tid]->get_normals();

@@ -245,10 +245,12 @@ HeatTransferFromHeatStructure3D1Phase::addVariables()
 
   getTHMProblem().addSimVariable(false,
                                  FlowModel::TEMPERATURE_WALL,
-                                 libMesh::FEType(CONSTANT, MONOMIAL),
+                                 libMesh::FEType(CONSTANT, MONOMIAL).set_p_refinement(false),
                                  _flow_channel_subdomains);
-  getTHMProblem().addSimVariable(
-      false, _T_wall_name, libMesh::FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
+  getTHMProblem().addSimVariable(false,
+                                 _T_wall_name,
+                                 libMesh::FEType(CONSTANT, MONOMIAL).set_p_refinement(false),
+                                 _flow_channel_subdomains);
 
   // wall temperature initial condition
   if (!getTHMProblem().hasInitialConditionsFromFile() && !_app.isRestarting())
