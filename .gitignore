@@ -103,6 +103,7 @@ temp_print_trace.*
 *.json.*
 *.bak
 *.data
+*.smatprop
 *.processor.*
 .clang_complete
 .failed_tests
