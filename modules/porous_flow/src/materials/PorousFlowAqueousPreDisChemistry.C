@@ -212,8 +212,11 @@ PorousFlowAqueousPreDisChemistry::PorousFlowAqueousPreDisChemistry(
   for (unsigned i = 0; i < _num_primary; ++i)
   {
     _primary_var_num[i] = coupled("primary_concentrations", i);
-    _primary[i] = (_nodal_material ? &coupledDofValues("primary_concentrations", i)
-                                   : &coupledValue("primary_concentrations", i));
+    // A primary concentration need not be a PorousFlow variable (the derivative loop below skips
+    // any that is not), and a prescribed one may be an elemental AuxVariable, which has no nodal
+    // value to read.  This matches the treatment of the mass fractions, which are the same kind of
+    // quantity, in PorousFlowMassFraction.
+    _primary[i] = &nodalOrQpValue("primary_concentrations", i);
   }
 
   for (unsigned i = 0; i < _num_equilibrium_constants; ++i)
