@@ -16,7 +16,7 @@
 []
 
 [Variables]
-  [send]
+  [transfer_var]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -25,13 +25,13 @@
 [BCs]
   [back]
     type = MFEMScalarDirichletBC
-    variable = send
+    variable = transfer_var
     boundary = 1
     coefficient = 1.0
   []
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = send
+    variable = transfer_var
     boundary = 2
   []
 []
@@ -39,7 +39,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = send
+    variable = transfer_var
   []
 []
 
@@ -56,15 +56,24 @@
   []
 []
 
+[Executioner]
+  type = MFEMSteady
+[]
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionSendApp
-    vtk_format = ASCII
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMVariableLineValueSampler
+    variable = 'transfer_var'
+    start_point = '0 0 0'
+    end_point = '1 1 0.1'
+    num_points = 101
   []
 []
 
-[Executioner]
-  type = MFEMSteady
+[Outputs]
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/DiffusionSendApp/send
+  []
 []

@@ -87,10 +87,37 @@
   device = cpu
 []
 
+[VectorPostprocessors]
+  [line_sample_e_field]
+    type = MFEMVariableLineValueSampler
+    variable = 'e_field'
+    start_point = '0.01 0.01 0.01'
+    end_point = '0.99 0.99 0.99'
+    num_points = 101
+    execute_on = 'final'
+  []
+  [line_sample_b_field]
+    type = MFEMVariableLineValueSampler
+    variable = 'b_field'
+    start_point = '0.01 0.01 0.01'
+    end_point = '0.99 0.99 0.99'
+    num_points = 101
+    execute_on = 'final'
+  []
+  [line_sample_lorentz_force]
+    type = MFEMVariableLineValueSampler
+    variable = 'lorentz_force'
+    start_point = '0.01 0.01 0.01'
+    end_point = '0.99 0.99 0.99'
+    num_points = 101
+    execute_on = 'final'
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/CrossProduct
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'final'
+    file_base = OutputData/CrossProduct/crossproduct
   []
 []

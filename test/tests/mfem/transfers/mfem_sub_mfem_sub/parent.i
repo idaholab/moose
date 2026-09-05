@@ -38,15 +38,15 @@
   active = 'copy_between_sub'
   [copy_between_sub]
     type = MultiAppMFEMCopyTransfer
-    source_variables = send
-    variables = recv
+    source_variables = transfer_var
+    variables = transfer_var
     from_multi_app = send_app
     to_multi_app = recv_app
   []
   [general_transfer_between_sub]
     type = MultiAppMFEMShapeEvaluationTransfer
-    source_variables = send
-    variables = recv
+    source_variables = transfer_var
+    variables = transfer_var
     from_multi_app = send_app
     to_multi_app = recv_app
   []
