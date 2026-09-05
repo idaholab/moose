@@ -62,6 +62,25 @@
     max_parallel = 1
     recover = false
   []
+  [MFEMHypreAMSInteriorNodes]
+    design = 'MFEMHypreAMS.md'
+    issues = '#33625'
+    type = XMLDiff
+    input = magnetostatic.i
+    cli_args = 'Solvers/ams/singular=false '
+               'Solvers/ams/block="1 2" '
+               'Solvers/ams/projection_frequency=1'
+    xmldiff = 'OutputData/Magnetostatic/Run0/Run0.pvd
+                OutputData/Magnetostatic/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['UnstructuredGrid']['Piece']['PointData']['DataArray'][0]['#text']" # ignore vector potential
+    requirement = 'The system shall be able to precondition an MFEM curl-curl solve with a HypreAMS '
+                  'preconditioner whose interior-node correction is restricted to a subset of '
+                  'subdomains and whose compatible-subspace projection frequency is set.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'
