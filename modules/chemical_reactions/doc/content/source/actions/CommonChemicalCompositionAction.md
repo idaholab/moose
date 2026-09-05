@@ -2,4 +2,7 @@
 
 ## Description
 
-This `CommonChemicalComposition` action adds the parameters supplied at the `[ChemicalComposition]` level as defaults for all the subblocks within the `[ChemicalComposition]` block. See the description, example use, and parameters on the [ChemicalComposition action](/ChemicalComposition/index.md) action system page.
+The `CommonChemicalComposition` action applies parameters supplied at the
+`[ChemicalComposition]` level as defaults for all named subblocks. See the description, example,
+and parameters on the [ChemicalComposition action system](syntax/ChemicalComposition/index.md)
+page.
