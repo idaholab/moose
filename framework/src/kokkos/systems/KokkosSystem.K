@@ -25,8 +25,10 @@ System::System(SystemBase & system)
     MeshHolder(*system.mesh().getKokkosMesh()),
     _system(system),
     _mesh(system.mesh()),
-    _dof_map(system.dofMap()),
     _comm(system.dofMap().comm()),
+    _dof_map(system.dofMap()),
+    _first_dof(system.dofMap().first_dof()),
+    _end_dof(system.dofMap().end_dof()),
     _num_vars(system.system().n_vars()),
     _num_local_dofs(system.system().n_local_dofs()),
     _num_ghost_dofs(system.dofMap().get_send_list().size())
@@ -164,6 +166,12 @@ System::setupDofs()
     }
   }
 
+  for (auto dof : _dof_map.get_send_list())
+  {
+    const auto local_idx = solution->map_global_to_local_index(dof);
+    _local_to_global_dof_index[local_idx] = dof;
+  }
+
   _local_elem_dof_index.copyToDeviceNested();
   _scalar_dof_index.copyToDeviceNested();
   _local_to_global_dof_index.copyToDevice();
@@ -226,9 +234,9 @@ System::setupSparsity()
   // The rows are laid out as the locally owned rows in ascending order followed by the ghost rows
   // in send list order.  buildCooIndices() recovers each row's global index from that ordering, so
   // the two must be kept consistent.
-  for (dof_id_type r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
+  for (dof_id_type r = _first_dof; r < _end_dof; ++r)
   {
-    auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
+    auto & cols = pattern->get_sparsity_pattern().at(r - _first_dof);
 
     for (auto col : cols)
       col_idx.push_back(col);
