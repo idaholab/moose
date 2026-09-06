@@ -17,8 +17,6 @@
 #include "libmesh/mesh.h"
 #include "libmesh/elem.h"
 
-using namespace libMesh;
-
 namespace Moose
 {
 
@@ -58,7 +56,7 @@ sideIntersectedByLine(const Elem * elem,
     if (dim == 3)
     {
       // Make a plane out of the first three nodes on the side
-      Plane plane(side_elem->point(0), side_elem->point(1), side_elem->point(2));
+      libMesh::Plane plane(side_elem->point(0), side_elem->point(1), side_elem->point(2));
 
       // See if they intersect
       intersect = line_segment.intersect(plane, intersection_point);

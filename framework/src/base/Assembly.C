@@ -36,8 +36,6 @@
 
 #include <algorithm>
 
-using namespace libMesh;
-
 template <typename P, typename C>
 void
 coordTransformFactor(const SubProblem & s,
@@ -636,7 +634,7 @@ Assembly::createQRules(QuadratureType type,
     q.vol->allow_rules_with_negative_weights = allow_negative_qweights;
     q.face = QBase::build(type, dim - 1, face_order);
     q.face->allow_rules_with_negative_weights = allow_negative_qweights;
-    q.fv_face = QBase::build(QMONOMIAL, dim - 1, CONSTANT);
+    q.fv_face = QBase::build(libMesh::QMONOMIAL, dim - 1, CONSTANT);
     q.fv_face->allow_rules_with_negative_weights = allow_negative_qweights;
     q.neighbor = std::make_unique<ArbitraryQuadrature>(dim - 1, face_order);
     q.neighbor->allow_rules_with_negative_weights = allow_negative_qweights;
@@ -1429,7 +1427,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
           _ad_d2xyzdxi2_map[p].zero();
 
       const auto n_mapping_shape_functions =
-          FE<2, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
+          libMesh::FE<2, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
@@ -1497,7 +1495,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         }
 
       const unsigned int n_mapping_shape_functions =
-          FE<3, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
+          libMesh::FE<3, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
@@ -2490,7 +2488,7 @@ Assembly::init(const CouplingMatrix * cm)
     for (unsigned int k = 0; k < ivar->count(); ++k)
     {
       unsigned int iv = i + k;
-      for (const auto & j : ConstCouplingRow(iv, *_cm))
+      for (const auto & j : libMesh::ConstCouplingRow(iv, *_cm))
       {
         if (_sys.isScalarVariable(j))
         {
@@ -2534,7 +2532,7 @@ Assembly::init(const CouplingMatrix * cm)
     if (i >= _component_block_diagonal.size())
       _component_block_diagonal.resize(i + 1, true);
 
-    for (const auto & j : ConstCouplingRow(i, *_cm))
+    for (const auto & j : libMesh::ConstCouplingRow(i, *_cm))
       if (_sys.isScalarVariable(j))
       {
         auto & jvar = _sys.getScalarVariable(_tid, j);
@@ -2661,7 +2659,7 @@ Assembly::initNonlocalCoupling()
     for (unsigned int k = 0; k < ivar->count(); ++k)
     {
       unsigned int iv = i + k;
-      for (const auto & j : ConstCouplingRow(iv, _nonlocal_cm))
+      for (const auto & j : libMesh::ConstCouplingRow(iv, _nonlocal_cm))
         if (!_sys.isScalarVariable(j))
         {
           auto & jvar = _sys.getVariable(_tid, j);
@@ -3570,7 +3568,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
   for (unsigned int i = 0; i < ivar.count(); ++i)
   {
-    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
+    for (const auto & jt : libMesh::ConstCouplingRow(iv + i, *_cm))
     {
       if (jt < jv || jt >= jv + jvar.count())
         continue;
@@ -3623,7 +3621,7 @@ Assembly::cacheJacobianBlock(const DenseMatrix<Number> & jac_block,
 
   for (unsigned int i = 0; i < ivar.count(); ++i)
   {
-    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
+    for (const auto & jt : libMesh::ConstCouplingRow(iv + i, *_cm))
     {
       if (jt < jv || jt >= jv + jvar.count())
         continue;
@@ -3681,7 +3679,7 @@ Assembly::cacheJacobianBlockNonzero(const DenseMatrix<Number> & jac_block,
   for (unsigned int i = 0; i < ivar.count(); ++i)
   {
     unsigned int iv = ivar.number();
-    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
+    for (const auto & jt : libMesh::ConstCouplingRow(iv + i, *_cm))
     {
       unsigned int jv = jvar.number();
       if (jt < jv || jt >= jv + jvar.count())

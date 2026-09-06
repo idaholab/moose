@@ -25,8 +25,6 @@
 
 #include "mtwist.h"
 
-using namespace libMesh;
-
 template <>
 void
 dataStore<mt_state>(std::ostream & stream, mt_state & foo, void * ctx)
@@ -374,7 +372,7 @@ dataStore(std::ostream & stream,
   // Store the solver package so that we know what vector type to construct
   libMesh::SolverPackage solver_package;
   if (dynamic_cast<libMesh::PetscVector<Number> *>(v.get()))
-    solver_package = PETSC_SOLVERS;
+    solver_package = libMesh::PETSC_SOLVERS;
   else
     mooseError("Can only store unique_ptrs of PetscVectors");
   int solver_package_int = solver_package;

@@ -21,8 +21,6 @@
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", MultiAppPostprocessorInterpolationTransfer);
 
 InputParameters
@@ -92,16 +90,17 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     case FROM_MULTIAPP:
     {
       errorIfObjectExecutesOnTransferInSourceApp(_postprocessor);
-      std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
+      std::unique_ptr<libMesh::InverseDistanceInterpolation<LIBMESH_DIM>> idi;
 
       switch (_interp_type)
       {
         case 0:
-          idi = std::make_unique<InverseDistanceInterpolation<LIBMESH_DIM>>(
+          idi = std::make_unique<libMesh::InverseDistanceInterpolation<LIBMESH_DIM>>(
               _communicator, _num_points, _power);
           break;
         case 1:
-          idi = std::make_unique<RadialBasisInterpolation<LIBMESH_DIM>>(_communicator, _radius);
+          idi = std::make_unique<libMesh::RadialBasisInterpolation<LIBMESH_DIM>>(_communicator,
+                                                                                 _radius);
           break;
         default:
           mooseError("Unknown interpolation type!");

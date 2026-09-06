@@ -144,8 +144,6 @@
 // C++
 #include <cstring> // for "Jacobian" exception test
 
-using namespace libMesh;
-
 // Anonymous namespace for helper function
 namespace
 {
@@ -2344,7 +2342,7 @@ FEProblemBase::reinitDirac(const Elem * elem, const THREAD_ID tid)
       for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
       {
         // the highest available order in libMesh is 43
-        _scalar_zero[tid].resize(FORTYTHIRD, 0);
+        _scalar_zero[tid].resize(libMesh::FORTYTHIRD, 0);
         _zero[tid].resize(max_qpts, 0);
         _grad_zero[tid].resize(max_qpts, RealGradient(0.));
         _second_zero[tid].resize(max_qpts, RealTensor(0.));
@@ -2986,7 +2984,7 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
 
     if (curr_sys_ptr->hasVariable(var_name))
     {
-      const Variable & var =
+      const libMesh::Variable & var =
           curr_sys_ptr->system().variable(curr_sys_ptr->system().variable_number(var_name));
 
       // variable type
@@ -3428,7 +3426,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
     var_type = "MooseVariableConstMonomial";
   else if (type.family == SCALAR)
     var_type = "MooseVariableScalar";
-  else if (FEInterface::field_type(type) == TYPE_VECTOR)
+  else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
     var_type = "VectorMooseVariable";
   else
     var_type = "MooseVariable";
@@ -6683,7 +6681,7 @@ FEProblemBase::updateMaxQps()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // the highest available order in libMesh is 43
-    _scalar_zero[tid].resize(FORTYTHIRD, 0);
+    _scalar_zero[tid].resize(libMesh::FORTYTHIRD, 0);
     _zero[tid].resize(max_qpts, 0);
     _ad_zero[tid].resize(max_qpts, 0);
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
@@ -8865,7 +8863,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   {
     // Finally clear refinement flags so that if someone tries to project vectors again without
     // an intervening mesh refinement to clear flags they won't run into trouble
-    MeshRefinement refinement(_mesh.getMesh());
+    libMesh::MeshRefinement refinement(_mesh.getMesh());
     refinement.clean_refinement_flags();
   }
 

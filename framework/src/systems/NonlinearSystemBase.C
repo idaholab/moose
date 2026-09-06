@@ -113,8 +113,6 @@ EXTERN_C_BEGIN
 extern PetscErrorCode DMCreate_Moose(DM);
 EXTERN_C_END
 
-using namespace libMesh;
-
 namespace
 {
 template <typename T>
@@ -351,7 +349,7 @@ NonlinearSystemBase::initialSetup()
     if (_off_diagonals_in_auto_scaling)
       _scaling_matrix = std::make_unique<OffDiagonalScalingMatrix<Number>>(_communicator);
     else
-      _scaling_matrix = std::make_unique<DiagonalMatrix<Number>>(_communicator);
+      _scaling_matrix = std::make_unique<libMesh::DiagonalMatrix<Number>>(_communicator);
   }
 
   if (_preconditioner)
@@ -1019,7 +1017,7 @@ NonlinearSystemBase::getResidualTimeVector()
     _Re_time_tag = _fe_problem.addVectorTag("TIME");
 
     // Most applications don't need the expense of ghosting
-    ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
+    libMesh::ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
     _Re_time = &addVector(_Re_time_tag, false, ptype);
   }
   else if (_need_residual_ghosted && _Re_time->type() == PARALLEL)
@@ -1042,7 +1040,7 @@ NonlinearSystemBase::getResidualNonTimeVector()
     _Re_non_time_tag = _fe_problem.addVectorTag("NONTIME");
 
     // Most applications don't need the expense of ghosting
-    ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
+    libMesh::ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
     _Re_non_time = &addVector(_Re_non_time_tag, false, ptype);
   }
   else if (_need_residual_ghosted && _Re_non_time->type() == PARALLEL)

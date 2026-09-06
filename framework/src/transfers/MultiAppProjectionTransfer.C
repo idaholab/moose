@@ -30,8 +30,6 @@
 // TIMPI includes
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 void
 assemble_l2(EquationSystems & es, const std::string & system_name)
 {
@@ -318,7 +316,7 @@ MultiAppProjectionTransfer::execute()
   }
 
   // Setup the local mesh functions.
-  std::vector<MeshFunction> local_meshfuns;
+  std::vector<libMesh::MeshFunction> local_meshfuns;
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];

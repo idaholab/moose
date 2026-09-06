@@ -33,8 +33,6 @@
 #include "libmesh/petsc_solver_exception.h"
 #include "libmesh/slepc_eigen_solver.h"
 
-using namespace libMesh;
-
 #ifdef LIBMESH_HAVE_SLEPC
 
 namespace Moose
@@ -44,7 +42,7 @@ void
 assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
-  CondensedEigenSystem & eigen_system = es.get_system<CondensedEigenSystem>(system_name);
+  auto & eigen_system = es.get_system<libMesh::CondensedEigenSystem>(system_name);
   NonlinearEigenSystem & eigen_nl =
       p->getNonlinearEigenSystem(/*nl_sys_num=*/eigen_system.number());
 
@@ -107,8 +105,8 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
 
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
   : NonlinearSystemBase(
-        eigen_problem, eigen_problem.es().add_system<CondensedEigenSystem>(name), name),
-    _eigen_sys(eigen_problem.es().get_system<CondensedEigenSystem>(name)),
+        eigen_problem, eigen_problem.es().add_system<libMesh::CondensedEigenSystem>(name), name),
+    _eigen_sys(eigen_problem.es().get_system<libMesh::CondensedEigenSystem>(name)),
     _eigen_problem(eigen_problem),
     _solver_configuration(nullptr),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
@@ -118,8 +116,8 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     _preconditioner(nullptr),
     _num_constrained_dofs(0)
 {
-  SlepcEigenSolver<Number> * solver =
-      cast_ptr<SlepcEigenSolver<Number> *>(_eigen_sys.eigen_solver.get());
+  libMesh::SlepcEigenSolver<Number> * solver =
+      cast_ptr<libMesh::SlepcEigenSolver<Number> *>(_eigen_sys.eigen_solver.get());
 
   if (!solver)
     mooseError("A slepc eigen solver is required");
@@ -410,7 +408,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   // Shell matrix A
   if (_eigen_sys.has_shell_matrix_A())
   {
-    Mat mat = cast_ref<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_A()).mat();
+    Mat mat = cast_ref<libMesh::PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_A()).mat();
 
     // Attach callbacks for nonlinear eigenvalue solver
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
@@ -422,7 +420,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   // Shell matrix B
   if (_eigen_sys.has_shell_matrix_B())
   {
-    Mat mat = cast_ref<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_B()).mat();
+    Mat mat = cast_ref<libMesh::PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_B()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
 
@@ -433,7 +431,8 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   // Shell preconditioning matrix
   if (_eigen_sys.has_shell_precond_matrix())
   {
-    Mat mat = cast_ref<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_precond_matrix()).mat();
+    Mat mat =
+        cast_ref<libMesh::PetscShellMatrix<Number> &>(_eigen_sys.get_shell_precond_matrix()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
@@ -482,7 +481,7 @@ NonlinearEigenSystem::residualVectorBX()
   return _work_rhs_vector_BX;
 }
 
-NonlinearSolver<Number> *
+libMesh::NonlinearSolver<Number> *
 NonlinearEigenSystem::nonlinearSolver()
 {
   mooseError("did not implement yet \n");
@@ -507,8 +506,8 @@ NonlinearEigenSystem::getSNES()
 EPS
 NonlinearEigenSystem::getEPS()
 {
-  SlepcEigenSolver<Number> * solver =
-      cast_ptr<SlepcEigenSolver<Number> *>(&(*_eigen_sys.eigen_solver));
+  libMesh::SlepcEigenSolver<Number> * solver =
+      cast_ptr<libMesh::SlepcEigenSolver<Number> *>(&(*_eigen_sys.eigen_solver));
 
   if (!solver)
     mooseError("Unable to retrieve eigen solver");

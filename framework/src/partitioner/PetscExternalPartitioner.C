@@ -18,8 +18,6 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/petsc_solver_exception.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", PetscExternalPartitioner);
 
 #include <memory>
@@ -77,7 +75,7 @@ PetscExternalPartitioner::preLinearPartition(MeshBase & mesh)
   // Temporarily cache the old partition method
   auto old_partitioner = std::move(mesh.partitioner());
   // Create a linear partitioner
-  mesh.partitioner() = std::make_unique<LinearPartitioner>();
+  mesh.partitioner() = std::make_unique<libMesh::LinearPartitioner>();
   // Partition mesh
   mesh.partition(n_processors());
   // Restore the old partition

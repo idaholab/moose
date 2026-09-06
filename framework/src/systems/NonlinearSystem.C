@@ -29,8 +29,6 @@
 #include "libmesh/default_coupling.h"
 #include "libmesh/petsc_solver_exception.h"
 
-using namespace libMesh;
-
 namespace Moose
 {
 void
@@ -109,8 +107,8 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
   nonlinearSolver()->transpose_nullspace = Moose::compute_transpose_nullspace;
   nonlinearSolver()->nearnullspace = Moose::compute_nearnullspace;
 
-  PetscNonlinearSolver<Real> * petsc_solver =
-      cast_ptr<PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
+  libMesh::PetscNonlinearSolver<Real> * petsc_solver =
+      cast_ptr<libMesh::PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
   if (petsc_solver)
   {
     petsc_solver->set_residual_zero_out(false);
@@ -130,8 +128,8 @@ NonlinearSystem::potentiallySetupFiniteDifferencing()
     setupFiniteDifferencedPreconditioner();
   }
 
-  PetscNonlinearSolver<Real> & solver =
-      cast_ref<PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
+  libMesh::PetscNonlinearSolver<Real> & solver =
+      cast_ref<libMesh::PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
   solver.mffd_residual_object = &_fd_residual_functor;
 
   solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
@@ -213,8 +211,8 @@ void
 NonlinearSystem::stopSolve(const ExecFlagType & exec_flag,
                            const std::set<TagID> & vector_tags_to_close)
 {
-  PetscNonlinearSolver<Real> & solver =
-      cast_ref<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
+  libMesh::PetscNonlinearSolver<Real> & solver =
+      cast_ref<libMesh::PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
 
   if (exec_flag == EXEC_LINEAR || exec_flag == EXEC_POSTCHECK)
   {
@@ -260,8 +258,8 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
   // Make sure that libMesh isn't going to override our preconditioner
   _nl_implicit_sys.nonlinear_solver->jacobian = nullptr;
 
-  PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
-      cast_ptr<PetscNonlinearSolver<Number> *>(_nl_implicit_sys.nonlinear_solver.get());
+  libMesh::PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
+      cast_ptr<libMesh::PetscNonlinearSolver<Number> *>(_nl_implicit_sys.nonlinear_solver.get());
 
   PetscMatrix<Number> * petsc_mat =
       cast_ptr<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
@@ -279,8 +277,8 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
   // Make sure that libMesh isn't going to override our preconditioner
   _nl_implicit_sys.nonlinear_solver->jacobian = nullptr;
 
-  PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> &>(*_nl_implicit_sys.nonlinear_solver);
+  libMesh::PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
+      dynamic_cast<libMesh::PetscNonlinearSolver<Number> &>(*_nl_implicit_sys.nonlinear_solver);
 
   // Pointer to underlying PetscMatrix type
   PetscMatrix<Number> * petsc_mat =
@@ -371,8 +369,8 @@ NonlinearSystem::computeScalingResidual()
 SNES
 NonlinearSystem::getSNES()
 {
-  PetscNonlinearSolver<Number> * petsc_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> *>(nonlinearSolver());
+  libMesh::PetscNonlinearSolver<Number> * petsc_solver =
+      dynamic_cast<libMesh::PetscNonlinearSolver<Number> *>(nonlinearSolver());
 
   if (petsc_solver)
   {

@@ -81,6 +81,7 @@ class Tri7;
 class RemoteElem;
 }
 
+using libMesh::C0POLYGON;
 using libMesh::Edge;
 using libMesh::Edge2;
 using libMesh::EDGE2;
@@ -138,7 +139,6 @@ using libMesh::Tri6;
 using libMesh::TRI6;
 using libMesh::Tri7;
 using libMesh::TRI7;
-using libMesh::C0POLYGON;
 
 // Continuity types
 using libMesh::C_ONE;
@@ -249,18 +249,18 @@ using libMesh::TypeVector;
 using libMesh::VectorValue;
 
 // Common FE families
+using libMesh::HERMITE;
 using libMesh::HIERARCHIC;
 using libMesh::L2_HIERARCHIC;
 using libMesh::L2_LAGRANGE;
+using libMesh::L2_RAVIART_THOMAS;
 using libMesh::LAGRANGE;
 using libMesh::LAGRANGE_VEC;
 using libMesh::MONOMIAL;
 using libMesh::MONOMIAL_VEC;
-using libMesh::SCALAR;
 using libMesh::NEDELEC_ONE;
 using libMesh::RAVIART_THOMAS;
-using libMesh::L2_RAVIART_THOMAS;
-using libMesh::HERMITE;
+using libMesh::SCALAR;
 
 // Counting from 0 to 20
 using libMesh::CONSTANT;

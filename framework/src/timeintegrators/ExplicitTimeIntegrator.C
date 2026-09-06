@@ -22,8 +22,6 @@
 // libMesh includes
 #include "libmesh/enum_convergence_flags.h"
 
-using namespace libMesh;
-
 InputParameters
 ExplicitTimeIntegrator::validParams()
 {
@@ -182,7 +180,7 @@ ExplicitTimeIntegrator::setupSolver()
   }
 
   if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
-    _linear_solver = LinearSolver<Number>::build(comm());
+    _linear_solver = libMesh::LinearSolver<Number>::build(comm());
 
   if (_solve_type == LUMP_PRECONDITIONED)
   {
@@ -272,27 +270,27 @@ ExplicitTimeIntegrator::checkLinearConvergence()
 
   switch (reason)
   {
-    case CONVERGED_RTOL_NORMAL:
-    case CONVERGED_ATOL_NORMAL:
-    case CONVERGED_RTOL:
-    case CONVERGED_ATOL:
-    case CONVERGED_ITS:
-    case CONVERGED_CG_NEG_CURVE:
-    case CONVERGED_CG_CONSTRAINED:
-    case CONVERGED_STEP_LENGTH:
-    case CONVERGED_HAPPY_BREAKDOWN:
+    case libMesh::CONVERGED_RTOL_NORMAL:
+    case libMesh::CONVERGED_ATOL_NORMAL:
+    case libMesh::CONVERGED_RTOL:
+    case libMesh::CONVERGED_ATOL:
+    case libMesh::CONVERGED_ITS:
+    case libMesh::CONVERGED_CG_NEG_CURVE:
+    case libMesh::CONVERGED_CG_CONSTRAINED:
+    case libMesh::CONVERGED_STEP_LENGTH:
+    case libMesh::CONVERGED_HAPPY_BREAKDOWN:
       return true;
-    case DIVERGED_NULL:
-    case DIVERGED_ITS:
-    case DIVERGED_DTOL:
-    case DIVERGED_BREAKDOWN:
-    case DIVERGED_BREAKDOWN_BICG:
-    case DIVERGED_NONSYMMETRIC:
-    case DIVERGED_INDEFINITE_PC:
-    case DIVERGED_NAN:
-    case DIVERGED_INDEFINITE_MAT:
-    case CONVERGED_ITERATING:
-    case DIVERGED_PCSETUP_FAILED:
+    case libMesh::DIVERGED_NULL:
+    case libMesh::DIVERGED_ITS:
+    case libMesh::DIVERGED_DTOL:
+    case libMesh::DIVERGED_BREAKDOWN:
+    case libMesh::DIVERGED_BREAKDOWN_BICG:
+    case libMesh::DIVERGED_NONSYMMETRIC:
+    case libMesh::DIVERGED_INDEFINITE_PC:
+    case libMesh::DIVERGED_NAN:
+    case libMesh::DIVERGED_INDEFINITE_MAT:
+    case libMesh::CONVERGED_ITERATING:
+    case libMesh::DIVERGED_PCSETUP_FAILED:
       return false;
     default:
       mooseError("Unknown convergence reason in ExplicitTimeIntegrator.");
