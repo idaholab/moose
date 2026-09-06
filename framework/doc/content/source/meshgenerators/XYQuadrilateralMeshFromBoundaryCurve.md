@@ -15,13 +15,19 @@ generators as sub-generators:
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/boundary), around the
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/holes), at the element size
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/desired_area). Its `metric` and `orientation` keep
-   their defaults, which place the right isosceles triangles that recombine well.
+   their defaults, which place the right isosceles triangles that recombine well. The
+   triangulation splits the boundary segments that are longer than the desired element size unless
+   [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/refine_boundary) and
+   [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/refine_holes) forbid it, which keeps the nodes
+   of the input curves so that the mesh can be stitched to a neighbor sharing them.
 2. [TriToQuadConverter.md] merges pairs of triangles that reach
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/eta_min). With
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/all_quad), its default, the triangles that could not
    be merged are eliminated and the mesh is purely quadrilateral; without it the mesh is
    quad-dominant, and the triangles of each subdomain are collected in a subdomain of their own
-   named after it with the suffix `_tri`.
+   named after it with the suffix `_tri`. The elimination splits every element, which adds a node
+   in the middle of every boundary segment: a mesh that must keep the boundary nodes of the input
+   curves also needs `all_quad = false`.
 3. [MoveBoundaryNodesToCurveGenerator.md] snaps each boundary named in
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/snap_boundaries) onto the curve of the
    [ParsedCurveGenerator.md] it is paired with in
@@ -30,7 +36,9 @@ generators as sub-generators:
 4. [SmoothMeshGenerator.md] runs a variational smoothing pass, unless
    [!param](/Mesh/XYQuadrilateralMeshFromBoundaryCurve/smooth) turns it off. The variational
    algorithm cannot tangle the mesh and only allows node movement that leaves the domain
-   unchanged, so the snapped geometry survives the smoothing.
+   unchanged, so the snapped geometry survives the smoothing. The boundary nodes may still slide
+   along the boundary, so a mesh that must keep its boundary nodes in place also needs
+   `smooth = false`.
 
 ## Example Syntax
 

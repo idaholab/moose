@@ -31,6 +31,16 @@ XYQuadrilateralMeshFromBoundaryCurve::validParams()
       "desired_area>=0",
       "Desired (maximum) triangle area of the triangulation the quadrilaterals are built from, or "
       "0 to size the elements from the boundary alone.");
+  params.addParam<bool>("refine_boundary",
+                        true,
+                        "Whether the triangulation may split the segments of the outer boundary "
+                        "to reach 'desired_area'. Set to false to keep the boundary nodes of the "
+                        "input, for example to stitch the mesh to a neighboring one.");
+  params.addParam<std::vector<bool>>("refine_holes",
+                                     std::vector<bool>(),
+                                     "Whether the triangulation may split the segments of each "
+                                     "hole boundary to reach 'desired_area', one entry per hole. "
+                                     "Set to false to keep the boundary nodes of that hole.");
 
   params.addParam<BoundaryName>("output_boundary",
                                 "Boundary name to set on the new outer boundary.");
@@ -68,9 +78,11 @@ XYQuadrilateralMeshFromBoundaryCurve::validParams()
   params.addParam<bool>("smooth",
                         true,
                         "Whether to finish the pipeline with a variational smoothing pass, which "
-                        "relaxes the elements without moving the boundary.");
+                        "relaxes the elements. The boundary nodes stay on the boundary but may "
+                        "slide along it; set to false to keep them where the earlier steps placed "
+                        "them.");
 
-  params.addParamNamesToGroup("boundary holes desired_area", "Region");
+  params.addParamNamesToGroup("boundary holes desired_area refine_boundary refine_holes", "Region");
   params.addParamNamesToGroup("eta_min all_quad", "Recombination");
   params.addParamNamesToGroup("parsed_curve_generators snap_boundaries", "Boundary snapping");
 
@@ -108,6 +120,8 @@ XYQuadrilateralMeshFromBoundaryCurve::XYQuadrilateralMeshFromBoundaryCurve(
     params.set<std::vector<MeshGeneratorName>>("holes") =
         getParam<std::vector<MeshGeneratorName>>("holes");
     params.set<Real>("desired_area") = getParam<Real>("desired_area");
+    params.set<bool>("refine_boundary") = getParam<bool>("refine_boundary");
+    params.set<std::vector<bool>>("refine_holes") = getParam<std::vector<bool>>("refine_holes");
     if (isParamValid("output_boundary"))
       params.set<BoundaryName>("output_boundary") = getParam<BoundaryName>("output_boundary");
     if (isParamValid("hole_boundaries"))
