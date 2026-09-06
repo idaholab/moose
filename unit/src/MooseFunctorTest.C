@@ -24,7 +24,6 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/type_tensor.h"
 
-using namespace libMesh;
 using namespace Moose;
 using namespace FV;
 
@@ -333,7 +332,7 @@ TEST(MooseFunctorTest, testArgs)
     mesh->setMeshBase(std::move(lm_mesh));
   }
 
-  mesh->prepare(nullptr);
+  mesh->prepare();
   mesh->setCoordSystem({}, coord_type_enum);
   // Build the face info
   mesh->buildFiniteVolumeInfo();

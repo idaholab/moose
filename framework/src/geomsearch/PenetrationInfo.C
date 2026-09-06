@@ -20,8 +20,6 @@
 
 #include "libmesh/elem.h"
 
-using namespace libMesh;
-
 PenetrationInfo::PenetrationInfo(const Elem * elem,
                                  const Elem * side,
                                  unsigned int side_num,

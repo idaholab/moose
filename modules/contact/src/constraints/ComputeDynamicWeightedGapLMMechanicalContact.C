@@ -203,8 +203,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 
   // Get the _dof_to_weighted_gap map
   const DofObject * dof = _var->isNodal()
-                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                              : static_cast<const DofObject *>(_lower_secondary_elem);
+                              ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                              : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
   // Regular normal contact constraint: Use before contact is established for contact detection
   _dof_to_weighted_gap[dof].first += _test[_i][_qp] * (_qp_gap_nodal * _normals[_i]);
@@ -367,9 +367,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::communicateWear()
     for (auto & pr : sent_data)
     {
       const auto dof_id = pr.first;
-      const auto * const dof_object =
-          _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                 : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = _nodal
+                                          ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                          : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       _dof_to_nodal_wear_depth[dof_object] += std::move(pr.second);
     }

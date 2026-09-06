@@ -2,7 +2,7 @@
 # element boundaries in order to check that warnings are emitted.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/mug.e
 []
 

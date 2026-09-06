@@ -29,6 +29,12 @@
 extrapolation_behavior_node = 'nearest-node'
 extrapolation_behavior_elem = 'nearest-elem'
 
+[GlobalParams]
+  # the test relies on the child apps output, but the multiapps cannot both execute after transfers
+  # alternatively we could execute the transfers on an earlier execute_on as the MultiApps
+  execute_after_from_multiapp = false
+[]
+
 [Transfers]
   # Nodal to nodal variables
   [app1_to_2_nodal_nodal]

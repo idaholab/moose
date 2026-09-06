@@ -162,5 +162,5 @@ template <typename T>
 void
 to_json(nlohmann::json & json, const GenericTwoVector<T> & two_vector)
 {
-  to_json(json, static_cast<const Eigen::Matrix<T, 2, 1> &>(two_vector));
+  to_json(json, libMesh::cast_ref<const Eigen::Matrix<T, 2, 1> &>(two_vector));
 }

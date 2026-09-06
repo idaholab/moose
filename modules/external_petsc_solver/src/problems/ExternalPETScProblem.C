@@ -27,7 +27,7 @@ ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
   : ExternalProblem(params),
     _sync_to_var_name(getParam<VariableName>("sync_variable")),
     // Require ExternalPetscSolverApp
-    _external_petsc_app(static_cast<ExternalPetscSolverApp &>(_app)),
+    _external_petsc_app(cast_ref<ExternalPetscSolverApp &>(_app)),
     _ts(_external_petsc_app.getPetscTS()),
     // RestartableData is required for recovering when PETSc solver runs as a master app
     _petsc_sol(declareRestartableData<Vec>("petsc_sol")),

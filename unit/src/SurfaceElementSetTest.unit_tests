@@ -1,0 +1,30 @@
+[Tests]
+  design = 'AdaptiveRayContainmentCheck.md'
+  issues = '#33397'
+
+  [from_mesh]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.fromMesh
+    requirement = 'The system shall construct indexed first-order triangular elements, centroids, and a bounding box from a surface mesh.'
+  []
+  [from_edge_mesh]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.fromMeshEdge2
+    requirement = 'The system shall construct indexed first-order line elements, centroids, and a bounding box from a surface mesh.'
+  []
+  [from_elements]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.fromElements
+    requirement = 'The system shall construct indexed surface geometry from a selected collection of first-order triangular elements.'
+  []
+  [unsupported_type]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.rejectsUnsupportedElementType
+    requirement = 'The system shall reject unsupported element types when constructing indexed surface geometry.'
+  []
+  [mixed_types]
+    type = GoogleTest
+    unit_test = SurfaceElementSetTest.rejectsMixedElementTypes
+    requirement = 'The system shall reject mixed element types when constructing indexed surface geometry.'
+  []
+[]

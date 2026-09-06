@@ -21,7 +21,6 @@
 #include "FluidProperties.h"
 #include "THMControl.h"
 #include "TerminateControl.h"
-#include "THMMesh.h"
 #include "RelationshipManager.h"
 #include "NonlinearSystemBase.h"
 #include "TimeIntegrator.h"
@@ -45,9 +44,9 @@ Simulation::setComponentVariableOrder(const VariableName & var, int index)
 Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   : ParallelObject(fe_problem.comm()),
     LoggingInterface(_log),
-    _thm_mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
+    _thm_mesh(*pars.get<MooseMesh *>("mesh")),
     _fe_problem(fe_problem),
-    _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>(MooseBase::app_param))),
+    _thm_app(*pars.get<MooseApp *>(MooseBase::app_param)),
     _thm_factory(_thm_app.getFactory()),
     _thm_pars(pars),
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
@@ -633,7 +632,7 @@ Simulation::sortAddedComponentVariables() const
 void
 Simulation::addVariables()
 {
-  TransientBase * trex = dynamic_cast<TransientBase *>(getApp().getExecutioner());
+  TransientBase * trex = dynamic_cast<TransientBase *>(_thm_app.getExecutioner());
   if (trex)
   {
     Moose::TimeIntegratorType ti_type = trex->getTimeScheme();

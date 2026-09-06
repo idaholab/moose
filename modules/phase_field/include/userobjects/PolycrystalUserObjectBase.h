@@ -71,7 +71,7 @@ public:
    */
   virtual Real getNodalVariableValue(unsigned int op_index, const Node & n) const
   {
-    return getVariableValue(op_index, static_cast<const Point &>(n));
+    return getVariableValue(op_index, cast_ref<const Point &>(n));
   }
 
   /* Returns all available coloring algorithms as an enumeration type for input files.

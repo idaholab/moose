@@ -48,7 +48,7 @@ void
 ElementSubdomainModifier::threadJoin(const UserObject & in_uo)
 {
   // Join the data from uo into _this_ object:
-  const auto & uo = static_cast<const ElementSubdomainModifier &>(in_uo);
+  const auto & uo = cast_ref<const ElementSubdomainModifier &>(in_uo);
 
   _moved_elems.insert(uo._moved_elems.begin(), uo._moved_elems.end());
 }

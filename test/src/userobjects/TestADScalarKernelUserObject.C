@@ -53,7 +53,7 @@ TestADScalarKernelUserObject::execute()
 void
 TestADScalarKernelUserObject::threadJoin(const UserObject & y)
 {
-  const TestADScalarKernelUserObject & uo = static_cast<const TestADScalarKernelUserObject &>(y);
+  const TestADScalarKernelUserObject & uo = cast_ref<const TestADScalarKernelUserObject &>(y);
   _integral_value += uo._integral_value;
 }
 

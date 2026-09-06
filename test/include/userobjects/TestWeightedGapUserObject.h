@@ -62,6 +62,6 @@ inline Real
 TestWeightedGapUserObject::getValue(const Node & node) const
 {
   auto & [weighted_gap, volume] =
-      libmesh_map_find(_dof_to_weighted_gap, static_cast<const DofObject *>(&node));
+      libmesh_map_find(_dof_to_weighted_gap, cast_ptr<const DofObject *>(&node));
   return weighted_gap / volume;
 }

@@ -36,7 +36,7 @@ LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobin
     _beta(getFunctor<Real>("beta")),
     _gamma(getFunctor<Real>("gamma"))
 {
-  _var.computeCellGradients();
+  _var.requestCellGradients();
 
   if (_alpha.isConstant())
   {

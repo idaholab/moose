@@ -147,6 +147,14 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
 }
 
 void
+MFEMProblem::addMFEMProblemComposer(const std::string & type,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+  _problem_composer = addObject<MFEMProblemComposer>(type, name, parameters).front();
+}
+
+void
 MFEMProblem::resolveMFEMSolvers()
 {
   if (_mfem_solver_definitions.empty())
@@ -769,9 +777,10 @@ MFEMProblem::getAuxVariableNames()
 MFEMMesh &
 MFEMProblem::mesh()
 {
-  mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
-              "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
-  return static_cast<MFEMMesh &>(_mesh);
+  auto * mfem_mesh = dynamic_cast<MFEMMesh *>(&_mesh);
+  mooseAssert(mfem_mesh,
+              "The mesh for an MFEMProblem must be MFEMFileMesh or MFEMMeshGeneratorMesh.");
+  return *mfem_mesh;
 }
 
 const MFEMMesh &

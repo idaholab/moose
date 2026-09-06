@@ -67,7 +67,7 @@ FlowChannelHeatStructureCouplerUserObject::execute()
 void
 FlowChannelHeatStructureCouplerUserObject::threadJoin(const UserObject & uo)
 {
-  const auto & fc_hs_uo = static_cast<const FlowChannelHeatStructureCouplerUserObject &>(uo);
+  const auto & fc_hs_uo = cast_ref<const FlowChannelHeatStructureCouplerUserObject &>(uo);
 
   const auto map_ptrs = getCachedQuantityMaps();
   const auto other_map_ptrs = fc_hs_uo.getCachedQuantityMaps();

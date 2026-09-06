@@ -1267,11 +1267,11 @@ CSGBase::deleteEngUnit(const CSGEngUnit & unit)
 
   // Delegate to the typed delete method which handles EngUnit index cleanup and type list erasure
   if (const auto * surf_unit = dynamic_cast<const CSGSurfaceEngUnit *>(&unit))
-    deleteSurface(static_cast<const CSGSurface &>(*surf_unit));
+    deleteSurface(cast_ref<const CSGSurface &>(*surf_unit));
   else if (const auto * cell_unit = dynamic_cast<const CSGCellEngUnit *>(&unit))
-    deleteCell(static_cast<const CSGCell &>(*cell_unit));
+    deleteCell(cast_ref<const CSGCell &>(*cell_unit));
   else if (const auto * univ_unit = dynamic_cast<const CSGUniverseEngUnit *>(&unit))
-    deleteUniverse(static_cast<const CSGUniverse &>(*univ_unit));
+    deleteUniverse(cast_ref<const CSGUniverse &>(*univ_unit));
   else
     mooseError(
         "Engineering unit '", unit.getName(), "' has an unrecognized type and cannot be deleted.");
@@ -1337,7 +1337,7 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
   // unit is const because the eng-unit API exposes only const references; re-fetch a mutable
   // reference to the same object from the owning surface list to perform the expansion, which
   // mutates and consumes the unit (expandUnit() is non-const).
-  auto & mutable_unit = static_cast<CSGSurfaceEngUnit &>(_surface_list.getSurface(unit.getName()));
+  auto & mutable_unit = cast_ref<CSGSurfaceEngUnit &>(_surface_list.getSurface(unit.getName()));
 
   // Derived class creates the CSGSurface object(s) in the unit's base object and sets
   // _expanded_region
@@ -1361,7 +1361,7 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
   CSGRegion expanded_region = mutable_unit.getExpandedRegion();
 
   // Propagate any stored transformations from the EngUnit to all new expanded surfaces
-  const auto & trans = static_cast<const CSGSurface &>(mutable_unit).getTransformations();
+  const auto & trans = cast_ref<const CSGSurface &>(mutable_unit).getTransformations();
   if (!trans.empty())
     for (const auto & surf_ref : expanded_region.getSurfaces())
     {
@@ -1371,7 +1371,7 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
     }
 
   // Replace every CSGSurfaceEngUnit reference in regions of CSGCells with the expanded sub-region
-  replaceSurfaceRefsWithRegion(static_cast<const CSGSurface &>(mutable_unit), expanded_region);
+  replaceSurfaceRefsWithRegion(cast_ref<const CSGSurface &>(mutable_unit), expanded_region);
 
   // Remove the EngUnit (destroyed here, no more references to it after
   // replaceSurfaceRefsWithRegion)
@@ -1385,7 +1385,7 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   // unit is const because the eng-unit API exposes only const references; re-fetch a mutable
   // reference to the same object from the owning cell list to perform the expansion, which
   // mutates and consumes the unit (expandUnit() is non-const).
-  auto & mutable_unit = static_cast<CSGCellEngUnit &>(_cell_list.getCell(unit.getName()));
+  auto & mutable_unit = cast_ref<CSGCellEngUnit &>(_cell_list.getCell(unit.getName()));
 
   // Derived class populates an internal base object (owned by the unit) with the expanded cell (in
   // root) and any supports
@@ -1400,7 +1400,7 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   joinOtherBase(mutable_unit.releaseBase(), false);
 
   // Propagate any stored transformations from the EngUnit to the expanded cell
-  const auto & trans = static_cast<const CSGCell &>(mutable_unit).getTransformations();
+  const auto & trans = cast_ref<const CSGCell &>(mutable_unit).getTransformations();
   if (!trans.empty())
   {
     CSGCell & mutable_cell = _cell_list.getCell(expanded_cell.getName());
@@ -1414,7 +1414,7 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
     removeCellFromUniverse(getRootUniverse(), expanded_cell);
 
   // Replace all references to the CSGCellEngUnit in universes with the new expanded CSGCell
-  replaceCellRefs(static_cast<const CSGCell &>(mutable_unit), expanded_cell);
+  replaceCellRefs(cast_ref<const CSGCell &>(mutable_unit), expanded_cell);
 
   // Remove the EngUnit (destroyed here, no more references to it after replaceCellRefs)
   deleteEngUnit(unit);
@@ -1429,7 +1429,7 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   // unit is const because the eng-unit API exposes only const references; re-fetch a mutable
   // reference to the same object from the owning universe list to perform the expansion, which
   // mutates and consumes the unit (expandUnit() is non-const).
-  auto & mutable_unit = static_cast<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit_name));
+  auto & mutable_unit = cast_ref<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit_name));
 
   // Derived class populates the unit's base object; the root of this base is the expanded universe
   // that will be used to replace this universe unit
@@ -1475,7 +1475,7 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   const CSGUniverse & expanded_univ = getUniverseByName(expanded_name);
 
   // Propagate any stored transformations from the EngUnit to the new expanded universe
-  const auto & trans = static_cast<const CSGUniverse &>(mutable_unit).getTransformations();
+  const auto & trans = cast_ref<const CSGUniverse &>(mutable_unit).getTransformations();
   if (!trans.empty())
   {
     CSGUniverse & mutable_univ = _universe_list.getUniverse(expanded_univ.getName());
@@ -1484,7 +1484,7 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   }
 
   // Replace references in cell fills, lattice maps and outers, and the root universe
-  replaceUniverseRefs(static_cast<const CSGUniverse &>(mutable_unit), expanded_univ);
+  replaceUniverseRefs(cast_ref<const CSGUniverse &>(mutable_unit), expanded_univ);
 
   // Remove the EngUnit (destroyed here, no more references to it after replaceUniverseRefs)
   deleteEngUnit(unit);

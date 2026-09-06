@@ -40,7 +40,7 @@ AddPeriodicBCAction::validParams()
 }
 
 AddPeriodicBCAction::AddPeriodicBCAction(const InputParameters & params)
-  : Action(params), Moose::PeriodicBCHelper(static_cast<const Action &>(*this))
+  : Action(params), Moose::PeriodicBCHelper(cast_ref<const Action &>(*this))
 {
   checkPeriodicParams();
 }

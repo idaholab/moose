@@ -565,7 +565,7 @@ public:
       _universe_list.addUniverse(std::move(unit));
 
     // Register non-owning pointer in the CSGEngUnitList if no name conflicts identified above.
-    _eng_unit_list.addEngUnit(static_cast<CSGEngUnit &>(*raw));
+    _eng_unit_list.addEngUnit(cast_ref<CSGEngUnit &>(*raw));
     return *raw;
   }
 

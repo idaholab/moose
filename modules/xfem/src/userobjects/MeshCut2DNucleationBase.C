@@ -111,7 +111,7 @@ MeshCut2DNucleationBase::execute()
 void
 MeshCut2DNucleationBase::threadJoin(const UserObject & y)
 {
-  const auto & xmuo = static_cast<const MeshCut2DNucleationBase &>(y);
+  const auto & xmuo = cast_ref<const MeshCut2DNucleationBase &>(y);
   for (std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>>::const_iterator mit =
            xmuo._nucleated_elems.begin();
        mit != xmuo._nucleated_elems.end();

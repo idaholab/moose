@@ -10,8 +10,6 @@
 #include "PINSFVRhieChowInterpolatorSegregated.h"
 #include "NS.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", PINSFVRhieChowInterpolatorSegregated);
 
 InputParameters

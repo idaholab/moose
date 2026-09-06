@@ -675,7 +675,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we b
   if (app->hasInitialBackupMesh())
   {
     app->restoreMeshFromInitialBackup(problem.mesh());
-    problem.mesh().prepare(/*mesh_to_clone=*/nullptr);
+    problem.mesh().prepare();
     problem.meshChanged(/*intermediate_change=*/false,
                         /*contract_mesh=*/false,
                         /*clean_refinement_flags=*/false);

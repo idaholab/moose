@@ -1,0 +1,16 @@
+[Tests]
+  design = 'SBMSurfaceMeshBuilder.md'
+  issues = '#31937'
+
+  [two_d_open_and_closed_geometry]
+    type = GoogleTest
+    unit_test = WaterTightTest.TwoDGeoOpenAndClose
+    requirement = 'The system shall identify open and closed two-dimensional boundary loops as non-watertight and watertight, respectively.'
+  []
+
+  [three_d_open_and_closed_geometry]
+    type = GoogleTest
+    unit_test = WaterTightTest.ThreeDGeoOpenAndClose
+    requirement = 'The system shall identify open and closed three-dimensional boundary surfaces as non-watertight and watertight, respectively.'
+  []
+[]

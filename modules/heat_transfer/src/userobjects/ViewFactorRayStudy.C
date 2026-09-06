@@ -24,8 +24,6 @@
 #include "ReflectRayBC.h"
 #include "RayTracingPackingUtils.h"
 
-using namespace libMesh;
-
 registerMooseObject("HeatTransferApp", ViewFactorRayStudy);
 
 InputParameters

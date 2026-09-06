@@ -9,8 +9,6 @@
 
 #include "RhieChowFaceFluxProvider.h"
 
-using namespace libMesh;
-
 InputParameters
 RhieChowFaceFluxProvider::validParams()
 {

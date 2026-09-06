@@ -11,11 +11,12 @@
     dmax = 90
   []
   [make3D]
-    type = MeshExtruderGenerator
-    extrusion_vector = '0 0 12'
-    num_layers = 3
-    bottom_sideset = 'bottom'
-    top_sideset = 'top'
+    type = AdvancedExtruderGenerator
+    direction = '0 0 1'
+    heights = '4 4 4'
+    num_layers = '1 1 1'
+    bottom_boundary = 'bottom'
+    top_boundary = 'top'
     input = annular
   []
   [shift_down]
@@ -88,8 +89,8 @@
     type = Water97FluidProperties
   []
   [tabulated_water]
-    type = TabulatedFluidProperties
-    fp = true_water
+    type = TabulatedBicubicFluidProperties
+    input_fp = true_water
     temperature_min = 275
     interpolated_properties = 'density viscosity enthalpy internal_energy'
     fluid_property_output_file = water97_tabulated.csv

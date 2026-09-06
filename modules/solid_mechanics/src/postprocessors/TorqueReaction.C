@@ -100,6 +100,6 @@ TorqueReaction::finalize()
 void
 TorqueReaction::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const TorqueReaction &>(y);
+  const auto & pps = cast_ref<const TorqueReaction &>(y);
   _sum += pps._sum;
 }

@@ -160,7 +160,7 @@ inline const INSFVPressureVariable &
 RhieChowInterpolatorBase::pressure(const THREAD_ID tid) const
 {
   mooseAssert(tid < _ps.size(), "Attempt to access out-of-bounds in pressure variable container");
-  return *static_cast<INSFVPressureVariable *>(_ps[tid]);
+  return *cast_ptr<INSFVPressureVariable *>(_ps[tid]);
 }
 
 template <typename Container>

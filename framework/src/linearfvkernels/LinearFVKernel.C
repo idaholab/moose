@@ -45,5 +45,5 @@ void
 LinearFVKernel::requestVariableCellGradient(const std::string & var_name)
 {
   dynamic_cast<MooseLinearVariableFV<Real> *>(&_fe_problem.getStandardVariable(_tid, var_name))
-      ->computeCellGradients();
+      ->requestCellGradients();
 }

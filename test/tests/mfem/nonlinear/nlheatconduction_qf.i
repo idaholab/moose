@@ -6,7 +6,7 @@ kappa = 0.5
 alpha = 1e-2
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/star.mesh
   uniform_refine = 1
 []

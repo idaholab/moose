@@ -32,7 +32,7 @@ MFEMObject::MFEMObject(const InputParameters & parameters)
     VectorPostprocessorInterface(this),
     ReporterInterface(this),
     _mfem_problem(
-        static_cast<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")))
+        cast_ref<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")))
 {
 }
 

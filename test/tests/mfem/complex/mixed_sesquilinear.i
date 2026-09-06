@@ -4,7 +4,7 @@ c=3.0
 omega=10.0
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.msh
 []
 

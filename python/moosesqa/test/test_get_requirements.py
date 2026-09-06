@@ -209,6 +209,11 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(r0.prefix, "box_marker")
         self.assertEqual(r1.prefix, "box_marker")
 
+    def testGlob(self):
+        loc = [os.path.join(os.getcwd(), "specs")]
+        req = get_requirements_from_tests(loc, ["spec_*"])
+        self.assertIn("spec_basic", req)
+
     def testRequirementWithDetails(self):
         loc = [os.getcwd()]
         req = get_requirements_from_tests(loc, ["test_get_requirements_spec0"])

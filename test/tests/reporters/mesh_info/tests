@@ -139,6 +139,7 @@
                   Reporters/mesh_info/subdomain_items="min_volume max_volume"
                   Outputs/file_base=subdomain_items_out'
       skip_keys = 'part number_of_parts'
+      min_slots = 2 # memory heavy
 
       detail = "includes selected extra information about subdomains"
     []

@@ -66,7 +66,7 @@ ADSpecificImpulse1Phase::ADSpecificImpulse1Phase(const InputParameters & paramet
 void
 ADSpecificImpulse1Phase::threadJoin(const UserObject & y)
 {
-  const ADSpecificImpulse1Phase & pps = static_cast<const ADSpecificImpulse1Phase &>(y);
+  const ADSpecificImpulse1Phase & pps = cast_ref<const ADSpecificImpulse1Phase &>(y);
   _thrust += pps._thrust;
   _mass_flow_rate += pps._mass_flow_rate;
 }

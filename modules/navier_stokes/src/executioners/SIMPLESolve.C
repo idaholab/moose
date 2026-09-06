@@ -12,8 +12,6 @@
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
 
-using namespace libMesh;
-
 InputParameters
 SIMPLESolve::validParams()
 {

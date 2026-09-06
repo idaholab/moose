@@ -165,7 +165,7 @@ EigenKernel::computeOffDiagJacobian(const unsigned int jvar_num)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           {
             RealEigenVector v = _JxW[_qp] * _coord[_qp] * one_over_eigen *
-                                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(
+                                computeQpOffDiagJacobianArray(cast_ref<ArrayMooseVariable &>(
                                     const_cast<MooseVariableFieldBase &>(jvar)));
             for (unsigned int k = 0; k < v.size(); ++k)
               _local_ke(_i, _j + k * n) += v(k);

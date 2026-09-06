@@ -9,7 +9,7 @@ alpha=1.0
 beta=0.5
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.msh
 []
 

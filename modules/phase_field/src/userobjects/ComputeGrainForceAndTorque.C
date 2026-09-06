@@ -183,7 +183,7 @@ ComputeGrainForceAndTorque::finalize()
 void
 ComputeGrainForceAndTorque::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const ComputeGrainForceAndTorque &>(y);
+  const auto & pps = cast_ref<const ComputeGrainForceAndTorque &>(y);
   for (unsigned int i = 0; i < _ncomp; ++i)
     _force_torque_store[i] += pps._force_torque_store[i];
   if (_fe_problem.currentlyComputingJacobian())

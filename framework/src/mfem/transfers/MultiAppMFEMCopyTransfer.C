@@ -30,13 +30,13 @@ MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & param
 MFEMProblem &
 MultiAppMFEMCopyTransfer::getActiveFromProblem()
 {
-  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
+  return cast_ref<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
 }
 
 MFEMProblem &
 MultiAppMFEMCopyTransfer::getActiveToProblem()
 {
-  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
+  return cast_ref<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
 }
 
 void

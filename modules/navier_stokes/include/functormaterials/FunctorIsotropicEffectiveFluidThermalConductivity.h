@@ -42,6 +42,6 @@ FunctorIsotropicEffectiveFluidThermalConductivity<
       [this](const auto & r, const auto & t) -> ADRealVectorValue
       {
         RealVectorValue multipliers(1.0, 1.0, 1.0);
-        return multipliers * static_cast<Derived *>(this)->computeEffectiveConductivity(r, t);
+        return multipliers * cast_ptr<Derived *>(this)->computeEffectiveConductivity(r, t);
       });
 }

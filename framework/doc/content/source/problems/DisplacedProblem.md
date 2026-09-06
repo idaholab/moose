@@ -13,7 +13,7 @@ auxiliary system and a displaced mesh. The undisplaced mesh can also be obtained
 
 !alert note
 The `DisplacedProblem` is automatically created by the [CreateDisplacedProblemAction.md]
-when the [!param](/Mesh/SetupMeshAction/displacements) parameter is set in the `[Mesh]` block.
+when the [!param](/Mesh/SetupMeshCompleteAction/displacements) parameter is set in the `[Mesh]` block.
 
 !syntax parameters /Problem/DisplacedProblem
 

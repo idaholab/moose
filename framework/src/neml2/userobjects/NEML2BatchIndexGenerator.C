@@ -76,7 +76,7 @@ NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
   if (!_outdated)
     return;
 
-  const auto & m2n = static_cast<const NEML2BatchIndexGenerator &>(uo);
+  const auto & m2n = cast_ref<const NEML2BatchIndexGenerator &>(uo);
 
   // append and renumber maps
   for (const auto & [elem_id, batch_index] : m2n._elem_to_batch_index)

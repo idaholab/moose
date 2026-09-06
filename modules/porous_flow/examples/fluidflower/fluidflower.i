@@ -420,8 +420,7 @@ inj_rate = 3.06e-7
   []
   [watertab]
     type = TabulatedBicubicFluidProperties
-    fp = water
-    save_file = false
+    input_fp = water
     pressure_min = 1e5
     pressure_max = 1e6
     temperature_min = 290
@@ -434,8 +433,7 @@ inj_rate = 3.06e-7
   []
   [co2tab]
     type = TabulatedBicubicFluidProperties
-    fp = co2
-    save_file = false
+    input_fp = co2
     pressure_min = 1e5
     pressure_max = 1e6
     temperature_min = 290

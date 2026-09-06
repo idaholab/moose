@@ -1,0 +1,30 @@
+[Tests]
+  design = 'InterceptedElementModifier.md'
+  issues = '#33397'
+
+  [fully_active_or_inactive]
+    type = GoogleTest
+    unit_test = ClassifyPartialElementTest.FullyInsideOrOutside
+    requirement = 'The system shall classify fully active and fully inactive elements independently of partial-element options.'
+  []
+  [mark_intercepted]
+    type = GoogleTest
+    unit_test = ClassifyPartialElementTest.MarkIntercepted
+    requirement = 'The system shall assign the intercepted subdomain to partial elements when intercepted-element marking is enabled.'
+  []
+  [lambda_threshold]
+    type = GoogleTest
+    unit_test = ClassifyPartialElementTest.LambdaThreshold
+    requirement = 'The system shall classify partial elements by comparing their inactive fraction with the lambda threshold.'
+  []
+  [enclosed_surface]
+    type = GoogleTest
+    unit_test = ClassifyPartialElementTest.EnclosedSurfaceEndpoints
+    requirement = 'The system shall apply partial-element classification when all nodes are active but the active fraction is not one.'
+  []
+  [inactive_predicate]
+    type = GoogleTest
+    unit_test = ClassifyPartialElementTest.IsInactive
+    requirement = 'The system shall determine element inactivity from active fraction and the endpoint and interior values of the lambda threshold.'
+  []
+[]

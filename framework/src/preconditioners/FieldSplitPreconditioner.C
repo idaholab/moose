@@ -140,8 +140,7 @@ FieldSplitPreconditioner::setupDM()
   // call would be in DMInitializePackage()
   LibmeshPetscCall(DMMooseRegisterAll());
   // Create and set up the DM that will consume the split options and deal with block matrices.
-  auto * const petsc_solver =
-      libMesh::cast_ptr<PetscNonlinearSolver<Number> *>(_nl.nonlinearSolver());
+  auto * const petsc_solver = cast_ptr<PetscNonlinearSolver<Number> *>(_nl.nonlinearSolver());
   SNES snes = petsc_solver->snes(prefix().c_str());
   // if there exists a DMMoose object, not to recreate a new one
   LibmeshPetscCall(SNESGetDM(snes, &dm));

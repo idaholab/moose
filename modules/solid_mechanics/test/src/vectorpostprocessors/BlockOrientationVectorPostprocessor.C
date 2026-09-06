@@ -66,7 +66,7 @@ BlockOrientationVectorPostprocessor::execute()
 void
 BlockOrientationVectorPostprocessor::threadJoin(const UserObject & y)
 {
-  const auto & vpp = static_cast<const BlockOrientationVectorPostprocessor &>(y);
+  const auto & vpp = cast_ref<const BlockOrientationVectorPostprocessor &>(y);
   SamplerBase::threadJoin(vpp);
 }
 

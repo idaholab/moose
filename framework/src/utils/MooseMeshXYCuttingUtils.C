@@ -18,8 +18,6 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/face_tri3.h"
 
-using namespace libMesh;
-
 namespace MooseMeshXYCuttingUtils
 {
 

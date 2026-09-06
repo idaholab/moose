@@ -19,8 +19,6 @@
 #include "MooseVariableFE.h"
 #include "TransientInterface.h"
 
-using namespace libMesh;
-
 InputParameters
 DiffusionIPHDGAssemblyHelper::validParams()
 {

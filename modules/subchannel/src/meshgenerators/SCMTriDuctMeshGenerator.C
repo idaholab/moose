@@ -70,7 +70,7 @@ SCMTriDuctMeshGenerator::generate()
 
   mesh_base->prepare_for_use();
 
-  auto & sch_mesh = static_cast<TriSubChannelMesh &>(*_mesh);
+  auto & sch_mesh = cast_ref<TriSubChannelMesh &>(*_mesh);
   sch_mesh.setChannelToDuctMaps(duct_nodes);
   sch_mesh._duct_mesh_exist = true;
 

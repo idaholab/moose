@@ -1,6 +1,8 @@
 directories:
     - ${MOOSE_DIR}/test/tests
+    - ${MOOSE_DIR}/unit/src
 specs:
     - tests
+    - '*.unit_tests'
 repo: moose
 reports: !include ${MOOSE_DIR}/framework/doc/sqa_reports.yml

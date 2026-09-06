@@ -124,8 +124,8 @@ ComputeFrictionalForceCartesianLMMechanicalContact::computeQpIProperties()
   const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
   // Get the _dof_to_weighted_tangential_velocity map
   const DofObject * const dof =
-      _lm_vars[0]->isNodal() ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                             : static_cast<const DofObject *>(_lower_secondary_elem);
+      _lm_vars[0]->isNodal() ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                             : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
   _dof_to_weighted_tangential_velocity[dof][0] +=
       _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];

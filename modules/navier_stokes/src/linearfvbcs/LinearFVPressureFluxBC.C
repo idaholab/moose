@@ -61,7 +61,7 @@ LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameter
     paramError("w", "The 'w' boundary velocity functor is only valid in 3D problems.");
 
   if (_two_term_expansion)
-    _var.computeCellGradients();
+    _var.requestCellGradients();
 }
 
 Real

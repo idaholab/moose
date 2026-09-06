@@ -361,10 +361,10 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   std::vector<std::pair<unsigned int, Real>> its_normalized_residuals;
 
   LinearImplicitSystem & momentum_system_0 =
-      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
+      cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
 
   PetscLinearSolver<Real> & momentum_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
 
   // Solve the momentum equations.
   // TO DO: These equations are VERY similar. If we can store the differences (things coming from
@@ -375,7 +375,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 
     // We will need the right hand side and the solution of the next component
     LinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
 
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
@@ -438,7 +438,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   for (const auto system_i : index_range(_momentum_systems))
   {
     LinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
     _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
   }
@@ -462,6 +462,12 @@ LinearAssemblySegregatedSolve::initialSetup()
   }
 }
 
+void
+LinearAssemblySegregatedSolve::updatePressureGradient()
+{
+  _pressure_system.computeGradients();
+}
+
 std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::solvePressureCorrector()
 {
@@ -469,7 +475,7 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
 
   // We will need some members from the linear system
   LinearImplicitSystem & pressure_system =
-      libMesh::cast_ref<LinearImplicitSystem &>(_pressure_system.system());
+      cast_ref<LinearImplicitSystem &>(_pressure_system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
@@ -479,7 +485,7 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   _problem.computeLinearSystemSys(pressure_system, mmat, rhs, false);
 
@@ -538,8 +544,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
   _problem.setCurrentLinearSystem(_solid_energy_sys_number);
 
   // We will need some members from the linear system
-  LinearImplicitSystem & system =
-      libMesh::cast_ref<LinearImplicitSystem &>(_solid_energy_system->system());
+  LinearImplicitSystem & system = cast_ref<LinearImplicitSystem &>(_solid_energy_system->system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(system.current_local_solution);
@@ -549,7 +554,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*system.get_linear_solver());
 
   _problem.computeLinearSystemSys(system, mmat, rhs, false);
 
@@ -631,7 +636,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   _pressure_system.setSolution(pressure_current_solution);
 
   // We recompute the updated pressure gradient
-  _pressure_system.computeGradients();
+  updatePressureGradient();
 
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
@@ -652,7 +657,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   _problem.setCurrentLinearSystem(system_num);
 
   // We will need some members from the implicit linear system
-  LinearImplicitSystem & li_system = libMesh::cast_ref<LinearImplicitSystem &>(system.system());
+  LinearImplicitSystem & li_system = cast_ref<LinearImplicitSystem &>(system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(li_system.current_local_solution);
@@ -665,7 +670,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
+      cast_ref<PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
 
   _problem.computeLinearSystemSys(li_system, mmat, rhs, true);
 
@@ -787,7 +792,7 @@ LinearAssemblySegregatedSolve::solve()
     // Initialize pressure gradients, after this we just reuse the last ones from each
     // iteration
     if (_should_solve_pressure && simple_iteration_counter == 1)
-      _pressure_system.computeGradients();
+      updatePressureGradient();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 
@@ -979,11 +984,15 @@ LinearAssemblySegregatedSolve::setupResidualStorage() const
   // Residual store: position in this vector defines the ordering used by NS::FV::converged()
   // Each entry holds (linear its, normalized residual) for one system
   if (_should_solve_momentum)
-    for ([[maybe_unused]] const auto system_i : index_range(_momentum_systems))
+    for (const auto system_i : index_range(_momentum_systems))
     {
       storage.momentum_indices.push_back(storage.ns_residuals.size());
       storage.ns_residuals.push_back(std::make_pair(0, 1.0));
-      storage.ns_abs_tols.push_back(_momentum_absolute_tolerance);
+
+      const auto abs_tol = _momentum_absolute_tolerance.size() == 1
+                               ? _momentum_absolute_tolerance[0]
+                               : _momentum_absolute_tolerance[system_i];
+      storage.ns_abs_tols.push_back(abs_tol);
     }
 
   if (_should_solve_pressure)

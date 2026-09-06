@@ -88,7 +88,7 @@ ArrayVariableValueVolumeHistogram::finalize()
 void
 ArrayVariableValueVolumeHistogram::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const ArrayVariableValueVolumeHistogram &>(y);
+  const auto & uo = cast_ref<const ArrayVariableValueVolumeHistogram &>(y);
   mooseAssert(uo._volumes.size() == _volumes.size(),
               "Inconsistent number of array variable components across threads.");
 

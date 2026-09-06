@@ -18,6 +18,8 @@
 #include "libmesh/threads.h"
 #include "libmesh/system.h"
 
+#include <unordered_set>
+
 class FEProblemBase;
 class SystemBase;
 
@@ -42,12 +44,14 @@ public:
    * Class constructor.
    * @param fe_problem Reference to the problem
    * @param system The system which contains variables that need gradients.
-   * @param temporary_gradient Scratch storage holding the gradients being assembled.
+   * @param input_gradient Scratch storage holding the unnormalized face sums.
+   * @param output_gradient Storage where normalized (with element volume) gradients are written.
    */
   ComputeLinearFVGreenGaussGradientVolumeThread(
       FEProblemBase & fe_problem,
       SystemBase & system,
-      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient);
+      std::vector<std::unique_ptr<NumericVector<Number>>> & gradient,
+      const std::unordered_set<unsigned int> & gradient_variables);
 
   /**
    * Splitting constructor.
@@ -56,6 +60,9 @@ public:
    */
   ComputeLinearFVGreenGaussGradientVolumeThread(ComputeLinearFVGreenGaussGradientVolumeThread & x,
                                                 Threads::split split);
+
+  ~ComputeLinearFVGreenGaussGradientVolumeThread();
+
   using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
   /// Operator which is used to execute the thread over a certain iterator range.
   /// @param range The range of ElemInfos which should be computed.
@@ -87,6 +94,21 @@ protected:
   /// Pointer to the current variable
   MooseLinearVariableFV<Real> * _current_var;
 
-  /// Cache for the temporary gradient being built.
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_gradient;
+  /// Normalized (by cell volume) gradients to write into.
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _gradient;
+
+  /**
+   * Writable local arrays, one per gradient component.
+   * _gradient_data[component][local_dof] stores that component at a local DOF.
+   *
+   * The original thread object acquires the arrays before threaded execution.
+   * Threaded copies share the pointers and write only to DOFs in their element range.
+   */
+  std::vector<Real *> _gradient_data;
+
+  /// True only for the original thread object that acquired and must restore the arrays.
+  const bool _owns_gradient_data;
+
+  /// Indices of the variables this producer should compute gradients for.
+  const std::unordered_set<unsigned int> & _gradient_variables;
 };

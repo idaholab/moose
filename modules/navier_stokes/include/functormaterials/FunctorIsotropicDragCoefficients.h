@@ -58,8 +58,8 @@ FunctorIsotropicDragCoefficients<Derived>::FunctorIsotropicDragCoefficients(
       [this](const auto & r, const auto & t) -> ADRealVectorValue
       {
         RealVectorValue multipliers(1.0, 1.0, 1.0);
-        return multipliers * static_cast<Derived *>(this)->computeDarcyPrefactor(r, t) *
-               static_cast<Derived *>(this)->computeDarcyCoefficient(r, t) * _darcy_mult;
+        return multipliers * cast_ptr<Derived *>(this)->computeDarcyPrefactor(r, t) *
+               cast_ptr<Derived *>(this)->computeDarcyCoefficient(r, t) * _darcy_mult;
       });
 
   addFunctorProperty<ADRealVectorValue>(
@@ -67,8 +67,7 @@ FunctorIsotropicDragCoefficients<Derived>::FunctorIsotropicDragCoefficients(
       [this](const auto & r, const auto & t) -> ADRealVectorValue
       {
         RealVectorValue multipliers(1.0, 1.0, 1.0);
-        return multipliers * static_cast<Derived *>(this)->computeForchheimerPrefactor(r, t) *
-               static_cast<Derived *>(this)->computeForchheimerCoefficient(r, t) *
-               _forchheimer_mult;
+        return multipliers * cast_ptr<Derived *>(this)->computeForchheimerPrefactor(r, t) *
+               cast_ptr<Derived *>(this)->computeForchheimerCoefficient(r, t) * _forchheimer_mult;
       });
 }

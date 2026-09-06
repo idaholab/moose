@@ -22,8 +22,6 @@
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
 
-using namespace libMesh;
-
 namespace MeshTriangulationUtils
 {
 

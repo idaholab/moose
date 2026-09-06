@@ -305,14 +305,16 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _skip_refine_when_use_split(other_mesh._skip_refine_when_use_split),
     _skip_deletion_repartition_after_refine(other_mesh._skip_deletion_repartition_after_refine),
     _is_nemesis(other_mesh._is_nemesis),
+    _mesh_subdomains(other_mesh._mesh_subdomains),
+    _mesh_boundary_ids(other_mesh._mesh_boundary_ids),
+    _mesh_sideset_ids(other_mesh._mesh_sideset_ids),
+    _mesh_nodeset_ids(other_mesh._mesh_nodeset_ids),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
     _max_leaf_size(other_mesh._max_leaf_size),
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
     _is_split(other_mesh._is_split),
-    _lower_d_interior_blocks(other_mesh._lower_d_interior_blocks),
-    _lower_d_boundary_blocks(other_mesh._lower_d_boundary_blocks),
     _allow_recovery(other_mesh._allow_recovery),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _displace_node_list_by_side_list(other_mesh._displace_node_list_by_side_list),
@@ -326,6 +328,10 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _provided_coord_blocks(other_mesh._provided_coord_blocks),
     _doing_p_refinement(other_mesh._doing_p_refinement)
 {
+  mooseAssert(other_mesh._moose_mesh_prepared,
+              "The mesh being cloned from must already be fully prepared; we rely on that to "
+              "rebuild our own prepare()-derived caches below");
+
   _bounds.resize(other_mesh._bounds.size());
   for (std::size_t i = 0; i < _bounds.size(); ++i)
   {
@@ -340,6 +346,13 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   if (_app.isKokkosAvailable())
     _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
 #endif
+
+  // update() rebuilds caches (boundary node/element lists, lower-D/higher-D element maps, element
+  // ID info, etc.) directly from our own (just-cloned) _mesh. Those caches hold pointers into the
+  // MeshBase they were built from, so other_mesh's copies of them cannot simply be copied above;
+  // they must be rebuilt against our own clone instead.
+  update();
+  _moose_mesh_prepared = true;
 }
 
 MooseMesh::~MooseMesh()
@@ -382,14 +395,12 @@ MooseMesh::freeBndElems()
   _bnd_elem_range.reset();
 }
 
-bool
-MooseMesh::prepare(const MeshBase * const mesh_to_clone)
+void
+MooseMesh::prepare()
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
 
   parallel_object_only();
-
-  bool libmesh_mesh_prepared = false;
 
   mooseAssert(_mesh, "The MeshBase has not been constructed");
 
@@ -397,22 +408,14 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     // For whatever reason we do not want to allow renumbering here nor ever in the future?
     getMesh().allow_renumbering(false);
 
-  if (mesh_to_clone)
-  {
-    mooseAssert(mesh_to_clone->is_prepared(),
-                "The mesh we wish to clone from must already be prepared");
-    _mesh = mesh_to_clone->clone();
-    _moose_mesh_prepared = false;
-  }
-  else if (!_mesh->is_prepared())
+  if (!_mesh->is_prepared())
   {
     _mesh->complete_preparation();
     _moose_mesh_prepared = false;
-    libmesh_mesh_prepared = true;
   }
 
   if (_moose_mesh_prepared)
-    return libmesh_mesh_prepared;
+    return;
 
   // Collect (local) subdomain IDs
   _mesh_subdomains.clear();
@@ -595,8 +598,15 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   checkDuplicateSubdomainNames();
 
   _moose_mesh_prepared = true;
+}
 
-  return libmesh_mesh_prepared;
+void
+MooseMesh::prepare(const MeshBase * libmesh_dbg_var(mesh_to_clone))
+{
+  mooseDeprecated("MooseMesh::prepare(const MeshBase *) is deprecated, please use the "
+                  "no-argument MooseMesh::prepare() instead");
+  mooseAssert(!mesh_to_clone, "Cloning a mesh_to_clone is no longer supported by prepare()");
+  prepare();
 }
 
 bool

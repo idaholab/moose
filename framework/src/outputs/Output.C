@@ -144,7 +144,7 @@ Output::Output(const InputParameters & parameters)
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _sync_times_object(isParamValid("sync_times_object")
-                           ? static_cast<Times *>(&_problem_ptr->getUserObject<Times>(
+                           ? cast_ptr<Times *>(&_problem_ptr->getUserObject<Times>(
                                  getParam<TimesName>("sync_times_object")))
                            : nullptr),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")

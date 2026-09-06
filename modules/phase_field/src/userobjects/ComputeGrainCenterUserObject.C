@@ -69,7 +69,7 @@ ComputeGrainCenterUserObject::finalize()
 void
 ComputeGrainCenterUserObject::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const ComputeGrainCenterUserObject &>(y);
+  const auto & pps = cast_ref<const ComputeGrainCenterUserObject &>(y);
   for (unsigned int i = 0; i < _ncomp; ++i)
     _grain_data[i] += pps._grain_data[i];
 }

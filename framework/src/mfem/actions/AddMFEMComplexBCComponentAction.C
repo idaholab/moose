@@ -38,10 +38,10 @@ AddMFEMComplexBCComponentAction::act()
   MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
 
   if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "RealComponent")
-    static_cast<MFEMProblem &>(*_problem).addRealComponentToBC(
+    cast_ref<MFEMProblem &>(*_problem).addRealComponentToBC(
         _type, elements[elements.size() - 2], _moose_object_pars);
   else if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "ImagComponent")
-    static_cast<MFEMProblem &>(*_problem).addImagComponentToBC(
+    cast_ref<MFEMProblem &>(*_problem).addImagComponentToBC(
         _type, elements[elements.size() - 2], _moose_object_pars);
 }
 

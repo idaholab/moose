@@ -65,7 +65,7 @@ void
 SideAverageValue::threadJoin(const UserObject & y)
 {
   SideIntegralVariablePostprocessor::threadJoin(y);
-  const auto & pps = static_cast<const SideAverageValue &>(y);
+  const auto & pps = cast_ref<const SideAverageValue &>(y);
   _volume += pps._volume;
 }
 

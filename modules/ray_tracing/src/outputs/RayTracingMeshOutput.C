@@ -24,8 +24,6 @@
 #include "libmesh/parallel_sync.h"
 #include "libmesh/remote_elem.h"
 
-using namespace libMesh;
-
 InputParameters
 RayTracingMeshOutput::validParams()
 {

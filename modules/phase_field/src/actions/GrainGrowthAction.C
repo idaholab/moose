@@ -20,8 +20,6 @@
 
 #include "libmesh/string_to_enum.h"
 
-using namespace libMesh;
-
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_variable");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_kernel");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_variable");

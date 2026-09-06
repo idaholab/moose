@@ -43,7 +43,7 @@ protected:
     _mesh = _factory.createUnique<MooseMesh>("GeneratedMesh", "moose_mesh", mesh_params);
     _mesh->setMeshBase(_mesh->buildMeshBaseObject());
     _mesh->buildMesh();
-    _mesh->prepare(nullptr);
+    _mesh->prepare();
 
     InputParameters problem_params = _factory.getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();

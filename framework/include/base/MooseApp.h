@@ -1789,7 +1789,7 @@ MooseApp::registerInterfaceObject(T & interface)
     _interface_registry.emplace(typeid(T), std::move(new_registry));
   }
   else
-    registry = static_cast<InterfaceRegistryObjects<T> *>(it->second.get());
+    registry = cast_ptr<InterfaceRegistryObjects<T> *>(it->second.get());
 
   mooseAssert(std::count(registry->_objects.begin(), registry->_objects.end(), &interface) == 0,
               "Interface already registered");
@@ -1804,7 +1804,7 @@ MooseApp::getInterfaceObjects() const
 
   const auto it = _interface_registry.find(typeid(T));
   if (it != _interface_registry.end())
-    return static_cast<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
+    return cast_ptr<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
   const static std::vector<T *> empty;
   return empty;
 }

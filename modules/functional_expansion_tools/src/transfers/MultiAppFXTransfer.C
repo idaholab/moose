@@ -33,6 +33,9 @@ MultiAppFXTransfer::validParams()
       "multi_app_object_name",
       "Name of the MutableCoefficientsInterface-derived object in the MultiApp.");
 
+  // Sibling transfers not supported
+  params.suppressParameter<bool>("execute_after_from_multiapp");
+
   return params;
 }
 

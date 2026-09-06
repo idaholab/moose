@@ -34,7 +34,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::MultiAppMFEMTolibMeshShapeEvaluati
 MFEMProblem &
 MultiAppMFEMTolibMeshShapeEvaluationTransfer::getActiveFromProblem()
 {
-  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
+  return cast_ref<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
 }
 
 /// Extract locations from libMesh-based MooseVariable at which projection will take place

@@ -79,7 +79,7 @@ SCMQuadDuctMeshGenerator::generate()
   mesh_base->prepare_for_use();
 
   // Mirror the Tri variant: provide mapping hooks into the subchannel mesh
-  auto & sch_mesh = static_cast<QuadSubChannelMesh &>(*_mesh);
+  auto & sch_mesh = cast_ref<QuadSubChannelMesh &>(*_mesh);
   sch_mesh.setChannelToDuctMaps(duct_nodes);
 
   return mesh_base;

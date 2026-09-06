@@ -585,7 +585,7 @@ TransientBase::computeConstrainedDT()
   _unconstrained_dt = dt_cur;
 
   if (_verbose)
-    _console << diag.str();
+    _console << diag.str() << std::flush;
 
   diag.str("");
   diag.clear();
@@ -625,7 +625,7 @@ TransientBase::computeConstrainedDT()
   constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_END);
 
   if (_verbose)
-    _console << diag.str();
+    _console << diag.str() << std::flush;
 
   return dt_cur;
 }

@@ -112,7 +112,7 @@ MOOSEQuantityToNEML2<T, state>::threadJoin(const UserObject & uo)
   if (!_batched)
     return;
   // append vectors
-  const auto & m2n = static_cast<const MOOSEQuantityToNEML2<T, state> &>(uo);
+  const auto & m2n = cast_ref<const MOOSEQuantityToNEML2<T, state> &>(uo);
   _buffer.insert(_buffer.end(), m2n._buffer.begin(), m2n._buffer.end());
 }
 

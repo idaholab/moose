@@ -151,7 +151,7 @@ SidesetAroundSubdomainUpdater::initialize()
 void
 SidesetAroundSubdomainUpdater::threadJoin(const UserObject & uo)
 {
-  const auto & sas = static_cast<const SidesetAroundSubdomainUpdater &>(uo);
+  const auto & sas = cast_ref<const SidesetAroundSubdomainUpdater &>(uo);
 
   for (const auto & [pid, list] : sas._add)
     _add[pid].insert(_add[pid].end(), list.begin(), list.end());

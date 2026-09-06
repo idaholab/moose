@@ -62,9 +62,8 @@ communicateGaps(
 
     for (auto & [dof_id, weighted_gap, normalization] : sent_data)
     {
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       if (send_data_back)
         pid_to_dof_object_for_sending_back[pid].push_back(dof_object);
@@ -105,9 +104,8 @@ communicateGaps(
 
     for (auto & [dof_id, weighted_gap, normalization] : sent_data)
     {
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = nodal ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                            : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       auto & [our_weighted_gap, our_normalization] = dof_to_weighted_gap[dof_object];
       our_weighted_gap = weighted_gap;

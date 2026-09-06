@@ -600,7 +600,7 @@ template <bool is_ad>
 void
 InteractionIntegralTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const InteractionIntegralTempl<is_ad> &>(y);
+  const auto & uo = cast_ref<const InteractionIntegralTempl<is_ad> &>(y);
 
   for (auto i = beginIndex(_interaction_integral); i < _interaction_integral.size(); ++i)
     _interaction_integral[i] += uo._interaction_integral[i];

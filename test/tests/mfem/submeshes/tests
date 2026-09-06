@@ -118,6 +118,7 @@
     restep = false
     valgrind = heavy
     rel_err = 7e-5
+    min_slots = 2
   []
   [MFEMNLDomainSubMeshBoundary]
     design = 'MFEMNLCurlCurlKernel.md'

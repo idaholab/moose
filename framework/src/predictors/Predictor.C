@@ -15,8 +15,6 @@
 
 #include "libmesh/numeric_vector.h"
 
-using namespace libMesh;
-
 InputParameters
 Predictor::validParams()
 {

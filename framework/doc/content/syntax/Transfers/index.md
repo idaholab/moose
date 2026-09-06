@@ -56,6 +56,33 @@ calculations that utilize the scalar variable, regardless of how this scalar is 
 approach allows the sub-application input file to run in union of independent from the parent without
 modification, which is useful for development and testing.
 
+## Execution ordering of transfers
+
+The execution of transfers is, like most objects, first governed by setting the
+[!param](/Transfers/MultiAppCopyTransfer/execute_on) parameter.
+A special `SAME_AS_MULTIAPP` `execute_on` is available, and generally the default,
+which copies the `execute_on` of the [!param](/Transfers/MultiAppCopyTransfer/to_multi_app) if specified,
+else the [!param](/Transfers/MultiAppCopyTransfer/from_multi_app).
+
+Within a given `execute_on` schedule, the following rules are applied:
+
+- transfers from the parent to the child app(s) are executed before the execution of all the `MultiApps`.
+  If no `MultiApps` are executed on that `execute_on`, the `Transfers` on that `execute_on` are executed anyway.
+- transfers from the child app(s) to the parent are executed after the execution of all the `MultiApps`.
+
+For transfers executing between sibling `MultiApps`, e.g. from one `MultiApp` (with potentially multiple child apps)
+to another `MultiApp`, there are two possibilities:
+
+- if the transfer is executed on the same `execute_on` as the [!param](/Transfers/MultiAppCopyTransfer/from_multi_app),
+  then by default, it will be executed right AFTER that application, on the same [!param](/MultiApps/TransientMultiApp/execution_order_group),
+  so that another application can be run with updated data on a later [!param](/MultiApps/TransientMultiApp/execution_order_group)
+  on the same `execute_on` schedule. This can be reversed by setting [!param](/Transfers/MultiAppCopyTransfer/execute_after_from_multiapp)
+  to false.
+- if the transfer is NOT executed on the same `execute_on` as the [!param](/Transfers/MultiAppCopyTransfer/from_multi_app),
+  then the transfer is executed BEFORE all `MultiApps` on that `execute_on`, following the execution of transfers from
+  the parent to the child app(s).
+
+
 ## Coordinate transformations id=coord-transform
 
 Different applications may use different setups. For example a neutronics

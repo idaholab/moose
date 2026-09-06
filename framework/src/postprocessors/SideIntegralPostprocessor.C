@@ -53,7 +53,7 @@ SideIntegralPostprocessor::getValue() const
 void
 SideIntegralPostprocessor::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const SideIntegralPostprocessor &>(y);
+  const auto & pps = cast_ref<const SideIntegralPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 

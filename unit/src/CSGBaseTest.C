@@ -1277,7 +1277,7 @@ TEST(CSGBaseTest, testUseSurfEngUnit)
   ASSERT_EQ("(-polygon_unit)", infixJSONToString(pre_reg.toInfixJSON()));
 
   // surface should be exactly the polygon unit
-  ASSERT_TRUE(static_cast<const CSGSurface &>(poly) == pre_surfs[0]);
+  ASSERT_TRUE(cast_ref<const CSGSurface &>(poly) == pre_surfs[0]);
 
   // expand unit and check surface of cell region again
   csg_obj->expandEngUnit(poly);

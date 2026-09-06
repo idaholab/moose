@@ -129,9 +129,8 @@ ElementSideNeighborLayers::dofmap_reinit()
   if (_dof_map)
   {
     if (_use_point_neighbors)
-      static_cast<PointNeighborCoupling *>(_functor.get())
-          ->set_dof_coupling(_dof_map->_dof_coupling);
+      cast_ptr<PointNeighborCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
     else
-      static_cast<DefaultCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
+      cast_ptr<DefaultCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
   }
 }

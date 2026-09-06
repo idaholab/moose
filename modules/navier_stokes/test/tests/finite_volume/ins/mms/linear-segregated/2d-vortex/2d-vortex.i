@@ -60,7 +60,7 @@ advected_interp_method = 'average'
     type = FVAdvectedVanLeerWeightBased
   []
   [venkatakrishnan]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
+    type = FVAdvectedMUSCLDeferredCorrection
   []
 []
 

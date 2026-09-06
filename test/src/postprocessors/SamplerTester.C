@@ -366,7 +366,7 @@ SamplerTester::threadJoin(const UserObject & uo)
 {
   if (_test_type == "thread")
   {
-    const SamplerTester & other = static_cast<const SamplerTester &>(uo);
+    const SamplerTester & other = cast_ref<const SamplerTester &>(uo);
     if (_sampler.getGlobalSamples() != other._sampler.getGlobalSamples())
       mooseError("The sample generation is not working correctly with threads.");
   }

@@ -27,8 +27,6 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", INSFVRhieChowInterpolatorSegregated);
 
 InputParameters

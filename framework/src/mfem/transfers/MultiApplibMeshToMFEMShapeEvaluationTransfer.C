@@ -35,7 +35,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluati
 MFEMProblem &
 MultiApplibMeshToMFEMShapeEvaluationTransfer::getActiveToProblem()
 {
-  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
+  return cast_ref<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
 }
 
 void

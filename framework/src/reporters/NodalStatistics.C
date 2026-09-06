@@ -56,7 +56,7 @@ NodalStatistics::execute()
 void
 NodalStatistics::threadJoin(const UserObject & uo)
 {
-  const NodalStatistics & node_uo = static_cast<const NodalStatistics &>(uo);
+  const NodalStatistics & node_uo = cast_ref<const NodalStatistics &>(uo);
   _max = std::max(_max, node_uo._max);
   _min = std::min(_min, node_uo._min);
   _average += node_uo._average;

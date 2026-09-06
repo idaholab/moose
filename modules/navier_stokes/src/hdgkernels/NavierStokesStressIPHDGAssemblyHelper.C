@@ -18,8 +18,6 @@
 #include "Assembly.h"
 #include "MooseMesh.h"
 
-using namespace libMesh;
-
 InputParameters
 NavierStokesStressIPHDGAssemblyHelper::validParams()
 {

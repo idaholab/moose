@@ -44,7 +44,5 @@ ElementCentroidToSurfaceDistanceAux::computeValue()
   // distance value calculation
   const Point & pt = _current_elem->vertex_average();
 
-  const Point & closest_vec = _distance_to_surface->distanceVector(pt);
-
-  return closest_vec.norm();
+  return _distance_to_surface->value(_t, pt);
 }

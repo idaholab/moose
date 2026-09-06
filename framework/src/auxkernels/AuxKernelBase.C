@@ -96,7 +96,7 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),
-    _aux_sys(static_cast<AuxiliarySystem &>(_sys)),
+    _aux_sys(_sys),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid, 0)),
     _mesh(_subproblem.mesh())

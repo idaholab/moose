@@ -10,6 +10,8 @@
 #include "UnsignedDistanceToSurfaceMesh.h"
 #include "MooseError.h"
 #include "SBMSurfaceMeshBuilder.h"
+#include "SBMSurfaceDistance.h"
+#include "SurfaceElement.h"
 
 registerMooseObject("ShiftedBoundaryMethodApp", UnsignedDistanceToSurfaceMesh);
 
@@ -44,10 +46,10 @@ UnsignedDistanceToSurfaceMesh::initialSetup()
                "' to be configured with 'build_kd_tree = true'.");
 
   _kd_tree = &builder->getKDTree();
-  _boundary_elements = &builder->getBoundaryElements();
+  _boundary_elements = &builder->surfaceElementSet().elements();
 }
 
-const SBMBndElementBase &
+const SurfaceElement &
 UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
 {
   // KDTree nearest neighbor search
@@ -60,8 +62,8 @@ UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
 RealVectorValue
 UnsignedDistanceToSurfaceMesh::distanceVectorToSurface(const Point & p) const
 {
-  const SBMBndElementBase & elem = closestBoundaryElem(p);
-  return elem.distanceFrom(p);
+  const SurfaceElement & elem = closestBoundaryElem(p);
+  return SBMUtils::distanceFrom(elem, p);
 }
 
 Real
@@ -88,7 +90,7 @@ UnsignedDistanceToSurfaceMesh::gradient(Real /*t*/, const Point & p) const
 RealVectorValue
 UnsignedDistanceToSurfaceMesh::surfaceNormal(const Point & p) const
 {
-  const SBMBndElementBase & elem = closestBoundaryElem(p);
+  const SurfaceElement & elem = closestBoundaryElem(p);
 
   RealVectorValue n = elem.normal();
   const Real n_norm = n.norm();

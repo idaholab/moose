@@ -33,7 +33,7 @@ RayTracingViewFactor::RayTracingViewFactor(const InputParameters & parameters)
 void
 RayTracingViewFactor::threadJoinViewFactor(const UserObject & y)
 {
-  const auto & vf = static_cast<const RayTracingViewFactor &>(y);
+  const auto & vf = cast_ref<const RayTracingViewFactor &>(y);
   for (unsigned int i = 0; i < _n_sides; ++i)
     for (unsigned int j = 0; j < _n_sides; ++j)
       _view_factors[i][j] += vf._view_factors[i][j];

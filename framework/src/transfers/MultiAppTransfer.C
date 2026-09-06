@@ -155,6 +155,50 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
     _current_direction = _directions[0];
   }
 
+  // Check the parameter for sibling transfers being nested within multiapp execution loop
+  const auto & exec_on = getExecuteOnEnum();
+  if (getParam<bool>("check_multiapp_execute_on") && isParamValid("execute_after_from_multiapp") &&
+      _from_multi_app &&
+      ((_from_multi_app->getExecuteOnEnum() != exec_on) &&
+       !(exec_on.size() == 1 && int(exec_on.get(0)) == EXEC_SAME_AS_MULTIAPP)))
+    paramError("execute_after_from_multiapp",
+               "This parameter is only obeyed when the from_multi_app and the transfer are "
+               "executing on the same execute_on flag.\nfrom_multi_app execution schedule: ",
+               Moose::stringify(_from_multi_app->getExecuteOnEnum()),
+               "\nTransfer execution schedule: ",
+               Moose::stringify(exec_on),
+               "\nYou can disable this error by setting 'check_multiapp_execute_on' to false.");
+  // This parameter is only obeyed for BETWEEN_MULTIAPP
+  if (!(_directions.size() == 1 && _directions.get(0) == BETWEEN_MULTIAPP) &&
+      isParamValid("execute_after_from_multiapp"))
+    paramError("execute_after_from_multiapp",
+               "This parameter is only intended for modifying the execution schedule of "
+               "siblings transfers, e.g. transfers from a from_multi_app to a to_multi_app");
+  // The default isn't enough to achieve staggering unless users staggered the multiapps.
+  // This is effectively a warning by default for sibling transfers BUT:
+  // - the order of execution is actually important here. You don't want to make things explicit
+  // (in terms of time integration) by lagging a term on accident
+  // - we would need dependency resolution between multiapps to set the order group to get
+  // staggering by default.
+  if (getParam<bool>("check_multiapp_execute_on") && _directions.contains("between_multiapp") &&
+      _exec_after_source_app_exec &&
+      _from_multi_app->getParam<unsigned int>("execution_order_group") >=
+          _to_multi_app->getParam<unsigned int>("execution_order_group") &&
+      // no need to check ordering groups if executing apps on different schedules
+      _from_multi_app->getExecuteOnEnum() == _to_multi_app->getExecuteOnEnum() &&
+      // no need to check ordering groups if transfer is executed on a different schedule
+      ((_from_multi_app->getExecuteOnEnum() == exec_on) ||
+       (exec_on.size() == 1 && int(exec_on.get(0)) == EXEC_SAME_AS_MULTIAPP)))
+    paramWarning("execute_after_from_multiapp",
+                 "Transfer is set to execute after the 'from_multi_app' but the 'to_multi_app' is "
+                 "executing before or in the same 'execution_order_group' as the 'from_multi_app'. "
+                 "Thus the transfer is not actually executing in between the 'from_' and "
+                 "'to_multi_app', but after both.\nfrom_multi_app execution order group: ",
+                 Moose::stringify(_from_multi_app->getParam<unsigned int>("execution_order_group")),
+                 "\nto_multi_app execution order group: ",
+                 Moose::stringify(_to_multi_app->getParam<unsigned int>("execution_order_group")),
+                 "\nYou can disable this warning by setting 'check_multiapp_execute_on' to false.");
+
   // Handle deprecated parameters
   if (parameters.isParamSetByUser("direction"))
   {

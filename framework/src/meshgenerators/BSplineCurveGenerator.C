@@ -18,8 +18,6 @@
 #include "libmesh/edge_edge3.h"
 #include "libmesh/edge_edge4.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", BSplineCurveGenerator);
 
 InputParameters

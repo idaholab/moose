@@ -37,8 +37,6 @@
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", INSFVRhieChowInterpolator);
 
 InputParameters
@@ -180,10 +178,10 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
       _disps.push_back(std::make_unique<Moose::VectorCompositeFunctor<ADReal>>(
           name() + "_disp_" + std::to_string(tid),
           *_disp_xs[tid],
-          _dim >= 2 ? static_cast<const Moose::FunctorBase<ADReal> &>(*_disp_ys[tid])
-                    : static_cast<const Moose::FunctorBase<ADReal> &>(_zero_functor),
-          _dim >= 3 ? static_cast<const Moose::FunctorBase<ADReal> &>(*_disp_zs[tid])
-                    : static_cast<const Moose::FunctorBase<ADReal> &>(_zero_functor)));
+          _dim >= 2 ? libMesh::cast_ref<const Moose::FunctorBase<ADReal> &>(*_disp_ys[tid])
+                    : libMesh::cast_ref<const Moose::FunctorBase<ADReal> &>(_zero_functor),
+          _dim >= 3 ? libMesh::cast_ref<const Moose::FunctorBase<ADReal> &>(*_disp_zs[tid])
+                    : libMesh::cast_ref<const Moose::FunctorBase<ADReal> &>(_zero_functor)));
   }
 
   if (_velocity_interp_method == Moose::FV::InterpMethod::Average && isParamValid("a_u"))

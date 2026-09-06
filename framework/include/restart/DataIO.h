@@ -26,6 +26,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/enum_elem_quality.h"
 #include "libmesh/enum_elem_type.h"
+#include "libmesh/enum_inf_map_type.h"
 
 #include "LibtorchUtils.h"
 
@@ -135,6 +136,7 @@ inline void dataStore(std::ostream & stream, EnumType & enum_type, void * ctx) \
   dataStore(stream, stored, ctx); \
 }
 
+dataStoreEnum(libMesh::InfMapType, int)
 dataStoreEnum(libMesh::FEFamily, int)
 dataStoreEnum(libMesh::ParallelType, int)
 dataStoreEnum(Moose::CoordinateSystemType, int)
@@ -455,7 +457,7 @@ template <typename T>
 void
 dataStore(std::ostream & stream, GenericTwoVector<T> & v, void * context)
 {
-  dataStore(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
+  dataStore(stream, libMesh::cast_ref<Eigen::Matrix<T, 2, 1> &>(v), context);
 }
 
 // Specializations (defined in .C)
@@ -681,6 +683,7 @@ inline void dataLoad(std::istream & stream, EnumType & enum_type, void * ctx) \
   enum_type = static_cast<EnumType>(loaded); \
 }
 
+dataLoadEnum(libMesh::InfMapType, int)
 dataLoadEnum(libMesh::FEFamily, int)
 dataLoadEnum(libMesh::ParallelType, int)
 dataLoadEnum(Moose::CoordinateSystemType, int)
@@ -1017,7 +1020,7 @@ template <typename T>
 void
 dataLoad(std::istream & stream, GenericTwoVector<T> & v, void * context)
 {
-  dataLoad(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
+  dataLoad(stream, libMesh::cast_ref<Eigen::Matrix<T, 2, 1> &>(v), context);
 }
 
 // Specializations (defined in .C)

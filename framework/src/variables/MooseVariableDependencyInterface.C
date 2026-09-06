@@ -17,8 +17,6 @@
 #include "libmesh/dof_object.h"
 #include "libmesh/dof_map.h"
 
-using namespace libMesh;
-
 MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject *) {}
 
 #ifdef MOOSE_KOKKOS_ENABLED

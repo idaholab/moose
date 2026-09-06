@@ -19,8 +19,6 @@
 // libMesh
 #include "libmesh/system.h"
 
-using namespace libMesh;
-
 const Number Transfer::OutOfMeshValue = -999999;
 
 InputParameters
@@ -46,11 +44,18 @@ Transfer::validParams()
       "Whether this Transfer will be 'to' or 'from' a MultiApp, or "
       "bidirectional, by providing both FROM_MULTIAPP and TO_MULTIAPP.",
       "Specifying direction+multiapp is deprecated. Specify the to_multi_app and from_multi_app");
-  params.registerBase("Transfer");
+
+  // No default to avoid displaying it in the documentation
+  params.addParam<bool>(
+      "execute_after_from_multiapp",
+      "Whether to execute the transfer after the from_multiapp has executed when both share an "
+      "execute_on flag. Note that this setting is only used to move the execution of "
+      "BETWEEN_MULTIAPP (siblings) transfers, FROM_ and TO_MULTIAPP transfers are always executed "
+      "after the from_multiapp and before the to_multiapp respectively.");
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addParamNamesToGroup("_called_legacy_params", "Advanced");
-
+  params.registerBase("Transfer");
   params.declareControllable("enable");
   return params;
 }
@@ -67,7 +72,10 @@ Transfer::Transfer(const InputParameters & parameters)
     _direction(possibleDirections()),
     _current_direction(possibleDirections()),
     _directions(isParamValid("direction") ? getParam<MultiMooseEnum>("direction")
-                                          : possibleDirections())
+                                          : possibleDirections()),
+    _exec_after_source_app_exec(isParamValid("execute_after_from_multiapp")
+                                    ? getParam<bool>("execute_after_from_multiapp")
+                                    : true)
 {
   if (parameters.isParamSetByUser("direction") && _directions.size() == 0)
     paramError("direction", "At least one direction is required");

@@ -15,8 +15,6 @@
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/dof_map.h"
 
-using namespace libMesh;
-
 InputParameters
 TimeIntegrator::validParams()
 {

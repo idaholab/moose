@@ -236,7 +236,7 @@ void
 FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::threadJoin(const UserObject & s)
 {
   const FXIntegralBaseUserObject<IntegralBaseVariableUserObject> & sibling =
-      static_cast<const FXIntegralBaseUserObject<IntegralBaseVariableUserObject> &>(s);
+      cast_ref<const FXIntegralBaseUserObject<IntegralBaseVariableUserObject> &>(s);
 
   for (std::size_t c = 0; c < _coefficient_partials.size(); ++c)
     _coefficient_partials[c] += sibling._coefficient_partials[c];

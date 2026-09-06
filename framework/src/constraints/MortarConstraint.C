@@ -127,14 +127,14 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     std::array<const VectorVariablePhiGradient *, 3> vector_grad_phis;
     if (jvariable.isVector())
     {
-      const auto & temp_var = static_cast<MooseVariableFE<RealVectorValue> &>(jvariable);
+      const auto & temp_var = cast_ref<MooseVariableFE<RealVectorValue> &>(jvariable);
       vector_phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
       vector_grad_phis = {
           {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};
     }
     else
     {
-      const auto & temp_var = static_cast<MooseVariableFE<Real> &>(jvariable);
+      const auto & temp_var = cast_ref<MooseVariableFE<Real> &>(jvariable);
       phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
       grad_phis = {
           {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};

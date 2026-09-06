@@ -1,0 +1,50 @@
+[Tests]
+  issues = '#31573'
+  design = 'Transfers/index.md'
+
+  [staggered]
+    type = CSVDiff
+    input = 'main_between_multiapp.i'
+    csvdiff = 'main_between_multiapp_out_ma10.csv main_between_multiapp_out_ma20.csv'
+    requirement = "The system shall be able to stagger the execution of multiapps and transfers between these multiapps in a way that reduces the lag in the the transfered quantities."
+    # Transfers execute_on don't match the MultiApps
+    allow_warnings = true
+  []
+
+  [warnings]
+    requirement = 'The system shall report a warning if'
+    [execution_order_groups]
+      type = RunException
+      input = 'main_between_multiapp.i'
+      # there are transfers both ways, so they will all trigger the check
+      cli_args = "MultiApps/ma2/execution_order_group=0"
+      expect_err = "Transfer is set to execute after the 'from_multi_app' but the 'to_multi_app' is executing before or in the same 'execution_order_group' as the 'from_multi_app'. Thus the transfer is not actually executing in between the 'from_' and 'to_multi_app', but after both"
+      detail = 'a sibling transfer is set to execute after its source application but the target application is executing on the same schedule and with an earlier execution order group, thus preventing sending updated data from the source to the target application.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error if'
+    [different_execute_on]
+      type = RunException
+      input = 'main_between_multiapp.i'
+      cli_args = "Transfers/pp_1_to_2/execute_after_from_multiapp=false
+                  Transfers/pp_1_to_2/execute_on=INITIAL"
+      allow_warnings = true
+      expect_err = 'This parameter is only obeyed when the from_multi_app and the transfer are executing on the same execute_on flag.'
+      detail = 'a sibling transfer is set to execute before its source application but it does not share the same execution schedule as that source application,'
+    []
+    [non-sibling_param_does_not_apply]
+      type = RunException
+      input = 'main_between_multiapp.i'
+      # create a non-sibling transfer
+      cli_args = "Transfers/active=pp_1_to_2b
+                  Transfers/pp_1_to_2b/type=MultiAppPostprocessorTransfer
+                  Transfers/pp_1_to_2b/from_multi_app=ma1
+                  Transfers/pp_1_to_2b/from_postprocessor='time_app1'
+                  Transfers/pp_1_to_2b/to_postprocessor='dummy'
+                  Transfers/pp_1_to_2b/execute_after_from_multiapp=false"
+      expect_err = 'This parameter is only intended for modifying the execution schedule of siblings transfers, e.g. transfers from a from_multi_app to a to_multi_app'
+      detail = 'a transfer is set to execute after its source application but this option is not currently implemented for child to parent and parent to child transfer.'
+    []
+  []
+[]

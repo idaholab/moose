@@ -24,8 +24,6 @@
 
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", MultiAppVariableValueSamplePostprocessorTransfer);
 
 InputParameters
@@ -54,6 +52,10 @@ MultiAppVariableValueSamplePostprocessorTransfer::validParams()
       "supplied array variable in 'source_variable'. For instance, if there are 9 sub-applications "
       "and 3 components in the variable, sub-apps 0-2 will go to component 0, 3-5 will go to 1, "
       "and 6-8 will go to 2.");
+
+  // Sibling transfers not supported
+  params.suppressParameter<bool>("execute_after_from_multiapp");
+
   return params;
 }
 
@@ -221,7 +223,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
       if (_var.isArray())
         array_var = &_fe_problem.getArrayVariable(0, _var_name);
       else if (!_var.isVector())
-        standard_var = static_cast<MooseVariableField<Real> *>(&_var);
+        standard_var = cast_ptr<MooseVariableField<Real> *>(&_var);
       else
         mooseError("MultiAppVariableValueSamplePostprocessorTransfer does not support transfer of "
                    "vector variables");

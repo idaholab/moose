@@ -471,7 +471,7 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
         {
           std::vector<unsigned int> more_grain_ids;
 
-          getGrainsBasedOnElem(*static_cast<const Elem *>(neighbor), more_grain_ids);
+          getGrainsBasedOnElem(*cast_ptr<const Elem *>(neighbor), more_grain_ids);
 
           neighbor_it = _entity_to_grain_cache.emplace_hint(
               neighbor_it, neighbor_id, std::move(more_grain_ids));

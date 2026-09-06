@@ -116,7 +116,7 @@ CrackFrontNonlocalMaterialBase::finalize()
 void
 CrackFrontNonlocalMaterialBase::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const CrackFrontNonlocalMaterialBase &>(y);
+  const auto & uo = cast_ref<const CrackFrontNonlocalMaterialBase &>(y);
   for (const auto i : index_range(_avg_crack_tip_scalar))
   {
     _volume[i] += uo._volume[i];

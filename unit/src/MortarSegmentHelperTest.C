@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-using namespace libMesh;
-
 class MortarSegmentHelperTest : public ::testing::Test
 {
 protected:

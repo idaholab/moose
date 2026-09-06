@@ -138,7 +138,7 @@ public:
   template <class T>
   T & getAction(const std::string & name)
   {
-    return const_cast<T &>(static_cast<const ActionWarehouse *>(this)->getAction<T>(name));
+    return const_cast<T &>(cast_ptr<const ActionWarehouse *>(this)->getAction<T>(name));
   }
 
   /**

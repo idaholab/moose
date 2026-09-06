@@ -22,7 +22,7 @@ mfem::ParMesh &
 mainMesh(const InputParameters & parameters)
 {
   auto & problem =
-      static_cast<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"));
+      cast_ref<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"));
   return problem.mesh().getMFEMParMesh();
 }
 }

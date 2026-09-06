@@ -19,8 +19,6 @@
 #include "MooseAppCoordTransform.h"
 #include "MooseFunctorArguments.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", MultiAppGeneralFieldFunctorTransfer);
 
 InputParameters

@@ -197,7 +197,7 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     ymin = ${half_aq_thickness}
   []
   [aq_and_cap_top_fine]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'aq_top_fine cap_top_fine'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'top bottom'
@@ -227,14 +227,14 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     ymax = -${half_aq_thickness}
   []
   [aq_and_cap_bottom_fine]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'aq_bottom_fine cap_bottom_fine'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'bottom top'
     merge_boundaries_with_same_name = false
   []
   [aq_and_cap_fine]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'aq_and_cap_bottom_fine aq_and_cap_top_fine'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'top bottom'
@@ -265,7 +265,7 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     ymin = ${half_aq_thickness}
   []
   [aq_and_cap_top]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'aq_top cap_top'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'top bottom'
@@ -295,20 +295,20 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     ymax = -${half_aq_thickness}
   []
   [aq_and_cap_bottom]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'aq_bottom cap_bottom'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'bottom top'
   []
   [aq_and_cap]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'aq_and_cap_bottom aq_and_cap_top'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'top bottom'
   []
 
   [aq_and_cap_all]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'aq_and_cap_fine aq_and_cap'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'right left'
@@ -543,8 +543,8 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     type = Water97FluidProperties
   []
   [tabulated_water]
-    type = TabulatedFluidProperties
-    fp = true_water
+    type = TabulatedBicubicFluidProperties
+    input_fp = true_water
     temperature_min = 275 # K
     temperature_max = 600
     interpolated_properties = 'density viscosity enthalpy internal_energy'

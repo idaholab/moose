@@ -14,8 +14,6 @@
 
 #include "libmesh/mesh_tools.h"
 
-using namespace libMesh;
-
 InputParameters
 ImageSampler::validParams()
 {

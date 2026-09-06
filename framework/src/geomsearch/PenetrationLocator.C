@@ -19,8 +19,6 @@
 #include "SubProblem.h"
 #include "MooseApp.h"
 
-using namespace libMesh;
-
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,

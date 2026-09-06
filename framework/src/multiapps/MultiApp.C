@@ -246,6 +246,11 @@ MultiApp::validParams()
   params.addParam<bool>(
       "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
 
+  params.addParam<unsigned int>("execution_order_group",
+                                0,
+                                "Execution order group. If Problem/num_concurrent_multiapps>1, "
+                                "multiple multiapps may be executed synchronously.");
+
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
@@ -686,12 +691,17 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         for (const auto i : make_range(_my_num_apps))
         {
           auto app_ptr = _apps[i];
+          auto & mesh = app_ptr->getExecutioner()->feProblem().mesh();
           if (usingPositions())
             app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+                mesh, _positions[_first_local_app + i]);
           else
-            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(mesh,
+                                                                                  Point(0, 0, 0));
+
+          // Transforming marks mesh->spatial_dimension() as invalid,
+          // so we reprepare before trying to print that later.
+          mesh.getMesh().complete_preparation();
         }
 
       // If the time step covers multiple reset times, set them all as having 'happened'
@@ -1286,12 +1296,16 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Transform the app mesh if requested
   if (_run_in_position)
   {
+    auto & mesh = app->getExecutioner()->feProblem().mesh();
     if (usingPositions())
       app->getExecutioner()->feProblem().coordTransform().transformMesh(
-          app->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+          mesh, _positions[_first_local_app + i]);
     else
-      app->getExecutioner()->feProblem().coordTransform().transformMesh(
-          app->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(mesh, Point(0, 0, 0));
+
+    // Transforming marks mesh->spatial_dimension() as invalid, so we
+    // reprepare before trying to print that later.
+    mesh.getMesh().complete_preparation();
   }
 }
 
@@ -1549,7 +1563,7 @@ dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
 
   multi_app->backup();
 
-  dataStore(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
+  dataStore(stream, cast_ref<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 }
 
 void
@@ -1558,7 +1572,7 @@ dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
   MultiApp * multi_app = static_cast<MultiApp *>(context);
   mooseAssert(multi_app, "Not set");
 
-  dataLoad(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
+  dataLoad(stream, cast_ref<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 
   multi_app->restore();
 }

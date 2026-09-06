@@ -438,8 +438,8 @@ public:
                                 const std::vector<Real> * const weights = nullptr);
   virtual void reinitNode(const Node * node, const THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) = 0;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
+  void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid);
+  void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
@@ -1310,9 +1310,9 @@ SubProblem::getFunctor(const std::string & name,
                                          std::make_unique<Moose::Functor<ADType>>(
                                              std::make_unique<Moose::NullFunctor<ADType>>())));
 
-    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
-                                                  ? std::get<2>(emplace_ret->second)
-                                                  : std::get<1>(emplace_ret->second)));
+    return cast_ref<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                               ? std::get<2>(emplace_ret->second)
+                                               : std::get<1>(emplace_ret->second)));
   }
   else
   {
@@ -1327,9 +1327,9 @@ SubProblem::getFunctor(const std::string & name,
                                          std::make_unique<Moose::Functor<ADType>>(
                                              std::make_unique<Moose::NullFunctor<ADType>>())));
 
-    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
-                                                  ? std::get<2>(emplace_ret->second)
-                                                  : std::get<1>(emplace_ret->second)));
+    return cast_ref<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                               ? std::get<2>(emplace_ret->second)
+                                               : std::get<1>(emplace_ret->second)));
   }
 }
 

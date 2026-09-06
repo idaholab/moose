@@ -26,8 +26,6 @@
 // C++
 #include <cstring> // for "Jacobian" exception test
 
-using namespace libMesh;
-
 namespace Moose
 {
 

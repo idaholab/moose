@@ -15,8 +15,6 @@
 #include "SMAAspUserUtilities.h"
 #include "MooseError.h"
 
-using namespace libMesh;
-
 Real mutex_test_global_thread_counter;
 
 extern "C" void

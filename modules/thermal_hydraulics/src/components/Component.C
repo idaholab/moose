@@ -42,7 +42,7 @@ Component::Component(const InputParameters & parameters)
     _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
     _zero(_sim._real_zero[0]),
-    _mesh(static_cast<THMMesh &>(_sim.mesh())),
+    _mesh(cast_ref<THMMesh &>(_sim.mesh())),
     _component_setup_status(CREATED)
 {
 }

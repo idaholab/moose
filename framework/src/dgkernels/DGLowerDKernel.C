@@ -229,7 +229,7 @@ DGLowerDKernel::computeOffDiagLowerDJacobian(Moose::ConstraintJacobianType type,
 
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    const auto & jv0 = static_cast<const MooseVariable &>(jvar);
+    const auto & jv0 = cast_ref<const MooseVariable &>(jvar);
     const VariableTestValue & loc_phi =
         (type == Moose::LowerLower || type == Moose::SecondaryLower || type == Moose::PrimaryLower)
             ? jv0.phiLower()

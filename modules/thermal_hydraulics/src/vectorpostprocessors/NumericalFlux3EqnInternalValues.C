@@ -84,7 +84,7 @@ NumericalFlux3EqnInternalValues::finalize()
 void
 NumericalFlux3EqnInternalValues::threadJoin(const UserObject & y)
 {
-  const auto & vpp = static_cast<const NumericalFlux3EqnInternalValues &>(y);
+  const auto & vpp = cast_ref<const NumericalFlux3EqnInternalValues &>(y);
 
   SamplerBase::threadJoin(vpp);
 }

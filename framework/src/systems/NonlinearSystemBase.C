@@ -82,6 +82,7 @@
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
 #include "AutomaticMortarGeneration.h"
+#include "Convergence.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -325,9 +326,8 @@ NonlinearSystemBase::initialSetup()
         auto & mortar_constraints =
             _constraints.getActiveMortarConstraints(primary_secondary_boundary_pair, displaced);
 
-        auto & subproblem = displaced
-                                ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
-                                : static_cast<SubProblem &>(_fe_problem);
+        auto & subproblem = displaced ? cast_ref<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                      : cast_ref<SubProblem &>(_fe_problem);
 
         auto & mortar_functors =
             displaced ? _displaced_mortar_functors : _undisplaced_mortar_functors;
@@ -1089,8 +1089,7 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
       {
-        _fe_problem.reinitNodes(primary_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(secondary_node_ids, tid);
+        nc->reinitConstraintNodes();
         nc->computeResidual(residual);
       }
     }
@@ -1117,8 +1116,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(const SparseMatrix<Number> 
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
       {
-        _fe_problem.reinitNodes(primary_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(secondary_node_ids, tid);
+        nc->reinitConstraintNodes();
         nc->computeJacobian(jacobian_to_view);
       }
     }
@@ -1136,8 +1134,8 @@ NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
                                     const PenetrationInfo & info,
                                     const bool displaced)
 {
-  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
-                                : static_cast<SubProblem &>(_fe_problem);
+  auto & subproblem = displaced ? cast_ref<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : cast_ref<SubProblem &>(_fe_problem);
 
   const Elem * primary_elem = info._elem;
   unsigned int primary_side = info._side_num;
@@ -1200,8 +1198,8 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
     mooseAssert(_fe_problem.getDisplacedProblem(),
                 "If we're calling this method with displaced = true, then we better well have a "
                 "displaced problem");
-  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
-                                : static_cast<SubProblem &>(_fe_problem);
+  auto & subproblem = displaced ? cast_ref<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : cast_ref<SubProblem &>(_fe_problem);
   const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
 
   bool constraints_applied = false;
@@ -1344,8 +1342,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     mooseAssert(_fe_problem.getDisplacedProblem(),
                 "If we're calling this method with displaced = true, then we better well have a "
                 "displaced problem");
-  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
-                                : static_cast<SubProblem &>(_fe_problem);
+  auto & subproblem = displaced ? cast_ref<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : cast_ref<SubProblem &>(_fe_problem);
   const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
 
   bool constraints_applied;
@@ -1655,8 +1653,8 @@ NonlinearSystemBase::overwriteNodeFace(NumericVector<Number> & soln)
 {
   // Overwrite results from integrator in case we have explicit dynamics contact constraints
   auto & subproblem = _fe_problem.getDisplacedProblem()
-                          ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
-                          : static_cast<SubProblem &>(_fe_problem);
+                          ? cast_ref<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                          : cast_ref<SubProblem &>(_fe_problem);
   const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
 
   for (const auto & it : penetration_locators)
@@ -2007,9 +2005,8 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
       if (_fe_problem.ignoreZerosInJacobian())
-        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                                      MAT_IGNORE_ZERO_ENTRIES,
-                                      PETSC_TRUE));
+        LibmeshPetscCall(MatSetOption(
+            cast_ref<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE));
     }
   }
 
@@ -2499,12 +2496,12 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
   auto & jacobian = getMatrix(systemMatrixTag());
 
   if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-    LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+    LibmeshPetscCall(MatSetOption(cast_ref<PetscMatrix<Number> &>(jacobian).mat(),
                                   MAT_NEW_NONZERO_ALLOCATION_ERR,
                                   PETSC_FALSE));
   if (_fe_problem.ignoreZerosInJacobian())
     LibmeshPetscCall(MatSetOption(
-        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE));
+        cast_ref<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE));
 
   std::vector<numeric_index_type> zero_rows;
 
@@ -2512,8 +2509,8 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
     mooseAssert(_fe_problem.getDisplacedProblem(),
                 "If we're calling this method with displaced = true, then we better well have a "
                 "displaced problem");
-  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
-                                : static_cast<SubProblem &>(_fe_problem);
+  auto & subproblem = displaced ? cast_ref<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : cast_ref<SubProblem &>(_fe_problem);
   const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
 
   bool constraints_applied;
@@ -2691,7 +2688,7 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
 
       if (constraints_applied)
       {
-        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+        LibmeshPetscCall(MatSetOption(cast_ref<PetscMatrix<Number> &>(jacobian).mat(),
                                       MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                                       PETSC_TRUE));
 
@@ -2710,7 +2707,7 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
 
     if (constraints_applied)
     {
-      LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+      LibmeshPetscCall(MatSetOption(cast_ref<PetscMatrix<Number> &>(jacobian).mat(),
                                     MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                                     PETSC_TRUE));
 
@@ -2903,7 +2900,7 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
 
   if (constraints_applied)
   {
-    LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+    LibmeshPetscCall(MatSetOption(cast_ref<PetscMatrix<Number> &>(jacobian).mat(),
                                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                                   PETSC_TRUE));
 
@@ -3026,9 +3023,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
       if (_fe_problem.ignoreZerosInJacobian())
-        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                                      MAT_IGNORE_ZERO_ENTRIES,
-                                      PETSC_TRUE));
+        LibmeshPetscCall(MatSetOption(
+            cast_ref<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE));
     }
   }
 
@@ -3217,7 +3213,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 #if PETSC_RELEASE_GREATER_EQUALS(3, 23, 0)
         if (system_matrix.use_hash_table())
         {
-          hash_copy = libMesh::cast_ref<PetscMatrix<Number> &>(system_matrix).copy_from_hash();
+          hash_copy = cast_ref<PetscMatrix<Number> &>(system_matrix).copy_from_hash();
           view_jac_ptr = hash_copy.get();
         }
         else
@@ -3329,11 +3325,11 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
   {
     SparseMatrix<Number> & jacobian = blocks[i]->_jacobian;
 
-    LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+    LibmeshPetscCall(MatSetOption(cast_ref<PetscMatrix<Number> &>(jacobian).mat(),
                                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                                   PETSC_TRUE));
     if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-      LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+      LibmeshPetscCall(MatSetOption(cast_ref<PetscMatrix<Number> &>(jacobian).mat(),
                                     MAT_NEW_NONZERO_ALLOCATION_ERR,
                                     PETSC_TRUE));
 
@@ -4038,9 +4034,8 @@ NonlinearSystemBase::setupScalingData()
                      "the nonlinear system.");
 
         const MooseVariableBase & var =
-            hasVariable(var_name)
-                ? static_cast<MooseVariableBase &>(getVariable(0, var_name))
-                : static_cast<MooseVariableBase &>(getScalarVariable(0, var_name));
+            hasVariable(var_name) ? cast_ref<MooseVariableBase &>(getVariable(0, var_name))
+                                  : cast_ref<MooseVariableBase &>(getScalarVariable(0, var_name));
         auto map_pair = _var_to_group_var.emplace(var.number(), group_index);
         if (!map_pair.second)
           mooseError("Variable ", var_name, " is contained in multiple scaling grouplings");
@@ -4305,6 +4300,8 @@ NonlinearSystemBase::preSolve()
   // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
   assembleScalingVector();
 
+  convergence().preSolve();
+
   return true;
 }
 
@@ -4322,4 +4319,10 @@ NonlinearSystemBase::getFieldSplitPreconditioner()
     mooseError("No field split preconditioner is present for this system");
 
   return *_fsp;
+}
+
+Convergence &
+NonlinearSystemBase::convergence()
+{
+  return _fe_problem.getConvergence(_convergence_name);
 }

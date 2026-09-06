@@ -19,8 +19,6 @@
 #include "MooseUtils.h"
 #include "BlockRestrictionDebugOutput.h"
 
-using namespace libMesh;
-
 registerMooseAction("MooseApp", SetupDebugAction, "add_output");
 
 InputParameters

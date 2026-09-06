@@ -47,7 +47,7 @@ ElementOptimizationFunctionInnerProduct::execute()
 void
 ElementOptimizationFunctionInnerProduct::threadJoin(const UserObject & y)
 {
-  const auto & vpp = static_cast<const ElementOptimizationFunctionInnerProduct &>(y);
+  const auto & vpp = cast_ref<const ElementOptimizationFunctionInnerProduct &>(y);
   add(vpp);
 }
 

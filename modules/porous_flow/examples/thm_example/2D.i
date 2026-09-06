@@ -356,7 +356,6 @@
     type = Pressure
     boundary = left
     variable = disp_r
-    component = 0
     postprocessor = p_bh # note, this lags
     use_displaced_mesh = false
   []

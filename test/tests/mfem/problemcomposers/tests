@@ -1,0 +1,38 @@
+[Tests]
+  design = 'MFEMProblemComposer.md'
+  issues = '#33021'
+  [WeakFormProblemComposer]
+    type = CSVDiff
+    input = explicit_composer_darcy.i
+    csvdiff = 'OutputData/Darcy.csv'
+    requirement = 'The system shall allow the user to explicitly build an MFEMWeakFormProblemComposer '
+                  'while still getting the same results for, e.g., a Darcy problem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [TimeDependentWeakFormProblemComposer]
+    type = XMLDiff
+    input = explicit_composer_heat_transfer.i
+    xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
+                OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    requirement = 'The system shall allow the user to explicitly build an MFEMTimeDependentWeakFormProblemComposer '
+                  'while still getting the same results for, e.g., a heat transfer problem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    restep = false
+  []
+  [CustomProblemComposer]
+    type = CSVDiff
+    input = custom_composer_and_operator.i
+    csvdiff = 'OutputData/custom_composer_and_operator/l2norm.csv'
+    requirement = 'The system shall have the ability to use a custom operator based on MFEM ex0p'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    restep = false
+  []
+[]

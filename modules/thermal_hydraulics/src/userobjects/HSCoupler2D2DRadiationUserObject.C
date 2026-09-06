@@ -117,7 +117,7 @@ HSCoupler2D2DRadiationUserObject::execute()
 void
 HSCoupler2D2DRadiationUserObject::threadJoin(const UserObject & uo)
 {
-  const auto & other_uo = static_cast<const HSCoupler2D2DRadiationUserObject &>(uo);
+  const auto & other_uo = cast_ref<const HSCoupler2D2DRadiationUserObject &>(uo);
   for (auto & it : other_uo._elem_id_to_heat_flux)
     if (_elem_id_to_heat_flux.find(it.first) == _elem_id_to_heat_flux.end())
       _elem_id_to_heat_flux[it.first] = it.second;

@@ -159,7 +159,7 @@ template <bool is_ad>
 void
 ElementExtremeMaterialPropertyReporterTempl<is_ad>::threadJoin(const UserObject & uo)
 {
-  const auto & rpt = static_cast<const ElementExtremeMaterialPropertyReporterTempl<is_ad> &>(uo);
+  const auto & rpt = cast_ref<const ElementExtremeMaterialPropertyReporterTempl<is_ad> &>(uo);
   const auto prop_size = _additional_reported_property_values.size();
 
   switch (_type)

@@ -160,15 +160,11 @@ GeneratedMeshGenerator::generate()
     // The build_XYZ mesh generation functions take an
     // UnstructuredMesh& as the first argument, hence the static_cast.
     case 1:
-      MeshTools::Generation::build_line(static_cast<UnstructuredMesh &>(*mesh),
-                                        _nx,
-                                        _xmin,
-                                        _xmax,
-                                        elem_type,
-                                        _gauss_lobatto_grid);
+      MeshTools::Generation::build_line(
+          cast_ref<UnstructuredMesh &>(*mesh), _nx, _xmin, _xmax, elem_type, _gauss_lobatto_grid);
       break;
     case 2:
-      MeshTools::Generation::build_square(static_cast<UnstructuredMesh &>(*mesh),
+      MeshTools::Generation::build_square(cast_ref<UnstructuredMesh &>(*mesh),
                                           _nx,
                                           _ny,
                                           _xmin,
@@ -179,7 +175,7 @@ GeneratedMeshGenerator::generate()
                                           _gauss_lobatto_grid);
       break;
     case 3:
-      MeshTools::Generation::build_cube(static_cast<UnstructuredMesh &>(*mesh),
+      MeshTools::Generation::build_cube(cast_ref<UnstructuredMesh &>(*mesh),
                                         _nx,
                                         _ny,
                                         _nz,

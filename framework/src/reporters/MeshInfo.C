@@ -389,9 +389,9 @@ MeshInfo::possiblyAddElemInfo()
     // bounding_box
     if (items.bounding_box)
       gather([](const auto & info)
-             { return static_cast<const std::pair<Point, Point> &>(info.bounding_box); },
+             { return cast_ref<const std::pair<Point, Point> &>(info.bounding_box); },
              [](auto & info, const auto & value)
-             { static_cast<std::pair<Point, Point> &>(info.bounding_box) = value; });
+             { cast_ref<std::pair<Point, Point> &>(info.bounding_box) = value; });
 
 #define gather_simple(name)                                                                        \
   if (items.name)                                                                                  \

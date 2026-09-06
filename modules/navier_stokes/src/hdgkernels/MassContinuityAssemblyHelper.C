@@ -16,8 +16,6 @@
 #include "SystemBase.h"
 #include "TransientInterface.h"
 
-using namespace libMesh;
-
 InputParameters
 MassContinuityAssemblyHelper::validParams()
 {

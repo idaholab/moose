@@ -308,8 +308,8 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
   {
     const auto * const var =
         dmm->_nl->hasVariable(var_name)
-            ? static_cast<MooseVariableBase *>(&dmm->_nl->getVariable(0, var_name))
-            : static_cast<MooseVariableBase *>(&dmm->_nl->getScalarVariable(0, var_name));
+            ? cast_ptr<MooseVariableBase *>(&dmm->_nl->getVariable(0, var_name))
+            : cast_ptr<MooseVariableBase *>(&dmm->_nl->getScalarVariable(0, var_name));
     if (var->isArray())
       for (const auto i : make_range(var->count()))
         processed_vars.insert(var->arrayVariableComponent(i));

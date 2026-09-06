@@ -298,31 +298,31 @@ NonlinearThread::computeOnInternalFace(const Elem * neighbor)
 void
 NonlinearThread::compute(KernelBase & kernel)
 {
-  compute(static_cast<ResidualObject &>(kernel));
+  compute(cast_ref<ResidualObject &>(kernel));
 }
 
 void
 NonlinearThread::compute(FVElementalKernel & kernel)
 {
-  compute(static_cast<ResidualObject &>(kernel));
+  compute(cast_ref<ResidualObject &>(kernel));
 }
 
 void
 NonlinearThread::compute(IntegratedBCBase & bc)
 {
-  compute(static_cast<ResidualObject &>(bc));
+  compute(cast_ref<ResidualObject &>(bc));
 }
 
 void
 NonlinearThread::compute(DGKernelBase & dg, const Elem * /*neighbor*/)
 {
-  compute(static_cast<ResidualObject &>(dg));
+  compute(cast_ref<ResidualObject &>(dg));
 }
 
 void
 NonlinearThread::compute(InterfaceKernelBase & ik)
 {
-  compute(static_cast<ResidualObject &>(ik));
+  compute(cast_ref<ResidualObject &>(ik));
 }
 
 void

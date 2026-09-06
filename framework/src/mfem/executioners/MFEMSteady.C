@@ -39,36 +39,19 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _last_solve_converged(false)
 {
   // If no ProblemOperators have been added by the user, add a default
-  if (getProblemOperators().empty())
+  if (!_mfem_problem.getProblemComposer())
   {
-    if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
-    {
-      if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
-      {
-        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-        auto problem_operator =
-            std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(_mfem_problem);
-        addProblemOperator(std::move(problem_operator));
-      }
-      else
-      {
-        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-        auto problem_operator =
-            std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
-        addProblemOperator(std::move(problem_operator));
-      }
-    }
+    std::string name = "__DefaultWeakFormProblemComposer";
+    InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
+
+    if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
+      _mfem_problem.addMFEMProblemComposer("MFEMEigenWeakFormProblemComposer", name, params);
     else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
-    {
-      _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
-      addProblemOperator(std::move(problem_operator));
-    }
+      _mfem_problem.addMFEMProblemComposer("MFEMComplexWeakFormProblemComposer", name, params);
     else
-      mooseError("Unknown numeric type. "
-                 "Please set the Problem numeric type to either 'real' or 'complex'.");
+      _mfem_problem.addMFEMProblemComposer("MFEMWeakFormProblemComposer", name, params);
   }
+  addProblemOperator(_mfem_problem.getProblemComposer()->createProblemOperator(_mfem_problem));
 }
 
 void
@@ -77,17 +60,20 @@ MFEMSteady::init()
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 
-  if (_mfem_problem_data.nonlinear_solver)
-    _mfem_problem_data.eqn_system->SetGradientRequired(
-        _mfem_problem_data.nonlinear_solver->RequiresGradient());
+  if (_mfem_problem_data.eqn_system)
+  {
+    if (_mfem_problem_data.nonlinear_solver)
+      _mfem_problem_data.eqn_system->SetGradientRequired(
+          _mfem_problem_data.nonlinear_solver->RequiresGradient());
 
-  _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
+    _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
 
-  // Set up initial conditions
-  _mfem_problem_data.eqn_system->Init(
-      _mfem_problem_data.gridfunctions,
-      _mfem_problem_data.cmplx_gridfunctions,
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
+    // Set up initial conditions
+    _mfem_problem_data.eqn_system->Init(
+        _mfem_problem_data.gridfunctions,
+        _mfem_problem_data.cmplx_gridfunctions,
+        getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
+  }
 
   for (const auto & problem_operator : getProblemOperators())
   {
@@ -117,7 +103,6 @@ MFEMSteady::execute()
   // first step in any steady state solve is always 1 (preserving backwards compatibility)
   _time_step = 1;
   _mfem_problem.timestepSetup();
-  _mfem_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_mfem_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true))
   {
     _last_solve_converged = false;
@@ -133,7 +118,6 @@ MFEMSteady::execute()
   // need to keep _time in sync with _time_step to get correct output
   _time = _time_step;
   _mfem_problem.execute(EXEC_TIMESTEP_END);
-  _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;

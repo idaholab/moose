@@ -175,7 +175,7 @@ LibmeshPartitioner::partition(MeshBase & mesh, const unsigned int n)
   {
     mooseAssert(_partitioner.get(), "Partitioner is a NULL object");
     prepareBlocksForSubdomainPartitioner(
-        mesh, static_cast<libMesh::SubdomainPartitioner &>(*_partitioner.get()));
+        mesh, cast_ref<libMesh::SubdomainPartitioner &>(*_partitioner.get()));
   }
 
   _partitioner->partition(mesh, n);
@@ -188,7 +188,7 @@ LibmeshPartitioner::partition(MeshBase & mesh)
   {
     mooseAssert(_partitioner.get(), "Partitioner is a NULL object");
     prepareBlocksForSubdomainPartitioner(
-        mesh, static_cast<libMesh::SubdomainPartitioner &>(*_partitioner.get()));
+        mesh, cast_ref<libMesh::SubdomainPartitioner &>(*_partitioner.get()));
   }
 
   _partitioner->partition(mesh);

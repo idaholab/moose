@@ -63,6 +63,6 @@ TestXYDelaunayGeneratorArea::finalize()
 void
 TestXYDelaunayGeneratorArea::threadJoin(const UserObject & uo)
 {
-  const auto & obj = static_cast<const TestXYDelaunayGeneratorArea &>(uo);
+  const auto & obj = cast_ref<const TestXYDelaunayGeneratorArea &>(uo);
   _failures.insert(_failures.end(), obj._failures.begin(), obj._failures.end());
 }

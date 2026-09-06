@@ -12,7 +12,7 @@
 #include "FVAdvectedMinmodWeightBased.h"
 #include "FVAdvectedUpwind.h"
 #include "FVAdvectedVanLeerWeightBased.h"
-#include "FVAdvectedVenkatakrishnanDeferredCorrection.h"
+#include "FVAdvectedMUSCLDeferredCorrection.h"
 #include "FVGeometricAverage.h"
 #include "FVHarmonicAverage.h"
 #include "MathFVUtils.h"
@@ -453,7 +453,7 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
   }
 }
 
-TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
+TEST_F(FVInterpolationMethodTest, advectedMUSCLDeferredCorrection)
 {
   const auto & face = *_internal_face;
 
@@ -464,10 +464,10 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
   const Real mass_flux = 1.0;
 
   {
-    InputParameters params = _factory.getValidParams("FVAdvectedVenkatakrishnanDeferredCorrection");
+    InputParameters params = _factory.getValidParams("FVAdvectedMUSCLDeferredCorrection");
     params.set<Real>("deferred_correction_factor") = 0.0;
-    auto & method = addObject<FVAdvectedVenkatakrishnanDeferredCorrection>(
-        "FVAdvectedVenkatakrishnanDeferredCorrection", "adv_venkat_method_upwind", params);
+    auto & method = addObject<FVAdvectedMUSCLDeferredCorrection>(
+        "FVAdvectedMUSCLDeferredCorrection", "adv_muscl_method_upwind", params);
 
     const auto contrib = method.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
@@ -481,10 +481,10 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
   }
 
   {
-    InputParameters params = _factory.getValidParams("FVAdvectedVenkatakrishnanDeferredCorrection");
+    InputParameters params = _factory.getValidParams("FVAdvectedMUSCLDeferredCorrection");
     params.set<Real>("deferred_correction_factor") = 1.0;
-    auto & method = addObject<FVAdvectedVenkatakrishnanDeferredCorrection>(
-        "FVAdvectedVenkatakrishnanDeferredCorrection", "adv_venkat_method_full", params);
+    auto & method = addObject<FVAdvectedMUSCLDeferredCorrection>(
+        "FVAdvectedMUSCLDeferredCorrection", "adv_muscl_method_full", params);
 
     const auto contrib = method.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
@@ -504,10 +504,10 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
 
 TEST_F(FVInterpolationMethodTest, advectedFunctorOverloadsWithGradients)
 {
-  InputParameters params = _factory.getValidParams("FVAdvectedVenkatakrishnanDeferredCorrection");
+  InputParameters params = _factory.getValidParams("FVAdvectedMUSCLDeferredCorrection");
   params.set<Real>("deferred_correction_factor") = 1.0;
-  auto & method = addObject<FVAdvectedVenkatakrishnanDeferredCorrection>(
-      "FVAdvectedVenkatakrishnanDeferredCorrection", "adv_venkat_functor_method", params);
+  auto & method = addObject<FVAdvectedMUSCLDeferredCorrection>(
+      "FVAdvectedMUSCLDeferredCorrection", "adv_muscl_functor_method", params);
 
   const auto & face = *_internal_face;
   const Real elem_value = 2.0;
