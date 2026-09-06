@@ -17,8 +17,6 @@
 #include "MooseError.h"
 #include "libmesh/libmesh_common.h"
 
-using namespace libMesh;
-
 /**
  * ExpressionBuilder adds an interface to derived classes that enables
  * convenient construction of FParser expressions through operator overloading.

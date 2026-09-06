@@ -14,13 +14,12 @@
 
 #include "ContactLineSearchBase.h"
 
-using namespace libMesh;
-
 namespace libMesh
 {
 template <typename>
 class PetscNonlinearSolver;
 }
+using libMesh::PetscNonlinearSolver;
 
 /**
  *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)

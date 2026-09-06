@@ -235,8 +235,8 @@ XFEM::updateHeal()
   if (mesh_changed)
   {
     _mesh->update_parallel_id_counts();
-    MeshCommunication().make_elems_parallel_consistent(*_mesh);
-    MeshCommunication().make_nodes_parallel_consistent(*_mesh);
+    libMesh::MeshCommunication().make_elems_parallel_consistent(*_mesh);
+    libMesh::MeshCommunication().make_nodes_parallel_consistent(*_mesh);
     //    _mesh->find_neighbors();
     //    _mesh->contract();
     _mesh->allow_renumbering(false);
@@ -246,8 +246,8 @@ XFEM::updateHeal()
     if (_displaced_mesh)
     {
       _displaced_mesh->update_parallel_id_counts();
-      MeshCommunication().make_elems_parallel_consistent(*_displaced_mesh);
-      MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
+      libMesh::MeshCommunication().make_elems_parallel_consistent(*_displaced_mesh);
+      libMesh::MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
       _displaced_mesh->allow_renumbering(false);
       _displaced_mesh->skip_partitioning(true);
       _displaced_mesh->prepare_for_use();

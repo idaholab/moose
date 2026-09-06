@@ -14,7 +14,9 @@
 #include "libmesh/plane.h"
 #include "EFAPoint.h"
 
-using namespace libMesh;
+using libMesh::Plane;
+using libMesh::Point;
+using libMesh::Real;
 
 namespace Xfem
 {

@@ -13,7 +13,9 @@
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
 #include "libmesh/elem.h"
 
-using namespace libMesh;
+using libMesh::Elem;
+using libMesh::Point;
+using libMesh::Real;
 
 struct CutEdgeForCrackGrowthIncr
 {
