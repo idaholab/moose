@@ -65,6 +65,7 @@ class Pyramid;
 class Pyramid5;
 class Pyramid13;
 class Pyramid14;
+class Pyramid18;
 class Quad;
 class Quad4;
 class Quad8;
@@ -110,6 +111,8 @@ using libMesh::Pyramid13;
 using libMesh::PYRAMID13;
 using libMesh::Pyramid14;
 using libMesh::PYRAMID14;
+using libMesh::Pyramid18;
+using libMesh::PYRAMID18;
 using libMesh::Pyramid5;
 using libMesh::PYRAMID5;
 using libMesh::Quad;
@@ -135,6 +138,7 @@ using libMesh::Tri6;
 using libMesh::TRI6;
 using libMesh::Tri7;
 using libMesh::TRI7;
+using libMesh::C0POLYGON;
 
 // Continuity types
 using libMesh::C_ONE;
@@ -251,7 +255,12 @@ using libMesh::L2_LAGRANGE;
 using libMesh::LAGRANGE;
 using libMesh::LAGRANGE_VEC;
 using libMesh::MONOMIAL;
+using libMesh::MONOMIAL_VEC;
 using libMesh::SCALAR;
+using libMesh::NEDELEC_ONE;
+using libMesh::RAVIART_THOMAS;
+using libMesh::L2_RAVIART_THOMAS;
+using libMesh::HERMITE;
 
 // Counting from 0 to 20
 using libMesh::CONSTANT;
