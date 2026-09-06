@@ -31,8 +31,6 @@
 
 #include "libmesh/string_to_enum.h"
 
-using namespace libMesh;
-
 std::map<VariableName, int> Simulation::_component_variable_order_map;
 
 void
@@ -127,7 +125,7 @@ Simulation::setupQuadrature()
       order = fe_type.default_quadrature_order();
   }
 
-  _fe_problem.createQRules(QGAUSS, order, order, order);
+  _fe_problem.createQRules(libMesh::QGAUSS, order, order, order);
 }
 
 void

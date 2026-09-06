@@ -16,7 +16,6 @@
 #include "libmesh/communicator.h"
 #include "libmesh/parallel_object.h"
 
-using namespace libMesh;
 using namespace StochasticTools;
 
 Real
@@ -108,7 +107,7 @@ TEST(StochasticTools, Sobol_Saltelli2002)
 
     // Compute SOBOL indices
     Parallel::Communicator comm;
-    ParallelObject po(comm);
+    libMesh::ParallelObject po(comm);
     SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
@@ -150,7 +149,7 @@ TEST(StochasticTools, Sobol_Saltelli2002)
   {
     // Construct Sobol calculator
     Parallel::Communicator comm;
-    ParallelObject po(comm);
+    libMesh::ParallelObject po(comm);
     SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", true);
 
     // Construct bootstrap calculator
@@ -286,7 +285,7 @@ TEST(StochasticTools, Sobol_Analytical)
 
   // Compute SOBOL indices
   Parallel::Communicator comm;
-  ParallelObject po(comm);
+  libMesh::ParallelObject po(comm);
 
   {
     // Compute SOBOL vectors of g_function

@@ -18,8 +18,6 @@
 #include <array>
 #include <utility>
 
-using namespace libMesh;
-
 namespace
 {
 // Add the points to the mesh (node id == index) and return the created nodes.
@@ -51,7 +49,7 @@ edgeLoopIsWatertight(const Parallel::Communicator & comm,
                      const std::vector<Point> & points,
                      const std::vector<std::pair<unsigned int, unsigned int>> & edges)
 {
-  SerialMesh mesh(comm);
+  libMesh::SerialMesh mesh(comm);
   const auto nodes = addNodes(mesh, points);
   for (const auto & [id0, id1] : edges)
   {
@@ -69,7 +67,7 @@ triSurfaceIsWatertight(const Parallel::Communicator & comm,
                        const std::vector<Point> & points,
                        const std::vector<std::array<unsigned int, 3>> & faces)
 {
-  SerialMesh mesh(comm);
+  libMesh::SerialMesh mesh(comm);
   const auto nodes = addNodes(mesh, points);
   for (const auto & f : faces)
   {

@@ -14,8 +14,6 @@
 
 #include "libmesh/nonlinear_implicit_system.h"
 
-using namespace libMesh;
-
 InputParameters
 SIMPLESolveNonlinearAssembly::validParams()
 {
@@ -64,7 +62,7 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     _momentum_system_numbers.push_back(_problem.nlSysNum(_momentum_system_names[system_i]));
     _momentum_systems.push_back(
         &_problem.getNonlinearSystemBase(_momentum_system_numbers[system_i]));
-    _momentum_systems[system_i]->addVector(_pressure_tag_id, false, ParallelType::PARALLEL);
+    _momentum_systems[system_i]->addVector(_pressure_tag_id, false, PARALLEL);
 
     // We disable this considering that this object passes petsc options a little differently
     _momentum_systems[system_i]->system().prefix_with_name(false);
@@ -184,8 +182,8 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
     NonlinearImplicitSystem & momentum_system =
         cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
 
-    PetscLinearSolver<Real> & momentum_solver =
-        cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+    libMesh::PetscLinearSolver<Real> & momentum_solver =
+        cast_ref<libMesh::PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
@@ -257,8 +255,8 @@ SIMPLESolveNonlinearAssembly::solvePressureCorrector()
   NumericVector<Number> & rhs = *(pressure_system.rhs);
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & pressure_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & pressure_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
@@ -325,8 +323,8 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   auto diff_diagonal = solution.zero_clone();
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & linear_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & linear_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
@@ -391,8 +389,8 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
   NumericVector<Number> & rhs = *(se_system.rhs);
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & se_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*se_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & se_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*se_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side

@@ -13,8 +13,6 @@
 #include "LinearSystem.h"
 #include "Executioner.h"
 
-using namespace libMesh;
-
 InputParameters
 LinearAssemblySegregatedSolve::validParams()
 {
@@ -363,8 +361,8 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   LinearImplicitSystem & momentum_system_0 =
       cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
 
-  PetscLinearSolver<Real> & momentum_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & momentum_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
 
   // Solve the momentum equations.
   // TO DO: These equations are VERY similar. If we can store the differences (things coming from
@@ -484,8 +482,8 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   NumericVector<Number> & rhs = *(pressure_system.rhs);
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & pressure_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & pressure_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   _problem.computeLinearSystemSys(pressure_system, mmat, rhs, false);
 
@@ -553,8 +551,8 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
   NumericVector<Number> & rhs = *(system.rhs);
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & solver =
-      cast_ref<PetscLinearSolver<Real> &>(*system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*system.get_linear_solver());
 
   _problem.computeLinearSystemSys(system, mmat, rhs, false);
 
@@ -648,7 +646,7 @@ std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num,
                                                    LinearSystem & system,
                                                    const Real relaxation_factor,
-                                                   SolverConfiguration & solver_config,
+                                                   libMesh::SolverConfiguration & solver_config,
                                                    const Real absolute_tol,
                                                    const bool reuse_pc,
                                                    const Real field_relaxation,
@@ -669,8 +667,8 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   auto diff_diagonal = solution.zero_clone();
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & linear_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & linear_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
 
   _problem.computeLinearSystemSys(li_system, mmat, rhs, true);
 

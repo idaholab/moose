@@ -21,8 +21,6 @@
 #include "libmesh/petsc_vector.h"
 #include "petscmat.h"
 
-using namespace libMesh;
-
 InputParameters
 AdjointSolve::validParams()
 {
@@ -186,7 +184,7 @@ AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
     if (petsc_matrix && petsc_solution && petsc_rhs)
       LibmeshPetscCall(MatZeroRowsColumns(petsc_matrix->mat(),
                                           cast_int<PetscInt>(nbc_dofs.size()),
-                                          numeric_petsc_cast(nbc_dofs.data()),
+                                          libMesh::numeric_petsc_cast(nbc_dofs.data()),
                                           1.0,
                                           petsc_solution->vec(),
                                           petsc_rhs->vec()));
@@ -203,7 +201,7 @@ AdjointSolve::checkIntegrity()
   for (const auto & adj_var : adj_vars)
     // If the user supplies any scaling factors for individual variables the
     // adjoint system won't be consistent.
-    if (!absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
+    if (!libMesh::absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
       mooseError(
           "User cannot supply scaling factors for adjoint variables.   Adjoint system is scaled "
           "automatically by the forward system.");
