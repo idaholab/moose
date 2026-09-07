@@ -7,6 +7,7 @@ so I figure this is a good place to put it.
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
+#include "MooseError.h"
 
 namespace Moose::MFEM
 {
