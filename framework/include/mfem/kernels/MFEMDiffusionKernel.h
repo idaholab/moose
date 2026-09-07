@@ -28,8 +28,7 @@ public:
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
-  mfem::Coefficient & _coef;
-  mfem::MatrixCoefficient & _matrix_coef;
+  MFEMCoefficientVariant _variant_coef;
 };
 
 #endif
