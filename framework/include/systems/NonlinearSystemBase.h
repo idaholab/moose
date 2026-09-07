@@ -335,6 +335,14 @@ public:
   void reportKokkosMatrixFreeCoverage();
 
   /**
+   * Check every p-multigrid level's operator against its diagonal, by applying the operator to one
+   * unit vector per degree of freedom of the level and comparing the entry the application lands on
+   * with the diagonal the level computes. Runs after a linearization, when the quadrature-point
+   * Jacobian cache the levels contract holds it, and errors out on the first mismatch.
+   */
+  void verifyKokkosLevelOperators();
+
+  /**
    * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
    * using the partial-assembly Jacobian-vector product hooks on active Kokkos kernels/nodal BCs.
    * This is the MatMult callback for the Kokkos matrix-free Amat shell.

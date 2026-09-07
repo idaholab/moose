@@ -33,9 +33,27 @@ public:
 
   virtual void initialSetup() override;
 
+  /**
+   * Get the coarse levels' function spaces, ascending in order
+   * @returns The levels
+   */
+  const std::vector<std::unique_ptr<Moose::Kokkos::PLevelSpace>> & levels() const
+  {
+    return _levels;
+  }
+
+  /**
+   * Get whether each level's operator is to be checked against its diagonal
+   * @returns Whether to check
+   */
+  bool verifyLevelOperators() const { return _verify_level_operators; }
+
 protected:
   /// The polynomial order of each coarse level, ascending; the fine level is not listed
   const std::vector<unsigned int> _level_orders;
+
+  /// Whether each level's operator is to be checked against its diagonal
+  const bool _verify_level_operators;
 
   /// The coarse levels' function spaces, ascending in order
   std::vector<std::unique_ptr<Moose::Kokkos::PLevelSpace>> _levels;

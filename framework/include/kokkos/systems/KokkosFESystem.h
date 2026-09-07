@@ -91,6 +91,13 @@ public:
   std::size_t qpJacobianCacheBytes() const { return _qp_jacobian.localBytes(); }
 
   /**
+   * Get the quadrature-point Jacobian cache, which every level of a p-multigrid hierarchy contracts
+   * against its own basis tables
+   * @returns The cache
+   */
+  const QpJacobianCache & qpJacobianCache() const { return _qp_jacobian; }
+
+  /**
    * Build the level context of the fine level: this system's own DOF layout, FE types and tagged
    * vectors, with the rows a nodal BC constrains for a matrix tag held fixed
    * @param matrix_tag The matrix tag whose nodal BC rows the level holds fixed
