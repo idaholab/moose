@@ -23,21 +23,27 @@ MFEMMixedVectorGradientKernel::validParams()
       "$(k\\vec\\nabla u, \\vec v)_\\Omega$ "
       "arising from the weak form of the gradient operator "
       "$k\\vec \\nabla u$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
+  params.addParam<MFEMScalarCoefficientName>(
+      MFEMKernel::COEFFICIENT_PARAM,
+      "1.",
+      "Name of scalar coefficient k to multiply the integrator by.");
+  params.addParam<MFEMMatrixCoefficientName>(MFEMKernel::MATRIX_COEFFICIENT_PARAM,
+                                             "Name of matrix coefficient for property k. Mutually "
+                                             "exclusive with parameter 'coefficient'.");
   return params;
 }
 
 MFEMMixedVectorGradientKernel::MFEMMixedVectorGradientKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMMixedBilinearFormKernel(parameters)
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMMixedVectorGradientKernel::createMBFIntegrator()
 {
-  return new mfem::MixedVectorGradientIntegrator(_coef);
+  auto coeffs = getMFEMProblem().getCoefficients().resolveCoefficientVariant(
+      _pars, MFEMKernel::COEFFICIENT_PARAM, MFEMKernel::MATRIX_COEFFICIENT_PARAM);
+  return std::visit([](auto & c) { return new mfem::MixedVectorGradientIntegrator(c); }, coeffs);
 }
 
 #endif
