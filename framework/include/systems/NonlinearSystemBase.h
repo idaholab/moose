@@ -313,11 +313,26 @@ public:
   void setKokkosInitialSolution();
 
   /**
+   * Install a shell matrix as this system's libMesh system matrix, so that the PETSc solver takes
+   * it for both Amat and Pmat and no assembled matrix is ever allocated. Must run before
+   * EquationSystems::init(). Only called when matrix-free mode is enabled.
+   */
+  void setupKokkosMatrixFreeSystemMatrix();
+
+  /**
    * Set up the persistent direction vector and vector tags used by the Kokkos matrix-free
-   * Jacobian-vector product, and propagate the tags to every active Kokkos kernel/nodal BC. Only
-   * called when matrix-free mode is enabled.
+   * Jacobian-vector product, propagate the tags to every active Kokkos kernel/nodal BC, and
+   * register the shell operations the solve and its preconditioner call. Only called when
+   * matrix-free mode is enabled.
    */
   void setupKokkosMatrixFreeJacobian();
+
+  /**
+   * Print, once per run, which active Kokkos kernels the quadrature-point Jacobian cache covers and
+   * how much storage the cache occupies. The cache is sized from the quadrature rule, so its
+   * storage is only known once the first fill has allocated it.
+   */
+  void reportKokkosMatrixFreeCoverage();
 
   /**
    * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
@@ -330,9 +345,9 @@ public:
 
   /**
    * Compute the diagonal of the (unassembled) Kokkos Jacobian, using the partial-assembly
-   * Jacobian diagonal hooks on active Kokkos kernels. This is the MatGetDiagonal callback for a
-   * Kokkos matrix-free shell that is also the tagged system matrix (see
-   * SystemBase::addShellMatrix()), e.g. a Multigrid level operator.
+   * Jacobian diagonal hooks on active Kokkos kernels. This is the MatGetDiagonal callback for the
+   * Kokkos matrix-free shell installed as the system matrix by
+   * setupKokkosMatrixFreeSystemMatrix(), and is what a Jacobi or Chebyshev preconditioner reads.
    * @param diag The diagonal vector (owned by the caller); zeroed and filled by this call
    */
   void computeKokkosJacobianDiagonal(Vec diag);
@@ -1005,11 +1020,11 @@ protected:
   /// Kokkos matrix-free Jacobian-vector product state; only populated when matrix-free mode is
   /// enabled (setupKokkosMatrixFreeJacobian())
   bool _kokkos_mf_enabled = false;
+  bool _kokkos_mf_reported = false;
   TagID _kokkos_mf_x_tag = 0;
   TagID _kokkos_mf_y_tag = 0;
   TagID _kokkos_mf_diag_tag = 0;
   NumericVector<Number> * _kokkos_mf_x = nullptr;
-  std::unique_ptr<libMesh::PetscMatrixShellMatrix<Number>> _kokkos_mf_shell;
   ///@}
 #endif
 

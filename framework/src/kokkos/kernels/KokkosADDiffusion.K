@@ -9,15 +9,15 @@
 
 #include "KokkosADDiffusion.h"
 
-registerKokkosADResidualObject("MooseApp", KokkosADDiffusion);
+registerKokkosResidualObject("MooseApp", KokkosADDiffusion);
 
 InputParameters
 KokkosADDiffusion::validParams()
 {
-  auto params = ADKernel::validParams();
+  auto params = ADKernelGrad::validParams();
   params.addClassDescription("Same as `KokkosDiffusion` in terms of physics/residual, but the "
                              "Jacobian is computed using forward automatic differentiation");
   return params;
 }
 
-KokkosADDiffusion::KokkosADDiffusion(const InputParameters & parameters) : ADKernel(parameters) {}
+KokkosADDiffusion::KokkosADDiffusion(const InputParameters & parameters) : ADKernelGrad(parameters) {}

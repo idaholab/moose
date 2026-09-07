@@ -11,12 +11,17 @@
 
 #include "KokkosADKernelGrad.h"
 
-class KokkosADDiffusion : public Moose::Kokkos::ADKernelGrad
+/**
+ * Diffusion with the solution-dependent conductivity $1 + u^2$, whose linearization occupies both
+ * flux blocks of the quadrature-point Jacobian tensor: the flux depends on the solution value
+ * through the conductivity and on the solution gradient through the gradient it multiplies.
+ */
+class KokkosADNonlinearDiffusion : public Moose::Kokkos::ADKernelGrad
 {
 public:
   static InputParameters validParams();
 
-  KokkosADDiffusion(const InputParameters & parameters);
+  KokkosADNonlinearDiffusion(const InputParameters & parameters);
 
   template <typename T>
   KOKKOS_FUNCTION Moose::Kokkos::Vector3<T> computeQpFlux(const T & u,
@@ -27,10 +32,10 @@ public:
 
 template <typename T>
 KOKKOS_FUNCTION Moose::Kokkos::Vector3<T>
-KokkosADDiffusion::computeQpFlux(const T & /* u */,
-                                 const Moose::Kokkos::Vector3<T> & grad_u,
-                                 const unsigned int /* qp */,
-                                 AssemblyDatum & /* datum */) const
+KokkosADNonlinearDiffusion::computeQpFlux(const T & u,
+                                          const Moose::Kokkos::Vector3<T> & grad_u,
+                                          const unsigned int /* qp */,
+                                          AssemblyDatum & /* datum */) const
 {
-  return grad_u;
+  return (1.0 + u * u) * grad_u;
 }

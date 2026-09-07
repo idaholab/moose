@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "KokkosKernel.h"
 #include "KokkosKernelBase.h"
 #include "KokkosNodalKernelBase.h"
 #include "KokkosNodalBCBase.h"
@@ -147,6 +148,22 @@ NonlinearSystemBase::setKokkosInitialSolution()
 }
 
 void
+NonlinearSystemBase::setupKokkosMatrixFreeSystemMatrix()
+{
+  // Register a shell under the name libMesh uses for an implicit system's own matrix, so that
+  // ImplicitSystem::add_matrices() finds it already present and keeps it. That matrix is what
+  // PetscNonlinearSolver::init() hands SNESSetJacobian for both Amat and Pmat, so the operator
+  // action serves Amat and the partially assembled diagonal serves everything a preconditioner
+  // reads from Pmat, with no compressed-row matrix allocated for this system at all.
+  //
+  // Running before EquationSystems::init() makes late_matrix_init() a no-op here; the ordinary
+  // System::init_matrices() then attaches the DofMap and calls
+  // PetscMatrixShellMatrix::init(ParallelType), which sizes the shell from that DofMap.
+  _matrix_free_operator = &system().add_matrix(
+      "System Matrix", std::make_unique<libMesh::PetscMatrixShellMatrix<Number>>(comm()));
+}
+
+void
 NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
 {
   if (_kokkos_mf_enabled)
@@ -155,8 +172,7 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
   using Moose::Kokkos::DispatcherRegistry;
 
   // Suffixed with name() because these tags are added at the FEProblem level and would otherwise
-  // collide across multiple matrix-free systems, e.g. the per-level systems of a Multigrid
-  // preconditioner
+  // collide across multiple matrix-free systems
   _kokkos_mf_x_tag = _fe_problem.addVectorTag(name() + "_kokkos_mf_x", Moose::VECTOR_TAG_SOLUTION);
   _kokkos_mf_y_tag = _fe_problem.addVectorTag(name() + "_kokkos_mf_y", Moose::VECTOR_TAG_RESIDUAL);
   _kokkos_mf_diag_tag =
@@ -164,24 +180,81 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
 
   _kokkos_mf_x = &addVector(_kokkos_mf_x_tag, false, libMesh::GHOSTED);
 
+  auto & fe_system = _fe_problem.getKokkosFESystems()[number()];
+
+  fe_system.enableQpJacobianCache();
+
   for (auto & kernel : _kokkos_kernels.getObjects(0))
   {
-    auto & object = *std::static_pointer_cast<Moose::Kokkos::ResidualObject>(kernel);
+    auto & object = *std::static_pointer_cast<Moose::Kokkos::KernelBase>(kernel);
 
-    // A plain (non-factored) kernel admits no partial-assembly decomposition and its matvec hook
-    // is an abort-by-default stub; catch that here with a clean error instead of a device abort.
+    // A kernel that supplies its quadrature-point linearization is served by the cache, whose
+    // consumers contract it against the basis tables themselves
+    const bool cached = object.usesQpJacobianCache();
+
+    // A kernel outside the cache must implement the operator-action loop itself. When it does
+    // neither, its matvec hook is an abort-by-default stub; catch that here with a clean error
+    // instead of a device abort.
     if (DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::JacobianLoop>(
             object.type()) &&
         !DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::JacobianVectorProductLoop>(
+            object.type()) &&
+        !cached)
+      mooseError("The Kokkos matrix-free Jacobian-vector product does not support kernel '",
+                 object.name(),
+                 "' of type '",
+                 object.type(),
+                 "'. Define computeQpJacobianTensor() so its linearization enters the "
+                 "quadrature-point Jacobian cache.");
+
+    // The cache is keyed on (subdomain, variable) and every operator-action loop contracts against
+    // the kernel's own variable, so a coupling to another variable would be dropped silently.
+    if (DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::OffDiagJacobianLoop>(
             object.type()))
       mooseError("The Kokkos matrix-free Jacobian-vector product does not support kernel '",
                  object.name(),
                  "' of type '",
                  object.type(),
-                 "', which is a plain (non-factored) kernel. Derive from KernelGrad or "
-                 "KernelValue instead.");
+                 "', which has an off-diagonal Jacobian contribution.");
+
+    if (cached)
+    {
+      const auto blocks = object.qpJacobianBlocks();
+
+      if (blocks == Moose::Kokkos::QP_JACOBIAN_NONE)
+        mooseError("Kokkos kernel '",
+                   object.name(),
+                   "' of type '",
+                   object.type(),
+                   "' defines computeQpJacobianTensor() but declares no quadrature-point "
+                   "Jacobian blocks. Override qpJacobianBlocks() to return the blocks it "
+                   "populates.");
+
+      for (const auto subdomain : _mesh.meshSubdomains())
+        if (object.hasBlocks(subdomain))
+          fe_system.addQpJacobianBlocks(subdomain, object.variable().number(), blocks);
+    }
 
     object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
+  }
+
+  // Integrated boundary conditions contribute to the Jacobian through the same element assembly the
+  // kernels use, and nothing in the matrix-free path evaluates them, so any Jacobian contribution
+  // they carry would be missing from the operator action.
+  for (auto & ibc : _kokkos_integrated_bcs.getObjects(0))
+  {
+    auto & object = *std::static_pointer_cast<Moose::Kokkos::ResidualObject>(ibc);
+
+    if (DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::JacobianLoop>(
+            object.type()) ||
+        DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::OffDiagJacobianLoop>(
+            object.type()))
+      mooseError("The Kokkos matrix-free Jacobian-vector product does not support the integrated "
+                 "boundary condition '",
+                 object.name(),
+                 "' of type '",
+                 object.type(),
+                 "', which has a Jacobian contribution.");
   }
 
   for (auto & nbc : _kokkos_nodal_bcs.getObjects(0))
@@ -198,55 +271,50 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
     object.setMatrixFreeTags(_kokkos_mf_x_tag, _kokkos_mf_y_tag, _kokkos_mf_diag_tag);
   }
 
-  // A Multigrid level system has already had its own shell installed as the tagged system matrix
-  // (SystemBase::addShellMatrix(), called early enough -- before EquationSystems::init() -- to
-  // stop libMesh ever allocating a CSR default in its place). That shell is already both Amat and
-  // Pmat for this system, so all that remains is registering the two PETSc operations the level
-  // preconditioner needs (MatMult for the operator action, MatGetDiagonal for the PA diagonal),
-  // pointed at this system's own matrix-free callbacks.
-  if (hasMatrix(systemMatrixTag()))
+  // Automatic scaling reads its factors from the diagonal of an assembled Jacobian, which a
+  // matrix-free system never forms.
+  if (automaticScaling())
+    mooseError("Automatic scaling is not supported for a Kokkos matrix-free system, which forms no "
+               "assembled Jacobian for the scaling factors to be read from.");
+
+  // Every Jacobian contribution has to come from a Kokkos object. With no compressed-row matrix in
+  // the system, the assembly sweep serving the non-Kokkos warehouses has nowhere to write, so a
+  // Jacobian contribution from one of them would be missing from the operator action.
+  auto check_non_kokkos = [](const auto & warehouse, const std::string & description)
   {
-    auto * const shell =
-        dynamic_cast<libMesh::PetscMatrixShellMatrix<Number> *>(&getMatrix(systemMatrixTag()));
+    if (warehouse.hasObjects())
+      mooseError("The Kokkos matrix-free Jacobian does not support ",
+                 description,
+                 ", whose Jacobian contribution is assembled into a matrix a matrix-free system "
+                 "does not have.");
+  };
 
-    if (shell)
-    {
-      LibmeshPetscCallA(comm().get(), MatShellSetContext(shell->mat(), this));
-      LibmeshPetscCallA(comm().get(),
-                        MatShellSetOperation(
-                            shell->mat(), MATOP_MULT, (void (*)(void))mooseKokkosMatShellMult));
-      LibmeshPetscCallA(comm().get(),
-                        MatShellSetOperation(shell->mat(),
-                                             MATOP_GET_DIAGONAL,
-                                             (void (*)(void))mooseKokkosMatShellGetDiagonal));
+  check_non_kokkos(_kernels, "non-Kokkos kernels");
+  check_non_kokkos(_nodal_kernels, "non-Kokkos nodal kernels");
+  check_non_kokkos(_scalar_kernels, "scalar kernels");
+  check_non_kokkos(_dg_kernels, "DG kernels");
+  check_non_kokkos(_interface_kernels, "interface kernels");
+  check_non_kokkos(_hybridized_kernels, "hybridized kernels");
+  check_non_kokkos(_dirac_kernels, "Dirac kernels");
+  check_non_kokkos(_integrated_bcs, "non-Kokkos integrated boundary conditions");
+  check_non_kokkos(_nodal_bcs, "non-Kokkos nodal boundary conditions");
+  check_non_kokkos(_constraints, "constraints");
 
-      _kokkos_mf_enabled = true;
-      return;
-    }
-  }
+  // The system matrix installed by setupKokkosMatrixFreeSystemMatrix() is already both Amat and
+  // Pmat, so all that remains is registering the two PETSc operations the solve calls: MatMult for
+  // the operator action, and MatGetDiagonal for the partially assembled diagonal a Jacobi or
+  // Chebyshev preconditioner smooths with.
+  auto & shell = libMesh::cast_ref<libMesh::PetscMatrixShellMatrix<Number> &>(
+      libMesh::cast_ref<libMesh::ImplicitSystem &>(system()).get_system_matrix());
 
-  // Otherwise (no Multigrid level shell already in place): build the matrix-free Amat shell,
-  // sized from the DofMap (not from Pmat, which need not be allocated yet), and register it with
-  // the PETSc nonlinear solver so every subsequent solve() call uses it for Amat automatically --
-  // no per-solve swap logic needed on our side. This is the original single-system, unpreconditioned
-  // matrix-free path; Pmat is untouched.
-  const auto & dof_map = system().get_dof_map();
-  const auto m = dof_map.n_dofs();
-  const auto m_l = dof_map.n_local_dofs();
-
-  _kokkos_mf_shell = std::make_unique<libMesh::PetscMatrixShellMatrix<Number>>(comm());
-  _kokkos_mf_shell->init(m, m, m_l, m_l);
-
-  // Overwrite the context init() set (a pointer to _kokkos_mf_shell itself, needed by no PETSc
-  // operation this class ever registers) with the context our own MatMult callback expects.
-  LibmeshPetscCallA(comm().get(), MatShellSetContext(_kokkos_mf_shell->mat(), this));
+  LibmeshPetscCallA(comm().get(), MatShellSetContext(shell.mat(), this));
+  LibmeshPetscCallA(
+      comm().get(),
+      MatShellSetOperation(shell.mat(), MATOP_MULT, (void (*)(void))mooseKokkosMatShellMult));
   LibmeshPetscCallA(comm().get(),
-                    MatShellSetOperation(_kokkos_mf_shell->mat(),
-                                         MATOP_MULT,
-                                         (void (*)(void))mooseKokkosMatShellMult));
-
-  libMesh::cast_ptr<libMesh::NonlinearImplicitSystem *>(&system())
-      ->set_operator_matrix(_kokkos_mf_shell.get());
+                    MatShellSetOperation(shell.mat(),
+                                         MATOP_GET_DIAGONAL,
+                                         (void (*)(void))mooseKokkosMatShellGetDiagonal));
 
   _kokkos_mf_enabled = true;
 }
@@ -279,8 +347,20 @@ NonlinearSystemBase::computeKokkosJacobianDiagonal(Vec diag)
 
   systems.copyToDevice();
 
+  if (!systems[number()].qpJacobianCacheValid())
+    mooseError("The Kokkos quadrature-point Jacobian cache does not hold a linearization. The "
+               "Jacobian diagonal must be requested only after a Jacobian evaluation at the "
+               "solution state it is to reflect.");
+
+  systems[number()].computeQpJacobianDiagonal(_kokkos_mf_diag_tag, systemMatrixTag());
+
   for (auto & kernel : _kokkos_kernels.getActiveObjects())
-    std::static_pointer_cast<Moose::Kokkos::KernelBase>(kernel)->computeJacobianDiagonal();
+  {
+    auto & object = static_cast<Moose::Kokkos::KernelBase &>(*kernel);
+
+    if (!object.usesQpJacobianCache())
+      object.computeJacobianDiagonal();
+  }
 
   for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->computeJacobianDiagonal();
@@ -557,19 +637,47 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosKernel", 1);
 
-    // Compute kernels
+    // Compute kernels. A matrix-free system has no compressed-row matrix for these to accumulate
+    // into: the quadrature-point cache filled below carries everything the operator action and its
+    // preconditioner need, including the rows the nodal boundary conditions constrain.
+    if (!_kokkos_mf_enabled)
+    {
+      for (auto & kernel : kernels.getActiveObjects())
+        kernel->computeJacobian();
 
-    for (auto & kernel : kernels.getActiveObjects())
-      kernel->computeJacobian();
+      for (auto & nodal_kernel : nodal_kernels.getActiveObjects())
+        nodal_kernel->computeJacobian();
 
-    for (auto & nodal_kernel : nodal_kernels.getActiveObjects())
-      nodal_kernel->computeJacobian();
+      for (auto & ibc : integrated_bcs.getActiveObjects())
+        ibc->computeJacobian();
 
-    for (auto & ibc : integrated_bcs.getActiveObjects())
-      ibc->computeJacobian();
+      for (auto & nbc : nodal_bcs.getActiveObjects())
+        nbc->computeJacobian();
+    }
 
-    for (auto & nbc : nodal_bcs.getActiveObjects())
-      nbc->computeJacobian();
+    // Refill the quadrature-point Jacobian cache, which the matrix-free operator action and
+    // diagonal are contracted from, at the same solution state this sweep was evaluated at
+    if (_kokkos_mf_enabled)
+    {
+      {
+        TIME_SECTION("KokkosQpJacobianCache", 2);
+
+        systems[number()].clearQpJacobianCache();
+
+        for (auto & kernel : kernels.getActiveObjects())
+        {
+          auto & object = static_cast<Moose::Kokkos::KernelBase &>(*kernel);
+
+          if (object.usesQpJacobianCache())
+            object.computeQpJacobianCache();
+        }
+
+        systems[number()].validateQpJacobianCache();
+      }
+
+      // Reported outside the timed section so the one-time diagnostic is not attributed to the fill
+      reportKokkosMatrixFreeCoverage();
+    }
   }
 
   // Close and restore vectors and matrices
@@ -672,20 +780,60 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   {
     TIME_SECTION("KokkosKernel", 1);
 
-    // Compute kernels
+    // Compute kernels. A matrix-free system has no compressed-row matrix for the Jacobian half of
+    // these contributions to accumulate into, so only the residual half is swept there; the
+    // quadrature-point cache filled below carries everything the operator action and its
+    // preconditioner need, including the rows the nodal boundary conditions constrain.
+    if (_kokkos_mf_enabled)
+    {
+      for (auto & kernel : _kokkos_kernels.getActiveObjects())
+        kernel->computeResidual();
 
-    for (auto & kernel : _kokkos_kernels.getActiveObjects())
-      kernel->computeResidualAndJacobian();
+      for (auto & nodal_kernel : _kokkos_nodal_kernels.getActiveObjects())
+        nodal_kernel->computeResidual();
 
-    for (auto & nodal_kernel : _kokkos_nodal_kernels.getActiveObjects())
-      nodal_kernel->computeResidualAndJacobian();
+      for (auto & ibc : _kokkos_integrated_bcs.getActiveObjects())
+        ibc->computeResidual();
+    }
+    else
+    {
+      for (auto & kernel : _kokkos_kernels.getActiveObjects())
+        kernel->computeResidualAndJacobian();
 
-    for (auto & ibc : _kokkos_integrated_bcs.getActiveObjects())
-      ibc->computeResidualAndJacobian();
+      for (auto & nodal_kernel : _kokkos_nodal_kernels.getActiveObjects())
+        nodal_kernel->computeResidualAndJacobian();
 
-    /// Nodal BC residuals are computed separately
-    for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
-      nbc->computeJacobian();
+      for (auto & ibc : _kokkos_integrated_bcs.getActiveObjects())
+        ibc->computeResidualAndJacobian();
+
+      /// Nodal BC residuals are computed separately
+      for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
+        nbc->computeJacobian();
+    }
+
+    // Refill the quadrature-point Jacobian cache, which the matrix-free operator action and
+    // diagonal are contracted from, at the same solution state this sweep was evaluated at
+    if (_kokkos_mf_enabled)
+    {
+      {
+        TIME_SECTION("KokkosQpJacobianCache", 2);
+
+        systems[number()].clearQpJacobianCache();
+
+        for (auto & kernel : _kokkos_kernels.getActiveObjects())
+        {
+          auto & object = static_cast<Moose::Kokkos::KernelBase &>(*kernel);
+
+          if (object.usesQpJacobianCache())
+            object.computeQpJacobianCache();
+        }
+
+        systems[number()].validateQpJacobianCache();
+      }
+
+      // Reported outside the timed section so the one-time diagnostic is not attributed to the fill
+      reportKokkosMatrixFreeCoverage();
+    }
   }
 
   // Close and restore vectors and matrices
@@ -707,6 +855,43 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
   }
+}
+
+void
+NonlinearSystemBase::reportKokkosMatrixFreeCoverage()
+{
+  if (_kokkos_mf_reported)
+    return;
+
+  _kokkos_mf_reported = true;
+
+  using Moose::Kokkos::DispatcherRegistry;
+
+  _console << "\nKokkos matrix-free Jacobian coverage for system '" << name() << "':\n";
+
+  for (auto & kernel : _kokkos_kernels.getObjects(0))
+  {
+    auto & object = *std::static_pointer_cast<Moose::Kokkos::KernelBase>(kernel);
+
+    std::string coverage;
+
+    if (object.usesQpJacobianCache())
+      coverage = "quadrature-point Jacobian cache";
+    else if (DispatcherRegistry::hasUserMethod<
+                 Moose::Kokkos::ResidualObject::JacobianVectorProductLoop>(object.type()))
+      coverage = "operator action of its own";
+    else
+      coverage = "no Jacobian contribution";
+
+    _console << "  " << object.name() << " (" << object.type() << "): " << coverage << '\n';
+  }
+
+  auto bytes = _fe_problem.getKokkosFESystems()[number()].qpJacobianCacheBytes();
+  _communicator.sum(bytes);
+
+  _console << "  quadrature-point Jacobian cache storage: " << Real(bytes) / (1024 * 1024)
+           << " MB\n"
+           << std::endl;
 }
 
 void
@@ -748,8 +933,20 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
 
   systems.copyToDevice();
 
+  if (!systems[number()].qpJacobianCacheValid())
+    mooseError("The Kokkos quadrature-point Jacobian cache does not hold a linearization. The "
+               "matrix-free Jacobian-vector product must be requested only after a Jacobian "
+               "evaluation at the solution state it is to reflect.");
+
+  systems[number()].applyQpJacobian(_kokkos_mf_x_tag, _kokkos_mf_y_tag, systemMatrixTag());
+
   for (auto & kernel : _kokkos_kernels.getActiveObjects())
-    std::static_pointer_cast<Moose::Kokkos::KernelBase>(kernel)->computeJacobianVectorProduct();
+  {
+    auto & object = static_cast<Moose::Kokkos::KernelBase &>(*kernel);
+
+    if (!object.usesQpJacobianCache())
+      object.computeJacobianVectorProduct();
+  }
 
   for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->computeJacobianVectorProduct();
