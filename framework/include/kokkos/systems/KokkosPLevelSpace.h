@@ -14,13 +14,16 @@
 
 #include "libmesh/system.h"
 
+class ConsoleStream;
 class NonlinearSystemBase;
 
 namespace Moose::Kokkos
 {
 
+class LevelTransfer;
 class QpJacobianCache;
 class QpJacobianLevel;
+struct TransferSide;
 
 /**
  * One coarse level of a p-multigrid hierarchy: the fine system's variables at a reduced polynomial
@@ -48,10 +51,29 @@ public:
   PLevelSpace(NonlinearSystemBase & fine, unsigned int order);
 
   /**
+   * Destructor
+   */
+  ~PLevelSpace();
+
+  /**
    * Build the level's device DOF layout. Must be called once the equation systems are initialized
    * and the Kokkos mesh is available, which is to say no earlier than initial setup.
    */
   void init();
+
+  /**
+   * Build the transfer between this level and the next finer level. Must be called once init() has
+   * been called on both levels, so that both sides have a DOF layout.
+   * @param finer The next finer level, or null when the next finer level is the solver system
+   */
+  void initTransfer(PLevelSpace * finer);
+
+  /**
+   * Check that the transfer to the next finer level restricts by the transpose of the way it
+   * prolongs, and report the agreement
+   * @param console The stream the agreement is reported on
+   */
+  void verifyTransfer(const ConsoleStream & console);
 
   /**
    * Get the polynomial order of the level
@@ -82,6 +104,12 @@ public:
    * @returns The DOF layout
    */
   const DofSpace & dofSpace() const;
+
+  /**
+   * Get this level as one side of a level pair, which is what a transfer between levels indexes
+   * @returns The side
+   */
+  TransferSide transferSide() const;
 
   /**
    * Get the level's libMesh system
@@ -151,6 +179,9 @@ private:
 
   /// The level's ghosted work vector, which carries the input of an operator application
   libMesh::NumericVector<Number> * _x = nullptr;
+
+  /// The transfer between this level and the next finer level, built by initTransfer()
+  std::unique_ptr<LevelTransfer> _prolongation;
 };
 
 } // namespace Moose::Kokkos
