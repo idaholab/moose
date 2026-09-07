@@ -22,10 +22,11 @@ namespace Moose::Kokkos
  *
  * A level is identified by the FE type its variables carry, and every level shares the fine
  * quadrature rule, so the values and reference gradients a level needs are the tables the assembly
- * already caches per (subdomain, element type, FE type). This class is the operation interface over
- * one such pair of tables: a consumer interpolates a level DOF vector to a quadrature point and
- * accumulates a quadrature-point value/flux pair back onto the level's test functions without
- * indexing the tables itself, which is what makes the level a loop parameter.
+ * already caches per (subdomain, element type, FE type, edge and face orientation). This class is
+ * the operation interface over one such pair of tables: a consumer interpolates a level DOF vector
+ * to a quadrature point and accumulates a quadrature-point value/flux pair back onto the level's
+ * test functions without indexing the tables itself, which is what makes the level a loop
+ * parameter.
  *
  * Operations are expressed one quadrature point at a time, which is what a dense contraction wants.
  * A sum-factorized specialization for tensor-product element types works on whole-element
@@ -40,13 +41,15 @@ public:
    * @param subdomain The contiguous subdomain ID, which selects the quadrature rule
    * @param elem_type The element type ID
    * @param fe_type The FE type ID of the level
+   * @param orientation The contiguous edge and face orientation ID
    */
   KOKKOS_FUNCTION LevelBasisTable(const Assembly & assembly,
                                   const ContiguousSubdomainID subdomain,
                                   const unsigned int elem_type,
-                                  const unsigned int fe_type)
-    : _phi(assembly.getPhi(subdomain, elem_type, fe_type)),
-      _grad_phi(assembly.getGradPhi(subdomain, elem_type, fe_type)),
+                                  const unsigned int fe_type,
+                                  const unsigned int orientation)
+    : _phi(assembly.getPhi(subdomain, elem_type, fe_type, orientation)),
+      _grad_phi(assembly.getGradPhi(subdomain, elem_type, fe_type, orientation)),
       _n_dofs(assembly.getNumDofs(elem_type, fe_type))
   {
   }

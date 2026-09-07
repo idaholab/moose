@@ -23,6 +23,78 @@
 namespace Moose::Kokkos
 {
 
+namespace
+{
+
+/**
+ * Assemble a reference-space shape function gradient from the per-direction derivatives libMesh
+ * reports, which it sizes by dimension so the directions above the mesh dimension are absent
+ * @param dphidxi The derivatives with respect to the first reference direction
+ * @param dphideta The derivatives with respect to the second reference direction
+ * @param dphidzeta The derivatives with respect to the third reference direction
+ * @param dimension The mesh dimension
+ * @param i The shape function index
+ * @param qp The quadrature point index
+ * @returns The gradient
+ */
+Real3
+referenceGradient(const std::vector<std::vector<Real>> & dphidxi,
+                  const std::vector<std::vector<Real>> & dphideta,
+                  const std::vector<std::vector<Real>> & dphidzeta,
+                  const unsigned int dimension,
+                  const unsigned int i,
+                  const unsigned int qp)
+{
+  Real3 gradient = 0;
+
+  gradient(0) = dphidxi[i][qp];
+
+  if (dimension > 1)
+    gradient(1) = dphideta[i][qp];
+  if (dimension > 2)
+    gradient(2) = dphidzeta[i][qp];
+
+  return gradient;
+}
+
+/**
+ * Assemble a reference-space vector shape function gradient from the per-direction derivatives
+ * libMesh reports, which it sizes by dimension so the directions above the mesh dimension are
+ * absent. Row a, column b holds the derivative of component a with respect to reference direction
+ * b.
+ * @param dphidxi The derivatives with respect to the first reference direction
+ * @param dphideta The derivatives with respect to the second reference direction
+ * @param dphidzeta The derivatives with respect to the third reference direction
+ * @param dimension The mesh dimension
+ * @param i The shape function index
+ * @param qp The quadrature point index
+ * @returns The gradient
+ */
+Real33
+referenceGradient(const std::vector<std::vector<libMesh::RealGradient>> & dphidxi,
+                  const std::vector<std::vector<libMesh::RealGradient>> & dphideta,
+                  const std::vector<std::vector<libMesh::RealGradient>> & dphidzeta,
+                  const unsigned int dimension,
+                  const unsigned int i,
+                  const unsigned int qp)
+{
+  Real33 gradient = 0;
+
+  for (const auto component : make_range(3u))
+  {
+    gradient(component, 0) = dphidxi[i][qp](component);
+
+    if (dimension > 1)
+      gradient(component, 1) = dphideta[i][qp](component);
+    if (dimension > 2)
+      gradient(component, 2) = dphidzeta[i][qp](component);
+  }
+
+  return gradient;
+}
+
+} // namespace
+
 Assembly::Assembly(FEProblemBase & problem)
   : MeshHolder(*problem.mesh().getKokkosMesh()),
     _problem(problem),
@@ -276,15 +348,17 @@ Assembly::initShape()
 
   const auto num_subdomains = kokkosMesh().getNumSubdomains();
   const auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
+  const auto num_orientations = kokkosMesh().getMaxNumOrientations();
 
-  _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _vector_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _vector_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _vector_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _vector_grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _phi.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _vector_phi.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _vector_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _vector_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
+  _vector_grad_phi_face.create(
+      num_subdomains, num_elem_types, _fe_type_map.size(), num_orientations);
   _is_vector_fe_type.create(_fe_type_map.size());
 
   _map_phi.create(num_subdomains, num_elem_types);
@@ -338,94 +412,121 @@ Assembly::initShape()
       }
 
       for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
-      {
-        auto elem = &libMesh::ReferenceElem::get(elem_type);
-
-        if (is_vector_fe)
+        for (const auto orientation : make_range(kokkosMesh().getNumOrientations(elem_type_id)))
         {
-          auto & phi = vector_fe->get_phi();
-          auto & grad_phi = vector_fe->get_dphi();
+          // The shape functions of an FE family may depend on the orientation of the element's
+          // edges and faces, so a table is built for each orientation the local mesh presents,
+          // evaluated on an element of the mesh that carries it. Only reference-space quantities
+          // are read from that element, which keeps the tables independent of its geometry.
+          auto elem = &kokkosMesh().getOrientationElem(elem_type_id, orientation);
 
-          vector_fe->reinit(elem);
-
-          _n_dofs(elem_type_id, fe_type_id) = phi.size();
-
-          _vector_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-          _vector_grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-
-          for (const auto i : index_range(phi))
-            for (const auto qp : make_range(qrule->n_points()))
-            {
-              _vector_phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-              _vector_grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
-            }
-
-          _vector_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-          _vector_grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-
-          for (const auto side : elem->side_index_range())
+          if (is_vector_fe)
           {
-            auto & phi = vector_fe_face->get_phi();
-            auto & grad_phi = vector_fe_face->get_dphi();
+            auto & phi = vector_fe->get_phi();
+            auto & dphidxi = vector_fe->get_dphidxi();
+            auto & dphideta = vector_fe->get_dphideta();
+            auto & dphidzeta = vector_fe->get_dphidzeta();
 
-            vector_fe_face->reinit(elem, side);
+            vector_fe->reinit(elem);
 
-            _vector_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                         qrule_face->n_points());
-            _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(
-                phi.size(), qrule_face->n_points());
+            _n_dofs(elem_type_id, fe_type_id) = phi.size();
+
+            auto & vector_phi = _vector_phi(sid, elem_type_id, fe_type_id, orientation);
+            auto & vector_grad_phi = _vector_grad_phi(sid, elem_type_id, fe_type_id, orientation);
+
+            vector_phi.create(phi.size(), qrule->n_points());
+            vector_grad_phi.create(phi.size(), qrule->n_points());
 
             for (const auto i : index_range(phi))
-              for (const auto qp : make_range(qrule_face->n_points()))
+              for (const auto qp : make_range(qrule->n_points()))
               {
-                _vector_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-                _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+                vector_phi(i, qp) = phi[i][qp];
+                vector_grad_phi(i, qp) =
+                    referenceGradient(dphidxi, dphideta, dphidzeta, _dimension, i, qp);
               }
-          }
-        }
-        else
-        {
-          auto & phi = fe->get_phi();
-          auto & grad_phi = fe->get_dphi();
 
-          fe->reinit(elem);
+            auto & vector_phi_face = _vector_phi_face(sid, elem_type_id, fe_type_id, orientation);
+            auto & vector_grad_phi_face =
+                _vector_grad_phi_face(sid, elem_type_id, fe_type_id, orientation);
 
-          _n_dofs(elem_type_id, fe_type_id) = phi.size();
+            vector_phi_face.create(elem->n_sides());
+            vector_grad_phi_face.create(elem->n_sides());
 
-          _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-          _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-
-          for (const auto i : index_range(phi))
-            for (const auto qp : make_range(qrule->n_points()))
+            for (const auto side : elem->side_index_range())
             {
-              _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-              _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
+              auto & phi = vector_fe_face->get_phi();
+              auto & dphidxi = vector_fe_face->get_dphidxi();
+              auto & dphideta = vector_fe_face->get_dphideta();
+              auto & dphidzeta = vector_fe_face->get_dphidzeta();
+
+              vector_fe_face->reinit(elem, side);
+
+              vector_phi_face(side).create(phi.size(), qrule_face->n_points());
+              vector_grad_phi_face(side).create(phi.size(), qrule_face->n_points());
+
+              for (const auto i : index_range(phi))
+                for (const auto qp : make_range(qrule_face->n_points()))
+                {
+                  vector_phi_face(side)(i, qp) = phi[i][qp];
+                  vector_grad_phi_face(side)(i, qp) =
+                      referenceGradient(dphidxi, dphideta, dphidzeta, _dimension, i, qp);
+                }
             }
-
-          _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-          _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-
-          for (const auto side : elem->side_index_range())
+          }
+          else
           {
-            auto & phi = fe_face->get_phi();
-            auto & grad_phi = fe_face->get_dphi();
+            auto & phi = fe->get_phi();
+            auto & dphidxi = fe->get_dphidxi();
+            auto & dphideta = fe->get_dphideta();
+            auto & dphidzeta = fe->get_dphidzeta();
 
-            fe_face->reinit(elem, side);
+            fe->reinit(elem);
 
-            _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                  qrule_face->n_points());
-            _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                       qrule_face->n_points());
+            _n_dofs(elem_type_id, fe_type_id) = phi.size();
+
+            auto & scalar_phi = _phi(sid, elem_type_id, fe_type_id, orientation);
+            auto & scalar_grad_phi = _grad_phi(sid, elem_type_id, fe_type_id, orientation);
+
+            scalar_phi.create(phi.size(), qrule->n_points());
+            scalar_grad_phi.create(phi.size(), qrule->n_points());
 
             for (const auto i : index_range(phi))
-              for (const auto qp : make_range(qrule_face->n_points()))
+              for (const auto qp : make_range(qrule->n_points()))
               {
-                _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-                _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+                scalar_phi(i, qp) = phi[i][qp];
+                scalar_grad_phi(i, qp) =
+                    referenceGradient(dphidxi, dphideta, dphidzeta, _dimension, i, qp);
               }
+
+            auto & scalar_phi_face = _phi_face(sid, elem_type_id, fe_type_id, orientation);
+            auto & scalar_grad_phi_face =
+                _grad_phi_face(sid, elem_type_id, fe_type_id, orientation);
+
+            scalar_phi_face.create(elem->n_sides());
+            scalar_grad_phi_face.create(elem->n_sides());
+
+            for (const auto side : elem->side_index_range())
+            {
+              auto & phi = fe_face->get_phi();
+              auto & dphidxi = fe_face->get_dphidxi();
+              auto & dphideta = fe_face->get_dphideta();
+              auto & dphidzeta = fe_face->get_dphidzeta();
+
+              fe_face->reinit(elem, side);
+
+              scalar_phi_face(side).create(phi.size(), qrule_face->n_points());
+              scalar_grad_phi_face(side).create(phi.size(), qrule_face->n_points());
+
+              for (const auto i : index_range(phi))
+                for (const auto qp : make_range(qrule_face->n_points()))
+                {
+                  scalar_phi_face(side)(i, qp) = phi[i][qp];
+                  scalar_grad_phi_face(side)(i, qp) =
+                      referenceGradient(dphidxi, dphideta, dphidzeta, _dimension, i, qp);
+                }
+            }
           }
         }
-      }
     }
 
     for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())

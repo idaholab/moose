@@ -62,7 +62,8 @@ QpJacobianOperator::operator()(ApplyLoop, const ThreadID tid) const
   auto num_qps = kokkosAssembly().getNumQps(info);
   auto qp_offset = kokkosAssembly().getQpOffset(info);
 
-  const LevelBasisTable basis(kokkosAssembly(), sid, info.type, _level.getFEType(var));
+  const LevelBasisTable basis(
+      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
 
   const auto num_dofs = basis.numDofs();
 
@@ -125,7 +126,8 @@ QpJacobianOperator::operator()(DiagonalLoop, const ThreadID tid) const
   auto num_qps = kokkosAssembly().getNumQps(info);
   auto qp_offset = kokkosAssembly().getQpOffset(info);
 
-  const LevelBasisTable basis(kokkosAssembly(), sid, info.type, _level.getFEType(var));
+  const LevelBasisTable basis(
+      kokkosAssembly(), sid, info.type, _level.getFEType(var), info.orientation);
 
   for (unsigned int i = 0; i < basis.numDofs(); ++i)
   {

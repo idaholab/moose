@@ -356,8 +356,8 @@ FESystem::operator()(const ThreadID tid) const
 
   if (_var_is_vector[var])
   {
-    auto & phi = kokkosAssembly().getVectorPhi(sid, elem_type, fe_type);
-    auto & grad_phi = kokkosAssembly().getVectorGradPhi(sid, elem_type, fe_type);
+    auto & phi = kokkosAssembly().getVectorPhi(sid, elem_type, fe_type, info.orientation);
+    auto & grad_phi = kokkosAssembly().getVectorGradPhi(sid, elem_type, fe_type, info.orientation);
     auto jacobian = kokkosAssembly().getJacobian(info, qp).transpose();
 
     Real3 value = 0;
@@ -380,8 +380,8 @@ FESystem::operator()(const ThreadID tid) const
   }
   else
   {
-    auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
-    auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
+    auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type, info.orientation);
+    auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type, info.orientation);
     auto jacobian = kokkosAssembly().getJacobian(info, qp);
 
     Real value = 0;
