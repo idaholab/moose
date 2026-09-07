@@ -25,10 +25,10 @@
  * For the nodal Material case, the Material Properties are sized
  * to max(number of nodes, number of quadpoints).  Only nodalDofCount() of
  * these will ever be computed and used - that is, the number of nodes
- * carrying a degree of freedom of the variables that are read at the nodes,
- * which is fewer than the number of nodes for a first-order variable on a
- * second-order mesh.  The remaining ones (if any) exist just to make sure
- * that the vectors are correctly sized in MOOSE's copying operations (etc).
+ * carrying a degree of freedom of the variables that are read at the nodes.
+ * This is fewer than the number of nodes for a first-order variable on a
+ * second-order mesh for example. The remaining ones (if any) exist just to make
+ * sure that the vectors are correctly sized in MOOSE's copying operations (etc).
  *
  * If number of quadpoints < number of nodes (eg for boundary elements)
  * care should be taken to store the required nodal information in
@@ -47,8 +47,8 @@ protected:
    * Error if this is a nodal Material but a variable supplied to one of the named coupled-variable
    * parameters is not nodal (Lagrange).  Call this from the constructor of a derived class, naming
    * exactly those parameters the class reads with coupledGenericDofValue when at_nodes = true.
-   * Parameters read behind an _is_*_nodal check must not be named, since those fall back to
-   * quadpoint values and so accept non-nodal variables.
+   * Any coupled variables that are already guarded by an _is_*_nodal check must not be named, since
+   * those fall back to quadpoint values and so can also accept non-nodal variables.
    * @param coupled_var_params names of the coupled-variable parameters that must be nodal
    */
   void checkNodalVariables(const std::vector<std::string> & coupled_var_params) const;
@@ -83,8 +83,7 @@ protected:
    * The values of a coupled variable for this Material to read: its
    * degree-of-freedom values if this is a nodal Material and the variable is
    * nodal, and its quadpoint values otherwise.  An elemental variable (or an
-   * uncoupled default) has no nodal degrees of freedom, so reading it by degree
-   * of freedom would run off the end of a much shorter array.
+   * uncoupled default) may not have dofs at nodes, so qp values are used.
    * @param var_name the name of the coupled variable
    * @param comp the component of the coupled variable
    */
@@ -95,12 +94,14 @@ protected:
    * the variables that nodal Materials read at the nodes.  This, not
    * _current_elem->n_nodes(), is the number of nodal values that may safely be
    * computed and consumed.
+   * Note: all variables (with the exception of coupled displacements or constant monomial
+   * material variables) should have identical nodal dof maps (same dof assignment on nodes).
    *
    * libMesh numbers element nodes vertices-first and numbers a LAGRANGE
    * variable's degrees of freedom to match, so looping 0 .. nodalDofCount() - 1
    * visits exactly the nodes that carry a degree of freedom, in order.
    *
-   * This equals _current_elem->n_nodes() for a consistent LAGRANGE
+   * This equals _current_elem->n_nodes() for an equal-order LAGRANGE
    * discretisation, and is smaller for a first-order variable on a second-order
    * mesh: 4 versus 10 on TET10, 8 versus 27 on HEX27.
    */

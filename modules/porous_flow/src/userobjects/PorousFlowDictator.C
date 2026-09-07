@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowDictator.h"
+#include "Conversion.h"
 #include "NonlinearSystem.h"
 
 #include "libmesh/enum_to_string.h"
@@ -201,11 +202,6 @@ PorousFlowDictator::registerNodalVariable(const VariableName & var_name) const
     _nodal_fe_type = fe_type;
 
   if (*_nodal_fe_type != fe_type)
-  {
-    std::string registered;
-    for (const auto & name : _nodal_fe_type_vars)
-      registered += (registered.empty() ? "'" : ", '") + name + "'";
-
     mooseError("Nodal PorousFlow Materials read variables of more than one FE type at the nodes: '",
                var_name,
                "' is ",
@@ -213,11 +209,10 @@ PorousFlowDictator::registerNodalVariable(const VariableName & var_name) const
                ", but ",
                feTypeName(*_nodal_fe_type),
                " was already registered by ",
-               registered,
+               Moose::stringify(_nodal_fe_type_vars, ", ", "'"),
                ".  Every variable read at the nodes must share an FE type, because nodal Materials "
                "index their properties with a single node counter that must be a valid "
                "degree-of-freedom index for all of them.");
-  }
 
   _nodal_fe_type_vars.insert(var_name);
 }
@@ -225,13 +220,5 @@ PorousFlowDictator::registerNodalVariable(const VariableName & var_name) const
 std::string
 PorousFlowDictator::feTypeName(const FEType & fe_type)
 {
-  return Utility::enum_to_string<Order>(fe_type.order) + " " +
-         Utility::enum_to_string<FEFamily>(fe_type.family);
-}
-
-std::string
-PorousFlowDictator::nonNodalAdvice()
-{
-  return "PorousFlow has no discontinuous-Galerkin finite-element discretisation, so an "
-         "element-local variable (eg CONSTANT MONOMIAL) cannot be used here.";
+  return Utility::enum_to_string<Order>(fe_type.order) + " " + Moose::stringify(fe_type.family);
 }

@@ -73,8 +73,10 @@ PorousFlowMaterial::checkNodalVariables(const std::vector<std::string> & coupled
                    param,
                    "' at the nodes, but the variable supplied to it ('",
                    var->name(),
-                   "') is not a nodal (Lagrange) variable.  ",
-                   PorousFlowDictator::nonNodalAdvice());
+                   "') is not a nodal (Lagrange) variable.  A variable read at the nodes must be "
+                   "LAGRANGE.  Other coupled variables of a nodal Material may well be "
+                   "element-local: those read at the quadpoints instead, such as a reference "
+                   "temperature or mineral concentration, accept a CONSTANT MONOMIAL.");
     }
   }
 }
@@ -86,9 +88,9 @@ PorousFlowMaterial::initialSetup()
     return;
 
   // Tell the Dictator the FE type of every variable this Material reads at the
-  // nodes, so that a single node count can be shared by all nodal Materials.
+  // nodes, so that a single node indexing can be shared by all nodal Materials.
   // Elemental coupled variables are read by quadpoint instead (see the isNodal
-  // guard in the derived classes) and so do not take part.
+  // guard that should exist in the derived classes) and so do not take part.
   for (const auto * const var : getCoupledMooseVars())
     if (var->isNodal())
       _dictator.registerNodalVariable(var->name());
@@ -211,7 +213,7 @@ PorousFlowMaterial::nodalDofCount() const
 {
   // If no nodal Material reads any variable at the nodes then there is no short
   // array to overrun, and every node is visited as it always has been
-  const auto & fe_type = _dictator.nodalFEType();
+  const auto & fe_type = _dictator.shareNodalVariableFEType();
   if (!fe_type)
     return _current_elem->n_nodes();
 
