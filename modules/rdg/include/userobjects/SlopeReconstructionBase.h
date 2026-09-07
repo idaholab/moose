@@ -12,8 +12,6 @@
 #include "BCUserObject.h"
 #include "ElementLoopUserObject.h"
 
-using libMesh::RealGradient;
-
 /**
  * Base class for piecewise linear slope reconstruction
  * to get the slopes of element average variables

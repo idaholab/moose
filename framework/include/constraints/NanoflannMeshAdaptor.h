@@ -23,15 +23,6 @@
 SORRY THIS APPLICATION REQUIRES NANOFLANN
 #endif
 
-// Using statements. These are used so that the code below does not
-// need to be littered with libMesh:: disambiguations.
-using libMesh::Point;
-using libMesh::MeshBase;
-using libMesh::Real;
-using libMesh::subdomain_id_type;
-using libMesh::dof_id_type;
-using libMesh::Elem;
-
 /**
  * This allows us to adapt the MeshBase class for use with nanoflann.
  *

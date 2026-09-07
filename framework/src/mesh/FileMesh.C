@@ -19,7 +19,6 @@
 #include "libmesh/nemesis_io.h"
 #include "libmesh/parallel_mesh.h"
 
-using libMesh::ExodusII_IO;
 using libMesh::Nemesis_IO;
 
 registerMooseObject("MooseApp", FileMesh);

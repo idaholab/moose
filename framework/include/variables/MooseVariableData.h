@@ -36,7 +36,6 @@ class DenseVector;
 using libMesh::DenseVector;
 using libMesh::DofMap;
 using libMesh::QBase;
-using libMesh::VectorValue;
 
 class TimeIntegrator;
 class Assembly;

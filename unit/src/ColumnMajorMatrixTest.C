@@ -12,8 +12,6 @@
 // Moose includes
 #include "ColumnMajorMatrix.h"
 
-using libMesh::VectorValue;
-
 TEST_F(ColumnMajorMatrixTest, addMatrixScalar)
 {
   ColumnMajorMatrix as(3, 3);

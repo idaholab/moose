@@ -71,15 +71,6 @@ class Assembly;
 }
 #endif
 
-// Assembly.h does not import Moose.h nor libMeshReducedNamespace.h
-using libMesh::FEBase;
-using libMesh::FEFamily;
-using libMesh::FEType;
-using libMesh::FEVectorBase;
-using libMesh::LAGRANGE_VEC;
-using libMesh::Order;
-using libMesh::QuadratureType;
-
 /// Computes a conversion multiplier for use when computing integraals for the
 /// current coordinate system type.  This allows us to handle cases where we use RZ,
 /// spherical, or other non-cartesian coordinate systems. The factor returned
