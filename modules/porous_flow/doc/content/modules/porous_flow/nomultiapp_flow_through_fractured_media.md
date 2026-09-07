@@ -281,7 +281,9 @@ Paraview.
 The following mixed-dimensional input-file blocks define Darcy velocity on a
 lower-dimensional fracture, with the result having units of m.s$^{-1}$.
 
-!listing modules/porous_flow/examples/flow_through_fractured_media/fine_transient.i start=[AuxVariables] end=[ICs]
+!listing modules/porous_flow/examples/flow_through_fractured_media/fine_transient.i block=AuxVariables
+
+!listing modules/porous_flow/examples/flow_through_fractured_media/fine_transient.i block=AuxKernels
 
 
 
