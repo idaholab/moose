@@ -17,7 +17,7 @@
 namespace Moose::Kokkos
 {
 
-class System;
+class DofSpace;
 
 /**
  * The Kokkos wrapper class for PETSc vector
@@ -47,10 +47,11 @@ public:
   /**
    * Create the vector from a libMesh PetscVector
    * @param vector The libMesh PetscVector
-   * @param system The Kokkos system
+   * @param dof_space The DOF layout of the system the vector belongs to
    * @param assemble Whether the vector will be assembled
    */
-  void create(libMesh::NumericVector<PetscScalar> & vector, const System & system, bool assemble);
+  void
+  create(libMesh::NumericVector<PetscScalar> & vector, const DofSpace & dof_space, bool assemble);
   /**
    * Copy from the host libMesh PetscVector
    */
@@ -165,9 +166,9 @@ private:
    */
   PetscScalar * _array = PETSC_NULLPTR;
   /**
-   * Pointer to the Kokkos system
+   * Pointer to the DOF layout of the system the vector belongs to
    */
-  const System * _system;
+  const DofSpace * _dof_space = nullptr;
   /**
    * Pointer to the libMesh communicator
    */
