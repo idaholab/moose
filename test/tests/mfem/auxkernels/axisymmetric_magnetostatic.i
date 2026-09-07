@@ -147,6 +147,6 @@
 [Outputs]
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/AxisymmetricMagnetostatic
+    file_base = AxisymmetricMagnetostatic
   []
 []
