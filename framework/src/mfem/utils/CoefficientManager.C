@@ -9,9 +9,15 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MooseStringUtils.h"
 #include "CoefficientManager.h"
-#include <algorithm>
+#include "InputParameters.h"
+#include "MooseError.h"
+#include "MooseStringUtils.h"
+#include "MooseTypes.h"
+
+#include "mfem/fem/coefficient.hpp"
+
+#include <functional>
 
 namespace Moose::MFEM
 {
@@ -236,6 +242,37 @@ CoefficientManager::setTime(const mfem::real_t time)
   this->_vector_coeffs.setTime(time);
   this->_matrix_coeffs.setTime(time);
 }
+
+// FIXME: MFEM also supports vector coefficients that could be added here.
+std::variant<std::reference_wrapper<mfem::Coefficient>,
+             std::reference_wrapper<mfem::MatrixCoefficient>>
+CoefficientManager::resolveCoefficientVariant(const InputParameters & params,
+                                              const std::string & scalar,
+                                              const std::string & matrix)
+{
+  // Allow at most one coefficient parameter to be set by the user.
+  if (params.isParamSetByUser(scalar) && params.isParamSetByUser(matrix))
+  {
+    mooseError("You must specify only one of parameter ",
+               std::quoted(scalar),
+               " and ",
+               std::quoted(matrix));
+  }
+  if (params.isParamSetByUser(matrix))
+  {
+    return getMatrixCoefficient(params.get<MFEMMatrixCoefficientName>(matrix));
+  }
+  // If no parameters have been set, we assume a default scalar value is set.
+  if (params.isParamValid(scalar))
+  {
+    return getScalarCoefficient(params.get<MFEMScalarCoefficientName>(scalar));
+  }
+  mooseError("No valid coefficient found with parameter names ",
+             std::quoted(scalar),
+             " or ",
+             std::quoted(matrix));
+}
+
 }
 
 #endif

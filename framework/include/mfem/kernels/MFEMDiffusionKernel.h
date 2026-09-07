@@ -26,10 +26,6 @@ public:
   MFEMDiffusionKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
-
-protected:
-  mfem::Coefficient & _coef;
-  mfem::MatrixCoefficient & _matrix_coef;
 };
 
 #endif

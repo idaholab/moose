@@ -1,7 +1,5 @@
-# Solves the Poisson problem -Div(sigma Grad u) = 1, in 3D on a 2D surface,
-# where the diffusion coefficient sigma is a constant 3x3 matrix.
-# Based on MFEM Example ex29p. See corresponding `gold/` directory for more info.
-
+# Tests that an error is raised when specifying both a scalar and matrix coefficient
+# in an MFEMKernel.
 [Mesh]
   type = MFEMMesh
   file = ../mesh/ex29p.mesh
@@ -36,16 +34,24 @@
 
 [Kernels]
   [linear_form]
-    # Linear form b(u)
     type = MFEMDomainLFKernel
     variable = u
     coefficient = 1.0
   []
   [bilinear_form]
-    # Bilinear form a(u,v): (Q ∇u, ∇v), where Q is the matrix coefficient.
-    type = MFEMDiffusionKernel
+    type = MFEMCurlCurlKernel
     variable = u
-    matrix_coefficient = '100.0 1.5 0.0; 1.5 2.5 0.0; 0.0 0.0 3.0'
+    # ERROR: specifying both coefficient and matrix_coefficient.
+    coefficient = 10.0
+    matrix_coefficient = anisotropic_material
+  []
+[]
+
+[FunctorMaterials]
+  [anisotropic_material]
+    type = MFEMGenericFunctorMatrixMaterial
+    prop_names = anisotropic_material
+    prop_values = '{ 100.0 1.5 0.0; 1.5 2.5 0.0; 0.0 0.0 3.0 }'
   []
 []
 
@@ -54,26 +60,11 @@
   device = cpu
 []
 
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-  []
-[]
-
 [Solvers]
   [main]
     type = MFEMCGSolver
-    preconditioner = boomeramg
     l_tol = 1e-12
     l_max_its = 2000
     use_initial_guess = false
-  []
-[]
-
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/AnisotropicDiffusion
-    vtk_format = ASCII
   []
 []
