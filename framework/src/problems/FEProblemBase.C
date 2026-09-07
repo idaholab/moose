@@ -5450,6 +5450,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     computeUserObjectsInternal(type,
                                query.clone().condition<AttribExecutionOrderGroup>(execution_group));
   }
+
+  checkExceptionAndStopSolve();
 }
 
 void
