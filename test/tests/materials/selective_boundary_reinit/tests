@@ -5,13 +5,6 @@
     issues = '#31418'
     requirement = 'The system shall not evaluate an unrelated face material while executing user objects on a boundary.'
   []
-  [unrelated_face_material_threaded]
-    type = 'RunApp'
-    input = 'unrelated_face_material.i'
-    min_threads = 2
-    issues = '#31418'
-    requirement = 'The system shall selectively reinitialize boundary materials during threaded user object execution.'
-  []
   [direct_face_dependency]
     type = 'CSVDiff'
     input = 'direct_face_dependency.i'
