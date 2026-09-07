@@ -108,4 +108,25 @@ Kernel::computeJacobianDiagonal()
   _jacobian_diagonal_dispatcher->parallelFor(policy);
 }
 
+bool
+Kernel::usesQpJacobianCache() const
+{
+  return DispatcherRegistry::hasUserMethod<QpJacobianCacheLoop>(type());
+}
+
+void
+Kernel::computeQpJacobianCache()
+{
+  // One thread per (element, quadrature point) so that each cache entry is written by a single
+  // thread of the dispatch
+  _thread.resize(kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+
+  Policy policy(0, _thread.size());
+
+  if (!_qp_jacobian_cache_dispatcher)
+    _qp_jacobian_cache_dispatcher = DispatcherRegistry::build<QpJacobianCacheLoop>(this, type());
+
+  _qp_jacobian_cache_dispatcher->parallelFor(policy);
+}
+
 } // namespace Moose::Kokkos

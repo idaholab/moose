@@ -32,7 +32,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/static_condensation.h"
-#include "libmesh/petsc_matrix_shell_matrix.h"
 
 /// Free function used for a libMesh callback
 void
@@ -584,35 +583,6 @@ SystemBase::addMatrix(TagID tag)
   return mat;
 }
 
-SparseMatrix<Number> &
-SystemBase::addShellMatrix(TagID tag)
-{
-  if (!_subproblem.matrixTagExists(tag))
-    mooseError("Cannot add tagged shell matrix with TagID ",
-               tag,
-               " in system '",
-               name(),
-               "' because the tag does not exist in the problem");
-
-  if (hasMatrix(tag))
-    return getMatrix(tag);
-
-  const auto matrix_name = _subproblem.matrixTagName(tag);
-
-  // Deliberately left uninitialized here: System::add_matrix(name, unique_ptr, type) replaces
-  // whatever matrix (ordinary or otherwise) is already registered under this name and, since
-  // this system's matrices are already initialized by the time this runs (see the call site in
-  // Multigrid::initialSetup(), well after EquationSystems::init()), its late_matrix_init() then
-  // attaches the DofMap and calls PetscMatrixShellMatrix::init(ParallelType), which sizes itself
-  // from that DofMap automatically.
-  auto shell = std::make_unique<libMesh::PetscMatrixShellMatrix<Number>>(comm());
-
-  SparseMatrix<Number> & mat = system().add_matrix(matrix_name, std::move(shell));
-  associateMatrixToTag(mat, tag);
-
-  return mat;
-}
-
 void
 SystemBase::removeMatrix(TagID tag_id)
 {
@@ -1106,6 +1076,13 @@ SystemBase::associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag)
 {
   if (!_subproblem.matrixTagExists(tag))
     mooseError("Cannot associate matrix to tag ", tag, " because that tag does not exist");
+
+  // A matrix-free operator has no entries to assemble into, so it is never registered as an
+  // assembly target. Leaving the tag empty is what makes the assembly-side code paths -- matrix
+  // zeroing, element and boundary condition contributions, row zeroing for constrained dofs, and
+  // closing -- skip it through the hasMatrix() guards they already carry.
+  if (&matrix == _matrix_free_operator)
+    return;
 
   if (_tagged_matrices.size() < tag + 1)
     _tagged_matrices.resize(tag + 1);

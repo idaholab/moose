@@ -47,6 +47,9 @@ public:
   /// KernelGrad hooks factor out the test-function gradient
   static constexpr bool use_precompute_hooks = true;
 
+  /// KernelGrad contracts its factored hook directly into the operator action and diagonal
+  static constexpr bool supports_matrix_free = true;
+
   /**
    * Constructor
    */

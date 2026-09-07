@@ -34,6 +34,9 @@ public:
   /// Whether this object's hooks factor out the test function
   static constexpr bool use_precompute_hooks = false;
 
+  /// Whether this object supplies its own Kokkos matrix-free operator action and diagonal
+  static constexpr bool supports_matrix_free = false;
+
   /**
    * Constructor
    * @param field_type The MOOSE variable field type
@@ -117,6 +120,7 @@ protected:
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _jvp_dispatcher;
   std::unique_ptr<DispatcherBase> _jacobian_diagonal_dispatcher;
+  std::unique_ptr<DispatcherBase> _qp_jacobian_cache_dispatcher;
   ///@}
 
   /**

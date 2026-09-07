@@ -201,6 +201,57 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 }
 
 void
+FESystem::enableQpJacobianCache()
+{
+  _qp_jacobian_enabled = true;
+  _qp_jacobian.create(kokkosMesh().getNumSubdomains(), _num_vars);
+}
+
+void
+FESystem::addQpJacobianBlocks(const SubdomainID subdomain,
+                              const unsigned int var,
+                              const unsigned int blocks)
+{
+  _qp_jacobian.addBlocks(kokkosMesh().getContiguousSubdomainID(subdomain), var, blocks);
+}
+
+void
+FESystem::clearQpJacobianCache()
+{
+  _qp_jacobian.invalidate();
+  _qp_jacobian.zero();
+}
+
+void
+FESystem::applyQpJacobian(const TagID x_tag, const TagID y_tag, const TagID matrix_tag)
+{
+  _qp_jacobian_x_tag = x_tag;
+  _qp_jacobian_y_tag = y_tag;
+  _qp_jacobian_matrix_tag = matrix_tag;
+
+  _qp_jacobian_thread.resize(kokkosMesh().getNumLocalElements(), _num_vars);
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, QpJacobianApplyLoop> policy(
+      0, _qp_jacobian_thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+void
+FESystem::computeQpJacobianDiagonal(const TagID diag_tag, const TagID matrix_tag)
+{
+  _qp_jacobian_y_tag = diag_tag;
+  _qp_jacobian_matrix_tag = matrix_tag;
+
+  _qp_jacobian_thread.resize(kokkosMesh().getNumLocalElements(), _num_vars);
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, QpJacobianDiagonalLoop> policy(
+      0, _qp_jacobian_thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+void
 FESystem::reinit()
 {
   for (auto tag : _active_solution_tags)
@@ -263,6 +314,20 @@ FESystem::reinit()
   _qp_vector_solutions.copyToDevice();
   _qp_vector_solutions_grad.copyToDevice();
   _qp_vector_solutions_curl.copyToDevice();
+
+  if (_qp_jacobian_enabled)
+  {
+    for (auto subdomain : _mesh.meshSubdomains())
+    {
+      auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
+
+      for (const auto var : make_range(_num_vars))
+        if (_qp_jacobian.getBlocks(sid, var) != QP_JACOBIAN_NONE)
+          _qp_jacobian.createTensors(sid, var, kokkosAssembly().getNumQps(sid));
+    }
+
+    _qp_jacobian.copyToDevice();
+  }
 
   dof_id_type num_elems = kokkosMesh().getNumLocalElements();
 
@@ -344,6 +409,115 @@ FESystem::operator()(const ThreadID tid) const
 
     getVectorQpValue(info, qp_offset + qp, var, tag) = value;
     getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
+  }
+}
+
+KOKKOS_FUNCTION void
+FESystem::operator()(QpJacobianApplyLoop, const ThreadID tid) const
+{
+  auto elem = _qp_jacobian_thread(tid, 0);
+  auto var = _qp_jacobian_thread(tid, 1);
+
+  auto info = kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  // A pair with no declared blocks has no cached linearization; the objects responsible for it
+  // supply their own operator action
+  if (_qp_jacobian.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  const LevelBasisTable basis(kokkosAssembly(), sid, info.type, _var_fe_types[var]);
+
+  const auto num_dofs = basis.numDofs();
+
+  const auto gather = [&](const unsigned int j)
+  { return getVectorDofValue(getElemLocalDofIndex(elem, j, var), _qp_jacobian_x_tag); };
+
+  Real local_y[MAX_CACHED_DOF];
+
+  // The test function index is batched so that the per-element accumulator stays within a bounded
+  // amount of per-thread storage. The trial-space gather is repeated for each batch, which costs
+  // nothing for the element types whose DOF count fits in a single batch.
+  for (unsigned int ib = 0; ib < num_dofs; ib += MAX_CACHED_DOF)
+  {
+    const auto ie = ::Kokkos::min(ib + MAX_CACHED_DOF, num_dofs);
+
+    for (unsigned int i = ib; i < ie; ++i)
+      local_y[i - ib] = 0;
+
+    for (unsigned int qp = 0; qp < num_qps; ++qp)
+    {
+      // The direction vector in the reference trial space at this quadrature point
+      Real value;
+      Real3 grad;
+
+      basis.applyB(gather, qp, value, grad);
+
+      const auto & tensor = getQpJacobianTensor(info, qp_offset + qp, var);
+
+      // The linearized value/flux pair the test functions are contracted against
+      const Real f = tensor.vv * value + tensor.vg * grad;
+      const Real3 flux = tensor.gv * value + tensor.gg * grad;
+
+      basis.applyBT(qp, f, flux, ib, ie, local_y);
+    }
+
+    for (unsigned int i = ib; i < ie; ++i)
+    {
+      auto row = getElemLocalDofIndex(elem, i, var);
+
+      if (hasNodalBCMatrixTag(row, _qp_jacobian_matrix_tag))
+        continue;
+
+      ::Kokkos::atomic_add(&getVectorDofValue(row, _qp_jacobian_y_tag), local_y[i - ib]);
+    }
+  }
+}
+
+KOKKOS_FUNCTION void
+FESystem::operator()(QpJacobianDiagonalLoop, const ThreadID tid) const
+{
+  auto elem = _qp_jacobian_thread(tid, 0);
+  auto var = _qp_jacobian_thread(tid, 1);
+
+  auto info = kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  if (_qp_jacobian.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  const LevelBasisTable basis(kokkosAssembly(), sid, info.type, _var_fe_types[var]);
+
+  for (unsigned int i = 0; i < basis.numDofs(); ++i)
+  {
+    auto row = getElemLocalDofIndex(elem, i, var);
+
+    if (hasNodalBCMatrixTag(row, _qp_jacobian_matrix_tag))
+      continue;
+
+    Real diagonal = 0;
+
+    // The diagonal entry is the operator with the same basis function in the test and trial slot
+    for (unsigned int qp = 0; qp < num_qps; ++qp)
+    {
+      const auto & tensor = getQpJacobianTensor(info, qp_offset + qp, var);
+
+      Real value;
+      Real3 grad;
+
+      basis.basis(i, qp, value, grad);
+
+      diagonal += value * (tensor.vv * value + tensor.vg * grad) +
+                  grad * (tensor.gv * value + tensor.gg * grad);
+    }
+
+    ::Kokkos::atomic_add(&getVectorDofValue(row, _qp_jacobian_y_tag), diagonal);
   }
 }
 

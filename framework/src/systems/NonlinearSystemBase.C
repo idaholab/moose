@@ -226,7 +226,11 @@ NonlinearSystemBase::preInit()
     _residual_copy->init(_sys.n_dofs(), false, SERIAL);
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosResidualObjects())
+  if (_fe_problem.solverParams(number())._kokkos_matrix_free)
+    setupKokkosMatrixFreeSystemMatrix();
+  // The full pattern serves Kokkos assembly into a compressed-row matrix, which a matrix-free
+  // system has none of
+  else if (_fe_problem.hasKokkosResidualObjects())
     _sys.get_dof_map().full_sparsity_pattern_needed();
 #endif
 }

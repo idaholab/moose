@@ -450,6 +450,37 @@ hasUserJacobianHook()
            Object::template defaultJacobian<Object>();
 }
 
+template <typename T, typename = void>
+struct has_qp_jacobian_cache_dispatcher : std::false_type
+{
+};
+
+template <typename T>
+struct has_qp_jacobian_cache_dispatcher<T, std::void_t<typename T::QpJacobianCacheLoop>>
+  : std::true_type
+{
+};
+
+template <typename Object>
+bool
+hasUserQpJacobianTensorHook()
+{
+  return &Object::template computeQpJacobianTensor<Object> !=
+         Object::template defaultQpJacobianTensor<Object>();
+}
+
+template <typename Object>
+void
+registerKokkosQpJacobianCacheDispatcher(const std::string & objectname)
+{
+  if constexpr (has_qp_jacobian_cache_dispatcher<Object>::value)
+  {
+    DispatcherRegistry::addDispatcher<typename Object::QpJacobianCacheLoop, Object>(objectname);
+    DispatcherRegistry::hasUserMethod<typename Object::QpJacobianCacheLoop>(
+        objectname, hasUserQpJacobianTensorHook<Object>());
+  }
+}
+
 template <typename Object>
 bool
 hasUserOffDiagJacobianHook()
@@ -480,14 +511,17 @@ hasUserOffDiagJacobianHook()
     DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
         objectname, hasUserOffDiagJacobianHook<classname>());                                      \
     /* Repurposed as a "supports the Kokkos matrix-free Jacobian-vector product" flag, queried  */ \
-    /* by NonlinearSystemBase::setupKokkosMatrixFreeJacobian() by object type name -- not tied */  \
-    /* to whether classname overrides any hook. */                                                 \
+    /* by NonlinearSystemBase::setupKokkosMatrixFreeJacobian() by object type name. It records  */ \
+    /* whether classname implements the loop body, not whether it overrides any hook.          */  \
     DispatcherRegistry::hasUserMethod<classname::JacobianVectorProductLoop>(                       \
-        objectname, classname::use_precompute_hooks);                                              \
-    /* Same repurposing as JacobianVectorProductLoop above, for the Kokkos matrix-free Jacobian */                                                                                                \
-    /* diagonal. */                                                                                                \
+        objectname, classname::supports_matrix_free);                                              \
+    /* Same repurposing as JacobianVectorProductLoop above, for the Kokkos matrix-free Jacobian */ \
+    /* diagonal. */                                                                                \
     DispatcherRegistry::hasUserMethod<classname::JacobianDiagonalLoop>(                            \
-        objectname, classname::use_precompute_hooks);                                              \
+        objectname, classname::supports_matrix_free);                                              \
+    /* Element kernels additionally register the quadrature-point Jacobian cache loop; */          \
+    /* the flag records whether classname defines the tensor hook the loop calls.      */          \
+    registerKokkosQpJacobianCacheDispatcher<classname>(objectname);                                \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

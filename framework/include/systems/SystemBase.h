@@ -870,21 +870,6 @@ public:
   libMesh::SparseMatrix<Number> & addMatrix(TagID tag);
 
   /**
-   * Replaces the ordinary assembled matrix under a given tag with a matrix-free PETSc shell
-   * matrix. Must be called after this system's matrices are initialized (i.e. after
-   * EquationSystems::init(), typically from a preconditioner's initialSetup()), so the shell can
-   * size itself from the already-distributed DofMap; the ordinary matrix it replaces is freed
-   * immediately. Because a shell matrix reports no sparsity pattern
-   * (SparseMatrix::need_full_sparsity_pattern() is false), no further sparsity pattern
-   * computation or CSR (re)allocation happens for this tag afterward -- the point of using one.
-   * The caller is responsible for registering whatever PETSc matrix operations (MatMult,
-   * MatGetDiagonal, ...) the shell needs to support.
-   *
-   * @param tag_name The name of the tag
-   */
-  libMesh::SparseMatrix<Number> & addShellMatrix(TagID tag);
-
-  /**
    * Removes a matrix with a given tag
    *
    * @param tag_name The name of the tag
@@ -1054,6 +1039,10 @@ protected:
   std::vector<NumericVector<Number> *> _tagged_vectors;
   /// Tagged matrices (pointer)
   std::vector<libMesh::SparseMatrix<Number> *> _tagged_matrices;
+
+  /// An operator whose action is computed rather than stored. It is never associated with a matrix
+  /// tag, which is what keeps the assembly-side code paths from trying to write entries into it
+  libMesh::SparseMatrix<Number> * _matrix_free_operator = nullptr;
   /// Active tagged matrices. A matrix is active if its tag-matrix pair is present in the map. We use a map instead of a vector so that users can easily add and remove to this container with calls to (de)activateMatrixTag
   std::unordered_map<TagID, libMesh::SparseMatrix<Number> *> _active_tagged_matrices;
   /// Active flags for tagged matrices

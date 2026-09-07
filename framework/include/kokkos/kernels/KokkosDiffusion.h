@@ -18,11 +18,18 @@
 class KokkosDiffusion : public Moose::Kokkos::KernelGrad
 {
   using Real3 = Moose::Kokkos::Real3;
+  using Real33 = Moose::Kokkos::Real33;
+  using QpJacobianBlockAccessor = Moose::Kokkos::QpJacobianBlockAccessor;
 
 public:
   static InputParameters validParams();
 
   KokkosDiffusion(const InputParameters & parameters);
+
+  virtual unsigned int qpJacobianBlocks() const override
+  {
+    return Moose::Kokkos::QP_JACOBIAN_GRADIENT_GRADIENT;
+  }
 
   template <typename Derived>
   KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
@@ -30,6 +37,10 @@ public:
   KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
                                              const unsigned int qp,
                                              AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeQpJacobianTensor(QpJacobianBlockAccessor & blocks,
+                                               const unsigned int qp,
+                                               AssemblyDatum & datum) const;
 };
 
 template <typename Derived>
@@ -46,4 +57,18 @@ KokkosDiffusion::precomputeQpJacobian(const unsigned int j,
                                       AssemblyDatum & datum) const
 {
   return _grad_phi(datum, j, qp);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosDiffusion::computeQpJacobianTensor(QpJacobianBlockAccessor & blocks,
+                                         const unsigned int /* qp */,
+                                         AssemblyDatum & /* datum */) const
+{
+  // The flux is the solution gradient itself, so its derivative with respect to that gradient is
+  // the identity and every other block vanishes
+  Real33 flux_gradient;
+  flux_gradient.identity(_dimension);
+
+  blocks.addFluxGradient(flux_gradient);
 }

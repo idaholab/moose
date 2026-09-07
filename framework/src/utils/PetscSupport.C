@@ -314,6 +314,13 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
       break;
   }
 
+  // A matrix-free system's preconditioning matrix is the shell operator, which supplies a
+  // matrix-vector product and a diagonal. Jacobi is the strongest preconditioner that can be built
+  // from those two operations alone, so it is the default here.
+  if (solver_params._kokkos_matrix_free)
+    setSinglePetscOptionIfAppropriate(
+        dont_add_these_options, prefix_with_dash + "pc_type", "jacobi");
+
   Moose::LineSearchType ls_type = solver_params._line_search;
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
@@ -392,6 +399,47 @@ petscSetOptionsHelper(const PetscOptions & po, FEProblemBase * const problem)
   addPetscOptionsFromCommandline(problem);
 }
 
+/**
+ * Error out when the preconditioner chosen for a Kokkos matrix-free solver system needs matrix
+ * entries. Such a system's Pmat is the shell operator, which supplies a matrix-vector product and a
+ * diagonal, so only preconditioners built from those two operations can be used. Called once the
+ * PETSc options database holds both the MOOSE defaults and the user's own options, so that it sees
+ * the preconditioner the solve will actually construct.
+ */
+void
+checkMatrixFreePreconditioner(const SolverParams & solver_params)
+{
+  if (!solver_params._kokkos_matrix_free)
+    return;
+
+  const auto option_name = '-' + solver_params._prefix + "pc_type";
+  std::array<char, PETSC_MAX_PATH_LEN> pc_type = {};
+  PetscBool found = PETSC_FALSE;
+  LibmeshPetscCallA(PETSC_COMM_WORLD,
+                    PetscOptionsGetString(LIBMESH_PETSC_NULLPTR,
+                                          LIBMESH_PETSC_NULLPTR,
+                                          option_name.c_str(),
+                                          pc_type.data(),
+                                          pc_type.size(),
+                                          &found));
+
+  if (!found)
+    return;
+
+  // Preconditioners whose setup and application need no more than MatMult and MatGetDiagonal.
+  // 'mg' qualifies only as far as its own machinery goes: each level's smoother carries its own
+  // preconditioner, which is subject to the same restriction on the operator handed to that level.
+  static const std::set<std::string> supported = {"none", "jacobi", "pbjacobi", "mg", "shell"};
+
+  if (!supported.count(pc_type.data()))
+    mooseError("Preconditioner '",
+               pc_type.data(),
+               "' reads matrix entries, which a Kokkos matrix-free system does not provide. Choose "
+               "one of: ",
+               MooseUtils::join(supported, ", "),
+               ".");
+}
+
 void
 petscSetOptions(const PetscOptions & po,
                 const SolverParams & solver_params,
@@ -400,6 +448,7 @@ petscSetOptions(const PetscOptions & po,
   PetscCallAbort(PETSC_COMM_WORLD, PetscOptionsClear(LIBMESH_PETSC_NULLPTR));
   setSolverOptions(solver_params, po.dont_add_these_options);
   petscSetOptionsHelper(po, problem);
+  checkMatrixFreePreconditioner(solver_params);
 }
 
 void
@@ -411,6 +460,8 @@ petscSetOptions(const PetscOptions & po,
   for (const auto & solver_params : solver_params_vec)
     setSolverOptions(solver_params, po.dont_add_these_options);
   petscSetOptionsHelper(po, problem);
+  for (const auto & solver_params : solver_params_vec)
+    checkMatrixFreePreconditioner(solver_params);
 }
 
 PetscErrorCode
