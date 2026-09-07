@@ -118,7 +118,7 @@ protected:
     GradientContainer next_values;
 
     /// Whether the current gradient has received a computed value.
-    bool current_state_initialized = false;
+    bool has_computed_gradient = false;
   };
 
   /**

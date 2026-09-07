@@ -171,7 +171,7 @@ LinearFVGradientInterface::ensureGradientStateStorage(LinearFVGradientContainer 
       if (state_values.empty())
         initializeContainer(state_values);
 
-  if (container.current_state_initialized)
+  if (container.has_computed_gradient)
     for (const auto state : make_range(std::max<std::size_t>(old_size, 1), required_states))
       copyGradient(container.state_values[0], container.state_values[state]);
 }
@@ -223,11 +223,11 @@ LinearFVGradientInterface::finalizeLinearFVGradientContainer(LinearFVGradientCon
               "Next and current gradient containers must have the same size.");
   container.state_values[0].swap(container.next_values);
 
-  if (!container.current_state_initialized)
+  if (!container.has_computed_gradient)
     for (const auto state : make_range(std::size_t(1), container.state_values.size()))
       copyGradient(container.state_values[0], container.state_values[state]);
 
-  container.current_state_initialized = true;
+  container.has_computed_gradient = true;
 }
 
 void
@@ -251,7 +251,7 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
     for (auto & state : method_container_pair.second.state_values)
       state.clear();
     method_container_pair.second.next_values.clear();
-    method_container_pair.second.current_state_initialized = false;
+    method_container_pair.second.has_computed_gradient = false;
   }
 
   initializeLinearFVGradientStorage();
@@ -261,11 +261,11 @@ void
 LinearFVGradientInterface::initializeGradientStatesForTimeAdvance()
 {
   for (auto & [method, container] : _linear_fv_gradient_container_by_method)
-    if (container.state_values.size() > 1 && !container.current_state_initialized)
+    if (container.state_values.size() > 1 && !container.has_computed_gradient)
       computeLinearFVGradientContainer(*method);
 
   for (auto & [_, container] : _linear_fv_gradient_container_by_method)
-    if (container.state_values.size() > 1 && !container.current_state_initialized)
+    if (container.state_values.size() > 1 && !container.has_computed_gradient)
       finalizeLinearFVGradientContainer(container);
 }
 
@@ -281,7 +281,7 @@ LinearFVGradientInterface::copyPreviousGradientStates(const bool skip_current_to
     if (number_of_states <= 1)
       continue;
 
-    mooseAssert(container.current_state_initialized,
+    mooseAssert(container.has_computed_gradient,
                 "Current gradient state must be initialized before advancing time states.");
     // Mirror solution-state advancement: some restore workflows preserve state 1 by skipping the
     // current-to-old copy while still shifting every deeper state.
@@ -300,7 +300,7 @@ LinearFVGradientInterface::restoreGradientStates()
     if (container.state_values.size() <= 1)
       continue;
 
-    mooseAssert(container.current_state_initialized,
+    mooseAssert(container.has_computed_gradient,
                 "Current gradient state must be initialized before restoration.");
     copyGradient(container.state_values[1], container.state_values[0]);
     copyGradient(container.state_values[0], container.next_values);
