@@ -24,6 +24,14 @@ to roundoff. Setting `verify_level_operators` checks that after every linearizat
 level's operator to one unit vector per degree of freedom, at the cost of an operator application per
 degree of freedom, which makes it a verification aid for small inputs.
 
+Consecutive levels are joined by a transfer that prolongs a coarse vector to the finer space and
+restricts a fine vector back by the transpose of that same prolongation, which makes the operator the
+hierarchy realizes on a coarse level the Galerkin operator of the fine linearization. For a family
+whose nested spaces share no degrees of freedom, such as Lagrange, the transfer expands each coarse
+element basis function in the finer element basis, so a transfer depends on the geometry and the
+bases alone and is built once at initial setup. Setting `verify_level_transfers` checks the transpose
+relationship of each transfer there, at the cost of one application of each direction.
+
 ## Example Input File Syntax
 
 !listing test/tests/kokkos/preconditioners/pmultigrid/pmultigrid.i block=Preconditioning

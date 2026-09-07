@@ -161,6 +161,13 @@ public:
   KOKKOS_FUNCTION unsigned int getFETypeID(unsigned int var) const { return _var_fe_types[var]; }
 
   /**
+   * Get the FE type ID of every variable, which is what a consumer that indexes the assembly's
+   * cached reference shape data by variable number needs
+   * @returns The FE type IDs, indexed by variable number
+   */
+  const Array<unsigned int> & feTypes() const { return _var_fe_types; }
+
+  /**
    * Get the local DOF index of a variable for a node
    * @param node The contiguous node ID
    * @param i The node-local DOF index

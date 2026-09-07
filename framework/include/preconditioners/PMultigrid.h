@@ -55,6 +55,9 @@ protected:
   /// Whether each level's operator is to be checked against its diagonal
   const bool _verify_level_operators;
 
+  /// Whether each level transfer is to be checked for the transpose relationship
+  const bool _verify_level_transfers;
+
   /// The coarse levels' function spaces, ascending in order
   std::vector<std::unique_ptr<Moose::Kokkos::PLevelSpace>> _levels;
 };
