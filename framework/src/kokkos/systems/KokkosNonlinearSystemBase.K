@@ -17,6 +17,7 @@
 #include "NonlinearSystemBase.h"
 #include "MooseVariableFieldBase.h"
 #include "FEProblemBase.h"
+#include "PMultigrid.h"
 
 #include "libmesh/petsc_matrix_shell_matrix.h"
 
@@ -197,8 +198,8 @@ NonlinearSystemBase::setupKokkosMatrixFreeJacobian()
     // instead of a device abort.
     if (DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::JacobianLoop>(
             object.type()) &&
-        !DispatcherRegistry::hasUserMethod<Moose::Kokkos::ResidualObject::JacobianVectorProductLoop>(
-            object.type()) &&
+        !DispatcherRegistry::hasUserMethod<
+            Moose::Kokkos::ResidualObject::JacobianVectorProductLoop>(object.type()) &&
         !cached)
       mooseError("The Kokkos matrix-free Jacobian-vector product does not support kernel '",
                  object.name(),
@@ -677,6 +678,10 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 
       // Reported outside the timed section so the one-time diagnostic is not attributed to the fill
       reportKokkosMatrixFreeCoverage();
+
+      // The cache the levels contract holds this linearization, so this is where a level's operator
+      // can be checked against itself
+      verifyKokkosLevelOperators();
     }
   }
 
@@ -833,6 +838,10 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 
       // Reported outside the timed section so the one-time diagnostic is not attributed to the fill
       reportKokkosMatrixFreeCoverage();
+
+      // The cache the levels contract holds this linearization, so this is where a level's operator
+      // can be checked against itself
+      verifyKokkosLevelOperators();
     }
   }
 
@@ -895,6 +904,77 @@ NonlinearSystemBase::reportKokkosMatrixFreeCoverage()
 }
 
 void
+NonlinearSystemBase::verifyKokkosLevelOperators()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg || !pmg->verifyLevelOperators())
+    return;
+
+  TIME_SECTION("verifyKokkosLevelOperators", 1);
+
+  const auto & cache = _fe_problem.getKokkosFESystems()[number()].qpJacobianCache();
+
+  for (const auto & level : pmg->levels())
+  {
+    auto & level_sys = level->system();
+    const auto & dof_map = level_sys.get_dof_map();
+
+    auto diagonal = level_sys.solution->zero_clone();
+    auto unit = level_sys.solution->zero_clone();
+    auto column = level_sys.solution->zero_clone();
+
+    level->diagonal(cache, *diagonal);
+
+    Real error = 0;
+    Real scale = 0;
+
+    for (const auto dof : make_range(level_sys.n_dofs()))
+    {
+      const auto owned = dof >= dof_map.first_dof() && dof < dof_map.end_dof();
+
+      unit->zero();
+
+      if (owned)
+        unit->set(dof, 1.0);
+
+      unit->close();
+
+      level->apply(cache, *unit, *column);
+
+      // Applying the operator to the unit vector of a degree of freedom produces that column of the
+      // operator, whose entry for the same degree of freedom is the diagonal entry
+      if (owned)
+      {
+        error = std::max(error, std::abs((*column)(dof) - (*diagonal)(dof)));
+        scale = std::max(scale, std::abs((*diagonal)(dof)));
+      }
+    }
+
+    _communicator.max(error);
+    _communicator.max(scale);
+
+    // The two paths contract the same cache against the same basis tables in a different loop
+    // order, so they agree to the roundoff of that contraction; the margin over the unit roundoff
+    // of double precision covers the element and quadrature-point sums
+    const auto tolerance = 1e-10 * std::max(scale, 1.0);
+
+    _console << "p-multigrid level p = " << level->order()
+             << ": operator agrees with its diagonal to " << error << " (tolerance " << tolerance
+             << ")" << std::endl;
+
+    if (error > tolerance)
+      mooseError("The operator of the p-multigrid level of order ",
+                 level->order(),
+                 " disagrees with the diagonal the level computes by ",
+                 error,
+                 ", which exceeds a tolerance of ",
+                 tolerance,
+                 ".");
+  }
+}
+
+void
 NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
 {
   TIME_SECTION("computeKokkosJacobianVectorProduct", 1);
@@ -912,7 +992,8 @@ NonlinearSystemBase::computeKokkosJacobianVectorProduct(Vec x, Vec y)
   auto * const petsc_x = libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_kokkos_mf_x);
   LibmeshPetscCallA(comm().get(),
                     VecGhostUpdateBegin(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
-  LibmeshPetscCallA(comm().get(), VecGhostUpdateEnd(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
+  LibmeshPetscCallA(comm().get(),
+                    VecGhostUpdateEnd(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
 
   // Wrap the raw output vector for the duration of this call only; the caller owns it and must
   // see the accumulated result once we return

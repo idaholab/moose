@@ -17,6 +17,13 @@ hold no kernels or boundary conditions of their own.
 The orders of the coarse levels are listed ascending in `level_orders`; the fine level is the solver
 system's own order and is not listed.
 
+Each level supplies the two operations a Jacobi or Chebyshev smoother needs: the action of its
+operator on a vector, and the diagonal of that operator. Both are contractions of the same
+quadrature-point linearization against the level's basis functions, so they agree with one another
+to roundoff. Setting `verify_level_operators` checks that after every linearization by applying each
+level's operator to one unit vector per degree of freedom, at the cost of an operator application per
+degree of freedom, which makes it a verification aid for small inputs.
+
 ## Example Input File Syntax
 
 !listing test/tests/kokkos/preconditioners/pmultigrid/pmultigrid.i block=Preconditioning
