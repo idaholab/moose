@@ -56,6 +56,19 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [test_matrix_free_jacobian_fd]
+    type = PetscJacobianTester
+    input = 'kokkos_2d_diffusion_test.i'
+    cli_args = 'Outputs/exodus=false Executioner/use_kokkos_matrix_free_jacobian=true'
+    recover = false
+    requirement = 'The Kokkos system shall compute the partial-assembly Jacobian-vector product to '
+                  'the same accuracy as a finite difference Jacobian, verifying the '
+                  'quadrature-point linearization that product is contracted from.'
+    design = 'KokkosDiffusion.md framework_stp.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [test_force_iteration]
     type = Exodiff
     input = 'kokkos_2d_diffusion_test.i'
@@ -75,6 +88,35 @@
     absent_out = 'Nonlinear \|R\|'
     requirement = 'The Kokkos system shall not compute an extra residual if the linear solver is used.'
     design = 'FEProblem.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [matrix_free_fdp_error]
+    type = RunException
+    input = 'kokkos_2d_diffusion_test.i'
+    cli_args = 'Outputs/exodus=false Executioner/use_kokkos_matrix_free_jacobian=true '
+               'Preconditioning/fdp/type=FDP'
+    expect_err = 'Finite difference preconditioning fills the entries of an assembled system matrix'
+    recover = false
+    requirement = 'The Kokkos system shall report an error when finite difference preconditioning '
+                  'is requested for a system whose Jacobian is computed as an operator action.'
+    design = 'FiniteDifferencePreconditioner.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [matrix_free_integrated_bc_error]
+    type = RunException
+    input = 'kokkos_2d_diffusion_test.i'
+    cli_args = 'Outputs/exodus=false Executioner/use_kokkos_matrix_free_jacobian=true '
+               'BCs/vacuum/type=KokkosVacuumBC BCs/vacuum/variable=u BCs/vacuum/boundary=top'
+    expect_err = 'does not support the integrated boundary condition .vacuum. of type .KokkosVacuumBC.'
+    recover = false
+    requirement = 'The Kokkos system shall report an error when a matrix-free Jacobian-vector '
+                  'product is requested with an integrated boundary condition that carries a '
+                  'Jacobian contribution, which the operator action does not evaluate.'
+    design = 'KokkosVacuumBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

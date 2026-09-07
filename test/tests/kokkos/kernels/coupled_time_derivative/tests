@@ -21,4 +21,18 @@
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
+
+  [matrix_free_off_diagonal_error]
+    type = RunException
+    input = 'kokkos_coupled_time_derivative_test.i'
+    cli_args = 'Outputs/exodus=false Executioner/use_kokkos_matrix_free_jacobian=true'
+    expect_err = 'does not support kernel .time_v. of type .KokkosCoupledTimeDerivative.'
+    recover = false
+    issues = '#33644'
+    requirement = 'The Kokkos system shall report an error when a matrix-free Jacobian-vector '
+                  'product is requested for a kernel that couples to another variable, whose '
+                  'quadrature-point linearization the cache does not carry.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
 []

@@ -1,0 +1,99 @@
+[Tests]
+  issues = '#33644'
+  design = 'KokkosKernels/index.md'
+  capabilities = 'kokkos'
+
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_test.i'
+    recover = false
+    requirement = 'The Kokkos system shall assemble an exact Jacobian for a nonlinear weak form in '
+                  'value/flux form whose linearization is seeded on the quadrature-point solution '
+                  'value and gradient.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [matrix_free_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_test.i'
+    cli_args = 'Executioner/use_kokkos_matrix_free_jacobian=true'
+    recover = false
+    requirement = 'The Kokkos system shall compute a matrix-free Jacobian-vector product for a '
+                  'nonlinear weak form in value/flux form by contracting the cached '
+                  'quadrature-point linearization against the basis functions.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [jacobian_3d]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_test.i'
+    cli_args = 'Mesh/square/dim=3 Mesh/square/nz=2'
+    recover = false
+    requirement = 'The Kokkos system shall assemble an exact Jacobian for a nonlinear weak form in '
+                  'value/flux form in three dimensions.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [matrix_free_jacobian_3d]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_test.i'
+    cli_args = 'Mesh/square/dim=3 Mesh/square/nz=2 '
+               'Executioner/use_kokkos_matrix_free_jacobian=true'
+    recover = false
+    requirement = 'The Kokkos system shall compute a matrix-free Jacobian-vector product for a '
+                  'nonlinear weak form in value/flux form in three dimensions.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [transient_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_transient_test.i'
+    recover = false
+    requirement = 'The Kokkos system shall assemble an exact Jacobian for a transient nonlinear '
+                  'weak form in value/flux form.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [transient_matrix_free_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_transient_test.i'
+    cli_args = 'Executioner/use_kokkos_matrix_free_jacobian=true'
+    recover = false
+    requirement = 'The Kokkos system shall compute a matrix-free Jacobian-vector product for a '
+                  'transient nonlinear weak form in value/flux form, including the time '
+                  'derivative mass contribution.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [transient_matrix_free_lumped_error]
+    type = RunException
+    input = 'kokkos_ad_nonlinear_transient_test.i'
+    cli_args = 'Executioner/use_kokkos_matrix_free_jacobian=true Kernels/time/lumping=true'
+    expect_err = 'does not support kernel .time. of type .KokkosTimeDerivative.'
+    recover = false
+    requirement = 'The Kokkos system shall report an error when a matrix-free Jacobian-vector '
+                  'product is requested for a mass-lumped time derivative, whose assembled element '
+                  'matrix has no quadrature-point representation.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [high_order_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_high_order_test.i'
+    recover = false
+    requirement = 'The Kokkos system shall assemble an exact Jacobian for a nonlinear weak form in '
+                  'value/flux form discretized with a hierarchic basis above second order.'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [high_order_matrix_free_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_ad_nonlinear_high_order_test.i'
+    cli_args = 'Executioner/use_kokkos_matrix_free_jacobian=true'
+    recover = false
+    requirement = 'The Kokkos system shall compute a matrix-free Jacobian-vector product for a '
+                  'nonlinear weak form in value/flux form discretized with a hierarchic basis '
+                  'above second order.'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]

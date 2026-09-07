@@ -10,4 +10,19 @@
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
+
+  [matrix_free_missing_tensor_error]
+    type = RunException
+    input = 'kokkos_kernel_precompute_test.i'
+    cli_args = 'Outputs/exodus=false Executioner/solve_type=NEWTON '
+               'Executioner/use_kokkos_matrix_free_jacobian=true'
+    expect_err = 'does not support kernel .conv. of type .KokkosConvectionPrecompute.'
+    recover = false
+    issues = '#33644'
+    requirement = 'The Kokkos system shall report an error when a matrix-free Jacobian-vector '
+                  'product is requested for a kernel that supplies neither a quadrature-point '
+                  'linearization nor an operator-action loop of its own.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
 []
