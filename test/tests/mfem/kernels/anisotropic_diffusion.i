@@ -1,5 +1,5 @@
 # Solves the Poisson problem -Div(sigma Grad u) = 1, in 3D on a 2D surface,
-# where the diffusion coefficient sigma is a 3x3 matrix.
+# where the diffusion coefficient sigma is a constant 3x3 matrix.
 # Based on MFEM Example ex29p. See corresponding `gold/` directory for more info.
 
 [Mesh]
@@ -45,15 +45,7 @@
     # Bilinear form a(u,v): (Q \nabla u, \nabla v), where Q is the matrix coefficient.
     type = MFEMDiffusionKernel
     variable = u
-    matrix_coefficient = anisotropic_material
-  []
-[]
-
-[FunctorMaterials]
-  [anisotropic_material]
-    type = MFEMGenericFunctorMatrixMaterial
-    prop_names = anisotropic_material
-    prop_values = '{ 100.0 1.5 0.0; 1.5 2.5 0.0; 0.0 0.0 3.0 }'
+    matrix_coefficient = '100.0 1.5 0.0; 1.5 2.5 0.0; 0.0 0.0 3.0'
   []
 []
 
