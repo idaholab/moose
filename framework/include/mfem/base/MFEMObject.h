@@ -72,6 +72,18 @@ public:
    * Retrieve a matrix MFEM coefficient using the value of an input parameter.
    */
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
+  /**
+   * Retrieve a variant type MFEM coefficient using the value of an input parameter.
+   *
+   * Defaults to the scalar coefficient's default if no user inputs are given.
+   * Throws a `paramError` if a user specifies more than one coefficient type.
+   */
+  std::variant<std::reference_wrapper<mfem::Coefficient>,
+               std::reference_wrapper<mfem::DiagonalMatrixCoefficient>,
+               std::reference_wrapper<mfem::MatrixCoefficient>>
+  getVariantCoefficient(const std::string & name_scalar,
+                        const std::string & name_diagonal,
+                        const std::string & name_matrix);
 
 private:
   /// Owning MFEM problem for this object.
