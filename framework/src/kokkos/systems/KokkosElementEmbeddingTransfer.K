@@ -19,7 +19,7 @@ namespace Moose::Kokkos
 
 ElementEmbedding::ElementEmbedding(const DofSpace & coarse,
                                    const DofSpace & fine,
-                                   const Array3D<Array2D<Real>> & embedding,
+                                   const Array4D<Array2D<Real>> & embedding,
                                    const Array<Vector> & vectors)
   : _coarse(coarse), _fine(fine), _embedding(embedding), _vectors(vectors)
 {
@@ -59,7 +59,7 @@ ElementEmbedding::table(const ContiguousElementID elem, const unsigned int var) 
 {
   const auto info = _fine.kokkosMesh().getElementInfo(elem);
 
-  return _embedding(info.subdomain, info.type, var);
+  return _embedding(info.subdomain, info.type, var, info.orientation);
 }
 
 KOKKOS_FUNCTION void
@@ -157,128 +157,137 @@ ElementEmbeddingTransfer::buildEmbedding()
   const auto & mesh = _assembly.kokkosMesh();
   const auto num_vars = _coarse.dof_space.getNumVars();
 
-  _embedding.create(mesh.getNumSubdomains(), mesh.getNumLocalElementTypes(), num_vars);
+  _embedding.create(mesh.getNumSubdomains(),
+                    mesh.getNumLocalElementTypes(),
+                    num_vars,
+                    mesh.getMaxNumOrientations());
 
   for (const auto sid : make_range(mesh.getNumSubdomains()))
     for (const auto & [elem_type, elem_type_id] : mesh.getElementTypeMap())
-      for (const auto var : make_range(num_vars))
-      {
-        const auto coarse_fe = _coarse.fe_types[var];
-        const auto fine_fe = _fine.fe_types[var];
-
-        const auto num_coarse = _assembly.getNumDofs(elem_type_id, coarse_fe);
-        const auto num_fine = _assembly.getNumDofs(elem_type_id, fine_fe);
-
-        if (!num_coarse || !num_fine)
-          continue;
-
-        const auto & coarse_phi = _assembly.getPhi(sid, elem_type_id, coarse_fe);
-        const auto & coarse_grad_phi = _assembly.getGradPhi(sid, elem_type_id, coarse_fe);
-        const auto & fine_phi = _assembly.getPhi(sid, elem_type_id, fine_fe);
-        const auto & fine_grad_phi = _assembly.getGradPhi(sid, elem_type_id, fine_fe);
-
-        const auto num_qps = fine_phi.n(1);
-
-        // Each coarse basis function is fit in the fine basis in the least-squares sense against
-        // both the values and the reference gradients at the shared quadrature points. The fit is
-        // exact whenever the coarse space is contained in the fine space, which is the case the
-        // transfer is for, and the normal equations are the same tables the level operators
-        // contract, so the embedding is consistent with them by construction.
-        libMesh::DenseMatrix<Real> normal(num_fine, num_fine);
-        libMesh::DenseMatrix<Real> rhs(num_fine, num_coarse);
-
-        for (const auto i : make_range(num_fine))
+      // The bases whose shape functions depend on the orientation of the element's edges and faces
+      // have a table of their own per orientation, so the embedding of one basis in another is fit
+      // per orientation as well
+      for (const auto orientation : make_range(mesh.getNumOrientations(elem_type_id)))
+        for (const auto var : make_range(num_vars))
         {
-          for (const auto j : make_range(num_fine))
+          const auto coarse_fe = _coarse.fe_types[var];
+          const auto fine_fe = _fine.fe_types[var];
+
+          const auto num_coarse = _assembly.getNumDofs(elem_type_id, coarse_fe);
+          const auto num_fine = _assembly.getNumDofs(elem_type_id, fine_fe);
+
+          if (!num_coarse || !num_fine)
+            continue;
+
+          const auto & coarse_phi = _assembly.getPhi(sid, elem_type_id, coarse_fe, orientation);
+          const auto & coarse_grad_phi =
+              _assembly.getGradPhi(sid, elem_type_id, coarse_fe, orientation);
+          const auto & fine_phi = _assembly.getPhi(sid, elem_type_id, fine_fe, orientation);
+          const auto & fine_grad_phi =
+              _assembly.getGradPhi(sid, elem_type_id, fine_fe, orientation);
+
+          const auto num_qps = fine_phi.n(1);
+
+          // Each coarse basis function is fit in the fine basis in the least-squares sense against
+          // both the values and the reference gradients at the shared quadrature points. The fit is
+          // exact whenever the coarse space is contained in the fine space, which is the case the
+          // transfer is for, and the normal equations are the same tables the level operators
+          // contract, so the embedding is consistent with them by construction.
+          libMesh::DenseMatrix<Real> normal(num_fine, num_fine);
+          libMesh::DenseMatrix<Real> rhs(num_fine, num_coarse);
+
+          for (const auto i : make_range(num_fine))
           {
-            Real entry = 0;
+            for (const auto j : make_range(num_fine))
+            {
+              Real entry = 0;
 
-            for (const auto qp : make_range(num_qps))
-              entry +=
-                  fine_phi(i, qp) * fine_phi(j, qp) + fine_grad_phi(i, qp) * fine_grad_phi(j, qp);
+              for (const auto qp : make_range(num_qps))
+                entry +=
+                    fine_phi(i, qp) * fine_phi(j, qp) + fine_grad_phi(i, qp) * fine_grad_phi(j, qp);
 
-            normal(i, j) = entry;
+              normal(i, j) = entry;
+            }
+
+            for (const auto j : make_range(num_coarse))
+            {
+              Real entry = 0;
+
+              for (const auto qp : make_range(num_qps))
+                entry += fine_phi(i, qp) * coarse_phi(j, qp) +
+                         fine_grad_phi(i, qp) * coarse_grad_phi(j, qp);
+
+              rhs(i, j) = entry;
+            }
           }
+
+          auto & embedding = _embedding(sid, elem_type_id, var, orientation);
+
+          embedding.create(num_fine, num_coarse);
+
+          libMesh::DenseVector<Real> column(num_fine);
+          libMesh::DenseVector<Real> solution;
 
           for (const auto j : make_range(num_coarse))
           {
-            Real entry = 0;
+            for (const auto i : make_range(num_fine))
+              column(i) = rhs(i, j);
 
-            for (const auto qp : make_range(num_qps))
-              entry += fine_phi(i, qp) * coarse_phi(j, qp) +
-                       fine_grad_phi(i, qp) * coarse_grad_phi(j, qp);
-
-            rhs(i, j) = entry;
-          }
-        }
-
-        auto & embedding = _embedding(sid, elem_type_id, var);
-
-        embedding.create(num_fine, num_coarse);
-
-        libMesh::DenseVector<Real> column(num_fine);
-        libMesh::DenseVector<Real> solution;
-
-        for (const auto j : make_range(num_coarse))
-        {
-          for (const auto i : make_range(num_fine))
-            column(i) = rhs(i, j);
-
-          // The normal matrix is a Gram matrix of the fine basis, so it is symmetric positive
-          // definite; the factorization is formed on the first column and reused for the rest
-          normal.cholesky_solve(column, solution);
-
-          for (const auto i : make_range(num_fine))
-            embedding(i, j) = solution(i);
-        }
-
-        Real error = 0;
-        Real scale = 0;
-
-        for (const auto j : make_range(num_coarse))
-          for (const auto qp : make_range(num_qps))
-          {
-            Real value = 0;
-            Real3 grad = 0;
+            // The normal matrix is a Gram matrix of the fine basis, so it is symmetric positive
+            // definite; the factorization is formed on the first column and reused for the rest
+            normal.cholesky_solve(column, solution);
 
             for (const auto i : make_range(num_fine))
-            {
-              value += embedding(i, j) * fine_phi(i, qp);
-              grad += embedding(i, j) * fine_grad_phi(i, qp);
-            }
-
-            error = std::max(error, std::abs(value - coarse_phi(j, qp)));
-            scale = std::max(scale, std::abs(coarse_phi(j, qp)));
-
-            for (const auto d : make_range(3u))
-            {
-              error = std::max(error, std::abs(grad(d) - coarse_grad_phi(j, qp)(d)));
-              scale = std::max(scale, std::abs(coarse_grad_phi(j, qp)(d)));
-            }
+              embedding(i, j) = solution(i);
           }
 
-        // An exact fit leaves the residual of a small dense symmetric solve, so the margin over the
-        // unit roundoff of double precision covers the conditioning of the normal equations
-        const auto tolerance = 1e-9 * std::max(scale, 1.0);
+          Real error = 0;
+          Real scale = 0;
 
-        if (error > tolerance)
-          mooseError(
-              "The order ",
-              _coarse.sys.variable(var).type().order.get_order(),
-              " space of variable '",
-              _coarse.sys.variable(var).name(),
-              "' is not contained in its order ",
-              _fine.sys.variable(var).type().order.get_order(),
-              " space on ",
-              libMesh::Utility::enum_to_string(elem_type),
-              " elements: the basis functions of the coarser space are reproduced in the "
-              "finer space only to ",
-              error,
-              ", which exceeds a tolerance of ",
-              tolerance,
-              ". A p-multigrid level transfer by element embedding requires the coarse space "
-              "to be a subspace of the fine space.");
-      }
+          for (const auto j : make_range(num_coarse))
+            for (const auto qp : make_range(num_qps))
+            {
+              Real value = 0;
+              Real3 grad = 0;
+
+              for (const auto i : make_range(num_fine))
+              {
+                value += embedding(i, j) * fine_phi(i, qp);
+                grad += embedding(i, j) * fine_grad_phi(i, qp);
+              }
+
+              error = std::max(error, std::abs(value - coarse_phi(j, qp)));
+              scale = std::max(scale, std::abs(coarse_phi(j, qp)));
+
+              for (const auto d : make_range(3u))
+              {
+                error = std::max(error, std::abs(grad(d) - coarse_grad_phi(j, qp)(d)));
+                scale = std::max(scale, std::abs(coarse_grad_phi(j, qp)(d)));
+              }
+            }
+
+          // An exact fit leaves the residual of a small dense symmetric solve, so the margin over
+          // the unit roundoff of double precision covers the conditioning of the normal equations
+          const auto tolerance = 1e-9 * std::max(scale, 1.0);
+
+          if (error > tolerance)
+            mooseError(
+                "The order ",
+                _coarse.sys.variable(var).type().order.get_order(),
+                " space of variable '",
+                _coarse.sys.variable(var).name(),
+                "' is not contained in its order ",
+                _fine.sys.variable(var).type().order.get_order(),
+                " space on ",
+                libMesh::Utility::enum_to_string(elem_type),
+                " elements: the basis functions of the coarser space are reproduced in the "
+                "finer space only to ",
+                error,
+                ", which exceeds a tolerance of ",
+                tolerance,
+                ". A p-multigrid level transfer by element embedding requires the coarse space "
+                "to be a subspace of the fine space.");
+        }
 
   _embedding.copyToDeviceNested();
 }

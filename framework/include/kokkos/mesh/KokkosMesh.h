@@ -15,6 +15,9 @@
 #include "KokkosUtils.h"
 #endif
 
+#include <cstdint>
+#include <map>
+
 using ContiguousSubdomainID = SubdomainID;
 using ContiguousBoundaryID = BoundaryID;
 using ContiguousElementID = dof_id_type;
@@ -44,6 +47,10 @@ struct ElementInfo
    * Contiguous subdomain ID
    */
   ContiguousSubdomainID subdomain = std::numeric_limits<ContiguousSubdomainID>::max();
+  /**
+   * Contiguous edge and face orientation ID
+   */
+  unsigned int orientation = 0;
 };
 
 /**
@@ -102,6 +109,32 @@ public:
    * @returns The element type ID map
    */
   const auto & getElementTypeMap() const { return _maps->elem_type_id_mapping; }
+  /**
+   * Get the number of edge and face orientations the local mesh presents for an element type
+   * @param elem_type The element type ID
+   * @returns The number of orientations
+   */
+  unsigned int getNumOrientations(const unsigned int elem_type) const
+  {
+    return _orientation_elems[elem_type].size();
+  }
+  /**
+   * Get the largest number of orientations over the local element types, which is the extent an
+   * array keyed on the contiguous orientation ID needs
+   * @returns The number of orientations
+   */
+  unsigned int getMaxNumOrientations() const;
+  /**
+   * Get an element of the local mesh that carries a given edge and face orientation. Reference
+   * shape data of an FE family whose shape functions depend on the orientation is evaluated on it.
+   * @param elem_type The element type ID
+   * @param orientation The contiguous orientation ID
+   * @returns The element
+   */
+  const libMesh::Elem & getOrientationElem(unsigned int elem_type, unsigned int orientation) const
+  {
+    return *_orientation_elems[elem_type][orientation];
+  }
   /**
    * Get the number of local elements
    * @returns The number of local elements
@@ -446,6 +479,22 @@ private:
   void initElement();
 
   /**
+   * Compute the edge and face orientation signature of an element, which is the bit pattern of
+   * libMesh's per-edge and per-face orientation predicates
+   * @param elem The element
+   * @returns The signature
+   */
+  static uint64_t orientationSignature(const libMesh::Elem & elem);
+  /**
+   * Get the contiguous orientation ID of an element, assigning a new ID the first time a signature
+   * is seen and keeping the element as the representative of that signature
+   * @param elem The element
+   * @param elem_type The element type ID of the element
+   * @returns The contiguous orientation ID
+   */
+  unsigned int getOrientationID(const libMesh::Elem & elem, unsigned int elem_type);
+
+  /**
    * Reference of the MOOSE mesh
    */
   MooseMesh & _mesh;
@@ -503,6 +552,16 @@ private:
    * A shared pointer holding all the host maps to avoid deep copy
    */
   std::shared_ptr<MeshMap> _maps;
+
+  /**
+   * Contiguous orientation ID of each edge and face orientation signature the local mesh presents,
+   * indexed by element type ID
+   */
+  std::vector<std::map<uint64_t, unsigned int>> _orientation_ids;
+  /**
+   * Representative element of each contiguous orientation ID, indexed by element type ID
+   */
+  std::vector<std::vector<const libMesh::Elem *>> _orientation_elems;
 
   /**
    * Element integer for Kokkos contiguous element ID
