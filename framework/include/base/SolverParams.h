@@ -21,9 +21,9 @@ public:
   Moose::MffdType _mffd_type;
 
   /// Whether to use the Kokkos matrix-free Jacobian-vector product (an analytic partial-assembly
-  /// operator action) as the actual SNES Amat, while still assembling the ordinary Jacobian for
-  /// preconditioning. Mutually exclusive with the PETSc-native ST_PJFNK/ST_JFNK finite-difference
-  /// matrix-free modes.
+  /// operator action) as both the SNES Amat and Pmat, a shell matrix whose operations are a
+  /// matrix-vector product and a diagonal, which limits preconditioning to what those two supply.
+  /// Mutually exclusive with the PETSc-native ST_PJFNK/ST_JFNK finite-difference matrix-free modes.
   bool _kokkos_matrix_free;
 
   // solver parameters for eigenvalue problems
