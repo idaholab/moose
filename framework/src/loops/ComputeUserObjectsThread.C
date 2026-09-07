@@ -158,6 +158,81 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   }
 }
 
+const ComputeUserObjectsThread::BoundaryMaterialReinitCache &
+ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id,
+                                                         const SubdomainID subdomain_id,
+                                                         const std::vector<UserObject *> & userobjs)
+{
+  const auto cache_key = std::make_pair(bnd_id, subdomain_id);
+  auto [cache_it, inserted] = _boundary_material_reinit_cache.try_emplace(cache_key);
+  auto & cache = cache_it->second;
+
+  if (!inserted)
+    return cache;
+
+  std::vector<const MaterialPropertyInterface *> material_consumers;
+  material_consumers.reserve(userobjs.size() + _domain_objs.size());
+
+  const auto add_material_consumers = [&material_consumers](const auto & objects)
+  {
+    for (const auto * const object : objects)
+      if (const auto * const consumer = dynamic_cast<const MaterialPropertyInterface *>(object))
+        material_consumers.push_back(consumer);
+  };
+
+  add_material_consumers(userobjs);
+  add_material_consumers(_domain_objs);
+
+  const auto & materials = _fe_problem.getRegularMaterialsWarehouse();
+
+  // Resolve boundary materials first. A boundary material can depend on a property supplied by a
+  // face material, while a property supplied by the boundary-material chain does not also need a
+  // face producer.
+  if (!material_consumers.empty() && materials.hasActiveBoundaryObjects(bnd_id, _tid))
+    cache.boundary_materials = MaterialBase::buildRequiredMaterials(
+        material_consumers, materials.getActiveBoundaryObjects(bnd_id, _tid), true);
+
+  std::unordered_set<unsigned int> needed_face_props;
+  for (const auto * const consumer : material_consumers)
+  {
+    const auto & dependencies = consumer->getMatPropDependencies();
+    needed_face_props.insert(dependencies.begin(), dependencies.end());
+  }
+
+  for (const auto * const material : cache.boundary_materials)
+  {
+    const auto & dependencies = material->getMatPropDependencies();
+    needed_face_props.insert(dependencies.begin(), dependencies.end());
+  }
+
+  // The boundary-material chain has already satisfied these properties. Removing them prevents a
+  // face material that happens to declare the same property from being selected unnecessarily.
+  for (const auto * const material : cache.boundary_materials)
+    for (const auto supplied_prop : material->getSuppliedPropIDs())
+      needed_face_props.erase(supplied_prop);
+
+  struct MaterialDependencyConsumer
+  {
+    const std::unordered_set<unsigned int> & dependencies;
+
+    const std::unordered_set<unsigned int> & getMatPropDependencies() const { return dependencies; }
+  };
+
+  if (!needed_face_props.empty())
+  {
+    const auto & face_materials = materials[Moose::FACE_MATERIAL_DATA];
+    if (face_materials.hasActiveBlockObjects(subdomain_id, _tid))
+    {
+      const MaterialDependencyConsumer face_consumer{needed_face_props};
+      const std::vector<const MaterialDependencyConsumer *> face_consumers{&face_consumer};
+      cache.face_materials = MaterialBase::buildRequiredMaterials(
+          face_consumers, face_materials.getActiveBlockObjects(subdomain_id, _tid), true);
+    }
+  }
+
+  return cache;
+}
+
 void
 ComputeUserObjectsThread::onBoundary(const Elem * elem,
                                      unsigned int side,
@@ -175,11 +250,15 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   if (lower_d_elem)
     _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
+  const auto & required_mats =
+      getBoundaryMaterialReinitCache(bnd_id, elem->subdomain_id(), userobjs);
+
   // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
   // still remember to swap back during stack unwinding.
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-  _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
-  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+  _fe_problem.reinitMaterialsFaceOnBoundary(
+      bnd_id, elem->subdomain_id(), _tid, true, &required_mats.face_materials);
+  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid, true, &required_mats.boundary_materials);
 
   for (const auto & uo : userobjs)
     uo->execute();

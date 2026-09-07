@@ -1,0 +1,29 @@
+[Tests]
+  [unrelated_face_material]
+    type = 'RunApp'
+    input = 'unrelated_face_material.i'
+    issues = '#31418'
+    requirement = 'The system shall not evaluate an unrelated face material while executing user objects on a boundary.'
+  []
+  [unrelated_face_material_threaded]
+    type = 'RunApp'
+    input = 'unrelated_face_material.i'
+    min_threads = 2
+    issues = '#31418'
+    requirement = 'The system shall selectively reinitialize boundary materials during threaded user object execution.'
+  []
+  [direct_face_dependency]
+    type = 'CSVDiff'
+    input = 'direct_face_dependency.i'
+    csvdiff = 'direct_face_dependency_out.csv'
+    issues = '#31418'
+    requirement = 'The system shall evaluate a face material directly required by a side user object.'
+  []
+  [boundary_face_dependency]
+    type = 'CSVDiff'
+    input = 'boundary_face_dependency.i'
+    csvdiff = 'boundary_face_dependency_out.csv'
+    issues = '#31418'
+    requirement = 'The system shall evaluate face materials required by boundary-material dependencies of user objects.'
+  []
+[]
