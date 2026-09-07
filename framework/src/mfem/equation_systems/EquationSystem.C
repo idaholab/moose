@@ -493,6 +493,9 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
     }
     else
     {
+      if (_assembly_level != mfem::AssemblyLevel::LEGACY)
+        mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
+                   "assembly in EquationSystem.");
       const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
     }
   }
