@@ -69,8 +69,7 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
   ensureGradientStateStorage(container, oldest_state);
 
   const auto & current_solution = _sys.system().current_local_solution;
-  if (container.next_values.empty() && _sys.solutionStatesInitialized() && current_solution &&
-      current_solution->initialized())
+  if (container.next_values.empty() && current_solution && current_solution->initialized())
     initializeContainer(container.next_values);
 
   return LinearFVGradientReader(_sys, container.state_values, method, variable_number);
@@ -79,7 +78,7 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
 void
 LinearFVGradientInterface::computeGradients()
 {
-  if (_linear_fv_gradient_container_by_method.empty())
+  if (_linear_fv_gradient_container_by_method.empty() || !_sys.solutionStatesInitialized())
     return;
 
   auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
@@ -167,9 +166,10 @@ LinearFVGradientInterface::ensureGradientStateStorage(LinearFVGradientContainer 
     container.state_values.resize(required_states);
 
   const auto & current_solution = _sys.system().current_local_solution;
-  if (_sys.solutionStatesInitialized() && current_solution && current_solution->initialized())
-    for (const auto state : make_range(old_size, required_states))
-      initializeContainer(container.state_values[state]);
+  if (current_solution && current_solution->initialized())
+    for (auto & state_values : container.state_values)
+      if (state_values.empty())
+        initializeContainer(state_values);
 
   if (container.current_state_initialized)
     for (const auto state : make_range(std::max<std::size_t>(old_size, 1), required_states))
@@ -196,6 +196,8 @@ LinearFVGradientInterface::copyGradient(const GradientContainer & source,
 LinearFVGradientInterface::LinearFVGradientContainer &
 LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMethod & method)
 {
+  initializeLinearFVGradientStorage();
+
   auto & container = libmesh_map_find(_linear_fv_gradient_container_by_method, &method);
 
   mooseAssert(!container.state_values.empty(),
