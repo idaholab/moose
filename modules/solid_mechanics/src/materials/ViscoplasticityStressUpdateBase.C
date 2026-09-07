@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ViscoplasticityStressUpdateBase.h"
+#include "FEProblemBase.h"
 
 template <bool is_ad>
 InputParameters
@@ -58,6 +59,7 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::ViscoplasticityStressUpdateBaseTemp
     _inelastic_strain_old(this->template getMaterialPropertyOld<RankTwoTensor>(
         _base_name + this->template getParam<std::string>("inelastic_strain_name"))),
     _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
+    _constitutive_time_step(0.0),
     _intermediate_porosity(0.0),
     _porosity_old(this->template getMaterialPropertyOld<Real>("porosity_name")),
     _verbose(this->template getParam<bool>("verbose")),
@@ -85,16 +87,49 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties()
 
 template <bool is_ad>
 Real
+ViscoplasticityStressUpdateBaseTempl<is_ad>::globalTimeStep() const
+{
+  const auto time_step = this->_ti_feproblem.time() - this->_ti_feproblem.timeOld();
+  if (!std::isfinite(time_step) || time_step < 0.0)
+    mooseException(
+        "In ", _name, ": invalid global timestep reconstructed from time - time_old: ", time_step);
+
+  return time_step;
+}
+
+template <bool is_ad>
+void
+ViscoplasticityStressUpdateBaseTempl<is_ad>::setConstitutiveTimeStep(const Real time_step)
+{
+  if (!std::isfinite(time_step) || time_step < 0.0)
+    mooseException(
+        "In ", _name, ": constitutive timestep must be finite and nonnegative: ", time_step);
+
+  _constitutive_time_step = time_step;
+}
+
+template <bool is_ad>
+void
+ViscoplasticityStressUpdateBaseTempl<is_ad>::resetConstitutiveTimeStep()
+{
+  setConstitutiveTimeStep(globalTimeStep());
+}
+
+template <bool is_ad>
+Real
 ViscoplasticityStressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
 {
   const Real scalar_inelastic_strain_incr =
       std::abs(MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
                _effective_inelastic_strain_old[_qp]);
 
+  if (!std::isfinite(scalar_inelastic_strain_incr))
+    mooseException("In ", _name, ": effective inelastic strain increment is nonfinite.");
+
   if (!scalar_inelastic_strain_incr)
     return std::numeric_limits<Real>::max();
 
-  return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
+  return globalTimeStep() * _max_inelastic_increment / scalar_inelastic_strain_incr;
 }
 
 template <bool is_ad>
@@ -120,9 +155,9 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity(
       mooseException("In ", _name, ": porosity is negative.");
   }
 
-  using std::isnan;
-  if (isnan(_intermediate_porosity))
-    mooseException("In ", _name, ": porosity is nan. Cutting timestep.");
+  const auto porosity_raw = MetaPhysicL::raw_value(_intermediate_porosity);
+  if (!std::isfinite(porosity_raw))
+    mooseException("In ", _name, ": porosity is nonfinite (", porosity_raw, "). Cutting timestep.");
 }
 
 template class ViscoplasticityStressUpdateBaseTempl<false>;
