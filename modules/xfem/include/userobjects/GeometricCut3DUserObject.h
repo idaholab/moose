@@ -11,8 +11,6 @@
 
 #include "GeometricCutUserObject.h"
 
-using namespace libMesh;
-
 class GeometricCut3DUserObject : public GeometricCutUserObject
 {
 public:

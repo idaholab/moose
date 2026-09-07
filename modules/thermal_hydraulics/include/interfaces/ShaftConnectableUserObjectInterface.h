@@ -12,7 +12,6 @@
 #include "libmesh/dense_matrix.h"
 #include "InputParameters.h"
 
-using namespace libMesh;
 class UserObject;
 class MooseVariableScalar;
 

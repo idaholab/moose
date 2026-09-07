@@ -14,8 +14,6 @@
 #include <deque>
 #include "libmesh/libmesh_common.h"
 
-using namespace libMesh;
-
 namespace StochasticTools
 {
 /* Compute the Cartesian Product of the supplied vectors.
