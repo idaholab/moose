@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMObject.h"
-#include "MFEMContainers.h"
 #include "MFEMBlockRestrictable.h"
 
 /**
@@ -21,6 +20,9 @@
 class MFEMKernel : public MFEMObject, public MFEMBlockRestrictable
 {
 public:
+  static const std::string COEFFICIENT_PARAM;
+  static const std::string MATRIX_COEFFICIENT_PARAM;
+
   static InputParameters validParams();
 
   MFEMKernel(const InputParameters & parameters);

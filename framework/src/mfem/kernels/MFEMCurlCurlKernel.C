@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMCurlCurlKernel.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMCurlCurlKernel);
 
@@ -24,21 +23,25 @@ MFEMCurlCurlKernel::validParams()
       "arising from the weak form of the curl curl operator "
       "$k\\vec\\nabla \\times \\vec\\nabla \\times \\vec u$.");
   params.addParam<MFEMScalarCoefficientName>(
-      "coefficient", "1.", "Name of scalar coefficient k to multiply the integrator by.");
+      MFEMKernel::COEFFICIENT_PARAM,
+      "1.",
+      "Name of scalar coefficient k to multiply the integrator by.");
+  params.addParam<MFEMMatrixCoefficientName>(MFEMKernel::MATRIX_COEFFICIENT_PARAM,
+                                             "Name of matrix coefficient for property k. Mutually "
+                                             "exclusive with parameter 'coefficient'.");
   return params;
 }
 
-MFEMCurlCurlKernel::MFEMCurlCurlKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+MFEMCurlCurlKernel::MFEMCurlCurlKernel(const InputParameters & parameters) : MFEMKernel(parameters)
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMCurlCurlKernel::createBFIntegrator()
 {
-  return new mfem::CurlCurlIntegrator(_coef);
+  auto coeffs = getMFEMProblem().getCoefficients().resolveCoefficientVariant(
+      _pars, MFEMKernel::COEFFICIENT_PARAM, MFEMKernel::MATRIX_COEFFICIENT_PARAM);
+  return std::visit([](auto & c) { return new mfem::CurlCurlIntegrator(c); }, coeffs);
 }
 
 #endif
