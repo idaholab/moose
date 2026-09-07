@@ -9,11 +9,14 @@
 
 #include "KokkosPLevelSpace.h"
 
+#include "KokkosQpJacobianOperator.h"
+
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/petsc_vector.h"
 
 namespace Moose::Kokkos
 {
@@ -71,6 +74,90 @@ void
 PLevelSpace::init()
 {
   _dof_space = std::make_unique<DofSpace>(_fine.feProblem().mesh(), _sys);
+
+  const auto & assembly = _fine.feProblem().kokkosAssembly();
+
+  _fe_types.create(_sys.n_vars());
+
+  for (const auto var : make_range(_sys.n_vars()))
+    _fe_types[var] = assembly.getFETypeID(_sys.variable(var).type());
+
+  _fe_types.copyToDevice();
+
+  _vectors.create(NUM_SLOTS);
+
+  // The loops gather the operator input by local, ghost-inclusive DOF index, so the input arrives
+  // through a ghosted vector of the level's own
+  _x = &_sys.add_vector("operator input", false, libMesh::GHOSTED);
+}
+
+QpJacobianLevel
+PLevelSpace::level() const
+{
+  // A level holds no rows fixed: the hierarchy operates on the homogenized linearized problem, and
+  // the zero-Dirichlet constraints of each level's own DofMap are a separate piece of the design
+  return QpJacobianLevel(dofSpace(), _fe_types, _vectors, Array<bool>());
+}
+
+void
+PLevelSpace::dispatch(const QpJacobianCache & cache,
+                      libMesh::NumericVector<Number> & y,
+                      const libMesh::NumericVector<Number> * const x)
+{
+  if (x)
+  {
+    *_x = *x;
+
+    auto * const petsc_x = libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_x);
+
+    LibmeshPetscCallA(_sys.comm().get(),
+                      VecGhostUpdateBegin(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
+    LibmeshPetscCallA(_sys.comm().get(),
+                      VecGhostUpdateEnd(petsc_x->vec(), INSERT_VALUES, SCATTER_FORWARD));
+  }
+
+  y.zero();
+
+  // The output is scattered into, so it is wrapped for assembly: its ghost-row contributions are
+  // buffered on device and added into the owning processes by close()
+  _vectors[Y].create(y, dofSpace(), true);
+  _vectors[Y].copyToDevice();
+
+  if (x)
+  {
+    _vectors[X].create(*_x, dofSpace(), false);
+    _vectors[X].copyToDevice();
+  }
+
+  _vectors.copyToDevice();
+
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache, level());
+
+  if (x)
+    op.apply(X, Y);
+  else
+    op.diagonal(Y);
+
+  _vectors[Y].close();
+
+  if (x)
+    _vectors[X].restore();
+
+  y.close();
+}
+
+void
+PLevelSpace::apply(const QpJacobianCache & cache,
+                   const libMesh::NumericVector<Number> & x,
+                   libMesh::NumericVector<Number> & y)
+{
+  dispatch(cache, y, &x);
+}
+
+void
+PLevelSpace::diagonal(const QpJacobianCache & cache, libMesh::NumericVector<Number> & diagonal)
+{
+  dispatch(cache, diagonal, nullptr);
 }
 
 const DofSpace &

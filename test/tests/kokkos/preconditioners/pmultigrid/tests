@@ -13,6 +13,19 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [level_operators]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND '
+               'Preconditioning/pmg/verify_level_operators=true'
+    expect_out = 'p-multigrid level p = 1: operator agrees with its diagonal'
+    requirement = 'The p-multigrid preconditioner shall apply each coarse level operator and compute '
+                  'the diagonal of that operator from the same quadrature-point linearization, in '
+                  'agreement with one another.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [level_order_not_coarser]
     type = RunException
     input = 'pmultigrid.i'

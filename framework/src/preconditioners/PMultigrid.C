@@ -31,12 +31,21 @@ PMultigrid::validParams()
       "The polynomial order of each coarse level, ascending. The fine level is the solver system's "
       "own order and is not listed.");
 
+  params.addParam<bool>(
+      "verify_level_operators",
+      false,
+      "Whether to check each level's operator against its diagonal after every linearization, by "
+      "applying the operator to a unit vector per degree of freedom. This costs one operator "
+      "application per degree of freedom of every level, so it is a verification aid for small "
+      "inputs.");
+
   return params;
 }
 
 PMultigrid::PMultigrid(const InputParameters & parameters)
   : MoosePreconditioner(parameters),
-    _level_orders(getParam<std::vector<unsigned int>>("level_orders"))
+    _level_orders(getParam<std::vector<unsigned int>>("level_orders")),
+    _verify_level_operators(getParam<bool>("verify_level_operators"))
 {
   if (_level_orders.empty())
     paramError("level_orders", "At least one coarse level is required.");
