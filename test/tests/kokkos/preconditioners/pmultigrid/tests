@@ -1,0 +1,38 @@
+[Tests]
+  issues = '#33644'
+  design = 'PMultigrid.md'
+
+  [levels]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false'
+    expect_out = 'p = 1: 25 dofs'
+    requirement = 'The p-multigrid preconditioner shall build a function space for each requested '
+                  'coarse polynomial order, holding the fine system variables on the fine mesh.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
+  [level_order_not_coarser]
+    type = RunException
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Preconditioning/pmg/level_orders=3'
+    expect_err = "Variable 'u' is of order 3, so a level of order 3 would not coarsen it"
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+    requirement = 'The p-multigrid preconditioner shall report an error when a requested level '
+                  'order does not coarsen every variable of the solver system.'
+  []
+
+  [requires_matrix_free]
+    type = RunException
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Executioner/use_kokkos_matrix_free_jacobian=false'
+    expect_err = 'the solver system must be run in Kokkos matrix-free mode'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+    requirement = 'The p-multigrid preconditioner shall report an error when the solver system does '
+                  'not compute its Jacobian action from the quadrature-point linearization the '
+                  'levels contract.'
+  []
+[]
