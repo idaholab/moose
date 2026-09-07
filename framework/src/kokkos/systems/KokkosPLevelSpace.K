@@ -9,8 +9,11 @@
 
 #include "KokkosPLevelSpace.h"
 
+#include "KokkosElementEmbeddingTransfer.h"
+#include "KokkosFESystem.h"
 #include "KokkosQpJacobianOperator.h"
 
+#include "ConsoleStream.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 
@@ -70,6 +73,8 @@ PLevelSpace::PLevelSpace(NonlinearSystemBase & fine, const unsigned int order)
   _fine.feProblem().kokkosAssembly().addShapeSystem(_sys);
 }
 
+PLevelSpace::~PLevelSpace() = default;
+
 void
 PLevelSpace::init()
 {
@@ -89,6 +94,36 @@ PLevelSpace::init()
   // The loops gather the operator input by local, ghost-inclusive DOF index, so the input arrives
   // through a ghosted vector of the level's own
   _x = &_sys.add_vector("operator input", false, libMesh::GHOSTED);
+}
+
+void
+PLevelSpace::initTransfer(PLevelSpace * const finer)
+{
+  auto & fine_system = _fine.feProblem().getKokkosFESystems()[_fine.number()];
+
+  // Lagrange p-coarsening nests the spaces as functions while sharing no degrees of freedom between
+  // them, which is what a per-element embedding transfers
+  _prolongation = std::make_unique<ElementEmbeddingTransfer>(
+      _fine.feProblem().kokkosAssembly(),
+      transferSide(),
+      finer ? finer->transferSide()
+            : TransferSide{_fine.system(), fine_system, fine_system.feTypes()});
+}
+
+void
+PLevelSpace::verifyTransfer(const ConsoleStream & console)
+{
+  mooseAssert(_prolongation, "The p-multigrid level transfer has not been built yet.");
+
+  console << "  p = " << _order << ": ";
+
+  _prolongation->verify(console);
+}
+
+TransferSide
+PLevelSpace::transferSide() const
+{
+  return TransferSide{_sys, dofSpace(), _fe_types};
 }
 
 QpJacobianLevel

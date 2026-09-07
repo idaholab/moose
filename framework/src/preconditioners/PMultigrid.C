@@ -39,13 +39,22 @@ PMultigrid::validParams()
       "application per degree of freedom of every level, so it is a verification aid for small "
       "inputs.");
 
+  params.addParam<bool>(
+      "verify_level_transfers",
+      false,
+      "Whether to check that each level transfer restricts by the transpose of its prolongation, "
+      "which is what makes the operator the hierarchy realizes on a coarse level the Galerkin "
+      "operator of the fine linearization. The check costs one application of each direction of "
+      "each transfer, at initial setup only.");
+
   return params;
 }
 
 PMultigrid::PMultigrid(const InputParameters & parameters)
   : MoosePreconditioner(parameters),
     _level_orders(getParam<std::vector<unsigned int>>("level_orders")),
-    _verify_level_operators(getParam<bool>("verify_level_operators"))
+    _verify_level_operators(getParam<bool>("verify_level_operators")),
+    _verify_level_transfers(getParam<bool>("verify_level_transfers"))
 {
   if (_level_orders.empty())
     paramError("level_orders", "At least one coarse level is required.");
@@ -84,6 +93,21 @@ PMultigrid::initialSetup()
   }
 
   _console << "  fine: " << _nl.system().n_dofs() << " dofs\n" << std::endl;
+
+  // A transfer indexes the DOF layout of both of its sides, so the transfers are built once every
+  // level has one
+  for (const auto i : index_range(_levels))
+    _levels[i]->initTransfer(i + 1 < _levels.size() ? _levels[i + 1].get() : nullptr);
+
+  if (_verify_level_transfers)
+  {
+    _console << "p-multigrid level transfers for system '" << _nl.name() << "':\n";
+
+    for (const auto & level : _levels)
+      level->verifyTransfer(_console);
+
+    _console << std::endl;
+  }
 }
 
 #endif

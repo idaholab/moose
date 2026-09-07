@@ -26,6 +26,19 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [level_transfers]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = 'Outputs/exodus=false Variables/u/family=LAGRANGE Variables/u/order=SECOND '
+               'Preconditioning/pmg/verify_level_transfers=true'
+    expect_out = 'p = 1: restriction is the transpose of prolongation'
+    requirement = 'The p-multigrid preconditioner shall transfer vectors between consecutive levels '
+                  'of the hierarchy by an embedding of the coarser element basis in the finer one, '
+                  'restricting by the transpose of the way it prolongs.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [level_order_not_coarser]
     type = RunException
     input = 'pmultigrid.i'
