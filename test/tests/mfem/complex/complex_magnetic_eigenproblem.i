@@ -1,7 +1,6 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/inline-quad.mesh
-  dim = 2
   serial_refine = 2
 []
 
