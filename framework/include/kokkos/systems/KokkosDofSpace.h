@@ -77,6 +77,12 @@ public:
   const Array<Array<dof_id_type>> & getGhostCommList() const { return _ghost_comm_list; }
 
   /**
+   * Get the number of variables the layout covers
+   * @returns The number of variables
+   */
+  KOKKOS_FUNCTION unsigned int getNumVars() const { return _num_vars; }
+
+  /**
    * Get the number of local DOFs
    * @returns The number of local DOFs
    */

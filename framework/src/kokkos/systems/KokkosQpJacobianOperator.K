@@ -1,0 +1,157 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "KokkosQpJacobianOperator.h"
+
+namespace Moose::Kokkos
+{
+
+QpJacobianOperator::QpJacobianOperator(const Assembly & assembly,
+                                       const QpJacobianCache & cache,
+                                       const QpJacobianLevel & level)
+  : AssemblyHolder(assembly), _cache(cache), _level(level)
+{
+  // Every level lives on the mesh the fine level does, so the loops of every level run over the
+  // same (element, variable) pairs
+  _thread.resize(_level.kokkosMesh().getNumLocalElements(), _level.getNumVars());
+}
+
+void
+QpJacobianOperator::apply(const TagID x_tag, const TagID y_tag)
+{
+  _x_tag = x_tag;
+  _y_tag = y_tag;
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, ApplyLoop> policy(0,
+                                                                                    _thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+void
+QpJacobianOperator::diagonal(const TagID diag_tag)
+{
+  _y_tag = diag_tag;
+
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>, DiagonalLoop> policy(
+      0, _thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(ApplyLoop, const ThreadID tid) const
+{
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  // A pair with no declared blocks has no cached linearization; the objects responsible for it
+  // supply their own operator action
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  const LevelBasisTable basis(kokkosAssembly(), sid, info.type, _level.getFEType(var));
+
+  const auto num_dofs = basis.numDofs();
+
+  const auto gather = [&](const unsigned int j)
+  { return _level.getDofValue(_level.getElemLocalDofIndex(elem, j, var), _x_tag); };
+
+  Real local_y[MAX_CACHED_DOF];
+
+  // The test function index is batched so that the per-element accumulator stays within a bounded
+  // amount of per-thread storage. The trial-space gather is repeated for each batch, which costs
+  // nothing for the element types whose DOF count fits in a single batch.
+  for (unsigned int ib = 0; ib < num_dofs; ib += MAX_CACHED_DOF)
+  {
+    const auto ie = ::Kokkos::min(ib + MAX_CACHED_DOF, num_dofs);
+
+    for (unsigned int i = ib; i < ie; ++i)
+      local_y[i - ib] = 0;
+
+    for (unsigned int qp = 0; qp < num_qps; ++qp)
+    {
+      // The direction vector in the reference trial space at this quadrature point
+      Real value;
+      Real3 grad;
+
+      basis.applyB(gather, qp, value, grad);
+
+      const auto & tensor = _cache.getTensor(sid, var, qp_offset + qp);
+
+      // The linearized value/flux pair the test functions are contracted against
+      const Real f = tensor.vv * value + tensor.vg * grad;
+      const Real3 flux = tensor.gv * value + tensor.gg * grad;
+
+      basis.applyBT(qp, f, flux, ib, ie, local_y);
+    }
+
+    for (unsigned int i = ib; i < ie; ++i)
+    {
+      auto row = _level.getElemLocalDofIndex(elem, i, var);
+
+      if (_level.isConstrained(row))
+        continue;
+
+      ::Kokkos::atomic_add(&_level.getDofValue(row, _y_tag), local_y[i - ib]);
+    }
+  }
+}
+
+KOKKOS_FUNCTION void
+QpJacobianOperator::operator()(DiagonalLoop, const ThreadID tid) const
+{
+  auto elem = _thread(tid, 0);
+  auto var = _thread(tid, 1);
+
+  auto info = _level.kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+
+  if (_cache.getBlocks(sid, var) == QP_JACOBIAN_NONE)
+    return;
+
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  const LevelBasisTable basis(kokkosAssembly(), sid, info.type, _level.getFEType(var));
+
+  for (unsigned int i = 0; i < basis.numDofs(); ++i)
+  {
+    auto row = _level.getElemLocalDofIndex(elem, i, var);
+
+    if (_level.isConstrained(row))
+      continue;
+
+    Real diagonal = 0;
+
+    // The diagonal entry is the operator with the same basis function in the test and trial slot
+    for (unsigned int qp = 0; qp < num_qps; ++qp)
+    {
+      const auto & tensor = _cache.getTensor(sid, var, qp_offset + qp);
+
+      Real value;
+      Real3 grad;
+
+      basis.basis(i, qp, value, grad);
+
+      diagonal += value * (tensor.vv * value + tensor.vg * grad) +
+                  grad * (tensor.gv * value + tensor.gg * grad);
+    }
+
+    ::Kokkos::atomic_add(&_level.getDofValue(row, _y_tag), diagonal);
+  }
+}
+
+} // namespace Moose::Kokkos

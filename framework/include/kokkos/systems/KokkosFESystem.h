@@ -12,7 +12,7 @@
 #include "KokkosSystem.h"
 #include "KokkosAssembly.h"
 #include "KokkosQpJacobianCache.h"
-#include "KokkosLevelBasisTable.h"
+#include "KokkosQpJacobianLevel.h"
 
 class MooseMesh;
 class SystemBase;
@@ -49,18 +49,6 @@ public:
    * quadrature point values
    */
   void reinit();
-
-  /**
-   * Kokkos function tags for the loops driven by the quadrature-point Jacobian cache
-   */
-  ///@{
-  struct QpJacobianApplyLoop
-  {
-  };
-  struct QpJacobianDiagonalLoop
-  {
-  };
-  ///@}
 
   /**
    * Put the quadrature-point Jacobian cache into use for this system. Allocates the cache's
@@ -103,8 +91,16 @@ public:
   std::size_t qpJacobianCacheBytes() const { return _qp_jacobian.localBytes(); }
 
   /**
-   * Contract the cached quadrature-point Jacobian with a tagged direction vector and accumulate
-   * the result into a tagged action vector, skipping rows constrained by a nodal BC
+   * Build the level context of the fine level: this system's own DOF layout, FE types and tagged
+   * vectors, with the rows a nodal BC constrains for a matrix tag held fixed
+   * @param matrix_tag The matrix tag whose nodal BC rows the level holds fixed
+   * @returns The level context
+   */
+  QpJacobianLevel fineLevel(TagID matrix_tag) const;
+
+  /**
+   * Contract the cached quadrature-point Jacobian on the fine level with a tagged direction vector
+   * and accumulate the result into a tagged action vector
    * @param x_tag The vector tag of the direction vector
    * @param y_tag The vector tag of the action vector
    * @param matrix_tag The matrix tag whose nodal BC rows are skipped
@@ -112,8 +108,8 @@ public:
   void applyQpJacobian(TagID x_tag, TagID y_tag, TagID matrix_tag);
 
   /**
-   * Accumulate the diagonal of the cached quadrature-point Jacobian into a tagged vector,
-   * skipping rows constrained by a nodal BC
+   * Accumulate the diagonal of the cached quadrature-point Jacobian on the fine level into a
+   * tagged vector
    * @param diag_tag The vector tag of the diagonal
    * @param matrix_tag The matrix tag whose nodal BC rows are skipped
    */
@@ -419,14 +415,6 @@ public:
    * Kokkos function for caching variable values on element quadrature points
    */
   KOKKOS_FUNCTION void operator()(const ThreadID tid) const;
-  /**
-   * Kokkos function for contracting the cached quadrature-point Jacobian with the direction vector
-   */
-  KOKKOS_FUNCTION void operator()(QpJacobianApplyLoop, const ThreadID tid) const;
-  /**
-   * Kokkos function for extracting the diagonal of the cached quadrature-point Jacobian
-   */
-  KOKKOS_FUNCTION void operator()(QpJacobianDiagonalLoop, const ThreadID tid) const;
 #endif
 
 private:
@@ -463,26 +451,11 @@ private:
   Thread<> _thread;
 
   /**
-   * Kokkos thread object for the loops driven by the quadrature-point Jacobian cache
-   */
-  Thread<> _qp_jacobian_thread;
-
-  /**
    * The quadrature-point Jacobian cache, and whether it is in use for this system
    */
   ///@{
   QpJacobianCache _qp_jacobian;
   bool _qp_jacobian_enabled = false;
-  ///@}
-
-  /**
-   * Vector and matrix tags used by the loops driven by the quadrature-point Jacobian cache. Set
-   * on the host immediately before each dispatch.
-   */
-  ///@{
-  TagID _qp_jacobian_x_tag = 0;
-  TagID _qp_jacobian_y_tag = 0;
-  TagID _qp_jacobian_matrix_tag = 0;
   ///@}
 
   /**
