@@ -19,6 +19,11 @@
 
 class FEProblemBase;
 
+namespace libMesh
+{
+class System;
+}
+
 namespace Moose::Kokkos
 {
 
@@ -37,6 +42,14 @@ public:
    * Initialize assembly
    */
   void init();
+  /**
+   * Register a libMesh system whose variables' FE types need cached reference shape data, in
+   * addition to the problem's solver and auxiliary systems. A p-multigrid level space is such a
+   * system: it carries no residual objects, so it is none of those, but its basis tables are
+   * contracted against the quadrature-point Jacobian cache. Must be called before init().
+   * @param system The libMesh system
+   */
+  void addShapeSystem(libMesh::System & system);
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -355,6 +368,10 @@ private:
    * FE type ID map
    */
   std::map<FEType, unsigned int> _fe_type_map;
+  /**
+   * Systems registered through addShapeSystem()
+   */
+  std::vector<libMesh::System *> _shape_systems;
 
   /**
    * Mesh dimension

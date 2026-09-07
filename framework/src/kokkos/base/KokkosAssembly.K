@@ -32,6 +32,12 @@ Assembly::Assembly(FEProblemBase & problem)
 }
 
 void
+Assembly::addShapeSystem(libMesh::System & system)
+{
+  _shape_systems.push_back(&system);
+}
+
+void
 Assembly::init()
 {
   // Cache mesh information
@@ -257,6 +263,9 @@ Assembly::initShape()
     getFETypes(_problem.getLinearSystem(linear).system());
 
   getFETypes(_problem.getAuxiliarySystem().system());
+
+  for (auto * const system : _shape_systems)
+    getFETypes(*system);
 
   _fe_type_map.clear();
 
