@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosKernelValue.h"
+#include "KokkosFunction.h"
 
 class KokkosBodyForce : public Moose::Kokkos::KernelValue
 {
@@ -19,11 +20,14 @@ public:
   KokkosBodyForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int, AssemblyDatum &) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   /// Scale factor
   const Moose::Kokkos::Scalar<const Real> _scale;
+
+  /// Optional function value
+  const Moose::Kokkos::Function _function;
 
   /// Optional Postprocessor value
   const Moose::Kokkos::PostprocessorValue _postprocessor;
@@ -31,7 +35,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBodyForce::precomputeQpResidual(const unsigned int, AssemblyDatum &) const
+KokkosBodyForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return -_scale * _postprocessor;
+  return -_scale * _postprocessor * _function.value(_t, datum.q_point(qp));
 }
