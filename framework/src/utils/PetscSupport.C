@@ -1138,7 +1138,8 @@ getPetscValidParams()
       "use_kokkos_matrix_free_jacobian",
       false,
       "Whether to use an analytic, partial-assembly Kokkos matrix-free Jacobian-vector product "
-      "as SNES's actual Amat, while still assembling the ordinary Jacobian for preconditioning. "
+      "as both SNES's Amat and Pmat, a shell matrix whose operations are a matrix-vector product "
+      "and a diagonal, which limits preconditioning to what those two supply. "
       "Requires Kokkos kernels/nodal boundary conditions that support the Jacobian-vector "
       "product (e.g. KernelGrad/KernelValue-derived kernels). Mutually exclusive with the "
       "PJFNK/JFNK solve types, which already provide their own (approximate, finite-difference) "
