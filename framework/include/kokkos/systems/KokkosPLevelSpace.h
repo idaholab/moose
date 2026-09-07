@@ -33,7 +33,7 @@ struct TransferSide;
  * fine level fills, contracted against this level's basis tables, so all a level needs to own is a
  * function space: a libMesh system supplies the DofMap, the parallel ghosting, and the vectors,
  * while the reference basis tables come from the Kokkos assembly, which caches them per (subdomain,
- * element type, FE type) at the fine quadrature rule.
+ * element type, FE type, edge and face orientation) at the fine quadrature rule.
  *
  * The level system must be added before the equation systems are initialized, so a level space is
  * constructed at preconditioner-construction time and its DOF layout, which needs distributed DOFs,

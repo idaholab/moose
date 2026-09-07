@@ -48,12 +48,12 @@ public:
    * @param coarse The DOF layout of the coarse side
    * @param fine The DOF layout of the fine side
    * @param embedding The reference-element embedding of the coarse basis in the fine basis, indexed
-   * by (subdomain, element type, variable) and sized (fine DOFs, coarse DOFs)
+   * by (subdomain, element type, variable, orientation) and sized (fine DOFs, coarse DOFs)
    * @param vectors The vectors of the two sides, indexed by EmbeddingVectorSlot
    */
   ElementEmbedding(const DofSpace & coarse,
                    const DofSpace & fine,
-                   const Array3D<Array2D<Real>> & embedding,
+                   const Array4D<Array2D<Real>> & embedding,
                    const Array<Vector> & vectors);
 
   /**
@@ -106,8 +106,8 @@ private:
   /// The DOF layout of the fine side
   const DofSpace _fine;
 
-  /// The reference-element embedding, indexed by (subdomain, element type, variable)
-  const Array3D<Array2D<Real>> _embedding;
+  /// The reference-element embedding, indexed by (subdomain, element type, variable, orientation)
+  const Array4D<Array2D<Real>> _embedding;
 
   /// The vectors of the two sides, indexed by EmbeddingVectorSlot
   const Array<Vector> _vectors;
@@ -173,8 +173,8 @@ private:
   /// The Kokkos assembly holding the cached reference basis tables
   const Assembly & _assembly;
 
-  /// The reference-element embedding, indexed by (subdomain, element type, variable)
-  Array3D<Array2D<Real>> _embedding;
+  /// The reference-element embedding, indexed by (subdomain, element type, variable, orientation)
+  Array4D<Array2D<Real>> _embedding;
 
   /// The vectors of the two sides, indexed by EmbeddingVectorSlot
   Array<Vector> _vectors;

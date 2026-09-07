@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#33644'
+  design = 'KokkosDiffusion.md'
+
+  [orientation]
+    requirement = 'The Kokkos reference shape tables shall account for the orientation of the '
+                  'edges and faces of an element, so that a hierarchic basis of order three on a '
+                  'triangular mesh gives the same solution through'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+
+    [assembled]
+      type = CSVDiff
+      input = 'hierarchic.i'
+      csvdiff = 'hierarchic_orientation.csv'
+
+      detail = 'the assembled framework kernels and'
+    []
+
+    [kokkos]
+      type = CSVDiff
+      input = 'kokkos_hierarchic.i'
+      csvdiff = 'hierarchic_orientation.csv'
+      prereq = 'orientation/assembled'
+
+      detail = 'the Kokkos matrix-free kernels.'
+    []
+  []
+[]
