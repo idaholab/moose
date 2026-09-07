@@ -99,6 +99,9 @@
                'Preconditioning/fdp/type=FDP'
     expect_err = 'Finite difference preconditioning fills the entries of an assembled system matrix'
     recover = false
+    # FDP itself warns whenever it runs on more than one process, which the test harness promotes to
+    # an error ahead of the error under test
+    max_parallel = 1
     requirement = 'The Kokkos system shall report an error when finite difference preconditioning '
                   'is requested for a system whose Jacobian is computed as an operator action.'
     design = 'FiniteDifferencePreconditioner.md'

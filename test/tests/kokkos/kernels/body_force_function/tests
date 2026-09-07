@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#33644'
+  design = 'KokkosDiffusion.md KokkosBodyForce.md'
+
+  [mms]
+    requirement = 'The Kokkos body force kernel shall drive a finite element residual with a '
+                  'spatially varying function, reproducing a manufactured solution to the accuracy '
+                  'of the discretization for a basis of'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+
+    [first_order]
+      type = CSVDiff
+      input = 'mms.i'
+      cli_args = 'Outputs/file_base=first_order'
+      csvdiff = 'first_order.csv'
+
+      detail = 'first order and'
+    []
+
+    [second_order]
+      type = CSVDiff
+      input = 'mms.i'
+      cli_args = 'Mesh/second_order=true Variables/u/order=SECOND Outputs/file_base=second_order'
+      csvdiff = 'second_order.csv'
+
+      detail = 'second order.'
+    []
+  []
+[]
