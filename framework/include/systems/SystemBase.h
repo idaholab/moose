@@ -1012,7 +1012,7 @@ protected:
    * honor this to remain aligned with the solution history.
    * Default implementation does nothing.
    */
-  virtual void copyPreviousAdditionalStates(Moose::SolutionIterationType, bool) {}
+  virtual void copyAdditionalStateBackwards(Moose::SolutionIterationType, bool) {}
 
   /**
    * Restore system-owned state not represented by solution vectors.

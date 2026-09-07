@@ -1312,7 +1312,7 @@ SystemBase::advanceStateHistory(const Moose::SolutionIterationType iteration_typ
   const bool skip_current_to_old =
       iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
   copyPreviousSolutions(iteration_type);
-  copyPreviousAdditionalStates(iteration_type, skip_current_to_old);
+  copyAdditionalStateBackwards(iteration_type, skip_current_to_old);
 }
 
 /**

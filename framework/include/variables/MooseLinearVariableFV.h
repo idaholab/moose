@@ -104,15 +104,10 @@ public:
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * Register the variable's configured default gradient method and return its reader.
-   */
-  const LinearFVGradientReader & requestCellGradients();
-
-  /**
    * Register the configured default gradient method with time-state storage.
-   * @param oldest_state Oldest time state that consumers need to read.
+   * @param oldest_state Oldest time state that consumers need to read. (0 is the current sate only)
    */
-  const LinearFVGradientReader & requestCellGradients(unsigned int oldest_state);
+  const LinearFVGradientReader & requestCellGradients(unsigned int oldest_state = 0);
 
   /**
    * Backward-compatible interface for requesting cell gradients.
@@ -121,30 +116,20 @@ public:
   void computeCellGradients();
 
   /**
-   * Register a named gradient method and return its reader.
-   */
-  const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name);
-
-  /**
    * Register a named gradient method with time-state storage.
    * @param method_name Name of the gradient method to register.
-   * @param oldest_state Oldest time state that consumers need to read.
+   * @param oldest_state Oldest time state that consumers need to read. (0 is the current state)
    */
   const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name,
-                                                      unsigned int oldest_state);
-
-  /**
-   * Register a specific gradient method object and return its reader.
-   */
-  const LinearFVGradientReader & requestCellGradients(const FVGradientMethod & method);
+                                                      unsigned int oldest_state = 0);
 
   /**
    * Register a specific gradient method object with time-state storage.
    * @param method Gradient method to register.
-   * @param oldest_state Oldest time state that consumers need to read.
+   * @param oldest_state Oldest time state that consumers need to read. (0 is the current only)
    */
   const LinearFVGradientReader & requestCellGradients(const FVGradientMethod & method,
-                                                      unsigned int oldest_state);
+                                                      unsigned int oldest_state = 0);
 
   /**
    * Check if cell gradient computations were requested for this variable.

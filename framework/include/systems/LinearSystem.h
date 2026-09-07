@@ -62,7 +62,6 @@ public:
    */
   virtual bool converged() override { return _converged; }
 
-  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
 
@@ -172,7 +171,7 @@ public:
   virtual void compute(ExecFlagType type) override;
 
 protected:
-  virtual void copyPreviousAdditionalStates(Moose::SolutionIterationType iteration_type,
+  virtual void copyAdditionalStateBackwards(Moose::SolutionIterationType iteration_type,
                                             bool skip_current_to_old) override;
   virtual void restoreAdditionalStates() override;
 

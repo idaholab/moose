@@ -90,13 +90,6 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::requestCellGradients()
-{
-  return requestCellGradients(0);
-}
-
-template <typename OutputType>
-const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const unsigned int oldest_state)
 {
   const auto & reader = requestCellGradients(_default_gradient_method_name, oldest_state);
@@ -114,13 +107,6 @@ MooseLinearVariableFV<OutputType>::computeCellGradients()
 
 template <typename OutputType>
 const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name)
-{
-  return requestCellGradients(method_name, 0);
-}
-
-template <typename OutputType>
-const LinearFVGradientReader &
 MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name,
                                                         const unsigned int oldest_state)
 {
@@ -128,13 +114,6 @@ MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName
                                        : _auxiliary_system->resolveFVGradientMethod(method_name);
 
   return requestCellGradients(method, oldest_state);
-}
-
-template <typename OutputType>
-const LinearFVGradientReader &
-MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method)
-{
-  return requestCellGradients(method, 0);
 }
 
 template <typename OutputType>

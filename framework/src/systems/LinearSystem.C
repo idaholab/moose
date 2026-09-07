@@ -103,13 +103,6 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 LinearSystem::~LinearSystem() = default;
 
 void
-LinearSystem::initSolutionState()
-{
-  SystemBase::initSolutionState();
-  LinearFVGradientInterface::initializeLinearFVGradientStorage();
-}
-
-void
 LinearSystem::preInit()
 {
   SolverSystem::preInit();
@@ -125,6 +118,7 @@ LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
   _current_solution = system().current_local_solution.get();
+  LinearFVGradientInterface::initializeLinearFVGradientStorage();
   // Checking if somebody accidentally assigned nonlinear variables to this system
   const auto & var_names = _vars[0].names();
   for (const auto & name : var_names)
@@ -186,7 +180,7 @@ LinearSystem::reinit()
 }
 
 void
-LinearSystem::copyPreviousAdditionalStates(const Moose::SolutionIterationType iteration_type,
+LinearSystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
                                            const bool skip_current_to_old)
 {
   if (iteration_type == Moose::SolutionIterationType::Time)
