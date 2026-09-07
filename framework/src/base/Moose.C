@@ -755,9 +755,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Note: Preconditioner Actions will be built by this setup action
   registerSyntax("SetupPreconditionerAction", "Preconditioning/*");
   registerSyntax("AddFieldSplitAction", "Preconditioning/*/*");
-  // No-op unless the block is a Multigrid ("MG") preconditioner, in which case it creates that
-  // preconditioner's coarse-level nonlinear systems
-  registerSyntax("MultigridLevelsAction", "Preconditioning/*");
 
   registerSyntax("CreateExecutionerAction", "Executioner");
   registerSyntax("ReadExecutorParamsAction", "Executors/*");
