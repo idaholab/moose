@@ -208,4 +208,25 @@
       detail = ' or by throwing an exception.'
     []
   []
+
+  [local_substepping_preserves_global_dt]
+    type = RunApp
+    input = preserve_global_dt.i
+    cli_args = 'Materials/lps/verbose=true Executioner/dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
+    expect_out = 'global_dt = 0.1 shared_dt = 0.1'
+    heavy = true
+    requirement = 'The porous viscoplastic stress update shall perform local constitutive substepping without modifying the FEProblem global timestep.'
+  []
+
+  [local_substepping_preserves_global_dt_threaded]
+    type = RunApp
+    input = preserve_global_dt.i
+    cli_args = 'Materials/lps/verbose=true Executioner/dt=0.1 Executioner/num_steps=1 Outputs/csv=false'
+    expect_out = 'global_dt = 0.1 shared_dt = 0.1'
+    min_threads = 2
+    max_threads = 2
+    heavy = true
+    prereq = local_substepping_preserves_global_dt
+    requirement = 'The porous viscoplastic stress update shall preserve the FEProblem global timestep when constitutive substepping executes with multiple threads.'
+  []
 []
