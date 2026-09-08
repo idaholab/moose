@@ -554,7 +554,7 @@ FESystem::getVectorQpADValue(const ElementInfo info,
   {
     auto fe = _var_fe_types[var];
     auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-    auto & phi = kokkosAssembly().getPhi(info.subdomain, info.type, fe, info.orientation);
+    const auto phi = kokkosAssembly().getPhi(info.subdomain, info.type, fe, info.orientation);
 
     for (unsigned int i = 0; i < n_dofs; ++i)
       value += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) * phi(i, qp);
@@ -580,7 +580,8 @@ FESystem::getVectorQpADGrad(const ElementInfo info,
   {
     auto fe = _var_fe_types[var];
     auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-    auto & grad_phi = kokkosAssembly().getGradPhi(info.subdomain, info.type, fe, info.orientation);
+    const auto grad_phi =
+        kokkosAssembly().getGradPhi(info.subdomain, info.type, fe, info.orientation);
 
     for (unsigned int i = 0; i < n_dofs; ++i)
       grad +=
@@ -601,7 +602,8 @@ FESystem::getVectorQpValueFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
+  const auto phi =
+      kokkosAssembly().getPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real value = 0;
 
@@ -620,7 +622,7 @@ FESystem::getVectorQpVectorValueFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi =
+  const auto phi =
       kokkosAssembly().getVectorPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real3 value = 0;
@@ -641,7 +643,8 @@ FESystem::getVectorQpADValueFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
+  const auto phi =
+      kokkosAssembly().getPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   ADReal value = 0;
 
@@ -661,7 +664,7 @@ FESystem::getVectorQpGradFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi =
+  const auto grad_phi =
       kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real3 grad = 0;
@@ -684,7 +687,7 @@ FESystem::getVectorQpVectorGradFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi =
+  const auto grad_phi =
       kokkosAssembly().getVectorGradPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   Real33 grad = 0;
@@ -708,7 +711,7 @@ FESystem::getVectorQpADGradFace(const ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi =
+  const auto grad_phi =
       kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe, info.orientation)(side);
 
   ADReal3 grad = ADReal(0);
