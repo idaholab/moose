@@ -15,6 +15,15 @@
 
 registerMooseObject("MooseApp", MFEMTimeDependentWeakForm);
 
+InputParameters
+MFEMTimeDependentWeakForm::validParams()
+{
+  InputParameters params = MFEMWeakForm::validParams();
+  params.addClassDescription("Builds a real-valued MFEM TimeDependentEquationSystem from the "
+                             "kernels and boundary conditions named by this weak form.");
+  return params;
+}
+
 MFEMTimeDependentWeakForm::MFEMTimeDependentWeakForm(const InputParameters & parameters)
   : MFEMWeakForm(parameters)
 {
