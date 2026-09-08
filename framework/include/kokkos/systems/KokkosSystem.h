@@ -40,16 +40,6 @@ public:
    */
   System(const System & src) = default;
 
-  /**
-   * CSR format sparsity data
-   */
-  struct Sparsity
-  {
-    Array<PetscInt> col_idx;
-    Array<PetscInt> row_idx;
-    Array<PetscInt> row_ptr;
-  };
-
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Synchronize the active tagged vectors and matrices between host and device
@@ -127,12 +117,6 @@ public:
   SystemBase & getSystem() { return _system; }
   const SystemBase & getSystem() const { return _system; }
   ///@}
-
-  /**
-   * Get the sparisty pattern data
-   * @returns The sparisty pattern data
-   */
-  const Sparsity & getSparsity() const { return _sparsity; }
 
   /**
    * Check whether a variable is active on a subdomain
@@ -249,16 +233,6 @@ private:
    * Allocate the tagged vector, matrix and tag activity data
    */
   void setupTags();
-
-  /**
-   * Setup sparsity data
-   */
-  void setupSparsity();
-
-  /**
-   * Matrix sparsity pattern data
-   */
-  Sparsity _sparsity;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE

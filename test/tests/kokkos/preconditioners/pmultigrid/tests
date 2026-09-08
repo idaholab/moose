@@ -57,6 +57,19 @@
     compute_devices = 'cpu cuda xpu'
   []
 
+  [level_matrix]
+    type = RunApp
+    input = 'pmultigrid.i'
+    cli_args = "Outputs/exodus=false Preconditioning/pmg/level_orders='1 2' "
+               "Preconditioning/pmg/verify_level_matrices=true"
+    expect_out = 'p = 1: assembled operator agrees with the matrix-free operator'
+    requirement = 'The p-multigrid preconditioner shall assemble the operator of its coarsest level '
+                  'into a sparse matrix, which a coarse solver can be applied to, agreeing with the '
+                  'operator that level applies without a matrix.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+
   [level_order_not_coarser]
     type = RunException
     input = 'pmultigrid.i'

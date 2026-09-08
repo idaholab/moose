@@ -32,9 +32,10 @@ PLevelSpace::systemName(const NonlinearSystemBase & fine, const unsigned int ord
   return fine.name() + "_p" + std::to_string(order);
 }
 
-PLevelSpace::PLevelSpace(NonlinearSystemBase & fine, const unsigned int order)
+PLevelSpace::PLevelSpace(NonlinearSystemBase & fine, const unsigned int order, const bool assemble)
   : _fine(fine),
     _order(order),
+    _assemble(assemble),
     _sys(fine.feProblem().es().add_system<libMesh::System>(systemName(fine, order)))
 {
   const auto & fine_sys = _fine.system();
@@ -73,6 +74,15 @@ PLevelSpace::PLevelSpace(NonlinearSystemBase & fine, const unsigned int order)
   }
 
   _fine.feProblem().kokkosAssembly().addShapeSystem(_sys);
+
+  if (_assemble)
+  {
+    _matrix_object = &_sys.add_matrix("level operator");
+
+    // The device assembly is indexed by the sparsity pattern libMesh computes for the level's DOF
+    // map, which libMesh keeps past initialization only when it is asked to
+    _sys.get_dof_map().full_sparsity_pattern_needed();
+  }
 }
 
 PLevelSpace::~PLevelSpace() = default;
@@ -98,6 +108,19 @@ PLevelSpace::init()
   _x = &_sys.add_vector("operator input", false, libMesh::GHOSTED);
 
   setupConstrainedDofs();
+
+  if (_assemble)
+  {
+    _dof_space->setupSparsity();
+
+    if (!dofSpace().getSparsity().row_ptr.size())
+      mooseError("The p-multigrid level of order ",
+                 _order,
+                 " assembles its operator, but libMesh computed no sparsity pattern for the "
+                 "level's DOF map, so there is no pattern to assemble over.");
+
+    _matrix.create(*_matrix_object, dofSpace());
+  }
 }
 
 void
@@ -317,6 +340,44 @@ void
 PLevelSpace::diagonal(const QpJacobianCache & cache, libMesh::NumericVector<Number> & diagonal)
 {
   dispatch(cache, diagonal, nullptr);
+}
+
+void
+PLevelSpace::assembleMatrix(const QpJacobianCache & cache)
+{
+  mooseAssert(_assemble, "This p-multigrid level does not assemble its operator.");
+
+  // The device assembly adds into the matrix, so both sides of it start from zero
+  _matrix_object->zero();
+
+  _matrix = 0.0;
+
+  QpJacobianOperator op(_fine.feProblem().kokkosAssembly(), cache, level());
+
+  op.assemble(_matrix);
+
+  _matrix.close();
+
+  // The element loops contribute nothing to a row the level holds fixed, so the identity goes on
+  // those rows here, which is the same operator the matrix-free application realizes
+  if (_num_constrained_dofs)
+  {
+    const auto first_dof = _sys.get_dof_map().first_dof();
+
+    for (const auto dof : make_range(dofSpace().getNumLocalDofs()))
+      if (_constrained_dof[dof])
+        _matrix_object->set(first_dof + dof, first_dof + dof, 1.0);
+
+    _matrix_object->close();
+  }
+}
+
+libMesh::SparseMatrix<Number> &
+PLevelSpace::matrix()
+{
+  mooseAssert(_matrix_object, "This p-multigrid level does not assemble its operator.");
+
+  return *_matrix_object;
 }
 
 const DofSpace &

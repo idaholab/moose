@@ -352,6 +352,19 @@ public:
   void verifyKokkosLevelGalerkin();
 
   /**
+   * Assemble the operator of every p-multigrid level that carries a matrix. Runs after a
+   * linearization, when the quadrature-point Jacobian cache the levels contract holds it.
+   */
+  void assembleKokkosLevelMatrices();
+
+  /**
+   * Check the assembled operator of every p-multigrid level that carries a matrix against the
+   * operator the level applies without a matrix, by applying both to the same vector of the level.
+   * Runs after a linearization and errors out on the first mismatch.
+   */
+  void verifyKokkosLevelMatrices();
+
+  /**
    * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
    * using the partial-assembly Jacobian-vector product hooks on active Kokkos kernels/nodal BCs.
    * This is the MatMult callback for the Kokkos matrix-free Amat shell.

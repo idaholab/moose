@@ -681,8 +681,12 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
       reportKokkosMatrixFreeCoverage();
 
       // The cache the levels contract holds this linearization, so this is where a level's operator
-      // can be checked against itself
+      // can be checked against itself, and where an assembled level operator is filled
       verifyKokkosLevelOperators();
+
+      assembleKokkosLevelMatrices();
+
+      verifyKokkosLevelMatrices();
     }
   }
 
@@ -847,8 +851,12 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
       reportKokkosMatrixFreeCoverage();
 
       // The cache the levels contract holds this linearization, so this is where a level's operator
-      // can be checked against itself
+      // can be checked against itself, and where an assembled level operator is filled
       verifyKokkosLevelOperators();
+
+      assembleKokkosLevelMatrices();
+
+      verifyKokkosLevelMatrices();
     }
   }
 
@@ -980,6 +988,79 @@ NonlinearSystemBase::verifyKokkosLevelOperators()
       mooseError("The operator of the p-multigrid level of order ",
                  level->order(),
                  " disagrees with the diagonal the level computes by ",
+                 error,
+                 ", which exceeds a tolerance of ",
+                 tolerance,
+                 ".");
+  }
+}
+
+void
+NonlinearSystemBase::assembleKokkosLevelMatrices()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg)
+    return;
+
+  TIME_SECTION("assembleKokkosLevelMatrices", 1);
+
+  const auto & cache = _fe_problem.getKokkosFESystems()[number()].qpJacobianCache();
+
+  for (const auto & level : pmg->levels())
+    if (level->assembles())
+      level->assembleMatrix(cache);
+}
+
+void
+NonlinearSystemBase::verifyKokkosLevelMatrices()
+{
+  auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
+
+  if (!pmg || !pmg->verifyLevelMatrices())
+    return;
+
+  TIME_SECTION("verifyKokkosLevelMatrices", 1);
+
+  const auto & cache = _fe_problem.getKokkosFESystems()[number()].qpJacobianCache();
+
+  for (const auto & level : pmg->levels())
+  {
+    if (!level->assembles())
+      continue;
+
+    auto & level_sys = level->system();
+
+    auto x = level_sys.solution->zero_clone();
+    auto matrix_free = level_sys.solution->zero_clone();
+    auto assembled = level_sys.solution->zero_clone();
+
+    Moose::Kokkos::LevelTransfer::fillVerificationPattern(*x, level_sys);
+
+    // Both operators hold the same rows fixed and couple the same fixed columns into their free
+    // rows, so they agree on every vector of the level and the comparison needs no projection
+    level->apply(cache, *x, *matrix_free);
+
+    level->matrix().vector_mult(*assembled, *x);
+
+    assembled->add(-1.0, *matrix_free);
+
+    const auto error = assembled->linfty_norm();
+    const auto scale = matrix_free->linfty_norm();
+
+    // The two paths contract the same cache against the same basis tables in a different loop
+    // order, so they agree to the roundoff of that contraction; the margin over the unit roundoff
+    // of double precision covers the element and quadrature-point sums
+    const auto tolerance = 1e-10 * std::max(scale, 1.0);
+
+    _console << "p-multigrid level p = " << level->order()
+             << ": assembled operator agrees with the matrix-free operator to " << error
+             << " (tolerance " << tolerance << ")" << std::endl;
+
+    if (error > tolerance)
+      mooseError("The assembled operator of the p-multigrid level of order ",
+                 level->order(),
+                 " disagrees with the operator the level applies without a matrix by ",
                  error,
                  ", which exceeds a tolerance of ",
                  tolerance,
