@@ -12,7 +12,6 @@
 // Moose includes
 #include "InputParameters.h"
 #include "MooseEnum.h"
-#include "MooseUnitUtils.h"
 #include "MooseUtils.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
@@ -30,8 +29,6 @@ variableParams(const std::string & order, const std::string & family)
   params.addParam<MooseEnum>(
       "family", MooseEnum("LAGRANGE MONOMIAL MONOMIAL_VEC HERMITE", "LAGRANGE"), "Variable family");
   params.addParam<bool>("p_refinement", "Whether to p-refine this FE type");
-  params.addDeprecatedParam<bool>(
-      "disable_p_refinement", "Disable p-refinement", "Use p_refinement instead");
 
   params.set<MooseEnum>("order") = order;
   params.set<MooseEnum>("family") = family;
@@ -90,25 +87,6 @@ TEST(MooseUtils, variableFETypePRefinementOverrides)
   params = variableParams("FIRST", "HERMITE");
   params.set<bool>("p_refinement") = false;
   expectVariableFEType(params, libMesh::FIRST, libMesh::HERMITE, false);
-
-  params = variableParams("FIRST", "HERMITE");
-  params.set<bool>("disable_p_refinement") = true;
-  expectVariableFEType(params, libMesh::FIRST, libMesh::HERMITE, false);
-
-  params = variableParams("CONSTANT", "MONOMIAL");
-  params.set<bool>("disable_p_refinement") = false;
-  expectVariableFEType(params, libMesh::CONSTANT, libMesh::MONOMIAL, true);
-}
-
-TEST(MooseUtils, variableFETypeRejectsConflictingPRefinementParams)
-{
-  auto params = variableParams("CONSTANT", "MONOMIAL");
-  params.set<bool>("p_refinement") = false;
-  params.set<bool>("disable_p_refinement") = true;
-
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { MooseUtils::variableFEType(params); },
-      "Cannot be supplied together with 'p_refinement'");
 }
 
 TEST(MooseUtils, underscoreToCamelCase)

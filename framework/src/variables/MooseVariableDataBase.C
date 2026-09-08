@@ -396,7 +396,7 @@ void
 MooseVariableDataBase<RealVectorValue>::setNodalValue(const RealVectorValue & value)
 {
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
-  dof_values.resize(Moose::dim);
+  dof_values.resize(_dof_indices.size());
   for (const auto i : index_range(dof_values))
     dof_values[i] = value(i);
 
