@@ -569,20 +569,20 @@ addActionTypes(Syntax & syntax)
   // resolve dependency order between added solver objects
   registerTask("resolve_mfem_solvers", true);
   addTaskDependency("resolve_mfem_solvers", "add_mfem_solver");
-  addTaskDependency("init_problem", "resolve_mfem_solvers");
 
   // indicators/estimators before markers
   addTaskDependency("add_marker", "add_indicator");
 
-  // set all MFEM ProblemOperators to be executed in this problem
-  registerTask("set_mfem_problem_operators", true);
-  addTaskDependency("set_mfem_problem_operators", "resolve_mfem_solvers");
-  addTaskDependency("set_mfem_problem_operators", "set_mfem_equation_systems");
-
-  // add problem composers (and operators)
+  // add problem composers
   registerMooseObjectTask("add_mfem_problem_composer", MFEMProblemComposer, false);
+  addTaskDependency("add_mfem_problem_composer", "set_mfem_equation_systems");
+  addTaskDependency("add_mfem_problem_composer", "resolve_mfem_solvers");
+
+  // build MFEM ProblemOperators from MFEMProblemComposers used in this problem
+  registerTask("set_mfem_problem_operators", true);
   addTaskDependency("set_mfem_problem_operators", "add_mfem_problem_composer");
-  addTaskDependency("setup_executioner", "add_mfem_problem_composer");
+
+  addTaskDependency("init_problem", "set_mfem_problem_operators");
 
 #endif
 

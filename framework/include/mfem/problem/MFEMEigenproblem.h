@@ -37,9 +37,9 @@ public:
   virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm() override;
 
   /**
-   * Add an MFEM problem operator. Takes ownership.
+   * Add default problem composer if none has been added by the user
    */
-  virtual void setMFEMProblemOperators() override;
+  virtual std::shared_ptr<MFEMProblemComposer> addDefaultProblemComposer() override;
 };
 
 #endif

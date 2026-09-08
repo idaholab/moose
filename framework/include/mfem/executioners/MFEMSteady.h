@@ -12,7 +12,6 @@
 #pragma once
 
 #include "Executioner.h"
-#include "ProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
 #include "EquationSystemProblemOperator.h"
 #include "ComplexEquationSystemProblemOperator.h"

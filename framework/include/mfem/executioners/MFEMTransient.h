@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "ProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
 #include "TimeDependentProblemOperator.h"
 #include "TransientBase.h"
