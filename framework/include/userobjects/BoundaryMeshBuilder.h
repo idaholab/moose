@@ -17,7 +17,7 @@
 #include <memory>
 
 /**
- * Owns a saved boundary (surface) mesh and the SurfaceElementSet wrapping it.
+ * Owns a saved boundary mesh and the SurfaceElementSet wrapping it.
  *
  * This is the single object allowed to retrieve a saved mesh via
  * MeshGeneratorSystem::getSavedMesh(): that retrieval std::move()s the mesh out

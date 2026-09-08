@@ -18,7 +18,7 @@ BoundaryMeshBuilder::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
-      "Owns a saved surface (boundary) mesh and the SurfaceElement wrappers built from it, "
+      "Owns a saved boundary mesh and the SurfaceElement wrappers built from it, "
       "for use by point-containment and distance user objects.");
 
   params.addRequiredParam<MeshGeneratorName>(
@@ -56,8 +56,8 @@ BoundaryMeshBuilder::initialSetup()
   if (!_mesh->is_replicated())
     mooseError("BoundaryMeshBuilder '",
                name(),
-               "': the saved surface mesh is distributed. A serialized/replicated surface mesh is "
-               "required for point-containment queries.");
+               "': the saved boundary mesh is distributed. A serialized/replicated boundary mesh "
+               "is required for point-containment queries.");
 
   const auto expected_dim_embedding_mesh = _mesh->mesh_dimension() + 1;
   if (_dim_embedding_mesh != expected_dim_embedding_mesh)
@@ -65,7 +65,7 @@ BoundaryMeshBuilder::initialSetup()
                name(),
                "': the background mesh dimension (",
                _dim_embedding_mesh,
-               ") does not match the surface mesh dimension + 1 (",
+               ") does not match the boundary mesh dimension + 1 (",
                expected_dim_embedding_mesh,
                ").");
 
