@@ -30,6 +30,32 @@ function underlying_compiler() {
   fi
 }
 
+# Set the build options for the PyTorch Python package
+#
+# PyTorch's setup.py forwards BUILD_*, USE_* and CMAKE_* environment variables to its cmake
+# configure step, so these are the environment-variable spelling of the flags that
+# configure_libtorch passes as -D arguments. They deliberately differ in the options that only
+# make sense once the Python package is built, which the C++-only configuration turns off. These
+# are set explicitly (rather than left to PyTorch's defaults) so that they also override the
+# cached OFF values when the C++ build directory is reused:
+#   * BUILD_PYTHON: this is the Python package
+#   * BUILD_FUNCTORCH: NEML2 uses torch.func (see neml2/models/param_ad.py)
+#   * USE_NUMPY: NEML2 uses NumPy interop (see neml2/texture/polefigure.py)
+function set_libtorch_python_build_options()
+{
+  export CMAKE_C_COMPILER="$(underlying_compiler "${CC:-cc}")"
+  export CMAKE_CXX_COMPILER="$(underlying_compiler "${CXX:-c++}")"
+  export CMAKE_BUILD_TYPE=Release
+  export CMAKE_INCLUDE_PATH="$(get_variable PETSC_DIR)/include"
+  export CMAKE_LIBRARY_PATH="$(get_variable PETSC_DIR)/lib"
+
+  export BUILD_BINARY=0 BUILD_FUNCTORCH=1 BUILD_LITE_INTERPRETER=0 BUILD_PYTHON=1 BUILD_TEST=0
+  export USE_BLAS=1 BLAS=OpenBLAS USE_LAPACK=1
+  export USE_DISTRIBUTED=0 USE_GLOO=0 USE_MPI=0 USE_NCCL=0 USE_TENSORPIPE=0 USE_XCCL=0
+  export USE_FBGEMM=0 USE_ITT=0 USE_KINETO=0 USE_MKLDNN=0 USE_NNPACK=0
+  export USE_NUMPY=1 USE_OBSERVERS=0 USE_PYTORCH_QNNPACK=0 USE_VALGRIND=0 USE_XNNPACK=0
+}
+
 # Configure libtorch with the default MOOSE configuration options
 #
 # Separated so that it can be used across all libtorch build scripts:
@@ -123,3 +149,41 @@ function install_libtorch()
 {
   cmake --install "$1" --prefix "$2"
 }
+
+# Install the PyTorch package into a Python environment.
+#
+# Arguments:
+#   1. Path to the PyTorch source directory
+#   2. Python executable into whose environment PyTorch will be installed
+#   3. Number of build jobs
+function install_libtorch_python()
+(
+  local source_dir="$1"
+  local python_executable="$2"
+
+  set_libtorch_python_build_options
+  export MAX_JOBS="$3"
+
+  "$python_executable" -m pip install --no-cache -r "$source_dir/requirements.txt" || return
+
+  # PyTorch's setup.py always builds in <source>/build, which is also the build directory used by
+  # the C++-only build. When that build directory already exists, reconfigure it in place (with
+  # BUILD_PYTHON on and the install prefix setup.py expects) and keep its cache so the Python
+  # package reuses the objects already compiled there instead of rebuilding from scratch. Note
+  # that this leaves BUILD_PYTHON on in the cache, so a subsequent --fast C++ rebuild will also
+  # build the Python targets.
+  if [[ -f "$source_dir/build/CMakeCache.txt" ]]; then
+    unset CMAKE_FRESH
+    cmake \
+      -S "$source_dir" \
+      -B "$source_dir/build" \
+      -DBUILD_PYTHON=ON \
+      -DPython_EXECUTABLE="$python_executable" \
+      -DCMAKE_INSTALL_PREFIX="$source_dir/torch" || return
+  else
+    export CMAKE_FRESH=1
+  fi
+
+  cd "$source_dir" || return
+  "$python_executable" -m pip install --no-cache --no-build-isolation .
+)
