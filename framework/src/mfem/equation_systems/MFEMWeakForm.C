@@ -15,6 +15,15 @@
 
 registerMooseObject("MooseApp", MFEMWeakForm);
 
+InputParameters
+MFEMWeakForm::validParams()
+{
+  InputParameters params = MFEMWeakFormBase::validParams();
+  params.addClassDescription("Builds a real-valued MFEM EquationSystem from the kernels and "
+                             "boundary conditions named by this weak form.");
+  return params;
+}
+
 MFEMWeakForm::MFEMWeakForm(const InputParameters & parameters) : MFEMWeakFormBase(parameters) {}
 
 void

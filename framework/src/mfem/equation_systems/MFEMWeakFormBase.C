@@ -16,6 +16,8 @@ InputParameters
 MFEMWeakFormBase::validParams()
 {
   InputParameters params = MFEMObject::validParams();
+  params.addClassDescription("Base class for MFEM weak forms, which build the EquationSystem "
+                             "solved by an MFEM problem operator.");
   params.registerBase("MFEMWeakFormBase");
   params.registerSystemAttributeName("MFEMWeakFormBase");
   params.addParam<std::vector<MFEMBoundaryConditionName>>(
@@ -45,18 +47,27 @@ MFEMWeakFormBase::initEquationSystem()
 {
   auto & problem_data = getMFEMProblem().getProblemData();
   if (_bc_names.empty()) // default to all BCs added by user
-    for (auto & [bc_name, bc] : problem_data.bcs)
+    for (const auto & [bc_name, bc] : problem_data.bcs)
       addBoundaryCondition(bc_name, bc);
   else
     for (const auto & bc_name : _bc_names)
+    {
+      if (!problem_data.bcs.Has(bc_name))
+        paramError(
+            "bcs", "No boundary condition named '", bc_name, "' has been added to the problem.");
       addBoundaryCondition(bc_name, problem_data.bcs.GetShared(bc_name));
+    }
 
   if (_kernel_names.empty()) // default to all kernels added by user
-    for (auto & [kernel_name, kernel] : problem_data.kernels)
+    for (const auto & [kernel_name, kernel] : problem_data.kernels)
       addKernel(kernel_name, kernel);
   else
     for (const auto & kernel_name : _kernel_names)
+    {
+      if (!problem_data.kernels.Has(kernel_name))
+        paramError("kernels", "No kernel named '", kernel_name, "' has been added to the problem.");
       addKernel(kernel_name, problem_data.kernels.GetShared(kernel_name));
+    }
 
   if (problem_data.nonlinear_solver)
     _equation_system->SetGradientRequired(problem_data.nonlinear_solver->RequiresGradient());

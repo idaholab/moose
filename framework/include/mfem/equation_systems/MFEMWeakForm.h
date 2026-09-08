@@ -19,6 +19,8 @@
 class MFEMWeakForm : public MFEMWeakFormBase
 {
 public:
+  static InputParameters validParams();
+
   MFEMWeakForm(const InputParameters & parameters);
 
 protected:

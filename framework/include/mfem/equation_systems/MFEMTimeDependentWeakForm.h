@@ -19,6 +19,8 @@
 class MFEMTimeDependentWeakForm : public MFEMWeakForm
 {
 public:
+  static InputParameters validParams();
+
   MFEMTimeDependentWeakForm(const InputParameters & parameters);
 
 protected:

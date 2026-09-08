@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMProblemSolve.h"
-#include "TimeDependentProblemOperator.h"
 #include "TransientBase.h"
 
 class MFEMTransient : public TransientBase
@@ -46,7 +45,6 @@ public:
 
 private:
   MFEMProblem & _mfem_problem;
-  MFEMProblemData & _mfem_problem_data;
   MFEMProblemSolve _mfem_problem_solve;
 };
 
