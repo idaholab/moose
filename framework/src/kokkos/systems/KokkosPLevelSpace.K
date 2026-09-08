@@ -26,6 +26,45 @@
 namespace Moose::Kokkos
 {
 
+namespace
+{
+PetscErrorCode
+levelMatMult(Mat shell, Vec x, Vec y)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  static_cast<PLevelSpace *>(ctx)->applyToVec(x, y);
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
+levelMatGetDiagonal(Mat shell, Vec diagonal)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  static_cast<PLevelSpace *>(ctx)->diagonalToVec(diagonal);
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
+levelMatInterpolate(Mat shell, Vec x, Vec y)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  static_cast<PLevelSpace *>(ctx)->prolongToVec(x, y);
+  return LIBMESH_PETSC_SUCCESS;
+}
+
+PetscErrorCode
+levelMatRestrict(Mat shell, Vec x, Vec y)
+{
+  void * ctx;
+  LibmeshPetscCallQ(MatShellGetContext(shell, &ctx));
+  static_cast<PLevelSpace *>(ctx)->restrictToVec(x, y);
+  return LIBMESH_PETSC_SUCCESS;
+}
+} // namespace
+
 std::string
 PLevelSpace::systemName(const NonlinearSystemBase & fine, const unsigned int order)
 {
@@ -121,6 +160,31 @@ PLevelSpace::init()
 
     _matrix.create(*_matrix_object, dofSpace());
   }
+  else
+  {
+    // A level that applies its operator hands PETSc a shell over the level's own DOF layout, whose
+    // product and diagonal are the contraction the level performs
+    createShell(_sys, _sys, *_operator);
+
+    LibmeshPetscCallA(_sys.comm().get(),
+                      MatShellSetOperation(_operator, MATOP_MULT, (void (*)(void))levelMatMult));
+    LibmeshPetscCallA(
+        _sys.comm().get(),
+        MatShellSetOperation(_operator, MATOP_GET_DIAGONAL, (void (*)(void))levelMatGetDiagonal));
+  }
+}
+
+void
+PLevelSpace::createShell(const libMesh::System & rows, const libMesh::System & columns, Mat & mat)
+{
+  LibmeshPetscCallA(_sys.comm().get(),
+                    MatCreateShell(_sys.comm().get(),
+                                   rows.get_dof_map().n_local_dofs(),
+                                   columns.get_dof_map().n_local_dofs(),
+                                   rows.get_dof_map().n_dofs(),
+                                   columns.get_dof_map().n_dofs(),
+                                   this,
+                                   &mat));
 }
 
 void
@@ -209,6 +273,18 @@ PLevelSpace::initTransfer(PLevelSpace * const finer)
                            fine_system,
                            fine_system.feTypes(),
                            fine_system.getNodalBCMatrixTagDofs(_fine.systemMatrixTag())});
+
+  // The transfer reaches PETSc as a shell from this level's space to the next finer one, which is
+  // the orientation PETSc's multigrid interpolation carries: its product prolongs and its
+  // transposed product restricts
+  createShell(finer ? finer->system() : _fine.system(), _sys, *_interpolation);
+
+  LibmeshPetscCallA(
+      _sys.comm().get(),
+      MatShellSetOperation(_interpolation, MATOP_MULT, (void (*)(void))levelMatInterpolate));
+  LibmeshPetscCallA(
+      _sys.comm().get(),
+      MatShellSetOperation(_interpolation, MATOP_MULT_TRANSPOSE, (void (*)(void))levelMatRestrict));
 }
 
 void
@@ -378,6 +454,81 @@ PLevelSpace::matrix()
   mooseAssert(_matrix_object, "This p-multigrid level does not assemble its operator.");
 
   return *_matrix_object;
+}
+
+void
+PLevelSpace::updateOperator(const QpJacobianCache & cache)
+{
+  if (_assemble)
+  {
+    assembleMatrix(cache);
+    return;
+  }
+
+  // A shell operator holds no state of its own: it reads the cache when it is applied. What a
+  // smoother built on top of it does hold, the diagonal above all, is rebuilt only when PETSc sees
+  // the operator change, which is what advancing the object state reports.
+  LibmeshPetscCallA(_sys.comm().get(), PetscObjectStateIncrease((PetscObject)(*_operator)));
+}
+
+Mat
+PLevelSpace::operatorMat() const
+{
+  if (_assemble)
+    return libMesh::cast_ptr<libMesh::PetscMatrix<Number> *>(_matrix_object)->mat();
+
+  mooseAssert(_operator, "The p-multigrid level operator has not been built yet.");
+
+  return _operator;
+}
+
+Mat
+PLevelSpace::interpolationMat() const
+{
+  mooseAssert(_interpolation, "The p-multigrid level transfer has not been built yet.");
+
+  return _interpolation;
+}
+
+const QpJacobianCache &
+PLevelSpace::cache() const
+{
+  return _fine.feProblem().getKokkosFESystems()[_fine.number()].qpJacobianCache();
+}
+
+void
+PLevelSpace::applyToVec(Vec x, Vec y)
+{
+  libMesh::PetscVector<Number> x_wrap(x, _sys.comm());
+  libMesh::PetscVector<Number> y_wrap(y, _sys.comm());
+
+  apply(cache(), x_wrap, y_wrap);
+}
+
+void
+PLevelSpace::diagonalToVec(Vec diagonal)
+{
+  libMesh::PetscVector<Number> diagonal_wrap(diagonal, _sys.comm());
+
+  this->diagonal(cache(), diagonal_wrap);
+}
+
+void
+PLevelSpace::prolongToVec(Vec x, Vec y)
+{
+  libMesh::PetscVector<Number> x_wrap(x, _sys.comm());
+  libMesh::PetscVector<Number> y_wrap(y, _sys.comm());
+
+  prolong(x_wrap, y_wrap);
+}
+
+void
+PLevelSpace::restrictToVec(Vec x, Vec y)
+{
+  libMesh::PetscVector<Number> x_wrap(x, _sys.comm());
+  libMesh::PetscVector<Number> y_wrap(y, _sys.comm());
+
+  restrict(x_wrap, y_wrap);
 }
 
 const DofSpace &

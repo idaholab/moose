@@ -33,6 +33,8 @@ public:
 
   virtual void initialSetup() override;
 
+  virtual void setupSolver() override;
+
   /**
    * Get the coarse levels' function spaces, ascending in order
    * @returns The levels

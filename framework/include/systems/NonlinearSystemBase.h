@@ -352,10 +352,13 @@ public:
   void verifyKokkosLevelGalerkin();
 
   /**
-   * Assemble the operator of every p-multigrid level that carries a matrix. Runs after a
-   * linearization, when the quadrature-point Jacobian cache the levels contract holds it.
+   * Update the operator of every p-multigrid level for the current linearization: a level that
+   * carries a matrix reassembles it, and a level that applies its operator as a shell has its
+   * PETSc object state bumped instead, so PETSc's PCMG treats the level (and its smoother) as
+   * changed. Runs after a linearization, when the quadrature-point Jacobian cache the levels
+   * contract holds it.
    */
-  void assembleKokkosLevelMatrices();
+  void updateKokkosLevelOperators();
 
   /**
    * Check the assembled operator of every p-multigrid level that carries a matrix against the
@@ -834,6 +837,13 @@ public:
    * Setup the PETSc DM object (when appropriate)
    */
   void setupDM();
+
+  /**
+   * Configure the solve's PETSc preconditioner, when a preconditioner is attached. Called once per
+   * solve, after setupDM(), so that a preconditioner that reaches the SNES/KSP/PC directly sees the
+   * objects the nonlinear solver has just (re)created for this solve.
+   */
+  void setupPreconditionerSolver();
 
   using SystemBase::reinitNodeFace;
 

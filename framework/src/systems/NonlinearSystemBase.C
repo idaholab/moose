@@ -440,6 +440,13 @@ NonlinearSystemBase::setupDM()
 }
 
 void
+NonlinearSystemBase::setupPreconditionerSolver()
+{
+  if (_preconditioner)
+    _preconditioner->setupSolver();
+}
+
+void
 NonlinearSystemBase::addKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters)

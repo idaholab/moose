@@ -7,12 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "libmesh/petsc_macro.h"
+
 #include "PMultigrid.h"
 
 #ifdef MOOSE_KOKKOS_ENABLED
 
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
+
+#include "libmesh/petsc_nonlinear_solver.h"
 
 registerMooseObjectAliased("MooseApp", PMultigrid, "PMG");
 
@@ -82,11 +86,18 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
     if (i && _level_orders[i] <= _level_orders[i - 1])
       paramError("level_orders", "The level orders must be strictly ascending.");
 
-  if (!_fe_problem.solverParams(_nl_sys_num)._kokkos_matrix_free)
+  auto & solver_params = _fe_problem.solverParams(_nl_sys_num);
+
+  if (!solver_params._kokkos_matrix_free)
     mooseError(
         "The p-multigrid preconditioner's operators are the quadrature-point Jacobian cache "
         "contracted against each level's basis, so the solver system must be run in Kokkos "
         "matrix-free mode. Set 'use_kokkos_matrix_free_jacobian = true' in the Executioner.");
+
+  // A p-multigrid preconditioner configures the solve's PETSc preconditioner itself, so the
+  // matrix-free default that would otherwise apply (a bare Jacobi over the fine shell) is left to
+  // that configuration
+  solver_params._kokkos_p_multigrid = true;
 
   // The levels' systems have to exist before the equation systems are initialized, and their FE
   // types have to be registered before the Kokkos assembly caches reference shape data; the
@@ -129,6 +140,69 @@ PMultigrid::initialSetup()
 
     _console << std::endl;
   }
+}
+
+void
+PMultigrid::setupSolver()
+{
+  SNES snes = _nl.getSNES();
+  KSP ksp;
+  LibmeshPetscCall(SNESGetKSP(snes, &ksp));
+  PC pc;
+  LibmeshPetscCall(KSPGetPC(ksp, &pc));
+
+  // KSPGetPC copies libMesh's DM onto a newly created PC. Every operator, interpolation, and
+  // smoother setting below is supplied explicitly, so the DM would only add unwanted work: with
+  // PC_MG_GALERKIN_NONE, PCSetUp_MG restricts the SNES solution vector through the DM hierarchy
+  // between levels, and libMesh's DM does not support the coarse levels that restriction needs
+  LibmeshPetscCall(PCSetDM(pc, nullptr));
+
+  // PCMG numbers levels from the coarsest (0) to the finest; the finest level is the solver
+  // system itself, which is not one of _levels
+  const auto n_levels = _levels.size() + 1;
+
+  LibmeshPetscCall(PCSetType(pc, PCMG));
+  LibmeshPetscCall(PCMGSetLevels(pc, n_levels, nullptr));
+  // Every level's operator is supplied directly below, rather than formed by PETSc from the
+  // interpolation and the next finer level's operator
+  LibmeshPetscCall(PCMGSetGalerkin(pc, PC_MG_GALERKIN_NONE));
+
+  for (const auto i : index_range(_levels))
+  {
+    KSP smoother;
+    LibmeshPetscCall(PCMGGetSmoother(pc, i, &smoother));
+    LibmeshPetscCall(
+        KSPSetOperators(smoother, _levels[i]->operatorMat(), _levels[i]->operatorMat()));
+
+    PC smoother_pc;
+    LibmeshPetscCall(KSPGetPC(smoother, &smoother_pc));
+
+    // The coarsest level is solved directly; every other level (including the finest, set below)
+    // is smoothed. None of these operators carry matrix entries except the assembled coarsest
+    // one, so the smoother and coarse solver defaults below are the ones that apply to a shell:
+    // Jacobi rather than SOR, and algebraic multigrid rather than a direct factorization.
+    if (i)
+    {
+      LibmeshPetscCall(KSPSetType(smoother, KSPCHEBYSHEV));
+      LibmeshPetscCall(PCSetType(smoother_pc, PCJACOBI));
+    }
+    else
+    {
+      LibmeshPetscCall(KSPSetType(smoother, KSPPREONLY));
+      LibmeshPetscCall(PCSetType(smoother_pc, PCGAMG));
+    }
+
+    // The interpolation from level i to the next finer level (i + 1, or the solver system if i is
+    // the finest of _levels) is this level's own transfer, per PCMGSetInterpolation's convention
+    LibmeshPetscCall(PCMGSetInterpolation(pc, i + 1, _levels[i]->interpolationMat()));
+  }
+
+  KSP fine_smoother;
+  LibmeshPetscCall(PCMGGetSmoother(pc, n_levels - 1, &fine_smoother));
+  LibmeshPetscCall(KSPSetType(fine_smoother, KSPCHEBYSHEV));
+  PC fine_smoother_pc;
+  LibmeshPetscCall(KSPGetPC(fine_smoother, &fine_smoother_pc));
+  LibmeshPetscCall(PCSetType(fine_smoother_pc, PCJACOBI));
 }
 
 #endif
