@@ -16,6 +16,7 @@
 #include "NodalBCBase.h"
 #include "Executioner.h"
 
+#include "libmesh/dof_map.h"
 #include "libmesh/fuzzy_equals.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
@@ -122,6 +123,11 @@ AdjointSolve::solve()
 
   // For scaling of the forward problem we need to apply correction factor
   solution *= _nl_forward.getVector("scaling_factors");
+
+  // Hanging-node (and other DofMap) constraints are not applied by the raw transpose solve above,
+  // which leaves constrained dofs at zero, so back-substitute them here. The vector being
+  // constrained belongs to the adjoint system, not the forward system that owns the matrix.
+  _nl_adjoint.system().get_dof_map().enforce_constraints_exactly(_nl_adjoint.system(), &solution);
 
   _nl_adjoint.update();
   if (solver.get_converged_reason() < 0)
