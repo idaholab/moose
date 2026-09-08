@@ -74,22 +74,31 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::validParams()
   substepping_type.addDocumentation("NONE", "Do not use local constitutive substepping");
   substepping_type.addDocumentation(
       "INCREMENT_BASED",
-      "Use explicit local substeps sized from the predicted viscoplastic strain increment.");
+      "Use local constitutive substeps controlled by the viscoplastic strain increment.");
   params.addParam<MooseEnum>(
       "use_substepping", substepping_type, "Whether and how to use local constitutive substepping");
   params.addRangeCheckedParam<Real>(
       "substep_strain_tolerance",
       0.1,
       "substep_strain_tolerance>0.0",
-      "Target fraction of max_inelastic_increment allowed in one local substep. Reduce this "
-      "value to increase the number of substeps.");
+      "Target fraction of max_inelastic_increment allowed in one local substep. A value of 1 uses "
+      "max_inelastic_increment itself as the local target. Fixed increment-based substepping sizes "
+      "the step from the elastic-trial estimate; adaptive substepping initializes from the "
+      "previous "
+      "accepted effective inelastic rate and enforces this target using converged local "
+      "increments.");
   params.addParam<bool>(
       "adaptive_substepping",
       false,
-      "If a local constitutive update fails, successively double the number of substeps.");
-  params.addParam<unsigned int>(
+      "Initialize the substep count from the previous accepted global-step effective inelastic "
+      "rate, using one substep when that history is zero, and adaptively refine when the local "
+      "solve "
+      "fails or a converged local inelastic increment exceeds substep_strain_tolerance times "
+      "max_inelastic_increment. The elastic-trial predictor is not used in adaptive mode.");
+  params.addRangeCheckedParam<unsigned int>(
       "maximum_number_substeps",
       25,
+      "maximum_number_substeps>=1",
       "Maximum number of local constitutive substeps before cutting the global timestep.");
   params.addParamNamesToGroup(
       "verbose maximum_gauge_ratio maximum_stress_magnitude use_substepping "
@@ -123,6 +132,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
     _substep_tolerance(this->template getParam<Real>("substep_strain_tolerance")),
     _adaptive_substepping(this->template getParam<bool>("adaptive_substepping")),
     _maximum_number_substeps(this->template getParam<unsigned int>("maximum_number_substeps")),
+    _effective_inelastic_strain_rate(this->template declareGenericProperty<Real, is_ad>(
+        this->_base_name + "effective_" +
+        this->template getParam<std::string>("inelastic_strain_name") + "_rate")),
+    _effective_inelastic_strain_rate_old(this->template getMaterialPropertyOld<Real>(
+        this->_base_name + "effective_" +
+        this->template getParam<std::string>("inelastic_strain_name") + "_rate")),
+    _suggested_number_substeps(0),
+    _last_effective_inelastic_strain_increment(0.0),
     _hydro_stress(0.0),
     _identity_two(RankTwoTensor::initIdentity),
     _dhydro_stress_dsigma(_identity_two / 3.0),
@@ -174,6 +191,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::PorousViscoplasticityStressUpdate
   if (_adaptive_substepping && _use_substepping == SubsteppingType::NONE)
     this->paramError("adaptive_substepping",
                      "adaptive_substepping can only be used when use_substepping is enabled.");
+
+  if (_use_substepping != SubsteppingType::NONE && this->_max_inelastic_increment <= 0.0)
+    this->paramError("max_inelastic_increment",
+                     "max_inelastic_increment must be positive when substepping is enabled.");
+
   if (_additional_porosity_pressure && _pore_shape != PoreShapeModel::SPHERICAL)
     this->paramError("additional_porosity_pressure",
                      "The gas-filled-pore implementation is restricted to spherical pores.");
@@ -221,9 +243,6 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::setGaugeStress(
 {
   mooseAssert(law_index < _creep_laws.size(), "Creep-law index is out of range.");
 
-  if (law_index == 0)
-    _gauge_stress[_qp] = gauge_stress;
-
   if (!_gauge_stress_laws.empty())
     (*_gauge_stress_laws[law_index])[_qp] = gauge_stress;
 }
@@ -236,11 +255,16 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::setGaugeStresses(
     const GenericReal<is_ad> & porosity)
 {
   const auto has_drive = hasViscoplasticDrive(equiv_stress, effective_hydro_stress, porosity);
+  auto primary_set = false;
+  _gauge_stress[_qp] = 0.0;
 
   for (auto law_index = std::size_t{0}; law_index < _creep_laws.size(); ++law_index)
   {
     const auto coefficient = creepCoefficient(law_index);
-    if (MetaPhysicL::raw_value(coefficient) == 0.0)
+    const auto zero_coefficient = MetaPhysicL::raw_value(coefficient) == 0.0;
+    // Preserve the legacy single-law gauge diagnostic when C = 0. In a multi-law model, an
+    // exactly zero coefficient denotes an inactive mechanism and its per-law gauge remains zero.
+    if (zero_coefficient && _creep_laws.size() > 1)
     {
       setGaugeStress(law_index, GenericReal<is_ad>(0.0));
       continue;
@@ -251,6 +275,11 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::setGaugeStresses(
       computeGaugeStress(
           gauge_stress, equiv_stress, effective_hydro_stress, porosity, _creep_laws[law_index]);
     setGaugeStress(law_index, gauge_stress);
+    if (!primary_set)
+    {
+      _gauge_stress[_qp] = gauge_stress;
+      primary_set = true;
+    }
   }
 }
 
@@ -270,10 +299,27 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::substeppingCapabilityRequested()
 
 template <bool is_ad>
 void
+PorousViscoplasticityStressUpdateTempl<is_ad>::initQpStatefulProperties()
+{
+  ViscoplasticityStressUpdateBaseTempl<is_ad>::initQpStatefulProperties();
+  _effective_inelastic_strain_rate[_qp] = 0.0;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::propagateQpStatefulProperties()
+{
+  ViscoplasticityStressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties();
+  _effective_inelastic_strain_rate[_qp] = _effective_inelastic_strain_rate_old[_qp];
+}
+
+template <bool is_ad>
+void
 PorousViscoplasticityStressUpdateTempl<is_ad>::resetIncrementalMaterialProperties()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp];
+  _effective_inelastic_strain_rate[_qp] = _effective_inelastic_strain_rate_old[_qp];
 }
 
 template <bool is_ad>
@@ -391,11 +437,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateState(
                        elasticity_tensor,
                        elastic_strain_old_ad,
                        effective_inelastic_strain_increment);
+    _last_effective_inelastic_strain_increment =
+        std::abs(MetaPhysicL::raw_value(effective_inelastic_strain_increment));
     _effective_inelastic_strain[_qp] =
         _effective_inelastic_strain_old[_qp] + effective_inelastic_strain_increment;
     _inelastic_strain[_qp] = _inelastic_strain_old[_qp] + inelastic_strain_increment;
 
     this->computeStressFinalize(inelastic_strain_increment);
+    recordEffectiveInelasticStrainRate(effective_inelastic_strain_increment);
   }
   catch (...)
   {
@@ -478,12 +527,14 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubstepsFromState(
     const GenericReal<is_ad> & porosity)
 {
   using std::sqrt;
+
   const auto dev_stress = stress.deviatoric();
   const auto dev_stress_squared = dev_stress.doubleContraction(dev_stress);
   const auto equiv_stress =
       dev_stress_squared == 0.0 ? GenericReal<is_ad>(0.0) : sqrt(1.5 * dev_stress_squared);
   if (!hasViscoplasticDrive(equiv_stress, effective_hydro_stress, porosity))
     return 1;
+
   const auto stress_scale = gaugeStressScale(equiv_stress, effective_hydro_stress);
   if (stress_scale > _maximum_stress_magnitude)
     mooseException("In ",
@@ -492,7 +543,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubstepsFromState(
                    MetaPhysicL::raw_value(stress_scale),
                    ") is higher than maximum_stress_magnitude (",
                    _maximum_stress_magnitude,
-                   ").\nCutting time step.");
+                   ") while estimating local substeps.\nCutting time step.");
 
   auto estimated_effective_increment = Real(0.0);
   for (auto law_index = std::size_t{0}; law_index < _creep_laws.size(); ++law_index)
@@ -509,11 +560,160 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::estimateNumberSubstepsFromState(
         this->globalTimeStep();
   }
 
-  const auto target_increment = _substep_tolerance * this->_max_inelastic_increment;
+  if (!std::isfinite(estimated_effective_increment))
+    mooseException("In ",
+                   _name,
+                   ": nonfinite predicted effective inelastic increment while "
+                   "estimating local substeps.");
 
-  if (estimated_effective_increment <= target_increment)
-    return 1;
-  return std::ceil(estimated_effective_increment / target_increment);
+  const auto target_increment = _substep_tolerance * this->_max_inelastic_increment;
+  const auto estimated_ratio = estimated_effective_increment / target_increment;
+  const auto estimated_number_substeps =
+      estimated_ratio <= 1.0 ? 1u
+      : estimated_ratio >= std::numeric_limits<unsigned int>::max()
+          ? std::numeric_limits<unsigned int>::max()
+          : static_cast<unsigned int>(std::ceil(estimated_ratio));
+
+  if (_verbose && estimated_number_substeps > 1)
+  {
+    Moose::out << "Porous viscoplastic substep predictor at element " << this->_current_elem->id()
+               << " _qp=" << _qp << " position=" << _q_point[_qp]
+               << " global_dt=" << this->globalTimeStep()
+               << " p_eff=" << MetaPhysicL::raw_value(effective_hydro_stress)
+               << " q=" << MetaPhysicL::raw_value(equiv_stress)
+               << " porosity=" << MetaPhysicL::raw_value(porosity)
+               << " target_increment=" << target_increment
+               << " estimated_increment=" << estimated_effective_increment
+               << " estimated_substeps=" << estimated_number_substeps << '\n';
+    for (auto law_index = std::size_t{0}; law_index < _creep_laws.size(); ++law_index)
+    {
+      const auto coefficient = creepCoefficient(law_index);
+      const auto coefficient_raw = MetaPhysicL::raw_value(coefficient);
+      if (coefficient_raw == 0.0)
+      {
+        Moose::out << "  law " << law_index << ": n=" << _creep_laws[law_index].power
+                   << " coefficient=0 gauge_stress=0 creep_rate=0 predicted_increment=0\n";
+        continue;
+      }
+
+      const auto & law = _creep_laws[law_index];
+      GenericReal<is_ad> gauge_stress;
+      computeGaugeStress(gauge_stress, equiv_stress, effective_hydro_stress, porosity, law);
+      const auto creep_rate =
+          std::abs(MetaPhysicL::raw_value(computeCreepRate(law, coefficient, gauge_stress)));
+      Moose::out << "  law " << law_index << ": n=" << law.power
+                 << " coefficient=" << coefficient_raw
+                 << " gauge_stress=" << MetaPhysicL::raw_value(gauge_stress)
+                 << " creep_rate=" << creep_rate
+                 << " predicted_increment=" << creep_rate * this->globalTimeStep() << '\n';
+    }
+  }
+
+  return estimated_number_substeps;
+}
+
+template <bool is_ad>
+unsigned int
+PorousViscoplasticityStressUpdateTempl<is_ad>::estimateAdaptiveNumberSubstepsFromHistory() const
+{
+  const auto previous_rate = std::abs(_effective_inelastic_strain_rate_old[_qp]);
+  if (!std::isfinite(previous_rate))
+    mooseException(
+        "In ", _name, ": previous accepted effective inelastic strain rate is nonfinite.");
+
+  const auto target_increment = _substep_tolerance * this->_max_inelastic_increment;
+  const auto predicted_increment = previous_rate * this->globalTimeStep();
+  if (!std::isfinite(predicted_increment))
+    mooseException(
+        "In ", _name, ": history-based predicted effective inelastic increment is nonfinite.");
+
+  const auto predicted_ratio = predicted_increment / target_increment;
+  auto predicted_substeps = predicted_ratio <= 1.0 ? 1u
+                            : predicted_ratio >= std::numeric_limits<unsigned int>::max()
+                                ? std::numeric_limits<unsigned int>::max()
+                                : static_cast<unsigned int>(std::ceil(predicted_ratio));
+
+  // History is only an initial guess. Never cut the global timestep solely because a lagged
+  // predictor exceeds the configured local-substep budget; try the maximum allowed subdivision and
+  // let the current converged constitutive response decide whether the global step is admissible.
+  predicted_substeps = std::min(predicted_substeps, _maximum_number_substeps);
+
+  if (_verbose && previous_rate > 0.0)
+    Moose::out << "In " << _name << ": adaptive history substep predictor at element "
+               << this->_current_elem->id() << " _qp=" << _qp << " position=" << _q_point[_qp]
+               << " previous_accepted_rate=" << previous_rate
+               << " global_dt=" << this->globalTimeStep()
+               << " target_increment=" << target_increment
+               << " predicted_increment=" << predicted_increment
+               << " initial_substeps=" << predicted_substeps << std::endl;
+
+  return predicted_substeps;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::recordEffectiveInelasticStrainRate(
+    const GenericReal<is_ad> & effective_inelastic_strain_increment)
+{
+  if (!_adaptive_substepping)
+    return;
+
+  const auto increment = std::abs(MetaPhysicL::raw_value(effective_inelastic_strain_increment));
+  if (!std::isfinite(increment))
+    mooseException("In ", _name, ": converged effective inelastic strain increment is nonfinite.");
+
+  const auto global_time_step = this->globalTimeStep();
+  _effective_inelastic_strain_rate[_qp] =
+      global_time_step > 0.0 ? increment / global_time_step : 0.0;
+}
+
+template <bool is_ad>
+void
+PorousViscoplasticityStressUpdateTempl<is_ad>::checkSubstepIncrement(
+    const GenericReal<is_ad> & effective_inelastic_strain_increment,
+    const unsigned int total_number_substeps,
+    const unsigned int substep_index)
+{
+  if (!_adaptive_substepping)
+    return;
+
+  const auto increment = std::abs(MetaPhysicL::raw_value(effective_inelastic_strain_increment));
+  if (!std::isfinite(increment))
+    mooseException("In ", _name, ": nonfinite effective inelastic increment in local substep.");
+
+  const auto target_increment = _substep_tolerance * this->_max_inelastic_increment;
+  if (increment <= target_increment * (1.0 + 1.0e-12))
+    return;
+
+  const auto suggested =
+      std::ceil(static_cast<Real>(total_number_substeps) * increment / target_increment);
+  const auto bounded_suggestion = suggested >= _maximum_number_substeps
+                                      ? _maximum_number_substeps
+                                      : static_cast<unsigned int>(suggested);
+  const auto one_more_substep = total_number_substeps >= _maximum_number_substeps
+                                    ? _maximum_number_substeps
+                                    : total_number_substeps + 1;
+  _suggested_number_substeps = std::max(one_more_substep, bounded_suggestion);
+
+  if (_verbose)
+    Moose::out << "In " << _name << ": actual effective inelastic increment " << increment
+               << " in local substep " << substep_index << "/" << total_number_substeps
+               << " exceeds target " << target_increment << "; suggesting "
+               << _suggested_number_substeps << " substeps." << std::endl;
+
+  mooseException("In ",
+                 _name,
+                 ": actual effective inelastic increment in local substep ",
+                 substep_index,
+                 "/",
+                 total_number_substeps,
+                 " is ",
+                 increment,
+                 ", which exceeds the substep target ",
+                 target_increment,
+                 ". Suggested retry uses ",
+                 _suggested_number_substeps,
+                 " substeps.");
 }
 
 template <bool is_ad>
@@ -534,6 +734,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
     mooseError("PorousViscoplasticityStressUpdate received zero substeps.");
   if (total_number_substeps == 1)
   {
+    _last_effective_inelastic_strain_increment = 0.0;
     updateState(strain_increment,
                 inelastic_strain_increment,
                 rotation_increment,
@@ -543,6 +744,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
                 elastic_strain_old,
                 compute_full_tangent_operator,
                 tangent_operator);
+    checkSubstepIncrement(_last_effective_inelastic_strain_increment, 1, 1);
     return;
   }
   if (total_number_substeps > _maximum_number_substeps)
@@ -575,6 +777,10 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
                        elasticity_tensor,
                        sub_elastic_strain_old,
                        sub_effective_inelastic_strain_increment);
+    _last_effective_inelastic_strain_increment =
+        std::abs(MetaPhysicL::raw_value(sub_effective_inelastic_strain_increment));
+    checkSubstepIncrement(
+        sub_effective_inelastic_strain_increment, total_number_substeps, step + 1);
 
     strain_increment += sub_strain_increment;
     inelastic_strain_increment += sub_inelastic_strain_increment;
@@ -597,6 +803,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstepInternal(
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp] + inelastic_strain_increment;
 
   this->computeStressFinalize(inelastic_strain_increment);
+  recordEffectiveInelasticStrainRate(accumulated_effective_inelastic_strain_increment);
   this->resetConstitutiveTimeStep();
 }
 
@@ -646,18 +853,13 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
   // Keep this model's intermediate porosity fixed during the local substeps. It still includes
   // porosity associated with inelastic increments already computed by the other inelastic models.
   this->updateIntermediatePorosity(original_strain_increment);
-  unsigned int number_substeps = 1;
-  try
-  {
+
+  unsigned int number_substeps;
+  if (_adaptive_substepping)
+    number_substeps = estimateAdaptiveNumberSubstepsFromHistory();
+  else
+    // Preserve the historical fixed INCREMENT_BASED behavior when adaptive retries are disabled.
     number_substeps = estimateNumberSubsteps(original_stress_new);
-  }
-  catch (...)
-  {
-    restore_attempt_state();
-    if (!_adaptive_substepping)
-      throw;
-    number_substeps = 2;
-  }
 
   while (true)
   {
@@ -666,7 +868,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       restore_attempt_state();
       mooseException("In ",
                      _name,
-                     ": required number of viscoplastic substeps (",
+                     ": estimated number of viscoplastic substeps (",
                      number_substeps,
                      ") exceeds maximum_number_substeps (",
                      _maximum_number_substeps,
@@ -681,6 +883,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       (*_gauge_stress_laws[law_index])[_qp] = original_gauge_stresses[law_index];
     resetIncrementalMaterialProperties();
     this->updateIntermediatePorosity(original_strain_increment);
+    _suggested_number_substeps = 0;
 
     try
     {
@@ -699,6 +902,7 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
     }
     catch (...)
     {
+      const auto suggested_number_substeps = _suggested_number_substeps;
       restore_attempt_state();
 
       if (!_adaptive_substepping)
@@ -707,8 +911,15 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::updateStateSubstep(
       if (number_substeps >= _maximum_number_substeps)
         break;
 
-      number_substeps = number_substeps > _maximum_number_substeps / 2 ? _maximum_number_substeps
-                                                                       : 2 * number_substeps;
+      if (suggested_number_substeps > number_substeps)
+        number_substeps = suggested_number_substeps;
+      else
+        number_substeps = number_substeps > _maximum_number_substeps / 2 ? _maximum_number_substeps
+                                                                         : 2 * number_substeps;
+
+      if (_verbose)
+        Moose::out << "In " << _name << ": retrying adaptive viscoplastic integration with "
+                   << number_substeps << " substeps." << std::endl;
     }
   }
 
@@ -1085,15 +1296,19 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::evaluateLpsCreepResponse(
   for (auto & derivative : response.dinelastic_dx)
     derivative.zero();
 
+  auto primary_set = false;
   for (auto law_index = std::size_t{0}; law_index < _creep_laws.size(); ++law_index)
   {
     const auto mechanism = evaluateLpsMechanismResponse(
         law_index, effective_hydro_stress, equiv_stress, dev_direction, porosity);
 
-    if (law_index == 0)
-      response.primary_gauge_stress = mechanism.gauge_stress;
     if (!mechanism.active)
       continue;
+    if (!primary_set)
+    {
+      response.primary_gauge_stress = mechanism.gauge_stress;
+      primary_set = true;
+    }
 
     response.inelastic_strain_increment += mechanism.inelastic_strain_increment;
     response.effective_inelastic_strain_increment += mechanism.effective_inelastic_strain_increment;
@@ -1196,11 +1411,16 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeInelasticStrainIncrement(
 {
   total_creep_rate = 0.0;
   inelastic_strain_increment.zero();
+  _gauge_stress[_qp] = 0.0;
+  auto primary_set = false;
 
   for (auto law_index = std::size_t{0}; law_index < _creep_laws.size(); ++law_index)
   {
     const auto coefficient = creepCoefficient(law_index);
-    if (MetaPhysicL::raw_value(coefficient) == 0.0)
+    const auto zero_coefficient = MetaPhysicL::raw_value(coefficient) == 0.0;
+    // Preserve the legacy single-law gauge diagnostic when C = 0. In a multi-law model, an
+    // exactly zero coefficient denotes an inactive mechanism and its per-law gauge remains zero.
+    if (zero_coefficient && _creep_laws.size() > 1)
     {
       setGaugeStress(law_index, GenericReal<is_ad>(0.0));
       continue;
@@ -1210,6 +1430,13 @@ PorousViscoplasticityStressUpdateTempl<is_ad>::computeInelasticStrainIncrement(
     GenericReal<is_ad> gauge_stress;
     computeGaugeStress(gauge_stress, equiv_stress, effective_hydro_stress, porosity, law);
     setGaugeStress(law_index, gauge_stress);
+    if (!primary_set)
+    {
+      _gauge_stress[_qp] = gauge_stress;
+      primary_set = true;
+    }
+    if (zero_coefficient)
+      continue;
 
     const auto creep_rate = computeCreepRate(law, coefficient, gauge_stress);
     total_creep_rate += creep_rate;
