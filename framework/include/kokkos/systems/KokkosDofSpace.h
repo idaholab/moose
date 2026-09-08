@@ -14,6 +14,8 @@
 
 #include "libmesh/communicator.h"
 
+#include <petscsystypes.h>
+
 class MooseMesh;
 
 namespace libMesh
@@ -39,6 +41,16 @@ class DofSpace : public MeshHolder
 {
 public:
   /**
+   * CSR format sparsity data
+   */
+  struct Sparsity
+  {
+    Array<PetscInt> col_idx;
+    Array<PetscInt> row_idx;
+    Array<PetscInt> row_ptr;
+  };
+
+  /**
    * Constructor. The system's DOFs must already be distributed, which is to say the equation
    * systems must be initialized.
    * @param mesh The MOOSE mesh
@@ -63,6 +75,19 @@ public:
    * @returns The libMesh communicator
    */
   const Parallel::Communicator & getComm() const { return _comm; }
+
+  /**
+   * Get the sparsity pattern data of the layout, which a Kokkos matrix is created over
+   * @returns The sparsity pattern data
+   */
+  const Sparsity & getSparsity() const { return _sparsity; }
+
+  /**
+   * Gather the sparsity pattern libMesh computed for the DOF map into device CSR arrays, covering
+   * the rows this process owns followed by the rows it sends to. The layout's system must carry a
+   * matrix for libMesh to have computed a pattern; the arrays are left empty when it has not.
+   */
+  void setupSparsity();
 
   /**
    * Get the list of local DOF indices to communicate
@@ -193,6 +218,11 @@ protected:
   Array<Array<dof_id_type>> _local_comm_list;
   Array<Array<dof_id_type>> _ghost_comm_list;
   ///@}
+
+  /**
+   * Matrix sparsity pattern data
+   */
+  Sparsity _sparsity;
 
 private:
   /**

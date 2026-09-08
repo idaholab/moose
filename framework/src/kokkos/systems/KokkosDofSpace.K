@@ -127,6 +127,80 @@ DofSpace::setupDofs(libMesh::System & system)
 }
 
 void
+DofSpace::setupSparsity()
+{
+  auto * const pattern = _dof_map.get_sparsity_pattern();
+  bool have_pattern = pattern;
+
+  // Make sure to check whether the sparsity pattern graph returned by
+  // pattern->get_sparsity_pattern() is non-empty
+  getComm().verify(have_pattern);
+  if (!have_pattern)
+    return;
+  have_pattern = !pattern->get_sparsity_pattern().empty();
+  getComm().max(have_pattern);
+  if (!have_pattern)
+    return;
+
+  std::vector<PetscInt> col_idx;
+  std::vector<PetscInt> row_idx;
+  std::vector<PetscInt> row_ptr = {0};
+
+  for (dof_id_type r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
+  {
+    auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
+
+    for (auto col : cols)
+    {
+      col_idx.push_back(col);
+      row_idx.push_back(r);
+    }
+
+    row_ptr.push_back(col_idx.size());
+  }
+
+  auto num_procs = _comm.size();
+
+  std::vector<std::vector<PetscInt>> send_cols(num_procs), send_num_cols(num_procs);
+  std::vector<std::vector<PetscInt>> recv_cols(num_procs), recv_num_cols(num_procs);
+
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
+    for (auto r : _local_comm_list[proc])
+    {
+      for (PetscInt c = row_ptr[r]; c < row_ptr[r + 1]; ++c)
+        send_cols[proc].push_back(col_idx[c]);
+
+      send_num_cols[proc].push_back(row_ptr[r + 1] - row_ptr[r]);
+    }
+
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
+  {
+    _comm.scatter(send_cols, recv_cols[proc], proc);
+    _comm.scatter(send_num_cols, recv_num_cols[proc], proc);
+  }
+
+  std::vector<PetscInt> col(num_procs), row(num_procs);
+
+  for (auto r : _dof_map.get_send_list())
+  {
+    auto proc = _dof_map.dof_owner(r);
+    auto n_cols = recv_num_cols[proc][row[proc]++];
+
+    for (PetscInt c = 0; c < n_cols; ++c)
+    {
+      col_idx.push_back(recv_cols[proc][col[proc]++]);
+      row_idx.push_back(r);
+    }
+
+    row_ptr.push_back(col_idx.size());
+  }
+
+  _sparsity.col_idx = col_idx;
+  _sparsity.row_idx = row_idx;
+  _sparsity.row_ptr = row_ptr;
+}
+
+void
 DofSpace::syncGhostMask(Array<bool> & mask) const
 {
   const auto num_procs = _comm.size();

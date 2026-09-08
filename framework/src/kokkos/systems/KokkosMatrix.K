@@ -8,13 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosMatrix.h"
-#include "KokkosFESystem.h"
+#include "KokkosDofSpace.h"
 
 namespace Moose::Kokkos
 {
 
 void
-Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & system)
+Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const DofSpace & dof_space)
 {
   auto petsc_matrix = dynamic_cast<libMesh::PetscMatrix<PetscScalar> *>(&matrix);
 
@@ -32,7 +32,7 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & syste
   if (_is_alloc)
     return;
 
-  auto & sparsity = system.getSparsity();
+  auto & sparsity = dof_space.getSparsity();
 
   _matrix = petsc_matrix->mat();
   _nr = sparsity.row_ptr.size() - 1;

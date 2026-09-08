@@ -55,6 +55,13 @@ public:
    */
   bool verifyLevelGalerkin() const { return _verify_level_galerkin; }
 
+  /**
+   * Get whether the assembled operator of each level that assembles one is to be checked against
+   * the operator the level applies without a matrix
+   * @returns Whether to check
+   */
+  bool verifyLevelMatrices() const { return _verify_level_matrices; }
+
 protected:
   /// The polynomial order of each coarse level, ascending; the fine level is not listed
   const std::vector<unsigned int> _level_orders;
@@ -68,6 +75,9 @@ protected:
   /// Whether each level's operator is to be checked against the operator of the next finer level
   /// carried through the level transfer
   const bool _verify_level_galerkin;
+
+  /// Whether each assembled level operator is to be checked against the matrix-free operator
+  const bool _verify_level_matrices;
 
   /// The coarse levels' function spaces, ascending in order
   std::vector<std::unique_ptr<Moose::Kokkos::PLevelSpace>> _levels;
