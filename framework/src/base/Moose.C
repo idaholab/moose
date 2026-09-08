@@ -866,6 +866,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
 #ifdef MOOSE_MFEM_ENABLED
   registerSyntaxTask("AddMFEMWeakFormAction", "WeakForms/*", "add_mfem_weak_forms");
+  syntax.registerSyntaxType("WeakForms/*", "MFEMWeakFormName");
+  syntax.registerSyntaxType("Kernels/*", "MFEMKernelName");
+  syntax.registerSyntaxType("BCs/*", "MFEMBoundaryConditionName");
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   registerSyntaxTask(

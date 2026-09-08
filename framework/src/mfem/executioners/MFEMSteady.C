@@ -11,10 +11,6 @@
 
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
-#include "MFEMEigenproblem.h"
-#include "EigenproblemEquationSystem.h"
-#include "EquationSystemProblemOperator.h"
-#include "EigenproblemESProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 
@@ -31,7 +27,6 @@ MFEMSteady::validParams()
 MFEMSteady::MFEMSteady(const InputParameters & params)
   : Executioner(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
-    _mfem_problem_data(_mfem_problem.getProblemData()),
     _mfem_problem_solve(*this, _mfem_problem.getProblemOperators()),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),

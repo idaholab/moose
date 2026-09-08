@@ -212,12 +212,6 @@ public:
   std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
 
   /**
-   * Get vector of all ProblemOperators added to this problem in a const context.
-   */
-  const std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> &
-  getProblemOperators() const;
-
-  /**
    * Method called in AddMFEMProblemComposerAction which will create the problem composer.
    */
   void addMFEMProblemComposer(const std::string & user_object_name,

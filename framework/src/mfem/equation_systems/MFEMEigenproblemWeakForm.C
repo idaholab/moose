@@ -14,6 +14,15 @@
 
 registerMooseObject("MooseApp", MFEMEigenproblemWeakForm);
 
+InputParameters
+MFEMEigenproblemWeakForm::validParams()
+{
+  InputParameters params = MFEMWeakForm::validParams();
+  params.addClassDescription("Builds a real-valued MFEM EigenproblemEquationSystem from the "
+                             "kernels and boundary conditions named by this weak form.");
+  return params;
+}
+
 MFEMEigenproblemWeakForm::MFEMEigenproblemWeakForm(const InputParameters & parameters)
   : MFEMWeakForm(parameters)
 {

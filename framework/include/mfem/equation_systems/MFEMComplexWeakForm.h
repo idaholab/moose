@@ -20,6 +20,8 @@
 class MFEMComplexWeakForm : public MFEMWeakFormBase
 {
 public:
+  static InputParameters validParams();
+
   MFEMComplexWeakForm(const InputParameters & parameters);
 
 protected:

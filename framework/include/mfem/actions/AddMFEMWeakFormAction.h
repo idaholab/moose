@@ -19,8 +19,8 @@
  * [WeakForms]
  *   [weak_form]
  *     type = MFEMWeakForm
- *     kernels = {}
- *     bcs = {}
+ *     kernels = 'kernel_1 kernel_2'
+ *     bcs = 'bc_1 bc_2'
  *   []
  * []
  */
