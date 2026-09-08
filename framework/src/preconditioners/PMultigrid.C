@@ -89,7 +89,8 @@ PMultigrid::initialSetup()
     // vectors and its gather/scatter are indexed by
     level->init();
 
-    _console << "  p = " << level->order() << ": " << level->system().n_dofs() << " dofs\n";
+    _console << "  p = " << level->order() << ": " << level->system().n_dofs() << " dofs, "
+             << level->numConstrainedDofs() << " constrained by nodal boundary conditions\n";
   }
 
   _console << "  fine: " << _nl.system().n_dofs() << " dofs\n" << std::endl;

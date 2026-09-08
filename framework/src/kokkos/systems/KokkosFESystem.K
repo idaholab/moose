@@ -200,24 +200,7 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
   }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
-
-  auto num_procs = _comm.size();
-
-  std::map<processor_id_type, std::vector<char>> send;
-
-  for (const auto proc : make_range(num_procs))
-    for (auto dof : _local_comm_list[proc])
-      send[proc].push_back(dofs[dof]);
-
-  auto receive = [this, &dofs](const processor_id_type pid, const std::vector<char> & recv)
-  {
-    const auto & ghost_dofs = _ghost_comm_list[pid];
-
-    for (const auto i : index_range(ghost_dofs))
-      dofs[ghost_dofs[i]] = recv[i];
-  };
-
-  TIMPI::push_parallel_vector_data(_comm, std::move(send), receive);
+  syncGhostMask(dofs);
 }
 
 void

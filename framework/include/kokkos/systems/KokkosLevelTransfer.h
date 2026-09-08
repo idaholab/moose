@@ -22,8 +22,8 @@ namespace Moose::Kokkos
 
 /**
  * One side of a level pair as a transfer sees it: the libMesh system the transfer's work vectors
- * and parallel ghosting come from, the device DOF layout its element loops index, and the FE type
- * each variable carries on that side.
+ * and parallel ghosting come from, the device DOF layout its element loops index, the FE type each
+ * variable carries on that side, and the DOFs the side holds fixed.
  *
  * A side is a level of a p-multigrid hierarchy, and the finest side is the solver system itself, so
  * this bundles what the two have in common as function spaces.
@@ -36,6 +36,9 @@ struct TransferSide
   const DofSpace & dof_space;
   /// The FE type ID each variable carries on the side
   Array<unsigned int> fe_types;
+  /// Local-plus-ghost mask of the side's DOFs a nodal boundary condition holds fixed, which is
+  /// unallocated when the side holds none fixed
+  Array<bool> constrained_dof;
 };
 
 /**

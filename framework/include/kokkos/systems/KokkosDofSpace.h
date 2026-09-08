@@ -77,6 +77,13 @@ public:
   const Array<Array<dof_id_type>> & getGhostCommList() const { return _ghost_comm_list; }
 
   /**
+   * Fill the ghost entries of a mask over local-plus-ghost DOF indices from the processes that own
+   * those DOFs, so that every process agrees on the mask of a DOF it can see
+   * @param mask The mask to fill
+   */
+  void syncGhostMask(Array<bool> & mask) const;
+
+  /**
    * Get the number of variables the layout covers
    * @returns The number of variables
    */

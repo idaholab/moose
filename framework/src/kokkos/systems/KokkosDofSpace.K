@@ -14,6 +14,7 @@
 #include "libmesh/system.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/petsc_vector.h"
+#include "libmesh/int_range.h"
 
 #include "timpi/parallel_sync.h"
 
@@ -166,6 +167,29 @@ DofSpace::setupDofs(libMesh::System & system)
 
   _local_comm_list.copyToDeviceNested();
   _ghost_comm_list.copyToDeviceNested();
+}
+
+void
+DofSpace::syncGhostMask(Array<bool> & mask) const
+{
+  const auto num_procs = _comm.size();
+
+  // A sparse exchange with only the neighboring processes
+  std::map<processor_id_type, std::vector<char>> send;
+
+  for (const auto proc : make_range(num_procs))
+    for (auto dof : _local_comm_list[proc])
+      send[proc].push_back(mask[dof]);
+
+  auto receive = [this, &mask](const processor_id_type pid, const std::vector<char> & recv)
+  {
+    const auto & ghost_dofs = _ghost_comm_list[pid];
+
+    for (const auto i : index_range(ghost_dofs))
+      mask[ghost_dofs[i]] = recv[i];
+  };
+
+  TIMPI::push_parallel_vector_data(_comm, std::move(send), receive);
 }
 
 } // namespace Moose::Kokkos
