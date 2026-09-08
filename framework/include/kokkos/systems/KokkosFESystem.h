@@ -154,6 +154,14 @@ public:
   }
 
   /**
+   * Get the mask of local DOF indices a nodal BC covers for a matrix tag, which is unallocated when
+   * no nodal BC contributes to that tag
+   * @param tag The matrix tag
+   * @returns The mask, indexed by local DOF index
+   */
+  const Array<bool> & getNodalBCMatrixTagDofs(TagID tag) const { return _nbc_matrix_tag_dof[tag]; }
+
+  /**
    * Get the FE type ID of a variable
    * @param var The variable number
    * @returns The FE type ID

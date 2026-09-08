@@ -82,6 +82,13 @@ public:
   unsigned int order() const { return _order; }
 
   /**
+   * Get the number of the level's degrees of freedom that a nodal boundary condition of the fine
+   * system pins, over all processes
+   * @returns The number of constrained DOFs
+   */
+  dof_id_type numConstrainedDofs() const { return _num_constrained_dofs; }
+
+  /**
    * Apply the level's operator, which is the fine level's quadrature-point Jacobian cache
    * contracted against this level's basis tables
    * @param cache The quadrature-point Jacobian cache, holding a linearization
@@ -143,6 +150,12 @@ private:
   };
 
   /**
+   * Build the mask of the level's degrees of freedom that a nodal boundary condition of the fine
+   * system pins, along with the vector that carries the identity on those rows
+   */
+  void setupConstrainedDofs();
+
+  /**
    * Build the level context the operator runs against: this level's DOF layout, FE types and
    * vectors
    * @returns The level context
@@ -179,6 +192,19 @@ private:
 
   /// The level's ghosted work vector, which carries the input of an operator application
   libMesh::NumericVector<Number> * _x = nullptr;
+
+  /**
+   * Local-plus-ghost mask of the level's DOFs that a nodal boundary condition of the fine system
+   * pins, which the level's operator holds fixed
+   */
+  Array<bool> _constrained_dof;
+
+  /// One on the DOFs the level holds fixed and zero elsewhere, which places the identity on the
+  /// operator's fixed rows
+  libMesh::NumericVector<Number> * _constrained_rows = nullptr;
+
+  /// The number of DOFs the level holds fixed, over all processes
+  dof_id_type _num_constrained_dofs = 0;
 
   /// The transfer between this level and the next finer level, built by initTransfer()
   std::unique_ptr<LevelTransfer> _prolongation;

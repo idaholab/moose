@@ -6,9 +6,11 @@
     type = RunApp
     input = 'pmultigrid.i'
     cli_args = 'Outputs/exodus=false'
-    expect_out = 'p = 1: 25 dofs'
+    expect_out = 'p = 1: 25 dofs, 10 constrained by nodal boundary conditions'
     requirement = 'The p-multigrid preconditioner shall build a function space for each requested '
-                  'coarse polynomial order, holding the fine system variables on the fine mesh.'
+                  'coarse polynomial order, holding the fine system variables on the fine mesh, and '
+                  'shall hold fixed the degrees of freedom of that space which a nodal boundary '
+                  'condition of the solver system pins.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

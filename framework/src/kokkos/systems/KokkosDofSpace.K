@@ -126,4 +126,23 @@ DofSpace::setupDofs(libMesh::System & system)
   _ghost_comm_list.copyToDeviceNested();
 }
 
+void
+DofSpace::syncGhostMask(Array<bool> & mask) const
+{
+  const auto num_procs = _comm.size();
+
+  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
+
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
+    for (auto dof : _local_comm_list[proc])
+      send[proc].push_back(mask[dof]);
+
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
+    _comm.scatter(send, recv[proc], proc);
+
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
+    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
+      mask[_ghost_comm_list[proc][i]] = recv[proc][i];
+}
+
 } // namespace Moose::Kokkos

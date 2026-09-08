@@ -184,21 +184,7 @@ FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
   }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
-
-  auto num_procs = _comm.size();
-
-  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (auto dof : _local_comm_list[proc])
-      send[proc].push_back(dofs[dof]);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    _comm.scatter(send, recv[proc], proc);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
-      dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
+  syncGhostMask(dofs);
 }
 
 void
