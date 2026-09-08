@@ -73,6 +73,16 @@
     # MFEM problems do not currently support recovery.
     recover = false
   []
+  [MFEMTwoProblemComposers]
+    type = CSVDiff
+    input = two_problem_composers.i
+    csvdiff = 'OutputData/TwoProblemComposers.csv'
+    requirement = 'The system shall be able to solve two independent equation systems sequentially in a single problem, each built by its own weak form and executed by its own problem composer.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # MFEM problems do not currently support recovery.
+    recover = false
+  []
   [MFEMRealWeakFormComplexProblem]
     type = RunException
     input = real_weakform_complex_problem.i

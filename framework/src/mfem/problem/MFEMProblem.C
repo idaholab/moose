@@ -572,7 +572,7 @@ MFEMProblem::setMFEMProblemOperators()
     addProblemOperator(problem_composer->createProblemOperator(*this));
 
   for (const auto & problem_operator : getProblemOperators())
-    problem_operator->Init(_problem_data.true_solution);
+    problem_operator->Init();
 }
 
 std::shared_ptr<MFEMProblemComposer>

@@ -19,7 +19,7 @@ CustomProblemOperator::CustomProblemOperator(MFEMProblem & mfem_problem, mfem::C
 }
 
 void
-CustomProblemOperator::Init(mfem::BlockVector &)
+CustomProblemOperator::Init()
 {
   // Get the FE-space and Variable that were just built
   auto fes = _problem.getProblemData().fespaces.Get("H1");

@@ -35,9 +35,9 @@ TimeDependentEquationSystemProblemOperator::SetGridFunctions()
 }
 
 void
-TimeDependentEquationSystemProblemOperator::Init(mfem::BlockVector & X)
+TimeDependentEquationSystemProblemOperator::Init()
 {
-  TimeDependentProblemOperator::Init(X);
+  TimeDependentProblemOperator::Init();
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
   ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
