@@ -10,6 +10,8 @@
 #include "PorousFlowPeacemanBorehole.h"
 #include "RotationMatrix.h"
 #include "Function.h"
+#include "SinglePhaseFluidProperties.h"
+#include "libmesh/system.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPeacemanBorehole);
 
@@ -31,7 +33,7 @@ PorousFlowPeacemanBorehole::validParams()
                                         "pressure at the bottom of the borehole, "
                                         "otherwise it is the temperature at the bottom of "
                                         "the borehole.");
-  params.addRequiredParam<RealVectorValue>(
+  params.addParam<RealVectorValue>(
       "unit_weight",
       "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  "
       "Note that the borehole pressure at a given z position is bottom_p_or_t + "
@@ -39,7 +41,59 @@ PorousFlowPeacemanBorehole::validParams()
       "bottom point of the borehole.  The analogous formula holds for "
       "function_of=temperature.  If you don't want bottomhole pressure (or "
       "temperature) to vary in the borehole just set unit_weight=0.  Typical value "
-      "is = (0,0,-1E4), for water");
+      "is = (0,0,-1E4), for water.  Exactly one of 'unit_weight' or 'unit_weight_fp' must be "
+      "given.  Use 'unit_weight_fp' instead of 'unit_weight' if you want the fluid unit weight "
+      "to vary along the borehole according to a temperature-dependent fluid "
+      "density, rather than being a single constant value.");
+  params.addParam<UserObjectName>(
+      "unit_weight_fp",
+      "SinglePhaseFluidProperties UserObject used to evaluate the in-well fluid density from "
+      "'unit_weight_temperature' at each borehole point, in order to build a wellbore pressure "
+      "profile that accounts for a thermal gradient along the borehole.  Providing this "
+      "parameter activates this temperature-dependent unit-weight mode instead of the constant "
+      "'unit_weight'.  Not compatible with function_of=temperature, since in that mode "
+      "bottom_p_or_t is a temperature, not a pressure, so there is no pressure profile to build.  "
+      "If given, 'unit_weight_temperature' and 'unit_weight_gravity' are also required.  "
+      "(Deliberately not named 'fp'/'gravity'/'temperature_variable', even though that mirrors "
+      "convention elsewhere in PorousFlow, because those are common GlobalParams names: an "
+      "input file that sets 'gravity' or 'fp' in [GlobalParams] for unrelated Darcy kernels or "
+      "fluid materials would otherwise silently activate, or fail to validate, this mode on "
+      "every PorousFlowPeacemanBorehole in the input.)");
+  params.addParam<VariableName>(
+      "unit_weight_temperature",
+      "The name of the (nonlinear or auxiliary) variable holding temperature, sampled at each "
+      "borehole point to compute the in-well fluid density used to build the wellbore pressure "
+      "profile.  This is unrelated to function_of=temperature (which instead selects whether "
+      "the *outflow* driving this DiracKernel is a function of porepressure or temperature).  "
+      "Only used, and required, if 'unit_weight_fp' is given.");
+  params.addParam<RealVectorValue>(
+      "unit_weight_gravity",
+      "Gravitational acceleration, pointing downwards, in the units used elsewhere in this "
+      "input file (eg (0,0,-9.81) for SI units and lengths in metres).  Only used, and "
+      "required, if 'unit_weight_fp' is given.  Densities computed from 'unit_weight_fp' are "
+      "always in kg/m^3, so if lengths in this input file are not metres, scale "
+      "'unit_weight_gravity' accordingly (eg (0,0,-9.81E-6) if pressures are in MPa and lengths "
+      "in metres, matching the 'gravity' convention used by PorousFlow Darcy kernels).");
+  MooseEnum temperature_unit_choice("Kelvin=0 Celsius=1", "Kelvin");
+  params.addParam<MooseEnum>(
+      "unit_weight_temperature_unit",
+      temperature_unit_choice,
+      "The unit of 'unit_weight_temperature'.  Only used if 'unit_weight_fp' is given.");
+  MooseEnum pressure_unit_choice("Pa MPa", "Pa");
+  params.addParam<MooseEnum>(
+      "unit_weight_pressure_unit",
+      pressure_unit_choice,
+      "The unit of 'unit_weight_reference_pressure'.  Only used if 'unit_weight_fp' is given.");
+  params.addRangeCheckedParam<Real>(
+      "unit_weight_reference_pressure",
+      101325.0, // standard atmosphere: liquid-water density is only weakly pressure-dependent
+                // (~0.9% per 20MPa), so a fixed reference pressure is used instead of the local
+                // (coupled, and hence more expensive to sample) porepressure
+      "unit_weight_reference_pressure > 0",
+      "The fixed pressure (in the units given by 'unit_weight_pressure_unit') at which the "
+      "in-well fluid density is evaluated by 'unit_weight_fp'.  Only used if 'unit_weight_fp' "
+      "is given.  Choose a value close to the expected wellbore pressure for the most accurate "
+      "density.");
   params.addParam<Real>("re_constant",
                         0.28,
                         "The dimensionless constant used in evaluating the borehole effective "
@@ -61,7 +115,11 @@ PorousFlowPeacemanBorehole::validParams()
       "read from a file.  NOTE: if you are using PorousFlowPorosity that depends on volumetric "
       "strain, you should set strain_at_nearest_qp=true in your GlobalParams, to ensure the nodal "
       "Porosity Material uses the volumetric strain at the Dirac quadpoints, and can therefore be "
-      "computed");
+      "computed.  The wellbore pressure profile is built either from a constant fluid unit "
+      "weight ('unit_weight') or, if a thermal gradient along the borehole makes a single "
+      "constant unit weight a poor approximation, from a fluid density computed at each "
+      "borehole point from a temperature-dependent fluid-properties UserObject "
+      "('unit_weight_fp')");
   return params;
 }
 
@@ -69,7 +127,30 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
   : PorousFlowLineSink(parameters),
     _character(getFunction("character")),
     _p_bot(getFunction("bottom_p_or_t")),
-    _unit_weight(getParam<RealVectorValue>("unit_weight")),
+    _unit_weight(isParamValid("unit_weight") ? getParam<RealVectorValue>("unit_weight")
+                                             : RealVectorValue()),
+    _use_density_from_temperature(isParamValid("unit_weight_fp")),
+    _fp(_use_density_from_temperature ? &getUserObject<SinglePhaseFluidProperties>("unit_weight_fp")
+                                      : nullptr),
+    _temperature_system(
+        (_use_density_from_temperature && isParamValid("unit_weight_temperature"))
+            ? &_subproblem.getSystem(getParam<VariableName>("unit_weight_temperature"))
+            : nullptr),
+    _temperature_var_number(
+        (_use_density_from_temperature && isParamValid("unit_weight_temperature"))
+            ? _subproblem
+                  .getVariable(_tid,
+                               getParam<VariableName>("unit_weight_temperature"),
+                               Moose::VarKindType::VAR_ANY,
+                               Moose::VarFieldType::VAR_FIELD_STANDARD)
+                  .number()
+            : libMesh::invalid_uint),
+    _gravity(isParamValid("unit_weight_gravity") ? getParam<RealVectorValue>("unit_weight_gravity")
+                                                 : RealVectorValue()),
+    _density_reference_pressure(
+        getParam<Real>("unit_weight_reference_pressure") *
+        (getParam<MooseEnum>("unit_weight_pressure_unit") == 0 ? 1.0 : 1.0E6)),
+    _t_c2k(getParam<MooseEnum>("unit_weight_temperature_unit") == 0 ? 0.0 : 273.15),
     _re_constant(getParam<Real>("re_constant")),
     _well_constant(getParam<Real>("well_constant")),
     _has_permeability(
@@ -94,6 +175,44 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
   if (_p_or_t == PorTchoice::temperature && !_has_thermal_conductivity)
     mooseError("PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do "
                "not have a quadpoint thermal_conductivity material");
+
+  // The wellbore pressure profile is built from either a single constant unit_weight, or a
+  // fluid density computed from temperature at each point (via 'unit_weight_fp') - never both,
+  // and never neither.  Note this deliberately does not error if 'unit_weight_temperature' or
+  // 'unit_weight_gravity' are valid while 'unit_weight_fp' is not: unlike 'unit_weight' and
+  // 'unit_weight_fp' themselves, those two are not required to detect the user's intended mode,
+  // so treating their unexpected presence as an error would only serve to reject input files
+  // that harmlessly set an identically-named GlobalParam for some unrelated object.
+  const int checkWellborePressureFormat =
+      int(isParamValid("unit_weight")) + int(isParamValid("unit_weight_fp"));
+  if (checkWellborePressureFormat > 1)
+    paramError("unit_weight",
+               "PorousFlowPeacemanBorehole: must specify only one of 'unit_weight' (a constant "
+               "fluid unit weight) or 'unit_weight_fp' (a fluid-properties UserObject, so that "
+               "the fluid unit weight is instead computed from the temperature at each borehole "
+               "point)");
+  else if (checkWellborePressureFormat == 0)
+    paramError("unit_weight",
+               "PorousFlowPeacemanBorehole: must specify at least one of 'unit_weight' or "
+               "'unit_weight_fp'");
+
+  if (_use_density_from_temperature)
+  {
+    if (_p_or_t == PorTchoice::temperature)
+      paramError("unit_weight_fp",
+                 "PorousFlowPeacemanBorehole: 'unit_weight_fp' computes a fluid density to "
+                 "build a hydrostatic *pressure* profile along the borehole, which is "
+                 "meaningless when function_of=temperature (bottom_p_or_t is then a "
+                 "temperature, not a pressure)");
+    if (!isParamValid("unit_weight_temperature"))
+      paramError("unit_weight_temperature",
+                 "PorousFlowPeacemanBorehole: 'unit_weight_temperature' must be supplied when "
+                 "'unit_weight_fp' is supplied");
+    if (!isParamValid("unit_weight_gravity"))
+      paramError("unit_weight_gravity",
+                 "PorousFlowPeacemanBorehole: 'unit_weight_gravity' must be supplied when "
+                 "'unit_weight_fp' is supplied");
+  }
 }
 
 void
@@ -119,6 +238,73 @@ PorousFlowPeacemanBorehole::initialSetup()
   }
   if (num_pts == (unsigned)1)
     _rot_matrix[0] = RotationMatrix::rotVecToZ(_line_direction);
+}
+
+void
+PorousFlowPeacemanBorehole::residualSetup()
+{
+  PorousFlowLineSink::residualSetup();
+  computeWellborePressures();
+}
+
+void
+PorousFlowPeacemanBorehole::jacobianSetup()
+{
+  PorousFlowLineSink::jacobianSetup();
+  computeWellborePressures();
+}
+
+void
+PorousFlowPeacemanBorehole::computeWellborePressures()
+{
+  if (!_use_density_from_temperature)
+    return;
+
+  const std::size_t num_pts = _z_coord->size();
+  _bh_pressure.assign(num_pts, 0.0);
+  if (num_pts == 0)
+    return;
+
+  // Sample the temperature, and hence the in-well fluid density, at every well point (not just
+  // the points owned by this processor), because the wellbore pressure at any point is a
+  // cumulative integral over all the points between it and the bottom point.
+  // System::point_value performs the parallel point-location and broadcast internally, so this
+  // is safe to call even for points this processor's mesh partition does not own.
+  std::vector<Real> density(num_pts);
+  for (const auto i : make_range(num_pts))
+  {
+    const Point p(_x_coord->at(i), _y_coord->at(i), _z_coord->at(i));
+    const Real temperature = _temperature_system->point_value(_temperature_var_number, p, false);
+    density[i] = _fp->rho_from_p_T(_density_reference_pressure, temperature + _t_c2k);
+  }
+
+  // Integrate the fluid unit weight (density*gravity) up the wellbore from the bottom point,
+  // where the pressure is prescribed by bottom_p_or_t, using the trapezoidal rule on each
+  // polyline segment.  This is exact for a density varying linearly along the well (the target
+  // use case: a linear thermal gradient with a locally-linear density(temperature)), and it
+  // degenerates exactly to the constant-unit_weight formula when the density is constant, since
+  // the sum then telescopes to density*gravity.(x_i - x_bottom).
+  _bh_pressure[num_pts - 1] = _p_bot.value(_t, _bottom_point);
+  for (std::size_t i = num_pts - 1; i > 0; --i)
+  {
+    const RealVectorValue segment(_x_coord->at(i - 1) - _x_coord->at(i),
+                                  _y_coord->at(i - 1) - _y_coord->at(i),
+                                  _z_coord->at(i - 1) - _z_coord->at(i));
+    _bh_pressure[i - 1] =
+        _bh_pressure[i] + 0.5 * (density[i - 1] + density[i]) * (_gravity * segment);
+  }
+}
+
+Real
+PorousFlowPeacemanBorehole::wellborePressure(unsigned current_dirac_ptid) const
+{
+  if (!_use_density_from_temperature)
+    return _p_bot.value(_t, _bottom_point) + _unit_weight * (_q_point[_qp] - _bottom_point);
+
+  mooseAssert(current_dirac_ptid < _bh_pressure.size(),
+              "PorousFlowPeacemanBorehole: the wellbore pressure profile has not been computed "
+              "for this Dirac point");
+  return _bh_pressure[current_dirac_ptid];
 }
 
 Real
@@ -233,8 +419,7 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflow(unsigned current_dirac_ptid) co
   if (character == 0.0)
     return 0.0;
 
-  const Real bh_pressure =
-      _p_bot.value(_t, _bottom_point) + _unit_weight * (_q_point[_qp] - _bottom_point);
+  const Real bh_pressure = wellborePressure(current_dirac_ptid);
   const Real pp = ptqp();
 
   Real outflow = 0.0; // this is the flow rate from porespace out of the system
@@ -290,8 +475,15 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflowJacobian(unsigned jvar,
     return;
   const unsigned pvar = _dictator.porousFlowVariableNum(jvar);
 
-  const Real bh_pressure =
-      _p_bot.value(_t, _bottom_point) + _unit_weight * (_q_point[_qp] - _bottom_point);
+  // When _use_density_from_temperature is true, bh_pressure also depends on the temperature at
+  // every well point between here and the bottom point (via computeWellborePressures()), not
+  // just on the porous flow variables at this quadpoint.  That dependence is deliberately not
+  // differentiated here: a DiracKernel can only assemble into the (test, phi) dofs of the
+  // element containing its own quadpoint, so the coupling to temperature dofs in other elements
+  // along the well cannot be represented in this Jacobian.  residualSetup()/jacobianSetup()
+  // still recompute bh_pressure from the current nonlinear iterate before every evaluation, so
+  // the converged solution is unaffected; only the Newton convergence rate may be mildly slower.
+  const Real bh_pressure = wellborePressure(current_dirac_ptid);
   const Real pp = ptqp();
   const Real pp_prime = dptqp(pvar) * _phi[_j][_qp];
 
