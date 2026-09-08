@@ -160,8 +160,7 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 
 const ComputeUserObjectsThread::BoundaryMaterialReinitCache &
 ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id,
-                                                         const SubdomainID subdomain_id,
-                                                         const std::vector<UserObject *> & userobjs)
+                                                         const SubdomainID subdomain_id)
 {
   const auto cache_key = std::make_pair(bnd_id, subdomain_id);
   auto [cache_it, inserted] = _boundary_material_reinit_cache.try_emplace(cache_key);
@@ -172,8 +171,6 @@ ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id
 
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
-
-  std::vector<const MaterialPropertyInterface *> material_consumers;
 
   std::vector<const MaterialPropertyInterface *> material_consumers;
   material_consumers.reserve(userobjs.size() + _domain_objs.size());

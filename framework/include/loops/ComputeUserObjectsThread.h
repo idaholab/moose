@@ -101,7 +101,9 @@ private:
 
   AuxiliarySystem & _aux_sys;
 
-  /// Exact material sets required for each boundary/subdomain pair during this loop execution
+  // Exact material sets required for each boundary/subdomain pair. This cache is valid only for
+  // this ComputeUserObjectsThread mesh traversal; a new ComputeUserObjectsThread, and therefore a
+  // new cache, is created for each computeUserObjectsInternal() execution.
   std::map<std::pair<BoundaryID, SubdomainID>, BoundaryMaterialReinitCache>
       _boundary_material_reinit_cache;
 };
