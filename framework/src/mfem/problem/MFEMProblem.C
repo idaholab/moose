@@ -528,10 +528,20 @@ MFEMProblem::addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase
 void
 MFEMProblem::setMFEMProblemOperators()
 {
-  if (!getProblemComposer())
-    _problem_composer = addDefaultProblemComposer();
+  std::vector<MFEMProblemComposer *> problem_composers;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("MFEMProblemComposer")
+      .queryInto(problem_composers);
 
-  addProblemOperator(getProblemComposer()->createProblemOperator(*this));
+  if (problem_composers.empty()) // Add default MFEMProblemComposer if none has been added by user
+  {
+    std::shared_ptr<MFEMProblemComposer> problem_composer = addDefaultProblemComposer();
+    addProblemOperator(problem_composer->createProblemOperator(*this));
+  }
+  else
+    for (auto & problem_composer : problem_composers)
+      addProblemOperator(problem_composer->createProblemOperator(*this));
 
   for (const auto & problem_operator : getProblemOperators())
     problem_operator->Init(_problem_data.true_solution);

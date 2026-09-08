@@ -316,11 +316,6 @@ public:
   const MFEMProblemData & getProblemData() const { return _problem_data; }
 
   /**
-   * Method to get the Problem Composer(s).
-   */
-  std::shared_ptr<MFEMProblemComposer> & getProblemComposer() { return _problem_composer; }
-
-  /**
    * Return the MPI communicator associated with this FE problem's mesh.
    */
   MPI_Comm getComm() { return getProblemData().comm; }

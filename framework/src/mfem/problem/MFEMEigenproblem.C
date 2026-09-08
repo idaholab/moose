@@ -102,16 +102,13 @@ MFEMEigenproblem::addDefaultWeakForm()
       .front();
 }
 
-void
-MFEMEigenproblem::setMFEMProblemOperators()
+std::shared_ptr<MFEMProblemComposer>
+MFEMEigenproblem::addDefaultProblemComposer()
 {
-  if (getNumericType() == MFEMProblem::NumericType::REAL)
-    addProblemOperator(std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(*this));
-  else
-    mooseError("Complex MFEM eigenproblems are not currently supported'.");
-
-  for (const auto & problem_operator : getProblemOperators())
-    problem_operator->Init(_problem_data.true_solution);
+  InputParameters params = _factory.getValidParams("MFEMEigenWeakFormProblemComposer");
+  return addObject<MFEMProblemComposer>(
+             "MFEMEigenWeakFormProblemComposer", "__DefaultWeakFormProblemComposer", params)
+      .front();
 }
 
 #endif
