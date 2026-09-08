@@ -3,7 +3,6 @@
   nx = 7
   ny = 3
   n_cells = 48
-  n_blocks = 1
   pitch = 0.014605
   pin_diameter = 0.012065
   side_gap = 0.0015875
