@@ -175,6 +175,18 @@ function install_libtorch_python()
   # here, along with the install prefix setup.py expects. Note that this leaves those options on in
   # the cache, so a subsequent --fast C++ rebuild will also build the Python targets.
   if [[ -f "$source_dir/build/CMakeCache.txt" ]]; then
+    local cmake_generator
+    cmake_generator=$(sed -n 's/^CMAKE_GENERATOR:INTERNAL=//p' "$source_dir/build/CMakeCache.txt")
+    if [[ -z "$cmake_generator" ]]; then
+      >&2 echo "ERROR: No CMAKE_GENERATOR in $source_dir/build/CMakeCache.txt"
+      return 1
+    fi
+
+    # setup.py picks the Ninja generator whenever ninja is on PATH, which installing the
+    # requirements above can make true even when this build directory was configured with a
+    # different generator. It takes that decision from CMAKE_GENERATOR, so pinning the generator
+    # that already owns the cache is what keeps it from reconfiguring with a mismatched one.
+    export CMAKE_GENERATOR="$cmake_generator"
     unset CMAKE_FRESH
     cmake \
       -S "$source_dir" \
