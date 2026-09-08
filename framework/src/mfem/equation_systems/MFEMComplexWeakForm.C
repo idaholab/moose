@@ -16,6 +16,15 @@
 
 registerMooseObject("MooseApp", MFEMComplexWeakForm);
 
+InputParameters
+MFEMComplexWeakForm::validParams()
+{
+  InputParameters params = MFEMWeakFormBase::validParams();
+  params.addClassDescription("Builds a complex-valued MFEM ComplexEquationSystem from the "
+                             "complex kernels and boundary conditions named by this weak form.");
+  return params;
+}
+
 MFEMComplexWeakForm::MFEMComplexWeakForm(const InputParameters & parameters)
   : MFEMWeakFormBase(parameters)
 {

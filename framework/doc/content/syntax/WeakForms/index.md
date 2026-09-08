@@ -24,6 +24,14 @@ solvers and preconditioners - then select one by name using their `weak_form` pa
 parameter may be omitted only when the problem has a single weak form; if it is omitted while
 several are present, the object cannot infer which system was intended and an error is raised.
 
+!alert note
+On a solver, `weak_form` selects only the equation system that solver configures *itself* against,
+such as the system [MFEMGeometricMultigridSolver.md] builds its hierarchy from. It does not bind
+the solver to a particular problem operator: a problem still has a single driver solver, which is
+used by every problem operator regardless of which equation system that operator solves. In a
+problem with several weak forms, a solver whose configuration depends on its equation system should
+therefore be used only when all of the operators solve the system it names.
+
 !if-end!
 
 !else

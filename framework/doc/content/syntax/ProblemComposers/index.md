@@ -50,6 +50,12 @@ input parameters, retrieving `FESpace`s and `GridFunction`s has to be done no ea
 The rest of the `Init()` function mirrors the MFEM ex0p example, i.e. build the forms, add the
 integrators, assemble the forms and form the linear system.
 
+`Init()` is called once by the [MFEMProblem.md] during the `set_mfem_problem_operators` task. The
+base class implementation populates the operator's trial and test variables and block offsets
+through `SetGridFunctions()` before aliasing the trial grid functions into the operator's true-DoF
+solution vector, so an override that relies on any of those members must call the base class
+implementation first.
+
 The `Solve()` method solves the linear/non-linear system that has been setup and passes the
 data to the mfem `GridFunction`s so that the [Postprocessor.md] can view the results.
 The class inherits a reference to the `MFEMProblem` and `MFEMProblemData` from

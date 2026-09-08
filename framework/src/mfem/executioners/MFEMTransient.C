@@ -11,7 +11,6 @@
 
 #include "MFEMTransient.h"
 #include "MFEMProblem.h"
-#include "TimeDependentEquationSystemProblemOperator.h"
 #include "TimeStepper.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
@@ -28,7 +27,6 @@ MFEMTransient::validParams()
 MFEMTransient::MFEMTransient(const InputParameters & params)
   : TransientBase(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
-    _mfem_problem_data(_mfem_problem.getProblemData()),
     _mfem_problem_solve(*this, _mfem_problem.getProblemOperators())
 {
   _mfem_problem.setDefaultAssemblyLevel(

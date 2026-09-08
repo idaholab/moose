@@ -19,6 +19,8 @@
 class MFEMEigenproblemWeakForm : public MFEMWeakForm
 {
 public:
+  static InputParameters validParams();
+
   MFEMEigenproblemWeakForm(const InputParameters & parameters);
 
 protected:

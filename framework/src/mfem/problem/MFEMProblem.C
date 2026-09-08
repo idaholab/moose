@@ -538,12 +538,6 @@ MFEMProblem::getProblemOperators()
   return _problem_operators;
 }
 
-const std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> &
-MFEMProblem::getProblemOperators() const
-{
-  return _problem_operators;
-}
-
 void
 MFEMProblem::addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator)
 {
