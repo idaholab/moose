@@ -86,8 +86,8 @@ private:
   };
 
   /// Return the exact face and boundary materials required while executing on this boundary.
-  const BoundaryMaterialReinitCache & getBoundaryMaterialReinitCache(
-      BoundaryID bnd_id, SubdomainID subdomain_id, const std::vector<UserObject *> & userobjs);
+  const BoundaryMaterialReinitCache & getBoundaryMaterialReinitCache(BoundaryID bnd_id,
+                                                                     SubdomainID subdomain_id);
 
   const TheWarehouse::Query _query;
   TheWarehouse::QueryCache<AttribThread, AttribSubdomains, AttribInterfaces> _query_subdomain;

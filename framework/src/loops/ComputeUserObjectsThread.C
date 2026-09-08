@@ -170,6 +170,11 @@ ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id
   if (!inserted)
     return cache;
 
+  std::vector<UserObject *> userobjs;
+  queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
+
+  std::vector<const MaterialPropertyInterface *> material_consumers;
+
   std::vector<const MaterialPropertyInterface *> material_consumers;
   material_consumers.reserve(userobjs.size() + _domain_objs.size());
 
@@ -183,6 +188,13 @@ ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id
   add_material_consumers(userobjs);
   add_material_consumers(_domain_objs);
 
+  std::unordered_set<unsigned int> needed_face_props;
+  for (const auto * const consumer : material_consumers)
+  {
+    const auto & dependencies = consumer->getMatPropDependencies();
+    needed_face_props.insert(dependencies.begin(), dependencies.end());
+  }
+
   const auto & materials = _fe_problem.getRegularMaterialsWarehouse();
 
   // Resolve boundary materials first. A boundary material can depend on a property supplied by a
@@ -191,13 +203,6 @@ ComputeUserObjectsThread::getBoundaryMaterialReinitCache(const BoundaryID bnd_id
   if (!material_consumers.empty() && materials.hasActiveBoundaryObjects(bnd_id, _tid))
     cache.boundary_materials = MaterialBase::buildRequiredMaterials(
         material_consumers, materials.getActiveBoundaryObjects(bnd_id, _tid), true);
-
-  std::unordered_set<unsigned int> needed_face_props;
-  for (const auto * const consumer : material_consumers)
-  {
-    const auto & dependencies = consumer->getMatPropDependencies();
-    needed_face_props.insert(dependencies.begin(), dependencies.end());
-  }
 
   for (const auto * const material : cache.boundary_materials)
   {
@@ -250,12 +255,13 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   if (lower_d_elem)
     _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
-  const auto & required_mats =
-      getBoundaryMaterialReinitCache(bnd_id, elem->subdomain_id(), userobjs);
+  const auto & required_mats = getBoundaryMaterialReinitCache(bnd_id, elem->subdomain_id());
 
   // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
   // still remember to swap back during stack unwinding.
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
+
+  // Preserve the stateful material-data swapping used by the previous unrestricted reinit calls.
   _fe_problem.reinitMaterialsFaceOnBoundary(
       bnd_id, elem->subdomain_id(), _tid, true, &required_mats.face_materials);
   _fe_problem.reinitMaterialsBoundary(bnd_id, _tid, true, &required_mats.boundary_materials);
