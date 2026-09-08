@@ -48,6 +48,13 @@ public:
    */
   bool verifyLevelOperators() const { return _verify_level_operators; }
 
+  /**
+   * Get whether each level's operator is to be checked against the operator of the next finer level
+   * carried through the level transfer
+   * @returns Whether to check
+   */
+  bool verifyLevelGalerkin() const { return _verify_level_galerkin; }
+
 protected:
   /// The polynomial order of each coarse level, ascending; the fine level is not listed
   const std::vector<unsigned int> _level_orders;
@@ -57,6 +64,10 @@ protected:
 
   /// Whether each level transfer is to be checked for the transpose relationship
   const bool _verify_level_transfers;
+
+  /// Whether each level's operator is to be checked against the operator of the next finer level
+  /// carried through the level transfer
+  const bool _verify_level_galerkin;
 
   /// The coarse levels' function spaces, ascending in order
   std::vector<std::unique_ptr<Moose::Kokkos::PLevelSpace>> _levels;
