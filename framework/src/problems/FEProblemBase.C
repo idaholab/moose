@@ -5451,7 +5451,12 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
                                query.clone().condition<AttribExecutionOrderGroup>(execution_group));
   }
 
-  checkExceptionAndStopSolve();
+  // Exceptions raised on solver execution flags are communicated and handled by the PARALLEL_CATCH
+  // surrounding the assembly loops of the residual, Jacobian and linear systems. On all other
+  // execution flags there is no solve left to fail, so the exception is communicated here in order
+  // to report it at the point of the simulation where it was raised
+  if (!Moose::isSolverExecFlag(_current_execute_on_flag))
+    checkExceptionAndStopSolve();
 }
 
 void
@@ -7159,8 +7164,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
   {
     _communicator.broadcast(_exception_message, processor_id);
 
-    if (_current_execute_on_flag == EXEC_LINEAR || _current_execute_on_flag == EXEC_NONLINEAR ||
-        _current_execute_on_flag == EXEC_POSTCHECK)
+    if (Moose::isSolverExecFlag(_current_execute_on_flag))
     {
       // Print the message
       if (_communicator.rank() == 0 && print_message)

@@ -152,6 +152,16 @@ extern const ExecFlagType EXEC_POST_ADAPTIVITY;
 
 namespace Moose
 {
+/**
+ * @return whether \p exec_flag is a solver execution flag, e.g. a flag on which a solver
+ * evaluation such as a residual, Jacobian, or postcheck evaluation is performed
+ *
+ * When a solver execution flag is added to the list of execution flags above, add it to the
+ * implementation of this method as well so that logic keyed on solver evaluations, such as the
+ * MooseException handling in FEProblemBase::checkExceptionAndStopSolve(), picks it up
+ */
+bool isSolverExecFlag(const ExecFlagType & exec_flag);
+
 // MOOSE is not tested with LIBMESH_DIM != 3
 static_assert(LIBMESH_DIM == 3,
               "MOOSE must be built with a libmesh library compiled without --enable-1D-only "
