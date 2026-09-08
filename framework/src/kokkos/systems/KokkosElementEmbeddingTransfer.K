@@ -179,14 +179,13 @@ ElementEmbeddingTransfer::buildEmbedding()
           if (!num_coarse || !num_fine)
             continue;
 
-          const auto & coarse_phi = _assembly.getPhi(sid, elem_type_id, coarse_fe, orientation);
-          const auto & coarse_grad_phi =
+          const auto coarse_phi = _assembly.getPhi(sid, elem_type_id, coarse_fe, orientation);
+          const auto coarse_grad_phi =
               _assembly.getGradPhi(sid, elem_type_id, coarse_fe, orientation);
-          const auto & fine_phi = _assembly.getPhi(sid, elem_type_id, fine_fe, orientation);
-          const auto & fine_grad_phi =
-              _assembly.getGradPhi(sid, elem_type_id, fine_fe, orientation);
+          const auto fine_phi = _assembly.getPhi(sid, elem_type_id, fine_fe, orientation);
+          const auto fine_grad_phi = _assembly.getGradPhi(sid, elem_type_id, fine_fe, orientation);
 
-          const auto num_qps = fine_phi.n(1);
+          const auto num_qps = fine_phi.numQps();
 
           // Each coarse basis function is fit in the fine basis in the least-squares sense against
           // both the values and the reference gradients at the shared quadrature points. The fit is

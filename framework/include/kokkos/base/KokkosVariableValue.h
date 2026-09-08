@@ -921,7 +921,7 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
     {
       auto fe = sys.getFETypeID(var);
       auto n_dofs = datum.assembly().getNumDofs(elem.type, fe);
-      auto & grad_phi = datum.assembly().getVectorGradPhiFace(
+      const auto grad_phi = datum.assembly().getVectorGradPhiFace(
           elem.subdomain, elem.type, fe, elem.orientation)(side);
       auto jacobian = datum.J(qp);
       auto jacobian_transpose = jacobian.transpose();
