@@ -64,6 +64,12 @@ const ExecFlagType EXEC_POST_ADAPTIVITY = registerExecFlag("POST_ADAPTIVITY");
 namespace Moose
 {
 
+bool
+isSolverExecFlag(const ExecFlagType & exec_flag)
+{
+  return exec_flag == EXEC_LINEAR || exec_flag == EXEC_NONLINEAR || exec_flag == EXEC_POSTCHECK;
+}
+
 void associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory);
 
 void
