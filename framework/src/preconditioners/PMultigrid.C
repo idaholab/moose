@@ -47,6 +47,16 @@ PMultigrid::validParams()
       "operator of the fine linearization. The check costs one application of each direction of "
       "each transfer, at initial setup only.");
 
+  params.addParam<bool>(
+      "verify_level_galerkin",
+      false,
+      "Whether to check each level's operator against P^T A P after every linearization, where A "
+      "is the operator of the next finer level and P is the transfer between the two. At the "
+      "finest pair A is the matrix-free Jacobian of the solver system, so the check chains down "
+      "the hierarchy and establishes that every level is consistent with the fine linearization. "
+      "It costs one application of the next finer level's operator and one of each direction of "
+      "the transfer, per level per linearization.");
+
   return params;
 }
 
@@ -54,7 +64,8 @@ PMultigrid::PMultigrid(const InputParameters & parameters)
   : MoosePreconditioner(parameters),
     _level_orders(getParam<std::vector<unsigned int>>("level_orders")),
     _verify_level_operators(getParam<bool>("verify_level_operators")),
-    _verify_level_transfers(getParam<bool>("verify_level_transfers"))
+    _verify_level_transfers(getParam<bool>("verify_level_transfers")),
+    _verify_level_galerkin(getParam<bool>("verify_level_galerkin"))
 {
   if (_level_orders.empty())
     paramError("level_orders", "At least one coarse level is required.");

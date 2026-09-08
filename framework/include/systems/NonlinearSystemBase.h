@@ -343,6 +343,15 @@ public:
   void verifyKokkosLevelOperators();
 
   /**
+   * Check every p-multigrid level's operator against P^T A P, where A is the operator of the next
+   * finer level and P is the transfer between the two, by applying both to the same vector of the
+   * level. The finest pair's A is this system's matrix-free Jacobian, so agreement at every pair
+   * establishes that each level is the Galerkin operator of the fine linearization on its own
+   * space. Runs after a linearization and errors out on the first mismatch.
+   */
+  void verifyKokkosLevelGalerkin();
+
+  /**
    * Compute y = J*x, the action of the (unassembled) Kokkos Jacobian on a direction vector x,
    * using the partial-assembly Jacobian-vector product hooks on active Kokkos kernels/nodal BCs.
    * This is the MatMult callback for the Kokkos matrix-free Amat shell.
