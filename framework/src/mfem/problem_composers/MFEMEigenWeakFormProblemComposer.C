@@ -24,7 +24,7 @@ MFEMEigenWeakFormProblemComposer::validParams()
 
 MFEMEigenWeakFormProblemComposer::MFEMEigenWeakFormProblemComposer(
     const InputParameters & parameters)
-  : MFEMProblemComposer(parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
 {
 }
 

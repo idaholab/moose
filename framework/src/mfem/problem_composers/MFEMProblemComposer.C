@@ -17,18 +17,11 @@ MFEMProblemComposer::validParams()
   InputParameters params = MFEMObject::validParams();
   params.registerBase("MFEMProblemComposer");
   params.registerSystemAttributeName("MFEMProblemComposer");
-  params.addParam<MFEMWeakFormName>(
-      "weak_form",
-      "Name of the weak form in the WeakForms block whose equation system this operator solves. "
-      "May be omitted only if the problem has a single weak form, whose equation system is then "
-      "used.");
   return params;
 }
 
 MFEMProblemComposer::MFEMProblemComposer(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    _weak_form_name(isParamValid("weak_form") ? getParam<MFEMWeakFormName>("weak_form")
-                                              : MFEMWeakFormName())
+  : MFEMObject(parameters)
 {
 }
 

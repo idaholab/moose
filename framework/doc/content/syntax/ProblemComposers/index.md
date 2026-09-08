@@ -10,8 +10,10 @@ third-party library, or cutting-edge mfem functionality. Users' operators may st
 multi-physics system. The problem composer classes and the [ProblemOperator.md]s they create are
 both built within the [MFEMProblem.md] class, during the `add_mfem_problem_composer` and
 `set_mfem_problem_operators` tasks respectively. Every problem composer added contributes one
-problem operator, and each may name the weak form supplying its equation system through the
-`weak_form` parameter.
+problem operator. Composers deriving from [MFEMWeakFormProblemComposerBase.md] additionally name
+the weak form supplying their equation system through the `weak_form` parameter; composers built
+directly on [MFEMProblemComposer.md], such as the custom composer below, have no associated weak
+form and so do not take that parameter.
 
 ## Using a custom problem composer to plug in a custom problem operator
 
