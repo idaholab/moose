@@ -120,9 +120,9 @@ public:
 
 private:
   /// Reference shape function values, indexed by (DOF, quadrature point)
-  const Array2D<Real> & _phi;
+  const ShapeTable<Real> _phi;
   /// Reference shape function gradients, indexed by (DOF, quadrature point)
-  const Array2D<Real3> & _grad_phi;
+  const ShapeTable<Real3> _grad_phi;
   /// The number of element DOFs the level carries on this element type
   const unsigned int _n_dofs;
 };
