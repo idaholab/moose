@@ -19,11 +19,11 @@ Tracers may now be incorporated into the simulation.  A `tracer_concentration` v
 
 To encourage flow, rather than a rapid convergence to a more-or-less steady-state situation, the outer boundary is fixed to $P=0$. The tracer concentration is fixed to 0.5 at the injection area.
 
-!listing modules/porous_flow/examples/tutorial/06.i start=[BCs] end=[Modules]
+!listing modules/porous_flow/examples/tutorial/06.i block=BCs
 
 The only other changes are that the `PorousFlowPorosity` `Material` is needed, not the `PorousFlowConstantBiotModulus` `Material`:
 
-!listing modules/porous_flow/examples/tutorial/06.i start=[Materials] end=[permeability_aquifer]
+!listing modules/porous_flow/examples/tutorial/06.i block=porosity
 
 If `multiply_by_density = true` then the arguments in [Page 02](porous_flow/tutorial_02.md) concerning the magnitude of the residual, and hence the size of the nonlinear absolute-tolerance must be modified.  Specifically, the fluid residuals now get multiplied by the density (which is the default and most common use-case in PorousFlow).  So in this problem, the fluid residual is approximately
 \begin{equation}
@@ -49,7 +49,7 @@ The most important (potential) problem lies with the boundary conditions.  Physi
 
 are saying "add or remove the final mass fraction ($1-\sum_{\kappa}\chi^{\kappa}$) to keep the porepressure fixed" (physically this mass fraction is probably the water mass fraction); while the BCs that have `variable = tracer_concentration`:
 
-!listing modules/porous_flow/examples/tutorial/06.i start=[injected_tracer] end=[]
+!listing modules/porous_flow/examples/tutorial/06.i block=injected_tracer
 
 are saying "add or remove the tracer so that its concentration remains fixed".  In complex multi-phase, multi-component models this can be a real "gotcha" and a [PorousFlowSink](PorousFlowSink.md) is recommended.
 
@@ -61,7 +61,7 @@ The "stripes" are removed by numerical stabilization, but this comes at a cost. 
 
 Numerical stabilization can be easily included using the [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) Action.  For instance, KT stabilization may be easily introduced:
 
-!listing modules/porous_flow/examples/tutorial/06_KT.i start=[PorousFlowFullySaturated] end=[]
+!listing modules/porous_flow/examples/tutorial/06_KT.i block=PorousFlowFullySaturated
 
 Users are strongly encouraged to experiment with KT stabilization and report their findings back to the moose-users google group, since this stabilization is still at the development stage.
 

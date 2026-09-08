@@ -30,11 +30,7 @@ The purpose of this page is to describe a MOOSE model of an ATES system, with th
 
 The model simulates an ATES system comprising a single injection-production well penetrating a horizontal aquifer 20 m thick. Five injection-production cycles are simulated, with each cycle comprising 91 days each of injection, storage, production and rest. The injection temperature is 90$^{\circ}\mathrm{C}$, and the injected fluid mass is 10$^8\,$kg.
 
-The single-well system has radial symmetry, hence it may be simulated using "RZ" coordinates:
-
-!listing modules/porous_flow/examples/ates/ates.i block=Mesh
-
-which means gravity acts along what is usually thought of as the "y" direction:
+The single-well system has radial symmetry, hence it may be simulated using "RZ" coordinates, which means gravity acts along what is usually thought of as the "y" direction:
 
 !listing modules/porous_flow/examples/ates/ates.i block=GlobalParams
 
@@ -60,11 +56,11 @@ The injection and production of heat from the borehole are the most complicated 
 
 These boundary conditions are not always active.  They are controlled using
 
-!listing modules/porous_flow/examples/ates/ates.i start=[inject_on] end=[produce_on]
+!listing modules/porous_flow/examples/ates/ates.i block=inject_on
 
 with the `conditional_function` being:
 
-!listing modules/porous_flow/examples/ates/ates.i start=[inject] end=[produce]
+!listing modules/porous_flow/examples/ates/ates.i block=inject
 
 The boundary conditions corresponding to production are a withdrawal of fluid mass using a [PorousFlowSink](sinks.md) along with its corresponding withdrawal of heat energy (with the `use_enthalpy` flag set to true):
 
@@ -72,11 +68,11 @@ The boundary conditions corresponding to production are a withdrawal of fluid ma
 
 These are controlled using similar `Controls` as the injection phase.  Notice the `save_in` for the heat withdrawal.  This records the rate of heat leaving each node.  To find the total rate of heat loss (with units J.day$^{-1}$), a [NodalSum](NodalSum.md) is used:
 
-!listing modules/porous_flow/examples/ates/ates.i start=[heat_out_fromBC] end=[heat_out_per_timestep]
+!listing modules/porous_flow/examples/ates/ates.i block=heat_out_fromBC
 
 This may be multiplied by the time-step size to find the total heat withdrawn (with units J) in each time-step
 
-!listing modules/porous_flow/examples/ates/ates.i start=[heat_out_in_timestep] end=[produced_T_time_integrated]
+!listing modules/porous_flow/examples/ates/ates.i block=heat_out_in_timestep
 
 which in turn can be used to calculate $R$ for each cycle.
 

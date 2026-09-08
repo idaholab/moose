@@ -159,7 +159,7 @@ Also note, if $C \times g$ is too large, the boundary residual will be much larg
 So what value should be assigned to $C$? In the example below, $C = 10^{-5}$, $\rho \sim 10^3$ kg/m$^3$, $k = 10^{-15}$ m$^2$, $k_r = 1$, and $\mu \sim 10^{-3}$ Pa-s. Therefore $L \sim 10^{-4}$ m. This value of $L$ is small enough to ensure that the Dirichlet boundary condition is satisfied. If $C$ is increased to $10^{-2}$, $L \sim 10^{-7}$ m, and the simulation has difficulty converging. If $C = 10^{-11}$, $L\sim10^2$ m, and the boundary acts like a source of fluid from a distant reservoir (i.e. it no longer acts like a Dirichlet boundary condition).
 The value of $C$ is simply $1/L$ if `use_mobility = true` and `use_relperm = true`.
 
-!listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i start=[BCs] end=[Postprocessors]
+!listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i block=BCs
 
 ## Class 1: Aquifer (Robin) boundary condition
 
@@ -193,11 +193,11 @@ are described on the [`PorousFlowAquiferBC`](PorousFlowAquiferBC.md) page.
 
 An example input using the head formulation:
 
-!listing modules/porous_flow/test/tests/sinks/aquiferBC04.i start=[BCs] end=[Postprocessors]
+!listing modules/porous_flow/test/tests/sinks/aquiferBC04.i block=BCs
 
 An example using the pressure-at-datum formulation with computed conductance:
 
-!listing modules/porous_flow/test/tests/sinks/aquiferBC02.i start=[BCs] end=[Postprocessors]
+!listing modules/porous_flow/test/tests/sinks/aquiferBC02.i block=BCs
 
 ## Class 1: Injection of fluid at a fixed temperature
 
@@ -242,11 +242,11 @@ The `pwater` Variable is associated with the water component, while the `pgas` V
 
 A van Genuchten capillary pressure is used
 
-!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[pc] end=[]
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i block=pc
 
 The remainder of the input file is pretty standard, save for the important `BCs` block:
 
-!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[BCs] end=[Preconditioning]
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i block=BCs
 
 Below are shown some outputs.  Evidently the boundary condition satisfies the requirements.
 
