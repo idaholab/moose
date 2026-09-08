@@ -18,22 +18,25 @@
  * Computes the turbulent conductivity.
  * Implements two near-wall treatements: equilibrium and non-equilibrium wall functions.
  */
-class TurbulentConductivityAux : public AuxKernel
+class EffectiveTurbulentThermalConductivityAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  TurbulentConductivityAux(const InputParameters & parameters);
+  EffectiveTurbulentThermalConductivityAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
   /// Specific heat at Constant Pressure
   const Moose::Functor<Real> & _cp;
-
+  /// Turbulent viscosity
+  const Moose::Functor<Real> & _mu_t;
+  /// Thermal Conductivity
+  const Moose::Functor<Real> & _k;
   /// Turbulent Prandtl number
   const Moose::Functor<Real> & _Pr_t;
 
-  /// Turbulent viscosity
-  const Moose::Functor<Real> & _mu_t;
+  /// Boolean to pick between k_eff or k_t
+  const bool _turbulent_thermal_conductivity;
 };
