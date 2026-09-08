@@ -36,8 +36,6 @@ LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobin
     _beta(getFunctor<Real>("beta")),
     _gamma(getFunctor<Real>("gamma"))
 {
-  _var.requestCellGradients();
-
   if (_alpha.isConstant())
   {
     // We check if we can parse the value to a number and if yes, we throw an error if it is 0
