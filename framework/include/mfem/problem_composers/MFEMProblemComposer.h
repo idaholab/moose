@@ -33,11 +33,6 @@ public:
   /// Returns a pointer to a freshly minted problem operator.
   virtual std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem &) = 0;
-
-protected:
-  /// Name of the weak form whose EquationSystem the created operator solves. Empty if unset by
-  /// the user, in which case the problem's sole EquationSystem is used.
-  const MFEMWeakFormName _weak_form_name;
 };
 
 #endif
