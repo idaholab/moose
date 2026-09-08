@@ -144,17 +144,23 @@ Mesh::orientationSignature(const libMesh::Elem & elem)
 {
   // libMesh orders the vertices of an edge or a face by their coordinates, comparing the points
   // lexicographically, so an element's orientation follows from its geometry and neighbouring
-  // elements agree on the orientation of an entity they share. An element type reports edges in two
-  // and three dimensions and faces in three, which bounds the signature well within the bit width.
+  // elements agree on the orientation of an entity they share.
+  //
+  // An edge mode of a basis depends on the one bit that orients its edge. A face mode depends on
+  // the whole orientation of its face, which runs over the eight symmetries of a quadrilateral
+  // face, so three bits per face carry it. The twelve edges and six faces of a hexahedron are the
+  // largest an element type reports, bounding the signature at thirty bits.
   uint64_t signature = 0;
+  unsigned int bit = 0;
 
   for (const auto edge : make_range(elem.n_edges()))
-    if (elem.positive_edge_orientation(edge))
-      signature |= uint64_t(1) << edge;
+    signature |= uint64_t(elem.edge_orientation(edge)) << bit++;
 
   for (const auto face : make_range(elem.n_faces()))
-    if (elem.positive_face_orientation(face))
-      signature |= uint64_t(1) << (elem.n_edges() + face);
+  {
+    signature |= uint64_t(elem.face_orientation(face)) << bit;
+    bit += 3;
+  }
 
   return signature;
 }
