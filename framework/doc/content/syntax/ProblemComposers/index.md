@@ -7,9 +7,11 @@ problem operators with custom inputs. This class is specifically intended for co
 user-defined custom operators which may be raw `mfem::Operator`'s optimized for specific
 purposes, e.g. a physics application, a bespoke solver or preconditioner implementation, usage of an optimized
 third-party library, or cutting-edge mfem functionality. Users' operators may still access the wider MOOSE
-multi-physics system. As of yet, the user may only provide a single, but arbitrarily convoluted, problem composer
-(and thus operator) object per [MFEMProblem.md]. The problem composer classes are built within the [MFEMProblem.md] class,
-however the [ProblemOperator.md]s are built by MFEM executioners.
+multi-physics system. The problem composer classes and the [ProblemOperator.md]s they create are
+both built within the [MFEMProblem.md] class, during the `add_mfem_problem_composer` and
+`set_mfem_problem_operators` tasks respectively. Every problem composer added contributes one
+problem operator, and each may name the weak form supplying its equation system through the
+`weak_form` parameter.
 
 ## Using a custom problem composer to plug in a custom problem operator
 
