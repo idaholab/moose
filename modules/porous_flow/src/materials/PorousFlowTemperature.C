@@ -60,6 +60,13 @@ PorousFlowTemperatureTempl<is_ad>::PorousFlowTemperatureTempl(const InputParamet
                                                      : &declareProperty<std::vector<RealGradient>>(
                                                            "dPorousFlow_grad_temperature_qp_dvar"))
 {
+  // A non-nodal temperature is supported when it is merely a coupled variable: _is_temp_nodal above
+  // falls back to the quadpoint values, which is how an isothermal simulation can supply
+  // temperature as a CONSTANT MONOMIAL AuxVariable.  That fallback is not enough when temperature
+  // is itself a PorousFlow variable, because then this nodal Material also supplies the
+  // temperature derivatives that the nodal Jacobian assembly indexes per node.  See #33370.
+  if (this->_nodal_material && _temperature_is_PF)
+    this->checkNodalVariables({"temperature"});
 }
 
 template <bool is_ad>
