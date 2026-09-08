@@ -681,10 +681,10 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
       reportKokkosMatrixFreeCoverage();
 
       // The cache the levels contract holds this linearization, so this is where a level's operator
-      // can be checked against itself, and where an assembled level operator is filled
+      // can be checked against itself, and where every level's operator is updated for it
       verifyKokkosLevelOperators();
 
-      assembleKokkosLevelMatrices();
+      updateKokkosLevelOperators();
 
       verifyKokkosLevelMatrices();
     }
@@ -851,10 +851,10 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
       reportKokkosMatrixFreeCoverage();
 
       // The cache the levels contract holds this linearization, so this is where a level's operator
-      // can be checked against itself, and where an assembled level operator is filled
+      // can be checked against itself, and where every level's operator is updated for it
       verifyKokkosLevelOperators();
 
-      assembleKokkosLevelMatrices();
+      updateKokkosLevelOperators();
 
       verifyKokkosLevelMatrices();
     }
@@ -996,20 +996,19 @@ NonlinearSystemBase::verifyKokkosLevelOperators()
 }
 
 void
-NonlinearSystemBase::assembleKokkosLevelMatrices()
+NonlinearSystemBase::updateKokkosLevelOperators()
 {
   auto * const pmg = dynamic_cast<PMultigrid *>(_preconditioner.get());
 
   if (!pmg)
     return;
 
-  TIME_SECTION("assembleKokkosLevelMatrices", 1);
+  TIME_SECTION("updateKokkosLevelOperators", 1);
 
   const auto & cache = _fe_problem.getKokkosFESystems()[number()].qpJacobianCache();
 
   for (const auto & level : pmg->levels())
-    if (level->assembles())
-      level->assembleMatrix(cache);
+    level->updateOperator(cache);
 }
 
 void

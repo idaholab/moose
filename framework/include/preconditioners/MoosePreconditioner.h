@@ -57,6 +57,15 @@ public:
    */
   virtual void initialSetup();
 
+  /**
+   * Configure the solve's PETSc preconditioner. Called once per solve, after the nonlinear solver
+   * has (re)created its SNES, KSP and PC, which is why this is not done at initialSetup(): libMesh
+   * destroys those objects at the end of every solve, so a preconditioner that reaches them
+   * directly has to be reconfigured on the next one. The default does nothing, which is correct for
+   * a preconditioner that reaches PETSc only through the options database.
+   */
+  virtual void setupSolver() {}
+
 protected:
   /// Setup the coupling matrix on the finite element problem
   void setCouplingMatrix(std::unique_ptr<libMesh::CouplingMatrix> cm);

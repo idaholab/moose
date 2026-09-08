@@ -7114,6 +7114,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // Do not worry, DM setup is very cheap
   _current_nl_sys->setupDM();
 
+  // A preconditioner that configures the PETSc PC directly (p-multigrid, for instance) needs the
+  // same per-solve treatment as the DM above, for the same reason
+  _current_nl_sys->setupPreconditionerSolver();
+
   possiblyRebuildGeomSearchPatches();
 
   // reset flag so that residual evaluation does not get skipped

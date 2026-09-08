@@ -316,8 +316,9 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
 
   // A matrix-free system's preconditioning matrix is the shell operator, which supplies a
   // matrix-vector product and a diagonal. Jacobi is the strongest preconditioner that can be built
-  // from those two operations alone, so it is the default here.
-  if (solver_params._kokkos_matrix_free)
+  // from those two operations alone, so it is the default here. A p-multigrid preconditioner sets
+  // the preconditioner type itself, once the solver objects its hierarchy attaches to exist.
+  if (solver_params._kokkos_matrix_free && !solver_params._kokkos_p_multigrid)
     setSinglePetscOptionIfAppropriate(
         dont_add_these_options, prefix_with_dash + "pc_type", "jacobi");
 
