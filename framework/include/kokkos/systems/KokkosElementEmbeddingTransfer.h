@@ -50,11 +50,17 @@ public:
    * @param embedding The reference-element embedding of the coarse basis in the fine basis, indexed
    * by (subdomain, element type, variable, orientation) and sized (fine DOFs, coarse DOFs)
    * @param vectors The vectors of the two sides, indexed by EmbeddingVectorSlot
+   * @param coarse_constrained Local-plus-ghost mask of the coarse side's fixed DOFs, which may be
+   * unallocated when the coarse side holds none fixed
+   * @param fine_constrained Local-plus-ghost mask of the fine side's fixed DOFs, which may be
+   * unallocated when the fine side holds none fixed
    */
   ElementEmbedding(const DofSpace & coarse,
                    const DofSpace & fine,
                    const Array4D<Array2D<Real>> & embedding,
-                   const Array<Vector> & vectors);
+                   const Array<Vector> & vectors,
+                   const Array<bool> & coarse_constrained,
+                   const Array<bool> & fine_constrained);
 
   /**
    * Kokkos function tags for the loops over (element, variable) pairs
@@ -100,6 +106,28 @@ private:
    */
   KOKKOS_FUNCTION const Array2D<Real> & table(ContiguousElementID elem, unsigned int var) const;
 
+  /**
+   * Get whether the coarse side holds a degree of freedom fixed, which keeps it out of both
+   * directions of the transfer
+   * @param dof The local DOF index on the coarse side
+   * @returns Whether the coarse side holds the DOF fixed
+   */
+  KOKKOS_FUNCTION bool coarseConstrained(const dof_id_type dof) const
+  {
+    return _coarse_constrained.isAlloc() && _coarse_constrained[dof];
+  }
+
+  /**
+   * Get whether the fine side holds a degree of freedom fixed, which keeps it out of both
+   * directions of the transfer
+   * @param dof The local DOF index on the fine side
+   * @returns Whether the fine side holds the DOF fixed
+   */
+  KOKKOS_FUNCTION bool fineConstrained(const dof_id_type dof) const
+  {
+    return _fine_constrained.isAlloc() && _fine_constrained[dof];
+  }
+
   /// The DOF layout of the coarse side
   const DofSpace _coarse;
 
@@ -111,6 +139,12 @@ private:
 
   /// The vectors of the two sides, indexed by EmbeddingVectorSlot
   const Array<Vector> _vectors;
+
+  /// Local-plus-ghost mask of the coarse side's fixed DOFs
+  const Array<bool> _coarse_constrained;
+
+  /// Local-plus-ghost mask of the fine side's fixed DOFs
+  const Array<bool> _fine_constrained;
 
   /// Kokkos thread object over the (element, variable) pairs of the loops
   Thread<> _thread;

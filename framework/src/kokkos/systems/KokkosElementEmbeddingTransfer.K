@@ -20,8 +20,15 @@ namespace Moose::Kokkos
 ElementEmbedding::ElementEmbedding(const DofSpace & coarse,
                                    const DofSpace & fine,
                                    const Array4D<Array2D<Real>> & embedding,
-                                   const Array<Vector> & vectors)
-  : _coarse(coarse), _fine(fine), _embedding(embedding), _vectors(vectors)
+                                   const Array<Vector> & vectors,
+                                   const Array<bool> & coarse_constrained,
+                                   const Array<bool> & fine_constrained)
+  : _coarse(coarse),
+    _fine(fine),
+    _embedding(embedding),
+    _vectors(vectors),
+    _coarse_constrained(coarse_constrained),
+    _fine_constrained(fine_constrained)
 {
   // The two sides share the mesh and the variables, so both directions run over the same
   // (element, variable) pairs
@@ -81,8 +88,16 @@ ElementEmbedding::operator()(ProlongLoop, const ThreadID tid) const
     Real value = 0;
 
     for (unsigned int j = 0; j < num_coarse; ++j)
-      value +=
-          embedding(i, j) * _vectors[EMBEDDING_COARSE][_coarse.getElemLocalDofIndex(elem, j, var)];
+    {
+      const auto coarse_dof = _coarse.getElemLocalDofIndex(elem, j, var);
+
+      // A coarse DOF the level holds fixed carries no correction to prolong, and the transpose
+      // gather leaves the same DOF out, which keeps the two directions exact transposes
+      if (coarseConstrained(coarse_dof))
+        continue;
+
+      value += embedding(i, j) * _vectors[EMBEDDING_COARSE][coarse_dof];
+    }
 
     ::Kokkos::atomic_add(&_vectors[EMBEDDING_FINE][_fine.getElemLocalDofIndex(elem, i, var)],
                          value);
@@ -105,13 +120,17 @@ ElementEmbedding::operator()(RestrictLoop, const ThreadID tid) const
 
   for (unsigned int j = 0; j < num_coarse; ++j)
   {
+    const auto coarse_dof = _coarse.getElemLocalDofIndex(elem, j, var);
+
+    if (coarseConstrained(coarse_dof))
+      continue;
+
     Real value = 0;
 
     for (unsigned int i = 0; i < num_fine; ++i)
       value += embedding(i, j) * _vectors[EMBEDDING_FINE][_fine.getElemLocalDofIndex(elem, i, var)];
 
-    ::Kokkos::atomic_add(&_vectors[EMBEDDING_COARSE][_coarse.getElemLocalDofIndex(elem, j, var)],
-                         value);
+    ::Kokkos::atomic_add(&_vectors[EMBEDDING_COARSE][coarse_dof], value);
   }
 }
 
@@ -129,7 +148,16 @@ ElementEmbedding::operator()(MultiplicityLoop, const ThreadID tid) const
   const unsigned int num_fine = embedding.n(0);
 
   for (unsigned int i = 0; i < num_fine; ++i)
-    ::Kokkos::atomic_add(&_vectors[EMBEDDING_FINE][_fine.getElemLocalDofIndex(elem, i, var)], 1.0);
+  {
+    const auto fine_dof = _fine.getElemLocalDofIndex(elem, i, var);
+
+    // A fine DOF the level holds fixed is counted by no element, which leaves the weight of the
+    // transfer zero there and so takes the DOF out of both directions
+    if (fineConstrained(fine_dof))
+      continue;
+
+    ::Kokkos::atomic_add(&_vectors[EMBEDDING_FINE][fine_dof], 1.0);
+  }
 }
 
 ElementEmbeddingTransfer::ElementEmbeddingTransfer(const Assembly & assembly,
@@ -307,14 +335,21 @@ ElementEmbeddingTransfer::buildMultiplicity()
   _inverse_multiplicity.close();
 
   // A DOF that no element of the fine space carries keeps a zero here, which leaves it untouched by
-  // either direction of the transfer
+  // either direction of the transfer. A DOF the fine side holds fixed is left uncounted for the
+  // same purpose: a prolonged correction has to leave it as its boundary condition set it, and its
+  // residual has to stay out of the coarse space.
   _inverse_multiplicity.reciprocal();
 }
 
 ElementEmbedding
 ElementEmbeddingTransfer::loops() const
 {
-  return ElementEmbedding(_coarse.dof_space, _fine.dof_space, _embedding, _vectors);
+  return ElementEmbedding(_coarse.dof_space,
+                          _fine.dof_space,
+                          _embedding,
+                          _vectors,
+                          _coarse.constrained_dof,
+                          _fine.constrained_dof);
 }
 
 void

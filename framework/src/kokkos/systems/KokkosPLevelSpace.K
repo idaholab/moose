@@ -11,12 +11,14 @@
 
 #include "KokkosElementEmbeddingTransfer.h"
 #include "KokkosFESystem.h"
+#include "KokkosNodalBCBase.h"
 #include "KokkosQpJacobianOperator.h"
 
 #include "ConsoleStream.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 
+#include "libmesh/dof_map.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/petsc_vector.h"
@@ -94,6 +96,79 @@ PLevelSpace::init()
   // The loops gather the operator input by local, ghost-inclusive DOF index, so the input arrives
   // through a ghosted vector of the level's own
   _x = &_sys.add_vector("operator input", false, libMesh::GHOSTED);
+
+  setupConstrainedDofs();
+}
+
+void
+PLevelSpace::setupConstrainedDofs()
+{
+  const auto & dof_map = _sys.get_dof_map();
+  const auto & mesh = dofSpace().kokkosMesh();
+
+  auto * const solution =
+      libMesh::cast_ptr<libMesh::PetscVector<Number> *>(_sys.current_local_solution.get());
+
+  // The nodes a nodal boundary condition of the fine system pins, per variable. A level reproduces
+  // the fine system's variables in the same order, so one variable number indexes both, and a node
+  // that carries no DOF of the level's own order simply contributes nothing below.
+  std::vector<std::vector<bool>> pinned_node(_sys.n_vars());
+
+  for (const auto & bc : _fine.getKokkosNodalBCWarehouse().getActiveObjects())
+  {
+    const auto & nbc = static_cast<const NodalBCBase &>(*bc);
+
+    auto & pinned = pinned_node[nbc.variable().number()];
+
+    if (pinned.empty())
+      pinned.resize(mesh.getNumLocalNodes(), false);
+
+    for (const auto node : nbc.getContiguousNodes())
+      pinned[node] = true;
+  }
+
+  _constrained_dof.create(dofSpace().getNumLocalDofs() + dofSpace().getNumGhostDofs());
+  _constrained_dof = false;
+
+  std::vector<dof_id_type> dof_indices;
+
+  for (const auto var : make_range(_sys.n_vars()))
+  {
+    if (pinned_node[var].empty())
+      continue;
+
+    for (const auto * const node : mesh.getLocalNodes())
+    {
+      if (node->processor_id() != _sys.processor_id() ||
+          !pinned_node[var][mesh.getContiguousNodeID(node)])
+        continue;
+
+      dof_map.dof_indices(node, dof_indices, var);
+
+      for (const auto dof : dof_indices)
+        _constrained_dof[solution->map_global_to_local_index(dof)] = true;
+    }
+  }
+
+  dofSpace().syncGhostMask(_constrained_dof);
+
+  _constrained_dof.copyToDevice();
+
+  // The operator's fixed rows carry the identity, which this vector places there
+  _constrained_rows = &_sys.add_vector("constrained rows", false);
+
+  _constrained_rows->zero();
+
+  for (const auto dof : make_range(dofSpace().getNumLocalDofs()))
+    if (_constrained_dof[dof])
+    {
+      _constrained_rows->set(dof_map.first_dof() + dof, 1.0);
+      ++_num_constrained_dofs;
+    }
+
+  _constrained_rows->close();
+
+  _sys.comm().sum(_num_constrained_dofs);
 }
 
 void
@@ -107,7 +182,10 @@ PLevelSpace::initTransfer(PLevelSpace * const finer)
       _fine.feProblem().kokkosAssembly(),
       transferSide(),
       finer ? finer->transferSide()
-            : TransferSide{_fine.system(), fine_system, fine_system.feTypes()});
+            : TransferSide{_fine.system(),
+                           fine_system,
+                           fine_system.feTypes(),
+                           fine_system.getNodalBCMatrixTagDofs(_fine.systemMatrixTag())});
 }
 
 void
@@ -123,15 +201,15 @@ PLevelSpace::verifyTransfer(const ConsoleStream & console)
 TransferSide
 PLevelSpace::transferSide() const
 {
-  return TransferSide{_sys, dofSpace(), _fe_types};
+  return TransferSide{_sys, dofSpace(), _fe_types, _constrained_dof};
 }
 
 QpJacobianLevel
 PLevelSpace::level() const
 {
-  // A level holds no rows fixed: the hierarchy operates on the homogenized linearized problem, and
-  // the zero-Dirichlet constraints of each level's own DofMap are a separate piece of the design
-  return QpJacobianLevel(dofSpace(), _fe_types, _vectors, Array<bool>());
+  // The hierarchy operates on the homogenized linearized problem, so the level holds fixed the rows
+  // a nodal boundary condition of the fine system pins
+  return QpJacobianLevel(dofSpace(), _fe_types, _vectors, _constrained_dof);
 }
 
 void
@@ -179,6 +257,22 @@ PLevelSpace::dispatch(const QpJacobianCache & cache,
     _vectors[X].restore();
 
   y.close();
+
+  // The element loops contribute nothing to a row the level holds fixed, so the identity goes on
+  // those rows here, which leaves the level's operator nonsingular and its diagonal usable by a
+  // smoother. The input work vector has served the loops by this point and holds the operator
+  // input, which is what the fixed rows of an application reproduce.
+  if (_num_constrained_dofs)
+  {
+    if (x)
+    {
+      _x->pointwise_mult(*_x, *_constrained_rows);
+
+      y.add(1.0, *_x);
+    }
+    else
+      y.add(1.0, *_constrained_rows);
+  }
 }
 
 void
