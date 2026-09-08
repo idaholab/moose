@@ -93,7 +93,7 @@ protected:
   selectPressureGradient(const bool updated_pressure);
 
   /// Get the registered pressure gradient component vectors.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
+  const std::vector<NumericVector<Number> *> & pressureGradientComponents() const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
