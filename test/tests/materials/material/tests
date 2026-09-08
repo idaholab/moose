@@ -96,7 +96,7 @@
       type = 'RunException'
       input = 'timestep_end_exception.i'
       expect_err = 'The following parallel-communicated exception was detected during TIMESTEP_END evaluation'
-      detail = 'executed at TIMESTEP_END,'
+      detail = 'executed at the end of a timestep,'
     []
     [serial]
       type = 'Exodiff'
