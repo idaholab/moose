@@ -26,7 +26,8 @@ MFEMTimeDependentWeakFormProblemComposer::createProblemOperator(MFEMProblem & mf
   if (!mfem_problem.isTransient())
     mooseError("Not a transient problem");
 
-  return std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfem_problem);
+  return std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfem_problem,
+                                                                                   _weak_form_name);
 }
 
 #endif

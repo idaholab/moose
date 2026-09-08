@@ -21,8 +21,8 @@ class MFEMTimeDependentWeakForm : public MFEMWeakForm
 public:
   MFEMTimeDependentWeakForm(const InputParameters & parameters);
 
-  /// Constructs the EquationSystem.
-  virtual std::shared_ptr<Moose::MFEM::EquationSystem> createEquationSystem() override;
+protected:
+  virtual std::shared_ptr<Moose::MFEM::EquationSystem> makeEquationSystem() override;
 };
 
 #endif

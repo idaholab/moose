@@ -14,6 +14,18 @@
 
 namespace Moose::MFEM
 {
+TimeDependentEquationSystemProblemOperator::TimeDependentEquationSystemProblemOperator(
+    MFEMProblem & problem, const std::string & weak_form_name)
+  : TimeDependentProblemOperator(problem),
+    _equation_system(std::dynamic_pointer_cast<TimeDependentEquationSystem>(
+        problem.getEquationSystem(weak_form_name)))
+{
+  if (!_equation_system)
+    mooseError("The weak form supplying this operator does not provide a "
+               "TimeDependentEquationSystem, which is required by "
+               "TimeDependentEquationSystemProblemOperator.");
+}
+
 void
 TimeDependentEquationSystemProblemOperator::SetGridFunctions()
 {

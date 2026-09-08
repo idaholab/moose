@@ -20,11 +20,9 @@ MFEMEigenproblemWeakForm::MFEMEigenproblemWeakForm(const InputParameters & param
 }
 
 std::shared_ptr<Moose::MFEM::EquationSystem>
-MFEMEigenproblemWeakForm::createEquationSystem()
+MFEMEigenproblemWeakForm::makeEquationSystem()
 {
-  _equation_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-  initEquationSystem(_equation_system);
-  return _equation_system;
+  return std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
 }
 
 #endif
